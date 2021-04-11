@@ -30,7 +30,7 @@ namespace ESM
         // The tmp buffer is a null-byte separated string list, we
         // just have to pick out one string at a time.
         char* str = tmp.data();
-        if (!str)
+        if (tmp.empty())
         {
             if (mVarNames.size() > 0)
                 Log(Debug::Warning) << "SCVR with no variable names";
@@ -51,6 +51,7 @@ namespace ESM
             ss << "\n  Subrecord: " << "SCVR";
             ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
             Log(Debug::Verbose) << ss.str();
+            str = tmp.data();
         }
 
         for (size_t i = 0; i < mVarNames.size(); i++)
