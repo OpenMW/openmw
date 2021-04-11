@@ -31,6 +31,7 @@ namespace MWMechanics
     MWWorld::Ptr getPlayer();
     bool isPlayerInCombat();
     bool canActorMoveByZAxis(const MWWorld::Ptr& actor);
+    bool hasWaterWalking(const MWWorld::Ptr& actor);
 
     template<class T>
     void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value)

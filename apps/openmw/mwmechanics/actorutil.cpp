@@ -23,4 +23,10 @@ namespace MWMechanics
         MWBase::World* world = MWBase::Environment::get().getWorld();
         return (actor.getClass().canSwim(actor) && world->isSwimming(actor)) || world->isFlying(actor);
     }
+
+    bool hasWaterWalking(const MWWorld::Ptr& actor)
+    {
+        const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
+        return effects.get(ESM::MagicEffect::WaterWalking).getMagnitude() > 0;
+    }
 }

@@ -419,7 +419,8 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
     if (actorClass.isPureWaterCreature(actor)
         || (getTypeId() != AiPackageTypeId::Wander
             && ((allowToFollowOverWaterSurface && getTypeId() == AiPackageTypeId::Follow)
-                || actorClass.canSwim(actor))))
+                || actorClass.canSwim(actor)
+                || hasWaterWalking(actor))))
         result |= DetourNavigator::Flag_swim;
 
     if (actorClass.canWalk(actor))
