@@ -1131,11 +1131,7 @@ namespace MWWorld
     MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, const osg::Vec3f& position, bool movePhysics)
     {
         ESM::Position pos = ptr.getRefData().getPosition();
-
-        pos.pos[0] = position.x();
-        pos.pos[1] = position.y();
-        pos.pos[2] = position.z();
-
+        std::memcpy(pos.pos, &position, sizeof(osg::Vec3f));
         ptr.getRefData().setPosition(pos);
 
         CellStore *currCell = ptr.isInCell() ? ptr.getCell() : nullptr; // currCell == nullptr should only happen for player, during initial startup
@@ -1292,7 +1288,7 @@ namespace MWWorld
             updateNavigatorObject(*object);
     }
 
-    void World::rotateObjectImp(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
+    void World::rotateObject(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
     {
         const float pi = static_cast<float>(osg::PI);
 
@@ -1412,11 +1408,6 @@ namespace MWWorld
             esmPos.pos[2] = traced.z();
             MWWorld::ActionTeleport(actor.getCell()->isExterior() ? "" : actor.getCell()->getCell()->mName, esmPos, false).execute(actor);
         }
-    }
-
-    void World::rotateObject (const Ptr& ptr, float x, float y, float z, MWBase::RotationFlags flags)
-    {
-        rotateObjectImp(ptr, osg::Vec3f(x, y, z), flags);
     }
 
     void World::rotateWorldObject (const Ptr& ptr, osg::Quat rotate)
@@ -1602,14 +1593,16 @@ namespace MWWorld
     bool World::rotateDoor(const Ptr door, MWWorld::DoorState state, float duration)
     {
         const ESM::Position& objPos = door.getRefData().getPosition();
-        float oldRot = objPos.rot[2];
+        auto oldRot = objPos.asRotationVec3();
+        auto newRot = oldRot;
 
         float minRot = door.getCellRef().getPosition().rot[2];
         float maxRot = minRot + osg::DegreesToRadians(90.f);
 
         float diff = duration * osg::DegreesToRadians(90.f) * (state == MWWorld::DoorState::Opening ? 1 : -1);
-        float targetRot = std::min(std::max(minRot, oldRot + diff), maxRot);
-        rotateObject(door, objPos.rot[0], objPos.rot[1], targetRot, MWBase::RotationFlag_none);
+        float targetRot = std::clamp(oldRot.z() + diff, minRot, maxRot);
+        newRot.z() = targetRot;
+        rotateObject(door, newRot, MWBase::RotationFlag_none);
 
         bool reached = (targetRot == maxRot && state != MWWorld::DoorState::Idle) || targetRot == minRot;
 
@@ -1660,7 +1653,7 @@ namespace MWWorld
                     MWBase::Environment::get().getSoundManager()->stopSound3D(door, closeSound);
             }
 
-            rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot, MWBase::RotationFlag_none);
+            rotateObject(door, oldRot, MWBase::RotationFlag_none);
         }
 
         return reached;
@@ -2511,7 +2504,7 @@ namespace MWWorld
         player.getClass().getInventoryStore(player).setContListener(anim);
 
         scaleObject(player, player.getCellRef().getScale()); // apply race height
-        rotateObject(player, 0.f, 0.f, 0.f, MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
+        rotateObject(player, osg::Vec3f(), MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
@@ -3858,7 +3851,7 @@ namespace MWWorld
 
                 const ESM::Position& origPos = ptr.getCellRef().getPosition();
                 MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.asVec3());
-                MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.rot[0], origPos.rot[1], origPos.rot[2]);
+                MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.asRotationVec3());
                 ptr.getClass().adjustPosition(ptr, true);
             }
             return true;

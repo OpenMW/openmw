@@ -843,11 +843,7 @@ namespace MWWorld
 
         if (adjustPlayerPos) {
             world->moveObject(player, pos.asVec3());
-
-            float x = pos.rot[0];
-            float y = pos.rot[1];
-            float z = pos.rot[2];
-            world->rotateObject(player, x, y, z);
+            world->rotateObject(player, pos.asRotationVec3());
 
             player.getClass().adjustPosition(player, true);
         }
@@ -922,11 +918,7 @@ namespace MWWorld
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->moveObject(world->getPlayerPtr(), position.asVec3());
-
-            float x = position.rot[0];
-            float y = position.rot[1];
-            float z = position.rot[2];
-            world->rotateObject(world->getPlayerPtr(), x, y, z);
+            world->rotateObject(world->getPlayerPtr(), position.asRotationVec3());
 
             if (adjustPlayerPos)
                 world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);

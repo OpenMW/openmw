@@ -2394,12 +2394,15 @@ void CharacterController::update(float duration)
             if(!isKnockedDown() && !isKnockedOut())
             {
                 if (rot != osg::Vec3f())
-                    world->rotateObject(mPtr, rot.x(), rot.y(), rot.z(), true);
+                    world->rotateObject(mPtr, rot, true);
             }
             else //avoid z-rotating for knockdown
             {
                 if (rot.x() != 0 && rot.y() != 0)
-                    world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
+                {
+                    rot.z() = 0.0f;
+                    world->rotateObject(mPtr, rot, true);
+                }
             }
 
             if (!mMovementAnimationControlled)

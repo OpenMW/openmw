@@ -133,8 +133,6 @@ namespace MWWorld
 
             void updateWeather(float duration, bool paused = false);
 
-            void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags);
-
             Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
 
             void updateSoundListener();
@@ -387,8 +385,7 @@ namespace MWWorld
             /// @note Rotations via this method use a different rotation order than the initial rotations in the CS. This
             /// could be considered a bug, but is needed for MW compatibility.
             /// \param adjust indicates rotation should be set or adjusted
-            void rotateObject (const Ptr& ptr, float x, float y, float z,
-                MWBase::RotationFlags flags = MWBase::RotationFlag_inverseOrder) override;
+            void rotateObject (const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags = MWBase::RotationFlag_inverseOrder) override;
 
             MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) override;
             ///< Place an object. Makes a copy of the Ptr.
