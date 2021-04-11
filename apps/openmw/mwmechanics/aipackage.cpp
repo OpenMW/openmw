@@ -411,10 +411,15 @@ bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& act
 
 DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::Ptr& actor) const
 {
+    static const bool allowToFollowOverWaterSurface = Settings::Manager::getBool("allow actors to follow over water surface", "Game");
+
     const MWWorld::Class& actorClass = actor.getClass();
     DetourNavigator::Flags result = DetourNavigator::Flag_none;
 
-    if (actorClass.isPureWaterCreature(actor) || (getTypeId() != AiPackageTypeId::Wander && actorClass.canSwim(actor)))
+    if (actorClass.isPureWaterCreature(actor)
+        || (getTypeId() != AiPackageTypeId::Wander
+            && ((allowToFollowOverWaterSurface && getTypeId() == AiPackageTypeId::Follow)
+                || actorClass.canSwim(actor))))
         result |= DetourNavigator::Flag_swim;
 
     if (actorClass.canWalk(actor))

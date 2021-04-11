@@ -108,6 +108,7 @@ bool Launcher::AdvancedPage::loadSettings()
         int numPhysicsThreads = mEngineSettings.getInt("async num threads", "Physics");
         if (numPhysicsThreads >= 0)
             physicsThreadsSpinBox->setValue(numPhysicsThreads);
+        loadSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
     }
 
     // Visuals
