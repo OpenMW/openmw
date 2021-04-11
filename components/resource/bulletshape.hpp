@@ -59,6 +59,13 @@ namespace Resource
         void setLocalScaling(const btVector3& scale);
 
         bool isAnimated() const { return !mAnimatedShapes.empty(); }
+
+        unsigned int mCollisionType = 0;
+        enum CollisionType
+        {
+            None = 0x1,
+            Camera = 0x2
+        };
     };
 
 

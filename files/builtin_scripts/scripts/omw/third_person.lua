@@ -28,10 +28,9 @@ local combatOffset = util.vector2(0, 15)
 
 local state = defaultShoulder
 
-local rayOptions = {collisionType = nearby.COLLISION_TYPE.Default - nearby.COLLISION_TYPE.Actor}
 local function ray(from, angle, limit)
     local to = from + util.transform.rotateZ(angle) * util.vector3(0, limit, 0)
-    local res = nearby.castRay(from, to, rayOptions)
+    local res = nearby.castRay(from, to, {collisionType = camera.getCollisionType()})
     if res.hit then
         return (res.hitPos - from):length()
     else

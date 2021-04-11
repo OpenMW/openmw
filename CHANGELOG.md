@@ -140,6 +140,7 @@
     Feature #6380: Commas are treated as whitespace in vanilla
     Feature #6419: Topics shouldn't be greyed out if they can produce another topic reference
     Feature #6443: Support NiStencilProperty
+    Feature #6496: NCC flag isn't handled properly
     Feature #6534: Shader-based object texture blending
     Feature #6541: Gloss-mapping
     Feature #6592: Missing support for NiTriShape particle emitters

@@ -24,7 +24,7 @@ local noHeadBobbing = 0
 local noZoom = 0
 
 local function init()
-    camera.setCollisionType(util.bitAnd(nearby.COLLISION_TYPE.Default, util.bitNot(nearby.COLLISION_TYPE.Actor)))
+    camera.setCollisionType(util.bitOr(util.bitAnd(nearby.COLLISION_TYPE.Default, util.bitNot(nearby.COLLISION_TYPE.Actor)), nearby.COLLISION_TYPE.Camera))
     camera.setFieldOfView(camera.getBaseFieldOfView())
     camera.allowCharacterDeferredRotation(settings._getBoolFromSettingsCfg('Camera', 'deferred preview rotation'))
     if camera.getMode() == MODE.FirstPerson then

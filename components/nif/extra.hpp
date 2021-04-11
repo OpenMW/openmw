@@ -55,9 +55,10 @@ struct NiTextKeyExtraData : public Extra
 
 struct NiStringExtraData : public Extra
 {
-    /* Two known meanings:
+    /* Known meanings:
        "MRK" - marker, only visible in the editor, not rendered in-game
-       "NCO" - no collision
+       "NCC" - no collision except with the camera
+       Anything else starting with "NC" - no collision
     */
     std::string string;
 

@@ -54,7 +54,10 @@ namespace MWLua
             {"HeightMap", MWPhysics::CollisionType_HeightMap},
             {"Projectile", MWPhysics::CollisionType_Projectile},
             {"Water", MWPhysics::CollisionType_Water},
-            {"Default", MWPhysics::CollisionType_Default}
+            {"Default", MWPhysics::CollisionType_Default},
+            {"AnyPhysical", MWPhysics::CollisionType_AnyPhysical},
+            {"Camera", MWPhysics::CollisionType_CameraOnly},
+            {"VisualOnly", MWPhysics::CollisionType_VisualOnly},
         }));
 
         api["castRay"] = [](const osg::Vec3f& from, const osg::Vec3f& to, sol::optional<sol::table> options)
