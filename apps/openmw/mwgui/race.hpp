@@ -7,11 +7,6 @@
 #include <MyGUI_RenderManager.h>
 
 
-namespace MWGui
-{
-    class WindowManager;
-}
-
 namespace MWRender
 {
     class RaceSelectionPreview;

@@ -93,7 +93,7 @@ LocalMap::LocalMap(osg::Group* root)
 {
     // Increase map resolution, if use UI scaling
     float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-    if (uiScale > 1.0)
+    if (uiScale > 0.f)
         mMapResolution *= uiScale;
 
     SceneUtil::FindByNameVisitor find("Scene Root");

@@ -60,8 +60,6 @@ namespace ToUTF8
     class Utf8Encoder;
 }
 
-struct ContentLoader;
-
 namespace MWPhysics
 {
     class Object;
@@ -137,9 +135,6 @@ namespace MWWorld
             void updateWeather(float duration, bool paused = false);
 
             void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags);
-
-            Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z, bool movePhysics=true, bool moveToActive=false);
-            ///< @return an updated Ptr in case the Ptr's cell changes
 
             Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
 
@@ -376,13 +371,13 @@ namespace MWWorld
 
             void undeleteObject (const Ptr& ptr) override;
 
-            MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z, bool moveToActive=false) override;
+            MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z, bool movePhysics=true, bool moveToActive=false) override;
             ///< @return an updated Ptr in case the Ptr's cell changes
 
             MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z, bool movePhysics=true) override;
             ///< @return an updated Ptr
 
-            MWWorld::Ptr moveObjectBy(const Ptr& ptr, osg::Vec3f vec) override;
+            MWWorld::Ptr moveObjectBy(const Ptr& ptr, osg::Vec3f vec, bool moveToActive) override;
             ///< @return an updated Ptr
 
             void scaleObject (const Ptr& ptr, float scale) override;
@@ -705,7 +700,7 @@ namespace MWWorld
 
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
-            osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
+            osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target, bool isRangedCombat) override;
 
             /// Return the distance between actor's weapon and target's collision box.
             float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;

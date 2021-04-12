@@ -33,26 +33,6 @@ namespace Compiler
     class Context;
 }
 
-namespace MWScript
-{
-    class ScriptManager;
-}
-
-namespace MWSound
-{
-    class SoundManager;
-}
-
-namespace MWWorld
-{
-    class World;
-}
-
-namespace MWGui
-{
-    class WindowManager;
-}
-
 namespace Files
 {
     struct ConfigurationManager;

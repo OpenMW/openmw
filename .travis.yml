@@ -10,7 +10,7 @@ addons:
       - sourceline: 'ppa:openmw/openmw'
     packages: [
       # Dev
-      build-essential, cmake, clang-tools, ccache,
+      build-essential, cmake, clang-tools-9, ccache,
       # Boost
       libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -37,8 +37,8 @@ matrix:
       os: linux
       dist: focal
       env:
-        - MATRIX_EVAL="CC=clang && CXX=clang++"
-        - ANALYZE="scan-build --force-analyze-debug-code --use-cc clang --use-c++ clang++"
+        - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
+        - ANALYZE="scan-build-9 --force-analyze-debug-code --use-cc clang-9 --use-c++ clang++-9"
       compiler: clang
 
 before_install:
@@ -66,11 +66,13 @@ deploy:
   repo: OpenMW/openmw
 notifications:
   email:
+    if: repository_slug = OpenMW/openmw AND branch = master
     recipients:
       - corrmage+travis-ci@gmail.com
     on_success: change
     on_failure: always
   irc:
+    if: repository_slug = OpenMW/openmw AND branch = master
     channels:
       - "chat.freenode.net#openmw"
     on_success: change

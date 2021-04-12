@@ -681,7 +681,7 @@ namespace MWMechanics
                     // Deviating from Morrowind here: it doesn't increase disposition on marginal wins,
                     // which seems to be a bug (MCP fixes it too).
                     // Original logic: x = 0, y = -iPerMinChange
-                    x = -iPerMinChange;
+                    x = iPerMinChange;
                     y = x; // This goes unused.
                 }
                 else

@@ -36,7 +36,6 @@ namespace Loading
 namespace DetourNavigator
 {
     struct Navigator;
-    class Water;
 }
 
 namespace MWRender

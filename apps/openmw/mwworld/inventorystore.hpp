@@ -123,7 +123,7 @@ namespace MWWorld
 
             InventoryStore& operator= (const InventoryStore& store);
 
-            InventoryStore* clone() override { return new InventoryStore(*this); }
+            std::unique_ptr<ContainerStore> clone() override { return std::make_unique<InventoryStore>(*this); }
 
             ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true, bool resolve = true) override;
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)

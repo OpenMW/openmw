@@ -65,6 +65,9 @@ namespace
     std::string getAspect (int x, int y)
     {
         int gcd = std::gcd (x, y);
+        if (gcd == 0)
+            return std::string();
+
         int xaspect = x / gcd;
         int yaspect = y / gcd;
         // special case: 8 : 5 is usually referred to as 16:10
@@ -282,8 +285,10 @@ namespace MWGui
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::pair<int, int>& resolution : resolutions)
         {
-            std::string str = MyGUI::utility::toString(resolution.first) + " x " + MyGUI::utility::toString(resolution.second)
-                    + " (" + getAspect(resolution.first, resolution.second) + ")";
+            std::string str = MyGUI::utility::toString(resolution.first) + " x " + MyGUI::utility::toString(resolution.second);
+            std::string aspect = getAspect(resolution.first, resolution.second);
+            if (!aspect.empty())
+                 str = str + " (" + aspect + ")";
 
             if (mResolutionList->findItemIndexWith(str) == MyGUI::ITEM_NONE)
                 mResolutionList->addItem(str);

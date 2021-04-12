@@ -14,106 +14,53 @@ namespace
     const uint32_t INTV = ESM::FourCC<'I','N','T','V'>::value;
     const uint32_t FLTV = ESM::FourCC<'F','L','T','V'>::value;
     const uint32_t STTV = ESM::FourCC<'S','T','T','V'>::value;
-}
 
-ESM::Variant::Variant() : mType (VT_None), mData (nullptr) {}
-
-ESM::Variant::Variant(const std::string &value)
-{
-    mData = nullptr;
-    mType = VT_None;
-    setType(VT_String);
-    setString(value);
-}
-
-ESM::Variant::Variant(int value)
-{
-    mData = nullptr;
-    mType = VT_None;
-    setType(VT_Long);
-    setInteger(value);
-}
-
-ESM::Variant::Variant(float value)
-{
-    mData = nullptr;
-    mType = VT_None;
-    setType(VT_Float);
-    setFloat(value);
-}
-
-ESM::Variant::~Variant()
-{
-    delete mData;
-}
-
-ESM::Variant& ESM::Variant::operator= (const Variant& variant)
-{
-    if (&variant!=this)
+    template <typename T, bool orDefault = false>
+    struct GetValue
     {
-        VariantDataBase *newData = variant.mData ? variant.mData->clone() : nullptr;
+        T operator()(int value) const { return static_cast<T>(value); }
 
-        delete mData;
+        T operator()(float value) const { return static_cast<T>(value); }
 
-        mType = variant.mType;
-        mData = newData;
-    }
+        template <typename V>
+        T operator()(const V&) const
+        {
+            if constexpr (orDefault)
+                return T {};
+            else
+                throw std::runtime_error("cannot convert variant");
+        }
+    };
 
-    return *this;
-}
-
-ESM::Variant& ESM::Variant::operator= (Variant&& variant)
-{
-    if (&variant!=this)
+    template <typename T>
+    struct SetValue
     {
-        delete mData;
+        T mValue;
 
-        mType = variant.mType;
-        mData = variant.mData;
+        explicit SetValue(T value) : mValue(value) {}
 
-        variant.mData = nullptr;
-    }
+        void operator()(int& value) const { value = static_cast<int>(mValue); }
 
-    return *this;
-}
+        void operator()(float& value) const { value = static_cast<float>(mValue); }
 
-ESM::Variant::Variant (const Variant& variant)
-: mType (variant.mType), mData (variant.mData ? variant.mData->clone() : nullptr)
-{}
-
-ESM::Variant::Variant(Variant&& variant)
-: mType (variant.mType), mData (variant.mData)
-{
-    variant.mData = nullptr;
-}
-
-ESM::VarType ESM::Variant::getType() const
-{
-    return mType;
+        template <typename V>
+        void operator()(V&) const { throw std::runtime_error("cannot convert variant"); }
+    };
 }
 
 std::string ESM::Variant::getString() const
 {
-    if (!mData)
-        throw std::runtime_error ("can not convert empty variant to string");
-
-    return mData->getString();
+    return std::get<std::string>(mData);
 }
 
 int ESM::Variant::getInteger() const
 {
-    if (!mData)
-        throw std::runtime_error ("can not convert empty variant to integer");
-
-    return mData->getInteger();
+    return std::visit(GetValue<int>{}, mData);
 }
 
 float ESM::Variant::getFloat() const
 {
-    if (!mData)
-        throw std::runtime_error ("can not convert empty variant to float");
-
-    return mData->getFloat();
+    return std::visit(GetValue<float>{}, mData);
 }
 
 void ESM::Variant::read (ESMReader& esm, Format format)
@@ -202,9 +149,7 @@ void ESM::Variant::read (ESMReader& esm, Format format)
 
     setType (type);
 
-    // data
-    if (mData)
-        mData->read (esm, format, mType);
+    std::visit(ReadESMVariantValue {esm, format, mType}, mData);
 }
 
 void ESM::Variant::write (ESMWriter& esm, Format format) const
@@ -227,7 +172,7 @@ void ESM::Variant::write (ESMWriter& esm, Format format) const
         // nothing to do here for GMST format
     }
     else
-        mData->write (esm, format, mType);
+        std::visit(WriteESMVariantValue {esm, format, mType}, mData);
 }
 
 void ESM::Variant::write (std::ostream& stream) const
@@ -246,27 +191,27 @@ void ESM::Variant::write (std::ostream& stream) const
 
         case VT_Short:
 
-            stream << "variant short: " << mData->getInteger();
+            stream << "variant short: " << std::get<int>(mData);
             break;
 
         case VT_Int:
 
-            stream << "variant int: " << mData->getInteger();
+            stream << "variant int: " << std::get<int>(mData);
             break;
 
         case VT_Long:
 
-            stream << "variant long: " << mData->getInteger();
+            stream << "variant long: " << std::get<int>(mData);
             break;
 
         case VT_Float:
 
-            stream << "variant float: " << mData->getFloat();
+            stream << "variant float: " << std::get<float>(mData);
             break;
 
         case VT_String:
 
-            stream << "variant string: \"" << mData->getString() << "\"";
+            stream << "variant string: \"" << std::get<std::string>(mData) << "\"";
             break;
     }
 }
@@ -275,88 +220,54 @@ void ESM::Variant::setType (VarType type)
 {
     if (type!=mType)
     {
-        VariantDataBase *newData = nullptr;
-
         switch (type)
         {
             case VT_Unknown:
             case VT_None:
-
-                break; // no data
+                mData = std::monostate {};
+                break;
 
             case VT_Short:
             case VT_Int:
             case VT_Long:
-
-                newData = new VariantIntegerData (mData);
+                mData = std::visit(GetValue<int, true>{}, mData);
                 break;
 
             case VT_Float:
-
-                newData = new VariantFloatData (mData);
+                mData = std::visit(GetValue<float, true>{}, mData);
                 break;
 
             case VT_String:
-
-                newData = new VariantStringData (mData);
+                mData = std::string {};
                 break;
         }
 
-        delete mData;
-        mData = newData;
         mType = type;
     }
 }
 
 void ESM::Variant::setString (const std::string& value)
 {
-    if (!mData)
-        throw std::runtime_error ("can not assign string to empty variant");
+    std::get<std::string>(mData) = value;
+}
 
-    mData->setString (value);
+void ESM::Variant::setString (std::string&& value)
+{
+    std::get<std::string>(mData) = std::move(value);
 }
 
 void ESM::Variant::setInteger (int value)
 {
-    if (!mData)
-        throw std::runtime_error ("can not assign integer to empty variant");
-
-    mData->setInteger (value);
+    std::visit(SetValue(value), mData);
 }
 
 void ESM::Variant::setFloat (float value)
 {
-    if (!mData)
-        throw std::runtime_error ("can not assign float to empty variant");
-
-    mData->setFloat (value);
-}
-
-bool ESM::Variant::isEqual (const Variant& value) const
-{
-    if (mType!=value.mType)
-        return false;
-
-    if (!mData)
-        return true;
-
-    assert (value.mData);
-
-    return mData->isEqual (*value.mData);
+    std::visit(SetValue(value), mData);
 }
 
 std::ostream& ESM::operator<< (std::ostream& stream, const Variant& value)
 {
     value.write (stream);
     return stream;
-}
-
-bool ESM::operator== (const Variant& left, const Variant& right)
-{
-    return left.isEqual (right);
-}
-
-bool ESM::operator!= (const Variant& left, const Variant& right)
-{
-    return !(left==right);
 }

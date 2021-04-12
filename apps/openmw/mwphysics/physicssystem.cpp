@@ -60,6 +60,22 @@
 #include "movementsolver.hpp"
 #include "mtphysics.hpp"
 
+namespace
+{
+    bool canMoveToWaterSurface(const MWPhysics::Actor* physicActor, const float waterlevel, btCollisionWorld* world)
+    {
+        if (!physicActor)
+            return false;
+        const float halfZ = physicActor->getHalfExtents().z();
+        const osg::Vec3f actorPosition = physicActor->getPosition();
+        const osg::Vec3f startingPosition(actorPosition.x(), actorPosition.y(), actorPosition.z() + halfZ);
+        const osg::Vec3f destinationPosition(actorPosition.x(), actorPosition.y(), waterlevel + halfZ);
+        MWPhysics::ActorTracer tracer;
+        tracer.doTrace(physicActor->getCollisionObject(), startingPosition, destinationPosition, world);
+        return (tracer.mFraction >= 1.0f);
+    }
+}
+
 namespace MWPhysics
 {
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
@@ -347,16 +363,7 @@ namespace MWPhysics
 
     bool PhysicsSystem::canMoveToWaterSurface(const MWWorld::ConstPtr &actor, const float waterlevel)
     {
-        const Actor* physicActor = getActor(actor);
-        if (!physicActor)
-            return false;
-        const float halfZ = physicActor->getHalfExtents().z();
-        const osg::Vec3f actorPosition = physicActor->getPosition();
-        const osg::Vec3f startingPosition(actorPosition.x(), actorPosition.y(), actorPosition.z() + halfZ);
-        const osg::Vec3f destinationPosition(actorPosition.x(), actorPosition.y(), waterlevel + halfZ);
-        ActorTracer tracer;
-        tracer.doTrace(physicActor->getCollisionObject(), startingPosition, destinationPosition, mCollisionWorld.get());
-        return (tracer.mFraction >= 1.0f);
+        return ::canMoveToWaterSurface(getActor(actor), waterlevel, mCollisionWorld.get());
     }
 
     osg::Vec3f PhysicsSystem::getHalfExtents(const MWWorld::ConstPtr &actor) const
@@ -772,16 +779,10 @@ namespace MWPhysics
             const MWMechanics::MagicEffects& effects = character.getClass().getCreatureStats(character).getMagicEffects();
 
             bool waterCollision = false;
-            bool moveToWaterSurface = false;
             if (cell->getCell()->hasWater() && effects.get(ESM::MagicEffect::WaterWalking).getMagnitude())
             {
-                if (!world->isUnderwater(character.getCell(), osg::Vec3f(character.getRefData().getPosition().asVec3())))
+                if (physicActor->getCollisionMode() || !world->isUnderwater(character.getCell(), osg::Vec3f(character.getRefData().getPosition().asVec3())))
                     waterCollision = true;
-                else if (physicActor->getCollisionMode() && canMoveToWaterSurface(character, waterlevel))
-                {
-                    moveToWaterSurface = true;
-                    waterCollision = true;
-                }
             }
 
             physicActor->setCanWaterWalk(waterCollision);
@@ -794,7 +795,7 @@ namespace MWPhysics
             if (!willSimulate)
                 standingOn = physicActor->getStandingOnPtr();
 
-            actorsFrameData.emplace_back(std::move(physicActor), standingOn, moveToWaterSurface, movement, slowFall, waterlevel);
+            actorsFrameData.emplace_back(std::move(physicActor), standingOn, waterCollision, movement, slowFall, waterlevel);
         }
         mMovementQueue.clear();
         return actorsFrameData;
@@ -937,9 +938,9 @@ namespace MWPhysics
     }
 
     ActorFrameData::ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn,
-            bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel)
+            bool waterCollision, osg::Vec3f movement, float slowFall, float waterlevel)
         : mActor(actor), mActorRaw(actor.get()), mStandingOn(standingOn),
-        mDidJump(false), mNeedLand(false), mMoveToWaterSurface(moveToWaterSurface),
+        mDidJump(false), mNeedLand(false), mWaterCollision(waterCollision),
         mWaterlevel(waterlevel), mSlowFall(slowFall), mOldHeight(0), mFallHeight(0), mMovement(movement), mPosition(), mRefpos()
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -953,7 +954,7 @@ namespace MWPhysics
         mWasOnGround = actor->getOnGround();
     }
 
-    void ActorFrameData::updatePosition()
+    void ActorFrameData::updatePosition(btCollisionWorld* world)
     {
         mActorRaw->updateWorldPosition();
         // If physics runs "fast enough", position are interpolated without simulation
@@ -961,10 +962,10 @@ namespace MWPhysics
         // regardless of simulation speed.
         mActorRaw->applyOffsetChange();
         mPosition = mActorRaw->getPosition();
-        if (mMoveToWaterSurface)
+        if (mWaterCollision && mPosition.z() < mWaterlevel && canMoveToWaterSurface(mActorRaw, mWaterlevel, world))
         {
             mPosition.z() = mWaterlevel;
-            MWBase::Environment::get().getWorld()->moveObject(mActorRaw->getPtr(), mPosition.x(), mPosition.y(), mPosition.z());
+            MWBase::Environment::get().getWorld()->moveObject(mActorRaw->getPtr(), mPosition.x(), mPosition.y(), mPosition.z(), false);
         }
         mOldHeight = mPosition.z();
         mRefpos = mActorRaw->getPtr().getRefData().getPosition();

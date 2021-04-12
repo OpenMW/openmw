@@ -153,7 +153,7 @@ namespace MWWorld
 
             virtual ~ContainerStore();
 
-            virtual ContainerStore* clone() { return new ContainerStore(*this); }
+            virtual std::unique_ptr<ContainerStore> clone() { return std::make_unique<ContainerStore>(*this); }
 
             ConstContainerStoreIterator cbegin (int mask = Type_All) const;
             ConstContainerStoreIterator cend() const;

@@ -132,9 +132,11 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, CellStore& cell) const
 
 MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader)
 : mStore (store), mReader (reader),
-  mIdCache (Settings::Manager::getInt("pointers cache size", "Cells"), std::pair<std::string, CellStore *> ("", (CellStore*)nullptr)),
   mIdCacheIndex (0)
-{}
+{
+    int cacheSize = std::max(Settings::Manager::getInt("pointers cache size", "Cells"), 0);
+    mIdCache = IdCache(cacheSize, std::pair<std::string, CellStore *> ("", (CellStore*)nullptr));
+}
 
 MWWorld::CellStore *MWWorld::Cells::getExterior (int x, int y)
 {
@@ -259,8 +261,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, CellStore& cell,
 MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
 {
     // First check the cache
-    for (std::vector<std::pair<std::string, CellStore *> >::iterator iter (mIdCache.begin());
-        iter!=mIdCache.end(); ++iter)
+    for (IdCache::iterator iter (mIdCache.begin()); iter!=mIdCache.end(); ++iter)
         if (iter->first==name && iter->second)
         {
             Ptr ptr = getPtr (name, *iter->second);

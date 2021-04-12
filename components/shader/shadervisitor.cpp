@@ -50,6 +50,7 @@ namespace Shader
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
         , mApplyLightingToEnvMaps(false)
+        , mConvertAlphaTestToAlphaToCoverage(false)
         , mTranslucentFramebuffer(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)

@@ -56,7 +56,9 @@ void CSMWorld::PotionRefIdAdapter::setData (const RefIdColumn *column, RefIdData
 
 
 CSMWorld::IngredientColumns::IngredientColumns (const InventoryColumns& columns)
-: InventoryColumns (columns) {}
+: InventoryColumns (columns)
+, mEffects(nullptr)
+{}
 
 CSMWorld::IngredientRefIdAdapter::IngredientRefIdAdapter (const IngredientColumns& columns)
 : InventoryRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, columns),
@@ -585,7 +587,13 @@ void CSMWorld::DoorRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
 }
 
 CSMWorld::LightColumns::LightColumns (const InventoryColumns& columns)
-: InventoryColumns (columns) {}
+: InventoryColumns (columns)
+, mTime(nullptr)
+, mRadius(nullptr)
+, mColor(nullptr)
+, mSound(nullptr)
+, mEmitterType(nullptr)
+{}
 
 CSMWorld::LightRefIdAdapter::LightRefIdAdapter (const LightColumns& columns)
 : InventoryRefIdAdapter<ESM::Light> (UniversalId::Type_Light, columns), mColumns (columns)
@@ -1454,7 +1462,15 @@ int CSMWorld::CreatureMiscRefIdAdapter::getNestedRowsCount(const RefIdColumn *co
 }
 
 CSMWorld::WeaponColumns::WeaponColumns (const EnchantableColumns& columns)
-: EnchantableColumns (columns) {}
+: EnchantableColumns (columns)
+, mType(nullptr)
+, mHealth(nullptr)
+, mSpeed(nullptr)
+, mReach(nullptr)
+, mChop{nullptr}
+, mSlash{nullptr}
+, mThrust{nullptr}
+{}
 
 CSMWorld::WeaponRefIdAdapter::WeaponRefIdAdapter (const WeaponColumns& columns)
 : EnchantableRefIdAdapter<ESM::Weapon> (UniversalId::Type_Weapon, columns), mColumns (columns)

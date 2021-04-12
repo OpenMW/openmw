@@ -40,8 +40,6 @@ namespace MWWorld
     void RefData::cleanup()
     {
         mBaseNode = nullptr;
-
-        delete mCustomData;
         mCustomData = nullptr;
     }
 
@@ -223,21 +221,20 @@ namespace MWWorld
         return mPosition;
     }
 
-    void RefData::setCustomData (CustomData *data)
+    void RefData::setCustomData(std::unique_ptr<CustomData>&& value) noexcept
     {
         mChanged = true; // We do not currently track CustomData, so assume anything with a CustomData is changed
-        delete mCustomData;
-        mCustomData = data;
+        mCustomData = std::move(value);
     }
 
     CustomData *RefData::getCustomData()
     {
-        return mCustomData;
+        return mCustomData.get();
     }
 
     const CustomData *RefData::getCustomData() const
     {
-        return mCustomData;
+        return mCustomData.get();
     }
 
     bool RefData::hasChanged() const

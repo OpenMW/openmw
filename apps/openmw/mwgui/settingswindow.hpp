@@ -5,11 +5,6 @@
 
 namespace MWGui
 {
-    class WindowManager;
-}
-
-namespace MWGui
-{
     class SettingsWindow : public WindowBase
     {
         public:

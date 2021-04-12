@@ -13,6 +13,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         mwdialogue/test_keywordsearch.cpp
 
         esm/test_fixed_string.cpp
+        esm/variant.cpp
 
         misc/test_stringops.cpp
         misc/test_endianness.cpp

@@ -115,6 +115,8 @@
     Bug #5906: Sunglare doesn't work with Mesa drivers and AMD GPUs
     Bug #5912: ImprovedBound mod doesn't work
     Bug #5914: BM: The Swimmer can't reach destination
+    Bug #5923: Clicking on empty spaces between journal entries might show random topics
+    Bug #5934: AddItem command doesn't accept negative values
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
@@ -122,6 +124,7 @@
     Feature #2404: Levelled List can not be placed into a container
     Feature #2686: Timestamps in openmw.log
     Feature #3171: OpenMW-CS: Instance drag selection
+    Feature #3983: Wizard: Add link to buy Morrowind
     Feature #4894: Consider actors as obstacles for pathfinding
     Feature #4899: Alpha-To-Coverage Anti-Aliasing for alpha testing
     Feature #4977: Use the "default icon.tga" when an item's icon is not found
@@ -133,6 +136,7 @@
     Feature #5456: Basic collada animation support
     Feature #5457: Realistic diagonal movement
     Feature #5486: Fixes trainers to choose their training skills based on their base skill points
+    Feature #5511: Add in game option to toggle HRTF support in OpenMW
     Feature #5519: Code Patch tab in launcher
     Feature #5524: Resume failed script execution after reload
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
@@ -147,6 +151,7 @@
     Feature #5730: Add graphic herbalism option to the launcher and documents
     Feature #5771: ori command should report where a mesh is loaded from and whether the x version is used.
     Feature #5813: Instanced groundcover support
+    Feature #5814: Bsatool should be able to create BSA archives, not only to extract it
     Feature #5828: Support more than 8 lights
     Feature #5910: Fall back to delta time when physics can't keep up
     Task #5480: Drop Qt4 support

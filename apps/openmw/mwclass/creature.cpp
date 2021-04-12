@@ -51,14 +51,16 @@ namespace
 namespace MWClass
 {
 
-    class CreatureCustomData : public MWWorld::CustomData
+    class CreatureCustomData : public MWWorld::TypedCustomData<CreatureCustomData>
     {
     public:
         MWMechanics::CreatureStats mCreatureStats;
-        MWWorld::ContainerStore* mContainerStore; // may be InventoryStore for some creatures
+        std::unique_ptr<MWWorld::ContainerStore> mContainerStore; // may be InventoryStore for some creatures
         MWMechanics::Movement mMovement;
 
-        MWWorld::CustomData *clone() const override;
+        CreatureCustomData() = default;
+        CreatureCustomData(const CreatureCustomData& other);
+        CreatureCustomData(CreatureCustomData&& other) noexcept = default;
 
         CreatureCustomData& asCreatureCustomData() override
         {
@@ -68,16 +70,13 @@ namespace MWClass
         {
             return *this;
         }
-
-        CreatureCustomData() : mContainerStore(nullptr) {}
-        virtual ~CreatureCustomData() { delete mContainerStore; }
     };
 
-    MWWorld::CustomData *CreatureCustomData::clone() const
+    CreatureCustomData::CreatureCustomData(const CreatureCustomData& other)
+        : mCreatureStats(other.mCreatureStats),
+          mContainerStore(other.mContainerStore->clone()),
+          mMovement(other.mMovement)
     {
-        CreatureCustomData* cloned = new CreatureCustomData (*this);
-        cloned->mContainerStore = mContainerStore->clone();
-        return cloned;
     }
 
     const Creature::GMST& Creature::getGmst()
@@ -148,16 +147,16 @@ namespace MWClass
             // inventory
             bool hasInventory = hasInventoryStore(ptr);
             if (hasInventory)
-                data->mContainerStore = new MWWorld::InventoryStore();
+                data->mContainerStore = std::make_unique<MWWorld::InventoryStore>();
             else
-                data->mContainerStore = new MWWorld::ContainerStore();
+                data->mContainerStore = std::make_unique<MWWorld::ContainerStore>();
 
             data->mCreatureStats.setGoldPool(ref->mBase->mData.mGold);
 
             data->mCreatureStats.setNeedRecalcDynamicStats(false);
 
             // store
-            ptr.getRefData().setCustomData(data.release());
+            ptr.getRefData().setCustomData(std::move(data));
 
             getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
 
@@ -758,11 +757,11 @@ namespace MWClass
                 std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
 
                 if (hasInventoryStore(ptr))
-                    data->mContainerStore = new MWWorld::InventoryStore();
+                    data->mContainerStore = std::make_unique<MWWorld::InventoryStore>();
                 else
-                    data->mContainerStore = new MWWorld::ContainerStore();
+                    data->mContainerStore = std::make_unique<MWWorld::ContainerStore>();
 
-                ptr.getRefData().setCustomData (data.release());
+                ptr.getRefData().setCustomData (std::move(data));
             }
         }
         else

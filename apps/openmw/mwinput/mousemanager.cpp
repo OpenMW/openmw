@@ -37,7 +37,7 @@ namespace MWInput
         , mGuiCursorEnabled(true)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-        if (uiScale != 0.f)
+        if (uiScale > 0.f)
             mInvUiScalingFactor = 1.f / uiScale;
 
         int w,h;

@@ -317,7 +317,7 @@ namespace MWPhysics
 
         // init
         for (auto& data : actorsData)
-            data.updatePosition();
+            data.updatePosition(mCollisionWorld);
         mPrevStepCount = numSteps;
         mRemainingSteps = numSteps;
         mTimeAccum = timeAccum;

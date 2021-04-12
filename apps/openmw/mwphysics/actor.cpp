@@ -179,6 +179,7 @@ bool Actor::setPosition(const osg::Vec3f& position)
     if (mSkipSimulation)
         return false;
     bool hasChanged = mPosition != position || mPositionOffset.length() != 0 || mWorldPositionChanged;
+    updateWorldPosition();
     applyOffsetChange();
     mPreviousPosition = mPosition;
     mPosition = position;

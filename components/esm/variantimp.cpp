@@ -5,71 +5,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-ESM::VariantDataBase::~VariantDataBase() {}
-
-std::string ESM::VariantDataBase::getString (bool default_) const
-{
-    if (default_)
-        return "";
-
-    throw std::runtime_error ("can not convert variant to string");
-}
-
-int ESM::VariantDataBase::getInteger (bool default_) const
-{
-    if (default_)
-        return 0;
-
-    throw std::runtime_error ("can not convert variant to integer");
-}
-
-float ESM::VariantDataBase::getFloat (bool default_) const
-{
-    if (default_)
-        return 0;
-
-    throw std::runtime_error ("can not convert variant to float");
-}
-
-void ESM::VariantDataBase::setString (const std::string& value)
-{
-    throw std::runtime_error ("conversion of string to variant not possible");
-}
-
-void ESM::VariantDataBase::setInteger (int value)
-{
-    throw std::runtime_error ("conversion of integer to variant not possible");
-}
-
-void ESM::VariantDataBase::setFloat (float value)
-{
-    throw std::runtime_error ("conversion of float to variant not possible");
-}
-
-
-
-ESM::VariantStringData::VariantStringData (const VariantDataBase *data)
-{
-    if (data)
-        mValue = data->getString (true);
-}
-
-ESM::VariantDataBase *ESM::VariantStringData::clone() const
-{
-    return new VariantStringData (*this);
-}
-
-std::string ESM::VariantStringData::getString (bool default_) const
-{
-    return mValue;
-}
-
-void ESM::VariantStringData::setString (const std::string& value)
-{
-    mValue = value;
-}
-
-void ESM::VariantStringData::read (ESMReader& esm, Variant::Format format, VarType type)
+void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, std::string& out)
 {
     if (type!=VT_String)
         throw std::logic_error ("not a string type");
@@ -84,10 +20,10 @@ void ESM::VariantStringData::read (ESMReader& esm, Variant::Format format, VarTy
         esm.fail ("local variables of type string not supported");
 
     // GMST
-    mValue = esm.getHString();
+    out = esm.getHString();
 }
 
-void ESM::VariantStringData::write (ESMWriter& esm, Variant::Format format, VarType type) const
+void ESM::writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, const std::string& in)
 {
     if (type!=VT_String)
         throw std::logic_error ("not a string type");
@@ -98,49 +34,14 @@ void ESM::VariantStringData::write (ESMWriter& esm, Variant::Format format, VarT
     if (format==Variant::Format_Info)
         throw std::runtime_error ("info variables of type string not supported");
 
+    if (format==Variant::Format_Local)
+        throw std::runtime_error ("local variables of type string not supported");
+
     // GMST
-    esm.writeHNString ("STRV", mValue);
+    esm.writeHNString("STRV", in);
 }
 
-bool ESM::VariantStringData::isEqual (const VariantDataBase& value) const
-{
-    return dynamic_cast<const VariantStringData&> (value).mValue==mValue;
-}
-
-
-
-ESM::VariantIntegerData::VariantIntegerData (const VariantDataBase *data) : mValue (0)
-{
-    if (data)
-        mValue = data->getInteger (true);
-}
-
-ESM::VariantDataBase *ESM::VariantIntegerData::clone() const
-{
-    return new VariantIntegerData (*this);
-}
-
-int ESM::VariantIntegerData::getInteger (bool default_) const
-{
-    return mValue;
-}
-
-float ESM::VariantIntegerData::getFloat (bool default_) const
-{
-    return static_cast<float>(mValue);
-}
-
-void ESM::VariantIntegerData::setInteger (int value)
-{
-    mValue = value;
-}
-
-void ESM::VariantIntegerData::setFloat (float value)
-{
-    mValue = static_cast<int> (value);
-}
-
-void ESM::VariantIntegerData::read (ESMReader& esm, Variant::Format format, VarType type)
+void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, int& out)
 {
     if (type!=VT_Short && type!=VT_Long && type!=VT_Int)
         throw std::logic_error ("not an integer type");
@@ -153,12 +54,12 @@ void ESM::VariantIntegerData::read (ESMReader& esm, Variant::Format format, VarT
         if (type==VT_Short)
         {
             if (value!=value)
-                mValue = 0; // nan
+                out = 0; // nan
             else
-                mValue = static_cast<short> (value);
+                out = static_cast<short> (value);
         }
         else if (type==VT_Long)
-            mValue = static_cast<int> (value);
+            out = static_cast<int> (value);
         else
             esm.fail ("unsupported global variable integer type");
     }
@@ -173,7 +74,7 @@ void ESM::VariantIntegerData::read (ESMReader& esm, Variant::Format format, VarT
             esm.fail (stream.str());
         }
 
-        esm.getHT (mValue);
+        esm.getHT(out);
     }
     else if (format==Variant::Format_Local)
     {
@@ -181,18 +82,18 @@ void ESM::VariantIntegerData::read (ESMReader& esm, Variant::Format format, VarT
         {
             short value;
             esm.getHT(value);
-            mValue = value;
+            out = value;
         }
         else if (type==VT_Int)
         {
-            esm.getHT(mValue);
+            esm.getHT(out);
         }
         else
             esm.fail("unsupported local variable integer type");
     }
 }
 
-void ESM::VariantIntegerData::write (ESMWriter& esm, Variant::Format format, VarType type) const
+void ESM::writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, int in)
 {
     if (type!=VT_Short && type!=VT_Long && type!=VT_Int)
         throw std::logic_error ("not an integer type");
@@ -201,7 +102,7 @@ void ESM::VariantIntegerData::write (ESMWriter& esm, Variant::Format format, Var
     {
         if (type==VT_Short || type==VT_Long)
         {
-            float value = static_cast<float>(mValue);
+            float value = static_cast<float>(in);
             esm.writeHNString ("FNAM", type==VT_Short ? "s" : "l");
             esm.writeHNT ("FLTV", value);
         }
@@ -219,72 +120,35 @@ void ESM::VariantIntegerData::write (ESMWriter& esm, Variant::Format format, Var
             throw std::runtime_error (stream.str());
         }
 
-        esm.writeHNT ("INTV", mValue);
+        esm.writeHNT("INTV", in);
     }
     else if (format==Variant::Format_Local)
     {
         if (type==VT_Short)
-            esm.writeHNT ("STTV", (short)mValue);
+            esm.writeHNT("STTV", static_cast<short>(in));
         else if (type == VT_Int)
-            esm.writeHNT ("INTV", mValue);
+            esm.writeHNT("INTV", in);
         else
             throw std::runtime_error("unsupported local variable integer type");
     }
 }
 
-bool ESM::VariantIntegerData::isEqual (const VariantDataBase& value) const
-{
-    return dynamic_cast<const VariantIntegerData&> (value).mValue==mValue;
-}
-
-
-ESM::VariantFloatData::VariantFloatData (const VariantDataBase *data) : mValue (0)
-{
-    if (data)
-        mValue = data->getFloat (true);
-}
-
-ESM::VariantDataBase *ESM::VariantFloatData::clone() const
-{
-    return new VariantFloatData (*this);
-}
-
-int ESM::VariantFloatData::getInteger (bool default_) const
-{
-    return static_cast<int> (mValue);
-}
-
-float ESM::VariantFloatData::getFloat (bool default_) const
-{
-    return mValue;
-}
-
-void ESM::VariantFloatData::setInteger (int value)
-{
-    mValue = static_cast<float>(value);
-}
-
-void ESM::VariantFloatData::setFloat (float value)
-{
-    mValue = value;
-}
-
-void ESM::VariantFloatData::read (ESMReader& esm, Variant::Format format, VarType type)
+void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, float& out)
 {
     if (type!=VT_Float)
         throw std::logic_error ("not a float type");
 
     if (format==Variant::Format_Global)
     {
-        esm.getHNT (mValue, "FLTV");
+        esm.getHNT(out, "FLTV");
     }
     else if (format==Variant::Format_Gmst || format==Variant::Format_Info || format==Variant::Format_Local)
     {
-        esm.getHT (mValue);
+        esm.getHT(out);
     }
 }
 
-void ESM::VariantFloatData::write (ESMWriter& esm, Variant::Format format, VarType type) const
+void ESM::writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, float in)
 {
     if (type!=VT_Float)
         throw std::logic_error ("not a float type");
@@ -292,15 +156,10 @@ void ESM::VariantFloatData::write (ESMWriter& esm, Variant::Format format, VarTy
     if (format==Variant::Format_Global)
     {
         esm.writeHNString ("FNAM", "f");
-        esm.writeHNT ("FLTV", mValue);
+        esm.writeHNT("FLTV", in);
     }
     else if (format==Variant::Format_Gmst || format==Variant::Format_Info || format==Variant::Format_Local)
     {
-        esm.writeHNT ("FLTV", mValue);
+        esm.writeHNT("FLTV", in);
     }
-}
-
-bool ESM::VariantFloatData::isEqual (const VariantDataBase& value) const
-{
-    return dynamic_cast<const VariantFloatData&> (value).mValue==mValue;
 }

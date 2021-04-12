@@ -17,11 +17,6 @@ namespace Gui
 
 namespace MWGui
 {
-    class WindowManager;
-}
-
-namespace MWGui
-{
     class ResponseCallback;
 
     class PersuasionDialog : public WindowModal

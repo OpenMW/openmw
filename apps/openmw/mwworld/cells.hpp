@@ -28,11 +28,12 @@ namespace MWWorld
     /// \brief Cell container
     class Cells
     {
+            typedef std::vector<std::pair<std::string, CellStore *> > IdCache;
             const MWWorld::ESMStore& mStore;
             std::vector<ESM::ESMReader>& mReader;
             mutable std::map<std::string, CellStore> mInteriors;
             mutable std::map<std::pair<int, int>, CellStore> mExteriors;
-            std::vector<std::pair<std::string, CellStore *> > mIdCache;
+            IdCache mIdCache;
             std::size_t mIdCacheIndex;
 
             Cells (const Cells&);

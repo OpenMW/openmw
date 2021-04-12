@@ -226,7 +226,6 @@ void CompressedBSAFile::readHeader()
             FileStruct fileStruct{};
             fileStruct.fileSize = file.getSizeWithoutCompressionFlag();
             fileStruct.offset = file.offset;
-            fileStruct.name = nullptr;
             mFiles.push_back(fileStruct);
 
             fullPaths.push_back(folder);
@@ -249,7 +248,7 @@ void CompressedBSAFile::readHeader()
         }
 
         //The vector guarantees that its elements occupy contiguous memory
-        mFiles[fileIndex].name = reinterpret_cast<char*>(mStringBuf.data() + mStringBuffOffset);
+        mFiles[fileIndex].setNameInfos(mStringBuffOffset, &mStringBuf);
 
         fullPaths.at(fileIndex) += "\\" + std::string(mStringBuf.data() + mStringBuffOffset);
 
@@ -276,7 +275,7 @@ void CompressedBSAFile::readHeader()
             fullPaths.at(fileIndex).c_str() + stringLength + 1u,
             mStringBuf.data() + mStringBuffOffset);
 
-        mFiles[fileIndex].name = reinterpret_cast<char*>(mStringBuf.data() + mStringBuffOffset);
+        mFiles[fileIndex].setNameInfos(mStringBuffOffset, &mStringBuf);
 
         mLookup[reinterpret_cast<char*>(mStringBuf.data() + mStringBuffOffset)] = fileIndex;
         mStringBuffOffset += stringLength + 1u;
@@ -320,11 +319,17 @@ CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string
 
 Files::IStreamPtr CompressedBSAFile::getFile(const FileStruct* file) 
 {
-    FileRecord fileRec = getFileRecord(file->name);
+    FileRecord fileRec = getFileRecord(file->name());
     if (!fileRec.isValid()) {
-        fail("File not found: " + std::string(file->name));
+        fail("File not found: " + std::string(file->name()));
     }
     return getFile(fileRec);
+}
+
+void CompressedBSAFile::addFile(const std::string& filename, std::istream& file)
+{
+    assert(false); //not implemented yet
+    fail("Add file is not implemented for compressed BSA: " + filename);
 }
 
 Files::IStreamPtr CompressedBSAFile::getFile(const char* file)
@@ -376,8 +381,10 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
             LZ4F_decompressionContext_t context = nullptr;
             LZ4F_createDecompressionContext(&context, LZ4F_VERSION);
             LZ4F_decompressOptions_t options = {};
-            LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.get(), &size, &options);
-            LZ4F_errorCode_t errorCode = LZ4F_freeDecompressionContext(context);
+            LZ4F_errorCode_t errorCode = LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.get(), &size, &options);
+            if (LZ4F_isError(errorCode))
+                fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
+            errorCode = LZ4F_freeDecompressionContext(context);
             if (LZ4F_isError(errorCode))
                 fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
         }
@@ -430,10 +437,10 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
 {
     for (auto & mFile : mFiles)
     {
-        const FileRecord& fileRecord = getFileRecord(mFile.name);
+        const FileRecord& fileRecord = getFileRecord(mFile.name());
         if (!fileRecord.isValid())
         {
-            fail("Could not find file " + std::string(mFile.name) + " in BSA");
+            fail("Could not find file " + std::string(mFile.name()) + " in BSA");
         }
 
         if (!fileRecord.isCompressed(mCompressedByDefault))

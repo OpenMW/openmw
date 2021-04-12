@@ -227,6 +227,7 @@ namespace Resource
         , mAutoUseSpecularMaps(false)
         , mApplyLightingToEnvMaps(false)
         , mLightingMethod(SceneUtil::LightingMethod::FFP)
+        , mConvertAlphaTestToAlphaToCoverage(false)
         , mInstanceCache(new MultiObjectCache)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)

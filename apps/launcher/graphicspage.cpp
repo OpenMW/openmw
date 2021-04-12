@@ -20,6 +20,9 @@
 QString getAspect(int x, int y)
 {
     int gcd = std::gcd (x, y);
+    if (gcd == 0)
+        return QString();
+
     int xaspect = x / gcd;
     int yaspect = y / gcd;
     // special case: 8 : 5 is usually referred to as 16:10
@@ -298,9 +301,9 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
             return result;
         }
 
-        QString aspect = getAspect(mode.w, mode.h);
         QString resolution = QString::number(mode.w) + QString(" x ") + QString::number(mode.h);
 
+        QString aspect = getAspect(mode.w, mode.h);
         if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
             resolution.append(tr("\t(Wide ") + aspect + ")");
 

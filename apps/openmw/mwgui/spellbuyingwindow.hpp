@@ -17,11 +17,6 @@ namespace MyGUI
 
 namespace MWGui
 {
-    class WindowManager;
-}
-
-namespace MWGui
-{
     class SpellBuyingWindow : public ReferenceInterface, public WindowBase
     {
         public:

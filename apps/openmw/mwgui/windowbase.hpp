@@ -3,11 +3,6 @@
 
 #include "layout.hpp"
 
-namespace MWBase
-{
-    class WindowManager;
-}
-
 namespace MWWorld
 {
     class Ptr;
@@ -15,7 +10,6 @@ namespace MWWorld
 
 namespace MWGui
 {
-    class WindowManager;
     class DragAndDrop;
 
     class WindowBase: public Layout

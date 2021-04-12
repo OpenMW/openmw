@@ -13,14 +13,12 @@ namespace ESM
 
 namespace MWClass
 {
-    class ContainerCustomData : public MWWorld::CustomData
+    class ContainerCustomData : public MWWorld::TypedCustomData<ContainerCustomData>
     {
         MWWorld::ContainerStore mStore;
     public:
         ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell);
         ContainerCustomData(const ESM::InventoryState& inventory);
-
-        MWWorld::CustomData *clone() const override;
 
         ContainerCustomData& asContainerCustomData() override;
         const ContainerCustomData& asContainerCustomData() const override;
