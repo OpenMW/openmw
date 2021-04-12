@@ -77,10 +77,24 @@ MWWorld::ResolutionListener::~ResolutionListener()
 {
     if(!mStore.mModified && mStore.mResolved && !mStore.mPtr.isEmpty())
     {
-        for(const auto&& ptr : mStore)
-            ptr.getRefData().setCount(0);
+        try
+        {
+            for(const auto&& ptr : mStore)
+                ptr.getRefData().setCount(0);
+        }
+        catch(const std::exception& e)
+        {
+            Log(Debug::Warning) << "Failed to clear temporary container contents of " << mStore.mPtr.get<ESM::Container>()->mBase->mId << ": " << e.what();
+        }
         mStore.fillNonRandom(mStore.mPtr.get<ESM::Container>()->mBase->mInventory, "", mStore.mSeed);
-        addScripts(mStore, mStore.mPtr.mCell);
+        try
+        {
+            addScripts(mStore, mStore.mPtr.mCell);
+        }
+        catch(const std::exception& e)
+        {
+            Log(Debug::Warning) << "Failed to restart item scripts inside " << mStore.mPtr.get<ESM::Container>()->mBase->mId << ": " << e.what();
+        }
         mStore.mResolved = false;
     }
 }
