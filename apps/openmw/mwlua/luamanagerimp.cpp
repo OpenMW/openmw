@@ -334,4 +334,30 @@ namespace MWLua
         scripts->setSerializer(mLocalSerializer.get());
     }
 
+    void LuaManager::reloadAllScripts()
+    {
+        Log(Debug::Info) << "Reload Lua";
+        mLua.dropScriptCache();
+
+        {  // Reload global scripts
+            ESM::LuaScripts data;
+            mGlobalScripts.save(data);
+            mGlobalScripts.removeAllScripts();
+            for (const std::string& path : mGlobalScriptList)
+                if (mGlobalScripts.addNewScript(path))
+                    Log(Debug::Info) << "Global script restarted: " << path;
+            mGlobalScripts.load(data, false);
+        }
+
+        for (const auto& [id, ptr] : mWorldView.getObjectRegistry()->mObjectMapping)
+        {  // Reload local scripts
+            LocalScripts* scripts = ptr.getRefData().getLuaScripts();
+            if (scripts == nullptr)
+                continue;
+            ESM::LuaScripts data;
+            scripts->save(data);
+            scripts->load(data, true);
+        }
+    }
+
 }

@@ -59,6 +59,9 @@ namespace MWBase
 
         // Should be called before loading. The map is used to fix refnums if the order of content files was changed.
         virtual void setContentFileMapping(const std::map<int, int>&) = 0;
+
+        // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
+        virtual void reloadAllScripts() = 0;
     };
 
 }

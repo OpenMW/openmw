@@ -114,6 +114,13 @@ Finally :ref:`register <Lua scripting>` it in ``openmw.cfg``:
 
 Now every time the player presses "X" on a keyboard, a message is shown.
 
+Hot reloading
+=============
+
+It is possible to modify a script without restarting OpenMW. To apply changes open in-game console and run the command ``reloadlua``.
+It will restart all Lua scripts using `onSave and onLoad`_ handlers the same way as if the game was saved and loaded.
+It works only with existing ``*.lua`` files that are not packed to any archives. Adding new scripts or modifying ``*.omwscripts`` files always requires restarting the game.
+
 Script structure
 ================
 

@@ -28,6 +28,7 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -169,8 +170,6 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    if(!ptr.isEmpty() && !ptr.mRef->mData.isEnabled())
-                        ptr.mRef->mData.mPhysicsPostponed = false;
                     MWBase::Environment::get().getWorld()->enable (ptr);
                 }
         };
@@ -1599,6 +1598,17 @@ namespace MWScript
                 }
         };
 
+        class OpReloadLua : public Interpreter::Opcode0
+        {
+            public:
+
+                void execute (Interpreter::Runtime& runtime) override
+                {
+                    MWBase::Environment::get().getLuaManager()->reloadAllScripts();
+                    runtime.getContext().report("All Lua scripts are reloaded");
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeMenuMode, new OpMenuMode);
@@ -1719,6 +1729,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeRepairedOnMeExplicit, new OpRepairedOnMe<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleRecastMesh, new OpToggleRecastMesh);
             interpreter.installSegment5 (Compiler::Misc::opcodeHelp, new OpHelp);
+            interpreter.installSegment5 (Compiler::Misc::opcodeReloadLua, new OpReloadLua);
         }
     }
 }

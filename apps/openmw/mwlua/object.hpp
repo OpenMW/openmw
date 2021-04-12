@@ -47,6 +47,7 @@ namespace MWLua
         friend class Object;
         friend class GObject;
         friend class LObject;
+        friend class LuaManager;
 
         bool mChanged = false;
         int64_t mUpdateCounter = 0;

@@ -62,6 +62,9 @@ namespace MWLua
         void loadLocalScripts(const MWWorld::Ptr& ptr, const ESM::LuaScripts& data) override;
         void setContentFileMapping(const std::map<int, int>& mapping) override { mContentFileMapping = mapping; }
 
+        // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
+        void reloadAllScripts() override;
+
     private:
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr);
 

@@ -319,6 +319,7 @@ namespace Compiler
         const int opcodeGetDisabledExplicit = 0x200031c;
         const int opcodeStartScriptExplicit = 0x200031d;
         const int opcodeHelp = 0x2000320;
+        const int opcodeReloadLua = 0x2000321;
     }
 
     namespace Sky
