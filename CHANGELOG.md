@@ -21,6 +21,7 @@
     Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
     Feature #2780: A way to see current OpenMW version in the console
     Feature #5489: MCP: Telekinesis fix for activators
+    Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
 
 0.47.0
