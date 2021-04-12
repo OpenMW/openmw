@@ -32,8 +32,8 @@ stages:
 
 Coverity:
   extends: .Debian
-  only:
-    - schedules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
     - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64 --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
