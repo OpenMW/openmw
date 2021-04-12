@@ -71,6 +71,11 @@ namespace
         mat(2, 3) = q;
         mat(3, 3) = r;
     }
+
+    bool isReflectionCamera(osg::Camera* camera)
+    {
+        return (camera->getName() == "ReflectionCamera");
+    }
 }
 
 namespace SceneUtil
@@ -612,6 +617,7 @@ namespace SceneUtil
         void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+            bool pop = false;
 
             if (mLastFrameNumber != cv->getTraversalNumber())
             {
@@ -642,15 +648,33 @@ namespace SceneUtil
                     {
                         auto buf = mLightManager->getLightBuffer(mLastFrameNumber);
 
-                        buf->setDiffuse(0, sun->getDiffuse());
-                        buf->setAmbient(0, sun->getAmbient());
-                        buf->setSpecular(0, sun->getSpecular());
                         buf->setPosition(0, sun->getPosition() * (*cv->getCurrentRenderStage()->getInitialViewMatrix()));
+                        buf->setAmbient(0, sun->getAmbient());
+                        buf->setDiffuse(0, sun->getDiffuse());
+                        buf->setSpecular(0, sun->getSpecular());
                     }
+                }
+            }
+            else if (isReflectionCamera(cv->getCurrentCamera()))
+            {
+                auto sun = mLightManager->getSunlight();
+                if (sun)
+                {
+                    osg::Vec4 originalPos = sun->getPosition();
+                    sun->setPosition(originalPos * (*cv->getCurrentRenderStage()->getInitialViewMatrix()));
+
+                    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+                    configureStateSetSunOverride(mLightManager->getLightingMethod(), sun, stateset);
+
+                    sun->setPosition(originalPos);
+                    cv->pushStateSet(stateset);
+                    pop = true;
                 }
             }
 
             traverse(node, nv);
+            if (pop)
+                cv->popStateSet();
         }
 
     private:
@@ -1151,7 +1175,7 @@ namespace SceneUtil
 
     const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(osg::Camera *camera, const osg::RefMatrix* viewMatrix, size_t frameNum)
     {
-        bool isReflectionCamera = camera->getName() == "ReflectionCamera";
+        bool isReflection = isReflectionCamera(camera);
         osg::observer_ptr<osg::Camera> camPtr (camera);
         auto it = mLightsInViewSpace.find(camPtr);
 
@@ -1168,7 +1192,7 @@ namespace SceneUtil
                 osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), radius * mPointLightRadiusMultiplier);
                 transformBoundingSphere(worldViewMat, viewBound);
 
-                if (!isReflectionCamera && mPointLightFadeEnd != 0.f)
+                if (!isReflection && mPointLightFadeEnd != 0.f)
                 {
                     const float fadeDelta = mPointLightFadeEnd - mPointLightFadeStart;
                     float fade = 1 - std::clamp((viewBound.center().length() - mPointLightFadeStart) / fadeDelta, 0.f, 1.f);
