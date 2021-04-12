@@ -40,8 +40,7 @@ Coverity:
     - tar xfz /tmp/cov-analysis-linux64.tgz
   script:
     - CI/before_script.linux.sh
-    - cd build
-    - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build . -- -j $(nproc)
+    - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
   after_script:
     - tar cfz cov-int.tar.gz cov-int
     - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME \
