@@ -174,7 +174,7 @@ this mode when supported and where the GPU is not a bottleneck. On some weaker
 devices, using this mode along with :ref:`force per pixel lighting` can carry
 performance penalties.
 
-Note that when enabled groundcover lighting is forced to be vertex lighting,
+Note that when enabled, groundcover lighting is forced to be vertex lighting,
 unless normal maps are provided. This is due to some groundcover mods using the
 Z-Up normals technique to avoid some common issues with shading. As a
 consequence, per pixel lighting would give undesirable results.

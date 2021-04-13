@@ -72,7 +72,7 @@ void doLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 a
     diffuseLight = diffuseOut * shadowing;
 #else
     shadowDiffuse = diffuseOut;
-    diffuseLight = vec3(0);
+    diffuseLight = vec3(0.0);
 #endif
 
     for (int i = @startLight; i < @endLight; ++i)

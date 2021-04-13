@@ -1171,8 +1171,8 @@ namespace MWRender
                     lightManager->updateMaxLights();
 
                     auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
-                    for (auto& define : lightManager->getLightDefines())
-                        defines[define.first] = define.second;
+                    for (const auto& [name, key] : lightManager->getLightDefines())
+                        defines[name] = key;
                     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
                     mSceneRoot->removeUpdateCallback(mStateUpdater);

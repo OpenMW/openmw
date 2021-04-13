@@ -184,8 +184,8 @@ namespace SceneUtil
 
         void configureLayout(int offsetColors, int offsetPosition, int offsetAttenuationRadius, int size, int stride)
         {
-            constexpr auto sizeofVec4 = sizeof(GL_FLOAT) * osg::Vec4::num_components;
             constexpr auto sizeofFloat = sizeof(GL_FLOAT);
+            constexpr auto sizeofVec4 = sizeofFloat * osg::Vec4::num_components;
 
             mOffsets[Diffuse] = offsetColors / sizeofFloat;
             mOffsets[Ambient] = mOffsets[Diffuse] + 1;
@@ -197,11 +197,12 @@ namespace SceneUtil
 
             // Copy over previous buffers light data. Buffers populate before we know the layout.
             LightBuffer oldBuffer = LightBuffer(*this);
+            mData->resize(size / sizeofFloat);
             for (int i = 0; i < oldBuffer.mCount; ++i)
             {
-                std::memcpy(&(*mData)[getOffset(i, Diffuse)], &(*mData)[oldBuffer.getOffset(i, Diffuse)], sizeof(osg::Vec4f));
-                std::memcpy(&(*mData)[getOffset(i, Position)], &(*mData)[oldBuffer.getOffset(i, Position)], sizeof(osg::Vec4f));
-                std::memcpy(&(*mData)[getOffset(i, AttenuationRadius)], &(*mData)[oldBuffer.getOffset(i, AttenuationRadius)], sizeof(osg::Vec4f));
+                std::memcpy(&(*mData)[getOffset(i, Diffuse)], &(*oldBuffer.mData)[oldBuffer.getOffset(i, Diffuse)], sizeof(osg::Vec4f));
+                std::memcpy(&(*mData)[getOffset(i, Position)], &(*oldBuffer.mData)[oldBuffer.getOffset(i, Position)], sizeof(osg::Vec4f));
+                std::memcpy(&(*mData)[getOffset(i, AttenuationRadius)], &(*oldBuffer.mData)[oldBuffer.getOffset(i, AttenuationRadius)], sizeof(osg::Vec4f));
             }
         }
 
@@ -766,17 +767,27 @@ namespace SceneUtil
 
         std::string generateDummyShader(int maxLightsInScene)
         {
-            return "#version 120\n"
-            "#extension GL_ARB_uniform_buffer_object : require                                      \n"
-            "struct LightData {                                                                     \n"
-            "   ivec4 packedColors;                                                                 \n"
-            "   vec4 position;                                                                      \n"
-            "   vec4 attenuation;                                                                   \n"
-            "};                                                                                     \n"
-            "uniform LightBufferBinding {                                                           \n"
-            "   LightData LightBuffer[" + std::to_string(mLightManager->getMaxLightsInScene()) + "];\n"
-            "};                                                                                     \n"
-            "void main() { gl_Position = vec4(0.0); }                                               \n";
+            const std::string define = "@maxLightsInScene";
+
+            std::string shader = R"GLSL(
+                #version 120
+                #extension GL_ARB_uniform_buffer_object : require
+                struct LightData {
+                   ivec4 packedColors;
+                   vec4 position;
+                   vec4 attenuation;
+                };
+                uniform LightBufferBinding {
+                   LightData LightBuffer[@maxLightsInScene];
+                };
+                void main()
+                {
+                    gl_Position = vec4(0.0);
+                }
+            )GLSL";
+
+            shader.replace(shader.find(define), define.length(), std::to_string(maxLightsInScene));
+            return shader;
         }
 
         LightManager* mLightManager;
