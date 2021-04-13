@@ -439,3 +439,19 @@ graphic herbalism
 Some mods add harvestable container models. When this setting is enabled, activating a container using a harvestable model will visually harvest from it instead of opening the menu.
 
 When this setting is turned off or when activating a regular container, the menu will open as usual.
+
+allow actors to follow over water surface
+---------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+If enabled actors will always find path over the water surface when following other actors. This makes OpenMW behaviour closer to the vanilla engine.
+
+If disabled actors without the ability to swim will not follow other actors to the water.
+
+.. note::
+    Has effect only when Navigator is enabled.
+
+This setting can be controlled in Advanced tab of the launcher.
