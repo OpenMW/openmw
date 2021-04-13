@@ -1,15 +1,10 @@
-#define MAX_LIGHTS 8
+#include "lighting_util.glsl"
 
-void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal)
+void perLightSun(out vec3 diffuseOut, vec3 viewPos, vec3 viewNormal)
 {
-    vec3 lightDir = gl_LightSource[lightIndex].position.xyz - viewPos * gl_LightSource[lightIndex].position.w;
-    float lightDistance = length(lightDir);
-    lightDir = normalize(lightDir);
-    float illumination = clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * lightDistance + gl_LightSource[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
+    vec3 lightDir = normalize(lcalcPosition(0));
+    float lambert = dot(viewNormal.xyz, lightDir);
 
-    ambientOut = gl_LightSource[lightIndex].ambient.xyz * illumination;
-
-    float lambert = dot(viewNormal.xyz, lightDir) * illumination;
 #ifndef GROUNDCOVER
     lambert = max(lambert, 0.0);
 #else
@@ -21,7 +16,46 @@ void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 vie
     }
     lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
 #endif
-    diffuseOut = gl_LightSource[lightIndex].diffuse.xyz * lambert;
+
+    diffuseOut = lcalcDiffuse(0).xyz * lambert;
+}
+
+void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal)
+{
+    vec3 lightPos = lcalcPosition(lightIndex) - viewPos;
+    float lightDistance = length(lightPos);
+
+// cull non-FFP point lighting by radius, light is guaranteed to not fall outside this bound with our cutoff
+#if !@lightingMethodFFP
+    float radius = lcalcRadius(lightIndex);
+
+    if (lightDistance > radius * 2.0)
+    {
+        ambientOut = vec3(0.0);
+        diffuseOut = vec3(0.0);
+        return;
+    }
+#endif
+
+    lightPos = normalize(lightPos);
+
+    float illumination = lcalcIllumination(lightIndex, lightDistance);
+    ambientOut = lcalcAmbient(lightIndex) * illumination;
+    float lambert = dot(viewNormal.xyz, lightPos) * illumination;
+
+#ifndef GROUNDCOVER
+    lambert = max(lambert, 0.0);
+#else
+    float eyeCosine = dot(normalize(viewPos), viewNormal.xyz);
+    if (lambert < 0.0)
+    {
+        lambert = -lambert;
+        eyeCosine = -eyeCosine;
+    }
+    lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
+#endif
+
+    diffuseOut = lcalcDiffuse(lightIndex) * lambert;
 }
 
 #if PER_PIXEL_LIGHTING
@@ -31,31 +65,35 @@ void doLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 a
 #endif
 {
     vec3 ambientOut, diffuseOut;
-    // This light gets added a second time in the loop to fix Mesa users' slowdown, so we need to negate its contribution here.
-    perLight(ambientOut, diffuseOut, 0, viewPos, viewNormal);
+
+    perLightSun(diffuseOut, viewPos, viewNormal);
+    ambientLight = gl_LightModel.ambient.xyz;
 #if PER_PIXEL_LIGHTING
-    diffuseLight = diffuseOut * shadowing - diffuseOut;
+    diffuseLight = diffuseOut * shadowing;
 #else
     shadowDiffuse = diffuseOut;
-    diffuseLight = -diffuseOut;
+    diffuseLight = vec3(0.0);
 #endif
-    ambientLight = gl_LightModel.ambient.xyz;
-    for (int i=0; i<MAX_LIGHTS; ++i)
+
+    for (int i = @startLight; i < @endLight; ++i)
     {
-        perLight(ambientOut, diffuseOut, i, viewPos, viewNormal);
+#if @lightingMethodUBO
+        perLightPoint(ambientOut, diffuseOut, PointLightIndex[i], viewPos, viewNormal);
+#else
+        perLightPoint(ambientOut, diffuseOut, i, viewPos, viewNormal);
+#endif
         ambientLight += ambientOut;
         diffuseLight += diffuseOut;
     }
 }
 
-
 vec3 getSpecular(vec3 viewNormal, vec3 viewDirection, float shininess, vec3 matSpec)
 {
-    vec3 lightDir = normalize(gl_LightSource[0].position.xyz);
+    vec3 lightDir = normalize(lcalcPosition(0));
     float NdotL = dot(viewNormal, lightDir);
     if (NdotL <= 0.0)
         return vec3(0.0);
     vec3 halfVec = normalize(lightDir - viewDirection);
     float NdotH = dot(viewNormal, halfVec);
-    return pow(max(NdotH, 0.0), max(1e-4, shininess)) * gl_LightSource[0].specular.xyz * matSpec;
+    return pow(max(NdotH, 0.0), max(1e-4, shininess)) * lcalcSpecular(0).xyz * matSpec;
 }

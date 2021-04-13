@@ -14,6 +14,8 @@ namespace MWGui
 
             void updateControlsBox();
 
+            void updateLightSettings();
+
             void onResChange(int, int) override { center(); }
 
     protected:
@@ -29,6 +31,10 @@ namespace MWGui
 
             MyGUI::ComboBox* mWaterTextureSize;
             MyGUI::ComboBox* mWaterReflectionDetail;
+
+            MyGUI::Widget* mLightSettingOverlay;
+            MyGUI::TextBox* mLightingMethodText;
+            MyGUI::Button* mLightsResetButton;
 
             // controls
             MyGUI::ScrollView* mControlsBox;
@@ -50,6 +56,8 @@ namespace MWGui
             void onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
             void onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos);
 
+            void onLightsResetButtonClicked(MyGUI::Widget* _sender);
+
             void onRebindAction(MyGUI::Widget* _sender);
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);
             void onResetDefaultBindings(MyGUI::Widget* _sender);
@@ -61,7 +69,7 @@ namespace MWGui
 
             void apply();
 
-            void configureWidgets(MyGUI::Widget* widget);
+            void configureWidgets(MyGUI::Widget* widget, bool init);
             void updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value);
 
             void layoutControlsBox();

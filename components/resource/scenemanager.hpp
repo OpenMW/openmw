@@ -12,6 +12,8 @@
 
 #include "resourcemanager.hpp"
 
+#include <components/sceneutil/lightmanager.hpp>
+
 namespace Resource
 {
     class ImageManager;
@@ -105,6 +107,9 @@ namespace Resource
 
         void setApplyLightingToEnvMaps(bool apply);
 
+        void setLightingMethod(SceneUtil::LightingMethod method);
+        SceneUtil::LightingMethod getLightingMethod() const;
+        
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
 
         void setShaderPath(const std::string& path);
@@ -191,6 +196,7 @@ namespace Resource
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
         bool mApplyLightingToEnvMaps;
+        SceneUtil::LightingMethod mLightingMethod;
         bool mConvertAlphaTestToAlphaToCoverage;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;

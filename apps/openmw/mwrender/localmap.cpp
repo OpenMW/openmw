@@ -19,7 +19,10 @@
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 #include <components/files/memorystream.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -219,6 +222,10 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
     SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
+
+    // override sun for local map 
+    auto lightingMethod = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getLightingMethod();    
+    SceneUtil::configureStateSetSunOverride(lightingMethod, light, stateset);
 
     camera->addChild(lightSource);
     camera->setStateSet(stateset);

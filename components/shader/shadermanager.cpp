@@ -9,15 +9,26 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include <components/sceneutil/lightmanager.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
 namespace Shader
 {
 
+    ShaderManager::ShaderManager()
+        : mLightingMethod(SceneUtil::LightingMethod::FFP)
+    {
+    }
+
     void ShaderManager::setShaderPath(const std::string &path)
     {
         mPath = path;
+    }
+
+    void ShaderManager::setLightingMethod(SceneUtil::LightingMethod method)
+    {
+        mLightingMethod = method;
     }
 
     bool addLineDirectivesAfterConditionalBlocks(std::string& source)
@@ -344,6 +355,8 @@ namespace Shader
             program->addShader(fragmentShader);
             program->addBindAttribLocation("aOffset", 6);
             program->addBindAttribLocation("aRotation", 7);
+            if (mLightingMethod == SceneUtil::LightingMethod::SingleUBO)
+                program->addBindUniformBlock("LightBufferBinding", static_cast<int>(UBOBinding::LightBuffer));
             found = mPrograms.insert(std::make_pair(std::make_pair(vertexShader, fragmentShader), program)).first;
         }
         return found->second;

@@ -5,6 +5,7 @@
 #include <osg/VertexAttribDivisor>
 
 #include <components/esm/esmreader.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwbase/environment.hpp"
@@ -271,6 +272,8 @@ namespace MWRender
         group->getOrCreateStateSet()->setAttributeAndModes(alpha.get(), osg::StateAttribute::ON);
         group->getBound();
         group->setNodeMask(Mask_Groundcover);
+        if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
+            group->setCullCallback(new SceneUtil::LightListCallback);
         mSceneManager->recreateShaders(group, "groundcover", false, true);
 
         return group;

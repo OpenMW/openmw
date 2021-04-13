@@ -152,6 +152,7 @@
     Feature #5771: ori command should report where a mesh is loaded from and whether the x version is used.
     Feature #5813: Instanced groundcover support
     Feature #5814: Bsatool should be able to create BSA archives, not only to extract it
+    Feature #5828: Support more than 8 lights
     Feature #5910: Fall back to delta time when physics can't keep up
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation

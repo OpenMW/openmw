@@ -278,6 +278,7 @@ protected:
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
     osg::ref_ptr<SceneUtil::GlowUpdater> mGlowUpdater;
     osg::ref_ptr<TransparencyUpdater> mTransparencyUpdater;
+    osg::ref_ptr<SceneUtil::LightSource> mExtraLightSource;
 
     float mAlpha;
 
