@@ -26,12 +26,19 @@ namespace MWLua
 
         struct SelfObject : public LObject
         {
-            SelfObject(const LObject& obj) : LObject(obj) {}
+            SelfObject(const LObject& obj) : LObject(obj), mIsActive(false) {}
             MWBase::LuaManager::ActorControls mControls;
+            bool mIsActive;
         };
+
+        void becomeActive();
+        void becomeInactive();
     protected:
         LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
         SelfObject mData;
+    private:
+        EngineHandlerList mOnActiveHandlers{"onActive"};
+        EngineHandlerList mOnInactiveHandlers{"onInactive"};
     };
 
 }

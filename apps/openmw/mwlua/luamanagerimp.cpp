@@ -44,7 +44,9 @@ namespace MWLua
         localContext.mSerializer = mLocalSerializer.get();
 
         initObjectBindingsForGlobalScripts(context);
+        initCellBindingsForGlobalScripts(context);
         initObjectBindingsForLocalScripts(localContext);
+        initCellBindingsForLocalScripts(localContext);
         LocalScripts::initializeSelfPackage(localContext);
 
         mLua.addCommonPackage("openmw.async", getAsyncPackageInitializer(context));
@@ -158,6 +160,13 @@ namespace MWLua
         }
         mKeyPressEvents.clear();
 
+        for (LocalScripts* localScripts : mObjectInactiveEvents)
+            localScripts->becomeInactive();
+        for (LocalScripts* localScripts : mObjectActiveEvents)
+            localScripts->becomeActive();
+        mObjectActiveEvents.clear();
+        mObjectInactiveEvents.clear();
+
         for (ObjectId id : mActorAddedEvents)
             mGlobalScripts.actorActive(GObject(id, mWorldView.getObjectRegistry()));
         mActorAddedEvents.clear();
@@ -190,6 +199,8 @@ namespace MWLua
         mGlobalEvents.clear();
         mKeyPressEvents.clear();
         mActorAddedEvents.clear();
+        mObjectActiveEvents.clear();
+        mObjectInactiveEvents.clear();
         mPlayerChanged = false;
         mPlayerScripts = nullptr;
         mWorldView.clear();
@@ -207,7 +218,10 @@ namespace MWLua
 
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (localScripts)
+        {
             mActiveLocalScripts.insert(localScripts);
+            mObjectActiveEvents.push_back(localScripts);
+        }
 
         if (ptr.getClass().isActor() && ptr != mPlayer)
             mActorAddedEvents.push_back(getId(ptr));
@@ -233,7 +247,10 @@ namespace MWLua
         mWorldView.objectRemovedFromScene(ptr);
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (localScripts)
+        {
             mActiveLocalScripts.erase(localScripts);
+            mObjectInactiveEvents.push_back(localScripts);
+        }
 
         // TODO: call mWorldView.objectUnloaded if object is unloaded from memory (does it ever happen?) and ptr becomes invalid.
     }
@@ -242,7 +259,7 @@ namespace MWLua
     {
         mKeyPressEvents.push_back(arg.keysym);
     }
-    
+
     const MWBase::LuaManager::ActorControls* LuaManager::getActorControls(const MWWorld::Ptr& ptr) const
     {
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();

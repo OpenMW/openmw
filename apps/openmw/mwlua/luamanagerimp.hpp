@@ -94,6 +94,8 @@ namespace MWLua
 
         std::vector<SDL_Keysym> mKeyPressEvents;
         std::vector<ObjectId> mActorAddedEvents;
+        std::vector<LocalScripts*> mObjectActiveEvents;
+        std::vector<LocalScripts*> mObjectInactiveEvents;
 
         // Queued actions that should be done in main thread. Processed by applyQueuedChanges().
         std::vector<std::unique_ptr<Action>> mActionQueue;

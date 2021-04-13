@@ -33,6 +33,7 @@ namespace MWLua
         selfAPI[sol::meta_function::to_string] = [](SelfObject& self) { return "openmw.self[" + self.toString() + "]"; };
         selfAPI["object"] = sol::readonly_property([](SelfObject& self) -> LObject { return LObject(self); });
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
+        selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
         selfAPI["setDirectControl"] = [](SelfObject& self, bool v) { self.mControls.controlledFromLua = v; };
         selfAPI["setEquipment"] = [manager=context.mLuaManager](const SelfObject& obj, sol::table equipment)
         {
@@ -87,6 +88,18 @@ namespace MWLua
     {
         mData.mControls.controlledFromLua = false;
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
+        registerEngineHandlers({&mOnActiveHandlers, &mOnInactiveHandlers});
+    }
+
+    void LocalScripts::becomeActive()
+    {
+        mData.mIsActive = true;
+        callEngineHandlers(mOnActiveHandlers);
+    }
+    void LocalScripts::becomeInactive()
+    {
+        mData.mIsActive = false;
+        callEngineHandlers(mOnInactiveHandlers);
     }
 
 }
