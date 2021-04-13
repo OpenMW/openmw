@@ -43,6 +43,7 @@ Coverity:
     # Add more than just `openmw` once we can build everything under 3h
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc) openmw
   after_script:
+    - cd build/
     - tar cfz cov-int.tar.gz cov-int
     - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME \
       --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL \
