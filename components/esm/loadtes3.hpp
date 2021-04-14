@@ -49,7 +49,6 @@ namespace ESM
         {
             std::string name;
             uint64_t size;
-            int index; // Position of the parent file in the global list of loaded files
         };
 
         GMDT mGameData; // Used in .ess savegames only

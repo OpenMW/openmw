@@ -986,20 +986,6 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
         mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, nullptr, &metaData));
     }
 
-    // Fix uninitialized master data index
-    for (std::vector<ESM::Header::MasterData>::const_iterator masterData = mReader->getGameFiles().begin();
-        masterData != mReader->getGameFiles().end(); ++masterData)
-    {
-        std::map<std::string, int>::iterator nameResult = mContentFileNames.find(masterData->name);
-        if (nameResult != mContentFileNames.end())
-        {
-            ESM::Header::MasterData& hackedMasterData = const_cast<ESM::Header::MasterData&>(*masterData);
-
-
-            hackedMasterData.index = nameResult->second;
-        }
-    }
-
     return mReader->getRecordCount();
 }
 

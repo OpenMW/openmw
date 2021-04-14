@@ -400,7 +400,7 @@ namespace SceneUtil
     class LightStateAttributePerObjectUniform : public osg::StateAttribute
     {
     public:
-        LightStateAttributePerObjectUniform() {}
+        LightStateAttributePerObjectUniform() : mLightManager(nullptr) {}
         LightStateAttributePerObjectUniform(const std::vector<osg::ref_ptr<osg::Light>>& lights, LightManager* lightManager) :  mLights(lights), mLightManager(lightManager) {}
 
         LightStateAttributePerObjectUniform(const LightStateAttributePerObjectUniform& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
@@ -613,7 +613,7 @@ namespace SceneUtil
     class LightManagerCullCallback : public osg::NodeCallback
     {
     public:
-        LightManagerCullCallback(LightManager* lightManager) : mLightManager(lightManager) {}
+        LightManagerCullCallback(LightManager* lightManager) : mLightManager(lightManager), mLastFrameNumber(0) {}
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
@@ -861,7 +861,7 @@ namespace SceneUtil
 
         if (ffp)
         {
-            initFFP(LightManager::mFFPMaxLights);
+            initFFP(mFFPMaxLights);
             return;
         }
 
@@ -903,6 +903,10 @@ namespace SceneUtil
         , mLightingMask(copy.mLightingMask)
         , mSun(copy.mSun)
         , mLightingMethod(copy.mLightingMethod)
+        , mPointLightRadiusMultiplier(copy.mPointLightRadiusMultiplier)
+        , mPointLightFadeEnd(copy.mPointLightFadeEnd)
+        , mPointLightFadeStart(copy.mPointLightFadeStart)
+        , mMaxLights(copy.mMaxLights)
     {
     }
 
@@ -1040,7 +1044,7 @@ namespace SceneUtil
         auto* stateset = getOrCreateStateSet();
 
         setLightingMethod(LightingMethod::PerObjectUniform);
-        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, LightManager::mMaxLightsUpperLimit));
+        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, mMaxLightsUpperLimit));
 
         stateset->setAttributeAndModes(new LightManagerStateAttributePerObjectUniform(this), osg::StateAttribute::ON);
         stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "LightBuffer", getMaxLights()));
@@ -1049,7 +1053,7 @@ namespace SceneUtil
     void LightManager::initSingleUBO(int targetLights)
     {
         setLightingMethod(LightingMethod::SingleUBO);
-        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, LightManager::mMaxLightsUpperLimit));
+        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, mMaxLightsUpperLimit));
 
         for (int i = 0; i < 2; ++i)
         {

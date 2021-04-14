@@ -278,8 +278,7 @@ namespace Shader
 
         const osg::StateSet::AttributeList& attributes = stateset->getAttributeList();
         osg::StateSet::AttributeList removedAttributes;
-        osg::ref_ptr<osg::StateSet> removedState;
-        if (removedState = getRemovedState(*stateset))
+        if (osg::ref_ptr<osg::StateSet> removedState = getRemovedState(*stateset))
             removedAttributes = removedState->getAttributeList();
         for (const auto& attributeMap : { attributes, removedAttributes })
         {
@@ -475,8 +474,7 @@ namespace Shader
 
         writableStateSet->removeAttribute(osg::StateAttribute::PROGRAM);
 
-        osg::ref_ptr<osg::StateSet> removedState;
-        if (removedState = getRemovedState(*writableStateSet))
+        if (osg::ref_ptr<osg::StateSet> removedState = getRemovedState(*writableStateSet))
         {
             // user data is normally shallow copied so shared with the original stateset
             osg::ref_ptr<osg::UserDataContainer> writableUserData;
