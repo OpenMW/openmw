@@ -861,7 +861,7 @@ namespace SceneUtil
 
         if (ffp)
         {
-            initFFP(LightManager::mFFPMaxLights);
+            initFFP(mFFPMaxLights);
             return;
         }
 
@@ -1044,7 +1044,7 @@ namespace SceneUtil
         auto* stateset = getOrCreateStateSet();
 
         setLightingMethod(LightingMethod::PerObjectUniform);
-        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, LightManager::mMaxLightsUpperLimit));
+        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, mMaxLightsUpperLimit));
 
         stateset->setAttributeAndModes(new LightManagerStateAttributePerObjectUniform(this), osg::StateAttribute::ON);
         stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "LightBuffer", getMaxLights()));
@@ -1053,7 +1053,7 @@ namespace SceneUtil
     void LightManager::initSingleUBO(int targetLights)
     {
         setLightingMethod(LightingMethod::SingleUBO);
-        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, LightManager::mMaxLightsUpperLimit));
+        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, mMaxLightsUpperLimit));
 
         for (int i = 0; i < 2; ++i)
         {
