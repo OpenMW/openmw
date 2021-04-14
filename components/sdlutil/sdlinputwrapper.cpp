@@ -368,6 +368,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         pack_evt.yrel = 0;
         pack_evt.z = mMouseZ;
         pack_evt.zrel = 0;
+        pack_evt.timestamp = 0;
 
         if(evt.type == SDL_MOUSEMOTION)
         {
