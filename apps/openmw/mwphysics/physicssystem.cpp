@@ -612,9 +612,6 @@ namespace MWPhysics
             return nullptr;
         }();
 
-        if (caster == nullptr)
-            Log(Debug::Warning) << "No caster for projectile " << projectileId;
-
         ProjectileConvexCallback resultCallback(caster, btFrom, btTo, projectile);
         resultCallback.m_collisionFilterMask = 0xff;
         resultCallback.m_collisionFilterGroup = CollisionType_Projectile;
