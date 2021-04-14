@@ -75,27 +75,13 @@ namespace
 
 MWWorld::ResolutionListener::~ResolutionListener()
 {
-    if(!mStore.mModified && mStore.mResolved && !mStore.mPtr.isEmpty())
+    try
     {
-        try
-        {
-            for(const auto&& ptr : mStore)
-                ptr.getRefData().setCount(0);
-        }
-        catch(const std::exception& e)
-        {
-            Log(Debug::Warning) << "Failed to clear temporary container contents of " << mStore.mPtr.get<ESM::Container>()->mBase->mId << ": " << e.what();
-        }
-        mStore.fillNonRandom(mStore.mPtr.get<ESM::Container>()->mBase->mInventory, "", mStore.mSeed);
-        try
-        {
-            addScripts(mStore, mStore.mPtr.mCell);
-        }
-        catch(const std::exception& e)
-        {
-            Log(Debug::Warning) << "Failed to restart item scripts inside " << mStore.mPtr.get<ESM::Container>()->mBase->mId << ": " << e.what();
-        }
-        mStore.mResolved = false;
+        mStore.unresolve();
+    }
+    catch(const std::exception& e)
+    {
+        Log(Debug::Error) << "Failed to clear temporary container contents of " << mStore.mPtr.get<ESM::Container>()->mBase->mId << ": " << e.what();
     }
 }
 
@@ -660,6 +646,21 @@ MWWorld::ResolutionHandle MWWorld::ContainerStore::resolveTemporarily()
         addScripts(*this, mPtr.mCell);
     }
     return {listener};
+}
+
+void MWWorld::ContainerStore::unresolve()
+{
+    if (mModified)
+        return;
+
+    if (mResolved && !mPtr.isEmpty())
+    {
+        for(const auto&& ptr : *this)
+            ptr.getRefData().setCount(0);
+        fillNonRandom(mPtr.get<ESM::Container>()->mBase->mInventory, "", mSeed);
+        addScripts(*this, mPtr.mCell);
+        mResolved = false;
+    }
 }
 
 float MWWorld::ContainerStore::getWeight() const
