@@ -16,6 +16,7 @@
 #include "category.hpp"
 #include "setting.hpp"
 #include "enumsetting.hpp"
+#include "stringsetting.hpp"
 #include "shortcutmanager.hpp"
 
 class QColor;
@@ -77,6 +78,8 @@ namespace CSMPrefs
 
             ShortcutSetting& declareShortcut (const std::string& key, const std::string& label,
                 const QKeySequence& default_);
+
+            StringSetting& declareString (const std::string& key, const std::string& label, std::string default_);
 
             ModifierSetting& declareModifier(const std::string& key, const std::string& label, int modifier_);
 

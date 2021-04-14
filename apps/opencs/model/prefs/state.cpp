@@ -421,6 +421,35 @@ void CSMPrefs::State::declare()
     declareSubcategory ("Script Editor");
     declareShortcut ("script-editor-comment", "Comment Selection", QKeySequence());
     declareShortcut ("script-editor-uncomment", "Uncomment Selection", QKeySequence());
+
+    declareCategory ("Models");
+    declareString ("baseanim", "3rd person base model with textkeys-data", "meshes/openmwdude.dae").
+        setTooltip("3rd person base model with textkeys-data");
+
+/*# 3rd person base model with textkeys-data
+baseanim = meshes/base_anim.nif
+
+# 1st person base animation model that looks also for corresponding kf-file
+xbaseanim1st = meshes/xbase_anim.1st.nif
+
+# 3rd person beast race base model with textkeys-data
+baseanimkna = meshes/base_animkna.nif
+
+# 1st person beast race base animation model
+baseanimkna1st = meshes/base_animkna.1st.nif
+
+# 3rd person female base model with textkeys-data
+baseanimfemale = meshes/base_anim_female.nif
+
+# 1st person female base model with textkeys-data
+baseanimfemale1st = meshes/base_anim_female.1st.nif
+
+# 3rd person werewolf skin
+wolfskin = meshes/wolf/skin.nif
+
+# 1st person werewolf skin
+wolfskin1st = meshes/wolf/skin.1st.nif*/
+
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
@@ -552,6 +581,24 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& 
 
     CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mSettings, &mMutex,
         key, label);
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+CSMPrefs::StringSetting& CSMPrefs::State::declareString (const std::string& key, const std::string& label, std::string default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    setDefault (key, default_);
+
+    default_ = mSettings.getString (key, mCurrentCategory->second.getKey());
+
+    CSMPrefs::StringSetting *setting =
+        new CSMPrefs::StringSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        default_);
+
     mCurrentCategory->second.addSetting (setting);
 
     return *setting;
