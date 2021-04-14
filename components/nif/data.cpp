@@ -363,11 +363,11 @@ void NiSkinPartition::read(NIFStream *nif)
 
 void NiSkinPartition::Partition::read(NIFStream *nif)
 {
-    unsigned short numVertices = nif->getUShort();
-    unsigned short numTriangles = nif->getUShort();
-    unsigned short numBones = nif->getUShort();
-    unsigned short numStrips = nif->getUShort();
-    unsigned short bonesPerVertex = nif->getUShort();
+    size_t numVertices = nif->getUShort();
+    size_t numTriangles = nif->getUShort();
+    size_t numBones = nif->getUShort();
+    size_t numStrips = nif->getUShort();
+    size_t bonesPerVertex = nif->getUShort();
     if (numBones)
         nif->getUShorts(bones, numBones);
 
@@ -395,7 +395,7 @@ void NiSkinPartition::Partition::read(NIFStream *nif)
         if (numStrips)
         {
             strips.resize(numStrips);
-            for (unsigned short i = 0; i < numStrips; i++)
+            for (size_t i = 0; i < numStrips; i++)
                 nif->getUShorts(strips[i], stripLengths[i]);
         }
         else if (numTriangles)
