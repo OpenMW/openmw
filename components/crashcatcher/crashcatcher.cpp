@@ -150,6 +150,9 @@ static void gdb_info(pid_t pid)
      * So CoverityScan warning is valid only for ancient versions of stdlib.
     */
     strcpy(respfile, "/tmp/gdb-respfile-XXXXXX");
+#ifdef __COVERITY__
+    umask(0600);
+#endif
     if((fd=mkstemp(respfile)) >= 0 && (f=fdopen(fd, "w")) != nullptr)
     {
         fprintf(f, "attach %d\n"
