@@ -120,7 +120,7 @@ Debian_Clang_tests:
 .MacOS:
   image: macos-11-xcode-12
   tags:
-    - macos
+    - shared-macos-amd64
   stage: build
   only:
     variables:
