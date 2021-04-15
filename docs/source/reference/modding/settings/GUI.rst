@@ -5,12 +5,13 @@ scaling factor
 --------------
 
 :Type:		floating point
-:Range:		> 0.0
+:Range:		0.5 to 8.0
 :Default:	1.0
 
-This setting scales the GUI interface windows.
+This setting scales GUI windows.
 A value of 1.0 results in the normal scale. Larger values are useful to increase the scale of the GUI for high resolution displays.
-This setting can only be configured by editing the settings configuration file.
+
+This setting can be configured in the Interface section of Advanced tab of the launcher.
 
 font size
 ---------

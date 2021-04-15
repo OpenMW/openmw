@@ -27,7 +27,7 @@ namespace Gui
     class FontLoader
     {
     public:
-        FontLoader (ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath);
+        FontLoader (ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath, float scalingFactor);
         ~FontLoader();
 
         /// @param exportToFile export the converted fonts (Images and XML with glyph metrics) to files?
@@ -43,6 +43,7 @@ namespace Gui
         const VFS::Manager* mVFS;
         std::string mUserDataPath;
         int mFontHeight;
+        float mScalingFactor;
 
         std::vector<MyGUI::ITexture*> mTextures;
         std::vector<MyGUI::ResourceManualFont*> mFonts;

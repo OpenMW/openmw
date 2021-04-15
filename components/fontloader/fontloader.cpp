@@ -146,10 +146,11 @@ namespace
 namespace Gui
 {
 
-    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath)
+    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath, float scalingFactor)
         : mVFS(vfs)
         , mUserDataPath(userDataPath)
         , mFontHeight(16)
+        , mScalingFactor(scalingFactor)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
             mEncoding = ToUTF8::CP437;
@@ -566,11 +567,7 @@ namespace Gui
                 // to allow to configure font size via config file, without need to edit XML files.
                 // Also we should take UI scaling factor in account.
                 int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                resolution = std::min(960, std::max(48, resolution));
-
-                float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-                if (uiScale > 0.f)
-                    resolution *= uiScale;
+                resolution = std::min(960, std::max(48, resolution)) * mScalingFactor;
 
                 MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
                 resolutionNode->addAttribute("key", "Resolution");

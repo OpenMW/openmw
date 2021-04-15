@@ -32,7 +32,6 @@ namespace MWInput
         , mMouseManager(mouseManager)
         , mJoystickEnabled (Settings::Manager::getBool("enable controller", "Input"))
         , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
-        , mInvUiScalingFactor(1.f)
         , mSneakToggleShortcutTimer(0.f)
         , mGamepadZoom(0)
         , mGamepadGuiCursorEnabled(true)
@@ -69,10 +68,6 @@ namespace MWInput
             }
         }
 
-        float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-        if (uiScale > 0.f)
-            mInvUiScalingFactor = 1.f / uiScale;
-
         float deadZoneRadius = Settings::Manager::getFloat("joystick dead zone", "Input");
         deadZoneRadius = std::min(std::max(deadZoneRadius, 0.0f), 0.5f);
         mBindingsManager->setJoystickDeadZone(deadZoneRadius);
@@ -102,8 +97,10 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            float xMove = xAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
-            float yMove = yAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
+            float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
+            float xMove = xAxis * dt * 1500.0f / uiScale;
+            float yMove = yAxis * dt * 1500.0f / uiScale;
+
             float mouseWheelMove = -zAxis * dt * 1500.0f;
             if (xMove != 0 || yMove != 0 || mouseWheelMove != 0)
             {

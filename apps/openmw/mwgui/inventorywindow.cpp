@@ -67,13 +67,8 @@ namespace MWGui
         , mLastYSize(0)
         , mPreview(new MWRender::InventoryPreview(parent, resourceSystem, MWMechanics::getPlayer()))
         , mTrading(false)
-        , mScaleFactor(1.0f)
         , mUpdateTimer(0.f)
     {
-        float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-        if (uiScale > 0.f)
-            mScaleFactor = uiScale;
-
         mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture()));
         mPreview->rebuild();
 
@@ -469,10 +464,11 @@ namespace MWGui
         MyGUI::IntSize size = mAvatarImage->getSize();
         int width = std::min(mPreview->getTextureWidth(), size.width);
         int height = std::min(mPreview->getTextureHeight(), size.height);
-        mPreview->setViewport(int(width*mScaleFactor), int(height*mScaleFactor));
+        float scalingFactor = MWBase::Environment::get().getWindowManager()->getScalingFactor();
+        mPreview->setViewport(int(width*scalingFactor), int(height*scalingFactor));
 
         mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f,
-                                                                     width*mScaleFactor/float(mPreview->getTextureWidth()), height*mScaleFactor/float(mPreview->getTextureHeight())));
+                                                                     width*scalingFactor/float(mPreview->getTextureWidth()), height*scalingFactor/float(mPreview->getTextureHeight())));
     }
 
     void InventoryWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
@@ -637,8 +633,9 @@ namespace MWGui
         y = (mAvatarImage->getHeight()-1) - y;
 
         // Scale coordinates
-        x = int(x*mScaleFactor);
-        y = int(y*mScaleFactor);
+        float scalingFactor = MWBase::Environment::get().getWindowManager()->getScalingFactor();
+        x = static_cast<int>(x*scalingFactor);
+        y = static_cast<int>(y*scalingFactor);
 
         int slot = mPreview->getSlotSelected (x, y);
 

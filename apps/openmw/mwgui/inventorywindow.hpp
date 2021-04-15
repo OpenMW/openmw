@@ -104,7 +104,6 @@ namespace MWGui
             std::unique_ptr<MWRender::InventoryPreview> mPreview;
 
             bool mTrading;
-            float mScaleFactor;
             float mUpdateTimer;
 
             void toggleMaximized();
