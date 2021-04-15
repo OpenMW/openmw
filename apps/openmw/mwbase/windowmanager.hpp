@@ -171,6 +171,8 @@ namespace MWBase
             virtual void setDragDrop(bool dragDrop) = 0;
             virtual bool getWorldMouseOver() = 0;
 
+            virtual float getScalingFactor() = 0;
+
             virtual bool toggleFogOfWar() = 0;
 
             virtual bool toggleFullHelp() = 0;

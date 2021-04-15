@@ -203,6 +203,7 @@ bool Launcher::AdvancedPage::loadSettings()
             showOwnedComboBox->setCurrentIndex(showOwnedIndex);
         loadSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
         loadSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
+        scalingSpinBox->setValue(mEngineSettings.getFloat("scaling factor", "GUI"));
     }
 
     // Bug fixes
@@ -360,6 +361,9 @@ void Launcher::AdvancedPage::saveSettings()
             mEngineSettings.setInt("show owned", "Game", showOwnedCurrentIndex);
         saveSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
         saveSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
+        float uiScalingFactor = scalingSpinBox->value();
+        if (uiScalingFactor != mEngineSettings.getFloat("scaling factor", "GUI"))
+            mEngineSettings.setFloat("scaling factor", "GUI", uiScalingFactor);
     }
 
     // Bug fixes

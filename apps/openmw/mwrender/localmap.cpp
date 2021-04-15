@@ -25,6 +25,7 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -92,9 +93,8 @@ LocalMap::LocalMap(osg::Group* root)
     , mInterior(false)
 {
     // Increase map resolution, if use UI scaling
-    float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-    if (uiScale > 0.f)
-        mMapResolution *= uiScale;
+    float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
+    mMapResolution *= uiScale;
 
     SceneUtil::FindByNameVisitor find("Scene Root");
     mRoot->accept(find);

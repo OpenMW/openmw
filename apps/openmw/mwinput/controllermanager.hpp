@@ -52,7 +52,6 @@ namespace MWInput
 
         bool mJoystickEnabled;
         float mGamepadCursorSpeed;
-        float mInvUiScalingFactor;
         float mSneakToggleShortcutTimer;
         float mGamepadZoom;
         bool mGamepadGuiCursorEnabled;

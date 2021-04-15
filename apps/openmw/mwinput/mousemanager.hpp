@@ -47,7 +47,6 @@ namespace MWInput
 
         BindingsManager* mBindingsManager;
         SDLUtil::InputWrapper* mInputWrapper;
-        float mInvUiScalingFactor;
 
         float mGuiCursorX;
         float mGuiCursorY;
