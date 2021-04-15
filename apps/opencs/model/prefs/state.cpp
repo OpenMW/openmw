@@ -423,33 +423,14 @@ void CSMPrefs::State::declare()
     declareShortcut ("script-editor-uncomment", "Uncomment Selection", QKeySequence());
 
     declareCategory ("Models");
-    declareString ("baseanim", "3rd person base model with textkeys-data", "meshes/openmwdude.dae").
+    declareString ("baseanim", "base animations", "meshes/base_anim.nif").
         setTooltip("3rd person base model with textkeys-data");
-
-/*# 3rd person base model with textkeys-data
-baseanim = meshes/base_anim.nif
-
-# 1st person base animation model that looks also for corresponding kf-file
-xbaseanim1st = meshes/xbase_anim.1st.nif
-
-# 3rd person beast race base model with textkeys-data
-baseanimkna = meshes/base_animkna.nif
-
-# 1st person beast race base animation model
-baseanimkna1st = meshes/base_animkna.1st.nif
-
-# 3rd person female base model with textkeys-data
-baseanimfemale = meshes/base_anim_female.nif
-
-# 1st person female base model with textkeys-data
-baseanimfemale1st = meshes/base_anim_female.1st.nif
-
-# 3rd person werewolf skin
-wolfskin = meshes/wolf/skin.nif
-
-# 1st person werewolf skin
-wolfskin1st = meshes/wolf/skin.1st.nif*/
-
+    declareString ("baseanimkna", "base animations, kna", "meshes/base_animkna.nif").
+        setTooltip("3rd person beast race base model with textkeys-data");
+    declareString ("baseanimfemale", "base animations, female", "meshes/base_anim_female.nif").
+        setTooltip("3rd person female base model with textkeys-data");
+    declareString ("wolfskin", "base animations, wolf", "meshes/wolf/skin.nif").
+        setTooltip("3rd person werewolf skin");
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)

@@ -3,7 +3,7 @@
 
 #include "setting.hpp"
 
-class QTextEdit;
+class QLineEdit;
 
 namespace CSMPrefs
 {
@@ -13,7 +13,7 @@ namespace CSMPrefs
 
             std::string mTooltip;
             std::string mDefault;
-            QTextEdit* mWidget;
+            QLineEdit* mWidget;
 
         public:
 
@@ -29,7 +29,7 @@ namespace CSMPrefs
 
         private slots:
 
-            void textChanged (std::string text);
+            void textChanged (const QString& text);
     };
 }
 
