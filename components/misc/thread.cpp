@@ -50,7 +50,7 @@ namespace Misc
 {
     void setCurrentThreadIdlePriority()
     {
-        rtprio prio;
+        struct rtprio prio;
         prio.type = RTP_PRIO_IDLE;
         prio.prio = RTP_PRIO_MAX;
         if (rtprio_thread(RTP_SET, 0, &prio) == 0)
