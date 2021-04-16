@@ -129,7 +129,7 @@ Debian_Clang_tests:
     paths:
     - ccache/
   script:
-    - rm -fr build/*  # remove anything in the build directory
+    - rm -fr build  # remove the build directory
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
