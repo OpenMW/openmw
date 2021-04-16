@@ -41,7 +41,7 @@ namespace ESM
         // Support '\r' terminated strings like vanilla.  See Bug #1324.
         std::replace(tmp.begin(), tmp.end(), '\r', '\0');
         // Avoid heap corruption
-        if (!tmp.empty() && tmp[tmp.size()-1] != '\0')
+        if (tmp.back() != '\0')
         {
             tmp.emplace_back('\0');
             std::stringstream ss;
@@ -54,11 +54,12 @@ namespace ESM
             str = tmp.data();
         }
 
+        const auto tmpEnd = tmp.data() + tmp.size();
         for (size_t i = 0; i < mVarNames.size(); i++)
         {
             mVarNames[i] = std::string(str);
             str += mVarNames[i].size() + 1;
-            if (static_cast<size_t>(str - tmp.data()) > tmp.size())
+            if (str >= tmpEnd)
             {
                 // SCVR subrecord is unused and variable names are determined
                 // from the script source, so an overflow is not fatal.
