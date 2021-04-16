@@ -174,12 +174,14 @@ this mode when supported and where the GPU is not a bottleneck. On some weaker
 devices, using this mode along with :ref:`force per pixel lighting` can carry
 performance penalties.
 
-Note that when enabled, groundcover lighting is forced to be vertex lighting,
-unless normal maps are provided. This is due to some groundcover mods using the
-Z-Up normals technique to avoid some common issues with shading. As a
-consequence, per pixel lighting would give undesirable results.
+When enabled, groundcover lighting is forced to be vertex lighting, unless
+normal maps are provided. This is due to some groundcover mods using the Z-Up
+normals technique to avoid some common issues with shading. As a consequence,
+per pixel lighting would give undesirable results.
 
-This setting has no effect if :ref:`force shaders` is 'false'.
+Note that the rendering will act as if you have 'force shaders' option enabled
+when not set to 'legacy'. This means that shaders will be used to render all objects and
+the terrain.
 
 light bounds multiplier
 -----------------------

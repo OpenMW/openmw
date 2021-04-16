@@ -5,6 +5,8 @@
 #include <osg/BufferObject>
 #include <osg/BufferIndexBinding>
 #include <osg/Endian>
+#include <osg/Version>
+#include <osg/ValueObject>
 
 #include <osgUtil/CullVisitor>
 
@@ -102,6 +104,7 @@ namespace SceneUtil
             , mEndian(osg::getCpuByteOrder())
             , mCount(count)
             , mStride(12)
+            , mCachedSunPos(osg::Vec4())
         {
             mOffsets[Diffuse] = 0;
             mOffsets[Ambient] = 1;
@@ -118,6 +121,7 @@ namespace SceneUtil
             , mCount(copy.mCount)
             , mStride(copy.mStride)
             , mOffsets(copy.mOffsets)
+            , mCachedSunPos(copy.mCachedSunPos)
         {}
 
         void setDiffuse(int index, const osg::Vec4& value)
@@ -172,6 +176,17 @@ namespace SceneUtil
             return 3 * osg::Vec4::num_components * sizeof(GL_FLOAT) * sz;
         }
 
+        void setCachedSunPos(const osg::Vec4& pos)
+        {
+            mCachedSunPos = pos;
+        }
+
+        void uploadCachedSunPos(const osg::Matrix& viewMat)
+        {
+            osg::Vec4 viewPos = mCachedSunPos * viewMat;
+            std::memcpy(&(*mData)[getOffset(0, Position)], viewPos.ptr(), sizeof(osg::Vec4f));
+        }
+
         unsigned int asRGBA(const osg::Vec4& value) const
         {
             return mEndian == osg::BigEndian ? value.asABGR() : value.asRGBA();
@@ -187,6 +202,8 @@ namespace SceneUtil
             constexpr auto sizeofFloat = sizeof(GL_FLOAT);
             constexpr auto sizeofVec4 = sizeofFloat * osg::Vec4::num_components;
 
+            LightBuffer oldBuffer = LightBuffer(*this);
+
             mOffsets[Diffuse] = offsetColors / sizeofFloat;
             mOffsets[Ambient] = mOffsets[Diffuse] + 1;
             mOffsets[Specular] = mOffsets[Diffuse] + 2;
@@ -196,7 +213,6 @@ namespace SceneUtil
             mStride = (offsetAttenuationRadius + sizeofVec4 + stride) / 4;
 
             // Copy over previous buffers light data. Buffers populate before we know the layout.
-            LightBuffer oldBuffer = LightBuffer(*this);
             mData->resize(size / sizeofFloat);
             for (int i = 0; i < oldBuffer.mCount; ++i)
             {
@@ -212,6 +228,7 @@ namespace SceneUtil
         int mCount;
         int mStride;
         std::array<std::size_t, 6> mOffsets;
+        osg::Vec4 mCachedSunPos;
     };
 
     class LightStateCache
@@ -229,8 +246,9 @@ namespace SceneUtil
         return &cacheVector[contextid];
     }
 
-    void configureStateSetSunOverride(LightingMethod method, const osg::Light* light, osg::StateSet* stateset, int mode)
+    void configureStateSetSunOverride(LightManager* lightManager, const osg::Light* light, osg::StateSet* stateset, int mode)
     {
+        auto method = lightManager->getLightingMethod();
         switch (method)
         {
         case LightingMethod::FFP:
@@ -244,12 +262,15 @@ namespace SceneUtil
                 configureAmbient(lightMat, light->getAmbient());
                 configureDiffuse(lightMat, light->getDiffuse());
                 configureSpecular(lightMat, light->getSpecular());
-                stateset->addUniform(new osg::Uniform("LightBuffer", lightMat), mode);
+
+                osg::ref_ptr<osg::Uniform> uni = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "LightBuffer", lightManager->getMaxLights());
+                uni->setElement(0, lightMat);
+                stateset->addUniform(uni, mode);
                 break;
             }
         case LightingMethod::SingleUBO:
             {
-                osg::ref_ptr<LightBuffer> buffer = new LightBuffer(1);
+                osg::ref_ptr<LightBuffer> buffer = new LightBuffer(lightManager->getMaxLightsInScene());
 
                 buffer->setDiffuse(0, light->getDiffuse());
                 buffer->setAmbient(0, light->getAmbient());
@@ -258,8 +279,11 @@ namespace SceneUtil
 
                 osg::ref_ptr<osg::UniformBufferObject> ubo = new osg::UniformBufferObject;
                 buffer->getData()->setBufferObject(ubo);
-                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), buffer->getData().get(), 0, buffer->getData()->getTotalDataSize());
-
+#if OSG_VERSION_GREATER_OR_EQUAL(3,5,7)
+                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), buffer->getData(), 0, buffer->getData()->getTotalDataSize());
+#else
+                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), ubo, 0, buffer->getData()->getTotalDataSize());
+#endif
                 stateset->setAttributeAndModes(ubb, mode);
 
                 break;
@@ -433,6 +457,11 @@ namespace SceneUtil
 
                 lightUniform->setElement(i+1, lightMat);
             }
+
+            auto sun = mLightManager->getSunlightBuffer(state.getFrameStamp()->getFrameNumber());
+            configurePosition(sun, osg::Vec4(sun(0,0), sun(0,1), sun(0,2), 0.0) * state.getInitialViewMatrix());
+            lightUniform->setElement(0, sun);
+
             lightUniform->dirty();
         }
 
@@ -618,7 +647,6 @@ namespace SceneUtil
         void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-            bool pop = false;
 
             if (mLastFrameNumber != cv->getTraversalNumber())
             {
@@ -628,18 +656,24 @@ namespace SceneUtil
                 {
                     auto stateset = mLightManager->getStateSet();
                     auto bo = mLightManager->getLightBuffer(mLastFrameNumber);
-                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), bo->getData().get(), 0, bo->getData()->getTotalDataSize());
-                    stateset->setAttributeAndModes(ubb.get(), osg::StateAttribute::ON);
+
+#if OSG_VERSION_GREATER_OR_EQUAL(3,5,7)
+                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), bo->getData(), 0, bo->getData()->getTotalDataSize());
+#else
+                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), bo->getData()->getBufferObject(), 0, bo->getData()->getTotalDataSize());
+#endif
+                    stateset->setAttributeAndModes(ubb, osg::StateAttribute::ON);
                 }
 
                 auto sun = mLightManager->getSunlight();
 
                 if (sun)
                 {
+                    // we must defer uploading the transformation to view-space position to deal with different cameras (e.g. reflection RTT).
                     if (mLightManager->getLightingMethod() == LightingMethod::PerObjectUniform)
                     {
                         osg::Matrixf lightMat;
-                        configurePosition(lightMat, sun->getPosition() * (*cv->getCurrentRenderStage()->getInitialViewMatrix()));
+                        configurePosition(lightMat, sun->getPosition());
                         configureAmbient(lightMat, sun->getAmbient());
                         configureDiffuse(lightMat, sun->getDiffuse());
                         configureSpecular(lightMat, sun->getSpecular());
@@ -649,33 +683,15 @@ namespace SceneUtil
                     {
                         auto buf = mLightManager->getLightBuffer(mLastFrameNumber);
 
-                        buf->setPosition(0, sun->getPosition() * (*cv->getCurrentRenderStage()->getInitialViewMatrix()));
+                        buf->setCachedSunPos(sun->getPosition());
                         buf->setAmbient(0, sun->getAmbient());
                         buf->setDiffuse(0, sun->getDiffuse());
                         buf->setSpecular(0, sun->getSpecular());
                     }
                 }
             }
-            else if (isReflectionCamera(cv->getCurrentCamera()))
-            {
-                auto sun = mLightManager->getSunlight();
-                if (sun)
-                {
-                    osg::Vec4 originalPos = sun->getPosition();
-                    sun->setPosition(originalPos * (*cv->getCurrentRenderStage()->getInitialViewMatrix()));
-
-                    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-                    configureStateSetSunOverride(mLightManager->getLightingMethod(), sun, stateset);
-
-                    sun->setPosition(originalPos);
-                    cv->pushStateSet(stateset);
-                    pop = true;
-                }
-            }
 
             traverse(node, nv);
-            if (pop)
-                cv->popStateSet();
         }
 
     private:
@@ -692,6 +708,7 @@ namespace SceneUtil
         LightManagerStateAttribute(LightManager* lightManager)
         : mLightManager(lightManager)
         , mDummyProgram(new osg::Program)
+        , mInitLayout(false)
         {
             static const std::string dummyVertSource = generateDummyShader(mLightManager->getMaxLightsInScene());
 
@@ -741,8 +758,7 @@ namespace SceneUtil
 
         void apply(osg::State& state) const override
         {
-            static bool init = false;
-            if (!init)
+            if (!mInitLayout)
             {
                 auto handle = mDummyProgram->getPCP(state)->getHandle();
                 auto* ext = state.get<osg::GLExtensions>();
@@ -754,13 +770,11 @@ namespace SceneUtil
                 if (activeUniformBlocks > 0)
                 {
                     initSharedLayout(ext, handle);
-                    init = true;
+                    mInitLayout = true;
                 }
             }
-            else
-            {
-                mLightManager->getLightBuffer(state.getFrameStamp()->getFrameNumber())->dirty();
-            }
+            mLightManager->getLightBuffer(state.getFrameStamp()->getFrameNumber())->uploadCachedSunPos(state.getInitialViewMatrix());
+            mLightManager->getLightBuffer(state.getFrameStamp()->getFrameNumber())->dirty();
         }
 
     private:
@@ -792,36 +806,7 @@ namespace SceneUtil
 
         LightManager* mLightManager;
         osg::ref_ptr<osg::Program> mDummyProgram;
-    };
-
-    class LightManagerStateAttributePerObjectUniform : public osg::StateAttribute
-    {
-    public:
-        LightManagerStateAttributePerObjectUniform()
-            : mLightManager(nullptr) {}
-
-        LightManagerStateAttributePerObjectUniform(LightManager* lightManager)
-        : mLightManager(lightManager)
-        {
-        }
-
-        LightManagerStateAttributePerObjectUniform(const LightManagerStateAttributePerObjectUniform& copy, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
-            : osg::StateAttribute(copy,copyop), mLightManager(copy.mLightManager) {}
-
-        int compare(const StateAttribute &sa) const override
-        {
-            throw std::runtime_error("LightManagerStateAttributePerObjectUniform::compare: unimplemented");
-        }
-
-        META_StateAttribute(NifOsg, LightManagerStateAttributePerObjectUniform, osg::StateAttribute::LIGHT)
-
-        void apply(osg::State& state) const override
-        {
-            mLightManager->getStateSet()->getUniform("LightBuffer")->setElement(0, mLightManager->getSunlightBuffer(state.getFrameStamp()->getFrameNumber()));
-        }
-
-    private:
-        LightManager* mLightManager;
+        mutable bool mInitLayout;
     };
 
     const std::unordered_map<std::string, LightingMethod> LightManager::mLightingMethodSettingMap = {
@@ -857,6 +842,14 @@ namespace SceneUtil
         , mPointLightFadeEnd(0.f)
         , mPointLightFadeStart(0.f)
     {
+        osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
+        bool supportsUBO = exts && exts->isUniformBufferObjectSupported;
+        bool supportsGPU4 = exts && exts->isGpuShader4Supported;
+
+        mSupported[static_cast<int>(LightingMethod::FFP)] = true;
+        mSupported[static_cast<int>(LightingMethod::PerObjectUniform)] = true;
+        mSupported[static_cast<int>(LightingMethod::SingleUBO)] = supportsUBO && supportsGPU4;
+
         setUpdateCallback(new LightManagerUpdateCallback);
 
         if (ffp)
@@ -869,10 +862,6 @@ namespace SceneUtil
         auto lightingMethod = LightManager::getLightingMethodFromString(lightingMethodString);
 
         updateSettings();
-
-        osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
-        bool supportsUBO = exts && exts->isUniformBufferObjectSupported;
-        bool supportsGPU4 = exts && exts->isGpuShader4Supported;
 
         static bool hasLoggedWarnings = false;
 
@@ -1046,7 +1035,8 @@ namespace SceneUtil
         setLightingMethod(LightingMethod::PerObjectUniform);
         setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, mMaxLightsUpperLimit));
 
-        stateset->setAttributeAndModes(new LightManagerStateAttributePerObjectUniform(this), osg::StateAttribute::ON);
+        // ensures sunlight element in our uniform array is updated when there are no point lights in scene
+        stateset->setAttributeAndModes(new LightStateAttributePerObjectUniform({}, this), osg::StateAttribute::ON);
         stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "LightBuffer", getMaxLights()));
     }
 

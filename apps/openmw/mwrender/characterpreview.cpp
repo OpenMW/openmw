@@ -233,7 +233,16 @@ namespace MWRender
         float positionZ = std::cos(altitude);
         light->setPosition(osg::Vec4(positionX,positionY,positionZ, 0.0));
         light->setDiffuse(osg::Vec4(diffuseR,diffuseG,diffuseB,1));
-        light->setAmbient(osg::Vec4(ambientR,ambientG,ambientB,1));
+        osg::Vec4 ambientRGBA = osg::Vec4(ambientR,ambientG,ambientB,1);
+        if (mResourceSystem->getSceneManager()->getForceShaders())
+        {
+            // When using shaders, we now skip the ambient sun calculation as this is the only place it's used.
+            // Using the scene ambient will give identical results.
+            lightmodel->setAmbientIntensity(ambientRGBA);
+            light->setAmbient(osg::Vec4(0,0,0,1));
+        }
+        else
+            light->setAmbient(ambientRGBA);
         light->setSpecular(osg::Vec4(0,0,0,0));
         light->setLightNum(0);
         light->setConstantAttenuation(1.f);

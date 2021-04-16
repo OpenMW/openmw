@@ -305,6 +305,16 @@ namespace Resource
         mApplyLightingToEnvMaps = apply;
     }
 
+    void SceneManager::setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported)
+    {
+        mSupportedLightingMethods = supported;
+    }
+
+    bool SceneManager::isSupportedLightingMethod(SceneUtil::LightingMethod method) const
+    {
+        return mSupportedLightingMethods[static_cast<int>(method)];
+    }
+
     void SceneManager::setLightingMethod(SceneUtil::LightingMethod method)
     {
         mLightingMethod = method;

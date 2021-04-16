@@ -224,8 +224,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 
     // override sun for local map 
-    auto lightingMethod = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getLightingMethod();    
-    SceneUtil::configureStateSetSunOverride(lightingMethod, light, stateset);
+    SceneUtil::configureStateSetSunOverride(static_cast<SceneUtil::LightManager*>(mSceneRoot.get()), light, stateset);
 
     camera->addChild(lightSource);
     camera->setStateSet(stateset);

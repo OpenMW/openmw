@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <memory>
+#include <array>
 
 #include <osg/Light>
 
@@ -24,7 +25,7 @@ namespace osgUtil
 namespace SceneUtil
 {
     class LightBuffer;
-    class StateSetGenerator;
+    struct StateSetGenerator;
 
     enum class LightingMethod
     {
@@ -32,8 +33,6 @@ namespace SceneUtil
         PerObjectUniform,
         SingleUBO,
     };
-
-    void configureStateSetSunOverride(LightingMethod method, const osg::Light* light, osg::StateSet* stateset, int mode = osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
     /// LightSource managed by a LightManager.
     /// @par Typically used for point lights. Spot lights are not supported yet. Directional lights affect the whole scene
@@ -130,6 +129,7 @@ namespace SceneUtil
         };
 
         using LightList = std::vector<const LightSourceViewBound*>;
+        using SupportedMethods = std::array<bool, 3>;
 
         META_Node(SceneUtil, LightManager)
 
@@ -177,6 +177,8 @@ namespace SceneUtil
 
         osg::Matrixf getSunlightBuffer(size_t frameNum) const { return mSunlightBuffers[frameNum%2]; }
         void setSunlightBuffer(const osg::Matrixf& buffer, size_t frameNum) { mSunlightBuffers[frameNum%2] = buffer; }
+
+        SupportedMethods getSupportedLightingMethods() { return mSupported; }
 
         std::map<std::string, std::string> getLightDefines() const;
 
@@ -232,6 +234,8 @@ namespace SceneUtil
 
         int mMaxLights;
 
+        SupportedMethods mSupported;
+
         static constexpr auto mMaxLightsLowerLimit = 2;
         static constexpr auto mMaxLightsUpperLimit = 64;
         static constexpr auto mFFPMaxLights = 8;
@@ -276,6 +280,8 @@ namespace SceneUtil
         LightManager::LightList mLightList;
         std::set<SceneUtil::LightSource*> mIgnoredLightSources;
     };
+
+    void configureStateSetSunOverride(LightManager* lightManager, const osg::Light* light, osg::StateSet* stateset, int mode = osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
 }
 

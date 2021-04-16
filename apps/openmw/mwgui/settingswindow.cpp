@@ -111,20 +111,17 @@ namespace
             max = MyGUI::utility::parseFloat(widget->getUserString(settingMax));
     }
 
-    const char* getLightingMethodCaptionText(SceneUtil::LightingMethod lightingMethod)
+    void updateMaxLightsComboBox(MyGUI::ComboBox* box)
     {
-        switch (lightingMethod)
-        {
-            case SceneUtil::LightingMethod::FFP:
-                return "Emulates fixed function pipeline lighting, advanced light settings are disabled when this mode is active";
-            case SceneUtil::LightingMethod::PerObjectUniform:
-                return "Removes limit of 8 lights per object, fixes lighting attenuation, and enables groundcover lighting and light fade."
-                        "\n\nDesigned for compatibility across hardware, and is not meant for large max light counts.";
-            case SceneUtil::LightingMethod::SingleUBO:
-                return "Removes limit of 8 lights per object, fixes lighting attenuation, and enables groundcover lighting and light fade."
-                        "\n\nDesigned for more modern hardware and large max light counts.";
-        }
-        return "";
+        constexpr int min = 8;
+        constexpr int max = 32;
+        constexpr int increment = 8;
+        int maxLights = Settings::Manager::getInt("max lights", "Shaders");
+        // show increments of 8 in dropdown
+        if (maxLights >= min && maxLights <= max && !(maxLights % increment))
+            box->setIndexSelected((maxLights / increment)-1);
+        else
+            box->setIndexSelected(MyGUI::ITEM_NONE);
     }
 }
 
@@ -235,9 +232,9 @@ namespace MWGui
         getWidget(mControllerSwitch, "ControllerButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
         getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
-        getWidget(mLightingMethodText, "LightingMethodText");
+        getWidget(mLightingMethodButton, "LightingMethodButton");
         getWidget(mLightsResetButton, "LightsResetButton");
-        getWidget(mLightSettingOverlay, "LightSettingOverlay");
+        getWidget(mMaxLights, "MaxLights");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -263,7 +260,9 @@ namespace MWGui
         mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
         mWaterReflectionDetail->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterReflectionDetailChanged);
 
+        mLightingMethodButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onLightingMethodButtonChanged);
         mLightsResetButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onLightsResetButtonClicked);
+        mMaxLights->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onMaxLightsChanged);
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
@@ -309,6 +308,8 @@ namespace MWGui
         int waterReflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
         waterReflectionDetail = std::min(5, std::max(0, waterReflectionDetail));
         mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
+
+        updateMaxLightsComboBox(mMaxLights);
 
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
 
@@ -396,18 +397,49 @@ namespace MWGui
         apply();
     }
 
+    void SettingsWindow::onLightingMethodButtonChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        if (pos == MyGUI::ITEM_NONE)
+            return;
+
+        std::string message = "This change requires a restart to take effect.";
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, {"#{sOK}"}, true);
+
+        Settings::Manager::setString("lighting method", "Shaders", _sender->getItemNameAt(pos));
+        apply();
+    }
+
+    void SettingsWindow::onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        int count = 8 * (pos + 1);
+
+        Settings::Manager::setInt("max lights", "Shaders", count);
+        apply();
+        configureWidgets(mMainWidget, false);
+    }
+
     void SettingsWindow::onLightsResetButtonClicked(MyGUI::Widget* _sender)
     {
         std::vector<std::string> buttons = {"#{sYes}", "#{sNo}"};
-        std::string message = "Resets to default values, would you like to continue?";
+        std::string message = "Resets to default values, would you like to continue? Changes to lighting method will require a restart.";
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons, true);
         int selectedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
         if (selectedButton == 1 || selectedButton == -1)
             return;
 
-        constexpr std::array<const char*, 5> settings = {"light bounds multiplier", "maximum light distance", "light fade start", "minimum interior brightness", "max lights"};
+        constexpr std::array<const char*, 6> settings = {
+            "light bounds multiplier",
+            "maximum light distance",
+            "light fade start",
+            "minimum interior brightness",
+            "max lights",
+            "lighting method",
+        };
         for (const auto& setting : settings)
             Settings::Manager::setString(setting, "Shaders", Settings::Manager::mDefaultSettings[{"Shaders", setting}]);
+
+        mLightingMethodButton->setIndexSelected(mLightingMethodButton->findItemIndexWith(Settings::Manager::mDefaultSettings[{"Shaders", "lighting method"}]));
+        updateMaxLightsComboBox(mMaxLights);
 
         apply();
         configureWidgets(mMainWidget, false);
@@ -614,20 +646,25 @@ namespace MWGui
     void SettingsWindow::updateLightSettings()
     {
         auto lightingMethod = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getLightingMethod();
-        mLightingMethodText->setCaption(SceneUtil::LightManager::getLightingMethodString(lightingMethod));
+        std::string lightingMethodStr = SceneUtil::LightManager::getLightingMethodString(lightingMethod);
 
-        if (lightingMethod == SceneUtil::LightingMethod::FFP || !Settings::Manager::getBool("force shaders", "Shaders"))
+        mLightingMethodButton->removeAllItems();
+
+        std::array<SceneUtil::LightingMethod, 3> methods = {
+            SceneUtil::LightingMethod::FFP,
+            SceneUtil::LightingMethod::PerObjectUniform,
+            SceneUtil::LightingMethod::SingleUBO,
+        };
+
+        for (const auto& method : methods)
         {
-            MyGUI::Widget* parent = mLightSettingOverlay->getParent();
-            mLightSettingOverlay->setEnabled(false);
-            mLightSettingOverlay->setAlpha(0.8);
-            parent->setUserString("ToolTipType", "Layout");
-            parent->setUserString("ToolTipLayout", "TextToolTip");
-            parent->setUserString("Caption_Text", "Unavailable with current settings.");
-            parent->setEnabled(true);
+            if (!MWBase::Environment::get().getResourceSystem()->getSceneManager()->isSupportedLightingMethod(method))
+                continue;
+
+            mLightingMethodButton->addItem(SceneUtil::LightManager::getLightingMethodString(method));
         }
 
-        mLightingMethodText->setUserString("Caption_Text", getLightingMethodCaptionText(lightingMethod));
+        mLightingMethodButton->setIndexSelected(mLightingMethodButton->findItemIndexWith(lightingMethodStr));
     }
 
     void SettingsWindow::layoutControlsBox()
