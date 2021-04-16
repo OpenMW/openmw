@@ -168,6 +168,14 @@ void BSAFile::readHeader()
         fs.setNameInfos(namesOffset, &mStringBuf);
         fs.hash = hashes[i];
 
+        if (namesOffset >= mStringBuf.size()) {
+            fail("Archive contains names offset outside itself");
+        }
+        const void* end = std::memchr(fs.name(), '\0', mStringBuf.size()-namesOffset);
+        if (!end) {
+            fail("Archive contains non-zero terminated string");
+        }
+
         endOfNameBuffer = std::max(endOfNameBuffer, namesOffset + std::strlen(fs.name())+1);
         assert(endOfNameBuffer <= mStringBuf.size());
 
