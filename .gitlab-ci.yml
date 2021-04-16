@@ -120,7 +120,7 @@ Debian_Clang_tests:
 .MacOS:
   image: macos-11-xcode-12
   tags:
-    - macos
+    - shared-macos-amd64
   stage: build
   only:
     variables:
@@ -129,7 +129,7 @@ Debian_Clang_tests:
     paths:
     - ccache/
   script:
-    - rm -fr build/*  # remove anything in the build directory
+    - rm -fr build  # remove the build directory
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
