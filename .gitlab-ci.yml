@@ -16,6 +16,8 @@ stages:
     - apt-cache/
     - ccache/
   stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   script:
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
@@ -31,7 +33,8 @@ stages:
       - build/install/
 
 Coverity:
-  extends: .Debian
+  extends: .Debian_Image
+  stage: build
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   before_script:
@@ -43,12 +46,11 @@ Coverity:
     # Add more than just `openmw` once we can build everything under 3h
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc) openmw
   after_script:
-    - cd build/
     - tar cfz cov-int.tar.gz cov-int
-    - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME \
-      --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL \
-      --form file=@cov-int.tar.gz --form version="`git describe --tags`" \
-      --form description="`git describe --tags` / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID  
+    - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
+      --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
+      --form file=@cov-int.tar.gz --form version="`git describe --tags`"
+      --form description="`git describe --tags` / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
   variables:
     CC: gcc
     CXX: g++
@@ -182,6 +184,8 @@ variables: &cs-targets
   - choco install python -y
   - refreshenv
   stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
@@ -274,6 +278,8 @@ Windows_Ninja_CS_RelWithDebInfo:
   - choco install python -y
   - refreshenv
   stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
