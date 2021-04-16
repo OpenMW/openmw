@@ -32,8 +32,8 @@ namespace MWGui
             MyGUI::ComboBox* mWaterTextureSize;
             MyGUI::ComboBox* mWaterReflectionDetail;
 
-            MyGUI::Widget* mLightSettingOverlay;
-            MyGUI::TextBox* mLightingMethodText;
+            MyGUI::ComboBox* mMaxLights;
+            MyGUI::ComboBox* mLightingMethodButton;
             MyGUI::Button* mLightsResetButton;
 
             // controls
@@ -56,7 +56,9 @@ namespace MWGui
             void onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
             void onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos);
 
+            void onLightingMethodButtonChanged(MyGUI::ComboBox* _sender, size_t pos);
             void onLightsResetButtonClicked(MyGUI::Widget* _sender);
+            void onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos);
 
             void onRebindAction(MyGUI::Widget* _sender);
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);

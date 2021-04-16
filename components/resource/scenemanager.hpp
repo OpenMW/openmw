@@ -107,6 +107,9 @@ namespace Resource
 
         void setApplyLightingToEnvMaps(bool apply);
 
+        void setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported);
+        bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
+
         void setLightingMethod(SceneUtil::LightingMethod method);
         SceneUtil::LightingMethod getLightingMethod() const;
         
@@ -197,6 +200,7 @@ namespace Resource
         std::string mSpecularMapPattern;
         bool mApplyLightingToEnvMaps;
         SceneUtil::LightingMethod mLightingMethod;
+        SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
         bool mConvertAlphaTestToAlphaToCoverage;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;

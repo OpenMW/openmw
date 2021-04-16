@@ -201,11 +201,15 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
     {
+        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(Settings::Manager::getString("lighting method", "Shaders"));
+
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
-        bool explicitlyForceShaders = Settings::Manager::getBool("force shaders", "Shaders");
         // Shadows and radial fog have problems with fixed-function mode
-        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders") || explicitlyForceShaders || Settings::Manager::getBool("enable shadows", "Shadows");
+        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders")
+                            || Settings::Manager::getBool("force shaders", "Shaders")
+                            || Settings::Manager::getBool("enable shadows", "Shadows")
+                            || lightingMethod != SceneUtil::LightingMethod::FFP;
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
@@ -217,12 +221,11 @@ namespace MWRender
         resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
         resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1);
 
-        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(Settings::Manager::getString("lighting method", "Shaders"));
         // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this depends on support for various OpenGL extensions.
-        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(!explicitlyForceShaders || lightingMethod == SceneUtil::LightingMethod::FFP);
+        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(lightingMethod == SceneUtil::LightingMethod::FFP);
         resourceSystem->getSceneManager()->getShaderManager().setLightingMethod(sceneRoot->getLightingMethod());
         resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
-
+        resourceSystem->getSceneManager()->setSupportedLightingMethods(sceneRoot->getSupportedLightingMethods());
         mMinimumAmbientLuminance = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
 
         sceneRoot->setLightingMask(Mask_Lighting);
@@ -554,7 +557,7 @@ namespace MWRender
                 // brighten ambient so it reaches the minimum threshold but no more, we want to mess with content data as least we can
                 float targetBrightnessIncreaseFactor = mMinimumAmbientLuminance / relativeLuminance;
                 if (ambient.r() == 0.f && ambient.g() == 0.f && ambient.b() == 0.f)
-                    ambient = osg::Vec4(targetBrightnessIncreaseFactor, targetBrightnessIncreaseFactor, targetBrightnessIncreaseFactor, ambient.a());
+                    ambient = osg::Vec4(mMinimumAmbientLuminance, mMinimumAmbientLuminance, mMinimumAmbientLuminance, ambient.a());
                 else
                     ambient *= targetBrightnessIncreaseFactor;
             }
