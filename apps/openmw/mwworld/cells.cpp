@@ -134,7 +134,7 @@ MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReade
 : mStore (store), mReader (reader),
   mIdCacheIndex (0)
 {
-    int cacheSize = std::max(Settings::Manager::getInt("pointers cache size", "Cells"), 0);
+    int cacheSize = std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000);
     mIdCache = IdCache(cacheSize, std::pair<std::string, CellStore *> ("", (CellStore*)nullptr));
 }
 
