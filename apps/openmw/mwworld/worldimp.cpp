@@ -1256,11 +1256,13 @@ namespace MWWorld
     MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, osg::Vec3f vec, bool moveToActive)
     {
         auto* actor = mPhysics->getActor(ptr);
-        if (actor)
-            actor->adjustPosition(vec);
-
         osg::Vec3f newpos = ptr.getRefData().getPosition().asVec3() + vec;
-        return moveObject(ptr, newpos.x(), newpos.y(), newpos.z(), false, moveToActive && ptr != getPlayerPtr());
+        if (actor)
+        {
+            actor->adjustPosition(vec);
+            return moveObject(ptr, newpos.x(), newpos.y(), newpos.z(), false, moveToActive && ptr != getPlayerPtr());
+        }
+        return moveObject(ptr, newpos.x(), newpos.y(), newpos.z());
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
