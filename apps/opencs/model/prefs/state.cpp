@@ -421,6 +421,16 @@ void CSMPrefs::State::declare()
     declareSubcategory ("Script Editor");
     declareShortcut ("script-editor-comment", "Comment Selection", QKeySequence());
     declareShortcut ("script-editor-uncomment", "Uncomment Selection", QKeySequence());
+
+    declareCategory ("Models");
+    declareString ("baseanim", "base animations", "meshes/base_anim.nif").
+        setTooltip("3rd person base model with textkeys-data");
+    declareString ("baseanimkna", "base animations, kna", "meshes/base_animkna.nif").
+        setTooltip("3rd person beast race base model with textkeys-data");
+    declareString ("baseanimfemale", "base animations, female", "meshes/base_anim_female.nif").
+        setTooltip("3rd person female base model with textkeys-data");
+    declareString ("wolfskin", "base animations, wolf", "meshes/wolf/skin.nif").
+        setTooltip("3rd person werewolf skin");
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
@@ -552,6 +562,24 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& 
 
     CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mSettings, &mMutex,
         key, label);
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+CSMPrefs::StringSetting& CSMPrefs::State::declareString (const std::string& key, const std::string& label, std::string default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    setDefault (key, default_);
+
+    default_ = mSettings.getString (key, mCurrentCategory->second.getKey());
+
+    CSMPrefs::StringSetting *setting =
+        new CSMPrefs::StringSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        default_);
+
     mCurrentCategory->second.addSetting (setting);
 
     return *setting;
