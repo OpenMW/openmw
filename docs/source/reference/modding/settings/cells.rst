@@ -175,7 +175,7 @@ pointers cache size
 -------------------
 
 :Type:		integer
-:Range:		>0
+:Range:		40 to 1000
 :Default:	40
 
 The count of object pointers that will be saved for a faster search by object ID.
