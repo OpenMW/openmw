@@ -39,6 +39,9 @@ namespace sol
 namespace MWLua
 {
 
+    template <typename ObjT>
+    using Cell = std::conditional_t<std::is_same_v<ObjT, LObject>, LCell, GCell>;
+
     template <class Class>
     static const MWWorld::Ptr& requireClass(const MWWorld::Ptr& ptr)
     {
@@ -95,10 +98,13 @@ namespace MWLua
         {
             return o.ptr().getCellRef().getRefId();
         });
-        objectT["cell"] = sol::readonly_property([](const ObjectT& o)
+        objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>>
         {
-            MWBase::World* world = MWBase::Environment::get().getWorld();
-            return world->getCellName(o.ptr().getCell());
+            const MWWorld::Ptr& ptr = o.ptr();
+            if (ptr.isInCell())
+                return Cell<ObjectT>{ptr.getCell()};
+            else
+                return {};
         });
         objectT["position"] = sol::readonly_property([](const ObjectT& o) -> osg::Vec3f
         {
@@ -115,6 +121,22 @@ namespace MWLua
         objectT["sendEvent"] = [context](const ObjectT& dest, std::string eventName, const sol::object& eventData)
         {
             context.mLocalEventQueue->push_back({dest.id(), std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
+        };
+
+        objectT["canMove"] = [context](const ObjectT& o)
+        {
+            const MWWorld::Class& cls = o.ptr().getClass();
+            return cls.getMaxSpeed(o.ptr()) > 0;
+        };
+        objectT["getRunSpeed"] = [context](const ObjectT& o)
+        {
+            const MWWorld::Class& cls = o.ptr().getClass();
+            return cls.getRunSpeed(o.ptr());
+        };
+        objectT["getWalkSpeed"] = [context](const ObjectT& o)
+        {
+            const MWWorld::Class& cls = o.ptr().getClass();
+            return cls.getWalkSpeed(o.ptr());
         };
 
         if constexpr (std::is_same_v<ObjectT, GObject>)
@@ -155,9 +177,17 @@ namespace MWLua
         {
             return ptr(o).getCellRef().getDoorDest().asRotationVec3();
         });
-        objectT["destCell"] = sol::readonly_property([ptr](const ObjectT& o) -> std::string_view
+        objectT["destCell"] = sol::readonly_property(
+            [ptr, worldView=context.mWorldView](const ObjectT& o) -> sol::optional<Cell<ObjectT>>
         {
-            return ptr(o).getCellRef().getDestCell();
+            const MWWorld::CellRef& cellRef = ptr(o).getCellRef();
+            if (!cellRef.getTeleport())
+                return {};
+            MWWorld::CellStore* cell = worldView->findCell(cellRef.getDestCell(), cellRef.getDoorDest().asVec3());
+            if (cell)
+                return Cell<ObjectT>{cell};
+            else
+                return {};
         });
     }
 

@@ -11,6 +11,11 @@
 #include "query.hpp"
 #include "worldview.hpp"
 
+namespace MWWorld
+{
+    class CellStore;
+}
+
 namespace MWLua
 {
 
@@ -24,6 +29,18 @@ namespace MWLua
     // Implemented in objectbindings.cpp
     void initObjectBindingsForLocalScripts(const Context&);
     void initObjectBindingsForGlobalScripts(const Context&);
+
+    // Implemented in cellbindings.cpp
+    struct LCell  // for local scripts
+    {
+        MWWorld::CellStore* mStore;
+    };
+    struct GCell  // for global scripts
+    {
+        MWWorld::CellStore* mStore;
+    };
+    void initCellBindingsForLocalScripts(const Context&);
+    void initCellBindingsForGlobalScripts(const Context&);
 
     // Implemented in asyncbindings.cpp
     struct AsyncPackageId

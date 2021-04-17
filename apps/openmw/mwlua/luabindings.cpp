@@ -62,6 +62,22 @@ namespace MWLua
     {
         sol::table api(context.mLua->sol(), sol::create);
         WorldView* worldView = context.mWorldView;
+        api["getCellByName"] = [worldView=context.mWorldView](const std::string& name) -> sol::optional<GCell>
+        {
+            MWWorld::CellStore* cell = worldView->findNamedCell(name);
+            if (cell)
+                return GCell{cell};
+            else
+                return {};
+        };
+        api["getExteriorCell"] = [worldView=context.mWorldView](int x, int y) -> sol::optional<GCell>
+        {
+            MWWorld::CellStore* cell = worldView->findExteriorCell(x, y);
+            if (cell)
+                return GCell{cell};
+            else
+                return {};
+        };
         api["activeActors"] = GObjectList{worldView->getActorsInScene()};
         api["selectObjects"] = [context](const Queries::Query& query)
         {

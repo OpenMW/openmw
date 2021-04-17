@@ -18,6 +18,7 @@ namespace MWLua
     inline const ObjectId& getId(const MWWorld::Ptr& ptr) { return ptr.getCellRef().getRefNum(); }
     std::string idToString(const ObjectId& id);
     std::string ptrToString(const MWWorld::Ptr& ptr);
+    bool isMarker(const MWWorld::Ptr& ptr);
     std::string_view getMWClassName(const std::type_index& cls_type, std::string_view fallback = "Unknown");
     std::string_view getMWClassName(const MWWorld::Ptr& ptr);
 

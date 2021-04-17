@@ -44,6 +44,10 @@ namespace MWLua
         // If onlyActive = true, then search only among the objects that are currently in the scene.
         // TODO: ObjectIdList selectObjects(const Queries::Query& query, bool onlyActive);
 
+        MWWorld::CellStore* findCell(const std::string& name, osg::Vec3f position);
+        MWWorld::CellStore* findNamedCell(const std::string& name);
+        MWWorld::CellStore* findExteriorCell(int x, int y);
+
         void load(ESM::ESMReader& esm);
         void save(ESM::ESMWriter& esm) const;
 

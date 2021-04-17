@@ -2,6 +2,7 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
@@ -11,23 +12,14 @@ namespace MWLua
 
     void TeleportAction::apply(WorldView& worldView) const
     {
-        MWBase::World* world = MWBase::Environment::get().getWorld();
-        bool exterior = mCell.empty() || world->getExterior(mCell);
-        MWWorld::CellStore* cell;
-        if (exterior)
-        {
-            int cellX, cellY;
-            world->positionToIndex(mPos.x(), mPos.y(), cellX, cellY);
-            cell = world->getExterior(cellX, cellY);
-        }
-        else
-            cell = world->getInterior(mCell);
+        MWWorld::CellStore* cell = worldView.findCell(mCell, mPos);
         if (!cell)
         {
             Log(Debug::Error) << "LuaManager::applyTeleport -> cell not found: '" << mCell << "'";
             return;
         }
 
+        MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr obj = worldView.getObjectRegistry()->getPtr(mObject, false);
         const MWWorld::Class& cls = obj.getClass();
         bool isPlayer = obj == world->getPlayerPtr();
@@ -40,7 +32,7 @@ namespace MWLua
             std::memcpy(esmPos.pos, &mPos, sizeof(osg::Vec3f));
             std::memcpy(esmPos.rot, &mRot, sizeof(osg::Vec3f));
             world->getPlayer().setTeleported(true);
-            if (exterior)
+            if (cell->isExterior())
                 world->changeToExteriorCell(esmPos, true);
             else
                 world->changeToInteriorCell(mCell, esmPos, true);

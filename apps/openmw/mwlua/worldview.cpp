@@ -2,6 +2,7 @@
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwclass/container.hpp"
 
@@ -33,6 +34,10 @@ namespace MWLua
 
     WorldView::ObjectGroup* WorldView::chooseGroup(const MWWorld::Ptr& ptr)
     {
+        // It is important to check `isMarker` first.
+        // For example "prisonmarker" has class "Door" despite that it is only an invisible marker.
+        if (isMarker(ptr))
+            return nullptr;
         const MWWorld::Class& cls = ptr.getClass();
         if (cls.isActivator())
             return &mActivatorsInScene;
@@ -111,6 +116,37 @@ namespace MWLua
     {
         group.mSet.erase(getId(ptr));
         group.mChanged = true;
+    }
+
+    // TODO: If Lua scripts will use several threads at the same time, then `find*Cell` functions should have critical sections.
+    MWWorld::CellStore* WorldView::findCell(const std::string& name, osg::Vec3f position)
+    {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        bool exterior = name.empty() || world->getExterior(name);
+        if (exterior)
+        {
+            int cellX, cellY;
+            world->positionToIndex(position.x(), position.y(), cellX, cellY);
+            return world->getExterior(cellX, cellY);
+        }
+        else
+            return world->getInterior(name);
+    }
+
+    MWWorld::CellStore* WorldView::findNamedCell(const std::string& name)
+    {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const ESM::Cell* esmCell = world->getExterior(name);
+        if (esmCell)
+            return world->getExterior(esmCell->getGridX(), esmCell->getGridY());
+        else
+            return world->getInterior(name);
+    }
+
+    MWWorld::CellStore* WorldView::findExteriorCell(int x, int y)
+    {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        return world->getExterior(x, y);
     }
 
 }

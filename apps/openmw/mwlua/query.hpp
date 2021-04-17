@@ -32,6 +32,7 @@ namespace MWLua
     // TODO: Implement custom fields. QueryFieldGroup registerCustomFields(...);
 
     ObjectIdList selectObjectsFromList(const Queries::Query& query, const ObjectIdList& list, const Context&);
+    ObjectIdList selectObjectsFromCellStore(const Queries::Query& query, MWWorld::CellStore* store, const Context&);
 
 }
 
