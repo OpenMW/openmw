@@ -5,6 +5,7 @@
 #include "tileposition.hpp"
 #include "navmeshtilescache.hpp"
 #include "dtstatus.hpp"
+#include "navmeshtileview.hpp"
 
 #include <components/misc/guarded.hpp>
 
@@ -141,6 +142,12 @@ namespace DetourNavigator
         template <class T>
         UpdateNavMeshStatus updateTile(const TilePosition& position, T&& navMeshData)
         {
+            const dtMeshTile* currentTile = getTile(position);
+            if (currentTile != nullptr
+                && asNavMeshTileConstView(*currentTile) == asNavMeshTileConstView(getRawData(navMeshData)))
+            {
+                return UpdateNavMeshStatus::ignored;
+            }
             const auto removed = removeTileImpl(position);
             const auto addStatus = addTileImpl(getRawData(navMeshData), getSize(navMeshData));
             if (dtStatusSucceed(addStatus))
@@ -205,6 +212,12 @@ namespace DetourNavigator
             unsigned char** const data = nullptr;
             int* const dataSize = nullptr;
             return dtStatusSucceed(mImpl->removeTile(tileRef, data, dataSize));
+        }
+
+        const dtMeshTile* getTile(const TilePosition& position) const
+        {
+            const int layer = 0;
+            return mImpl->getTileAt(position.x(), position.y(), layer);
         }
     };
 
