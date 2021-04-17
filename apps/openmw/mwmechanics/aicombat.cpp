@@ -263,8 +263,9 @@ namespace MWMechanics
             && ((!storage.mReadyToAttack && !mPathFinder.isPathConstructed())
                 || (storage.mUseCustomDestination && (storage.mCustomDestination - vTargetPos).length() > rangeAttack)))
         {
+            const MWBase::World* world = MWBase::Environment::get().getWorld();
             // Try to build path to the target.
-            const auto halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+            const auto halfExtents = world->getPathfindingHalfExtents(actor);
             const auto navigatorFlags = getNavigatorFlags(actor);
             const auto areaCosts = getAreaCosts(actor);
             const auto pathGridGraph = getPathGridGraph(actor.getCell());
@@ -274,11 +275,7 @@ namespace MWMechanics
             {
                 // If there is no path, try to find a point on a line from the actor position to target projected
                 // on navmesh to attack the target from there.
-                const MWBase::World* world = MWBase::Environment::get().getWorld();
-                const auto halfExtents = world->getPathfindingHalfExtents(actor);
                 const auto navigator = world->getNavigator();
-                const auto navigatorFlags = getNavigatorFlags(actor);
-                const auto areaCosts = getAreaCosts(actor);
                 const auto hit = navigator->raycast(halfExtents, vActorPos, vTargetPos, navigatorFlags);
 
                 if (hit.has_value() && (*hit - vTargetPos).length() <= rangeAttack)
