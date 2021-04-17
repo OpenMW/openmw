@@ -52,12 +52,7 @@ void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType ty
         esm.getHNT (value, "FLTV");
 
         if (type==VT_Short)
-        {
-            if (value!=value)
-                out = 0; // nan
-            else
-                out = static_cast<short> (value);
-        }
+            out = static_cast<short> (value);
         else if (type==VT_Long)
             out = static_cast<int> (value);
         else
