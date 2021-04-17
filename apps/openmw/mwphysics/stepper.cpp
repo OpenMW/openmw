@@ -67,7 +67,7 @@ namespace MWPhysics
 
             if(attempt == 1)
                 tracerDest = tracerPos + toMove;
-            else if (!firstIteration || !sDoExtraStairHacks) // first attempt failed and not on first movement solver iteration, can't retry -- or we have extra hacks disabled
+            else if (!sDoExtraStairHacks) // early out if we have extra hacks disabled
             {
                 return false;
             }
