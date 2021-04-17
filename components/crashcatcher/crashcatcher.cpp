@@ -43,7 +43,7 @@ namespace bfs = boost::filesystem;
 #include <sys/user.h>
 #endif
 
-static const char crash_switch[] = "--cc-handle-crash";
+#include "crashcatcher.hpp"
 
 static const char fatal_err[] = "\n\n*** Fatal Error ***\n";
 static const char pipe_err[] = "!!! Failed to create pipe\n";

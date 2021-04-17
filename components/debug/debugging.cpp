@@ -179,7 +179,12 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         std::cerr.rdbuf (&sb);
 #else
         // Redirect cout and cerr to the log file
-        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / logName));
+        // If we are collecting a stack trace, append to existing log file
+        std::ios_base::openmode mode = std::ios::out;
+        if(argc == 2 && strcmp(argv[1], crash_switch) == 0)
+            mode |= std::ios::app;
+
+        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / logName), mode);
 
         coutsb.open (Debug::Tee(logfile, oldcout));
         cerrsb.open (Debug::Tee(logfile, oldcerr));
