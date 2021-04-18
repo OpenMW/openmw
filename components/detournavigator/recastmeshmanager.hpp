@@ -52,7 +52,6 @@ namespace DetourNavigator
 
     private:
         std::size_t mRevision = 0;
-        std::size_t mLastBuildRevision = 0;
         std::size_t mGeneration;
         RecastMeshBuilder mMeshBuilder;
         std::list<RecastMeshObject> mObjectsOrder;

@@ -74,7 +74,7 @@ namespace DetourNavigator
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh()
     {
         rebuild();
-        return mMeshBuilder.create(mGeneration, mLastBuildRevision);
+        return mMeshBuilder.create(mGeneration, mRevision);
     }
 
     bool RecastMeshManager::isEmpty() const
@@ -84,13 +84,10 @@ namespace DetourNavigator
 
     void RecastMeshManager::rebuild()
     {
-        if (mLastBuildRevision == mRevision)
-            return;
         mMeshBuilder.reset();
         for (const auto& v : mWaterOrder)
             mMeshBuilder.addWater(v.mCellSize, v.mTransform);
         for (const auto& v : mObjectsOrder)
             mMeshBuilder.addObject(v.getShape(), v.getTransform(), v.getAreaType());
-        mLastBuildRevision = mRevision;
     }
 }
