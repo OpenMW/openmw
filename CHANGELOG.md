@@ -127,6 +127,7 @@
     Feature #3983: Wizard: Add link to buy Morrowind
     Feature #4894: Consider actors as obstacles for pathfinding
     Feature #4899: Alpha-To-Coverage Anti-Aliasing for alpha testing
+    Feature #4917: Do not trigger NavMesh update when RecastMesh update should not change NavMesh
     Feature #4977: Use the "default icon.tga" when an item's icon is not found
     Feature #5043: Head Bobbing
     Feature #5199: OpenMW-CS: Improve scene view colors

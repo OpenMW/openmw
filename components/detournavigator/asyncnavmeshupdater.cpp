@@ -2,6 +2,7 @@
 #include "debug.hpp"
 #include "makenavmesh.hpp"
 #include "settings.hpp"
+#include "version.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/thread.hpp>
@@ -179,6 +180,19 @@ namespace DetourNavigator
 
         const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mChangedTile, playerTile,
             offMeshConnections, mSettings, navMeshCacheItem, mNavMeshTilesCache);
+
+        if (recastMesh != nullptr)
+        {
+            Version navMeshVersion;
+            {
+                const auto locked = navMeshCacheItem->lockConst();
+                navMeshVersion.mGeneration = locked->getGeneration();
+                navMeshVersion.mRevision = locked->getNavMeshRevision();
+            }
+            mRecastMeshManager.get().reportNavMeshChange(job.mChangedTile,
+                Version {recastMesh->getGeneration(), recastMesh->getRevision()},
+                navMeshVersion);
+        }
 
         const auto finish = std::chrono::steady_clock::now();
 

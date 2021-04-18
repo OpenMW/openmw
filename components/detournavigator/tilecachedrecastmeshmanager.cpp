@@ -145,6 +145,15 @@ namespace DetourNavigator
         return mRevision;
     }
 
+    void TileCachedRecastMeshManager::reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion)
+    {
+        const auto tiles = mTiles.lock();
+        const auto it = tiles->find(tilePosition);
+        if (it == tiles->end())
+            return;
+        it->second.reportNavMeshChange(recastMeshVersion, navMeshVersion);
+    }
+
     bool TileCachedRecastMeshManager::addTile(const ObjectId id, const btCollisionShape& shape,
         const btTransform& transform, const AreaType areaType, const TilePosition& tilePosition, float border,
         std::map<TilePosition, CachedRecastMeshManager>& tiles)

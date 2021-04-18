@@ -2,8 +2,9 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESHMANAGER_H
 
 #include "recastmeshbuilder.hpp"
-#include "recastmeshobject.hpp"
+#include "oscillatingrecastmeshobject.hpp"
 #include "objectid.hpp"
+#include "version.hpp"
 
 #include <LinearMath/btTransform.h>
 
@@ -50,15 +51,24 @@ namespace DetourNavigator
 
         bool isEmpty() const;
 
+        void reportNavMeshChange(Version recastMeshVersion, Version navMeshVersion);
+
     private:
+        struct Report
+        {
+            std::size_t mRevision;
+            Version mNavMeshVersion;
+        };
+
         std::size_t mRevision = 0;
-        std::size_t mLastBuildRevision = 0;
         std::size_t mGeneration;
         RecastMeshBuilder mMeshBuilder;
-        std::list<RecastMeshObject> mObjectsOrder;
-        std::unordered_map<ObjectId, std::list<RecastMeshObject>::iterator> mObjects;
+        std::list<OscillatingRecastMeshObject> mObjectsOrder;
+        std::unordered_map<ObjectId, std::list<OscillatingRecastMeshObject>::iterator> mObjects;
         std::list<Water> mWaterOrder;
         std::map<osg::Vec2i, std::list<Water>::iterator> mWater;
+        std::optional<Report> mLastNavMeshReportedChange;
+        std::optional<Report> mLastNavMeshReport;
 
         void rebuild();
     };

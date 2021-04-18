@@ -13,7 +13,8 @@ namespace DetourNavigator
     bool RecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
-        const auto iterator = mObjectsOrder.emplace(mObjectsOrder.end(), RecastMeshObject(shape, transform, areaType));
+        const auto iterator = mObjectsOrder.emplace(mObjectsOrder.end(),
+            OscillatingRecastMeshObject(RecastMeshObject(shape, transform, areaType), mRevision + 1));
         if (!mObjects.emplace(id, iterator).second)
         {
             mObjectsOrder.erase(iterator);
@@ -28,7 +29,9 @@ namespace DetourNavigator
         const auto object = mObjects.find(id);
         if (object == mObjects.end())
             return false;
-        if (!object->second->update(transform, areaType))
+        const std::size_t lastChangeRevision = mLastNavMeshReportedChange.has_value()
+                ? mLastNavMeshReportedChange->mRevision : mRevision;
+        if (!object->second->update(transform, areaType, lastChangeRevision))
             return false;
         ++mRevision;
         return true;
@@ -39,7 +42,7 @@ namespace DetourNavigator
         const auto object = mObjects.find(id);
         if (object == mObjects.end())
             return std::nullopt;
-        const RemovedRecastMeshObject result {object->second->getShape(), object->second->getTransform()};
+        const RemovedRecastMeshObject result {object->second->getImpl().getShape(), object->second->getImpl().getTransform()};
         mObjectsOrder.erase(object->second);
         mObjects.erase(object);
         ++mRevision;
@@ -74,7 +77,7 @@ namespace DetourNavigator
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh()
     {
         rebuild();
-        return mMeshBuilder.create(mGeneration, mLastBuildRevision);
+        return mMeshBuilder.create(mGeneration, mRevision);
     }
 
     bool RecastMeshManager::isEmpty() const
@@ -82,15 +85,27 @@ namespace DetourNavigator
         return mObjects.empty();
     }
 
+    void RecastMeshManager::reportNavMeshChange(Version recastMeshVersion, Version navMeshVersion)
+    {
+        if (recastMeshVersion.mGeneration != mGeneration)
+            return;
+        if (mLastNavMeshReport.has_value() && navMeshVersion < mLastNavMeshReport->mNavMeshVersion)
+            return;
+        mLastNavMeshReport = {recastMeshVersion.mRevision, navMeshVersion};
+        if (!mLastNavMeshReportedChange.has_value()
+                || mLastNavMeshReportedChange->mNavMeshVersion < mLastNavMeshReport->mNavMeshVersion)
+            mLastNavMeshReportedChange = mLastNavMeshReport;
+    }
+
     void RecastMeshManager::rebuild()
     {
-        if (mLastBuildRevision == mRevision)
-            return;
         mMeshBuilder.reset();
         for (const auto& v : mWaterOrder)
             mMeshBuilder.addWater(v.mCellSize, v.mTransform);
-        for (const auto& v : mObjectsOrder)
+        for (const auto& object : mObjectsOrder)
+        {
+            const RecastMeshObject& v = object.getImpl();
             mMeshBuilder.addObject(v.getShape(), v.getTransform(), v.getAreaType());
-        mLastBuildRevision = mRevision;
+        }
     }
 }

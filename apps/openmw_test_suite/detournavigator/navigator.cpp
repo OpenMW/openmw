@@ -835,4 +835,55 @@ namespace
 
         ASSERT_THAT(result, Optional(Vec3fEq(mEnd.x(), mEnd.y(), 1.87719)));
     }
+
+    TEST_F(DetourNavigatorNavigatorTest, update_for_oscillating_object_that_does_not_change_navmesh_should_not_trigger_navmesh_update)
+    {
+        const std::array<btScalar, 5 * 5> heightfieldData {{
+            0,   0,    0,    0,    0,
+            0, -25,  -25,  -25,  -25,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+        }};
+        btHeightfieldTerrainShape heightfieldShape = makeSquareHeightfieldTerrainShape(heightfieldData);
+        heightfieldShape.setLocalScaling(btVector3(128, 128, 1));
+
+        const btBoxShape oscillatingBoxShape(btVector3(20, 20, 20));
+        const btVector3 oscillatingBoxShapePosition(32, 32, 400);
+        const btBoxShape boderBoxShape(btVector3(50, 50, 50));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addObject(ObjectId(&heightfieldShape), heightfieldShape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&oscillatingBoxShape), oscillatingBoxShape,
+                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition));
+        // add this box to make navmesh bound box independent from oscillatingBoxShape rotations
+        mNavigator->addObject(ObjectId(&boderBoxShape), boderBoxShape,
+                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition + btVector3(0, 0, 200)));
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        const auto navMeshes = mNavigator->getNavMeshes();
+        ASSERT_EQ(navMeshes.size(), 1);
+        {
+            const auto navMesh = navMeshes.begin()->second->lockConst();
+            ASSERT_EQ(navMesh->getGeneration(), 1);
+            ASSERT_EQ(navMesh->getNavMeshRevision(), 4);
+        }
+
+        for (int n = 0; n < 10; ++n)
+        {
+            const btTransform transform(btQuaternion(btVector3(0, 0, 1), n * 2 * osg::PI / 10),
+                                        oscillatingBoxShapePosition);
+            mNavigator->updateObject(ObjectId(&oscillatingBoxShape), oscillatingBoxShape, transform);
+            mNavigator->update(mPlayerPosition);
+            mNavigator->wait();
+        }
+
+        ASSERT_EQ(navMeshes.size(), 1);
+        {
+            const auto navMesh = navMeshes.begin()->second->lockConst();
+            ASSERT_EQ(navMesh->getGeneration(), 1);
+            ASSERT_EQ(navMesh->getNavMeshRevision(), 4);
+        }
+    }
 }
