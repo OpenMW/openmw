@@ -38,7 +38,9 @@ However, a scale factor like this is impractical to work with. A better approach
 Materials
 =========
 
-In Blender, use the Principled BSDF node with textures plugged into the correct sockets. TODO...
+OpenMW uses the classic, specular material setup and currently doesn't use the more mainstream `PBR <https://en.wikipedia.org/wiki/Physically_based_rendering>`_ way. In Blender, the mesh needs a default material with a diffuse texture connected to the ``Base Color`` socket. This is enough for the material to be included in the exported COLLADA file.
+
+Additional texture types, such as specular or normal maps, will be automatically recognized and used by OpenMW. They need an identical base name as the diffuse texture, a suffix, and be in the same folder. How to enable this and what suffix is used for what texture type is covered in more detail in :doc:`../../modding/texture-modding/texture-basics`.
 
 Collision Shapes
 ================
