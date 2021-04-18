@@ -1,6 +1,6 @@
 #include "engine.hpp"
 
-#include <atomic>
+#include <condition_variable>
 #include <iomanip>
 #include <fstream>
 #include <chrono>
@@ -830,6 +830,82 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mLuaManager->init();
 }
 
+class OMW::Engine::LuaWorker
+{
+public:
+    explicit LuaWorker(Engine* engine) :
+        mEngine(engine),
+        mSeparateThread(Settings::Manager::getInt("lua num threads", "Lua") > 0)
+    {
+        if (mSeparateThread)
+            mThread = std::thread([this]{ threadBody(); });
+    };
+
+    void allowUpdate(double dt)
+    {
+        mDt = dt;
+        if (!mSeparateThread)
+            return;
+        {
+            std::lock_guard<std::mutex> lk(mMutex);
+            mUpdateRequest = true;
+        }
+        mCV.notify_one();
+    }
+
+    void finishUpdate()
+    {
+        if (mSeparateThread)
+        {
+            std::unique_lock<std::mutex> lk(mMutex);
+            mCV.wait(lk, [&]{ return !mUpdateRequest; });
+        }
+        else
+            update();
+        mEngine->mLuaManager->applyQueuedChanges();
+    };
+
+    void join()
+    {
+        if (mSeparateThread)
+            mThread.join();
+    }
+
+private:
+    void update()
+    {
+        const auto& viewer = mEngine->mViewer;
+        const osg::Timer_t frameStart = viewer->getStartTick();
+        const unsigned int frameNumber = viewer->getFrameStamp()->getFrameNumber();
+        ScopedProfile<UserStatsType::Lua> profile(frameStart, frameNumber, *osg::Timer::instance(), *viewer->getViewerStats());
+
+        mEngine->mLuaManager->update(mEngine->mEnvironment.getWindowManager()->isGuiMode(), mDt);
+    }
+
+    void threadBody()
+    {
+        while (!mEngine->mViewer->done() && !mEngine->mEnvironment.getStateManager()->hasQuitRequest())
+        {
+            std::unique_lock<std::mutex> lk(mMutex);
+            mCV.wait(lk, [&]{ return mUpdateRequest; });
+
+            update();
+
+            mUpdateRequest = false;
+            lk.unlock();
+            mCV.notify_one();
+        }
+    }
+
+    Engine* mEngine;
+    const bool mSeparateThread;
+    std::mutex mMutex;
+    std::condition_variable mCV;
+    bool mUpdateRequest;
+    double mDt = 0;
+    std::thread mThread;
+};
+
 // Initialise and enter main loop.
 void OMW::Engine::go()
 {
@@ -912,27 +988,7 @@ void OMW::Engine::go()
         mEnvironment.getWindowManager()->executeInConsole(mStartupScript);
     }
 
-    // Start Lua scripting thread
-    std::atomic_bool luaUpdateRequest;
-    double luaDt = 0;
-    std::thread scriptingThread([&]() {
-        const osg::Timer* const timer = osg::Timer::instance();
-        osg::Stats* const stats = mViewer->getViewerStats();
-        while (!mViewer->done() && !mEnvironment.getStateManager()->hasQuitRequest())
-        {
-            while (!luaUpdateRequest)
-                std::this_thread::yield();
-
-            {
-                const osg::Timer_t frameStart = mViewer->getStartTick();
-                const unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
-                ScopedProfile<UserStatsType::Lua> profile(frameStart, frameNumber, *timer, *stats);
-
-                mLuaManager->update(mEnvironment.getWindowManager()->isGuiMode(), luaDt);
-            }
-            luaUpdateRequest = false;
-        }
-    });
+    LuaWorker luaWorker(this);  // starts a separate lua thread if "lua num threads" > 0
 
     // Start the main rendering loop
     double simulationTime = 0.0;
@@ -959,16 +1015,11 @@ void OMW::Engine::go()
 
             mEnvironment.getWorld()->updateWindowManager();
 
-            // scriptingThread starts processing Lua scripts
-            luaDt = dt;
-            luaUpdateRequest = true;
+            luaWorker.allowUpdate(dt);  // if there is a separate Lua thread, it starts the update now
 
             mViewer->renderingTraversals();
 
-            // wait for scriptingThread to finish
-            while (luaUpdateRequest)
-                std::this_thread::yield();
-            mLuaManager->applyQueuedChanges();
+            luaWorker.finishUpdate();
 
             bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
             if (!guiActive)
@@ -991,7 +1042,7 @@ void OMW::Engine::go()
         frameRateLimiter.limit();
     }
 
-    scriptingThread.join();
+    luaWorker.join();
 
     // Save user settings
     settings.saveUser(settingspath);

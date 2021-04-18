@@ -194,6 +194,7 @@ namespace OMW
 
         private:
             Files::ConfigurationManager& mCfgMgr;
+            class LuaWorker;
     };
 }
 
