@@ -41,9 +41,6 @@ namespace DetourNavigator
             AreaType mAreaType;
             btVector3 mLocalScaling;
             std::vector<RecastMeshObject> mChildren;
-
-            static bool updateCompoundObject(const btCompoundShape& shape, const AreaType areaType,
-                std::vector<RecastMeshObject>& children);
     };
 
     std::vector<RecastMeshObject> makeChildrenObjects(const btCollisionShape& shape, const AreaType areaType);
