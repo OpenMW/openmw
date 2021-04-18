@@ -1,6 +1,7 @@
 #include "variantimp.hpp"
 
 #include <stdexcept>
+#include <cmath>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
@@ -52,12 +53,10 @@ void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType ty
         esm.getHNT (value, "FLTV");
 
         if (type==VT_Short)
-        {
-            if (value!=value)
-                out = 0; // nan
+            if (std::isnan(value))
+                out = 0;
             else
                 out = static_cast<short> (value);
-        }
         else if (type==VT_Long)
             out = static_cast<int> (value);
         else

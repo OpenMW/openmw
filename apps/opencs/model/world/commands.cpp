@@ -76,6 +76,7 @@ void CSMWorld::ImportLandTexturesCommand::redo()
     }
 
     std::vector<std::string> oldTextures;
+    oldTextures.reserve(texIndices.size());
     for (int index : texIndices)
     {
         oldTextures.push_back(LandTexture::createUniqueRecordId(oldPlugin, index));
