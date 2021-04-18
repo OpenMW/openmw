@@ -1258,10 +1258,9 @@ namespace MWWorld
         auto* actor = mPhysics->getActor(ptr);
         osg::Vec3f newpos = ptr.getRefData().getPosition().asVec3() + vec;
         if (actor)
-        {
             actor->adjustPosition(vec);
+        if (ptr.getClass().isActor())
             return moveObject(ptr, newpos.x(), newpos.y(), newpos.z(), false, moveToActive && ptr != getPlayerPtr());
-        }
         return moveObject(ptr, newpos.x(), newpos.y(), newpos.z());
     }
 
