@@ -43,7 +43,7 @@ In Blender, use the Principled BSDF node with textures plugged into the correct 
 Collision Shapes
 ================
 
-In Blender, have an empty object named ``Collision`` with child meshes. These meshes are regarded as collision shapes. TODO...
+In Blender, create an empty and name it ``collision``. Any mesh that is a child of this empty will be used for physics collision and will not be visible. There can be multiple child meshes under ``collision`` and they will all contribute to the collision shapes. The meshes themselves can have an arbitrary name, it's only the name of the empty that is important. The ``tcb`` command in OpenMW's in-game console will make the collision shapes visible and you will be able to inspect them.
 
 Exporter Settings
 =================
