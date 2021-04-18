@@ -35,6 +35,7 @@ namespace MWLua
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
         selfAPI["setDirectControl"] = [](SelfObject& self, bool v) { self.mControls.controlledFromLua = v; };
+        selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.disableAI = !v; };
         selfAPI["setEquipment"] = [manager=context.mLuaManager](const SelfObject& obj, sol::table equipment)
         {
             if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
@@ -87,6 +88,7 @@ namespace MWLua
         : LuaUtil::ScriptsContainer(lua, "L" + idToString(obj.id())), mData(obj)
     {
         mData.mControls.controlledFromLua = false;
+        mData.mControls.disableAI = false;
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
         registerEngineHandlers({&mOnActiveHandlers, &mOnInactiveHandlers});
     }

@@ -22,7 +22,7 @@ namespace MWLua
         static std::unique_ptr<LocalScripts> create(LuaUtil::LuaState* lua, const LObject& obj);
         static void initializeSelfPackage(const Context&);
 
-        const MWBase::LuaManager::ActorControls* getActorControls() const { return &mData.mControls; }
+        MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
 
         struct SelfObject : public LObject
         {

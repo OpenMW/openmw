@@ -260,7 +260,7 @@ namespace MWLua
         mKeyPressEvents.push_back(arg.keysym);
     }
 
-    const MWBase::LuaManager::ActorControls* LuaManager::getActorControls(const MWWorld::Ptr& ptr) const
+    MWBase::LuaManager::ActorControls* LuaManager::getActorControls(const MWWorld::Ptr& ptr) const
     {
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (!localScripts)

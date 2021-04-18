@@ -34,6 +34,7 @@ namespace MWBase
         virtual void keyPressed(const SDL_KeyboardEvent &arg) = 0;
 
         struct ActorControls {
+            bool disableAI;
             bool controlledFromLua;
 
             bool jump;
@@ -43,7 +44,7 @@ namespace MWBase
             float turn;
         };
 
-        virtual const ActorControls* getActorControls(const MWWorld::Ptr&) const = 0;
+        virtual ActorControls* getActorControls(const MWWorld::Ptr&) const = 0;
 
         virtual void clear() = 0;
         virtual void setupPlayer(const MWWorld::Ptr&) = 0;
