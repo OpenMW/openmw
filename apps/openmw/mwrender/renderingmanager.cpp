@@ -264,9 +264,12 @@ namespace MWRender
         for (auto itr = lightDefines.begin(); itr != lightDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
 
+        // Refactor this at some point - most shaders don't care about these defines
         float groundcoverDistance = (Constants::CellSizeInUnits * std::max(1, Settings::Manager::getInt("distance", "Groundcover")) - 1024) * 0.93;
         globalDefines["groundcoverFadeStart"] = std::to_string(groundcoverDistance * 0.9f);
         globalDefines["groundcoverFadeEnd"] = std::to_string(groundcoverDistance);
+        globalDefines["groundcoverStompMode"] = std::to_string(std::clamp(Settings::Manager::getInt("stomp mode", "Groundcover"), 0, 2));
+        globalDefines["groundcoverStompIntensity"] = std::to_string(std::clamp(Settings::Manager::getInt("stomp intensity", "Groundcover"), 0, 2));
 
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
