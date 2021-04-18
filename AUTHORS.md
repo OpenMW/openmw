@@ -90,6 +90,7 @@ Programmers
     Internecine
     Jackerty
     Jacob Essex (Yacoby)
+    Jacob Turnbull (Tankinfrank)
     Jake Westrip (16bitint)
     James Carty (MrTopCat)
     James Moore (moore.work)

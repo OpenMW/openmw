@@ -131,7 +131,8 @@ namespace MWMechanics
             void turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor& actorState, const osg::Vec3f& dir);
 
             void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
-                                            MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);
+                                          MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance,
+                                          bool inCombatOrPursue);
 
             void rest(double hours, bool sleep);
             ///< Update actors while the player is waiting or sleeping.

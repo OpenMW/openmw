@@ -432,7 +432,8 @@ namespace MWMechanics
     }
 
     void Actors::updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
-                                    MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance)
+                                    MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance,
+                                    bool inCombatOrPursue)
     {
         if (!actor.getRefData().getBaseNode())
             return;
@@ -453,7 +454,7 @@ namespace MWMechanics
         const osg::Vec3f actor2Pos(targetActor.getRefData().getPosition().asVec3());
         float sqrDist = (actor1Pos - actor2Pos).length2();
 
-        if (sqrDist > std::min(maxDistance * maxDistance, sqrHeadTrackDistance))
+        if (sqrDist > std::min(maxDistance * maxDistance, sqrHeadTrackDistance) && !inCombatOrPursue)
             return;
 
         // stop tracking when target is behind the actor
@@ -461,7 +462,7 @@ namespace MWMechanics
         osg::Vec3f targetDirection(actor2Pos - actor1Pos);
         actorDirection.z() = 0;
         targetDirection.z() = 0;
-        if (actorDirection * targetDirection > 0
+        if ((actorDirection * targetDirection > 0 || inCombatOrPursue)
             && MWBase::Environment::get().getWorld()->getLOS(actor, targetActor) // check LOS and awareness last as it's the most expensive function
             && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(targetActor, actor))
         {
@@ -2012,28 +2013,25 @@ namespace MWMechanics
                             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
                             bool firstPersonPlayer = isPlayer && world->isFirstPerson();
                             bool inCombatOrPursue = stats.getAiSequence().isInCombat() || stats.getAiSequence().hasPackage(AiPackageTypeId::Pursue);
+                            MWWorld::Ptr activePackageTarget;
 
                             // 1. Unconsious actor can not track target
-                            // 2. Actors in combat and pursue mode do not bother to headtrack
+                            // 2. Actors in combat and pursue mode do not bother to headtrack anyone except their target
                             // 3. Player character does not use headtracking in the 1st-person view
-                            if (!stats.getKnockedDown() && !firstPersonPlayer && !inCombatOrPursue)
+                            if (!stats.getKnockedDown() && !firstPersonPlayer)
                             {
-                                for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                                if (inCombatOrPursue)
+                                    activePackageTarget = stats.getAiSequence().getActivePackage().getTarget();
+
+                                for (PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                                 {
                                     if (it->first == iter->first)
                                         continue;
-                                    updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
-                                }
-                            }
 
-                            if (!stats.getKnockedDown() && !isPlayer && inCombatOrPursue)
-                            {
-                                // Actors in combat and pursue mode always look at their target.
-                                for (const auto& package : stats.getAiSequence())
-                                {
-                                    headTrackTarget = package->getTarget();
-                                    if (!headTrackTarget.isEmpty())
-                                        break;
+                                    if (inCombatOrPursue && it->first != activePackageTarget)
+                                        continue;
+
+                                    updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
                                 }
                             }
 
