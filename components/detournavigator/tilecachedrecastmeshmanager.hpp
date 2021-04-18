@@ -5,6 +5,7 @@
 #include "tileposition.hpp"
 #include "settingsutils.hpp"
 #include "gettilespositions.hpp"
+#include "version.hpp"
 
 #include <components/misc/guarded.hpp>
 
@@ -87,6 +88,8 @@ namespace DetourNavigator
         }
 
         std::size_t getRevision() const;
+
+        void reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion);
 
     private:
         const Settings& mSettings;

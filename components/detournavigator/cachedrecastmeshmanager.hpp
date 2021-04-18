@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_CACHEDRECASTMESHMANAGER_H
 
 #include "recastmeshmanager.hpp"
+#include "version.hpp"
 
 namespace DetourNavigator
 {
@@ -24,6 +25,8 @@ namespace DetourNavigator
         std::shared_ptr<RecastMesh> getMesh();
 
         bool isEmpty() const;
+
+        void reportNavMeshChange(Version recastMeshVersion, Version navMeshVersion);
 
     private:
         RecastMeshManager mImpl;

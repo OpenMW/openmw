@@ -183,6 +183,7 @@ add_component_dir(detournavigator
     findrandompointaroundcircle
     raycast
     navmeshtileview
+    oscillatingrecastmeshobject
     )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
