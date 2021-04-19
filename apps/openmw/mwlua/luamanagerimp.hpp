@@ -40,6 +40,8 @@ namespace MWLua
         void newGameStarted() override { mGlobalScripts.newGameStarted(); }
         void objectAddedToScene(const MWWorld::Ptr& ptr) override;
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
+        void registerObject(const MWWorld::Ptr& ptr) override;
+        void deregisterObject(const MWWorld::Ptr& ptr) override;
         void keyPressed(const SDL_KeyboardEvent &arg) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;

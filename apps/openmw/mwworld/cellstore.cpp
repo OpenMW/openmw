@@ -18,6 +18,7 @@
 #include <components/esm/doorstate.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -195,6 +196,8 @@ namespace
                         iter->mData.enable();
                         MWBase::Environment::get().getWorld()->disable(MWWorld::Ptr(&*iter, cellstore));
                     }
+                    else
+                        MWBase::Environment::get().getLuaManager()->registerObject(MWWorld::Ptr(&*iter, cellstore));
                     return;
                 }
 
@@ -206,6 +209,9 @@ namespace
         MWWorld::LiveCellRef<T> ref (record);
         ref.load (state);
         collection.mList.push_back (ref);
+
+        MWWorld::LiveCellRefBase* base = &collection.mList.back();
+        MWBase::Environment::get().getLuaManager()->registerObject(MWWorld::Ptr(base, cellstore));
     }
 }
 
@@ -286,16 +292,7 @@ namespace MWWorld
         if (searchViaRefNum(object.getCellRef().getRefNum()).isEmpty())
             throw std::runtime_error("moveTo: object is not in this cell");
 
-
-        // Objects with no refnum can't be handled correctly in the merging process that happens
-        // on a save/load, so do a simple copy & delete for these objects.
-        if (!object.getCellRef().getRefNum().hasContentFile())
-        {
-            MWWorld::Ptr copied = object.getClass().copyToCell(object, *cellToMoveTo, object.getRefData().getCount());
-            object.getRefData().setCount(0);
-            object.getRefData().setBaseNode(nullptr);
-            return copied;
-        }
+        MWBase::Environment::get().getLuaManager()->registerObject(MWWorld::Ptr(object.getBase(), cellToMoveTo));
 
         MovedRefTracker::iterator found = mMovedHere.find(object.getBase());
         if (found != mMovedHere.end())

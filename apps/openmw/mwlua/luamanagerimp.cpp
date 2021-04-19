@@ -134,6 +134,7 @@ namespace MWLua
                 scripts->processTimers(seconds, hours);
         }
 
+        // Receive events
         for (GlobalEvent& e : globalEvents)
             mGlobalScripts.receiveEvent(e.eventName, e.eventData);
         for (LocalEvent& e : localEvents)
@@ -147,12 +148,7 @@ namespace MWLua
                                   << ". Object not found or has no attached scripts";
         }
 
-        if (mPlayerChanged)
-        {
-            mPlayerChanged = false;
-            mGlobalScripts.playerAdded(GObject(getId(mPlayer), mWorldView.getObjectRegistry()));
-        }
-
+        // Engine handlers in local scripts
         if (mPlayerScripts)
         {
             for (const SDL_Keysym key : mKeyPressEvents)
@@ -167,13 +163,21 @@ namespace MWLua
         mObjectActiveEvents.clear();
         mObjectInactiveEvents.clear();
 
+        for (LocalScripts* scripts : mActiveLocalScripts)
+            scripts->update(dt);
+
+        // Engine handlers in global scripts
+        if (mPlayerChanged)
+        {
+            mPlayerChanged = false;
+            mGlobalScripts.playerAdded(GObject(getId(mPlayer), mWorldView.getObjectRegistry()));
+        }
+
         for (ObjectId id : mActorAddedEvents)
             mGlobalScripts.actorActive(GObject(id, mWorldView.getObjectRegistry()));
         mActorAddedEvents.clear();
 
         mGlobalScripts.update(dt);
-        for (LocalScripts* scripts : mActiveLocalScripts)
-            scripts->update(dt);
     }
 
     void LuaManager::applyQueuedChanges()
@@ -212,6 +216,22 @@ namespace MWLua
         }
     }
 
+    void LuaManager::setupPlayer(const MWWorld::Ptr& ptr)
+    {
+        if (!mPlayer.isEmpty())
+            throw std::logic_error("Player is initialized twice");
+        mWorldView.objectAddedToScene(ptr);
+        mPlayer = ptr;
+        MWWorld::RefData& refData = ptr.getRefData();
+        if (!refData.getLuaScripts())
+            createLocalScripts(ptr);
+        if (!mPlayerScripts)
+            throw std::logic_error("mPlayerScripts not initialized");
+        mActiveLocalScripts.insert(mPlayerScripts);
+        mObjectActiveEvents.push_back(mPlayerScripts);
+        mPlayerChanged = true;
+    }
+
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
         mWorldView.objectAddedToScene(ptr);  // assigns generated RefNum if it is not set yet.
@@ -227,21 +247,6 @@ namespace MWLua
             mActorAddedEvents.push_back(getId(ptr));
     }
 
-    void LuaManager::setupPlayer(const MWWorld::Ptr& ptr)
-    {
-        if (!mPlayer.isEmpty())
-            throw std::logic_error("Player is initialized twice");
-        mWorldView.objectAddedToScene(ptr);
-        mPlayer = ptr;
-        MWWorld::RefData& refData = ptr.getRefData();
-        if (!refData.getLuaScripts())
-            createLocalScripts(ptr);
-        if (!mPlayerScripts)
-            throw std::logic_error("mPlayerScripts not initialized");
-        mActiveLocalScripts.insert(mPlayerScripts);
-        mPlayerChanged = true;
-    }
-
     void LuaManager::objectRemovedFromScene(const MWWorld::Ptr& ptr)
     {
         mWorldView.objectRemovedFromScene(ptr);
@@ -249,10 +254,19 @@ namespace MWLua
         if (localScripts)
         {
             mActiveLocalScripts.erase(localScripts);
-            mObjectInactiveEvents.push_back(localScripts);
+            if (!mWorldView.getObjectRegistry()->getPtr(getId(ptr), true).isEmpty())
+                mObjectInactiveEvents.push_back(localScripts);
         }
+    }
 
-        // TODO: call mWorldView.objectUnloaded if object is unloaded from memory (does it ever happen?) and ptr becomes invalid.
+    void LuaManager::registerObject(const MWWorld::Ptr& ptr)
+    {
+        mWorldView.getObjectRegistry()->registerPtr(ptr);
+    }
+
+    void LuaManager::deregisterObject(const MWWorld::Ptr& ptr)
+    {
+        mWorldView.getObjectRegistry()->deregisterPtr(ptr);
     }
 
     void LuaManager::keyPressed(const SDL_KeyboardEvent& arg)
@@ -349,6 +363,9 @@ namespace MWLua
         scripts->setSerializer(mLocalLoader.get());
         scripts->load(data, true);
         scripts->setSerializer(mLocalSerializer.get());
+
+        // LiveCellRef is usually copied after loading, so this Ptr will become invalid and should be deregistered.
+        mWorldView.getObjectRegistry()->deregisterPtr(ptr);
     }
 
     void LuaManager::reloadAllScripts()

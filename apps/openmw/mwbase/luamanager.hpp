@@ -31,6 +31,8 @@ namespace MWBase
         virtual void newGameStarted() = 0;
         virtual void objectAddedToScene(const MWWorld::Ptr& ptr) = 0;
         virtual void objectRemovedFromScene(const MWWorld::Ptr& ptr) = 0;
+        virtual void registerObject(const MWWorld::Ptr& ptr) = 0;
+        virtual void deregisterObject(const MWWorld::Ptr& ptr) = 0;
         virtual void keyPressed(const SDL_KeyboardEvent &arg) = 0;
 
         struct ActorControls {
