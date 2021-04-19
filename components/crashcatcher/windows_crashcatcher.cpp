@@ -178,8 +178,6 @@ namespace Crash
         sInstance->handleVectoredException(info);
 
         _Exit(1);
-
-        return EXCEPTION_CONTINUE_SEARCH;
     }
 
     void CrashCatcher::handleVectoredException(PEXCEPTION_POINTERS info)
