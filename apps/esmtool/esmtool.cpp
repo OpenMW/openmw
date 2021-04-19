@@ -322,7 +322,7 @@ int load(Arguments& info)
     std::string filename = info.filename;
     std::cout << "Loading file: " << filename << std::endl;
 
-    std::list<int> skipped;
+    std::list<uint32_t> skipped;
 
     try {
 

@@ -13,8 +13,6 @@
 
 namespace CSMPrefs
 {
-    const int ShortcutSetting::MaxKeys;
-
     ShortcutSetting::ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
         const std::string& label)
         : Setting(parent, values, mutex, key, label)
