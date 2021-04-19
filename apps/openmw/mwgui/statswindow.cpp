@@ -93,7 +93,7 @@ namespace MWGui
         int windowHeight = window->getSize().height;
 
         //initial values defined in openmw_stats_window.layout, if custom options are not present in .layout, a default is loaded
-        float leftPaneRatio = 0.44;
+        float leftPaneRatio = 0.44f;
         if (mLeftPane->isUserString("LeftPaneRatio"))
             leftPaneRatio = MyGUI::utility::parseFloat(mLeftPane->getUserString("LeftPaneRatio"));
 
