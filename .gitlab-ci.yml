@@ -157,6 +157,7 @@ macOS11_Xcode12:
 macOS10.15_Xcode11:
   extends: .MacOS
   image: macos-10.15-xcode-11
+  allow_failure: true
   cache:
     key: macOS10.15_Xcode11.v1
   variables:
