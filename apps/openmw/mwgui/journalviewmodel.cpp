@@ -129,7 +129,7 @@ struct JournalViewModelImpl : JournalViewModel
 
                         utf8text.replace(pos_begin, pos_end+1-pos_begin, displayName);
 
-                        intptr_t value;
+                        intptr_t value = 0;
                         if (mModel->mKeywordSearch.containsKeyword(topicName, value))
                             mHyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = value;
                     }

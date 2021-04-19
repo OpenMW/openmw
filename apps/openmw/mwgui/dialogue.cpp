@@ -148,7 +148,7 @@ namespace MWGui
         // We need this copy for when @# hyperlinks are replaced
         std::string text = mText;
 
-        size_t pos_end;
+        size_t pos_end = std::string::npos;
         for(;;)
         {
             size_t pos_begin = text.find('@');
