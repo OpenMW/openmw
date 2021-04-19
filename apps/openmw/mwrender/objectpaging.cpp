@@ -402,7 +402,7 @@ namespace MWRender
                             refs[ref.mRefNum] = ref;
                         }
                     }
-                    catch (std::exception& e)
+                    catch (std::exception&)
                     {
                         continue;
                     }

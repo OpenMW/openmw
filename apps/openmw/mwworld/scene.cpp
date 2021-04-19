@@ -965,7 +965,7 @@ namespace MWWorld
             {
                 mSceneManager->getTemplate(mMesh);
             }
-            catch (std::exception& e)
+            catch (std::exception&)
             {
             }
         }
@@ -1049,7 +1049,7 @@ namespace MWWorld
                         exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
                     }
                 }
-                catch (std::exception& e)
+                catch (std::exception&)
                 {
                     // ignore error for now, would spam the log too much
                 }

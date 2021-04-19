@@ -3895,7 +3895,7 @@ namespace MWWorld
             if (!model.empty())
                 scene->preload(model, ref.getPtr().getClass().useAnim());
         }
-        catch(std::exception& e)
+        catch(std::exception&)
         {
         }
     }

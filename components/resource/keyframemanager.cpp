@@ -77,7 +77,7 @@ namespace Resource
                         mTarget.mTextKeys.emplace(parseTimeSignature(line), parseTextKey(line));
                     }
                 }
-                catch (std::exception& e)
+                catch (std::exception&)
                 {
                     Log(Debug::Warning) << "No textkey file found for " << mNormalized;
                 }
