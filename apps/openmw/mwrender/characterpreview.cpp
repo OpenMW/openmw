@@ -426,7 +426,7 @@ namespace MWRender
         visitor.setTraversalNumber(mDrawOnceCallback->getLastRenderedFrame());
 
         osg::Node::NodeMask nodeMask = mCamera->getNodeMask();
-        mCamera->setNodeMask(~0);
+        mCamera->setNodeMask(~0u);
         mCamera->accept(visitor);
         mCamera->setNodeMask(nodeMask);
 

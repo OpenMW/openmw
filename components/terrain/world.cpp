@@ -13,7 +13,7 @@
 namespace Terrain
 {
 
-World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
+World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask)
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
@@ -49,7 +49,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     mResourceSystem->addResourceManager(mTextureManager.get());
 }
 
-World::World(osg::Group* parent, Storage* storage, int nodeMask)
+World::World(osg::Group* parent, Storage* storage, unsigned int nodeMask)
     : mStorage(storage)
     , mParent(parent)
     , mCompositeMapCamera(nullptr)

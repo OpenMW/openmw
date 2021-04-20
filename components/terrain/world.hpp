@@ -105,8 +105,8 @@ namespace Terrain
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param nodeMask mask for the terrain root
         /// @param preCompileMask mask for pre compiling textures
-        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask);
-        World(osg::Group* parent, Storage* storage, int nodeMask);
+        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask);
+        World(osg::Group* parent, Storage* storage, unsigned int nodeMask);
         virtual ~World();
 
         /// Set a WorkQueue to delete objects in the background thread.

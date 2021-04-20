@@ -776,11 +776,11 @@ void Water::update(float dt)
 void Water::updateVisible()
 {
     bool visible = mEnabled && mToggled;
-    mWaterNode->setNodeMask(visible ? ~0 : 0);
+    mWaterNode->setNodeMask(visible ? ~0u : 0u);
     if (mRefraction)
-        mRefraction->setNodeMask(visible ? Mask_RenderToTexture : 0);
+        mRefraction->setNodeMask(visible ? Mask_RenderToTexture : 0u);
     if (mReflection)
-        mReflection->setNodeMask(visible ? Mask_RenderToTexture : 0);
+        mReflection->setNodeMask(visible ? Mask_RenderToTexture : 0u);
 }
 
 bool Water::toggle()

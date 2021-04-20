@@ -660,7 +660,7 @@ namespace MWRender
         }
         else if (mode == Render_Scene)
         {
-            int mask = mViewer->getCamera()->getCullMask();
+            unsigned int mask = mViewer->getCamera()->getCullMask();
             bool enabled = mask&Mask_Scene;
             enabled = !enabled;
             if (enabled)
@@ -815,7 +815,7 @@ namespace MWRender
             return false;
         }
 
-        int maskBackup = mPlayerAnimation->getObjectRoot()->getNodeMask();
+        unsigned int maskBackup = mPlayerAnimation->getObjectRoot()->getNodeMask();
 
         if (mCamera->isFirstPerson())
             mPlayerAnimation->getObjectRoot()->setNodeMask(0);
@@ -916,7 +916,7 @@ namespace MWRender
         mIntersectionVisitor->setFrameStamp(mViewer->getFrameStamp());
         mIntersectionVisitor->setIntersector(intersector);
 
-        int mask = ~0;
+        unsigned int mask = ~0u;
         mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect|Mask_Water|Mask_SimpleWater|Mask_Groundcover);
         if (ignorePlayer)
             mask &= ~(Mask_Player);

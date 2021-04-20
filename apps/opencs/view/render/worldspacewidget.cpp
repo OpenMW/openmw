@@ -163,7 +163,7 @@ void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 
 void CSVRender::WorldspaceWidget::centerOrbitCameraOnSelection()
 {
-    std::vector<osg::ref_ptr<TagBase> > selection = getSelection(~0);
+    std::vector<osg::ref_ptr<TagBase> > selection = getSelection(~0u);
 
     for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it!=selection.end(); ++it)
     {
