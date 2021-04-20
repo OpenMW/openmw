@@ -703,7 +703,10 @@ namespace SceneUtil
     {
     public:
         LightManagerStateAttribute()
-            : mLightManager(nullptr) {}
+            : mLightManager(nullptr)
+            , mInitLayout(false)
+        {
+        }
 
         LightManagerStateAttribute(LightManager* lightManager)
         : mLightManager(lightManager)
@@ -720,7 +723,7 @@ namespace SceneUtil
         }
 
         LightManagerStateAttribute(const LightManagerStateAttribute& copy, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
-            : osg::StateAttribute(copy,copyop), mLightManager(copy.mLightManager) {}
+            : osg::StateAttribute(copy,copyop), mLightManager(copy.mLightManager), mInitLayout(copy.mInitLayout) {}
 
         int compare(const StateAttribute &sa) const override
         {
@@ -874,7 +877,7 @@ namespace SceneUtil
             hasLoggedWarnings = true;
         }
 
-        int targetLights = Settings::Manager::getInt("max lights", "Shaders");
+        int targetLights = std::clamp(Settings::Manager::getInt("max lights", "Shaders"), mMaxLightsLowerLimit, mMaxLightsUpperLimit);
 
         if (!supportsUBO || !supportsGPU4 || lightingMethod == LightingMethod::PerObjectUniform)
             initPerObjectUniform(targetLights);
@@ -954,7 +957,8 @@ namespace SceneUtil
         if (usingFFP())
             return;
 
-        setMaxLights(std::clamp(Settings::Manager::getInt("max lights", "Shaders"), mMaxLightsLowerLimit, mMaxLightsUpperLimit));
+        int targetLights = std::clamp(Settings::Manager::getInt("max lights", "Shaders"), mMaxLightsLowerLimit, mMaxLightsUpperLimit);
+        setMaxLights(targetLights);
 
         if (getLightingMethod() == LightingMethod::PerObjectUniform)
         {
@@ -1033,7 +1037,7 @@ namespace SceneUtil
         auto* stateset = getOrCreateStateSet();
 
         setLightingMethod(LightingMethod::PerObjectUniform);
-        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, mMaxLightsUpperLimit));
+        setMaxLights(targetLights);
 
         // ensures sunlight element in our uniform array is updated when there are no point lights in scene
         stateset->setAttributeAndModes(new LightStateAttributePerObjectUniform({}, this), osg::StateAttribute::ON);
@@ -1043,7 +1047,7 @@ namespace SceneUtil
     void LightManager::initSingleUBO(int targetLights)
     {
         setLightingMethod(LightingMethod::SingleUBO);
-        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, mMaxLightsUpperLimit));
+        setMaxLights(targetLights);
 
         for (int i = 0; i < 2; ++i)
         {

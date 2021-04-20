@@ -81,7 +81,7 @@ MWWorld::ResolutionListener::~ResolutionListener()
     }
     catch(const std::exception& e)
     {
-        Log(Debug::Error) << "Failed to clear temporary container contents of " << mStore.mPtr.get<ESM::Container>()->mBase->mId << ": " << e.what();
+        Log(Debug::Error) << "Failed to clear temporary container contents: " << e.what();
     }
 }
 

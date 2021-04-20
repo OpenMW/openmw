@@ -361,14 +361,10 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
     /// \brief Package mouse and mousewheel motions into a single event
     MouseMotionEvent InputWrapper::_packageMouseMotion(const SDL_Event &evt)
     {
-        MouseMotionEvent pack_evt;
+        MouseMotionEvent pack_evt = {};
         pack_evt.x = mMouseX;
-        pack_evt.xrel = 0;
         pack_evt.y = mMouseY;
-        pack_evt.yrel = 0;
         pack_evt.z = mMouseZ;
-        pack_evt.zrel = 0;
-        pack_evt.timestamp = 0;
 
         if(evt.type == SDL_MOUSEMOTION)
         {
