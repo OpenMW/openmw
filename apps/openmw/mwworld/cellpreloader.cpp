@@ -84,7 +84,7 @@ namespace MWWorld
                     mTerrain->cacheCell(mTerrainView.get(), mX, mY);
                     mPreloadedObjects.insert(mLandManager->getLand(mX, mY));
                 }
-                catch(std::exception& e)
+                catch(std::exception&)
                 {
                 }
             }
@@ -127,7 +127,7 @@ namespace MWWorld
                         mPreloadedObjects.insert(mBulletShapeManager->getShape(mesh));
 
                 }
-                catch (std::exception& e)
+                catch (std::exception&)
                 {
                     // ignore error for now, would spam the log too much
                     // error will be shown when visiting the cell

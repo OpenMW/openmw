@@ -608,7 +608,6 @@ if (WIN32)
         5204 # Class has virtual functions, but its trivial destructor is not virtual
 
         # caused by MyGUI
-        4275 # non dll-interface class 'std::exception' used as base for dll-interface class 'MyGUI::Exception'
         4297 # function assumed not to throw an exception but does
 
         # OpenMW specific warnings
@@ -641,6 +640,12 @@ if (WIN32)
     if( "${MyGUI_VERSION}" VERSION_LESS_EQUAL "3.4.0" )
         set(WARNINGS_DISABLE ${WARNINGS_DISABLE}
         4866 # compiler may not enforce left-to-right evaluation order for call
+        )
+    endif()
+
+    if( "${MyGUI_VERSION}" VERSION_LESS_EQUAL "3.4.1" )
+        set(WARNINGS_DISABLE ${WARNINGS_DISABLE}
+        4275 # non dll-interface class 'MyGUI::delegates::IDelegateUnlink' used as base for dll-interface class 'MyGUI::Widget'
         )
     endif()
 

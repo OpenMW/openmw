@@ -531,7 +531,7 @@ namespace MWMechanics
             // Otherwise apply a random side step (kind of dodging) with some probability
             // if actor is within range of target's weapon.
             if (std::abs(angleToTarget) > osg::PI / 4)
-                moveDuration = 0.2;
+                moveDuration = 0.2f;
             else if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability() < 0.25)
                 moveDuration = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
             if (moveDuration > 0)

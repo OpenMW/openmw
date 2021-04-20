@@ -23,7 +23,7 @@ bool MWMechanics::AiBreathe::execute (const MWWorld::Ptr& actor, CharacterContro
             actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
             actorClass.getMovementSettings(actor).mPosition[1] = 1;
-            smoothTurn(actor, -osg::PI / 2, 0);
+            smoothTurn(actor, static_cast<float>(-osg::PI_2), 0);
 
             return false;
         }

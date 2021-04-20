@@ -132,7 +132,7 @@ namespace SceneUtil
             if (value[0] < 0)
             {
                 positiveColor *= -1.0;
-                signBit = -1;
+                signBit = ~0u;
             }
             unsigned int packedColor = asRGBA(positiveColor);
             std::memcpy(&(*mData)[getOffset(index, Diffuse)], &packedColor, sizeof(unsigned int));

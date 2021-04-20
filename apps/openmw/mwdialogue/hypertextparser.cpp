@@ -17,7 +17,7 @@ namespace MWDialogue
         std::vector<Token> parseHyperText(const std::string & text)
         {
             std::vector<Token> result;
-            size_t pos_end, iteration_pos = 0;
+            size_t pos_end = std::string::npos, iteration_pos = 0;
             for(;;)
             {
                 size_t pos_begin = text.find('@', iteration_pos);

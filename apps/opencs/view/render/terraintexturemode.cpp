@@ -606,7 +606,7 @@ void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
             newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
             if (ltexTable.getRecord(newId).isDeleted() == 0) counter = (counter + 1) % maxCounter;
         }
-        catch (const std::exception& e)
+        catch (const std::exception&)
         {
             newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
             freeIndexFound = true;

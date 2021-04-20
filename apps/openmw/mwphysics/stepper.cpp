@@ -60,7 +60,7 @@ namespace MWPhysics
         // attempt 3: further, less tall fixed distance movement, same as above
         // If you're making a full conversion you should purge the logic for attempts 2 and 3. Attempts 2 and 3 just try to work around problems with vanilla Morrowind assets.
         int attempt = 0;
-        float downStepSize;
+        float downStepSize = 0;
         while(attempt < 3)
         {
             attempt++;
