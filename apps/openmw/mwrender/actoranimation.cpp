@@ -358,6 +358,8 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
     }
 
     mScabbard = attachMesh(scabbardName, boneName);
+    if (mScabbard)
+        resetControllers(mScabbard->getNode());
 
     osg::Group* weaponNode = getBoneByName("Bip01 Weapon");
     if (!weaponNode)

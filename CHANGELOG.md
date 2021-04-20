@@ -117,6 +117,7 @@
     Bug #5914: BM: The Swimmer can't reach destination
     Bug #5923: Clicking on empty spaces between journal entries might show random topics
     Bug #5934: AddItem command doesn't accept negative values
+    Bug #5975: NIF controllers from sheath meshes are used
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
