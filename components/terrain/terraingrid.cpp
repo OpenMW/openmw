@@ -20,13 +20,13 @@ public:
     void reset() override {}
 };
 
-TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask)
     : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mNumSplits(4)
 {
 }
 
-TerrainGrid::TerrainGrid(osg::Group* parent, Storage* storage, int nodeMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, Storage* storage, unsigned int nodeMask)
     : Terrain::World(parent, storage, nodeMask)
     , mNumSplits(4)
 {

@@ -55,7 +55,7 @@ namespace CSVRender
             /// Initiates a request to redraw the view
             void flagAsModified();
 
-            void setVisibilityMask(int mask);
+            void setVisibilityMask(unsigned int mask);
 
             osg::Camera *getCamera();
 

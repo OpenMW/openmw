@@ -241,7 +241,7 @@ private:
     osg::ref_ptr<RootNode> mRootNode;
 };
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
     : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
@@ -256,7 +256,7 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     mChunkManagers.push_back(mChunkManager.get());
 }
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, Storage *storage, int nodeMask, float lodFactor, float chunkSize)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, Storage *storage, unsigned int nodeMask, float lodFactor, float chunkSize)
     : TerrainGrid(parent, storage, nodeMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)

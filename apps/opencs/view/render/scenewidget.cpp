@@ -120,7 +120,7 @@ void RenderWidget::flagAsModified()
     mView->requestRedraw();
 }
 
-void RenderWidget::setVisibilityMask(int mask)
+void RenderWidget::setVisibilityMask(unsigned int mask)
 {
     mView->getCamera()->setCullMask(mask | Mask_ParticleSystem | Mask_Lighting);
 }

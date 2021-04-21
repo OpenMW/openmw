@@ -317,8 +317,8 @@ public:
             if (cv->getCullingMode() & osg::CullSettings::FAR_PLANE_CULLING)
                 ++numPlanes;
 
-            int mask = 0x1;
-            int resultMask = cv->getProjectionCullingStack().back().getFrustum().getResultMask();
+            unsigned int mask = 0x1;
+            unsigned int resultMask = cv->getProjectionCullingStack().back().getFrustum().getResultMask();
             for (unsigned int i=0; i<cv->getProjectionCullingStack().back().getFrustum().getPlaneList().size(); ++i)
             {
                 if (i >= numPlanes)
@@ -441,7 +441,7 @@ private:
 class CelestialBody
 {
 public:
-    CelestialBody(osg::Group* parentNode, float scaleFactor, int numUvSets, unsigned int visibleMask=~0)
+    CelestialBody(osg::Group* parentNode, float scaleFactor, int numUvSets, unsigned int visibleMask=~0u)
         : mVisibleMask(visibleMask)
     {
         mGeom = createTexturedQuad(numUvSets);
@@ -1624,7 +1624,7 @@ void SkyManager::setEnabled(bool enabled)
     if (enabled && !mCreated)
         create();
 
-    mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
+    mRootNode->setNodeMask(enabled ? Mask_Sky : 0u);
 
     mEnabled = enabled;
 }
@@ -1785,7 +1785,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
         mCloudUpdater->setOpacity((1.f-mCloudBlendFactor));
         mCloudUpdater2->setOpacity(mCloudBlendFactor);
-        mCloudMesh2->setNodeMask(mCloudBlendFactor > 0.f ? ~0 : 0);
+        mCloudMesh2->setNodeMask(mCloudBlendFactor > 0.f ? ~0u : 0);
     }
 
     if (mCloudColour != weather.mFogColor)
@@ -1830,7 +1830,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
         mAtmosphereNightUpdater->setFade(mStarsOpacity);
     }
 
-    mAtmosphereNightNode->setNodeMask(weather.mNight ? ~0 : 0);
+    mAtmosphereNightNode->setNodeMask(weather.mNight ? ~0u : 0);
 
     mPrecipitationAlpha = weather.mPrecipitationAlpha;
 }

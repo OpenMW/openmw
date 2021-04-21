@@ -214,7 +214,7 @@ namespace NifOsg
         return sHiddenNodeMask;
     }
 
-    unsigned int Loader::sIntersectionDisabledNodeMask = ~0;
+    unsigned int Loader::sIntersectionDisabledNodeMask = ~0u;
 
     void Loader::setIntersectionDisabledNodeMask(unsigned int mask)
     {
