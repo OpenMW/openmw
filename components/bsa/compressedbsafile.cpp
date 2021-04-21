@@ -35,7 +35,16 @@
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
+
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4706)
+    #include <boost/iostreams/filter/zlib.hpp>
+    #pragma warning (pop)
+#else
+    #include <boost/iostreams/filter/zlib.hpp>
+#endif
+
 #include <boost/iostreams/device/array.hpp>
 #include <components/bsa/memorystream.hpp>
 

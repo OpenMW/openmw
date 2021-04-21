@@ -126,8 +126,7 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     {
         Nif::Record* r = nif.getRoot(i);
         assert(r != nullptr);
-        Nif::Node* node = nullptr;
-        if ((node = dynamic_cast<Nif::Node*>(r)))
+        if (Nif::Node* node = dynamic_cast<Nif::Node*>(r))
             roots.emplace_back(node);
     }
     const std::string filename = nif.getFilename();
