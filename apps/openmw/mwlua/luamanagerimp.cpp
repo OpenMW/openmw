@@ -100,6 +100,8 @@ namespace MWLua
 
     void LuaManager::update(bool paused, float dt)
     {
+        ObjectRegistry* objectRegistry = mWorldView.getObjectRegistry();
+
         if (!mPlayer.isEmpty())
         {
             MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -108,7 +110,7 @@ namespace MWLua
             if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
             {
                 mPlayer = newPlayerPtr;
-                mWorldView.getObjectRegistry()->registerPtr(mPlayer);
+                objectRegistry->registerPtr(mPlayer);
             }
         }
         mWorldView.update();
@@ -136,15 +138,15 @@ namespace MWLua
 
         // Receive events
         for (GlobalEvent& e : globalEvents)
-            mGlobalScripts.receiveEvent(e.eventName, e.eventData);
+            mGlobalScripts.receiveEvent(e.mEventName, e.mEventData);
         for (LocalEvent& e : localEvents)
         {
-            LObject obj(e.dest, mWorldView.getObjectRegistry());
+            LObject obj(e.mDest, objectRegistry);
             LocalScripts* scripts = obj.isValid() ? obj.ptr().getRefData().getLuaScripts() : nullptr;
             if (scripts)
-                scripts->receiveEvent(e.eventName, e.eventData);
+                scripts->receiveEvent(e.mEventName, e.mEventData);
             else
-                Log(Debug::Debug) << "Ignored event " << e.eventName << " to L" << idToString(e.dest)
+                Log(Debug::Debug) << "Ignored event " << e.mEventName << " to L" << idToString(e.mDest)
                                   << ". Object not found or has no attached scripts";
         }
 
@@ -156,12 +158,19 @@ namespace MWLua
         }
         mKeyPressEvents.clear();
 
-        for (LocalScripts* localScripts : mObjectInactiveEvents)
-            localScripts->becomeInactive();
-        for (LocalScripts* localScripts : mObjectActiveEvents)
-            localScripts->becomeActive();
-        mObjectActiveEvents.clear();
-        mObjectInactiveEvents.clear();
+        for (const LocalEngineEvent& e : mLocalEngineEvents)
+        {
+            LObject obj(e.mDest, objectRegistry);
+            if (!obj.isValid())
+            {
+                Log(Debug::Verbose) << "Can not call engine handlers: object" << idToString(e.mDest) << " is not found";
+                continue;
+            }
+            LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
+            if (scripts)
+                scripts->receiveEngineEvent(e.mEvent, objectRegistry);
+        }
+        mLocalEngineEvents.clear();
 
         for (LocalScripts* scripts : mActiveLocalScripts)
             scripts->update(dt);
@@ -170,11 +179,11 @@ namespace MWLua
         if (mPlayerChanged)
         {
             mPlayerChanged = false;
-            mGlobalScripts.playerAdded(GObject(getId(mPlayer), mWorldView.getObjectRegistry()));
+            mGlobalScripts.playerAdded(GObject(getId(mPlayer), objectRegistry));
         }
 
         for (ObjectId id : mActorAddedEvents)
-            mGlobalScripts.actorActive(GObject(id, mWorldView.getObjectRegistry()));
+            mGlobalScripts.actorActive(GObject(id, objectRegistry));
         mActorAddedEvents.clear();
 
         mGlobalScripts.update(dt);
@@ -203,8 +212,7 @@ namespace MWLua
         mGlobalEvents.clear();
         mKeyPressEvents.clear();
         mActorAddedEvents.clear();
-        mObjectActiveEvents.clear();
-        mObjectInactiveEvents.clear();
+        mLocalEngineEvents.clear();
         mPlayerChanged = false;
         mPlayerScripts = nullptr;
         mWorldView.clear();
@@ -228,7 +236,7 @@ namespace MWLua
         if (!mPlayerScripts)
             throw std::logic_error("mPlayerScripts not initialized");
         mActiveLocalScripts.insert(mPlayerScripts);
-        mObjectActiveEvents.push_back(mPlayerScripts);
+        mLocalEngineEvents.push_back({getId(ptr), LocalScripts::OnActive{}});
         mPlayerChanged = true;
     }
 
@@ -240,7 +248,7 @@ namespace MWLua
         if (localScripts)
         {
             mActiveLocalScripts.insert(localScripts);
-            mObjectActiveEvents.push_back(localScripts);
+            mLocalEngineEvents.push_back({getId(ptr), LocalScripts::OnActive{}});
         }
 
         if (ptr.getClass().isActor() && ptr != mPlayer)
@@ -255,7 +263,7 @@ namespace MWLua
         {
             mActiveLocalScripts.erase(localScripts);
             if (!mWorldView.getObjectRegistry()->getPtr(getId(ptr), true).isEmpty())
-                mObjectInactiveEvents.push_back(localScripts);
+                mLocalEngineEvents.push_back({getId(ptr), LocalScripts::OnInactive{}});
         }
     }
 
@@ -272,6 +280,11 @@ namespace MWLua
     void LuaManager::keyPressed(const SDL_KeyboardEvent& arg)
     {
         mKeyPressEvents.push_back(arg.keysym);
+    }
+
+    void LuaManager::appliedToObject(const MWWorld::Ptr& toPtr, std::string_view recordId, const MWWorld::Ptr& fromPtr)
+    {
+        mLocalEngineEvents.push_back({getId(toPtr), LocalScripts::OnConsume{std::string(recordId)}});
     }
 
     MWBase::LuaManager::ActorControls* LuaManager::getActorControls(const MWWorld::Ptr& ptr) const

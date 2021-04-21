@@ -90,18 +90,30 @@ namespace MWLua
         mData.mControls.controlledFromLua = false;
         mData.mControls.disableAI = false;
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
-        registerEngineHandlers({&mOnActiveHandlers, &mOnInactiveHandlers});
+        registerEngineHandlers({&mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers});
     }
 
-    void LocalScripts::becomeActive()
+    void LocalScripts::receiveEngineEvent(const EngineEvent& event, ObjectRegistry*)
     {
-        mData.mIsActive = true;
-        callEngineHandlers(mOnActiveHandlers);
-    }
-    void LocalScripts::becomeInactive()
-    {
-        mData.mIsActive = false;
-        callEngineHandlers(mOnInactiveHandlers);
+        std::visit([this](auto&& arg)
+        {
+            using EventT = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<EventT, OnActive>)
+            {
+                mData.mIsActive = true;
+                callEngineHandlers(mOnActiveHandlers);
+            }
+            else if constexpr (std::is_same_v<EventT, OnInactive>)
+            {
+                mData.mIsActive = false;
+                callEngineHandlers(mOnInactiveHandlers);
+            }
+            else
+            {
+                static_assert(std::is_same_v<EventT, OnConsume>);
+                callEngineHandlers(mOnConsumeHandlers, arg.mRecordId);
+            }
+        }, event);
     }
 
 }

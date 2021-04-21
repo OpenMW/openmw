@@ -31,14 +31,23 @@ namespace MWLua
             bool mIsActive;
         };
 
-        void becomeActive();
-        void becomeInactive();
+        struct OnActive {};
+        struct OnInactive {};
+        struct OnConsume
+        {
+            std::string mRecordId;
+        };
+        using EngineEvent = std::variant<OnActive, OnInactive, OnConsume>;
+
+        void receiveEngineEvent(const EngineEvent&, ObjectRegistry*);
+
     protected:
         LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
         SelfObject mData;
     private:
         EngineHandlerList mOnActiveHandlers{"onActive"};
         EngineHandlerList mOnInactiveHandlers{"onInactive"};
+        EngineHandlerList mOnConsumeHandlers{"onConsume"};
     };
 
 }

@@ -23,14 +23,14 @@ namespace MWLua
 {
     struct GlobalEvent
     {
-        std::string eventName;
-        std::string eventData;
+        std::string mEventName;
+        std::string mEventData;
     };
     struct LocalEvent
     {
-        ObjectId dest;
-        std::string eventName;
-        std::string eventData;
+        ObjectId mDest;
+        std::string mEventName;
+        std::string mEventData;
     };
     using GlobalEventQueue = std::vector<GlobalEvent>;
     using LocalEventQueue = std::vector<LocalEvent>;

@@ -14,10 +14,10 @@ namespace MWLua
     template <typename Event>
     void saveEvent(ESM::ESMWriter& esm, const ObjectId& dest, const Event& event)
     {
-        esm.writeHNString("LUAE", event.eventName);
+        esm.writeHNString("LUAE", event.mEventName);
         dest.save(esm, true);
-        if (!event.eventData.empty())
-            saveLuaBinaryData(esm, event.eventData);
+        if (!event.mEventData.empty())
+            saveLuaBinaryData(esm, event.mEventData);
     }
 
     void loadEvents(sol::state& lua, ESM::ESMReader& esm, GlobalEventQueue& globalEvents, LocalEventQueue& localEvents,
@@ -57,7 +57,7 @@ namespace MWLua
         for (const GlobalEvent& e : globalEvents)
             saveEvent(esm, globalId, e);
         for (const LocalEvent& e : localEvents)
-            saveEvent(esm, e.dest, e);
+            saveEvent(esm, e.mDest, e);
     }
 
 }

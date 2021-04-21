@@ -43,6 +43,7 @@ namespace MWLua
         void registerObject(const MWWorld::Ptr& ptr) override;
         void deregisterObject(const MWWorld::Ptr& ptr) override;
         void keyPressed(const SDL_KeyboardEvent &arg) override;
+        void appliedToObject(const MWWorld::Ptr& toPtr, std::string_view recordId, const MWWorld::Ptr& fromPtr) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 
@@ -96,8 +97,13 @@ namespace MWLua
 
         std::vector<SDL_Keysym> mKeyPressEvents;
         std::vector<ObjectId> mActorAddedEvents;
-        std::vector<LocalScripts*> mObjectActiveEvents;
-        std::vector<LocalScripts*> mObjectInactiveEvents;
+
+        struct LocalEngineEvent
+        {
+            ObjectId mDest;
+            LocalScripts::EngineEvent mEvent;
+        };
+        std::vector<LocalEngineEvent> mLocalEngineEvents;
 
         // Queued actions that should be done in main thread. Processed by applyQueuedChanges().
         std::vector<std::unique_ptr<Action>> mActionQueue;
