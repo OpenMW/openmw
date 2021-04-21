@@ -1,7 +1,5 @@
 #include "inisettings.hpp"
 
-#include <QDir>
-
 #include <QTextStream>
 #include <QFile>
 #include <QStringList>

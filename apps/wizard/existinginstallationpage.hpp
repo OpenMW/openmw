@@ -1,8 +1,6 @@
 #ifndef EXISTINGINSTALLATIONPAGE_HPP
 #define EXISTINGINSTALLATIONPAGE_HPP
 
-#include <QWizardPage>
-
 #include "ui_existinginstallationpage.h"
 
 namespace Wizard

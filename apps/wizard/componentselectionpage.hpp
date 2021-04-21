@@ -1,8 +1,6 @@
 #ifndef COMPONENTSELECTIONPAGE_HPP
 #define COMPONENTSELECTIONPAGE_HPP
 
-#include <QWizardPage>
-
 #include "ui_componentselectionpage.h"
 
 namespace Wizard

@@ -1,7 +1,5 @@
 #include <QApplication>
-#include <QTextCodec>
 #include <QDir>
-#include <QDebug>
 
 #include "mainwizard.hpp"
 
