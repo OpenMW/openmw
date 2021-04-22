@@ -152,6 +152,7 @@ Programmers
     Nathan Jeffords (blunted2night)
     NeveHanter
     Nialsy
+    Nick Crawford (nighthawk469)
     Nikolay Kasyanov (corristo)
     nobrakal
     Nolan Poe (nopoe)
