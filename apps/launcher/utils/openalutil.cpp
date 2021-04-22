@@ -37,19 +37,25 @@ std::vector<const char *> Launcher::enumerateOpenALDevicesHrtf()
     std::vector<const char *> ret;
 
     ALCdevice *device = alcOpenDevice(nullptr);
-    if(device && alcIsExtensionPresent(device, "ALC_SOFT_HRTF"))
+    if(device)
     {
-        LPALCGETSTRINGISOFT alcGetStringiSOFT = nullptr;
-        void* funcPtr = alcGetProcAddress(device, "alcGetStringiSOFT");
-        memcpy(&alcGetStringiSOFT, &funcPtr, sizeof(funcPtr));
-        ALCint num_hrtf;
-        alcGetIntegerv(device, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &num_hrtf);
-        ret.reserve(num_hrtf);
-        for(ALCint i = 0;i < num_hrtf && i < 20;++i)
+        if(alcIsExtensionPresent(device, "ALC_SOFT_HRTF"))
         {
-            const ALCchar *entry = alcGetStringiSOFT(device, ALC_HRTF_SPECIFIER_SOFT, i);
-            ret.emplace_back(entry);
+            LPALCGETSTRINGISOFT alcGetStringiSOFT = nullptr;
+            void* funcPtr = alcGetProcAddress(device, "alcGetStringiSOFT");
+            memcpy(&alcGetStringiSOFT, &funcPtr, sizeof(funcPtr));
+            ALCint num_hrtf;
+            alcGetIntegerv(device, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &num_hrtf);
+            ret.reserve(num_hrtf);
+            for(ALCint i = 0;i < num_hrtf;++i)
+            {
+                const ALCchar *entry = alcGetStringiSOFT(device, ALC_HRTF_SPECIFIER_SOFT, i);
+                if(strcmp(entry, "") == 0)
+                    break;
+                ret.emplace_back(entry);
+            }
         }
+        alcCloseDevice(device);
     }
     return ret;
 }
