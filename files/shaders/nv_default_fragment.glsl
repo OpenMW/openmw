@@ -78,11 +78,7 @@ void main()
 #endif
     vec3 lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
 
-#if @clamp
-    lighting = clamp(lighting, vec3(0.0), vec3(1.0));
-#else
-    lighting = max(lighting, 0.0);
-#endif
+    clampLightingResult(lighting);
 
     gl_FragData[0].xyz *= lighting;
 

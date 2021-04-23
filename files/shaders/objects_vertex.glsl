@@ -125,6 +125,7 @@ void main(void)
     doLighting(viewPos.xyz, viewNormal, diffuseLight, ambientLight, shadowDiffuseLighting);
     vec3 emission = getEmissionColor().xyz * emissiveMult;
     passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
+    clampLightingResult(passLighting);
     shadowDiffuseLighting *= getDiffuseColor().xyz;
 #endif
 

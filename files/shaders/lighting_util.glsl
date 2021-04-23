@@ -129,3 +129,12 @@ vec4 lcalcSpecular(int lightIndex)
     return @getLight[lightIndex].specular;
 #endif
 }
+
+void clampLightingResult(inout vec3 lighting)
+{
+#if @clamp
+    lighting = clamp(lighting, vec3(0.0), vec3(1.0));
+#else
+    lighting = max(lighting, 0.0);
+#endif
+}
