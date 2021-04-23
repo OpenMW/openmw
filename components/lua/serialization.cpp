@@ -10,7 +10,7 @@ namespace LuaUtil
 
     constexpr unsigned char FORMAT_VERSION = 0;
 
-    enum class SerializedType
+    enum class SerializedType : char
     {
         NUMBER =       0x0,
         LONG_STRING =  0x1,
@@ -20,8 +20,10 @@ namespace LuaUtil
 
         VEC2 =         0x10,
         VEC3 =         0x11,
+
+        // All values should be lesser than 0x20 (SHORT_STRING_FLAG).
     };
-    constexpr unsigned char SHORT_STRING_FLAG = 0x20;    // 0x001SSSSS. SSSSS = string length
+    constexpr unsigned char SHORT_STRING_FLAG = 0x20;    // 0b001SSSSS. SSSSS = string length
     constexpr unsigned char CUSTOM_FULL_FLAG = 0x40;     // 0b01TTTTTT + 32bit dataSize
     constexpr unsigned char CUSTOM_COMPACT_FLAG = 0x80;  // 0b1SSSSTTT. SSSS = dataSize, TTT = (typeName size - 1)
 
@@ -224,8 +226,8 @@ namespace LuaUtil
                 sol::stack::push<osg::Vec3f>(lua.lua_state(), osg::Vec3f(x, y, z));
                 return;
             }
-            default: throw std::runtime_error("Unknown type: " + std::to_string(type));
         }
+        throw std::runtime_error("Unknown type: " + std::to_string(type));
     }
 
     BinaryData serialize(const sol::object& obj, const UserdataSerializer* customSerializer)

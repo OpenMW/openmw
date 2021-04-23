@@ -103,7 +103,7 @@ namespace MWWorld
             void setLocals (const ESM::Script& script);
 
             MWLua::LocalScripts* getLuaScripts() { return mLuaScripts.get(); }
-            void setLuaScripts(std::unique_ptr<MWLua::LocalScripts>&&);
+            void setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&&);
 
             void setCount (int count);
             ///< Set object count (an object pile is a simple object with a count >1).

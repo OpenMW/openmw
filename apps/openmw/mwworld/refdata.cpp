@@ -23,7 +23,7 @@ enum RefDataFlags
 namespace MWWorld
 {
 
-    void RefData::setLuaScripts(std::unique_ptr<MWLua::LocalScripts>&& scripts)
+    void RefData::setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&& scripts)
     {
         mChanged = true;
         mLuaScripts = std::move(scripts);

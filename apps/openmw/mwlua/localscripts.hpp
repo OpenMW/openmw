@@ -19,8 +19,8 @@ namespace MWLua
     class LocalScripts : public LuaUtil::ScriptsContainer
     {
     public:
-        static std::unique_ptr<LocalScripts> create(LuaUtil::LuaState* lua, const LObject& obj);
         static void initializeSelfPackage(const Context&);
+        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
 
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
 
@@ -42,8 +42,8 @@ namespace MWLua
         void receiveEngineEvent(const EngineEvent&, ObjectRegistry*);
 
     protected:
-        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
         SelfObject mData;
+
     private:
         EngineHandlerList mOnActiveHandlers{"onActive"};
         EngineHandlerList mOnInactiveHandlers{"onInactive"};

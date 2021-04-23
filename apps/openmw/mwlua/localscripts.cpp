@@ -22,11 +22,11 @@ namespace MWLua
     {
         using ActorControls = MWBase::LuaManager::ActorControls;
         sol::usertype<ActorControls> controls = context.mLua->sol().new_usertype<ActorControls>("ActorControls");
-        controls["movement"] = &ActorControls::movement;
-        controls["sideMovement"] = &ActorControls::sideMovement;
-        controls["turn"] = &ActorControls::turn;
-        controls["run"] = &ActorControls::run;
-        controls["jump"] = &ActorControls::jump;
+        controls["movement"] = &ActorControls::mMovement;
+        controls["sideMovement"] = &ActorControls::mSideMovement;
+        controls["turn"] = &ActorControls::mTurn;
+        controls["run"] = &ActorControls::mRun;
+        controls["jump"] = &ActorControls::mJump;
 
         sol::usertype<SelfObject> selfAPI =
             context.mLua->sol().new_usertype<SelfObject>("SelfObject", sol::base_classes, sol::bases<LObject>());
@@ -34,8 +34,8 @@ namespace MWLua
         selfAPI["object"] = sol::readonly_property([](SelfObject& self) -> LObject { return LObject(self); });
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
-        selfAPI["setDirectControl"] = [](SelfObject& self, bool v) { self.mControls.controlledFromLua = v; };
-        selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.disableAI = !v; };
+        selfAPI["setDirectControl"] = [](SelfObject& self, bool v) { self.mControls.mControlledFromLua = v; };
+        selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
         selfAPI["setEquipment"] = [manager=context.mLuaManager](const SelfObject& obj, sol::table equipment)
         {
             if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
@@ -79,16 +79,11 @@ namespace MWLua
         };
     }
 
-    std::unique_ptr<LocalScripts> LocalScripts::create(LuaUtil::LuaState* lua, const LObject& obj)
-    {
-        return std::unique_ptr<LocalScripts>(new LocalScripts(lua, obj));
-    }
-
     LocalScripts::LocalScripts(LuaUtil::LuaState* lua, const LObject& obj)
         : LuaUtil::ScriptsContainer(lua, "L" + idToString(obj.id())), mData(obj)
     {
-        mData.mControls.controlledFromLua = false;
-        mData.mControls.disableAI = false;
+        mData.mControls.mControlledFromLua = false;
+        mData.mControls.mDisableAI = false;
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
         registerEngineHandlers({&mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers});
     }

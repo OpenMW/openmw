@@ -29,7 +29,7 @@ endif (GIT_CHECKOUT)
 # source files
 
 add_component_dir (lua
-    luastate scriptscontainer utilpackage serialization
+    luastate scriptscontainer utilpackage serialization omwscriptsparser
     )
 
 add_component_dir (settings

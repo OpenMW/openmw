@@ -14,8 +14,14 @@ namespace ESM
 
     struct LuaTimer
     {
+        enum class TimeUnit : bool
+        {
+            SECONDS = 0,
+            HOURS = 1,
+        };
+
+        TimeUnit mUnit;
         double mTime;
-        bool mHours;  // false - game seconds, true - game hours
         std::string mCallbackName;
         std::string mCallbackArgument;  // Serialized Lua table. It is a binary data. Can contain '\0'.
     };

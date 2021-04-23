@@ -78,10 +78,10 @@ namespace LuaUtil
 
     bool ScriptsContainer::removeScript(const std::string& path)
     {
-        auto it = mScripts.find(path);
-        if (it == mScripts.end())
+        auto scriptIter = mScripts.find(path);
+        if (scriptIter == mScripts.end())
             return false;  // no such script
-        sol::object& script = it->second.mInterface;
+        sol::object& script = scriptIter->second.mInterface;
         if (getFieldOrNil(script, INTERFACE_NAME) != sol::nil)
         {
             std::string_view interfaceName = getFieldOrNil(script, INTERFACE_NAME).as<std::string_view>();
@@ -110,10 +110,10 @@ namespace LuaUtil
             for (auto& [key, value] : sol::table(engineHandlers))
             {
                 std::string_view handlerName = key.as<std::string_view>();
-                auto it = mEngineHandlers.find(handlerName);
-                if (it == mEngineHandlers.end())
+                auto handlerIter = mEngineHandlers.find(handlerName);
+                if (handlerIter == mEngineHandlers.end())
                     continue;
-                std::vector<sol::protected_function>& list = it->second->mList;
+                std::vector<sol::protected_function>& list = handlerIter->second->mList;
                 list.erase(std::find(list.begin(), list.end(), value.as<sol::protected_function>()));
             }
         }
@@ -126,7 +126,7 @@ namespace LuaUtil
                 list.erase(std::find(list.begin(), list.end(), value.as<sol::protected_function>()));
             }
         }
-        mScripts.erase(it);
+        mScripts.erase(scriptIter);
         mScriptOrder.erase(std::find(mScriptOrder.begin(), mScriptOrder.end(), path));
         return true;
     }
@@ -201,13 +201,13 @@ namespace LuaUtil
     void ScriptsContainer::save(ESM::LuaScripts& data)
     {
         std::map<std::string, std::vector<ESM::LuaTimer>> timers;
-        auto saveTimerFn = [&](const Timer& timer, bool inHours)
+        auto saveTimerFn = [&](const Timer& timer, TimeUnit timeUnit)
         {
             if (!timer.mSerializable)
                 return;
             ESM::LuaTimer savedTimer;
             savedTimer.mTime = timer.mTime;
-            savedTimer.mHours = inHours;
+            savedTimer.mUnit = timeUnit;
             savedTimer.mCallbackName = std::get<std::string>(timer.mCallback);
             savedTimer.mCallbackArgument = timer.mSerializedArg;
             if (timers.count(timer.mScript) == 0)
@@ -215,9 +215,9 @@ namespace LuaUtil
             timers[timer.mScript].push_back(std::move(savedTimer));
         };
         for (const Timer& timer : mSecondsTimersQueue)
-            saveTimerFn(timer, false);
+            saveTimerFn(timer, TimeUnit::SECONDS);
         for (const Timer& timer : mHoursTimersQueue)
-            saveTimerFn(timer, true);
+            saveTimerFn(timer, TimeUnit::HOURS);
         data.mScripts.clear();
         for (const std::string& path : mScriptOrder)
         {
@@ -291,7 +291,7 @@ namespace LuaUtil
                     // updates refnums, so timer.mSerializedArg may be not equal to savedTimer.mCallbackArgument.
                     timer.mSerializedArg = serialize(timer.mArg, mSerializer);
 
-                    if (savedTimer.mHours)
+                    if (savedTimer.mUnit == TimeUnit::HOURS)
                         mHoursTimersQueue.push_back(std::move(timer));
                     else
                         mSecondsTimersQueue.push_back(std::move(timer));
@@ -352,7 +352,7 @@ namespace LuaUtil
         std::push_heap(timerQueue.begin(), timerQueue.end());
     }
 
-    void ScriptsContainer::setupSerializableTimer(bool inHours, double time, const std::string& scriptPath,
+    void ScriptsContainer::setupSerializableTimer(TimeUnit timeUnit, double time, const std::string& scriptPath,
                                                   std::string_view callbackName, sol::object callbackArg)
     {
         Timer t;
@@ -362,10 +362,10 @@ namespace LuaUtil
         t.mTime = time;
         t.mArg = callbackArg;
         t.mSerializedArg = serialize(t.mArg, mSerializer);
-        insertTimer(inHours ? mHoursTimersQueue : mSecondsTimersQueue, std::move(t));
+        insertTimer(timeUnit == TimeUnit::HOURS ? mHoursTimersQueue : mSecondsTimersQueue, std::move(t));
     }
 
-    void ScriptsContainer::setupUnsavableTimer(bool inHours, double time, const std::string& scriptPath, sol::function callback)
+    void ScriptsContainer::setupUnsavableTimer(TimeUnit timeUnit, double time, const std::string& scriptPath, sol::function callback)
     {
         Timer t;
         t.mScript = scriptPath;
@@ -376,7 +376,7 @@ namespace LuaUtil
         getHiddenData(scriptPath)[TEMPORARY_TIMER_CALLBACKS][mTemporaryCallbackCounter] = std::move(callback);
         mTemporaryCallbackCounter++;
 
-        insertTimer(inHours ? mHoursTimersQueue : mSecondsTimersQueue, std::move(t));
+        insertTimer(timeUnit == TimeUnit::HOURS ? mHoursTimersQueue : mSecondsTimersQueue, std::move(t));
     }
 
     void ScriptsContainer::callTimer(const Timer& t)

@@ -48,7 +48,7 @@ void ESM::LuaScripts::load(ESMReader& esm)
         {
             esm.getSubHeader();
             LuaTimer timer;
-            esm.getT(timer.mHours);
+            esm.getT(timer.mUnit);
             esm.getT(timer.mTime);
             timer.mCallbackName = esm.getHNString("LUAC");
             timer.mCallbackArgument = loadLuaBinaryData(esm);
@@ -68,7 +68,7 @@ void ESM::LuaScripts::save(ESMWriter& esm) const
         for (const LuaTimer& timer : script.mTimers)
         {
             esm.startSubRecord("LUAT");
-            esm.writeT(timer.mHours);
+            esm.writeT(timer.mUnit);
             esm.writeT(timer.mTime);
             esm.endRecord("LUAT");
             esm.writeHNString("LUAC", timer.mCallbackName);

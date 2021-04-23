@@ -12,9 +12,7 @@ namespace LuaUtil
     static std::string packageNameToPath(std::string_view packageName)
     {
         std::string res(packageName);
-        for (size_t i = 0; i < res.size(); ++i)
-            if (res[i] == '.')
-                res[i] = '/';
+        std::replace(res.begin(), res.end(), '.', '/');
         res.append(".lua");
         return res;
     }
@@ -28,7 +26,7 @@ namespace LuaUtil
     {
         mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::string, sol::lib::table);
 
-        mLua["math"]["randomseed"](static_cast<unsigned>(time(NULL)));
+        mLua["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
         mLua["math"]["randomseed"] = sol::nil;
 
         mLua["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };

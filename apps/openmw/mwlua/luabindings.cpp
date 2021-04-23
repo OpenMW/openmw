@@ -76,7 +76,7 @@ namespace MWLua
             if (cell)
                 return GCell{cell};
             else
-                return {};
+                return sol::nullopt;
         };
         api["getExteriorCell"] = [worldView=context.mWorldView](int x, int y) -> sol::optional<GCell>
         {
@@ -84,7 +84,7 @@ namespace MWLua
             if (cell)
                 return GCell{cell};
             else
-                return {};
+                return sol::nullopt;
         };
         api["activeActors"] = GObjectList{worldView->getActorsInScene()};
         api["selectObjects"] = [context](const Queries::Query& query)
@@ -156,7 +156,9 @@ namespace MWLua
         for (const Queries::Field* field : group.mFields)
         {
             sol::table subgroup = res;
-            for (int i = 0; i < static_cast<int>(field->path().size()) - 1; ++i)
+            if (field->path().empty())
+                throw std::logic_error("Empty path in Queries::Field");
+            for (size_t i = 0; i < field->path().size() - 1; ++i)
             {
                 const std::string& name = field->path()[i];
                 if (subgroup[name] == sol::nil)

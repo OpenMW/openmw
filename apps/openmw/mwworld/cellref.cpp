@@ -22,8 +22,9 @@ namespace MWWorld
             lastAssignedRefNum.mIndex++;
             if (lastAssignedRefNum.mIndex == 0)  // mIndex overflow, so mContentFile should be changed
             {
-                lastAssignedRefNum.mContentFile--;
-                if (lastAssignedRefNum.mContentFile > 0)
+                if (lastAssignedRefNum.mContentFile > std::numeric_limits<int32_t>::min())
+                    lastAssignedRefNum.mContentFile--;
+                else
                     Log(Debug::Error) << "RefNum counter overflow in CellRef::getOrAssignRefNum";
             }
             mCellRef.mRefNum = lastAssignedRefNum;

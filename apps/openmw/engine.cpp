@@ -833,18 +833,17 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 class OMW::Engine::LuaWorker
 {
 public:
-    explicit LuaWorker(Engine* engine) :
-        mEngine(engine),
-        mSeparateThread(Settings::Manager::getInt("lua num threads", "Lua") > 0)
+    explicit LuaWorker(Engine* engine) : mEngine(engine)
     {
-        if (mSeparateThread)
+        if (Settings::Manager::getInt("lua num threads", "Lua") > 0)
             mThread = std::thread([this]{ threadBody(); });
     };
 
     void allowUpdate(double dt)
     {
         mDt = dt;
-        if (!mSeparateThread)
+        mIsGuiMode = mEngine->mEnvironment.getWindowManager()->isGuiMode();
+        if (!mThread)
             return;
         {
             std::lock_guard<std::mutex> lk(mMutex);
@@ -855,7 +854,7 @@ public:
 
     void finishUpdate()
     {
-        if (mSeparateThread)
+        if (mThread)
         {
             std::unique_lock<std::mutex> lk(mMutex);
             mCV.wait(lk, [&]{ return !mUpdateRequest; });
@@ -867,8 +866,8 @@ public:
 
     void join()
     {
-        if (mSeparateThread)
-            mThread.join();
+        if (mThread)
+            mThread->join();
     }
 
 private:
@@ -879,7 +878,7 @@ private:
         const unsigned int frameNumber = viewer->getFrameStamp()->getFrameNumber();
         ScopedProfile<UserStatsType::Lua> profile(frameStart, frameNumber, *osg::Timer::instance(), *viewer->getViewerStats());
 
-        mEngine->mLuaManager->update(mEngine->mEnvironment.getWindowManager()->isGuiMode(), mDt);
+        mEngine->mLuaManager->update(mIsGuiMode, mDt);
     }
 
     void threadBody()
@@ -898,12 +897,12 @@ private:
     }
 
     Engine* mEngine;
-    const bool mSeparateThread;
     std::mutex mMutex;
     std::condition_variable mCV;
     bool mUpdateRequest;
     double mDt = 0;
-    std::thread mThread;
+    bool mIsGuiMode = false;
+    std::optional<std::thread> mThread;
 };
 
 // Initialise and enter main loop.

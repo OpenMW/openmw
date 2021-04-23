@@ -2065,7 +2065,7 @@ namespace MWMechanics
                         if (iter->first != player)
                         {
                             CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
-                            if (isConscious(iter->first) && !(luaControls && luaControls->disableAI))
+                            if (isConscious(iter->first) && !(luaControls && luaControls->mDisableAI))
                             {
                                 stats.getAiSequence().execute(iter->first, *ctrl, duration);
                                 updateGreetingState(iter->first, *iter->second, timerUpdateHello > 0);
@@ -2074,7 +2074,7 @@ namespace MWMechanics
                             }
                         }
                     }
-                    else if (aiActive && iter->first != player && isConscious(iter->first) && !(luaControls && luaControls->disableAI))
+                    else if (aiActive && iter->first != player && isConscious(iter->first) && !(luaControls && luaControls->mDisableAI))
                     {
                         CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                         stats.getAiSequence().execute(iter->first, *ctrl, duration, /*outOfRange*/true);
@@ -2101,21 +2101,21 @@ namespace MWMechanics
                         float rotationZ = mov.mRotation[2];
                         bool jump = mov.mPosition[2] == 1;
                         bool runFlag = stats.getMovementFlag(MWMechanics::CreatureStats::Flag_Run);
-                        if (luaControls->controlledFromLua)
+                        if (luaControls->mControlledFromLua)
                         {
-                            mov.mPosition[0] = luaControls->sideMovement;
-                            mov.mPosition[1] = luaControls->movement;
-                            mov.mPosition[2] = luaControls->jump ? 1 : 0;
+                            mov.mPosition[0] = luaControls->mSideMovement;
+                            mov.mPosition[1] = luaControls->mMovement;
+                            mov.mPosition[2] = luaControls->mJump ? 1 : 0;
                             mov.mRotation[1] = 0;
-                            mov.mRotation[2] = luaControls->turn;
-                            mov.mSpeedFactor = osg::Vec2(luaControls->movement, luaControls->sideMovement).length();
-                            stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, luaControls->run);
+                            mov.mRotation[2] = luaControls->mTurn;
+                            mov.mSpeedFactor = osg::Vec2(luaControls->mMovement, luaControls->mSideMovement).length();
+                            stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, luaControls->mRun);
                         }
-                        luaControls->sideMovement = movement.x();
-                        luaControls->movement = movement.y();
-                        luaControls->turn = rotationZ;
-                        luaControls->jump = jump;
-                        luaControls->run = runFlag;
+                        luaControls->mSideMovement = movement.x();
+                        luaControls->mMovement = movement.y();
+                        luaControls->mTurn = rotationZ;
+                        luaControls->mJump = jump;
+                        luaControls->mRun = runFlag;
                     }
                 }
             }

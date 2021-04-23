@@ -53,7 +53,7 @@ namespace MWLua
         std::fill(usedSlots.begin(), usedSlots.end(), false);
 
         constexpr int anySlot = -1;
-        auto tryEquipToSlot = [&](int slot, const Item& item) -> bool
+        auto tryEquipToSlot = [&actor, &store, &usedSlots, &worldView, anySlot](int slot, const Item& item) -> bool
         {
             auto old_it = slot != anySlot ? store.getSlot(slot) : store.end();
             MWWorld::Ptr itemPtr;
@@ -83,23 +83,16 @@ namespace MWLua
             }
 
             auto [allowedSlots, _] = itemPtr.getClass().getEquipmentSlots(itemPtr);
-            bool requestedSlotIsAllowed = false;
-            for (int allowedSlot : allowedSlots)
-                requestedSlotIsAllowed = requestedSlotIsAllowed || allowedSlot == slot;
+            bool requestedSlotIsAllowed = std::find(allowedSlots.begin(), allowedSlots.end(), slot) != allowedSlots.end();
             if (!requestedSlotIsAllowed)
             {
-                slot = anySlot;
-                for (int allowedSlot : allowedSlots)
-                    if (!usedSlots[allowedSlot])
-                    {
-                        slot = allowedSlot;
-                        break;
-                    }
-                if (slot == anySlot)
+                auto firstAllowed = std::find_if(allowedSlots.begin(), allowedSlots.end(), [&](int s) { return !usedSlots[s]; });
+                if (firstAllowed == allowedSlots.end())
                 {
                     Log(Debug::Warning) << "No suitable slot for " << ptrToString(itemPtr);
                     return false;
                 }
+                slot = *firstAllowed;
             }
 
             // TODO: Refactor InventoryStore to accept Ptr and get rid of this linear search.
@@ -124,7 +117,7 @@ namespace MWLua
             if (tryEquipToSlot(slot, new_it->second))
                 usedSlots[slot] = true;
         }
-        for (auto [slot, item] : mEquipment)
+        for (const auto& [slot, item] : mEquipment)
             if (slot >= MWWorld::InventoryStore::Slots)
                 tryEquipToSlot(anySlot, item);
     }

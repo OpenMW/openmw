@@ -17,7 +17,7 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
-    class LuaScripts;
+    struct LuaScripts;
 }
 
 namespace MWBase
@@ -40,15 +40,16 @@ namespace MWBase
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,
         //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) = 0;
 
-        struct ActorControls {
-            bool disableAI;
-            bool controlledFromLua;
+        struct ActorControls
+        {
+            bool mDisableAI;
+            bool mControlledFromLua;
 
-            bool jump;
-            bool run;
-            float movement;
-            float sideMovement;
-            float turn;
+            bool mJump;
+            bool mRun;
+            float mMovement;
+            float mSideMovement;
+            float mTurn;
         };
 
         virtual ActorControls* getActorControls(const MWWorld::Ptr&) const = 0;

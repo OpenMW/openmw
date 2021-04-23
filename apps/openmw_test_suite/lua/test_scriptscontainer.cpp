@@ -304,6 +304,7 @@ return {
 
     TEST_F(LuaScriptsContainerTest, Timers)
     {
+        using TimeUnit = LuaUtil::ScriptsContainer::TimeUnit;
         LuaUtil::ScriptsContainer scripts(&mLua, "Test");
         EXPECT_TRUE(scripts.addNewScript("test1.lua"));
         EXPECT_TRUE(scripts.addNewScript("test2.lua"));
@@ -321,18 +322,18 @@ return {
 
         scripts.processTimers(1, 2);
 
-        scripts.setupSerializableTimer(false, 10, "test1.lua", "B", sol::make_object(mLua.sol(), 3));
-        scripts.setupSerializableTimer(true, 10, "test2.lua", "B", sol::make_object(mLua.sol(), 4));
-        scripts.setupSerializableTimer(false, 5, "test1.lua", "A", sol::make_object(mLua.sol(), 1));
-        scripts.setupSerializableTimer(true, 5, "test2.lua", "A", sol::make_object(mLua.sol(), 2));
-        scripts.setupSerializableTimer(false, 15, "test1.lua", "A", sol::make_object(mLua.sol(), 10));
-        scripts.setupSerializableTimer(false, 15, "test1.lua", "B", sol::make_object(mLua.sol(), 20));
+        scripts.setupSerializableTimer(TimeUnit::SECONDS, 10, "test1.lua", "B", sol::make_object(mLua.sol(), 3));
+        scripts.setupSerializableTimer(TimeUnit::HOURS, 10, "test2.lua", "B", sol::make_object(mLua.sol(), 4));
+        scripts.setupSerializableTimer(TimeUnit::SECONDS, 5, "test1.lua", "A", sol::make_object(mLua.sol(), 1));
+        scripts.setupSerializableTimer(TimeUnit::HOURS, 5, "test2.lua", "A", sol::make_object(mLua.sol(), 2));
+        scripts.setupSerializableTimer(TimeUnit::SECONDS, 15, "test1.lua", "A", sol::make_object(mLua.sol(), 10));
+        scripts.setupSerializableTimer(TimeUnit::SECONDS, 15, "test1.lua", "B", sol::make_object(mLua.sol(), 20));
 
-        scripts.setupUnsavableTimer(false, 10, "test2.lua", fn2);
-        scripts.setupUnsavableTimer(true, 10, "test1.lua", fn2);
-        scripts.setupUnsavableTimer(false, 5, "test2.lua", fn1);
-        scripts.setupUnsavableTimer(true, 5, "test1.lua", fn1);
-        scripts.setupUnsavableTimer(false, 15, "test2.lua", fn1);
+        scripts.setupUnsavableTimer(TimeUnit::SECONDS, 10, "test2.lua", fn2);
+        scripts.setupUnsavableTimer(TimeUnit::HOURS, 10, "test1.lua", fn2);
+        scripts.setupUnsavableTimer(TimeUnit::SECONDS, 5, "test2.lua", fn1);
+        scripts.setupUnsavableTimer(TimeUnit::HOURS, 5, "test1.lua", fn1);
+        scripts.setupUnsavableTimer(TimeUnit::SECONDS, 15, "test2.lua", fn1);
 
         EXPECT_EQ(counter1, 0);
         EXPECT_EQ(counter3, 0);

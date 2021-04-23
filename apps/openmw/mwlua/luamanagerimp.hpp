@@ -23,7 +23,6 @@ namespace MWLua
     {
     public:
         LuaManager(const VFS::Manager* vfs, const std::vector<std::string>& globalScriptLists);
-        ~LuaManager() {}
 
         // Called by engine.cpp when environment is fully initialized.
         void init();

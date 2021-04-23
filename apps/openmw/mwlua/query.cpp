@@ -84,9 +84,12 @@ namespace MWLua
         }
         if (ptr.getRefData().getCount() == 0)
             return false;
-        // It is stupid, but "prisonmarker" has class "Door" despite that it is only an invisible marker. So we ignore all markers.
+
+        // It is important to exclude all markers before checking what class it is.
+        // For example "prisonmarker" has class "Door" despite that it is only an invisible marker.
         if (isMarker(ptr))
             return false;
+
         const MWWorld::Class& cls = ptr.getClass();
         if (cls.isActivator() != (query.mQueryType == ObjectQueryTypes::ACTIVATORS))
             return false;

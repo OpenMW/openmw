@@ -104,7 +104,7 @@ namespace MWLua
             if (ptr.isInCell())
                 return Cell<ObjectT>{ptr.getCell()};
             else
-                return {};
+                return sol::nullopt;
         });
         objectT["position"] = sol::readonly_property([](const ObjectT& o) -> osg::Vec3f
         {
@@ -123,17 +123,17 @@ namespace MWLua
             context.mLocalEventQueue->push_back({dest.id(), std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
         };
 
-        objectT["canMove"] = [context](const ObjectT& o)
+        objectT["canMove"] = [](const ObjectT& o)
         {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getMaxSpeed(o.ptr()) > 0;
         };
-        objectT["getRunSpeed"] = [context](const ObjectT& o)
+        objectT["getRunSpeed"] = [](const ObjectT& o)
         {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getRunSpeed(o.ptr());
         };
-        objectT["getWalkSpeed"] = [context](const ObjectT& o)
+        objectT["getWalkSpeed"] = [](const ObjectT& o)
         {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getWalkSpeed(o.ptr());
@@ -182,12 +182,12 @@ namespace MWLua
         {
             const MWWorld::CellRef& cellRef = ptr(o).getCellRef();
             if (!cellRef.getTeleport())
-                return {};
+                return sol::nullopt;
             MWWorld::CellStore* cell = worldView->findCell(cellRef.getDestCell(), cellRef.getDoorDest().asVec3());
             if (cell)
                 return Cell<ObjectT>{cell};
             else
-                return {};
+                return sol::nullopt;
         });
     }
 
