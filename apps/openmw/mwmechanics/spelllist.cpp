@@ -164,4 +164,12 @@ namespace MWMechanics
         if (it != mListeners.end())
             mListeners.erase(it);
     }
+
+    void SpellList::updateListener(Spells* before, Spells* after)
+    {
+        const auto it = std::find(mListeners.begin(), mListeners.end(), before);
+        if (it == mListeners.end())
+            return mListeners.push_back(after);
+        *it = after;
+    }
 }
