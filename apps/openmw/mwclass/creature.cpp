@@ -60,7 +60,7 @@ namespace MWClass
 
         CreatureCustomData() = default;
         CreatureCustomData(const CreatureCustomData& other);
-        CreatureCustomData(CreatureCustomData&& other) noexcept = default;
+        CreatureCustomData(CreatureCustomData&& other) = default;
 
         CreatureCustomData& asCreatureCustomData() override
         {
