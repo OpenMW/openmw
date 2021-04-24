@@ -277,6 +277,8 @@ Windows_Ninja_CS_RelWithDebInfo:
   - choco install python -y
   - refreshenv
   stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
