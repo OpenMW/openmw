@@ -59,7 +59,7 @@ namespace MWMechanics
 
             Spells(const Spells&);
 
-            Spells(const Spells&&) = delete;
+            Spells(Spells&& spells);
 
             ~Spells();
 

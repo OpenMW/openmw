@@ -32,6 +32,15 @@ namespace MWMechanics
             mSpellList->addListener(this);
     }
 
+    Spells::Spells(Spells&& spells) : mSpellList(std::move(spells.mSpellList)), mSpells(std::move(spells.mSpells)),
+        mSelectedSpell(std::move(spells.mSelectedSpell)), mUsedPowers(std::move(spells.mUsedPowers)),
+        mSpellsChanged(std::move(spells.mSpellsChanged)), mEffects(std::move(spells.mEffects)),
+        mSourcedEffects(std::move(spells.mSourcedEffects))
+    {
+        if (mSpellList)
+            mSpellList->updateListener(&spells, this);
+    }
+
     std::map<const ESM::Spell*, SpellParams>::const_iterator Spells::begin() const
     {
         return mSpells.begin();

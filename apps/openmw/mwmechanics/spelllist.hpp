@@ -61,6 +61,8 @@ namespace MWMechanics
 
             void removeListener(Spells* spells);
 
+            void updateListener(Spells* before, Spells* after);
+
             const std::vector<std::string> getSpells() const;
     };
 }
