@@ -7,6 +7,7 @@ OpenMW Lua scripting
 
 .. toctree::
     :caption: Table of Contents
+    :includehidden:
     :maxdepth: 2
 
     overview

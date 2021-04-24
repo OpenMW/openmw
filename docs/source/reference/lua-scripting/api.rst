@@ -3,54 +3,25 @@ Lua API reference
 #################
 
 .. toctree::
-    :caption: Table of Contents
-    :maxdepth: 2
+    :hidden:
 
-Engine handlers reference
-=========================
-
-Engine handler is a function defined by a script, that can be called by the engine.
-
-+------------------------------------------------------------------------------------------------+
-| **Can be defined by any script**                                                               |
-+----------------------------------+-------------------------------------------------------------+
-| onUpdate(dt)                     | | Called every frame if game not paused. `dt` is the time   |
-|                                  | | from the last update in seconds.                          |
-+----------------------------------+-------------------------------------------------------------+
-| onSave() -> data                 | | Called when the game is saving. May be called in inactive |
-|                                  | | state, so it shouldn't use `openmw.nearby`.               |
-+----------------------------------+-------------------------------------------------------------+
-| onLoad(data)                     | | Called on loading with the data previosly returned by     |
-|                                  | | onSave. During loading the object is always in inactive.  |
-+----------------------------------+-------------------------------------------------------------+
-| **Only for global scripts**                                                                    |
-+----------------------------------+-------------------------------------------------------------+
-| onNewGame()                      | New game is started                                         |
-+----------------------------------+-------------------------------------------------------------+
-| onPlayerAdded(player)            |Player added to game world. The argument is a `Game object`. |
-+----------------------------------+-------------------------------------------------------------+
-| onActorActive(actor)             | Actor (NPC or Creature) becomes active.                     |
-+----------------------------------+-------------------------------------------------------------+
-| **Only for local scripts**                                                                     |
-+----------------------------------+-------------------------------------------------------------+
-| onActive()                       | | Called when the object becomes active (either a player    |
-|                                  | | came to this cell again, or a save was loaded).           |
-+----------------------------------+-------------------------------------------------------------+
-| onInactive()                     | | Object became inactive. Since it is inactive the handler  |
-|                                  | | can not access anything nearby, but it is possible to send|
-|                                  | | an event to global scripts.                               |
-+----------------------------------+-------------------------------------------------------------+
-| onConsume(recordId)              | | Called if `recordId` (e.g. a potion) is consumed.         |
-+----------------------------------+-------------------------------------------------------------+
-| **Only for local scripts attached to a player**                                                |
-+----------------------------------+-------------------------------------------------------------+
-| onKeyPress(symbol, modifiers)    | | Key pressed. `Symbol` is an ASCII code, `modifiers` is    |
-|                                  | | a binary OR of flags of special keys (ctrl, shift, alt).  |
-+----------------------------------+-------------------------------------------------------------+
+    engine_handlers
+    openmw_util
+    openmw_core
+    openmw_async
+    openmw_query
+    openmw_world
+    openmw_self
+    openmw_nearby
+    openmw_ui
+    openmw_aux_util
 
 
-Packages reference
-==================
+- :ref:`Engine handlers reference`
+- `Game object reference <openmw_core.html##(GameObject)>`_
+- `Cell reference <openmw_core.html##(Cell)>`_
+
+**API packages**
 
 API packages provide functions that can be called by scripts. I.e. it is a script-to-engine interaction.
 A package can be loaded with ``require('<package name>')``.
@@ -63,23 +34,34 @@ Player scripts are local scripts that are attached to a player.
 +=========================================================+====================+===============================================================+
 |:ref:`openmw.interfaces <Script interfaces>`             | everywhere         | | Public interfaces of other scripts.                         |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|`openmw.util <../../lua-api-reference/util.html>`_       | everywhere         | | Defines utility functions and classes like 3D vectors,      |
+|:ref:`openmw.util <Package openmw.util>`                 | everywhere         | | Defines utility functions and classes like 3D vectors,      |
 |                                                         |                    | | that don't depend on the game world.                        |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|`openmw.core <../../lua-api-reference/core.html>`_       | everywhere         | | Functions that are common for both global and local scripts |
+|:ref:`openmw.core <Package openmw.core>`                 | everywhere         | | Functions that are common for both global and local scripts |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|`openmw.async <../../lua-api-reference/async.html>`_     | everywhere         | | Timers (implemented) and coroutine utils (not implemented)  |
+|:ref:`openmw.async <Package openmw.async>`               | everywhere         | | Timers (implemented) and coroutine utils (not implemented)  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|`openmw.query <../../lua-api-reference/query.html>`_     | everywhere         | | Tools for constructing queries: base queries and fields.    |
+|:ref:`openmw.query <Package openmw.query>`               | everywhere         | | Tools for constructing queries: base queries and fields.    |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|`openmw.world <../../lua-api-reference/world.html>`_     | by global scripts  | | Read-write access to the game world.                        |
+|:ref:`openmw.world <Package openmw.world>`               | by global scripts  | | Read-write access to the game world.                        |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|`openmw.self <../../lua-api-reference/self.html>`_       | by local scripts   | | Full access to the object the script is attached to.        |
+|:ref:`openmw.self <Package openmw.self>`                 | by local scripts   | | Full access to the object the script is attached to.        |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|`openmw.nearby <../../lua-api-reference/nearby.html>`_   | by local scripts   | | Read-only access to the nearest area of the game world.     |
+|:ref:`openmw.nearby <Package openmw.nearby>`             | by local scripts   | | Read-only access to the nearest area of the game world.     |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|`openmw.ui <../../lua-api-reference/ui.html>`_           | by player scripts  | | Controls user interface                                     |
+|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls user interface                                     |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |openmw.camera                                            | by player scripts  | | Controls camera (not implemented)                           |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+
+**openmw_aux**
+
+``openmw_aux.*`` are built-in libraries that are itself implemented in Lua. They can not do anything that is not possible with the basic API, they only make it more convenient.
+Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can override them, but it is not recommended.
+
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+| Built-in library                                        | Can be used        | Description                                                   |
++=========================================================+====================+===============================================================+
+|:ref:`openmw_aux.util <Package openmw_aux.util>`         | everywhere         | | Miscellaneous utils                                         |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
