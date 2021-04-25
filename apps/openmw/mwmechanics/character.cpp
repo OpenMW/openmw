@@ -966,7 +966,7 @@ void CharacterController::handleTextKey(const std::string &groupname, SceneUtil:
 
         // The event can optionally contain volume and pitch modifiers
         float volume=1.f, pitch=1.f;
-        if (soundgen.find(" ") != std::string::npos)
+        if (soundgen.find(' ') != std::string::npos)
         {
             std::vector<std::string> tokens;
             split(soundgen, ' ', tokens);
