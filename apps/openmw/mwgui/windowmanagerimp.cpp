@@ -1017,8 +1017,9 @@ namespace MWGui
         if(tag.compare(0, MyGuiPrefixLength, MyGuiPrefix) == 0)
         {
             tag = tag.substr(MyGuiPrefixLength, tag.length());
-            std::string settingSection = tag.substr(0, tag.find(","));
-            std::string settingTag = tag.substr(tag.find(",")+1, tag.length());
+            size_t comma_pos = tag.find(',');
+            std::string settingSection = tag.substr(0, comma_pos);
+            std::string settingTag = tag.substr(comma_pos+1, tag.length());
             
             _result = Settings::Manager::getString(settingTag, settingSection);            
         }

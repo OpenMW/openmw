@@ -273,7 +273,7 @@ namespace MWGui
                         std::string widgetName = userStringPair.first.substr(underscorePos+1, userStringPair.first.size()-(underscorePos+1));
 
                         type = "Property";
-                        size_t caretPos = key.find("^");
+                        size_t caretPos = key.find('^');
                         if (caretPos != std::string::npos)
                         {
                             type = key.substr(0, caretPos);
