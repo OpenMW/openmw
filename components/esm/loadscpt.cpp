@@ -61,15 +61,18 @@ namespace ESM
             str += mVarNames[i].size() + 1;
             if (str >= tmpEnd)
             {
-                // SCVR subrecord is unused and variable names are determined
-                // from the script source, so an overflow is not fatal.
-                std::stringstream ss;
-                ss << "String table overflow";
-                ss << "\n  File: " << esm.getName();
-                ss << "\n  Record: " << esm.getContext().recName.toString();
-                ss << "\n  Subrecord: " << "SCVR";
-                ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
-                Log(Debug::Verbose) << ss.str();
+                if(str > tmpEnd)
+                {
+                    // SCVR subrecord is unused and variable names are determined
+                    // from the script source, so an overflow is not fatal.
+                    std::stringstream ss;
+                    ss << "String table overflow";
+                    ss << "\n  File: " << esm.getName();
+                    ss << "\n  Record: " << esm.getContext().recName.toString();
+                    ss << "\n  Subrecord: " << "SCVR";
+                    ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
+                    Log(Debug::Verbose) << ss.str();
+                }
                 // Get rid of empty strings in the list.
                 mVarNames.resize(i+1);
                 break;
