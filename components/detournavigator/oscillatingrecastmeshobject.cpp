@@ -4,8 +4,15 @@
 
 namespace DetourNavigator
 {
-    OscillatingRecastMeshObject::OscillatingRecastMeshObject(RecastMeshObject impl, std::size_t lastChangeRevision)
+    OscillatingRecastMeshObject::OscillatingRecastMeshObject(RecastMeshObject&& impl, std::size_t lastChangeRevision)
         : mImpl(std::move(impl))
+        , mLastChangeRevision(lastChangeRevision)
+        , mAabb(BulletHelpers::getAabb(mImpl.getShape(), mImpl.getTransform()))
+    {
+    }
+
+    OscillatingRecastMeshObject::OscillatingRecastMeshObject(const RecastMeshObject& impl, std::size_t lastChangeRevision)
+        : mImpl(impl)
         , mLastChangeRevision(lastChangeRevision)
         , mAabb(BulletHelpers::getAabb(mImpl.getShape(), mImpl.getTransform()))
     {

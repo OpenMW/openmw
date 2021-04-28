@@ -12,7 +12,8 @@ namespace DetourNavigator
     class OscillatingRecastMeshObject
     {
         public:
-            explicit OscillatingRecastMeshObject(RecastMeshObject impl, std::size_t lastChangeRevision);
+            explicit OscillatingRecastMeshObject(RecastMeshObject&& impl, std::size_t lastChangeRevision);
+            explicit OscillatingRecastMeshObject(const RecastMeshObject& impl, std::size_t lastChangeRevision);
 
             bool update(const btTransform& transform, const AreaType areaType, std::size_t lastChangeRevision);
 
