@@ -34,6 +34,7 @@ option(BUILD_NIFTEST            "Build nif file tester" ON)
 option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
+option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
 option(BULLET_USE_DOUBLES       "Use double precision for Bullet" ON)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
@@ -547,6 +548,10 @@ endif(BUILD_NIFTEST)
 # UnitTests
 if (BUILD_UNITTESTS)
   add_subdirectory( apps/openmw_test_suite )
+endif()
+
+if (BUILD_BENCHMARKS)
+  add_subdirectory(apps/benchmarks)
 endif()
 
 if (WIN32)

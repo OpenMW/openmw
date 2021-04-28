@@ -1,5 +1,4 @@
 #include "navmeshtilescache.hpp"
-#include "exceptions.hpp"
 
 #include <osg/Stats>
 
@@ -32,16 +31,8 @@ namespace DetourNavigator
 
         ++mGetCount;
 
-        const auto agentValues = mValues.find(agentHalfExtents);
-        if (agentValues == mValues.end())
-            return Value();
-
-        const auto tileValues = agentValues->second.find(changedTile);
-        if (tileValues == agentValues->second.end())
-            return Value();
-
-        const auto tile = tileValues->second.mMap.find(NavMeshKeyView(recastMesh, offMeshConnections));
-        if (tile == tileValues->second.mMap.end())
+        const auto tile = mValues.find(std::make_tuple(agentHalfExtents, changedTile, NavMeshKeyView(recastMesh, offMeshConnections)));
+        if (tile == mValues.end())
             return Value();
 
         acquireItemUnsafe(tile->second);
@@ -71,76 +62,61 @@ namespace DetourNavigator
         };
 
         const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, std::move(navMeshKey), itemSize);
-        const auto emplaced = mValues[agentHalfExtents][changedTile].mMap.emplace(iterator->mNavMeshKey, iterator);
+        const auto emplaced = mValues.emplace(std::make_tuple(agentHalfExtents, changedTile, NavMeshKeyRef(iterator->mNavMeshKey)), iterator);
 
         if (!emplaced.second)
         {
             mFreeItems.erase(iterator);
-            throw InvalidArgument("Set existing cache value");
+            acquireItemUnsafe(emplaced.first->second);
+            ++mGetCount;
+            ++mHitCount;
+            return Value(*this, emplaced.first->second);
         }
 
         iterator->mNavMeshData = std::move(value);
+        ++iterator->mUseCount;
         mUsedNavMeshDataSize += itemSize;
-        mFreeNavMeshDataSize += itemSize;
-
-        acquireItemUnsafe(iterator);
+        mBusyItems.splice(mBusyItems.end(), mFreeItems, iterator);
 
         return Value(*this, iterator);
     }
 
-    void NavMeshTilesCache::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    NavMeshTilesCache::Stats NavMeshTilesCache::getStats() const
     {
-        std::size_t navMeshCacheSize = 0;
-        std::size_t usedNavMeshTiles = 0;
-        std::size_t cachedNavMeshTiles = 0;
-        std::size_t hitCount = 0;
-        std::size_t getCount = 0;
-
+        Stats result;
         {
             const std::lock_guard<std::mutex> lock(mMutex);
-            navMeshCacheSize = mUsedNavMeshDataSize;
-            usedNavMeshTiles = mBusyItems.size();
-            cachedNavMeshTiles = mFreeItems.size();
-            hitCount = mHitCount;
-            getCount = mGetCount;
+            result.mNavMeshCacheSize = mUsedNavMeshDataSize;
+            result.mUsedNavMeshTiles = mBusyItems.size();
+            result.mCachedNavMeshTiles = mFreeItems.size();
+            result.mHitCount = mHitCount;
+            result.mGetCount = mGetCount;
         }
+        return result;
+    }
 
-        stats.setAttribute(frameNumber, "NavMesh CacheSize", navMeshCacheSize);
-        stats.setAttribute(frameNumber, "NavMesh UsedTiles", usedNavMeshTiles);
-        stats.setAttribute(frameNumber, "NavMesh CachedTiles", cachedNavMeshTiles);
-        stats.setAttribute(frameNumber, "NavMesh CacheHitRate", static_cast<double>(hitCount) / getCount * 100.0);
+    void NavMeshTilesCache::reportStats(unsigned int frameNumber, osg::Stats& out) const
+    {
+        const Stats stats = getStats();
+        out.setAttribute(frameNumber, "NavMesh CacheSize", stats.mNavMeshCacheSize);
+        out.setAttribute(frameNumber, "NavMesh UsedTiles", stats.mUsedNavMeshTiles);
+        out.setAttribute(frameNumber, "NavMesh CachedTiles", stats.mCachedNavMeshTiles);
+        out.setAttribute(frameNumber, "NavMesh CacheHitRate", static_cast<double>(stats.mHitCount) / stats.mGetCount * 100.0);
     }
 
     void NavMeshTilesCache::removeLeastRecentlyUsed()
     {
         const auto& item = mFreeItems.back();
 
-        const auto agentValues = mValues.find(item.mAgentHalfExtents);
-        if (agentValues == mValues.end())
-            return;
-
-        const auto tileValues = agentValues->second.find(item.mChangedTile);
-        if (tileValues == agentValues->second.end())
-            return;
-
-        const auto value = tileValues->second.mMap.find(item.mNavMeshKey);
-        if (value == tileValues->second.mMap.end())
+        const auto value = mValues.find(std::make_tuple(item.mAgentHalfExtents, item.mChangedTile, NavMeshKeyRef(item.mNavMeshKey)));
+        if (value == mValues.end())
             return;
 
         mUsedNavMeshDataSize -= item.mSize;
         mFreeNavMeshDataSize -= item.mSize;
 
-        tileValues->second.mMap.erase(value);
+        mValues.erase(value);
         mFreeItems.pop_back();
-
-        if (!tileValues->second.mMap.empty())
-            return;
-
-        agentValues->second.erase(tileValues);
-        if (!agentValues->second.empty())
-            return;
-
-        mValues.erase(agentValues);
     }
 
     void NavMeshTilesCache::acquireItemUnsafe(ItemIterator iterator)

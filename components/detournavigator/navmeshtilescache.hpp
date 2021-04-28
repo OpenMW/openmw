@@ -110,6 +110,14 @@ namespace DetourNavigator
         return lhs < rhs.mRef.get();
     }
 
+    template <class L, class R>
+    inline bool operator <(const std::tuple<osg::Vec3f, TilePosition, L>& lhs, const std::tuple<osg::Vec3f, TilePosition, R>& rhs)
+    {
+        const auto left = std::tie(std::get<0>(lhs), std::get<1>(lhs));
+        const auto right = std::tie(std::get<0>(rhs), std::get<1>(rhs));
+        return std::tie(left, std::get<2>(lhs)) < std::tie(right, std::get<2>(rhs));
+    }
+
     class NavMeshTilesCache
     {
     public:
@@ -188,6 +196,15 @@ namespace DetourNavigator
             ItemIterator mIterator;
         };
 
+        struct Stats
+        {
+            std::size_t mNavMeshCacheSize;
+            std::size_t mUsedNavMeshTiles;
+            std::size_t mCachedNavMeshTiles;
+            std::size_t mHitCount;
+            std::size_t mGetCount;
+        };
+
         NavMeshTilesCache(const std::size_t maxNavMeshDataSize);
 
         Value get(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
@@ -197,14 +214,11 @@ namespace DetourNavigator
             const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections,
             NavMeshData&& value);
 
+        Stats getStats() const;
+
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
 
     private:
-        struct TileMap
-        {
-            std::map<NavMeshKeyRef, ItemIterator, std::less<>> mMap;
-        };
-
         mutable std::mutex mMutex;
         std::size_t mMaxNavMeshDataSize;
         std::size_t mUsedNavMeshDataSize;
@@ -213,7 +227,7 @@ namespace DetourNavigator
         std::size_t mGetCount;
         std::list<Item> mBusyItems;
         std::list<Item> mFreeItems;
-        std::map<osg::Vec3f, std::map<TilePosition, TileMap>> mValues;
+        std::map<std::tuple<osg::Vec3f, TilePosition, NavMeshKeyRef>, ItemIterator, std::less<>> mValues;
 
         void removeLeastRecentlyUsed();
 
