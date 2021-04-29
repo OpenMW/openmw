@@ -2113,7 +2113,7 @@ struct ConvexHull
                 if (edge.first == vertex)
                     otherEnd = edge.second;
                 else if (edge.second == vertex)
-                    otherEnd - edge.first;
+                    otherEnd = edge.first;
                 else
                     continue;
 
