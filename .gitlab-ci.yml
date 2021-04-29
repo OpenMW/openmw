@@ -16,8 +16,6 @@ stages:
     - apt-cache/
     - ccache/
   stage: build
-  rules:
-    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   script:
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
@@ -185,8 +183,6 @@ variables: &cs-targets
   - choco install python -y
   - refreshenv
   stage: build
-  rules:
-    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
@@ -279,8 +275,6 @@ Windows_Ninja_CS_RelWithDebInfo:
   - choco install python -y
   - refreshenv
   stage: build
-  rules:
-    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
