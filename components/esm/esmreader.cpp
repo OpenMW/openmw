@@ -315,7 +315,7 @@ std::string ESMReader::getString(int size)
     return std::string (ptr, size);
 }
 
-void ESMReader::fail(const std::string &msg)
+[[noreturn]] void ESMReader::fail(const std::string &msg)
 {
     std::stringstream ss;
 

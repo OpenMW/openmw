@@ -28,9 +28,9 @@ namespace Interpreter
 
             void execute (Type_Code code);
 
-            void abortUnknownCode (int segment, int opcode);
+            [[noreturn]] void abortUnknownCode (int segment, int opcode);
 
-            void abortUnknownSegment (Type_Code code);
+            [[noreturn]] void abortUnknownSegment (Type_Code code);
 
             void begin();
 

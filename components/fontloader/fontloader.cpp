@@ -132,7 +132,7 @@ namespace
             return encoder.getUtf8(std::string(1, c));
     }
 
-    void fail (Files::IStreamPtr file, const std::string& fileName, const std::string& message)
+    [[noreturn]] void fail (Files::IStreamPtr file, const std::string& fileName, const std::string& message)
     {
         std::stringstream error;
         error << "Font loading error: " << message;
