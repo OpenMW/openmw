@@ -24,5 +24,6 @@ about creating new content for OpenMW, please refer to
 	texture-modding/index
 	custom-models/index
 	font
+	sky-system
 	extended
 	paths
