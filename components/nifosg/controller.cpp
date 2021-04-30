@@ -277,19 +277,18 @@ void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     if (hasInput())
     {
         float value = getInputValue(nv);
-        float uTrans = mUTrans.interpKey(value);
-        float vTrans = mVTrans.interpKey(value);
-        float uScale = mUScale.interpKey(value);
-        float vScale = mVScale.interpKey(value);
 
-        osg::Matrix flipMat;
-        flipMat.preMultTranslate(osg::Vec3f(0,1,0));
-        flipMat.preMultScale(osg::Vec3f(1,-1,1));
+        // First scale the UV relative to its center, then apply the offset.
+        // U offset is flipped regardless of the graphics library,
+        // while V offset is flipped to account for OpenGL Y axis convention.
+        osg::Vec3f uvOrigin(0.5f, 0.5f, 0.f);
+        osg::Vec3f uvScale(mUScale.interpKey(value), mVScale.interpKey(value), 1.f);
+        osg::Vec3f uvTrans(-mUTrans.interpKey(value), -mVTrans.interpKey(value), 0.f);
 
-        osg::Matrixf mat = osg::Matrixf::scale(uScale, vScale, 1);
-        mat.setTrans(uTrans, vTrans, 0);
-
-        mat = flipMat * mat * flipMat;
+        osg::Matrixf mat = osg::Matrixf::translate(uvOrigin);
+        mat.preMultScale(uvScale);
+        mat.preMultTranslate(-uvOrigin);
+        mat.setTrans(mat.getTrans() + uvTrans);
 
         // setting once is enough because all other texture units share the same TexMat (see setDefaults).
         if (!mTextureUnits.empty())
