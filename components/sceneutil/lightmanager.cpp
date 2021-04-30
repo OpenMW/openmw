@@ -715,11 +715,10 @@ namespace SceneUtil
         {
             static const std::string dummyVertSource = generateDummyShader(mLightManager->getMaxLightsInScene());
 
-            mDummyProgram->addShader(new osg::Shader(osg::Shader::VERTEX, dummyVertSource));
-            mDummyProgram->addBindUniformBlock("LightBufferBinding", static_cast<int>(Shader::UBOBinding::LightBuffer));
             // Needed to query the layout of the buffer object. The layout specifier needed to use the std140 layout is not reliably
             // available, regardless of extensions, until GLSL 140.
-            mLightManager->getOrCreateStateSet()->setAttributeAndModes(mDummyProgram, osg::StateAttribute::ON);
+            mDummyProgram->addShader(new osg::Shader(osg::Shader::VERTEX, dummyVertSource));
+            mDummyProgram->addBindUniformBlock("LightBufferBinding", static_cast<int>(Shader::UBOBinding::LightBuffer));
         }
 
         LightManagerStateAttribute(const LightManagerStateAttribute& copy, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
@@ -763,6 +762,7 @@ namespace SceneUtil
         {
             if (!mInitLayout)
             {
+                mDummyProgram->apply(state);
                 auto handle = mDummyProgram->getPCP(state)->getHandle();
                 auto* ext = state.get<osg::GLExtensions>();
 
