@@ -282,14 +282,17 @@ void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
         float uScale = mUScale.interpKey(value);
         float vScale = mVScale.interpKey(value);
 
-        osg::Matrix flipMat;
-        flipMat.preMultTranslate(osg::Vec3f(0,1,0));
-        flipMat.preMultScale(osg::Vec3f(1,-1,1));
-
+        // First scale the UV relative to (0,0),
+        // then offset the UV to change the scaling origin to its center.
         osg::Matrixf mat = osg::Matrixf::scale(uScale, vScale, 1);
-        mat.setTrans(uTrans, vTrans, 0);
-
-        mat = flipMat * mat * flipMat;
+        float uOffset = 0.5f * (1.f - uScale);
+        float vOffset = 0.5f * (1.f - vScale);
+        // Apply the original offsets:
+        // U offset is supposed to be subtracted regardless of the graphics library,
+        // while V offset is made negative to account for OpenGL's Y axis convention.
+        uOffset -= uTrans;
+        vOffset -= vTrans;
+        mat.setTrans(uOffset, vOffset, 0);
 
         // setting once is enough because all other texture units share the same TexMat (see setDefaults).
         if (!mTextureUnits.empty())

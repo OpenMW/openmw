@@ -118,6 +118,7 @@
     Bug #5923: Clicking on empty spaces between journal entries might show random topics
     Bug #5934: AddItem command doesn't accept negative values
     Bug #5975: NIF controllers from sheath meshes are used
+    Bug #5995: NiUVController doesn't calculate the UV offset properly
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
