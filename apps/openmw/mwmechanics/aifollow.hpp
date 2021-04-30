@@ -9,8 +9,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "pathfinding.hpp"
-
 namespace ESM
 {
 namespace AiSequence

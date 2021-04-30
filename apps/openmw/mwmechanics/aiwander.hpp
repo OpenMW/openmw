@@ -5,8 +5,6 @@
 
 #include <vector>
 
-#include "../mwworld/timestamp.hpp"
-
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
 #include "aistate.hpp"

@@ -9,7 +9,6 @@
 
 #include "pathfinding.hpp"
 #include "movement.hpp"
-#include "obstacle.hpp"
 #include "aitimer.hpp"
 
 namespace ESM
