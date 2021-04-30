@@ -5,8 +5,6 @@
 
 #include <components/compiler/locals.hpp>
 
-#include <components/esm/cellid.hpp>
-
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"

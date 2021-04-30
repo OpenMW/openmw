@@ -6,7 +6,6 @@
 #include <osg/ref_ptr>
 
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/inventorystore.hpp"
 
 #include "animation.hpp"
 

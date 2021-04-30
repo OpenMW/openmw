@@ -44,7 +44,6 @@
 
 #include "../mwsound/sound.hpp"
 
-#include "../mwphysics/collisiontype.hpp"
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/projectile.hpp"
 

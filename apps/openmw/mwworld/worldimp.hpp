@@ -4,7 +4,6 @@
 #include <osg/ref_ptr>
 
 #include <components/settings/settings.hpp>
-#include <components/fallback/fallback.hpp>
 
 #include "../mwbase/world.hpp"
 

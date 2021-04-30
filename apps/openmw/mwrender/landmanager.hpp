@@ -3,7 +3,6 @@
 
 #include <osg/Object>
 
-#include <components/resource/objectcache.hpp>
 #include <components/resource/resourcemanager.hpp>
 #include <components/esmterrain/storage.hpp>
 

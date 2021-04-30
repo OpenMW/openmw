@@ -1,6 +1,5 @@
 #include "controlextensions.hpp"
 
-#include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -14,8 +13,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
-
-#include "../mwmechanics/npcstats.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"

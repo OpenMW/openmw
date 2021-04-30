@@ -13,7 +13,6 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"

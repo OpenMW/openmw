@@ -23,7 +23,6 @@
 #include <components/sceneutil/shadow.hpp>
 #include <components/settings/settings.hpp>
 
-#include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
