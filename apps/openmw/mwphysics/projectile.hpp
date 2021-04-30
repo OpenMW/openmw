@@ -6,8 +6,6 @@
 #include <mutex>
 #include <optional>
 
-#include "components/misc/convert.hpp"
-
 #include "ptrholder.hpp"
 
 class btCollisionObject;

@@ -3,8 +3,6 @@
 
 #include "../mwworld/inventorystore.hpp"
 
-#include "creaturestats.hpp"
-
 namespace MWMechanics
 {
     static std::map<int, ESM::WeaponType> sWeaponTypeList =

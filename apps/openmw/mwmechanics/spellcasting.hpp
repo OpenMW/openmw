@@ -2,7 +2,6 @@
 #define MWMECHANICS_SPELLCASTING_H
 
 #include <components/esm/effectlist.hpp>
-#include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
 

@@ -3,7 +3,6 @@
 #include <iterator>
 #include <limits>
 
-#include <components/detournavigator/exceptions.hpp>
 #include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/debug/debuglog.hpp>

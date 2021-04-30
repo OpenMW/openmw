@@ -23,7 +23,6 @@
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadgmst.hpp>
-#include <components/misc/constants.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/misc/convert.hpp>
@@ -56,7 +55,6 @@
 #include "closestnotmerayresultcallback.hpp"
 #include "contacttestresultcallback.hpp"
 #include "projectileconvexcallback.hpp"
-#include "constants.hpp"
 #include "movementsolver.hpp"
 #include "mtphysics.hpp"
 

@@ -9,7 +9,6 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
-#include "npcstats.hpp"
 #include "combat.hpp"
 #include "aicombataction.hpp"
 #include "spellpriority.hpp"

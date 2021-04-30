@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include <components/esm/loadspel.hpp>
-#include <components/misc/rng.hpp>
 
 #include "spells.hpp"
 
