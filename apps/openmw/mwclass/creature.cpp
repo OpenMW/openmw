@@ -25,7 +25,6 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/localscripts.hpp"
 
