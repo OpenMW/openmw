@@ -100,6 +100,8 @@ namespace ESM
                         for(PointList::const_iterator it = mPoints.begin(); it != mPoints.end(); ++it, ++pointIndex)
                         {
                             unsigned char connectionNum = (*it).mConnectionNum;
+                            if (rawConnections.end() - rawIt < connectionNum)
+                                esm.fail("Not enough connections");
                             for (int i = 0; i < connectionNum; ++i) {
                                 Edge edge;
                                 edge.mV0 = pointIndex;
