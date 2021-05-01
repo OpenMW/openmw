@@ -129,7 +129,7 @@ object paging active grid
 -------------------------
 :Type:		boolean
 :Range:		True/False
-:Default:	False
+:Default:	True
 
 Controls whether the objects in the active cells use the mentioned paging algorithms.
 Active grid paging significantly improves the framerate when your setup is CPU-limited.
