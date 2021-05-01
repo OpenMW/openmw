@@ -91,6 +91,7 @@ namespace MWPhysics
         bool mFloatToSurface;
         bool mNeedLand;
         bool mWaterCollision;
+        bool mSkipCollisionDetection;
         float mWaterlevel;
         float mSlowFall;
         float mOldHeight;

@@ -101,7 +101,7 @@ namespace MWPhysics
         void updatePosition();
 
         // register a position offset that will be applied during simulation.
-        void adjustPosition(const osg::Vec3f& offset);
+        void adjustPosition(const osg::Vec3f& offset, bool ignoreCollisions);
 
         // apply position offset. Can't be called during simulation
         void applyOffsetChange();
@@ -177,6 +177,8 @@ namespace MWPhysics
             mLastStuckPosition = position;
         }
 
+        bool skipCollisions();
+
     private:
         MWWorld::Ptr mStandingOnPtr;
         /// Removes then re-adds the collision object to the dynamics world
@@ -206,7 +208,7 @@ namespace MWPhysics
         osg::Vec3f mPreviousPosition;
         osg::Vec3f mPositionOffset;
         bool mWorldPositionChanged;
-        bool mSkipSimulation;
+        bool mSkipCollisions;
         btTransform mLocalTransform;
         mutable std::mutex mPositionMutex;
 
