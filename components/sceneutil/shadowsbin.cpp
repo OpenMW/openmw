@@ -194,8 +194,9 @@ void ShadowsBin::sortImplementation()
     // noTestRoot is now a stategraph with useDiffuseMapForShadowAlpha disabled but minimal other state
 
     bool cullFaceOverridden = false;
-    while ((root = root->_parent))
+    while (root->_parent)
     {
+        root = root->_parent;
         if (!root->getStateSet())
             continue;
         unsigned int cullFaceFlags = root->getStateSet()->getMode(GL_CULL_FACE);

@@ -1315,7 +1315,8 @@ public:
 
                     while (callback)
                     {
-                        if ((composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback)))
+                        composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback);
+                        if (composite)
                             break;
 
                         callback = callback->getNestedCallback();
