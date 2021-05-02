@@ -1,9 +1,9 @@
 #!/bin/sh -ex
 
 # workaround python issue on travis
-[-z "${TRAVIS}"] && HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies python@3.8 || true
-[-z "${TRAVIS}"] && HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies python@3.9 || true
-[-z "${TRAVIS}"] && HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies qt@6 || true
+[ -z "${TRAVIS}" ] && HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies python@3.8 || true
+[ -z "${TRAVIS}" ] && HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies python@3.9 || true
+[ -z "${TRAVIS}" ] && HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies qt@6 || true
 
 # Some of these tools can come from places other than brew, so check before installing
 command -v ccache >/dev/null 2>&1 || brew install ccache
@@ -15,5 +15,5 @@ ccache --version
 cmake --version
 qmake --version
 
-curl -fSL -R -J https://downloads.openmw.org/osx/dependencies/openmw-deps-f8918dd.zip -o ~/openmw-deps.zip
+curl -fSL -R -J https://downloads.openmw.org/osx/dependencies/openmw-deps-8f5ef6e.zip -o ~/openmw-deps.zip
 unzip -o ~/openmw-deps.zip -d /private/tmp/openmw-deps > /dev/null
