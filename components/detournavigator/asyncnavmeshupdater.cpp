@@ -262,7 +262,7 @@ namespace DetourNavigator
         if (jobs.top().mProcessTime > now)
             return {};
 
-        Job job = std::move(jobs.top());
+        Job job = jobs.top();
         jobs.pop();
 
         if (changeLastUpdate && job.mChangeType == ChangeType::update)
@@ -273,7 +273,7 @@ namespace DetourNavigator
         if (it->second.empty())
             pushed.erase(it);
 
-        return {std::move(job)};
+        return job;
     }
 
     void AsyncNavMeshUpdater::writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const
