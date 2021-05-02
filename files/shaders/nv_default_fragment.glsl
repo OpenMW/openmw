@@ -56,8 +56,6 @@ void main()
 
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
-    // Must flip Y for DirectX format normal maps
-    normalTex.y = 1.0 - normalTex.y;
 
     vec3 normalizedNormal = normalize(passNormal);
     vec3 normalizedTangent = normalize(passTangent.xyz);
