@@ -217,7 +217,7 @@ namespace ESM
         if (mCounting && !mRecords.empty())
         {
             for (std::list<RecordData>::iterator it = mRecords.begin(); it != mRecords.end(); ++it)
-                it->size += size;
+                it->size += static_cast<uint32_t>(size);
         }
 
         mStream->write(data, size);

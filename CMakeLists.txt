@@ -607,7 +607,6 @@ if (WIN32)
         4100 # Unreferenced formal parameter (-Wunused-parameter)
         4127 # Conditional expression is constant
         4244 # Storing value of one type in variable of another (size_t in int, for example)
-        4267 # Conversion from 'size_t' to 'int', possible loss of data
         4996 # Function was declared deprecated
         )
     

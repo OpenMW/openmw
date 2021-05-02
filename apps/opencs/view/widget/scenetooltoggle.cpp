@@ -80,7 +80,7 @@ QRect CSVWidget::SceneToolToggle::getIconBox (int index) const
     int y = index / xMax;
     int x = index % xMax;
 
-    int total = mButtons.size();
+    int total = static_cast<int>(mButtons.size());
 
     int actualYIcons = total/xMax;
 
@@ -154,7 +154,7 @@ void CSVWidget::SceneToolToggle::addButton (const std::string& icon, unsigned in
     desc.mMask = mask;
     desc.mSmallIcon = smallIcon;
     desc.mName = name;
-    desc.mIndex = mButtons.size();
+    desc.mIndex = static_cast<int>(mButtons.size());
 
     mButtons.insert (std::make_pair (button, desc));
 

@@ -39,14 +39,14 @@ namespace Compiler
                     Codes block;
 
                     if (iter!=mIfCode.rbegin())
-                        Generator::jump (iter->second, codes.size()+1);
+                        Generator::jump (iter->second, static_cast<int>(codes.size()+1));
 
                     if (!iter->first.empty())
                     {
                         // if or elseif
                         std::copy (iter->first.begin(), iter->first.end(),
                             std::back_inserter (block));
-                        Generator::jumpOnZero (block, iter->second.size()+1);
+                        Generator::jumpOnZero (block, static_cast<int>(iter->second.size()+1));
                     }
 
                     std::copy (iter->second.begin(), iter->second.end(),
@@ -113,7 +113,7 @@ namespace Compiler
 
             Codes skip;
 
-            Generator::jumpOnZero (skip, mCodeBlock.size()+loop.size()+1);
+            Generator::jumpOnZero (skip, static_cast<int> (mCodeBlock.size()+loop.size()+1));
 
             std::copy (skip.begin(), skip.end(), std::back_inserter (mCode));
 

@@ -270,7 +270,7 @@ void CSMWorld::IdTable::reorderRows (int baseIndex, const std::vector<int>& newO
     if (!newOrder.empty())
         if (mIdCollection->reorderRows (baseIndex, newOrder))
             emit dataChanged (index (baseIndex, 0),
-                index (baseIndex+newOrder.size()-1, mIdCollection->getColumns()-1));
+                index (baseIndex+static_cast<int>(newOrder.size())-1, mIdCollection->getColumns()-1));
 }
 
 std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) const

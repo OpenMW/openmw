@@ -326,7 +326,7 @@ void LowLevelFile::seek (size_t position)
 {
     assert (mHandle != INVALID_HANDLE_VALUE);
 
-    if (SetFilePointer (mHandle, position, nullptr, SEEK_SET) == INVALID_SET_FILE_POINTER)
+    if (SetFilePointer (mHandle, static_cast<LONG>(position), nullptr, SEEK_SET) == INVALID_SET_FILE_POINTER)
         if (GetLastError () != NO_ERROR)
             throw std::runtime_error ("A seek operation on a file failed.");
 }
@@ -349,7 +349,7 @@ size_t LowLevelFile::read (void * data, size_t size)
 
     DWORD read;
 
-    if (!ReadFile (mHandle, data, size, &read, nullptr))
+    if (!ReadFile (mHandle, data, static_cast<DWORD>(size), &read, nullptr))
         throw std::runtime_error ("A read operation on a file failed.");
 
     return read;

@@ -676,7 +676,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::p
         }
 
         if(line[0] == '[') {
-            int pos = line.find(']');
+            int pos = static_cast<int>(line.find(']'));
             if(pos < 2) {
                 std::cout << "Warning: ini file wrongly formatted (" << line << "). Line ignored." << std::endl;
                 continue;
@@ -686,12 +686,12 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::p
             continue;
         }
 
-        int comment_pos = line.find(';');
+        int comment_pos = static_cast<int>(line.find(';'));
         if(comment_pos > 0) {
             line = line.substr(0,comment_pos);
         }
 
-        int pos = line.find('=');
+        int pos = static_cast<int>(line.find('='));
         if(pos < 1) {
             continue;
         }
@@ -722,7 +722,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const boost::filesystem::p
     while (std::getline(file, line)) {
 
         // we cant say comment by only looking at first char anymore
-        int comment_pos = line.find('#');
+        int comment_pos = static_cast<int>(line.find('#'));
         if(comment_pos > 0) {
             line = line.substr(0,comment_pos);
         }
@@ -731,7 +731,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const boost::filesystem::p
             continue;
         }
 
-        int pos = line.find('=');
+        int pos = static_cast<int>(line.find('='));
         if(pos < 1) {
             continue;
         }

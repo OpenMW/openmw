@@ -115,7 +115,7 @@ namespace Gui
 
     unsigned int MWList::getItemCount()
     {
-        return mItems.size();
+        return static_cast<unsigned int>(mItems.size());
     }
 
     std::string MWList::getItemNameAt(unsigned int at)

@@ -255,7 +255,7 @@ size_t MovieAudioDecoder::read(char *stream, size_t len)
         size_t sampleSize = av_get_bytes_per_sample(mOutputSampleFormat);
         char* data[1];
         data[0] = stream;
-        av_samples_set_silence((uint8_t**)data, 0, len/sampleSize, 1, mOutputSampleFormat);
+        av_samples_set_silence((uint8_t**)data, 0, static_cast<int>(len/sampleSize), 1, mOutputSampleFormat);
         return len;
     }
 

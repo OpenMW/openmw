@@ -43,7 +43,7 @@ void BSAFile::fail(const std::string &msg)
 BSAFile::Hash getHash(const std::string& name)
 {
     BSAFile::Hash hash;
-    unsigned l = (name.size() >> 1);
+    unsigned l = (static_cast<unsigned>(name.size()) >> 1);
     unsigned sum, off, temp, i, n;
 
     for (sum = off = i = 0; i < l; i++) {
@@ -163,7 +163,7 @@ void BSAFile::readHeader()
     {
         FileStruct &fs = mFiles[i];
         fs.fileSize = offsets[i*2];
-        fs.offset = offsets[i*2+1] + fileDataOffset;
+        fs.offset = static_cast<uint32_t>(offsets[i*2+1] + fileDataOffset);
         auto namesOffset = offsets[2*filenum+i];
         fs.setNameInfos(namesOffset, &mStringBuf);
         fs.hash = hashes[i];
@@ -203,11 +203,11 @@ void Bsa::BSAFile::writeHeader()
     uint32_t head[3];
     head[0] = 0x100;
     auto fileDataOffset = mFiles.empty() ? 12 : mFiles.front().offset;
-    head[1] = fileDataOffset - 12 - 8*mFiles.size();
+    head[1] = static_cast<uint32_t>(fileDataOffset - 12 - 8*mFiles.size());
 
     output.seekp(0, std::ios_base::end);
 
-    head[2] = mFiles.size();
+    head[2] = static_cast<uint32_t>(mFiles.size());
     output.seekp(0);
     output.write(reinterpret_cast<char*>(head), 12);
 
@@ -239,9 +239,9 @@ int BSAFile::getIndex(const char *str) const
     if(it == mLookup.end())
         return -1;
 
-    int res = it->second;
-    assert(res >= 0 && (size_t)res < mFiles.size());
-    return res;
+    size_t res = it->second;
+    assert(res >= 0 && res < mFiles.size());
+    return static_cast<int>(res);
 }
 
 /// Open an archive file.
@@ -300,7 +300,7 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
     newFile.hash = getHash(filename);
 
     if(mFiles.empty())
-        newFile.offset = newStartOfDataBuffer;
+        newFile.offset = static_cast<uint32_t>(newStartOfDataBuffer);
     else
     {
         std::vector<char> buffer;

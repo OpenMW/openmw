@@ -45,7 +45,7 @@ namespace Interpreter
 
         for (; index; --index)
         {
-            offset += std::strlen (literalBlock+offset) + 1;
+            offset += static_cast<int>(std::strlen (literalBlock+offset)) + 1;
             if (offset / 4 >= static_cast<int> (mCode[3]))
                 throw std::out_of_range("out of range");
         }

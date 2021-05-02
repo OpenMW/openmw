@@ -6,12 +6,12 @@ namespace Compiler
 {
     int Literals::getIntegerSize() const
     {
-        return mIntegers.size() * sizeof (Interpreter::Type_Integer);
+        return static_cast<int>(mIntegers.size() * sizeof (Interpreter::Type_Integer));
     }
 
     int Literals::getFloatSize() const
     {
-        return mFloats.size() * sizeof (Interpreter::Type_Float);
+        return static_cast<int>(mFloats.size() * sizeof (Interpreter::Type_Float));
     }
 
     int Literals::getStringSize() const
@@ -41,11 +41,11 @@ namespace Compiler
         
         code.resize (size+stringBlockSize/4);
         
-        int offset = 0;
+        size_t offset = 0;
         
         for (const auto & mString : mStrings)
         {
-            int stringSize = mString.size()+1;
+            size_t stringSize = mString.size()+1;
             
             std::copy (mString.c_str(), mString.c_str()+stringSize,
                 reinterpret_cast<char *> (&code[size]) + offset);
