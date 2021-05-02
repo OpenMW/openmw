@@ -6,6 +6,11 @@
 #include <new>
 #include <memory>
 
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4244)
+#endif
+
 extern "C"
 {
     #include <libavutil/avutil.h>
@@ -13,6 +18,10 @@ extern "C"
     #include <libavformat/avformat.h>
     #include <libavutil/channel_layout.h>
 }
+
+#if defined(_MSC_VER)
+    #pragma warning (pop)
+#endif
 
 #if defined(_WIN32) && !defined(__MINGW32__)
 #include <basetsd.h>

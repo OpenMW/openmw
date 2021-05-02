@@ -295,7 +295,7 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
 
     FileStruct newFile;
     file.seekg(0, std::ios::end);
-    newFile.fileSize = file.tellg();
+    newFile.fileSize = static_cast<uint32_t>(file.tellg());
     newFile.setNameInfos(mStringBuf.size(), &mStringBuf);
     newFile.hash = getHash(filename);
 
@@ -312,7 +312,7 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
             stream.read(buffer.data(), firstFile.fileSize);
 
             stream.seekp(0, std::ios::end);
-            firstFile.offset = stream.tellp();
+            firstFile.offset = static_cast<uint32_t>(stream.tellp());
 
             stream.write(buffer.data(), firstFile.fileSize);
 
@@ -320,7 +320,7 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
             std::rotate(mFiles.begin(), mFiles.begin() + 1, mFiles.end());
         }
         stream.seekp(0, std::ios::end);
-        newFile.offset = stream.tellp();
+        newFile.offset = static_cast<uint32_t>(stream.tellp());
     }
 
     mStringBuf.insert(mStringBuf.end(), filename.begin(), filename.end());

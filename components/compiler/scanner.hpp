@@ -103,7 +103,7 @@ namespace Compiler
         {
             blank();
 
-            char ch = in.peek();
+            char ch = static_cast<char>(in.peek());
 
             if (!in.good())
                 return false;
@@ -130,7 +130,7 @@ namespace Compiler
         {
             std::streampos p_orig = in.tellg();
 
-            char ch = in.peek();
+            char ch = static_cast<char>(in.peek());
 
             if (!in.good())
                 return false;
@@ -156,7 +156,7 @@ namespace Compiler
 
         void blank()
         {
-            std::fill(mData, mData + sizeof(mData), 0);
+            std::fill(std::begin(mData), std::end(mData), '\0');
             mLength = -1;
         }
 

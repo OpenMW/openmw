@@ -16,17 +16,16 @@ namespace ESM
         {
             int base = 0;
             esm.getHNT(base, "STBA");
-            mBase = static_cast<float>(base);
+            mBase = static_cast<T>(base);
 
             int mod = 0;
             esm.getHNOT(mod, "STMO");
-            mMod = static_cast<float>(mod);
+            mMod = static_cast<T>(mod);
 
             int current = 0;
             esm.getHNOT(current, "STCU");
-            mCurrent = static_cast<float>(current);
+            mCurrent = static_cast<T>(current);
 
-            // mDamage was changed to a float; ensure backwards compatibility
             int oldDamage = 0;
             esm.getHNOT(oldDamage, "STDA");
             mDamage = static_cast<float>(oldDamage);

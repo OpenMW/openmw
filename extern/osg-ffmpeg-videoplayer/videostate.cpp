@@ -9,6 +9,11 @@
 
 #include <osg/Texture2D>
 
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4244)
+#endif
+
 extern "C"
 {
     #include <libavcodec/avcodec.h>
@@ -16,6 +21,10 @@ extern "C"
     #include <libswscale/swscale.h>
     #include <libavutil/time.h>
 }
+
+#if defined(_MSC_VER)
+    #pragma warning (pop)
+#endif
 
 static const char* flushString = "FLUSH";
 struct FlushPacket : AVPacket
