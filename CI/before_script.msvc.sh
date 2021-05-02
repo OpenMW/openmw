@@ -73,9 +73,6 @@ CONFIGURATIONS=()
 TEST_FRAMEWORK=""
 GOOGLE_INSTALL_ROOT=""
 INSTALL_PREFIX="."
-BULLET_DOUBLE=true
-BULLET_DBL=""
-BULLET_DBL_DISPLAY="Single precision"
 
 ACTIVATE_MSVC=""
 SINGLE_CONFIG=""
@@ -98,9 +95,6 @@ while [ $# -gt 0 ]; do
 
 			d )
 				SKIP_DOWNLOAD=true ;;
-
-			D )
-				BULLET_DOUBLE=true ;;
 
 			e )
 				SKIP_EXTRACT=true ;;
@@ -149,8 +143,6 @@ Options:
 		For single-config generators, several configurations can be set up at once by specifying -c multiple times.
 	-d
 		Skip checking the downloads.
-	-D
-		Use double-precision Bullet
 	-e
 		Skip extracting dependencies.
 	-h
@@ -433,9 +425,6 @@ if [ -n "$SINGLE_CONFIG" ]; then
 		if [ -n "$SKIP_DOWNLOAD" ]; then
 			RECURSIVE_OPTIONS+=("-d")
 		fi
-		if [ -n "$BULLET_DOUBLE" ]; then
-			RECURSIVE_OPTIONS+=("-D")
-		fi
 		if [ -n "$SKIP_EXTRACT" ]; then
 			RECURSIVE_OPTIONS+=("-e")
 		fi
@@ -508,12 +497,6 @@ if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
-if [ -n "$BULLET_DOUBLE" ]; then
-	BULLET_DBL="-double"
-	BULLET_DBL_DISPLAY="Double precision"
-	add_cmake_opts "-DBULLET_USE_DOUBLES=True"
-fi
-
 echo
 echo "==================================="
 echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
@@ -538,9 +521,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	fi
 
 	# Bullet
-	download "Bullet 2.89 (${BULLET_DBL_DISPLAY})" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" \
-		"Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z"
+	download "Bullet 2.89" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}-double.7z" \
+		"Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}-double.7z"
 
 	# FFmpeg
 	download "FFmpeg 4.2.2" \
@@ -680,15 +663,15 @@ fi
 cd $DEPS
 echo
 # Bullet
-printf "Bullet 2.89 (${BULLET_DBL_DISPLAY})... "
+printf "Bullet 2.89... "
 {
 	cd $DEPS_INSTALL
 	if [ -d Bullet ]; then
 		printf -- "Exists. (No version checking) "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf Bullet
-		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" $STRIP
-		mv "Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}" Bullet
+		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}-double.7z" $STRIP
+		mv "Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}-double" Bullet
 	fi
 	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.

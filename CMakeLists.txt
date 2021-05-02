@@ -35,7 +35,6 @@ option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
 option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
-option(BULLET_USE_DOUBLES       "Use double precision for Bullet" ON)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
 
@@ -314,6 +313,12 @@ if(OPENMW_USE_SYSTEM_BULLET)
     endif()
 
     find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
+    include(cmake/CheckBulletPrecision.cmake)
+    if (HAS_DOUBLE_PRECISION_BULLET)
+        message(STATUS "Bullet uses double precision")
+    else()
+        message(FATAL_ERROR "Bullet does not uses double precision")
+    endif()
 endif()
 
 if (NOT WIN32 AND BUILD_WIZARD) # windows users can just run the morrowind installer
