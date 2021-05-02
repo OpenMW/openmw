@@ -254,11 +254,7 @@ target_link_libraries(components
     RecastNavigation::Recast
     )
 
-if ((UBUNTU_FOUND OR DEBIAN_FOUND) AND OPENMW_USE_SYSTEM_BULLET)
-    target_link_libraries(components BulletCollision-float64 LinearMath-float64)
-else()
-    target_link_libraries(components ${BULLET_LIBRARIES})
-endif()
+target_link_libraries(components ${BULLET_LIBRARIES})
 
 if (WIN32)
     target_link_libraries(components

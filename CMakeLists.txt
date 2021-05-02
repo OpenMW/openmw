@@ -13,9 +13,6 @@ if(POLICY CMP0083)
   cmake_policy(SET CMP0083 NEW)
 endif()
 
-# Detect OS
-include(cmake/OSIdentity.cmake)
-
 option(OPENMW_GL4ES_MANUAL_INIT "Manually initialize gl4es. This is more reliable on platforms without a windowing system. Requires gl4es to be configured with -DNOEGL=ON -DNO_LOADER=ON -DNO_INIT_CONSTRUCTOR=ON." OFF)
 if(OPENMW_GL4ES_MANUAL_INIT)
     add_definitions(-DOPENMW_GL4ES_MANUAL_INIT)
@@ -312,7 +309,25 @@ if(OPENMW_USE_SYSTEM_BULLET)
         set(REQUIRED_BULLET_VERSION 283) # but for build testing, 283 is fine
     endif()
 
-    find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
+    # First, try BulletConfig-float64.cmake which comes with Debian derivatives.
+    # This file does not define the Bullet version in a CMake-friendly way.
+    find_package(Bullet CONFIGS BulletConfig-float64.cmake QUIET COMPONENTS BulletCollision LinearMath)
+    if (BULLET_FOUND)
+        string(REPLACE "." "" _bullet_version_num ${BULLET_VERSION_STRING})
+        if (_bullet_version_num VERSION_LESS REQUIRED_BULLET_VERSION)
+            message(FATAL_ERROR "System bullet version too old, OpenMW requires at least ${REQUIRED_BULLET_VERSION}, got ${_bullet_version_num}")
+        endif()
+        # Fix the relative include:
+        set(BULLET_INCLUDE_DIRS "${BULLET_ROOT_DIR}/${BULLET_INCLUDE_DIRS}")
+        include(FindPackageMessage)
+        find_package_message(Bullet "Found Bullet: ${BULLET_LIBRARIES} ${BULLET_VERSION_STRING}" "${BULLET_VERSION_STRING}-float64")
+    else()
+        find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
+    endif()
+
+    # Only link the Bullet libraries that we need:
+    string(REGEX MATCHALL "((optimized|debug);)?[^;]*(BulletCollision|LinearMath)[^;]*" BULLET_LIBRARIES "${BULLET_LIBRARIES}")
+
     include(cmake/CheckBulletPrecision.cmake)
     if (HAS_DOUBLE_PRECISION_BULLET)
         message(STATUS "Bullet uses double precision")
