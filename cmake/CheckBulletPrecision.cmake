@@ -18,16 +18,21 @@ file(WRITE ${TMP_ROOT}/CMakeLists.txt
 "
 cmake_minimum_required(VERSION 3.1.0)
 project(checkbullet)
-add_executable(checkbullet checkbullet.cpp)
-find_package(Bullet REQUIRED COMPONENTS BulletCollision LinearMath)
-target_compile_definitions(checkbullet PUBLIC BT_USE_DOUBLE_PRECISION)
-include_directories(\$\{BULLET_INCLUDE_DIRS\})
-include(${CMAKE_SOURCE_DIR}/cmake/OSIdentity.cmake)
-if (UBUNTU_FOUND OR DEBIAN_FOUND)
-    target_link_libraries(checkbullet BulletCollision-float64 LinearMath-float64)
+
+# First, try BulletConfig-float64.cmake which comes with Debian derivatives.
+find_package(Bullet CONFIGS BulletConfig-float64.cmake QUIET COMPONENTS BulletCollision LinearMath)
+if (BULLET_FOUND)
+    # Fix the relative include:
+    set(BULLET_INCLUDE_DIRS \"\$\{BULLET_ROOT_DIR\}/\$\{BULLET_INCLUDE_DIRS\}\")
 else()
-    target_link_libraries(checkbullet \$\{BULLET_LIBRARIES\})
+    find_package(Bullet REQUIRED COMPONENTS BulletCollision LinearMath)
 endif()
+string(REGEX MATCHALL \"((optimized|debug);)?[^;]*(BulletCollision|LinearMath)[^;]*\" BULLET_LIBRARIES \"$\{BULLET_LIBRARIES\}\")
+
+add_executable(checkbullet checkbullet.cpp)
+target_compile_definitions(checkbullet PUBLIC BT_USE_DOUBLE_PRECISION)
+target_include_directories(checkbullet PUBLIC \$\{BULLET_INCLUDE_DIRS\})
+target_link_libraries(checkbullet \$\{BULLET_LIBRARIES\})
 ")
 
 if (DEFINED BULLET_ROOT)
