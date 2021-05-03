@@ -25,22 +25,22 @@ class NIFFile;
 /* 
     readLittleEndianBufferOfType: This template should only be used with arithmetic types
 */
-template <uint32_t numInstances, typename T> inline void readLittleEndianBufferOfType(Files::IStreamPtr &pIStream, T* dest)
+template <std::size_t numInstances, typename T> inline void readLittleEndianBufferOfType(Files::IStreamPtr &pIStream, T* dest)
 {
     pIStream->read((char*)dest, numInstances * sizeof(T));
     if constexpr (Misc::IS_BIG_ENDIAN)
-        for (uint32_t i = 0; i < numInstances; i++)
+        for (std::size_t i = 0; i < numInstances; i++)
             Misc::swapEndiannessInplace(dest[i]);
 }
 
 /*
     readLittleEndianDynamicBufferOfType: This template should only be used with arithmetic types
 */
-template <typename T> inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr &pIStream, T* dest, uint32_t numInstances)
+template <typename T> inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr &pIStream, T* dest, std::size_t numInstances)
 {
     pIStream->read((char*)dest, numInstances * sizeof(T));
     if constexpr (Misc::IS_BIG_ENDIAN)
-        for (uint32_t i = 0; i < numInstances; i++)
+        for (std::size_t i = 0; i < numInstances; i++)
             Misc::swapEndiannessInplace(dest[i]);
 }
 template<typename type> type inline readLittleEndianType(Files::IStreamPtr &pIStream)
