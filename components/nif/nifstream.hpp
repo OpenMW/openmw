@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdexcept>
 #include <vector>
+#include <typeinfo>
 
 #include <components/files/constrainedfilestream.hpp>
 #include <components/misc/endianness.hpp>
@@ -28,6 +29,9 @@ class NIFFile;
 template <std::size_t numInstances, typename T> inline void readLittleEndianBufferOfType(Files::IStreamPtr &pIStream, T* dest)
 {
     pIStream->read((char*)dest, numInstances * sizeof(T));
+    if (pIStream->bad())
+        throw std::runtime_error("Failed to read little endian typed (" + std::string(typeid(T).name()) + ") buffer of "
+                                 + std::to_string(numInstances) + " instances");
     if constexpr (Misc::IS_BIG_ENDIAN)
         for (std::size_t i = 0; i < numInstances; i++)
             Misc::swapEndiannessInplace(dest[i]);
@@ -39,6 +43,8 @@ template <std::size_t numInstances, typename T> inline void readLittleEndianBuff
 template <typename T> inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr &pIStream, T* dest, std::size_t numInstances)
 {
     pIStream->read((char*)dest, numInstances * sizeof(T));
+    if (pIStream->bad())
+        throw std::runtime_error("Failed to read little endian dynamic buffer of " + std::to_string(numInstances) + " instances");
     if constexpr (Misc::IS_BIG_ENDIAN)
         for (std::size_t i = 0; i < numInstances; i++)
             Misc::swapEndiannessInplace(dest[i]);
@@ -144,6 +150,8 @@ public:
     {
         std::string str(length, '\0');
         inp->read(str.data(), length);
+        if (inp->bad())
+            throw std::runtime_error("Failed to read sized string of " + std::to_string(length) + " chars");
         return str;
     }
     ///Read in a string of the length specified in the file
@@ -165,6 +173,8 @@ public:
     {
         std::string result;
         std::getline(*inp, result);
+        if (inp->bad())
+            throw std::runtime_error("Failed to read version string");
         return result;
     }
 
