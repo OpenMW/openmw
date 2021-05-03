@@ -142,11 +142,9 @@ public:
     ///Read in a string of the given length
     std::string getSizedString(size_t length)
     {
-        std::vector<char> str(length + 1, 0);
-
+        std::string str(length, '\0');
         inp->read(str.data(), length);
-
-        return str.data();
+        return str;
     }
     ///Read in a string of the length specified in the file
     std::string getSizedString()
