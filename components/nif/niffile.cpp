@@ -315,7 +315,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
     for (std::size_t i = 0; i < rootNum; i++)
     {
         int idx = nif.getInt();
-        if (idx >= 0 && idx < int(records.size()))
+        if (idx >= 0 && static_cast<std::size_t>(idx) < records.size())
         {
             roots[i] = records[idx];
         }
