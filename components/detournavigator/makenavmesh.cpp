@@ -189,23 +189,6 @@ namespace
             {
                 const auto chunk = chunkyMesh.getChunk(cid);
 
-                std::fill(
-                    areas.begin(),
-                    std::min(areas.begin() + static_cast<std::ptrdiff_t>(chunk.mSize),
-                    areas.end()),
-                    AreaType_null
-                );
-
-                rcMarkWalkableTriangles(
-                    &context,
-                    config.walkableSlopeAngle,
-                    recastMesh.getVertices().data(),
-                    static_cast<int>(recastMesh.getVerticesCount()),
-                    chunk.mIndices,
-                    static_cast<int>(chunk.mSize),
-                    areas.data()
-                );
-
                 for (std::size_t i = 0; i < chunk.mSize; ++i)
                     areas[i] = chunk.mAreaTypes[i];
 
