@@ -49,7 +49,7 @@ template <typename T> inline void readLittleEndianDynamicBufferOfType(Files::ISt
 template<typename type> type inline readLittleEndianType(Files::IStreamPtr &pIStream)
 {
     type val;
-    readLittleEndianBufferOfType<1, type>(pIStream, (type*)&val);
+    readLittleEndianBufferOfType<1, type>(pIStream, &val);
     return val;
 }
 
@@ -99,21 +99,21 @@ public:
     osg::Vec2f getVector2()
     {
         osg::Vec2f vec;
-        readLittleEndianBufferOfType<2,float>(inp, (float*)&vec._v[0]);
+        readLittleEndianBufferOfType<2,float>(inp, vec._v);
         return vec;
     }
 
     osg::Vec3f getVector3()
     {
         osg::Vec3f vec;
-        readLittleEndianBufferOfType<3, float>(inp, (float*)&vec._v[0]);
+        readLittleEndianBufferOfType<3, float>(inp, vec._v);
         return vec;
     }
 
     osg::Vec4f getVector4()
     {
         osg::Vec4f vec;
-        readLittleEndianBufferOfType<4, float>(inp, (float*)&vec._v[0]);
+        readLittleEndianBufferOfType<4, float>(inp, vec._v);
         return vec;
     }
 
