@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <stdexcept>
 #include <vector>
-#include <typeinfo>
-#include <type_traits>
 
 #include <components/files/constrainedfilestream.hpp>
 #include <components/misc/endianness.hpp>
@@ -24,32 +22,31 @@ namespace Nif
 
 class NIFFile;
 
-template <std::size_t numInstances, typename T> inline void readLittleEndianBufferOfType(Files::IStreamPtr &pIStream, T* dest)
+/* 
+    readLittleEndianBufferOfType: This template should only be used with arithmetic types
+*/
+template <uint32_t numInstances, typename T> inline void readLittleEndianBufferOfType(Files::IStreamPtr &pIStream, T* dest)
 {
-    static_assert(std::is_arithmetic_v<T>, "Buffer element type is not arithmetic");
     pIStream->read((char*)dest, numInstances * sizeof(T));
-    if (pIStream->bad())
-        throw std::runtime_error("Failed to read little endian typed (" + std::string(typeid(T).name()) + ") buffer of "
-                                 + std::to_string(numInstances) + " instances");
     if constexpr (Misc::IS_BIG_ENDIAN)
-        for (std::size_t i = 0; i < numInstances; i++)
+        for (uint32_t i = 0; i < numInstances; i++)
             Misc::swapEndiannessInplace(dest[i]);
 }
 
-template <typename T> inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr &pIStream, T* dest, std::size_t numInstances)
+/*
+    readLittleEndianDynamicBufferOfType: This template should only be used with arithmetic types
+*/
+template <typename T> inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr &pIStream, T* dest, uint32_t numInstances)
 {
-    static_assert(std::is_arithmetic_v<T>, "Buffer element type is not arithmetic");
     pIStream->read((char*)dest, numInstances * sizeof(T));
-    if (pIStream->bad())
-        throw std::runtime_error("Failed to read little endian dynamic buffer of " + std::to_string(numInstances) + " instances");
     if constexpr (Misc::IS_BIG_ENDIAN)
-        for (std::size_t i = 0; i < numInstances; i++)
+        for (uint32_t i = 0; i < numInstances; i++)
             Misc::swapEndiannessInplace(dest[i]);
 }
 template<typename type> type inline readLittleEndianType(Files::IStreamPtr &pIStream)
 {
     type val;
-    readLittleEndianBufferOfType<1, type>(pIStream, &val);
+    readLittleEndianBufferOfType<1, type>(pIStream, (type*)&val);
     return val;
 }
 
@@ -99,21 +96,21 @@ public:
     osg::Vec2f getVector2()
     {
         osg::Vec2f vec;
-        readLittleEndianBufferOfType<2,float>(inp, vec._v);
+        readLittleEndianBufferOfType<2,float>(inp, (float*)&vec._v[0]);
         return vec;
     }
 
     osg::Vec3f getVector3()
     {
         osg::Vec3f vec;
-        readLittleEndianBufferOfType<3, float>(inp, vec._v);
+        readLittleEndianBufferOfType<3, float>(inp, (float*)&vec._v[0]);
         return vec;
     }
 
     osg::Vec4f getVector4()
     {
         osg::Vec4f vec;
-        readLittleEndianBufferOfType<4, float>(inp, vec._v);
+        readLittleEndianBufferOfType<4, float>(inp, (float*)&vec._v[0]);
         return vec;
     }
 
@@ -145,11 +142,11 @@ public:
     ///Read in a string of the given length
     std::string getSizedString(size_t length)
     {
-        std::string str(length, '\0');
+        std::vector<char> str(length + 1, 0);
+
         inp->read(str.data(), length);
-        if (inp->bad())
-            throw std::runtime_error("Failed to read sized string of " + std::to_string(length) + " chars");
-        return str;
+
+        return str.data();
     }
     ///Read in a string of the length specified in the file
     std::string getSizedString()
@@ -170,8 +167,6 @@ public:
     {
         std::string result;
         std::getline(*inp, result);
-        if (inp->bad())
-            throw std::runtime_error("Failed to read version string");
         return result;
     }
 

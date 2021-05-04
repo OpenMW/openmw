@@ -212,7 +212,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
         userVer = nif.getUInt();
 
     // Number of records
-    const std::size_t recNum = nif.getUInt();
+    unsigned int recNum = nif.getUInt();
     records.resize(recNum);
 
     // Bethesda stream header
@@ -251,7 +251,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
                     std::vector<unsigned int> recSizes; // Currently unused
                     nif.getUInts(recSizes, recNum);
                 }
-                const std::size_t stringNum = nif.getUInt();
+                unsigned int stringNum = nif.getUInt();
                 nif.getUInt(); // Max string length
                 if (stringNum)
                     nif.getSizedStrings(strings, stringNum);
@@ -264,7 +264,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
     }
 
     const bool hasRecordSeparators = ver >= NIFStream::generateVersion(10,0,0,0) && ver < NIFStream::generateVersion(10,2,0,0);
-    for (std::size_t i = 0; i < recNum; i++)
+    for (unsigned int i = 0; i < recNum; i++)
     {
         Record *r = nullptr;
 
@@ -308,14 +308,14 @@ void NIFFile::parse(Files::IStreamPtr stream)
         r->read(&nif);
     }
 
-    const std::size_t rootNum = nif.getUInt();
+    unsigned int rootNum = nif.getUInt();
     roots.resize(rootNum);
 
     //Determine which records are roots
-    for (std::size_t i = 0; i < rootNum; i++)
+    for (unsigned int i = 0; i < rootNum; i++)
     {
         int idx = nif.getInt();
-        if (idx >= 0 && static_cast<std::size_t>(idx) < records.size())
+        if (idx >= 0 && idx < int(records.size()))
         {
             roots[i] = records[idx];
         }
