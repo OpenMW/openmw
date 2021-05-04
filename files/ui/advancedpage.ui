@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>617</width>
+    <width>732</width>
     <height>487</height>
    </rect>
   </property>
@@ -273,6 +273,30 @@
       <layout class="QVBoxLayout">
        <item>
         <layout class="QGridLayout" name="gridLayout_2">
+         <item row="3" column="1">
+          <widget class="QCheckBox" name="radialFogCheckBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;By default, the fog becomes thicker proportionally to your distance from the clipping plane set at the clipping distance, which causes distortion at the edges of the screen.
+This setting makes the fog use the actual eye point distance (or so called Euclidean distance) to calculate the fog, which makes the fog look less artificial, especially if you have a wide FOV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Radial fog</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QCheckBox" name="bumpMapLocalLightingCheckBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Normally environment map reflections aren't affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
+Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
+Affected objects will use shaders.
+&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Bump/reflect map local lighting</string>
+           </property>
+          </widget>
+         </item>
          <item row="5" column="1">
           <widget class="QCheckBox" name="turnToMovementDirectionCheckBox">
            <property name="toolTip">
@@ -280,6 +304,16 @@
            </property>
            <property name="text">
             <string>Turn to movement direction</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QCheckBox" name="animSourcesCheckBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load per-group KF-files and skeleton files from Animations folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Use additional animation sources</string>
            </property>
           </widget>
          </item>
@@ -297,7 +331,7 @@
              <item>
               <property name="text">
                <string>legacy</string>
-                </property>
+              </property>
              </item>
              <item>
               <property name="text">
@@ -313,16 +347,6 @@
            </item>
           </layout>
          </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="smoothMovementCheckBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with "turn to movement direction" enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>Smooth movement</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="1">
           <widget class="QCheckBox" name="distantLandCheckBox">
            <property name="toolTip">
@@ -333,26 +357,6 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <widget class="QCheckBox" name="autoUseTerrainNormalMapsCheckBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See 'auto use object normal maps'. Affects terrain.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>Auto use terrain normal maps</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="autoUseTerrainSpecularMapsCheckBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a file with pattern 'terrain specular map pattern' exists, use that file as a 'diffuse specular' map. The texture must contain the layer colour in the RGB channel (as usual), and a specular multiplier in the alpha channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>Auto use terrain specular maps</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="1">
           <widget class="QCheckBox" name="activeGridObjectPagingCheckBox">
            <property name="toolTip">
@@ -360,51 +364,6 @@
            </property>
            <property name="text">
             <string>Active grid object paging</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QCheckBox" name="magicItemAnimationsCheckBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use casting animations for magic items, just as for spells.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>Use magic item animation</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QCheckBox" name="animSourcesCheckBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load per-group KF-files and skeleton files from Animations folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>Use additional animation sources</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="autoUseObjectNormalMapsCheckBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this option is enabled, normal maps are automatically recognized and used if they are named appropriately
-(see 'normal map pattern', e.g. for a base texture foo.dds, the normal map texture would have to be named foo_n.dds).
-If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file (.nif or .osg file). Affects objects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>Auto use object normal maps</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QCheckBox" name="bumpMapLocalLightingCheckBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Normally environment map reflections aren't affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
-Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
-Affected objects will use shaders.
-&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>Bump/reflect map local lighting</string>
            </property>
           </widget>
          </item>
@@ -432,6 +391,16 @@ Affected objects will use shaders.
            </item>
           </layout>
          </item>
+         <item row="3" column="0">
+          <widget class="QCheckBox" name="autoUseTerrainNormalMapsCheckBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See 'auto use object normal maps'. Affects terrain.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Auto use terrain normal maps</string>
+           </property>
+          </widget>
+         </item>
          <item row="2" column="0">
           <widget class="QCheckBox" name="autoUseObjectSpecularMapsCheckBox">
            <property name="toolTip">
@@ -446,49 +415,80 @@ If this option is disabled, normal maps are only used if they are explicitly lis
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
-          <widget class="QCheckBox" name="radialFogCheckBox">
+         <item row="4" column="0">
+          <widget class="QCheckBox" name="autoUseTerrainSpecularMapsCheckBox">
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;By default, the fog becomes thicker proportionally to your distance from the clipping plane set at the clipping distance, which causes distortion at the edges of the screen.
-This setting makes the fog use the actual eye point distance (or so called Euclidean distance) to calculate the fog, which makes the fog look less artificial, especially if you have a wide FOV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a file with pattern 'terrain specular map pattern' exists, use that file as a 'diffuse specular' map. The texture must contain the layer colour in the RGB channel (as usual), and a specular multiplier in the alpha channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
-            <string>Radial fog</string>
+            <string>Auto use terrain specular maps</string>
            </property>
           </widget>
          </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="sheathingLayout">
-         <property name="leftMargin">
-          <number>20</number>
-         </property>
-         <item>
-          <widget class="QCheckBox" name="weaponSheathingCheckBox">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="smoothMovementCheckBox">
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered weapons (with quivers and scabbards), requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with &quot;turn to movement direction&quot; enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
-            <string>Weapon sheathing</string>
+            <string>Smooth movement</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QCheckBox" name="shieldSheathingCheckBox">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="magicItemAnimationsCheckBox">
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered shield, requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use casting animations for magic items, just as for spells.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
-            <string>Shield sheathing</string>
+            <string>Use magic item animation</string>
            </property>
           </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="autoUseObjectNormalMapsCheckBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this option is enabled, normal maps are automatically recognized and used if they are named appropriately
+(see 'normal map pattern', e.g. for a base texture foo.dds, the normal map texture would have to be named foo_n.dds).
+If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file (.nif or .osg file). Affects objects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Auto use object normal maps</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <layout class="QVBoxLayout" name="sheathingLayout">
+           <property name="leftMargin">
+            <number>20</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="weaponSheathingCheckBox">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered weapons (with quivers and scabbards), requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>Weapon sheathing</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="shieldSheathingCheckBox">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered shield, requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>Shield sheathing</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -516,11 +516,11 @@ This setting makes the fog use the actual eye point distance (or so called Eucli
         <layout class="QHBoxLayout">
          <item>
           <widget class="QLabel" name="audioDeviceSelectorLabel">
-           <property name="text">
-            <string>Audio Device</string>
-           </property>
            <property name="toolTip">
             <string>Select your preferred audio device.</string>
+           </property>
+           <property name="text">
+            <string>Audio Device</string>
            </property>
           </widget>
          </item>
@@ -554,11 +554,11 @@ This setting makes the fog use the actual eye point distance (or so called Eucli
         <layout class="QHBoxLayout">
          <item>
           <widget class="QLabel" name="enableHRTFLabel">
-           <property name="text">
-            <string>HRTF</string>
-           </property>
            <property name="toolTip">
             <string>This setting controls HRTF, which simulates 3D sound on stereo systems.</string>
+           </property>
+           <property name="text">
+            <string>HRTF</string>
            </property>
           </widget>
          </item>
@@ -602,11 +602,11 @@ This setting makes the fog use the actual eye point distance (or so called Eucli
         <layout class="QHBoxLayout">
          <item>
           <widget class="QLabel" name="hrtfProfileSelectorLabel">
-           <property name="text">
-            <string>HRTF Profile</string>
-           </property>
            <property name="toolTip">
             <string>Select your preferred HRTF profile.</string>
+           </property>
+           <property name="text">
+            <string>HRTF Profile</string>
            </property>
           </widget>
          </item>
