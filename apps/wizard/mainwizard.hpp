@@ -1,9 +1,7 @@
 #ifndef MAINWIZARD_HPP
 #define MAINWIZARD_HPP
 
-#include <QProcess>
 #include <QWizard>
-#include <QMap>
 
 #include <components/process/processinvoker.hpp>
 

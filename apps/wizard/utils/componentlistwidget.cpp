@@ -1,7 +1,6 @@
 #include "componentlistwidget.hpp"
 
 #include <QDebug>
-#include <QStringList>
 
 ComponentListWidget::ComponentListWidget(QWidget *parent) :
     QListWidget(parent)

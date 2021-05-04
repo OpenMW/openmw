@@ -1,8 +1,6 @@
 #ifndef IMPORTPAGE_HPP
 #define IMPORTPAGE_HPP
 
-#include <QWizardPage>
-
 #include "ui_importpage.h"
 
 namespace Wizard
