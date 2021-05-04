@@ -114,9 +114,8 @@ namespace
         generateAreaTypes(std::back_inserter(areaTypes), indices.size() / 3, random);
         std::vector<RecastMesh::Water> water;
         generateWater(std::back_inserter(water), 2, random);
-        const std::size_t trianglesPerChunk = 256;
         RecastMesh recastMesh(generation, revision, std::move(indices), std::move(vertices),
-                              std::move(areaTypes), std::move(water), trianglesPerChunk);
+                              std::move(areaTypes), std::move(water));
         std::vector<OffMeshConnection> offMeshConnections;
         generateOffMeshConnection(std::back_inserter(offMeshConnections), 300, random);
         return Key {agentHalfExtents, tilePosition, std::move(recastMesh), std::move(offMeshConnections)};

@@ -68,7 +68,6 @@ namespace
             mSettings.mMaxNavMeshTilesCacheSize = 1024 * 1024;
             mSettings.mMaxPolygonPathSize = 1024;
             mSettings.mMaxSmoothPathSize = 1024;
-            mSettings.mTrianglesPerChunk = 256;
             mSettings.mMaxPolys = 4096;
             mSettings.mMaxTilesNumber = 512;
             mSettings.mMinUpdateInterval = std::chrono::milliseconds(50);

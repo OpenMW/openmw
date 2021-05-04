@@ -231,15 +231,6 @@ max smooth path size
 
 Maximum size of smoothed path.
 
-triangles per chunk
--------------------
-
-:Type:		integer
-:Range:		> 0
-:Default:	256
-
-Maximum number of triangles in each node of mesh AABB tree.
-
 Expert Recastnavigation related settings
 ****************************************
 

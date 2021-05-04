@@ -24,7 +24,6 @@ namespace
             mSettings.mCellSize = 0.2f;
             mSettings.mRecastScaleFactor = 0.017647058823529415f;
             mSettings.mTileSize = 64;
-            mSettings.mTrianglesPerChunk = 256;
         }
 
         void onChangedTile(const TilePosition& tilePosition)
