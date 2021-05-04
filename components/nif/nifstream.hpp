@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <vector>
 #include <typeinfo>
+#include <type_traits>
 
 #include <components/files/constrainedfilestream.hpp>
 #include <components/misc/endianness.hpp>
@@ -23,11 +24,9 @@ namespace Nif
 
 class NIFFile;
 
-/* 
-    readLittleEndianBufferOfType: This template should only be used with arithmetic types
-*/
 template <std::size_t numInstances, typename T> inline void readLittleEndianBufferOfType(Files::IStreamPtr &pIStream, T* dest)
 {
+    static_assert(std::is_arithmetic_v<T>, "Buffer element type is not arithmetic");
     pIStream->read((char*)dest, numInstances * sizeof(T));
     if (pIStream->bad())
         throw std::runtime_error("Failed to read little endian typed (" + std::string(typeid(T).name()) + ") buffer of "
@@ -37,11 +36,9 @@ template <std::size_t numInstances, typename T> inline void readLittleEndianBuff
             Misc::swapEndiannessInplace(dest[i]);
 }
 
-/*
-    readLittleEndianDynamicBufferOfType: This template should only be used with arithmetic types
-*/
 template <typename T> inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr &pIStream, T* dest, std::size_t numInstances)
 {
+    static_assert(std::is_arithmetic_v<T>, "Buffer element type is not arithmetic");
     pIStream->read((char*)dest, numInstances * sizeof(T));
     if (pIStream->bad())
         throw std::runtime_error("Failed to read little endian dynamic buffer of " + std::to_string(numInstances) + " instances");
