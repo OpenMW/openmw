@@ -6,7 +6,6 @@
 #include "settings.hpp"
 #include "objectid.hpp"
 #include "navmeshcacheitem.hpp"
-#include "recastmesh.hpp"
 #include "recastmeshtiles.hpp"
 
 namespace ESM

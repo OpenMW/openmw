@@ -35,7 +35,6 @@ namespace DetourNavigator
         std::size_t mMaxNavMeshTilesCacheSize = 0;
         std::size_t mMaxPolygonPathSize = 0;
         std::size_t mMaxSmoothPathSize = 0;
-        std::size_t mTrianglesPerChunk = 0;
         std::string mRecastMeshPathPrefix;
         std::string mNavMeshPathPrefix;
         std::chrono::milliseconds mMinUpdateInterval;

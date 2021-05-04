@@ -1,5 +1,4 @@
 #include "recastmeshbuilder.hpp"
-#include "chunkytrimesh.hpp"
 #include "debug.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
@@ -19,6 +18,7 @@
 #include <algorithm>
 #include <cassert>
 #include <tuple>
+#include <array>
 
 namespace DetourNavigator
 {
@@ -156,8 +156,7 @@ namespace DetourNavigator
     {
         optimizeRecastMesh(mIndices, mVertices);
         std::sort(mWater.begin(), mWater.end());
-        return std::make_shared<RecastMesh>(generation, revision, mIndices, mVertices, mAreaTypes,
-            mWater, mSettings.get().mTrianglesPerChunk);
+        return std::make_shared<RecastMesh>(generation, revision, mIndices, mVertices, mAreaTypes, mWater);
     }
 
     void RecastMeshBuilder::reset()

@@ -37,7 +37,6 @@ namespace
         DetourNavigatorRecastMeshBuilderTest()
         {
             mSettings.mRecastScaleFactor = 1.0f;
-            mSettings.mTrianglesPerChunk = 256;
             mBounds.mMin = osg::Vec2f(-std::numeric_limits<float>::max() * std::numeric_limits<float>::epsilon(),
                                       -std::numeric_limits<float>::max() * std::numeric_limits<float>::epsilon());
             mBounds.mMax = osg::Vec2f(std::numeric_limits<float>::max() * std::numeric_limits<float>::epsilon(),

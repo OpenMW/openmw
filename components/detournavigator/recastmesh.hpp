@@ -2,7 +2,6 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESH_H
 
 #include "areatype.hpp"
-#include "chunkytrimesh.hpp"
 #include "bounds.hpp"
 
 #include <components/bullethelpers/operators.hpp>
@@ -28,7 +27,7 @@ namespace DetourNavigator
         };
 
         RecastMesh(std::size_t generation, std::size_t revision, std::vector<int> indices, std::vector<float> vertices,
-            std::vector<AreaType> areaTypes, std::vector<Water> water, const std::size_t trianglesPerChunk);
+            std::vector<AreaType> areaTypes, std::vector<Water> water);
 
         std::size_t getGeneration() const
         {
@@ -70,11 +69,6 @@ namespace DetourNavigator
             return mIndices.size() / 3;
         }
 
-        const ChunkyTriMesh& getChunkyTriMesh() const
-        {
-            return mChunkyTriMesh;
-        }
-
         const Bounds& getBounds() const
         {
             return mBounds;
@@ -87,7 +81,6 @@ namespace DetourNavigator
         std::vector<float> mVertices;
         std::vector<AreaType> mAreaTypes;
         std::vector<Water> mWater;
-        ChunkyTriMesh mChunkyTriMesh;
         Bounds mBounds;
     };
 
