@@ -45,6 +45,6 @@ try_compile(RESULT_VAR
     ${CMAKE_BINARY_DIR}/temp
     ${TMP_ROOT}
     checkbullet
-    CMAKE_FLAGS  "${ROOT}"
+    CMAKE_FLAGS "${ROOT}" "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
     )
 set(HAS_DOUBLE_PRECISION_BULLET ${RESULT_VAR})
