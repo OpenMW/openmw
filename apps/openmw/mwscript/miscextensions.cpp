@@ -278,7 +278,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (ptr.getRefData().activateByScript())
+                    if (ptr.getRefData().activateByScript() || ptr.getContainerStore())
                         context.executeActivation(ptr, MWMechanics::getPlayer());
                 }
         };
