@@ -212,8 +212,8 @@ public:
         {
             // We arrived at a leaf.
             // Since the tree is used for LOD level selection instead of culling, we do not need to load the actual height data here.
-            float minZ = -std::numeric_limits<float>::max();
-            float maxZ = std::numeric_limits<float>::max();
+            constexpr float minZ = -std::numeric_limits<float>::max();
+            constexpr float maxZ = std::numeric_limits<float>::max();
             float cellWorldSize = mStorage->getCellWorldSize();
             osg::BoundingBox boundingBox(osg::Vec3f((center.x()-halfSize)*cellWorldSize, (center.y()-halfSize)*cellWorldSize, minZ),
                                     osg::Vec3f((center.x()+halfSize)*cellWorldSize, (center.y()+halfSize)*cellWorldSize, maxZ));
