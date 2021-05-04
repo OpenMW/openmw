@@ -131,7 +131,7 @@ namespace MWPhysics
         // Reset per-frame data
         physicActor->setWalkingOnWater(false);
         // Anything to collide with?
-        if(!physicActor->getCollisionMode())
+        if(!physicActor->getCollisionMode() || actor.mSkipCollisionDetection)
         {
             actor.mPosition += (osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) *
                                 osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))
@@ -437,7 +437,7 @@ namespace MWPhysics
             return;
 
         auto* physicActor = actor.mActorRaw;
-        if(!physicActor->getCollisionMode()) // noclipping/tcl
+        if(!physicActor->getCollisionMode() || actor.mSkipCollisionDetection) // noclipping/tcl
             return;
 
         auto* collisionObject = physicActor->getCollisionObject();

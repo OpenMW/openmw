@@ -361,7 +361,6 @@ namespace MWPhysics
         for (const auto& [_, actor] : actors)
         {
             actor->updatePosition();
-            actor->setSimulationPosition(actor->getWorldPosition()); // updatePosition skip next simulation, now we need to "consume" it
             actor->updateCollisionObjectPosition();
             mMovedActors.emplace_back(actor->getPtr());
         }

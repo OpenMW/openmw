@@ -287,7 +287,7 @@ namespace MWBase
             virtual MWWorld::Ptr moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore* newCell, float x, float y, float z, bool movePhysics=true) = 0;
             ///< @return an updated Ptr
 
-            virtual MWWorld::Ptr moveObjectBy(const MWWorld::Ptr &ptr, osg::Vec3f vec, bool moveToActive) = 0;
+            virtual MWWorld::Ptr moveObjectBy(const MWWorld::Ptr &ptr, osg::Vec3f vec, bool moveToActive, bool ignoreCollisions) = 0;
             ///< @return an updated Ptr
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
