@@ -570,6 +570,11 @@ namespace MWWorld
             return getInterior (id.mWorldspace);
     }
 
+    bool World::isCellActive(CellStore* cell) const
+    {
+        return mWorldScene->getActiveCells().count(cell) > 0;
+    }
+
     void World::testExteriorCells()
     {
         mWorldScene->testExteriorCells();
