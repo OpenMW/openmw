@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cassert>
 #include <tuple>
+#include <array>
 
 namespace DetourNavigator
 {

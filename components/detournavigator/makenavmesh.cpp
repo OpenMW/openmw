@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <limits>
+#include <array>
 
 namespace
 {
