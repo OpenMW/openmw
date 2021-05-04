@@ -11,7 +11,6 @@
 #define LINEEDIT_H
 
 #include <QLineEdit>
-#include <QStyle>
 #include <QStylePainter>
 #include <QToolButton>
 

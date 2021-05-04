@@ -1,8 +1,6 @@
 #ifndef MAINDIALOG_H
 #define MAINDIALOG_H
 
-#include <QMainWindow>
-#include <QProcess>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>

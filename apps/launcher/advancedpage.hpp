@@ -1,7 +1,6 @@
 #ifndef ADVANCEDPAGE_H
 #define ADVANCEDPAGE_H
 
-#include <QWidget>
 #include <QCompleter>
 #include <QStringListModel>
 

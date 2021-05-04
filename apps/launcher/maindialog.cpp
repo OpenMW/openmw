@@ -5,14 +5,11 @@
 
 #include <QDate>
 #include <QMessageBox>
-#include <QPushButton>
 #include <QFontDatabase>
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QTextCodec>
-
-#include <QDebug>
 
 #include "playpage.hpp"
 #include "graphicspage.hpp"

@@ -1,7 +1,6 @@
 #ifndef OPENMW_CELLNAMELOADER_H
 #define OPENMW_CELLNAMELOADER_H
 
-#include <QComboBox>
 #include <QSet>
 #include <QString>
 

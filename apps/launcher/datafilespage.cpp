@@ -4,7 +4,6 @@
 
 #include <QPushButton>
 #include <QMessageBox>
-#include <QCheckBox>
 #include <QMenu>
 #include <QSortFilterProxyModel>
 #include <thread>
@@ -14,7 +13,6 @@
 #include <components/files/configurationmanager.hpp>
 
 #include <components/contentselector/model/esmfile.hpp>
-#include <components/contentselector/model/naturalsort.hpp>
 #include <components/contentselector/view/contentselector.hpp>
 
 #include <components/config/gamesettings.hpp>

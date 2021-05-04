@@ -2,7 +2,6 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QDebug>
 #include <QDir>
 
 #include <components/files/configurationmanager.hpp>

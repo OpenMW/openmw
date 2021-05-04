@@ -6,7 +6,6 @@
 
 
 #include <QDir>
-#include <QFile>
 #include <QStringList>
 
 class QSortFilterProxyModel;

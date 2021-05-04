@@ -1,9 +1,6 @@
 #ifndef SETTINGSPAGE_HPP
 #define SETTINGSPAGE_HPP
 
-#include <QWidget>
-#include <QProcess>
-
 #include <components/process/processinvoker.hpp>
 
 #include "ui_settingspage.h"

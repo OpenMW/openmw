@@ -1,10 +1,8 @@
 #include <iostream>
 
-#include <QApplication>
 #include <QTranslator>
 #include <QTextCodec>
 #include <QDir>
-#include <QDebug>
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
 #undef MAC_OS_X_VERSION_MIN_REQUIRED

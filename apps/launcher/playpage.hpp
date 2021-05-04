@@ -1,8 +1,6 @@
 #ifndef PLAYPAGE_H
 #define PLAYPAGE_H
 
-#include <QWidget>
-
 #include "ui_playpage.h"
 
 class QComboBox;

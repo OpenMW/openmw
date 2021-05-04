@@ -3,10 +3,8 @@
 #include <array>
 
 #include <components/config/gamesettings.hpp>
-#include <components/config/launchersettings.hpp>
 #include <QFileDialog>
 #include <QCompleter>
-#include <QProxyStyle>
 #include <QString>
 #include <components/contentselector/view/contentselector.hpp>
 #include <components/contentselector/model/esmfile.hpp>

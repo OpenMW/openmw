@@ -1,5 +1,4 @@
 #include <QRegExpValidator>
-#include <QLineEdit>
 #include <QString>
 #include <QApplication>
 #include <QKeyEvent>

@@ -1,8 +1,6 @@
 #ifndef GRAPHICSPAGE_H
 #define GRAPHICSPAGE_H
 
-#include <QWidget>
-
 #include "ui_graphicspage.h"
 
 #include <components/settings/settings.hpp>
