@@ -7,7 +7,7 @@ namespace Nif
     osg::Quat NIFStream::getQuaternion()
     {
         float f[4];
-        readLittleEndianBufferOfType<4, float>(inp, (float*)&f);
+        readLittleEndianBufferOfType<4, float>(inp, f);
         osg::Quat quat;
         quat.w() = f[0];
         quat.x() = f[1];
