@@ -161,14 +161,6 @@ macOS10.15_Xcode11:
   variables:
     CCACHE_SIZE: 3G
 
-macOS10.14_Xcode10:
-  extends: .MacOS
-  image: macos-10.14-xcode-10
-  cache:
-    key: macOS10.14_Xcode10.v1
-  variables:
-    CCACHE_SIZE: 3G
-
 variables: &engine-targets
   targets: "openmw,openmw-essimporter,openmw-iniimporter,openmw-launcher,openmw-wizard"
   package: "Engine"
