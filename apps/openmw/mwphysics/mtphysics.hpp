@@ -66,6 +66,9 @@ namespace MWPhysics
             void updatePtrAabb(const std::weak_ptr<PtrHolder>& ptr);
             void updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
             std::tuple<int, float> calculateStepConfig(float timeAccum) const;
+            void afterPreStep();
+            void afterPostStep();
+            void afterPostSim();
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
             std::vector<ActorFrameData> mActorsFrameData;
