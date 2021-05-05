@@ -41,7 +41,7 @@ void ESM::Header::load (ESMReader &esm)
     {
         MasterData m;
         m.name = esm.getHString();
-        m.size = esm.getHNLong ("DATA");
+        esm.getHNT(m.size, "DATA");
         mMaster.push_back (m);
     }
 
@@ -54,14 +54,14 @@ void ESM::Header::load (ESMReader &esm)
         esm.getSubHeader();
         mSCRD.resize(esm.getSubSize());
         if (!mSCRD.empty())
-            esm.getExact(&mSCRD[0], mSCRD.size());
+            esm.getExact(mSCRD.data(), mSCRD.size());
     }
     if (esm.isNextSub("SCRS"))
     {
         esm.getSubHeader();
         mSCRS.resize(esm.getSubSize());
         if (!mSCRS.empty())
-            esm.getExact(&mSCRS[0], mSCRS.size());
+            esm.getExact(mSCRS.data(), mSCRS.size());
     }
 }
 
@@ -78,10 +78,9 @@ void ESM::Header::save (ESMWriter &esm)
     esm.writeT(mData.records);
     esm.endRecord("HEDR");
 
-    for (std::vector<Header::MasterData>::iterator iter = mMaster.begin();
-         iter != mMaster.end(); ++iter)
+    for (const Header::MasterData& data : mMaster)
     {
-        esm.writeHNCString ("MAST", iter->name);
-        esm.writeHNT ("DATA", iter->size);
+        esm.writeHNCString ("MAST", data.name);
+        esm.writeHNT ("DATA", data.size);
     }
 }
