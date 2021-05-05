@@ -322,7 +322,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
         else
         {
             roots[i] = nullptr;
-            warn("Null Root found");
+            warn("Root " + std::to_string(i + 1) + " does not point to a record: index " + std::to_string(idx));
         }
     }
 

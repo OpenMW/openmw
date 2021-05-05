@@ -121,12 +121,14 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     mAvoidStaticMesh.reset();
 
     const size_t numRoots = nif.numRoots();
-    std::vector<Nif::Node*> roots;
+    std::vector<const Nif::Node*> roots;
     for (size_t i = 0; i < numRoots; ++i)
     {
-        Nif::Record* r = nif.getRoot(i);
-        assert(r != nullptr);
-        if (Nif::Node* node = dynamic_cast<Nif::Node*>(r))
+        const Nif::Record* r = nif.getRoot(i);
+        if (!r)
+            continue;
+        const Nif::Node* node = dynamic_cast<const Nif::Node*>(r);
+        if (node)
             roots.emplace_back(node);
     }
     const std::string filename = nif.getFilename();

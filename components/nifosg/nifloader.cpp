@@ -254,8 +254,7 @@ namespace NifOsg
             for (size_t i = 0; i < numRoots; ++i)
             {
                 const Nif::Record *r = nif->getRoot(i);
-                assert(r != nullptr);
-                if (r->recType == Nif::RC_NiSequenceStreamHelper)
+                if (r && r->recType == Nif::RC_NiSequenceStreamHelper)
                 {
                     seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
                     break;
@@ -312,7 +311,10 @@ namespace NifOsg
             for (size_t i = 0; i < numRoots; ++i)
             {
                 const Nif::Record* r = nif->getRoot(i);
-                if (const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r))
+                if (!r)
+                    continue;
+                const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
+                if (nifNode)
                     roots.emplace_back(nifNode);
             }
             if (roots.empty())
