@@ -620,6 +620,8 @@ namespace MWWorld
 
         if (changeEvent)
             mCellChanged = true;
+
+        mNavigator.wait(*loadingListener);
     }
 
     void Scene::testExteriorCells()

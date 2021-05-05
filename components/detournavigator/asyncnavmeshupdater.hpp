@@ -142,7 +142,7 @@ namespace DetourNavigator
 
         void cleanupLastUpdates();
 
-        void waitUntilJobsDone(const std::size_t initialJobsLeft, std::size_t& maxJobsLeft, Loading::Listener& listener);
+        int waitUntilJobsDone(const std::size_t initialJobsLeft, std::size_t& maxJobsLeft, Loading::Listener& listener);
     };
 }
 

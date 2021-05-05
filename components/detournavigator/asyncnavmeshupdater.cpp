@@ -21,6 +21,16 @@ namespace
     {
         return std::abs(lhs.x() - rhs.x()) + std::abs(lhs.y() - rhs.y());
     }
+
+    int getMinDistanceTo(const TilePosition& position, int maxDistance,
+                         const std::map<osg::Vec3f, std::set<TilePosition>>& tilesPerHalfExtents)
+    {
+        int result = maxDistance;
+        for (const auto& [halfExtents, tiles] : tilesPerHalfExtents)
+            for (const TilePosition& tile : tiles)
+                result = std::min(result, getManhattanDistance(position, tile));
+        return result;
+    }
 }
 
 namespace DetourNavigator
@@ -114,24 +124,40 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::wait(Loading::Listener& listener)
     {
+        if (mSettings.get().mWaitUntilMinDistanceToPlayer == 0)
+            return;
         listener.setLabel("Building navigation mesh");
         const std::size_t initialJobsLeft = getTotalJobs();
         std::size_t maxProgress = initialJobsLeft + mThreads.size();
         listener.setProgressRange(maxProgress);
-        waitUntilJobsDone(initialJobsLeft, maxProgress, listener);
-        mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
-        listener.setProgress(maxProgress);
+        const int minDistanceToPlayer = waitUntilJobsDone(initialJobsLeft, maxProgress, listener);
+        if (minDistanceToPlayer < mSettings.get().mWaitUntilMinDistanceToPlayer)
+        {
+            mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
+            listener.setProgress(maxProgress);
+        }
     }
 
-    void AsyncNavMeshUpdater::waitUntilJobsDone(const std::size_t initialJobsLeft, std::size_t& maxProgress, Loading::Listener& listener)
+    int AsyncNavMeshUpdater::waitUntilJobsDone(const std::size_t initialJobsLeft, std::size_t& maxProgress, Loading::Listener& listener)
     {
         std::size_t prevJobsLeft = initialJobsLeft;
         std::size_t jobsDone = 0;
         std::size_t jobsLeft = 0;
+        const int maxDistanceToPlayer = mSettings.get().mWaitUntilMinDistanceToPlayer;
+        const TilePosition playerPosition = *mPlayerTile.lockConst();
+        int minDistanceToPlayer = 0;
         const auto isDone = [&]
         {
             jobsLeft = mJobs.size() + getTotalThreadJobsUnsafe();
-            return jobsLeft == 0;
+            if (jobsLeft == 0)
+            {
+                minDistanceToPlayer = 0;
+                return true;
+            }
+            minDistanceToPlayer = getMinDistanceTo(playerPosition, maxDistanceToPlayer, mPushed);
+            for (const auto& [threadId, queue] : mThreadsQueues)
+                minDistanceToPlayer = getMinDistanceTo(playerPosition, minDistanceToPlayer, queue.mPushed);
+            return minDistanceToPlayer >= maxDistanceToPlayer;
         };
         std::unique_lock<std::mutex> lock(mMutex);
         while (!mDone.wait_for(lock, std::chrono::milliseconds(250), isDone))
@@ -150,6 +176,7 @@ namespace DetourNavigator
                 listener.increaseProgress(newJobsDone);
             }
         }
+        return minDistanceToPlayer;
     }
 
     void AsyncNavMeshUpdater::reportStats(unsigned int frameNumber, osg::Stats& stats) const

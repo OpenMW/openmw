@@ -31,6 +31,7 @@ namespace DetourNavigator
         int mRegionMergeSize = 0;
         int mRegionMinSize = 0;
         int mTileSize = 0;
+        int mWaitUntilMinDistanceToPlayer = 0;
         std::size_t mAsyncNavMeshUpdaterThreads = 0;
         std::size_t mMaxNavMeshTilesCacheSize = 0;
         std::size_t mMaxPolygonPathSize = 0;

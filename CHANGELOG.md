@@ -141,6 +141,7 @@
     Feature #5456: Basic collada animation support
     Feature #5457: Realistic diagonal movement
     Feature #5486: Fixes trainers to choose their training skills based on their base skill points
+    Feature #5500: Prepare enough navmesh tiles before scene loading ends
     Feature #5511: Add in game option to toggle HRTF support in OpenMW
     Feature #5519: Code Patch tab in launcher
     Feature #5524: Resume failed script execution after reload

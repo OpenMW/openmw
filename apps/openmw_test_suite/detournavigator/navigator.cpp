@@ -66,6 +66,7 @@ namespace
             mSettings.mRegionMergeSize = 20;
             mSettings.mRegionMinSize = 8;
             mSettings.mTileSize = 64;
+            mSettings.mWaitUntilMinDistanceToPlayer = std::numeric_limits<int>::max();
             mSettings.mAsyncNavMeshUpdaterThreads = 1;
             mSettings.mMaxNavMeshTilesCacheSize = 1024 * 1024;
             mSettings.mMaxPolygonPathSize = 1024;
