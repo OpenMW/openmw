@@ -261,14 +261,14 @@ if(FFmpeg_FOUND)
             set(FFVER_OK FALSE)
         endif()
     endif()
+
+    if(NOT FFVER_OK AND NOT APPLE)  # unable to detect on version on MacOS < 11.0
+        message(FATAL_ERROR "FFmpeg version is too old, 3.2 is required" )
+    endif()
 endif()
 
 if(NOT FFmpeg_FOUND)
     message(FATAL_ERROR "FFmpeg was not found" )
-endif()
-
-if(NOT FFVER_OK)
-    message(FATAL_ERROR "FFmpeg version is too old, 3.2 is required" )
 endif()
 
 if(WIN32)
