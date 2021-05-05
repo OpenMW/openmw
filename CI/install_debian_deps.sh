@@ -22,12 +22,12 @@ declare -rA GROUPED_DEPS=(
     libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
     libsdl2-dev libqt5opengl5-dev libopenal-dev libunshield-dev libtinyxml-dev
     libbullet-dev liblz4-dev libpng-dev libjpeg-dev
+    ca-certificates
   "
   # TODO: add librecastnavigation-dev when debian is ready
 
   # These dependencies can alternatively be built and linked statically.
   [openmw-deps-dynamic]="libmygui-dev libopenscenegraph-dev"
-	
   [coverity]="curl"
 
   # Pre-requisites for building MyGUI and OSG for static linking.
@@ -64,4 +64,4 @@ export APT_CACHE_DIR="${PWD}/apt-cache"
 set -x
 mkdir -pv "$APT_CACHE_DIR"
 apt-get update -yq
-apt-get -q -o dir::cache::archives="$APT_CACHE_DIR" install -y "${deps[@]}"
+apt-get -q -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}"
