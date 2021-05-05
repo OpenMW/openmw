@@ -179,10 +179,6 @@ namespace MWWorld
 
         const T *find(const std::string &id) const;
 
-        /** Returns a random record that starts with the named ID. An exception is thrown if none
-         * are found. */
-        const T *findRandom(const std::string &id) const;
-
         iterator begin() const;
         iterator end() const;
 

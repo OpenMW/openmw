@@ -186,17 +186,6 @@ namespace MWWorld
         return ptr;
     }
     template<typename T>
-    const T *Store<T>::findRandom(const std::string &id) const
-    {
-        const T *ptr = searchRandom(id);
-        if(ptr == nullptr)
-        {
-            const std::string msg = T::getRecordType() + " starting with '" + id + "' not found";
-            throw std::runtime_error(msg);
-        }
-        return ptr;
-    }
-    template<typename T>
     RecordId Store<T>::load(ESM::ESMReader &esm)
     {
         T record;
