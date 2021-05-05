@@ -378,7 +378,7 @@ namespace Resource
         Resource::ImageManager* mImageManager;
     };
 
-    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
+    osg::ref_ptr<osg::Node> load (const std::string& normalizedFilename, const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
     {
         std::string ext = Resource::getFileExtension(normalizedFilename);
         if (ext == "nif")
@@ -400,7 +400,7 @@ namespace Resource
             options->setReadFileCallback(new ImageReadCallback(imageManager));
             if (ext == "dae") options->setOptionString("daeUseSequencedTextureUnits");
 
-            osgDB::ReaderWriter::ReadResult result = reader->readNode(*file, options);
+            osgDB::ReaderWriter::ReadResult result = reader->readNode(*vfs->get(normalizedFilename), options);
             if (!result.success())
             {
                 std::stringstream errormsg;
@@ -527,9 +527,7 @@ namespace Resource
             osg::ref_ptr<osg::Node> loaded;
             try
             {
-                Files::IStreamPtr file = mVFS->get(normalized);
-
-                loaded = load(file, normalized, mImageManager, mNifFileManager);
+                loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
             }
             catch (std::exception& e)
             {
@@ -542,7 +540,7 @@ namespace Resource
                     {
                         Log(Debug::Error) << "Failed to load '" << name << "': " << e.what() << ", using marker_error." << sMeshTypes[i] << " instead";
                         Files::IStreamPtr file = mVFS->get(normalized);
-                        loaded = load(file, normalized, mImageManager, mNifFileManager);
+                        loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
                         break;
                     }
                 }
