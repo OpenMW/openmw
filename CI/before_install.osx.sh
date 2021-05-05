@@ -19,4 +19,4 @@ curl -fSL -R -J https://downloads.openmw.org/osx/dependencies/openmw-deps-8f5ef6
 unzip -o ~/openmw-deps.zip -d /private/tmp/openmw-deps > /dev/null
 
 # additional libraries
-brew install fontconfig
+[ -z "${TRAVIS}" ] && HOMEBREW_NO_AUTO_UPDATE=1 brew install fontconfig

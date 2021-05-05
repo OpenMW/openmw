@@ -147,6 +147,7 @@ Debian_Clang_tests:
 macOS11_Xcode12:
   extends: .MacOS
   image: macos-11-xcode-12
+  allow_failure: true
   cache:
     key: macOS11_Xcode12.v1
   variables:
@@ -155,9 +156,16 @@ macOS11_Xcode12:
 macOS10.15_Xcode11:
   extends: .MacOS
   image: macos-10.15-xcode-11
-  allow_failure: true
   cache:
     key: macOS10.15_Xcode11.v1
+  variables:
+    CCACHE_SIZE: 3G
+
+macOS10.14_Xcode10:
+  extends: .MacOS
+  image: macos-10.14-xcode-10
+  cache:
+    key: macOS10.14_Xcode10.v1
   variables:
     CCACHE_SIZE: 3G
 
