@@ -6,6 +6,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/thread.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
 
 #include <osg/Stats>
 
@@ -111,13 +112,44 @@ namespace DetourNavigator
             mHasJob.notify_all();
     }
 
-    void AsyncNavMeshUpdater::wait()
+    void AsyncNavMeshUpdater::wait(Loading::Listener& listener)
     {
-        {
-            std::unique_lock<std::mutex> lock(mMutex);
-            mDone.wait(lock, [&] { return mJobs.empty() && getTotalThreadJobsUnsafe() == 0; });
-        }
+        listener.setLabel("Building navigation mesh");
+        const std::size_t initialJobsLeft = getTotalJobs();
+        std::size_t maxProgress = initialJobsLeft + mThreads.size();
+        listener.setProgressRange(maxProgress);
+        waitUntilJobsDone(initialJobsLeft, maxProgress, listener);
         mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
+        listener.setProgress(maxProgress);
+    }
+
+    void AsyncNavMeshUpdater::waitUntilJobsDone(const std::size_t initialJobsLeft, std::size_t& maxProgress, Loading::Listener& listener)
+    {
+        std::size_t prevJobsLeft = initialJobsLeft;
+        std::size_t jobsDone = 0;
+        std::size_t jobsLeft = 0;
+        const auto isDone = [&]
+        {
+            jobsLeft = mJobs.size() + getTotalThreadJobsUnsafe();
+            return jobsLeft == 0;
+        };
+        std::unique_lock<std::mutex> lock(mMutex);
+        while (!mDone.wait_for(lock, std::chrono::milliseconds(250), isDone))
+        {
+            if (maxProgress < jobsLeft)
+            {
+                maxProgress = jobsLeft + mThreads.size();
+                listener.setProgressRange(maxProgress);
+                listener.setProgress(jobsDone);
+            }
+            else if (jobsLeft < prevJobsLeft)
+            {
+                const std::size_t newJobsDone = prevJobsLeft - jobsLeft;
+                jobsDone += newJobsDone;
+                prevJobsLeft = jobsLeft;
+                listener.increaseProgress(newJobsDone);
+            }
+        }
     }
 
     void AsyncNavMeshUpdater::reportStats(unsigned int frameNumber, osg::Stats& stats) const
@@ -379,6 +411,12 @@ namespace DetourNavigator
 
         if (locked->empty())
             mProcessed.notify_all();
+    }
+
+    std::size_t AsyncNavMeshUpdater::getTotalJobs() const
+    {
+        const std::scoped_lock lock(mMutex);
+        return mJobs.size() + getTotalThreadJobsUnsafe();
     }
 
     std::size_t AsyncNavMeshUpdater::getTotalThreadJobsUnsafe() const

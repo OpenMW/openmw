@@ -45,7 +45,7 @@ namespace DetourNavigator
 
         void update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents);
 
-        void wait();
+        void wait(Loading::Listener& listener);
 
         SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& agentHalfExtents) const;
 

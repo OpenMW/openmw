@@ -14,6 +14,11 @@ namespace ESM
     struct Pathgrid;
 }
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace DetourNavigator
 {
     struct ObjectShapes
@@ -162,7 +167,7 @@ namespace DetourNavigator
         /**
          * @brief wait locks thread until all tiles are updated from last update call.
          */
-        virtual void wait() = 0;
+        virtual void wait(Loading::Listener& listener) = 0;
 
         /**
          * @brief findPath fills output iterator with points of scene surfaces to be used for actor to walk through.

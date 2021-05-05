@@ -153,9 +153,9 @@ namespace DetourNavigator
         mUpdatesEnabled = enabled;
     }
 
-    void NavigatorImpl::wait()
+    void NavigatorImpl::wait(Loading::Listener& listener)
     {
-        mNavMeshManager.wait();
+        mNavMeshManager.wait(listener);
     }
 
     SharedNavMeshCacheItem NavigatorImpl::getNavMesh(const osg::Vec3f& agentHalfExtents) const

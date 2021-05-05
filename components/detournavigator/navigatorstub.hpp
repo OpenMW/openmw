@@ -3,6 +3,11 @@
 
 #include "navigator.hpp"
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace DetourNavigator
 {
     class NavigatorStub final : public Navigator
@@ -68,7 +73,7 @@ namespace DetourNavigator
 
         void setUpdatesEnabled(bool /*enabled*/) override {}
 
-        void wait() override {}
+        void wait(Loading::Listener& /*listener*/) override {}
 
         SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& /*agentHalfExtents*/) const override
         {
