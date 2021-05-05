@@ -17,3 +17,6 @@ qmake --version
 
 curl -fSL -R -J https://downloads.openmw.org/osx/dependencies/openmw-deps-8f5ef6e.zip -o ~/openmw-deps.zip
 unzip -o ~/openmw-deps.zip -d /private/tmp/openmw-deps > /dev/null
+
+# additional libraries
+brew install fontconfig
