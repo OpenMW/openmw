@@ -2,6 +2,7 @@
 #include <vector>
 #include <deque>
 #include <list>
+#include <unordered_set>
 #include <map>
 #include <set>
 #include <fstream>
@@ -322,7 +323,7 @@ int load(Arguments& info)
     std::string filename = info.filename;
     std::cout << "Loading file: " << filename << std::endl;
 
-    std::list<uint32_t> skipped;
+    std::unordered_set<uint32_t> skipped;
 
     try {
 
@@ -364,17 +365,17 @@ int load(Arguments& info)
         // Loop through all records
         while(esm.hasMoreRecs())
         {
-            ESM::NAME n = esm.getRecName();
+            const ESM::NAME n = esm.getRecName();
             uint32_t flags;
             esm.getRecHeader(flags);
 
             EsmTool::RecordBase *record = EsmTool::RecordBase::create(n);
             if (record == nullptr)
             {
-                if (std::find(skipped.begin(), skipped.end(), n.intval) == skipped.end())
+                if (skipped.count(n.intval) == 0)
                 {
                     std::cout << "Skipping " << n.toString() << " records." << std::endl;
-                    skipped.push_back(n.intval);
+                    skipped.emplace(n.intval);
                 }
 
                 esm.skipRecord();

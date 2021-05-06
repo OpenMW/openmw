@@ -110,15 +110,14 @@ struct FIXED_STRING<4> : public FIXED_STRING_BASE<FIXED_STRING, 4>
     void assign(const std::string& value)
     {
         intval = 0;
-        size_t length = value.size();
-        if (length == 0) return;
-        data[0] = value[0];
-        if (length == 1) return;
-        data[1] = value[1];
-        if (length == 2) return;
-        data[2] = value[2];
-        if (length == 3) return;
-        data[3] = value[3];
+        switch(value.size()) {
+            case 4: data[3] = value[3];
+            case 3: data[2] = value[2];
+            case 2: data[1] = value[1];
+            case 1: data[0] = value[0];
+            default: break;
+        }
+
     }
 
     char const* ro_data() const { return data; }
