@@ -539,7 +539,6 @@ namespace Resource
                     if (mVFS->exists(normalized))
                     {
                         Log(Debug::Error) << "Failed to load '" << name << "': " << e.what() << ", using marker_error." << sMeshTypes[i] << " instead";
-                        Files::IStreamPtr file = mVFS->get(normalized);
                         loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
                         break;
                     }
