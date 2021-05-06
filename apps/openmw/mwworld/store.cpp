@@ -8,28 +8,11 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
+#include <iterator>
 #include <stdexcept>
 
 namespace
 {
-    template<typename T>
-    class GetRecords
-    {
-        const std::string mFind;
-        std::vector<const T*> *mRecords;
-
-    public:
-        GetRecords(const std::string &str, std::vector<const T*> *records)
-          : mFind(Misc::StringUtils::lowerCase(str)), mRecords(records)
-        { }
-
-        void operator()(const T *item)
-        {
-            if(Misc::StringUtils::ciCompareLen(mFind, item->mId, mFind.size()) == 0)
-                mRecords->push_back(item);
-        }
-    };
-
     struct Compare
     {
         bool operator()(const ESM::Land *x, const ESM::Land *y) {
@@ -169,7 +152,11 @@ namespace MWWorld
     const T *Store<T>::searchRandom(const std::string &id) const
     {
         std::vector<const T*> results;
-        std::for_each(mShared.begin(), mShared.end(), GetRecords<T>(id, &results));
+        std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
+                [&id](const T* item)
+                {
+                    return Misc::StringUtils::ciCompareLen(id, item->mId, id.size()) == 0;
+                });
         if(!results.empty())
             return results[Misc::Rng::rollDice(results.size())];
         return nullptr;
@@ -181,17 +168,6 @@ namespace MWWorld
         if (ptr == nullptr)
         {
             const std::string msg = T::getRecordType() + " '" + id + "' not found";
-            throw std::runtime_error(msg);
-        }
-        return ptr;
-    }
-    template<typename T>
-    const T *Store<T>::findRandom(const std::string &id) const
-    {
-        const T *ptr = searchRandom(id);
-        if(ptr == nullptr)
-        {
-            const std::string msg = T::getRecordType() + " starting with '" + id + "' not found";
             throw std::runtime_error(msg);
         }
         return ptr;
