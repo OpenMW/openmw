@@ -10,6 +10,8 @@
 
 #include <DetourNavMesh.h>
 
+#include <iterator>
+
 namespace
 {
     using DetourNavigator::ChangeType;
