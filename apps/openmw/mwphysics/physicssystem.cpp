@@ -937,7 +937,7 @@ namespace MWPhysics
     ActorFrameData::ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn,
             bool waterCollision, osg::Vec3f movement, float slowFall, float waterlevel)
         : mActor(actor), mActorRaw(actor.get()), mStandingOn(standingOn),
-        mDidJump(false), mNeedLand(false), mWaterCollision(waterCollision),
+        mDidJump(false), mNeedLand(false), mWaterCollision(waterCollision), mSkipCollisionDetection(actor->skipCollisions()),
         mWaterlevel(waterlevel), mSlowFall(slowFall), mOldHeight(0), mFallHeight(0), mMovement(movement), mPosition(), mRefpos()
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -954,7 +954,6 @@ namespace MWPhysics
     void ActorFrameData::updatePosition(btCollisionWorld* world)
     {
         mActorRaw->updateWorldPosition();
-        mSkipCollisionDetection = mActorRaw->skipCollisions();
         mActorRaw->applyOffsetChange();
         mPosition = mActorRaw->getPosition();
         if (mWaterCollision && mPosition.z() < mWaterlevel && canMoveToWaterSurface(mActorRaw, mWaterlevel, world))
