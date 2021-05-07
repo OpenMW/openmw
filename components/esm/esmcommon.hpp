@@ -110,7 +110,7 @@ struct FIXED_STRING<4> : public FIXED_STRING_BASE<FIXED_STRING, 4>
     void assign(const std::string& value)
     {
         intval = 0;
-        std::memcpy(data, value.data(), std::min(value.size(), 4));
+        std::memcpy(data, value.data(), (value.size() < 4)? value.size(): 4);
 
     }
 
