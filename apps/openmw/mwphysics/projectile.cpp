@@ -5,10 +5,7 @@
 
 #include <LinearMath/btVector3.h>
 
-#include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
-#include <components/resource/bulletshape.hpp>
-#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/class.hpp"
 

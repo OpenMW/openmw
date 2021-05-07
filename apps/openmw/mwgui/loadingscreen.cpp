@@ -25,8 +25,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
 
-#include "../mwrender/vismask.hpp"
-
 #include "backgroundimage.hpp"
 
 namespace MWGui

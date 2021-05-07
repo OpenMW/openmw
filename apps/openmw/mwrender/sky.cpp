@@ -46,7 +46,6 @@
 #include <components/sceneutil/shadow.hpp>
 
 #include <components/settings/settings.hpp>
-#include <components/misc/stringops.hpp>
 
 #include <components/nifosg/particle.hpp>
 

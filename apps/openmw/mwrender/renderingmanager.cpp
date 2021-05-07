@@ -43,14 +43,12 @@
 #include <components/terrain/quadtreeworld.hpp>
 
 #include <components/esm/loadcell.hpp>
-#include <components/fallback/fallback.hpp>
 
 #include <components/detournavigator/navigator.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwgui/loadingscreen.hpp"
-#include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
@@ -63,7 +61,6 @@
 #include "viewovershoulder.hpp"
 #include "water.hpp"
 #include "terrainstorage.hpp"
-#include "util.hpp"
 #include "navmesh.hpp"
 #include "actorspaths.hpp"
 #include "recastmesh.hpp"

@@ -12,8 +12,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-
 #include "interpretercontext.hpp"
 
 namespace

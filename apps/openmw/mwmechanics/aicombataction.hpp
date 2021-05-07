@@ -3,8 +3,6 @@
 
 #include <memory>
 
-#include <components/esm/loadspel.hpp>
-
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
 

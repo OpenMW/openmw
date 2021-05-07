@@ -9,7 +9,6 @@
 
 #include <osgDB/WriteFile>
 
-#include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/settings.hpp>
 #include <components/files/memorystream.hpp>
 

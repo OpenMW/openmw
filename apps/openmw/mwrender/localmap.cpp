@@ -22,7 +22,6 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/files/memorystream.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

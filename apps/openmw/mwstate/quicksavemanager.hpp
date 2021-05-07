@@ -4,7 +4,6 @@
 #include <string>
 
 #include "character.hpp"
-#include "../mwbase/statemanager.hpp"
 
 namespace MWState{
     class QuickSaveManager{

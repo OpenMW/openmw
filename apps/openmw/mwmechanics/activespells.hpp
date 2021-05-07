@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 
-#include <components/esm/defs.hpp>
 #include <components/esm/activespells.hpp>
 
 #include "../mwworld/timestamp.hpp"

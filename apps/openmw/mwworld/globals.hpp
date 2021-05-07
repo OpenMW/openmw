@@ -7,7 +7,6 @@
 
 #include <stdint.h>
 
-#include <components/interpreter/types.hpp>
 #include <components/esm/loadglob.hpp>
 
 namespace ESM

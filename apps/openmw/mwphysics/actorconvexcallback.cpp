@@ -7,7 +7,6 @@
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <components/misc/convert.hpp>
 
-#include "collisiontype.hpp"
 #include "projectile.hpp"
 
 namespace MWPhysics

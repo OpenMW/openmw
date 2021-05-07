@@ -17,7 +17,6 @@
 #include "creaturestats.hpp"
 #include "spellresistance.hpp"
 #include "weapontype.hpp"
-#include "combat.hpp"
 #include "summoning.hpp"
 #include "spellutil.hpp"
 

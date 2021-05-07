@@ -8,7 +8,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/action.hpp"
 
 #include "movement.hpp"
 #include "creaturestats.hpp"

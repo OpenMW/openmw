@@ -40,7 +40,6 @@
 #include "aiwander.hpp"
 #include "actor.hpp"
 #include "summoning.hpp"
-#include "combat.hpp"
 #include "actorutil.hpp"
 #include "tickableeffects.hpp"
 

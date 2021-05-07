@@ -35,7 +35,6 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
-#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/localscripts.hpp"
 

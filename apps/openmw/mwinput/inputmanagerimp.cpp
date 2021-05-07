@@ -5,7 +5,6 @@
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>
-#include <components/esm/controlsstate.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"

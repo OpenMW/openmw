@@ -1,8 +1,6 @@
 #ifndef MWGUI_QUICKKEYS_H
 #define MWGUI_QUICKKEYS_H
 
-#include "../mwworld/ptr.hpp"
-
 #include "windowbase.hpp"
 
 #include "spellmodel.hpp"

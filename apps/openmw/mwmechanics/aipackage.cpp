@@ -2,7 +2,6 @@
 
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
-#include <components/esm/loadmgef.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/misc/coordinateconverter.hpp>
 #include <components/settings/settings.hpp>
@@ -14,8 +13,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-
-#include "../mwphysics/collisiontype.hpp"
 
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"

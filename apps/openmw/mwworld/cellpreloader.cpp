@@ -15,13 +15,9 @@
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/esm/loadcell.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
 #include "../mwrender/landmanager.hpp"
 
 #include "cellstore.hpp"
-#include "manualref.hpp"
 #include "class.hpp"
 
 namespace MWWorld
