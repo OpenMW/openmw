@@ -10,7 +10,7 @@ addons:
       - sourceline: 'ppa:openmw/openmw'
     packages: [
       # Dev
-      build-essential, cmake, clang-tools-9, ccache,
+      build-essential, cmake, clang-tools-10, ccache,
       # Boost
       libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -37,8 +37,8 @@ matrix:
       os: linux
       dist: focal
       env:
-        - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
-        - ANALYZE="scan-build-9 --force-analyze-debug-code --use-cc clang-9 --use-c++ clang++-9"
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
+        - ANALYZE="scan-build-10 --force-analyze-debug-code --use-cc clang-10 --use-c++ clang++-10"
       compiler: clang
 
 before_install:
