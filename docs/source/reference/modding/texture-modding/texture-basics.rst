@@ -19,8 +19,10 @@ OpenMW automatically uses shaders for objects with these mapping techniques.
 Normal Mapping
 ##############
 
-To plug in a normal map, you name the normal map as the diffuse texture but with a specified suffix after. 
-OpenMW will then recognise the file and load it as a normal map, provided you have set up your settings file correctly. 
+To plug in a normal map, you name the normal map as the diffuse texture but with a specified suffix after. OpenMW will then recognise the file and load it as a normal map, provided you have set up your settings file correctly. 
+
+Content creators need to know that OpenMW uses the DX format for normal maps, and not the OpenGL format as one otherwise might expect. See an example of the difference between the two formats `here <https://i.stack.imgur.com/kf9jo.png>`_. Make sure your normal maps are created according to the DX style.
+
 See the section `Automatic use`_ further down below for detailed information.
 
 Specular Mapping
