@@ -354,7 +354,7 @@ void ESMReader::setEncoder(ToUTF8::Utf8Encoder* encoder)
     mEncoder = encoder;
 }
 
-size_t ESMReader::getFileOffset()
+size_t ESMReader::getFileOffset() const
 {
     return mEsm->tellg();
 }

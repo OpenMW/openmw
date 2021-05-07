@@ -172,7 +172,7 @@ void printTransport(const std::vector<ESM::Transport::Dest>& transport)
 namespace EsmTool {
 
 RecordBase *
-RecordBase::create(ESM::NAME type)
+RecordBase::create(const ESM::NAME type)
 {
     RecordBase *record = nullptr;
 
