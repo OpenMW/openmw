@@ -13,8 +13,7 @@ void ESM::GlobalScript::load (ESMReader &esm)
     esm.getHNOT (mRunning, "RUN_");
 
     mTargetRef.unset();
-    if (esm.peekNextSub("TARG"))
-        mTargetId = esm.getHNString ("TARG");
+    mTargetId = esm.getHNOString ("TARG");
     if (esm.peekNextSub("FRMR"))
         mTargetRef.load(esm, true, "FRMR");
 }

@@ -97,13 +97,6 @@ void ESMReader::open(const std::string &file)
     open (Files::openConstrainedFileStream (file.c_str ()), file);
 }
 
-int64_t ESMReader::getHNLong(const char *name)
-{
-    int64_t val;
-    getHNT(val, name);
-    return val;
-}
-
 std::string ESMReader::getHNOString(const char* name)
 {
     if (isNextSub(name))
@@ -213,18 +206,6 @@ void ESMReader::getSubName()
     const size_t subNameSize = mCtx.subName.data_size();
     getExact(mCtx.subName.rw_data(), subNameSize);
     mCtx.leftRec -= subNameSize;
-}
-
-bool ESMReader::isEmptyOrGetName()
-{
-    if (mCtx.leftRec)
-    {
-        const size_t subNameSize = mCtx.subName.data_size();
-        getExact(mCtx.subName.rw_data(), subNameSize);
-        mCtx.leftRec -= subNameSize;
-        return false;
-    }
-    return true;
 }
 
 void ESMReader::skipHSub()
@@ -343,7 +324,7 @@ std::string ESMReader::getString(int size)
     mBuffer[s] = 0;
 
     // read ESM data
-    char *ptr = &mBuffer[0];
+    char *ptr = mBuffer.data();
     getExact(ptr, size);
 
     size = strnlen(ptr, size);

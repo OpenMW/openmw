@@ -31,15 +31,15 @@ namespace ESM
         esm.getHNT(mNextWeather, nextWeatherRecord);
         esm.getHNT(mQueuedWeather, queuedWeatherRecord);
 
-        while(esm.peekNextSub(regionNameRecord))
+        while (esm.isNextSub(regionNameRecord))
         {
-            std::string regionID = esm.getHNString(regionNameRecord);
+            std::string regionID = esm.getHString();
             RegionWeatherState region;
             esm.getHNT(region.mWeather, regionWeatherRecord);
-            while(esm.peekNextSub(regionChanceRecord))
+            while (esm.isNextSub(regionChanceRecord))
             {
                 char chance;
-                esm.getHNT(chance, regionChanceRecord);
+                esm.getHT(chance);
                 region.mChances.push_back(chance);
             }
 

@@ -128,8 +128,6 @@ public:
           getHT(x);
   }
 
-  int64_t getHNLong(const char *name);
-
   // Get data of a given type/size, including subrecord header
   template <typename X>
   void getHT(X &x)
@@ -192,9 +190,6 @@ public:
   // Read subrecord name. This gets called a LOT, so I've optimized it
   // slightly.
   void getSubName();
-
-  // This is specially optimized for LoadINFO.
-  bool isEmptyOrGetName();
 
   // Skip current sub record, including header (but not including
   // name.)
