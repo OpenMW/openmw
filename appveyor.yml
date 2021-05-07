@@ -50,7 +50,7 @@ install:
 
 before_build:
     - cmd: git submodule update --init --recursive
-    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -c %configuration% -p %PLATFORM% -v %msvc% -V -i %APPVEYOR_BUILD_FOLDER%\install -D
+    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -c %configuration% -p %PLATFORM% -v %msvc% -V -i %APPVEYOR_BUILD_FOLDER%\install
 
 build_script:
     - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
