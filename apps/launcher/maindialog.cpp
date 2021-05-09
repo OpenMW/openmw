@@ -424,11 +424,11 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     mEngineSettings.clear();
 
     // Create the settings manager and load default settings file
-    const std::string localDefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
-    const std::string globalDefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
+    const std::string localDefault = (mCfgMgr.getLocalPath() / "defaults.bin").string();
+    const std::string globalDefault = (mCfgMgr.getGlobalPath() / "defaults.bin").string();
     std::string defaultPath;
 
-    // Prefer the settings-default.cfg in the current directory.
+    // Prefer the defaults.bin in the current directory.
     if (boost::filesystem::exists(localDefault))
         defaultPath = localDefault;
     else if (boost::filesystem::exists(globalDefault))

@@ -10,7 +10,7 @@ namespace Settings
     class SettingsFileParser
     {
     public:
-        void loadSettingsFile(const std::string& file, CategorySettingValueMap& settings);
+        void loadSettingsFile(const std::string& file, CategorySettingValueMap& settings, bool base64encoded = false);
 
         void saveSettingsFile(const std::string& file, const CategorySettingValueMap& settings);
 

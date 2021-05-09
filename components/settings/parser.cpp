@@ -7,7 +7,7 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings)
+void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings, bool base64Encoded)
 {
     mFile = file;
     boost::filesystem::ifstream stream;

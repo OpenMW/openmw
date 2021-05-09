@@ -22,7 +22,7 @@ void Manager::clear()
 void Manager::loadDefault(const std::string &file)
 {
     SettingsFileParser parser;
-    parser.loadSettingsFile(file, mDefaultSettings);
+    parser.loadSettingsFile(file, mDefaultSettings, true);
 }
 
 void Manager::loadUser(const std::string &file)

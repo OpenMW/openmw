@@ -478,8 +478,8 @@ void OMW::Engine::setSkipMenu (bool skipMenu, bool newGame)
 std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 {
     // Create the settings manager and load default settings file
-    const std::string localdefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
-    const std::string globaldefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
+    const std::string localdefault = (mCfgMgr.getLocalPath() / "defaults.bin").string();
+    const std::string globaldefault = (mCfgMgr.getGlobalPath() / "defaults.bin").string();
 
     // prefer local
     if (boost::filesystem::exists(localdefault))
