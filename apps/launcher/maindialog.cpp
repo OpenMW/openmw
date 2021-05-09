@@ -436,7 +436,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     // Something's very wrong if we can't find the file at all.
     else {
         cfgError(tr("Error reading OpenMW configuration file"),
-                 tr("<br><b>Could not find settings-default.cfg</b><br><br> \
+                 tr("<br><b>Could not find defaults.bin</b><br><br> \
                      The problem may be due to an incomplete installation of OpenMW.<br> \
                      Reinstalling OpenMW may resolve the problem."));
         return false;
@@ -447,7 +447,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
         mEngineSettings.loadDefault(defaultPath);
     }
     catch (std::exception& e) {
-        std::string msg = std::string("<br><b>Error reading settings-default.cfg</b><br><br>") + e.what();
+        std::string msg = std::string("<br><b>Error reading defaults.bin</b><br><br>") + e.what();
         cfgError(tr("Error reading OpenMW configuration file"), tr(msg.c_str()));
         return false;
     }

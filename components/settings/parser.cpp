@@ -255,7 +255,7 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
         ostream << "# This is the OpenMW user 'settings.cfg' file.  This file only contains" << std::endl;
         ostream << "# explicitly changed settings.  If you would like to revert a setting" << std::endl;
         ostream << "# to its default, simply remove it from this file.  For available" << std::endl;
-        ostream << "# settings, see the file 'settings-default.cfg' or the documentation at:" << std::endl;
+        ostream << "# settings, see the file 'files/settings-default.cfg' in our source repo or the documentation at:" << std::endl;
         ostream << "#" << std::endl;
         ostream << "#   https://openmw.readthedocs.io/en/master/reference/modding/settings/index.html" << std::endl;
     }

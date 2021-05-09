@@ -8,6 +8,14 @@ If you are familiar with ``.ini`` tweaks in Morrowind or the other games, this w
 All settings described in this section are changed in ``settings.cfg``, located in your OpenMW user directory.
 See :doc:`../paths` for this location.
 
+When creating a new game based on the OpenMW engine, it may be desirable to change the default settings - the defaults are chosen for compatibility with Morrowind.
+This can be done by editing ``defaults.bin`` in the OpenMW installation directory without rebuilding OpenMW itself.
+If you're using a custom fork of OpenMW, ``files/settings-default.cfg`` in the source repository should be edited instead.
+To edit ``defaults.bin``, base64 decode it, make any changes, and then base64 encode it again.
+
+If you feel a need to edit the default settings for any other reason than when creating a new OpenMW-based game, you should not.
+We may be able to accommodate your desired workflow some other way if you make a feature request.
+
 Changing Settings
 #################
 
@@ -25,8 +33,10 @@ Changing Settings
 	Then to the line above, type ``[GUI]``, as the tooltip delay setting comes from the "GUI Settings" section.
 
 Although this guide attempts to be comprehensive and up to date,
-you will always be able to find the full list of settings available and their default values in ``settings-default.cfg``
-in your main OpenMW installation directory.
+you will always be able to find the full list of settings available and their default values in ``settings-default.cfg``,
+available in the ``files`` directory of our source repo, or by base64 decoding ``defaults.bin`` in your main OpenMW installation directory.
+This has changed compared to previous versions of OpenMW as more users were confused by the existence of a file they weren't supposed to edit
+than were helped by the existence of a file listing settings they could edit in a different file.
 The ranges included with each setting are the physically possible ranges, not recommendations.
 
 .. warning::

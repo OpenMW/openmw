@@ -487,7 +487,7 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     else if (boost::filesystem::exists(globaldefault))
         settings.loadDefault(globaldefault);
     else
-        throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
+        throw std::runtime_error ("No default settings file found! Make sure the file \"defaults.bin\" was properly installed.");
 
     // load user settings if they exist
     const std::string settingspath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
