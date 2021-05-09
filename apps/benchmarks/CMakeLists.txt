@@ -19,16 +19,9 @@ FetchContent_MakeAvailableExcludeFromAll(benchmark)
 set(CMAKE_CXX_FLAGS "${SAVED_CMAKE_CXX_FLAGS}")
 
 openmw_add_executable(openmw_detournavigator_navmeshtilescache_benchmark detournavigator/navmeshtilescache.cpp)
-target_compile_options(openmw_detournavigator_navmeshtilescache_benchmark PRIVATE -Wall)
 target_compile_features(openmw_detournavigator_navmeshtilescache_benchmark PRIVATE cxx_std_17)
 target_link_libraries(openmw_detournavigator_navmeshtilescache_benchmark benchmark::benchmark components)
 
 if (UNIX AND NOT APPLE)
     target_link_libraries(openmw_detournavigator_navmeshtilescache_benchmark ${CMAKE_THREAD_LIBS_INIT})
 endif()
-
-if (MSVC)
-    if (CMAKE_CL_64)
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
-    endif (CMAKE_CL_64)
-endif (MSVC)

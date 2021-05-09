@@ -669,6 +669,10 @@ if (WIN32)
     if (BUILD_WIZARD)
         set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif()
+
+    if (BUILD_BENCHMARKS)
+        set_target_properties(openmw_detournavigator_navmeshtilescache_benchmark PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
   endif(MSVC)
 
   # TODO: At some point release builds should not use the console but rather write to a log file
