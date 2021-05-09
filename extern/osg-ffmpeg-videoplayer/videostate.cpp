@@ -409,42 +409,49 @@ public:
 
         pFrame = av_frame_alloc();
 
-        while(self->videoq.get(packet, self) >= 0)
+        try
         {
-            if(packet->data == flush_pkt.data)
+            while(self->videoq.get(packet, self) >= 0)
             {
-                avcodec_flush_buffers(self->video_ctx);
-
-                self->pictq_mutex.lock();
-                self->pictq_size = 0;
-                self->pictq_rindex = 0;
-                self->pictq_windex = 0;
-                self->pictq_mutex.unlock();
-
-                self->frame_last_pts = packet->pts * av_q2d((*self->video_st)->time_base);
-                continue;
-            }
-
-            // Decode video frame
-            int ret = avcodec_send_packet(self->video_ctx, packet);
-            // EAGAIN is not expected
-            if (ret < 0)
-                throw std::runtime_error("Error decoding video frame");
-
-            while (!ret)
-            {
-                ret = avcodec_receive_frame(self->video_ctx, pFrame);
-                if (!ret)
+                if(packet->data == flush_pkt.data)
                 {
-                    double pts = pFrame->best_effort_timestamp;
-                    pts *= av_q2d((*self->video_st)->time_base);
+                    avcodec_flush_buffers(self->video_ctx);
 
-                    pts = self->synchronize_video(pFrame, pts);
+                    self->pictq_mutex.lock();
+                    self->pictq_size = 0;
+                    self->pictq_rindex = 0;
+                    self->pictq_windex = 0;
+                    self->pictq_mutex.unlock();
 
-                    if(self->queue_picture(pFrame, pts) < 0)
-                        break;
+                    self->frame_last_pts = packet->pts * av_q2d((*self->video_st)->time_base);
+                    continue;
+                }
+
+                // Decode video frame
+                int ret = avcodec_send_packet(self->video_ctx, packet);
+                // EAGAIN is not expected
+                if (ret < 0)
+                    throw std::runtime_error("Error decoding video frame");
+
+                while (!ret)
+                {
+                    ret = avcodec_receive_frame(self->video_ctx, pFrame);
+                    if (!ret)
+                    {
+                        double pts = pFrame->best_effort_timestamp;
+                        pts *= av_q2d((*self->video_st)->time_base);
+
+                        pts = self->synchronize_video(pFrame, pts);
+
+                        if(self->queue_picture(pFrame, pts) < 0)
+                            break;
+                    }
                 }
             }
+        }
+        catch(std::exception& e)
+        {
+            std::cerr << "An error occurred playing the video: " << e.what () << std::endl;
         }
 
         av_packet_unref(packet);
