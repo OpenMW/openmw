@@ -271,6 +271,7 @@ namespace MWRender
         AnalyzeVisitor(osg::Node::NodeMask analyzeMask)
          : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
          , mCurrentStateSet(nullptr)
+         , mCurrentDistance(0.f)
          , mAnalyzeMask(analyzeMask) {}
 
         typedef std::unordered_map<osg::StateSet*, unsigned int> StateSetCounter;
@@ -287,6 +288,22 @@ namespace MWRender
 
             if (node.getStateSet())
                 mCurrentStateSet = node.getStateSet();
+
+            if (osg::Switch* sw = node.asSwitch())
+            {
+                for (unsigned int i=0; i<sw->getNumChildren(); ++i)
+                    if (sw->getValue(i))
+                        traverse(*sw->getChild(i));
+                return;
+            }
+            if (osg::LOD* lod = dynamic_cast<osg::LOD*>(&node))
+            {
+                for (unsigned int i=0; i<lod->getNumChildren(); ++i)
+                    if (lod->getMinRange(i) * lod->getMinRange(i) <= mCurrentDistance && mCurrentDistance < lod->getMaxRange(i) * lod->getMaxRange(i))
+                        traverse(*lod->getChild(i));
+                return;
+            }
+
             traverse(node);
         }
         void apply(osg::Geometry& geom) override
@@ -327,6 +344,7 @@ namespace MWRender
         Result mResult;
         osg::StateSet* mCurrentStateSet;
         StateSetCounter mGlobalStateSetCounter;
+        float mCurrentDistance;
         osg::Node::NodeMask mAnalyzeMask;
     };
 
@@ -530,6 +548,7 @@ namespace MWRender
                 continue;
             }
 
+            analyzeVisitor.mCurrentDistance = dSqr;
             auto emplaced = nodes.emplace(cnode, InstanceList());
             if (emplaced.second)
             {
