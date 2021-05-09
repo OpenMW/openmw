@@ -25,6 +25,7 @@ stages:
     - cmake --build . -- -j $(nproc)
     - cmake --install .
     - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - ccache -s
   artifacts:
     paths:
