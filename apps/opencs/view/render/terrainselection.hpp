@@ -36,7 +36,8 @@ namespace CSVRender
             ~TerrainSelection();
 
             void onlySelect(const std::vector<std::pair<int, int>> &localPositions);
-            void addSelect(const std::pair<int, int> &localPos);
+            void addSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress);
+            void removeSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress);
             void toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool toggleInProgress);
 
             void activate();

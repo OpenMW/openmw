@@ -42,7 +42,7 @@
 #include "worldspacewidget.hpp"
 
 CSVRender::TerrainShapeMode::TerrainShapeMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, Mask_Terrain | Mask_Reference, "Terrain land editing", parent),
+: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, Mask_Terrain, "Terrain land editing", parent),
     mParentNode(parentNode)
 {
 }
@@ -1089,9 +1089,21 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
         }
     }
 
-    if(selectMode == 0) mTerrainShapeSelection->onlySelect(selections);
-    if(selectMode == 1) mTerrainShapeSelection->toggleSelect(selections, dragOperation);
+    std::string selectAction;
 
+    if (selectMode == 0)
+        selectAction = CSMPrefs::get()["3D Scene Editing"]["primary-select-action"].toString();
+    else
+        selectAction = CSMPrefs::get()["3D Scene Editing"]["secondary-select-action"].toString();
+        
+    if (selectAction == "Select only")
+        mTerrainShapeSelection->onlySelect(selections);
+    else if (selectAction == "Add to selection")
+        mTerrainShapeSelection->addSelect(selections, dragOperation);
+    else if (selectAction == "Remove from selection")
+        mTerrainShapeSelection->removeSelect(selections, dragOperation);
+    else if (selectAction == "Invert selection")
+        mTerrainShapeSelection->toggleSelect(selections, dragOperation);
 }
 
 void CSVRender::TerrainShapeMode::pushEditToCommand(const CSMWorld::LandHeightsColumn::DataType& newLandGrid, CSMDoc::Document& document,

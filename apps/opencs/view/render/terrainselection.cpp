@@ -42,13 +42,84 @@ void CSVRender::TerrainSelection::onlySelect(const std::vector<std::pair<int, in
     update();
 }
 
-void CSVRender::TerrainSelection::addSelect(const std::pair<int, int> &localPos)
+void CSVRender::TerrainSelection::addSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress)
 {
-    if (std::find(mSelection.begin(), mSelection.end(), localPos) == mSelection.end())
+    if (toggleInProgress)
     {
-        mSelection.emplace_back(localPos);
-        update();
+        for (auto const& localPos : localPositions)
+        {
+            auto iterTemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
+            mDraggedOperationFlag = true;
+
+            if (iterTemp == mTemporarySelection.end())
+            {
+                auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
+                if (iter == mSelection.end())
+                {
+                    mSelection.emplace_back(localPos);
+                }
+            }
+
+            mTemporarySelection.push_back(localPos);
+        }
     }
+    else if (mDraggedOperationFlag == false)
+    {
+        for (auto const& localPos : localPositions)
+        {
+            const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
+            if (iter == mSelection.end())
+            {
+                mSelection.emplace_back(localPos);
+            }
+        }
+    }
+    else
+    {
+        mDraggedOperationFlag = false;
+        mTemporarySelection.clear();
+    }
+    update();
+}
+
+void CSVRender::TerrainSelection::removeSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress)
+{
+    if (toggleInProgress)
+    {
+        for (auto const& localPos : localPositions)
+        {
+            auto iterTemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
+            mDraggedOperationFlag = true;
+
+            if (iterTemp == mTemporarySelection.end())
+            {
+                auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
+                if (iter != mSelection.end())
+                {
+                    mSelection.erase(iter);
+                }
+            }
+
+            mTemporarySelection.push_back(localPos);
+        }
+    }
+    else if (mDraggedOperationFlag == false)
+    {
+        for (auto const& localPos : localPositions)
+        {
+            const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
+            if (iter != mSelection.end())
+            {
+                mSelection.erase(iter);
+            }
+        }
+    }
+    else
+    {
+        mDraggedOperationFlag = false;
+        mTemporarySelection.clear();
+    }
+    update();
 }
 
 void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool toggleInProgress)
