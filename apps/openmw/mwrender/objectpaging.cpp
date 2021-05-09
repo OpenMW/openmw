@@ -105,6 +105,7 @@ namespace MWRender
         bool mOptimizeBillboards = true;
         float mSqrDistance = 0.f;
         osg::Vec3f mViewVector;
+        osg::Node::NodeMask mCopyMask = ~0u;
         mutable std::vector<const osg::Node*> mNodePath;
 
         void copy(const osg::Node* toCopy, osg::Group* attachTo)
@@ -121,6 +122,9 @@ namespace MWRender
 
         osg::Node* operator() (const osg::Node* node) const override
         {
+            if (!(node->getNodeMask() & mCopyMask))
+                return nullptr;
+
             if (const osg::Drawable* d = node->asDrawable())
                 return operator()(d);
 
@@ -224,6 +228,9 @@ namespace MWRender
         }
         osg::Drawable* operator() (const osg::Drawable* drawable) const override
         {
+            if (!(drawable->getNodeMask() & mCopyMask))
+                return nullptr;
+
             if (dynamic_cast<const osgParticle::ParticleSystem*>(drawable))
                 return nullptr;
 
@@ -261,9 +268,10 @@ namespace MWRender
     class AnalyzeVisitor : public osg::NodeVisitor
     {
     public:
-        AnalyzeVisitor()
+        AnalyzeVisitor(osg::Node::NodeMask analyzeMask)
          : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-         , mCurrentStateSet(nullptr) {}
+         , mCurrentStateSet(nullptr)
+         , mAnalyzeMask(analyzeMask) {}
 
         typedef std::unordered_map<osg::StateSet*, unsigned int> StateSetCounter;
         struct Result
@@ -274,12 +282,18 @@ namespace MWRender
 
         void apply(osg::Node& node) override
         {
+            if (!(node.getNodeMask() & mAnalyzeMask))
+                return;
+
             if (node.getStateSet())
                 mCurrentStateSet = node.getStateSet();
             traverse(node);
         }
         void apply(osg::Geometry& geom) override
         {
+            if (!(geom.getNodeMask() & mAnalyzeMask))
+                return;
+
             if (osg::Array* array = geom.getVertexArray())
                 mResult.mNumVerts += array->getNumElements();
 
@@ -313,6 +327,7 @@ namespace MWRender
         Result mResult;
         osg::StateSet* mCurrentStateSet;
         StateSetCounter mGlobalStateSetCounter;
+        osg::Node::NodeMask mAnalyzeMask;
     };
 
     class DebugVisitor : public osg::NodeVisitor
@@ -438,7 +453,14 @@ namespace MWRender
         typedef std::map<osg::ref_ptr<const osg::Node>, InstanceList> NodeMap;
         NodeMap nodes;
         osg::ref_ptr<RefnumSet> refnumSet = activeGrid ? new RefnumSet : nullptr;
-        AnalyzeVisitor analyzeVisitor;
+
+        // Mask_UpdateVisitor is used in such cases in NIF loader:
+        // 1. For collision nodes, which is not supposed to be rendered.
+        // 2. For nodes masked via Flag_Hidden (VisController can change this flag value at runtime).
+        // Since ObjectPaging does not handle VisController, we can just ignore both types of nodes.
+        constexpr auto copyMask = ~Mask_UpdateVisitor;
+
+        AnalyzeVisitor analyzeVisitor(copyMask);
         float minSize = mMinSize;
         if (mMinSizeMergeFactor)
             minSize *= mMinSizeMergeFactor;
@@ -525,6 +547,7 @@ namespace MWRender
         osg::ref_ptr<Resource::TemplateMultiRef> templateRefs = new Resource::TemplateMultiRef;
         osgUtil::StateToCompile stateToCompile(0, nullptr);
         CopyOp copyop;
+        copyop.mCopyMask = copyMask;
         for (const auto& pair : nodes)
         {
             const osg::Node* cnode = pair.first;
