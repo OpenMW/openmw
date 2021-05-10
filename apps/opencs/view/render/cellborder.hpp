@@ -7,7 +7,7 @@
 
 namespace osg
 {
-    class Geode;
+    class Geometry;
     class Group;
     class PositionAttitudeTransform;
 }
@@ -48,7 +48,7 @@ namespace CSVRender
 
         osg::Group* mParentNode;
         osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
-        osg::ref_ptr<osg::Geode> mBorderGeode;
+        osg::ref_ptr<osg::Geometry> mBorderGeometry;
     };
 }
 
