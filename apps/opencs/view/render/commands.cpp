@@ -2,7 +2,6 @@
 
 #include <components/esm/loadland.hpp>
 
-#include "cell.hpp"
 #include "terrainselection.hpp"
 
 CSVRender::DrawTerrainSelectionCommand::DrawTerrainSelectionCommand(TerrainSelection& terrainSelection, QUndoCommand* parent)

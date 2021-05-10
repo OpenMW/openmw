@@ -10,7 +10,6 @@ namespace ESM
 
 namespace CSVRender
 {
-    class Cell;
     class TerrainSelection;
     
 
