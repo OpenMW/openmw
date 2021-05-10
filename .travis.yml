@@ -10,7 +10,7 @@ addons:
       - sourceline: 'ppa:openmw/openmw'
     packages: [
       # Dev
-      build-essential, cmake, clang-tools, clang-tools-10, ccache,
+      build-essential, cmake, clang-10, clang-tools, clang-tools-10, ccache,
       # Boost
       libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
