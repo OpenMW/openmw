@@ -12,7 +12,7 @@ addons:
       # Dev
       build-essential, cmake, ccache,
       # Clang
-      clang-10, clang-tools, clang-tools-10, libclang-common-10-dev,
+      clang-10, clang-tools, clang-tools-10, libclang-common-10-dev, lib32gcc-s1, lib32stdc++6, libc6-i386,
       # Boost
       libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
