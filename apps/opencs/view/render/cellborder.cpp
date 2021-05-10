@@ -19,9 +19,12 @@ const int CSVRender::CellBorder::VertexCount = (ESM::Land::LAND_SIZE * 4) - 3;
 CSVRender::CellBorder::CellBorder(osg::Group* cellNode, const CSMWorld::CellCoordinates& coords)
     : mParentNode(cellNode)
 {
+    mBorderGeode = new osg::Geode();
+    
     mBaseNode = new osg::PositionAttitudeTransform();
     mBaseNode->setNodeMask(Mask_CellBorder);
     mBaseNode->setPosition(osg::Vec3f(coords.getX() * CellSize, coords.getY() * CellSize, 10));
+    mBaseNode->addChild(mBorderGeode);
 
     mParentNode->addChild(mBaseNode);
 }
@@ -79,10 +82,8 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
     geometry->addPrimitiveSet(primitives);
     geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
-
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    geode->addDrawable(geometry);
-    mBaseNode->addChild(geode);
+    mBorderGeode->removeDrawables(0);
+    mBorderGeode->addDrawable(geometry);
 }
 
 size_t CSVRender::CellBorder::landIndex(int x, int y)

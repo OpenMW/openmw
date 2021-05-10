@@ -34,6 +34,7 @@
 #include "../../model/world/universalid.hpp"
 
 #include "brushdraw.hpp"
+#include "commands.hpp"
 #include "editmode.hpp"
 #include "pagedworldspacewidget.hpp"
 #include "mask.hpp"
@@ -284,6 +285,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
     sortAndLimitAlteredCells();
 
     undoStack.beginMacro ("Edit shape and normal records");
+    undoStack.push(new DrawTerrainSelectionCommand(*mTerrainShapeSelection));
 
     for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
     {
@@ -353,6 +355,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         }
         pushNormalsEditToCommand(landNormalsNew, document, landTable, cellId);
     }
+    undoStack.push(new DrawTerrainSelectionCommand(*mTerrainShapeSelection));
     undoStack.endMacro();
     clearTransientEdits();
 }
