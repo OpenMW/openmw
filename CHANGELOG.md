@@ -121,6 +121,7 @@
     Bug #5975: NIF controllers from sheath meshes are used
     Bug #5991: Activate should always be allowed for inventory items
     Bug #5995: NiUVController doesn't calculate the UV offset properly
+    Bug #6016: Greeting interrupts Fargoth's sneak-walk
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu

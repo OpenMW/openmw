@@ -209,14 +209,17 @@ namespace MWMechanics
                 storage.setState(AiWanderStorage::Wander_Walking);
         }
 
-        GreetingState greetingState = MWBase::Environment::get().getMechanicsManager()->getGreetingState(actor);
-        if (greetingState == Greet_InProgress)
+        if(!cStats.getMovementFlag(CreatureStats::Flag_ForceJump) && !cStats.getMovementFlag(CreatureStats::Flag_ForceSneak))
         {
-            if (storage.mState == AiWanderStorage::Wander_Walking)
+            GreetingState greetingState = MWBase::Environment::get().getMechanicsManager()->getGreetingState(actor);
+            if (greetingState == Greet_InProgress)
             {
-                stopMovement(actor);
-                mObstacleCheck.clear();
-                storage.setState(AiWanderStorage::Wander_IdleNow);
+                if (storage.mState == AiWanderStorage::Wander_Walking)
+                {
+                    stopMovement(actor);
+                    mObstacleCheck.clear();
+                    storage.setState(AiWanderStorage::Wander_IdleNow);
+                }
             }
         }
 
