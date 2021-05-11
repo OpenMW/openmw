@@ -118,7 +118,7 @@ namespace Gui
 
     void ImageButton::setImage(const std::string &image)
     {
-        size_t extpos = image.find_last_of(".");
+        size_t extpos = image.find_last_of('.');
         std::string imageNoExt = image.substr(0, extpos);
 
         std::string ext = image.substr(extpos);

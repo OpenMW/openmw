@@ -179,7 +179,7 @@ namespace Debug
         if (str.length() == 0)
             return true;
 
-        return str.find("OFF") == std::string::npos && str.find("0") == std::string::npos && str.find("NO") == std::string::npos;
+        return str.find("OFF") == std::string::npos && str.find('0') == std::string::npos && str.find("NO") == std::string::npos;
     }
 
     DebugGroup::DebugGroup(const std::string & message, GLuint id)

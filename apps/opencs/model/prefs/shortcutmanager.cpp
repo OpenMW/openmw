@@ -178,7 +178,7 @@ namespace CSMPrefs
     {
         const int MaxKeys = 4; // A limitation of QKeySequence
 
-        size_t end = data.find(";");
+        size_t end = data.find(';');
         size_t size = std::min(end, data.size());
 
         std::string value = data.substr(0, size);
@@ -191,7 +191,7 @@ namespace CSMPrefs
 
         while (start < value.size())
         {
-            end = data.find("+", start);
+            end = data.find('+', start);
             end = std::min(end, value.size());
 
             std::string name = value.substr(start, end - start);
@@ -243,7 +243,7 @@ namespace CSMPrefs
 
     void ShortcutManager::convertFromString(const std::string& data, int& modifier) const
     {
-        size_t start = data.find(";") + 1;
+        size_t start = data.find(';') + 1;
         start = std::min(start, data.size());
 
         std::string name = data.substr(start);
