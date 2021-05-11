@@ -20,7 +20,7 @@ namespace bfs = boost::filesystem;
 ///See if the file has the named extension
 bool hasExtension(std::string filename, std::string  extensionToFind)
 {
-    std::string extension = filename.substr(filename.find_last_of(".")+1);
+    std::string extension = filename.substr(filename.find_last_of('.')+1);
 
     //Convert strings to lower case for comparison
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);

@@ -266,7 +266,7 @@ namespace MWGui
                     std::map<std::string, std::string> userStrings = focus->getUserStrings();
                     for (auto& userStringPair : userStrings)
                     {
-                        size_t underscorePos = userStringPair.first.find("_");
+                        size_t underscorePos = userStringPair.first.find('_');
                         if (underscorePos == std::string::npos)
                             continue;
                         std::string key = userStringPair.first.substr(0, underscorePos);
