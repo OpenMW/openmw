@@ -6,7 +6,7 @@ near clip
 
 :Type:		floating point
 :Range:		> 0
-:Default:	1.0
+:Default:	3.0
 
 This setting controls the distance to the near clipping plane. The value must be greater than zero.
 Values greater than approximately 18.0 will occasionally clip objects in the world in front of the character.
