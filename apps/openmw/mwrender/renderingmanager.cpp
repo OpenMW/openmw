@@ -262,7 +262,7 @@ namespace MWRender
             globalDefines[itr->first] = itr->second;
 
         // Refactor this at some point - most shaders don't care about these defines
-        float groundcoverDistance = (Constants::CellSizeInUnits * std::max(1, Settings::Manager::getInt("distance", "Groundcover")) - 1024) * 0.93;
+        float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
         globalDefines["groundcoverFadeStart"] = std::to_string(groundcoverDistance * 0.9f);
         globalDefines["groundcoverFadeEnd"] = std::to_string(groundcoverDistance);
         globalDefines["groundcoverStompMode"] = std::to_string(std::clamp(Settings::Manager::getInt("stomp mode", "Groundcover"), 0, 2));
@@ -349,6 +349,10 @@ namespace MWRender
             mGroundcover.reset(new Groundcover(mResourceSystem->getSceneManager(), density));
             static_cast<Terrain::QuadTreeWorld*>(mGroundcoverWorld.get())->addChunkManager(mGroundcover.get());
             mResourceSystem->addResourceManager(mGroundcover.get());
+
+            // Groundcover it is handled in the same way indifferently from if it is from active grid or from distant cell.
+            // Use a stub grid to avoid splitting between chunks for active grid and chunks for distant cells.
+            mGroundcoverWorld->setActiveGrid(osg::Vec4i(0, 0, 0, 0));
         }
         // water goes after terrain for correct waterculling order
         mWater.reset(new Water(sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
@@ -1076,7 +1080,7 @@ namespace MWRender
 
         if (mGroundcoverWorld)
         {
-            int groundcoverDistance = Constants::CellSizeInUnits * std::max(1, Settings::Manager::getInt("distance", "Groundcover"));
+            float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
             mGroundcoverWorld->setViewDistance(groundcoverDistance * (distanceMult ? 1.f/distanceMult : 1.f));
         }
     }
@@ -1311,8 +1315,6 @@ namespace MWRender
     void RenderingManager::setActiveGrid(const osg::Vec4i &grid)
     {
         mTerrain->setActiveGrid(grid);
-        if (mGroundcoverWorld)
-            mGroundcoverWorld->setActiveGrid(grid);
     }
     bool RenderingManager::pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled)
     {
