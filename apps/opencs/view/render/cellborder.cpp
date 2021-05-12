@@ -12,7 +12,7 @@
 #include "../../model/world/cellcoordinates.hpp"
 
 const int CSVRender::CellBorder::CellSize = ESM::Land::REAL_SIZE;
-const int CSVRender::CellBorder::VertexCount = (ESM::Land::LAND_SIZE * 4) - 3;
+const int CSVRender::CellBorder::VertexCount = (ESM::Land::LAND_SIZE * 4) - 4;
 
 
 CSVRender::CellBorder::CellBorder(osg::Group* cellNode, const CSMWorld::CellCoordinates& coords)
@@ -61,7 +61,7 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
         vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
     x = 0;
-    for (/* */; y >= 0; --y)
+    for (/* */; y > 0; --y)
         vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
     mBorderGeometry->setVertexArray(vertices);
@@ -74,7 +74,7 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
 
     // Primitive
     osg::ref_ptr<osg::DrawElementsUShort> primitives =
-        new osg::DrawElementsUShort(osg::PrimitiveSet::LINE_STRIP, VertexCount);
+        new osg::DrawElementsUShort(osg::PrimitiveSet::LINE_STRIP, VertexCount + 1);
 
     for (size_t i = 0; i < VertexCount; ++i)
         primitives->setElement(i, i);
