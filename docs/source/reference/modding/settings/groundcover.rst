@@ -28,15 +28,14 @@ are used in the game. Can affect performance a lot.
 
 This setting can only be configured by editing the settings configuration file.
 
-distance
---------
+rendering distance
+------------------
 
-:Type:		integer
-:Range:		> 0
-:Default:	1
+:Type:		floating point
+:Range:		>= 0.0
+:Default:	6144.0
 
-Determines on which distance in cells grass pages are rendered.
-Default 1 value means 3x3 cells area (active grid).
+Determines on which distance in game units grass pages are rendered.
 May affect performance a lot.
 
 This setting can only be configured by editing the settings configuration file.
