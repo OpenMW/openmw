@@ -160,6 +160,8 @@
     Feature #5814: Bsatool should be able to create BSA archives, not only to extract it
     Feature #5828: Support more than 8 lights
     Feature #5910: Fall back to delta time when physics can't keep up
+    Feature #6033: Include pathgrid to navigation mesh
+    Feature #6034: Find path based on area cost depending on NPC stats
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
     Task #5844: Update 'toggle sneak' documentation
