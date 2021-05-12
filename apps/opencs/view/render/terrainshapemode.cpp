@@ -433,7 +433,9 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                 float smoothedByDistance = 0.0f;
                 if (mShapeEditTool == ShapeEditTool_Drag) smoothedByDistance = calculateBumpShape(distance, r, mTotalDiffY);
                 if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower) smoothedByDistance = calculateBumpShape(distance, r, r + mShapeEditToolStrength);
-                if (distance <= r)
+
+                // Using floating-point radius here to prevent selecting too few vertices.
+                if (distance <= mBrushSize / 2.0f)
                 {
                     if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, smoothedByDistance);
                     if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower)
@@ -1036,10 +1038,25 @@ void CSVRender::TerrainShapeMode::handleSelection(int globalSelectionX, int glob
             return;
         int selectionX = globalSelectionX;
         int selectionY = globalSelectionY;
-        if (xIsAtCellBorder)
+
+        if (xIsAtCellBorder && yIsAtCellBorder)
+        {
+            if (isInCellSelection(globalSelectionX - 1, globalSelectionY - 1)
+                || isInCellSelection(globalSelectionX + 1, globalSelectionY - 1)
+                || isInCellSelection(globalSelectionX - 1, globalSelectionY + 1))
+            {
+                selections->emplace_back(globalSelectionX, globalSelectionY);
+            }
+        }
+        else if (xIsAtCellBorder)
+        {
             selectionX--;
-        if (yIsAtCellBorder)
+        }
+        else if (yIsAtCellBorder)
+        {
             selectionY--;
+        }
+
         if (isInCellSelection(selectionX, selectionY))
             selections->emplace_back(globalSelectionX, globalSelectionY);
     }
@@ -1074,8 +1091,11 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
             {
                 int distanceX = abs(i - vertexCoords.first);
                 int distanceY = abs(j - vertexCoords.second);
-                int distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                if (distance <= r) handleSelection(i, j, &selections);
+                float distance = sqrt(pow(distanceX, 2)+pow(distanceY, 2));
+
+                // Using floating-point radius here to prevent selecting too few vertices.
+                if (distance <= mBrushSize / 2.0f)
+                    handleSelection(i, j, &selections);
             }
         }
     }
