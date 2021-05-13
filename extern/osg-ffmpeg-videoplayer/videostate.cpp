@@ -37,6 +37,22 @@ namespace
 {
     const int MAX_AUDIOQ_SIZE = (5 * 16 * 1024);
     const int MAX_VIDEOQ_SIZE = (5 * 256 * 1024);
+
+    struct AVPacketUnref
+    {
+        void operator()(AVPacket* packet) const
+        {
+            av_packet_unref(packet);
+        }
+    };
+
+    struct AVFrameFree
+    {
+        void operator()(AVFrame* frame) const
+        {
+            av_frame_free(&frame);
+        }
+    };
 }
 
 namespace Video
@@ -80,8 +96,7 @@ void VideoState::setAudioFactory(MovieAudioFactory *factory)
 
 void PacketQueue::put(AVPacket *pkt)
 {
-    AVPacketList *pkt1;
-    pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
+    std::unique_ptr<AVPacketList> pkt1(static_cast<AVPacketList*>(av_malloc(sizeof(AVPacketList))));
     if(!pkt1) throw std::bad_alloc();
 
     if(pkt == &flush_pkt)
@@ -91,18 +106,16 @@ void PacketQueue::put(AVPacket *pkt)
 
     pkt1->next = nullptr;
 
-    this->mutex.lock ();
+    std::lock_guard<std::mutex> lock(this->mutex);
 
     if(!last_pkt)
-        this->first_pkt = pkt1;
+        this->first_pkt = pkt1.get();
     else
-        this->last_pkt->next = pkt1;
-    this->last_pkt = pkt1;
+        this->last_pkt->next = pkt1.get();
+    this->last_pkt = pkt1.release();
     this->nb_packets++;
-    this->size += pkt1->pkt.size;
+    this->size += this->last_pkt->pkt.size;
     this->cond.notify_one();
-
-    this->mutex.unlock();
 }
 
 int PacketQueue::get(AVPacket *pkt, VideoState *is)
@@ -144,7 +157,7 @@ void PacketQueue::clear()
 {
     AVPacketList *pkt, *pkt1;
 
-    this->mutex.lock();
+    std::lock_guard<std::mutex> lock(this->mutex);
     for(pkt = this->first_pkt; pkt != nullptr; pkt = pkt1)
     {
         pkt1 = pkt->next;
@@ -156,7 +169,6 @@ void PacketQueue::clear()
     this->first_pkt = nullptr;
     this->nb_packets = 0;
     this->size = 0;
-    this->mutex.unlock ();
 }
 
 int VideoPicture::set_dimensions(int w, int h) {
@@ -312,7 +324,7 @@ void VideoState::video_refresh()
 }
 
 
-int VideoState::queue_picture(AVFrame *pFrame, double pts)
+int VideoState::queue_picture(const AVFrame &pFrame, double pts)
 {
     VideoPicture *vp;
 
@@ -325,7 +337,7 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     if(this->mQuit)
         return -1;
 
-    this->pictq_mutex.lock();
+    std::lock_guard<std::mutex> lock(this->pictq_mutex);
 
     // windex is set to 0 initially
     vp = &this->pictq[this->pictq_windex];
@@ -333,8 +345,8 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     // Convert the image into RGBA format
     // TODO: we could do this in a pixel shader instead, if the source format
     // matches a commonly used format (ie YUV420P)
-    const int w = pFrame->width;
-    const int h = pFrame->height;
+    const int w = pFrame.width;
+    const int h = pFrame.height;
     if(this->sws_context == nullptr || this->sws_context_w != w || this->sws_context_h != h)
     {
         if (this->sws_context != nullptr)
@@ -350,23 +362,19 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
 
     vp->pts = pts;
     if (vp->set_dimensions(w, h) < 0)
-    {
-        this->pictq_mutex.unlock();
         return -1;
-    }
 
-    sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
+    sws_scale(this->sws_context, pFrame.data, pFrame.linesize,
               0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);
 
     // now we inform our display thread that we have a pic ready
     this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_ARRAY_SIZE;
     this->pictq_size++;
-    this->pictq_mutex.unlock();
 
     return 0;
 }
 
-double VideoState::synchronize_video(AVFrame *src_frame, double pts)
+double VideoState::synchronize_video(const AVFrame &src_frame, double pts)
 {
     double frame_delay;
 
@@ -380,7 +388,7 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
     frame_delay = av_q2d(this->video_ctx->pkt_timebase);
 
     /* if we are repeating a frame, adjust clock accordingly */
-    frame_delay += src_frame->repeat_pict * (frame_delay * 0.5);
+    frame_delay += src_frame.repeat_pict * (frame_delay * 0.5);
     this->video_clock += frame_delay;
 
     return pts;
@@ -391,7 +399,17 @@ class VideoThread
 public:
     VideoThread(VideoState* self)
         : mVideoState(self)
-        , mThread([this] { run(); })
+        , mThread([this]
+        {
+            try
+            {
+                run();
+            }
+            catch(std::exception& e)
+            {
+                std::cerr << "An error occurred playing the video: " << e.what () << std::endl;
+            }
+        })
     {
     }
 
@@ -403,13 +421,12 @@ public:
     void run()
     {
         VideoState* self = mVideoState;
-        AVPacket pkt1, *packet = &pkt1;
-        av_init_packet(packet);
-        AVFrame *pFrame;
+        AVPacket packetData;
+        av_init_packet(&packetData);
+        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData);
+        std::unique_ptr<AVFrame, AVFrameFree> pFrame{av_frame_alloc()};
 
-        pFrame = av_frame_alloc();
-
-        while(self->videoq.get(packet, self) >= 0)
+        while(self->videoq.get(packet.get(), self) >= 0)
         {
             if(packet->data == flush_pkt.data)
             {
@@ -426,30 +443,26 @@ public:
             }
 
             // Decode video frame
-            int ret = avcodec_send_packet(self->video_ctx, packet);
+            int ret = avcodec_send_packet(self->video_ctx, packet.get());
             // EAGAIN is not expected
             if (ret < 0)
                 throw std::runtime_error("Error decoding video frame");
 
             while (!ret)
             {
-                ret = avcodec_receive_frame(self->video_ctx, pFrame);
+                ret = avcodec_receive_frame(self->video_ctx, pFrame.get());
                 if (!ret)
                 {
                     double pts = pFrame->best_effort_timestamp;
                     pts *= av_q2d((*self->video_st)->time_base);
 
-                    pts = self->synchronize_video(pFrame, pts);
+                    pts = self->synchronize_video(*pFrame, pts);
 
-                    if(self->queue_picture(pFrame, pts) < 0)
+                    if(self->queue_picture(*pFrame, pts) < 0)
                         break;
                 }
             }
         }
-
-        av_packet_unref(packet);
-
-        av_frame_free(&pFrame);
     }
 
 private:
@@ -476,8 +489,9 @@ public:
         VideoState* self = mVideoState;
 
         AVFormatContext *pFormatCtx = self->format_ctx;
-        AVPacket pkt1, *packet = &pkt1;
-        av_init_packet(packet);
+        AVPacket packetData;
+        av_init_packet(&packetData);
+        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData);
 
         try
         {
@@ -560,7 +574,7 @@ public:
                     continue;
                 }
 
-                if(av_read_frame(pFormatCtx, packet) < 0)
+                if(av_read_frame(pFormatCtx, packet.get()) < 0)
                 {
                     if (self->audioq.nb_packets == 0 && self->videoq.nb_packets == 0 && self->pictq_size == 0)
                         self->mVideoEnded = true;
@@ -571,11 +585,11 @@ public:
 
                 // Is this a packet from the video stream?
                 if(self->video_st && packet->stream_index == self->video_st-pFormatCtx->streams)
-                    self->videoq.put(packet);
+                    self->videoq.put(packet.get());
                 else if(self->audio_st && packet->stream_index == self->audio_st-pFormatCtx->streams)
-                    self->audioq.put(packet);
+                    self->audioq.put(packet.get());
                 else
-                    av_packet_unref(packet);
+                    av_packet_unref(packet.get());
             }
         }
         catch(std::exception& e) {

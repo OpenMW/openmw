@@ -132,8 +132,8 @@ struct VideoState {
     void video_display(VideoPicture* vp);
     void video_refresh();
 
-    int queue_picture(AVFrame *pFrame, double pts);
-    double synchronize_video(AVFrame *src_frame, double pts);
+    int queue_picture(const AVFrame &pFrame, double pts);
+    double synchronize_video(const AVFrame &src_frame, double pts);
 
     double get_audio_clock();
     double get_video_clock();
