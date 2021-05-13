@@ -38,36 +38,11 @@ namespace
     const int MAX_AUDIOQ_SIZE = (5 * 16 * 1024);
     const int MAX_VIDEOQ_SIZE = (5 * 256 * 1024);
 
-    class PacketGuard
+    struct AVPacketUnref
     {
-        AVPacket mPacket;
-        bool mReleased;
-    public:
-        PacketGuard() : mReleased(false)
+        void operator()(AVPacket* packet) const
         {
-            av_init_packet(&mPacket);
-        }
-
-        AVPacket* operator->()
-        {
-            return &mPacket;
-        }
-
-        AVPacket* operator*()
-        {
-            return &mPacket;
-        }
-
-        AVPacket* release()
-        {
-            mReleased = true;
-            return &mPacket;
-        }
-
-        ~PacketGuard()
-        {
-            if(!mReleased)
-                av_packet_unref(&mPacket);
+            av_packet_unref(packet);
         }
     };
 }
@@ -438,10 +413,12 @@ public:
     void run()
     {
         VideoState* self = mVideoState;
-        PacketGuard packet;
+        AVPacket packetData;
+        av_init_packet(&packetData);
+        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData, AVPacketUnref{});
         std::unique_ptr<AVFrame, VideoPicture::AVFrameDeleter> pFrame{av_frame_alloc()};
 
-        while(self->videoq.get(*packet, self) >= 0)
+        while(self->videoq.get(packet.get(), self) >= 0)
         {
             if(packet->data == flush_pkt.data)
             {
@@ -458,7 +435,7 @@ public:
             }
 
             // Decode video frame
-            int ret = avcodec_send_packet(self->video_ctx, *packet);
+            int ret = avcodec_send_packet(self->video_ctx, packet.get());
             // EAGAIN is not expected
             if (ret < 0)
                 throw std::runtime_error("Error decoding video frame");
@@ -504,7 +481,9 @@ public:
         VideoState* self = mVideoState;
 
         AVFormatContext *pFormatCtx = self->format_ctx;
-        PacketGuard packet;
+        AVPacket packetData;
+        av_init_packet(&packetData);
+        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData, AVPacketUnref{});
 
         try
         {
@@ -587,7 +566,7 @@ public:
                     continue;
                 }
 
-                if(av_read_frame(pFormatCtx, *packet) < 0)
+                if(av_read_frame(pFormatCtx, packet.get()) < 0)
                 {
                     if (self->audioq.nb_packets == 0 && self->videoq.nb_packets == 0 && self->pictq_size == 0)
                         self->mVideoEnded = true;
@@ -598,9 +577,11 @@ public:
 
                 // Is this a packet from the video stream?
                 if(self->video_st && packet->stream_index == self->video_st-pFormatCtx->streams)
-                    self->videoq.put(packet.release());
+                    self->videoq.put(packet.get());
                 else if(self->audio_st && packet->stream_index == self->audio_st-pFormatCtx->streams)
-                    self->audioq.put(packet.release());
+                    self->audioq.put(packet.get());
+                else
+                    av_packet_unref(packet.get());
             }
         }
         catch(std::exception& e) {
