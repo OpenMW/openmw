@@ -1095,7 +1095,7 @@ namespace MWWorld
         else
         {
             found->second.loadData(esm, isDeleted);
-            dialogue = found->second;
+            dialogue.mId = found->second.mId;
         }
 
         return RecordId(dialogue.mId, isDeleted);
