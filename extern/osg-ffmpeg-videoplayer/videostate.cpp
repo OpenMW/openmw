@@ -37,6 +37,39 @@ namespace
 {
     const int MAX_AUDIOQ_SIZE = (5 * 16 * 1024);
     const int MAX_VIDEOQ_SIZE = (5 * 256 * 1024);
+
+    class PacketGuard
+    {
+        AVPacket mPacket;
+        bool mReleased;
+    public:
+        PacketGuard() : mReleased(false)
+        {
+            av_init_packet(&mPacket);
+        }
+
+        AVPacket* operator->()
+        {
+            return &mPacket;
+        }
+
+        AVPacket* operator*()
+        {
+            return &mPacket;
+        }
+
+        AVPacket* release()
+        {
+            mReleased = true;
+            return &mPacket;
+        }
+
+        ~PacketGuard()
+        {
+            if(!mReleased)
+                av_packet_unref(&mPacket);
+        }
+    };
 }
 
 namespace Video
@@ -98,7 +131,7 @@ void PacketQueue::put(AVPacket *pkt)
         this->last_pkt->next = pkt1.get();
     this->last_pkt = pkt1.release();
     this->nb_packets++;
-    this->size += pkt1->pkt.size;
+    this->size += this->last_pkt->pkt.size;
     this->cond.notify_one();
 }
 
@@ -383,7 +416,17 @@ class VideoThread
 public:
     VideoThread(VideoState* self)
         : mVideoState(self)
-        , mThread([this] { run(); })
+        , mThread([this]
+        {
+            try
+            {
+                run();
+            }
+            catch(std::exception& e)
+            {
+                std::cerr << "An error occurred playing the video: " << e.what () << std::endl;
+            }
+        })
     {
     }
 
@@ -395,60 +438,46 @@ public:
     void run()
     {
         VideoState* self = mVideoState;
-        AVPacket pkt1, *packet = &pkt1;
-        av_init_packet(packet);
-        AVFrame *pFrame;
+        PacketGuard packet;
+        std::unique_ptr<AVFrame, VideoPicture::AVFrameDeleter> pFrame{av_frame_alloc()};
 
-        pFrame = av_frame_alloc();
-
-        try
+        while(self->videoq.get(*packet, self) >= 0)
         {
-            while(self->videoq.get(packet, self) >= 0)
+            if(packet->data == flush_pkt.data)
             {
-                if(packet->data == flush_pkt.data)
+                avcodec_flush_buffers(self->video_ctx);
+
+                self->pictq_mutex.lock();
+                self->pictq_size = 0;
+                self->pictq_rindex = 0;
+                self->pictq_windex = 0;
+                self->pictq_mutex.unlock();
+
+                self->frame_last_pts = packet->pts * av_q2d((*self->video_st)->time_base);
+                continue;
+            }
+
+            // Decode video frame
+            int ret = avcodec_send_packet(self->video_ctx, *packet);
+            // EAGAIN is not expected
+            if (ret < 0)
+                throw std::runtime_error("Error decoding video frame");
+
+            while (!ret)
+            {
+                ret = avcodec_receive_frame(self->video_ctx, pFrame.get());
+                if (!ret)
                 {
-                    avcodec_flush_buffers(self->video_ctx);
+                    double pts = pFrame->best_effort_timestamp;
+                    pts *= av_q2d((*self->video_st)->time_base);
 
-                    self->pictq_mutex.lock();
-                    self->pictq_size = 0;
-                    self->pictq_rindex = 0;
-                    self->pictq_windex = 0;
-                    self->pictq_mutex.unlock();
+                    pts = self->synchronize_video(pFrame.get(), pts);
 
-                    self->frame_last_pts = packet->pts * av_q2d((*self->video_st)->time_base);
-                    continue;
-                }
-
-                // Decode video frame
-                int ret = avcodec_send_packet(self->video_ctx, packet);
-                // EAGAIN is not expected
-                if (ret < 0)
-                    throw std::runtime_error("Error decoding video frame");
-
-                while (!ret)
-                {
-                    ret = avcodec_receive_frame(self->video_ctx, pFrame);
-                    if (!ret)
-                    {
-                        double pts = pFrame->best_effort_timestamp;
-                        pts *= av_q2d((*self->video_st)->time_base);
-
-                        pts = self->synchronize_video(pFrame, pts);
-
-                        if(self->queue_picture(pFrame, pts) < 0)
-                            break;
-                    }
+                    if(self->queue_picture(pFrame.get(), pts) < 0)
+                        break;
                 }
             }
         }
-        catch(std::exception& e)
-        {
-            std::cerr << "An error occurred playing the video: " << e.what () << std::endl;
-        }
-
-        av_packet_unref(packet);
-
-        av_frame_free(&pFrame);
     }
 
 private:
@@ -475,8 +504,7 @@ public:
         VideoState* self = mVideoState;
 
         AVFormatContext *pFormatCtx = self->format_ctx;
-        AVPacket pkt1, *packet = &pkt1;
-        av_init_packet(packet);
+        PacketGuard packet;
 
         try
         {
@@ -559,7 +587,7 @@ public:
                     continue;
                 }
 
-                if(av_read_frame(pFormatCtx, packet) < 0)
+                if(av_read_frame(pFormatCtx, *packet) < 0)
                 {
                     if (self->audioq.nb_packets == 0 && self->videoq.nb_packets == 0 && self->pictq_size == 0)
                         self->mVideoEnded = true;
@@ -570,11 +598,9 @@ public:
 
                 // Is this a packet from the video stream?
                 if(self->video_st && packet->stream_index == self->video_st-pFormatCtx->streams)
-                    self->videoq.put(packet);
+                    self->videoq.put(packet.release());
                 else if(self->audio_st && packet->stream_index == self->audio_st-pFormatCtx->streams)
-                    self->audioq.put(packet);
-                else
-                    av_packet_unref(packet);
+                    self->audioq.put(packet.release());
             }
         }
         catch(std::exception& e) {
