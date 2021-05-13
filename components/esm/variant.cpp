@@ -10,20 +10,20 @@
 
 namespace
 {
-    const uint32_t STRV = ESM::FourCC<'S','T','R','V'>::value;
-    const uint32_t INTV = ESM::FourCC<'I','N','T','V'>::value;
-    const uint32_t FLTV = ESM::FourCC<'F','L','T','V'>::value;
-    const uint32_t STTV = ESM::FourCC<'S','T','T','V'>::value;
+    constexpr uint32_t STRV = ESM::FourCC<'S','T','R','V'>::value;
+    constexpr uint32_t INTV = ESM::FourCC<'I','N','T','V'>::value;
+    constexpr uint32_t FLTV = ESM::FourCC<'F','L','T','V'>::value;
+    constexpr uint32_t STTV = ESM::FourCC<'S','T','T','V'>::value;
 
     template <typename T, bool orDefault = false>
     struct GetValue
     {
-        T operator()(int value) const { return static_cast<T>(value); }
+        constexpr T operator()(int value) const { return static_cast<T>(value); }
 
-        T operator()(float value) const { return static_cast<T>(value); }
+        constexpr T operator()(float value) const { return static_cast<T>(value); }
 
         template <typename V>
-        T operator()(const V&) const
+        constexpr T operator()(const V&) const
         {
             if constexpr (orDefault)
                 return T {};
