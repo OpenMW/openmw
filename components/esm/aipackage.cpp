@@ -15,7 +15,12 @@ namespace ESM
     {
         AIPackage pack;
         if (esm.retSubName() == AI_CNDT) {
-            mList.back().mCellName = esm.getHString();
+            if (mList.empty()) 
+            {
+                esm.fail("AIPackge with an AI_CNDT applying to no cell.");
+            } else {
+                mList.back().mCellName = esm.getHString();
+            }
         } else if (esm.retSubName() == AI_Wander) {
             pack.mType = AI_Wander;
             esm.getHExact(&pack.mWander, 14);
