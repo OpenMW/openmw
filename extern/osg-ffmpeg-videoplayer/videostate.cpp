@@ -80,8 +80,7 @@ void VideoState::setAudioFactory(MovieAudioFactory *factory)
 
 void PacketQueue::put(AVPacket *pkt)
 {
-    AVPacketList *pkt1;
-    pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
+    std::unique_ptr<AVPacketList> pkt1(static_cast<AVPacketList*>(av_malloc(sizeof(AVPacketList))));
     if(!pkt1) throw std::bad_alloc();
 
     if(pkt == &flush_pkt)
@@ -91,18 +90,16 @@ void PacketQueue::put(AVPacket *pkt)
 
     pkt1->next = nullptr;
 
-    this->mutex.lock ();
+    std::lock_guard<std::mutex> lock(this->mutex);
 
     if(!last_pkt)
-        this->first_pkt = pkt1;
+        this->first_pkt = pkt1.get();
     else
-        this->last_pkt->next = pkt1;
-    this->last_pkt = pkt1;
+        this->last_pkt->next = pkt1.get();
+    this->last_pkt = pkt1.release();
     this->nb_packets++;
     this->size += pkt1->pkt.size;
     this->cond.notify_one();
-
-    this->mutex.unlock();
 }
 
 int PacketQueue::get(AVPacket *pkt, VideoState *is)
@@ -144,7 +141,7 @@ void PacketQueue::clear()
 {
     AVPacketList *pkt, *pkt1;
 
-    this->mutex.lock();
+    std::lock_guard<std::mutex> lock(this->mutex);
     for(pkt = this->first_pkt; pkt != nullptr; pkt = pkt1)
     {
         pkt1 = pkt->next;
@@ -156,7 +153,6 @@ void PacketQueue::clear()
     this->first_pkt = nullptr;
     this->nb_packets = 0;
     this->size = 0;
-    this->mutex.unlock ();
 }
 
 int VideoPicture::set_dimensions(int w, int h) {
@@ -325,7 +321,7 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     if(this->mQuit)
         return -1;
 
-    this->pictq_mutex.lock();
+    std::lock_guard<std::mutex> lock(this->pictq_mutex);
 
     // windex is set to 0 initially
     vp = &this->pictq[this->pictq_windex];
@@ -350,10 +346,7 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
 
     vp->pts = pts;
     if (vp->set_dimensions(w, h) < 0)
-    {
-        this->pictq_mutex.unlock();
         return -1;
-    }
 
     sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
               0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);
@@ -361,7 +354,6 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     // now we inform our display thread that we have a pic ready
     this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_ARRAY_SIZE;
     this->pictq_size++;
-    this->pictq_mutex.unlock();
 
     return 0;
 }
