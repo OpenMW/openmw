@@ -3,7 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <map>
+#include <boost/container/flat_set.hpp>
 
 #include "recordcmp.hpp"
 
@@ -74,10 +76,10 @@ namespace MWWorld
         const T *find(int index) const;
     };
 
-    template <class T>
+    template <class T, class Container=std::vector<T*>>
     class SharedIterator
     {
-        typedef typename std::vector<T *>::const_iterator Iter;
+        typedef typename Container::const_iterator Iter;
 
         Iter mIter;
 
@@ -233,10 +235,34 @@ namespace MWWorld
     template <>
     class Store<ESM::Land> : public StoreBase
     {
-        std::vector<ESM::Land *> mStatic;
+        struct SpatialComparator
+        {
+            using is_transparent = void;
+
+            bool operator()(const std::unique_ptr<ESM::Land>& x, const std::unique_ptr<ESM::Land>& y) const {
+                if (x->mX == y->mX) {
+                    return x->mY < y->mY;
+                }
+                return x->mX < y->mX;
+            }
+            bool operator()(const std::unique_ptr<ESM::Land>& x, const std::pair<int, int>& y) const {
+                if (x->mX == y.first) {
+                    return x->mY < y.second;
+                }
+                return x->mX < y.first;
+            }
+            bool operator()(const std::pair<int, int>& x, const std::unique_ptr<ESM::Land>& y) const {
+                if (x.first == y->mX) {
+                    return x.second < y->mY;
+                }
+                return x.first < y->mX;
+            }
+        };
+        using Statics = boost::container::flat_set<std::unique_ptr<ESM::Land>, SpatialComparator>;
+        Statics mStatic;
 
     public:
-        typedef SharedIterator<ESM::Land> iterator;
+        typedef SharedIterator<ESM::Land, Statics> iterator;
 
         virtual ~Store();
 
