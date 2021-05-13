@@ -29,6 +29,7 @@ namespace DetourNavigator
         navigatorSettings.mRegionMergeSize = ::Settings::Manager::getInt("region merge size", "Navigator");
         navigatorSettings.mRegionMinSize = ::Settings::Manager::getInt("region min size", "Navigator");
         navigatorSettings.mTileSize = ::Settings::Manager::getInt("tile size", "Navigator");
+        navigatorSettings.mWaitUntilMinDistanceToPlayer = ::Settings::Manager::getInt("wait until min distance to player", "Navigator");
         navigatorSettings.mAsyncNavMeshUpdaterThreads = static_cast<std::size_t>(::Settings::Manager::getInt("async nav mesh updater threads", "Navigator"));
         navigatorSettings.mMaxNavMeshTilesCacheSize = static_cast<std::size_t>(::Settings::Manager::getInt("max nav mesh tiles cache size", "Navigator"));
         navigatorSettings.mMaxPolygonPathSize = static_cast<std::size_t>(::Settings::Manager::getInt("max polygon path size", "Navigator"));

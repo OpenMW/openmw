@@ -190,9 +190,9 @@ namespace DetourNavigator
             " recastMeshManagerRevision=" << lastRevision;
     }
 
-    void NavMeshManager::wait()
+    void NavMeshManager::wait(Loading::Listener& listener)
     {
-        mAsyncNavMeshUpdater.wait();
+        mAsyncNavMeshUpdater.wait(listener);
     }
 
     SharedNavMeshCacheItem NavMeshManager::getNavMesh(const osg::Vec3f& agentHalfExtents) const

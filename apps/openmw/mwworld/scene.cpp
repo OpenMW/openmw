@@ -618,6 +618,8 @@ namespace MWWorld
 
         if (changeEvent)
             mCellChanged = true;
+
+        mNavigator.wait(*loadingListener);
     }
 
     void Scene::testExteriorCells()
@@ -845,6 +847,8 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
+
+        mNavigator.wait(*loadingListener);
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)

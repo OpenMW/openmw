@@ -20,6 +20,11 @@
 
 class dtNavMesh;
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace DetourNavigator
 {
     enum class ChangeType
@@ -55,7 +60,7 @@ namespace DetourNavigator
         void post(const osg::Vec3f& agentHalfExtents, const SharedNavMeshCacheItem& mNavMeshCacheItem,
             const TilePosition& playerTile, const std::map<TilePosition, ChangeType>& changedTiles);
 
-        void wait();
+        void wait(Loading::Listener& listener);
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
 
@@ -131,9 +136,13 @@ namespace DetourNavigator
 
         void unlockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
 
+        inline std::size_t getTotalJobs() const;
+
         inline std::size_t getTotalThreadJobsUnsafe() const;
 
         void cleanupLastUpdates();
+
+        int waitUntilJobsDone(const std::size_t initialJobsLeft, std::size_t& maxJobsLeft, Loading::Listener& listener);
     };
 }
 
