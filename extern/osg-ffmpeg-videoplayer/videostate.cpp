@@ -45,6 +45,14 @@ namespace
             av_packet_unref(packet);
         }
     };
+
+    struct AVFrameFree
+    {
+        void operator()(AVFrame* frame) const
+        {
+            av_frame_free(&frame);
+        }
+    };
 }
 
 namespace Video
@@ -316,7 +324,7 @@ void VideoState::video_refresh()
 }
 
 
-int VideoState::queue_picture(AVFrame *pFrame, double pts)
+int VideoState::queue_picture(const AVFrame &pFrame, double pts)
 {
     VideoPicture *vp;
 
@@ -337,8 +345,8 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     // Convert the image into RGBA format
     // TODO: we could do this in a pixel shader instead, if the source format
     // matches a commonly used format (ie YUV420P)
-    const int w = pFrame->width;
-    const int h = pFrame->height;
+    const int w = pFrame.width;
+    const int h = pFrame.height;
     if(this->sws_context == nullptr || this->sws_context_w != w || this->sws_context_h != h)
     {
         if (this->sws_context != nullptr)
@@ -356,7 +364,7 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     if (vp->set_dimensions(w, h) < 0)
         return -1;
 
-    sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
+    sws_scale(this->sws_context, pFrame.data, pFrame.linesize,
               0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);
 
     // now we inform our display thread that we have a pic ready
@@ -366,7 +374,7 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     return 0;
 }
 
-double VideoState::synchronize_video(AVFrame *src_frame, double pts)
+double VideoState::synchronize_video(const AVFrame &src_frame, double pts)
 {
     double frame_delay;
 
@@ -380,7 +388,7 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
     frame_delay = av_q2d(this->video_ctx->pkt_timebase);
 
     /* if we are repeating a frame, adjust clock accordingly */
-    frame_delay += src_frame->repeat_pict * (frame_delay * 0.5);
+    frame_delay += src_frame.repeat_pict * (frame_delay * 0.5);
     this->video_clock += frame_delay;
 
     return pts;
@@ -415,8 +423,8 @@ public:
         VideoState* self = mVideoState;
         AVPacket packetData;
         av_init_packet(&packetData);
-        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData, AVPacketUnref{});
-        std::unique_ptr<AVFrame, VideoPicture::AVFrameDeleter> pFrame{av_frame_alloc()};
+        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData);
+        std::unique_ptr<AVFrame, AVFrameFree> pFrame{av_frame_alloc()};
 
         while(self->videoq.get(packet.get(), self) >= 0)
         {
@@ -448,9 +456,9 @@ public:
                     double pts = pFrame->best_effort_timestamp;
                     pts *= av_q2d((*self->video_st)->time_base);
 
-                    pts = self->synchronize_video(pFrame.get(), pts);
+                    pts = self->synchronize_video(*pFrame, pts);
 
-                    if(self->queue_picture(pFrame.get(), pts) < 0)
+                    if(self->queue_picture(*pFrame, pts) < 0)
                         break;
                 }
             }
@@ -483,7 +491,7 @@ public:
         AVFormatContext *pFormatCtx = self->format_ctx;
         AVPacket packetData;
         av_init_packet(&packetData);
-        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData, AVPacketUnref{});
+        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData);
 
         try
         {
