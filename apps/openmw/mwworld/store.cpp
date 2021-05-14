@@ -58,10 +58,7 @@ namespace MWWorld
 
         record.load(esm, isDeleted);
 
-        // Try to overwrite existing record
-        std::pair<typename Static::iterator, bool> ret = mStatic.insert(std::make_pair(record.mIndex, record));
-        if (!ret.second)
-            ret.first->second = record;
+        mStatic.insert_or_assign(record.mIndex, record);
     }
     template<typename T>
     int IndexedStore<T>::getSize() const
@@ -181,11 +178,9 @@ namespace MWWorld
         record.load(esm, isDeleted);
         Misc::StringUtils::lowerCaseInPlace(record.mId);
 
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(record.mId, record));
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert_or_assign(record.mId, record);
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
-        else
-            inserted.first->second = record;
 
         return RecordId(record.mId, isDeleted);
     }
@@ -235,28 +230,20 @@ namespace MWWorld
             if(it == mStatic.end())
                 return nullptr;
         }
-        std::pair<typename Dynamic::iterator, bool> result =
-            mDynamic.insert(std::pair<std::string, T>(id, item));
+        std::pair<typename Dynamic::iterator, bool> result = mDynamic.insert_or_assign(id, item);
         T *ptr = &result.first->second;
-        if (result.second) {
+        if (result.second)
             mShared.push_back(ptr);
-        } else {
-            *ptr = item;
-        }
         return ptr;
     }
     template<typename T>
     T *Store<T>::insertStatic(const T &item)
     {
         std::string id = Misc::StringUtils::lowerCase(item.mId);
-        std::pair<typename Static::iterator, bool> result =
-            mStatic.insert(std::pair<std::string, T>(id, item));
+        std::pair<typename Static::iterator, bool> result = mStatic.insert_or_assign(id, item);
         T *ptr = &result.first->second;
-        if (result.second) {
+        if (result.second)
             mShared.push_back(ptr);
-        } else {
-            *ptr = item;
-        }
         return ptr;
     }
     template<typename T>
