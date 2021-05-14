@@ -44,11 +44,11 @@ if(NOT OPENMW_USE_SYSTEM_BULLET)
         set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "" FORCE)
     endif()
 
-    # master on 12 Mar 2021
+    # May 7, 2021
     include(FetchContent)
     FetchContent_Declare(bullet
-        URL https://github.com/bulletphysics/bullet3/archive/87e668f6b2a883b4ef63db8a07c8e9283916e9d9.zip
-        URL_HASH MD5=9f13246439968494c2b595cf412d83c8
+        URL https://github.com/bulletphysics/bullet3/archive/refs/tags/3.17.tar.gz
+        URL_HASH MD5=7711bce9a49c289a08ecda34eaa0f32e
         SOURCE_DIR fetched/bullet
     )
     FetchContent_MakeAvailableExcludeFromAll(bullet)
