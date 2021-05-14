@@ -2,7 +2,6 @@
 #include "settings.hpp"
 #include "findsmoothpath.hpp"
 
-#include <DetourCommon.h>
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>
 

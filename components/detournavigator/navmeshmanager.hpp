@@ -4,7 +4,6 @@
 #include "asyncnavmeshupdater.hpp"
 #include "cachedrecastmeshmanager.hpp"
 #include "offmeshconnectionsmanager.hpp"
-#include "sharednavmesh.hpp"
 #include "recastmeshtiles.hpp"
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>

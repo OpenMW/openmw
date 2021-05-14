@@ -11,8 +11,6 @@
 #include <vector>
 #include <tuple>
 
-#include <osg/Vec3f>
-
 #include <LinearMath/btTransform.h>
 
 namespace DetourNavigator

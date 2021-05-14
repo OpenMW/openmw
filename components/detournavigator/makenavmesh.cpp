@@ -1,6 +1,5 @@
 #include "makenavmesh.hpp"
 #include "debug.hpp"
-#include "dtstatus.hpp"
 #include "exceptions.hpp"
 #include "recastmesh.hpp"
 #include "settings.hpp"
