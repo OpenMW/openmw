@@ -7,6 +7,7 @@
 #include "objectid.hpp"
 #include "navmeshcacheitem.hpp"
 #include "recastmeshtiles.hpp"
+#include "waitconditiontype.hpp"
 
 namespace ESM
 {
@@ -165,9 +166,10 @@ namespace DetourNavigator
         virtual void setUpdatesEnabled(bool enabled) = 0;
 
         /**
-         * @brief wait locks thread until all tiles are updated from last update call.
+         * @brief wait locks thread until tiles are updated from last update call based on passed condition type.
+         * @param waitConditionType defines when waiting will stop
          */
-        virtual void wait(Loading::Listener& listener) = 0;
+        virtual void wait(Loading::Listener& listener, WaitConditionType waitConditionType) = 0;
 
         /**
          * @brief findPath fills output iterator with points of scene surfaces to be used for actor to walk through.

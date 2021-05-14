@@ -10,7 +10,9 @@
 
 #include <osg/Stats>
 
+#include <algorithm>
 #include <numeric>
+#include <set>
 
 namespace
 {
@@ -23,12 +25,14 @@ namespace
     }
 
     int getMinDistanceTo(const TilePosition& position, int maxDistance,
-                         const std::map<osg::Vec3f, std::set<TilePosition>>& tilesPerHalfExtents)
+                         const std::map<osg::Vec3f, std::set<TilePosition>>& tilesPerHalfExtents,
+                         const std::set<std::tuple<osg::Vec3f, TilePosition>>& presentTiles)
     {
         int result = maxDistance;
         for (const auto& [halfExtents, tiles] : tilesPerHalfExtents)
             for (const TilePosition& tile : tiles)
-                result = std::min(result, getManhattanDistance(position, tile));
+                if (presentTiles.find(std::make_tuple(halfExtents, tile)) == presentTiles.end())
+                    result = std::min(result, getManhattanDistance(position, tile));
         return result;
     }
 }
@@ -142,7 +146,7 @@ namespace DetourNavigator
             mHasJob.notify_all();
     }
 
-    void AsyncNavMeshUpdater::wait(Loading::Listener& listener)
+    void AsyncNavMeshUpdater::wait(Loading::Listener& listener, WaitConditionType waitConditionType)
     {
         if (mSettings.get().mWaitUntilMinDistanceToPlayer == 0)
             return;
@@ -150,15 +154,26 @@ namespace DetourNavigator
         const std::size_t initialJobsLeft = getTotalJobs();
         std::size_t maxProgress = initialJobsLeft + mThreads.size();
         listener.setProgressRange(maxProgress);
-        const int minDistanceToPlayer = waitUntilJobsDone(initialJobsLeft, maxProgress, listener);
-        if (minDistanceToPlayer < mSettings.get().mWaitUntilMinDistanceToPlayer)
+        switch (waitConditionType)
         {
-            mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
-            listener.setProgress(maxProgress);
+            case WaitConditionType::requiredTilesPresent:
+            {
+                const int minDistanceToPlayer = waitUntilJobsDoneForNotPresentTiles(initialJobsLeft, maxProgress, listener);
+                if (minDistanceToPlayer < mSettings.get().mWaitUntilMinDistanceToPlayer)
+                {
+                    mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
+                    listener.setProgress(maxProgress);
+                }
+                break;
+            }
+            case WaitConditionType::allJobsDone:
+                waitUntilAllJobsDone();
+                listener.setProgress(maxProgress);
+                break;
         }
     }
 
-    int AsyncNavMeshUpdater::waitUntilJobsDone(const std::size_t initialJobsLeft, std::size_t& maxProgress, Loading::Listener& listener)
+    int AsyncNavMeshUpdater::waitUntilJobsDoneForNotPresentTiles(const std::size_t initialJobsLeft, std::size_t& maxProgress, Loading::Listener& listener)
     {
         std::size_t prevJobsLeft = initialJobsLeft;
         std::size_t jobsDone = 0;
@@ -174,9 +189,9 @@ namespace DetourNavigator
                 minDistanceToPlayer = 0;
                 return true;
             }
-            minDistanceToPlayer = getMinDistanceTo(playerPosition, maxDistanceToPlayer, mPushed);
+            minDistanceToPlayer = getMinDistanceTo(playerPosition, maxDistanceToPlayer, mPushed, mPresentTiles);
             for (const auto& [threadId, queue] : mThreadsQueues)
-                minDistanceToPlayer = getMinDistanceTo(playerPosition, minDistanceToPlayer, queue.mPushed);
+                minDistanceToPlayer = getMinDistanceTo(playerPosition, minDistanceToPlayer, queue.mPushed, mPresentTiles);
             return minDistanceToPlayer >= maxDistanceToPlayer;
         };
         std::unique_lock<std::mutex> lock(mMutex);
@@ -197,6 +212,15 @@ namespace DetourNavigator
             }
         }
         return minDistanceToPlayer;
+    }
+
+    void AsyncNavMeshUpdater::waitUntilAllJobsDone()
+    {
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            mDone.wait(lock, [this] { return mJobs.size() + getTotalThreadJobsUnsafe() == 0; });
+        }
+        mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
     }
 
     void AsyncNavMeshUpdater::reportStats(unsigned int frameNumber, osg::Stats& stats) const
@@ -272,6 +296,11 @@ namespace DetourNavigator
                 Version {recastMesh->getGeneration(), recastMesh->getRevision()},
                 navMeshVersion);
         }
+
+        if (status == UpdateNavMeshStatus::removed || status == UpdateNavMeshStatus::lost)
+            mPresentTiles.erase(std::make_tuple(job.mAgentHalfExtents, job.mChangedTile));
+        else if (isSuccess(status) && status != UpdateNavMeshStatus::ignored)
+            mPresentTiles.insert(std::make_tuple(job.mAgentHalfExtents, job.mChangedTile));
 
         const auto finish = std::chrono::steady_clock::now();
 

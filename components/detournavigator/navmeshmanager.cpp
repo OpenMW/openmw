@@ -5,6 +5,7 @@
 #include "makenavmesh.hpp"
 #include "navmeshcacheitem.hpp"
 #include "settings.hpp"
+#include "waitconditiontype.hpp"
 
 #include <components/debug/debuglog.hpp>
 
@@ -190,9 +191,9 @@ namespace DetourNavigator
             " recastMeshManagerRevision=" << lastRevision;
     }
 
-    void NavMeshManager::wait(Loading::Listener& listener)
+    void NavMeshManager::wait(Loading::Listener& listener, WaitConditionType waitConditionType)
     {
-        mAsyncNavMeshUpdater.wait(listener);
+        mAsyncNavMeshUpdater.wait(listener, waitConditionType);
     }
 
     SharedNavMeshCacheItem NavMeshManager::getNavMesh(const osg::Vec3f& agentHalfExtents) const

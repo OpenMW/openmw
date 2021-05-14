@@ -6,6 +6,7 @@
 #include "offmeshconnectionsmanager.hpp"
 #include "sharednavmesh.hpp"
 #include "recastmeshtiles.hpp"
+#include "waitconditiontype.hpp"
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
@@ -45,7 +46,7 @@ namespace DetourNavigator
 
         void update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents);
 
-        void wait(Loading::Listener& listener);
+        void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
 
         SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& agentHalfExtents) const;
 

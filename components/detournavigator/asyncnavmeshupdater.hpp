@@ -6,6 +6,7 @@
 #include "tilecachedrecastmeshmanager.hpp"
 #include "tileposition.hpp"
 #include "navmeshtilescache.hpp"
+#include "waitconditiontype.hpp"
 
 #include <osg/Vec3f>
 
@@ -61,7 +62,7 @@ namespace DetourNavigator
         void post(const osg::Vec3f& agentHalfExtents, const SharedNavMeshCacheItem& mNavMeshCacheItem,
             const TilePosition& playerTile, const std::map<TilePosition, ChangeType>& changedTiles);
 
-        void wait(Loading::Listener& listener);
+        void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
 
@@ -114,6 +115,7 @@ namespace DetourNavigator
         NavMeshTilesCache mNavMeshTilesCache;
         Misc::ScopeGuarded<std::map<osg::Vec3f, std::map<TilePosition, std::thread::id>>> mProcessingTiles;
         std::map<osg::Vec3f, std::map<TilePosition, std::chrono::steady_clock::time_point>> mLastUpdates;
+        std::set<std::tuple<osg::Vec3f, TilePosition>> mPresentTiles;
         std::map<std::thread::id, Queue> mThreadsQueues;
         std::vector<std::thread> mThreads;
 
@@ -143,7 +145,9 @@ namespace DetourNavigator
 
         void cleanupLastUpdates();
 
-        int waitUntilJobsDone(const std::size_t initialJobsLeft, std::size_t& maxJobsLeft, Loading::Listener& listener);
+        int waitUntilJobsDoneForNotPresentTiles(const std::size_t initialJobsLeft, std::size_t& maxJobsLeft, Loading::Listener& listener);
+
+        void waitUntilAllJobsDone();
     };
 }
 

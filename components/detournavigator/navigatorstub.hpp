@@ -73,7 +73,7 @@ namespace DetourNavigator
 
         void setUpdatesEnabled(bool /*enabled*/) override {}
 
-        void wait(Loading::Listener& /*listener*/) override {}
+        void wait(Loading::Listener& /*listener*/, WaitConditionType /*waitConditionType*/) override {}
 
         SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& /*agentHalfExtents*/) const override
         {
