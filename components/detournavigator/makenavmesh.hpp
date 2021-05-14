@@ -2,10 +2,8 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 
 #include "offmeshconnectionsmanager.hpp"
-#include "settings.hpp"
 #include "navmeshcacheitem.hpp"
 #include "tileposition.hpp"
-#include "tilebounds.hpp"
 #include "sharednavmesh.hpp"
 #include "navmeshtilescache.hpp"
 

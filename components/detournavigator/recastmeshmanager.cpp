@@ -1,7 +1,5 @@
 #include "recastmeshmanager.hpp"
 
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-
 namespace DetourNavigator
 {
     RecastMeshManager::RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation)

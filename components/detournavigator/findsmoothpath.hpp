@@ -14,8 +14,6 @@
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>
 
-#include <LinearMath/btVector3.h>
-
 #include <components/misc/convert.hpp>
 
 #include <osg/Vec3f>

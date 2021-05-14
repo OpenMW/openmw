@@ -5,8 +5,6 @@
 #include <components/esm/loadpgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
-#include <Recast.h>
-
 namespace DetourNavigator
 {
     NavigatorImpl::NavigatorImpl(const Settings& settings)
