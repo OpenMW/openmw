@@ -21,7 +21,7 @@ void CSMDoc::Blacklist::add (CSMWorld::UniversalId::Type type,
 {
     std::vector<std::string>& list = mIds[type];
 
-    int size = list.size();
+    size_t size = list.size();
 
     list.resize (size+ids.size());
 

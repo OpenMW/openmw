@@ -4,12 +4,19 @@
 #include <stdexcept>
 #include <string>
 
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4244)
+#endif
+
 extern "C"
 {
-    #include <libavcodec/avcodec.h>
-
     #include <libswresample/swresample.h>
 }
+
+#if defined(_MSC_VER)
+    #pragma warning (pop)
+#endif
 
 #include "videostate.hpp"
 
@@ -255,7 +262,7 @@ size_t MovieAudioDecoder::read(char *stream, size_t len)
         size_t sampleSize = av_get_bytes_per_sample(mOutputSampleFormat);
         char* data[1];
         data[0] = stream;
-        av_samples_set_silence((uint8_t**)data, 0, len/sampleSize, 1, mOutputSampleFormat);
+        av_samples_set_silence((uint8_t**)data, 0, static_cast<int>(len/sampleSize), 1, mOutputSampleFormat);
         return len;
     }
 
@@ -276,7 +283,7 @@ size_t MovieAudioDecoder::read(char *stream, size_t len)
 
             mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
             if(sample_skip > 0 || mFrameSize > -sample_skip)
-                sample_skip -= mFramePos;
+                sample_skip -= static_cast<int>(mFramePos);
             continue;
         }
 

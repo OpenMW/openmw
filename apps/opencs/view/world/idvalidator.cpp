@@ -42,7 +42,7 @@ QValidator::State CSVWorld::IdValidator::validate (QString& input, int& pos) con
 
         if (!mNamespace.empty())
         {
-            std::string namespace_ = input.left (mNamespace.size()).toUtf8().constData();
+            std::string namespace_ = input.left (static_cast<int>(mNamespace.size())).toUtf8().constData();
 
             if (Misc::StringUtils::lowerCase (namespace_)!=mNamespace)
                 return QValidator::Invalid; // incorrect namespace

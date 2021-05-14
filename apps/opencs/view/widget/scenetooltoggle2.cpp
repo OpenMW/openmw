@@ -99,7 +99,7 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
     desc.mButtonId = id;
     desc.mMask = mask;
     desc.mName = name;
-    desc.mIndex = mButtons.size();
+    desc.mIndex = static_cast<int>(mButtons.size());
 
     mButtons.insert (std::make_pair (button, desc));
 

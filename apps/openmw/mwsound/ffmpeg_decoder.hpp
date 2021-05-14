@@ -2,6 +2,12 @@
 #define GAME_SOUND_FFMPEG_DECODER_H
 
 #include <stdint.h>
+
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4244)
+#endif
+
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -13,6 +19,10 @@ extern "C"
 // https://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
 #include <libswresample/swresample.h>
 }
+
+#if defined(_MSC_VER)
+    #pragma warning (pop)
+#endif
 
 #include <components/files/constrainedfilestream.hpp>
 

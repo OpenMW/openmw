@@ -58,7 +58,7 @@ public:
         void setNameInfos(size_t index,
             std::vector<char>* stringBuf
         ) {
-            namesOffset = index;
+            namesOffset = static_cast<uint32_t>(index);
             namesBuffer = stringBuf;
         }
 
@@ -102,7 +102,7 @@ protected:
         the files[] vector above. The iltstr ensures that file name
         checks are case insensitive.
     */
-    typedef std::map<std::string, int, iltstr> Lookup;
+    typedef std::map<std::string, size_t, iltstr> Lookup;
     Lookup mLookup;
 
     /// Error handling

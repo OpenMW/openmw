@@ -203,9 +203,9 @@ void ESMReader::getSubName()
     }
 
     // reading the subrecord data anyway.
-    const size_t subNameSize = mCtx.subName.data_size();
+    const int subNameSize = static_cast<int>(mCtx.subName.data_size());
     getExact(mCtx.subName.rw_data(), subNameSize);
-    mCtx.leftRec -= subNameSize;
+    mCtx.leftRec -= static_cast<uint32_t>(subNameSize);
 }
 
 void ESMReader::skipHSub()
@@ -327,7 +327,7 @@ std::string ESMReader::getString(int size)
     char *ptr = mBuffer.data();
     getExact(ptr, size);
 
-    size = strnlen(ptr, size);
+    size = static_cast<int>(strnlen(ptr, size));
 
     // Convert to UTF8 and return
     if (mEncoder)

@@ -20,13 +20,13 @@ void CSMWorld::Resources::recreate(const VFS::Manager* vfs, const char * const *
     mFiles.clear();
     mIndex.clear();
 
-    int baseSize = mBaseDirectory.size();
+    size_t baseSize = mBaseDirectory.size();
 
     const std::map<std::string, VFS::File*>& index = vfs->getIndex();
     for (std::map<std::string, VFS::File*>::const_iterator it = index.begin(); it != index.end(); ++it)
     {
         std::string filepath = it->first;
-        if (static_cast<int> (filepath.size())<baseSize+1 ||
+        if (filepath.size()<baseSize+1 ||
             filepath.substr (0, baseSize)!=mBaseDirectory ||
             (filepath[baseSize]!='/' && filepath[baseSize]!='\\'))
             continue;
@@ -60,7 +60,7 @@ void CSMWorld::Resources::recreate(const VFS::Manager* vfs, const char * const *
 
 int CSMWorld::Resources::getSize() const
 {
-    return mFiles.size();
+    return static_cast<int>(mFiles.size());
 }
 
 std::string CSMWorld::Resources::getId (int index) const
