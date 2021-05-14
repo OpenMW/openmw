@@ -25,14 +25,11 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
-#include "../../model/world/columnbase.hpp"
-#include "../../model/world/commandmacro.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/land.hpp"
-#include "../../model/world/resourcetable.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/universalid.hpp"
 

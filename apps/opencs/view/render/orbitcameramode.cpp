@@ -3,7 +3,6 @@
 #include <QMenu>
 
 #include "../../model/prefs/shortcut.hpp"
-#include "../../model/prefs/shortcuteventhandler.hpp"
 
 #include "worldspacewidget.hpp"
 

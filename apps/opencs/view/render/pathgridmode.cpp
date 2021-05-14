@@ -9,8 +9,6 @@
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/commandmacro.hpp"
-#include "../../model/world/idtable.hpp"
-#include "../../model/world/idtree.hpp"
 
 #include "../widget/scenetoolbar.hpp"
 

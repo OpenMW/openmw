@@ -27,11 +27,6 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
 #include "../../model/world/commands.hpp"
-#include "../../model/world/data.hpp"
-#include "../../model/world/idcollection.hpp"
-#include "../../model/world/idtable.hpp"
-#include "../../model/world/landtexture.hpp"
-#include "../../model/world/universalid.hpp"
 
 
 CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString &title, QWidget *parent)

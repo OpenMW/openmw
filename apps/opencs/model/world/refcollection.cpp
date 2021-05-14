@@ -1,6 +1,5 @@
 #include "refcollection.hpp"
 
-#include <components/misc/stringops.hpp>
 #include <components/esm/loadcell.hpp>
 
 #include "ref.hpp"

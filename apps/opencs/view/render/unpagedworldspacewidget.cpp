@@ -12,7 +12,6 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
-#include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 
 #include "cameracontroller.hpp"
