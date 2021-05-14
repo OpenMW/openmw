@@ -7,18 +7,14 @@
 #include <QMouseEvent>
 #include <QApplication>
 
-#include <components/esm/loadland.hpp>
-
 #include <components/misc/constants.hpp>
 
 #include "../../model/prefs/shortcut.hpp"
 
-#include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolmode.hpp"
-#include "../widget/scenetooltoggle2.hpp"
 
 #include "editmode.hpp"
 #include "mask.hpp"

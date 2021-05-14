@@ -5,7 +5,6 @@
 #include "../tools/reportmodel.hpp"
 
 #include "document.hpp"
-#include "state.hpp"
 
 CSMDoc::Loader::Stage::Stage() : mFile (0), mRecordsLoaded (0), mRecordsLeft (false) {}
 

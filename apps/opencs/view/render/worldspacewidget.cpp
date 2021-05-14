@@ -17,7 +17,6 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../../model/prefs/shortcut.hpp"
-#include "../../model/prefs/shortcuteventhandler.hpp"
 #include "../../model/prefs/state.hpp"
 
 #include "../render/orbitcameramode.hpp"
