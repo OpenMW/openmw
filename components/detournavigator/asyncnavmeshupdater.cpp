@@ -88,12 +88,21 @@ namespace DetourNavigator
         const SharedNavMeshCacheItem& navMeshCacheItem, const TilePosition& playerTile,
         const std::map<TilePosition, ChangeType>& changedTiles)
     {
-        *mPlayerTile.lock() = playerTile;
+        bool playerTileChanged = false;
+        {
+            auto locked = mPlayerTile.lock();
+            playerTileChanged = *locked != playerTile;
+            *locked = playerTile;
+        }
 
-        if (changedTiles.empty())
+        if (!playerTileChanged && changedTiles.empty())
             return;
 
         const std::lock_guard<std::mutex> lock(mMutex);
+
+        if (playerTileChanged)
+            for (auto& job : mJobs)
+                job.mDistanceToPlayer = getManhattanDistance(job.mChangedTile, playerTile);
 
         for (const auto& changedTile : changedTiles)
         {
@@ -112,9 +121,20 @@ namespace DetourNavigator
                     ? mLastUpdates[job.mAgentHalfExtents][job.mChangedTile] + mSettings.get().mMinUpdateInterval
                     : std::chrono::steady_clock::time_point();
 
-                mJobs.push(std::move(job));
+                if (playerTileChanged)
+                {
+                    mJobs.push_back(std::move(job));
+                }
+                else
+                {
+                    const auto it = std::upper_bound(mJobs.begin(), mJobs.end(), job);
+                    mJobs.insert(it, std::move(job));
+                }
             }
         }
+
+        if (playerTileChanged)
+            std::sort(mJobs.begin(), mJobs.end());
 
         Log(Debug::Debug) << "Posted " << mJobs.size() << " navigator jobs";
 
@@ -283,7 +303,7 @@ namespace DetourNavigator
         while (true)
         {
             const auto hasJob = [&] {
-                return (!mJobs.empty() && mJobs.top().mProcessTime <= std::chrono::steady_clock::now())
+                return (!mJobs.empty() && mJobs.front().mProcessTime <= std::chrono::steady_clock::now())
                     || !threadQueue.mJobs.empty();
             };
 
@@ -318,11 +338,11 @@ namespace DetourNavigator
     {
         const auto now = std::chrono::steady_clock::now();
 
-        if (jobs.top().mProcessTime > now)
+        if (jobs.front().mProcessTime > now)
             return {};
 
-        Job job = jobs.top();
-        jobs.pop();
+        Job job = jobs.front();
+        jobs.pop_front();
 
         if (changeLastUpdate && job.mChangeType == ChangeType::update)
             mLastUpdates[job.mAgentHalfExtents][job.mChangedTile] = now;
@@ -376,7 +396,7 @@ namespace DetourNavigator
         if (mPushed[job.mAgentHalfExtents].insert(job.mChangedTile).second)
         {
             ++job.mTryNumber;
-            mJobs.push(std::move(job));
+            mJobs.push_back(std::move(job));
             mHasJob.notify_all();
         }
     }
@@ -385,7 +405,7 @@ namespace DetourNavigator
     {
         if (queue.mPushed[job.mAgentHalfExtents].insert(job.mChangedTile).second)
         {
-            queue.mJobs.push(std::move(job));
+            queue.mJobs.push_back(std::move(job));
             mHasJob.notify_all();
         }
     }

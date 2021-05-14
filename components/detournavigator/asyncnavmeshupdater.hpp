@@ -14,9 +14,10 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
-#include <queue>
+#include <deque>
 #include <set>
 #include <thread>
+#include <tuple>
 
 class dtNavMesh;
 
@@ -83,11 +84,11 @@ namespace DetourNavigator
 
             friend inline bool operator <(const Job& lhs, const Job& rhs)
             {
-                return lhs.getPriority() > rhs.getPriority();
+                return lhs.getPriority() < rhs.getPriority();
             }
         };
 
-        using Jobs = std::priority_queue<Job, std::deque<Job>>;
+        using Jobs = std::deque<Job>;
         using Pushed = std::map<osg::Vec3f, std::set<TilePosition>>;
 
         struct Queue
