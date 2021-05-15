@@ -3,7 +3,6 @@
 
 #include <memory>
 
-#include <osg/Camera>
 #include <osg/Timer>
 #include <osg/ref_ptr>
 

@@ -6,12 +6,8 @@
 #include <vector>
 
 #include <components/compiler/errorhandler.hpp>
-#include <components/compiler/lineparser.hpp>
-#include <components/compiler/scanner.hpp>
-#include <components/compiler/locals.hpp>
 #include <components/compiler/output.hpp>
 #include <components/compiler/extensions.hpp>
-#include <components/interpreter/interpreter.hpp>
 
 #include "../mwscript/compilercontext.hpp"
 #include "../mwscript/interpretercontext.hpp"

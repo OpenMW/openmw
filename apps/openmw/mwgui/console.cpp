@@ -9,6 +9,10 @@
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
+#include <components/compiler/lineparser.hpp>
+#include <components/compiler/scanner.hpp>
+#include <components/compiler/locals.hpp>
+#include <components/interpreter/interpreter.hpp>
 
 #include "../mwscript/extensions.hpp"
 
