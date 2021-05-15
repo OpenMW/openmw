@@ -63,7 +63,7 @@ namespace
         // We will replace invalid entries by fixed ones
         std::vector<ESM::NPC> npcsToReplace;
 
-        for (auto npcIter : npcs)
+        for (const auto& npcIter : npcs)
         {
             ESM::NPC npc = npcIter.second;
             bool changed = false;

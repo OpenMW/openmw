@@ -306,7 +306,7 @@ namespace MWGui
         deleteLater();
         for (Link* link : mLinks)
             delete link;
-        for (auto link : mTopicLinks)
+        for (const auto& link : mTopicLinks)
             delete link.second;
         for (auto history : mHistoryContents)
             delete history;

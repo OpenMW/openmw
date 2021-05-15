@@ -70,7 +70,7 @@ namespace MWMechanics
         auto& id = spell->mId;
         bool changed = withBaseRecord([&] (auto& spells)
         {
-            for(auto it : spells)
+            for(const auto& it : spells)
             {
                 if(Misc::StringUtils::ciEqual(id, it))
                     return false;
