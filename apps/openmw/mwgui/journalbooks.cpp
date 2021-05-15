@@ -278,7 +278,7 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
         mIndexPagesCount = 2;
     }
 
-    unsigned char ch[2] = {0xd0, 0x90}; // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
+    unsigned char ch[3] = {0xd0, 0x90, 0x00}; // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
 
     for (int i = 0; i < 32; ++i)
     {
