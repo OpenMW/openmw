@@ -240,7 +240,7 @@ int BSAFile::getIndex(const char *str) const
         return -1;
 
     size_t res = it->second;
-    assert(res >= 0 && res < mFiles.size());
+    assert(res < mFiles.size());
     return static_cast<int>(res);
 }
 
