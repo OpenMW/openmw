@@ -124,6 +124,7 @@
     Bug #6007: Crash when ending cutscene is playing
     Bug #6016: Greeting interrupts Fargoth's sneak-walk
     Bug #6028: Particle system controller values are incorrectly used
+    Bug #6043: Actor can have torch missing when torch animation is played
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
