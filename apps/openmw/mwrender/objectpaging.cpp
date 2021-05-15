@@ -432,7 +432,7 @@ namespace MWRender
                             if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
                             if (ref.mRefNum.fromGroundcoverFile()) continue;
-                            refs[ref.mRefNum] = ref;
+                            refs[ref.mRefNum] = std::move(ref);
                         }
                     }
                     catch (std::exception&)
@@ -448,7 +448,7 @@ namespace MWRender
                     if (deleted) { refs.erase(ref.mRefNum); continue; }
                     int type = store.findStatic(ref.mRefID);
                     if (!typeFilter(type,size>=2)) continue;
-                    refs[ref.mRefNum] = ref;
+                    refs[ref.mRefNum] = std::move(ref);
                 }
             }
         }

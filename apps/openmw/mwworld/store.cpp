@@ -518,9 +518,9 @@ namespace MWWorld
             // But there may be duplicates here!
             ESM::CellRefTracker::iterator iter = std::find_if(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ESM::CellRefTrackerPredicate(ref.mRefNum));
             if (iter == cellAlt->mLeasedRefs.end())
-                cellAlt->mLeasedRefs.push_back(std::make_pair(ref, deleted));
+                cellAlt->mLeasedRefs.emplace_back(std::move(ref), deleted);
             else
-                *iter = std::make_pair(ref, deleted);
+                *iter = std::make_pair(std::move(ref), deleted);
         }
     }
     const ESM::Cell *Store<ESM::Cell>::search(const std::string &id) const

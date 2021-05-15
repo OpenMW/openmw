@@ -31,7 +31,7 @@ namespace
                 else if (std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), ref.mRefNum) == cell.mMovedRefs.end())
                 {
                     Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-                    refs[ref.mRefNum] = ref.mRefID;
+                    refs[ref.mRefNum] = std::move(ref.mRefID);
                 }
             }
         }
@@ -42,9 +42,9 @@ namespace
                 refs.erase(it.first.mRefNum);
             else
             {
-                ESM::CellRef ref = it.first;
-                Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-                refs[ref.mRefNum] = ref.mRefID;
+                std::string refId = it.first.mRefID;
+                Misc::StringUtils::lowerCaseInPlace(refId);
+                refs[it.first.mRefNum] = std::move(refId);
             }
         }
     }
@@ -254,8 +254,8 @@ void ESMStore::countRecords()
         readRefs(*it, refs, readers);
     for(auto it = mCells.extBegin(); it != mCells.extEnd(); it++)
         readRefs(*it, refs, readers);
-    for(const auto& pair : refs)
-        mRefCount[pair.second]++;
+    for(auto& pair : refs)
+        mRefCount[std::move(pair.second)]++;
 }
 
 int ESMStore::getRefCount(const std::string& id) const
