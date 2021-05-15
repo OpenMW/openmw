@@ -1003,7 +1003,7 @@ namespace MWWorld
         if (index >= mStatic.size()) {
             return nullptr;
         }
-        return &mStatic.at(index);
+        return &mStatic[index];
     }
 
     const ESM::Attribute *Store<ESM::Attribute>::find(size_t index) const

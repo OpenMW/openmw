@@ -547,7 +547,7 @@ namespace MWWorld
             try
             {
                 // Reopen the ESM reader and seek to the right position.
-                int index = mCell->mContextList.at(i).index;
+                int index = mCell->mContextList[i].index;
                 mCell->restore (esm[index], i);
 
                 ESM::CellRef ref;
@@ -605,7 +605,7 @@ namespace MWWorld
             try
             {
                 // Reopen the ESM reader and seek to the right position.
-                int index = mCell->mContextList.at(i).index;
+                int index = mCell->mContextList[i].index;
                 mCell->restore (esm[index], i);
 
                 ESM::CellRef ref;
