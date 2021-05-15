@@ -1,8 +1,6 @@
 #ifndef OPENMW_MWPHYSICS_PROJECTILECONVEXCALLBACK_H
 #define OPENMW_MWPHYSICS_PROJECTILECONVEXCALLBACK_H
 
-#include <vector>
-
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 class btCollisionObject;

@@ -1,5 +1,3 @@
-#include <mutex>
-
 #include "actorconvexcallback.hpp"
 #include "collisiontype.hpp"
 #include "contacttestwrapper.h"

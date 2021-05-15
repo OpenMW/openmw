@@ -1,8 +1,6 @@
 #ifndef OPENMW_MWPHYSICS_MOVEMENTSOLVER_H
 #define OPENMW_MWPHYSICS_MOVEMENTSOLVER_H
 
-#include <map>
-
 #include <osg/Vec3f>
 
 #include "constants.hpp"

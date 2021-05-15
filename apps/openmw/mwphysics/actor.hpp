@@ -10,7 +10,6 @@
 #include <LinearMath/btTransform.h>
 #include <osg/Vec3f>
 #include <osg/Quat>
-#include <osg/ref_ptr>
 
 class btCollisionShape;
 class btCollisionObject;
