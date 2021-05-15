@@ -132,6 +132,7 @@ void DebugDrawer::drawLine(const btVector3 &from, const btVector3 &to, const btV
     mLinesColors->push_back({1,1,1,1});
     mLinesColors->push_back({1,1,1,1});
 
+#if BT_BULLET_VERSION < 317
     size_t size = mLinesVertices->size();
     if (size >= 6
         && (*mLinesVertices)[size - 1] == (*mLinesVertices)[size - 6]
@@ -154,6 +155,7 @@ void DebugDrawer::drawLine(const btVector3 &from, const btVector3 &to, const btV
         mLinesVertices->pop_back();
         mLinesColors->pop_back();
     }
+#endif
 }
 
 void DebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar)
