@@ -1876,8 +1876,10 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
                 && updateCarriedLeftVisible(mWeaponType))
-
         {
+            if (mAnimation->isPlaying("shield"))
+                mAnimation->disable("shield");
+
             mAnimation->play("torch", Priority_Torch, MWRender::Animation::BlendMask_LeftArm,
                 false, 1.0f, "start", "stop", 0.0f, (~(size_t)0), true);
         }
