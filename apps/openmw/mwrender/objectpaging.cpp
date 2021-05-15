@@ -743,7 +743,7 @@ namespace MWRender
         ccf.mCell = cell;
         mCache->call(ccf);
         if (ccf.mToClear.empty()) return false;
-        for (auto chunk : ccf.mToClear)
+        for (const auto& chunk : ccf.mToClear)
             mCache->removeFromObjectCache(chunk);
         return true;
     }
@@ -765,7 +765,7 @@ namespace MWRender
         ccf.mActiveGridOnly = true;
         mCache->call(ccf);
         if (ccf.mToClear.empty()) return false;
-        for (auto chunk : ccf.mToClear)
+        for (const auto& chunk : ccf.mToClear)
             mCache->removeFromObjectCache(chunk);
         return true;
     }
