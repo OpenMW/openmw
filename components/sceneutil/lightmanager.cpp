@@ -114,15 +114,35 @@ namespace SceneUtil
             mOffsets[AttenuationRadius] = 8;
         }
 
-        LightBuffer(const LightBuffer& copy)
-            : osg::Referenced()
-            , mData(copy.mData)
-            , mEndian(copy.mEndian)
-            , mCount(copy.mCount)
-            , mStride(copy.mStride)
-            , mOffsets(copy.mOffsets)
-            , mCachedSunPos(copy.mCachedSunPos)
-        {}
+        LightBuffer(const LightBuffer&) = delete;
+
+        LightBuffer(const LightBuffer& other, int offsetColors, int offsetPosition, int offsetAttenuationRadius, int size, int stride)
+            : mData(new osg::FloatArray(size / sizeof(GL_FLOAT)))
+            , mEndian(other.mEndian)
+            , mCount(other.mCount)
+            , mStride((offsetAttenuationRadius + sizeof(GL_FLOAT) * osg::Vec4::num_components + stride) / 4)
+            , mCachedSunPos(other.mCachedSunPos)
+        {
+            mData->setBufferObject(other.mData->getBufferObject());
+
+            constexpr auto sizeofFloat = sizeof(GL_FLOAT);
+            const auto diffuseOffset = offsetColors / sizeofFloat;
+
+            mOffsets[Diffuse] = diffuseOffset;
+            mOffsets[Ambient] = diffuseOffset + 1;
+            mOffsets[Specular] = diffuseOffset + 2;
+            mOffsets[DiffuseSign] = diffuseOffset + 3;
+            mOffsets[Position] = offsetPosition / sizeofFloat;
+            mOffsets[AttenuationRadius] = offsetAttenuationRadius / sizeofFloat;
+
+            // Copy over previous buffers light data. Buffers populate before we know the layout.
+            for (int i = 0; i < other.mCount; ++i)
+            {
+                std::memcpy(&(*mData)[getOffset(i, Diffuse)], &(*other.mData)[other.getOffset(i, Diffuse)], sizeof(osg::Vec4f));
+                std::memcpy(&(*mData)[getOffset(i, Position)], &(*other.mData)[other.getOffset(i, Position)], sizeof(osg::Vec4f));
+                std::memcpy(&(*mData)[getOffset(i, AttenuationRadius)], &(*other.mData)[other.getOffset(i, AttenuationRadius)], sizeof(osg::Vec4f));
+            }
+        }
 
         void setDiffuse(int index, const osg::Vec4& value)
         {
@@ -192,34 +212,9 @@ namespace SceneUtil
             return mEndian == osg::BigEndian ? value.asABGR() : value.asRGBA();
         }
 
-        int getOffset(int index, LayoutOffset slot)
+        int getOffset(int index, LayoutOffset slot) const
         {
             return mStride * index + mOffsets[slot];
-        }
-
-        void configureLayout(int offsetColors, int offsetPosition, int offsetAttenuationRadius, int size, int stride)
-        {
-            constexpr auto sizeofFloat = sizeof(GL_FLOAT);
-            constexpr auto sizeofVec4 = sizeofFloat * osg::Vec4::num_components;
-
-            LightBuffer oldBuffer = LightBuffer(*this);
-
-            mOffsets[Diffuse] = offsetColors / sizeofFloat;
-            mOffsets[Ambient] = mOffsets[Diffuse] + 1;
-            mOffsets[Specular] = mOffsets[Diffuse] + 2;
-            mOffsets[DiffuseSign] = mOffsets[Diffuse] + 3;
-            mOffsets[Position] = offsetPosition / sizeofFloat;
-            mOffsets[AttenuationRadius] = offsetAttenuationRadius / sizeofFloat;
-            mStride = (offsetAttenuationRadius + sizeofVec4 + stride) / 4;
-
-            // Copy over previous buffers light data. Buffers populate before we know the layout.
-            mData->resize(size / sizeofFloat);
-            for (int i = 0; i < oldBuffer.mCount; ++i)
-            {
-                std::memcpy(&(*mData)[getOffset(i, Diffuse)], &(*oldBuffer.mData)[oldBuffer.getOffset(i, Diffuse)], sizeof(osg::Vec4f));
-                std::memcpy(&(*mData)[getOffset(i, Position)], &(*oldBuffer.mData)[oldBuffer.getOffset(i, Position)], sizeof(osg::Vec4f));
-                std::memcpy(&(*mData)[getOffset(i, AttenuationRadius)], &(*oldBuffer.mData)[oldBuffer.getOffset(i, AttenuationRadius)], sizeof(osg::Vec4f));
-            }
         }
 
     private:
@@ -754,7 +749,7 @@ namespace SceneUtil
             for (int i = 0; i < 2; ++i)
             {
                 auto& buf = lightManager.getLightBuffer(i);
-                buf->configureLayout(offsets[0], offsets[1], offsets[2], totalBlockSize, stride);
+                buf = new LightBuffer(*buf, offsets[0], offsets[1], offsets[2], totalBlockSize, stride);
             }
         }
 
