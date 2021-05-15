@@ -1,5 +1,6 @@
 #include "esmstore.hpp"
 
+#include <algorithm>
 #include <set>
 
 #include <boost/filesystem/operations.hpp>
@@ -8,12 +9,23 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
+#include <components/misc/algorithm.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
 
 namespace
 {
-    void readRefs(const ESM::Cell& cell, std::map<ESM::RefNum, std::string>& refs, std::vector<ESM::ESMReader>& readers)
+    struct Ref
+    {
+        ESM::RefNum mRefNum;
+        std::size_t mRefID;
+
+        Ref(ESM::RefNum refNum, std::size_t refID) : mRefNum(refNum), mRefID(refID) {}
+    };
+
+    constexpr std::size_t deletedRefID = std::numeric_limits<std::size_t>::max();
+
+    void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, std::vector<ESM::ESMReader>& readers)
     {
         for (size_t i = 0; i < cell.mContextList.size(); i++)
         {
@@ -27,24 +39,22 @@ namespace
             while(cell.getNextRef(readers[index], ref, deleted))
             {
                 if(deleted)
-                    refs.erase(ref.mRefNum);
+                    refs.emplace_back(ref.mRefNum, deletedRefID);
                 else if (std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), ref.mRefNum) == cell.mMovedRefs.end())
                 {
-                    Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-                    refs[ref.mRefNum] = ref.mRefID;
+                    refs.emplace_back(ref.mRefNum, refIDs.size());
+                    refIDs.push_back(std::move(ref.mRefID));
                 }
             }
         }
-        for(const auto& it : cell.mLeasedRefs)
+        for(const auto& [value, deleted] : cell.mLeasedRefs)
         {
-            bool deleted = it.second;
             if(deleted)
-                refs.erase(it.first.mRefNum);
+                refs.emplace_back(value.mRefNum, deletedRefID);
             else
             {
-                ESM::CellRef ref = it.first;
-                Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-                refs[ref.mRefNum] = ref.mRefID;
+                refs.emplace_back(value.mRefNum, refIDs.size());
+                refIDs.push_back(value.mRefID);
             }
         }
     }
@@ -248,14 +258,26 @@ void ESMStore::countRecords()
 {
     if(!mRefCount.empty())
         return;
-    std::map<ESM::RefNum, std::string> refs;
+    std::vector<Ref> refs;
+    std::vector<std::string> refIDs;
     std::vector<ESM::ESMReader> readers;
     for(auto it = mCells.intBegin(); it != mCells.intEnd(); it++)
-        readRefs(*it, refs, readers);
+        readRefs(*it, refs, refIDs, readers);
     for(auto it = mCells.extBegin(); it != mCells.extEnd(); it++)
-        readRefs(*it, refs, readers);
-    for(const auto& pair : refs)
-        mRefCount[pair.second]++;
+        readRefs(*it, refs, refIDs, readers);
+    const auto lessByRefNum = [] (const Ref& l, const Ref& r) { return l.mRefNum < r.mRefNum; };
+    std::stable_sort(refs.begin(), refs.end(), lessByRefNum);
+    const auto equalByRefNum = [] (const Ref& l, const Ref& r) { return l.mRefNum == r.mRefNum; };
+    const auto incrementRefCount = [&] (const Ref& value)
+    {
+        if (value.mRefID != deletedRefID)
+        {
+            std::string& refId = refIDs[value.mRefID];
+            Misc::StringUtils::lowerCaseInPlace(refId);
+            ++mRefCount[std::move(refId)];
+        }
+    };
+    Misc::forEachUnique(refs.rbegin(), refs.rend(), equalByRefNum, incrementRefCount);
 }
 
 int ESMStore::getRefCount(const std::string& id) const
