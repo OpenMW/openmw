@@ -106,16 +106,6 @@ namespace
         return actorData.mPosition * interpolationFactor + actorData.mActorRaw->getPreviousPosition() * (1.f - interpolationFactor);
     }
 
-    struct WorldFrameData
-    {
-        WorldFrameData() : mIsInStorm(MWBase::Environment::get().getWorld()->isInStorm())
-                         , mStormDirection(MWBase::Environment::get().getWorld()->getStormDirection())
-        {}
-
-        bool mIsInStorm;
-        osg::Vec3f mStormDirection;
-    };
-
     namespace Config
     {
         /// @return either the number of thread as configured by the user, or 1 if Bullet doesn't support multithreading
