@@ -426,8 +426,8 @@ namespace MWRender
                         bool deleted = false;
                         while(cell->getNextRef(esm[index], ref, deleted))
                         {
-                            Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                             if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
+                            Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                             int type = store.findStatic(ref.mRefID);
                             if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
@@ -443,9 +443,9 @@ namespace MWRender
                 for (ESM::CellRefTracker::const_iterator it = cell->mLeasedRefs.begin(); it != cell->mLeasedRefs.end(); ++it)
                 {
                     ESM::CellRef ref = it->first;
-                    Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                     bool deleted = it->second;
                     if (deleted) { refs.erase(ref.mRefNum); continue; }
+                    Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                     int type = store.findStatic(ref.mRefID);
                     if (!typeFilter(type,size>=2)) continue;
                     refs[ref.mRefNum] = std::move(ref);
