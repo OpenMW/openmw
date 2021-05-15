@@ -3,10 +3,6 @@
 
 #include "typedaipackage.hpp"
 
-#include <string>
-
-#include <components/esm/defs.hpp>
-
 #include "../mwworld/class.hpp"
 
 #include "pathfinding.hpp"
