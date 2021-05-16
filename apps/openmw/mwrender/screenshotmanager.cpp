@@ -44,7 +44,7 @@ namespace MWRender
         void operator () (osg::RenderInfo& renderInfo) const override
         {
             std::lock_guard<std::mutex> lock(mMutex);
-            if (renderInfo.getState()->getFrameStamp()->getFrameNumber() >= mFrame)
+            if (renderInfo.getState()->getFrameStamp()->getFrameNumber() >= mFrame && !mDone)
             {
                 mDone = true;
                 mCondition.notify_one();
