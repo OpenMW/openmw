@@ -440,10 +440,8 @@ namespace MWRender
                         continue;
                     }
                 }
-                for (ESM::CellRefTracker::const_iterator it = cell->mLeasedRefs.begin(); it != cell->mLeasedRefs.end(); ++it)
+                for (auto [ref, deleted] : cell->mLeasedRefs)
                 {
-                    ESM::CellRef ref = it->first;
-                    bool deleted = it->second;
                     if (deleted) { refs.erase(ref.mRefNum); continue; }
                     Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                     int type = store.findStatic(ref.mRefID);

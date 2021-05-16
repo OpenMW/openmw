@@ -621,20 +621,15 @@ namespace MWWorld
 
     void Store<ESM::Cell>::setUp()
     {
-        typedef DynamicExt::iterator ExtIterator;
-        typedef std::map<std::string, ESM::Cell>::iterator IntIterator;
-
         mSharedInt.clear();
         mSharedInt.reserve(mInt.size());
-        for (IntIterator it = mInt.begin(); it != mInt.end(); ++it) {
-            mSharedInt.push_back(&(it->second));
-        }
+        for (auto & [_, cell] : mInt)
+            mSharedInt.push_back(&cell);
 
         mSharedExt.clear();
         mSharedExt.reserve(mExt.size());
-        for (ExtIterator it = mExt.begin(); it != mExt.end(); ++it) {
-            mSharedExt.push_back(&(it->second));
-        }
+        for (auto & [_, cell] : mExt)
+            mSharedExt.push_back(&cell);
     }
     RecordId Store<ESM::Cell>::load(ESM::ESMReader &esm)
     {
@@ -1050,18 +1045,13 @@ namespace MWWorld
     {
         // DialInfos marked as deleted are kept during the loading phase, so that the linked list
         // structure is kept intact for inserting further INFOs. Delete them now that loading is done.
-        for (Static::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
-        {
-            ESM::Dialogue& dial = it->second;
+        for (auto & [_, dial] : mStatic)
             dial.clearDeletedInfos();
-        }
 
         mShared.clear();
         mShared.reserve(mStatic.size());
-        std::map<std::string, ESM::Dialogue>::iterator it = mStatic.begin();
-        for (; it != mStatic.end(); ++it) {
-            mShared.push_back(&(it->second));
-        }
+        for (auto & [_, dial] : mStatic)
+            mShared.push_back(&dial);
     }
 
     template <>
