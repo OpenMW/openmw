@@ -1,9 +1,7 @@
 #include "spellwindow.hpp"
 
-#include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
-#include <MyGUI_Window.h>
 
 #include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>

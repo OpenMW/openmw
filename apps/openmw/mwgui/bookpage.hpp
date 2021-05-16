@@ -10,7 +10,6 @@
 #include <stdint.h>
 
 #include <components/settings/settings.hpp>
-#include <components/widgets/widgets.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
