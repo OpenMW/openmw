@@ -36,15 +36,15 @@ namespace MWRender
     class NotifyDrawCompletedCallback : public osg::Camera::DrawCallback
     {
     public:
-        NotifyDrawCompletedCallback(unsigned int frame)
-            : mDone(false), mFrame(frame)
+        NotifyDrawCompletedCallback()
+            : mDone(false), mFrame(0)
         {
         }
 
         void operator () (osg::RenderInfo& renderInfo) const override
         {
             std::lock_guard<std::mutex> lock(mMutex);
-            if (renderInfo.getState()->getFrameStamp()->getFrameNumber() >= mFrame)
+            if (renderInfo.getState()->getFrameStamp()->getFrameNumber() >= mFrame && !mDone)
             {
                 mDone = true;
                 mCondition.notify_one();
@@ -57,6 +57,12 @@ namespace MWRender
             if (mDone)
                 return;
             mCondition.wait(lock);
+        }
+
+        void reset(unsigned int frame)
+        {
+            mDone = false;
+            mFrame = frame;
         }
 
         mutable std::condition_variable mCondition;
@@ -94,8 +100,18 @@ namespace MWRender
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mSceneRoot(sceneRoot)
+        , mDrawCompleteCallback(new NotifyDrawCompletedCallback)
         , mResourceSystem(resourceSystem)
         , mWater(water)
+    {
+        // Note: This assumes no other final draw callbacks are set anywhere and that this callback will remain set until the application exits.
+        // This works around *DrawCallback manipulation being unsafe in OSG >= 3.5.10 for release 0.47
+        // If you need to set other final draw callbacks, read the comments of issue 6013 for a suggestion
+        // Ref https://gitlab.com/OpenMW/openmw/-/issues/6013
+        mViewer->getCamera()->setFinalDrawCallback(mDrawCompleteCallback);
+    }
+
+    ScreenshotManager::~ScreenshotManager()
     {
     }
 
@@ -107,16 +123,10 @@ namespace MWRender
         tempDrw->setCullingActive(false);
         tempDrw->getOrCreateStateSet()->setRenderBinDetails(100, "RenderBin", osg::StateSet::USE_RENDERBIN_DETAILS); // so its after all scene bins but before POST_RENDER gui camera
         camera->addChild(tempDrw);
-        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback(mViewer->getFrameStamp()->getFrameNumber()));
-        camera->setFinalDrawCallback(callback);
-        mViewer->eventTraversal();
-        mViewer->updateTraversal();
-        mViewer->renderingTraversals();
-        callback->waitTillDone();
+        traversalsAndWait(mViewer->getFrameStamp()->getFrameNumber());
         // now that we've "used up" the current frame, get a fresh frame number for the next frame() following after the screenshot is completed
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
         camera->removeChild(tempDrw);
-        camera->setFinalDrawCallback(nullptr);
     }
 
     bool ScreenshotManager::screenshot360(osg::Image* image)
@@ -257,6 +267,15 @@ namespace MWRender
         return true;
     }
 
+    void ScreenshotManager::traversalsAndWait(unsigned int frame)
+    {
+        mDrawCompleteCallback->reset(frame);
+        mViewer->eventTraversal();
+        mViewer->updateTraversal();
+        mViewer->renderingTraversals();
+        mDrawCompleteCallback->waitTillDone();
+    }
+
     void ScreenshotManager::renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h)
     {
         camera->setNodeMask(Mask_RenderToTexture);
@@ -280,16 +299,10 @@ namespace MWRender
 
         mRootNode->addChild(camera);
 
-        // The draw needs to complete before we can copy back our image.
-        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback(0));
-        camera->setFinalDrawCallback(callback);
-
         MWBase::Environment::get().getWindowManager()->getLoadingScreen()->loadingOn(false);
 
-        mViewer->eventTraversal();
-        mViewer->updateTraversal();
-        mViewer->renderingTraversals();
-        callback->waitTillDone();
+        // The draw needs to complete before we can copy back our image.
+        traversalsAndWait(0);
 
         MWBase::Environment::get().getWindowManager()->getLoadingScreen()->loadingOff();
 
