@@ -1,7 +1,5 @@
 #include "stepper.hpp"
 
-#include <limits>
-
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
