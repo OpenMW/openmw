@@ -52,9 +52,14 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
         if (windowEventsOnly)
         {
-            // During loading, just handle window events, and keep others for later
+            // During loading, handle window events, discard button presses and keep others for later
             while (SDL_PeepEvents(&evt, 1, SDL_GETEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT))
                 handleWindowEvent(evt);
+
+            SDL_FlushEvent(SDL_KEYDOWN);
+            SDL_FlushEvent(SDL_CONTROLLERBUTTONDOWN);
+            SDL_FlushEvent(SDL_MOUSEBUTTONDOWN);
+
             return;
         }
 
