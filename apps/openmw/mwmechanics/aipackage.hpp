@@ -3,7 +3,6 @@
 
 #include <memory>
 
-#include <components/esm/defs.hpp>
 #include <components/detournavigator/areatype.hpp>
 
 #include "pathfinding.hpp"

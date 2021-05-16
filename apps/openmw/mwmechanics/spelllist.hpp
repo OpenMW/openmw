@@ -9,8 +9,6 @@
 
 #include <components/esm/loadspel.hpp>
 
-#include "magiceffects.hpp"
-
 namespace ESM
 {
     struct SpellState;

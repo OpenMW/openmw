@@ -4,7 +4,6 @@
 #include <memory>
 #include <map>
 #include <string>
-#include <set>
 #include <vector>
 
 #include "../mwworld/timestamp.hpp"
