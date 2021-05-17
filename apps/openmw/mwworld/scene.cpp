@@ -619,7 +619,7 @@ namespace MWWorld
         if (changeEvent)
             mCellChanged = true;
 
-        mNavigator.wait(*loadingListener);
+        mNavigator.wait(*loadingListener, DetourNavigator::WaitConditionType::requiredTilesPresent);
     }
 
     void Scene::testExteriorCells()
@@ -848,7 +848,7 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
-        mNavigator.wait(*loadingListener);
+        mNavigator.wait(*loadingListener, DetourNavigator::WaitConditionType::requiredTilesPresent);
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
