@@ -439,7 +439,11 @@ namespace SceneUtil
 
         void apply(osg::State &state) const override
         {
-            auto* lightUniform = mLightManager->getStateSet()->getUniform("LightBuffer");
+            osg::StateSet* stateSet = mLightManager->getStateSet();
+            if (!stateSet)
+                return;
+
+            auto* lightUniform = stateSet->getUniform("LightBuffer");
             for (size_t i = 0; i < mLights.size(); ++i)
             {
                 auto light = mLights[i];
@@ -830,6 +834,11 @@ namespace SceneUtil
             if (p.second == method)
                 return p.first;
         return "";
+    }
+
+    LightManager::~LightManager()
+    {
+        getOrCreateStateSet()->removeAttribute(osg::StateAttribute::LIGHT);
     }
 
     LightManager::LightManager(bool ffp)
