@@ -27,7 +27,7 @@
 
 #include <string>
 
-namespace macaron {
+namespace Base64 {
 
 class Base64 {
  public:
