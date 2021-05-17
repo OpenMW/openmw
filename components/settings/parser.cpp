@@ -7,6 +7,8 @@
 
 #include <boost/filesystem/fstream.hpp>
 
+#include <Base64.h>
+
 void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings, bool base64Encoded)
 {
     mFile = file;
