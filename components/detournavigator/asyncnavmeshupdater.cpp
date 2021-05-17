@@ -298,9 +298,15 @@ namespace DetourNavigator
         }
 
         if (status == UpdateNavMeshStatus::removed || status == UpdateNavMeshStatus::lost)
+        {
+            const std::scoped_lock lock(mMutex);
             mPresentTiles.erase(std::make_tuple(job.mAgentHalfExtents, job.mChangedTile));
+        }
         else if (isSuccess(status) && status != UpdateNavMeshStatus::ignored)
+        {
+            const std::scoped_lock lock(mMutex);
             mPresentTiles.insert(std::make_tuple(job.mAgentHalfExtents, job.mChangedTile));
+        }
 
         const auto finish = std::chrono::steady_clock::now();
 
