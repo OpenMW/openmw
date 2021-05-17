@@ -144,7 +144,8 @@ namespace MWInput
 
     void MouseManager::mousePressed(const SDL_MouseButtonEvent &arg, Uint8 id)
     {
-        MWBase::Environment::get().getInputManager()->setJoystickLastUsed(false);
+        MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
+        input->setJoystickLastUsed(false);
         bool guiMode = false;
 
         if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
@@ -165,7 +166,8 @@ namespace MWInput
         mBindingsManager->setPlayerControlsEnabled(!guiMode);
 
         // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
-        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings)
+        // Also do not trigger bindings when input controls are disabled, e.g. during save loading
+        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings && !input->controlsDisabled())
             mBindingsManager->mousePressed(arg, id);
     }
 
