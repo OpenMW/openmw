@@ -12,16 +12,31 @@
 void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings, bool base64Encoded)
 {
     mFile = file;
-    boost::filesystem::ifstream stream;
-    stream.open(boost::filesystem::path(file));
+    boost::filesystem::ifstream fstream;
+    fstream.open(boost::filesystem::path(file));
+    auto stream = std::ref<std::istream>(fstream);
+
+    std::istringstream decodedStream;
+    if (base64Encoded)
+    {
+        std::string base64String(std::istreambuf_iterator<char>(fstream), {});
+        std::string decodedString;
+        auto result = Base64::Base64::Decode(base64String, decodedString);
+        if (!result.empty())
+            fail("Could not decode Base64 file: " + result);
+        // Move won't do anything until C++20, but won't hurt to do it anyway.
+        decodedStream.str(std::move(decodedString));
+        stream = std::ref<std::istream>(decodedStream);
+    }
+
     Log(Debug::Info) << "Loading settings file: " << file;
     std::string currentCategory;
     mLine = 0;
-    while (!stream.eof() && !stream.fail())
+    while (!stream.get().eof() && !stream.get().fail())
     {
         ++mLine;
         std::string line;
-        std::getline( stream, line );
+        std::getline( stream.get(), line );
 
         size_t i = 0;
         if (!skipWhiteSpace(i, line))
