@@ -11,6 +11,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <array>
 #include <deque>
 
 MATCHER_P3(Vec3fEq, x, y, z, "")

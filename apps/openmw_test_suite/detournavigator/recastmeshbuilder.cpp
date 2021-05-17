@@ -14,6 +14,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <array>
+
 namespace DetourNavigator
 {
     static inline bool operator ==(const RecastMesh::Water& lhs, const RecastMesh::Water& rhs)
