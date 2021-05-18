@@ -22,7 +22,7 @@ namespace MWPhysics
 Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler)
   : mStandingOnPtr(nullptr), mCanWaterWalk(false), mWalkingOnWater(false)
   , mCollisionObject(nullptr), mMeshTranslation(shape->mCollisionBox.center), mHalfExtents(shape->mCollisionBox.extents)
-  , mStuckFrames(0), mLastStuckPosition{0, 0, 0}
+  , mVelocity(0,0,0), mStuckFrames(0), mLastStuckPosition{0, 0, 0}
   , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
   , mInternalCollisionMode(true)
   , mExternalCollisionMode(true)
@@ -301,6 +301,16 @@ void Actor::setStandingOnPtr(const MWWorld::Ptr& ptr)
 bool Actor::skipCollisions()
 {
     return std::exchange(mSkipCollisions, false);
+}
+
+void Actor::setVelocity(osg::Vec3f velocity)
+{
+    mVelocity = velocity;
+}
+
+osg::Vec3f Actor::velocity()
+{
+    return std::exchange(mVelocity, osg::Vec3f());
 }
 
 }

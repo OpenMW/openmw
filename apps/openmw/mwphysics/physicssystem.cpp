@@ -725,21 +725,15 @@ namespace MWPhysics
 
     void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity)
     {
-        for(auto& movementItem : mMovementQueue)
-        {
-            if (movementItem.first == ptr)
-            {
-                movementItem.second = velocity;
-                return;
-            }
-        }
-
-        mMovementQueue.emplace_back(ptr, velocity);
+        ActorMap::iterator found = mActors.find(ptr);
+        if (found != mActors.end())
+            found->second->setVelocity(velocity);
     }
 
     void PhysicsSystem::clearQueuedMovement()
     {
-        mMovementQueue.clear();
+        for (const auto& [_, actor] : mActors)
+            actor->setVelocity(osg::Vec3f());
     }
 
     const std::vector<MWWorld::Ptr>& PhysicsSystem::applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
@@ -756,27 +750,21 @@ namespace MWPhysics
     std::vector<ActorFrameData> PhysicsSystem::prepareFrameData(bool willSimulate)
     {
         std::vector<ActorFrameData> actorsFrameData;
-        actorsFrameData.reserve(mMovementQueue.size());
+        actorsFrameData.reserve(mActors.size());
         const MWBase::World *world = MWBase::Environment::get().getWorld();
-        for (const auto& [character, movement] : mMovementQueue)
+        for (const auto& [ptr, physicActor] : mActors)
         {
-            const auto foundActor = mActors.find(character);
-            if (foundActor == mActors.end()) // actor was already removed from the scene
-                continue;
-
-            auto physicActor = foundActor->second;
-
             float waterlevel = -std::numeric_limits<float>::max();
-            const MWWorld::CellStore *cell = character.getCell();
+            const MWWorld::CellStore *cell = ptr.getCell();
             if(cell->getCell()->hasWater())
                 waterlevel = cell->getWaterLevel();
 
-            const MWMechanics::MagicEffects& effects = character.getClass().getCreatureStats(character).getMagicEffects();
+            const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(physicActor->getPtr()).getMagicEffects();
 
             bool waterCollision = false;
             if (cell->getCell()->hasWater() && effects.get(ESM::MagicEffect::WaterWalking).getMagnitude())
             {
-                if (physicActor->getCollisionMode() || !world->isUnderwater(character.getCell(), osg::Vec3f(character.getRefData().getPosition().asVec3())))
+                if (physicActor->getCollisionMode() || !world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())))
                     waterCollision = true;
             }
 
@@ -790,9 +778,8 @@ namespace MWPhysics
             if (!willSimulate)
                 standingOn = physicActor->getStandingOnPtr();
 
-            actorsFrameData.emplace_back(std::move(physicActor), standingOn, waterCollision, movement, slowFall, waterlevel);
+            actorsFrameData.emplace_back(physicActor, standingOn, waterCollision, slowFall, waterlevel);
         }
-        mMovementQueue.clear();
         return actorsFrameData;
     }
 
@@ -933,10 +920,10 @@ namespace MWPhysics
     }
 
     ActorFrameData::ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn,
-            bool waterCollision, osg::Vec3f movement, float slowFall, float waterlevel)
+            bool waterCollision, float slowFall, float waterlevel)
         : mActor(actor), mActorRaw(actor.get()), mStandingOn(standingOn),
         mDidJump(false), mNeedLand(false), mWaterCollision(waterCollision), mSkipCollisionDetection(actor->skipCollisions()),
-        mWaterlevel(waterlevel), mSlowFall(slowFall), mOldHeight(0), mFallHeight(0), mMovement(movement), mPosition(), mRefpos()
+        mWaterlevel(waterlevel), mSlowFall(slowFall), mOldHeight(0), mFallHeight(0), mMovement(actor->velocity()), mPosition(), mRefpos()
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const auto ptr = actor->getPtr();

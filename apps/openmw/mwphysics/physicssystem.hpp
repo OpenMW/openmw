@@ -78,7 +78,7 @@ namespace MWPhysics
 
     struct ActorFrameData
     {
-        ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn, bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel);
+        ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn, bool moveToWaterSurface, float slowFall, float waterlevel);
         void  updatePosition(btCollisionWorld* world);
         std::weak_ptr<Actor> mActor;
         Actor* mActorRaw;
@@ -280,9 +280,6 @@ namespace MWPhysics
             HeightFieldMap mHeightFields;
 
             bool mDebugDrawEnabled;
-
-            using PtrVelocityList = std::vector<std::pair<MWWorld::Ptr, osg::Vec3f>>;
-            PtrVelocityList mMovementQueue;
 
             float mTimeAccum;
 

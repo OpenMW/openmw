@@ -2405,9 +2405,6 @@ void CharacterController::update(float duration)
             if (!mMovementAnimationControlled)
                 world->queueMovement(mPtr, vec);
         }
-        else
-            // We must always queue movement, even if there is none, to apply gravity.
-            world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
 
         movement = vec;
         movementSettings.mPosition[0] = movementSettings.mPosition[1] = 0;
@@ -2429,8 +2426,6 @@ void CharacterController::update(float duration)
             if (cls.isPersistent(mPtr) || cls.getCreatureStats(mPtr).isDeathAnimationFinished())
                 playDeath(1.f, mDeathState);
         }
-        // We must always queue movement, even if there is none, to apply gravity.
-        world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
     bool isPersist = isPersistentAnimPlaying();

@@ -119,11 +119,8 @@ namespace MWPhysics
         assert (mShapeInstance->getCollisionShape()->isCompound());
 
         btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
-        for (const auto& shape : mShapeInstance->mAnimatedShapes)
+        for (const auto& [recIndex, shapeIndex] : mShapeInstance->mAnimatedShapes)
         {
-            int recIndex = shape.first;
-            int shapeIndex = shape.second;
-
             auto nodePathFound = mRecIndexToNodePath.find(recIndex);
             if (nodePathFound == mRecIndexToNodePath.end())
             {

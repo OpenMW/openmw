@@ -178,6 +178,9 @@ namespace MWPhysics
 
         bool skipCollisions();
 
+        void setVelocity(osg::Vec3f velocity);
+        osg::Vec3f velocity();
+
     private:
         MWWorld::Ptr mStandingOnPtr;
         /// Removes then re-adds the collision object to the dynamics world
@@ -206,6 +209,7 @@ namespace MWPhysics
         osg::Vec3f mPosition;
         osg::Vec3f mPreviousPosition;
         osg::Vec3f mPositionOffset;
+        osg::Vec3f mVelocity;
         bool mWorldPositionChanged;
         bool mSkipCollisions;
         btTransform mLocalTransform;
