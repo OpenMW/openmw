@@ -444,36 +444,6 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
-               <layout class="QHBoxLayout" name="lightingMethodLayout">
-                <item>
-                 <widget class="QLabel" name="lightingMethodLabel">
-                  <property name="text">
-                   <string>Lighting Method:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="lightingMethodComboBox">
-                  <item>
-                   <property name="text">
-                    <string>legacy</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>shaders compatibility</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>shaders</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-               </layout>
-              </item>
              </layout>
             </widget>
            </item>
