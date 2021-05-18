@@ -90,7 +90,7 @@ namespace ESM
         if (!hasName)
             esm.fail("Missing NAME subrecord");
         if (!hasData && !isDeleted)
-            esm.fail("Missing CTDT subrecord");
+            esm.fail("Missing AODT subrecord");
     }
 
     void Armor::save(ESMWriter &esm, bool isDeleted) const
