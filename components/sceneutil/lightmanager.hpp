@@ -137,6 +137,8 @@ namespace SceneUtil
 
         LightManager(const LightManager& copy, const osg::CopyOp& copyop);
 
+        ~LightManager();
+
         /// @param mask This mask is compared with the current Camera's cull mask to determine if lighting is desired.
         /// By default, it's ~0u i.e. always on.
         /// If you have some views that do not require lighting, then set the Camera's cull mask to not include

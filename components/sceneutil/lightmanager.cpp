@@ -439,7 +439,11 @@ namespace SceneUtil
 
         void apply(osg::State &state) const override
         {
-            auto* lightUniform = mLightManager->getStateSet()->getUniform("LightBuffer");
+            osg::StateSet* stateSet = mLightManager->getStateSet();
+            if (!stateSet)
+                return;
+
+            auto* lightUniform = stateSet->getUniform("LightBuffer");
             for (size_t i = 0; i < mLights.size(); ++i)
             {
                 auto light = mLights[i];
@@ -726,7 +730,7 @@ namespace SceneUtil
 
         META_StateAttribute(NifOsg, LightManagerStateAttribute, osg::StateAttribute::LIGHT)
 
-        void initSharedLayout(osg::GLExtensions* ext, int handle, LightManager& lightManager) const
+        void initSharedLayout(osg::GLExtensions* ext, int handle) const
         {
             constexpr std::array<unsigned int, 1> index = { static_cast<unsigned int>(Shader::UBOBinding::LightBuffer) };
             int totalBlockSize = -1;
@@ -748,17 +752,13 @@ namespace SceneUtil
 
             for (int i = 0; i < 2; ++i)
             {
-                auto& buf = lightManager.getLightBuffer(i);
+                auto& buf = mLightManager->getLightBuffer(i);
                 buf = new LightBuffer(*buf, offsets[0], offsets[1], offsets[2], totalBlockSize, stride);
             }
         }
 
         void apply(osg::State& state) const override
         {
-            osg::ref_ptr<LightManager> lightManager;
-            if (!mLightManager.lock(lightManager))
-                return;
-
             if (!mInitLayout)
             {
                 mDummyProgram->apply(state);
@@ -771,12 +771,12 @@ namespace SceneUtil
                 // wait until the UBO binding is created
                 if (activeUniformBlocks > 0)
                 {
-                    initSharedLayout(ext, handle, *lightManager);
+                    initSharedLayout(ext, handle);
                     mInitLayout = true;
                 }
             }
-            lightManager->getLightBuffer(state.getFrameStamp()->getFrameNumber())->uploadCachedSunPos(state.getInitialViewMatrix());
-            lightManager->getLightBuffer(state.getFrameStamp()->getFrameNumber())->dirty();
+            mLightManager->getLightBuffer(state.getFrameStamp()->getFrameNumber())->uploadCachedSunPos(state.getInitialViewMatrix());
+            mLightManager->getLightBuffer(state.getFrameStamp()->getFrameNumber())->dirty();
         }
 
     private:
@@ -806,7 +806,7 @@ namespace SceneUtil
             return shader;
         }
 
-        osg::observer_ptr<LightManager> mLightManager;
+        LightManager* mLightManager;
         osg::ref_ptr<osg::Program> mDummyProgram;
         mutable bool mInitLayout;
     };
@@ -834,6 +834,11 @@ namespace SceneUtil
             if (p.second == method)
                 return p.first;
         return "";
+    }
+
+    LightManager::~LightManager()
+    {
+        getOrCreateStateSet()->removeAttribute(osg::StateAttribute::LIGHT);
     }
 
     LightManager::LightManager(bool ffp)
