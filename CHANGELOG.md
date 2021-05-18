@@ -128,6 +128,8 @@
     Bug #6022: OpenMW-CS: Terrain selection is not updated when undoing/redoing terrain changes
     Bug #6023: OpenMW-CS: Clicking on a reference in "Terrain land editing" mode discards corresponding select/edit action
     Bug #6028: Particle system controller values are incorrectly used
+    Bug #6035: OpenMW-CS: Circle brush in "Terrain land editing" mode sometimes includes vertices outside its radius
+    Bug #6036: OpenMW-CS: Terrain selection at the border of cells omits certain corner vertices
     Bug #6043: Actor can have torch missing when torch animation is played
     Bug #6047: Mouse bindings can be triggered during save loading
     Feature #390: 3rd person look "over the shoulder"

@@ -45,6 +45,8 @@ Editor Bug Fixes:
 - Terrain-selection grid is now properly updated when undoing/redoing terrain changes (#6022)
 - Tool outline and select/edit actions in "Terrain land editing" mode now ignore references (#6023)
 - Primary-select and secondary-select actions in "Terrain land editing" mode now behave like in "Instance editing" mode (#6024)
+- Using the circle brush to select terrain in the "Terrain land editing" mode no longer selects vertices outside the circle (#6035)
+- Vertices at the NW and SE corners of a cell can now also be selected in "Terrain land editing" mode if the adjacent cells aren't loaded yet (#6036)
 
 Miscellaneous:
 - Prevent save-game bloating by using an appropriate fog texture format (#5108)
