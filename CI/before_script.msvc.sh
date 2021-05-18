@@ -73,6 +73,7 @@ CONFIGURATIONS=()
 TEST_FRAMEWORK=""
 GOOGLE_INSTALL_ROOT=""
 INSTALL_PREFIX="."
+BUILD_BENCHMARKS=""
 
 ACTIVATE_MSVC=""
 SINGLE_CONFIG=""
@@ -133,6 +134,9 @@ while [ $# -gt 0 ]; do
 				INSTALL_PREFIX=$(echo "$1" | sed 's;\\;/;g' | sed -E 's;/+;/;g')
 				shift ;;
 
+			b )
+				BUILD_BENCHMARKS=true ;;
+
 			h )
 				cat <<EOF
 Usage: $0 [-cdehkpuvVi]
@@ -167,6 +171,8 @@ Options:
 		Run verbosely
 	-i
 		CMake install prefix
+	-b
+		Build benchmarks
 EOF
 				wrappedExit 0
 				;;
@@ -1066,6 +1072,10 @@ fi
 		echo
 	done
 #fi
+
+if [ "${BUILD_BENCHMARKS}" ]; then
+	add_cmake_opts -DBUILD_BENCHMARKS=ON
+fi
 
 if [ -n "$ACTIVATE_MSVC" ]; then
 	echo -n "- Activating MSVC in the current shell... "

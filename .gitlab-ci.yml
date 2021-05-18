@@ -170,6 +170,10 @@ variables: &cs-targets
   targets: "openmw-cs,bsatool,esmtool,niftest"
   package: "CS"
 
+variables: &tests-targets
+  targets: "openmw_test_suite,openmw_detournavigator_navmeshtilescache_benchmark"
+  package: "Tests"
+
 .Windows_Ninja_Base:
   tags:
     - windows
@@ -188,7 +192,7 @@ variables: &cs-targets
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
     - cmake --build . --config $config --target ($targets.Split(','))
@@ -200,6 +204,7 @@ variables: &cs-targets
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
     - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip '*'
+    - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
@@ -263,6 +268,15 @@ Windows_Ninja_CS_RelWithDebInfo:
     <<: *cs-targets
     config: "RelWithDebInfo"
 
+Windows_Ninja_Tests_RelWithDebInfo:
+  extends: .Windows_Ninja_Base
+  stage: build
+  variables:
+    <<: *tests-targets
+    config: "RelWithDebInfo"
+    # Gitlab can't successfully execute following binaries due to unknown reason
+    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+
 .Windows_MSBuild_Base:
   tags:
     - windows
@@ -280,7 +294,7 @@ Windows_Ninja_CS_RelWithDebInfo:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t
     - cd MSVC2019_64
     - cmake --build . --config $config --target ($targets.Split(','))
     - cd $config
@@ -291,6 +305,7 @@ Windows_Ninja_CS_RelWithDebInfo:
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
     - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip '*'
+    - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
@@ -353,6 +368,15 @@ Windows_MSBuild_CS_RelWithDebInfo:
   variables:
     <<: *cs-targets
     config: "RelWithDebInfo"
+
+Windows_MSBuild_Tests_RelWithDebInfo:
+  extends: .Windows_MSBuild_Base
+  stage: build
+  variables:
+    <<: *tests-targets
+    config: "RelWithDebInfo"
+    # Gitlab can't successfully execute following binaries due to unknown reason
+    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
 
 Debian_AndroidNDK_arm64-v8a:
   tags:
