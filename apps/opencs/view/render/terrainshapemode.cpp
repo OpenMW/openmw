@@ -285,6 +285,8 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
     sortAndLimitAlteredCells();
 
     undoStack.beginMacro ("Edit shape and normal records");
+
+    // One command at the beginning of the macro for redrawing the terrain-selection grid when undoing the changes.
     undoStack.push(new DrawTerrainSelectionCommand(*mTerrainShapeSelection));
 
     for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
@@ -355,7 +357,9 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         }
         pushNormalsEditToCommand(landNormalsNew, document, landTable, cellId);
     }
+    // One command at the end of the macro for redrawing the terrain-selection grid when redoing the changes.
     undoStack.push(new DrawTerrainSelectionCommand(*mTerrainShapeSelection));
+
     undoStack.endMacro();
     clearTransientEdits();
 }
@@ -1039,8 +1043,18 @@ void CSVRender::TerrainShapeMode::handleSelection(int globalSelectionX, int glob
         int selectionX = globalSelectionX;
         int selectionY = globalSelectionY;
 
+        /*
+            The northern and eastern edges don't belong to the current cell.
+            If the corresponding adjacent cell is not loaded, some special handling is necessary to select border vertices.
+        */
         if (xIsAtCellBorder && yIsAtCellBorder)
         {
+            /* 
+                Handle the NW, NE, and SE corner vertices.
+                NW corner: (+1, -1) offset to reach current cell.
+                NE corner: (-1, -1) offset to reach current cell.
+                SE corner: (-1, +1) offset to reach current cell.
+            */
             if (isInCellSelection(globalSelectionX - 1, globalSelectionY - 1)
                 || isInCellSelection(globalSelectionX + 1, globalSelectionY - 1)
                 || isInCellSelection(globalSelectionX - 1, globalSelectionY + 1))

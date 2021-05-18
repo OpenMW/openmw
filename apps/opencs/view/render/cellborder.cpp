@@ -12,6 +12,11 @@
 #include "../../model/world/cellcoordinates.hpp"
 
 const int CSVRender::CellBorder::CellSize = ESM::Land::REAL_SIZE;
+
+/*
+    The number of vertices per cell border is equal to the number of vertices per edge
+    minus the duplicated corner vertices. An additional vertex to close the loop is NOT needed.
+*/
 const int CSVRender::CellBorder::VertexCount = (ESM::Land::LAND_SIZE * 4) - 4;
 
 
@@ -43,42 +48,45 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
     mBaseNode->removeChild(mBorderGeometry);
     mBorderGeometry = new osg::Geometry();
 
-    // Vertices
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
 
     int x = 0;
     int y = 0;
 
-    for (/* */; x < ESM::Land::LAND_SIZE - 1; ++x)
+    /*
+        Traverse the cell border counter-clockwise starting at the SW corner vertex (0, 0).
+        Each loop starts at a corner vertex and ends right before the next corner vertex.
+    */
+    for (; x < ESM::Land::LAND_SIZE - 1; ++x)
         vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
     x = ESM::Land::LAND_SIZE - 1;
-    for (/* */; y < ESM::Land::LAND_SIZE - 1; ++y)
+    for (; y < ESM::Land::LAND_SIZE - 1; ++y)
         vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
     y = ESM::Land::LAND_SIZE - 1;
-    for (/* */; x > 0; --x)
+    for (; x > 0; --x)
         vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
     x = 0;
-    for (/* */; y > 0; --y)
+    for (; y > 0; --y)
         vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
     mBorderGeometry->setVertexArray(vertices);
 
-    // Color
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
     colors->push_back(osg::Vec4f(0.f, 0.5f, 0.f, 1.f));
 
     mBorderGeometry->setColorArray(colors, osg::Array::BIND_PER_PRIMITIVE_SET);
 
-    // Primitive
     osg::ref_ptr<osg::DrawElementsUShort> primitives =
         new osg::DrawElementsUShort(osg::PrimitiveSet::LINE_STRIP, VertexCount + 1);
 
+    // Assign one primitive to each vertex.
     for (size_t i = 0; i < VertexCount; ++i)
         primitives->setElement(i, i);
 
+    // Assign the last primitive to the first vertex to close the loop.
     primitives->setElement(VertexCount, 0);
 
     mBorderGeometry->addPrimitiveSet(primitives);
