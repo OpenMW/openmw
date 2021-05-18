@@ -126,6 +126,7 @@
     Bug #6016: Greeting interrupts Fargoth's sneak-walk
     Bug #6028: Particle system controller values are incorrectly used
     Bug #6043: Actor can have torch missing when torch animation is played
+    Bug #6047: Mouse bindings can be triggered during save loading
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
