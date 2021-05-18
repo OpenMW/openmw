@@ -7,19 +7,36 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings)
+#include <Base64.h>
+
+void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings, bool base64Encoded)
 {
     mFile = file;
-    boost::filesystem::ifstream stream;
-    stream.open(boost::filesystem::path(file));
+    boost::filesystem::ifstream fstream;
+    fstream.open(boost::filesystem::path(file));
+    auto stream = std::ref<std::istream>(fstream);
+
+    std::istringstream decodedStream;
+    if (base64Encoded)
+    {
+        std::string base64String(std::istreambuf_iterator<char>(fstream), {});
+        std::string decodedString;
+        auto result = Base64::Base64::Decode(base64String, decodedString);
+        if (!result.empty())
+            fail("Could not decode Base64 file: " + result);
+        // Move won't do anything until C++20, but won't hurt to do it anyway.
+        decodedStream.str(std::move(decodedString));
+        stream = std::ref<std::istream>(decodedStream);
+    }
+
     Log(Debug::Info) << "Loading settings file: " << file;
     std::string currentCategory;
     mLine = 0;
-    while (!stream.eof() && !stream.fail())
+    while (!stream.get().eof() && !stream.get().fail())
     {
         ++mLine;
         std::string line;
-        std::getline( stream, line );
+        std::getline( stream.get(), line );
 
         size_t i = 0;
         if (!skipWhiteSpace(i, line))
@@ -255,7 +272,7 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
         ostream << "# This is the OpenMW user 'settings.cfg' file.  This file only contains" << std::endl;
         ostream << "# explicitly changed settings.  If you would like to revert a setting" << std::endl;
         ostream << "# to its default, simply remove it from this file.  For available" << std::endl;
-        ostream << "# settings, see the file 'settings-default.cfg' or the documentation at:" << std::endl;
+        ostream << "# settings, see the file 'files/settings-default.cfg' in our source repo or the documentation at:" << std::endl;
         ostream << "#" << std::endl;
         ostream << "#   https://openmw.readthedocs.io/en/master/reference/modding/settings/index.html" << std::endl;
     }

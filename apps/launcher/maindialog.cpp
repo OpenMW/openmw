@@ -424,11 +424,11 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     mEngineSettings.clear();
 
     // Create the settings manager and load default settings file
-    const std::string localDefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
-    const std::string globalDefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
+    const std::string localDefault = (mCfgMgr.getLocalPath() / "defaults.bin").string();
+    const std::string globalDefault = (mCfgMgr.getGlobalPath() / "defaults.bin").string();
     std::string defaultPath;
 
-    // Prefer the settings-default.cfg in the current directory.
+    // Prefer the defaults.bin in the current directory.
     if (boost::filesystem::exists(localDefault))
         defaultPath = localDefault;
     else if (boost::filesystem::exists(globalDefault))
@@ -436,7 +436,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     // Something's very wrong if we can't find the file at all.
     else {
         cfgError(tr("Error reading OpenMW configuration file"),
-                 tr("<br><b>Could not find settings-default.cfg</b><br><br> \
+                 tr("<br><b>Could not find defaults.bin</b><br><br> \
                      The problem may be due to an incomplete installation of OpenMW.<br> \
                      Reinstalling OpenMW may resolve the problem."));
         return false;
@@ -447,7 +447,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
         mEngineSettings.loadDefault(defaultPath);
     }
     catch (std::exception& e) {
-        std::string msg = std::string("<br><b>Error reading settings-default.cfg</b><br><br>") + e.what();
+        std::string msg = std::string("<br><b>Error reading defaults.bin</b><br><br>") + e.what();
         cfgError(tr("Error reading OpenMW configuration file"), tr(msg.c_str()));
         return false;
     }

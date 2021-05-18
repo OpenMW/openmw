@@ -251,6 +251,8 @@ target_link_libraries(components
     RecastNavigation::DebugUtils
     RecastNavigation::Detour
     RecastNavigation::Recast
+
+    Base64
     )
 
 target_link_libraries(components ${BULLET_LIBRARIES})

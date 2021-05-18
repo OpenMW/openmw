@@ -199,6 +199,18 @@ macro (configure_resource_file source_path destination_dir_base dest_path_relati
 	endif (multi_config)
 endmacro (configure_resource_file)
 
+macro (pack_resource_file source_path destination_dir_base dest_path_relative)
+    get_generator_is_multi_config(multi_config)
+    if (multi_config)
+        foreach(cfgtype ${CMAKE_CONFIGURATION_TYPES})
+            execute_process(COMMAND ${CMAKE_COMMAND} "-DINPUT_FILE=${source_path}" "-DOUTPUT_FILE=${destination_dir_base}/${cfgtype}/${dest_path_relative}" -P "${CMAKE_SOURCE_DIR}/cmake/base64.cmake")
+        endforeach(cfgtype)
+    else (multi_config)
+        execute_process(COMMAND ${CMAKE_COMMAND} "-DINPUT_FILE=${source_path}" "-DOUTPUT_FILE=${destination_dir_base}/${dest_path_relative}" -P "${CMAKE_SOURCE_DIR}/cmake/base64.cmake")
+    endif (multi_config)
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${source_path}")
+endmacro (pack_resource_file)
+
 macro (copy_all_resource_files source_dir destination_dir_base destination_dir_relative files)
 	foreach (f ${files})
 		get_filename_component(filename ${f} NAME)
