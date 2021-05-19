@@ -374,7 +374,7 @@ public:
     void write(ESM::ESMWriter &esm) override
     {
         esm.startRecord(ESM::REC_DCOU);
-        for (std::map<std::string, int>::const_iterator it = mKillCounter.begin(); it != mKillCounter.end(); ++it)
+        for (auto it = mKillCounter.begin(); it != mKillCounter.end(); ++it)
         {
             esm.writeHNString("ID__", it->first);
             esm.writeHNT ("COUN", it->second);
@@ -397,7 +397,7 @@ public:
         faction.load(esm, isDeleted);
         std::string id = Misc::StringUtils::lowerCase(faction.mId);
 
-        for (std::map<std::string, int>::const_iterator it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
+        for (auto it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
         {
             std::string faction2 = Misc::StringUtils::lowerCase(it->first);
             mContext->mDialogueState.mChangedFactionReaction[id].insert(std::make_pair(faction2, it->second));
@@ -431,7 +431,7 @@ public:
     void write(ESM::ESMWriter &esm) override
     {
         ESM::StolenItems items;
-        for (std::map<std::string, std::set<Owner> >::const_iterator it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
+        for (auto it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
         {
             std::map<std::pair<std::string, bool>, int> owners;
             for (const auto & ownerIt : it->second)
@@ -487,7 +487,7 @@ public:
     }
     void write(ESM::ESMWriter &esm) override
     {
-        for (std::map<std::string, DIAL>::const_iterator it = mDials.begin(); it != mDials.end(); ++it)
+        for (auto it = mDials.begin(); it != mDials.end(); ++it)
         {
             esm.startRecord(ESM::REC_QUES);
             ESM::QuestState state;

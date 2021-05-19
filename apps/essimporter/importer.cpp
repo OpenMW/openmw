@@ -385,7 +385,7 @@ namespace ESSImport
 
         // Writing order should be Dynamic Store -> Cells -> Player,
         // so that references to dynamic records can be recognized when loading
-        for (std::map<unsigned int, std::shared_ptr<Converter> >::const_iterator it = converters.begin();
+        for (auto it = converters.begin();
              it != converters.end(); ++it)
         {
             if (it->second->getStage() != 0)
@@ -398,7 +398,7 @@ namespace ESSImport
         context.mPlayerBase.save(writer);
         writer.endRecord(ESM::REC_NPC_);
 
-        for (std::map<unsigned int, std::shared_ptr<Converter> >::const_iterator it = converters.begin();
+        for (auto it = converters.begin();
              it != converters.end(); ++it)
         {
             if (it->second->getStage() != 1)
@@ -423,7 +423,7 @@ namespace ESSImport
         writer.endRecord(ESM::REC_ACTC);
 
         // Stage 2 requires cell references to be written / actors IDs assigned
-        for (std::map<unsigned int, std::shared_ptr<Converter> >::const_iterator it = converters.begin();
+        for (auto it = converters.begin();
              it != converters.end(); ++it)
         {
             if (it->second->getStage() != 2)

@@ -16,7 +16,7 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &
     mButtonBox->addButton(QDialogButtonBox::Cancel);
     mButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
 
-    QLabel *label = new QLabel(this);
+    auto *label = new QLabel(this);
     label->setText(text);
 
     // Line edit
@@ -25,7 +25,7 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &
     mLineEdit->setValidator(validator);
     mLineEdit->setCompleter(nullptr);
 
-    QVBoxLayout *dialogLayout = new QVBoxLayout(this);
+    auto *dialogLayout = new QVBoxLayout(this);
     dialogLayout->addWidget(label);
     dialogLayout->addWidget(mLineEdit);
     dialogLayout->addWidget(mButtonBox);
