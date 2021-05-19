@@ -182,14 +182,19 @@ void BSAFile::readHeader()
         if(fs.offset + fs.fileSize > fsize)
             fail("Archive contains offsets outside itself");
 
-        // Add the file name to the lookup
-        mLookup[fs.name()] = i;
     }
     mStringBuf.resize(endOfNameBuffer);
 
     std::sort(mFiles.begin(), mFiles.end(), [](const FileStruct& left, const FileStruct& right) {
         return left.offset < right.offset;
     });
+
+    for (size_t i = 0; i < filenum; i++)
+    {
+        FileStruct& fs = mFiles[i];
+        // Add the file name to the lookup
+        mLookup[fs.name()] = i;
+    }
 
     mIsLoaded = true;
 }
