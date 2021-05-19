@@ -58,7 +58,7 @@ namespace CSMWorld
 
             RefIdCollection();
 
-            virtual ~RefIdCollection();
+            ~RefIdCollection() override;
 
             int getSize() const override;
 

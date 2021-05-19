@@ -384,7 +384,7 @@ namespace CSMWorld
 
         IngredEffectRefIdAdapter();
 
-        virtual ~IngredEffectRefIdAdapter();
+        ~IngredEffectRefIdAdapter() override;
 
         void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const override;
@@ -998,7 +998,7 @@ namespace CSMWorld
     public:
 
         NpcMiscRefIdAdapter ();
-        virtual ~NpcMiscRefIdAdapter();
+        ~NpcMiscRefIdAdapter() override;
 
         void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const override;
@@ -1089,7 +1089,7 @@ namespace CSMWorld
     public:
 
         CreatureMiscRefIdAdapter ();
-        virtual ~CreatureMiscRefIdAdapter();
+        ~CreatureMiscRefIdAdapter() override;
 
         void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const override;

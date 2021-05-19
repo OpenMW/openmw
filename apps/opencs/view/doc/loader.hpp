@@ -75,7 +75,7 @@ namespace CSVDoc
 
             Loader();
 
-            virtual ~Loader();
+            ~Loader() override;
 
         signals:
 

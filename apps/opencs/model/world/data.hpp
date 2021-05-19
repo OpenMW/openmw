@@ -152,7 +152,7 @@ namespace CSMWorld
             Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
                 const std::vector<std::string>& archives, const boost::filesystem::path& resDir);
 
-            virtual ~Data();
+            ~Data() override;
 
             const VFS::Manager* getVFS() const;
 

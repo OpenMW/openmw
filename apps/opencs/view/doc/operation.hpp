@@ -28,7 +28,7 @@ namespace CSVDoc
         public:
 
             Operation (int type, QWidget *parent);
-            ~Operation();
+            ~Operation() override;
 
             void setProgress (int current, int max, int threads);
 

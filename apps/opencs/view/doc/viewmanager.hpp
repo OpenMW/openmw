@@ -52,7 +52,7 @@ namespace CSVDoc
 
             ViewManager (CSMDoc::DocumentManager& documentManager);
 
-            virtual ~ViewManager();
+            ~ViewManager() override;
 
             View *addView (CSMDoc::Document *document);
             ///< The ownership of the returned view is not transferred.
