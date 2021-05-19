@@ -187,6 +187,56 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="LightingWrapper">
+      <attribute name="title">
+       <string>Lighting</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="lightingLayout">
+       <item>
+        <layout class="QHBoxLayout" name="lightingMethodLayout">
+         <item>
+          <widget class="QLabel" name="lightingMethodLabel">
+           <property name="text">
+            <string>Lighting Method:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="lightingMethodComboBox">
+           <item>
+            <property name="text">
+             <string>legacy</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>shaders compatibility</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>shaders</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="ShadowWrapper">
       <attribute name="title">
        <string>Shadows</string>
