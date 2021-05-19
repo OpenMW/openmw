@@ -16,7 +16,7 @@ namespace Launcher
     public:
 
         explicit TextInputDialog(const QString& title, const QString &text, QWidget *parent = nullptr);
-        ~TextInputDialog ();
+        ~TextInputDialog () override;
 
         inline LineEdit *lineEdit() { return mLineEdit; }
         void setOkButtonEnabled(bool enabled);

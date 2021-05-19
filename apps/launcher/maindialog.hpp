@@ -47,7 +47,7 @@ namespace Launcher
 
     public:
         explicit MainDialog(QWidget *parent = nullptr);
-        ~MainDialog();
+        ~MainDialog() override;
 
         FirstRunDialogResult showFirstRunDialog();
 
