@@ -514,6 +514,12 @@ namespace Resource
         return options;
     }
 
+    void SceneManager::shareState(osg::ref_ptr<osg::Node> node) {
+        mSharedStateMutex.lock();
+        mSharedStateManager->share(node.get());
+        mSharedStateMutex.unlock();
+    }
+
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name, bool compile)
     {
         std::string normalized = name;

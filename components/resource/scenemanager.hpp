@@ -135,7 +135,7 @@ namespace Resource
         osg::ref_ptr<osg::Node> createInstance(const std::string& name);
 
         osg::ref_ptr<osg::Node> createInstance(const osg::Node* base);
-
+        void shareState(osg::ref_ptr<osg::Node> node);
         /// Get an instance of the given scene template
         /// @see getTemplate
         /// @note Thread safe.
