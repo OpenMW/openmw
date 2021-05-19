@@ -38,9 +38,15 @@ Editor Bug Fixes:
 - Disabled record sorting in Topic and Journal Info tables, implemented drag-move for records (#4357)
 - Topic and Journal Info records can now be cloned with a different parent Topic/Journal Id (#4363)
 - Verifier no longer checks for alleged 'race' entries in clothing body parts (#5400)
+- Cell borders are now properly redrawn when undoing/redoing terrain changes (#5473)
 - Loading mods now keeps the master index (#5675)
 - Flicker and crashing on XFCE4 fixed (#5703)
 - Collada models render properly in the Editor (#5713)
+- Terrain-selection grid is now properly updated when undoing/redoing terrain changes (#6022)
+- Tool outline and select/edit actions in "Terrain land editing" mode now ignore references (#6023)
+- Primary-select and secondary-select actions in "Terrain land editing" mode now behave like in "Instance editing" mode (#6024)
+- Using the circle brush to select terrain in the "Terrain land editing" mode no longer selects vertices outside the circle (#6035)
+- Vertices at the NW and SE corners of a cell can now also be selected in "Terrain land editing" mode if the adjacent cells aren't loaded yet (#6036)
 
 Miscellaneous:
 - Prevent save-game bloating by using an appropriate fog texture format (#5108)

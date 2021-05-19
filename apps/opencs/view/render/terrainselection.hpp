@@ -27,6 +27,14 @@ namespace CSVRender
         Shape
     };
 
+    enum class SelectionMethod
+    {
+        OnlySelect,
+        AddSelect,
+        RemoveSelect,
+        ToggleSelect
+    };
+
     /// \brief Class handling the terrain selection data and rendering
     class TerrainSelection
     {
@@ -36,7 +44,8 @@ namespace CSVRender
             ~TerrainSelection();
 
             void onlySelect(const std::vector<std::pair<int, int>> &localPositions);
-            void addSelect(const std::pair<int, int> &localPos);
+            void addSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress);
+            void removeSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress);
             void toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool toggleInProgress);
 
             void activate();
@@ -54,6 +63,8 @@ namespace CSVRender
             int calculateLandHeight(int x, int y);
 
         private:
+
+            void handleSelection(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress, SelectionMethod selectionMethod);
 
             bool noCell(const std::string& cellId);
 
