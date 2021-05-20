@@ -85,47 +85,51 @@ namespace
         {
             // Hacks for polish font
             unsigned char win1250;
-            std::map<unsigned char, unsigned char> conv;
-            conv[0x80] = 0xc6;
-            conv[0x81] = 0x9c;
-            conv[0x82] = 0xe6;
-            conv[0x83] = 0xb3;
-            conv[0x84] = 0xf1;
-            conv[0x85] = 0xb9;
-            conv[0x86] = 0xbf;
-            conv[0x87] = 0x9f;
-            conv[0x88] = 0xea;
-            conv[0x89] = 0xea;
-            conv[0x8a] = 0x0; // not contained in win1250
-            conv[0x8b] = 0x0; // not contained in win1250
-            conv[0x8c] = 0x8f;
-            conv[0x8d] = 0xaf;
-            conv[0x8e] = 0xa5;
-            conv[0x8f] = 0x8c;
-            conv[0x90] = 0xca;
-            conv[0x93] = 0xa3;
-            conv[0x94] = 0xf6;
-            conv[0x95] = 0xf3;
-            conv[0x96] = 0xaf;
-            conv[0x97] = 0x8f;
-            conv[0x99] = 0xd3;
-            conv[0x9a] = 0xd1;
-            conv[0x9c] = 0x0; // not contained in win1250
-            conv[0xa0] = 0xb9;
-            conv[0xa1] = 0xaf;
-            conv[0xa2] = 0xf3;
-            conv[0xa3] = 0xbf;
-            conv[0xa4] = 0x0; // not contained in win1250
-            conv[0xe1] = 0x8c;
-            // Can't remember if this was supposed to read 0xe2, or is it just an extraneous copypaste?
-            //conv[0xe1] = 0x8c;
-            conv[0xe3] = 0x0; // not contained in win1250
-            conv[0xf5] = 0x0; // not contained in win1250
-
-            if (conv.find(c) != conv.end())
-                win1250 = conv[c];
-            else
+            static const std::map<unsigned char, unsigned char> conv {
+                {0x80, 0xc6},
+                {0x81, 0x9c},
+                {0x82, 0xe6},
+                {0x83, 0xb3},
+                {0x84, 0xf1},
+                {0x85, 0xb9},
+                {0x86, 0xbf},
+                {0x87, 0x9f},
+                {0x88, 0xea},
+                {0x89, 0xea},
+                {0x8a, 0x00}, // not contained in win1250
+                {0x8b, 0x00}, // not contained in win1250
+                {0x8c, 0x8f},
+                {0x8d, 0xaf},
+                {0x8e, 0xa5},
+                {0x8f, 0x8c},
+                {0x90, 0xca},
+                {0x93, 0xa3},
+                {0x94, 0xf6},
+                {0x95, 0xf3},
+                {0x96, 0xaf},
+                {0x97, 0x8f},
+                {0x99, 0xd3},
+                {0x9a, 0xd1},
+                {0x9c, 0x00}, // not contained in win1250
+                {0xa0, 0xb9},
+                {0xa1, 0xaf},
+                {0xa2, 0xf3},
+                {0xa3, 0xbf},
+                {0xa4, 0x00}, // not contained in win1250
+                {0xe1, 0x8c},
+                // Can't remember if this was supposed to read 0xe2, or is it just an extraneous copypaste?
+                //{0xe1, 0x8c},
+                {0xe3, 0x0}, // not contained in win1250
+                {0xf5, 0x0} // not contained in win1250
+            };
+            try
+            {
+                win1250 = conv.at(c);
+            }
+            catch (std::out_of_range)
+            {
                 win1250 = c;
+            }
             return encoder.getUtf8(std::string(1, win1250));
         }
         else
