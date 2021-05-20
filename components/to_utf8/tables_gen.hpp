@@ -8,7 +8,7 @@ namespace ToUTF8
 /// Central European and Eastern European languages that use Latin script,
 /// such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian,
 /// Serbian (Latin script), Romanian and Albanian.
-static signed char windows_1250[] =
+const static signed char windows_1250[] =
 {
     1, 0, 0, 0, 0, 0,
     1, 1, 0, 0, 0, 0,
@@ -270,7 +270,7 @@ static signed char windows_1250[] =
 
 /// Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic
 /// and other languages
-static signed char windows_1251[] =
+const static signed char windows_1251[] =
 {
     1, 0, 0, 0, 0, 0,
     1, 1, 0, 0, 0, 0,
@@ -531,7 +531,7 @@ static signed char windows_1251[] =
 };
 
 /// Latin alphabet used by English and some other Western languages
-static signed char windows_1252[] =
+const static signed char windows_1252[] =
 {
     1, 0, 0, 0, 0, 0,
     1, 1, 0, 0, 0, 0,
@@ -790,7 +790,7 @@ static signed char windows_1252[] =
     2, -61, -66, 0, 0, 0,
     2, -61, -65, 0, 0, 0
 };
-static signed char cp437[] =
+const static signed char cp437[] =
 {
     1, 0, 0, 0, 0, 0,
     1, 1, 0, 0, 0, 0,

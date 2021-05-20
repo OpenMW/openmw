@@ -45,7 +45,7 @@ void writeMissing(bool last)
 int write_table(const std::string &charset, const std::string &tableName)
 {
   // Write table header
-  std::cout << "static signed char " << tableName << "[] =\n{\n";
+  std::cout << "const static signed char " << tableName << "[] =\n{\n";
 
   // Open conversion system
   iconv_t cd = iconv_open ("UTF-8", charset.c_str());

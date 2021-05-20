@@ -182,7 +182,7 @@ void Utf8Encoder::resize(size_t size)
   is the case, then the ascii parameter is set to true, and the
   caller can optimize for this case.
  */
-size_t Utf8Encoder::getLength(const char* input, bool &ascii)
+size_t Utf8Encoder::getLength(const char* input, bool &ascii) const
 {
     ascii = true;
     size_t len = 0;
@@ -214,7 +214,7 @@ size_t Utf8Encoder::getLength(const char* input, bool &ascii)
 
 // Translate one character 'ch' using the translation array 'arr', and
 // advance the output pointer accordingly.
-void Utf8Encoder::copyFromArray(unsigned char ch, char* &out)
+void Utf8Encoder::copyFromArray(unsigned char ch, char* &out) const
 {
     // Optimize for ASCII values
     if (ch < 128)
@@ -229,7 +229,7 @@ void Utf8Encoder::copyFromArray(unsigned char ch, char* &out)
         *(out++) = *(in++);
 }
 
-size_t Utf8Encoder::getLength2(const char* input, bool &ascii)
+size_t Utf8Encoder::getLength2(const char* input, bool &ascii) const
 {
     ascii = true;
     size_t len = 0;
@@ -273,7 +273,7 @@ size_t Utf8Encoder::getLength2(const char* input, bool &ascii)
     return len;
 }
 
-void Utf8Encoder::copyFromArray2(const char*& chp, char* &out)
+void Utf8Encoder::copyFromArray2(const char*& chp, char* &out) const
 {
     unsigned char ch = *(chp++);
     // Optimize for ASCII values
