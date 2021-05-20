@@ -117,25 +117,13 @@ int Actor::getCollisionMask() const
 void Actor::updatePosition()
 {
     std::scoped_lock lock(mPositionMutex);
-    updateWorldPosition();
-    mPreviousPosition = mWorldPosition;
-    mPosition = mWorldPosition;
-    mSimulationPosition = mWorldPosition;
+    const auto worldPosition = mPtr.getRefData().getPosition().asVec3();
+    mPreviousPosition = worldPosition;
+    mPosition = worldPosition;
+    mSimulationPosition = worldPosition;
     mPositionOffset = osg::Vec3f();
     mStandingOnPtr = nullptr;
     mSkipCollisions = true;
-}
-
-void Actor::updateWorldPosition()
-{
-    if (mWorldPosition != mPtr.getRefData().getPosition().asVec3())
-        mWorldPositionChanged = true;
-    mWorldPosition = mPtr.getRefData().getPosition().asVec3();
-}
-
-osg::Vec3f Actor::getWorldPosition() const
-{
-    return mWorldPosition;
 }
 
 void Actor::setSimulationPosition(const osg::Vec3f& position)
@@ -174,7 +162,6 @@ osg::Vec3f Actor::getCollisionObjectPosition() const
 bool Actor::setPosition(const osg::Vec3f& position)
 {
     std::scoped_lock lock(mPositionMutex);
-    updateWorldPosition();
     applyOffsetChange();
     bool hasChanged = mPosition != position || mWorldPositionChanged;
     mPreviousPosition = mPosition;

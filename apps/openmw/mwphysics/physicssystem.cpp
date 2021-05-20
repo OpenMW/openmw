@@ -938,7 +938,6 @@ namespace MWPhysics
 
     void ActorFrameData::updatePosition(btCollisionWorld* world)
     {
-        mActorRaw->updateWorldPosition();
         mActorRaw->applyOffsetChange();
         mPosition = mActorRaw->getPosition();
         if (mWaterCollision && mPosition.z() < mWaterlevel && canMoveToWaterSurface(mActorRaw, mWaterlevel, world))
