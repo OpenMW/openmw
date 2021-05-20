@@ -225,8 +225,8 @@ void Utf8Encoder::copyFromArray(unsigned char ch, char* &out) const
 
     const signed char *in = translationArray + ch*6;
     int len = *(in++);
-    for (int i=0; i<len; i++)
-        *(out++) = *(in++);
+    memcpy(out, in, len);
+    out += len;
 }
 
 size_t Utf8Encoder::getLength2(const char* input, bool &ascii) const
