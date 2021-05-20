@@ -62,6 +62,15 @@ namespace
             av_frame_free(&frame);
         }
     };
+
+    template<class T>
+    struct AVFree
+    {
+        void operator()(T* frame) const
+        {
+            av_free(&frame);
+        }
+    };
 }
 
 namespace Video
@@ -105,7 +114,7 @@ void VideoState::setAudioFactory(MovieAudioFactory *factory)
 
 void PacketQueue::put(AVPacket *pkt)
 {
-    std::unique_ptr<AVPacketList> pkt1(static_cast<AVPacketList*>(av_malloc(sizeof(AVPacketList))));
+    std::unique_ptr<AVPacketList, AVFree<AVPacketList>> pkt1(static_cast<AVPacketList*>(av_malloc(sizeof(AVPacketList))));
     if(!pkt1) throw std::bad_alloc();
 
     if(pkt == &flush_pkt)
@@ -116,14 +125,14 @@ void PacketQueue::put(AVPacket *pkt)
     pkt1->next = nullptr;
 
     std::lock_guard<std::mutex> lock(this->mutex);
-
+    AVPacketList* ptr = pkt1.release();
     if(!last_pkt)
-        this->first_pkt = pkt1.get();
+        this->first_pkt = ptr;
     else
-        this->last_pkt->next = pkt1.get();
-    this->last_pkt = pkt1.release();
+        this->last_pkt->next = ptr;
+    this->last_pkt = ptr;
     this->nb_packets++;
-    this->size += this->last_pkt->pkt.size;
+    this->size += ptr->pkt.size;
     this->cond.notify_one();
 }
 
