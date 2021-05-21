@@ -45,19 +45,19 @@ public:
     {
         // Russian alphabet
         if (ch >= 0x0410 && ch < 0x0430)
-            return ch += 0x20;
+            return ch + 0x20;
 
         // Cyrillic IO character
         if (ch == 0x0401)
-            return ch += 0x50;
+            return ch + 0x50;
 
         // Latin alphabet
         if (ch >= 0x41 && ch < 0x60)
-            return ch += 0x20;
+            return ch + 0x20;
 
         // Deutch characters
         if (ch == 0xc4 || ch == 0xd6 || ch == 0xdc)
-            return ch += 0x20;
+            return ch + 0x20;
         if (ch == 0x1e9e)
             return 0xdf;
 
