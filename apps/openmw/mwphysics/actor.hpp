@@ -56,13 +56,6 @@ namespace MWPhysics
         bool isRotationallyInvariant() const;
 
         /**
-         * Set mWorldPosition to the position in the Ptr's RefData. This is used by the physics simulation to account for 
-         * when an object is "instantly" moved/teleported as opposed to being moved by the physics simulation.
-         */
-        void updateWorldPosition();
-        osg::Vec3f getWorldPosition() const;
-
-        /**
         * Used by the physics simulation to store the simulation result. Used in conjunction with mWorldPosition
         * to account for e.g. scripted movements
         */
@@ -204,7 +197,6 @@ namespace MWPhysics
 
         osg::Vec3f mScale;
         osg::Vec3f mRenderingScale;
-        osg::Vec3f mWorldPosition;
         osg::Vec3f mSimulationPosition;
         osg::Vec3f mPosition;
         osg::Vec3f mPreviousPosition;
