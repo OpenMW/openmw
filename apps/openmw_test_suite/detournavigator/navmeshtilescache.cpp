@@ -60,6 +60,7 @@ namespace
 
         EXPECT_FALSE(cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections,
                                std::move(mNavMeshData)));
+        EXPECT_NE(mNavMeshData.mValue, nullptr);
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_return_cached_value)
@@ -85,6 +86,7 @@ namespace
         NavMeshData anotherNavMeshData {anotherData, 1};
 
         cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections, std::move(mNavMeshData));
+        EXPECT_EQ(mNavMeshData.mValue, nullptr);
         const auto result = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections, std::move(anotherNavMeshData));
         ASSERT_TRUE(result);
         EXPECT_EQ(result.get(), (NavMeshDataRef {mData, 1}));
