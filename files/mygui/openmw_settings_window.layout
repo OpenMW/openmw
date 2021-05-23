@@ -498,7 +498,7 @@
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 104 352 18" align="HStretch Top">
                             <Property key="Range" value="8192"/>
-                            <Property key="Page" value="1"/>
+                            <Property key="Page" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingMin" value="0"/>
                             <UserString key="SettingMax" value="8192"/>
