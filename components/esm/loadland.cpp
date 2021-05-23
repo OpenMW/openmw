@@ -50,7 +50,9 @@ namespace ESM
             switch (esm.retSubName().intval)
             {
                 case ESM::FourCC<'I','N','T','V'>::value:
-                    esm.getSubHeaderIs(8);
+                    esm.getSubHeader();
+                    if (esm.getSubSize() != 8)
+                        esm.fail("Subrecord size is not equal to 8");
                     esm.getT<int>(mX);
                     esm.getT<int>(mY);
                     hasLocation = true;

@@ -119,13 +119,13 @@ std::string ESMReader::getHString()
     // them. For some reason, they break the rules, and contain a byte
     // (value 0) even if the header says there is no data. If
     // Morrowind accepts it, so should we.
-    if (mCtx.leftSub == 0 && !mEsm->peek())
+    if (mCtx.leftSub == 0 && hasMoreSubs() && !mEsm->peek())
     {
         // Skip the following zero byte
         mCtx.leftRec--;
         char c;
-        getExact(&c, 1);
-        return "";
+        getT(c);
+        return std::string();
     }
 
     return getString(mCtx.leftSub);
@@ -155,14 +155,12 @@ void ESMReader::getSubNameIs(const char* name)
 {
     getSubName();
     if (mCtx.subName != name)
-        fail(
-                "Expected subrecord " + std::string(name) + " but got "
-                        + mCtx.subName.toString());
+        fail("Expected subrecord " + std::string(name) + " but got " + mCtx.subName.toString());
 }
 
 bool ESMReader::isNextSub(const char* name)
 {
-    if (!mCtx.leftRec)
+    if (!hasMoreSubs())
         return false;
 
     getSubName();
@@ -177,7 +175,7 @@ bool ESMReader::isNextSub(const char* name)
 
 bool ESMReader::peekNextSub(const char *name)
 {
-    if (!mCtx.leftRec)
+    if (!hasMoreSubs())
         return false;
 
     getSubName();
@@ -234,21 +232,17 @@ void ESMReader::skipHSubUntil(const char *name)
 
 void ESMReader::getSubHeader()
 {
-    if (mCtx.leftRec < 4)
+    if (mCtx.leftRec < sizeof(mCtx.leftSub))
         fail("End of record while reading sub-record header");
 
     // Get subrecord size
     getT(mCtx.leftSub);
+    mCtx.leftRec -= sizeof(mCtx.leftSub);
 
     // Adjust number of record bytes left
-    mCtx.leftRec -= mCtx.leftSub + 4;
-}
-
-void ESMReader::getSubHeaderIs(int size)
-{
-    getSubHeader();
-    if (size != static_cast<int> (mCtx.leftSub))
-        fail("getSubHeaderIs(): Sub header mismatch");
+    if (mCtx.leftRec < mCtx.leftSub)
+        fail("Record size is larger than rest of file");
+    mCtx.leftRec -= mCtx.leftSub;
 }
 
 NAME ESMReader::getRecName()
@@ -276,7 +270,7 @@ void ESMReader::skipRecord()
 void ESMReader::getRecHeader(uint32_t &flags)
 {
     // General error checking
-    if (mCtx.leftFile < 12)
+    if (mCtx.leftFile < 3 * sizeof(uint32_t))
         fail("End of file while reading record header");
     if (mCtx.leftRec)
         fail("Previous record contains unread bytes");
@@ -284,7 +278,7 @@ void ESMReader::getRecHeader(uint32_t &flags)
     getUint(mCtx.leftRec);
     getUint(flags);// This header entry is always zero
     getUint(flags);
-    mCtx.leftFile -= 12;
+    mCtx.leftFile -= 3 * sizeof(uint32_t);
 
     // Check that sizes add up
     if (mCtx.leftFile < mCtx.leftRec)
