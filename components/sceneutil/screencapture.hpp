@@ -15,19 +15,21 @@ namespace SceneUtil
 {
     class WorkQueue;
 
-    void writeScreenshotToFile(const std::string& screenshotPath, const std::string& screenshotFormat,
-                               const osg::Image& image);
+    std::string writeScreenshotToFile(const std::string& screenshotPath, const std::string& screenshotFormat,
+                                      const osg::Image& image);
 
     class WriteScreenshotToFileOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation
     {
         public:
-            WriteScreenshotToFileOperation(const std::string& screenshotPath, const std::string& screenshotFormat);
+            WriteScreenshotToFileOperation(const std::string& screenshotPath, const std::string& screenshotFormat,
+                                           std::function<void (std::string)> callback);
 
             void operator()(const osg::Image& image, const unsigned int context_id) override;
 
         private:
             const std::string mScreenshotPath;
             const std::string mScreenshotFormat;
+            const std::function<void (std::string)> mCallback;
     };
 
     class AsyncScreenCaptureOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation

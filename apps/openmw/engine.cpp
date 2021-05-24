@@ -218,6 +218,14 @@ namespace
         if (Settings::Manager::getInt("async num threads", "Physics") == 0)
             profiler.removeUserStatsLine(" -Async");
     }
+
+    struct ScheduleNonDialogMessageBox
+    {
+        void operator()(std::string message) const
+        {
+            MWBase::Environment::get().getWindowManager()->scheduleMessageBox(std::move(message), MWGui::ShowInDialogueMode_Never);
+        }
+    };
 }
 
 void OMW::Engine::executeLocalScripts()
@@ -676,7 +684,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mWorkQueue,
         new SceneUtil::WriteScreenshotToFileOperation(
             mCfgMgr.getScreenshotPath().string(),
-            Settings::Manager::getString("screenshot format", "General")
+            Settings::Manager::getString("screenshot format", "General"),
+            ScheduleNonDialogMessageBox {}
         )
     );
 

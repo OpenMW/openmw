@@ -51,59 +51,74 @@ namespace
 
 namespace SceneUtil
 {
-    void writeScreenshotToFile(const std::string& screenshotPath, const std::string& screenshotFormat,
-                               const osg::Image& image)
+    std::string writeScreenshotToFile(const std::string& screenshotPath, const std::string& screenshotFormat,
+                                      const osg::Image& image)
     {
         // Count screenshots.
         int shotCount = 0;
 
         // Find the first unused filename with a do-while
         std::ostringstream stream;
+        std::string lastFileName;
+        std::string lastFilePath;
         do
         {
             // Reset the stream
             stream.str("");
             stream.clear();
 
-            stream << screenshotPath << "/screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << screenshotFormat;
+            stream << "screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << screenshotFormat;
 
-        } while (boost::filesystem::exists(stream.str()));
+            lastFileName = stream.str();
+            lastFilePath = screenshotPath + "/" + lastFileName;
+
+        } while (boost::filesystem::exists(lastFilePath));
 
         boost::filesystem::ofstream outStream;
-        outStream.open(boost::filesystem::path(stream.str()), std::ios::binary);
+        outStream.open(boost::filesystem::path(std::move(lastFilePath)), std::ios::binary);
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(screenshotFormat);
         if (!readerwriter)
         {
             Log(Debug::Error) << "Error: Can't write screenshot, no '" << screenshotFormat << "' readerwriter found";
-            return;
+            return std::string();
         }
 
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(image, outStream);
         if (!result.success())
         {
             Log(Debug::Error) << "Error: Can't write screenshot: " << result.message() << " code " << result.status();
+            return std::string();
         }
+
+        return lastFileName;
     }
 
     WriteScreenshotToFileOperation::WriteScreenshotToFileOperation(const std::string& screenshotPath,
-                                                                   const std::string& screenshotFormat)
+                                                                   const std::string& screenshotFormat,
+                                                                   std::function<void (std::string)> callback)
         : mScreenshotPath(screenshotPath)
         , mScreenshotFormat(screenshotFormat)
+        , mCallback(callback)
     {
     }
 
     void WriteScreenshotToFileOperation::operator()(const osg::Image& image, const unsigned int /*context_id*/)
     {
+        std::string fileName;
         try
         {
-            writeScreenshotToFile(mScreenshotPath, mScreenshotFormat, image);
+            fileName = writeScreenshotToFile(mScreenshotPath, mScreenshotFormat, image);
         }
         catch (const std::exception& e)
         {
             Log(Debug::Error) << "Failed to write screenshot to file with path=\"" << mScreenshotPath
                               << "\", format=\"" << mScreenshotFormat << "\": " << e.what();
         }
+        if (fileName.empty())
+            mCallback("Failed to save screenshot");
+        else
+            mCallback(fileName + " has been saved");
     }
 
     AsyncScreenCaptureOperation::AsyncScreenCaptureOperation(osg::ref_ptr<WorkQueue> queue,
