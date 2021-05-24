@@ -61,6 +61,7 @@ namespace MWRender
 
         void reset(unsigned int frame)
         {
+            std::lock_guard<std::mutex> lock(mMutex);
             mDone = false;
             mFrame = frame;
         }
@@ -104,11 +105,6 @@ namespace MWRender
         , mResourceSystem(resourceSystem)
         , mWater(water)
     {
-        // Note: This assumes no other final draw callbacks are set anywhere and that this callback will remain set until the application exits.
-        // This works around *DrawCallback manipulation being unsafe in OSG >= 3.5.10 for release 0.47
-        // If you need to set other final draw callbacks, read the comments of issue 6013 for a suggestion
-        // Ref https://gitlab.com/OpenMW/openmw/-/issues/6013
-        mViewer->getCamera()->setFinalDrawCallback(mDrawCompleteCallback);
     }
 
     ScreenshotManager::~ScreenshotManager()
@@ -269,7 +265,10 @@ namespace MWRender
 
     void ScreenshotManager::traversalsAndWait(unsigned int frame)
     {
+        // Ref https://gitlab.com/OpenMW/openmw/-/issues/6013
         mDrawCompleteCallback->reset(frame);
+        mViewer->getCamera()->setFinalDrawCallback(mDrawCompleteCallback);
+
         mViewer->eventTraversal();
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
