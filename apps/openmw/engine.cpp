@@ -670,6 +670,18 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         throw std::runtime_error("Invalid setting: 'preload num threads' must be >0");
     mWorkQueue = new SceneUtil::WorkQueue(numThreads);
 
+    mScreenCaptureOperation = new SceneUtil::AsyncScreenCaptureOperation(
+        mWorkQueue,
+        new SceneUtil::WriteScreenshotToFileOperation(
+            mCfgMgr.getScreenshotPath().string(),
+            Settings::Manager::getString("screenshot format", "General")
+        )
+    );
+
+    mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(mScreenCaptureOperation);
+
+    mViewer->addEventHandler(mScreenCaptureHandler);
+
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
@@ -813,14 +825,6 @@ void OMW::Engine::go()
     // Do not try to outsmart the OS thread scheduler (see bug #4785).
     mViewer->setUseConfigureAffinity(false);
 #endif
-
-    mScreenCaptureOperation = new SceneUtil::WriteScreenshotToFileOperation(
-        mCfgMgr.getScreenshotPath().string(),
-        Settings::Manager::getString("screenshot format", "General"));
-
-    mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(mScreenCaptureOperation);
-
-    mViewer->addEventHandler(mScreenCaptureHandler);
 
     mEnvironment.setFrameRateLimit(Settings::Manager::getFloat("framerate limit", "Video"));
 

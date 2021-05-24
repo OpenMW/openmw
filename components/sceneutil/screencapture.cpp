@@ -3,6 +3,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
+#include <osg/ref_ptr>
 #include <osg/Image>
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
@@ -10,9 +11,43 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include <string>
-#include <sstream>
+#include <cassert>
 #include <iomanip>
+#include <sstream>
+#include <string>
+
+namespace
+{
+    class ScreenCaptureWorkItem : public SceneUtil::WorkItem
+    {
+        public:
+            ScreenCaptureWorkItem(const osg::ref_ptr<osgViewer::ScreenCaptureHandler::CaptureOperation>& impl,
+                                  const osg::Image& image, unsigned int contextId)
+                : mImpl(impl),
+                  mImage(new osg::Image(image)),
+                  mContextId(contextId)
+            {
+                assert(mImpl != nullptr);
+            }
+
+            void doWork() override
+            {
+                try
+                {
+                    (*mImpl)(*mImage, mContextId);
+                }
+                catch (const std::exception& e)
+                {
+                    Log(Debug::Error) << "ScreenCaptureWorkItem exception: " << e.what();
+                }
+            }
+
+        private:
+            const osg::ref_ptr<osgViewer::ScreenCaptureHandler::CaptureOperation> mImpl;
+            const osg::ref_ptr<const osg::Image> mImage;
+            const unsigned int mContextId;
+    };
+}
 
 namespace SceneUtil
 {
@@ -69,5 +104,19 @@ namespace SceneUtil
             Log(Debug::Error) << "Failed to write screenshot to file with path=\"" << mScreenshotPath
                               << "\", format=\"" << mScreenshotFormat << "\": " << e.what();
         }
+    }
+
+    AsyncScreenCaptureOperation::AsyncScreenCaptureOperation(osg::ref_ptr<WorkQueue> queue,
+                                                             osg::ref_ptr<CaptureOperation> impl)
+        : mQueue(std::move(queue)),
+          mImpl(std::move(impl))
+    {
+        assert(mQueue != nullptr);
+        assert(mImpl != nullptr);
+    }
+
+    void AsyncScreenCaptureOperation::operator()(const osg::Image& image, const unsigned int context_id)
+    {
+        mQueue->addWorkItem(new ScreenCaptureWorkItem(mImpl, image, context_id));
     }
 }
