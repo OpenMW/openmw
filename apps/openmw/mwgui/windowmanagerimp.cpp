@@ -1499,6 +1499,7 @@ namespace MWGui
     {
         mHudEnabled = !mHudEnabled;
         updateVisible();
+        mMessageBoxManager->setVisible(mHudEnabled);
         return mHudEnabled;
     }
 
