@@ -213,6 +213,8 @@ bool Launcher::AdvancedPage::loadSettings()
         if (screenshotFormatComboBox->findText(screenshotFormatString) == -1)
             screenshotFormatComboBox->addItem(screenshotFormatString);
         screenshotFormatComboBox->setCurrentIndex(screenshotFormatComboBox->findText(screenshotFormatString));
+
+        loadSettingBool(notifyOnSavedScreenshotCheckBox, "notify on saved screenshot", "General");
     }
 
     // Testing
@@ -376,6 +378,8 @@ void Launcher::AdvancedPage::saveSettings()
         std::string screenshotFormatString = screenshotFormatComboBox->currentText().toLower().toStdString();
         if (screenshotFormatString != Settings::Manager::getString("screenshot format", "General"))
             Settings::Manager::setString("screenshot format", "General", screenshotFormatString);
+
+        saveSettingBool(notifyOnSavedScreenshotCheckBox, "notify on saved screenshot", "General");
     }
 
     // Testing

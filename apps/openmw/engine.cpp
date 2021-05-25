@@ -226,6 +226,11 @@ namespace
             MWBase::Environment::get().getWindowManager()->scheduleMessageBox(std::move(message), MWGui::ShowInDialogueMode_Never);
         }
     };
+
+    struct IgnoreString
+    {
+        void operator()(std::string) const {}
+    };
 }
 
 void OMW::Engine::executeLocalScripts()
@@ -685,7 +690,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         new SceneUtil::WriteScreenshotToFileOperation(
             mCfgMgr.getScreenshotPath().string(),
             Settings::Manager::getString("screenshot format", "General"),
-            ScheduleNonDialogMessageBox {}
+            Settings::Manager::getBool("notify on saved screenshot", "General")
+                    ? std::function(ScheduleNonDialogMessageBox {})
+                    : std::function(IgnoreString {})
         )
     );
 

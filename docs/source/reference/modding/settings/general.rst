@@ -59,3 +59,12 @@ texture mipmap
 Set the texture mipmap type to control the method mipmaps are created.
 Mipmapping is a way of reducing the processing power needed during minification
 by pregenerating a series of smaller textures.
+
+notify on saved screenshot
+--------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Show message box when screenshot is saved to a file.
