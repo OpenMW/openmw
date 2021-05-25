@@ -33,14 +33,25 @@ bool WorkItem::isDone() const
     return mDone;
 }
 
-WorkQueue::WorkQueue(int workerThreads)
+WorkQueue::WorkQueue(std::size_t workerThreads)
     : mIsReleased(false)
 {
-    for (int i=0; i<workerThreads; ++i)
-        mThreads.emplace_back(std::make_unique<WorkThread>(*this));
+    start(workerThreads);
 }
 
 WorkQueue::~WorkQueue()
+{
+    stop();
+}
+
+void WorkQueue::start(std::size_t workerThreads)
+{
+    while (mThreads.size() < workerThreads)
+        mThreads.emplace_back(std::make_unique<WorkThread>(*this));
+    mIsReleased = false;
+}
+
+void WorkQueue::stop()
 {
     {
         std::unique_lock<std::mutex> lock(mMutex);

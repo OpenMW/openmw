@@ -407,6 +407,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
+    mWorkQueue->stop();
+
     mEnvironment.cleanup();
 
     delete mScriptContext;
