@@ -37,7 +37,7 @@ namespace MWGui
         virtual ~LoadingScreen();
 
         /// Overridden from Loading::Listener, see the Loading::Listener documentation for usage details
-        void setLabel (const std::string& label, bool important, bool center) override;
+        void setLabel (const std::string& label, bool important) override;
         void loadingOn(bool visible=true) override;
         void loadingOff() override;
         void setProgressRange (size_t range) override;
