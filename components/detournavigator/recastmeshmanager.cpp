@@ -95,6 +95,11 @@ namespace DetourNavigator
             mLastNavMeshReportedChange = mLastNavMeshReport;
     }
 
+    Version RecastMeshManager::getVersion() const
+    {
+        return Version {mGeneration, mRevision};
+    }
+
     void RecastMeshManager::rebuild()
     {
         mMeshBuilder.reset();

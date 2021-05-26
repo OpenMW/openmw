@@ -81,10 +81,10 @@ namespace DetourNavigator
         bool hasTile(const TilePosition& tilePosition);
 
         template <class Function>
-        void forEachTilePosition(Function&& function)
+        void forEachTile(Function&& function)
         {
-            for (const auto& tile : *mTiles.lock())
-                function(tile.first);
+            for (auto& [tilePosition, recastMeshManager] : *mTiles.lock())
+                function(tilePosition, recastMeshManager);
         }
 
         std::size_t getRevision() const;

@@ -28,6 +28,8 @@ namespace DetourNavigator
 
         void reportNavMeshChange(Version recastMeshVersion, Version navMeshVersion);
 
+        Version getVersion() const;
+
     private:
         RecastMeshManager mImpl;
         std::shared_ptr<RecastMesh> mCached;

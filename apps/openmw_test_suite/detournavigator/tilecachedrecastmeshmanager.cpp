@@ -54,7 +54,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         std::size_t calls = 0;
-        manager.forEachTilePosition([&] (const TilePosition&) { ++calls; });
+        manager.forEachTile([&] (const TilePosition&, const CachedRecastMeshManager&) { ++calls; });
         EXPECT_EQ(calls, 0);
     }
 
