@@ -65,6 +65,7 @@ namespace DetourNavigator
         std::size_t mRevision = 0;
         std::size_t mGeneration;
         RecastMeshBuilder mMeshBuilder;
+        TileBounds mTileBounds;
         std::list<OscillatingRecastMeshObject> mObjectsOrder;
         std::unordered_map<ObjectId, std::list<OscillatingRecastMeshObject>::iterator> mObjects;
         std::list<Water> mWaterOrder;

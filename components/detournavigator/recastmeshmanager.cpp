@@ -5,6 +5,7 @@ namespace DetourNavigator
     RecastMeshManager::RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation)
         : mGeneration(generation)
         , mMeshBuilder(settings, bounds)
+        , mTileBounds(bounds)
     {
     }
 
@@ -29,7 +30,7 @@ namespace DetourNavigator
             return false;
         const std::size_t lastChangeRevision = mLastNavMeshReportedChange.has_value()
                 ? mLastNavMeshReportedChange->mRevision : mRevision;
-        if (!object->second->update(transform, areaType, lastChangeRevision))
+        if (!object->second->update(transform, areaType, lastChangeRevision, mTileBounds))
             return false;
         ++mRevision;
         return true;
