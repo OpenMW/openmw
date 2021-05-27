@@ -12,13 +12,12 @@ namespace DetourNavigator
     bool RecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
+        const auto object = mObjects.lower_bound(id);
+        if (object != mObjects.end() && object->first == id)
+            return false;
         const auto iterator = mObjectsOrder.emplace(mObjectsOrder.end(),
             OscillatingRecastMeshObject(RecastMeshObject(shape, transform, areaType), mRevision + 1));
-        if (!mObjects.emplace(id, iterator).second)
-        {
-            mObjectsOrder.erase(iterator);
-            return false;
-        }
+        mObjects.emplace_hint(object, id, iterator);
         ++mRevision;
         return true;
     }
