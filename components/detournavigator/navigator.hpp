@@ -155,10 +155,16 @@ namespace DetourNavigator
         virtual void removePathgrid(const ESM::Pathgrid& pathgrid) = 0;
 
         /**
-         * @brief update start background navmesh update using current scene state.
+         * @brief update starts background navmesh update using current scene state.
          * @param playerPosition setup initial point to order build tiles of navmesh.
          */
         virtual void update(const osg::Vec3f& playerPosition) = 0;
+
+        /**
+         * @brief updatePlayerPosition starts background navmesh update using current scene state only when player position has been changed.
+         * @param playerPosition setup initial point to order build tiles of navmesh.
+         */
+        virtual void updatePlayerPosition(const osg::Vec3f& playerPosition) = 0;
 
         /**
          * @brief disable navigator updates

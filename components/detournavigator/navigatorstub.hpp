@@ -71,6 +71,8 @@ namespace DetourNavigator
 
         void update(const osg::Vec3f& /*playerPosition*/) override {}
 
+        void updatePlayerPosition(const osg::Vec3f& /*playerPosition*/) override {};
+
         void setUpdatesEnabled(bool /*enabled*/) override {}
 
         void wait(Loading::Listener& /*listener*/, WaitConditionType /*waitConditionType*/) override {}
