@@ -260,10 +260,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writer.save (stream);
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        int messagesCount = MWBase::Environment::get().getWindowManager()->getMessagesCount();
         // Using only Cells for progress information, since they typically have the largest records by far
         listener.setProgressRange(MWBase::Environment::get().getWorld()->countSavedGameCells());
-        listener.setLabel("#{sNotifyMessage4}", true, messagesCount > 0);
+        listener.setLabel("#{sNotifyMessage4}", true);
 
         Loading::ScopedLoad load(&listener);
 
@@ -385,10 +384,9 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         std::map<int, int> contentFileMap = buildContentFileIndexMap (reader);
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        int messagesCount = MWBase::Environment::get().getWindowManager()->getMessagesCount();
 
         listener.setProgressRange(100);
-        listener.setLabel("#{sLoadingMessage14}", false, messagesCount > 0);
+        listener.setLabel("#{sLoadingMessage14}");
 
         Loading::ScopedLoad load(&listener);
 
