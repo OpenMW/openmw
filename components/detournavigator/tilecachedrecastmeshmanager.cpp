@@ -3,6 +3,9 @@
 #include "gettilespositions.hpp"
 #include "settingsutils.hpp"
 
+#include <algorithm>
+#include <vector>
+
 namespace DetourNavigator
 {
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const Settings& settings)
@@ -12,23 +15,22 @@ namespace DetourNavigator
     bool TileCachedRecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape,
                                                 const btTransform& transform, const AreaType areaType)
     {
-        bool result = false;
-        auto& tilesPositions = mObjectsTilesPositions[id];
+        std::vector<TilePosition> tilesPositions;
         const auto border = getBorderSize(mSettings);
         {
             auto tiles = mTiles.lock();
             getTilesPositions(shape, transform, mSettings, [&] (const TilePosition& tilePosition)
                 {
                     if (addTile(id, shape, transform, areaType, tilePosition, border, tiles.get()))
-                    {
-                        tilesPositions.insert(tilePosition);
-                        result = true;
-                    }
+                        tilesPositions.push_back(tilePosition);
                 });
         }
-        if (result)
-            ++mRevision;
-        return result;
+        if (tilesPositions.empty())
+            return false;
+        std::sort(tilesPositions.begin(), tilesPositions.end());
+        mObjectsTilesPositions.insert_or_assign(id, std::move(tilesPositions));
+        ++mRevision;
+        return true;
     }
 
     std::optional<RemovedRecastMeshObject> TileCachedRecastMeshManager::removeObject(const ObjectId id)

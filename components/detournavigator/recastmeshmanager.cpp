@@ -5,19 +5,19 @@ namespace DetourNavigator
     RecastMeshManager::RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation)
         : mGeneration(generation)
         , mMeshBuilder(settings, bounds)
+        , mTileBounds(bounds)
     {
     }
 
     bool RecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
+        const auto object = mObjects.lower_bound(id);
+        if (object != mObjects.end() && object->first == id)
+            return false;
         const auto iterator = mObjectsOrder.emplace(mObjectsOrder.end(),
             OscillatingRecastMeshObject(RecastMeshObject(shape, transform, areaType), mRevision + 1));
-        if (!mObjects.emplace(id, iterator).second)
-        {
-            mObjectsOrder.erase(iterator);
-            return false;
-        }
+        mObjects.emplace_hint(object, id, iterator);
         ++mRevision;
         return true;
     }
@@ -29,7 +29,7 @@ namespace DetourNavigator
             return false;
         const std::size_t lastChangeRevision = mLastNavMeshReportedChange.has_value()
                 ? mLastNavMeshReportedChange->mRevision : mRevision;
-        if (!object->second->update(transform, areaType, lastChangeRevision))
+        if (!object->second->update(transform, areaType, lastChangeRevision, mTileBounds))
             return false;
         ++mRevision;
         return true;
@@ -93,6 +93,11 @@ namespace DetourNavigator
         if (!mLastNavMeshReportedChange.has_value()
                 || mLastNavMeshReportedChange->mNavMeshVersion < mLastNavMeshReport->mNavMeshVersion)
             mLastNavMeshReportedChange = mLastNavMeshReport;
+    }
+
+    Version RecastMeshManager::getVersion() const
+    {
+        return Version {mGeneration, mRevision};
     }
 
     void RecastMeshManager::rebuild()

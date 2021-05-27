@@ -171,7 +171,7 @@ namespace DetourNavigator
                     }
             }
             const auto maxTiles = std::min(mSettings.mMaxTilesNumber, navMesh.getParams()->maxTiles);
-            mRecastMeshManager.forEachTilePosition([&] (const TilePosition& tile)
+            mRecastMeshManager.forEachTile([&] (const TilePosition& tile, CachedRecastMeshManager& recastMeshManager)
             {
                 if (tilesToPost.count(tile))
                     return;
@@ -181,6 +181,8 @@ namespace DetourNavigator
                     tilesToPost.insert(std::make_pair(tile, ChangeType::add));
                 else if (!shouldAdd && presentInNavMesh)
                     tilesToPost.insert(std::make_pair(tile, ChangeType::mixed));
+                else
+                    recastMeshManager.reportNavMeshChange(recastMeshManager.getVersion(), Version {0, 0});
             });
         }
         mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, tilesToPost);
@@ -214,8 +216,8 @@ namespace DetourNavigator
     RecastMeshTiles NavMeshManager::getRecastMeshTiles()
     {
         std::vector<TilePosition> tiles;
-        mRecastMeshManager.forEachTilePosition(
-            [&tiles] (const TilePosition& tile) { tiles.push_back(tile); });
+        mRecastMeshManager.forEachTile(
+            [&tiles] (const TilePosition& tile, const CachedRecastMeshManager&) { tiles.push_back(tile); });
         RecastMeshTiles result;
         std::transform(tiles.begin(), tiles.end(), std::inserter(result, result.end()),
             [this] (const TilePosition& tile) { return std::make_pair(tile, mRecastMeshManager.getMesh(tile)); });

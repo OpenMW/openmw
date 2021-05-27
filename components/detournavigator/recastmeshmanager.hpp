@@ -13,7 +13,6 @@
 #include <list>
 #include <map>
 #include <optional>
-#include <unordered_map>
 
 class btCollisionShape;
 
@@ -53,6 +52,8 @@ namespace DetourNavigator
 
         void reportNavMeshChange(Version recastMeshVersion, Version navMeshVersion);
 
+        Version getVersion() const;
+
     private:
         struct Report
         {
@@ -63,8 +64,9 @@ namespace DetourNavigator
         std::size_t mRevision = 0;
         std::size_t mGeneration;
         RecastMeshBuilder mMeshBuilder;
+        TileBounds mTileBounds;
         std::list<OscillatingRecastMeshObject> mObjectsOrder;
-        std::unordered_map<ObjectId, std::list<OscillatingRecastMeshObject>::iterator> mObjects;
+        std::map<ObjectId, std::list<OscillatingRecastMeshObject>::iterator> mObjects;
         std::list<Water> mWaterOrder;
         std::map<osg::Vec2i, std::list<Water>::iterator> mWater;
         std::optional<Report> mLastNavMeshReportedChange;

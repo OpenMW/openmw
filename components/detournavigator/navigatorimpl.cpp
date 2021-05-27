@@ -146,6 +146,15 @@ namespace DetourNavigator
             mNavMeshManager.update(playerPosition, v.first);
     }
 
+    void NavigatorImpl::updatePlayerPosition(const osg::Vec3f& playerPosition)
+    {
+        const TilePosition tilePosition = getTilePosition(mSettings, toNavMeshCoordinates(mSettings, playerPosition));
+        if (mLastPlayerPosition.has_value() && *mLastPlayerPosition == tilePosition)
+            return;
+        update(playerPosition);
+        mLastPlayerPosition = tilePosition;
+    }
+
     void NavigatorImpl::setUpdatesEnabled(bool enabled)
     {
         mUpdatesEnabled = enabled;
