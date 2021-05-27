@@ -343,7 +343,7 @@ namespace MWDialogue
                     if(!inJournal(topicId, answer->mId))
                     {
                         // Does this dialogue contains some actor-specific answer?
-                        if (answer->mActor == mActor.getCellRef().getRefId())
+                        if (Misc::StringUtils::ciEqual(answer->mActor, mActor.getCellRef().getRefId()))
                             flag |= MWBase::DialogueManager::TopicType::Specific;
                     }
                     else
