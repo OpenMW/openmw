@@ -2458,7 +2458,7 @@ void CharacterController::update(float duration)
     if (mFloatToSurface && cls.isActor())
     {
         if (cls.getCreatureStats(mPtr).isDead()
-            || (!godmode && cls.getCreatureStats(mPtr).isParalyzed()))
+            || (!godmode && cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0))
         {
             moved.z() = 1.0;
         }
