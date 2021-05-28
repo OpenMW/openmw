@@ -103,46 +103,11 @@ namespace SceneUtil
             : mData(new osg::FloatArray(3*4*count))
             , mEndian(osg::getCpuByteOrder())
             , mCount(count)
-            , mStride(12)
             , mCachedSunPos(osg::Vec4())
         {
-            mOffsets[Diffuse] = 0;
-            mOffsets[Ambient] = 1;
-            mOffsets[Specular] = 2;
-            mOffsets[DiffuseSign] = 3;
-            mOffsets[Position] = 4;
-            mOffsets[AttenuationRadius] = 8;
         }
 
         LightBuffer(const LightBuffer&) = delete;
-
-        LightBuffer(const LightBuffer& other, int offsetColors, int offsetPosition, int offsetAttenuationRadius, int size, int stride)
-            : mData(new osg::FloatArray(size / sizeof(GL_FLOAT)))
-            , mEndian(other.mEndian)
-            , mCount(other.mCount)
-            , mStride((offsetAttenuationRadius + sizeof(GL_FLOAT) * osg::Vec4::num_components + stride) / 4)
-            , mCachedSunPos(other.mCachedSunPos)
-        {
-            mData->setBufferObject(other.mData->getBufferObject());
-
-            constexpr auto sizeofFloat = sizeof(GL_FLOAT);
-            const auto diffuseOffset = offsetColors / sizeofFloat;
-
-            mOffsets[Diffuse] = diffuseOffset;
-            mOffsets[Ambient] = diffuseOffset + 1;
-            mOffsets[Specular] = diffuseOffset + 2;
-            mOffsets[DiffuseSign] = diffuseOffset + 3;
-            mOffsets[Position] = offsetPosition / sizeofFloat;
-            mOffsets[AttenuationRadius] = offsetAttenuationRadius / sizeofFloat;
-
-            // Copy over previous buffers light data. Buffers populate before we know the layout.
-            for (int i = 0; i < other.mCount; ++i)
-            {
-                std::memcpy(&(*mData)[getOffset(i, Diffuse)], &(*other.mData)[other.getOffset(i, Diffuse)], sizeof(osg::Vec4f));
-                std::memcpy(&(*mData)[getOffset(i, Position)], &(*other.mData)[other.getOffset(i, Position)], sizeof(osg::Vec4f));
-                std::memcpy(&(*mData)[getOffset(i, AttenuationRadius)], &(*other.mData)[other.getOffset(i, AttenuationRadius)], sizeof(osg::Vec4f));
-            }
-        }
 
         void setDiffuse(int index, const osg::Vec4& value)
         {
@@ -214,15 +179,69 @@ namespace SceneUtil
 
         int getOffset(int index, LayoutOffset slot) const
         {
-            return mStride * index + mOffsets[slot];
+            return mOffsets.get(index, slot);
+        }
+
+        void configureLayout(int offsetColors, int offsetPosition, int offsetAttenuationRadius, int size, int stride)
+        {
+            const Offsets offsets(offsetColors, offsetPosition, offsetAttenuationRadius, stride);
+
+            // Copy cloned data using current layout into current data using new layout.
+            // This allows to preserve osg::FloatArray buffer object in mData.
+            const auto data = mData->asVector();
+            mData->resizeArray(static_cast<unsigned>(size));
+            for (int i = 0; i < mCount; ++i)
+            {
+                std::memcpy(&(*mData)[offsets.get(i, Diffuse)], data.data() + getOffset(i, Diffuse), sizeof(osg::Vec4f));
+                std::memcpy(&(*mData)[offsets.get(i, Position)], data.data() + getOffset(i, Position), sizeof(osg::Vec4f));
+                std::memcpy(&(*mData)[offsets.get(i, AttenuationRadius)], data.data() + getOffset(i, AttenuationRadius), sizeof(osg::Vec4f));
+            }
+            mOffsets = offsets;
         }
 
     private:
+        class Offsets
+        {
+            public:
+                Offsets()
+                    : mStride(12)
+                {
+                    mValues[Diffuse] = 0;
+                    mValues[Ambient] = 1;
+                    mValues[Specular] = 2;
+                    mValues[DiffuseSign] = 3;
+                    mValues[Position] = 4;
+                    mValues[AttenuationRadius] = 8;
+                }
+
+                Offsets(int offsetColors, int offsetPosition, int offsetAttenuationRadius, int stride)
+                    : mStride((offsetAttenuationRadius + sizeof(GL_FLOAT) * osg::Vec4::num_components + stride) / 4)
+                {
+                    constexpr auto sizeofFloat = sizeof(GL_FLOAT);
+                    const auto diffuseOffset = offsetColors / sizeofFloat;
+
+                    mValues[Diffuse] = diffuseOffset;
+                    mValues[Ambient] = diffuseOffset + 1;
+                    mValues[Specular] = diffuseOffset + 2;
+                    mValues[DiffuseSign] = diffuseOffset + 3;
+                    mValues[Position] = offsetPosition / sizeofFloat;
+                    mValues[AttenuationRadius] = offsetAttenuationRadius / sizeofFloat;
+                }
+
+                int get(int index, LayoutOffset slot) const
+                {
+                    return mStride * index + mValues[slot];
+                }
+
+            private:
+                int mStride;
+                std::array<int, 6> mValues;
+        };
+
         osg::ref_ptr<osg::FloatArray> mData;
         osg::Endian mEndian;
         int mCount;
-        int mStride;
-        std::array<std::size_t, 6> mOffsets;
+        Offsets mOffsets;
         osg::Vec4 mCachedSunPos;
     };
 
@@ -751,10 +770,7 @@ namespace SceneUtil
             ext->glGetActiveUniformsiv(handle, indices.size(), indices.data(), GL_UNIFORM_OFFSET, offsets.data());
 
             for (int i = 0; i < 2; ++i)
-            {
-                auto& buf = mLightManager->getLightBuffer(i);
-                buf = new LightBuffer(*buf, offsets[0], offsets[1], offsets[2], totalBlockSize, stride);
-            }
+                mLightManager->getLightBuffer(i)->configureLayout(offsets[0], offsets[1], offsets[2], totalBlockSize, stride);
         }
 
         void apply(osg::State& state) const override
