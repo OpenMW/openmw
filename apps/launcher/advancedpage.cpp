@@ -136,7 +136,7 @@ bool Launcher::AdvancedPage::loadSettings()
 
         loadSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
         viewingDistanceComboBox->setValue(convertToCells(Settings::Manager::getInt("viewing distance", "Camera")));
-        objectPagingMinSizeComboBox->setValue(Settings::Manager::getFloat("object paging min size", "Terrain"));
+        objectPagingMinSizeComboBox->setValue(Settings::Manager::getDouble("object paging min size", "Terrain"));
     }
 
     // Audio
@@ -289,8 +289,8 @@ void Launcher::AdvancedPage::saveSettings()
             Settings::Manager::setInt("viewing distance", "Camera", convertToUnits(viewingDistance));
         }
         double objectPagingMinSize = objectPagingMinSizeComboBox->value();
-        if (objectPagingMinSize != Settings::Manager::getFloat("object paging min size", "Terrain"))
-            Settings::Manager::setFloat("object paging min size", "Terrain", objectPagingMinSize);
+        if (objectPagingMinSize != Settings::Manager::getDouble("object paging min size", "Terrain"))
+            Settings::Manager::setDouble("object paging min size", "Terrain", objectPagingMinSize);
     }
     
     // Audio
