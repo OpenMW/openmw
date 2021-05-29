@@ -319,7 +319,7 @@ namespace MWWorld
 
         // in case there are multiple effects, the model is a dummy without geometry. Use the second effect for physics shape
         if (state.mIdMagic.size() > 1)
-            model = "meshes\\" + MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find(state.mIdMagic.at(1))->mModel;
+            model = "meshes\\" + MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find(state.mIdMagic[1])->mModel;
         state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true, false);
         state.mToDelete = false;
         mMagicBolts.push_back(state);
