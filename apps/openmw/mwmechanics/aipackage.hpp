@@ -122,6 +122,10 @@ namespace MWMechanics
             /// Return if actor's rotation speed is sufficient to rotate to the destination pathpoint on the run. Otherwise actor should rotate while standing.
             static bool isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const osg::Vec3f& dest);
 
+            osg::Vec3f getNextPathPoint(const osg::Vec3f& destination) const;
+
+            float getNextPathPointTolerance(float speed, float duration, const osg::Vec3f& halfExtents) const;
+
         protected:
             /// Handles path building and shortcutting with obstacles avoiding
             /** \return If the actor has arrived at his destination **/
@@ -166,6 +170,7 @@ namespace MWMechanics
             bool mIsShortcutting;   // if shortcutting at the moment
             bool mShortcutProhibited; // shortcutting may be prohibited after unsuccessful attempt
             osg::Vec3f mShortcutFailPos; // position of last shortcut fail
+            float mLastDestinationTolerance = 0;
 
         private:
             bool isNearInactiveCell(osg::Vec3f position);
