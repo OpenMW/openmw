@@ -932,7 +932,7 @@ namespace MWPhysics
         mWantJump = ptr.getClass().getMovementSettings(ptr).mPosition[2] != 0;
         auto& stats = ptr.getClass().getCreatureStats(ptr);
         const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
-        mFloatToSurface = stats.isDead() || (!godmode && stats.isParalyzed());
+        mFloatToSurface = stats.isDead() || (!godmode && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0);
         mWasOnGround = actor->getOnGround();
     }
 
