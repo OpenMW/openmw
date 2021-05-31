@@ -10,7 +10,7 @@ OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 * Version: 0.47.0
 * License: GPLv3 (see [LICENSE](https://github.com/OpenMW/openmw/blob/master/LICENSE) for more information)
 * Website: https://www.openmw.org
-* IRC: #openmw on irc.freenode.net
+* IRC: #openmw on irc.libera.chat
 
 Font Licenses:
 * DejaVuLGCSansMono.ttf: custom (see [files/mygui/DejaVuFontLicense.txt](https://github.com/OpenMW/openmw/blob/master/files/mygui/DejaVuFontLicense.txt) for more information)

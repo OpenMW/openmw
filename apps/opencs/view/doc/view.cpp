@@ -749,7 +749,7 @@ void CSVDoc::View::infoAbout()
     "<tr><td>%4</td><td><a href=\"https://openmw.org\">https://openmw.org</a></td></tr>"
     "<tr><td>%5</td><td><a href=\"https://forum.openmw.org\">https://forum.openmw.org</a></td></tr>"
     "<tr><td>%6</td><td><a href=\"https://gitlab.com/OpenMW/openmw/issues\">https://gitlab.com/OpenMW/openmw/issues</a></td></tr>"
-    "<tr><td>%7</td><td><a href=\"https://webchat.freenode.net/?channels=openmw&uio=OT10cnVlde\">irc://irc.freenode.net/#openmw</a></td></tr>"
+    "<tr><td>%7</td><td><a href=\"https://web.libera.chat/#openmw\">ircs://irc.libera.chat/#openmw</a></td></tr>"
     "</table>"
     "</p>")
     .arg(versionInfo
