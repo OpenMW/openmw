@@ -74,7 +74,7 @@ notifications:
   irc:
     if: repository_slug = OpenMW/openmw AND branch = master
     channels:
-      - "chat.freenode.net#openmw"
+      - "irc.libera.chat#openmw"
     on_success: change
     on_failure: always
     use_notice: true
