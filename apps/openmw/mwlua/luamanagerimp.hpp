@@ -75,6 +75,8 @@ namespace MWLua
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;
         sol::table mCameraPackage;
+        sol::table mLocalSettingsPackage;
+        sol::table mPlayerSettingsPackage;
 
         std::vector<std::string> mGlobalScriptList;
         GlobalScripts mGlobalScripts{&mLua};

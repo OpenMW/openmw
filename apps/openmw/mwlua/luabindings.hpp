@@ -59,6 +59,11 @@ namespace MWLua
     // Implemented in uibindings.cpp
     sol::table initUserInterfacePackage(const Context&);
 
+    // Implemented in settingsbindings.cpp
+    sol::table initGlobalSettingsPackage(const Context&);
+    sol::table initLocalSettingsPackage(const Context&);
+    sol::table initPlayerSettingsPackage(const Context&);
+
     // openmw.self package is implemented in localscripts.cpp
 }
 

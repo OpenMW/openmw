@@ -60,9 +60,12 @@ namespace MWLua
         mLua.addCommonPackage("openmw.core", initCorePackage(context));
         mLua.addCommonPackage("openmw.query", initQueryPackage(context));
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
+        mGlobalScripts.addPackage("openmw.settings", initGlobalSettingsPackage(context));
         mCameraPackage = initCameraPackage(localContext);
         mUserInterfacePackage = initUserInterfacePackage(localContext);
         mNearbyPackage = initNearbyPackage(localContext);
+        mLocalSettingsPackage = initLocalSettingsPackage(localContext);
+        mPlayerSettingsPackage = initPlayerSettingsPackage(localContext);
 
         mKeyPressEvents.clear();
         for (const std::string& path : mGlobalScriptList)
@@ -291,9 +294,13 @@ namespace MWLua
             scripts = std::make_shared<PlayerScripts>(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
             scripts->addPackage("openmw.ui", mUserInterfacePackage);
             scripts->addPackage("openmw.camera", mCameraPackage);
+            scripts->addPackage("openmw.settings", mPlayerSettingsPackage);
         }
         else
+        {
             scripts = std::make_shared<LocalScripts>(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
+            scripts->addPackage("openmw.settings", mLocalSettingsPackage);
+        }
         scripts->addPackage("openmw.nearby", mNearbyPackage);
         scripts->setSerializer(mLocalSerializer.get());
 
