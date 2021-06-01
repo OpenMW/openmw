@@ -62,6 +62,7 @@ varying vec3 passNormal;
 #include "shadows_vertex.glsl"
 
 #include "lighting.glsl"
+#include "depth.glsl"
 
 void main(void)
 {
@@ -70,7 +71,7 @@ void main(void)
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
     euclideanDepth = length(viewPos.xyz);
-    linearDepth = gl_Position.z;
+    linearDepth = getLinearDepth(viewPos);
 
 #if (@envMap || !PER_PIXEL_LIGHTING || @shadows_enabled)
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);

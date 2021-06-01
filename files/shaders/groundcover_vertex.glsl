@@ -39,6 +39,7 @@ centroid varying vec3 shadowDiffuseLighting;
 
 #include "shadows_vertex.glsl"
 #include "lighting.glsl"
+#include "depth.glsl"
 
 uniform float osg_SimulationTime;
 uniform mat4 osg_ViewMatrixInverse;
@@ -143,7 +144,7 @@ void main(void)
     else
         gl_Position = gl_ProjectionMatrix * viewPos;
 
-    linearDepth = gl_Position.z;
+    linearDepth = getLinearDepth(viewPos);
 
 #if (!PER_PIXEL_LIGHTING || @shadows_enabled)
     vec3 viewNormal = normalize((gl_NormalMatrix * rotation3(rotation) * gl_Normal).xyz);

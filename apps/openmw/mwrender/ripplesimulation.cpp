@@ -16,6 +16,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include "vismask.hpp"
 
@@ -55,7 +56,7 @@ namespace
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
         stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);
 
-        osg::ref_ptr<osg::Depth> depth (new osg::Depth);
+        auto depth = SceneUtil::createDepth(resourceSystem->getSceneManager()->getReverseZ());
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 

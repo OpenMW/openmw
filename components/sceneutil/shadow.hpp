@@ -17,7 +17,7 @@ namespace SceneUtil
 
         static Shader::ShaderManager::DefineMap getShadowsDisabledDefines();
 
-        ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager);
+        ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager, bool reverseZ);
 
         void setupShadowSettings();
 
@@ -26,8 +26,11 @@ namespace SceneUtil
         void enableIndoorMode();
 
         void enableOutdoorMode();
+
+        bool getReverseZ() const;
     protected:
         bool mEnableShadows;
+        bool mReverseZ;
 
         osg::ref_ptr<osgShadow::ShadowedScene> mShadowedScene;
         osg::ref_ptr<osgShadow::ShadowSettings> mShadowSettings;

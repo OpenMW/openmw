@@ -83,13 +83,14 @@ namespace
 namespace MWRender
 {
 
-LocalMap::LocalMap(osg::Group* root)
+LocalMap::LocalMap(osg::Group* root, bool reverseZ)
     : mRoot(root)
     , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
     , mMapWorldSize(Constants::CellSizeInUnits)
     , mCellDistance(Constants::CellGridRadius)
     , mAngle(0.f)
     , mInterior(false)
+    , mReverseZ(reverseZ)
 {
     // Increase map resolution, if use UI scaling
     float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
@@ -176,7 +177,12 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, float width, float height, const osg::Vec3d& upVector, float zmin, float zmax)
 {
     osg::ref_ptr<osg::Camera> camera (new osg::Camera);
-    camera->setProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10);
+
+    if (mReverseZ)
+        camera->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10));
+    else
+        camera->setProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10);
+
     camera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
     camera->setViewMatrixAsLookAt(osg::Vec3d(x, y, zmax + 5), osg::Vec3d(x, y, zmin), upVector);
     camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT);
@@ -194,6 +200,13 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
     stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
+
+    if (mReverseZ)
+    {
+        camera->setClearDepth(0.0);
+        auto depth = SceneUtil::createDepth(mReverseZ);
+        stateset->setAttributeAndModes(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+    }
 
     // assign large value to effectively turn off fog
     // shaders don't respect glDisable(GL_FOG)

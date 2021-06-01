@@ -741,7 +741,7 @@ namespace MWGui
     }
 
     // ------------------------------------------------------------------------------------------
-    MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender, SceneUtil::WorkQueue* workQueue)
+    MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender, SceneUtil::WorkQueue* workQueue, bool reverseZ)
         : WindowPinnableBase("openmw_map_window.layout")
         , LocalMapBase(customMarkers, localMapRender)
         , NoDrop(drag, mMainWidget)
@@ -751,7 +751,7 @@ namespace MWGui
         , mGlobal(Settings::Manager::getBool("global", "Map"))
         , mEventBoxGlobal(nullptr)
         , mEventBoxLocal(nullptr)
-        , mGlobalMapRender(new MWRender::GlobalMap(localMapRender->getRoot(), workQueue))
+        , mGlobalMapRender(new MWRender::GlobalMap(localMapRender->getRoot(), workQueue, reverseZ))
         , mEditNoteDialog()
     {
         static bool registered = false;

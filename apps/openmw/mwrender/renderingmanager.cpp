@@ -11,6 +11,8 @@
 #include <osg/Group>
 #include <osg/UserDataContainer>
 #include <osg/ComputeBoundsVisitor>
+#include <osg/Depth>
+#include <osg/ClipControl>
 
 #include <osgUtil/LineSegmentIntersector>
 
@@ -68,6 +70,7 @@
 #include "objectpaging.hpp"
 #include "screenshotmanager.hpp"
 #include "groundcover.hpp"
+#include "postprocessor.hpp"
 
 namespace MWRender
 {
@@ -198,6 +201,17 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
     {
+        auto ext = osg::GLExtensions::Get(0, false);
+        bool reverseZ = ext && ext->isClipControlSupported;
+
+        if (getenv("OPENMW_DISABLE_REVERSEZ") != nullptr)
+            reverseZ = false;
+
+        if (reverseZ)
+            Log(Debug::Info) << "Using reverse-z depth buffer";
+        else
+            Log(Debug::Info) << "Using standard depth buffer";
+
         auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(Settings::Manager::getString("lighting method", "Shaders"));
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
@@ -216,6 +230,7 @@ namespace MWRender
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
         resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1);
+        resourceSystem->getSceneManager()->setReverseZ(reverseZ);
 
         // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this depends on support for various OpenGL extensions.
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(lightingMethod == SceneUtil::LightingMethod::FFP);
@@ -242,7 +257,7 @@ namespace MWRender
         if (Settings::Manager::getBool("object shadows", "Shadows"))
             shadowCastingTraversalMask |= (Mask_Object|Mask_Static);
 
-        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
+        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager(), reverseZ));
 
         Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
         Shader::ShaderManager::DefineMap lightDefines = sceneRoot->getLightDefines();
@@ -266,6 +281,8 @@ namespace MWRender
         globalDefines["groundcoverFadeEnd"] = std::to_string(groundcoverDistance);
         globalDefines["groundcoverStompMode"] = std::to_string(std::clamp(Settings::Manager::getInt("stomp mode", "Groundcover"), 0, 2));
         globalDefines["groundcoverStompIntensity"] = std::to_string(std::clamp(Settings::Manager::getInt("stomp intensity", "Groundcover"), 0, 2));
+
+        globalDefines["reverseZ"] = reverseZ ? "1" : "0";
 
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
@@ -413,6 +430,7 @@ namespace MWRender
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
+        NifOsg::Loader::setReverseZ(reverseZ);
         Nif::NIFFile::setLoadUnsupportedFiles(Settings::Manager::getBool("load unsupported nif files", "Models"));
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
@@ -434,6 +452,18 @@ namespace MWRender
 
         mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
         mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
+
+        if (reverseZ)
+        {
+            auto depth = SceneUtil::createDepth(reverseZ);
+            osg::ref_ptr<osg::ClipControl> clipcontrol = new osg::ClipControl(osg::ClipControl::LOWER_LEFT, osg::ClipControl::ZERO_TO_ONE);
+            mViewer->getCamera()->setClearDepth(0.0);
+            mRootNode->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+            mRootNode->getOrCreateStateSet()->setAttributeAndModes(clipcontrol, osg::StateAttribute::ON);
+        }
+
+        mPostProcessor.reset(new PostProcessor(viewer, mRootNode));
+
         updateProjectionMatrix();
     }
 
@@ -1066,7 +1096,20 @@ namespace MWRender
         float fov = mFieldOfView;
         if (mFieldOfViewOverridden)
             fov = mFieldOfViewOverride;
-        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
+
+        if (mResourceSystem->getSceneManager()->getReverseZ())
+        {
+            mViewer->getCamera()->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspectiveInf(fov, aspect, mNearClip));
+            float linearFac = -mNearClip / (mViewDistance - mNearClip) - 1.0;
+            mRootNode->getOrCreateStateSet()->getOrCreateUniform("linearFac", osg::Uniform::FLOAT, 1)->set(linearFac);
+
+            osg::Matrix shadowProj = osg::Matrix::perspective(fov, aspect, mNearClip, mViewDistance);
+            mViewer->getCamera()->setUserValue("shadowProj", shadowProj);
+            mViewer->getCamera()->setUserValue("near", static_cast<double>(mNearClip));
+            mViewer->getCamera()->setUserValue("far", static_cast<double>(mViewDistance));
+        }
+        else
+            mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
 
         mUniformNear->set(mNearClip);
         mUniformFar->set(mViewDistance);

@@ -5,6 +5,7 @@ varying vec4  position;
 varying float linearDepth;
 
 #include "shadows_vertex.glsl"
+#include "depth.glsl"
 
 void main(void)
 {
@@ -20,7 +21,8 @@ void main(void)
 
     position = gl_Vertex;
 
-    linearDepth = gl_Position.z;
+    vec4 viewPos = gl_ModelViewMatrix * gl_Vertex;
+    linearDepth = getLinearDepth(viewPos);
 
-    setupShadowCoords(gl_ModelViewMatrix * gl_Vertex, normalize((gl_NormalMatrix * gl_Normal).xyz));
+    setupShadowCoords(viewPos, normalize((gl_NormalMatrix * gl_Normal).xyz));
 }

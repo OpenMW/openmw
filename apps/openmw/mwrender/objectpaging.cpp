@@ -661,6 +661,7 @@ namespace MWRender
         if (mergeGroup->getNumChildren())
         {
             SceneUtil::Optimizer optimizer;
+            optimizer.setReverseZ(mSceneManager->getReverseZ());
             if (size > 1/8.f)
             {
                 optimizer.setViewPoint(relativeViewPoint);

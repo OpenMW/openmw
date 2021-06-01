@@ -85,6 +85,10 @@ namespace SceneUtil {
 
         virtual void disableFrontFaceCulling();
 
+        virtual void enableReverseZ();
+
+        virtual void disableReverseZ();
+
         virtual void setupCastingShader(Shader::ShaderManager &shaderManager);
 
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
@@ -265,6 +269,8 @@ namespace SceneUtil {
         bool                                    _useFrontFaceCulling = true;
 
         float                                   _shadowFadeStart = 0.0;
+
+        bool                                    _reverseZ = false;
 
         class DebugHUD final : public osg::Referenced
         {

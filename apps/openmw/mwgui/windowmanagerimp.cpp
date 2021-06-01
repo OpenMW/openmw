@@ -305,8 +305,9 @@ namespace MWGui
         mGuiModeStates[GM_MainMenu] = GuiModeState(menu);
         mWindows.push_back(menu);
 
-        mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
-        mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue);
+        bool reverseZ = mResourceSystem->getSceneManager()->getReverseZ();
+        mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup(), reverseZ);
+        mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue, reverseZ);
         mWindows.push_back(mMap);
         mMap->renderGlobalMap();
         trackWindow(mMap, "map");

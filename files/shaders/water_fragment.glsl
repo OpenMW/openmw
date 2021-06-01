@@ -158,11 +158,14 @@ uniform float rainIntensity;
 float frustumDepth;
 
 float linearizeDepth(float depth)
-  {
-    float z_n = 2.0 * depth - 1.0;
-    depth = 2.0 * near * far / (far + near - z_n * frustumDepth);
-    return depth;
-  }
+{
+#if @reverseZ
+  depth = 1.0 - depth;
+#endif
+  float z_n = 2.0 * depth - 1.0;
+  depth = 2.0 * near * far / (far + near - z_n * frustumDepth);
+  return depth;
+}
 
 void main(void)
 {

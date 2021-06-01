@@ -40,6 +40,8 @@
 
 #include <iterator>
 
+#include <components/sceneutil/util.hpp>
+
 using namespace osgUtil;
 
 namespace SceneUtil
@@ -107,6 +109,7 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         MergeGeometryVisitor mgv(this);
         mgv.setTargetMaximumNumberOfVertices(1000000);
         mgv.setMergeAlphaBlending(_mergeAlphaBlending);
+        mgv.setReverseZ(_reverseZ);
         mgv.setViewPoint(_viewPoint);
         node->accept(mgv);
 
@@ -1560,7 +1563,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                 }
                 if (_alphaBlendingActive && _mergeAlphaBlending && !geom->getStateSet())
                 {
-                    osg::Depth* d = new osg::Depth;
+                    auto d = createDepth(_reverseZ);
                     d->setWriteMask(0);
                     geom->getOrCreateStateSet()->setAttribute(d);
                 }

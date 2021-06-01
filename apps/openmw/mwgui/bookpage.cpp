@@ -8,7 +8,11 @@
 #include "MyGUI_FactoryManager.h"
 
 #include <components/misc/utf8stream.hpp>
+#include <components/sceneutil/util.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 
+#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -1217,8 +1221,10 @@ public:
 
         RenderXform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
 
+        float z = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getReverseZ() ? 1.0 : -1.0;
+
         GlyphStream glyphStream(textFormat.mFont, static_cast<float>(mCoord.left), static_cast<float>(mCoord.top - mViewTop),
-                                  -1 /*mNode->getNodeDepth()*/, vertices, renderXform);
+                                  z /*mNode->getNodeDepth()*/, vertices, renderXform);
 
         int visit_top    = (std::max) (mViewTop,    mViewTop + int (renderXform.clipTop   ));
         int visit_bottom = (std::min) (mViewBottom, mViewTop + int (renderXform.clipBottom));

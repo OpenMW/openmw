@@ -17,6 +17,7 @@ varying vec3 passViewPos;
 varying float passFalloff;
 
 #include "vertexcolors.glsl"
+#include "depth.glsl"
 
 void main(void)
 {
@@ -27,7 +28,7 @@ void main(void)
 #if @radialFog
     euclideanDepth = length(viewPos.xyz);
 #else
-    linearDepth = gl_Position.z;
+    linearDepth = getLinearDepth(viewPos);
 #endif
 
 #if @diffuseMap

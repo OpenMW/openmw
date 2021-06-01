@@ -168,7 +168,7 @@ namespace MWRender
         mCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture, 0, 0, false, Settings::Manager::getInt("antialiasing", "Video"));
         mCamera->setName("CharacterPreview");
-        mCamera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
+        mCamera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mCamera->setCullMask(~(Mask_UpdateVisitor));
 
         mCamera->setNodeMask(Mask_RenderToTexture);
@@ -187,6 +187,9 @@ namespace MWRender
         defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
+
+        osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+        stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
         SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 

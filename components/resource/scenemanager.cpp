@@ -275,6 +275,16 @@ namespace Resource
         return mClampLighting;
     }
 
+    void SceneManager::setReverseZ(bool reverseZ)
+    {
+        mReverseZ = reverseZ;
+    }
+
+    bool SceneManager::getReverseZ() const
+    {
+        return mReverseZ;
+    }
+
     void SceneManager::setAutoUseNormalMaps(bool use)
     {
         mAutoUseNormalMaps = use;

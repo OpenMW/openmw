@@ -473,7 +473,7 @@ const float CelestialBody::mDistance = 1000.0f;
 class Sun : public CelestialBody
 {
 public:
-    Sun(osg::Group* parentNode, Resource::ImageManager& imageManager)
+    Sun(osg::Group* parentNode, Resource::ImageManager& imageManager, bool reverseZ)
         : CelestialBody(parentNode, 1.0f, 1, Mask_Sun)
         , mUpdater(new Updater)
     {
@@ -502,8 +502,8 @@ public:
 
         mTransform->addChild(queryNode);
 
-        mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryNode, true);
-        mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryNode, false);
+        mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryNode, true, reverseZ);
+        mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryNode, false, reverseZ);
 
         createSunFlash(imageManager);
         createSunGlare();
@@ -556,7 +556,7 @@ private:
     };
 
     /// @param queryVisible If true, queries the amount of visible pixels. If false, queries the total amount of pixels.
-    osg::ref_ptr<osg::OcclusionQueryNode> createOcclusionQueryNode(osg::Group* parent, bool queryVisible)
+    osg::ref_ptr<osg::OcclusionQueryNode> createOcclusionQueryNode(osg::Group* parent, bool queryVisible, bool reverseZ)
     {
         osg::ref_ptr<osg::OcclusionQueryNode> oqn = new osg::OcclusionQueryNode;
         oqn->setQueriesEnabled(true);
@@ -594,13 +594,13 @@ private:
         osg::StateSet* queryStateSet = new osg::StateSet;
         if (queryVisible)
         {
-            osg::ref_ptr<osg::Depth> depth (new osg::Depth);
-            depth->setFunction(osg::Depth::LEQUAL);
+            auto depth = SceneUtil::createDepth(reverseZ);
             // This is a trick to make fragments written by the query always use the maximum depth value,
             // without having to retrieve the current far clipping distance.
             // We want the sun glare to be "infinitely" far away.
-            depth->setZNear(1.0);
-            depth->setZFar(1.0);
+            float far = reverseZ ? 0.0 : 1.0;
+            depth->setZNear(far);
+            depth->setZFar(far);
             depth->setWriteMask(false);
             queryStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
@@ -1188,7 +1188,8 @@ void SkyManager::create()
     mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getImageManager());
     atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
-    mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getImageManager()));
+    bool reverseZ = mSceneManager->getReverseZ();
+    mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), reverseZ));
 
     mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), Fallback::Map::getFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
     mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), Fallback::Map::getFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
@@ -1209,7 +1210,7 @@ void SkyManager::create()
     mCloudMesh2->addUpdateCallback(mCloudUpdater2);
     mCloudMesh2->setNodeMask(0);
 
-    osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+    auto depth = SceneUtil::createDepth(reverseZ);
     depth->setWriteMask(false);
     mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
     mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);

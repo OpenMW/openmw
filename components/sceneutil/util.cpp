@@ -285,4 +285,43 @@ bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::
     return addMSAAIntermediateTarget;
 }
 
+osg::ref_ptr<osg::Depth> createDepth(bool reverseZ)
+{
+    static osg::Depth::Function func = reverseZ ? osg::Depth::GEQUAL : osg::Depth::LEQUAL;
+    return new osg::Depth(func);
+}
+
+osg::Matrix getReversedZProjectionMatrixAsPerspectiveInf(double fov, double aspect, double near)
+{
+    double A = 1.0/std::tan(osg::DegreesToRadians(fov)/2.0);
+    return osg::Matrix(
+        A/aspect,   0,      0,      0,
+        0,          A,      0,      0,
+        0,          0,      0,      -1,
+        0,          0,      near,   0
+    );
+}
+
+osg::Matrix getReversedZProjectionMatrixAsPerspective(double fov, double aspect, double near, double far)
+{
+    double A = 1.0/std::tan(osg::DegreesToRadians(fov)/2.0);
+    return osg::Matrix(
+        A/aspect,   0,      0,                          0,
+        0,          A,      0,                          0,
+        0,          0,      far/(far-near)-1.0,         -1,
+        0,          0,      -(far*near)/(far - near),   0
+    );
+}
+
+osg::Matrix getReversedZProjectionMatrixAsOrtho(double left, double right, double bottom, double top, double near, double far)
+{
+    return osg::Matrix(
+        2/(right-left),             0,                          0,                  0,
+        0,                          2/(top-bottom),             0,                  0,
+        0,                          0,                          1/(far-near),       0,
+        (right+left)/(left-right),  (top+bottom)/(bottom-top),  far/(far-near),     1
+    );
+}
+
+
 }

@@ -92,6 +92,9 @@ namespace Resource
         void setClampLighting(bool clamp);
         bool getClampLighting() const;
 
+        void setReverseZ(bool reverseZ);
+        bool getReverseZ() const;
+
         /// @see ShaderVisitor::setAutoUseNormalMaps
         void setAutoUseNormalMaps(bool use);
 
@@ -202,6 +205,7 @@ namespace Resource
         SceneUtil::LightingMethod mLightingMethod;
         SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
         bool mConvertAlphaTestToAlphaToCoverage;
+        bool mReverseZ;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 

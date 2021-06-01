@@ -94,10 +94,12 @@ namespace SceneUtil
         }
     }
 
-    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
-        mShadowTechnique(new MWShadowTechnique),
-        mOutdoorShadowCastingMask(outdoorShadowCastingMask),
-        mIndoorShadowCastingMask(indoorShadowCastingMask)
+    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager, bool reverseZ)
+        : mShadowedScene(new osgShadow::ShadowedScene)
+        , mReverseZ(reverseZ)
+        , mShadowTechnique(new MWShadowTechnique)
+        , mOutdoorShadowCastingMask(outdoorShadowCastingMask)
+        , mIndoorShadowCastingMask(indoorShadowCastingMask)
     {
         mShadowedScene->setShadowTechnique(mShadowTechnique);
 
@@ -107,6 +109,9 @@ namespace SceneUtil
 
         mShadowSettings = mShadowedScene->getShadowSettings();
         setupShadowSettings();
+
+        if (mReverseZ)
+            mShadowTechnique->enableReverseZ();
 
         mShadowTechnique->setupCastingShader(shaderManager);
 
@@ -179,5 +184,10 @@ namespace SceneUtil
         if (mEnableShadows)
             mShadowTechnique->enableShadows();
         mShadowSettings->setCastsShadowTraversalMask(mOutdoorShadowCastingMask);
+    }
+    
+    bool ShadowManager::getReverseZ() const
+    {
+        return mReverseZ;
     }
 }

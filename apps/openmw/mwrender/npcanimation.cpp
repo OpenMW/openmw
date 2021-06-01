@@ -370,9 +370,9 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
 {
 public:
-    DepthClearCallback()
+    DepthClearCallback(bool reverseZ)
     {
-        mDepth = new osg::Depth;
+        mDepth = SceneUtil::createDepth(reverseZ);
         mDepth->setWriteMask(true);
     }
 
@@ -432,7 +432,7 @@ void NpcAnimation::setRenderBin()
         if (!prototypeAdded)
         {
             osg::ref_ptr<osgUtil::RenderBin> depthClearBin (new osgUtil::RenderBin);
-            depthClearBin->setDrawCallback(new DepthClearCallback);
+            depthClearBin->setDrawCallback(new DepthClearCallback(mResourceSystem->getSceneManager()->getReverseZ()));
             osgUtil::RenderBin::addRenderBinPrototype("DepthClear", depthClearBin);
             prototypeAdded = true;
         }

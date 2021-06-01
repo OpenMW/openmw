@@ -226,6 +226,18 @@ namespace NifOsg
         return sIntersectionDisabledNodeMask;
     }
 
+    bool Loader::sReverseZ = false;
+
+    void Loader::setReverseZ(bool reverseZ)
+    {
+        sReverseZ = reverseZ;
+    }
+
+    bool Loader::getReverseZ()
+    {
+        return sReverseZ;
+    }
+
     class LoaderImpl
     {
     public:
@@ -1823,7 +1835,7 @@ namespace NifOsg
                 // Depth test flag
                 stateset->setMode(GL_DEPTH_TEST, zprop->flags&1 ? osg::StateAttribute::ON
                                                                 : osg::StateAttribute::OFF);
-                osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+                auto depth = SceneUtil::createDepth(Loader::getReverseZ());
                 // Depth write flag
                 depth->setWriteMask((zprop->flags>>1)&1);
                 // Morrowind ignores depth test function

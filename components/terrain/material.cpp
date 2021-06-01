@@ -7,7 +7,9 @@
 #include <osg/TexMat>
 #include <osg/BlendFunc>
 
+#include <components/resource/scenemanager.hpp>
 #include <components/shader/shadermanager.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include <mutex>
 
@@ -95,19 +97,18 @@ namespace
     class LequalDepth
     {
     public:
-        static const osg::ref_ptr<osg::Depth>& value()
+        static const osg::ref_ptr<osg::Depth>& value(bool reverseZ)
         {
-            static LequalDepth instance;
+            static LequalDepth instance(reverseZ);
             return instance.mValue;
         }
 
     private:
         osg::ref_ptr<osg::Depth> mValue;
 
-        LequalDepth()
-            : mValue(new osg::Depth)
+        LequalDepth(bool reverseZ)
+            : mValue(SceneUtil::createDepth(reverseZ))
         {
-            mValue->setFunction(osg::Depth::LEQUAL);
         }
     };
 
@@ -170,9 +171,10 @@ namespace
 
 namespace Terrain
 {
-    std::vector<osg::ref_ptr<osg::StateSet> > createPasses(bool useShaders, Shader::ShaderManager* shaderManager, const std::vector<TextureLayer> &layers,
+    std::vector<osg::ref_ptr<osg::StateSet> > createPasses(bool useShaders, Resource::SceneManager* sceneManager, const std::vector<TextureLayer> &layers,
                                                            const std::vector<osg::ref_ptr<osg::Texture2D> > &blendmaps, int blendmapScale, float layerTileSize)
     {
+        Shader::ShaderManager* shaderManager = &sceneManager->getShaderManager();
         std::vector<osg::ref_ptr<osg::StateSet> > passes;
 
         unsigned int blendmapIndex = 0;
@@ -195,7 +197,7 @@ namespace Terrain
                 else
                 {
                     stateset->setAttributeAndModes(BlendFuncFirst::value(), osg::StateAttribute::ON);
-                    stateset->setAttributeAndModes(LequalDepth::value(), osg::StateAttribute::ON);
+                    stateset->setAttributeAndModes(LequalDepth::value(sceneManager->getReverseZ()), osg::StateAttribute::ON);
                 }
             }
 
@@ -238,7 +240,7 @@ namespace Terrain
                 if (!vertexShader || !fragmentShader)
                 {
                     // Try again without shader. Error already logged by above
-                    return createPasses(false, shaderManager, layers, blendmaps, blendmapScale, layerTileSize);
+                    return createPasses(false, sceneManager, layers, blendmaps, blendmapScale, layerTileSize);
                 }
 
                 stateset->setAttributeAndModes(shaderManager->getProgram(vertexShader, fragmentShader));

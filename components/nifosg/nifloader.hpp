@@ -51,10 +51,14 @@ namespace NifOsg
         static void setIntersectionDisabledNodeMask(unsigned int mask);
         static unsigned int getIntersectionDisabledNodeMask();
 
+        static void setReverseZ(bool reverseZ);
+        static bool getReverseZ();
+
     private:
         static unsigned int sHiddenNodeMask;
         static unsigned int sIntersectionDisabledNodeMask;
         static bool sShowMarkers;
+        static bool sReverseZ;
     };
 
 }
