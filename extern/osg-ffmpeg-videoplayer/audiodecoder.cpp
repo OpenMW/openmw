@@ -71,7 +71,7 @@ MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
 {
     mAudioResampler.reset(new AudioResampler());
 
-    AVCodec *codec = avcodec_find_decoder(mAVStream->codecpar->codec_id);
+    const AVCodec *codec = avcodec_find_decoder(mAVStream->codecpar->codec_id);
     if(!codec)
     {
         std::string ss = "No codec found for id " +

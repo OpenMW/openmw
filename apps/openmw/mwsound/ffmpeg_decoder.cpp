@@ -221,7 +221,7 @@ void FFmpeg_Decoder::open(const std::string &fname)
         if(!mStream)
             throw std::runtime_error("No audio streams in "+fname);
 
-        AVCodec *codec = avcodec_find_decoder((*mStream)->codecpar->codec_id);
+        const AVCodec *codec = avcodec_find_decoder((*mStream)->codecpar->codec_id);
         if(!codec)
         {
             std::string ss = "No codec found for id " +
