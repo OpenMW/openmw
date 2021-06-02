@@ -33,21 +33,7 @@ struct ESMData
     std::map<ESM::Cell *, std::deque<std::pair<ESM::CellRef, bool> > > mCellRefs;
     std::map<int, int> mRecordStats;
 
-    static const std::set<int> sLabeledRec;
 };
-
-static const int sLabeledRecIds[] = {
-    ESM::REC_GLOB, ESM::REC_CLAS, ESM::REC_FACT, ESM::REC_RACE, ESM::REC_SOUN,
-    ESM::REC_REGN, ESM::REC_BSGN, ESM::REC_LTEX, ESM::REC_STAT, ESM::REC_DOOR,
-    ESM::REC_MISC, ESM::REC_WEAP, ESM::REC_CONT, ESM::REC_SPEL, ESM::REC_CREA,
-    ESM::REC_BODY, ESM::REC_LIGH, ESM::REC_ENCH, ESM::REC_NPC_, ESM::REC_ARMO,
-    ESM::REC_CLOT, ESM::REC_REPA, ESM::REC_ACTI, ESM::REC_APPA, ESM::REC_LOCK,
-    ESM::REC_PROB, ESM::REC_INGR, ESM::REC_BOOK, ESM::REC_ALCH, ESM::REC_LEVI,
-    ESM::REC_LEVC, ESM::REC_SNDG, ESM::REC_CELL, ESM::REC_DIAL
-};
-
-const std::set<int> ESMData::sLabeledRec =
-    std::set<int>(sLabeledRecIds, sLabeledRecIds + 34);
 
 // Based on the legacy struct
 struct Arguments
