@@ -462,7 +462,10 @@ namespace MWRender
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(clipcontrol, osg::StateAttribute::ON);
         }
 
-        mPostProcessor.reset(new PostProcessor(viewer, mRootNode));
+        if (ext && ext->isFrameBufferObjectSupported)
+           mPostProcessor.reset(new PostProcessor(viewer, mRootNode));
+        else
+           Log(Debug::Warning) << "Disabling postprocessing and using default framebuffer for rendering: FrameBufferObjects not supported";
 
         updateProjectionMatrix();
     }

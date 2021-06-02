@@ -12,6 +12,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/shader/shadermanager.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -88,6 +89,19 @@ namespace MWRender
             int topPadding = std::max(0, static_cast<int>(screenH - screenW / imageaspect) / 2);
             int width = screenW - leftPadding*2;
             int height = screenH - topPadding*2;
+
+            // Ensure we are reading from the resolved framebuffer and not the multisampled render buffer when in use.
+            // glReadPixel() cannot read from multisampled targets.
+
+            osg::FrameBufferObject* fbo = dynamic_cast<osg::FrameBufferObject*>(renderInfo.getCurrentCamera()->getUserData());
+
+            if (fbo)
+            {
+                osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getContextID(), false);
+                if (ext)
+                    ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo->getHandle(renderInfo.getContextID()));
+            }
+
             mImage->readPixels(leftPadding, topPadding, width, height, GL_RGB, GL_UNSIGNED_BYTE);
             mImage->scaleImage(mWidth, mHeight, 1);
         }
@@ -236,6 +250,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::Camera> screenshotCamera(new osg::Camera);
         osg::ref_ptr<osg::ShapeDrawable> quad(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0,0,0), 2.0)));
+        quad->getOrCreateStateSet()->setRenderBinDetails(100, "RenderBin", osg::StateSet::USE_RENDERBIN_DETAILS);
 
         std::map<std::string, std::string> defineMap;
 
@@ -283,6 +298,9 @@ namespace MWRender
         camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT,osg::Camera::PIXEL_BUFFER_RTT);
 
+        if (MWBase::Environment::get().getResourceSystem()->getSceneManager()->getReverseZ())
+            camera->setClearDepth(0.0);
+
         camera->setViewport(0, 0, w, h);
 
         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
@@ -318,7 +336,10 @@ namespace MWRender
         float nearClip = Settings::Manager::getFloat("near clip", "Camera");
         float viewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         // each cubemap side sees 90 degrees
-        rttCamera->setProjectionMatrixAsPerspective(90.0, w/float(h), nearClip, viewDistance);
+        if (MWBase::Environment::get().getResourceSystem()->getSceneManager()->getReverseZ())
+            rttCamera->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspectiveInf(90.0, w/float(h), nearClip));
+        else
+            rttCamera->setProjectionMatrixAsPerspective(90.0, w/float(h), nearClip, viewDistance);
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
 
         rttCamera->setUpdateCallback(new NoTraverseCallback);

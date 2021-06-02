@@ -116,6 +116,8 @@ namespace MWRender
         mFbo->setAttachment(osg::Camera::COLOR_BUFFER0, osg::FrameBufferAttachment(mSceneTex));
         mFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(mDepthTex));
 
+        mViewer->getCamera()->setUserData(mFbo);
+
         // When MSAA is enabled we must first render to a render buffer, then
         // blit the result to the FBO which is either passed to the main frame
         // buffer for display or used as the entry point for a post process chain.
