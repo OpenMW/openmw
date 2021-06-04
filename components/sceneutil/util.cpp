@@ -150,6 +150,33 @@ void GlowUpdater::setDuration(float duration)
     mDuration = duration;
 }
 
+AttachMultisampledDepthColorCallback::AttachMultisampledDepthColorCallback(const osg::ref_ptr<osg::Texture2D>& colorTex, const osg::ref_ptr<osg::Texture2D>& depthTex, int samples, int colorSamples)
+{
+    int width = colorTex->getTextureWidth();
+    int height = colorTex->getTextureHeight();
+
+    osg::ref_ptr<osg::RenderBuffer> rbColor = new osg::RenderBuffer(width, height, colorTex->getInternalFormat(), samples, colorSamples);
+    osg::ref_ptr<osg::RenderBuffer> rbDepth = new osg::RenderBuffer(width, height, depthTex->getInternalFormat(), samples, colorSamples);
+
+    mMsaaFbo = new osg::FrameBufferObject;
+    mMsaaFbo->setAttachment(osg::Camera::COLOR_BUFFER0, osg::FrameBufferAttachment(rbColor));
+    mMsaaFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(rbDepth));
+
+    mFbo = new osg::FrameBufferObject;
+    mFbo->setAttachment(osg::Camera::COLOR_BUFFER0, osg::FrameBufferAttachment(colorTex));
+    mFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(depthTex));
+}
+
+void AttachMultisampledDepthColorCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
+{
+    osgUtil::RenderStage* renderStage = nv->asCullVisitor()->getCurrentRenderStage();
+
+    renderStage->setMultisampleResolveFramebufferObject(mFbo);
+    renderStage->setFrameBufferObject(mMsaaFbo);
+
+    traverse(node, nv);
+}
+
 void transformBoundingSphere (const osg::Matrixf& matrix, osg::BoundingSphere& bsphere)
 {
     osg::BoundingSphere::vec_type xdash = bsphere._center;
@@ -308,8 +335,8 @@ osg::Matrix getReversedZProjectionMatrixAsPerspective(double fov, double aspect,
     return osg::Matrix(
         A/aspect,   0,      0,                          0,
         0,          A,      0,                          0,
-        0,          0,      far/(far-near)-1.0,         -1,
-        0,          0,      -(far*near)/(far - near),   0
+        0,          0,      near/(far-near),            -1,
+        0,          0,      (far*near)/(far - near),    0
     );
 }
 

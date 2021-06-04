@@ -8,6 +8,7 @@
 #include <osg/Texture2D>
 #include <osg/Vec4f>
 #include <osg/Depth>
+#include <osg/FrameBufferObject>
 
 #include <components/resource/resourcesystem.hpp>
 
@@ -46,6 +47,22 @@ namespace SceneUtil
         Resource::ResourceSystem* mResourceSystem;
         bool mColorChanged;
         bool mDone;
+    };
+
+    // Allows camera to render to a color and floating point depth texture with a multisampled framebuffer.
+    // Must be set on a cameras cull callback.
+    // When the depth texture isn't needed as a sampler, use osg::Camera::attach(osg::Camera::DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F) instead.
+    // If multisampling is not being used on the color buffer attachment, use the osg::Camera::attach() method.
+    class AttachMultisampledDepthColorCallback : public osg::NodeCallback
+    {
+    public:
+        AttachMultisampledDepthColorCallback(const osg::ref_ptr<osg::Texture2D>& colorTex, const osg::ref_ptr<osg::Texture2D>& depthTex, int samples, int colorSamples);
+
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
+
+    private:
+        osg::ref_ptr<osg::FrameBufferObject> mFbo;
+        osg::ref_ptr<osg::FrameBufferObject> mMsaaFbo;
     };
 
     // Transform a bounding sphere by a matrix
