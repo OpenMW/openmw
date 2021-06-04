@@ -158,7 +158,7 @@ namespace SceneUtil
 
         static constexpr int queryBlockSize(int sz)
         {
-            return 3 * osg::Vec4::num_components * sizeof(GL_FLOAT) * sz;
+            return 3 * osg::Vec4::num_components * sizeof(GLfloat) * sz;
         }
 
         void setCachedSunPos(const osg::Vec4& pos)
@@ -215,9 +215,9 @@ namespace SceneUtil
                 }
 
                 Offsets(int offsetColors, int offsetPosition, int offsetAttenuationRadius, int stride)
-                    : mStride((offsetAttenuationRadius + sizeof(GL_FLOAT) * osg::Vec4::num_components + stride) / 4)
+                    : mStride((offsetAttenuationRadius + sizeof(GLfloat) * osg::Vec4::num_components + stride) / 4)
                 {
-                    constexpr auto sizeofFloat = sizeof(GL_FLOAT);
+                    constexpr auto sizeofFloat = sizeof(GLfloat);
                     const auto diffuseOffset = offsetColors / sizeofFloat;
 
                     mValues[Diffuse] = diffuseOffset;
