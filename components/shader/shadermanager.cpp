@@ -335,9 +335,10 @@ namespace Shader
 
             osg::ref_ptr<osg::Shader> shader (new osg::Shader(shaderType));
             shader->setShaderSource(shaderSource);
-            // Assign a unique name to allow the SharedStateManager to compare shaders efficiently
+            // Assign a unique prefix to allow the SharedStateManager to compare shaders efficiently.
+            // Append shader source filename for debugging.
             static unsigned int counter = 0;
-            shader->setName(std::to_string(counter++));
+            shader->setName(Misc::StringUtils::format("%u %s", counter++, templateName));
 
             shaderIt = mShaders.insert(std::make_pair(std::make_pair(templateName, defines), shader)).first;
         }
