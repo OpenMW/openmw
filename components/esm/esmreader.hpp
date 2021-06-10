@@ -135,9 +135,9 @@ public:
       getSubHeader();
       if (mCtx.leftSub != sizeof(X))
       {
-          std::stringstream error;
-          error << "getHT(): subrecord size mismatch (requested " << sizeof(X) << ", got " << mCtx.leftSub << ")";
-          fail(error.str());
+          fail("getHT(): subrecord size mismatch,requested "
+                  + std::to_string(sizeof(X)) + ", got"
+                      + std::to_string(mCtx.leftSub));
       }
       getT(x);
   }
