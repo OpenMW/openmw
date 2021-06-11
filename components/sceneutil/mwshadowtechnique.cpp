@@ -566,8 +566,9 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
     _camera = new osg::Camera;
     _camera->setName("ShadowCamera");
     _camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT);
+#ifndef __APPLE__ // workaround shadow issue on macOS, https://gitlab.com/OpenMW/openmw/-/issues/6057
     _camera->setImplicitBufferAttachmentMask(0, 0);
-
+#endif
     //_camera->setClearColor(osg::Vec4(1.0f,1.0f,1.0f,1.0f));
     _camera->setClearColor(osg::Vec4(0.0f,0.0f,0.0f,0.0f));
 
