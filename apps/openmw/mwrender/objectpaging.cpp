@@ -477,6 +477,8 @@ namespace MWRender
         constexpr auto copyMask = ~Mask_UpdateVisitor;
 
         AnalyzeVisitor analyzeVisitor(copyMask);
+        osg::Vec3f center3 = { center.x(), center.y(), 0.f };
+        analyzeVisitor.mCurrentDistance = (viewPoint - center3).length2();
         float minSize = mMinSize;
         if (mMinSizeMergeFactor)
             minSize *= mMinSizeMergeFactor;
@@ -546,7 +548,6 @@ namespace MWRender
                 continue;
             }
 
-            analyzeVisitor.mCurrentDistance = dSqr;
             auto emplaced = nodes.emplace(cnode, InstanceList());
             if (emplaced.second)
             {
