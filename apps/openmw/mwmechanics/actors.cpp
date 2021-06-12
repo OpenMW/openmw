@@ -1261,7 +1261,7 @@ namespace MWMechanics
             {
                 bool found = creatureStats.mBoundItems.find(effect) != creatureStats.mBoundItems.end();
                 float magnitude = effects.get(effect).getMagnitude();
-                if (found != (magnitude > 0) || creatureStats.mBoundItems.empty())
+                if (found != (magnitude > 0))
                 {
                     if (magnitude > 0)
                         creatureStats.mBoundItems.insert(effect);
@@ -1281,10 +1281,6 @@ namespace MWMechanics
                     }
                 }
             }
-            // mBoundItems does not get saved so the cache is out of date after loading a save.
-            // Use Length as a sentinel value to force an update.
-            if(creatureStats.mBoundItems.empty())
-                creatureStats.mBoundItems.insert(ESM::MagicEffect::Length);
         }
 
         // Summoned creature update visitor assumes the actor belongs to a cell.
