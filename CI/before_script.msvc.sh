@@ -556,13 +556,13 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# OSGoS
 	download "OSGoS 3.6.5" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSGos-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
-		"OSGoS-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
+		"OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
 
 	if [ -n "$PDBS" ]; then
 		download "OSGoS symbols" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSGoS-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
-			"OSGoS-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
+			"OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
 	fi
 
 	# SDL2
@@ -771,9 +771,9 @@ printf "OSGoS 3.6.5... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf OSG
-		eval 7z x -y "${DEPS}/OSGoS-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
-		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/OSGoS-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
-		mv "OSGoS-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}" OSG
+		eval 7z x -y "${DEPS}/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
+		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
+		mv "OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}" OSG
 	fi
 	OSG_SDK="$(real_pwd)/OSG"
 	add_cmake_opts -DOSG_DIR="$OSG_SDK"
