@@ -2398,11 +2398,6 @@ namespace MWWorld
         return mRendering->getCamera()->getMode() == MWRender::Camera::Mode::Preview;
     }
 
-    void World::togglePreviewMode(bool enable)
-    {
-        mRendering->getCamera()->togglePreviewMode(enable);
-    }
-
     bool World::toggleVanityMode(bool enable)
     {
         return mRendering->getCamera()->toggleVanityMode(enable);
@@ -2418,10 +2413,7 @@ namespace MWWorld
         mRendering->getCamera()->applyDeferredPreviewRotationToPlayer(dt);
     }
 
-    void World::allowVanityMode(bool allow)
-    {
-        mRendering->getCamera()->allowVanityMode(allow);
-    }
+    MWRender::Camera* World::getCamera() { return mRendering->getCamera(); }
 
     bool World::vanityRotateCamera(float * rot)
     {
@@ -2432,11 +2424,6 @@ namespace MWWorld
         camera->setPitch(camera->getPitch() + rot[0]);
         camera->setYaw(camera->getYaw() + rot[2]);
         return true;
-    }
-
-    void World::adjustCameraDistance(float dist)
-    {
-        mRendering->getCamera()->adjustCameraDistance(dist);
     }
 
     void World::saveLoaded()

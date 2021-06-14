@@ -34,12 +34,10 @@ namespace MWInput
         , mJoystickEnabled (Settings::Manager::getBool("enable controller", "Input"))
         , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
         , mSneakToggleShortcutTimer(0.f)
-        , mGamepadZoom(0)
         , mGamepadGuiCursorEnabled(true)
         , mGuiCursorEnabled(true)
         , mJoystickLastUsed(false)
         , mSneakGamepadShortcut(false)
-        , mGamepadPreviewMode(false)
     {
         if (!controllerBindingsFile.empty())
         {
@@ -85,8 +83,6 @@ namespace MWInput
 
     bool ControllerManager::update(float dt)
     {
-        mGamepadPreviewMode = mActionManager->isPreviewModeEnabled();
-
         if (mGuiCursorEnabled && !(mJoystickLastUsed && !mGamepadGuiCursorEnabled))
         {
             float xAxis = mBindingsManager->getActionValue(A_MoveLeftRight) * 2.0f - 1.0f;
@@ -115,7 +111,6 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
             || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running)
         {
-            mGamepadZoom = 0;
             return false;
         }
 
@@ -180,15 +175,6 @@ namespace MWInput
                 else
                     player.setSneak(mBindingsManager->actionIsActive(A_Sneak));
             }
-        }
-
-        if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch"))
-        {
-            if (!mBindingsManager->actionIsActive(A_TogglePOV))
-                mGamepadZoom = 0;
-
-            if (mGamepadZoom)
-                MWBase::Environment::get().getWorld()->adjustCameraDistance(-mGamepadZoom);
         }
 
         return triedToMove;
@@ -289,21 +275,11 @@ namespace MWInput
         {
             gamepadToGuiControl(arg);
         }
-        else
+        else if (MWBase::Environment::get().getWorld()->isPreviewModeEnabled() &&
+                (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT || arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT))
         {
-            if (mGamepadPreviewMode) // Preview Mode Gamepad Zooming
-            {
-                if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
-                {
-                    mGamepadZoom = arg.value * 0.85f / 1000.f / 12.f;
-                    return; // Do not propagate event.
-                }
-                else if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
-                {
-                    mGamepadZoom = -arg.value * 0.85f / 1000.f / 12.f;
-                    return; // Do not propagate event.
-                }
-            }
+            // Preview Mode Gamepad Zooming; do not propagate to mBindingsManager
+            return;
         }
         mBindingsManager->controllerAxisMoved(deviceID, arg);
     }

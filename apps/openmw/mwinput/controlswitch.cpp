@@ -54,10 +54,6 @@ namespace MWInput
             /// \fixme maybe crouching at this time
             player.setUpDown(0);
         }
-        else if (key == "vanitymode")
-        {
-            MWBase::Environment::get().getWorld()->allowVanityMode(value);
-        }
         else if (key == "playerlooking" && !value)
         {
             MWBase::Environment::get().getWorld()->rotateObject(player.getPlayer(), osg::Vec3f());

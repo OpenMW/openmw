@@ -56,12 +56,10 @@ namespace MWInput
         bool mJoystickEnabled;
         float mGamepadCursorSpeed;
         float mSneakToggleShortcutTimer;
-        float mGamepadZoom;
         bool mGamepadGuiCursorEnabled;
         bool mGuiCursorEnabled;
         bool mJoystickLastUsed;
         bool mSneakGamepadShortcut;
-        bool mGamepadPreviewMode;
     };
 }
 #endif
