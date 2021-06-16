@@ -1239,7 +1239,7 @@ namespace MWMechanics
         // Update bound effects
         // Note: in vanilla MW multiple bound items of the same type can be created by different spells.
         // As these extra copies are kinda useless this may or may not be important.
-        static std::map<int, std::string> boundItemsMap;
+        static std::map<ESM::MagicEffect::Effects, std::string> boundItemsMap;
         if (boundItemsMap.empty())
         {
             boundItemsMap[ESM::MagicEffect::BoundBattleAxe] = "sMagicBoundBattleAxeID";
@@ -1255,28 +1255,30 @@ namespace MWMechanics
             boundItemsMap[ESM::MagicEffect::BoundSpear] = "sMagicBoundSpearID";
         }
 
-        for (std::map<int, std::string>::iterator it = boundItemsMap.begin(); it != boundItemsMap.end(); ++it)
+        if(ptr.getClass().hasInventoryStore(ptr))
         {
-            bool found = creatureStats.mBoundItems.find(it->first) != creatureStats.mBoundItems.end();
-            float magnitude = effects.get(it->first).getMagnitude();
-            if (found != (magnitude > 0))
+            for (const auto& [effect, itemGmst] : boundItemsMap)
             {
-                if (magnitude > 0)
-                    creatureStats.mBoundItems.insert(it->first);
-                else
-                    creatureStats.mBoundItems.erase(it->first);
-
-                std::string itemGmst = it->second;
-                std::string item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                            itemGmst)->mValue.getString();
-
-                magnitude > 0 ? addBoundItem(item, ptr) : removeBoundItem(item, ptr);
-
-                if (it->first == ESM::MagicEffect::BoundGloves)
+                bool found = creatureStats.mBoundItems.find(effect) != creatureStats.mBoundItems.end();
+                float magnitude = effects.get(effect).getMagnitude();
+                if (found != (magnitude > 0))
                 {
-                    item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                                "sMagicBoundRightGauntletID")->mValue.getString();
+                    if (magnitude > 0)
+                        creatureStats.mBoundItems.insert(effect);
+                    else
+                        creatureStats.mBoundItems.erase(effect);
+
+                    std::string item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                                itemGmst)->mValue.getString();
+
                     magnitude > 0 ? addBoundItem(item, ptr) : removeBoundItem(item, ptr);
+
+                    if (effect == ESM::MagicEffect::BoundGloves)
+                    {
+                        item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                                    "sMagicBoundRightGauntletID")->mValue.getString();
+                        magnitude > 0 ? addBoundItem(item, ptr) : removeBoundItem(item, ptr);
+                    }
                 }
             }
         }
