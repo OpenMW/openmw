@@ -15,7 +15,7 @@ ccache --version
 cmake --version
 qmake --version
 
-curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20210611.zip -o ~/openmw-deps.zip
+curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20210617.zip -o ~/openmw-deps.zip
 unzip -o ~/openmw-deps.zip -d /private/tmp/openmw-deps > /dev/null
 
 # additional libraries
