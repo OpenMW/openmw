@@ -17,6 +17,8 @@ namespace MWMechanics
 
     std::string getSummonedCreature(int effectId);
 
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<const ESM::SummonKey, int>& summon);
+
     struct UpdateSummonedCreatures : public EffectSourceVisitor
     {
         UpdateSummonedCreatures(const MWWorld::Ptr& actor);

@@ -152,16 +152,10 @@ namespace MWMechanics
                 continue;
             }
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->second);
-            if (ptr.isEmpty() || (ptr.getClass().getCreatureStats(ptr).isDead() && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished()))
+            if (!ptr.isEmpty() && ptr.getClass().getCreatureStats(ptr).isDead() && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished())
             {
                 // Purge the magic effect so a new creature can be summoned if desired
-                const ESM::SummonKey& key = it->first;
-                creatureStats.getActiveSpells().purgeEffect(key.mEffectId, key.mSourceId, key.mEffectIndex);
-                creatureStats.getSpells().purgeEffect(key.mEffectId, key.mSourceId);
-                if (mActor.getClass().hasInventoryStore(mActor))
-                    mActor.getClass().getInventoryStore(mActor).purgeEffect(key.mEffectId, key.mSourceId, false, key.mEffectIndex);
-
-                MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, it->second);
+                purgeSummonEffect(mActor, *it);
                 creatureMap.erase(it++);
             }
             else
@@ -169,4 +163,14 @@ namespace MWMechanics
         }
     }
 
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<const ESM::SummonKey, int>& summon)
+    {
+        auto& creatureStats = summoner.getClass().getCreatureStats(summoner);
+        creatureStats.getActiveSpells().purgeEffect(summon.first.mEffectId, summon.first.mSourceId, summon.first.mEffectIndex);
+        creatureStats.getSpells().purgeEffect(summon.first.mEffectId, summon.first.mSourceId);
+        if (summoner.getClass().hasInventoryStore(summoner))
+            summoner.getClass().getInventoryStore(summoner).purgeEffect(summon.first.mEffectId, summon.first.mSourceId, false, summon.first.mEffectIndex);
+
+        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(summoner, summon.second);
+    }
 }
