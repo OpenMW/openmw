@@ -199,9 +199,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 esm.skipRecord();
             }
             else {
-                std::stringstream error;
-                error << "Unknown record: " << n.toString();
-                throw std::runtime_error(error.str());
+                throw std::runtime_error("Unknown record: " + n.toString());
             }
         } else {
             RecordId id = it->second->load(esm);

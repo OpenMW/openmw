@@ -65,31 +65,23 @@ size_t LowLevelFile::size ()
     long oldPosition = ftell (mHandle);
     if (oldPosition == -1)
     {
-        std::ostringstream os;
-        os << "An ftell() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An ftell() call failed: " + std::string(strerror(errno)));
     }
 
     if (fseek (mHandle, 0, SEEK_END) != 0)
     {
-        std::ostringstream os;
-        os << "An fseek() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An fseek() call failed: " + std::string(strerror(errno)));
     }
 
     long size = ftell (mHandle);
     if (size == -1)
     {
-        std::ostringstream os;
-        os << "An ftell() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An ftell() call failed: " + std::string(strerror(errno)));
     }
 
     if (fseek (mHandle, oldPosition, SEEK_SET) != 0)
     {
-        std::ostringstream os;
-        os << "An fseek() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An fseek() call failed: " + std::string(strerror(errno)));
     }
 
     return size_t (size);
@@ -101,9 +93,7 @@ void LowLevelFile::seek (size_t position)
 
     if (fseek (mHandle, position, SEEK_SET) != 0)
     {
-        std::ostringstream os;
-        os << "An fseek() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An fseek() call failed: " + std::string(strerror(errno)));
     }
 }
 
@@ -114,9 +104,7 @@ size_t LowLevelFile::tell ()
     long position = ftell (mHandle);
     if (position == -1)
     {
-        std::ostringstream os;
-        os << "An ftell() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An ftell() call failed: " + std::string(strerror(errno)));
     }
 
     return size_t (position);
@@ -193,25 +181,19 @@ size_t LowLevelFile::size ()
 
     if (oldPosition == size_t (-1))
     {
-        std::ostringstream os;
-        os << "An lseek() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An lseek() call failed: " + std::string(strerror(errno)));
     }
 
     size_t size = ::lseek (mHandle, 0, SEEK_END);
 
     if (size == size_t (-1))
     {
-        std::ostringstream os;
-        os << "An lseek() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An lseek() call failed: " + std::string(strerror(errno)));
     }
 
     if (lseek (mHandle, oldPosition, SEEK_SET) == -1)
     {
-        std::ostringstream os;
-        os << "An lseek() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An lseek() call failed: " + std::string(strerror(errno)));
     }
 
     return size;
@@ -223,9 +205,7 @@ void LowLevelFile::seek (size_t position)
 
     if (::lseek (mHandle, position, SEEK_SET) == -1)
     {
-        std::ostringstream os;
-        os << "An lseek() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error ("An lseek() call failed: " + std::string(strerror(errno)));
     }
 }
 
@@ -237,9 +217,7 @@ size_t LowLevelFile::tell ()
 
     if (position == size_t (-1))
     {
-        std::ostringstream os;
-        os << "An lseek() call failed: " << strerror(errno);
-        throw std::runtime_error (os.str ());
+        throw std::runtime_error("An lseek() call failed: " + std::string(strerror(errno)));
     }
 
     return position;
