@@ -1,7 +1,5 @@
 #include "actors.hpp"
 
-#include <optional>
-
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
@@ -174,15 +172,6 @@ namespace MWMechanics
     static const int GREETING_SHOULD_END = 20;  // how many updates should pass before NPC stops turning to player
     static const int GREETING_COOLDOWN = 40;    // how many updates should pass before NPC can continue movement
     static const float DECELERATE_DISTANCE = 512.f;
-
-    namespace
-    {
-        float getTimeToDestination(const AiPackage& package, const osg::Vec3f& position, float speed, float duration, const osg::Vec3f& halfExtents)
-        {
-            const auto distanceToNextPathPoint = (package.getNextPathPoint(package.getDestination()) - position).length();
-            return (distanceToNextPathPoint - package.getNextPathPointTolerance(speed, duration, halfExtents)) / speed;
-        }
-    }
 
     class GetStuntedMagickaDuration : public MWMechanics::EffectSourceVisitor
     {
@@ -1777,7 +1766,7 @@ namespace MWMechanics
 
     }
 
-    void Actors::predictAndAvoidCollisions(float duration)
+    void Actors::predictAndAvoidCollisions()
     {
         if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
             return;
@@ -1812,8 +1801,7 @@ namespace MWMechanics
             bool shouldAvoidCollision = isMoving;
             bool shouldTurnToApproachingActor = !isMoving;
             MWWorld::Ptr currentTarget; // Combat or pursue target (NPCs should not avoid collision with their targets).
-            const auto& aiSequence = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            for (const auto& package : aiSequence)
+            for (const auto& package : ptr.getClass().getCreatureStats(ptr).getAiSequence())
             {
                 if (package->getTypeId() == AiPackageTypeId::Follow)
                     shouldAvoidCollision = true;
@@ -1842,10 +1830,6 @@ namespace MWMechanics
             float timeToCollision = maxTimeToCheck;
             osg::Vec2f movementCorrection(0, 0);
             float angleToApproachingActor = 0;
-
-            const float timeToDestination = aiSequence.isEmpty()
-                    ? std::numeric_limits<float>::max()
-                    : getTimeToDestination(**aiSequence.begin(), basePos, maxSpeed, duration, halfExtents);
 
             // Iterate through all other actors and predict collisions.
             for(PtrActorMap::iterator otherIter(mActors.begin()); otherIter != mActors.end(); ++otherIter)
@@ -1883,7 +1867,7 @@ namespace MWMechanics
                     continue; // No solution; distance is always >= collisionDist.
                 float t = (-vr - std::sqrt(Dh)) / v2;
 
-                if (t < 0 || t > timeToCollision || t > timeToDestination)
+                if (t < 0 || t > timeToCollision)
                     continue;
 
                 // Check visibility and awareness last as it's expensive.
@@ -2093,7 +2077,7 @@ namespace MWMechanics
 
             static const bool avoidCollisions = Settings::Manager::getBool("NPCs avoid collisions", "Game");
             if (avoidCollisions)
-                predictAndAvoidCollisions(duration);
+                predictAndAvoidCollisions();
 
             timerUpdateHeadTrack += duration;
             timerUpdateEquippedLight += duration;

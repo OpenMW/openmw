@@ -63,7 +63,7 @@ namespace MWMechanics
 
             void purgeSpellEffects (int casterActorId);
 
-            void predictAndAvoidCollisions(float duration);
+            void predictAndAvoidCollisions();
 
         public:
 

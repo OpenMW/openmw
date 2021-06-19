@@ -28,12 +28,6 @@ namespace
     {
         return divisor == 0 ? std::numeric_limits<float>::max() * std::numeric_limits<float>::epsilon() : dividend / divisor;
     }
-
-    float getPointTolerance(float speed, float duration, const osg::Vec3f& halfExtents)
-    {
-        const float actorTolerance = 2 * speed * duration + 1.2 * std::max(halfExtents.x(), halfExtents.y());
-        return std::max(MWMechanics::MIN_TOLERANCE, actorTolerance);
-    }
 }
 
 MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options) :
@@ -104,8 +98,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         return false;
     }
 
-    mLastDestinationTolerance = destTolerance;
-
     const float distToTarget = distance(position, dest);
     const bool isDestReached = (distToTarget <= destTolerance);
     const bool actorCanMoveByZ = canActorMoveByZAxis(actor);
@@ -156,7 +148,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         }
     }
 
-    const float pointTolerance = getPointTolerance(actor.getClass().getMaxSpeed(actor), duration, halfExtents);
+    const float actorTolerance = 2 * actor.getClass().getMaxSpeed(actor) * duration
+            + 1.2 * std::max(halfExtents.x(), halfExtents.y());
+    const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
 
     static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
     mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE,
@@ -187,7 +181,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     zTurn(actor, zAngleToNext);
     smoothTurn(actor, mPathFinder.getXAngleToNext(position.x(), position.y(), position.z()), 0);
 
-    const auto destination = getNextPathPoint(dest);
+    const auto destination = mPathFinder.getPath().empty() ? dest : mPathFinder.getPath().front();
     mObstacleCheck.update(actor, destination, duration);
 
     if (smoothMovement)
@@ -466,16 +460,4 @@ DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::P
     }
 
     return costs;
-}
-
-osg::Vec3f MWMechanics::AiPackage::getNextPathPoint(const osg::Vec3f& destination) const
-{
-    return mPathFinder.getPath().empty() ? destination : mPathFinder.getPath().front();
-}
-
-float MWMechanics::AiPackage::getNextPathPointTolerance(float speed, float duration, const osg::Vec3f& halfExtents) const
-{
-    if (mPathFinder.getPathSize() <= 1)
-        return mLastDestinationTolerance;
-    return getPointTolerance(speed, duration, halfExtents);
 }
