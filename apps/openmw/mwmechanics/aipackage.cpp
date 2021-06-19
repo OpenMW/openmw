@@ -476,6 +476,6 @@ osg::Vec3f MWMechanics::AiPackage::getNextPathPoint(const osg::Vec3f& destinatio
 float MWMechanics::AiPackage::getNextPathPointTolerance(float speed, float duration, const osg::Vec3f& halfExtents) const
 {
     if (mPathFinder.getPathSize() <= 1)
-        return mLastDestinationTolerance;
+        return std::max(DEFAULT_TOLERANCE, mLastDestinationTolerance);
     return getPointTolerance(speed, duration, halfExtents);
 }
