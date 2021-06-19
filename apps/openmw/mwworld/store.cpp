@@ -895,7 +895,7 @@ namespace MWWorld
         // mX and mY will be (0,0) for interior cells, but there is also an exterior cell with the coordinates of (0,0), so that doesn't help.
         // Check whether mCell is an interior cell. This isn't perfect, will break if a Region with the same name as an interior cell is created.
         // A proper fix should be made for future versions of the file format.
-        bool interior = mCells->search(pathgrid.mCell) != nullptr;
+        bool interior = pathgrid.mData.mX == 0 && pathgrid.mData.mY == 0 && mCells->search(pathgrid.mCell) != nullptr;
 
         // Try to overwrite existing record
         if (interior)
