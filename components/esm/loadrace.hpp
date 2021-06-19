@@ -38,7 +38,7 @@ struct Race
     {
         float mMale, mFemale;
 
-        int getValue (bool male) const;
+        float getValue (bool male) const;
     };
 
     enum Flags
