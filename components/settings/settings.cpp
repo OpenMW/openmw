@@ -61,6 +61,15 @@ float Manager::getFloat (const std::string& setting, const std::string& category
     return number;
 }
 
+double Manager::getDouble (const std::string& setting, const std::string& category)
+{
+    const std::string& value = getString(setting, category);
+    std::stringstream stream(value);
+    double number = 0.0;
+    stream >> number;
+    return number;
+}
+
 int Manager::getInt (const std::string& setting, const std::string& category)
 {
     const std::string& value = getString(setting, category);
@@ -122,6 +131,13 @@ void Manager::setInt (const std::string& setting, const std::string& category, c
 }
 
 void Manager::setFloat (const std::string &setting, const std::string &category, const float value)
+{
+    std::ostringstream stream;
+    stream << value;
+    setString(setting, category, stream.str());
+}
+
+void Manager::setDouble (const std::string &setting, const std::string &category, const double value)
 {
     std::ostringstream stream;
     stream << value;
