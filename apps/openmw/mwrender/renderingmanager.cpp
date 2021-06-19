@@ -830,11 +830,7 @@ namespace MWRender
             mViewOverShoulderController->update();
         mCamera->update(dt, paused);
 
-        osg::Vec3d focal, cameraPos;
-        mCamera->getPosition(focal, cameraPos);
-        mCurrentCameraPos = cameraPos;
-
-        bool isUnderwater = mWater->isUnderwater(cameraPos);
+        bool isUnderwater = mWater->isUnderwater(mCamera->getPosition());
         mStateUpdater->setFogStart(mFog->getFogStart(isUnderwater));
         mStateUpdater->setFogEnd(mFog->getFogEnd(isUnderwater));
         setFogColor(mFog->getFogColor(isUnderwater));

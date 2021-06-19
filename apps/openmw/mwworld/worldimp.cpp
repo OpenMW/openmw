@@ -595,13 +595,7 @@ namespace MWWorld
 
     void World::useDeathCamera()
     {
-        if(mRendering->getCamera()->isVanityOrPreviewModeEnabled() )
-        {
-            mRendering->getCamera()->togglePreviewMode(false);
-            mRendering->getCamera()->toggleVanityMode(false);
-        }
-        if(mRendering->getCamera()->isFirstPerson())
-            mRendering->getCamera()->toggleViewMode(true);
+        mRendering->getCamera()->setMode(MWRender::Camera::Mode::ThirdPerson);
     }
 
     MWWorld::Player& World::getPlayer()
@@ -1858,7 +1852,7 @@ namespace MWWorld
         }
 
         bool isWerewolf = player.getClass().getNpcStats(player).isWerewolf();
-        bool isFirstPerson = mRendering->getCamera()->isFirstPerson();
+        bool isFirstPerson = this->isFirstPerson();
         if (isWerewolf && isFirstPerson)
         {
             float werewolfFov = Fallback::Map::getFloat("General_Werewolf_FOV");
@@ -1928,11 +1922,12 @@ namespace MWWorld
 
     void World::updateSoundListener()
     {
+        osg::Vec3f cameraPosition = mRendering->getCamera()->getPosition();
         const ESM::Position& refpos = getPlayerPtr().getRefData().getPosition();
         osg::Vec3f listenerPos;
 
         if (isFirstPerson())
-            listenerPos = mRendering->getCameraPosition();
+            listenerPos = cameraPosition;
         else
             listenerPos = refpos.asVec3() + osg::Vec3f(0, 0, 1.85f * mPhysics->getHalfExtents(getPlayerPtr()).z());
 
@@ -1943,7 +1938,7 @@ namespace MWWorld
         osg::Vec3f forward = listenerOrient * osg::Vec3f(0,1,0);
         osg::Vec3f up = listenerOrient * osg::Vec3f(0,0,1);
 
-        bool underwater = isUnderwater(getPlayerPtr().getCell(), mRendering->getCameraPosition());
+        bool underwater = isUnderwater(getPlayerPtr().getCell(), cameraPosition);
 
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(listenerPos, forward, up, underwater);
     }
@@ -2395,7 +2390,7 @@ namespace MWWorld
 
     bool World::isFirstPerson() const
     {
-        return mRendering->getCamera()->isFirstPerson();
+        return mRendering->getCamera()->getMode() == MWRender::Camera::Mode::FirstPerson;
     }
     
     bool World::isPreviewModeEnabled() const
@@ -2430,10 +2425,12 @@ namespace MWWorld
 
     bool World::vanityRotateCamera(float * rot)
     {
-        if(!mRendering->getCamera()->isVanityOrPreviewModeEnabled())
+        auto* camera = mRendering->getCamera();
+        if(!camera->isVanityOrPreviewModeEnabled())
             return false;
 
-        mRendering->getCamera()->rotateCamera(rot[0], rot[2], true);
+        camera->setPitch(camera->getPitch() + rot[0]);
+        camera->setYaw(camera->getYaw() + rot[2]);
         return true;
     }
 

@@ -33,7 +33,7 @@ namespace MWRender
 
     void ViewOverShoulderController::update()
     {
-        if (mCamera->isFirstPerson())
+        if (mCamera->getMode() == Camera::Mode::FirstPerson || mCamera->getMode() == Camera::Mode::Static)
             return;
 
         Mode oldMode = mMode;
@@ -54,7 +54,7 @@ namespace MWRender
         if (mCamera->getMode() == Camera::Mode::Vanity)
             // Player doesn't touch controls for a long time. Transition should be very slow.
             mCamera->setFocalPointTransitionSpeed(0.2f);
-        else if ((oldMode == Mode::Combat || mMode == Mode::Combat) && mCamera->getMode() == Camera::Mode::Normal)
+        else if ((oldMode == Mode::Combat || mMode == Mode::Combat) && mCamera->getMode() == Camera::Mode::ThirdPerson)
             // Transition to/from combat mode and we are not it preview mode. Should be fast.
             mCamera->setFocalPointTransitionSpeed(5.f);
         else
@@ -77,14 +77,14 @@ namespace MWRender
 
     void ViewOverShoulderController::trySwitchShoulder()
     {
-        if (mCamera->getMode() != Camera::Mode::Normal)
+        if (mCamera->getMode() != Camera::Mode::ThirdPerson)
             return;
 
         const float limitToSwitch = 120; // switch to other shoulder if wall is closer than this limit
         const float limitToSwitchBack = 300; // switch back to default shoulder if there is no walls at this distance
 
         auto orient = osg::Quat(mCamera->getYaw(), osg::Vec3d(0,0,1));
-        osg::Vec3d playerPos = mCamera->getFocalPoint() - mCamera->getFocalPointOffset();
+        osg::Vec3d playerPos = mCamera->getThirdPersonBasePosition();
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
         osg::Vec3d sideOffset = orient * osg::Vec3d(world->getHalfExtents(mCamera->getTrackingPtr()).x() - 1, 0, 0);
