@@ -193,6 +193,7 @@ namespace Compiler
             bool mStrictKeywords;
             bool mTolerantNames;
             bool mIgnoreNewline;
+            bool mExpectName;
 
         public:
 
@@ -286,6 +287,11 @@ namespace Compiler
             ///
             /// \attention This mode lasts only until the next newline is reached.
             void enableTolerantNames();
+
+            /// Treat '.' and '-' as the start of a name.
+            ///
+            /// \attention This mode lasts only until the next newline is reached or the call to scan ends.
+            void enableExpectName();
     };
 }
 
