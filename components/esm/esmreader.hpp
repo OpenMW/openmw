@@ -206,10 +206,6 @@ public:
   */
   void getSubHeader();
 
-  /** Get sub header and check the size
-   */
-  void getSubHeaderIs(int size);
-
   /*************************************************************************
    *
    *  Low level record methods

@@ -39,7 +39,7 @@ namespace ESM
                         // May include the additional two bytes (but not necessarily)
                         if (esm.getSubSize() == sizeof(mData))
                         {
-                            esm.getExact(&mData, sizeof(mData));
+                            esm.getT(mData);
                         }
                         else
                         {
