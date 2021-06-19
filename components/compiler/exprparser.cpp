@@ -669,6 +669,7 @@ namespace Compiler
 
                 if (argument=='c') stringParser.smashCase();
                 if (argument=='x') stringParser.discard();
+                scanner.enableExpectName();
                 scanner.scan (stringParser);
 
                 if ((optional || argument=='x') && stringParser.isEmpty())

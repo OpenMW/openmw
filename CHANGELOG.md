@@ -1,7 +1,7 @@
 0.48.0
 ------
 
-    
+    Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
 
 0.47.0
 ------
