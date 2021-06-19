@@ -632,7 +632,7 @@ bool VideoState::update()
 
 int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
 {
-    AVCodec *codec;
+    const AVCodec *codec;
 
     if(stream_index < 0 || stream_index >= static_cast<int>(pFormatCtx->nb_streams))
         return -1;
