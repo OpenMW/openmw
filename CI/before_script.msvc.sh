@@ -539,14 +539,14 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"ffmpeg-4.2.2-dev-win${BITS}.zip"
 
 	# MyGUI
-	download "MyGUI 3.4.0" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
-		"MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
+	download "MyGUI 3.4.1" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
+		"MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
 
 	if [ -n "$PDBS" ]; then
 		download "MyGUI symbols" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
-			"MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
+			"MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
 	fi
 
 	# OpenAL
@@ -554,15 +554,15 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-1.20.1.zip" \
 		"OpenAL-Soft-1.20.1.zip"
 
-	# OSG
-	download "OpenSceneGraph 3.6.5" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
-		"OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
+	# OSGoS
+	download "OSGoS 3.6.5" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
+		"OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
 
 	if [ -n "$PDBS" ]; then
-		download "OpenSceneGraph symbols" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
-			"OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
+		download "OSGoS symbols" \
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
+			"OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
 	fi
 
 	# SDL2
@@ -710,20 +710,20 @@ printf "FFmpeg 4.2.2... "
 cd $DEPS
 echo
 # MyGUI
-printf "MyGUI 3.4.0... "
+printf "MyGUI 3.4.1... "
 {
 	cd $DEPS_INSTALL
 	if [ -d MyGUI ] && \
 		grep "MYGUI_VERSION_MAJOR 3" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
 		grep "MYGUI_VERSION_MINOR 4" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
-		grep "MYGUI_VERSION_PATCH 0" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null
+		grep "MYGUI_VERSION_PATCH 1" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null
 	then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf MyGUI
-		eval 7z x -y "${DEPS}/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
-		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
-		mv "MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}" MyGUI
+		eval 7z x -y "${DEPS}/MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
+		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
+		mv "MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}" MyGUI
 	fi
 	export MYGUI_HOME="$(real_pwd)/MyGUI"
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
@@ -759,8 +759,8 @@ printf "OpenAL-Soft 1.20.1... "
 }
 cd $DEPS
 echo
-# OSG
-printf "OSG 3.6.5... "
+# OSGoS
+printf "OSGoS 3.6.5... "
 {
 	cd $DEPS_INSTALL
 	if [ -d OSG ] && \
@@ -771,9 +771,9 @@ printf "OSG 3.6.5... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf OSG
-		eval 7z x -y "${DEPS}/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
-		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
-		mv "OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}" OSG
+		eval 7z x -y "${DEPS}/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
+		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
+		mv "OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}" OSG
 	fi
 	OSG_SDK="$(real_pwd)/OSG"
 	add_cmake_opts -DOSG_DIR="$OSG_SDK"
