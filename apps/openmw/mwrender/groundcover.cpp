@@ -220,7 +220,7 @@ namespace MWRender
                 calculator.reset();
                 for (size_t i=0; i<cell->mContextList.size(); ++i)
                 {
-                    unsigned int index = cell->mContextList.at(i).index;
+                    unsigned int index = cell->mContextList[i].index;
                     if (esm.size() <= index)
                         esm.resize(index+1);
                     cell->restore(esm[index], i);
