@@ -275,9 +275,11 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
-
-                    ptr.getClass().getCreatureStats(ptr).setAiSetting(mIndex, value);
-                    ptr.getClass().setBaseAISetting(ptr.getCellRef().getRefId(), mIndex, value);
+                    if(ptr.getClass().isActor())
+                    {
+                        ptr.getClass().getCreatureStats(ptr).setAiSetting(mIndex, value);
+                        ptr.getClass().setBaseAISetting(ptr.getCellRef().getRefId(), mIndex, value);
+                    }
                 }
         };
 

@@ -47,6 +47,8 @@ namespace MWScript
             InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
+            std::string getTarget() const override;
+
             int getLocalShort (int index) const override;
 
             int getLocalLong (int index) const override;
@@ -124,7 +126,7 @@ namespace MWScript
 
             void setMemberFloat (const std::string& id, const std::string& name, float value, bool global) override;
 
-            MWWorld::Ptr getReference(bool required=true);
+            MWWorld::Ptr getReference(bool required=true) const;
             ///< Reference, that the script is running from (can be empty)
 
             void updatePtr(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);

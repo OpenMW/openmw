@@ -2,6 +2,7 @@
 #define GAME_SCRIPT_SCRIPTMANAGER_H
 
 #include <map>
+#include <set>
 #include <string>
 
 #include <components/compiler/streamerrorhandler.hpp>
@@ -45,13 +46,12 @@ namespace MWScript
             {
                 std::vector<Interpreter::Type_Code> mByteCode;
                 Compiler::Locals mLocals;
-                bool mActive;
+                std::set<std::string> mInactive;
 
                 CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals)
                 {
                     mByteCode = code;
                     mLocals = locals;
-                    mActive = true;
                 }
             };
 

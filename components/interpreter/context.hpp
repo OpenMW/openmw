@@ -12,6 +12,8 @@ namespace Interpreter
 
             virtual ~Context() {}
 
+            virtual std::string getTarget() const = 0;
+
             virtual int getLocalShort (int index) const = 0;
 
             virtual int getLocalLong (int index) const = 0;
