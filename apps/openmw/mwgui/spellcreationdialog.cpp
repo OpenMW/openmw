@@ -456,7 +456,7 @@ namespace MWGui
 
         for (const ESM::ENAMstruct& effect : mEffects)
         {
-            y += std::max(1.f, MWMechanics::calcEffectCost(effect));
+            y += std::max(1.f, MWMechanics::calcEffectCost(effect, nullptr, MWMechanics::EffectCostMethod::PlayerSpell));
 
             if (effect.mRange == ESM::RT_Target)
                 y *= 1.5;

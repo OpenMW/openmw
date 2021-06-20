@@ -19,7 +19,13 @@ namespace MWMechanics
 {
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect = nullptr);
+    enum class EffectCostMethod {
+        GameSpell,
+        PlayerSpell,
+    };
+
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect = nullptr, const EffectCostMethod method = EffectCostMethod::GameSpell);
+    int calcSpellCost (const ESM::Spell& spell);
 
     int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
 

@@ -109,7 +109,7 @@ namespace MWGui
             if (spell->mData.mType == ESM::Spell::ST_Spell)
             {
                 newSpell.mType = Spell::Type_Spell;
-                std::string cost = std::to_string(spell->mData.mCost);
+                std::string cost = std::to_string(MWMechanics::calcSpellCost(*spell));
                 std::string chance = std::to_string(int(MWMechanics::getSpellSuccessChance(spell, mActor)));
                 newSpell.mCostColumn = cost + "/" + chance;
             }
