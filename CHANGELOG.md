@@ -4,6 +4,7 @@
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
     Bug #5483: AutoCalc flag is not used to calculate spells cost
+    Bug #6066: addtopic "return" does not work from within script. No errors thrown
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
 
 0.47.0
