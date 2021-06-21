@@ -239,7 +239,7 @@ public:
   template <typename X>
   void getT(X &x) { getExact(&x, sizeof(X)); }
 
-  void getExact(void*x, int size);
+  void getExact(void* x, int size) { mEsm->read((char*)x, size); }
   void getName(NAME &name) { getT(name); }
   void getUint(uint32_t &u) { getT(u); }
 

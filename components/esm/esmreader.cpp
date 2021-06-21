@@ -291,18 +291,6 @@ void ESMReader::getRecHeader(uint32_t &flags)
  *
  *************************************************************************/
 
-void ESMReader::getExact(void*x, int size)
-{
-    try
-    {
-        mEsm->read((char*)x, size);
-    }
-    catch (std::exception& e)
-    {
-        fail(std::string("Read error: ") + e.what());
-    }
-}
-
 std::string ESMReader::getString(int size)
 {
     size_t s = size;
