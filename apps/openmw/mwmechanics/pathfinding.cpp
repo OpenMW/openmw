@@ -105,6 +105,19 @@ namespace
 
         return checkAngle && checkDist;
     }
+
+    struct IsValidShortcut
+    {
+        const DetourNavigator::Navigator* mNavigator;
+        const osg::Vec3f mHalfExtents;
+        const DetourNavigator::Flags mFlags;
+
+        bool operator()(const osg::Vec3f& start, const osg::Vec3f& end) const
+        {
+            const auto position = mNavigator->raycast(mHalfExtents, start, end, mFlags);
+            return position.has_value() && std::abs((position.value() - start).length2() - (end - start).length2()) <= 1;
+        }
+    };
 }
 
 namespace MWMechanics
@@ -296,7 +309,8 @@ namespace MWMechanics
     }
 
     void PathFinder::update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,
-                            bool shortenIfAlmostStraight, bool canMoveByZ)
+                            bool shortenIfAlmostStraight, bool canMoveByZ, const osg::Vec3f& halfExtents,
+                            const DetourNavigator::Flags flags)
     {
         if (mPath.empty())
             return;
@@ -306,9 +320,15 @@ namespace MWMechanics
 
         if (shortenIfAlmostStraight)
         {
-            while (mPath.size() > 2 && isAlmostStraight(mPath[0], mPath[1], mPath[2], pointTolerance))
+            const IsValidShortcut isValidShortcut {
+                MWBase::Environment::get().getWorld()->getNavigator(),
+                halfExtents, flags
+            };
+            while (mPath.size() > 2 && isAlmostStraight(mPath[0], mPath[1], mPath[2], pointTolerance)
+                   && isValidShortcut(mPath[0], mPath[2]))
                 mPath.erase(mPath.begin() + 1);
-            if (mPath.size() > 1 && isAlmostStraight(position, mPath[0], mPath[1], pointTolerance))
+            if (mPath.size() > 1 && isAlmostStraight(position, mPath[0], mPath[1], pointTolerance)
+                    && isValidShortcut(position, mPath[1]))
                 mPath.pop_front();
         }
 

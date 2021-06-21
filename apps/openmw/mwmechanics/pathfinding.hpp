@@ -107,7 +107,8 @@ namespace MWMechanics
 
             /// Remove front point if exist and within tolerance
             void update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,
-                        bool shortenIfAlmostStraight, bool canMoveByZ);
+                        bool shortenIfAlmostStraight, bool canMoveByZ, const osg::Vec3f& halfExtents,
+                        const DetourNavigator::Flags flags);
 
             bool checkPathCompleted() const
             {
