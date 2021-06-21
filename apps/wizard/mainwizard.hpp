@@ -40,7 +40,7 @@ namespace Wizard
         };
 
         MainWizard(QWidget *parent = nullptr);
-        ~MainWizard();
+        ~MainWizard() override;
 
         bool findFiles(const QString &name, const QString &path);
         void addInstallation(const QString &path);

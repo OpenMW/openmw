@@ -27,7 +27,7 @@ namespace ESSImport
 
         void load(ESM::ESMReader& esm) override;
 
-        virtual ~CellRef() = default;
+        ~CellRef() override = default;
     };
 
 }

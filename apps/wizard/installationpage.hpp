@@ -20,7 +20,7 @@ namespace Wizard
         Q_OBJECT
     public:
         InstallationPage(QWidget *parent);
-        ~InstallationPage();
+        ~InstallationPage() override;
 
         int nextId() const override;
          bool isComplete() const override;

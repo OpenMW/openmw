@@ -27,7 +27,7 @@ namespace Wizard
 
     public:
         UnshieldWorker(QObject *parent = nullptr);
-        ~UnshieldWorker();
+        ~UnshieldWorker() override;
 
         void stopWorker();
 

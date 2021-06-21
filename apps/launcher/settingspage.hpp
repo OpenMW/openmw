@@ -22,7 +22,7 @@ namespace Launcher
     public:
         SettingsPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
                       Config::LauncherSettings &launcherSettings, MainDialog *parent = nullptr);
-        ~SettingsPage();
+        ~SettingsPage() override;
 
         void saveSettings();
         bool loadSettings();
