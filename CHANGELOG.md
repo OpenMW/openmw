@@ -7,7 +7,6 @@
     Bug #2069: Fireflies in Fireflies invade Morrowind look wrong
     Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #2473: Unable to overstock merchants
-    Bug #2798: Mutable ESM records
     Bug #2976: [reopened]: Issues combining settings from the command line and both config files
     Bug #3137: Walking into a wall prevents jumping
     Bug #3372: Projectiles and magic bolts go through moving targets
@@ -20,7 +19,6 @@
     Bug #4039: Multiple followers should have the same following distance
     Bug #4055: Local scripts don't inherit variables from their base record
     Bug #4083: Door animation freezes when colliding with actors
-    Bug #4201: Projectile-projectile collision
     Bug #4247: Cannot walk up stairs in Ebonheart docks
     Bug #4357: OpenMW-CS: TopicInfos index sorting and rearranging isn't fully functional
     Bug #4363: OpenMW-CS: Defect in Clone Function for Dialogue Info records
@@ -89,7 +87,7 @@
     Bug #5644: Summon effects running on the player during game initialization cause crashes
     Bug #5656: Sneaking characters block hits while standing
     Bug #5661: Region sounds don't play at the right interval
-    Bug #5675: OpenMW-cs. FRMR subrecords are saved with the wrong MastIdx
+    Bug #5675: OpenMW-CS: FRMR subrecords are saved with the wrong MastIdx
     Bug #5680: Bull Netches incorrectly aim over the player character's head and always miss
     Bug #5681: Player character can clip or pass through bridges instead of colliding against them
     Bug #5687: Bound items covering the same inventory slot expiring at the same time freezes the game
@@ -102,7 +100,7 @@
     Bug #5739: Saving and loading the save a second or two before hitting the ground doesn't count fall damage
     Bug #5758: Paralyzed actors behavior is inconsistent with vanilla
     Bug #5762: Movement solver is insufficiently robust
-    BUG #5800: Equipping a CE enchanted ring deselects an already equipped and selected enchanted ring from the spell menu
+    Bug #5800: Equipping a CE enchanted ring deselects an already equipped and selected enchanted ring from the spell menu
     Bug #5807: Video decoding crash on ARM
     Bug #5821: NPCs from mods getting removed if mod order was changed
     Bug #5835: OpenMW doesn't accept negative values for NPC's hello, alarm, fight, and flee
@@ -135,11 +133,15 @@
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
+    Feature #2159: "Graying out" exhausted dialogue topics
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
     Feature #2686: Timestamps in openmw.log
+    Feature #2798: Mutable ESM records
     Feature #3171: OpenMW-CS: Instance drag selection
     Feature #3983: Wizard: Add link to buy Morrowind
+    Feature #4201: Projectile-projectile collision
+    Feature #4486: Handle crashes on Windows
     Feature #4894: Consider actors as obstacles for pathfinding
     Feature #4899: Alpha-To-Coverage Anti-Aliasing for alpha testing
     Feature #4917: Do not trigger NavMesh update when RecastMesh update should not change NavMesh
@@ -176,7 +178,6 @@
     Feature #6034: Find path based on area cost depending on NPC stats
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
-    Task #5844: Update 'toggle sneak' documentation
 
 0.46.0
 ------
@@ -186,7 +187,7 @@
     Bug #2395: Duplicated plugins in the launcher when multiple data directories provide the same plugin
     Bug #2679: Unable to map mouse wheel under control settings
     Bug #2969: Scripted items can stack
-    Bug #2976: Data lines in global openmw.cfg take priority over user openmw.cfg
+    Bug #2976: [reopened in 0.47] Data lines in global openmw.cfg take priority over user openmw.cfg
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3006: 'else if' operator breaks script compilation
     Bug #3109: SetPos/Position handles actors differently
@@ -204,7 +205,6 @@
     Bug #4009: Launcher does not show data files on the first run after installing
     Bug #4077: Enchanted items are not recharged if they are not in the player's inventory
     Bug #4141: PCSkipEquip isn't set to 1 when reading books/scrolls
-    Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4262: Rain settings are hardcoded
     Bug #4270: Closing doors while they are obstructed desyncs closing sfx
@@ -294,7 +294,6 @@
     Bug #4964: Multiple effect spell projectile sounds play louder than vanilla
     Bug #4965: Global light attenuation settings setup is lacking
     Bug #4969: "Miss" sound plays for any actor
-    Bug #4971: OpenMW-CS: Make rotations display as degrees instead of radians
     Bug #4972: Player is able to use quickkeys while disableplayerfighting is active
     Bug #4979: AiTravel maximum range depends on "actors processing range" setting
     Bug #4980: Drowning mechanics is applied for actors indifferently from distance to player
@@ -392,7 +391,6 @@
     Bug #5350: An attempt to launch magic bolt causes "AL error invalid value" error
     Bug #5352: Light source items' duration is decremented while they aren't visible
     Feature #1724: Handle AvoidNode
-    Feature #2159: "Graying out" exhausted dialogue topics
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
     Feature #3442: Default values for fallbacks from ini file
@@ -405,6 +403,7 @@
     Feature #4001: Toggle sneak controller shortcut
     Feature #4068: OpenMW-CS: Add a button to reset key bindings to defaults
     Feature #4129: Beta Comment to File
+    Feature #4202: Open .omwaddon files without needing to open openmw-cs first
     Feature #4209: Editor: Faction rank sub-table
     Feature #4255: Handle broken RepairedOnMe script function
     Feature #4316: Implement RaiseRank/LowerRank functions properly
@@ -427,6 +426,7 @@
     Feature #4958: Support eight blood types
     Feature #4962: Add casting animations for magic items
     Feature #4968: Scalable UI widget skins
+    Feature #4971: OpenMW-CS: Make rotations display as degrees instead of radians
     Feature #4994: Persistent pinnable windows hiding
     Feature #5000: Compressed BSA format support
     Feature #5005: Editor: Instance window via Scene window
