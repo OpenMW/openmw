@@ -737,12 +737,31 @@ namespace MWMechanics
             else
             {
                 // If the caster has no animation, add the effect directly to the effectManager
-                // We should scale it manually
-                osg::Vec3f bounds (MWBase::Environment::get().getWorld()->getHalfExtents(mCaster) * 2.f / Constants::UnitsPerFoot);
-                float scale = std::max({ bounds.x()/3.f, bounds.y()/3.f, bounds.z()/6.f });
-                float meshScale = !mCaster.getClass().isActor() ? mCaster.getCellRef().getScale() : 1.0f;
+                // We must scale and position it manually
+                float scale = mCaster.getCellRef().getScale();
                 osg::Vec3f pos (mCaster.getRefData().getPosition().asVec3());
-                MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + castStatic->mModel, effect->mParticle, pos, scale * meshScale);
+                if (!mCaster.getClass().isNpc())
+                {
+                    osg::Vec3f bounds (MWBase::Environment::get().getWorld()->getHalfExtents(mCaster) * 2.f);
+                    scale *= std::max({bounds.x(), bounds.y(), bounds.z() / 2.f}) / 64.f;
+                    float offset = 0.f;
+                    if (bounds.z() < 128.f)
+                        offset = bounds.z() - 128.f;
+                    else if (bounds.z() < bounds.x() + bounds.y())
+                        offset = 128.f - bounds.z();
+                    if (MWBase::Environment::get().getWorld()->isFlying(mCaster))
+                        offset /= 20.f;
+                    pos.z() += offset * scale;
+                }
+                else
+                {
+                    // Additionally use the NPC's height
+                    osg::Vec3f npcScaleVec (1.f, 1.f, 1.f);
+                    mCaster.getClass().adjustScale(mCaster, npcScaleVec, true);
+                    scale *= npcScaleVec.z();
+                }
+                scale = std::max(scale, 1.f);
+                MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + castStatic->mModel, effect->mParticle, pos, scale);
             }
 
             if (animation && !mCaster.getClass().isActor())

@@ -6,7 +6,6 @@
 #include <osg/MatrixTransform>
 #include <osg/BlendFunc>
 #include <osg/Material>
-#include <osg/PositionAttitudeTransform>
 #include <osg/Switch>
 
 #include <osgParticle/ParticleSystem>
@@ -1655,12 +1654,21 @@ namespace MWRender
             parentNode = found->second;
         }
 
-        osg::ref_ptr<osg::PositionAttitudeTransform> trans = new osg::PositionAttitudeTransform;
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> trans = new SceneUtil::PositionAttitudeTransform;
         if (!mPtr.getClass().isNpc())
         {
-            osg::Vec3f bounds (MWBase::Environment::get().getWorld()->getHalfExtents(mPtr) * 2.f / Constants::UnitsPerFoot);
-            float scale = std::max({ bounds.x()/3.f, bounds.y()/3.f, bounds.z()/6.f });
-            trans->setScale(osg::Vec3f(scale, scale, scale));
+            osg::Vec3f bounds (MWBase::Environment::get().getWorld()->getHalfExtents(mPtr) * 2.f);
+            float scale = std::max({bounds.x(), bounds.y(), bounds.z() / 2.f}) / 64.f;
+            if (scale > 1.f)
+                trans->setScale(osg::Vec3f(scale, scale, scale));
+            float offset = 0.f;
+            if (bounds.z() < 128.f)
+                offset = bounds.z() - 128.f;
+            else if (bounds.z() < bounds.x() + bounds.y())
+                offset = 128.f - bounds.z();
+            if (MWBase::Environment::get().getWorld()->isFlying(mPtr))
+                offset /= 20.f;
+            trans->setPosition(osg::Vec3f(0.f, 0.f, offset * scale));
         }
         parentNode->addChild(trans);
 
