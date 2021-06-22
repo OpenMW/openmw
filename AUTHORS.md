@@ -27,6 +27,7 @@ Programmers
     Alexander Olofsson (Ananace)
     Alex Rice
     Alex S (docwest)
+    Alexey Yaryshev (skeevert)
     Allofich
     Andrei Kortunov (akortunov)
     AnyOldName3

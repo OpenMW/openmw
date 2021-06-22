@@ -869,7 +869,7 @@ namespace MWMechanics
         int lockLevel = cellref.getLockLevel();
         if (target.getClass().isDoor() &&
             (lockLevel <= 0 || lockLevel == ESM::UnbreakableLock) &&
-            ptr.getCellRef().getTrap().empty())
+            cellref.getTrap().empty())
         {
             return true;
         }
