@@ -42,13 +42,13 @@ namespace ToUTF8
 
         private:
             void resize(size_t size);
-            size_t getLength(const char* input, bool &ascii);
-            void copyFromArray(unsigned char chp, char* &out);
-            size_t getLength2(const char* input, bool &ascii);
-            void copyFromArray2(const char*& chp, char* &out);
+            size_t getLength(const char* input, bool &ascii) const;
+            void copyFromArray(unsigned char chp, char* &out) const;
+            size_t getLength2(const char* input, bool &ascii) const;
+            void copyFromArray2(const char*& chp, char* &out) const;
 
             std::vector<char> mOutput;
-            signed char* translationArray;
+            const signed char* translationArray;
     };
 }
 
