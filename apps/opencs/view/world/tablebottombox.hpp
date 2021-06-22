@@ -61,7 +61,7 @@ namespace CSVWorld
                             const CSMWorld::UniversalId& id,
                             QWidget *parent = nullptr);
 
-            virtual ~TableBottomBox();
+            ~TableBottomBox() override;
 
             bool eventFilter(QObject *object, QEvent *event) override;
 

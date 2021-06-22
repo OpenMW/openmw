@@ -30,7 +30,7 @@ namespace CSMWorld
         public:
 
             NestedIdCollection ();
-            ~NestedIdCollection();
+            ~NestedIdCollection() override;
 
             void addNestedRow(int row, int column, int position) override;
 

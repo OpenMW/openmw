@@ -20,7 +20,7 @@ namespace CSMWorld
         NestedTableWrapper(const NestedTable& nestedTable)
             : mNestedTable(nestedTable) {}
 
-        virtual ~NestedTableWrapper() {}
+        ~NestedTableWrapper() override {}
 
         int size() const override
         {
