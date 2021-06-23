@@ -21,12 +21,9 @@ namespace ESM
 
     struct SummonKey
     {
-        SummonKey(int effectId, const std::string& sourceId, int index)
-        {
-            mEffectId = effectId;
-            mSourceId = sourceId;
-            mEffectIndex = index;
-        }
+        SummonKey(int effectId, const std::string& sourceId, int index):
+            mEffectId(effectId), mSourceId(sourceId), mEffectIndex(index)
+        {}
 
         bool operator==(const SummonKey &other) const
         {
