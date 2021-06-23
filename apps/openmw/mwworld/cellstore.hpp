@@ -127,7 +127,7 @@ namespace MWWorld
 
             void updateRechargingItems();
             void rechargeItems(float duration);
-            void checkItem(Ptr ptr);
+            void checkItem(const Ptr& ptr);
 
             // helper function for forEachInternal
             template<class Visitor, class List>

@@ -153,7 +153,7 @@ namespace SceneUtil
         return osg::Vec3f();
     }
 
-    void OsgAnimationController::update(float time, std::string animationName)
+    void OsgAnimationController::update(float time, const std::string& animationName)
     {
         for (const auto& mergedAnimationTrack : mMergedAnimationTracks)
         {
@@ -190,7 +190,7 @@ namespace SceneUtil
         traverse(node, nv);
     }
 
-    void OsgAnimationController::setEmulatedAnimations(std::vector<EmulatedAnimation> emulatedAnimations)
+    void OsgAnimationController::setEmulatedAnimations(const std::vector<EmulatedAnimation>& emulatedAnimations)
     {
         mEmulatedAnimations = emulatedAnimations;
     }

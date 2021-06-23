@@ -75,7 +75,7 @@ namespace MWMechanics
             void setPlayerClass (const ESM::Class& class_) override;
             ///< Set player class to custom class.
 
-            void restoreDynamicStats(MWWorld::Ptr actor, double hours, bool sleep) override;
+            void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep) override;
 
             void rest(double hours, bool sleep) override;
             ///< If the player is sleeping or waiting, this should be called every hour.

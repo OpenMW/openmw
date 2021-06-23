@@ -58,13 +58,13 @@ namespace SceneUtil
         osg::Vec3f getTranslation(float time) const override;
 
         /// @brief Calls animation track update()
-        void update(float time, std::string animationName);
+        void update(float time, const std::string& animationName);
 
         /// @brief Called every frame for osgAnimation
         void operator() (osg::Node*, osg::NodeVisitor*) override;
 
         /// @brief Sets details of the animations
-        void setEmulatedAnimations(std::vector<EmulatedAnimation> emulatedAnimations);
+        void setEmulatedAnimations(const std::vector<EmulatedAnimation>& emulatedAnimations);
 
         /// @brief Adds an animation track to a model
         void addMergedAnimationTrack(osg::ref_ptr<Resource::Animation> animationTrack);

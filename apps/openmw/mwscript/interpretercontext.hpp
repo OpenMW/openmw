@@ -111,7 +111,7 @@ namespace MWScript
 
             std::string getCurrentCellName() const override;
 
-            void executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor);
+            void executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor);
             ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.
 
             int getMemberShort (const std::string& id, const std::string& name, bool global) const override;

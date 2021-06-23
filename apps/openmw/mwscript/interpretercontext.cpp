@@ -415,7 +415,7 @@ namespace MWScript
         return  MWBase::Environment::get().getWorld()->getCellName();
     }
 
-    void InterpreterContext::executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor)
+    void InterpreterContext::executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor)
     {
         std::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
         action->execute (actor);

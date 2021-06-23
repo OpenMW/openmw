@@ -1996,7 +1996,7 @@ struct ConvexHull
         }
     };
 
-    Vertices findInternalEdges(osg::Vec3d mainVertex, Vertices connectedVertices)
+    Vertices findInternalEdges(const osg::Vec3d& mainVertex, const Vertices& connectedVertices)
     {
         Vertices internalEdgeVertices;
         for (const auto& vertex : connectedVertices)

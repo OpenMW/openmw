@@ -279,7 +279,7 @@ public:
     // TODO: use the std::string_view once we will use the C++17.
     // It should allow us to avoid data copying while we still will support both string and literal arguments.
 
-    static inline void replaceAll(std::string& data, std::string toSearch, std::string replaceStr)
+    static inline void replaceAll(std::string& data, const std::string& toSearch, const std::string& replaceStr)
     {
         size_t pos = data.find(toSearch);
 

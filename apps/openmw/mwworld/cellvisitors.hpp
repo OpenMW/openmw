@@ -13,7 +13,7 @@ namespace MWWorld
     {
         std::vector<MWWorld::Ptr> mObjects;
 
-        bool operator() (MWWorld::Ptr ptr)
+        bool operator() (const MWWorld::Ptr& ptr)
         {
             if (ptr.getRefData().getBaseNode())
             {
