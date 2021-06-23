@@ -85,7 +85,7 @@ namespace MWSound
         Sound(Sound&&) = delete;
 
     public:
-        Sound() { }
+        Sound() = default;
     };
 
     class Stream : public SoundBase {
@@ -94,7 +94,7 @@ namespace MWSound
         Stream(Stream&&) = delete;
 
     public:
-        Stream() { }
+        Stream() = default;
     };
 }
 

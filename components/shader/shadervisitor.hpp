@@ -77,7 +77,7 @@ namespace Shader
         struct ShaderRequirements
         {
             ShaderRequirements();
-            ~ShaderRequirements();
+            ~ShaderRequirements() = default;
 
             // <texture stage, texture name>
             std::map<int, std::string> mTextures;

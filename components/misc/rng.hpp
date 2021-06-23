@@ -17,7 +17,7 @@ public:
     {
         std::mt19937 mGenerator;
     public:
-        Seed();
+        Seed() = default;
         Seed(const Seed&) = delete;
         Seed(unsigned int seed);
         friend class Rng;

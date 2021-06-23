@@ -38,11 +38,6 @@ namespace Shader
     {
     }
 
-    ShaderVisitor::ShaderRequirements::~ShaderRequirements()
-    {
-
-    }
-
     ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string &defaultShaderPrefix)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(false)

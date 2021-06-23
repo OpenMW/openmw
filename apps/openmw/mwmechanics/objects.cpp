@@ -13,10 +13,6 @@
 namespace MWMechanics
 {
 
-Objects::Objects()
-{
-}
-
 Objects::~Objects()
 {
   for(auto& object : mObjects)

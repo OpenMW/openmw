@@ -207,7 +207,7 @@ protected:
                       mLoopCount(0), mPriority(0), mBlendMask(0), mAutoDisable(true)
         {
         }
-        ~AnimState();
+        ~AnimState() = default;
 
         float getTime() const
         {
