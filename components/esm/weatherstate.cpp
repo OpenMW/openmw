@@ -49,7 +49,7 @@ namespace ESM
 
     void WeatherState::save(ESMWriter& esm) const
     {
-        esm.writeHNCString(currentRegionRecord, mCurrentRegion.c_str());
+        esm.writeHNCString(currentRegionRecord, mCurrentRegion);
         esm.writeHNT(timePassedRecord, mTimePassed);
         esm.writeHNT(fastForwardRecord, mFastForward);
         esm.writeHNT(weatherUpdateTimeRecord, mWeatherUpdateTime);
