@@ -286,7 +286,7 @@ public:
 
     void setVisibility(float visibility);
     void setAttackingOrSpell(bool attackingOrSpell);
-    void castSpell(const std::string spellId, bool manualSpell=false);
+    void castSpell(const std::string& spellId, bool manualSpell=false);
     void setAIAttackType(const std::string& attackType);
     static void setAttackTypeRandomly(std::string& attackType);
 

@@ -251,7 +251,7 @@ namespace MWMechanics
             mObjects.addObject(ptr);
     }
 
-    void MechanicsManager::castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell)
+    void MechanicsManager::castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell)
     {
         if(ptr.getClass().isActor())
             mActors.castSpell(ptr, spellId, manualSpell);

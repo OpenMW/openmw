@@ -2852,7 +2852,7 @@ void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
     mAttackingOrSpell = attackingOrSpell;
 }
 
-void CharacterController::castSpell(const std::string spellId, bool manualSpell)
+void CharacterController::castSpell(const std::string& spellId, bool manualSpell)
 {
     mAttackingOrSpell = true;
     mCastingManualSpell = manualSpell;

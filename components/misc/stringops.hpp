@@ -66,7 +66,7 @@ public:
         return ch;
     }
 
-    static std::string lowerCaseUtf8(const std::string str)
+    static std::string lowerCaseUtf8(const std::string& str)
     {
         if (str.empty())
             return str;

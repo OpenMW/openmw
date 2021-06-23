@@ -22,7 +22,7 @@ namespace Resource
 
         private:
 
-            std::string changeFileExtension(const std::string file, const std::string ext);
+            std::string changeFileExtension(const std::string& file, const std::string& ext);
             std::string parseTextKey(const std::string& line);
             double parseTimeSignature(const std::string& line);
 

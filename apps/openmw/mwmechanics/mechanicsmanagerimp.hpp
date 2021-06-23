@@ -186,7 +186,7 @@ namespace MWMechanics
             /// Is \a ptr casting spell or using weapon now?
             bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const override;
 
-            void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell=false) override;
+            void castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell=false) override;
 
             void processChangedSettings(const Settings::CategorySettingVector& settings) override;
 
