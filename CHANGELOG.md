@@ -5,6 +5,7 @@
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
+    Bug #6066: addtopic "return" does not work from within script. No errors thrown
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
 
 0.47.0
