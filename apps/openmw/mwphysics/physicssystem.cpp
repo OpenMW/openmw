@@ -261,7 +261,7 @@ namespace MWPhysics
         return 0.f;
     }
 
-    RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
+    RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, const std::vector<MWWorld::Ptr>& targets, int mask, int group) const
     {
         if (from == to)
         {
@@ -290,7 +290,7 @@ namespace MWPhysics
 
         if (!targets.empty())
         {
-            for (MWWorld::Ptr& target : targets)
+            for (const MWWorld::Ptr& target : targets)
             {
                 const Actor* actor = getActor(target);
                 if (actor)

@@ -53,7 +53,7 @@ namespace MWMechanics
         }
     }
 
-    bool Pickpocket::pick(MWWorld::Ptr item, int count)
+    bool Pickpocket::pick(const MWWorld::Ptr& item, int count)
     {
         float stackValue = static_cast<float>(item.getClass().getValue(item) * count);
         float fPickPocketMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()

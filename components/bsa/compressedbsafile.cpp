@@ -406,7 +406,7 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
     return std::shared_ptr<std::istream>(memoryStreamPtr, (std::istream*)memoryStreamPtr.get());
 }
 
-BsaVersion CompressedBSAFile::detectVersion(std::string filePath)
+BsaVersion CompressedBSAFile::detectVersion(const std::string& filePath)
 {
     namespace bfs = boost::filesystem;
     bfs::ifstream input(bfs::path(filePath), std::ios_base::binary);

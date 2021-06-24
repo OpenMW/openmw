@@ -488,7 +488,7 @@ namespace MWGui
         mHistoryContents.clear();
     }
 
-    bool DialogueWindow::setKeywords(std::list<std::string> keyWords)
+    bool DialogueWindow::setKeywords(const std::list<std::string>& keyWords)
     {
         if (mKeywords == keyWords && isCompanion() == mIsCompanion)
             return false;

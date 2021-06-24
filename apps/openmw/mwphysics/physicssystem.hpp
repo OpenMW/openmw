@@ -175,7 +175,7 @@ namespace MWPhysics
 
             /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all other actors.
             RayCastingResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
-                    std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>(),
+                    const std::vector<MWWorld::Ptr>& targets = std::vector<MWWorld::Ptr>(),
                     int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const override;
 
             RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius) const override;

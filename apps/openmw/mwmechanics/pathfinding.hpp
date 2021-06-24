@@ -167,7 +167,7 @@ namespace MWMechanics
             // Caller needs to be careful for very short distances (i.e. less than 1)
             // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
             //
-            static float distanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
+            static float distanceSquared(const ESM::Pathgrid::Point& point, const osg::Vec3f& pos)
             {
                 return (MWMechanics::PathFinder::makeOsgVec3(point) - pos).length2();
             }

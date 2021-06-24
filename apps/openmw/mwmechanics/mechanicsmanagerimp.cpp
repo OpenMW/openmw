@@ -402,7 +402,7 @@ namespace MWMechanics
         mActors.rest(hours, sleep);
     }
 
-    void MechanicsManager::restoreDynamicStats(MWWorld::Ptr actor, double hours, bool sleep)
+    void MechanicsManager::restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep)
     {
         mActors.restoreDynamicStats(actor, hours, sleep);
     }
