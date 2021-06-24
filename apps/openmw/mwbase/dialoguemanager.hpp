@@ -94,7 +94,6 @@ namespace MWBase
             virtual bool checkServiceRefused (ResponseCallback* callback, ServiceType service = ServiceType::Any) = 0;
 
             virtual void persuade (int type, ResponseCallback* callback) = 0;
-            virtual int getTemporaryDispositionChange () const = 0;
 
             /// @note Controlled by an option, gets discarded when dialogue ends by default
             virtual void applyBarterDispositionChange (int delta) = 0;
