@@ -115,7 +115,7 @@ namespace MWRender
         struct MapSegment
         {
             MapSegment();
-            ~MapSegment();
+            ~MapSegment() = default;
 
             void initFogOfWar();
             void loadFogOfWar(const ESM::FogTexture& fog);

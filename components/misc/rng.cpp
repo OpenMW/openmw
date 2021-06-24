@@ -10,9 +10,6 @@ namespace
 
 namespace Misc
 {
-
-    Rng::Seed::Seed() {}
-
     Rng::Seed::Seed(unsigned int seed)
     {
         mGenerator.seed(seed);

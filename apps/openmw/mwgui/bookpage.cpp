@@ -746,9 +746,7 @@ namespace
             mVertexColourType = MyGUI::RenderManager::getInstance().getVertexFormat();
         }
 
-        ~GlyphStream ()
-        {
-        }
+        ~GlyphStream () = default;
 
         MyGUI::Vertex* end () const { return mVertices; }
 

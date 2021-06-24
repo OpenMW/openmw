@@ -58,7 +58,7 @@ namespace MWWorld
             std::shared_ptr<ResolutionListener> mListener;
         public:
             ResolutionHandle(std::shared_ptr<ResolutionListener> listener) : mListener(listener) {}
-            ResolutionHandle() {}
+            ResolutionHandle() = default;
     };
     
     class ContainerStoreListener

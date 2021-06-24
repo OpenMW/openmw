@@ -16,8 +16,6 @@
 
 namespace MWDialogue
 {
-    Entry::Entry() {}
-
     Entry::Entry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor)
     : mInfoId (infoId)
     {
@@ -59,8 +57,6 @@ namespace MWDialogue
         entry.mActorName = mActorName;
     }
 
-
-    JournalEntry::JournalEntry() {}
 
     JournalEntry::JournalEntry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor)
         : Entry (topic, infoId, actor), mTopic (topic)

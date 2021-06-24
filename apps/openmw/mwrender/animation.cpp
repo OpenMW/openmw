@@ -1973,11 +1973,6 @@ namespace MWRender
         return SceneUtil::hasUserDescription(mObjectRoot, Constants::HerbalismLabel);
     }
 
-    Animation::AnimState::~AnimState()
-    {
-
-    }
-
     // ------------------------------
 
     PartHolder::PartHolder(osg::ref_ptr<osg::Node> node)
