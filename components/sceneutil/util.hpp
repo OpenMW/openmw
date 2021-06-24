@@ -58,7 +58,7 @@ namespace SceneUtil
 
     float makeOsgColorComponent (unsigned int value, unsigned int shift);
 
-    bool hasUserDescription(const osg::Node* node, const std::string pattern);
+    bool hasUserDescription(const osg::Node* node, const std::string& pattern);
 
     osg::ref_ptr<GlowUpdater> addEnchantedGlow(osg::ref_ptr<osg::Node> node, Resource::ResourceSystem* resourceSystem, osg::Vec4f glowColor, float glowDuration=-1);
 

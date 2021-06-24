@@ -106,7 +106,7 @@ namespace Resource
         return time;
     }
 
-    std::string RetrieveAnimationsVisitor::changeFileExtension(const std::string file, const std::string ext)
+    std::string RetrieveAnimationsVisitor::changeFileExtension(const std::string& file, const std::string& ext)
     {
         size_t extPos = file.find_last_of('.');
         if (extPos != std::string::npos && extPos+1 < file.size())

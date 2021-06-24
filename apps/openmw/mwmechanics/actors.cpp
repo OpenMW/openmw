@@ -1667,7 +1667,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell)
+    void Actors::castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell)
     {
         PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())

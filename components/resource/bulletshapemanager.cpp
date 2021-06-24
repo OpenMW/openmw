@@ -45,9 +45,9 @@ struct GetTriangleFunctor
     }
 
 #if OSG_MIN_VERSION_REQUIRED(3,5,6)
-    void inline operator()( const osg::Vec3 v1, const osg::Vec3 v2, const osg::Vec3 v3 )
+    void inline operator()( const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3 )
 #else
-    void inline operator()( const osg::Vec3 v1, const osg::Vec3 v2, const osg::Vec3 v3, bool _temp )
+    void inline operator()( const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3, bool _temp )
 #endif
     {
         if (mTriMesh)
