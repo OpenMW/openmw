@@ -106,7 +106,7 @@ protected:
     Lookup mLookup;
 
     /// Error handling
-    void fail(const std::string &msg);
+    [[noreturn]] void fail(const std::string &msg);
 
     /// Read header information from the input source
     virtual void readHeader();

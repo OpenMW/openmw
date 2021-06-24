@@ -43,7 +43,7 @@ public:
         Log(Debug::Warning) << "NIFLoader: Warn: " << msg;
     }
 
-    void fail(const std::string &msg)
+    [[noreturn]] void fail(const std::string &msg)
     {
         Log(Debug::Error) << "NIFLoader: Fail: "<< msg;
         abort();

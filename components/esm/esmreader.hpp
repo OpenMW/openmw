@@ -250,7 +250,7 @@ public:
   void skip(int bytes);
 
   /// Used for error handling
-  void fail(const std::string &msg);
+  [[noreturn]] void fail(const std::string &msg);
 
   /// Sets font encoder for ESM strings
   void setEncoder(ToUTF8::Utf8Encoder* encoder);

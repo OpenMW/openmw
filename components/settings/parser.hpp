@@ -20,7 +20,7 @@ namespace Settings
         /// @return false if we have reached the end of the string
         bool skipWhiteSpace(size_t& i, std::string& str);
 
-        void fail(const std::string& message);
+        [[noreturn]] void fail(const std::string& message);
 
         std::string mFile;
         int mLine = 0;

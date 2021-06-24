@@ -23,13 +23,13 @@ namespace Compiler
 
         protected:
 
-            void reportSeriousError (const std::string& message, const TokenLoc& loc);
+            [[noreturn]] void reportSeriousError (const std::string& message, const TokenLoc& loc);
             ///< Report the error and throw a exception.
 
             void reportWarning (const std::string& message, const TokenLoc& loc);
             ///< Report the warning without throwing an exception.
 
-            void reportEOF();
+            [[noreturn]] void reportEOF();
             ///< Report an unexpected EOF condition.
 
             ErrorHandler& getErrorHandler();

@@ -92,11 +92,9 @@ public:
     };
 
     /// Used if file parsing fails
-    void fail(const std::string &msg) const
+    [[noreturn]] void fail(const std::string &msg) const
     {
-        std::string err = " NIFFile Error: " + msg;
-        err += "\nFile: " + filename;
-        throw std::runtime_error(err);
+        throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + filename);
     }
     /// Used when something goes wrong, but not catastrophically so
     void warn(const std::string &msg) const
