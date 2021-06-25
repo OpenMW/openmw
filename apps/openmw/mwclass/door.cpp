@@ -132,12 +132,14 @@ namespace MWClass
             MWBase::Environment::get().getWorld()->getMaxActivationDistance())
         {
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+            if(animation)
+            {
+                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
+                const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
 
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-            int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
-            const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
-
-            animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
+                animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
+            }
         }
 
         const std::string keyId = ptr.getCellRef().getKey();
