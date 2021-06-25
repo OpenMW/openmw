@@ -83,7 +83,7 @@ namespace DetourNavigator
         return mObjects.empty();
     }
 
-    void RecastMeshManager::reportNavMeshChange(Version recastMeshVersion, Version navMeshVersion)
+    void RecastMeshManager::reportNavMeshChange(const Version& recastMeshVersion, const Version& navMeshVersion)
     {
         if (recastMeshVersion.mGeneration != mGeneration)
             return;

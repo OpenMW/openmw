@@ -26,7 +26,7 @@ namespace Interpreter{
         return a.length() > b.length();
     }
 
-    std::string fixDefinesReal(std::string text, bool dialogue, Context& context)
+    static std::string fixDefinesReal(const std::string& text, bool dialogue, Context& context)
     {
         unsigned int start = 0;
         std::ostringstream retval;

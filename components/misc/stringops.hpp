@@ -290,7 +290,7 @@ public:
         }
     }
 
-     static inline void replaceLast(std::string& str, std::string substr, std::string with)
+     static inline void replaceLast(std::string& str, const std::string& substr, const std::string& with)
      {
          size_t pos = str.rfind(substr);
          if (pos == std::string::npos)
