@@ -178,49 +178,49 @@ namespace AiSequence
             {
             case Ai_Wander:
             {
-                std::unique_ptr<AiWander> ptr (new AiWander());
+                std::unique_ptr<AiWander> ptr = std::make_unique<AiWander>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
                 break;
             }
             case Ai_Travel:
             {
-                std::unique_ptr<AiTravel> ptr (new AiTravel());
+                std::unique_ptr<AiTravel> ptr = std::make_unique<AiTravel>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
                 break;
             }
             case Ai_Escort:
             {
-                std::unique_ptr<AiEscort> ptr (new AiEscort());
+                std::unique_ptr<AiEscort> ptr = std::make_unique<AiEscort>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
                 break;
             }
             case Ai_Follow:
             {
-                std::unique_ptr<AiFollow> ptr (new AiFollow());
+                std::unique_ptr<AiFollow> ptr = std::make_unique<AiFollow>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
                 break;
             }
             case Ai_Activate:
             {
-                std::unique_ptr<AiActivate> ptr (new AiActivate());
+                std::unique_ptr<AiActivate> ptr = std::make_unique<AiActivate>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
                 break;
             }
             case Ai_Combat:
             {
-                std::unique_ptr<AiCombat> ptr (new AiCombat());
+                std::unique_ptr<AiCombat> ptr = std::make_unique<AiCombat>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
                 break;
             }
             case Ai_Pursue:
             {
-                std::unique_ptr<AiPursue> ptr (new AiPursue());
+                std::unique_ptr<AiPursue> ptr = std::make_unique<AiPursue>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
                 break;
