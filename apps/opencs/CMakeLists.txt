@@ -158,7 +158,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
     set (OPENCS_MAC_ICON "${CMAKE_SOURCE_DIR}/files/mac/openmw-cs.icns")
-    set (OPENCS_CFG "${OpenMW_BINARY_DIR}/openmw-cs.cfg")
+    set (OPENCS_CFG "${OpenMW_BINARY_DIR}/defaults-cs.bin")
     set (OPENCS_DEFAULT_FILTERS_FILE "${OpenMW_BINARY_DIR}/resources/defaultfilters")
     set (OPENCS_OPENMW_CFG "${OpenMW_BINARY_DIR}/openmw.cfg")
 else()
@@ -270,7 +270,7 @@ if (WIN32)
         SET(INSTALL_SOURCE "${OpenMW_BINARY_DIR}")
     endif ()
 
-    INSTALL(FILES "${INSTALL_SOURCE}/openmw-cs.cfg" DESTINATION ".")
+    INSTALL(FILES "${INSTALL_SOURCE}/defaults-cs.bin" DESTINATION ".")
 endif()
 
 if (MSVC)

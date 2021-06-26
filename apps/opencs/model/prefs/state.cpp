@@ -17,15 +17,15 @@ CSMPrefs::State *CSMPrefs::State::sThis = nullptr;
 void CSMPrefs::State::load()
 {
     // default settings file
-    boost::filesystem::path local = mConfigurationManager.getLocalPath() / mConfigFile;
-    boost::filesystem::path global = mConfigurationManager.getGlobalPath() / mConfigFile;
+    boost::filesystem::path local = mConfigurationManager.getLocalPath() / mDefaultConfigFile;
+    boost::filesystem::path global = mConfigurationManager.getGlobalPath() / mDefaultConfigFile;
 
     if (boost::filesystem::exists (local))
         mSettings.loadDefault (local.string());
     else if (boost::filesystem::exists (global))
         mSettings.loadDefault (global.string());
     else
-        throw std::runtime_error ("No default settings file found! Make sure the file \"openmw-cs.cfg\" was properly installed.");
+        throw std::runtime_error ("No default settings file found! Make sure the file \"" + mDefaultConfigFile + "\" was properly installed.");
 
     // user settings file
     boost::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
@@ -641,7 +641,7 @@ void CSMPrefs::State::setDefault (const std::string& key, const std::string& def
 }
 
 CSMPrefs::State::State (const Files::ConfigurationManager& configurationManager)
-: mConfigFile ("openmw-cs.cfg"), mConfigurationManager (configurationManager),
+: mConfigFile ("openmw-cs.cfg"), mDefaultConfigFile("defaults-cs.bin"), mConfigurationManager (configurationManager),
   mCurrentCategory (mCategories.end())
 {
     if (sThis)

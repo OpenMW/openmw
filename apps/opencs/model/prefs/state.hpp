@@ -48,6 +48,7 @@ namespace CSMPrefs
         private:
 
             const std::string mConfigFile;
+            const std::string mDefaultConfigFile;
             const Files::ConfigurationManager& mConfigurationManager;
             ShortcutManager mShortcutManager;
             Settings::Manager mSettings;
