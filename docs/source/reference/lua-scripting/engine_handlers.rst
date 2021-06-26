@@ -36,8 +36,21 @@ Engine handler is a function defined by a script, that can be called by the engi
 +----------------------------------+----------------------------------------------------------------------+
 | **Only for local scripts attached to a player**                                                         |
 +----------------------------------+----------------------------------------------------------------------+
-| onKeyPress(key)                  | | `Key <openmw_core.html##(KeyboardEvent)>`_ pressed. Usage example: |
-|                                  | | ``if key.symbol == 'z' and key.withShift then ...``                |
+| onKeyPress(key)                  | | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.            |
+|                                  | | Usage example: ``if key.symbol == 'z' and key.withShift then ...`` |
 +----------------------------------+----------------------------------------------------------------------+
-
+| onKeyRelease(key)                | | `Key <openmw_input.html##(KeyboardEvent)>`_ is released.           |
+|                                  | | Usage example: ``if key.symbol == 'z' and key.withShift then ...`` |
++----------------------------------+----------------------------------------------------------------------+
+| onControllerButtonPress(id)      | | A `button <openmw_input.html##(CONTROLLER_BUTTON)>`_ on a game     |
+|                                  |   controller is pressed. Usage example:                              |
+|                                  | | ``if id == input.CONTROLLER_BUTTON.LeftStick then ...``            |
++----------------------------------+----------------------------------------------------------------------+
+| onControllerButtonRelease(id)    | | A `button <openmw_input.html##(CONTROLLER_BUTTON)>`_ on a game     |
+|                                  |   controller is released. Usage example:                             |
+|                                  | | ``if id == input.CONTROLLER_BUTTON.LeftStick then ...``            |
++----------------------------------+----------------------------------------------------------------------+
+| onInputAction(id)                | | `Game control <openmw_input.html##(ACTION)>`_ is pressed.          |
+|                                  | | Usage example: ``if id == input.ACTION.ToggleWeapon then ...``     |
++----------------------------------+----------------------------------------------------------------------+
 

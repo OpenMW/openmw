@@ -314,6 +314,8 @@ Player scripts are local scripts that are attached to a player.
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.nearby <Package openmw.nearby>`             | by local scripts   | | Read-only access to the nearest area of the game world.     |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input                                                  |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls user interface                                     |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |openmw.camera                                            | by player scripts  | | Controls camera (not implemented)                           |

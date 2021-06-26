@@ -38,6 +38,10 @@ namespace MWInput
         void setMouseLookEnabled(bool enabled) { mMouseLookEnabled = enabled; }
         void setGuiCursorEnabled(bool enabled) { mGuiCursorEnabled = enabled; }
 
+        uint32_t getButtonsState() const { return mButtonsState; }
+        int getMouseMoveX() const { return mMouseMoveX; }
+        int getMouseMoveY() const { return mMouseMoveY; }
+
     private:
         bool mInvertX;
         bool mInvertY;
@@ -53,6 +57,10 @@ namespace MWInput
         int mMouseWheel;
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
+
+        uint32_t mButtonsState;
+        int mMouseMoveX;
+        int mMouseMoveY;
     };
 }
 #endif

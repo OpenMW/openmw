@@ -34,6 +34,9 @@ namespace MWInput
         , mMouseWheel(0)
         , mMouseLookEnabled(false)
         , mGuiCursorEnabled(true)
+        , mButtonsState(0)
+        , mMouseMoveX(0)
+        , mMouseMoveY(0)
     {
         int w,h;
         SDL_GetWindowSize(window, &w, &h);
@@ -196,6 +199,8 @@ namespace MWInput
 
     void MouseManager::update(float dt)
     {
+        mButtonsState = SDL_GetRelativeMouseState(&mMouseMoveX, &mMouseMoveY);
+
         if (!mMouseLookEnabled)
             return;
 

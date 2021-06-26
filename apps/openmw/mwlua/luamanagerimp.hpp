@@ -41,7 +41,7 @@ namespace MWLua
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
         void registerObject(const MWWorld::Ptr& ptr) override;
         void deregisterObject(const MWWorld::Ptr& ptr) override;
-        void keyPressed(const SDL_KeyboardEvent &arg) override;
+        void inputEvent(const InputEvent& event) override { mInputEvents.push_back(event); }
         void appliedToObject(const MWWorld::Ptr& toPtr, std::string_view recordId, const MWWorld::Ptr& fromPtr) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
@@ -75,6 +75,7 @@ namespace MWLua
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;
         sol::table mCameraPackage;
+        sol::table mInputPackage;
         sol::table mLocalSettingsPackage;
         sol::table mPlayerSettingsPackage;
 
@@ -96,7 +97,7 @@ namespace MWLua
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalLoader;
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalLoader;
 
-        std::vector<SDL_Keysym> mKeyPressEvents;
+        std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
         std::vector<ObjectId> mActorAddedEvents;
 
         struct LocalEngineEvent

@@ -48,6 +48,7 @@ namespace MWInput
         void showQuickKeysMenu();
 
         void resetIdleTime();
+        float getIdleTime() const { return mTimeIdle; }
 
         bool isAlwaysRunActive() const { return mAlwaysRunActive; };
         bool isSneaking() const { return mSneaking; };
