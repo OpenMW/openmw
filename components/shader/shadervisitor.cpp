@@ -279,6 +279,8 @@ namespace Shader
         {
             for (osg::StateSet::AttributeList::const_iterator it = attributeMap.begin(); it != attributeMap.end(); ++it)
             {
+                if (attributeMap != removedAttributes && removedAttributes.count(it->first))
+                    continue;
                 if (it->first.first == osg::StateAttribute::MATERIAL)
                 {
                     // This should probably be moved out of ShaderRequirements and be applied directly now it's a uniform instead of a define
