@@ -275,11 +275,11 @@ namespace Shader
         osg::StateSet::AttributeList removedAttributes;
         if (osg::ref_ptr<osg::StateSet> removedState = getRemovedState(*stateset))
             removedAttributes = removedState->getAttributeList();
-        for (const auto& attributeMap : { attributes, removedAttributes })
+        for (const auto* attributeMap : std::initializer_list<const osg::StateSet::AttributeList*>{ &attributes, &removedAttributes })
         {
-            for (osg::StateSet::AttributeList::const_iterator it = attributeMap.begin(); it != attributeMap.end(); ++it)
+            for (osg::StateSet::AttributeList::const_iterator it = attributeMap->begin(); it != attributeMap->end(); ++it)
             {
-                if (attributeMap != removedAttributes && removedAttributes.count(it->first))
+                if (attributeMap != &removedAttributes && removedAttributes.count(it->first))
                     continue;
                 if (it->first.first == osg::StateAttribute::MATERIAL)
                 {
