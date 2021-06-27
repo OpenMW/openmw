@@ -50,6 +50,16 @@ namespace DetourNavigator
                 removed.emplace(endTilePosition);
         });
 
+        for (const TilePosition& tilePosition : removed)
+        {
+            const auto it = values->mByTilePosition.find(tilePosition);
+            if (it == values->mByTilePosition.end())
+                continue;
+            it->second.erase(id);
+            if (it->second.empty())
+                values->mByTilePosition.erase(it);
+        }
+
         values->mById.erase(byId.first, byId.second);
 
         return removed;
