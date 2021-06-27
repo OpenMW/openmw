@@ -54,7 +54,7 @@ namespace CSVRender
 
             Object* mObject;
 
-            QString getToolTip (bool hideBasics) const override;
+            QString getToolTip (bool hideBasics, const WorldspaceHitResult& hit) const override;
     };
 
     class ObjectMarkerTag : public ObjectTag
