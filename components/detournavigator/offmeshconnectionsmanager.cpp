@@ -80,7 +80,12 @@ namespace DetourNavigator
             [&] (const ObjectId v)
             {
                 const auto byId = values->mById.equal_range(v);
-                std::for_each(byId.first, byId.second, [&] (const auto& v) { result.push_back(v.second); });
+                std::for_each(byId.first, byId.second, [&] (const auto& v)
+                {
+                    if (getTilePosition(mSettings, v.second.mStart) == tilePosition
+                            || getTilePosition(mSettings, v.second.mEnd) == tilePosition)
+                        result.push_back(v.second);
+                });
             });
 
         std::sort(result.begin(), result.end());
