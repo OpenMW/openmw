@@ -402,9 +402,12 @@ namespace Shader
         {
             writableStateSet->addUniform(new osg::Uniform("alphaRef", reqs.mAlphaRef));
 
-            const auto* alphaFunc = writableStateSet->getAttributePair(osg::StateAttribute::ALPHAFUNC);
-            if (alphaFunc)
-                removedState->setAttribute(alphaFunc->first, alphaFunc->second);
+            if (!removedState->getAttributePair(osg::StateAttribute::ALPHAFUNC))
+            {
+                const auto* alphaFunc = writableStateSet->getAttributePair(osg::StateAttribute::ALPHAFUNC);
+                if (alphaFunc)
+                    removedState->setAttribute(alphaFunc->first, alphaFunc->second);
+            }
             // This prevents redundant glAlphaFunc calls while letting the shadows bin still see the test
             writableStateSet->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
