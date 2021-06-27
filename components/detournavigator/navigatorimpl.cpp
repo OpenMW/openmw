@@ -55,12 +55,10 @@ namespace DetourNavigator
     {
         if (addObject(id, static_cast<const ObjectShapes&>(shapes), transform))
         {
-            mNavMeshManager.addOffMeshConnection(
-                id,
-                toNavMeshCoordinates(mSettings, shapes.mConnectionStart),
-                toNavMeshCoordinates(mSettings, shapes.mConnectionEnd),
-                AreaType_door
-            );
+            const osg::Vec3f start = toNavMeshCoordinates(mSettings, shapes.mConnectionStart);
+            const osg::Vec3f end = toNavMeshCoordinates(mSettings, shapes.mConnectionEnd);
+            mNavMeshManager.addOffMeshConnection(id, start, end, AreaType_door);
+            mNavMeshManager.addOffMeshConnection(id, end, start, AreaType_door);
             return true;
         }
         return false;
