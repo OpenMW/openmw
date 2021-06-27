@@ -47,9 +47,8 @@ namespace DetourNavigator
 
             const auto byId = values->mById.equal_range(id);
 
-            if (byId.first == byId.second) {
+            if (byId.first == byId.second)
                 return {};
-            }
 
             std::set<TilePosition> removed;
 
