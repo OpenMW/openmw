@@ -159,7 +159,7 @@ namespace MWMechanics
                 float diff = (strength+willpower+agility+endurance) - fatigue.getBase();
                 float currentToBaseRatio = fatigue.getBase() > 0 ? (fatigue.getCurrent() / fatigue.getBase()) : 0;
                 fatigue.setModified(fatigue.getModified() + diff, 0);
-                fatigue.setCurrent(fatigue.getBase() * currentToBaseRatio);
+                fatigue.setCurrent(fatigue.getBase() * currentToBaseRatio, false, true);
                 setFatigue(fatigue);
             }
         }
