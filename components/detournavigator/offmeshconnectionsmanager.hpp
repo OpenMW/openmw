@@ -98,14 +98,6 @@ namespace DetourNavigator
 
         const Settings& mSettings;
         Misc::ScopeGuarded<Values> mValues;
-
-        void removeByTilePosition(std::map<TilePosition, std::unordered_set<ObjectId>>& valuesByTilePosition,
-            const TilePosition& tilePosition, const ObjectId id)
-        {
-            const auto it = valuesByTilePosition.find(tilePosition);
-            if (it != valuesByTilePosition.end())
-                it->second.erase(id);
-        }
     };
 }
 
