@@ -280,10 +280,12 @@ namespace Shader
         osg::StateSet::AttributeList removedAttributes;
         if (osg::ref_ptr<osg::StateSet> removedState = getRemovedState(*stateset))
             removedAttributes = removedState->getAttributeList();
-        for (const auto& attributeMap : { attributes, removedAttributes })
+        for (const auto* attributeMap : std::initializer_list<const osg::StateSet::AttributeList*>{ &attributes, &removedAttributes })
         {
-            for (osg::StateSet::AttributeList::const_iterator it = attributeMap.begin(); it != attributeMap.end(); ++it)
+            for (osg::StateSet::AttributeList::const_iterator it = attributeMap->begin(); it != attributeMap->end(); ++it)
             {
+                if (attributeMap != &removedAttributes && removedAttributes.count(it->first))
+                    continue;
                 if (it->first.first == osg::StateAttribute::MATERIAL)
                 {
                     // This should probably be moved out of ShaderRequirements and be applied directly now it's a uniform instead of a define
@@ -405,9 +407,12 @@ namespace Shader
         {
             writableStateSet->addUniform(new osg::Uniform("alphaRef", reqs.mAlphaRef));
 
-            const auto* alphaFunc = writableStateSet->getAttributePair(osg::StateAttribute::ALPHAFUNC);
-            if (alphaFunc)
-                removedState->setAttribute(alphaFunc->first, alphaFunc->second);
+            if (!removedState->getAttributePair(osg::StateAttribute::ALPHAFUNC))
+            {
+                const auto* alphaFunc = writableStateSet->getAttributePair(osg::StateAttribute::ALPHAFUNC);
+                if (alphaFunc)
+                    removedState->setAttribute(alphaFunc->first, alphaFunc->second);
+            }
             // This prevents redundant glAlphaFunc calls while letting the shadows bin still see the test
             writableStateSet->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
