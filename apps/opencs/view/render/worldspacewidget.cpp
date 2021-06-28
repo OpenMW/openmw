@@ -592,7 +592,7 @@ void CSVRender::WorldspaceWidget::showToolTip()
         if (hit.tag)
         {
             bool hideBasics = CSMPrefs::get()["Tooltips"]["scene-hide-basic"].isTrue();
-            QToolTip::showText (pos, hit.tag->getToolTip (hideBasics), this);
+            QToolTip::showText(pos, hit.tag->getToolTip(hideBasics, hit), this);
         }
     }
 }

@@ -23,7 +23,7 @@ CSVRender::CellArrow *CSVRender::CellArrowTag::getCellArrow() const
     return mArrow;
 }
 
-QString CSVRender::CellArrowTag::getToolTip (bool hideBasics) const
+QString CSVRender::CellArrowTag::getToolTip(bool hideBasics, const WorldspaceHitResult& /*hit*/) const
 {
     QString text ("Direction: ");
 
