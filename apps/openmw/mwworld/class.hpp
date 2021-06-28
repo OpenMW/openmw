@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <osg/Quat>
 #include <osg/Vec4f>
 
 #include "ptr.hpp"
@@ -57,13 +58,9 @@ namespace MWWorld
 
             std::string mTypeName;
 
-            // not implemented
-            Class (const Class&);
-            Class& operator= (const Class&);
-
         protected:
 
-            Class();
+            Class() = default;
 
             std::shared_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
             ///< Generate default action for activating inventory items
@@ -72,14 +69,16 @@ namespace MWWorld
 
         public:
 
-            virtual ~Class();
+            virtual ~Class() = default;
+            Class (const Class&) = delete;
+            Class& operator= (const Class&) = delete;
 
             const std::string& getTypeName() const {
                 return mTypeName;
             }
 
             virtual void insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const;
-            virtual void insertObject(const Ptr& ptr, const std::string& mesh, MWPhysics::PhysicsSystem& physics) const;
+            virtual void insertObject(const Ptr& ptr, const std::string& mesh, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated = false) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual std::string getName (const ConstPtr& ptr) const = 0;

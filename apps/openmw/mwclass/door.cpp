@@ -55,10 +55,10 @@ namespace MWClass
         }
     }
 
-    void Door::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
+    void Door::insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
     {
         if(!model.empty())
-            physics.addObject(ptr, model, MWPhysics::CollisionType_Door);
+            physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_Door, skipAnimated);
 
         // Resume the door's opening/closing animation if it wasn't finished
         if (ptr.getRefData().getCustomData())
