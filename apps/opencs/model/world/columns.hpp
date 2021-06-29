@@ -280,7 +280,7 @@ namespace CSMWorld
             ColumnId_NpcReputation = 258,
             ColumnId_NpcRank = 259,
             ColumnId_Gold = 260,
-            ColumnId_NpcPersistence = 261,
+            // unused
 
             ColumnId_RaceAttributes = 262,
             ColumnId_Male = 263,

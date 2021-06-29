@@ -294,7 +294,6 @@ namespace CSMWorld
             { ColumnId_NpcReputation, "Reputation" },
             { ColumnId_NpcRank, "NPC Rank" },
             { ColumnId_Gold, "Gold" },
-            { ColumnId_NpcPersistence, "Persistent" },
 
             { ColumnId_RaceAttributes, "Race Attributes" },
             { ColumnId_Male, "Male" },

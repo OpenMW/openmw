@@ -76,8 +76,6 @@ struct Creature
     int mBloodType;
     unsigned char mFlags;
 
-    bool mPersistent;
-
     float mScale;
 
     unsigned int mRecordFlags;

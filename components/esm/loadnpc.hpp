@@ -116,8 +116,6 @@ struct NPC
     int mBloodType;
     unsigned char mFlags;
 
-    bool mPersistent;
-
     InventoryList mInventory;
     SpellList mSpells;
 

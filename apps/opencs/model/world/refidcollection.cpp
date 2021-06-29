@@ -551,8 +551,6 @@ CSMWorld::RefIdCollection::RefIdCollection()
             new RefIdColumn (Columns::ColumnId_NpcRank, CSMWorld::ColumnBase::Display_UnsignedInteger8));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_Gold, CSMWorld::ColumnBase::Display_Integer));
-    mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcPersistence, CSMWorld::ColumnBase::Display_Boolean));
 
     WeaponColumns weaponColumns (enchantableColumns);
 

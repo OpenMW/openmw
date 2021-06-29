@@ -15,8 +15,6 @@ namespace ESM {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
 
-        mPersistent = (mRecordFlags & 0x0400) != 0;
-
         mAiPackage.mList.clear();
         mInventory.mList.clear();
         mSpells.mList.clear();

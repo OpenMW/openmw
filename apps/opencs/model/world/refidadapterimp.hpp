@@ -153,10 +153,7 @@ namespace CSMWorld
             return QString::fromUtf8 (record.get().mModel.c_str());
 
         if (column==mModel.mPersistence)
-        {
-            bool isPersistent = (record.get().mRecordFlags & 0x00000400) != 0;
-            return QString::fromUtf8 (isPersistent ? "Yes" : "No");
-        }
+            return (record.get().mRecordFlags & 0x00000400) != 0;
 
         return BaseRefIdAdapter<RecordT>::getData (column, data, index);
     }
@@ -173,14 +170,10 @@ namespace CSMWorld
             record2.mModel = value.toString().toUtf8().constData();
         else if (column==mModel.mPersistence)
         {
-            unsigned int flag = record2.mRecordFlags;
-            std::string val = value.toString().toUtf8().constData();
-            if (val == "Yes")
-                flag |= 0x00000400;
-            else if (val == "No")
-                flag &= ~0x00000400;
-
-            record2.mRecordFlags = flag;
+            if (value.toInt() != 0)
+                record2.mRecordFlags |= 0x00000400;
+            else
+                record2.mRecordFlags &= ~0x00000400;
         }
         else
         {
