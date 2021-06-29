@@ -370,7 +370,6 @@ namespace MWWorld
         if (!test)
             Log(Debug::Info) << "Deactivate cell " << cell->getCell()->getDescription();
 
-        const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         ListAndResetObjectsVisitor visitor;
 
         cell->forEach(visitor);
@@ -379,13 +378,13 @@ namespace MWWorld
         {
             if (const auto object = mPhysics->getObject(ptr))
             {
-                navigator->removeObject(DetourNavigator::ObjectId(object));
+                mNavigator.removeObject(DetourNavigator::ObjectId(object));
                 if (object->isAnimated())
                     mPhysics->remove(ptr);
             }
             else if (mPhysics->getActor(ptr))
             {
-                navigator->removeAgent(world->getPathfindingHalfExtents(ptr));
+                mNavigator.removeAgent(world->getPathfindingHalfExtents(ptr));
                 mRendering.removeActorPath(ptr);
                 mPhysics->remove(ptr);
             }
@@ -398,17 +397,17 @@ namespace MWWorld
         if (cell->getCell()->isExterior())
         {
             if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                navigator->removeObject(DetourNavigator::ObjectId(heightField));
+                mNavigator.removeObject(DetourNavigator::ObjectId(heightField));
         }
 
         if (cell->getCell()->hasWater())
-            navigator->removeWater(osg::Vec2i(cellX, cellY));
+            mNavigator.removeWater(osg::Vec2i(cellX, cellY));
 
         if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
-            navigator->removePathgrid(*pathgrid);
+            mNavigator.removePathgrid(*pathgrid);
 
         const auto player = world->getPlayerPtr();
-        navigator->update(player.getRefData().getPosition().asVec3());
+        mNavigator.update(player.getRefData().getPosition().asVec3());
 
         MWBase::Environment::get().getMechanicsManager()->drop (cell);
 
@@ -433,7 +432,6 @@ namespace MWWorld
             Log(Debug::Info) << "Loading cell " << cell->getCell()->getDescription();
 
         const auto world = MWBase::Environment::get().getWorld();
-        const auto navigator = world->getNavigator();
 
         const int cellX = cell->getCell()->getGridX();
         const int cellY = cell->getCell()->getGridY();
@@ -441,12 +439,12 @@ namespace MWWorld
         if (!test && cell->getCell()->isExterior())
         {
             if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                navigator->addObject(DetourNavigator::ObjectId(heightField), *heightField->getShape(),
+                mNavigator.addObject(DetourNavigator::ObjectId(heightField), *heightField->getShape(),
                         heightField->getCollisionObject()->getWorldTransform());
         }
 
         if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
-            navigator->addPathgrid(*cell->getCell(), *pathgrid);
+            mNavigator.addPathgrid(*cell->getCell(), *pathgrid);
 
         // register local scripts
         // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
@@ -472,12 +470,12 @@ namespace MWWorld
                 if (cell->getCell()->isExterior())
                 {
                     if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                        navigator->addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE,
+                        mNavigator.addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE,
                                 cell->getWaterLevel(), heightField->getCollisionObject()->getWorldTransform());
                 }
                 else
                 {
-                    navigator->addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(),
+                    mNavigator.addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(),
                             cell->getWaterLevel(), btTransform::getIdentity());
                 }
             }
@@ -486,7 +484,7 @@ namespace MWWorld
 
             const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-            navigator->update(player.getRefData().getPosition().asVec3());
+            mNavigator.update(player.getRefData().getPosition().asVec3());
 
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
@@ -569,9 +567,8 @@ namespace MWWorld
 
     void Scene::playerMoved(const osg::Vec3f &pos)
     {
-        const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        navigator->updatePlayerPosition(player.getRefData().getPosition().asVec3());
+        mNavigator.updatePlayerPosition(player.getRefData().getPosition().asVec3());
 
         if (!mCurrentCell || !mCurrentCell->isExterior())
             return;
@@ -996,9 +993,8 @@ namespace MWWorld
             addObject(ptr, *mPhysics, mRendering, mPagedRefs, false);
             addObject(ptr, *mPhysics, mNavigator);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
-            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
             const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            navigator->update(player.getRefData().getPosition().asVec3());
+            mNavigator.update(player.getRefData().getPosition().asVec3());
         }
         catch (std::exception& e)
         {
@@ -1011,16 +1007,15 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->remove (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(ptr);
-        const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         if (const auto object = mPhysics->getObject(ptr))
         {
-            navigator->removeObject(DetourNavigator::ObjectId(object));
+            mNavigator.removeObject(DetourNavigator::ObjectId(object));
             const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            navigator->update(player.getRefData().getPosition().asVec3());
+            mNavigator.update(player.getRefData().getPosition().asVec3());
         }
         else if (mPhysics->getActor(ptr))
         {
-            navigator->removeAgent(MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(ptr));
+            mNavigator.removeAgent(MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(ptr));
         }
         mPhysics->remove(ptr);
         mRendering.removeObject (ptr);
