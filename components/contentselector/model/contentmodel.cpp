@@ -543,7 +543,7 @@ bool ContentSelectorModel::ContentModel::isChecked(const QString& filepath) cons
     return false;
 }
 
-bool ContentSelectorModel::ContentModel::isEnabled (QModelIndex index) const
+bool ContentSelectorModel::ContentModel::isEnabled (const QModelIndex& index) const
 {
     return (flags(index) & Qt::ItemIsEnabled);
 }
