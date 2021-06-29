@@ -72,10 +72,7 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
                 break;
             case ESM::FourCC<'X','S','C','L'>::value:
                 esm.getHT(mScale);
-                if (mScale < 0.5)
-                    mScale = 0.5;
-                else if (mScale > 2)
-                    mScale = 2;
+                mScale = std::clamp(mScale, 0.5f, 2.0f);
                 break;
             case ESM::FourCC<'A','N','A','M'>::value:
                 mOwner = esm.getHString();
@@ -153,12 +150,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
     }
 
     if (mScale != 1.0) {
-        float scale = mScale;
-        if (scale < 0.5)
-            scale = 0.5;
-        else if (scale > 2)
-            scale = 2;
-        esm.writeHNT("XSCL", scale);
+        esm.writeHNT("XSCL", std::clamp(mScale, 0.5f, 2.0f));
     }
 
     if (!inInventory)
