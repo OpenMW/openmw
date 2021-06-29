@@ -109,7 +109,6 @@ namespace
             case 0xa3: return 0xbf;
             case 0xa4: return 0x00; // not contained in win1250
             case 0xe1: return 0x8c;
-            // case 0xe1: return 0x8c; // Can't remember if this was supposed to read 0xe2, or is it just an extraneous copypaste?
             case 0xe3: return 0x00; // not contained in win1250
             case 0xf5: return 0x00; // not contained in win1250
             default: return c;
