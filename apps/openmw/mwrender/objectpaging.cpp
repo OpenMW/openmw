@@ -510,8 +510,8 @@ namespace MWRender
                     continue;
             }
 
-            if (ref.mRefID == "prisonmarker" || ref.mRefID == "divinemarker" || ref.mRefID == "templemarker" || ref.mRefID == "northmarker")
-                continue; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
+            if (Misc::ResourceHelpers::isHiddenMarker(ref.mRefID))
+                continue;
 
             int type = store.findStatic(ref.mRefID);
             std::string model = getModel(type, ref.mRefID, store);

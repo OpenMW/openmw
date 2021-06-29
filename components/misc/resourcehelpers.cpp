@@ -1,6 +1,7 @@
 #include "resourcehelpers.hpp"
 
 #include <sstream>
+#include <string_view>
 
 #include <components/misc/stringops.hpp>
 
@@ -137,4 +138,9 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resP
         return resPath;
     }
     return mdlname;
+}
+
+bool Misc::ResourceHelpers::isHiddenMarker(std::string_view id)
+{
+    return id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker";
 }

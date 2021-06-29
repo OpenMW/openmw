@@ -94,14 +94,12 @@ namespace
 
     std::string getModel(const MWWorld::Ptr &ptr, const VFS::Manager *vfs)
     {
+        if (Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId()))
+            return {};
         bool useAnim = ptr.getClass().useAnim();
         std::string model = ptr.getClass().getModel(ptr);
         if (useAnim)
             model = Misc::ResourceHelpers::correctActorModelPath(model, vfs);
-
-        const std::string &id = ptr.getCellRef().getRefId();
-        if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
-            model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
         return model;
     }
 
