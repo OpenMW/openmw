@@ -146,7 +146,7 @@ namespace ESM
             }
         }
 
-        if (saveContext) 
+        if (saveContext)
         {
             mContextList.push_back(esm.getContext());
             esm.skipRecord();
@@ -197,9 +197,12 @@ namespace ESM
             if (mMapColor != 0)
                 esm.writeHNT("NAM5", mMapColor);
         }
+    }
 
-        if (mRefNumCounter != 0)
-            esm.writeHNT("NAM0", mRefNumCounter);
+    void Cell::saveTempMarker(ESMWriter &esm, int tempCount) const
+    {
+        if (tempCount != 0)
+            esm.writeHNT("NAM0", tempCount);
     }
 
     void Cell::restore(ESMReader &esm, int iCtx) const
@@ -221,7 +224,7 @@ namespace ESM
         return region + ' ' + cellGrid;
     }
 
-    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool &isDeleted, bool ignoreMoves, MovedCellRef *mref)
+    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool &isDeleted, int *tempRefCount, bool ignoreMoves, MovedCellRef *mref)
     {
         isDeleted = false;
 
@@ -249,7 +252,9 @@ namespace ESM
 
         if (esm.peekNextSub("FRMR"))
         {
-            ref.load (esm, isDeleted);
+            ref.load (esm, isDeleted, tempRefCount);
+
+            // TODO: should count the number of temp refs and validate the number
 
             // Identify references belonging to a parent file and adapt the ID accordingly.
             adjustRefNum (ref.mRefNum, esm);
@@ -275,7 +280,7 @@ namespace ESM
         mWater = 0;
         mWaterInt = false;
         mMapColor = 0;
-        mRefNumCounter = 0;
+        mRefNumCounter = -1;
 
         mData.mFlags = 0;
         mData.mX = 0;

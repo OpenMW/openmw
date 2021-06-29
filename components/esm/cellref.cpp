@@ -31,10 +31,10 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
 }
 
 
-void ESM::CellRef::load (ESMReader& esm, bool &isDeleted, bool wideRefNum)
+void ESM::CellRef::load (ESMReader& esm, bool &isDeleted, int *tempRefCount, bool wideRefNum)
 {
     loadId(esm, wideRefNum);
-    loadData(esm, isDeleted);
+    loadData(esm, isDeleted, tempRefCount);
 }
 
 void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
@@ -57,9 +57,11 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
     }
 }
 
-void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
+void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted, int *tempRefCount)
 {
     isDeleted = false;
+    mIsPersistent = !tempRefCount // default to persistent
+                    || (tempRefCount && *tempRefCount == -1);
 
     bool isLoaded = false;
     while (!isLoaded && esm.hasMoreSubs())
@@ -121,8 +123,17 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
                 esm.getHT(mPos, 24);
                 break;
             case ESM::FourCC<'N','A','M','0'>::value:
-                esm.skipHSub();
+            {
+                if (tempRefCount && *tempRefCount == -1)
+                {
+                    esm.getHT(*tempRefCount);
+                    // TODO: check that there are no more subs following this sub
+                }
+                else
+                    esm.skipHSub();
+
                 break;
+            }
             case ESM::SREC_DELE:
                 esm.skipHSub();
                 isDeleted = true;
@@ -236,4 +247,6 @@ void ESM::CellRef::blank()
         mPos.pos[i] = 0;
         mPos.rot[i] = 0;
     }
+
+    mIsPersistent = false;
 }

@@ -171,6 +171,8 @@ namespace CSMDoc
             Document& mDocument;
             SavingState& mState;
 
+            int writeReferences (const std::deque<int>& references, bool interior, unsigned int& newRefNum, bool temp);
+
         public:
 
             WriteCellCollectionStage (Document& document, SavingState& state);
