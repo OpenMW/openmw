@@ -60,8 +60,6 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
 void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted, int *tempRefCount)
 {
     isDeleted = false;
-    mIsPersistent = !tempRefCount // default to persistent
-                    || (tempRefCount && *tempRefCount == -1);
 
     bool isLoaded = false;
     while (!isLoaded && esm.hasMoreSubs())
@@ -247,6 +245,4 @@ void ESM::CellRef::blank()
         mPos.pos[i] = 0;
         mPos.rot[i] = 0;
     }
-
-    mIsPersistent = false;
 }

@@ -73,6 +73,7 @@ struct Weapon
 
     WPDTstruct mData;
 
+    unsigned int mRecordFlags;
     std::string mId, mName, mModel, mIcon, mEnchant, mScript;
 
     void load(ESMReader &esm, bool &isDeleted);

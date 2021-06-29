@@ -209,7 +209,7 @@ namespace CSMWorld
         if (record.isModified() || record.mState == RecordBase::State_Deleted)
         {
             RecordT esmRecord = record.get();
-            writer.startRecord(esmRecord.sRecordId);
+            writer.startRecord(esmRecord.sRecordId, esmRecord.mRecordFlags);
             esmRecord.save(writer, record.mState == RecordBase::State_Deleted);
             writer.endRecord(esmRecord.sRecordId);
         }
@@ -272,6 +272,8 @@ namespace CSMWorld
             const RecordBase& getRecord (const LocalIndex& index) const;
 
             RecordBase& getRecord (const LocalIndex& index);
+
+            unsigned int getRecordFlags(const std::string& id) const;
 
             void appendRecord (UniversalId::Type type, const std::string& id, bool base);
 

@@ -106,8 +106,6 @@ namespace ESM
             // Position and rotation of this object within the cell
             Position mPos;
 
-            bool mIsPersistent;
-
             /// Calls loadId and loadData
             void load (ESMReader& esm, bool &isDeleted, int *tempRefCount, bool wideRefNum = false);
 

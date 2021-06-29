@@ -257,6 +257,8 @@ int CSMDoc::WriteCellCollectionStage::writeReferences (const std::deque<int>& re
 {
     ESM::ESMWriter& writer = mState.getWriter();
     size_t refCount = 0;
+    const CSMWorld::RefIdCollection& referenceables = mDocument.getData().getReferenceables();
+    const CSMWorld::RefIdData& refIdData = referenceables.getDataSet();
 
     for (std::deque<int>::const_iterator iter (references.begin());
         iter!=references.end(); ++iter)
@@ -264,7 +266,10 @@ int CSMDoc::WriteCellCollectionStage::writeReferences (const std::deque<int>& re
         const CSMWorld::Record<CSMWorld::CellRef>& ref =
             mDocument.getData().getReferences().getRecord (*iter);
 
-        if (temp && ref.get().mIsPersistent || !temp && !ref.get().mIsPersistent)
+        unsigned int recordFlags = refIdData.getRecordFlags(ref.get().mId);
+        bool isPersistent = (recordFlags & 0x00000400) != 0;
+
+        if (temp && isPersistent || !temp && !isPersistent)
             continue;
 
         refCount++;

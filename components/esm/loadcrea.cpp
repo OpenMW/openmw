@@ -13,8 +13,9 @@ namespace ESM {
     void Creature::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
 
-        mPersistent = (esm.getRecordFlags() & 0x0400) != 0;
+        mPersistent = (mRecordFlags & 0x0400) != 0;
 
         mAiPackage.mList.clear();
         mInventory.mList.clear();

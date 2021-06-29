@@ -129,6 +129,7 @@ struct NPC
 
     AIPackageList     mAiPackage;
 
+    unsigned int mRecordFlags;
     std::string mId, mName, mModel, mRace, mClass, mFaction, mScript;
 
     // body parts

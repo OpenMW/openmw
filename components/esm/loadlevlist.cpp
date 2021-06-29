@@ -9,6 +9,7 @@ namespace ESM
     void LevelledListBase::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
 
         bool hasName = false;
         bool hasList = false;
