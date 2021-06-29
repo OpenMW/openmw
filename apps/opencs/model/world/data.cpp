@@ -528,6 +528,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mRefs.addColumn (new TrapColumn<CellRef>);
     mRefs.addColumn (new OwnerGlobalColumn<CellRef>);
     mRefs.addColumn (new RefNumColumn<CellRef>);
+    mRefs.addColumn (new PersistentColumn<CellRef>);
 
     mFilters.addColumn (new StringIdColumn<ESM::Filter>);
     mFilters.addColumn (new RecordStateColumn<ESM::Filter>);

@@ -1430,6 +1430,33 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
+    struct PersistentColumn : public Column<ESXRecordT>
+    {
+        PersistentColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Persistent, ColumnBase::Display_Boolean)
+        {}
+
+        QVariant get (const Record<ESXRecordT>& record) const override
+        {
+            return record.get().mIsPersistent;
+        }
+
+        void set (Record<ESXRecordT>& record, const QVariant& data) override
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mIsPersistent = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        bool isEditable() const override
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
     struct QuestStatusTypeColumn : public Column<ESXRecordT>
     {
         QuestStatusTypeColumn()
