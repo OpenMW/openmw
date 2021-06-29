@@ -88,6 +88,8 @@ namespace DetourNavigator
 
         std::shared_ptr<RecastMesh> getCachedMesh(const TilePosition& tilePosition) const;
 
+        std::shared_ptr<RecastMesh> getNewMesh(const TilePosition& tilePosition) const;
+
         template <class Function>
         void forEachTile(Function&& function) const
         {

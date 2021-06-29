@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_SQLITE3_REQUEST_H
 
 #include "statement.hpp"
+#include "types.hpp"
 
 #include <sqlite3.h>
 
@@ -49,6 +50,13 @@ namespace Sqlite3
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, const std::vector<std::byte>& value)
     {
         if (sqlite3_bind_blob(&stmt, index, value.data(), static_cast<int>(value.size()), SQLITE_STATIC) != SQLITE_OK)
+            throw std::runtime_error("Failed to bind blob to parameter " + std::to_string(index)
+                                     + ": " + std::string(sqlite3_errmsg(&db)));
+    }
+
+    inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, const ConstBlob& value)
+    {
+        if (sqlite3_bind_blob(&stmt, index, value.mData, value.mSize, SQLITE_STATIC) != SQLITE_OK)
             throw std::runtime_error("Failed to bind blob to parameter " + std::to_string(index)
                                      + ": " + std::string(sqlite3_errmsg(&db)));
     }

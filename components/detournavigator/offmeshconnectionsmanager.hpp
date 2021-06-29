@@ -24,7 +24,7 @@ namespace DetourNavigator
 
         std::set<TilePosition> remove(const ObjectId id);
 
-        std::vector<OffMeshConnection> get(const TilePosition& tilePosition);
+        std::vector<OffMeshConnection> get(const TilePosition& tilePosition) const;
 
     private:
         struct Values

@@ -204,6 +204,9 @@ add_component_dir(detournavigator
     navmeshcacheitem
     navigatorutils
     generatenavmeshtile
+    navmeshdb
+    serialization
+    navmeshdbutils
     )
 
 add_component_dir(loadinglistener

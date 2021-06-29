@@ -114,6 +114,30 @@ namespace
         return waterLevel - settings.mSwimHeightScale * agentHalfExtentsZ - agentHalfExtentsZ;;
     }
 
+    struct RecastParams
+    {
+        float mSampleDist = 0;
+        float mSampleMaxError = 0;
+        int mMaxEdgeLen = 0;
+        int mWalkableClimb = 0;
+        int mWalkableHeight = 0;
+        int mWalkableRadius = 0;
+    };
+
+    RecastParams makeRecastParams(const RecastSettings& settings, const osg::Vec3f& agentHalfExtents)
+    {
+        RecastParams result;
+
+        result.mWalkableHeight = static_cast<int>(std::ceil(getHeight(settings, agentHalfExtents) / settings.mCellHeight));
+        result.mWalkableClimb = static_cast<int>(std::floor(getMaxClimb(settings) / settings.mCellHeight));
+        result.mWalkableRadius = static_cast<int>(std::ceil(getRadius(settings, agentHalfExtents) / settings.mCellSize));
+        result.mMaxEdgeLen = static_cast<int>(std::round(static_cast<float>(settings.mMaxEdgeLen) / settings.mCellSize));
+        result.mSampleDist = settings.mDetailSampleDist < 0.9f ? 0 : settings.mCellSize * settings.mDetailSampleDist;
+        result.mSampleMaxError = settings.mCellHeight * settings.mDetailSampleMaxError;
+
+        return result;
+    }
+
     void initHeightfield(rcContext& context, const TilePosition& tilePosition, float minZ, float maxZ,
         const RecastSettings& settings, rcHeightfield& solid)
     {
@@ -399,26 +423,12 @@ namespace
 
 namespace DetourNavigator
 {
-    RecastParams makeRecastParams(const RecastSettings& settings, const osg::Vec3f& agentHalfExtents)
-    {
-        RecastParams result;
-
-        result.mWalkableHeight = static_cast<int>(std::ceil(getHeight(settings, agentHalfExtents) / settings.mCellHeight));
-        result.mWalkableClimb = static_cast<int>(std::floor(getMaxClimb(settings) / settings.mCellHeight));
-        result.mWalkableRadius = static_cast<int>(std::ceil(getRadius(settings, agentHalfExtents) / settings.mCellSize));
-        result.mMaxEdgeLen = static_cast<int>(std::round(static_cast<float>(settings.mMaxEdgeLen) / settings.mCellSize));
-        result.mSampleDist = settings.mDetailSampleDist < 0.9f ? 0 : settings.mCellSize * settings.mDetailSampleDist;
-        result.mSampleMaxError = settings.mCellHeight * settings.mDetailSampleMaxError;
-
-        return result;
-    }
-
     std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
         const TilePosition& tilePosition, const osg::Vec3f& agentHalfExtents, const RecastSettings& settings)
     {
-        const auto [minZ, maxZ] = getBoundsByZ(recastMesh, agentHalfExtents, settings);
-
         rcContext context;
+
+        const auto [minZ, maxZ] = getBoundsByZ(recastMesh, agentHalfExtents, settings);
 
         rcHeightfield solid;
         initHeightfield(context, tilePosition, toNavMeshCoordinates(settings, minZ),
@@ -549,8 +559,7 @@ namespace DetourNavigator
             return navMeshCacheItem->lock()->removeTile(changedTile);
         }
 
-        if (recastMesh->getMesh().getIndices().empty() && recastMesh->getWater().empty()
-                && recastMesh->getHeightfields().empty() && recastMesh->getFlatHeightfields().empty())
+        if (isEmpty(*recastMesh))
         {
             Log(Debug::Debug) << "Ignore add tile: recastMesh is empty";
             return navMeshCacheItem->lock()->removeTile(changedTile);

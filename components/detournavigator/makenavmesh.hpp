@@ -14,6 +14,7 @@
 #include <vector>
 
 class dtNavMesh;
+struct rcConfig;
 
 namespace DetourNavigator
 {
@@ -21,16 +22,6 @@ namespace DetourNavigator
     struct Settings;
     struct PreparedNavMeshData;
     struct NavMeshData;
-
-    struct RecastParams
-    {
-        float mSampleDist = 0;
-        float mSampleMaxError = 0;
-        int mMaxEdgeLen = 0;
-        int mWalkableClimb = 0;
-        int mWalkableHeight = 0;
-        int mWalkableRadius = 0;
-    };
 
     inline float getLength(const osg::Vec2i& value)
     {
@@ -48,10 +39,16 @@ namespace DetourNavigator
         return expectedTilesCount <= maxTiles;
     }
 
-    RecastParams makeRecastParams(const RecastSettings& settings, const osg::Vec3f& agentHalfExtents);
+    inline bool isEmpty(const RecastMesh& recastMesh)
+    {
+        return recastMesh.getMesh().getIndices().empty()
+                && recastMesh.getWater().empty()
+                && recastMesh.getHeightfields().empty()
+                && recastMesh.getFlatHeightfields().empty();
+    }
 
-    std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh, const TilePosition& tile,
-        const Bounds& bounds, const osg::Vec3f& agentHalfExtents, const Settings& settings);
+    std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
+        const TilePosition& tilePosition, const osg::Vec3f& agentHalfExtents, const RecastSettings& settings);
 
     NavMeshData makeNavMeshTileData(const PreparedNavMeshData& data,
         const std::vector<OffMeshConnection>& offMeshConnections, const osg::Vec3f& agentHalfExtents,

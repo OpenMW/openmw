@@ -206,6 +206,17 @@ Absent pieces usually mean a bug in recast mesh tiles building.
 Allows to do in-game debug.
 Potentially decreases performance.
 
+nav mesh version
+----------------
+
+:Type:		integer
+:Range:		> 0
+:Default:	1
+
+Version of navigation mesh generation algorithm.
+Should be increased each time there is a difference between output of makeNavMeshTileData function for the same input.
+Changing the value will invalidate navmesh disk cache.
+
 Expert settings
 ***************
 

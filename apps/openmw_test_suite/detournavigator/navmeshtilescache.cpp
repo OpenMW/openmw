@@ -1,4 +1,5 @@
 #include "operators.hpp"
+#include "generate.hpp"
 
 #include <components/detournavigator/navmeshtilescache.hpp>
 #include <components/detournavigator/exceptions.hpp>
@@ -21,6 +22,7 @@ namespace
 {
     using namespace testing;
     using namespace DetourNavigator;
+    using namespace DetourNavigator::Tests;
 
     void* permRecastAlloc(int size)
     {
@@ -30,14 +32,15 @@ namespace
         return result;
     }
 
-    template <class T>
-    void generate(T*& values, int size)
+    template <class T, class Random>
+    void generateRecastArray(T*& values, int size, Random& random)
     {
         values = static_cast<T*>(permRecastAlloc(size * sizeof(T)));
-        std::generate_n(values, static_cast<std::size_t>(size), [] { return static_cast<T>(std::rand()); });
+        generateRange(values, values + static_cast<std::ptrdiff_t>(size), random);
     }
 
-    void generate(rcPolyMesh& value, int size)
+    template <class Random>
+    void generate(rcPolyMesh& value, int size, Random& random)
     {
         value.nverts = size;
         value.maxpolys = size;
@@ -45,40 +48,43 @@ namespace
         value.npolys = size;
         rcVcopy(value.bmin, osg::Vec3f(-1, -2, -3).ptr());
         rcVcopy(value.bmax, osg::Vec3f(3, 2, 1).ptr());
-        value.cs = 1.0f / (std::rand() % 999 + 1);
-        value.ch = 1.0f / (std::rand() % 999 + 1);
-        value.borderSize = std::rand();
-        value.maxEdgeError = 1.0f / (std::rand() % 999 + 1);
-        generate(value.verts, getVertsLength(value));
-        generate(value.polys, getPolysLength(value));
-        generate(value.regs, getRegsLength(value));
-        generate(value.flags, getFlagsLength(value));
-        generate(value.areas, getAreasLength(value));
+        generateValue(value.cs, random);
+        generateValue(value.ch, random);
+        generateValue(value.borderSize, random);
+        generateValue(value.maxEdgeError, random);
+        generateRecastArray(value.verts, getVertsLength(value), random);
+        generateRecastArray(value.polys, getPolysLength(value), random);
+        generateRecastArray(value.regs, getRegsLength(value), random);
+        generateRecastArray(value.flags, getFlagsLength(value), random);
+        generateRecastArray(value.areas, getAreasLength(value), random);
     }
 
-    void generate(rcPolyMeshDetail& value, int size)
+    template <class Random>
+    void generate(rcPolyMeshDetail& value, int size, Random& random)
     {
         value.nmeshes = size;
         value.nverts = size;
         value.ntris = size;
-        generate(value.meshes, getMeshesLength(value));
-        generate(value.verts, getVertsLength(value));
-        generate(value.tris, getTrisLength(value));
+        generateRecastArray(value.meshes, getMeshesLength(value), random);
+        generateRecastArray(value.verts, getVertsLength(value), random);
+        generateRecastArray(value.tris, getTrisLength(value), random);
     }
 
-    void generate(PreparedNavMeshData& value, int size)
+    template <class Random>
+    void generate(PreparedNavMeshData& value, int size, Random& random)
     {
-        value.mUserId = std::rand();
-        value.mCellHeight = 1.0f / (std::rand() % 999 + 1);
-        value.mCellSize = 1.0f / (std::rand() % 999 + 1);
-        generate(value.mPolyMesh, size);
-        generate(value.mPolyMeshDetail, size);
+        generateValue(value.mUserId, random);
+        generateValue(value.mCellHeight, random);
+        generateValue(value.mCellSize, random);
+        generate(value.mPolyMesh, size, random);
+        generate(value.mPolyMeshDetail, size, random);
     }
 
     std::unique_ptr<PreparedNavMeshData> makePeparedNavMeshData(int size)
     {
+        std::minstd_rand random;
         auto result = std::make_unique<PreparedNavMeshData>();
-        generate(*result, size);
+        generate(*result, size, random);
         return result;
     }
 

@@ -196,6 +196,13 @@ namespace DetourNavigator
         return nullptr;
     }
 
+    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getNewMesh(const TilePosition& tilePosition) const
+    {
+        if (const auto manager = getManager(tilePosition))
+            return manager->getNewMesh();
+        return nullptr;
+    }
+
     std::size_t TileCachedRecastMeshManager::getRevision() const
     {
         return mRevision;
