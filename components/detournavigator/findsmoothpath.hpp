@@ -14,9 +14,8 @@
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>
 
-#include <components/misc/convert.hpp>
-
 #include <osg/Vec3f>
+
 #include <cassert>
 #include <vector>
 

@@ -1,5 +1,7 @@
 #include "findsmoothpath.hpp"
 
+#include <components/misc/convert.hpp>
+
 #include <algorithm>
 #include <array>
 
