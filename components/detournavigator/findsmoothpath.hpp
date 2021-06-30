@@ -27,8 +27,7 @@ namespace DetourNavigator
 
     inline bool inRange(const osg::Vec3f& v1, const osg::Vec3f& v2, const float r)
     {
-        const auto d = v2 - v1;
-        return (d.x() * d.x() + d.z() * d.z()) < r * r;
+        return (osg::Vec2f(v1.x(), v1.z()) - osg::Vec2f(v2.x(), v2.z())).length() < r;
     }
 
     std::vector<dtPolyRef> fixupCorridor(const std::vector<dtPolyRef>& path, const std::vector<dtPolyRef>& visited);
