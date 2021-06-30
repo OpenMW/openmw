@@ -198,7 +198,7 @@ void ESMReader::skipHSubSize(int size)
 {
     skipHSub();
     if (static_cast<int> (mCtx.leftSub) != size)
-        fail("skipHSubSize() mismatch");
+        reportSubSizeMismatch(mCtx.leftSub, size);
 }
 
 void ESMReader::skipHSubUntil(const char *name)
