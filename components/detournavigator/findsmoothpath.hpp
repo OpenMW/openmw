@@ -142,15 +142,6 @@ namespace DetourNavigator
         return {std::move(result)};
     }
 
-    inline std::optional<float> getPolyHeight(const dtNavMeshQuery& navMeshQuery, const dtPolyRef ref, const osg::Vec3f& pos)
-    {
-        float result = 0.0f;
-        const auto status = navMeshQuery.getPolyHeight(ref, pos.ptr(), &result);
-        if (!dtStatusSucceed(status))
-            return {};
-        return result;
-    }
-
     template <class OutputIterator>
     Status makeSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery,
             const dtQueryFilter& filter, const osg::Vec3f& start, const osg::Vec3f& end, const float stepSize,
@@ -243,11 +234,10 @@ namespace DetourNavigator
                     }
 
                     // Move position at the other side of the off-mesh link.
-                    iterPos = endPos;
-                    const auto height = getPolyHeight(navMeshQuery, polygonPath.front(), iterPos);
-                    if (!height)
+                    if (dtStatusFailed(navMeshQuery.getPolyHeight(polygonPath.front(), endPos.ptr(), &iterPos.y())))
                         return Status::GetPolyHeightFailed;
-                    iterPos.y() = *height;
+                    iterPos.x() = endPos.x();
+                    iterPos.z() = endPos.z();
                 }
             }
 
