@@ -93,126 +93,26 @@ unsigned int CSMWorld::RefIdData::getRecordFlags (const std::string& id) const
 
     switch (localIndex.second)
     {
-        case UniversalId::Type_Activator:
-        {
-            const RefIdDataContainer<ESM::Activator>& records = getActivators();
-            const ESM::Activator& record = dynamic_cast<const ESM::Activator&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Potion:
-        {
-            const RefIdDataContainer<ESM::Potion>& records = getPotions();
-            const ESM::Potion& record = dynamic_cast<const ESM::Potion&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Apparatus:
-        {
-            const RefIdDataContainer<ESM::Apparatus>& records = getApparati();
-            const ESM::Apparatus& record = dynamic_cast<const ESM::Apparatus&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Armor:
-        {
-            const RefIdDataContainer<ESM::Armor>& records = getArmors();
-            const ESM::Armor& record = dynamic_cast<const ESM::Armor&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Book:
-        {
-            const RefIdDataContainer<ESM::Book>& records = getBooks();
-            const ESM::Book& record = dynamic_cast<const ESM::Book&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Clothing:
-        {
-            const RefIdDataContainer<ESM::Clothing>& records = getClothing();
-            const ESM::Clothing& record = dynamic_cast<const ESM::Clothing&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Container:
-        {
-            const RefIdDataContainer<ESM::Container>& records = getContainers();
-            const ESM::Container& record = dynamic_cast<const ESM::Container&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Creature:
-        {
-            const RefIdDataContainer<ESM::Creature>& records = getCreatures();
-            const ESM::Creature& record = dynamic_cast<const ESM::Creature&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Door:
-        {
-            const RefIdDataContainer<ESM::Door>& records = getDoors();
-            const ESM::Door& record = dynamic_cast<const ESM::Door&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Ingredient:
-        {
-            const RefIdDataContainer<ESM::Ingredient>& records = getIngredients();
-            const ESM::Ingredient& record = dynamic_cast<const ESM::Ingredient&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_CreatureLevelledList:
-        {
-            const RefIdDataContainer<ESM::CreatureLevList>& records = getCreatureLevelledLists();
-            const ESM::CreatureLevList& record = dynamic_cast<const ESM::CreatureLevList&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_ItemLevelledList:
-        {
-            const RefIdDataContainer<ESM::ItemLevList>& records = getItemLevelledList();
-            const ESM::ItemLevList& record = dynamic_cast<const ESM::ItemLevList&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Light:
-        {
-            const RefIdDataContainer<ESM::Light>& records = getLights();
-            const ESM::Light& record = dynamic_cast<const ESM::Light&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Lockpick:
-        {
-            const RefIdDataContainer<ESM::Lockpick>& records = getLocpicks();
-            const ESM::Lockpick& record = dynamic_cast<const ESM::Lockpick&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Miscellaneous:
-        {
-            const RefIdDataContainer<ESM::Miscellaneous>& records = getMiscellaneous();
-            const ESM::Miscellaneous& record = dynamic_cast<const ESM::Miscellaneous&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Npc:
-        {
-            const RefIdDataContainer<ESM::NPC>& records = getNPCs();
-            const ESM::NPC& record = dynamic_cast<const ESM::NPC&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Probe:
-        {
-            const RefIdDataContainer<ESM::Probe>& records = getProbes();
-            const ESM::Probe& record = dynamic_cast<const ESM::Probe&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Repair:
-        {
-            const RefIdDataContainer<ESM::Repair>& records = getRepairs();
-            const ESM::Repair& record = dynamic_cast<const ESM::Repair&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Static:
-        {
-            const RefIdDataContainer<ESM::Static>& records = getStatics();
-            const ESM::Static& record = dynamic_cast<const ESM::Static&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
-        case UniversalId::Type_Weapon:
-        {
-            const RefIdDataContainer<ESM::Weapon>& records = getWeapons();
-            const ESM::Weapon& record = dynamic_cast<const ESM::Weapon&>(records.getRecord(localIndex.first));
-            return record.mRecordFlags;
-        }
+        case UniversalId::Type_Activator: return mActivators.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Potion:    return mPotions.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Apparatus: return mApparati.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Armor:     return mArmors.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Book:      return mBooks.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Clothing:  return mClothing.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Container: return mContainers.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Creature:  return mCreatures.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Door:      return mDoors.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Ingredient: return mIngredients.getRecordFlags(localIndex.first);
+        case UniversalId::Type_CreatureLevelledList: return mCreatureLevelledLists.getRecordFlags(localIndex.first);
+        case UniversalId::Type_ItemLevelledList: return mItemLevelledLists.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Light:     return mLights.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Lockpick:  return mLockpicks.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Miscellaneous: return mMiscellaneous.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Npc:       return mNpcs.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Probe:     return mProbes.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Repair:    return mRepairs.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Static:    return mStatics.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Weapon:    return mWeapons.getRecordFlags(localIndex.first);
         default:
             break;
     }
