@@ -26,10 +26,10 @@ namespace DetourNavigator
 {
     struct Settings;
 
-    inline bool inRange(const osg::Vec3f& v1, const osg::Vec3f& v2, const float r, const float h)
+    inline bool inRange(const osg::Vec3f& v1, const osg::Vec3f& v2, const float r)
     {
         const auto d = v2 - v1;
-        return (d.x() * d.x() + d.z() * d.z()) < r * r && std::abs(d.y()) < h;
+        return (d.x() * d.x() + d.z() * d.z()) < r * r;
     }
 
     std::vector<dtPolyRef> fixupCorridor(const std::vector<dtPolyRef>& path, const std::vector<dtPolyRef>& visited);
@@ -201,13 +201,8 @@ namespace DetourNavigator
             polygonPath = fixupCorridor(polygonPath, result->mVisited);
             polygonPath = fixupShortcuts(polygonPath, navMeshQuery);
 
-            float h = 0;
-            navMeshQuery.getPolyHeight(polygonPath.front(), result->mResultPos.ptr(), &h);
-            iterPos = result->mResultPos;
-            iterPos.y() = h;
-
             // Handle end of path and off-mesh links when close enough.
-            if (endOfPath && inRange(iterPos, steerTarget->steerPos, slop, 1.0f))
+            if (endOfPath && inRange(result->mResultPos, steerTarget->steerPos, slop))
             {
                 // Reached end of path.
                 iterPos = targetPos;
@@ -215,7 +210,7 @@ namespace DetourNavigator
                 ++smoothPathSize;
                 break;
             }
-            else if (offMeshConnection && inRange(iterPos, steerTarget->steerPos, slop, 1.0f))
+            else if (offMeshConnection && inRange(result->mResultPos, steerTarget->steerPos, slop))
             {
                 // Advance the path up to and over the off-mesh connection.
                 dtPolyRef prevRef = 0;
@@ -251,13 +246,15 @@ namespace DetourNavigator
                     // Move position at the other side of the off-mesh link.
                     iterPos = endPos;
                     const auto height = getPolyHeight(navMeshQuery, polygonPath.front(), iterPos);
-
                     if (!height)
                         return Status::GetPolyHeightFailed;
-
                     iterPos.y() = *height;
                 }
             }
+
+            navMeshQuery.getPolyHeight(polygonPath.front(), result->mResultPos.ptr(), &iterPos.y());
+            iterPos.x() = result->mResultPos.x();
+            iterPos.z() = result->mResultPos.z();
 
             // Store results.
             *out++ = iterPos;
