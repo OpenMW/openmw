@@ -171,7 +171,7 @@ namespace CSMDoc
             Document& mDocument;
             SavingState& mState;
 
-            int writeReferences (const std::deque<int>& references, bool interior, unsigned int& newRefNum, bool temp);
+            void writeReferences (const std::deque<int>& references, bool interior, unsigned int& newRefNum);
 
         public:
 

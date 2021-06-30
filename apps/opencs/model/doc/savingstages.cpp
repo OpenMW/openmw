@@ -253,26 +253,15 @@ int CSMDoc::WriteCellCollectionStage::setup()
     return mDocument.getData().getCells().getSize();
 }
 
-int CSMDoc::WriteCellCollectionStage::writeReferences (const std::deque<int>& references, bool interior, unsigned int& newRefNum, bool temp)
+void CSMDoc::WriteCellCollectionStage::writeReferences (const std::deque<int>& references, bool interior, unsigned int& newRefNum)
 {
     ESM::ESMWriter& writer = mState.getWriter();
-    size_t refCount = 0;
-    const CSMWorld::RefIdCollection& referenceables = mDocument.getData().getReferenceables();
-    const CSMWorld::RefIdData& refIdData = referenceables.getDataSet();
 
     for (std::deque<int>::const_iterator iter (references.begin());
         iter!=references.end(); ++iter)
     {
         const CSMWorld::Record<CSMWorld::CellRef>& ref =
             mDocument.getData().getReferences().getRecord (*iter);
-
-        unsigned int recordFlags = refIdData.getRecordFlags(ref.get().mId);
-        bool isPersistent = (recordFlags & 0x00000400) != 0;
-
-        if (temp && isPersistent || !temp && !isPersistent)
-            continue;
-
-        refCount++;
 
         if (ref.isModified() || ref.mState == CSMWorld::RecordBase::State_Deleted)
         {
@@ -318,14 +307,17 @@ int CSMDoc::WriteCellCollectionStage::writeReferences (const std::deque<int>& re
             refRecord.save (writer, false, false, ref.mState == CSMWorld::RecordBase::State_Deleted);
         }
     }
-
-    return refCount;
 }
 
 void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
     const CSMWorld::Record<CSMWorld::Cell>& cell = mDocument.getData().getCells().getRecord (stage);
+    const CSMWorld::RefIdCollection& referenceables = mDocument.getData().getReferenceables();
+    const CSMWorld::RefIdData& refIdData = referenceables.getDataSet();
+
+    std::deque<int> tempRefs;
+    std::deque<int> persistentRefs;
 
     std::map<std::string, std::deque<int> >::const_iterator references =
         mState.getSubRecords().find (Misc::StringUtils::lowerCase (cell.get().mId));
@@ -349,6 +341,14 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                     mDocument.getData().getReferences().getRecord (*iter);
 
                 CSMWorld::CellRef refRecord = ref.get();
+
+                unsigned int recordFlags = refIdData.getRecordFlags(refRecord.mRefID);
+                bool isPersistent = (recordFlags & 0x00000400) != 0;
+
+                if (isPersistent)
+                    persistentRefs.push_back(*iter);
+                else
+                    tempRefs.push_back(*iter);
 
                 if (refRecord.mNew ||
                     (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
@@ -380,10 +380,9 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
         // write references
         if (references!=mState.getSubRecords().end())
         {
-            int persistentRefCount = writeReferences(references->second, interior, newRefNum, false/*temp*/);
-            cellRecord.saveTempMarker(writer, int(references->second.size()) - persistentRefCount);
-            // FIXME: loops twice, inefficient
-            writeReferences(references->second, interior, newRefNum, true/*temp*/);
+            writeReferences(persistentRefs, interior, newRefNum);
+            cellRecord.saveTempMarker(writer, int(references->second.size()) - persistentRefs.size());
+            writeReferences(tempRefs, interior, newRefNum);
         }
 
         writer.endRecord (cellRecord.sRecordId);
