@@ -369,7 +369,13 @@ namespace MWMechanics
         mPath.clear();
 
         // If it's not possible to build path over navmesh due to disabled navmesh generation fallback to straight path
-        if (!buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, areaCosts, std::back_inserter(mPath)))
+        DetourNavigator::Status status = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags,
+                                                                  areaCosts, std::back_inserter(mPath));
+
+        if (status != DetourNavigator::Status::Success)
+            mPath.clear();
+
+        if (status == DetourNavigator::Status::NavMeshNotFound)
             mPath.push_back(endPoint);
 
         mConstructed = !mPath.empty();
@@ -382,25 +388,33 @@ namespace MWMechanics
         mPath.clear();
         mCell = cell;
 
-        bool hasNavMesh = false;
+        DetourNavigator::Status status = DetourNavigator::Status::NavMeshNotFound;
 
         if (!actor.getClass().isPureWaterCreature(actor) && !actor.getClass().isPureFlyingCreature(actor))
-            hasNavMesh = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, areaCosts, std::back_inserter(mPath));
+        {
+            status = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, areaCosts, std::back_inserter(mPath));
+            if (status != DetourNavigator::Status::Success)
+                mPath.clear();
+        }
 
-        if (hasNavMesh && mPath.empty())
-            buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents,
+        if (status != DetourNavigator::Status::NavMeshNotFound && mPath.empty())
+        {
+            status = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents,
                                      flags | DetourNavigator::Flag_usePathgrid, areaCosts, std::back_inserter(mPath));
+            if (status != DetourNavigator::Status::Success)
+                mPath.clear();
+        }
 
         if (mPath.empty())
             buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
 
-        if (!hasNavMesh && mPath.empty())
+        if (status == DetourNavigator::Status::NavMeshNotFound && mPath.empty())
             mPath.push_back(endPoint);
 
         mConstructed = !mPath.empty();
     }
 
-    bool PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
+    DetourNavigator::Status PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
         const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
         const DetourNavigator::AreaCosts& areaCosts, std::back_insert_iterator<std::deque<osg::Vec3f>> out)
     {
@@ -408,9 +422,6 @@ namespace MWMechanics
         const auto stepSize = getPathStepSize(actor);
         const auto navigator = world->getNavigator();
         const auto status = navigator->findPath(halfExtents, stepSize, startPoint, endPoint, flags, areaCosts, out);
-
-        if (status == DetourNavigator::Status::NavMeshNotFound)
-            return false;
 
         if (status != DetourNavigator::Status::Success)
         {
@@ -420,7 +431,7 @@ namespace MWMechanics
                 << DetourNavigator::WriteFlags {flags} << ")";
         }
 
-        return true;
+        return status;
     }
 
     void PathFinder::buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor, const osg::Vec3f& halfExtents,
