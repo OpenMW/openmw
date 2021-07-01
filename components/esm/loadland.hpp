@@ -49,28 +49,28 @@ struct Land
     };
 
     // default height to use in case there is no Land record
-    static const int DEFAULT_HEIGHT = -2048;
+    static constexpr int DEFAULT_HEIGHT = -2048;
 
     // number of vertices per side
-    static const int LAND_SIZE = 65;
+    static constexpr int LAND_SIZE = 65;
 
     // cell terrain size in world coords
-    static const int REAL_SIZE = Constants::CellSizeInUnits;
+    static constexpr int REAL_SIZE = Constants::CellSizeInUnits;
 
     // total number of vertices
-    static const int LAND_NUM_VERTS = LAND_SIZE * LAND_SIZE;
+    static constexpr int LAND_NUM_VERTS = LAND_SIZE * LAND_SIZE;
 
-    static const int HEIGHT_SCALE = 8;
+    static constexpr int HEIGHT_SCALE = 8;
 
     //number of textures per side of land
-    static const int LAND_TEXTURE_SIZE = 16;
+    static constexpr int LAND_TEXTURE_SIZE = 16;
 
     //total number of textures per land
-    static const int LAND_NUM_TEXTURES = LAND_TEXTURE_SIZE * LAND_TEXTURE_SIZE;
+    static constexpr int LAND_NUM_TEXTURES = LAND_TEXTURE_SIZE * LAND_TEXTURE_SIZE;
 
-    static const int LAND_GLOBAL_MAP_LOD_SIZE = 81;
+    static constexpr int LAND_GLOBAL_MAP_LOD_SIZE = 81;
 
-    static const int LAND_GLOBAL_MAP_LOD_SIZE_SQRT = 9;
+    static constexpr int LAND_GLOBAL_MAP_LOD_SIZE_SQRT = 9;
 
 #pragma pack(push,1)
     struct VHGT
