@@ -124,17 +124,14 @@ namespace MWScript
                 const MWWorld::Store<ESM::Cell> &cells =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>();
 
-                MWWorld::Store<ESM::Cell>::iterator it = cells.extBegin();
-                for (; it != cells.extEnd(); ++it)
+                MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
+
+                for (auto it = cells.extBegin(); it != cells.extEnd(); ++it)
                 {
                     std::string name = it->mName;
                     ::Misc::StringUtils::lowerCaseInPlace(name);
-                    if (name.find(cell) != std::string::npos)
-                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (
-                            it->mName,
-                            it->getGridX(),
-                            it->getGridY()
-                        );
+                    if (name.length() >= cell.length() && name.substr(0, cell.length()) == cell)
+                        winMgr->addVisitedLocation(it->mName, it->getGridX(), it->getGridY());
                 }
             }
         };
