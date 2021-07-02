@@ -458,8 +458,8 @@ else ()
         "${OpenMW_BINARY_DIR}/openmw.cfg")
 endif ()
 
-configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
-    "${OpenMW_BINARY_DIR}" "openmw-cs.cfg")
+pack_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
+    "${OpenMW_BINARY_DIR}" "defaults-cs.bin")
 
 # Needs the copy version because the configure version assumes the end of the file has been reached when a null character is reached and there are no CMake expressions to evaluate.
 copy_resource_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
@@ -928,7 +928,7 @@ elseif(NOT APPLE)
         INSTALL(FILES "${INSTALL_SOURCE}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
         IF(BUILD_OPENCS)
-            INSTALL(FILES "${INSTALL_SOURCE}/openmw-cs.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "opencs")
+            INSTALL(FILES "${INSTALL_SOURCE}/defaults-cs.bin" DESTINATION "${SYSCONFDIR}" COMPONENT "opencs")
         ENDIF(BUILD_OPENCS)
 
         # Install resources

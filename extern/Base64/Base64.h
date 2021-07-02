@@ -95,6 +95,12 @@ class Base64 {
     size_t in_len = input.size();
     if (in_len % 4 != 0) return "Input data size is not a multiple of 4";
 
+    if (in_len == 0)
+    {
+        out = "";
+        return "";
+    }
+
     size_t out_len = in_len / 4 * 3;
     if (input[in_len - 1] == '=') out_len--;
     if (input[in_len - 2] == '=') out_len--;
