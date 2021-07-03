@@ -19,5 +19,9 @@ namespace DetourNavigator
                 + std::to_string(getTrianglesCount()) + ", areaTypes=" + std::to_string(mAreaTypes.size()));
         if (getVerticesCount())
             rcCalcBounds(mVertices.data(), static_cast<int>(getVerticesCount()), mBounds.mMin.ptr(), mBounds.mMax.ptr());
+        mIndices.shrink_to_fit();
+        mVertices.shrink_to_fit();
+        mAreaTypes.shrink_to_fit();
+        mWater.shrink_to_fit();
     }
 }
