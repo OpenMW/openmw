@@ -170,14 +170,14 @@ namespace MWScript
         std::string name2 = Misc::StringUtils::lowerCase (name);
 
         {
-            ScriptCollection::iterator iter = mScripts.find (name2);
+            auto iter = mScripts.find (name2);
 
             if (iter!=mScripts.end())
                 return iter->second.mLocals;
         }
 
         {
-            std::map<std::string, Compiler::Locals>::iterator iter = mOtherLocals.find (name2);
+            auto iter = mOtherLocals.find (name2);
 
             if (iter!=mOtherLocals.end())
                 return iter->second;
@@ -192,10 +192,22 @@ namespace MWScript
             std::istringstream stream (script->mScriptText);
             Compiler::QuickFileParser parser (mErrorHandler, mCompilerContext, locals);
             Compiler::Scanner scanner (mErrorHandler, stream, mCompilerContext.getExtensions());
-            scanner.scan (parser);
+            try
+            {
+                scanner.scan (parser);
+            }
+            catch (const Compiler::SourceException&)
+            {
+                // error has already been reported via error handler
+                locals.clear();
+            }
+            catch (const std::exception& error)
+            {
+                Log(Debug::Error) << "Error: An exception has been thrown: " << error.what();
+                locals.clear();
+            }
 
-            std::map<std::string, Compiler::Locals>::iterator iter =
-                mOtherLocals.emplace(name2, locals).first;
+            auto iter = mOtherLocals.emplace(name2, locals).first;
 
             return iter->second;
         }
