@@ -160,8 +160,6 @@ namespace
     bool rasterizeSolidObjectsTriangles(rcContext& context, const RecastMesh& recastMesh, const rcConfig& config,
         rcHeightfield& solid)
     {
-        const osg::Vec2f tileBoundsMin(config.bmin[0], config.bmin[2]);
-        const osg::Vec2f tileBoundsMax(config.bmax[0], config.bmax[2]);
         std::vector<unsigned char> areas(recastMesh.getAreaTypes().begin(), recastMesh.getAreaTypes().end());
 
         rcClearUnwalkableTriangles(
@@ -485,7 +483,6 @@ namespace DetourNavigator
             " changedTileDistance=" << getDistance(changedTile, playerTile);
 
         const auto params = *navMeshCacheItem->lockConst()->getImpl().getParams();
-        const osg::Vec3f origin(params.orig[0], params.orig[1], params.orig[2]);
 
         if (!recastMesh)
         {
