@@ -1,10 +1,11 @@
 #include "recastmeshmanager.hpp"
+#include "recastmeshbuilder.hpp"
 
 namespace DetourNavigator
 {
     RecastMeshManager::RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation)
-        : mGeneration(generation)
-        , mMeshBuilder(settings, bounds)
+        : mSettings(settings)
+        , mGeneration(generation)
         , mTileBounds(bounds)
     {
     }
@@ -74,8 +75,15 @@ namespace DetourNavigator
 
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh()
     {
-        rebuild();
-        return mMeshBuilder.create(mGeneration, mRevision);
+        RecastMeshBuilder builder(mSettings, mTileBounds);
+        for (const auto& v : mWaterOrder)
+            builder.addWater(v.mCellSize, v.mTransform);
+        for (const auto& object : mObjectsOrder)
+        {
+            const RecastMeshObject& v = object.getImpl();
+            builder.addObject(v.getShape(), v.getTransform(), v.getAreaType());
+        }
+        return std::move(builder).create(mGeneration, mRevision);
     }
 
     bool RecastMeshManager::isEmpty() const
@@ -98,17 +106,5 @@ namespace DetourNavigator
     Version RecastMeshManager::getVersion() const
     {
         return Version {mGeneration, mRevision};
-    }
-
-    void RecastMeshManager::rebuild()
-    {
-        mMeshBuilder.reset();
-        for (const auto& v : mWaterOrder)
-            mMeshBuilder.addWater(v.mCellSize, v.mTransform);
-        for (const auto& object : mObjectsOrder)
-        {
-            const RecastMeshObject& v = object.getImpl();
-            mMeshBuilder.addObject(v.getShape(), v.getTransform(), v.getAreaType());
-        }
     }
 }
