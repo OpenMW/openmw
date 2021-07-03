@@ -8,6 +8,7 @@
     Bug #5483: AutoCalc flag is not used to calculate spells cost
     Bug #6066: addtopic "return" does not work from within script. No errors thrown
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
+    Bug #6115: Showmap overzealous matching
 
 0.47.0
 ------
