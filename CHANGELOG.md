@@ -9,6 +9,7 @@
     Bug #6066: addtopic "return" does not work from within script. No errors thrown
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
     Bug #6115: Showmap overzealous matching
+    Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
 
 0.47.0
 ------

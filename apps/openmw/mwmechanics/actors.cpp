@@ -2396,9 +2396,15 @@ namespace MWMechanics
             float radius = std::min(fSneakUseDist, mActorsProcessingRange);
             getObjectsInRange(position, radius, observers);
 
+            std::set<MWWorld::Ptr> sidingActors;
+            getActorsSidingWith(player, sidingActors);
+
             for (const MWWorld::Ptr &observer : observers)
             {
                 if (observer == player || observer.getClass().getCreatureStats(observer).isDead())
+                    continue;
+
+                if (sidingActors.find(observer) != sidingActors.cend())
                     continue;
 
                 if (world->getLOS(player, observer))
