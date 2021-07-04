@@ -55,6 +55,11 @@ MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
 
     if (mTargetActorId == -1)
     {
+        if (mTargetActorRefId.empty())
+        {
+            mTargetActorId = -2;
+            return MWWorld::Ptr();
+        }
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mTargetActorRefId, false);
         if (target.isEmpty())
         {
