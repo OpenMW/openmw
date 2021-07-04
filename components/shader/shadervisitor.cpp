@@ -482,6 +482,7 @@ namespace Shader
             removedState = new osg::StateSet();
 
         defineMap["alphaToCoverage"] = "0";
+        defineMap["adjustCoverage"] = "0";
         if (reqs.mAlphaFunc != osg::AlphaFunc::ALWAYS)
         {
             writableStateSet->addUniform(new osg::Uniform("alphaRef", reqs.mAlphaRef));
@@ -504,6 +505,11 @@ namespace Shader
                 addedState->setMode(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
                 defineMap["alphaToCoverage"] = "1";
             }
+
+            // Adjusting coverage isn't safe with blending on as blending requires the alpha to be intact.
+            // Maybe we could also somehow (e.g. userdata) detect when the diffuse map has coverage-preserving mip maps in the future
+            if (!reqs.mAlphaBlend)
+                defineMap["adjustCoverage"] = "1";
 
             // Preventing alpha tested stuff shrinking as lower mip levels are used requires knowing the texture size
             osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
