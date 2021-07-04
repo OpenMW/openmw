@@ -343,7 +343,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                 CSMWorld::CellRef refRecord = ref.get();
 
                 unsigned int recordFlags = refIdData.getRecordFlags(refRecord.mRefID);
-                bool isPersistent = (recordFlags & 0x00000400) != 0;
+                bool isPersistent = ((recordFlags & 0x00000400) != 0) || refRecord.mTeleport;
 
                 if (isPersistent)
                     persistentRefs.push_back(*iter);
