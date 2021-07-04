@@ -130,6 +130,9 @@ namespace MWGui
             void updatePreviewSize();
             void updateArmorRating();
 
+            MyGUI::IntSize getPreviewViewportSize() const;
+            osg::Vec2f mapPreviewWindowToViewport(int x, int y) const;
+
             void adjustPanes();
 
             /// Unequips count items from mSelectedItem, if it is equipped, and then updates mSelectedItem in case the items were re-stacked

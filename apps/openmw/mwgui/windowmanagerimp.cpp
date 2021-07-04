@@ -1326,7 +1326,7 @@ namespace MWGui
         return mHud->getWorldMouseOver();
     }
 
-    float WindowManager::getScalingFactor()
+    float WindowManager::getScalingFactor() const
     {
         return mScalingFactor;
     }

@@ -29,6 +29,7 @@ Programmers
     Alex S (docwest)
     Alexey Yaryshev (skeevert)
     Allofich
+    Andreas Stöckel
     Andrei Kortunov (akortunov)
     AnyOldName3
     Ardekantur
