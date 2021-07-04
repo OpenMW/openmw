@@ -208,7 +208,7 @@ namespace MWGui
     void setDragDrop(bool dragDrop) override;
     bool getWorldMouseOver() override;
 
-    float getScalingFactor() override;
+    float getScalingFactor() const override;
 
     bool toggleFogOfWar() override;
     bool toggleFullHelp() override; ///< show extra info in item tooltips (owner, script)
