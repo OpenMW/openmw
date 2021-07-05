@@ -10,6 +10,7 @@
     Bug #6066: addtopic "return" does not work from within script. No errors thrown
     Bug #6067: esp loader fails in for certain subrecord orders
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
+    Bug #6107: Fatigue is incorrectly recalculated when fortify effect is applied or removed
     Bug #6115: Showmap overzealous matching
     Bug #6129: Player avatar not displayed correctly for large window sizes when GUI scaling active
     Bug #6131: Item selection in the avatar window not working correctly for large window sizes
