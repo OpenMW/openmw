@@ -904,6 +904,7 @@ void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & sh
         program->addShader(castingVertexShader);
         program->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", { {"alphaFunc", std::to_string(alphaFunc)},
                                                                                     {"alphaToCoverage", "0"},
+                                                                                    {"adjustCoverage", "1"},
                                                                                     {"useGPUShader4", useGPUShader4}
                                                                                   }, osg::Shader::FRAGMENT));
     }
