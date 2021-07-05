@@ -130,6 +130,7 @@
     Bug #6036: OpenMW-CS: Terrain selection at the border of cells omits certain corner vertices
     Bug #6043: Actor can have torch missing when torch animation is played
     Bug #6047: Mouse bindings can be triggered during save loading
+    Bug #6136: Game freezes when NPCs try to open doors that are about to be closed
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
