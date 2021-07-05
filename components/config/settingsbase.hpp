@@ -24,9 +24,7 @@ namespace Config
 
         inline void setValue(const QString &key, const QString &value)
         {
-            QStringList values = mSettings.values(key);
-            if (!values.contains(value))
-                mSettings.insert(key, value);
+            mSettings.replace(key, value);
         }
 
         inline void setMultiValue(const QString &key, const QString &value)
