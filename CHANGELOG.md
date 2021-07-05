@@ -6,6 +6,7 @@
     Bug #5379: Wandering NPCs falling through cantons
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
+    Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
     Bug #6066: addtopic "return" does not work from within script. No errors thrown
     Bug #6067: esp loader fails in for certain subrecord orders
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
