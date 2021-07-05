@@ -22,6 +22,68 @@
 
 namespace Shader
 {
+    class AddedState : public osg::Object
+    {
+    public:
+        AddedState() = default;
+        AddedState(const AddedState& rhs, const osg::CopyOp& copyOp)
+            : osg::Object(rhs, copyOp)
+            , mUniforms(rhs.mUniforms)
+            , mModes(rhs.mModes)
+            , mAttributes(rhs.mAttributes)
+        {
+        }
+
+        void addUniform(const std::string& name) { mUniforms.emplace(name); }
+        void setMode(osg::StateAttribute::GLMode mode) { mModes.emplace(mode); }
+        void setAttribute(osg::StateAttribute::TypeMemberPair typeMemberPair) { mAttributes.emplace(typeMemberPair); }
+
+        void setAttribute(const osg::StateAttribute* attribute)
+        {
+            mAttributes.emplace(attribute->getTypeMemberPair());
+        }
+        template<typename T>
+        void setAttribute(osg::ref_ptr<T> attribute) { setAttribute(attribute.get()); }
+
+        void setAttributeAndModes(const osg::StateAttribute* attribute)
+        {
+            setAttribute(attribute);
+            InterrogateModesHelper helper(this);
+            attribute->getModeUsage(helper);
+        }
+        template<typename T>
+        void setAttributeAndModes(osg::ref_ptr<T> attribute) { setAttributeAndModes(attribute.get()); }
+
+        bool hasUniform(const std::string& name) { return mUniforms.count(name); }
+        bool hasMode(osg::StateAttribute::GLMode mode) { return mModes.count(mode); }
+        bool hasAttribute(osg::StateAttribute::TypeMemberPair typeMemberPair) { return mAttributes.count(typeMemberPair); }
+        bool hasAttribute(osg::StateAttribute::Type type, unsigned int member) { return hasAttribute(osg::StateAttribute::TypeMemberPair(type, member)); }
+
+        const std::set<osg::StateAttribute::TypeMemberPair>& getAttributes() { return mAttributes; }
+
+        bool empty()
+        {
+            return mUniforms.empty() && mModes.empty() && mAttributes.empty();
+        }
+
+        META_Object(Shader, AddedState)
+
+    private:
+        class InterrogateModesHelper : public osg::StateAttribute::ModeUsage
+        {
+        public:
+            InterrogateModesHelper(AddedState* tracker) : mTracker(tracker) {}
+            void usesMode(osg::StateAttribute::GLMode mode) override { mTracker->setMode(mode); }
+            void usesTextureMode(osg::StateAttribute::GLMode mode) override {}
+
+        private:
+            AddedState* mTracker;
+        };
+
+        std::unordered_set<std::string> mUniforms;
+        std::unordered_set<osg::StateAttribute::GLMode> mModes;
+        std::set<osg::StateAttribute::TypeMemberPair> mAttributes;
+    };
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
         : mShaderRequired(false)
@@ -100,14 +162,32 @@ namespace Shader
         return static_cast<osg::StateSet *>(stateSet.getUserDataContainer()->getUserObject("removedState"));
     }
 
-    void updateRemovedState(osg::UserDataContainer& userData, osg::StateSet* stateSet)
+    void updateRemovedState(osg::UserDataContainer& userData, osg::StateSet* removedState)
     {
         unsigned int index = userData.getUserObjectIndex("removedState");
         if (index < userData.getNumUserObjects())
-            userData.setUserObject(index, stateSet);
+            userData.setUserObject(index, removedState);
         else
-            userData.addUserObject(stateSet);
-        stateSet->setName("removedState");
+            userData.addUserObject(removedState);
+        removedState->setName("removedState");
+    }
+
+    AddedState* getAddedState(osg::StateSet& stateSet)
+    {
+        if (!stateSet.getUserDataContainer())
+            return nullptr;
+
+        return static_cast<AddedState*>(stateSet.getUserDataContainer()->getUserObject("addedState"));
+    }
+
+    void updateAddedState(osg::UserDataContainer& userData, AddedState* addedState)
+    {
+        unsigned int index = userData.getUserObjectIndex("addedState");
+        if (index < userData.getNumUserObjects())
+            userData.setUserObject(index, addedState);
+        else
+            userData.addUserObject(addedState);
+        addedState->setName("addedState");
     }
 
     const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap", "decalMap", "bumpMap" };
@@ -275,11 +355,13 @@ namespace Shader
         osg::StateSet::AttributeList removedAttributes;
         if (osg::ref_ptr<osg::StateSet> removedState = getRemovedState(*stateset))
             removedAttributes = removedState->getAttributeList();
+        osg::ref_ptr<AddedState> addedState = getAddedState(*stateset);
+
         for (const auto* attributeMap : std::initializer_list<const osg::StateSet::AttributeList*>{ &attributes, &removedAttributes })
         {
             for (osg::StateSet::AttributeList::const_iterator it = attributeMap->begin(); it != attributeMap->end(); ++it)
             {
-                if (attributeMap != &removedAttributes && removedAttributes.count(it->first))
+                if (addedState && attributeMap != &removedAttributes && addedState->hasAttribute(it->first))
                     continue;
                 if (it->first.first == osg::StateAttribute::MATERIAL)
                 {
@@ -290,9 +372,6 @@ namespace Shader
                             mRequirements.back().mMaterialOverridden = true;
 
                         const osg::Material* mat = static_cast<const osg::Material*>(it->second.first.get());
-
-                        if (!writableStateSet)
-                            writableStateSet = getWritableStateSet(node);
 
                         int colorMode;
                         switch (mat->getColorMode())
@@ -371,6 +450,10 @@ namespace Shader
             writableStateSet = node.getOrCreateStateSet();
         else
             writableStateSet = getWritableStateSet(node);
+        osg::ref_ptr<AddedState> addedState = new AddedState;
+        osg::ref_ptr<AddedState> previousAddedState = getAddedState(*writableStateSet);
+        if (!previousAddedState)
+            previousAddedState = new AddedState;
 
         ShaderManager::DefineMap defineMap;
         for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
@@ -387,6 +470,7 @@ namespace Shader
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
 
         writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
+        addedState->addUniform("colorMode");
 
         defineMap["alphaFunc"] = std::to_string(reqs.mAlphaFunc);
 
@@ -398,25 +482,34 @@ namespace Shader
             removedState = new osg::StateSet();
 
         defineMap["alphaToCoverage"] = "0";
+        defineMap["adjustCoverage"] = "0";
         if (reqs.mAlphaFunc != osg::AlphaFunc::ALWAYS)
         {
             writableStateSet->addUniform(new osg::Uniform("alphaRef", reqs.mAlphaRef));
+            addedState->addUniform("alphaRef");
 
             if (!removedState->getAttributePair(osg::StateAttribute::ALPHAFUNC))
             {
                 const auto* alphaFunc = writableStateSet->getAttributePair(osg::StateAttribute::ALPHAFUNC);
-                if (alphaFunc)
+                if (alphaFunc && !previousAddedState->hasAttribute(osg::StateAttribute::ALPHAFUNC, 0))
                     removedState->setAttribute(alphaFunc->first, alphaFunc->second);
             }
             // This prevents redundant glAlphaFunc calls while letting the shadows bin still see the test
             writableStateSet->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            addedState->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc));
 
             // Blending won't work with A2C as we use the alpha channel for coverage. gl_SampleCoverage from ARB_sample_shading would save the day, but requires GLSL 130
             if (mConvertAlphaTestToAlphaToCoverage && !reqs.mAlphaBlend)
             {
                 writableStateSet->setMode(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB, osg::StateAttribute::ON);
+                addedState->setMode(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
                 defineMap["alphaToCoverage"] = "1";
             }
+
+            // Adjusting coverage isn't safe with blending on as blending requires the alpha to be intact.
+            // Maybe we could also somehow (e.g. userdata) detect when the diffuse map has coverage-preserving mip maps in the future
+            if (!reqs.mAlphaBlend)
+                defineMap["adjustCoverage"] = "1";
 
             // Preventing alpha tested stuff shrinking as lower mip levels are used requires knowing the texture size
             osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
@@ -425,10 +518,11 @@ namespace Shader
             // We could fall back to a texture size uniform if EXT_gpu_shader4 is missing
         }
 
-        if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT)
+        if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT && !previousAddedState->hasMode(GL_ALPHA_TEST))
             removedState->setMode(GL_ALPHA_TEST, writableStateSet->getMode(GL_ALPHA_TEST));
         // This disables the deprecated fixed-function alpha test
         writableStateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
+        addedState->setMode(GL_ALPHA_TEST);
 
         if (!removedState->getModeList().empty() || !removedState->getAttributeList().empty())
         {
@@ -442,6 +536,18 @@ namespace Shader
             updateRemovedState(*writableUserData, removedState);
         }
 
+        if (!addedState->empty())
+        {
+            // user data is normally shallow copied so shared with the original stateset
+            osg::ref_ptr<osg::UserDataContainer> writableUserData;
+            if (mAllowedToModifyStateSets)
+                writableUserData = writableStateSet->getOrCreateUserDataContainer();
+            else
+                writableUserData = getWritableUserDataContainer(*writableStateSet);
+
+            updateAddedState(*writableUserData, addedState);
+        }
+
         defineMap["translucentFramebuffer"] = mTranslucentFramebuffer ? "1" : "0";
 
         std::string shaderPrefix;
@@ -453,11 +559,14 @@ namespace Shader
 
         if (vertexShader && fragmentShader)
         {
-            writableStateSet->setAttributeAndModes(mShaderManager.getProgram(vertexShader, fragmentShader), osg::StateAttribute::ON);
+            auto program = mShaderManager.getProgram(vertexShader, fragmentShader);
+            writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
+            addedState->setAttributeAndModes(program);
 
             for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
             {
                 writableStateSet->addUniform(new osg::Uniform(texIt->second.c_str(), texIt->first), osg::StateAttribute::ON);
+                addedState->addUniform(texIt->second);
             }
         }
     }
@@ -472,24 +581,57 @@ namespace Shader
         else
             writableStateSet = getWritableStateSet(node);
 
-        writableStateSet->removeAttribute(osg::StateAttribute::PROGRAM);
+        // user data is normally shallow copied so shared with the original stateset - we'll need to copy before edits
+        osg::ref_ptr<osg::UserDataContainer> writableUserData;
 
-        if (osg::ref_ptr<osg::StateSet> removedState = getRemovedState(*writableStateSet))
+        if (osg::ref_ptr<AddedState> addedState = getAddedState(*writableStateSet))
         {
-            // user data is normally shallow copied so shared with the original stateset
-            osg::ref_ptr<osg::UserDataContainer> writableUserData;
             if (mAllowedToModifyStateSets)
                 writableUserData = writableStateSet->getUserDataContainer();
             else
                 writableUserData = getWritableUserDataContainer(*writableStateSet);
+
+            unsigned int index = writableUserData->getUserObjectIndex("addedState");
+            writableUserData->removeUserObject(index);
+
+            // O(n log n) to use StateSet::removeX, but this is O(n)
+            for (auto itr = writableStateSet->getUniformList().begin(); itr != writableStateSet->getUniformList().end();)
+            {
+                if (addedState->hasUniform(itr->first))
+                    writableStateSet->getUniformList().erase(itr);
+                else
+                    ++itr;
+            }
+
+            for (auto itr = writableStateSet->getModeList().begin(); itr != writableStateSet->getModeList().end();)
+            {
+                if (addedState->hasMode(itr->first))
+                    writableStateSet->getModeList().erase(itr);
+                else
+                    ++itr;
+            }
+
+            // StateAttributes track the StateSets they're attached to
+            // We don't have access to the function to do that, and can't call removeAttribute with an iterator
+            for (const auto& [type, member] : addedState->getAttributes())
+                writableStateSet->removeAttribute(type, member);
+        }
+
+
+        if (osg::ref_ptr<osg::StateSet> removedState = getRemovedState(*writableStateSet))
+        {
+            if (!writableUserData)
+            {
+            if (mAllowedToModifyStateSets)
+                writableUserData = writableStateSet->getUserDataContainer();
+            else
+                writableUserData = getWritableUserDataContainer(*writableStateSet);
+            }
+            
             unsigned int index = writableUserData->getUserObjectIndex("removedState");
             writableUserData->removeUserObject(index);
 
-            for (const auto& [mode, value] : removedState->getModeList())
-                writableStateSet->setMode(mode, value);
-
-            for (const auto& attribute : removedState->getAttributeList())
-                writableStateSet->setAttribute(attribute.second.first, attribute.second.second);
+            writableStateSet->merge(*removedState);
         }
     }
 
