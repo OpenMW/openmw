@@ -6,6 +6,7 @@
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
+    Task #6017: Separate persistent and temporary cell references when saving
 
 0.47.0
 ------
