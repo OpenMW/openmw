@@ -36,16 +36,16 @@ namespace MWWorld
         : mId(id), mIsDeleted(isDeleted)
     {}
 
-    template<typename T> 
+    template<typename T>
     IndexedStore<T>::IndexedStore()
     {
     }
-    template<typename T>        
+    template<typename T>
     typename IndexedStore<T>::iterator IndexedStore<T>::begin() const
     {
         return mStatic.begin();
     }
-    template<typename T>    
+    template<typename T>
     typename IndexedStore<T>::iterator IndexedStore<T>::end() const
     {
         return mStatic.end();
@@ -192,7 +192,7 @@ namespace MWWorld
     template<typename T>
     typename Store<T>::iterator Store<T>::begin() const
     {
-        return mShared.begin(); 
+        return mShared.begin();
     }
     template<typename T>
     typename Store<T>::iterator Store<T>::end() const
@@ -407,7 +407,7 @@ namespace MWWorld
         if (mStatic.size() < num)
             mStatic.resize(num);
     }
-    
+
     // Land
     //=========================================================================
     Store<ESM::Land>::~Store()
@@ -496,20 +496,28 @@ namespace MWWorld
         }
         return search(cell.mName);
     }
+
+    // this method *must* be called right after esm.loadCell()
     void Store<ESM::Cell>::handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell)
     {
-        //Handling MovedCellRefs, there is no way to do it inside loadcell
-        while (esm.isNextSub("MVRF")) {
-            ESM::CellRef ref;
-            ESM::MovedCellRef cMRef;
-            cell->getNextMVRF(esm, cMRef);
+        ESM::CellRef ref;
+        ESM::MovedCellRef cMRef;
+        cMRef.mRefNum.mIndex = 0;
+        bool deleted = false;
+
+        ESM::ESM_Context ctx = esm.getContext();
+
+        // Handling MovedCellRefs, there is no way to do it inside loadcell
+        // TODO: verify above comment
+        //
+        // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
+        //  implementation when the oher implementation works as well.
+        while (cell->getNextRef(esm, ref, deleted, /*ignoreMoves*/true, &cMRef))
+        {
+            if (!cMRef.mRefNum.mIndex)
+                continue; // ignore refs that are not moved
 
             ESM::Cell *cellAlt = const_cast<ESM::Cell*>(searchOrCreate(cMRef.mTarget[0], cMRef.mTarget[1]));
-
-            // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
-            //  implementation when the oher implementation works as well.
-            bool deleted = false;
-            cell->getNextRef(esm, ref, deleted);
 
             // Add data required to make reference appear in the correct cell.
             // We should not need to test for duplicates, as this part of the code is pre-cell merge.
@@ -521,7 +529,11 @@ namespace MWWorld
                 cellAlt->mLeasedRefs.emplace_back(std::move(ref), deleted);
             else
                 *iter = std::make_pair(std::move(ref), deleted);
+
+            cMRef.mRefNum.mIndex = 0;
         }
+
+        esm.restoreContext(ctx);
     }
     const ESM::Cell *Store<ESM::Cell>::search(const std::string &id) const
     {
@@ -642,7 +654,7 @@ namespace MWWorld
         ESM::Cell cell;
         bool isDeleted = false;
 
-        // Load the (x,y) coordinates of the cell, if it is an exterior cell, 
+        // Load the (x,y) coordinates of the cell, if it is an exterior cell,
         // so we can find the cell we need to merge with
         cell.loadNameAndData(esm, isDeleted);
         std::string idLower = Misc::StringUtils::lowerCase(cell.mName);
@@ -870,7 +882,7 @@ namespace MWWorld
         return true;
     }
 
-    
+
     // Pathgrid
     //=========================================================================
 
@@ -972,7 +984,7 @@ namespace MWWorld
 
     // Skill
     //=========================================================================
-    
+
     Store<ESM::Skill>::Store()
     {
     }
@@ -1013,7 +1025,7 @@ namespace MWWorld
     }
     void Store<ESM::Attribute>::setUp()
     {
-        for (int i = 0; i < ESM::Attribute::Length; ++i) 
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
             ESM::Attribute newAttribute;
             newAttribute.mId = ESM::Attribute::sAttributeIds[i];
@@ -1035,7 +1047,7 @@ namespace MWWorld
         return mStatic.end();
     }
 
-    
+
     // Dialogue
     //=========================================================================
 
