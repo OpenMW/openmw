@@ -69,7 +69,7 @@ namespace
     AreaType generateAreaType(Random& random)
     {
         std::uniform_int_distribution<int> distribution(0, 4);
-        return toAreaType(distribution(random));;
+        return toAreaType(distribution(random));
     }
 
     template <typename OutputIterator, typename Random>
