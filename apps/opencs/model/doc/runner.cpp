@@ -78,7 +78,7 @@ void CSMDoc::Runner::start (bool delayed)
         else
             arguments << "--new-game=1";
 
-        arguments << ("--script-run="+mStartup->fileName());;
+        arguments << ("--script-run="+mStartup->fileName());
 
         arguments <<
             QString::fromUtf8 (("--data=\""+mProjectPath.parent_path().string()+"\"").c_str());

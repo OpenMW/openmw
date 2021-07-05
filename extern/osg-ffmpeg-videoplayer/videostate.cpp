@@ -524,7 +524,7 @@ public:
                     uint64_t seek_target = self->mSeekPos;
                     int streamIndex = -1;
 
-                    int videoStreamIndex = -1;;
+                    int videoStreamIndex = -1;
                     int audioStreamIndex = -1;
                     if (self->video_st)
                         videoStreamIndex = self->video_st - self->format_ctx->streams;
