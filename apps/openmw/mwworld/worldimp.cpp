@@ -1223,7 +1223,7 @@ namespace MWWorld
             if (movePhysics)
             {
                 if (const auto object = mPhysics->getObject(ptr))
-                    updateNavigatorObject(object);
+                    updateNavigatorObject(*object);
             }
         }
 
@@ -1282,7 +1282,7 @@ namespace MWWorld
         if (mPhysics->getActor(ptr))
             mNavigator->addAgent(getPathfindingHalfExtents(ptr));
         else if (const auto object = mPhysics->getObject(ptr))
-            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
+            updateNavigatorObject(*object);
     }
 
     void World::rotateObjectImp(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
@@ -1331,7 +1331,7 @@ namespace MWWorld
             mWorldScene->updateObjectRotation(ptr, order);
 
             if (const auto object = mPhysics->getObject(ptr))
-                updateNavigatorObject(object);
+                updateNavigatorObject(*object);
         }
     }
 
@@ -1423,7 +1423,7 @@ namespace MWWorld
             mPhysics->updateRotation(ptr);
 
             if (const auto object = mPhysics->getObject(ptr))
-                updateNavigatorObject(object);
+                updateNavigatorObject(*object);
         }
     }
 
@@ -1543,14 +1543,11 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
-        mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
-        {
-            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
-        });
+        mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object) { updateNavigatorObject(*object); });
 
         for (const auto& door : mDoorStates)
             if (const auto object = mPhysics->getObject(door.first))
-                mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
+                updateNavigatorObject(*object);
 
         if (mShouldUpdateNavigator)
         {
@@ -1559,13 +1556,14 @@ namespace MWWorld
         }
     }
 
-    bool World::updateNavigatorObject(const MWPhysics::Object* object)
+    void World::updateNavigatorObject(const MWPhysics::Object& object)
     {
         const DetourNavigator::ObjectShapes shapes {
-            *object->getShapeInstance()->getCollisionShape(),
-            object->getShapeInstance()->getAvoidCollisionShape()
+            *object.getShapeInstance()->getCollisionShape(),
+            object.getShapeInstance()->getAvoidCollisionShape()
         };
-        return mNavigator->updateObject(DetourNavigator::ObjectId(object), shapes, object->getTransform());
+        mShouldUpdateNavigator = mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform())
+            || mShouldUpdateNavigator;
     }
 
     const MWPhysics::RayCastingInterface* World::getRayCasting() const
