@@ -184,8 +184,7 @@ struct Cell
   /// \param ignoreMoves ignore MVRF record and read reference like a regular CellRef.
   static bool getNextRef(ESMReader &esm, 
                          CellRef &ref, 
-                         bool &isDeleted, 
-                         int *tempRefCount = nullptr, 
+                         bool &isDeleted,
                          bool ignoreMoves = false, 
                          MovedCellRef *mref = nullptr);
 

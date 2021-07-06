@@ -224,7 +224,7 @@ namespace ESM
         return region + ' ' + cellGrid;
     }
 
-    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool &isDeleted, int *tempRefCount, bool ignoreMoves, MovedCellRef *mref)
+    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool &isDeleted, bool ignoreMoves, MovedCellRef *mref)
     {
         isDeleted = false;
 
@@ -252,7 +252,7 @@ namespace ESM
 
         if (esm.peekNextSub("FRMR"))
         {
-            ref.load (esm, isDeleted, tempRefCount);
+            ref.load (esm, isDeleted);
 
             // TODO: should count the number of temp refs and validate the number
 

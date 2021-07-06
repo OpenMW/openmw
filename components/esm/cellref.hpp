@@ -107,12 +107,12 @@ namespace ESM
             Position mPos;
 
             /// Calls loadId and loadData
-            void load (ESMReader& esm, bool &isDeleted, int *tempRefCount, bool wideRefNum = false);
+            void load (ESMReader& esm, bool &isDeleted, bool wideRefNum = false);
 
             void loadId (ESMReader& esm, bool wideRefNum = false);
 
             /// Implicitly called by load
-            void loadData (ESMReader& esm, bool &isDeleted, int *tempRefCount = nullptr);
+            void loadData (ESMReader& esm, bool &isDeleted);
 
             void save (ESMWriter &esm, bool wideRefNum = false, bool inInventory = false, bool isDeleted = false) const;
 

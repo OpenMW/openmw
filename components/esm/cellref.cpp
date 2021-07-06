@@ -31,10 +31,10 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
 }
 
 
-void ESM::CellRef::load (ESMReader& esm, bool &isDeleted, int *tempRefCount, bool wideRefNum)
+void ESM::CellRef::load (ESMReader& esm, bool &isDeleted, bool wideRefNum)
 {
     loadId(esm, wideRefNum);
-    loadData(esm, isDeleted, tempRefCount);
+    loadData(esm, isDeleted);
 }
 
 void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
@@ -57,7 +57,7 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
     }
 }
 
-void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted, int *tempRefCount)
+void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
 {
     isDeleted = false;
 
@@ -119,14 +119,7 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted, int *tempRefCount)
                 break;
             case ESM::FourCC<'N','A','M','0'>::value:
             {
-                if (tempRefCount && *tempRefCount == -1)
-                {
-                    esm.getHT(*tempRefCount);
-                    // TODO: check that there are no more subs following this sub
-                }
-                else
-                    esm.skipHSub();
-
+                esm.skipHSub();
                 break;
             }
             case ESM::SREC_DELE:
