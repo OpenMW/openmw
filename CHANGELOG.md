@@ -15,6 +15,7 @@
     Bug #6129: Player avatar not displayed correctly for large window sizes when GUI scaling active
     Bug #6131: Item selection in the avatar window not working correctly for large window sizes
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
+    Editor: For consistency with TES CS make DELE records 4 bytes long
 
 0.47.0
 ------
