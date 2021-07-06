@@ -11,6 +11,9 @@ namespace ESM
     void Static::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
+        //bool isBlocked = (mRecordFlags & ESM::FLAG_Blocked) != 0;
+        //bool isPersistent = (mRecordFlags & ESM::FLAG_Persistent) != 0;
 
         bool hasName = false;
         while (esm.hasMoreSubs())

@@ -41,6 +41,7 @@ namespace ESM
     void Armor::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
 
         mParts.mParts.clear();
 

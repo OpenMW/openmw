@@ -76,10 +76,9 @@ struct Creature
     int mBloodType;
     unsigned char mFlags;
 
-    bool mPersistent;
-
     float mScale;
 
+    unsigned int mRecordFlags;
     std::string mId, mModel, mName, mScript;
     std::string mOriginal; // Base creature that this is a modification of
 

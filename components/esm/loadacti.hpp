@@ -15,6 +15,7 @@ struct Activator
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string getRecordType() { return "Activator"; }
 
+    unsigned int mRecordFlags;
     std::string mId, mName, mScript, mModel;
 
     void load(ESMReader &esm, bool &isDeleted);

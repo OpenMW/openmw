@@ -32,6 +32,7 @@ namespace ESM
     void Container::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
 
         mInventory.mList.clear();
 

@@ -294,7 +294,6 @@ namespace CSMWorld
             { ColumnId_NpcReputation, "Reputation" },
             { ColumnId_NpcRank, "NPC Rank" },
             { ColumnId_Gold, "Gold" },
-            { ColumnId_NpcPersistence, "Persistent" },
 
             { ColumnId_RaceAttributes, "Race Attributes" },
             { ColumnId_Male, "Male" },
@@ -370,6 +369,8 @@ namespace CSMWorld
             { ColumnId_Skill5, "Skill 5" },
             { ColumnId_Skill6, "Skill 6" },
             { ColumnId_Skill7, "Skill 7" },
+
+            { ColumnId_Persistent, "Persistent" },
 
             { -1, 0 } // end marker
         };
