@@ -253,10 +253,71 @@ int CSMDoc::WriteCellCollectionStage::setup()
     return mDocument.getData().getCells().getSize();
 }
 
+void CSMDoc::WriteCellCollectionStage::writeReferences (const std::deque<int>& references, bool interior, unsigned int& newRefNum)
+{
+    ESM::ESMWriter& writer = mState.getWriter();
+
+    for (std::deque<int>::const_iterator iter (references.begin());
+        iter!=references.end(); ++iter)
+    {
+        const CSMWorld::Record<CSMWorld::CellRef>& ref =
+            mDocument.getData().getReferences().getRecord (*iter);
+
+        if (ref.isModified() || ref.mState == CSMWorld::RecordBase::State_Deleted)
+        {
+            CSMWorld::CellRef refRecord = ref.get();
+
+            // Check for uninitialized content file
+            if (!refRecord.mRefNum.hasContentFile())
+                refRecord.mRefNum.mContentFile = 0;
+
+            // recalculate the ref's cell location
+            std::ostringstream stream;
+            if (!interior)
+            {
+                std::pair<int, int> index = refRecord.getCellIndex();
+                stream << "#" << index.first << " " << index.second;
+            }
+
+            if (refRecord.mNew || refRecord.mRefNum.mIndex == 0 ||
+                (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
+                refRecord.mCell!=stream.str()))
+            {
+                refRecord.mRefNum.mIndex = newRefNum++;
+            }
+            else if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell)
+                    != stream.str() && !interior)
+            {
+                // An empty mOriginalCell is meant to indicate that it is the same as
+                // the current cell.  It is possible that a moved ref is moved again.
+
+                ESM::MovedCellRef moved;
+                moved.mRefNum = refRecord.mRefNum;
+
+                // Need to fill mTarget with the ref's new position.
+                std::istringstream istream (stream.str().c_str());
+
+                char ignore;
+                istream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
+
+                refRecord.mRefNum.save (writer, false, "MVRF");
+                writer.writeHNT ("CNDT", moved.mTarget);
+            }
+
+            refRecord.save (writer, false, false, ref.mState == CSMWorld::RecordBase::State_Deleted);
+        }
+    }
+}
+
 void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
     const CSMWorld::Record<CSMWorld::Cell>& cell = mDocument.getData().getCells().getRecord (stage);
+    const CSMWorld::RefIdCollection& referenceables = mDocument.getData().getReferenceables();
+    const CSMWorld::RefIdData& refIdData = referenceables.getDataSet();
+
+    std::deque<int> tempRefs;
+    std::deque<int> persistentRefs;
 
     std::map<std::string, std::deque<int> >::const_iterator references =
         mState.getSubRecords().find (Misc::StringUtils::lowerCase (cell.get().mId));
@@ -281,6 +342,18 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
 
                 CSMWorld::CellRef refRecord = ref.get();
 
+                CSMWorld::RefIdData::LocalIndex localIndex = refIdData.searchId(refRecord.mRefID);
+                unsigned int recordFlags = refIdData.getRecordFlags(refRecord.mRefID);
+                bool isPersistent = ((recordFlags & ESM::FLAG_Persistent) != 0)
+                    || refRecord.mTeleport
+                    || localIndex.second == CSMWorld::UniversalId::Type_Creature
+                    || localIndex.second == CSMWorld::UniversalId::Type_Npc;
+
+                if (isPersistent)
+                    persistentRefs.push_back(*iter);
+                else
+                    tempRefs.push_back(*iter);
+
                 if (refRecord.mNew ||
                     (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
                     /// \todo consider worldspace
@@ -289,7 +362,6 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
 
                 if (refRecord.mRefNum.mIndex >= newRefNum)
                     newRefNum = refRecord.mRefNum.mIndex + 1;
-
             }
         }
 
@@ -312,56 +384,9 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
         // write references
         if (references!=mState.getSubRecords().end())
         {
-            for (std::deque<int>::const_iterator iter (references->second.begin());
-                iter!=references->second.end(); ++iter)
-            {
-                const CSMWorld::Record<CSMWorld::CellRef>& ref =
-                    mDocument.getData().getReferences().getRecord (*iter);
-
-                if (ref.isModified() || ref.mState == CSMWorld::RecordBase::State_Deleted)
-                {
-                    CSMWorld::CellRef refRecord = ref.get();
-
-                    // Check for uninitialized content file
-                    if (!refRecord.mRefNum.hasContentFile())
-                        refRecord.mRefNum.mContentFile = 0;
-
-                    // recalculate the ref's cell location
-                    std::ostringstream stream;
-                    if (!interior)
-                    {
-                        std::pair<int, int> index = refRecord.getCellIndex();
-                        stream << "#" << index.first << " " << index.second;
-                    }
-
-                    if (refRecord.mNew || refRecord.mRefNum.mIndex == 0 ||
-                        (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
-                        refRecord.mCell!=stream.str()))
-                    {
-                        refRecord.mRefNum.mIndex = newRefNum++;
-                    }
-                    else if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell)
-                            != stream.str() && !interior)
-                    {
-                        // An empty mOriginalCell is meant to indicate that it is the same as
-                        // the current cell.  It is possible that a moved ref is moved again.
-
-                        ESM::MovedCellRef moved;
-                        moved.mRefNum = refRecord.mRefNum;
-
-                        // Need to fill mTarget with the ref's new position.
-                        std::istringstream istream (stream.str().c_str());
-
-                        char ignore;
-                        istream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
-
-                        refRecord.mRefNum.save (writer, false, "MVRF");
-                        writer.writeHNT ("CNDT", moved.mTarget);
-                    }
-
-                    refRecord.save (writer, false, false, ref.mState == CSMWorld::RecordBase::State_Deleted);
-                }
-            }
+            writeReferences(persistentRefs, interior, newRefNum);
+            cellRecord.saveTempMarker(writer, int(references->second.size()) - persistentRefs.size());
+            writeReferences(tempRefs, interior, newRefNum);
         }
 
         writer.endRecord (cellRecord.sRecordId);

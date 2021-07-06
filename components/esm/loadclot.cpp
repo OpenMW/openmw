@@ -11,6 +11,7 @@ namespace ESM
     void Clothing::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
 
         mParts.mParts.clear();
 
@@ -69,7 +70,7 @@ namespace ESM
 
         if (isDeleted)
         {
-            esm.writeHNCString("DELE", "");
+            esm.writeHNString("DELE", "", 3);
             return;
         }
 

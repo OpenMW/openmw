@@ -19,6 +19,7 @@ namespace MWClass
             ///< Add reference into a cell for rendering
 
             void insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated = false) const override;
+            void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated = false) const override;
 
             bool isDoor() const override;
 

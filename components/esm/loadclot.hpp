@@ -46,6 +46,7 @@ struct Clothing
 
     PartReferenceList mParts;
 
+    unsigned int mRecordFlags;
     std::string mId, mName, mModel, mIcon, mEnchant, mScript;
 
     void load(ESMReader &esm, bool &isDeleted);

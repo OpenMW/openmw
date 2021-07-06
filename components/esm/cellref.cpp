@@ -118,8 +118,10 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
                 esm.getHT(mPos, 24);
                 break;
             case ESM::FourCC<'N','A','M','0'>::value:
+            {
                 esm.skipHSub();
                 break;
+            }
             case ESM::SREC_DELE:
                 esm.skipHSub();
                 isDeleted = true;
@@ -145,7 +147,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
     esm.writeHNCString("NAME", mRefID);
 
     if (isDeleted) {
-        esm.writeHNCString("DELE", "");
+        esm.writeHNString("DELE", "", 3);
         return;
     }
 

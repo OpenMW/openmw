@@ -16,6 +16,11 @@ enum Version
     VER_13 = 0x3fa66666
   };
 
+enum RecordFlag
+  {
+    FLAG_Persistent = 0x00000400,
+    FLAG_Blocked    = 0x00002000
+  };
 
 // CRTP for FIXED_STRING class, a structure used for holding fixed-length strings
 template< template<size_t> class DERIVED, size_t SIZE>

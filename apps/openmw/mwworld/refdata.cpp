@@ -31,6 +31,7 @@ namespace MWWorld
         mChanged = refData.mChanged;
         mDeletedByContentFile = refData.mDeletedByContentFile;
         mFlags = refData.mFlags;
+        mPhysicsPostponed = refData.mPhysicsPostponed;
 
         mAnimationState = refData.mAnimationState;
 
@@ -44,7 +45,7 @@ namespace MWWorld
     }
 
     RefData::RefData()
-    : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true), mCount (1), mCustomData (nullptr), mChanged(false), mFlags(0)
+    : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true), mCount (1), mCustomData (nullptr), mChanged(false), mFlags(0), mPhysicsPostponed(false)
     {
         for (int i=0; i<3; ++i)
         {
@@ -57,7 +58,7 @@ namespace MWWorld
     : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true),
       mCount (1), mPosition (cellRef.mPos),
       mCustomData (nullptr),
-      mChanged(false), mFlags(0) // Loading from ESM/ESP files -> assume unchanged
+      mChanged(false), mFlags(0), mPhysicsPostponed(false) // Loading from ESM/ESP files -> assume unchanged
     {
     }
 
@@ -68,7 +69,7 @@ namespace MWWorld
       mPosition (objectState.mPosition),
       mAnimationState(objectState.mAnimationState),
       mCustomData (nullptr),
-      mChanged(true), mFlags(objectState.mFlags) // Loading from a savegame -> assume changed
+      mChanged(true), mFlags(objectState.mFlags), mPhysicsPostponed(false) // Loading from a savegame -> assume changed
     {
         // "Note that the ActivationFlag_UseEnabled is saved to the reference,
         // which will result in permanently suppressed activation if the reference script is removed.

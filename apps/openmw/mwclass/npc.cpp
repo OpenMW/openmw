@@ -403,7 +403,7 @@ namespace MWClass
     bool Npc::isPersistent(const MWWorld::ConstPtr &actor) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = actor.get<ESM::NPC>();
-        return ref->mBase->mPersistent;
+        return (ref->mBase->mRecordFlags & ESM::FLAG_Persistent) != 0;
     }
 
     std::string Npc::getModel(const MWWorld::ConstPtr &ptr) const

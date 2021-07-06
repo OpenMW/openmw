@@ -87,6 +87,39 @@ CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId (
     return iter->second;
 }
 
+unsigned int CSMWorld::RefIdData::getRecordFlags (const std::string& id) const
+{
+    LocalIndex localIndex = searchId (id);
+
+    switch (localIndex.second)
+    {
+        case UniversalId::Type_Activator: return mActivators.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Potion:    return mPotions.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Apparatus: return mApparati.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Armor:     return mArmors.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Book:      return mBooks.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Clothing:  return mClothing.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Container: return mContainers.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Creature:  return mCreatures.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Door:      return mDoors.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Ingredient: return mIngredients.getRecordFlags(localIndex.first);
+        case UniversalId::Type_CreatureLevelledList: return mCreatureLevelledLists.getRecordFlags(localIndex.first);
+        case UniversalId::Type_ItemLevelledList: return mItemLevelledLists.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Light:     return mLights.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Lockpick:  return mLockpicks.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Miscellaneous: return mMiscellaneous.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Npc:       return mNpcs.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Probe:     return mProbes.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Repair:    return mRepairs.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Static:    return mStatics.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Weapon:    return mWeapons.getRecordFlags(localIndex.first);
+        default:
+            break;
+    }
+
+    return 0;
+}
+
 void CSMWorld::RefIdData::erase (int index, int count)
 {
     LocalIndex localIndex = globalToLocalIndex (index);

@@ -94,7 +94,7 @@ struct Cell
            mWater(0),
            mWaterInt(false),
            mMapColor(0),
-           mRefNumCounter(0)
+           mRefNumCounter(-1)
   {}
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
@@ -133,6 +133,7 @@ struct Cell
   void loadCell(ESMReader &esm, bool saveContext = true); // Load everything, except NAME, DATAstruct and references
 
   void save(ESMWriter &esm, bool isDeleted = false) const;
+  void saveTempMarker(ESMWriter &esm, int tempCount) const;
 
   bool isExterior() const
   {
@@ -183,7 +184,7 @@ struct Cell
   /// \param ignoreMoves ignore MVRF record and read reference like a regular CellRef.
   static bool getNextRef(ESMReader &esm, 
                          CellRef &ref, 
-                         bool &isDeleted, 
+                         bool &isDeleted,
                          bool ignoreMoves = false, 
                          MovedCellRef *mref = nullptr);
 

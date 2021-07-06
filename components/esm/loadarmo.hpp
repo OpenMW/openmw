@@ -94,6 +94,7 @@ struct Armor
     AODTstruct mData;
     PartReferenceList mParts;
 
+    unsigned int mRecordFlags;
     std::string mId, mName, mModel, mIcon, mScript, mEnchant;
 
     void load(ESMReader &esm, bool &isDeleted);

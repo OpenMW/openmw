@@ -1108,7 +1108,6 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
             case 5: return static_cast<int>(record.get().mNpdt.mReputation);
             case 6: return static_cast<int>(record.get().mNpdt.mRank);
             case 7: return record.get().mNpdt.mGold;
-            case 8: return record.get().mPersistent == true;
             default: return QVariant(); // throw an exception here?
         }
     else
@@ -1122,7 +1121,6 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
             case 5: return static_cast<int>(record.get().mNpdt.mReputation);
             case 6: return static_cast<int>(record.get().mNpdt.mRank);
             case 7: return record.get().mNpdt.mGold;
-            case 8: return record.get().mPersistent == true;
             default: return QVariant(); // throw an exception here?
         }
 }
@@ -1147,7 +1145,6 @@ void CSMWorld::NpcMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
             case 5: npc.mNpdt.mReputation = static_cast<signed char>(value.toInt()); break;
             case 6: npc.mNpdt.mRank = static_cast<signed char>(value.toInt()); break;
             case 7: npc.mNpdt.mGold = value.toInt(); break;
-            case 8: npc.mPersistent = value.toBool(); break;
             default: return; // throw an exception here?
         }
     else
@@ -1161,7 +1158,6 @@ void CSMWorld::NpcMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
             case 5: npc.mNpdt.mReputation = static_cast<signed char>(value.toInt()); break;
             case 6: npc.mNpdt.mRank = static_cast<signed char>(value.toInt()); break;
             case 7: npc.mNpdt.mGold = value.toInt(); break;
-            case 8: npc.mPersistent = value.toBool(); break;
             default: return; // throw an exception here?
         }
 
@@ -1170,7 +1166,7 @@ void CSMWorld::NpcMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
 
 int CSMWorld::NpcMiscRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
 {
-    return 9; // Level, Health, Mana, Fatigue, Disposition, Reputation, Rank, Gold, Persist
+    return 8; // Level, Health, Mana, Fatigue, Disposition, Reputation, Rank, Gold
 }
 
 int CSMWorld::NpcMiscRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const

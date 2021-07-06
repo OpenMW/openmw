@@ -11,6 +11,7 @@ namespace ESM
     void Book::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
 
         bool hasName = false;
         bool hasData = false;
@@ -66,7 +67,7 @@ namespace ESM
 
         if (isDeleted)
         {
-            esm.writeHNCString("DELE", "");
+            esm.writeHNString("DELE", "", 3);
             return;
         }
 

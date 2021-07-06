@@ -3,6 +3,8 @@
 
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
+    Bug #3905: Great House Dagoth issues
+    Bug #5120: Scripted object spawning updates physics system
     Bug #5379: Wandering NPCs falling through cantons
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
@@ -16,6 +18,7 @@
     Bug #6131: Item selection in the avatar window not working correctly for large window sizes
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Feature #5489: MCP: Telekinesis fix for activators
+    Feature #6017: Separate persistent and temporary cell references when saving
 
 0.47.0
 ------
