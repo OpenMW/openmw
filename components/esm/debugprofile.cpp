@@ -44,7 +44,7 @@ void ESM::DebugProfile::save (ESMWriter& esm, bool isDeleted) const
 
     if (isDeleted)
     {
-        esm.writeHNCString("DELE", "");
+        esm.writeHNString("DELE", "", 3);
         return;
     }
 
