@@ -200,7 +200,7 @@ float makeOsgColorComponent(unsigned int value, unsigned int shift)
     return float((value >> shift) & 0xFFu) / 255.0f;
 }
 
-bool hasUserDescription(const osg::Node* node, const std::string pattern)
+bool hasUserDescription(const osg::Node* node, const std::string& pattern)
 {
     if (node == nullptr)
         return false;
@@ -218,7 +218,7 @@ bool hasUserDescription(const osg::Node* node, const std::string pattern)
     return false;
 }
 
-osg::ref_ptr<GlowUpdater> addEnchantedGlow(osg::ref_ptr<osg::Node> node, Resource::ResourceSystem* resourceSystem, osg::Vec4f glowColor, float glowDuration)
+osg::ref_ptr<GlowUpdater> addEnchantedGlow(osg::ref_ptr<osg::Node> node, Resource::ResourceSystem* resourceSystem, const osg::Vec4f& glowColor, float glowDuration)
 {
     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
     for (int i=0; i<32; ++i)

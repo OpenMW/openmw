@@ -7,11 +7,6 @@ namespace ESM
 
 using namespace Misc;
 
-    std::string ESMReader::getName() const
-    {
-        return mCtx.filename;
-    }
-
 ESM_Context ESMReader::getContext()
 {
     // Update the file position before returning
@@ -27,11 +22,6 @@ ESMReader::ESMReader()
     , mFileSize(0)
 {
     clearCtx();
-}
-
-int ESMReader::getFormat() const
-{
-    return mHeader.mFormat;
 }
 
 void ESMReader::restoreContext(const ESM_Context &rc)
@@ -181,11 +171,6 @@ bool ESMReader::peekNextSub(const char *name)
     return mCtx.subName == name;
 }
 
-void ESMReader::cacheSubName()
-{
-    mCtx.subCached = true;
-}
-
 // Read subrecord name. This gets called a LOT, so I've optimized it
 // slightly.
 void ESMReader::getSubName()
@@ -315,7 +300,7 @@ std::string ESMReader::getString(int size)
     return std::string (ptr, size);
 }
 
-void ESMReader::fail(const std::string &msg)
+[[noreturn]] void ESMReader::fail(const std::string &msg)
 {
     std::stringstream ss;
 
@@ -326,21 +311,6 @@ void ESMReader::fail(const std::string &msg)
     if (mEsm.get())
         ss << "\n  Offset: 0x" << std::hex << mEsm->tellg();
     throw std::runtime_error(ss.str());
-}
-
-void ESMReader::setEncoder(ToUTF8::Utf8Encoder* encoder)
-{
-    mEncoder = encoder;
-}
-
-size_t ESMReader::getFileOffset() const
-{
-    return mEsm->tellg();
-}
-
-void ESMReader::skip(int bytes)
-{
-    mEsm->seekg(getFileOffset()+bytes);
 }
 
 }

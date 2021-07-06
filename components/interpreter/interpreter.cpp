@@ -81,13 +81,13 @@ namespace Interpreter
         abortUnknownSegment (code);
     }
 
-    void Interpreter::abortUnknownCode (int segment, int opcode)
+    [[noreturn]] void Interpreter::abortUnknownCode (int segment, int opcode)
     {
         const std::string error = "unknown opcode " + std::to_string(opcode) + " in segment " + std::to_string(segment);
         throw std::runtime_error (error);
     }
 
-    void Interpreter::abortUnknownSegment (Type_Code code)
+    [[noreturn]] void Interpreter::abortUnknownSegment (Type_Code code)
     {
         const std::string error = "opcode outside of the allocated segment range: " + std::to_string(code);
         throw std::runtime_error (error);

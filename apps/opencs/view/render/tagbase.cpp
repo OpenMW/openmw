@@ -8,7 +8,7 @@ CSVRender::Mask CSVRender::TagBase::getMask() const
     return mMask;
 }
 
-QString CSVRender::TagBase::getToolTip (bool hideBasics) const
+QString CSVRender::TagBase::getToolTip (bool hideBasics, const WorldspaceHitResult& /*hit*/) const
 {
     return "";
 }

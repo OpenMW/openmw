@@ -43,7 +43,7 @@ namespace DetourNavigator
 
         void removeOffMeshConnections(const ObjectId id);
 
-        void update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents);
+        void update(const osg::Vec3f& playerPosition, const osg::Vec3f& agentHalfExtents);
 
         void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
 

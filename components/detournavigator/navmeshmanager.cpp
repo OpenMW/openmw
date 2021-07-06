@@ -133,7 +133,7 @@ namespace DetourNavigator
             addChangedTile(tile, ChangeType::update);
     }
 
-    void NavMeshManager::update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents)
+    void NavMeshManager::update(const osg::Vec3f& playerPosition, const osg::Vec3f& agentHalfExtents)
     {
         const auto playerTile = getTilePosition(mSettings, toNavMeshCoordinates(mSettings, playerPosition));
         auto& lastRevision = mLastRecastMeshManagerRevision[agentHalfExtents];

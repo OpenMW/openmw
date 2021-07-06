@@ -1,5 +1,7 @@
 #include "findsmoothpath.hpp"
 
+#include <components/misc/convert.hpp>
+
 #include <algorithm>
 #include <array>
 
@@ -103,7 +105,7 @@ namespace DetourNavigator
         return result;
     }
 
-    std::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navQuery, const osg::Vec3f& startPos,
+    std::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& startPos,
             const osg::Vec3f& endPos, const float minTargetDist, const std::vector<dtPolyRef>& path)
     {
         // Find steer target.
@@ -113,8 +115,11 @@ namespace DetourNavigator
         std::array<unsigned char, maxSteerPoints> steerPathFlags;
         std::array<dtPolyRef, maxSteerPoints> steerPathPolys;
         int nsteerPath = 0;
-        navQuery.findStraightPath(startPos.ptr(), endPos.ptr(), path.data(), int(path.size()), steerPath.data(),
-            steerPathFlags.data(), steerPathPolys.data(), &nsteerPath, maxSteerPoints);
+        const dtStatus status = navMeshQuery.findStraightPath(startPos.ptr(), endPos.ptr(), path.data(),
+            static_cast<int>(path.size()), steerPath.data(), steerPathFlags.data(), steerPathPolys.data(),
+            &nsteerPath, maxSteerPoints);
+        if (dtStatusFailed(status))
+            return std::nullopt;
         assert(nsteerPath >= 0);
         if (!nsteerPath)
             return std::nullopt;
@@ -125,7 +130,7 @@ namespace DetourNavigator
         {
             // Stop at Off-Mesh link or when point is further than slop away.
             if ((steerPathFlags[ns] & DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
-                    !inRange(Misc::Convert::makeOsgVec3f(&steerPath[ns * 3]), startPos, minTargetDist, 1000.0f))
+                    !inRange(Misc::Convert::makeOsgVec3f(&steerPath[ns * 3]), startPos, minTargetDist))
                 break;
             ns++;
         }

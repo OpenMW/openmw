@@ -217,7 +217,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         profile.mTimePlayed = mTimePlayed;
         profile.mDescription = description;
 
-        Log(Debug::Info) << "Making a screenshot for saved game '" << description << "'";;
+        Log(Debug::Info) << "Making a screenshot for saved game '" << description << "'";
         writeScreenshot(profile.mScreenshot);
 
         if (!slot)

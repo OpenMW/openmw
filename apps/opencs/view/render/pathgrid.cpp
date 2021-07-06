@@ -16,6 +16,7 @@
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtree.hpp"
+#include "worldspacewidget.hpp"
 
 namespace CSVRender
 {
@@ -40,10 +41,13 @@ namespace CSVRender
         return mPathgrid;
     }
 
-    QString PathgridTag::getToolTip(bool hideBasics) const
+    QString PathgridTag::getToolTip(bool /*hideBasics*/, const WorldspaceHitResult& hit) const
     {
         QString text("Pathgrid: ");
         text += mPathgrid->getId().c_str();
+        text += " (";
+        text += QString::number(SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0)));
+        text += ")";
 
         return text;
     }

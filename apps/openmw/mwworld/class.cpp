@@ -25,16 +25,12 @@ namespace MWWorld
 {
     std::map<std::string, std::shared_ptr<Class> > Class::sClasses;
 
-    Class::Class() {}
-
-    Class::~Class() {}
-
     void Class::insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const
     {
 
     }
 
-    void Class::insertObject(const Ptr& ptr, const std::string& mesh, MWPhysics::PhysicsSystem& physics) const
+    void Class::insertObject(const Ptr& ptr, const std::string& mesh, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
     {
 
     }

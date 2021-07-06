@@ -318,7 +318,7 @@ bool Settings::SettingsFileParser::skipWhiteSpace(size_t& i, std::string& str)
     return i < str.size();
 }
 
-void Settings::SettingsFileParser::fail(const std::string& message)
+[[noreturn]] void Settings::SettingsFileParser::fail(const std::string& message)
 {
     std::stringstream error;
     error << "Error on line " << mLine << " in " << mFile << ":\n" << message;

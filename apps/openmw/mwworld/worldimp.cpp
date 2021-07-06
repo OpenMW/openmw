@@ -753,7 +753,7 @@ namespace MWWorld
 
         FindContainerVisitor(const ConstPtr& containedPtr) : mContainedPtr(containedPtr) {}
 
-        bool operator() (Ptr ptr)
+        bool operator() (const Ptr& ptr)
         {
             if (mContainedPtr.getContainerStore() == &ptr.getClass().getContainerStore(ptr))
             {
@@ -1224,7 +1224,7 @@ namespace MWWorld
             if (movePhysics)
             {
                 if (const auto object = mPhysics->getObject(ptr))
-                    updateNavigatorObject(object);
+                    updateNavigatorObject(*object);
             }
         }
 
@@ -1283,7 +1283,7 @@ namespace MWWorld
         if (mPhysics->getActor(ptr))
             mNavigator->addAgent(getPathfindingHalfExtents(ptr));
         else if (const auto object = mPhysics->getObject(ptr))
-            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
+            updateNavigatorObject(*object);
     }
 
     void World::rotateObjectImp(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
@@ -1332,7 +1332,7 @@ namespace MWWorld
             mWorldScene->updateObjectRotation(ptr, order);
 
             if (const auto object = mPhysics->getObject(ptr))
-                updateNavigatorObject(object);
+                updateNavigatorObject(*object);
         }
     }
 
@@ -1421,10 +1421,10 @@ namespace MWWorld
             mWorldScene->removeFromPagedRefs(ptr);
 
             mRendering->rotateObject(ptr, rotate);
-            mPhysics->updateRotation(ptr);
+            mPhysics->updateRotation(ptr, rotate);
 
             if (const auto object = mPhysics->getObject(ptr))
-                updateNavigatorObject(object);
+                updateNavigatorObject(*object);
         }
     }
 
@@ -1544,14 +1544,11 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
-        mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
-        {
-            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
-        });
+        mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object) { updateNavigatorObject(*object); });
 
         for (const auto& door : mDoorStates)
             if (const auto object = mPhysics->getObject(door.first))
-                mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
+                updateNavigatorObject(*object);
 
         if (mShouldUpdateNavigator)
         {
@@ -1560,13 +1557,14 @@ namespace MWWorld
         }
     }
 
-    bool World::updateNavigatorObject(const MWPhysics::Object* object)
+    void World::updateNavigatorObject(const MWPhysics::Object& object)
     {
         const DetourNavigator::ObjectShapes shapes {
-            *object->getShapeInstance()->getCollisionShape(),
-            object->getShapeInstance()->getAvoidCollisionShape()
+            *object.getShapeInstance()->getCollisionShape(),
+            object.getShapeInstance()->getAvoidCollisionShape()
         };
-        return mNavigator->updateObject(DetourNavigator::ObjectId(object), shapes, object->getTransform());
+        mShouldUpdateNavigator = mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform())
+            || mShouldUpdateNavigator;
     }
 
     const MWPhysics::RayCastingInterface* World::getRayCasting() const
@@ -2552,7 +2550,14 @@ namespace MWWorld
 
     MWRender::Animation* World::getAnimation(const MWWorld::Ptr &ptr)
     {
-        return mRendering->getAnimation(ptr);
+        auto* animation = mRendering->getAnimation(ptr);
+        if(!animation) {
+            mWorldScene->removeFromPagedRefs(ptr);
+            animation = mRendering->getAnimation(ptr);
+            if(animation)
+                mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+        }
+        return animation;
     }
 
     const MWRender::Animation* World::getAnimation(const MWWorld::ConstPtr &ptr) const
@@ -3836,7 +3841,7 @@ namespace MWWorld
 
     struct ResetActorsVisitor
     {
-        bool operator() (Ptr ptr)
+        bool operator() (const Ptr& ptr)
         {
             if (ptr.getClass().isActor() && ptr.getCellRef().hasContentFile())
             {

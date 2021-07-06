@@ -904,6 +904,7 @@ void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & sh
         program->addShader(castingVertexShader);
         program->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", { {"alphaFunc", std::to_string(alphaFunc)},
                                                                                     {"alphaToCoverage", "0"},
+                                                                                    {"adjustCoverage", "1"},
                                                                                     {"useGPUShader4", useGPUShader4}
                                                                                   }, osg::Shader::FRAGMENT));
     }
@@ -1996,7 +1997,7 @@ struct ConvexHull
         }
     };
 
-    Vertices findInternalEdges(osg::Vec3d mainVertex, Vertices connectedVertices)
+    Vertices findInternalEdges(const osg::Vec3d& mainVertex, const Vertices& connectedVertices)
     {
         Vertices internalEdgeVertices;
         for (const auto& vertex : connectedVertices)

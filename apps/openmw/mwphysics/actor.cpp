@@ -68,7 +68,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     updateScale();
 
     if(!mRotationallyInvariant)
-        updateRotation();
+        setRotation(mPtr.getRefData().getBaseNode()->getAttitude());
 
     updatePosition();
     addCollisionMask(getCollisionMask());
@@ -197,10 +197,10 @@ osg::Vec3f Actor::getPreviousPosition() const
     return mPreviousPosition;
 }
 
-void Actor::updateRotation ()
+void Actor::setRotation(osg::Quat quat)
 {
     std::scoped_lock lock(mPositionMutex);
-    mRotation = mPtr.getRefData().getBaseNode()->getAttitude();
+    mRotation = quat;
 }
 
 bool Actor::isRotationallyInvariant() const

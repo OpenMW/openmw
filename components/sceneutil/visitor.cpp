@@ -65,11 +65,7 @@ namespace SceneUtil
         if (trans.libraryName() == std::string("osgAnimation"))
         {
             // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses whitespace-separated names)
-            std::string underscore = "_";
-            std::size_t foundUnderscore = originalNodeName.find(underscore);
-
-            if (foundUnderscore != std::string::npos)
-                std::replace(originalNodeName.begin(), originalNodeName.end(), '_', ' ');
+            std::replace(originalNodeName.begin(), originalNodeName.end(), '_', ' ');
         }
 
         const std::string nodeName = originalNodeName;

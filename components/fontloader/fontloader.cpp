@@ -75,64 +75,59 @@ namespace
         return unicode;
     }
 
+    /// This is a hack for Polish font
+    unsigned char mapUtf8Char(unsigned char c) {
+        switch(c){
+            case 0x80: return 0xc6;
+            case 0x81: return 0x9c;
+            case 0x82: return 0xe6;
+            case 0x83: return 0xb3;
+            case 0x84: return 0xf1;
+            case 0x85: return 0xb9;
+            case 0x86: return 0xbf;
+            case 0x87: return 0x9f;
+            case 0x88: return 0xea;
+            case 0x89: return 0xea;
+            case 0x8a: return 0x00; // not contained in win1250
+            case 0x8b: return 0x00; // not contained in win1250
+            case 0x8c: return 0x8f;
+            case 0x8d: return 0xaf;
+            case 0x8e: return 0xa5;
+            case 0x8f: return 0x8c;
+            case 0x90: return 0xca;
+            case 0x93: return 0xa3;
+            case 0x94: return 0xf6;
+            case 0x95: return 0xf3;
+            case 0x96: return 0xaf;
+            case 0x97: return 0x8f;
+            case 0x99: return 0xd3;
+            case 0x9a: return 0xd1;
+            case 0x9c: return 0x00; // not contained in win1250
+            case 0xa0: return 0xb9;
+            case 0xa1: return 0xaf;
+            case 0xa2: return 0xf3;
+            case 0xa3: return 0xbf;
+            case 0xa4: return 0x00; // not contained in win1250
+            case 0xe1: return 0x8c;
+            case 0xe3: return 0x00; // not contained in win1250
+            case 0xf5: return 0x00; // not contained in win1250
+            default: return c;
+        }
+    }
+
     // getUtf8, aka the worst function ever written.
     // This includes various hacks for dealing with Morrowind's .fnt files that are *mostly*
     // in the expected win12XX encoding, but also have randomly swapped characters sometimes.
     // Looks like the Morrowind developers found standard encodings too boring and threw in some twists for fun.
     std::string getUtf8 (unsigned char c, ToUTF8::Utf8Encoder& encoder, ToUTF8::FromType encoding)
     {
-        if (encoding == ToUTF8::WINDOWS_1250)
-        {
-            // Hacks for polish font
-            unsigned char win1250;
-            std::map<unsigned char, unsigned char> conv;
-            conv[0x80] = 0xc6;
-            conv[0x81] = 0x9c;
-            conv[0x82] = 0xe6;
-            conv[0x83] = 0xb3;
-            conv[0x84] = 0xf1;
-            conv[0x85] = 0xb9;
-            conv[0x86] = 0xbf;
-            conv[0x87] = 0x9f;
-            conv[0x88] = 0xea;
-            conv[0x89] = 0xea;
-            conv[0x8a] = 0x0; // not contained in win1250
-            conv[0x8b] = 0x0; // not contained in win1250
-            conv[0x8c] = 0x8f;
-            conv[0x8d] = 0xaf;
-            conv[0x8e] = 0xa5;
-            conv[0x8f] = 0x8c;
-            conv[0x90] = 0xca;
-            conv[0x93] = 0xa3;
-            conv[0x94] = 0xf6;
-            conv[0x95] = 0xf3;
-            conv[0x96] = 0xaf;
-            conv[0x97] = 0x8f;
-            conv[0x99] = 0xd3;
-            conv[0x9a] = 0xd1;
-            conv[0x9c] = 0x0; // not contained in win1250
-            conv[0xa0] = 0xb9;
-            conv[0xa1] = 0xaf;
-            conv[0xa2] = 0xf3;
-            conv[0xa3] = 0xbf;
-            conv[0xa4] = 0x0; // not contained in win1250
-            conv[0xe1] = 0x8c;
-            // Can't remember if this was supposed to read 0xe2, or is it just an extraneous copypaste?
-            //conv[0xe1] = 0x8c;
-            conv[0xe3] = 0x0; // not contained in win1250
-            conv[0xf5] = 0x0; // not contained in win1250
-
-            if (conv.find(c) != conv.end())
-                win1250 = conv[c];
-            else
-                win1250 = c;
-            return encoder.getUtf8(std::string(1, win1250));
-        }
+        if (encoding == ToUTF8::WINDOWS_1250) // Hack for polish font
+            return encoder.getUtf8(std::string(1, mapUtf8Char(c)));
         else
             return encoder.getUtf8(std::string(1, c));
     }
 
-    void fail (Files::IStreamPtr file, const std::string& fileName, const std::string& message)
+    [[noreturn]] void fail (Files::IStreamPtr file, const std::string& fileName, const std::string& message)
     {
         std::stringstream error;
         error << "Font loading error: " << message;

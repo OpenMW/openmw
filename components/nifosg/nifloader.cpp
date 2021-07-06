@@ -2011,6 +2011,11 @@ namespace NifOsg
                     {
                         osg::ref_ptr<osg::BlendFunc> blendFunc (new osg::BlendFunc(getBlendMode((alphaprop->flags>>1)&0xf),
                                                                                    getBlendMode((alphaprop->flags>>5)&0xf)));
+                        // on AMD hardware, alpha still seems to be stored with an RGBA framebuffer with OpenGL.
+                        // This might be mandated by the OpenGL 2.1 specification section 2.14.9, or might be a bug.
+                        // Either way, D3D8.1 doesn't do that, so adapt the destination factor.
+                        if (blendFunc->getDestination() == GL_DST_ALPHA)
+                            blendFunc->setDestination(GL_ONE);
                         blendFunc = shareAttribute(blendFunc);
                         stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
 

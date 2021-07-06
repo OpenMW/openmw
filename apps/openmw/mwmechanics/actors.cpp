@@ -826,7 +826,7 @@ namespace MWMechanics
 
         DynamicStat<float> magicka = creatureStats.getMagicka();
         float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
-        float currentToBaseRatio = (magicka.getCurrent() / magicka.getBase());
+        float currentToBaseRatio = magicka.getBase() > 0 ? magicka.getCurrent() / magicka.getBase() : 0;
         magicka.setModified(magicka.getModified() + diff, 0);
         magicka.setCurrent(magicka.getBase() * currentToBaseRatio, false, true);
         creatureStats.setMagicka(magicka);
@@ -1667,7 +1667,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell)
+    void Actors::castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell)
     {
         PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
@@ -2396,9 +2396,15 @@ namespace MWMechanics
             float radius = std::min(fSneakUseDist, mActorsProcessingRange);
             getObjectsInRange(position, radius, observers);
 
+            std::set<MWWorld::Ptr> sidingActors;
+            getActorsSidingWith(player, sidingActors);
+
             for (const MWWorld::Ptr &observer : observers)
             {
                 if (observer == player || observer.getClass().getCreatureStats(observer).isDead())
+                    continue;
+
+                if (sidingActors.find(observer) != sidingActors.cend())
                     continue;
 
                 if (world->getLOS(player, observer))

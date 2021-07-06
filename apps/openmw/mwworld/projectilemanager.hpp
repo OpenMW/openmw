@@ -51,8 +51,8 @@ namespace MWWorld
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
         void launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection);
 
-        void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
-                                       const osg::Vec3f& pos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength);
+        void launchProjectile (const MWWorld::Ptr& actor, const MWWorld::ConstPtr& projectile,
+                                       const osg::Vec3f& pos, const osg::Quat& orient, const MWWorld::Ptr& bow, float speed, float attackStrength);
 
         void updateCasters();
 

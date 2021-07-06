@@ -4,7 +4,7 @@
 
 namespace MWMechanics
 {
-    MWWorld::ContainerStoreIterator getActiveWeapon(MWWorld::Ptr actor, int *weaptype)
+    MWWorld::ContainerStoreIterator getActiveWeapon(const MWWorld::Ptr& actor, int *weaptype)
     {
         MWWorld::InventoryStore &inv = actor.getClass().getInventoryStore(actor);
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);

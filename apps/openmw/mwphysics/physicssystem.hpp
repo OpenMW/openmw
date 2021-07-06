@@ -122,7 +122,7 @@ namespace MWPhysics
             void setWaterHeight(float height);
             void disableWater();
 
-            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType = CollisionType_World);
+            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType = CollisionType_World, bool skipAnimated = false);
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
             int addProjectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius, bool canTraverseWater);
@@ -143,7 +143,7 @@ namespace MWPhysics
             void remove (const MWWorld::Ptr& ptr);
 
             void updateScale (const MWWorld::Ptr& ptr);
-            void updateRotation (const MWWorld::Ptr& ptr);
+            void updateRotation (const MWWorld::Ptr& ptr, osg::Quat rotate);
             void updatePosition (const MWWorld::Ptr& ptr);
 
             void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject);
@@ -175,7 +175,7 @@ namespace MWPhysics
 
             /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all other actors.
             RayCastingResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
-                    std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>(),
+                    const std::vector<MWWorld::Ptr>& targets = std::vector<MWWorld::Ptr>(),
                     int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const override;
 
             RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius) const override;

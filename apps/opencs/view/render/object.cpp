@@ -61,7 +61,7 @@ CSVRender::ObjectTag::ObjectTag (Object* object)
 : TagBase (Mask_Reference), mObject (object)
 {}
 
-QString CSVRender::ObjectTag::getToolTip (bool hideBasics) const
+QString CSVRender::ObjectTag::getToolTip(bool /*hideBasics*/, const WorldspaceHitResult& /*hit*/) const
 {
     return QString::fromUtf8 (mObject->getReferenceableId().c_str());
 }

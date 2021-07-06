@@ -48,11 +48,9 @@ namespace MWScript
                 Compiler::Locals mLocals;
                 std::set<std::string> mInactive;
 
-                CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals)
-                {
-                    mByteCode = code;
-                    mLocals = locals;
-                }
+                CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals):
+                    mByteCode(code), mLocals(locals)
+                {}
             };
 
             typedef std::map<std::string, CompiledScript> ScriptCollection;

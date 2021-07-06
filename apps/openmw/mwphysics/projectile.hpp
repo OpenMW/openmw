@@ -58,11 +58,11 @@ namespace MWPhysics
         }
 
         MWWorld::Ptr getCaster() const;
-        void setCaster(MWWorld::Ptr caster);
+        void setCaster(const MWWorld::Ptr& caster);
 
         bool canTraverseWater() const;
 
-        void hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal);
+        void hit(const MWWorld::Ptr& target, btVector3 pos, btVector3 normal);
 
         void setValidTargets(const std::vector<MWWorld::Ptr>& targets);
         bool isValidTarget(const MWWorld::Ptr& target) const;

@@ -3,10 +3,20 @@
 
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
+    Bug #5379: Wandering NPCs falling through cantons
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
+    Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
+    Bug #6066: addtopic "return" does not work from within script. No errors thrown
+    Bug #6067: esp loader fails in for certain subrecord orders
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
+    Bug #6107: Fatigue is incorrectly recalculated when fortify effect is applied or removed
+    Bug #6115: Showmap overzealous matching
+    Bug #6129: Player avatar not displayed correctly for large window sizes when GUI scaling active
+    Bug #6131: Item selection in the avatar window not working correctly for large window sizes
+    Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Task #6017: Separate persistent and temporary cell references when saving
+
 
 0.47.0
 ------
@@ -140,6 +150,7 @@
     Bug #6036: OpenMW-CS: Terrain selection at the border of cells omits certain corner vertices
     Bug #6043: Actor can have torch missing when torch animation is played
     Bug #6047: Mouse bindings can be triggered during save loading
+    Bug #6136: Game freezes when NPCs try to open doors that are about to be closed
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu

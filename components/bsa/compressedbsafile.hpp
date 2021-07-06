@@ -87,7 +87,7 @@ namespace Bsa
         virtual ~CompressedBSAFile();
 
         //checks version of BSA from file header
-        static BsaVersion detectVersion(std::string filePath);
+        static BsaVersion detectVersion(const std::string& filePath);
 
         /// Read header information from the input source
         void readHeader() override;

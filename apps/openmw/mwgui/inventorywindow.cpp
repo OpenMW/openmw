@@ -461,14 +461,10 @@ namespace MWGui
 
     void InventoryWindow::updatePreviewSize()
     {
-        MyGUI::IntSize size = mAvatarImage->getSize();
-        int width = std::min(mPreview->getTextureWidth(), size.width);
-        int height = std::min(mPreview->getTextureHeight(), size.height);
-        float scalingFactor = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-        mPreview->setViewport(int(width*scalingFactor), int(height*scalingFactor));
-
+        const MyGUI::IntSize viewport = getPreviewViewportSize();
+        mPreview->setViewport(viewport.width, viewport.height);
         mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f,
-                                                                     width*scalingFactor/float(mPreview->getTextureWidth()), height*scalingFactor/float(mPreview->getTextureHeight())));
+                                                                     viewport.width / float(mPreview->getTextureWidth()), viewport.height / float(mPreview->getTextureHeight())));
     }
 
     void InventoryWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
@@ -629,15 +625,8 @@ namespace MWGui
 
     MWWorld::Ptr InventoryWindow::getAvatarSelectedItem(int x, int y)
     {
-        // convert to OpenGL lower-left origin
-        y = (mAvatarImage->getHeight()-1) - y;
-
-        // Scale coordinates
-        float scalingFactor = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-        x = static_cast<int>(x*scalingFactor);
-        y = static_cast<int>(y*scalingFactor);
-
-        int slot = mPreview->getSlotSelected (x, y);
+        const osg::Vec2f viewport_coords = mapPreviewWindowToViewport(x, y);
+        int slot = mPreview->getSlotSelected(viewport_coords.x(), viewport_coords.y());
 
         if (slot == -1)
             return MWWorld::Ptr();
@@ -831,5 +820,27 @@ namespace MWGui
     void InventoryWindow::rebuildAvatar()
     {
         mPreview->rebuild();
+    }
+
+    MyGUI::IntSize InventoryWindow::getPreviewViewportSize() const
+    {
+        const MyGUI::IntSize previewWindowSize = mAvatarImage->getSize();
+        const float scale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
+
+        return MyGUI::IntSize(std::min<int>(mPreview->getTextureWidth(), previewWindowSize.width * scale),
+                              std::min<int>(mPreview->getTextureHeight(), previewWindowSize.height * scale));
+    }
+
+    osg::Vec2f InventoryWindow::mapPreviewWindowToViewport(int x, int y) const
+    {
+        const MyGUI::IntSize previewWindowSize = mAvatarImage->getSize();
+        const float normalisedX = x / std::max<float>(1.0f, previewWindowSize.width);
+        const float normalisedY = y / std::max<float>(1.0f, previewWindowSize.height);
+
+        const MyGUI::IntSize viewport = getPreviewViewportSize();
+        return osg::Vec2f(
+            normalisedX * float(viewport.width - 1),
+            (1.0 - normalisedY) * float(viewport.height - 1)
+        );
     }
 }

@@ -55,10 +55,10 @@ namespace MWClass
         }
     }
 
-    void Door::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
+    void Door::insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
     {
         if(!model.empty())
-            physics.addObject(ptr, model, MWPhysics::CollisionType_Door);
+            physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_Door, skipAnimated);
 
         // Resume the door's opening/closing animation if it wasn't finished
         if (ptr.getRefData().getCustomData())
@@ -132,12 +132,14 @@ namespace MWClass
             MWBase::Environment::get().getWorld()->getMaxActivationDistance())
         {
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+            if(animation)
+            {
+                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
+                const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
 
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-            int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
-            const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
-
-            animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
+                animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
+            }
         }
 
         const std::string keyId = ptr.getCellRef().getKey();

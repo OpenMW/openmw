@@ -26,7 +26,7 @@ namespace MWMechanics
         PtrControllerMap mObjects;
 
     public:
-        Objects();
+        Objects() = default;
         ~Objects();
 
         void addObject (const MWWorld::Ptr& ptr);

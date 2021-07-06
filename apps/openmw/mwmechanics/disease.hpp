@@ -21,7 +21,7 @@ namespace MWMechanics
     /// Call when \a actor has got in contact with \a carrier (e.g. hit by him, or loots him)
     /// @param actor The actor that will potentially catch diseases. Currently only the player can catch diseases.
     /// @param carrier The disease carrier.
-    inline void diseaseContact (MWWorld::Ptr actor, MWWorld::Ptr carrier)
+    inline void diseaseContact (const MWWorld::Ptr& actor, const MWWorld::Ptr& carrier)
     {
         if (!carrier.getClass().isActor() || actor != getPlayer())
             return;

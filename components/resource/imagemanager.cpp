@@ -94,7 +94,7 @@ namespace Resource
             Files::IStreamPtr stream;
             try
             {
-                stream = mVFS->get(normalized.c_str());
+                stream = mVFS->get(normalized);
             }
             catch (std::exception& e)
             {

@@ -12,7 +12,8 @@
 #include <osg/Vec2i>
 #include <osg/Vec3f>
 
-#include <utility>
+#include <algorithm>
+#include <cmath>
 
 namespace DetourNavigator
 {
@@ -28,7 +29,7 @@ namespace DetourNavigator
 
     inline float getRadius(const Settings& settings, const osg::Vec3f& agentHalfExtents)
     {
-        return agentHalfExtents.x() * settings.mRecastScaleFactor;
+        return std::max(agentHalfExtents.x(), agentHalfExtents.y()) * std::sqrt(2) * settings.mRecastScaleFactor;
     }
 
     inline float toNavMeshCoordinates(const Settings& settings, float value)

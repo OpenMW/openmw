@@ -1162,7 +1162,7 @@ namespace MWWorld
         update(mBooks.mList);
     }
 
-    void MWWorld::CellStore::checkItem(Ptr ptr)
+    void MWWorld::CellStore::checkItem(const Ptr& ptr)
     {
         if (ptr.getClass().getEnchantment(ptr).empty())
             return;

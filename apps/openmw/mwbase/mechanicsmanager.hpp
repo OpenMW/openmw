@@ -88,7 +88,7 @@ namespace MWBase
             virtual void setPlayerClass (const ESM::Class& class_) = 0;
             ///< Set player class to custom class.
 
-            virtual void restoreDynamicStats(MWWorld::Ptr actor, double hours, bool sleep) = 0;
+            virtual void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep) = 0;
 
             virtual void rest(double hours, bool sleep) = 0;
             ///< If the player is sleeping or waiting, this should be called every hour.
@@ -230,7 +230,7 @@ namespace MWBase
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const = 0;
             virtual bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const = 0;
 
-            virtual void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell) = 0;
+            virtual void castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell) = 0;
 
             virtual void processChangedSettings (const std::set< std::pair<std::string, std::string> >& settings) = 0;
 

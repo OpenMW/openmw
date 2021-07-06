@@ -50,15 +50,16 @@ namespace MWDialogue
             const MWWorld::Store<ESM::Dialogue> & dialogs =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
-            std::list<std::string> keywordList;
-            for (MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin(); it != dialogs.end(); ++it)
-                keywordList.push_back(Misc::StringUtils::lowerCase(it->mId));
-            keywordList.sort(Misc::StringUtils::ciLess);
+            std::vector<std::string> keywordList;
+            keywordList.reserve(dialogs.getSize());
+            for (const auto& it : dialogs)
+                keywordList.push_back(Misc::StringUtils::lowerCase(it.mId));
+            sort(keywordList.begin(), keywordList.end());
 
             KeywordSearch<std::string, int /*unused*/> keywordSearch;
 
-            for (std::list<std::string>::const_iterator it = keywordList.begin(); it != keywordList.end(); ++it)
-                keywordSearch.seed(*it, 0 /*unused*/);
+            for (const auto& it : keywordList)
+                keywordSearch.seed(it, 0 /*unused*/);
 
             std::vector<KeywordSearch<std::string, int /*unused*/>::Match> matches;
             keywordSearch.highlightKeywords(text.begin(), text.end(), matches);

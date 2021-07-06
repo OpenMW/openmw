@@ -78,7 +78,7 @@ bool Projectile::canTraverseWater() const
     return mCanCrossWaterSurface;
 }
 
-void Projectile::hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal)
+void Projectile::hit(const MWWorld::Ptr& target, btVector3 pos, btVector3 normal)
 {
     if (!mActive.load(std::memory_order_acquire))
         return;
@@ -95,7 +95,7 @@ MWWorld::Ptr Projectile::getCaster() const
     return mCaster;
 }
 
-void Projectile::setCaster(MWWorld::Ptr caster)
+void Projectile::setCaster(const MWWorld::Ptr& caster)
 {
     std::scoped_lock lock(mMutex);
     mCaster = caster;
