@@ -15,6 +15,7 @@ namespace MWClass
             ///< Add reference into a cell for rendering
 
             void insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated = false) const override;
+            void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated = false) const override;
 
             std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.

@@ -168,6 +168,8 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    if(!ptr.isEmpty() && !ptr.mRef->mData.isEnabled())
+                        ptr.mRef->mData.mPhysicsPostponed = false;
                     MWBase::Environment::get().getWorld()->enable (ptr);
                 }
         };

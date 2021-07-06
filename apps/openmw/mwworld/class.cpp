@@ -35,6 +35,9 @@ namespace MWWorld
 
     }
 
+    void Class::insertObjectPhysics(const Ptr& ptr, const std::string& mesh, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
+    {}
+
     bool Class::apply (const MWWorld::Ptr& ptr, const std::string& id,  const MWWorld::Ptr& actor) const
     {
         return false;

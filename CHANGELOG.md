@@ -3,6 +3,8 @@
 
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
+    Bug #3905: Great House Dagoth issues
+    Bug #5120: Scripted object spawning updates physics system
     Bug #5379: Wandering NPCs falling through cantons
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
