@@ -1166,7 +1166,7 @@ void CSMWorld::NpcMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
 
 int CSMWorld::NpcMiscRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
 {
-    return 9; // Level, Health, Mana, Fatigue, Disposition, Reputation, Rank, Gold, Persist
+    return 8; // Level, Health, Mana, Fatigue, Disposition, Reputation, Rank, Gold
 }
 
 int CSMWorld::NpcMiscRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
