@@ -97,10 +97,6 @@ namespace MWClass
         return !getName(ptr).empty();
     }
 
-    bool Activator::allowTelekinesis(const MWWorld::ConstPtr &ptr) const {
-        return false;
-    }
-
     MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();

@@ -27,9 +27,6 @@ namespace MWClass
             bool hasToolTip (const MWWorld::ConstPtr& ptr) const override;
             ///< @return true if this object has a tooltip when focused (default implementation: true)
 
-            bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const override;
-            ///< Return whether this class of object can be activated with telekinesis
-
             MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const override;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
