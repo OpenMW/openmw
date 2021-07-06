@@ -342,8 +342,12 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
 
                 CSMWorld::CellRef refRecord = ref.get();
 
+                CSMWorld::RefIdData::LocalIndex localIndex = refIdData.searchId(refRecord.mRefID);
                 unsigned int recordFlags = refIdData.getRecordFlags(refRecord.mRefID);
-                bool isPersistent = ((recordFlags & 0x00000400) != 0) || refRecord.mTeleport;
+                bool isPersistent = ((recordFlags & ESM::FLAG_Persistent) != 0)
+                    || refRecord.mTeleport
+                    || localIndex.second == CSMWorld::UniversalId::Type_Creature
+                    || localIndex.second == CSMWorld::UniversalId::Type_Npc;
 
                 if (isPersistent)
                     persistentRefs.push_back(*iter);

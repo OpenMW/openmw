@@ -153,7 +153,7 @@ namespace CSMWorld
             return QString::fromUtf8 (record.get().mModel.c_str());
 
         if (column==mModel.mPersistence)
-            return (record.get().mRecordFlags & 0x00000400) != 0;
+            return (record.get().mRecordFlags & ESM::FLAG_Persistent) != 0;
 
         return BaseRefIdAdapter<RecordT>::getData (column, data, index);
     }
@@ -171,9 +171,9 @@ namespace CSMWorld
         else if (column==mModel.mPersistence)
         {
             if (value.toInt() != 0)
-                record2.mRecordFlags |= 0x00000400;
+                record2.mRecordFlags |= ESM::FLAG_Persistent;
             else
-                record2.mRecordFlags &= ~0x00000400;
+                record2.mRecordFlags &= ~ESM::FLAG_Persistent;
         }
         else
         {

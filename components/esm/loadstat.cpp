@@ -12,8 +12,8 @@ namespace ESM
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
-        //bool isBlocked = (mRecordFlags & 0x00002000) != 0;
-        //bool isPersistent = (mRecordFlags & 0x00000400) != 0;
+        //bool isBlocked = (mRecordFlags & ESM::FLAG_Blocked) != 0;
+        //bool isPersistent = (mRecordFlags & ESM::FLAG_Persistent) != 0;
 
         bool hasName = false;
         while (esm.hasMoreSubs())
