@@ -147,7 +147,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
     esm.writeHNCString("NAME", mRefID);
 
     if (isDeleted) {
-        esm.writeHNCString("DELE", "");
+        esm.writeHNString("DELE", "", 3);
         return;
     }
 
