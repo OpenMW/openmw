@@ -610,9 +610,17 @@ namespace MWWorld
                 ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
 
                 // Get each reference in turn
+                ESM::MovedCellRef cMRef;
+                cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
-                while(mCell->getNextRef(esm[index], ref, deleted))
+                while(mCell->getNextRef(esm[index], ref, deleted, /*ignoreMoves*/true, &cMRef))
                 {
+                    if (cMRef.mRefNum.mIndex)
+                    {
+                        cMRef.mRefNum.mIndex = 0;
+                        continue; // ignore refs that are moved
+                    }
+
                     // Don't load reference if it was moved to a different cell.
                     ESM::MovedCellRefTracker::const_iterator iter =
                         std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
