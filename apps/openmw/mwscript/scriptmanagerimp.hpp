@@ -83,6 +83,8 @@ namespace MWScript
             ///< Return locals for script \a name.
 
             GlobalScripts& getGlobalScripts() override;
+
+            const Compiler::Extensions& getExtensions() const override;
     };
 }
 
