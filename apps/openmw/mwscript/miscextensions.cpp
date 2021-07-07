@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iomanip>
 
+#include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 #include <components/compiler/locals.hpp>
 
@@ -1582,6 +1583,22 @@ namespace MWScript
                 }
         };
 
+        class OpHelp : public Interpreter::Opcode0
+        {
+            public:
+
+                void execute(Interpreter::Runtime& runtime) override
+                {
+                    std::stringstream message;
+                    message << MWBase::Environment::get().getWindowManager()->getVersionDescription() << "\n\n";
+                    std::vector<std::string> commands;
+                    MWBase::Environment::get().getScriptManager()->getExtensions().listKeywords(commands);
+                    for(const auto& command : commands)
+                        message << command << "\n";
+                    runtime.getContext().report(message.str());
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeMenuMode, new OpMenuMode);
@@ -1701,6 +1718,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeRepairedOnMe, new OpRepairedOnMe<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeRepairedOnMeExplicit, new OpRepairedOnMe<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleRecastMesh, new OpToggleRecastMesh);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHelp, new OpHelp);
         }
     }
 }

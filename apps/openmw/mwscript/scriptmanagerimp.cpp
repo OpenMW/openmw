@@ -207,4 +207,9 @@ namespace MWScript
     {
         return mGlobalScripts;
     }
+
+    const Compiler::Extensions& ScriptManager::getExtensions() const
+    {
+        return *mCompilerContext.getExtensions();
+    }
 }

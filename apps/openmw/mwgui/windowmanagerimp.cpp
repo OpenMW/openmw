@@ -2199,4 +2199,9 @@ namespace MWGui
     {
         return mStatsWatcher->getWatchedActor();
     }
+
+    const std::string& WindowManager::getVersionDescription() const
+    {
+        return mVersionDescription;
+    }
 }

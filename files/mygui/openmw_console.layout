@@ -14,6 +14,7 @@
         <Property key="TextColour" value="1 1 1"/>
         <Property key="InvertSelected" value="false"/>
         <Property key="WordWrap" value="true"/>
+        <Property key="MaxTextLength" value="10000"/>
     </Widget>
 
     <!-- Command line -->
