@@ -130,7 +130,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     }
     if (!variables.count("mode"))
     {
-        std::cout << "No mode specified!" << std::endl << std::endl
+        std::cout << "No mode specified!\n\n"
                   << desc << finalText << std::endl;
         return false;
     }
@@ -143,7 +143,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     info.mode = variables["mode"].as<std::string>();
     if (!(info.mode == "dump" || info.mode == "clone" || info.mode == "comp"))
     {
-        std::cout << std::endl << "ERROR: invalid mode \"" << info.mode << "\"" << std::endl << std::endl
+        std::cout << "\nERROR: invalid mode \"" << info.mode << "\"\n\n"
                   << desc << finalText << std::endl;
         return false;
     }
@@ -176,7 +176,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     info.encoding = variables["encoding"].as<std::string>();
     if(info.encoding != "win1250" && info.encoding != "win1251" && info.encoding != "win1252")
     {
-        std::cout << info.encoding << " is not a valid encoding option." << std::endl;
+        std::cout << info.encoding << " is not a valid encoding option.\n";
         info.encoding = "win1252";
     }
     std::cout << ToUTF8::encodingUsingMessage(info.encoding) << std::endl;
@@ -244,37 +244,37 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
 
         if(quiet) continue;
 
-        std::cout << "    Refnum: " << ref.mRefNum.mIndex << std::endl;
-        std::cout << "    ID: " << ref.mRefID << std::endl;
-        std::cout << "    Position: (" << ref.mPos.pos[0] << ", " << ref.mPos.pos[1] << ", " << ref.mPos.pos[2] << ")" << std::endl;
+        std::cout << "    Refnum: " << ref.mRefNum.mIndex << '\n';
+        std::cout << "    ID: " << ref.mRefID << '\n';
+        std::cout << "    Position: (" << ref.mPos.pos[0] << ", " << ref.mPos.pos[1] << ", " << ref.mPos.pos[2] << ")\n";
         if (ref.mScale != 1.f)
-            std::cout << "    Scale: " << ref.mScale << std::endl;
+            std::cout << "    Scale: " << ref.mScale << '\n';
         if (!ref.mOwner.empty())
-            std::cout << "    Owner: " << ref.mOwner << std::endl;
+            std::cout << "    Owner: " << ref.mOwner << '\n';
         if (!ref.mGlobalVariable.empty())
-            std::cout << "    Global: " << ref.mGlobalVariable << std::endl;
+            std::cout << "    Global: " << ref.mGlobalVariable << '\n';
         if (!ref.mFaction.empty())
-            std::cout << "    Faction: " << ref.mFaction << std::endl;
+            std::cout << "    Faction: " << ref.mFaction << '\n';
         if (!ref.mFaction.empty() || ref.mFactionRank != -2)
-            std::cout << "    Faction rank: " << ref.mFactionRank << std::endl;
-        std::cout << "    Enchantment charge: " << ref.mEnchantmentCharge << std::endl;
-        std::cout << "    Uses/health: " << ref.mChargeInt << std::endl;
-        std::cout << "    Gold value: " << ref.mGoldValue << std::endl;
-        std::cout << "    Blocked: " << static_cast<int>(ref.mReferenceBlocked) << std::endl;
-        std::cout << "    Deleted: " << deleted << std::endl;
+            std::cout << "    Faction rank: " << ref.mFactionRank << '\n';
+        std::cout << "    Enchantment charge: " << ref.mEnchantmentCharge << '\n';
+        std::cout << "    Uses/health: " << ref.mChargeInt << '\n';
+        std::cout << "    Gold value: " << ref.mGoldValue << '\n';
+        std::cout << "    Blocked: " << static_cast<int>(ref.mReferenceBlocked) << '\n';
+        std::cout << "    Deleted: " << deleted << '\n';
         if (!ref.mKey.empty())
-            std::cout << "    Key: " << ref.mKey << std::endl;
-        std::cout << "    Lock level: " << ref.mLockLevel << std::endl;
+            std::cout << "    Key: " << ref.mKey << '\n';
+        std::cout << "    Lock level: " << ref.mLockLevel << '\n';
         if (!ref.mTrap.empty())
-            std::cout << "    Trap: " << ref.mTrap << std::endl;
+            std::cout << "    Trap: " << ref.mTrap << '\n';
         if (!ref.mSoul.empty())
-            std::cout << "    Soul: " << ref.mSoul << std::endl;
+            std::cout << "    Soul: " << ref.mSoul << '\n';
         if (ref.mTeleport)
         {
             std::cout << "    Destination position: (" << ref.mDoorDest.pos[0] << ", "
-                      << ref.mDoorDest.pos[1] << ", " << ref.mDoorDest.pos[2] << ")" << std::endl;
+                      << ref.mDoorDest.pos[1] << ", " << ref.mDoorDest.pos[2] << ")\n";
             if (!ref.mDestCell.empty())
-                std::cout << "    Destination cell: " << ref.mDestCell << std::endl;
+                std::cout << "    Destination cell: " << ref.mDestCell << '\n';
         }
     }
 }
@@ -284,7 +284,7 @@ void printRaw(ESM::ESMReader &esm)
     while(esm.hasMoreRecs())
     {
         ESM::NAME n = esm.getRecName();
-        std::cout << "Record: " << n.toString() << std::endl;
+        std::cout << "Record: " << n.toString() << '\n';
         esm.getRecHeader();
         while(esm.hasMoreSubs())
         {
@@ -294,7 +294,7 @@ void printRaw(ESM::ESMReader &esm)
             n = esm.retSubName();
             std::ios::fmtflags f(std::cout.flags());
             std::cout << "    " << n.toString() << " - " << esm.getSubSize()
-                 << " bytes @ 0x" << std::hex << offs << "\n";
+                 << " bytes @ 0x" << std::hex << offs << '\n';
             std::cout.flags(f);
         }
     }
@@ -307,7 +307,7 @@ int load(Arguments& info)
     esm.setEncoder(&encoder);
 
     std::string filename = info.filename;
-    std::cout << "Loading file: " << filename << std::endl;
+    std::cout << "Loading file: " << filename << '\n';
 
     std::unordered_set<uint32_t> skipped;
 
@@ -336,15 +336,15 @@ int load(Arguments& info)
 
         if (!quiet)
         {
-            std::cout << "Author: " << esm.getAuthor() << std::endl
-                 << "Description: " << esm.getDesc() << std::endl
-                 << "File format version: " << esm.getFVer() << std::endl;
+            std::cout << "Author: " << esm.getAuthor() << '\n'
+                 << "Description: " << esm.getDesc() << '\n'
+                 << "File format version: " << esm.getFVer() << '\n';
             std::vector<ESM::Header::MasterData> masterData = esm.getGameFiles();
             if (!masterData.empty())
             {
-                std::cout << "Masters:" << std::endl;
+                std::cout << "Masters:" << '\n';
                 for(const auto& master : masterData)
-                    std::cout << "  " << master.name << ", " << master.size << " bytes" << std::endl;
+                    std::cout << "  " << master.name << ", " << master.size << " bytes\n";
             }
         }
 
@@ -360,7 +360,7 @@ int load(Arguments& info)
             {
                 if (skipped.count(n.intval) == 0)
                 {
-                    std::cout << "Skipping " << n.toString() << " records." << std::endl;
+                    std::cout << "Skipping " << n.toString() << " records.\n";
                     skipped.emplace(n.intval);
                 }
 
@@ -444,7 +444,7 @@ int clone(Arguments& info)
     if (recordCount > 0)
         digitCount = (int)std::log10(recordCount) + 1;
 
-    std::cout << "Loaded " << recordCount << " records:" << std::endl << std::endl;
+    std::cout << "Loaded " << recordCount << " records:\n\n";
 
     int i = 0;
     for (std::pair<int, int> stat : info.data.mRecordStats)
@@ -454,13 +454,13 @@ int clone(Arguments& info)
         int amount = stat.second;
         std::cout << std::setw(digitCount) << amount << " " << name.toString() << "  ";
         if (++i % 3 == 0)
-            std::cout << std::endl;
+            std::cout << '\n';
     }
 
     if (i % 3 != 0)
-        std::cout << std::endl;
+        std::cout << '\n';
 
-    std::cout << std::endl << "Saving records to: " << info.outname << "..." << std::endl;
+    std::cout << "\nSaving records to: " << info.outname << "...\n";
 
     ESM::ESMWriter& esm = info.writer;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
