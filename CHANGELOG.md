@@ -14,6 +14,7 @@
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
     Bug #6107: Fatigue is incorrectly recalculated when fortify effect is applied or removed
     Bug #6115: Showmap overzealous matching
+    Bug #6123: NPC with broken script freezes the game on hello
     Bug #6129: Player avatar not displayed correctly for large window sizes when GUI scaling active
     Bug #6131: Item selection in the avatar window not working correctly for large window sizes
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
