@@ -40,6 +40,8 @@
 
 #include <components/misc/frameratelimiter.hpp>
 
+#include <components/sceneutil/screencapture.hpp>
+
 #include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/windowmanagerimp.hpp"
@@ -216,6 +218,19 @@ namespace
         if (Settings::Manager::getInt("async num threads", "Physics") == 0)
             profiler.removeUserStatsLine(" -Async");
     }
+
+    struct ScheduleNonDialogMessageBox
+    {
+        void operator()(std::string message) const
+        {
+            MWBase::Environment::get().getWindowManager()->scheduleMessageBox(std::move(message), MWGui::ShowInDialogueMode_Never);
+        }
+    };
+
+    struct IgnoreString
+    {
+        void operator()(std::string) const {}
+    };
 }
 
 void OMW::Engine::executeLocalScripts()
@@ -405,6 +420,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
+    mWorkQueue->stop();
+
     mEnvironment.cleanup();
 
     delete mScriptContext;
@@ -668,6 +685,21 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         throw std::runtime_error("Invalid setting: 'preload num threads' must be >0");
     mWorkQueue = new SceneUtil::WorkQueue(numThreads);
 
+    mScreenCaptureOperation = new SceneUtil::AsyncScreenCaptureOperation(
+        mWorkQueue,
+        new SceneUtil::WriteScreenshotToFileOperation(
+            mCfgMgr.getScreenshotPath().string(),
+            Settings::Manager::getString("screenshot format", "General"),
+            Settings::Manager::getBool("notify on saved screenshot", "General")
+                    ? std::function(ScheduleNonDialogMessageBox {})
+                    : std::function(IgnoreString {})
+        )
+    );
+
+    mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(mScreenCaptureOperation);
+
+    mViewer->addEventHandler(mScreenCaptureHandler);
+
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
@@ -781,54 +813,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 }
 
-class WriteScreenshotToFileOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation
-{
-public:
-    WriteScreenshotToFileOperation(const std::string& screenshotPath, const std::string& screenshotFormat)
-        : mScreenshotPath(screenshotPath)
-        , mScreenshotFormat(screenshotFormat)
-    {
-    }
-
-    void operator()(const osg::Image& image, const unsigned int context_id) override
-    {
-        // Count screenshots.
-        int shotCount = 0;
-
-        // Find the first unused filename with a do-while
-        std::ostringstream stream;
-        do
-        {
-            // Reset the stream
-            stream.str("");
-            stream.clear();
-
-            stream << mScreenshotPath << "/screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << mScreenshotFormat;
-
-        } while (boost::filesystem::exists(stream.str()));
-
-        boost::filesystem::ofstream outStream;
-        outStream.open(boost::filesystem::path(stream.str()), std::ios::binary);
-
-        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(mScreenshotFormat);
-        if (!readerwriter)
-        {
-            Log(Debug::Error) << "Error: Can't write screenshot, no '" << mScreenshotFormat << "' readerwriter found";
-            return;
-        }
-
-        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(image, outStream);
-        if (!result.success())
-        {
-            Log(Debug::Error) << "Error: Can't write screenshot: " << result.message() << " code " << result.status();
-        }
-    }
-
-private:
-    std::string mScreenshotPath;
-    std::string mScreenshotFormat;
-};
-
 // Initialise and enter main loop.
 void OMW::Engine::go()
 {
@@ -859,14 +843,6 @@ void OMW::Engine::go()
     // Do not try to outsmart the OS thread scheduler (see bug #4785).
     mViewer->setUseConfigureAffinity(false);
 #endif
-
-    mScreenCaptureOperation = new WriteScreenshotToFileOperation(
-        mCfgMgr.getScreenshotPath().string(),
-        Settings::Manager::getString("screenshot format", "General"));
-
-    mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(mScreenCaptureOperation);
-
-    mViewer->addEventHandler(mScreenCaptureHandler);
 
     mEnvironment.setFrameRateLimit(Settings::Manager::getFloat("framerate limit", "Video"));
 

@@ -1121,7 +1121,7 @@ True: In non-combat mode camera is positioned behind the character's shoulder. C
          <layout class="QVBoxLayout" name="otherGroupVerticalLayout">
           <item>
            <layout class="QHBoxLayout" name="screenshotFormatLayout">
-            <item alignment="Qt::AlignRight">
+            <item>
              <widget class="QLabel" name="screenshotFormatLabel">
               <property name="text">
                <string>Screenshot Format</string>
@@ -1148,6 +1148,13 @@ True: In non-combat mode camera is positioned behind the character's shoulder. C
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="notifyOnSavedScreenshotCheckBox">
+            <property name="text">
+             <string>Notify on saved screenshot</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

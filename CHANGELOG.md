@@ -17,6 +17,7 @@
     Bug #6129: Player avatar not displayed correctly for large window sizes when GUI scaling active
     Bug #6131: Item selection in the avatar window not working correctly for large window sizes
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
+    Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
     Feature #2780: A way to see current OpenMW version in the console
     Feature #5489: MCP: Telekinesis fix for activators
     Feature #6017: Separate persistent and temporary cell references when saving

@@ -101,6 +101,8 @@ namespace MWGui
         if(stat)
             mStaticMessageBox = box;
 
+        box->setVisible(mVisible);
+
         mMessageBoxes.push_back(box);
 
         if(mMessageBoxes.size() > 3) {
@@ -167,8 +169,12 @@ namespace MWGui
         return pressed;
     }
 
-
-
+    void MessageBoxManager::setVisible(bool value)
+    {
+        mVisible = value;
+        for (MessageBox* messageBox : mMessageBoxes)
+            messageBox->setVisible(value);
+    }
 
     MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
       : Layout("openmw_messagebox.layout")
@@ -201,7 +207,10 @@ namespace MWGui
         return mMainWidget->getHeight()+mNextBoxPadding;
     }
 
-
+    void MessageBox::setVisible(bool value)
+    {
+        mMainWidget->setVisible(value);
+    }
 
     InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
         : WindowModal(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "openmw_interactive_messagebox_notransp.layout" : "openmw_interactive_messagebox.layout")
