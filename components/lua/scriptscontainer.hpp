@@ -163,6 +163,7 @@ namespace LuaUtil
         void registerEngineHandlers(std::initializer_list<EngineHandlerList*> handlers);
 
         const std::string mNamePrefix;
+        LuaUtil::LuaState& mLua;
 
     private:
         struct Script
@@ -190,7 +191,6 @@ namespace LuaUtil
         void updateTimerQueue(std::vector<Timer>& timerQueue, double time);
         static void insertTimer(std::vector<Timer>& timerQueue, Timer&& t);
 
-        LuaUtil::LuaState& mLua;
         const UserdataSerializer* mSerializer = nullptr;
         std::map<std::string, sol::object> API;
 

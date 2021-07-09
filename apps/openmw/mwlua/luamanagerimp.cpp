@@ -48,6 +48,7 @@ namespace MWLua
         initObjectBindingsForLocalScripts(localContext);
         initCellBindingsForLocalScripts(localContext);
         LocalScripts::initializeSelfPackage(localContext);
+        initInputBindings(localContext);
 
         mLua.addCommonPackage("openmw.async", getAsyncPackageInitializer(context));
         mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
@@ -153,8 +154,8 @@ namespace MWLua
         // Engine handlers in local scripts
         if (mPlayerScripts)
         {
-            for (const SDL_Keysym key : mKeyPressEvents)
-                mPlayerScripts->keyPress(key.sym, key.mod);
+            for (const SDL_Keysym& key : mKeyPressEvents)
+                mPlayerScripts->keyPress(key);
         }
         mKeyPressEvents.clear();
 

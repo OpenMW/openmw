@@ -1,6 +1,8 @@
 #ifndef MWLUA_PLAYERSCRIPTS_H
 #define MWLUA_PLAYERSCRIPTS_H
 
+#include <SDL_events.h>
+
 #include "localscripts.hpp"
 
 namespace MWLua
@@ -14,7 +16,7 @@ namespace MWLua
             registerEngineHandlers({&mKeyPressHandlers});
         }
 
-        void keyPress(int sym, int mod) { callEngineHandlers(mKeyPressHandlers, sym, mod); }
+        void keyPress(const SDL_Keysym& key) { callEngineHandlers(mKeyPressHandlers, key); }
 
     private:
         EngineHandlerList mKeyPressHandlers{"onKeyPress"};
