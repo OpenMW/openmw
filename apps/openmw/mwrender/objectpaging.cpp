@@ -423,9 +423,17 @@ namespace MWRender
                         cell->restore(esm[index], i);
                         ESM::CellRef ref;
                         ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
+                        ESM::MovedCellRef cMRef;
+                        cMRef.mRefNum.mIndex = 0;
                         bool deleted = false;
-                        while(cell->getNextRef(esm[index], ref, deleted))
+                        while(cell->getNextRef(esm[index], ref, deleted, /*ignoreMoves*/true, &cMRef))
                         {
+                            if (cMRef.mRefNum.mIndex)
+                            {
+                                cMRef.mRefNum.mIndex = 0;
+                                continue; // ignore refs that are moved
+                            }
+
                             if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
                             Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                             int type = store.findStatic(ref.mRefID);

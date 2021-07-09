@@ -553,11 +553,19 @@ namespace MWWorld
                 ESM::CellRef ref;
 
                 // Get each reference in turn
+                ESM::MovedCellRef cMRef;
+                cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
-                while (mCell->getNextRef (esm[index], ref, deleted))
+                while(mCell->getNextRef(esm[index], ref, deleted, /*ignoreMoves*/true, &cMRef))
                 {
                     if (deleted)
                         continue;
+
+                    if (cMRef.mRefNum.mIndex)
+                    {
+                        cMRef.mRefNum.mIndex = 0;
+                        continue; // ignore refs that are moved
+                    }
 
                     // Don't list reference if it was moved to a different cell.
                     ESM::MovedCellRefTracker::const_iterator iter =
