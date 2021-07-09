@@ -65,6 +65,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("groundcover", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
             ->multitoken()->composing(), "groundcover content file(s): esm/esp, or omwgame/omwaddon")
 
+        ("lua-scripts", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+            ->multitoken()->composing(), "file(s) with a list of global Lua scripts: omwscripts")
+
         ("no-sound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
@@ -203,6 +206,10 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         engine.addGroundcoverFile(file);
     }
+
+    StringsVector luaScriptLists = variables["lua-scripts"].as<Files::EscapeStringVector>().toStdStringVector();
+    for (const auto& file : luaScriptLists)
+        engine.addLuaScriptListFile(file);
 
     // startup-settings
     engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());

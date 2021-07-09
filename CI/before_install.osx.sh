@@ -15,6 +15,8 @@ ccache --version
 cmake --version
 qmake --version
 
+brew install lua
+
 curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20210617.zip -o ~/openmw-deps.zip
 unzip -o ~/openmw-deps.zip -d /private/tmp/openmw-deps > /dev/null
 

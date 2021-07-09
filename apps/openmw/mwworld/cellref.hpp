@@ -25,6 +25,10 @@ namespace MWWorld
         // Note: Currently unused for items in containers
         const ESM::RefNum& getRefNum() const;
 
+        // Returns RefNum.
+        // If RefNum is not set, assigns a generated one and changes the "lastAssignedRefNum" counter.
+        const ESM::RefNum& getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum);
+
         // Set RefNum to its default state.
         void unsetRefNum();
 

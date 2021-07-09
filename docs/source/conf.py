@@ -13,6 +13,7 @@
 # serve to show the default.
 import os
 import sys
+import subprocess
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -148,7 +149,11 @@ html_theme = 'sphinx_rtd_theme'
 
 def setup(app):
     app.add_stylesheet('figures.css')
-
+    app.add_stylesheet('luadoc.css')
+    try:
+        subprocess.call(project_root + '/docs/source/generate_luadoc.sh')
+    except Exception as e:
+        print('Can\'t generate Lua API documentation:', e)
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".

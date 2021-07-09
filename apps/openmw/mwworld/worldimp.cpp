@@ -36,6 +36,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -569,6 +570,11 @@ namespace MWWorld
             return getInterior (id.mWorldspace);
     }
 
+    bool World::isCellActive(CellStore* cell) const
+    {
+        return mWorldScene->getActiveCells().count(cell) > 0;
+    }
+
     void World::testExteriorCells()
     {
         mWorldScene->testExteriorCells();
@@ -812,7 +818,8 @@ namespace MWWorld
 
     void World::enable (const Ptr& reference)
     {
-        // enable is a no-op for items in containers
+        MWBase::Environment::get().getLuaManager()->registerObject(reference);
+
         if (!reference.isInCell())
             return;
 
@@ -863,6 +870,7 @@ namespace MWWorld
         if (reference == getPlayerPtr())
             throw std::runtime_error("can not disable player object");
 
+        MWBase::Environment::get().getLuaManager()->deregisterObject(reference);
         reference.getRefData().disable();
 
         if (reference.getCellRef().getRefNum().hasContentFile())
@@ -2020,7 +2028,7 @@ namespace MWWorld
             rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
 
         facedObject = rayToObject.mHitObject;
-        if (facedObject.isEmpty() && rayToObject.mHitRefnum.hasContentFile())
+        if (facedObject.isEmpty() && rayToObject.mHitRefnum.isSet())
         {
             for (CellStore* cellstore : mWorldScene->getActiveCells())
             {
@@ -2483,12 +2491,14 @@ namespace MWWorld
             mNavigator->removeAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
             mPhysics->remove(getPlayerPtr());
             mRendering->removePlayer(getPlayerPtr());
+            MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(getPlayerPtr());
 
             mPlayer->set(player);
         }
 
         Ptr ptr = mPlayer->getPlayer();
         mRendering->setupPlayer(ptr);
+        MWBase::Environment::get().getLuaManager()->setupPlayer(ptr);
     }
 
     void World::renderPlayer()

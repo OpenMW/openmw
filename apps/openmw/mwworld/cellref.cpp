@@ -1,5 +1,8 @@
 #include "cellref.hpp"
 
+#include <assert.h>
+
+#include <components/debug/debuglog.hpp>
 #include <components/esm/objectstate.hpp>
 
 namespace MWWorld
@@ -7,6 +10,26 @@ namespace MWWorld
 
     const ESM::RefNum& CellRef::getRefNum() const
     {
+        return mCellRef.mRefNum;
+    }
+
+    const ESM::RefNum& CellRef::getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum)
+    {
+        if (!mCellRef.mRefNum.isSet())
+        {
+            // Generated RefNums have negative mContentFile
+            assert(lastAssignedRefNum.mContentFile < 0);
+            lastAssignedRefNum.mIndex++;
+            if (lastAssignedRefNum.mIndex == 0)  // mIndex overflow, so mContentFile should be changed
+            {
+                if (lastAssignedRefNum.mContentFile > std::numeric_limits<int32_t>::min())
+                    lastAssignedRefNum.mContentFile--;
+                else
+                    Log(Debug::Error) << "RefNum counter overflow in CellRef::getOrAssignRefNum";
+            }
+            mCellRef.mRefNum = lastAssignedRefNum;
+            mChanged = true;
+        }
         return mCellRef.mRefNum;
     }
 

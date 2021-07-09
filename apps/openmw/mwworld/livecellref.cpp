@@ -5,6 +5,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "ptr.hpp"
 #include "class.hpp"
@@ -52,6 +53,8 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
         Log(Debug::Warning) << "Soul '" << mRef.getSoul() << "' not found, removing the soul from soul gem";
         mRef.setSoul(std::string());
     }
+
+    MWBase::Environment::get().getLuaManager()->loadLocalScripts(ptr, state.mLuaScripts);
 }
 
 void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
@@ -61,6 +64,7 @@ void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
     ConstPtr ptr (this);
 
     mData.write (state, mClass->getScript (ptr));
+    MWBase::Environment::get().getLuaManager()->saveLocalScripts(Ptr(const_cast<LiveCellRefBase*>(this)), state.mLuaScripts);
 
     mClass->writeAdditionalState (ptr, state);
 }

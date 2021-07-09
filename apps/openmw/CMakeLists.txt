@@ -55,6 +55,11 @@ add_openmw_dir (mwscript
     animationextensions transformationextensions consoleextensions userextensions
     )
 
+add_openmw_dir (mwlua
+    luamanagerimp actions object worldview userdataserializer eventqueue query
+    luabindings localscripts objectbindings cellbindings asyncbindings camerabindings uibindings
+    )
+
 add_openmw_dir (mwsound
     soundmanagerimp openal_output ffmpeg_decoder sound sound_buffer sound_decoder sound_output
     loudness movieaudiofactory alext efx efx-presets regionsoundselector watersoundupdater volumesettings
@@ -146,6 +151,7 @@ target_link_libraries(openmw
     "osg-ffmpeg-videoplayer"
     "oics"
     components
+    ${LUA_LIBRARIES}
 )
 
 if(OSG_STATIC)

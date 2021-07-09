@@ -225,7 +225,7 @@ namespace MWRender
                         esm.resize(index+1);
                     cell->restore(esm[index], i);
                     ESM::CellRef ref;
-                    ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
+                    ref.mRefNum.unset();
                     bool deleted = false;
                     while(cell->getNextRef(esm[index], ref, deleted))
                     {

@@ -22,6 +22,11 @@ namespace ESM
     struct ObjectState;
 }
 
+namespace MWLua
+{
+    class LocalScripts;
+}
+
 namespace MWWorld
 {
 
@@ -32,6 +37,7 @@ namespace MWWorld
             SceneUtil::PositionAttitudeTransform* mBaseNode;
 
             MWScript::Locals mLocals;
+            std::shared_ptr<MWLua::LocalScripts> mLuaScripts;
 
             /// separate delete flag used for deletion by a content file
             /// @note not stored in the save game file.
@@ -72,7 +78,7 @@ namespace MWWorld
             /// perform these operations).
 
             RefData (const RefData& refData);
-            RefData (RefData&& other) noexcept = default;
+            RefData (RefData&& other) noexcept;
 
             ~RefData();
 
@@ -81,7 +87,7 @@ namespace MWWorld
             /// perform this operations).
 
             RefData& operator= (const RefData& refData);
-            RefData& operator= (RefData&& other) noexcept = default;
+            RefData& operator= (RefData&& other) noexcept;
 
             /// Return base node (can be a null pointer).
             SceneUtil::PositionAttitudeTransform* getBaseNode();
@@ -95,6 +101,9 @@ namespace MWWorld
             int getCount(bool absolute = true) const;
 
             void setLocals (const ESM::Script& script);
+
+            MWLua::LocalScripts* getLuaScripts() { return mLuaScripts.get(); }
+            void setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&&);
 
             void setCount (int count);
             ///< Set object count (an object pile is a simple object with a count >1).

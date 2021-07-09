@@ -575,6 +575,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/lz4_win${BITS}_v1_9_2.7z" \
 		"lz4_win${BITS}_v1_9_2.7z"
 
+	# LuaJIT
+	download "LuaJIT 2.1.0-beta3" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/LuaJIT-2.1.0-beta3-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
+		"LuaJIT-2.1.0-beta3-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
+
 	# Google test and mock
 	if [ ! -z $TEST_FRAMEWORK ]; then
 		echo "Google test 1.10.0..."
@@ -929,6 +934,25 @@ printf "LZ4 1.9.2... "
 			LZ4_CONFIGURATION="Release"
 		fi
 		add_runtime_dlls $CONFIGURATION "$(pwd)/LZ4_1.9.2/bin/${LZ4_CONFIGURATION}/liblz4.dll"
+	done
+	echo Done.
+}
+cd $DEPS
+echo
+# LuaJIT 2.1.0-beta3
+printf "LuaJIT 2.1.0-beta3... "
+{
+	if [ -d LuaJIT ]; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf LuaJIT
+		eval 7z x -y LuaJIT-2.1.0-beta3-msvc${MSVC_REAL_YEAR}-win${BITS}.7z -o$(real_pwd)/LuaJIT $STRIP
+	fi
+	export LUAJIT_DIR="$(real_pwd)/LuaJIT"
+	add_cmake_opts -DLuaJit_INCLUDE_DIR="${LUAJIT_DIR}/include" \
+		-DLuaJit_LIBRARY="${LUAJIT_DIR}/lib/lua51.lib"
+	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
+		add_runtime_dlls $CONFIGURATION "$(pwd)/LuaJIT/bin/lua51.dll"
 	done
 	echo Done.
 }

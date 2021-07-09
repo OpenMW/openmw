@@ -34,7 +34,7 @@ namespace
                 readers.resize(index + 1);
             cell.restore(readers[index], i);
             ESM::CellRef ref;
-            ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
+            ref.mRefNum.unset();
             bool deleted = false;
             while(cell.getNextRef(readers[index], ref, deleted))
             {

@@ -394,6 +394,22 @@ endif()
 find_package(SDL2 2.0.9 REQUIRED)
 find_package(OpenAL REQUIRED)
 
+option(USE_LUAJIT "Switch Lua/LuaJit (TRUE is highly recommended)" TRUE)
+if(USE_LUAJIT)
+   find_package(LuaJit REQUIRED)
+   set(LUA_INCLUDE_DIR ${LuaJit_INCLUDE_DIR})
+   set(LUA_LIBRARIES ${LuaJit_LIBRARIES})
+else(USE_LUAJIT)
+   find_package(Lua REQUIRED)
+   add_compile_definitions(NO_LUAJIT)
+endif(USE_LUAJIT)
+
+# Download sol - C++ library binding to Lua
+file(DOWNLOAD
+     "https://github.com/ThePhD/sol2/releases/download/v3.2.2/sol.hpp" "${OpenMW_BINARY_DIR}/extern/sol3.2.2/sol/sol.hpp"
+     EXPECTED_MD5 ba113cf458f60672917108e69bb4d958)
+set(SOL_INCLUDE_DIRS ${OpenMW_BINARY_DIR}/extern/sol3.2.2 ${OpenMW_SOURCE_DIR}/extern/sol_config)
+
 include_directories(
     BEFORE SYSTEM
     "."
@@ -403,6 +419,8 @@ include_directories(
     ${OPENAL_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${BULLET_INCLUDE_DIRS}
+    ${LUA_INCLUDE_DIR}
+    ${SOL_INCLUDE_DIRS}
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
@@ -661,11 +679,10 @@ if (WIN32)
     endif()
 
     if (BUILD_OPENMW)
-        if (OPENMW_UNITY_BUILD)
-            set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD} /bigobj")
-        else()
-            set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-        endif()
+        # \bigobj is required:
+        #  1) for OPENMW_UNITY_BUILD;
+        #  2) to compile lua binginds, because sol3 is heavily templated.
+        set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD} /bigobj")
     endif()
 
     if (BUILD_WIZARD)
@@ -680,6 +697,11 @@ if (WIN32)
   # TODO: At some point release builds should not use the console but rather write to a log file
   #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
   #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
+endif()
+
+if (BUILD_OPENMW AND APPLE)
+    # Without these flags LuaJit crashes on startup on OSX
+    set_target_properties(openmw PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
 endif()
 
 # Apple bundling

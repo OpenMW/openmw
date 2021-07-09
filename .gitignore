@@ -72,6 +72,7 @@ components/ui_contentselector.h
 docs/mainpage.hpp
 docs/Doxyfile
 docs/DoxyfilePages
+docs/source/reference/lua-scripting/generated_html
 moc_*.cxx
 *.cxx_parameters
 *qrc_launcher.cxx

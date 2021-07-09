@@ -20,6 +20,8 @@ void ESM::ObjectState::load (ESMReader &esm)
     if (mHasLocals)
         mLocals.load (esm);
 
+    mLuaScripts.load(esm);
+
     mEnabled = 1;
     esm.getHNOT (mEnabled, "ENAB");
 
@@ -55,6 +57,8 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
         esm.writeHNT ("HLOC", mHasLocals);
         mLocals.save (esm);
     }
+
+    mLuaScripts.save(esm);
 
     if (!mEnabled && !inInventory)
         esm.writeHNT ("ENAB", mEnabled);

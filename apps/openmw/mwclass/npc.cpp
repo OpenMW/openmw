@@ -17,6 +17,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -1095,6 +1096,7 @@ namespace MWClass
     bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,
         const MWWorld::Ptr& actor) const
     {
+        MWBase::Environment::get().getLuaManager()->appliedToObject(ptr, id, actor);
         MWMechanics::CastSpell cast(ptr, ptr);
         return cast.cast(id);
     }

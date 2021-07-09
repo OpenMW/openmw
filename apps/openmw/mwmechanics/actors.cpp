@@ -24,6 +24,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwmechanics/aibreathe.hpp"
 
@@ -1961,6 +1962,8 @@ namespace MWMechanics
             {
                 bool isPlayer = iter->first == player;
                 CharacterController* ctrl = iter->second->getCharacterController();
+                MWBase::LuaManager::ActorControls* luaControls =
+                    MWBase::Environment::get().getLuaManager()->getActorControls(iter->first);
 
                 float distSqr = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2();
                 // AI processing is only done within given distance to the player.
@@ -2062,7 +2065,7 @@ namespace MWMechanics
                         if (iter->first != player)
                         {
                             CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
-                            if (isConscious(iter->first))
+                            if (isConscious(iter->first) && !(luaControls && luaControls->mDisableAI))
                             {
                                 stats.getAiSequence().execute(iter->first, *ctrl, duration);
                                 updateGreetingState(iter->first, *iter->second, timerUpdateHello > 0);
@@ -2071,7 +2074,7 @@ namespace MWMechanics
                             }
                         }
                     }
-                    else if (aiActive && iter->first != player && isConscious(iter->first))
+                    else if (aiActive && iter->first != player && isConscious(iter->first) && !(luaControls && luaControls->mDisableAI))
                     {
                         CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                         stats.getAiSequence().execute(iter->first, *ctrl, duration, /*outOfRange*/true);
@@ -2087,6 +2090,32 @@ namespace MWMechanics
 
                         if (timerUpdateEquippedLight == 0)
                             updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
+                    }
+
+                    if (luaControls && isConscious(iter->first))
+                    {
+                        Movement& mov = iter->first.getClass().getMovementSettings(iter->first);
+                        CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+                        float speedFactor = isPlayer ? 1.f : mov.mSpeedFactor;
+                        osg::Vec2f movement = osg::Vec2f(mov.mPosition[0], mov.mPosition[1]) * speedFactor;
+                        float rotationZ = mov.mRotation[2];
+                        bool jump = mov.mPosition[2] == 1;
+                        bool runFlag = stats.getMovementFlag(MWMechanics::CreatureStats::Flag_Run);
+                        if (luaControls->mControlledFromLua)
+                        {
+                            mov.mPosition[0] = luaControls->mSideMovement;
+                            mov.mPosition[1] = luaControls->mMovement;
+                            mov.mPosition[2] = luaControls->mJump ? 1 : 0;
+                            mov.mRotation[1] = 0;
+                            mov.mRotation[2] = luaControls->mTurn;
+                            mov.mSpeedFactor = osg::Vec2(luaControls->mMovement, luaControls->mSideMovement).length();
+                            stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, luaControls->mRun);
+                        }
+                        luaControls->mSideMovement = movement.x();
+                        luaControls->mMovement = movement.y();
+                        luaControls->mTurn = rotationZ;
+                        luaControls->mJump = jump;
+                        luaControls->mRun = runFlag;
                     }
                 }
             }

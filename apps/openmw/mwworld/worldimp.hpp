@@ -216,6 +216,8 @@ namespace MWWorld
 
             CellStore *getCell (const ESM::CellId& id) override;
 
+            bool isCellActive(CellStore* cell) const override;
+
             void testExteriorCells() override;
             void testInteriorCells() override;
 

@@ -27,6 +27,7 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -59,6 +60,7 @@ void MWState::StateManager::cleanup (bool force)
 
         MWMechanics::CreatureStats::cleanup();
     }
+    MWBase::Environment::get().getLuaManager()->clear();
 }
 
 std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM::ESMReader& reader)
@@ -146,7 +148,7 @@ void MWState::StateManager::newGame (bool bypass)
     {
         Log(Debug::Info) << "Starting a new game";
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
-
+        MWBase::Environment::get().getLuaManager()->newGameStarted();
         MWBase::Environment::get().getWorld()->startNewGame (bypass);
 
         mState = State_Running;
@@ -249,6 +251,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         int recordCount =         1 // saved game header
                 +MWBase::Environment::get().getJournal()->countSavedGameRecords()
+                +MWBase::Environment::get().getLuaManager()->countSavedGameRecords()
                 +MWBase::Environment::get().getWorld()->countSavedGameRecords()
                 +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
                 +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
@@ -272,6 +275,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         MWBase::Environment::get().getJournal()->write (writer, listener);
         MWBase::Environment::get().getDialogueManager()->write (writer, listener);
+        // LuaManager::write should be called before World::write because world also saves
+        // local scripts that depend on LuaManager.
+        MWBase::Environment::get().getLuaManager()->write(writer, listener);
         MWBase::Environment::get().getWorld()->write (writer, listener);
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer, listener);
         MWBase::Environment::get().getWindowManager()->write(writer, listener);
@@ -382,6 +388,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
             throw std::runtime_error("This save file was created using a newer version of OpenMW and is thus not supported. Please upgrade to the newest OpenMW version to load this file.");
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap (reader);
+        MWBase::Environment::get().getLuaManager()->setContentFileMapping(contentFileMap);
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
 
@@ -478,6 +485,10 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
                 case ESM::REC_INPU:
                     MWBase::Environment::get().getInputManager()->readRecord(reader, n.intval);
+                    break;
+
+                case ESM::REC_LUAM:
+                    MWBase::Environment::get().getLuaManager()->readRecord(reader, n.intval);
                     break;
 
                 default:

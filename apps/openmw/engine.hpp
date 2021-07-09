@@ -33,6 +33,11 @@ namespace Compiler
     class Context;
 }
 
+namespace MWLua
+{
+    class LuaManager;
+}
+
 namespace Files
 {
     struct ConfigurationManager;
@@ -66,6 +71,7 @@ namespace OMW
             std::string mCellName;
             std::vector<std::string> mContentFiles;
             std::vector<std::string> mGroundcoverFiles;
+            std::vector<std::string> mLuaScriptListFiles;
             bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
@@ -84,6 +90,8 @@ namespace OMW
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
+
+            MWLua::LuaManager* mLuaManager;
 
             Files::Collections mFileCollections;
             bool mFSStrict;
@@ -137,6 +145,7 @@ namespace OMW
              */
             void addContentFile(const std::string& file);
             void addGroundcoverFile(const std::string& file);
+            void addLuaScriptListFile(const std::string& file);
 
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
@@ -185,6 +194,7 @@ namespace OMW
 
         private:
             Files::ConfigurationManager& mCfgMgr;
+            class LuaWorker;
     };
 }
 
