@@ -41,7 +41,6 @@ namespace MWLua
         {
             MWWorld::Ptr newObj = world->moveObject(obj, cell, mPos.x(), mPos.y(), mPos.z());
             world->rotateObject(newObj, mRot.x(), mRot.y(), mRot.z());
-            worldView.getObjectRegistry()->registerPtr(newObj);
         }
     }
 

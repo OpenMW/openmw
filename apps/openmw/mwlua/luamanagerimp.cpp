@@ -81,7 +81,7 @@ namespace MWLua
                 throw std::logic_error("Player Refnum was changed unexpectedly");
             if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
             {
-                mPlayer = newPlayerPtr;
+                mPlayer = newPlayerPtr;  // player was moved to another cell, update ptr in registry
                 objectRegistry->registerPtr(mPlayer);
             }
         }
@@ -123,10 +123,11 @@ namespace MWLua
         }
 
         // Engine handlers in local scripts
-        if (mPlayerScripts)
+        PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+        if (playerScripts)
         {
             for (const SDL_Keysym& key : mKeyPressEvents)
-                mPlayerScripts->keyPress(key);
+                playerScripts->keyPress(key);
         }
         mKeyPressEvents.clear();
 
@@ -186,7 +187,6 @@ namespace MWLua
         mActorAddedEvents.clear();
         mLocalEngineEvents.clear();
         mPlayerChanged = false;
-        mPlayerScripts = nullptr;
         mWorldView.clear();
         if (!mPlayer.isEmpty())
         {
@@ -202,12 +202,10 @@ namespace MWLua
             throw std::logic_error("Player is initialized twice");
         mWorldView.objectAddedToScene(ptr);
         mPlayer = ptr;
-        MWWorld::RefData& refData = ptr.getRefData();
-        if (!refData.getLuaScripts())
-            createLocalScripts(ptr);
-        if (!mPlayerScripts)
-            throw std::logic_error("mPlayerScripts not initialized");
-        mActiveLocalScripts.insert(mPlayerScripts);
+        LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
+        if (!localScripts)
+            localScripts = createLocalScripts(ptr);
+        mActiveLocalScripts.insert(localScripts);
         mLocalEngineEvents.push_back({getId(ptr), LocalScripts::OnActive{}});
         mPlayerChanged = true;
     }
@@ -269,10 +267,14 @@ namespace MWLua
 
     void LuaManager::addLocalScript(const MWWorld::Ptr& ptr, const std::string& scriptPath)
     {
-        MWWorld::RefData& refData = ptr.getRefData();
-        if (!refData.getLuaScripts())
-            mActiveLocalScripts.insert(createLocalScripts(ptr));
-        refData.getLuaScripts()->addNewScript(scriptPath);
+        LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
+        if (!localScripts)
+        {
+            localScripts = createLocalScripts(ptr);
+            if (ptr.isInCell() && MWBase::Environment::get().getWorld()->isCellActive(ptr.getCell()))
+                mActiveLocalScripts.insert(localScripts);
+        }
+        localScripts->addNewScript(scriptPath);
     }
 
     LocalScripts* LuaManager::createLocalScripts(const MWWorld::Ptr& ptr)
@@ -282,8 +284,7 @@ namespace MWLua
         // so we can't just check ptr == mPlayer here.
         if (*ptr.getCellRef().getRefIdPtr() == "player")
         {
-            mPlayerScripts = new PlayerScripts(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
-            scripts = std::shared_ptr<LocalScripts>(mPlayerScripts);
+            scripts = std::make_shared<PlayerScripts>(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
             scripts->addPackage("openmw.ui", mUserInterfacePackage);
             scripts->addPackage("openmw.camera", mCameraPackage);
         }

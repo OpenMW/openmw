@@ -118,16 +118,16 @@ namespace MWLua
         mLastAssignedId.unset();
     }
 
-    MWWorld::Ptr ObjectRegistry::getPtr(ObjectId id, bool onlyActive)
+    MWWorld::Ptr ObjectRegistry::getPtr(ObjectId id, bool local)
     {
         MWWorld::Ptr ptr;
         auto it = mObjectMapping.find(id);
         if (it != mObjectMapping.end())
             ptr = it->second;
-        if (onlyActive)
+        if (local)
         {
-            // TODO: add flag `isActive` to LiveCellRefBase. Return empty Ptr if the flag is not set.
-            //     Needed because in multiplayer mode inactive objects will not be synchronized, so will likely be out of date.
+            // TODO: Return ptr only if it is active or was active in the previous frame, otherwise return empty.
+            //     Needed because in multiplayer inactive objects will not be synchronized, so an be out of date.
         }
         else
         {

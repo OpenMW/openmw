@@ -35,10 +35,9 @@ namespace MWLua
         ObjectId deregisterPtr(const MWWorld::Ptr& ptr);
 
         // Returns Ptr by id. If object is not found, returns empty Ptr.
-        // If onlyActive = true, returns non-empty ptr only if it is registered and is in an active cell.
-        // If onlyActive = false, tries to load and register the object if it is not loaded yet.
-        // NOTE: `onlyActive` logic is not yet implemented.
-        MWWorld::Ptr getPtr(ObjectId id, bool onlyActive);
+        // If local = true, returns non-empty ptr only if it can be used in local scripts
+        // (i.e. is active or was active in the previous frame).
+        MWWorld::Ptr getPtr(ObjectId id, bool local);
 
         // Needed only for saving/loading.
         const ObjectId& getLastAssignedId() const { return mLastAssignedId; }
@@ -46,8 +45,6 @@ namespace MWLua
 
     private:
         friend class Object;
-        friend class GObject;
-        friend class LObject;
         friend class LuaManager;
 
         bool mChanged = false;

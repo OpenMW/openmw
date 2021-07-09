@@ -82,7 +82,6 @@ namespace MWLua
 
         bool mPlayerChanged = false;
         MWWorld::Ptr mPlayer;
-        PlayerScripts* mPlayerScripts = nullptr;
 
         GlobalEventQueue mGlobalEvents;
         LocalEventQueue mLocalEvents;

@@ -52,6 +52,9 @@ Global scripts
 Local scripts
     Lua scripts that are attached to some game object. A local script is active only if the object it is attached to is in an active cell. There are no limitations to the number of local scripts on one object. Local scripts can be attached to (or detached from) any object at any moment by a global script. In some cases inactive local scripts still can run code (for example during saving and loading), but while inactive they can not see nearby objects.
 
+.. note::
+    Currently scripts on objects in a container or an inventory are considered inactive. Probably later this behaviour will be changed.
+
 Player scripts
     A specific kind of local scripts; *player script* is a local script that is attached to a player. It can do everything that a normal local script can do, plus some player-specific functionality (e.g. control UI and camera).
 
