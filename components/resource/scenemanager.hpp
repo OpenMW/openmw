@@ -95,6 +95,9 @@ namespace Resource
         void setReverseZ(bool reverseZ);
         bool getReverseZ() const;
 
+        void setDepthFormat(GLenum format);
+        GLenum getDepthFormat() const;
+
         /// @see ShaderVisitor::setAutoUseNormalMaps
         void setAutoUseNormalMaps(bool use);
 
@@ -206,6 +209,7 @@ namespace Resource
         SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
         bool mConvertAlphaTestToAlphaToCoverage;
         bool mReverseZ;
+        GLenum mDepthFormat;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 

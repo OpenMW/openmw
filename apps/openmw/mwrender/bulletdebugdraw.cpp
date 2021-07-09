@@ -10,9 +10,18 @@
 #include <osg/PolygonMode>
 #include <osg/ShapeDrawable>
 #include <osg/StateSet>
+#include <osg/Fog>
 
 #include "bulletdebugdraw.hpp"
 #include "vismask.hpp"
+
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+
+#include <components/sceneutil/util.hpp>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 
 namespace MWRender
 {
@@ -30,7 +39,6 @@ void DebugDrawer::createGeometry()
     {
         mGeometry = new osg::Geometry;
         mGeometry->setNodeMask(Mask_Debug);
-
         mVertices = new osg::Vec3Array;
         mColors = new osg::Vec4Array;
 
@@ -42,6 +50,8 @@ void DebugDrawer::createGeometry()
         mGeometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
         mGeometry->setDataVariance(osg::Object::DYNAMIC);
         mGeometry->addPrimitiveSet(mDrawArrays);
+        // make this friendly to recreateShaders()
+        mGeometry->setStateSet(new osg::StateSet);
 
         mParentNode->addChild(mGeometry);
 
@@ -52,6 +62,8 @@ void DebugDrawer::createGeometry()
         mShapesRoot->setDataVariance(osg::Object::DYNAMIC);
         mShapesRoot->setNodeMask(Mask_Debug);
         mParentNode->addChild(mShapesRoot);
+
+        MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(mGeometry, "debug");
     }
 }
 

@@ -298,7 +298,7 @@ namespace MWRender
         camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT,osg::Camera::PIXEL_BUFFER_RTT);
 
-        if (MWBase::Environment::get().getResourceSystem()->getSceneManager()->getReverseZ())
+        if (getReverseZ())
             camera->setClearDepth(0.0);
 
         camera->setViewport(0, 0, w, h);
@@ -336,7 +336,7 @@ namespace MWRender
         float nearClip = Settings::Manager::getFloat("near clip", "Camera");
         float viewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         // each cubemap side sees 90 degrees
-        if (MWBase::Environment::get().getResourceSystem()->getSceneManager()->getReverseZ())
+        if (getReverseZ())
             rttCamera->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspectiveInf(90.0, w/float(h), nearClip));
         else
             rttCamera->setProjectionMatrixAsPerspective(90.0, w/float(h), nearClip, viewDistance);

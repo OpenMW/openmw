@@ -2,11 +2,11 @@
 uniform float linearFac;
 #endif
 
-float getLinearDepth(in vec4 viewPos)
+float getLinearDepth(in float z, in float viewZ)
 {
 #if @reverseZ
-    return linearFac*viewPos.z;
+    return linearFac*viewZ;
 #else
-    return gl_Position.z;
+    return z;
 #endif
 }

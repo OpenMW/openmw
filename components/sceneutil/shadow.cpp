@@ -95,8 +95,8 @@ namespace SceneUtil
     }
 
     ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager, bool reverseZ)
-        : mShadowedScene(new osgShadow::ShadowedScene)
-        , mReverseZ(reverseZ)
+        : mReverseZ(reverseZ)
+        , mShadowedScene(new osgShadow::ShadowedScene)
         , mShadowTechnique(new MWShadowTechnique)
         , mOutdoorShadowCastingMask(outdoorShadowCastingMask)
         , mIndoorShadowCastingMask(indoorShadowCastingMask)

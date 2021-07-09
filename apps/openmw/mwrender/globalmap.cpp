@@ -25,6 +25,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "vismask.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -220,14 +221,13 @@ namespace MWRender
         osg::ref_ptr<osg::Texture2D> mOverlayTexture;
     };
 
-    GlobalMap::GlobalMap(osg::Group* root, SceneUtil::WorkQueue* workQueue, bool reverseZ)
+    GlobalMap::GlobalMap(osg::Group* root, SceneUtil::WorkQueue* workQueue)
         : mRoot(root)
         , mWorkQueue(workQueue)
         , mWidth(0)
         , mHeight(0)
         , mMinX(0), mMaxX(0)
         , mMinY(0), mMaxY(0)
-        , mReverseZ(reverseZ)
 
     {
         mCellSize = Settings::Manager::getInt("global map cell size", "Map");
@@ -325,7 +325,7 @@ namespace MWRender
         if (texture)
         {
             osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(srcLeft, srcTop, srcRight, srcBottom);
-            auto depth = SceneUtil::createDepth(mReverseZ);
+            auto depth = SceneUtil::createDepth(getReverseZ());
             depth->setWriteMask(0);
             osg::StateSet* stateset = geom->getOrCreateStateSet();
             stateset->setAttribute(depth);

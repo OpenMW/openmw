@@ -74,6 +74,45 @@
 
 namespace MWRender
 {
+    class SharedUniformStateUpdater : public SceneUtil::StateSetUpdater
+    {
+    public:
+        SharedUniformStateUpdater()
+            : mLinearFac(0.f)
+        {
+        }
+
+        void setDefaults(osg::StateSet *stateset) override
+        {
+            stateset->addUniform(new osg::Uniform("projectionMatrix", osg::Matrixf{}));
+            stateset->addUniform(new osg::Uniform("linearFac", 0.f));
+        }
+
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
+        {
+            auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
+            if (uProjectionMatrix)
+                uProjectionMatrix->set(mProjectionMatrix);
+
+            auto* uLinearFac = stateset->getUniform("linearFac");
+            if (uLinearFac)
+                uLinearFac->set(mLinearFac);
+        }
+
+        void setProjectionMatrix(const osg::Matrixf& projectionMatrix)
+        {
+            mProjectionMatrix = projectionMatrix;
+        }
+
+        void setLinearFac(float linearFac)
+        {
+            mLinearFac = linearFac;
+        }
+
+    private:
+        osg::Matrixf mProjectionMatrix;
+        float mLinearFac;
+    };
 
     class StateUpdater : public SceneUtil::StateSetUpdater
     {
@@ -202,10 +241,7 @@ namespace MWRender
         , mFieldOfViewOverride(0.f)
     {
         auto ext = osg::GLExtensions::Get(0, false);
-        bool reverseZ = ext && ext->isClipControlSupported;
-
-        if (getenv("OPENMW_DISABLE_REVERSEZ") != nullptr)
-            reverseZ = false;
+        bool reverseZ = Settings::Manager::getBool("reverse z", "Camera") && ext && ext->isClipControlSupported;
 
         if (reverseZ)
             Log(Debug::Info) << "Using reverse-z depth buffer";
@@ -219,7 +255,8 @@ namespace MWRender
         bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders")
                             || Settings::Manager::getBool("force shaders", "Shaders")
                             || Settings::Manager::getBool("enable shadows", "Shadows")
-                            || lightingMethod != SceneUtil::LightingMethod::FFP;
+                            || lightingMethod != SceneUtil::LightingMethod::FFP
+                            || reverseZ;
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
@@ -370,6 +407,10 @@ namespace MWRender
             // Use a stub grid to avoid splitting between chunks for active grid and chunks for distant cells.
             mGroundcoverWorld->setActiveGrid(osg::Vec4i(0, 0, 0, 0));
         }
+
+        mPostProcessor.reset(new PostProcessor(*this, viewer, mRootNode));
+        resourceSystem->getSceneManager()->setDepthFormat(mPostProcessor->getDepthFormat());
+
         // water goes after terrain for correct waterculling order
         mWater.reset(new Water(sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
 
@@ -412,6 +453,9 @@ namespace MWRender
         mStateUpdater = new StateUpdater;
         sceneRoot->addUpdateCallback(mStateUpdater);
 
+        mSharedUniformStateUpdater = new SharedUniformStateUpdater;
+        rootNode->addUpdateCallback(mSharedUniformStateUpdater);
+
         osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING;
 
         if (!Settings::Manager::getBool("small feature culling", "Camera"))
@@ -433,7 +477,9 @@ namespace MWRender
         NifOsg::Loader::setReverseZ(reverseZ);
         Nif::NIFFile::setLoadUnsupportedFiles(Settings::Manager::getBool("load unsupported nif files", "Models"));
 
-        mNearClip = Settings::Manager::getFloat("near clip", "Camera");
+        // TODO: Near clip should not need to be bounded like this, but too small values break OSG shadow calculations CPU-side.
+        // See issue: #6072
+        mNearClip = std::max(0.005f, Settings::Manager::getFloat("near clip", "Camera"));
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         float fov = Settings::Manager::getFloat("field of view", "Camera");
         mFieldOfView = std::min(std::max(1.f, fov), 179.f);
@@ -461,11 +507,6 @@ namespace MWRender
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(clipcontrol, osg::StateAttribute::ON);
         }
-
-        if (ext && ext->isFrameBufferObjectSupported)
-           mPostProcessor.reset(new PostProcessor(viewer, mRootNode));
-        else
-           Log(Debug::Warning) << "Disabling postprocessing and using default framebuffer for rendering: FrameBufferObjects not supported";
 
         updateProjectionMatrix();
     }
@@ -1100,19 +1141,15 @@ namespace MWRender
         if (mFieldOfViewOverridden)
             fov = mFieldOfViewOverride;
 
+        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
+
         if (mResourceSystem->getSceneManager()->getReverseZ())
         {
-            mViewer->getCamera()->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspectiveInf(fov, aspect, mNearClip));
-            float linearFac = -mNearClip / (mViewDistance - mNearClip) - 1.0;
-            mRootNode->getOrCreateStateSet()->getOrCreateUniform("linearFac", osg::Uniform::FLOAT, 1)->set(linearFac);
-
-            osg::Matrix shadowProj = osg::Matrix::perspective(fov, aspect, mNearClip, mViewDistance);
-            mViewer->getCamera()->setUserValue("shadowProj", shadowProj);
-            mViewer->getCamera()->setUserValue("near", static_cast<double>(mNearClip));
-            mViewer->getCamera()->setUserValue("far", static_cast<double>(mViewDistance));
+            mSharedUniformStateUpdater->setLinearFac(-mNearClip / (mViewDistance - mNearClip) - 1.f);
+            mSharedUniformStateUpdater->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance));
         }
         else
-            mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
+            mSharedUniformStateUpdater->setProjectionMatrix(mViewer->getCamera()->getProjectionMatrix());
 
         mUniformNear->set(mNearClip);
         mUniformFar->set(mViewDistance);

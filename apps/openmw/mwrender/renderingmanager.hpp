@@ -72,6 +72,7 @@ namespace MWRender
 {
     class GroundcoverUpdater;
     class StateUpdater;
+    class SharedUniformStateUpdater;
 
     class EffectManager;
     class ScreenshotManager;
@@ -240,9 +241,9 @@ namespace MWRender
         void pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr);
         bool pagingUnlockCache();
         void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
-
-    private:
+        
         void updateProjectionMatrix();
+    private:
         void updateTextureFiltering();
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
@@ -296,6 +297,7 @@ namespace MWRender
         osg::Vec3f mCurrentCameraPos;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
+        osg::ref_ptr<SharedUniformStateUpdater> mSharedUniformStateUpdater;
 
         osg::Vec4f mAmbientColor;
         float mMinimumAmbientLuminance;

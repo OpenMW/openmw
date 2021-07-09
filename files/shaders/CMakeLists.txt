@@ -34,6 +34,8 @@ set(SHADER_FILES
     nv_nolighting_fragment.glsl
     gui_vertex.glsl
     gui_fragment.glsl
+    debug_vertex.glsl
+    debug_fragment.glsl
 )
 
 copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_SHADERS_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")

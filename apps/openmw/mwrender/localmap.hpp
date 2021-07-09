@@ -36,7 +36,7 @@ namespace MWRender
     class LocalMap
     {
     public:
-        LocalMap(osg::Group* root, bool reverseZ);
+        LocalMap(osg::Group* root);
         ~LocalMap();
 
         /**
@@ -156,7 +156,6 @@ namespace MWRender
         void setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int y);
 
         bool mInterior;
-        bool mReverseZ;
         osg::BoundingBox mBounds;
     };
 

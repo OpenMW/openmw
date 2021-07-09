@@ -18,15 +18,19 @@ namespace osgViewer
 
 namespace MWRender
 {
+    class RenderingManager;
+
     class PostProcessor
     {
     public:
-        PostProcessor(osgViewer::Viewer* viewer, osg::Group* rootNode);
+        PostProcessor(RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode);
 
         auto getMsaaFbo() { return mMsaaFbo; }
         auto getFbo() { return mFbo; }
 
-        void resize(int width, int height);
+        int getDepthFormat() { return mDepthFormat; }
+
+        void resize(int width, int height, bool init=false);
 
     private:
         osgViewer::Viewer* mViewer;
@@ -39,7 +43,11 @@ namespace MWRender
         osg::ref_ptr<osg::Texture2D> mSceneTex;
         osg::ref_ptr<osg::Texture2D> mDepthTex;
 
+        int mDepthFormat;
+
         void createTexturesAndCamera(int width, int height);
+
+        RenderingManager& mRendering;
     };
 }
 

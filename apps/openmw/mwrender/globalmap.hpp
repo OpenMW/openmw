@@ -33,7 +33,7 @@ namespace MWRender
     class GlobalMap
     {
     public:
-        GlobalMap(osg::Group* root, SceneUtil::WorkQueue* workQueue, bool reverseZ);
+        GlobalMap(osg::Group* root, SceneUtil::WorkQueue* workQueue);
         ~GlobalMap();
 
         void render();
@@ -126,8 +126,6 @@ namespace MWRender
         int mHeight;
 
         int mMinX, mMaxX, mMinY, mMaxY;
-
-        bool mReverseZ;
     };
 
 }

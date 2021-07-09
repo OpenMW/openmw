@@ -50,7 +50,7 @@ namespace SceneUtil
     };
 
     // Allows camera to render to a color and floating point depth texture with a multisampled framebuffer.
-    // Must be set on a cameras cull callback.
+    // Must be set on a camera's cull callback.
     // When the depth texture isn't needed as a sampler, use osg::Camera::attach(osg::Camera::DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F) instead.
     // If multisampling is not being used on the color buffer attachment, use the osg::Camera::attach() method.
     class AttachMultisampledDepthColorCallback : public osg::NodeCallback
@@ -99,6 +99,8 @@ namespace SceneUtil
     // Returns an orthographic projection matrix for use with a reversed z-buffer.
     osg::Matrix getReversedZProjectionMatrixAsOrtho(double left, double right, double bottom, double top, double near, double far);
 
+    // Returns true if the GL format is a floating point depth format
+    bool isFloatingPointDepthFormat(GLenum format); 
 }
 
 #endif

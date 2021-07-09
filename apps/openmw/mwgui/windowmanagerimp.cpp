@@ -35,7 +35,6 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
-#include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
 
@@ -305,9 +304,8 @@ namespace MWGui
         mGuiModeStates[GM_MainMenu] = GuiModeState(menu);
         mWindows.push_back(menu);
 
-        bool reverseZ = mResourceSystem->getSceneManager()->getReverseZ();
-        mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup(), reverseZ);
-        mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue, reverseZ);
+        mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
+        mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue);
         mWindows.push_back(mMap);
         mMap->renderGlobalMap();
         trackWindow(mMap, "map");

@@ -1,5 +1,7 @@
 #version 120
 
+uniform mat4 projectionMatrix;
+
 #if @diffuseMap
 varying vec2 diffuseMapUV;
 #endif
@@ -21,14 +23,14 @@ varying float passFalloff;
 
 void main(void)
 {
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = projectionMatrix * (gl_ModelViewMatrix * gl_Vertex);
 
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
 #if @radialFog
     euclideanDepth = length(viewPos.xyz);
 #else
-    linearDepth = getLinearDepth(viewPos);
+    linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 #endif
 
 #if @diffuseMap

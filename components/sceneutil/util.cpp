@@ -9,6 +9,7 @@
 #include <osg/TexGen>
 #include <osg/TexEnvCombine>
 #include <osg/Version>
+#include <osg/Fog>
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -314,8 +315,7 @@ bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::
 
 osg::ref_ptr<osg::Depth> createDepth(bool reverseZ)
 {
-    static osg::Depth::Function func = reverseZ ? osg::Depth::GEQUAL : osg::Depth::LEQUAL;
-    return new osg::Depth(func);
+    return new osg::Depth(reverseZ ? osg::Depth::GEQUAL : osg::Depth::LEQUAL);
 }
 
 osg::Matrix getReversedZProjectionMatrixAsPerspectiveInf(double fov, double aspect, double near)
@@ -350,5 +350,9 @@ osg::Matrix getReversedZProjectionMatrixAsOrtho(double left, double right, doubl
     );
 }
 
+bool isFloatingPointDepthFormat(GLenum format)
+{
+    return format == GL_DEPTH_COMPONENT32F || format == GL_DEPTH_COMPONENT32F_NV;
+}
 
 }

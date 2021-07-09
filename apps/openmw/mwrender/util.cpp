@@ -4,9 +4,12 @@
 #include <osg/ValueObject>
 
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/sceneutil/visitor.hpp>
+
+#include "../mwbase/environment.hpp"
 
 namespace MWRender
 {
@@ -62,6 +65,11 @@ void overrideTexture(const std::string &texture, Resource::ResourceSystem *resou
     stateset->setTextureAttribute(0, tex, osg::StateAttribute::OVERRIDE);
 
     node->setStateSet(stateset);
+}
+
+bool getReverseZ()
+{
+    return MWBase::Environment::get().getResourceSystem()->getSceneManager()->getReverseZ();
 }
 
 }

@@ -43,6 +43,7 @@
 #include "rotatecontroller.hpp"
 #include "renderbin.hpp"
 #include "vismask.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -370,9 +371,9 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
 {
 public:
-    DepthClearCallback(bool reverseZ)
+    DepthClearCallback()
     {
-        mDepth = SceneUtil::createDepth(reverseZ);
+        mDepth = SceneUtil::createDepth(getReverseZ());
         mDepth->setWriteMask(true);
     }
 
@@ -432,7 +433,7 @@ void NpcAnimation::setRenderBin()
         if (!prototypeAdded)
         {
             osg::ref_ptr<osgUtil::RenderBin> depthClearBin (new osgUtil::RenderBin);
-            depthClearBin->setDrawCallback(new DepthClearCallback(mResourceSystem->getSceneManager()->getReverseZ()));
+            depthClearBin->setDrawCallback(new DepthClearCallback);
             osgUtil::RenderBin::addRenderBinPrototype("DepthClear", depthClearBin);
             prototypeAdded = true;
         }

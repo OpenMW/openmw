@@ -28,8 +28,6 @@
 #include <sstream>
 #include "shadowsbin.hpp"
 
-#include <components/sceneutil/util.hpp>
-
 namespace {
 
 using namespace osgShadow;
@@ -348,11 +346,6 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
     }
 
     _projectionMatrix = cv->getProjectionMatrix();
-}
-
-bool isOrthographicViewFrustum(const osg::Matrix& m)
-{
-    return m(0,3)==0.0 && m(1,3)==0.0 && m(2,3)==0.0; 
 }
 
 } // namespace
@@ -988,9 +981,6 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
         return;
     }
 
-    osg::Matrix shadowProj;
-    cv.getCurrentCamera()->getUserValue("shadowProj", shadowProj);
-
     ViewDependentData* vdd = getViewDependentData(&cv);
 
     if (!vdd)
@@ -1006,41 +996,34 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
     osg::CullSettings::ComputeNearFarMode cachedNearFarMode = cv.getComputeNearFarMode();
 
+    osg::RefMatrix& viewProjectionMatrix = *cv.getProjectionMatrix();
+
+    // check whether this main views projection is perspective or orthographic
+    bool orthographicViewFrustum = viewProjectionMatrix(0,3)==0.0 &&
+                                   viewProjectionMatrix(1,3)==0.0 &&
+                                   viewProjectionMatrix(2,3)==0.0;
+
     double minZNear = 0.0;
     double maxZFar = dbl_max;
-    bool orthographicViewFrustum;
 
-    if (_reverseZ)
+    if (cachedNearFarMode==osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
     {
-        cv.getCurrentCamera()->getUserValue("near", minZNear);
-        cv.getCurrentCamera()->getUserValue("far", maxZFar);
-        orthographicViewFrustum = isOrthographicViewFrustum(shadowProj);
+        double left, right, top, bottom;
+        if (orthographicViewFrustum)
+        {
+            viewProjectionMatrix.getOrtho(left, right, bottom, top, minZNear, maxZFar);
+        }
+        else
+        {
+            viewProjectionMatrix.getFrustum(left, right, bottom, top, minZNear, maxZFar);
+        }
+        OSG_INFO<<"minZNear="<<minZNear<<", maxZFar="<<maxZFar<<std::endl;
     }
-    else
+
+    // set the compute near/far mode to the highest quality setting to ensure we push the near plan out as far as possible
+    if (settings->getComputeNearFarModeOverride()!=osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
     {
-        osg::RefMatrix& viewProjectionMatrix = *cv.getProjectionMatrix();
-
-        // check whether this main views projection is perspective or orthographic
-        orthographicViewFrustum = isOrthographicViewFrustum(viewProjectionMatrix);
-
-        if (cachedNearFarMode==osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
-        {
-            double left, right, top, bottom;
-            if (orthographicViewFrustum)
-            {
-                viewProjectionMatrix.getOrtho(left, right, bottom, top, minZNear, maxZFar);
-            }
-            else
-            {
-                viewProjectionMatrix.getFrustum(left, right, bottom, top, minZNear, maxZFar);
-            }
-        }
-
-        // set the compute near/far mode to the highest quality setting to ensure we push the near plan out as far as possible
-        if (settings->getComputeNearFarModeOverride()!=osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
-        {
-            cv.setComputeNearFarMode(settings->getComputeNearFarModeOverride());
-        }
+        cv.setComputeNearFarMode(settings->getComputeNearFarModeOverride());
     }
 
     // 1. Traverse main scene graph
@@ -1051,9 +1034,6 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     cullShadowReceivingScene(&cv);
 
     cv.popStateSet();
-
-    if (_reverseZ)
-        cv.pushProjectionMatrix(new osg::RefMatrix(shadowProj));
 
     if (cv.getComputeNearFarMode()!=osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
     {
@@ -1094,8 +1074,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     }
 
     // return compute near far mode back to it's original settings
-    if (!_reverseZ)
-        cv.setComputeNearFarMode(cachedNearFarMode);
+    cv.setComputeNearFarMode(cachedNearFarMode);
 
     OSG_INFO<<"frustum.eye="<<frustum.eye<<", frustum.centerNearPlane, "<<frustum.centerNearPlane<<" distance = "<<(frustum.eye-frustum.centerNearPlane).length()<<std::endl;
 
@@ -1480,8 +1459,6 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
         prepareStateSetForRenderingShadow(*vdd, cv.getTraversalNumber());
     }
 
-    if (_reverseZ)
-        cv.popProjectionMatrix();
     // OSG_NOTICE<<"End of shadow setup Projection matrix "<<*cv.getProjectionMatrix()<<std::endl;
 }
 
@@ -1670,9 +1647,11 @@ void MWShadowTechnique::createShaders()
     _shadowCastingStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(true);
-    osg::ref_ptr<osg::ClipControl> clipcontrol = new osg::ClipControl(osg::ClipControl::LOWER_LEFT, osg::ClipControl::NEGATIVE_ONE_TO_ONE);
     if (_reverseZ)
+    {
+        osg::ref_ptr<osg::ClipControl> clipcontrol = new osg::ClipControl(osg::ClipControl::LOWER_LEFT, osg::ClipControl::NEGATIVE_ONE_TO_ONE);
         _shadowCastingStateSet->setAttribute(clipcontrol, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+    }
     _shadowCastingStateSet->setAttribute(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
 

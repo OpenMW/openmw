@@ -8,6 +8,8 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
+uniform mat4 projectionMatrix;
+
 #if @diffuseMap
 varying vec2 diffuseMapUV;
 #endif
@@ -66,12 +68,13 @@ varying vec3 passNormal;
 
 void main(void)
 {
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = projectionMatrix * (gl_ModelViewMatrix * gl_Vertex);
 
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
+
     gl_ClipVertex = viewPos;
     euclideanDepth = length(viewPos.xyz);
-    linearDepth = getLinearDepth(viewPos);
+    linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
 #if (@envMap || !PER_PIXEL_LIGHTING || @shadows_enabled)
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);

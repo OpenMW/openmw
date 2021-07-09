@@ -32,6 +32,8 @@ namespace MWRender
             // no traverse()
         }
     };
+
+    bool getReverseZ();
 }
 
 #endif

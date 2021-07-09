@@ -9,6 +9,11 @@
 #include <osgViewer/Viewer>
 
 #include <components/settings/settings.hpp>
+#include <components/sceneutil/util.hpp>
+#include <components/debug/debuglog.hpp>
+
+#include "vismask.hpp"
+#include "renderingmanager.hpp"
 
 namespace
 {
@@ -57,6 +62,8 @@ namespace
 
             traverse(node, nv);
         }
+
+    private:
         MWRender::PostProcessor* mPostProcessor;
         unsigned int mLastFrameNumber;
     };
@@ -70,6 +77,7 @@ namespace
 
         void resizedImplementation(osg::GraphicsContext* gc, int x, int y, int width, int height) override
         {
+            gc->resizedImplementation(x, y, width, height);
             mPostProcessor->resize(width, height);
         }
 
@@ -79,22 +87,55 @@ namespace
 
 namespace MWRender
 {
-    PostProcessor::PostProcessor(osgViewer::Viewer* viewer, osg::Group* rootNode)
+    PostProcessor::PostProcessor(RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode)
         : mViewer(viewer)
         , mRootNode(new osg::Group)
+        , mRendering(rendering)
     {
+        osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
+        unsigned int contextID = gc->getState()->getContextID();
+        osg::GLExtensions* ext = gc->getState()->get<osg::GLExtensions>();
+
+        constexpr char errPreamble[] = "Postprocessing and floating point depth buffers disabled: ";
+
+        if (!ext->isFrameBufferObjectSupported)
+        {
+            Log(Debug::Warning) << errPreamble << "FrameBufferObject unsupported.";
+            return;
+        }
+
+        if (Settings::Manager::getInt("antialiasing", "Video") > 1 && !ext->isRenderbufferMultisampleSupported())
+        {
+            Log(Debug::Warning) << errPreamble << "RenderBufferMultiSample unsupported. Disabling antialiasing will resolve this issue.";
+            return;
+        }
+
+        if (osg::isGLExtensionSupported(contextID, "GL_ARB_depth_buffer_float"))
+            mDepthFormat = GL_DEPTH_COMPONENT32F;
+        else if (osg::isGLExtensionSupported(contextID, "GL_NV_depth_buffer_float"))
+            mDepthFormat = GL_DEPTH_COMPONENT32F_NV;
+        else
+        {
+            // TODO: Once we have post-processing implemented we want to skip this return and continue with setup.
+            // Rendering to a FBO to fullscreen geometry has overhead (especially when MSAA is enabled) and there are no 
+            // benefits if no floating point depth formats are supported.
+            mDepthFormat = GL_DEPTH_COMPONENT24;
+            Log(Debug::Warning) << errPreamble << "'GL_ARB_depth_buffer_float' and 'GL_NV_depth_buffer_float' unsupported.";
+            return;
+        }
+
         int width = viewer->getCamera()->getViewport()->width();
         int height = viewer->getCamera()->getViewport()->height();
 
         createTexturesAndCamera(width, height);
-        resize(width, height);
+        resize(width, height, true);
 
         mRootNode->addChild(mHUDCamera);
         mRootNode->addChild(rootNode);
         mViewer->setSceneData(mRootNode);
 
-        // Main camera is treated specially, we need to manually set the FBO and
-        // resolve FBO during the cull callback.
+        // We need to manually set the FBO and resolve FBO during the cull callback. If we were using a separate
+        // RTT camera this would not be needed.
         mViewer->getCamera()->addCullCallback(new CullCallback(this));
         mViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         mViewer->getCamera()->attach(osg::Camera::COLOR_BUFFER0, mSceneTex);
@@ -103,12 +144,12 @@ namespace MWRender
         mViewer->getCamera()->getGraphicsContext()->setResizedCallback(new ResizedCallback(this));
     }
 
-    void PostProcessor::resize(int width, int height)
+    void PostProcessor::resize(int width, int height, bool init)
     {
         mDepthTex->setTextureSize(width, height);
         mSceneTex->setTextureSize(width, height);
-		mDepthTex->dirtyTextureObject();
-		mSceneTex->dirtyTextureObject();
+        mDepthTex->dirtyTextureObject();
+        mSceneTex->dirtyTextureObject();
 
         int samples = Settings::Manager::getInt("antialiasing", "Video");
 
@@ -130,15 +171,13 @@ namespace MWRender
             mMsaaFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(depthRB));
         }
 
-        double prevWidth = mViewer->getCamera()->getViewport()->width();
-        double prevHeight = mViewer->getCamera()->getViewport()->height();
-        double scaleX = prevWidth / width;
-        double scaleY = prevHeight / height;
+        if (init)
+            return;
 
-        mViewer->getCamera()->resize(width,height);
-        mHUDCamera->resize(width,height);
+        mViewer->getCamera()->resize(width, height);
+        mHUDCamera->resize(width, height);
 
-        mViewer->getCamera()->getProjectionMatrix() *= osg::Matrix::scale(scaleX, scaleY, 1.0);
+        mRendering.updateProjectionMatrix();
     }
 
     void PostProcessor::createTexturesAndCamera(int width, int height)
@@ -146,8 +185,8 @@ namespace MWRender
         mDepthTex = new osg::Texture2D;
         mDepthTex->setTextureSize(width, height);
         mDepthTex->setSourceFormat(GL_DEPTH_COMPONENT);
-        mDepthTex->setSourceType(GL_FLOAT);
-        mDepthTex->setInternalFormat(GL_DEPTH_COMPONENT32F);
+        mDepthTex->setSourceType(SceneUtil::isFloatingPointDepthFormat(getDepthFormat()) ? GL_FLOAT : GL_UNSIGNED_INT);
+        mDepthTex->setInternalFormat(mDepthFormat);
         mDepthTex->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::NEAREST);
         mDepthTex->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::NEAREST);
         mDepthTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -206,6 +245,7 @@ namespace MWRender
         program->addShader(fragShader);
 
         mHUDCamera->addChild(createFullScreenTri());
+        mHUDCamera->setNodeMask(Mask_RenderToTexture);
 
         auto* stateset = mHUDCamera->getOrCreateStateSet();
         stateset->setTextureAttributeAndModes(0, mSceneTex, osg::StateAttribute::ON);
