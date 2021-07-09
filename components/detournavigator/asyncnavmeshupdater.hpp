@@ -7,6 +7,7 @@
 #include "tileposition.hpp"
 #include "navmeshtilescache.hpp"
 #include "waitconditiontype.hpp"
+#include "navmeshdb.hpp"
 
 #include <osg/Vec3f>
 
@@ -57,6 +58,7 @@ namespace DetourNavigator
     {
         const osg::Vec3f mAgentHalfExtents;
         const std::weak_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItem;
+        const std::string mWorldspace;
         const TilePosition mChangedTile;
         const std::chrono::steady_clock::time_point mProcessTime;
         unsigned mTryNumber = 0;
@@ -65,7 +67,7 @@ namespace DetourNavigator
         const int mDistanceToOrigin;
 
         Job(const osg::Vec3f& agentHalfExtents, std::weak_ptr<GuardedNavMeshCacheItem> navMeshCacheItem,
-            const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
+            std::string_view worldspace, const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
             std::chrono::steady_clock::time_point processTime);
     };
 
@@ -75,11 +77,12 @@ namespace DetourNavigator
     {
     public:
         AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager,
-            OffMeshConnectionsManager& offMeshConnectionsManager);
+            OffMeshConnectionsManager& offMeshConnectionsManager, std::unique_ptr<NavMeshDb>&& db);
         ~AsyncNavMeshUpdater();
 
         void post(const osg::Vec3f& agentHalfExtents, const SharedNavMeshCacheItem& mNavMeshCacheItem,
-            const TilePosition& playerTile, const std::map<TilePosition, ChangeType>& changedTiles);
+            const TilePosition& playerTile, std::string_view worldspace,
+            const std::map<TilePosition, ChangeType>& changedTiles);
 
         void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
 
@@ -89,6 +92,8 @@ namespace DetourNavigator
         std::reference_wrapper<const Settings> mSettings;
         std::reference_wrapper<TileCachedRecastMeshManager> mRecastMeshManager;
         std::reference_wrapper<OffMeshConnectionsManager> mOffMeshConnectionsManager;
+        Misc::ScopeGuarded<std::unique_ptr<NavMeshDb>> mDb;
+        ShapeId mNextShapeId {1};
         std::atomic_bool mShouldStop;
         mutable std::mutex mMutex;
         std::condition_variable mHasJob;

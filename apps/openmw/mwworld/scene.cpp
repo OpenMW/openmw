@@ -350,8 +350,7 @@ namespace MWWorld
         if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
             mNavigator.removePathgrid(*pathgrid);
 
-        const auto player = world->getPlayerPtr();
-        mNavigator.update(player.getRefData().getPosition().asVec3());
+        mNavigator.update(world->getPlayerPtr().getRefData().getPosition().asVec3());
 
         MWBase::Environment::get().getMechanicsManager()->drop (cell);
 
@@ -377,6 +376,8 @@ namespace MWWorld
 
         const int cellX = cell->getCell()->getGridX();
         const int cellY = cell->getCell()->getGridY();
+
+        mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace);
 
         if (cell->getCell()->isExterior())
         {
@@ -507,10 +508,13 @@ namespace MWWorld
 
     void Scene::playerMoved(const osg::Vec3f &pos)
     {
+        if (mCurrentCell == nullptr)
+            return;
+
         const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         mNavigator.updatePlayerPosition(player.getRefData().getPosition().asVec3());
 
-        if (!mCurrentCell || !mCurrentCell->isExterior())
+        if (!mCurrentCell->isExterior())
             return;
 
         osg::Vec2i newCell = getNewGridCenter(pos, &mCurrentGridCenter);
@@ -886,8 +890,11 @@ namespace MWWorld
             addObject(ptr, *mPhysics, mRendering, mPagedRefs);
             addObject(ptr, *mPhysics, mNavigator);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
-            const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            mNavigator.update(player.getRefData().getPosition().asVec3());
+            if (mCurrentCell != nullptr)
+            {
+                const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                mNavigator.update(player.getRefData().getPosition().asVec3());
+            }
         }
         catch (std::exception& e)
         {
@@ -903,8 +910,11 @@ namespace MWWorld
         if (const auto object = mPhysics->getObject(ptr))
         {
             mNavigator.removeObject(DetourNavigator::ObjectId(object));
-            const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            mNavigator.update(player.getRefData().getPosition().asVec3());
+            if (mCurrentCell != nullptr)
+            {
+                const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                mNavigator.update(player.getRefData().getPosition().asVec3());
+            }
         }
         else if (mPhysics->getActor(ptr))
         {

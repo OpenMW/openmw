@@ -7,6 +7,9 @@
 #include "sharednavmesh.hpp"
 #include "navmeshtilescache.hpp"
 #include "offmeshconnection.hpp"
+#include "navmeshdb.hpp"
+
+#include <components/misc/guarded.hpp>
 
 #include <osg/Vec3f>
 
@@ -63,9 +66,10 @@ namespace DetourNavigator
     };
 
     UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
-        const TilePosition& changedTile, const TilePosition& playerTile,
+        const std::string& worldspace, const TilePosition& changedTile, const TilePosition& playerTile,
         const std::vector<OffMeshConnection>& offMeshConnections, const Settings& settings,
-        const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache, UpdateType updateType);
+        const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache, UpdateType updateType,
+        Misc::ScopeGuarded<std::unique_ptr<NavMeshDb>>& db, ShapeId& nextShapeId);
 }
 
 #endif

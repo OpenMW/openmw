@@ -41,12 +41,22 @@ namespace
 
 namespace DetourNavigator
 {
-    NavMeshManager::NavMeshManager(const Settings& settings)
+    NavMeshManager::NavMeshManager(const Settings& settings, std::unique_ptr<NavMeshDb>&& db)
         : mSettings(settings)
-        , mRecastMeshManager(mSettings.mRecast)
-        , mOffMeshConnectionsManager(mSettings.mRecast)
-        , mAsyncNavMeshUpdater(settings, mRecastMeshManager, mOffMeshConnectionsManager)
+        , mRecastMeshManager(settings.mRecast)
+        , mOffMeshConnectionsManager(settings.mRecast)
+        , mAsyncNavMeshUpdater(settings, mRecastMeshManager, mOffMeshConnectionsManager, std::move(db))
     {}
+
+    void NavMeshManager::setWorldspace(std::string_view worldspace)
+    {
+        if (worldspace == mWorldspace)
+            return;
+        mRecastMeshManager.setWorldspace(worldspace);
+        for (auto& [agent, cache] : mCache)
+            cache = std::make_shared<GuardedNavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter);
+        mWorldspace = worldspace;
+    }
 
     bool NavMeshManager::addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                                    const AreaType areaType)
@@ -208,7 +218,7 @@ namespace DetourNavigator
                     recastMeshManager.reportNavMeshChange(recastMeshManager.getVersion(), Version {0, 0});
             });
         }
-        mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, tilesToPost);
+        mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, mRecastMeshManager.getWorldspace(), tilesToPost);
         if (changedTiles != mChangedTiles.end())
             changedTiles->second.clear();
         Log(Debug::Debug) << "Cache update posted for agent=" << agentHalfExtents <<
@@ -241,9 +251,10 @@ namespace DetourNavigator
         std::vector<TilePosition> tiles;
         mRecastMeshManager.forEachTile(
             [&tiles] (const TilePosition& tile, const CachedRecastMeshManager&) { tiles.push_back(tile); });
+        const std::string worldspace = mRecastMeshManager.getWorldspace();
         RecastMeshTiles result;
         for (const TilePosition& tile : tiles)
-            if (auto mesh = mRecastMeshManager.getCachedMesh(tile))
+            if (auto mesh = mRecastMeshManager.getCachedMesh(worldspace, tile))
                 result.emplace(tile, std::move(mesh));
         return result;
     }

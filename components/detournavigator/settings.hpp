@@ -39,6 +39,7 @@ namespace DetourNavigator
         bool mEnableWriteNavMeshToFile = false;
         bool mEnableRecastMeshFileNameRevision = false;
         bool mEnableNavMeshFileNameRevision = false;
+        bool mEnableNavMeshDiskCache = false;
         RecastSettings mRecast;
         DetourSettings mDetour;
         int mWaitUntilMinDistanceToPlayer = 0;

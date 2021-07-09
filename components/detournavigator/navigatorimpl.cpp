@@ -8,9 +8,9 @@
 
 namespace DetourNavigator
 {
-    NavigatorImpl::NavigatorImpl(const Settings& settings)
+    NavigatorImpl::NavigatorImpl(const Settings& settings, std::unique_ptr<NavMeshDb>&& db)
         : mSettings(settings)
-        , mNavMeshManager(mSettings)
+        , mNavMeshManager(mSettings, std::move(db))
         , mUpdatesEnabled(true)
     {
     }
@@ -30,6 +30,11 @@ namespace DetourNavigator
             return;
         if (it->second > 0)
             --it->second;
+    }
+
+    void NavigatorImpl::setWorldspace(std::string_view worldspace)
+    {
+        mNavMeshManager.setWorldspace(worldspace);
     }
 
     bool NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)

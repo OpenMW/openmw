@@ -19,6 +19,8 @@ namespace DetourNavigator
 
         void removeAgent(const osg::Vec3f& /*agentHalfExtents*/) override {}
 
+        void setWorldspace(std::string_view /*worldspace*/) override {}
+
         bool addObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/) override
         {
             return false;

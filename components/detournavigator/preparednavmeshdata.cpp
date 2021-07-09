@@ -1,8 +1,8 @@
 #include "preparednavmeshdata.hpp"
 #include "preparednavmeshdatatuple.hpp"
+#include "recast.hpp"
 
 #include <Recast.h>
-#include <RecastAlloc.h>
 
 namespace
 {
@@ -14,13 +14,6 @@ namespace
         value.nmeshes = 0;
         value.nverts = 0;
         value.ntris = 0;
-    }
-
-    void freePolyMeshDetail(rcPolyMeshDetail& value) noexcept
-    {
-        rcFree(value.meshes);
-        rcFree(value.verts);
-        rcFree(value.tris);
     }
 }
 

@@ -61,7 +61,7 @@ namespace DetourNavigator
         {
             Ignore ignore {consumer};
 
-            const std::shared_ptr<RecastMesh> recastMesh = mRecastMeshProvider.getMesh(mTilePosition);
+            const std::shared_ptr<RecastMesh> recastMesh = mRecastMeshProvider.getMesh(mWorldspace, mTilePosition);
 
             if (recastMesh == nullptr || isEmpty(*recastMesh))
                 return;

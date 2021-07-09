@@ -54,6 +54,17 @@ Allows to complete cell loading only when minimal navigation mesh area is genera
 nearby the player. Increasing this value will keep loading screen longer but will slightly increase nav mesh generation
 speed on systems bound by CPU. Zero means no waiting.
 
+enable nav mesh disk cache
+--------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+If true navmesh cache stored on disk will be used in addition to memory cache.
+If navmesh tile is not present in memory cache, it will be looked up in the disk cache.
+If it's not found there it will be generated.
+
 Advanced settings
 *****************
 

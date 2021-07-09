@@ -5,6 +5,7 @@
 #include "navmeshmanager.hpp"
 
 #include <set>
+#include <memory>
 
 namespace DetourNavigator
 {
@@ -15,11 +16,13 @@ namespace DetourNavigator
          * @brief Navigator constructor initializes all internal data. Constructed object is ready to build a scene.
          * @param settings allows to customize navigator work. Constructor is only place to set navigator settings.
          */
-        explicit NavigatorImpl(const Settings& settings);
+        explicit NavigatorImpl(const Settings& settings, std::unique_ptr<NavMeshDb>&& db);
 
         void addAgent(const osg::Vec3f& agentHalfExtents) override;
 
         void removeAgent(const osg::Vec3f& agentHalfExtents) override;
+
+        void setWorldspace(std::string_view worldspace) override;
 
         bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
 

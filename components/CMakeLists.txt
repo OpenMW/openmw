@@ -207,6 +207,7 @@ add_component_dir(detournavigator
     navmeshdb
     serialization
     navmeshdbutils
+    recast
     )
 
 add_component_dir(loadinglistener

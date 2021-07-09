@@ -4,6 +4,7 @@
 #include <Recast.h>
 
 #include <cstddef>
+#include <type_traits>
 
 namespace DetourNavigator
 {
@@ -46,6 +47,21 @@ namespace DetourNavigator
     {
         return 4 * static_cast<std::size_t>(value.ntris);
     }
+
+    void* permRecastAlloc(std::size_t size);
+
+    template <class T>
+    inline void permRecastAlloc(T*& values, std::size_t size)
+    {
+        static_assert(std::is_arithmetic_v<T>);
+        values = new (permRecastAlloc(size * sizeof(T))) T[size];
+    }
+
+    void permRecastAlloc(rcPolyMesh& value);
+
+    void permRecastAlloc(rcPolyMeshDetail& value);
+
+    void freePolyMeshDetail(rcPolyMeshDetail& value) noexcept;
 }
 
 #endif

@@ -264,6 +264,7 @@ namespace NavMeshTool
                 {
                     it = navMeshInputs.emplace(cell.mCellId.mWorldspace,
                         std::make_unique<WorldspaceNavMeshInput>(cell.mCellId.mWorldspace, settings.mRecast)).first;
+                    it->second->mTileCachedRecastMeshManager.setWorldspace(cell.mCellId.mWorldspace);
                 }
                 return *it->second;
             } ();

@@ -24,14 +24,6 @@ namespace
     using namespace DetourNavigator;
     using namespace DetourNavigator::Tests;
 
-    void* permRecastAlloc(int size)
-    {
-        void* result = rcAlloc(static_cast<std::size_t>(size), RC_ALLOC_PERM);
-        if (result == nullptr)
-            throw std::bad_alloc();
-        return result;
-    }
-
     template <class T, class Random>
     void generateRecastArray(T*& values, int size, Random& random)
     {

@@ -76,10 +76,11 @@ namespace
 namespace DetourNavigator
 {
     Job::Job(const osg::Vec3f& agentHalfExtents, std::weak_ptr<GuardedNavMeshCacheItem> navMeshCacheItem,
-        const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
+        std::string_view worldspace, const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
         std::chrono::steady_clock::time_point processTime)
         : mAgentHalfExtents(agentHalfExtents)
         , mNavMeshCacheItem(std::move(navMeshCacheItem))
+        , mWorldspace(worldspace)
         , mChangedTile(changedTile)
         , mProcessTime(processTime)
         , mChangeType(changeType)
@@ -89,10 +90,11 @@ namespace DetourNavigator
     }
 
     AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager,
-            OffMeshConnectionsManager& offMeshConnectionsManager)
+            OffMeshConnectionsManager& offMeshConnectionsManager, std::unique_ptr<NavMeshDb>&& db)
         : mSettings(settings)
         , mRecastMeshManager(recastMeshManager)
         , mOffMeshConnectionsManager(offMeshConnectionsManager)
+        , mDb(std::move(db))
         , mShouldStop()
         , mNavMeshTilesCache(settings.mMaxNavMeshTilesCacheSize)
     {
@@ -111,8 +113,8 @@ namespace DetourNavigator
             thread.join();
     }
 
-    void AsyncNavMeshUpdater::post(const osg::Vec3f& agentHalfExtents,
-        const SharedNavMeshCacheItem& navMeshCacheItem, const TilePosition& playerTile,
+    void AsyncNavMeshUpdater::post(const osg::Vec3f& agentHalfExtents, const SharedNavMeshCacheItem& navMeshCacheItem,
+        const TilePosition& playerTile, std::string_view worldspace,
         const std::map<TilePosition, ChangeType>& changedTiles)
     {
         bool playerTileChanged = false;
@@ -147,8 +149,8 @@ namespace DetourNavigator
                     ? mLastUpdates[std::tie(agentHalfExtents, changedTile)] + mSettings.get().mMinUpdateInterval
                     : std::chrono::steady_clock::time_point();
 
-                const JobIt it = mJobs.emplace(mJobs.end(), agentHalfExtents, navMeshCacheItem, changedTile,
-                    changeType, getManhattanDistance(changedTile, playerTile), processTime);
+                const JobIt it = mJobs.emplace(mJobs.end(), agentHalfExtents, navMeshCacheItem, worldspace,
+                    changedTile, changeType, getManhattanDistance(changedTile, playerTile), processTime);
 
                 if (playerTileChanged)
                     mWaiting.push_back(it);
@@ -302,12 +304,13 @@ namespace DetourNavigator
         if (!navMeshCacheItem)
             return true;
 
-        const auto recastMesh = mRecastMeshManager.get().getMesh(job.mChangedTile);
+        const auto recastMesh = mRecastMeshManager.get().getMesh(job.mWorldspace, job.mChangedTile);
         const auto playerTile = *mPlayerTile.lockConst();
         const auto offMeshConnections = mOffMeshConnectionsManager.get().get(job.mChangedTile);
 
-        const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mChangedTile, playerTile,
-            offMeshConnections, mSettings, navMeshCacheItem, mNavMeshTilesCache, getUpdateType(job.mChangeType));
+        const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mWorldspace, job.mChangedTile,
+            playerTile, offMeshConnections, mSettings, navMeshCacheItem, mNavMeshTilesCache,
+            getUpdateType(job.mChangeType), mDb, mNextShapeId);
 
         if (recastMesh != nullptr)
         {

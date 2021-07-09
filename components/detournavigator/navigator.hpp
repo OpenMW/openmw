@@ -10,6 +10,8 @@
 
 #include <components/resource/bulletshape.hpp>
 
+#include <string_view>
+
 namespace ESM
 {
     struct Cell;
@@ -74,6 +76,12 @@ namespace DetourNavigator
          * @param agentHalfExtents allows determine which agent to remove
          */
         virtual void removeAgent(const osg::Vec3f& agentHalfExtents) = 0;
+
+        /**
+         * @brief setWorldspace should be called before adding object from new worldspace
+         * @param worldspace
+         */
+        virtual void setWorldspace(std::string_view worldspace) = 0;
 
         /**
          * @brief addObject is used to add complex object with allowed to walk and avoided to walk shapes
@@ -188,7 +196,7 @@ namespace DetourNavigator
         virtual float getMaxNavmeshAreaRealRadius() const = 0;
     };
 
-    std::unique_ptr<Navigator> makeNavigator(const Settings& settings);
+    std::unique_ptr<Navigator> makeNavigator(const Settings& settings, const std::string& userDataPath);
 
     std::unique_ptr<Navigator> makeNavigatorStub();
 }

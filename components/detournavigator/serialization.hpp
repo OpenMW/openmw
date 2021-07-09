@@ -22,6 +22,8 @@ namespace DetourNavigator
         const std::vector<DbRefGeometryObject>& dbRefGeometryObjects);
 
     std::vector<std::byte> serialize(const PreparedNavMeshData& value);
+
+    bool deserialize(const std::vector<std::byte>& data, PreparedNavMeshData& value);
 }
 
 #endif
