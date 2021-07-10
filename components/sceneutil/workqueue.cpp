@@ -93,8 +93,7 @@ osg::ref_ptr<WorkItem> WorkQueue::removeWorkItem()
         mQueue.pop_front();
         return item;
     }
-    else
-        return nullptr;
+    return nullptr;
 }
 
 unsigned int WorkQueue::getNumItems() const
