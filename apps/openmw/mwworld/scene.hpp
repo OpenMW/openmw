@@ -3,6 +3,7 @@
 
 #include <osg/Vec4i>
 #include <osg/Vec2i>
+#include <osg/ref_ptr>
 
 #include "ptr.hpp"
 #include "globals.hpp"
@@ -10,6 +11,7 @@
 #include <set>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include <components/misc/constants.hpp>
 
@@ -47,6 +49,11 @@ namespace MWRender
 namespace MWPhysics
 {
     class PhysicsSystem;
+}
+
+namespace SceneUtil
+{
+    class WorkItem;
 }
 
 namespace MWWorld
@@ -90,6 +97,8 @@ namespace MWWorld
             osg::Vec3f mLastPlayerPos;
 
             std::set<ESM::RefNum> mPagedRefs;
+
+            std::vector<osg::ref_ptr<SceneUtil::WorkItem>> mWorkItems;
 
             void insertCell (CellStore &cell, Loading::Listener* loadingListener, bool onlyObjects, bool test = false);
             osg::Vec2i mCurrentGridCenter;
