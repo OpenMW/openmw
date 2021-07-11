@@ -76,6 +76,15 @@ Debian_GCC_tests:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
 
+Debian_GCC_tests_Debug:
+  extends: Debian_GCC
+  cache:
+    key: Debian_GCC_tests_Debug.v1
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
+
 Debian_GCC_Static_Deps:
   extends: Debian_GCC
   cache:
@@ -117,6 +126,15 @@ Debian_Clang_tests:
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
+
+Debian_Clang_tests_Debug:
+  extends: Debian_Clang
+  cache:
+    key: Debian_Clang_tests_Debug.v1
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
 
 .MacOS:
   image: macos-11-xcode-12

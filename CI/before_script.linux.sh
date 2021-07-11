@@ -34,6 +34,12 @@ if [[ $CI_OPENMW_USE_STATIC_DEPS ]]; then
     )
 fi
 
+if [[ "${CMAKE_BUILD_TYPE}" ]]; then
+    CMAKE_CONF_OPTS+=(
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    )
+fi
+
 mkdir -p build
 cd build
 
