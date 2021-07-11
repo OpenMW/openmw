@@ -703,8 +703,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
             mCfgMgr.getScreenshotPath().string(),
             Settings::Manager::getString("screenshot format", "General"),
             Settings::Manager::getBool("notify on saved screenshot", "General")
-                    ? std::function(ScheduleNonDialogMessageBox {})
-                    : std::function(IgnoreString {})
+                    ? std::function<void (std::string)>(ScheduleNonDialogMessageBox {})
+                    : std::function<void (std::string)>(IgnoreString {})
         )
     );
 
