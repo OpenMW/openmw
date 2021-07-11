@@ -17,8 +17,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <tuple>
 #include <array>
+#include <vector>
 
 namespace DetourNavigator
 {
@@ -26,40 +26,59 @@ namespace DetourNavigator
 
     namespace
     {
-        void optimizeRecastMesh(std::vector<int>& indices, std::vector<float>& vertices)
+        RecastMeshTriangle makeRecastMeshTriangle(const btVector3* vertices, const AreaType areaType, const Settings& settings)
         {
-            std::vector<std::tuple<float, float, float>> uniqueVertices;
-            uniqueVertices.reserve(vertices.size() / 3);
+            RecastMeshTriangle result;
+            result.mAreaType = areaType;
+            for (std::size_t i = 0; i < 3; ++i)
+                result.mVertices[i] = toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(vertices[i]));
+            return result;
+        }
+    }
 
-            for (std::size_t i = 0, n = vertices.size() / 3; i < n; ++i)
-                uniqueVertices.emplace_back(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
+    Mesh makeMesh(std::vector<RecastMeshTriangle>&& triangles)
+    {
+        std::vector<osg::Vec3f> uniqueVertices;
+        uniqueVertices.reserve(3 * triangles.size());
 
-            std::sort(uniqueVertices.begin(), uniqueVertices.end());
-            const auto end = std::unique(uniqueVertices.begin(), uniqueVertices.end());
-            uniqueVertices.erase(end, uniqueVertices.end());
+        for (const RecastMeshTriangle& v : triangles)
+            for (const osg::Vec3f& v : v.mVertices)
+                uniqueVertices.push_back(v);
 
-            if (uniqueVertices.size() == vertices.size() / 3)
-                return;
+        std::sort(uniqueVertices.begin(), uniqueVertices.end());
+        uniqueVertices.erase(std::unique(uniqueVertices.begin(), uniqueVertices.end()), uniqueVertices.end());
 
-            for (std::size_t i = 0, n = indices.size(); i < n; ++i)
+        std::vector<int> indices;
+        indices.reserve(3 * triangles.size());
+        std::vector<AreaType> areaTypes;
+        areaTypes.reserve(triangles.size());
+
+        for (const RecastMeshTriangle& v : triangles)
+        {
+            areaTypes.push_back(v.mAreaType);
+
+            for (const osg::Vec3f& v : v.mVertices)
             {
-                const auto index = indices[i];
-                const auto vertex = std::make_tuple(vertices[index * 3], vertices[index * 3 + 1], vertices[index * 3 + 2]);
-                const auto it = std::lower_bound(uniqueVertices.begin(), uniqueVertices.end(), vertex);
+                const auto it = std::lower_bound(uniqueVertices.begin(), uniqueVertices.end(), v);
                 assert(it != uniqueVertices.end());
-                assert(*it == vertex);
-                indices[i] = std::distance(uniqueVertices.begin(), it);
-            }
-
-            vertices.resize(uniqueVertices.size() * 3);
-
-            for (std::size_t i = 0, n = uniqueVertices.size(); i < n; ++i)
-            {
-                vertices[i * 3] = std::get<0>(uniqueVertices[i]);
-                vertices[i * 3 + 1] = std::get<1>(uniqueVertices[i]);
-                vertices[i * 3 + 2] = std::get<2>(uniqueVertices[i]);
+                assert(*it == v);
+                indices.push_back(static_cast<int>(it - uniqueVertices.begin()));
             }
         }
+
+        triangles.clear();
+
+        std::vector<float> vertices;
+        vertices.reserve(3 * uniqueVertices.size());
+
+        for (const osg::Vec3f& v : uniqueVertices)
+        {
+            vertices.push_back(v.x());
+            vertices.push_back(v.y());
+            vertices.push_back(v.z());
+        }
+
+        return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));
     }
 
     RecastMeshBuilder::RecastMeshBuilder(const Settings& settings, const TileBounds& bounds)
@@ -96,37 +115,26 @@ namespace DetourNavigator
     void RecastMeshBuilder::addObject(const btConcaveShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
-        return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* triangle, int, int)
+        return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
         {
-            for (std::size_t i = 3; i > 0; --i)
-                addTriangleVertex(triangle[i - 1]);
-            mAreaTypes.push_back(areaType);
+            RecastMeshTriangle triangle = makeRecastMeshTriangle(vertices, areaType, mSettings);
+            std::reverse(triangle.mVertices.begin(), triangle.mVertices.end());
+            mTriangles.emplace_back(triangle);
         }));
     }
 
     void RecastMeshBuilder::addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
-        return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* triangle, int, int)
+        return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
         {
-            for (std::size_t i = 0; i < 3; ++i)
-                addTriangleVertex(triangle[i]);
-            mAreaTypes.push_back(areaType);
+            mTriangles.emplace_back(makeRecastMeshTriangle(vertices, areaType, mSettings));
         }));
     }
 
     void RecastMeshBuilder::addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType)
     {
-        const auto indexOffset = static_cast<int>(mVertices.size() / 3);
-
-        for (int vertex = 0, count = shape.getNumVertices(); vertex < count; ++vertex)
-        {
-            btVector3 position;
-            shape.getVertex(vertex, position);
-            addVertex(transform(position));
-        }
-
-        const std::array<int, 36> indices {{
+        constexpr std::array<int, 36> indices {{
             0, 2, 3,
             3, 1, 0,
             0, 4, 6,
@@ -141,10 +149,17 @@ namespace DetourNavigator
             4, 5, 7,
         }};
 
-        std::transform(indices.begin(), indices.end(), std::back_inserter(mIndices),
-            [&] (int index) { return index + indexOffset; });
-
-        std::generate_n(std::back_inserter(mAreaTypes), 12, [=] { return areaType; });
+        for (std::size_t i = 0; i < indices.size(); i += 3)
+        {
+            std::array<btVector3, 3> vertices;
+            for (std::size_t j = 0; j < 3; ++j)
+            {
+                btVector3 position;
+                shape.getVertex(indices[i + j], position);
+                vertices[j] = transform(position);
+            }
+            mTriangles.emplace_back(makeRecastMeshTriangle(vertices.data(), areaType, mSettings));
+        }
     }
 
     void RecastMeshBuilder::addWater(const int cellSize, const btTransform& transform)
@@ -154,9 +169,10 @@ namespace DetourNavigator
 
     std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision) &&
     {
-        optimizeRecastMesh(mIndices, mVertices);
+        std::sort(mTriangles.begin(), mTriangles.end());
         std::sort(mWater.begin(), mWater.end());
-        return std::make_shared<RecastMesh>(generation, revision, std::move(mIndices), std::move(mVertices), std::move(mAreaTypes), std::move(mWater));
+        Mesh mesh = makeMesh(std::move(mTriangles));
+        return std::make_shared<RecastMesh>(generation, revision, std::move(mesh), std::move(mWater));
     }
 
     void RecastMeshBuilder::addObject(const btConcaveShape& shape, const btTransform& transform,
@@ -217,19 +233,5 @@ namespace DetourNavigator
         });
 
         shape.processAllTriangles(&wrapper, aabbMin, aabbMax);
-    }
-
-    void RecastMeshBuilder::addTriangleVertex(const btVector3& worldPosition)
-    {
-        mIndices.push_back(static_cast<int>(mVertices.size() / 3));
-        addVertex(worldPosition);
-    }
-
-    void RecastMeshBuilder::addVertex(const btVector3& worldPosition)
-    {
-        const auto navMeshPosition = toNavMeshCoordinates(mSettings, Misc::Convert::makeOsgVec3f(worldPosition));
-        mVertices.push_back(navMeshPosition.x());
-        mVertices.push_back(navMeshPosition.y());
-        mVertices.push_back(navMeshPosition.z());
     }
 }

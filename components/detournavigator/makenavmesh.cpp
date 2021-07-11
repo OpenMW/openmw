@@ -157,26 +157,26 @@ namespace
             throw NavigatorException("Failed to create heightfield for navmesh");
     }
 
-    bool rasterizeSolidObjectsTriangles(rcContext& context, const RecastMesh& recastMesh, const rcConfig& config,
+    bool rasterizeTriangles(rcContext& context, const Mesh& mesh, const rcConfig& config,
         rcHeightfield& solid)
     {
-        std::vector<unsigned char> areas(recastMesh.getAreaTypes().begin(), recastMesh.getAreaTypes().end());
+        std::vector<unsigned char> areas(mesh.getAreaTypes().begin(), mesh.getAreaTypes().end());
 
         rcClearUnwalkableTriangles(
             &context,
             config.walkableSlopeAngle,
-            recastMesh.getVertices().data(),
-            static_cast<int>(recastMesh.getVerticesCount()),
-            recastMesh.getIndices().data(),
+            mesh.getVertices().data(),
+            static_cast<int>(mesh.getVerticesCount()),
+            mesh.getIndices().data(),
             static_cast<int>(areas.size()),
             areas.data()
         );
 
         return rcRasterizeTriangles(
             &context,
-            recastMesh.getVertices().data(),
-            static_cast<int>(recastMesh.getVerticesCount()),
-            recastMesh.getIndices().data(),
+            mesh.getVertices().data(),
+            static_cast<int>(mesh.getVerticesCount()),
+            mesh.getIndices().data(),
             areas.data(),
             static_cast<int>(areas.size()),
             solid,
@@ -242,7 +242,7 @@ namespace
     bool rasterizeTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
         const rcConfig& config, const Settings& settings, rcHeightfield& solid)
     {
-        if (!rasterizeSolidObjectsTriangles(context, recastMesh, config, solid))
+        if (!rasterizeTriangles(context, recastMesh.getMesh(), config, solid))
             return false;
 
         rasterizeWaterTriangles(context, agentHalfExtents, recastMesh, settings, config, solid);

@@ -39,10 +39,11 @@ namespace SceneUtil
     {
         const osg::ref_ptr<osg::Group> group(new osg::Group);
         DebugDraw debugDraw(*group, osg::Vec3f(0, 0, 0), 1.0f / settings.mRecastScaleFactor);
-        const auto normals = calculateNormals(recastMesh.getVertices(), recastMesh.getIndices());
+        const DetourNavigator::Mesh& mesh = recastMesh.getMesh();
+        const auto normals = calculateNormals(mesh.getVertices(), mesh.getIndices());
         const auto texScale = 1.0f / (settings.mCellSize * 10.0f);
-        duDebugDrawTriMesh(&debugDraw, recastMesh.getVertices().data(), recastMesh.getVerticesCount(),
-            recastMesh.getIndices().data(), normals.data(), recastMesh.getTrianglesCount(), nullptr, texScale);
+        duDebugDrawTriMesh(&debugDraw, mesh.getVertices().data(), mesh.getVerticesCount(),
+            mesh.getIndices().data(), normals.data(), mesh.getTrianglesCount(), nullptr, texScale);
         return group;
     }
 }

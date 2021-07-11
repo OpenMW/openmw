@@ -5,23 +5,28 @@
 
 namespace DetourNavigator
 {
-    RecastMesh::RecastMesh(std::size_t generation, std::size_t revision, std::vector<int> indices, std::vector<float> vertices,
-            std::vector<AreaType> areaTypes, std::vector<Water> water)
+    Mesh::Mesh(std::vector<int>&& indices, std::vector<float>&& vertices, std::vector<AreaType>&& areaTypes)
+    {
+        if (indices.size() / 3 != areaTypes.size())
+           throw InvalidArgument("Number of flags doesn't match number of triangles: triangles="
+               + std::to_string(indices.size() / 3) + ", areaTypes=" + std::to_string(areaTypes.size()));
+        indices.shrink_to_fit();
+        vertices.shrink_to_fit();
+        areaTypes.shrink_to_fit();
+        mIndices = std::move(indices);
+        mVertices = std::move(vertices);
+        mAreaTypes = std::move(areaTypes);
+    }
+
+    RecastMesh::RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Water> water)
         : mGeneration(generation)
         , mRevision(revision)
-        , mIndices(std::move(indices))
-        , mVertices(std::move(vertices))
-        , mAreaTypes(std::move(areaTypes))
+        , mMesh(std::move(mesh))
         , mWater(std::move(water))
     {
-        if (getTrianglesCount() != mAreaTypes.size())
-            throw InvalidArgument("Number of flags doesn't match number of triangles: triangles="
-                + std::to_string(getTrianglesCount()) + ", areaTypes=" + std::to_string(mAreaTypes.size()));
-        if (getVerticesCount())
-            rcCalcBounds(mVertices.data(), static_cast<int>(getVerticesCount()), mBounds.mMin.ptr(), mBounds.mMax.ptr());
-        mIndices.shrink_to_fit();
-        mVertices.shrink_to_fit();
-        mAreaTypes.shrink_to_fit();
+        if (mMesh.getVerticesCount() > 0)
+            rcCalcBounds(mMesh.getVertices().data(), static_cast<int>(mMesh.getVerticesCount()),
+                         mBounds.mMin.ptr(), mBounds.mMax.ptr());
         mWater.shrink_to_fit();
     }
 }

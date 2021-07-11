@@ -16,9 +16,8 @@ namespace DetourNavigator
         const auto object = mObjects.lower_bound(id);
         if (object != mObjects.end() && object->first == id)
             return false;
-        const auto iterator = mObjectsOrder.emplace(mObjectsOrder.end(),
+        mObjects.emplace_hint(object, id,
             OscillatingRecastMeshObject(RecastMeshObject(shape, transform, areaType), mRevision + 1));
-        mObjects.emplace_hint(object, id, iterator);
         ++mRevision;
         return true;
     }
@@ -30,7 +29,7 @@ namespace DetourNavigator
             return false;
         const std::size_t lastChangeRevision = mLastNavMeshReportedChange.has_value()
                 ? mLastNavMeshReportedChange->mRevision : mRevision;
-        if (!object->second->update(transform, areaType, lastChangeRevision, mTileBounds))
+        if (!object->second.update(transform, areaType, lastChangeRevision, mTileBounds))
             return false;
         ++mRevision;
         return true;
@@ -41,8 +40,7 @@ namespace DetourNavigator
         const auto object = mObjects.find(id);
         if (object == mObjects.end())
             return std::nullopt;
-        const RemovedRecastMeshObject result {object->second->getImpl().getShape(), object->second->getImpl().getTransform()};
-        mObjectsOrder.erase(object->second);
+        const RemovedRecastMeshObject result {object->second.getImpl().getShape(), object->second.getImpl().getTransform()};
         mObjects.erase(object);
         ++mRevision;
         return result;
@@ -51,12 +49,8 @@ namespace DetourNavigator
     bool RecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
         const btTransform& transform)
     {
-        const auto iterator = mWaterOrder.emplace(mWaterOrder.end(), Water {cellSize, transform});
-        if (!mWater.emplace(cellPosition, iterator).second)
-        {
-            mWaterOrder.erase(iterator);
+        if (!mWater.emplace(cellPosition, Water {cellSize, transform}).second)
             return false;
-        }
         ++mRevision;
         return true;
     }
@@ -67,8 +61,7 @@ namespace DetourNavigator
         if (water == mWater.end())
             return std::nullopt;
         ++mRevision;
-        const auto result = *water->second;
-        mWaterOrder.erase(water->second);
+        const Water result = water->second;
         mWater.erase(water);
         return result;
     }
@@ -76,9 +69,9 @@ namespace DetourNavigator
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh()
     {
         RecastMeshBuilder builder(mSettings, mTileBounds);
-        for (const auto& v : mWaterOrder)
+        for (const auto& [k, v] : mWater)
             builder.addWater(v.mCellSize, v.mTransform);
-        for (const auto& object : mObjectsOrder)
+        for (const auto& [k, object] : mObjects)
         {
             const RecastMeshObject& v = object.getImpl();
             builder.addObject(v.getShape(), v.getTransform(), v.getAreaType());

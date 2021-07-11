@@ -88,22 +88,29 @@ namespace
     }
 
     template <class Random>
+    Mesh generateMesh(std::size_t triangles, Random& random)
+    {
+        std::uniform_real_distribution<float> distribution(0.0, 1.0);
+        std::vector<float> vertices;
+        std::vector<int> indices;
+        std::vector<AreaType> areaTypes;
+        generateVertices(std::back_inserter(vertices), triangles * 1.98, random);
+        generateIndices(std::back_inserter(indices), static_cast<int>(vertices.size() / 3) - 1, vertices.size() * 1.53, random);
+        generateAreaTypes(std::back_inserter(areaTypes), indices.size() / 3, random);
+        return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));
+    }
+
+    template <class Random>
     Key generateKey(std::size_t triangles, Random& random)
     {
         const osg::Vec3f agentHalfExtents = generateAgentHalfExtents(0.5, 1.5, random);
         const TilePosition tilePosition = generateTilePosition(10000, random);
         const std::size_t generation = std::uniform_int_distribution<std::size_t>(0, 100)(random);
         const std::size_t revision = std::uniform_int_distribution<std::size_t>(0, 10000)(random);
-        std::vector<float> vertices;
-        generateVertices(std::back_inserter(vertices), triangles * 1.98, random);
-        std::vector<int> indices;
-        generateIndices(std::back_inserter(indices), static_cast<int>(vertices.size() / 3) - 1, vertices.size() * 1.53, random);
-        std::vector<AreaType> areaTypes;
-        generateAreaTypes(std::back_inserter(areaTypes), indices.size() / 3, random);
+        Mesh mesh = generateMesh(triangles, random);
         std::vector<RecastMesh::Water> water;
         generateWater(std::back_inserter(water), 2, random);
-        RecastMesh recastMesh(generation, revision, std::move(indices), std::move(vertices),
-                              std::move(areaTypes), std::move(water));
+        RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water));
         return Key {agentHalfExtents, tilePosition, std::move(recastMesh)};
     }
 

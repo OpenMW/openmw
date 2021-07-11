@@ -18,7 +18,7 @@ namespace DetourNavigator
         file.exceptions(std::ios::failbit | std::ios::badbit);
         file.precision(std::numeric_limits<float>::max_exponent10);
         std::size_t count = 0;
-        for (auto v : recastMesh.getVertices())
+        for (float v : recastMesh.getMesh().getVertices())
         {
             if (count % 3 == 0)
             {
@@ -31,7 +31,7 @@ namespace DetourNavigator
         }
         file << '\n';
         count = 0;
-        for (auto v : recastMesh.getIndices())
+        for (int v : recastMesh.getMesh().getIndices())
         {
             if (count % 3 == 0)
             {

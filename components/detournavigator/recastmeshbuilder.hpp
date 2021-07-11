@@ -4,7 +4,15 @@
 #include "recastmesh.hpp"
 #include "tilebounds.hpp"
 
+#include <osg/Vec3f>
+
 #include <LinearMath/btTransform.h>
+
+#include <array>
+#include <functional>
+#include <memory>
+#include <tuple>
+#include <vector>
 
 class btBoxShape;
 class btCollisionShape;
@@ -16,6 +24,17 @@ class btTriangleCallback;
 namespace DetourNavigator
 {
     struct Settings;
+
+    struct RecastMeshTriangle
+    {
+        AreaType mAreaType;
+        std::array<osg::Vec3f, 3> mVertices;
+
+        friend inline bool operator<(const RecastMeshTriangle& lhs, const RecastMeshTriangle& rhs)
+        {
+            return std::tie(lhs.mAreaType, lhs.mVertices) < std::tie(rhs.mAreaType, rhs.mVertices);
+        }
+    };
 
     class RecastMeshBuilder
     {
@@ -39,19 +58,15 @@ namespace DetourNavigator
     private:
         std::reference_wrapper<const Settings> mSettings;
         TileBounds mBounds;
-        std::vector<int> mIndices;
-        std::vector<float> mVertices;
-        std::vector<AreaType> mAreaTypes;
+        std::vector<RecastMeshTriangle> mTriangles;
         std::vector<RecastMesh::Water> mWater;
 
         void addObject(const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback);
 
         void addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform, btTriangleCallback&& callback);
-
-        void addTriangleVertex(const btVector3& worldPosition);
-
-        void addVertex(const btVector3& worldPosition);
     };
+
+    Mesh makeMesh(std::vector<RecastMeshTriangle>&& triangles);
 }
 
 #endif

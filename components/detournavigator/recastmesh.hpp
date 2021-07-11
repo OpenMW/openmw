@@ -15,6 +15,36 @@
 
 namespace DetourNavigator
 {
+    class Mesh
+    {
+    public:
+        Mesh(std::vector<int>&& indices, std::vector<float>&& vertices, std::vector<AreaType>&& areaTypes);
+
+        const std::vector<int>& getIndices() const noexcept { return mIndices; }
+        const std::vector<float>& getVertices() const noexcept { return mVertices; }
+        const std::vector<AreaType>& getAreaTypes() const noexcept { return mAreaTypes; }
+        std::size_t getVerticesCount() const noexcept { return mVertices.size() / 3; }
+        std::size_t getTrianglesCount() const noexcept { return mAreaTypes.size(); }
+
+    private:
+        std::vector<int> mIndices;
+        std::vector<float> mVertices;
+        std::vector<AreaType> mAreaTypes;
+
+        friend inline bool operator<(const Mesh& lhs, const Mesh& rhs) noexcept
+        {
+            return std::tie(lhs.mIndices, lhs.mVertices, lhs.mAreaTypes)
+                    < std::tie(rhs.mIndices, rhs.mVertices, rhs.mAreaTypes);
+        }
+
+        friend inline std::size_t getSize(const Mesh& value) noexcept
+        {
+            return value.mIndices.size() * sizeof(int)
+                + value.mVertices.size() * sizeof(float)
+                + value.mAreaTypes.size() * sizeof(AreaType);
+        }
+    };
+
     class RecastMesh
     {
     public:
@@ -24,8 +54,7 @@ namespace DetourNavigator
             btTransform mTransform;
         };
 
-        RecastMesh(std::size_t generation, std::size_t revision, std::vector<int> indices, std::vector<float> vertices,
-            std::vector<AreaType> areaTypes, std::vector<Water> water);
+        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Water> water);
 
         std::size_t getGeneration() const
         {
@@ -37,34 +66,11 @@ namespace DetourNavigator
             return mRevision;
         }
 
-        const std::vector<int>& getIndices() const
-        {
-            return mIndices;
-        }
-
-        const std::vector<float>& getVertices() const
-        {
-            return mVertices;
-        }
-
-        const std::vector<AreaType>& getAreaTypes() const
-        {
-            return mAreaTypes;
-        }
+        const Mesh& getMesh() const noexcept { return mMesh; }
 
         const std::vector<Water>& getWater() const
         {
             return mWater;
-        }
-
-        std::size_t getVerticesCount() const
-        {
-            return mVertices.size() / 3;
-        }
-
-        std::size_t getTrianglesCount() const
-        {
-            return mIndices.size() / 3;
         }
 
         const Bounds& getBounds() const
@@ -75,31 +81,24 @@ namespace DetourNavigator
     private:
         std::size_t mGeneration;
         std::size_t mRevision;
-        std::vector<int> mIndices;
-        std::vector<float> mVertices;
-        std::vector<AreaType> mAreaTypes;
+        Mesh mMesh;
         std::vector<Water> mWater;
         Bounds mBounds;
 
-        friend inline std::size_t getSize(const RecastMesh& recastMesh) noexcept
+        friend inline bool operator <(const RecastMesh& lhs, const RecastMesh& rhs) noexcept
         {
-            const std::size_t indicesSize = recastMesh.mIndices.size() * sizeof(int);
-            const std::size_t verticesSize = recastMesh.mVertices.size() * sizeof(float);
-            const std::size_t areaTypesSize = recastMesh.mAreaTypes.size() * sizeof(AreaType);
-            const std::size_t waterSize = recastMesh.mWater.size() * sizeof(RecastMesh::Water);
-            return indicesSize + verticesSize + areaTypesSize + waterSize;
+            return std::tie(lhs.mMesh, lhs.mWater) < std::tie(rhs.mMesh, rhs.mWater);
+        }
+
+        friend inline std::size_t getSize(const RecastMesh& value) noexcept
+        {
+            return getSize(value.mMesh) + value.mWater.size() * sizeof(RecastMesh::Water);
         }
     };
 
-    inline bool operator<(const RecastMesh::Water& lhs, const RecastMesh::Water& rhs)
+    inline bool operator<(const RecastMesh::Water& lhs, const RecastMesh::Water& rhs) noexcept
     {
         return std::tie(lhs.mCellSize, lhs.mTransform) < std::tie(rhs.mCellSize, rhs.mTransform);
-    }
-
-    inline bool operator <(const RecastMesh& lhs, const RecastMesh& rhs)
-    {
-        return std::tie(lhs.getIndices(), lhs.getVertices(), lhs.getAreaTypes(), lhs.getWater())
-                < std::tie(rhs.getIndices(), rhs.getVertices(), rhs.getAreaTypes(), rhs.getWater());
     }
 }
 

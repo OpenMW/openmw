@@ -9,7 +9,6 @@
 
 #include <osg/Vec2i>
 
-#include <list>
 #include <map>
 #include <optional>
 #include <memory>
@@ -68,10 +67,8 @@ namespace DetourNavigator
         std::size_t mRevision = 0;
         std::size_t mGeneration;
         TileBounds mTileBounds;
-        std::list<OscillatingRecastMeshObject> mObjectsOrder;
-        std::map<ObjectId, std::list<OscillatingRecastMeshObject>::iterator> mObjects;
-        std::list<Water> mWaterOrder;
-        std::map<osg::Vec2i, std::list<Water>::iterator> mWater;
+        std::map<ObjectId, OscillatingRecastMeshObject> mObjects;
+        std::map<osg::Vec2i, Water> mWater;
         std::optional<Report> mLastNavMeshReportedChange;
         std::optional<Report> mLastNavMeshReport;
     };

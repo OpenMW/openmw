@@ -22,28 +22,26 @@ namespace DetourNavigator
 {
     struct RecastMeshData
     {
-        std::vector<int> mIndices;
-        std::vector<float> mVertices;
-        std::vector<AreaType> mAreaTypes;
+        Mesh mMesh;
         std::vector<RecastMesh::Water> mWater;
     };
 
     inline bool operator <(const RecastMeshData& lhs, const RecastMeshData& rhs)
     {
-        return std::tie(lhs.mIndices, lhs.mVertices, lhs.mAreaTypes, lhs.mWater)
-                < std::tie(rhs.mIndices, rhs.mVertices, rhs.mAreaTypes, rhs.mWater);
+        return std::tie(lhs.mMesh, lhs.mWater)
+                < std::tie(rhs.mMesh, rhs.mWater);
     }
 
     inline bool operator <(const RecastMeshData& lhs, const RecastMesh& rhs)
     {
-        return std::tie(lhs.mIndices, lhs.mVertices, lhs.mAreaTypes, lhs.mWater)
-                < std::tie(rhs.getIndices(), rhs.getVertices(), rhs.getAreaTypes(), rhs.getWater());
+        return std::tie(lhs.mMesh, lhs.mWater)
+                < std::tie(rhs.getMesh(), rhs.getWater());
     }
 
     inline bool operator <(const RecastMesh& lhs, const RecastMeshData& rhs)
     {
-        return std::tie(lhs.getIndices(), lhs.getVertices(), lhs.getAreaTypes(), lhs.getWater())
-                < std::tie(rhs.mIndices, rhs.mVertices, rhs.mAreaTypes, rhs.mWater);
+        return std::tie(lhs.getMesh(), lhs.getWater())
+                < std::tie(rhs.mMesh, rhs.mWater);
     }
 
     class NavMeshTilesCache
