@@ -124,11 +124,13 @@ void Actor::updatePosition()
     mPositionOffset = osg::Vec3f();
     mStandingOnPtr = nullptr;
     mSkipCollisions = true;
+    mSkipSimulation = true;
 }
 
 void Actor::setSimulationPosition(const osg::Vec3f& position)
 {
-    mSimulationPosition = position;
+    if (!std::exchange(mSkipSimulation, false))
+        mSimulationPosition = position;
 }
 
 osg::Vec3f Actor::getSimulationPosition() const
