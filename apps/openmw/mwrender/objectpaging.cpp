@@ -364,6 +364,7 @@ namespace MWRender
             osg::ref_ptr<osg::StateSet> stateset = node.getStateSet() ? osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY) : new osg::StateSet;
             stateset->setAttribute(m);
             stateset->addUniform(new osg::Uniform("colorMode", 0));
+            stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
             node.setStateSet(stateset);
         }
     };
