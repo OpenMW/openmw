@@ -3,6 +3,7 @@
 #include <limits>
 #include <chrono>
 #include <thread>
+#include <atomic>
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
@@ -867,6 +868,11 @@ namespace MWWorld
 
     Scene::~Scene()
     {
+        for (const osg::ref_ptr<SceneUtil::WorkItem>& v : mWorkItems)
+            v->abort();
+
+        for (const osg::ref_ptr<SceneUtil::WorkItem>& v : mWorkItems)
+            v->waitTillDone();
     }
 
     bool Scene::hasCellChanged() const
@@ -1061,6 +1067,9 @@ namespace MWWorld
 
         void doWork() override
         {
+            if (mAborted)
+                return;
+
             try
             {
                 mSceneManager->getTemplate(mMesh);
@@ -1069,9 +1078,16 @@ namespace MWWorld
             {
             }
         }
+
+        void abort() override
+        {
+            mAborted = true;
+        }
+
     private:
         std::string mMesh;
         Resource::SceneManager* mSceneManager;
+        std::atomic_bool mAborted {false};
     };
 
     void Scene::preload(const std::string &mesh, bool useAnim)
@@ -1081,7 +1097,13 @@ namespace MWWorld
             mesh_ = Misc::ResourceHelpers::correctActorModelPath(mesh_, mRendering.getResourceSystem()->getVFS());
 
         if (!mRendering.getResourceSystem()->getSceneManager()->checkLoaded(mesh_, mRendering.getReferenceTime()))
-            mRendering.getWorkQueue()->addWorkItem(new PreloadMeshItem(mesh_, mRendering.getResourceSystem()->getSceneManager()));
+        {
+            osg::ref_ptr<PreloadMeshItem> item(new PreloadMeshItem(mesh_, mRendering.getResourceSystem()->getSceneManager()));
+            mRendering.getWorkQueue()->addWorkItem(item);
+            const auto isDone = [] (const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
+            mWorkItems.erase(std::remove_if(mWorkItems.begin(), mWorkItems.end(), isDone), mWorkItems.end());
+            mWorkItems.emplace_back(std::move(item));
+        }
     }
 
     void Scene::preloadCells(float dt)

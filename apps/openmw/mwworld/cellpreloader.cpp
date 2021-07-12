@@ -317,7 +317,7 @@ namespace MWWorld
             if (found->second.mWorkItem)
             {
                 found->second.mWorkItem->abort();
-                mUnrefQueue->push(mPreloadCells[cell].mWorkItem);
+                mUnrefQueue->push(std::move(found->second.mWorkItem));
             }
 
             mPreloadCells.erase(found);

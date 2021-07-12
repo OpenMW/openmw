@@ -427,7 +427,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    mWorkQueue->stop();
+    if (mScreenCaptureOperation != nullptr)
+        mScreenCaptureOperation->stop();
 
     mEnvironment.cleanup();
 

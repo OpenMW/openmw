@@ -492,7 +492,7 @@ namespace MWRender
 
         workItem->mTextures.emplace_back("textures/_land_default.dds");
 
-        mWorkQueue->addWorkItem(workItem);
+        mWorkQueue->addWorkItem(std::move(workItem));
     }
 
     double RenderingManager::getReferenceTime() const
