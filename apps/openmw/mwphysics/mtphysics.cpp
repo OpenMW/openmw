@@ -599,7 +599,7 @@ namespace MWPhysics
         if (!mRemainingSteps)
             return;
         for (auto& data : mActorsFrameData)
-            if (data.mActor.lock())
+            if (const auto actor = data.mActor.lock())
             {
                 std::unique_lock lock(mCollisionWorldMutex);
                 MovementSolver::unstuck(data, mCollisionWorld);
