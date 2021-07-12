@@ -87,13 +87,13 @@ namespace MWMechanics
             int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying) override;
             ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
 
-            int getDerivedDisposition(const MWWorld::Ptr& ptr, bool addTemporaryDispositionChange = true) override;
+            int getDerivedDisposition(const MWWorld::Ptr& ptr, bool clamp = true) override;
             ///< Calculate the diposition of an NPC toward the player.
 
             int countDeaths (const std::string& id) const override;
             ///< Return the number of deaths for actors with the given ID.
 
-            void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type, bool& success, float& tempChange, float& permChange) override;
+            void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type, bool& success, int& tempChange, int& permChange) override;
             ///< Perform a persuasion action on NPC
 
             /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
