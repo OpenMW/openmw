@@ -109,6 +109,21 @@ namespace
 
         return npcsToReplace;
     }
+
+    // Custom enchanted items can reference scripts that no longer exist, this doesn't necessarily mean the base item no longer exists however.
+    // So instead of removing the item altogether, we're only removing the script.
+    template<class T>
+    void removeMissingScripts(const MWWorld::Store<ESM::Script>& scripts, std::map<std::string, T>& items)
+    {
+        for(auto& [id, item] : items)
+        {
+            if(!item.mScript.empty() && !scripts.search(item.mScript))
+            {
+                item.mScript.clear();
+                Log(Debug::Verbose) << "Item '" << id << "' (" << item.mName << ") has nonexistent script '" << item.mScript << "', ignoring it.";
+            }
+        }
+    }
 }
 
 namespace MWWorld
@@ -366,6 +381,32 @@ void ESMStore::validateDynamic()
 
     for (const ESM::NPC &npc : npcsToReplace)
         mNpcs.insert(npc);
+
+    removeMissingScripts(mScripts, mArmors.mDynamic);
+    removeMissingScripts(mScripts, mBooks.mDynamic);
+    removeMissingScripts(mScripts, mClothes.mDynamic);
+    removeMissingScripts(mScripts, mWeapons.mDynamic);
+
+    removeMissingObjects(mCreatureLists);
+    removeMissingObjects(mItemLists);
+}
+
+// Leveled lists can be modified by scripts. This removes items that no longer exist (presumably because the plugin was removed) from modified lists
+template<class T>
+void ESMStore::removeMissingObjects(Store<T>& store)
+{
+    for(auto& [id, list] : store.mDynamic)
+    {
+        std::remove_if(list.mList.begin(), list.mList.end(), [&] (const auto& item)
+        {
+            if(!find(item.mId))
+            {
+                Log(Debug::Verbose) << "Leveled list '" << id << "' has nonexistent object '" << item.mId << "', ignoring it.";
+                return true;
+            }
+            return false;
+        });
+    }
 }
 
     int ESMStore::countSavedGameRecords() const

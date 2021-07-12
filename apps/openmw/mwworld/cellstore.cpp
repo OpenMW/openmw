@@ -844,7 +844,12 @@ namespace MWWorld
             if (type == 0)
             {
                 Log(Debug::Warning) << "Dropping reference to '" << cref.mRefID << "' (object no longer exists)";
-                reader.skipHSubUntil("OBJE");
+                // Skip until the next OBJE or MVRF
+                while(reader.hasMoreSubs() && !reader.peekNextSub("OBJE") && !reader.peekNextSub("MVRF"))
+                {
+                    reader.getSubName();
+                    reader.skipHSub();
+                }
                 continue;
             }
 

@@ -89,6 +89,9 @@ namespace MWWorld
         void validate();
 
         void countRecords();
+
+        template<class T>
+        void removeMissingObjects(Store<T>& store);
     public:
         /// \todo replace with SharedIterator<StoreBase>
         typedef std::map<int, StoreBase *>::const_iterator iterator;
