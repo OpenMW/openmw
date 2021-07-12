@@ -407,6 +407,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mExportFonts(false)
   , mRandomSeed(0)
   , mScriptContext (nullptr)
+  , mLuaManager (nullptr)
   , mFSStrict (false)
   , mScriptBlacklistUse (true)
   , mNewGame (false)
@@ -900,7 +901,7 @@ private:
     Engine* mEngine;
     std::mutex mMutex;
     std::condition_variable mCV;
-    bool mUpdateRequest;
+    bool mUpdateRequest = false;
     double mDt = 0;
     bool mIsGuiMode = false;
     std::optional<std::thread> mThread;

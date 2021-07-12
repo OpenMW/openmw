@@ -82,7 +82,9 @@ namespace LuaUtil
     sol::table LuaState::getMutableFromReadOnly(const sol::userdata& ro)
     {
         sol::stack::push(mLua, ro);
-        lua_getmetatable(mLua, -1);
+        int ok = lua_getmetatable(mLua, -1);
+        assert(ok);
+        (void)ok;
         sol::table res = sol::stack::pop<sol::table>(mLua);
         lua_pop(mLua, 1);
         return res;

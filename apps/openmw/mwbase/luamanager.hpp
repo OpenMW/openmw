@@ -42,14 +42,14 @@ namespace MWBase
 
         struct ActorControls
         {
-            bool mDisableAI;
-            bool mControlledFromLua;
+            bool mDisableAI = false;
+            bool mControlledFromLua = false;
 
-            bool mJump;
-            bool mRun;
-            float mMovement;
-            float mSideMovement;
-            float mTurn;
+            bool mJump = false;
+            bool mRun = false;
+            float mMovement = 0;
+            float mSideMovement = 0;
+            float mTurn = 0;
         };
 
         virtual ActorControls* getActorControls(const MWWorld::Ptr&) const = 0;
