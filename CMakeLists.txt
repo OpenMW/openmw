@@ -404,11 +404,8 @@ else(USE_LUAJIT)
    add_compile_definitions(NO_LUAJIT)
 endif(USE_LUAJIT)
 
-# Download sol - C++ library binding to Lua
-file(DOWNLOAD
-     "https://github.com/ThePhD/sol2/releases/download/v3.2.2/sol.hpp" "${OpenMW_BINARY_DIR}/extern/sol3.2.2/sol/sol.hpp"
-     EXPECTED_MD5 ba113cf458f60672917108e69bb4d958)
-set(SOL_INCLUDE_DIRS ${OpenMW_BINARY_DIR}/extern/sol3.2.2 ${OpenMW_SOURCE_DIR}/extern/sol_config)
+# C++ library binding to Lua
+set(SOL_INCLUDE_DIRS ${OpenMW_SOURCE_DIR}/extern/sol3.2.2 ${OpenMW_SOURCE_DIR}/extern/sol_config)
 
 include_directories(
     BEFORE SYSTEM
