@@ -232,13 +232,18 @@ namespace ESM
         if (!esm.hasMoreSubs())
             return false;
 
-        // NOTE: We should not need this check. It is a safety check until we have checked
-        // more plugins, and how they treat these moved references.
-        if (esm.isNextSub("MVRF"))
+        // MVRF are FRMR are present in pairs. MVRF indicates that following FRMR describes moved CellRef.
+        // This function has to skip all moved CellRefs therefore read all such pairs to ignored values.
+        while (esm.isNextSub("MVRF"))
         {
-            // skip rest of cell record (moved references), they are handled elsewhere
-            esm.skipRecord(); // skip MVRF, CNDT
-            return false;
+            MovedCellRef movedCellRef;
+            esm.getHT(movedCellRef.mRefNum.mIndex);
+            esm.getHNOT(movedCellRef.mTarget, "CNDT");
+            CellRef skippedCellRef;
+            if (!esm.peekNextSub("FRMR"))
+                return false;
+            bool skippedDeleted;
+            skippedCellRef.load(esm, skippedDeleted);
         }
 
         if (esm.peekNextSub("FRMR"))
