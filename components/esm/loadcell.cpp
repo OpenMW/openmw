@@ -224,7 +224,7 @@ namespace ESM
         return region + ' ' + cellGrid;
     }
 
-    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool &isDeleted, bool ignoreMoves, MovedCellRef *mref)
+    bool Cell::getNextRef(ESMReader& esm, CellRef& ref, bool& isDeleted)
     {
         isDeleted = false;
 
@@ -236,18 +236,9 @@ namespace ESM
         // more plugins, and how they treat these moved references.
         if (esm.isNextSub("MVRF"))
         {
-            if (ignoreMoves)
-            {
-                esm.getHT (mref->mRefNum.mIndex);
-                esm.getHNOT (mref->mTarget, "CNDT");
-                adjustRefNum (mref->mRefNum, esm);
-            }
-            else
-            {
-                // skip rest of cell record (moved references), they are handled elsewhere
-                esm.skipRecord(); // skip MVRF, CNDT
-                return false;
-            }
+            // skip rest of cell record (moved references), they are handled elsewhere
+            esm.skipRecord(); // skip MVRF, CNDT
+            return false;
         }
 
         if (esm.peekNextSub("FRMR"))
@@ -261,6 +252,29 @@ namespace ESM
             return true;
         }
         return false;
+    }
+
+    bool Cell::getNextRef(ESMReader& esm, CellRef& cellRef, bool& deleted, MovedCellRef& movedCellRef, bool& moved)
+    {
+        deleted = false;
+        moved = false;
+
+        if (!esm.hasMoreSubs())
+            return false;
+
+        if (esm.isNextSub("MVRF"))
+        {
+            moved = true;
+            getNextMVRF(esm, movedCellRef);
+        }
+
+        if (!esm.peekNextSub("FRMR"))
+            return false;
+
+        cellRef.load(esm, deleted);
+        adjustRefNum(cellRef.mRefNum, esm);
+
+        return true;
     }
 
     bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)

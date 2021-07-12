@@ -19,8 +19,9 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     ESM::MovedCellRef mref;
     mref.mRefNum.mIndex = 0;
     bool isDeleted = false;
+    bool isMoved = false;
 
-    while (ESM::Cell::getNextRef(reader, ref, isDeleted, true, &mref))
+    while (ESM::Cell::getNextRef(reader, ref, isDeleted, mref, isMoved))
     {
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).
@@ -34,7 +35,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             ref.mCell = "#" + std::to_string(index.first) + " " + std::to_string(index.second);
 
             // Handle non-base moved references
-            if (!base && mref.mRefNum.mIndex != 0)
+            if (!base && !isMoved)
             {
                 // Moved references must have a link back to their original cell
                 // See discussion: https://forum.openmw.org/viewtopic.php?f=6&t=577&start=30
@@ -58,8 +59,6 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         }
         else
             ref.mCell = cell2.mId;
-
-        mref.mRefNum.mIndex = 0;
 
         // ignore content file number
         std::map<ESM::RefNum, std::string>::iterator iter = cache.begin();

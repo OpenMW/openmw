@@ -427,13 +427,11 @@ namespace MWRender
                         ESM::MovedCellRef cMRef;
                         cMRef.mRefNum.mIndex = 0;
                         bool deleted = false;
-                        while(cell->getNextRef(esm[index], ref, deleted, /*ignoreMoves*/true, &cMRef))
+                        bool moved = false;
+                        while(cell->getNextRef(esm[index], ref, deleted, cMRef, moved))
                         {
-                            if (cMRef.mRefNum.mIndex)
-                            {
-                                cMRef.mRefNum.mIndex = 0;
-                                continue; // ignore refs that are moved
-                            }
+                            if (moved)
+                                continue;
 
                             if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
                             Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
