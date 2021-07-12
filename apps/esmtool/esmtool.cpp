@@ -244,7 +244,7 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
 
         if(quiet) continue;
 
-        std::cout << "    Refnum: " << ref.mRefNum.mIndex << '\n';
+        std::cout << "  - Refnum: " << ref.mRefNum.mIndex << '\n';
         std::cout << "    ID: " << ref.mRefID << '\n';
         std::cout << "    Position: (" << ref.mPos.pos[0] << ", " << ref.mPos.pos[1] << ", " << ref.mPos.pos[2] << ")\n";
         if (ref.mScale != 1.f)
