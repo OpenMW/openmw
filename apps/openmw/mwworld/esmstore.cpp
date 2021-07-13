@@ -395,17 +395,18 @@ void ESMStore::validateDynamic()
 template<class T>
 void ESMStore::removeMissingObjects(Store<T>& store)
 {
-    for(auto& [id, list] : store.mDynamic)
+    for(auto& entry : store.mDynamic)
     {
-        std::remove_if(list.mList.begin(), list.mList.end(), [&] (const auto& item)
+        auto first = std::remove_if(entry.second.mList.begin(), entry.second.mList.end(), [&] (const auto& item)
         {
             if(!find(item.mId))
             {
-                Log(Debug::Verbose) << "Leveled list '" << id << "' has nonexistent object '" << item.mId << "', ignoring it.";
+                Log(Debug::Verbose) << "Leveled list '" << entry.first << "' has nonexistent object '" << item.mId << "', ignoring it.";
                 return true;
             }
             return false;
         });
+        entry.second.mList.erase(first, entry.second.mList.end());
     }
 }
 
