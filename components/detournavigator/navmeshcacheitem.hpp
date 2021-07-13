@@ -5,13 +5,13 @@
 #include "tileposition.hpp"
 #include "navmeshtilescache.hpp"
 #include "dtstatus.hpp"
-#include "navmeshtileview.hpp"
+#include "navmeshdata.hpp"
 
 #include <components/misc/guarded.hpp>
 
-#include <DetourNavMesh.h>
-
 #include <map>
+
+struct dtMeshTile;
 
 namespace DetourNavigator
 {
@@ -96,26 +96,6 @@ namespace DetourNavigator
         }
     };
 
-    inline unsigned char* getRawData(NavMeshData& navMeshData)
-    {
-        return navMeshData.mValue.get();
-    }
-
-    inline unsigned char* getRawData(NavMeshTilesCache::Value& cachedNavMeshData)
-    {
-        return cachedNavMeshData.get().mValue;
-    }
-
-    inline int getSize(const NavMeshData& navMeshData)
-    {
-        return navMeshData.mSize;
-    }
-
-    inline int getSize(const NavMeshTilesCache::Value& cachedNavMeshData)
-    {
-        return cachedNavMeshData.get().mSize;
-    }
-
     class NavMeshCacheItem
     {
     public:
@@ -139,86 +119,16 @@ namespace DetourNavigator
             return mNavMeshRevision;
         }
 
-        template <class T>
-        UpdateNavMeshStatus updateTile(const TilePosition& position, T&& navMeshData)
-        {
-            const dtMeshTile* currentTile = getTile(position);
-            if (currentTile != nullptr
-                && asNavMeshTileConstView(*currentTile) == asNavMeshTileConstView(getRawData(navMeshData)))
-            {
-                return UpdateNavMeshStatus::ignored;
-            }
-            const auto removed = removeTileImpl(position);
-            const auto addStatus = addTileImpl(getRawData(navMeshData), getSize(navMeshData));
-            if (dtStatusSucceed(addStatus))
-            {
-                setUsedTile(position, std::forward<T>(navMeshData));
-                return UpdateNavMeshStatusBuilder().added(true).removed(removed).getResult();
-            }
-            else
-            {
-                if (removed)
-                    removeUsedTile(position);
-                return UpdateNavMeshStatusBuilder().removed(removed).failed((addStatus & DT_OUT_OF_MEMORY) != 0).getResult();
-            }
-        }
+        UpdateNavMeshStatus updateTile(const TilePosition& position, NavMeshTilesCache::Value&& cached,
+                                       NavMeshData&& navMeshData);
 
-        UpdateNavMeshStatus removeTile(const TilePosition& position)
-        {
-            const auto removed = removeTileImpl(position);
-            if (removed)
-                removeUsedTile(position);
-            return UpdateNavMeshStatusBuilder().removed(removed).getResult();
-        }
+        UpdateNavMeshStatus removeTile(const TilePosition& position);
 
     private:
         NavMeshPtr mImpl;
         std::size_t mGeneration;
         std::size_t mNavMeshRevision;
         std::map<TilePosition, std::pair<NavMeshTilesCache::Value, NavMeshData>> mUsedTiles;
-
-        void setUsedTile(const TilePosition& tilePosition, NavMeshTilesCache::Value value)
-        {
-            mUsedTiles[tilePosition] = std::make_pair(std::move(value), NavMeshData());
-            ++mNavMeshRevision;
-        }
-
-        void setUsedTile(const TilePosition& tilePosition, NavMeshData value)
-        {
-            mUsedTiles[tilePosition] = std::make_pair(NavMeshTilesCache::Value(), std::move(value));
-            ++mNavMeshRevision;
-        }
-
-        void removeUsedTile(const TilePosition& tilePosition)
-        {
-            mUsedTiles.erase(tilePosition);
-            ++mNavMeshRevision;
-        }
-
-        dtStatus addTileImpl(unsigned char* data, int size)
-        {
-            const int doNotTransferOwnership = 0;
-            const dtTileRef lastRef = 0;
-            dtTileRef* const result = nullptr;
-            return mImpl->addTile(data, size, doNotTransferOwnership, lastRef, result);
-        }
-
-        bool removeTileImpl(const TilePosition& position)
-        {
-            const int layer = 0;
-            const auto tileRef = mImpl->getTileRefAt(position.x(), position.y(), layer);
-            if (tileRef == 0)
-                return false;
-            unsigned char** const data = nullptr;
-            int* const dataSize = nullptr;
-            return dtStatusSucceed(mImpl->removeTile(tileRef, data, dataSize));
-        }
-
-        const dtMeshTile* getTile(const TilePosition& position) const
-        {
-            const int layer = 0;
-            return mImpl->getTileAt(position.x(), position.y(), layer);
-        }
     };
 
     using GuardedNavMeshCacheItem = Misc::ScopeGuarded<NavMeshCacheItem>;

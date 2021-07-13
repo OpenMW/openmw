@@ -7,6 +7,8 @@
 #include "sharednavmesh.hpp"
 #include "flags.hpp"
 #include "navmeshtilescache.hpp"
+#include "preparednavmeshdata.hpp"
+#include "navmeshdata.hpp"
 
 #include <components/misc/convert.hpp>
 
@@ -25,25 +27,6 @@
 namespace
 {
     using namespace DetourNavigator;
-
-    void initPolyMeshDetail(rcPolyMeshDetail& value)
-    {
-        value.meshes = nullptr;
-        value.verts = nullptr;
-        value.tris = nullptr;
-    }
-
-    struct PolyMeshDetailStackDeleter
-    {
-        void operator ()(rcPolyMeshDetail* value) const
-        {
-            rcFree(value->meshes);
-            rcFree(value->verts);
-            rcFree(value->tris);
-        }
-    };
-
-    using PolyMeshDetailStackPtr = std::unique_ptr<rcPolyMeshDetail, PolyMeshDetailStackDeleter>;
 
     struct WaterBounds
     {
@@ -363,10 +346,25 @@ namespace
         return true;
     }
 
-    NavMeshData makeNavMeshTileData(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-        const std::vector<OffMeshConnection>& offMeshConnections, const TilePosition& tile,
-        const osg::Vec3f& boundsMin, const osg::Vec3f& boundsMax, const Settings& settings)
+    template <class T>
+    unsigned long getMinValuableBitsNumber(const T value)
     {
+        unsigned long power = 0;
+        while (power < sizeof(T) * 8 && (static_cast<T>(1) << power) < value)
+            ++power;
+        return power;
+    }
+}
+
+namespace DetourNavigator
+{
+    std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
+        const TilePosition& tile, const Bounds& bounds, const osg::Vec3f& agentHalfExtents, const Settings& settings)
+    {
+        const TileBounds tileBounds = makeTileBounds(settings, tile);
+        const osg::Vec3f boundsMin(tileBounds.mMin.x(), bounds.mMin.y() - 1, tileBounds.mMin.y());
+        const osg::Vec3f boundsMax(tileBounds.mMax.x(), bounds.mMax.y() + 1, tileBounds.mMax.y());
+
         rcContext context;
         const auto config = makeConfig(agentHalfExtents, boundsMin, boundsMax, settings);
 
@@ -374,19 +372,27 @@ namespace
         createHeightfield(context, solid, config.width, config.height, config.bmin, config.bmax, config.cs, config.ch);
 
         if (!rasterizeTriangles(context, agentHalfExtents, recastMesh, config, settings, solid))
-            return NavMeshData();
+            return nullptr;
 
         rcFilterLowHangingWalkableObstacles(&context, config.walkableClimb, solid);
         rcFilterLedgeSpans(&context, config.walkableHeight, config.walkableClimb, solid);
         rcFilterWalkableLowHeightSpans(&context, config.walkableHeight, solid);
 
-        rcPolyMesh polyMesh;
-        rcPolyMeshDetail polyMeshDetail;
-        initPolyMeshDetail(polyMeshDetail);
-        const PolyMeshDetailStackPtr polyMeshDetailPtr(&polyMeshDetail);
-        if (!fillPolyMesh(context, config, solid, polyMesh, polyMeshDetail))
-            return NavMeshData();
+        std::unique_ptr<PreparedNavMeshData> result = std::make_unique<PreparedNavMeshData>();
 
+        if (!fillPolyMesh(context, config, solid, result->mPolyMesh, result->mPolyMeshDetail))
+            return nullptr;
+
+        result->mCellSize = config.cs;
+        result->mCellHeight = config.ch;
+
+        return result;
+    }
+
+    NavMeshData makeNavMeshTileData(const PreparedNavMeshData& data,
+        const std::vector<OffMeshConnection>& offMeshConnections, const osg::Vec3f& agentHalfExtents,
+        const TilePosition& tile, const Settings& settings)
+    {
         const auto offMeshConVerts = getOffMeshVerts(offMeshConnections);
         const std::vector<float> offMeshConRad(offMeshConnections.size(), getRadius(settings, agentHalfExtents));
         const std::vector<unsigned char> offMeshConDir(offMeshConnections.size(), 0);
@@ -394,18 +400,18 @@ namespace
         const std::vector<unsigned short> offMeshConFlags = getOffMeshFlags(offMeshConnections);
 
         dtNavMeshCreateParams params;
-        params.verts = polyMesh.verts;
-        params.vertCount = polyMesh.nverts;
-        params.polys = polyMesh.polys;
-        params.polyAreas = polyMesh.areas;
-        params.polyFlags = polyMesh.flags;
-        params.polyCount = polyMesh.npolys;
-        params.nvp = polyMesh.nvp;
-        params.detailMeshes = polyMeshDetail.meshes;
-        params.detailVerts = polyMeshDetail.verts;
-        params.detailVertsCount = polyMeshDetail.nverts;
-        params.detailTris = polyMeshDetail.tris;
-        params.detailTriCount = polyMeshDetail.ntris;
+        params.verts = data.mPolyMesh.verts;
+        params.vertCount = data.mPolyMesh.nverts;
+        params.polys = data.mPolyMesh.polys;
+        params.polyAreas = data.mPolyMesh.areas;
+        params.polyFlags = data.mPolyMesh.flags;
+        params.polyCount = data.mPolyMesh.npolys;
+        params.nvp = data.mPolyMesh.nvp;
+        params.detailMeshes = data.mPolyMeshDetail.meshes;
+        params.detailVerts = data.mPolyMeshDetail.verts;
+        params.detailVertsCount = data.mPolyMeshDetail.nverts;
+        params.detailTris = data.mPolyMeshDetail.tris;
+        params.detailTriCount = data.mPolyMeshDetail.ntris;
         params.offMeshConVerts = offMeshConVerts.data();
         params.offMeshConRad = offMeshConRad.data();
         params.offMeshConDir = offMeshConDir.data();
@@ -416,12 +422,12 @@ namespace
         params.walkableHeight = getHeight(settings, agentHalfExtents);
         params.walkableRadius = getRadius(settings, agentHalfExtents);
         params.walkableClimb = getMaxClimb(settings);
-        rcVcopy(params.bmin, polyMesh.bmin);
-        rcVcopy(params.bmax, polyMesh.bmax);
-        params.cs = config.cs;
-        params.ch = config.ch;
+        rcVcopy(params.bmin, data.mPolyMesh.bmin);
+        rcVcopy(params.bmax, data.mPolyMesh.bmax);
+        params.cs = data.mCellSize;
+        params.ch = data.mCellHeight;
         params.buildBvTree = true;
-        params.userId = 0;
+        params.userId = data.mUserId;
         params.tileX = tile.x();
         params.tileY = tile.y();
         params.tileLayer = 0;
@@ -436,20 +442,6 @@ namespace
         return NavMeshData(navMeshData, navMeshDataSize);
     }
 
-
-
-    template <class T>
-    unsigned long getMinValuableBitsNumber(const T value)
-    {
-        unsigned long power = 0;
-        while (power < sizeof(T) * 8 && (static_cast<T>(1) << power) < value)
-            ++power;
-        return power;
-    }
-}
-
-namespace DetourNavigator
-{
     NavMeshPtr makeEmptyNavMesh(const Settings& settings)
     {
         // Max tiles and max polys affect how the tile IDs are caculated.
@@ -522,35 +514,32 @@ namespace DetourNavigator
             return navMeshCacheItem->lock()->removeTile(changedTile);
         }
 
-        auto cachedNavMeshData = navMeshTilesCache.get(agentHalfExtents, changedTile, *recastMesh, offMeshConnections);
+        auto cachedNavMeshData = navMeshTilesCache.get(agentHalfExtents, changedTile, *recastMesh);
         bool cached = static_cast<bool>(cachedNavMeshData);
 
         if (!cachedNavMeshData)
         {
-            const auto tileBounds = makeTileBounds(settings, changedTile);
-            const osg::Vec3f tileBorderMin(tileBounds.mMin.x(), recastMeshBounds.mMin.y() - 1, tileBounds.mMin.y());
-            const osg::Vec3f tileBorderMax(tileBounds.mMax.x(), recastMeshBounds.mMax.y() + 1, tileBounds.mMax.y());
+            auto prepared = prepareNavMeshTileData(*recastMesh, changedTile, recastMeshBounds,
+                                                   agentHalfExtents, settings);
 
-            auto navMeshData = makeNavMeshTileData(agentHalfExtents, *recastMesh, offMeshConnections, changedTile,
-                tileBorderMin, tileBorderMax, settings);
-
-            if (!navMeshData.mValue)
+            if (prepared == nullptr)
             {
                 Log(Debug::Debug) << "Ignore add tile: NavMeshData is null";
                 return navMeshCacheItem->lock()->removeTile(changedTile);
             }
 
-            cachedNavMeshData = navMeshTilesCache.set(agentHalfExtents, changedTile, *recastMesh,
-                                                      offMeshConnections, std::move(navMeshData));
+            cachedNavMeshData = navMeshTilesCache.set(agentHalfExtents, changedTile, *recastMesh, std::move(prepared));
 
             if (!cachedNavMeshData)
             {
                 Log(Debug::Debug) << "Navigator cache overflow";
-                return navMeshCacheItem->lock()->updateTile(changedTile, std::move(navMeshData));
+                return navMeshCacheItem->lock()->updateTile(changedTile, NavMeshTilesCache::Value(),
+                    makeNavMeshTileData(*prepared, offMeshConnections, agentHalfExtents, changedTile, settings));
             }
         }
 
-        const auto updateStatus = navMeshCacheItem->lock()->updateTile(changedTile, std::move(cachedNavMeshData));
+        const auto updateStatus = navMeshCacheItem->lock()->updateTile(changedTile, std::move(cachedNavMeshData),
+            makeNavMeshTileData(cachedNavMeshData.get(), offMeshConnections, agentHalfExtents, changedTile, settings));
 
         return UpdateNavMeshStatusBuilder(updateStatus).cached(cached).getResult();
     }

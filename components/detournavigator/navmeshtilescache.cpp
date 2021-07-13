@@ -6,32 +6,18 @@
 
 namespace DetourNavigator
 {
-    namespace
-    {
-        inline std::size_t getSize(const RecastMesh& recastMesh,
-                                   const std::vector<OffMeshConnection>& offMeshConnections)
-        {
-            const std::size_t indicesSize = recastMesh.getIndices().size() * sizeof(int);
-            const std::size_t verticesSize = recastMesh.getVertices().size() * sizeof(float);
-            const std::size_t areaTypesSize = recastMesh.getAreaTypes().size() * sizeof(AreaType);
-            const std::size_t waterSize = recastMesh.getWater().size() * sizeof(RecastMesh::Water);
-            const std::size_t offMeshConnectionsSize = offMeshConnections.size() * sizeof(OffMeshConnection);
-            return indicesSize + verticesSize + areaTypesSize + waterSize + offMeshConnectionsSize;
-        }
-    }
-
     NavMeshTilesCache::NavMeshTilesCache(const std::size_t maxNavMeshDataSize)
         : mMaxNavMeshDataSize(maxNavMeshDataSize), mUsedNavMeshDataSize(0), mFreeNavMeshDataSize(0),
           mHitCount(0), mGetCount(0) {}
 
     NavMeshTilesCache::Value NavMeshTilesCache::get(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
-        const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections)
+        const RecastMesh& recastMesh)
     {
         const std::lock_guard<std::mutex> lock(mMutex);
 
         ++mGetCount;
 
-        const auto tile = mValues.find(std::make_tuple(agentHalfExtents, changedTile, NavMeshKeyView(recastMesh, offMeshConnections)));
+        const auto tile = mValues.find(std::make_tuple(agentHalfExtents, changedTile, recastMesh));
         if (tile == mValues.end())
             return Value();
 
@@ -43,10 +29,10 @@ namespace DetourNavigator
     }
 
     NavMeshTilesCache::Value NavMeshTilesCache::set(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
-        const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections,
-        NavMeshData&& value)
+        const RecastMesh& recastMesh, std::unique_ptr<PreparedNavMeshData>&& value)
     {
-        const auto itemSize = static_cast<std::size_t>(value.mSize) + getSize(recastMesh, offMeshConnections);
+        const auto itemSize = sizeof(RecastMesh) + getSize(recastMesh)
+            + (value == nullptr ? 0 : sizeof(PreparedNavMeshData) + getSize(*value));
 
         const std::lock_guard<std::mutex> lock(mMutex);
 
@@ -56,13 +42,10 @@ namespace DetourNavigator
         while (!mFreeItems.empty() && mUsedNavMeshDataSize + itemSize > mMaxNavMeshDataSize)
             removeLeastRecentlyUsed();
 
-        NavMeshKey navMeshKey {
-            RecastMeshData {recastMesh.getIndices(), recastMesh.getVertices(), recastMesh.getAreaTypes(), recastMesh.getWater()},
-            offMeshConnections
-        };
+        RecastMeshData key {recastMesh.getIndices(), recastMesh.getVertices(), recastMesh.getAreaTypes(), recastMesh.getWater()};
 
-        const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, std::move(navMeshKey), itemSize);
-        const auto emplaced = mValues.emplace(std::make_tuple(agentHalfExtents, changedTile, NavMeshKeyRef(iterator->mNavMeshKey)), iterator);
+        const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, std::move(key), itemSize);
+        const auto emplaced = mValues.emplace(std::make_tuple(agentHalfExtents, changedTile, std::cref(iterator->mRecastMeshData)), iterator);
 
         if (!emplaced.second)
         {
@@ -73,7 +56,7 @@ namespace DetourNavigator
             return Value(*this, emplaced.first->second);
         }
 
-        iterator->mNavMeshData = std::move(value);
+        iterator->mPreparedNavMeshData = std::move(value);
         ++iterator->mUseCount;
         mUsedNavMeshDataSize += itemSize;
         mBusyItems.splice(mBusyItems.end(), mFreeItems, iterator);
@@ -108,7 +91,7 @@ namespace DetourNavigator
     {
         const auto& item = mFreeItems.back();
 
-        const auto value = mValues.find(std::make_tuple(item.mAgentHalfExtents, item.mChangedTile, NavMeshKeyRef(item.mNavMeshKey)));
+        const auto value = mValues.find(std::make_tuple(item.mAgentHalfExtents, item.mChangedTile, std::cref(item.mRecastMeshData)));
         if (value == mValues.end())
             return;
 

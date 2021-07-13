@@ -1,4 +1,5 @@
 #include "navmeshtileview.hpp"
+#include "ref.hpp"
 
 #include <DetourCommon.h>
 #include <DetourNavMesh.h>
@@ -10,47 +11,9 @@
 
 namespace
 {
-    template <typename T>
-    struct Ref
-    {
-        T& mRef;
-
-        explicit Ref(T& ref) : mRef(ref) {}
-
-        friend bool operator==(const Ref& lhs, const Ref& rhs)
-        {
-            return lhs.mRef == rhs.mRef;
-        }
-    };
-
-    template <typename T, std::size_t size>
-    struct ArrayRef
-    {
-        T (&mRef)[size];
-
-        explicit ArrayRef(T (&ref)[size]) : mRef(ref) {}
-
-        friend bool operator==(const ArrayRef& lhs, const ArrayRef& rhs)
-        {
-            return std::equal(std::begin(lhs.mRef), std::end(lhs.mRef), std::begin(rhs.mRef));
-        }
-    };
-
-    template <typename T>
-    struct Span
-    {
-        T* mBegin;
-        T* mEnd;
-
-        explicit Span(T* data, int size) : mBegin(data), mEnd(data + static_cast<std::size_t>(size)) {}
-
-        friend bool operator==(const Span& lhs, const Span& rhs)
-        {
-            // size is already equal if headers are equal
-            assert((lhs.mEnd - lhs.mBegin) == (rhs.mEnd - rhs.mBegin));
-            return std::equal(lhs.mBegin, lhs.mEnd, rhs.mBegin);
-        }
-    };
+    using DetourNavigator::ArrayRef;
+    using DetourNavigator::Ref;
+    using DetourNavigator::Span;
 
     auto makeTuple(const dtMeshHeader& v)
     {

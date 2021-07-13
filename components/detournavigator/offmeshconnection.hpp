@@ -5,6 +5,7 @@
 
 #include <osg/Vec3f>
 
+#include <vector>
 #include <tuple>
 
 namespace DetourNavigator

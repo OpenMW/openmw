@@ -15,13 +15,12 @@ namespace
         osg::Vec3f mAgentHalfExtents;
         TilePosition mTilePosition;
         RecastMesh mRecastMesh;
-        std::vector<OffMeshConnection> mOffMeshConnections;
     };
 
     struct Item
     {
         Key mKey;
-        NavMeshData mValue;
+        PreparedNavMeshData mValue;
     };
 
     template <typename Random>
@@ -105,8 +104,7 @@ namespace
         generateWater(std::back_inserter(water), 2, random);
         RecastMesh recastMesh(generation, revision, std::move(indices), std::move(vertices),
                               std::move(areaTypes), std::move(water));
-        std::vector<OffMeshConnection> offMeshConnections;
-        return Key {agentHalfExtents, tilePosition, std::move(recastMesh), std::move(offMeshConnections)};
+        return Key {agentHalfExtents, tilePosition, std::move(recastMesh)};
     }
 
     constexpr std::size_t trianglesPerTile = 310;
@@ -125,7 +123,8 @@ namespace
         while (true)
         {
             Key key = generateKey(trianglesPerTile, random);
-            cache.set(key.mAgentHalfExtents, key.mTilePosition, key.mRecastMesh, key.mOffMeshConnections, NavMeshData());
+            cache.set(key.mAgentHalfExtents, key.mTilePosition, key.mRecastMesh,
+                      std::make_unique<PreparedNavMeshData>());
             *out++ = std::move(key);
             const std::size_t newSize = cache.getStats().mNavMeshCacheSize;
             if (size >= newSize)
@@ -147,7 +146,7 @@ namespace
         while (state.KeepRunning())
         {
             const auto& key = keys[n++ % keys.size()];
-            const auto result = cache.get(key.mAgentHalfExtents, key.mTilePosition, key.mRecastMesh, key.mOffMeshConnections);
+            const auto result = cache.get(key.mAgentHalfExtents, key.mTilePosition, key.mRecastMesh);
             benchmark::DoNotOptimize(result);
         }
     }
@@ -175,7 +174,8 @@ namespace
         while (state.KeepRunning())
         {
             const auto& key = keys[n++ % keys.size()];
-            const auto result = cache.set(key.mAgentHalfExtents, key.mTilePosition, key.mRecastMesh, key.mOffMeshConnections, NavMeshData());
+            const auto result = cache.set(key.mAgentHalfExtents, key.mTilePosition, key.mRecastMesh,
+                                          std::make_unique<PreparedNavMeshData>());
             benchmark::DoNotOptimize(result);
         }
     }

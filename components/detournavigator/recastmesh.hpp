@@ -80,6 +80,15 @@ namespace DetourNavigator
         std::vector<AreaType> mAreaTypes;
         std::vector<Water> mWater;
         Bounds mBounds;
+
+        friend inline std::size_t getSize(const RecastMesh& recastMesh) noexcept
+        {
+            const std::size_t indicesSize = recastMesh.mIndices.size() * sizeof(int);
+            const std::size_t verticesSize = recastMesh.mVertices.size() * sizeof(float);
+            const std::size_t areaTypesSize = recastMesh.mAreaTypes.size() * sizeof(AreaType);
+            const std::size_t waterSize = recastMesh.mWater.size() * sizeof(RecastMesh::Water);
+            return indicesSize + verticesSize + areaTypesSize + waterSize;
+        }
     };
 
     inline bool operator<(const RecastMesh::Water& lhs, const RecastMesh::Water& rhs)

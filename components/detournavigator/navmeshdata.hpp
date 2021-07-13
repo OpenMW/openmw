@@ -3,7 +3,6 @@
 
 #include <DetourAlloc.h>
 
-#include <algorithm>
 #include <memory>
 
 namespace DetourNavigator
