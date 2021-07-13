@@ -88,17 +88,6 @@ namespace
         });
     }
 
-    template <typename OutputIterator, typename Random>
-    void generateOffMeshConnection(OutputIterator out, std::size_t count, Random& random)
-    {
-        std::uniform_real_distribution<btScalar> distribution(0.0, 1.0);
-        std::generate_n(out, count, [&] {
-            const osg::Vec3f start(distribution(random), distribution(random), distribution(random));
-            const osg::Vec3f end(distribution(random), distribution(random), distribution(random));
-            return OffMeshConnection {start, end, generateAreaType(random)};
-        });
-    }
-
     template <class Random>
     Key generateKey(std::size_t triangles, Random& random)
     {
@@ -117,7 +106,6 @@ namespace
         RecastMesh recastMesh(generation, revision, std::move(indices), std::move(vertices),
                               std::move(areaTypes), std::move(water));
         std::vector<OffMeshConnection> offMeshConnections;
-        generateOffMeshConnection(std::back_inserter(offMeshConnections), 300, random);
         return Key {agentHalfExtents, tilePosition, std::move(recastMesh), std::move(offMeshConnections)};
     }
 
