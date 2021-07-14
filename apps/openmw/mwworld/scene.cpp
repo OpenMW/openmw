@@ -20,6 +20,7 @@
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/debug.hpp>
 #include <components/misc/convert.hpp>
+#include <components/detournavigator/heightfieldshape.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -422,6 +423,8 @@ namespace MWWorld
 
     void Scene::activateCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn, bool test)
     {
+        using DetourNavigator::HeightfieldShape;
+
         assert(mActiveCells.find(cell) == mActiveCells.end());
         assert(mInactiveCells.find(cell) != mInactiveCells.end());
         mActiveCells.insert(cell);
@@ -439,8 +442,30 @@ namespace MWWorld
         if (!test && cell->getCell()->isExterior())
         {
             if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                mNavigator.addObject(DetourNavigator::ObjectId(heightField), *heightField->getShape(),
-                        heightField->getCollisionObject()->getWorldTransform());
+            {
+                const osg::Vec2i cellPosition(cellX, cellY);
+                const btVector3& origin = heightField->getCollisionObject()->getWorldTransform().getOrigin();
+                const osg::Vec3f shift(origin.x(), origin.y(), origin.z());
+                const osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
+                const ESM::Land::LandData* const data = land == nullptr ? nullptr : land->getData(ESM::Land::DATA_VHGT);
+                const HeightfieldShape shape = [&] () -> HeightfieldShape
+                {
+                    if (data == nullptr)
+                    {
+                        return DetourNavigator::HeightfieldPlane {static_cast<float>(ESM::Land::DEFAULT_HEIGHT)};
+                    }
+                    else
+                    {
+                        DetourNavigator::HeightfieldSurface heights;
+                        heights.mHeights = data->mHeights;
+                        heights.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
+                        heights.mMinHeight = data->mMinHeight;
+                        heights.mMaxHeight = data->mMaxHeight;
+                        return heights;
+                    }
+                } ();
+                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shift, shape);
+            }
         }
 
         if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))

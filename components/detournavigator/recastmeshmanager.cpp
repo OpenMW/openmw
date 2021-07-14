@@ -1,6 +1,30 @@
 #include "recastmeshmanager.hpp"
 #include "recastmeshbuilder.hpp"
 #include "settings.hpp"
+#include "heightfieldshape.hpp"
+
+#include <components/debug/debuglog.hpp>
+
+#include <utility>
+
+namespace
+{
+    struct AddHeightfield
+    {
+        const DetourNavigator::Cell& mCell;
+        DetourNavigator::RecastMeshBuilder& mBuilder;
+
+        void operator()(const DetourNavigator::HeightfieldSurface& v)
+        {
+            mBuilder.addHeightfield(mCell.mSize, mCell.mShift, v.mHeights, v.mSize, v.mMinHeight, v.mMaxHeight);
+        }
+
+        void operator()(DetourNavigator::HeightfieldPlane v)
+        {
+            mBuilder.addHeightfield(mCell.mSize, mCell.mShift, v.mHeight);
+        }
+    };
+}
 
 namespace DetourNavigator
 {
@@ -66,6 +90,26 @@ namespace DetourNavigator
         return result;
     }
 
+    bool RecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+        const HeightfieldShape& shape)
+    {
+        if (!mHeightfields.emplace(cellPosition, Heightfield {Cell {cellSize, shift}, shape}).second)
+            return false;
+        ++mRevision;
+        return true;
+    }
+
+    std::optional<Cell> RecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    {
+        const auto it = mHeightfields.find(cellPosition);
+        if (it == mHeightfields.end())
+            return std::nullopt;
+        ++mRevision;
+        const auto result = std::make_optional(it->second.mCell);
+        mHeightfields.erase(it);
+        return result;
+    }
+
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh()
     {
         TileBounds tileBounds = mTileBounds;
@@ -79,12 +123,14 @@ namespace DetourNavigator
             const RecastMeshObject& v = object.getImpl();
             builder.addObject(v.getShape(), v.getTransform(), v.getAreaType());
         }
+        for (const auto& [cellPosition, v] : mHeightfields)
+            std::visit(AddHeightfield {v.mCell, builder}, v.mShape);
         return std::move(builder).create(mGeneration, mRevision);
     }
 
     bool RecastMeshManager::isEmpty() const
     {
-        return mObjects.empty() && mWater.empty();
+        return mObjects.empty() && mWater.empty() && mHeightfields.empty();
     }
 
     void RecastMeshManager::reportNavMeshChange(const Version& recastMeshVersion, const Version& navMeshVersion)

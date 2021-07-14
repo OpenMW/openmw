@@ -50,6 +50,23 @@ namespace DetourNavigator
         return water;
     }
 
+    bool CachedRecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
+        const osg::Vec3f& shift, const HeightfieldShape& shape)
+    {
+        if (!mImpl.addHeightfield(cellPosition, cellSize, shift, shape))
+            return false;
+        mCached.reset();
+        return true;
+    }
+
+    std::optional<Cell> CachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    {
+        const auto cell = mImpl.removeHeightfield(cellPosition);
+        if (cell)
+            mCached.reset();
+        return cell;
+    }
+
     std::shared_ptr<RecastMesh> CachedRecastMeshManager::getMesh()
     {
         if (!mCached)

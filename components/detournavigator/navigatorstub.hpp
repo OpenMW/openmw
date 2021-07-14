@@ -64,6 +64,17 @@ namespace DetourNavigator
             return false;
         }
 
+        bool addHeightfield(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, const osg::Vec3f& /*shift*/,
+            const HeightfieldShape& /*height*/) override
+        {
+            return false;
+        }
+
+        bool removeHeightfield(const osg::Vec2i& /*cellPosition*/) override
+        {
+            return false;
+        }
+
         void addPathgrid(const ESM::Cell& /*cell*/, const ESM::Pathgrid& /*pathgrid*/) override {}
 
         void removePathgrid(const ESM::Pathgrid& /*pathgrid*/) override {}

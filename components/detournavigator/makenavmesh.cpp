@@ -9,8 +9,10 @@
 #include "navmeshtilescache.hpp"
 #include "preparednavmeshdata.hpp"
 #include "navmeshdata.hpp"
+#include "recastmeshbuilder.hpp"
 
 #include <components/misc/convert.hpp>
+#include <components/bullethelpers/processtrianglecallback.hpp>
 
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
@@ -195,64 +197,92 @@ namespace
         );
     }
 
-    void rasterizeWaterTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const std::vector<Cell>& cells,
+    bool rasterizeTriangles(rcContext& context, const Rectangle& rectangle, const rcConfig& config,
+        const unsigned char* areas, std::size_t areasSize, rcHeightfield& solid)
+    {
+        const osg::Vec2f tileBoundsMin(
+            std::clamp(rectangle.mBounds.mMin.x(), config.bmin[0], config.bmax[0]),
+            std::clamp(rectangle.mBounds.mMin.y(), config.bmin[2], config.bmax[2])
+        );
+        const osg::Vec2f tileBoundsMax(
+            std::clamp(rectangle.mBounds.mMax.x(), config.bmin[0], config.bmax[0]),
+            std::clamp(rectangle.mBounds.mMax.y(), config.bmin[2], config.bmax[2])
+        );
+
+        if (tileBoundsMax == tileBoundsMin)
+            return true;
+
+        const std::array vertices {
+            tileBoundsMin.x(), rectangle.mHeight, tileBoundsMin.y(),
+            tileBoundsMin.x(), rectangle.mHeight, tileBoundsMax.y(),
+            tileBoundsMax.x(), rectangle.mHeight, tileBoundsMax.y(),
+            tileBoundsMax.x(), rectangle.mHeight, tileBoundsMin.y(),
+        };
+
+        const std::array indices {
+            0, 1, 2,
+            0, 2, 3,
+        };
+
+        return rcRasterizeTriangles(
+            &context,
+            vertices.data(),
+            static_cast<int>(vertices.size() / 3),
+            indices.data(),
+            areas,
+            static_cast<int>(areasSize),
+            solid,
+            config.walkableClimb
+        );
+    }
+
+    bool rasterizeTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const std::vector<Cell>& cells,
         const Settings& settings, const rcConfig& config, rcHeightfield& solid)
     {
         const std::array<unsigned char, 2> areas {{AreaType_water, AreaType_water}};
-
         for (const Cell& cell : cells)
         {
-            const auto rectangle = getSwimRectangle(cell, settings, agentHalfExtents);
-
-            const osg::Vec2f tileBoundsMin(
-                std::min(config.bmax[0], std::max(config.bmin[0], rectangle.mBounds.mMin.x())),
-                std::min(config.bmax[2], std::max(config.bmin[2], rectangle.mBounds.mMin.y()))
-            );
-            const osg::Vec2f tileBoundsMax(
-                std::min(config.bmax[0], std::max(config.bmin[0], rectangle.mBounds.mMax.x())),
-                std::min(config.bmax[2], std::max(config.bmin[2], rectangle.mBounds.mMax.y()))
-            );
-
-            if (tileBoundsMax == tileBoundsMin)
-                continue;
-
-            const std::array vertices {
-                tileBoundsMin.x(), rectangle.mHeight, tileBoundsMin.y(),
-                tileBoundsMin.x(), rectangle.mHeight, tileBoundsMax.y(),
-                tileBoundsMax.x(), rectangle.mHeight, tileBoundsMax.y(),
-                tileBoundsMax.x(), rectangle.mHeight, tileBoundsMin.y(),
-            };
-
-            const std::array indices {
-                0, 1, 2,
-                0, 2, 3,
-            };
-
-            const auto trianglesRasterized = rcRasterizeTriangles(
-                &context,
-                vertices.data(),
-                static_cast<int>(vertices.size() / 3),
-                indices.data(),
-                areas.data(),
-                static_cast<int>(areas.size()),
-                solid,
-                config.walkableClimb
-            );
-
-            if (!trianglesRasterized)
-                throw NavigatorException("Failed to create rasterize water triangles for navmesh");
+            const Rectangle rectangle = getSwimRectangle(cell, settings, agentHalfExtents);
+            if (!rasterizeTriangles(context, rectangle, config, areas.data(), areas.size(), solid))
+                return false;
         }
+        return true;
+    }
+
+    bool rasterizeTriangles(rcContext& context, const std::vector<FlatHeightfield>& heightfields,
+        const Settings& settings, const rcConfig& config, rcHeightfield& solid)
+    {
+        for (const FlatHeightfield& heightfield : heightfields)
+        {
+            const std::array<unsigned char, 2> areas {{AreaType_ground, AreaType_ground}};
+            const Rectangle rectangle {heightfield.mBounds, toNavMeshCoordinates(settings, heightfield.mHeight)};
+            if (!rasterizeTriangles(context, rectangle, config, areas.data(), areas.size(), solid))
+                return false;
+        }
+        return true;
+    }
+
+    bool rasterizeTriangles(rcContext& context, const std::vector<Heightfield>& heightfields,
+        const Settings& settings, const rcConfig& config, rcHeightfield& solid)
+    {
+        using BulletHelpers::makeProcessTriangleCallback;
+
+        for (const Heightfield& heightfield : heightfields)
+        {
+            const Mesh mesh = makeMesh(heightfield);
+            if (!rasterizeTriangles(context, mesh, settings, config, solid))
+                return false;
+        }
+        return true;
     }
 
     bool rasterizeTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
         const rcConfig& config, const Settings& settings, rcHeightfield& solid)
     {
-        if (!rasterizeTriangles(context, recastMesh.getMesh(), settings, config, solid))
-            return false;
-
-        rasterizeWaterTriangles(context, agentHalfExtents, recastMesh.getWater(), settings, config, solid);
-
-        return true;
+        return rasterizeTriangles(context, recastMesh.getMesh(), settings, config, solid)
+            && rasterizeTriangles(context, agentHalfExtents, recastMesh.getWater(), settings, config, solid)
+            && rasterizeTriangles(context, recastMesh.getHeightfields(), settings, config, solid)
+            && rasterizeTriangles(context, recastMesh.getFlatHeightfields(), settings, config, solid);
     }
 
     void buildCompactHeightfield(rcContext& context, const int walkableHeight, const int walkableClimb,

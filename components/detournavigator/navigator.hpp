@@ -8,6 +8,9 @@
 #include "navmeshcacheitem.hpp"
 #include "recastmeshtiles.hpp"
 #include "waitconditiontype.hpp"
+#include "heightfieldshape.hpp"
+
+#include <variant>
 
 namespace ESM
 {
@@ -147,6 +150,11 @@ namespace DetourNavigator
          * @return true if there was water at given cell.
          */
         virtual bool removeWater(const osg::Vec2i& cellPosition) = 0;
+
+        virtual bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+            const HeightfieldShape& shape) = 0;
+
+        virtual bool removeHeightfield(const osg::Vec2i& cellPosition) = 0;
 
         virtual void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) = 0;
 

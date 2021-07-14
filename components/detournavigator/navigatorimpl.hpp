@@ -39,6 +39,11 @@ namespace DetourNavigator
 
         bool removeWater(const osg::Vec2i& cellPosition) override;
 
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+            const HeightfieldShape& shape) override;
+
+        bool removeHeightfield(const osg::Vec2i& cellPosition) override;
+
         void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) override;
 
         void removePathgrid(const ESM::Pathgrid& pathgrid) override;

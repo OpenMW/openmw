@@ -3,6 +3,7 @@
 
 #include "areatype.hpp"
 #include "bounds.hpp"
+#include "tilebounds.hpp"
 
 #include <components/bullethelpers/operators.hpp>
 
@@ -12,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <numeric>
 
 namespace DetourNavigator
 {
@@ -51,10 +53,43 @@ namespace DetourNavigator
         osg::Vec3f mShift;
     };
 
+    struct Heightfield
+    {
+        TileBounds mBounds;
+        std::uint8_t mLength;
+        float mMinHeight;
+        float mMaxHeight;
+        osg::Vec3f mShift;
+        float mScale;
+        std::vector<float> mHeights;
+    };
+
+    inline auto makeTuple(const Heightfield& v) noexcept
+    {
+        return std::tie(v.mBounds, v.mLength, v.mMinHeight, v.mMaxHeight, v.mShift, v.mScale, v.mHeights);
+    }
+
+    inline bool operator<(const Heightfield& lhs, const Heightfield& rhs) noexcept
+    {
+        return makeTuple(lhs) < makeTuple(rhs);
+    }
+
+    struct FlatHeightfield
+    {
+        TileBounds mBounds;
+        float mHeight;
+    };
+
+    inline bool operator<(const FlatHeightfield& lhs, const FlatHeightfield& rhs) noexcept
+    {
+        return std::tie(lhs.mBounds, lhs.mHeight) < std::tie(rhs.mBounds, rhs.mHeight);
+    }
+
     class RecastMesh
     {
     public:
-        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Cell> water);
+        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Cell> water,
+            std::vector<Heightfield> heightfields, std::vector<FlatHeightfield> flatHeightfields);
 
         std::size_t getGeneration() const
         {
@@ -73,6 +108,16 @@ namespace DetourNavigator
             return mWater;
         }
 
+        const std::vector<Heightfield>& getHeightfields() const noexcept
+        {
+            return mHeightfields;
+        }
+
+        const std::vector<FlatHeightfield>& getFlatHeightfields() const noexcept
+        {
+            return mFlatHeightfields;
+        }
+
         const Bounds& getBounds() const
         {
             return mBounds;
@@ -83,6 +128,8 @@ namespace DetourNavigator
         std::size_t mRevision;
         Mesh mMesh;
         std::vector<Cell> mWater;
+        std::vector<Heightfield> mHeightfields;
+        std::vector<FlatHeightfield> mFlatHeightfields;
         Bounds mBounds;
 
         friend inline bool operator <(const RecastMesh& lhs, const RecastMesh& rhs) noexcept
@@ -92,7 +139,11 @@ namespace DetourNavigator
 
         friend inline std::size_t getSize(const RecastMesh& value) noexcept
         {
-            return getSize(value.mMesh) + value.mWater.size() * sizeof(Cell);
+            return getSize(value.mMesh) + value.mWater.size() * sizeof(Cell)
+                + value.mHeightfields.size() * sizeof(Heightfield)
+                + std::accumulate(value.mHeightfields.begin(), value.mHeightfields.end(), std::size_t {0},
+                                  [] (std::size_t r, const Heightfield& v) { return r + v.mHeights.size() * sizeof(float); })
+                + value.mFlatHeightfields.size() * sizeof(FlatHeightfield);
         }
     };
 

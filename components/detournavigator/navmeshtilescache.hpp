@@ -24,24 +24,26 @@ namespace DetourNavigator
     {
         Mesh mMesh;
         std::vector<Cell> mWater;
+        std::vector<Heightfield> mHeightfields;
+        std::vector<FlatHeightfield> mFlatHeightfields;
     };
 
     inline bool operator <(const RecastMeshData& lhs, const RecastMeshData& rhs)
     {
-        return std::tie(lhs.mMesh, lhs.mWater)
-                < std::tie(rhs.mMesh, rhs.mWater);
+        return std::tie(lhs.mMesh, lhs.mWater, lhs.mHeightfields, lhs.mFlatHeightfields)
+                < std::tie(rhs.mMesh, rhs.mWater, rhs.mHeightfields, rhs.mFlatHeightfields);
     }
 
     inline bool operator <(const RecastMeshData& lhs, const RecastMesh& rhs)
     {
-        return std::tie(lhs.mMesh, lhs.mWater)
-                < std::tie(rhs.getMesh(), rhs.getWater());
+        return std::tie(lhs.mMesh, lhs.mWater, lhs.mHeightfields, lhs.mFlatHeightfields)
+                < std::tie(rhs.getMesh(), rhs.getWater(), rhs.getHeightfields(), rhs.getFlatHeightfields());
     }
 
     inline bool operator <(const RecastMesh& lhs, const RecastMeshData& rhs)
     {
-        return std::tie(lhs.getMesh(), lhs.getWater())
-                < std::tie(rhs.mMesh, rhs.mWater);
+        return std::tie(lhs.getMesh(), lhs.getWater(), lhs.getHeightfields(), lhs.getFlatHeightfields())
+                < std::tie(rhs.mMesh, rhs.mWater, rhs.mHeightfields, rhs.mFlatHeightfields);
     }
 
     class NavMeshTilesCache

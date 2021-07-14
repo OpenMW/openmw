@@ -1,6 +1,7 @@
 #include <benchmark/benchmark.h>
 
 #include <components/detournavigator/navmeshtilescache.hpp>
+#include <components/esm/loadland.hpp>
 
 #include <algorithm>
 #include <random>
@@ -28,6 +29,14 @@ namespace
     {
         std::uniform_int_distribution<int> distribution(0, max);
         return TilePosition(distribution(random), distribution(random));
+    }
+
+    template <typename Random>
+    TileBounds generateTileBounds(Random& random)
+    {
+        std::uniform_real_distribution<float> distribution(0.0, 1.0);
+        const osg::Vec2f min(distribution(random), distribution(random));
+        return TileBounds {min, min + osg::Vec2f(1.0, 1.0)};
     }
 
     template <typename Random>
@@ -94,10 +103,41 @@ namespace
         std::vector<float> vertices;
         std::vector<int> indices;
         std::vector<AreaType> areaTypes;
-        generateVertices(std::back_inserter(vertices), triangles * 1.946, random);
-        generateIndices(std::back_inserter(indices), static_cast<int>(vertices.size() / 3) - 1, vertices.size() * 1.545, random);
-        generateAreaTypes(std::back_inserter(areaTypes), indices.size() / 3, random);
+        if (distribution(random) < 0.939)
+        {
+            generateVertices(std::back_inserter(vertices), triangles * 2.467, random);
+            generateIndices(std::back_inserter(indices), static_cast<int>(vertices.size() / 3) - 1, vertices.size() * 1.279, random);
+            generateAreaTypes(std::back_inserter(areaTypes), indices.size() / 3, random);
+        }
         return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));
+    }
+
+    template <class Random>
+    Heightfield generateHeightfield(Random& random)
+    {
+        std::uniform_real_distribution<float> distribution(0.0, 1.0);
+        Heightfield result;
+        result.mBounds = generateTileBounds(random);
+        result.mMinHeight = distribution(random);
+        result.mMaxHeight = result.mMinHeight + 1.0;
+        result.mShift = osg::Vec3f(distribution(random), distribution(random), distribution(random));
+        result.mScale = distribution(random);
+        result.mLength = static_cast<std::uint8_t>(ESM::Land::LAND_SIZE);
+        std::generate_n(std::back_inserter(result.mHeights), ESM::Land::LAND_NUM_VERTS, [&]
+        {
+            return distribution(random);
+        });
+        return result;
+    }
+
+    template <class Random>
+    FlatHeightfield generateFlatHeightfield(Random& random)
+    {
+        std::uniform_real_distribution<float> distribution(0.0, 1.0);
+        FlatHeightfield result;
+        result.mBounds = generateTileBounds(random);
+        result.mHeight = distribution(random);
+        return result;
     }
 
     template <class Random>
@@ -110,11 +150,12 @@ namespace
         Mesh mesh = generateMesh(triangles, random);
         std::vector<Cell> water;
         generateWater(std::back_inserter(water), 1, random);
-        RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water));
+        RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water),
+                              {generateHeightfield(random)}, {generateFlatHeightfield(random)});
         return Key {agentHalfExtents, tilePosition, std::move(recastMesh)};
     }
 
-    constexpr std::size_t trianglesPerTile = 438;
+    constexpr std::size_t trianglesPerTile = 239;
 
     template <typename OutputIterator, typename Random>
     void generateKeys(OutputIterator out, std::size_t count, Random& random)

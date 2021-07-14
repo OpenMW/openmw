@@ -3,6 +3,7 @@
 
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/recastmesh.hpp>
+#include <components/detournavigator/recastmeshbuilder.hpp>
 
 #include <RecastDebugDraw.h>
 
@@ -45,15 +46,25 @@ namespace SceneUtil
         const osg::ref_ptr<osg::Group> group(new osg::Group);
         DebugDraw debugDraw(*group, osg::Vec3f(0, 0, 0), 1.0f);
         const DetourNavigator::Mesh& mesh = recastMesh.getMesh();
+        std::vector<int> indices = mesh.getIndices();
         std::vector<float> vertices = mesh.getVertices();
+
+        for (const Heightfield& heightfield : recastMesh.getHeightfields())
+        {
+            const Mesh mesh = makeMesh(heightfield);
+            const int indexShift = static_cast<int>(vertices.size() / 3);
+            std::copy(mesh.getVertices().begin(), mesh.getVertices().end(), std::back_inserter(vertices));
+            std::transform(mesh.getIndices().begin(), mesh.getIndices().end(), std::back_inserter(indices),
+                           [&] (int index) { return index + indexShift; });
+        }
 
         for (std::size_t i = 0; i < vertices.size(); i += 3)
             std::swap(vertices[i + 1], vertices[i + 2]);
 
-        const auto normals = calculateNormals(vertices, mesh.getIndices());
+        const auto normals = calculateNormals(vertices, indices);
         const auto texScale = 1.0f / (settings.mCellSize * 10.0f);
         duDebugDrawTriMesh(&debugDraw, vertices.data(), static_cast<int>(vertices.size() / 3),
-            mesh.getIndices().data(), normals.data(), static_cast<int>(mesh.getIndices().size() / 3), nullptr, texScale);
+            indices.data(), normals.data(), static_cast<int>(indices.size() / 3), nullptr, texScale);
         return group;
     }
 }

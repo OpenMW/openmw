@@ -33,9 +33,18 @@ namespace DetourNavigator
                 result.mVertices[i] = Misc::Convert::makeOsgVec3f(vertices[i]);
             return result;
         }
+
+        TileBounds maxCellTileBounds(int size, const osg::Vec3f& shift)
+        {
+            const float halfCellSize = size / 2;
+            return TileBounds {
+                osg::Vec2f(shift.x() - halfCellSize, shift.y() - halfCellSize),
+                osg::Vec2f(shift.x() + halfCellSize, shift.y() + halfCellSize)
+            };
+        }
     }
 
-    Mesh makeMesh(std::vector<RecastMeshTriangle>&& triangles)
+    Mesh makeMesh(std::vector<RecastMeshTriangle>&& triangles, const osg::Vec3f& shift)
     {
         std::vector<osg::Vec3f> uniqueVertices;
         uniqueVertices.reserve(3 * triangles.size());
@@ -72,12 +81,44 @@ namespace DetourNavigator
 
         for (const osg::Vec3f& v : uniqueVertices)
         {
-            vertices.push_back(v.x());
-            vertices.push_back(v.y());
-            vertices.push_back(v.z());
+            vertices.push_back(v.x() + shift.x());
+            vertices.push_back(v.y() + shift.y());
+            vertices.push_back(v.z() + shift.z());
         }
 
         return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));
+    }
+
+    Mesh makeMesh(const Heightfield& heightfield)
+    {
+        using BulletHelpers::makeProcessTriangleCallback;
+        using Misc::Convert::toOsg;
+
+        constexpr int upAxis = 2;
+        constexpr bool flipQuadEdges = false;
+#if BT_BULLET_VERSION < 310
+        std::vector<btScalar> heights(heightfield.mHeights.begin(), heightfield.mHeights.end());
+        btHeightfieldTerrainShape shape(static_cast<int>(heightfield.mHeights.size() / heightfield.mLength),
+            static_cast<int>(heightfield.mLength), heights.data(), 1,
+            heightfield.mMinHeight, heightfield.mMaxHeight, upAxis, PHY_FLOAT, flipQuadEdges
+        );
+#else
+        btHeightfieldTerrainShape shape(static_cast<int>(heightfield.mHeights.size() / heightfield.mLength),
+            static_cast<int>(heightfield.mLength), heightfield.mHeights.data(),
+            heightfield.mMinHeight, heightfield.mMaxHeight, upAxis, flipQuadEdges);
+#endif
+        shape.setLocalScaling(btVector3(heightfield.mScale, heightfield.mScale, 1));
+        btVector3 aabbMin;
+        btVector3 aabbMax;
+        shape.getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+        std::vector<RecastMeshTriangle> triangles;
+        auto callback = makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
+        {
+            triangles.emplace_back(makeRecastMeshTriangle(vertices, AreaType_ground));
+        });
+        shape.processAllTriangles(&callback, aabbMin, aabbMax);
+        const osg::Vec2f shift = (osg::Vec2f(aabbMax.x(), aabbMax.y()) - osg::Vec2f(aabbMin.x(), aabbMin.y())) * 0.5;
+        return makeMesh(std::move(triangles), heightfield.mShift + osg::Vec3f(shift.x(), shift.y(), 0));
     }
 
     RecastMeshBuilder::RecastMeshBuilder(const TileBounds& bounds) noexcept
@@ -122,7 +163,7 @@ namespace DetourNavigator
     void RecastMeshBuilder::addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
-        return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
+        addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
         {
             mTriangles.emplace_back(makeRecastMeshTriangle(vertices, areaType));
         }));
@@ -163,12 +204,54 @@ namespace DetourNavigator
         mWater.push_back(Cell {cellSize, shift});
     }
 
+    void RecastMeshBuilder::addHeightfield(int cellSize, const osg::Vec3f& shift, float height)
+    {
+        if (const auto intersection = getIntersection(mBounds, maxCellTileBounds(cellSize, shift)))
+            mFlatHeightfields.emplace_back(FlatHeightfield {*intersection, height + shift.z()});
+    }
+
+    void RecastMeshBuilder::addHeightfield(int cellSize, const osg::Vec3f& shift, const float* heights,
+        std::size_t size, float minHeight, float maxHeight)
+    {
+        const auto intersection = getIntersection(mBounds, maxCellTileBounds(cellSize, shift));
+        if (!intersection.has_value())
+            return;
+        const float stepSize = static_cast<float>(cellSize) / (size - 1);
+        const int halfCellSize = cellSize / 2;
+        const auto local = [&] (float v, float shift) { return (v - shift + halfCellSize) / stepSize; };
+        const auto index = [&] (float v, int add) { return std::clamp<int>(static_cast<int>(v) + add, 0, size); };
+        const std::size_t minX = index(std::round(local(intersection->mMin.x(), shift.x())), -1);
+        const std::size_t minY = index(std::round(local(intersection->mMin.y(), shift.y())), -1);
+        const std::size_t maxX = index(std::round(local(intersection->mMax.x(), shift.x())), 1);
+        const std::size_t maxY = index(std::round(local(intersection->mMax.y(), shift.y())), 1);
+        const std::size_t endX = std::min(maxX + 1, size);
+        const std::size_t endY = std::min(maxY + 1, size);
+        const std::size_t sliceSize = (endX - minX) * (endY - minY);
+        if (sliceSize == 0)
+            return;
+        std::vector<float> tileHeights;
+        tileHeights.reserve(sliceSize);
+        for (std::size_t y = minY; y < endY; ++y)
+            for (std::size_t x = minX; x < endX; ++x)
+                tileHeights.push_back(heights[x + y * size]);
+        Heightfield heightfield;
+        heightfield.mBounds = *intersection;
+        heightfield.mLength = static_cast<std::uint8_t>(endY - minY);
+        heightfield.mMinHeight = minHeight;
+        heightfield.mMaxHeight = maxHeight;
+        heightfield.mShift = shift + osg::Vec3f(minX, minY, 0) * stepSize - osg::Vec3f(halfCellSize, halfCellSize, 0);
+        heightfield.mScale = stepSize;
+        heightfield.mHeights = std::move(tileHeights);
+        mHeightfields.emplace_back(heightfield);
+    }
+
     std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision) &&
     {
         std::sort(mTriangles.begin(), mTriangles.end());
         std::sort(mWater.begin(), mWater.end());
         Mesh mesh = makeMesh(std::move(mTriangles));
-        return std::make_shared<RecastMesh>(generation, revision, std::move(mesh), std::move(mWater));
+        return std::make_shared<RecastMesh>(generation, revision, std::move(mesh), std::move(mWater),
+                                            std::move(mHeightfields), std::move(mFlatHeightfields));
     }
 
     void RecastMeshBuilder::addObject(const btConcaveShape& shape, const btTransform& transform,

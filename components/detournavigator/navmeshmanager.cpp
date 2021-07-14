@@ -89,6 +89,24 @@ namespace DetourNavigator
         return true;
     }
 
+    bool NavMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+        const HeightfieldShape& shape)
+    {
+        if (!mRecastMeshManager.addHeightfield(cellPosition, cellSize, shift, shape))
+            return false;
+        addChangedTiles(cellSize, shift, ChangeType::add);
+        return true;
+    }
+
+    bool NavMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    {
+        const auto heightfield = mRecastMeshManager.removeHeightfield(cellPosition);
+        if (!heightfield)
+            return false;
+        addChangedTiles(heightfield->mSize, heightfield->mShift, ChangeType::remove);
+        return true;
+    }
+
     void NavMeshManager::addAgent(const osg::Vec3f& agentHalfExtents)
     {
         auto cached = mCache.find(agentHalfExtents);

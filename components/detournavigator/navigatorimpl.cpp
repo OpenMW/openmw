@@ -2,6 +2,7 @@
 #include "debug.hpp"
 #include "settingsutils.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadpgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
@@ -110,6 +111,17 @@ namespace DetourNavigator
     bool NavigatorImpl::removeWater(const osg::Vec2i& cellPosition)
     {
         return mNavMeshManager.removeWater(cellPosition);
+    }
+
+    bool NavigatorImpl::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+        const HeightfieldShape& shape)
+    {
+        return mNavMeshManager.addHeightfield(cellPosition, cellSize, shift, shape);
+    }
+
+    bool NavigatorImpl::removeHeightfield(const osg::Vec2i& cellPosition)
+    {
+        return mNavMeshManager.removeHeightfield(cellPosition);
     }
 
     void NavigatorImpl::addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid)

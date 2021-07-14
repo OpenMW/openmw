@@ -3,12 +3,16 @@
 #include <components/detournavigator/recastmeshbuilder.hpp>
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/exceptions.hpp>
+#include <components/esm/loadland.hpp>
+#include <components/misc/convert.hpp>
+#include <components/debug/debuglog.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 #include <DetourCommon.h>
 
@@ -22,6 +26,35 @@ namespace DetourNavigator
     static inline bool operator ==(const Cell& lhs, const Cell& rhs)
     {
         return lhs.mSize == rhs.mSize && lhs.mShift == rhs.mShift;
+    }
+
+    static inline bool operator==(const Heightfield& lhs, const Heightfield& rhs)
+    {
+        return makeTuple(lhs) == makeTuple(rhs);
+    }
+
+    static inline bool operator==(const FlatHeightfield& lhs, const FlatHeightfield& rhs)
+    {
+        return std::tie(lhs.mBounds, lhs.mHeight) == std::tie(rhs.mBounds, rhs.mHeight);
+    }
+
+    static inline std::ostream& operator<<(std::ostream& s, const FlatHeightfield& v)
+    {
+        return s << "FlatHeightfield {" << v.mBounds << ", " << v.mHeight << "}";
+    }
+
+    static inline std::ostream& operator<<(std::ostream& s, const Heightfield& v)
+    {
+        s << "Heightfield {.mBounds=" << v.mBounds
+          << ", .mLength=" << int(v.mLength)
+          << ", .mMinHeight=" << v.mMinHeight
+          << ", .mMaxHeight=" << v.mMaxHeight
+          << ", .mShift=" << v.mShift
+          << ", .mScale=" << v.mScale
+          << ", .mHeights={";
+        for (float h : v.mHeights)
+            s << h << ", ";
+        return s << "}}";
     }
 }
 
@@ -427,5 +460,66 @@ namespace
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 1, 0, 2, 1, 3}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground, AreaType_ground}));
+    }
+
+    TEST_F(DetourNavigatorRecastMeshBuilderTest, add_flat_heightfield_should_add_intersection)
+    {
+        mBounds.mMin = osg::Vec2f(0, 0);
+        RecastMeshBuilder builder(mBounds);
+        builder.addHeightfield(1000, osg::Vec3f(1, 2, 3), 10);
+        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        EXPECT_EQ(recastMesh->getFlatHeightfields(), std::vector<FlatHeightfield>({
+            FlatHeightfield {TileBounds {osg::Vec2f(0, 0), osg::Vec2f(501, 502)}, 13},
+        }));
+    }
+
+    TEST_F(DetourNavigatorRecastMeshBuilderTest, add_heightfield_inside_tile)
+    {
+        constexpr std::array<float, 9> heights {{
+            0, 1, 2,
+            3, 4, 5,
+            6, 7, 8,
+        }};
+        RecastMeshBuilder builder(mBounds);
+        builder.addHeightfield(1000, osg::Vec3f(1, 2, 3), heights.data(), 3, 0, 8);
+        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        Heightfield expected;
+        expected.mBounds = TileBounds {osg::Vec2f(-499, -498), osg::Vec2f(501, 502)};
+        expected.mLength = 3;
+        expected.mMinHeight = 0;
+        expected.mMaxHeight = 8;
+        expected.mShift = osg::Vec3f(-499, -498, 3);
+        expected.mScale = 500;
+        expected.mHeights = {
+            0, 1, 2,
+            3, 4, 5,
+            6, 7, 8,
+        };
+        EXPECT_EQ(recastMesh->getHeightfields(), std::vector<Heightfield>({expected}));
+    }
+
+    TEST_F(DetourNavigatorRecastMeshBuilderTest, add_heightfield_should_add_intersection)
+    {
+        constexpr std::array<float, 9> heights {{
+            0, 1, 2,
+            3, 4, 5,
+            6, 7, 8,
+        }};
+        mBounds.mMin = osg::Vec2f(250, 250);
+        RecastMeshBuilder builder(mBounds);
+        builder.addHeightfield(1000, osg::Vec3f(-1, -2, 3), heights.data(), 3, 0, 8);
+        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        Heightfield expected;
+        expected.mBounds = TileBounds {osg::Vec2f(250, 250), osg::Vec2f(499, 498)};
+        expected.mLength = 2;
+        expected.mMinHeight = 0;
+        expected.mMaxHeight = 8;
+        expected.mShift = osg::Vec3f(-1, -2, 3);
+        expected.mScale = 500;
+        expected.mHeights = {
+            4, 5,
+            7, 8,
+        };
+        EXPECT_EQ(recastMesh->getHeightfields(), std::vector<Heightfield>({expected}));
     }
 }
