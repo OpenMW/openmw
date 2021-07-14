@@ -4,6 +4,7 @@
 #include "oscillatingrecastmeshobject.hpp"
 #include "objectid.hpp"
 #include "version.hpp"
+#include "recastmesh.hpp"
 
 #include <LinearMath/btTransform.h>
 
@@ -29,12 +30,6 @@ namespace DetourNavigator
     class RecastMeshManager
     {
     public:
-        struct Water
-        {
-            int mCellSize = 0;
-            btTransform mTransform;
-        };
-
         RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation);
 
         bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,

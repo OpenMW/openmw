@@ -42,7 +42,7 @@ namespace DetourNavigator
         return true;
     }
 
-    std::optional<RecastMeshManager::Water> CachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<Water> CachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto water = mImpl.removeWater(cellPosition);
         if (water)

@@ -102,12 +102,12 @@ namespace DetourNavigator
         return result;
     }
 
-    std::optional<RecastMeshManager::Water> TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<Water> TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto object = mWaterTilesPositions.find(cellPosition);
         if (object == mWaterTilesPositions.end())
             return std::nullopt;
-        std::optional<RecastMeshManager::Water> result;
+        std::optional<Water> result;
         for (const auto& tilePosition : object->second)
         {
             const auto tiles = mTiles.lock();
