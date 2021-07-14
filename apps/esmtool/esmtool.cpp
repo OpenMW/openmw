@@ -236,7 +236,9 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     if(!quiet) std::cout << "  References:\n";
 
     bool deleted = false;
-    while(cell.getNextRef(esm, ref, deleted))
+    ESM::MovedCellRef movedCellRef;
+    bool moved = false;
+    while(cell.getNextRef(esm, ref, deleted, movedCellRef, moved))
     {
         if (save) {
             info.data.mCellRefs[&cell].push_back(std::make_pair(ref, deleted));
@@ -244,7 +246,7 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
 
         if(quiet) continue;
 
-        std::cout << "    Refnum: " << ref.mRefNum.mIndex << '\n';
+        std::cout << "  - Refnum: " << ref.mRefNum.mIndex << '\n';
         std::cout << "    ID: " << ref.mRefID << '\n';
         std::cout << "    Position: (" << ref.mPos.pos[0] << ", " << ref.mPos.pos[1] << ", " << ref.mPos.pos[2] << ")\n";
         if (ref.mScale != 1.f)
@@ -275,6 +277,13 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
                       << ref.mDoorDest.pos[1] << ", " << ref.mDoorDest.pos[2] << ")\n";
             if (!ref.mDestCell.empty())
                 std::cout << "    Destination cell: " << ref.mDestCell << '\n';
+        }
+        std::cout << "    Moved: " << std::boolalpha << moved << '\n';
+        if (moved)
+        {
+            std::cout << "    Moved refnum: " << movedCellRef.mRefNum.mIndex << '\n';
+            std::cout << "    Moved content file: " << movedCellRef.mRefNum.mContentFile << '\n';
+            std::cout << "    Target: " << movedCellRef.mTarget[0] << ", " << movedCellRef.mTarget[1] << '\n';
         }
     }
 }

@@ -502,8 +502,8 @@ namespace MWWorld
     {
         ESM::CellRef ref;
         ESM::MovedCellRef cMRef;
-        cMRef.mRefNum.mIndex = 0;
         bool deleted = false;
+        bool moved = false;
 
         ESM::ESM_Context ctx = esm.getContext();
 
@@ -512,10 +512,10 @@ namespace MWWorld
         //
         // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
         //  implementation when the oher implementation works as well.
-        while (cell->getNextRef(esm, ref, deleted, /*ignoreMoves*/true, &cMRef))
+        while (cell->getNextRef(esm, ref, deleted, cMRef, moved))
         {
-            if (!cMRef.mRefNum.mIndex)
-                continue; // ignore refs that are not moved
+            if (!moved)
+                continue;
 
             ESM::Cell *cellAlt = const_cast<ESM::Cell*>(searchOrCreate(cMRef.mTarget[0], cMRef.mTarget[1]));
 
