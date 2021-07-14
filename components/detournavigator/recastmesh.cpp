@@ -18,7 +18,7 @@ namespace DetourNavigator
         mAreaTypes = std::move(areaTypes);
     }
 
-    RecastMesh::RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Water> water)
+    RecastMesh::RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Cell> water)
         : mGeneration(generation)
         , mRevision(revision)
         , mMesh(std::move(mesh))

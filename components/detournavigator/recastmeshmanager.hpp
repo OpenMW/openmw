@@ -39,7 +39,7 @@ namespace DetourNavigator
 
         bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
 
-        std::optional<Water> removeWater(const osg::Vec2i& cellPosition);
+        std::optional<Cell> removeWater(const osg::Vec2i& cellPosition);
 
         std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
@@ -63,7 +63,7 @@ namespace DetourNavigator
         std::size_t mGeneration;
         TileBounds mTileBounds;
         std::map<ObjectId, OscillatingRecastMeshObject> mObjects;
-        std::map<osg::Vec2i, Water> mWater;
+        std::map<osg::Vec2i, Cell> mWater;
         std::optional<Report> mLastNavMeshReportedChange;
         std::optional<Report> mLastNavMeshReport;
     };

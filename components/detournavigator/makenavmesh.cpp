@@ -34,10 +34,10 @@ namespace
         osg::Vec3f mMax;
     };
 
-    WaterBounds getWaterBounds(const Water& water, const Settings& settings,
+    WaterBounds getWaterBounds(const Cell& water, const Settings& settings,
         const osg::Vec3f& agentHalfExtents)
     {
-        if (water.mCellSize == std::numeric_limits<int>::max())
+        if (water.mSize == std::numeric_limits<int>::max())
         {
             const auto transform = getSwimLevelTransform(settings, water.mShift, agentHalfExtents.z());
             const auto min = toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(-1, -1, 0))));
@@ -50,7 +50,7 @@ namespace
         else
         {
             const auto transform = getSwimLevelTransform(settings, water.mShift, agentHalfExtents.z());
-            const auto halfCellSize = water.mCellSize / 2.0f;
+            const auto halfCellSize = water.mSize / 2.0f;
             return WaterBounds {
                 toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(-halfCellSize, -halfCellSize, 0)))),
                 toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(halfCellSize, halfCellSize, 0))))

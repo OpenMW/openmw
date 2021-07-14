@@ -19,9 +19,9 @@
 
 namespace DetourNavigator
 {
-    static inline bool operator ==(const Water& lhs, const Water& rhs)
+    static inline bool operator ==(const Cell& lhs, const Cell& rhs)
     {
-        return lhs.mCellSize == rhs.mCellSize && lhs.mShift == rhs.mShift;
+        return lhs.mSize == rhs.mSize && lhs.mShift == rhs.mShift;
     }
 }
 
@@ -404,8 +404,8 @@ namespace
         RecastMeshBuilder builder(mBounds);
         builder.addWater(1000, osg::Vec3f(100, 200, 300));
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
-        EXPECT_EQ(recastMesh->getWater(), std::vector<Water>({
-            Water {1000, osg::Vec3f(100, 200, 300)}
+        EXPECT_EQ(recastMesh->getWater(), std::vector<Cell>({
+            Cell {1000, osg::Vec3f(100, 200, 300)}
         }));
     }
 

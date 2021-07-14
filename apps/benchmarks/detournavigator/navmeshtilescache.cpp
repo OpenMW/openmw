@@ -83,7 +83,7 @@ namespace
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         std::generate_n(out, count, [&] {
             const osg::Vec3f shift(distribution(random), distribution(random), distribution(random));
-            return Water {1, shift};
+            return Cell {1, shift};
         });
     }
 
@@ -108,7 +108,7 @@ namespace
         const std::size_t generation = std::uniform_int_distribution<std::size_t>(0, 100)(random);
         const std::size_t revision = std::uniform_int_distribution<std::size_t>(0, 10000)(random);
         Mesh mesh = generateMesh(triangles, random);
-        std::vector<Water> water;
+        std::vector<Cell> water;
         generateWater(std::back_inserter(water), 2, random);
         RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water));
         return Key {agentHalfExtents, tilePosition, std::move(recastMesh)};

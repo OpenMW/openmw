@@ -49,19 +49,19 @@ namespace DetourNavigator
 
     bool RecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift)
     {
-        if (!mWater.emplace(cellPosition, Water {cellSize, shift}).second)
+        if (!mWater.emplace(cellPosition, Cell {cellSize, shift}).second)
             return false;
         ++mRevision;
         return true;
     }
 
-    std::optional<Water> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<Cell> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto water = mWater.find(cellPosition);
         if (water == mWater.end())
             return std::nullopt;
         ++mRevision;
-        const Water result = water->second;
+        const Cell result = water->second;
         mWater.erase(water);
         return result;
     }
@@ -73,7 +73,7 @@ namespace DetourNavigator
         tileBounds.mMax /= mSettings.mRecastScaleFactor;
         RecastMeshBuilder builder(tileBounds);
         for (const auto& [k, v] : mWater)
-            builder.addWater(v.mCellSize, v.mShift);
+            builder.addWater(v.mSize, v.mShift);
         for (const auto& [k, object] : mObjects)
         {
             const RecastMeshObject& v = object.getImpl();

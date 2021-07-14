@@ -45,16 +45,16 @@ namespace DetourNavigator
         }
     };
 
-    struct Water
+    struct Cell
     {
-        int mCellSize;
+        int mSize;
         osg::Vec3f mShift;
     };
 
     class RecastMesh
     {
     public:
-        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Water> water);
+        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Cell> water);
 
         std::size_t getGeneration() const
         {
@@ -68,7 +68,7 @@ namespace DetourNavigator
 
         const Mesh& getMesh() const noexcept { return mMesh; }
 
-        const std::vector<Water>& getWater() const
+        const std::vector<Cell>& getWater() const
         {
             return mWater;
         }
@@ -82,7 +82,7 @@ namespace DetourNavigator
         std::size_t mGeneration;
         std::size_t mRevision;
         Mesh mMesh;
-        std::vector<Water> mWater;
+        std::vector<Cell> mWater;
         Bounds mBounds;
 
         friend inline bool operator <(const RecastMesh& lhs, const RecastMesh& rhs) noexcept
@@ -92,13 +92,13 @@ namespace DetourNavigator
 
         friend inline std::size_t getSize(const RecastMesh& value) noexcept
         {
-            return getSize(value.mMesh) + value.mWater.size() * sizeof(Water);
+            return getSize(value.mMesh) + value.mWater.size() * sizeof(Cell);
         }
     };
 
-    inline bool operator<(const Water& lhs, const Water& rhs) noexcept
+    inline bool operator<(const Cell& lhs, const Cell& rhs) noexcept
     {
-        return std::tie(lhs.mCellSize, lhs.mShift) < std::tie(rhs.mCellSize, rhs.mShift);
+        return std::tie(lhs.mSize, lhs.mShift) < std::tie(rhs.mSize, rhs.mShift);
     }
 }
 

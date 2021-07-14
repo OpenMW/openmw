@@ -295,7 +295,7 @@ namespace
         ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
         const auto result = manager.removeWater(cellPosition);
         ASSERT_TRUE(result.has_value());
-        EXPECT_EQ(result->mCellSize, cellSize);
+        EXPECT_EQ(result->mSize, cellSize);
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_water_for_existing_cell_should_remove_empty_tiles)

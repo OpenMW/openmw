@@ -85,7 +85,7 @@ namespace DetourNavigator
         const auto water = mRecastMeshManager.removeWater(cellPosition);
         if (!water)
             return false;
-        addChangedTiles(water->mCellSize, water->mShift, ChangeType::remove);
+        addChangedTiles(water->mSize, water->mShift, ChangeType::remove);
         return true;
     }
 

@@ -56,7 +56,7 @@ namespace DetourNavigator
     private:
         const TileBounds mBounds;
         std::vector<RecastMeshTriangle> mTriangles;
-        std::vector<Water> mWater;
+        std::vector<Cell> mWater;
 
         void addObject(const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback);
 
