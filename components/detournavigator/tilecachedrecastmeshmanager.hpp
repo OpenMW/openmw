@@ -76,7 +76,7 @@ namespace DetourNavigator
 
         std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
+        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
 
         std::optional<Water> removeWater(const osg::Vec2i& cellPosition);
 

@@ -49,7 +49,7 @@ namespace DetourNavigator
 
         void addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType);
 
-        void addWater(const int mCellSize, const btTransform& transform);
+        void addWater(const int mCellSize, const osg::Vec3f& shift);
 
         std::shared_ptr<RecastMesh> create(std::size_t generation, std::size_t revision) &&;
 

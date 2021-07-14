@@ -6,12 +6,12 @@
 
 #include <components/bullethelpers/operators.hpp>
 
+#include <osg/Vec3f>
+
 #include <memory>
 #include <string>
 #include <vector>
 #include <tuple>
-
-#include <LinearMath/btTransform.h>
 
 namespace DetourNavigator
 {
@@ -48,7 +48,7 @@ namespace DetourNavigator
     struct Water
     {
         int mCellSize;
-        btTransform mTransform;
+        osg::Vec3f mShift;
     };
 
     class RecastMesh
@@ -98,7 +98,7 @@ namespace DetourNavigator
 
     inline bool operator<(const Water& lhs, const Water& rhs) noexcept
     {
-        return std::tie(lhs.mCellSize, lhs.mTransform) < std::tie(rhs.mCellSize, rhs.mTransform);
+        return std::tie(lhs.mCellSize, lhs.mShift) < std::tie(rhs.mCellSize, rhs.mShift);
     }
 }
 

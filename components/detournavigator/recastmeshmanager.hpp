@@ -37,7 +37,7 @@ namespace DetourNavigator
 
         bool updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
+        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
 
         std::optional<Water> removeWater(const osg::Vec2i& cellPosition);
 

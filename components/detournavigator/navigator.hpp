@@ -134,14 +134,12 @@ namespace DetourNavigator
          * @brief addWater is used to set water level at given world cell.
          * @param cellPosition allows to distinguish cells if there is many in current world.
          * @param cellSize set cell borders. std::numeric_limits<int>::max() disables cell borders.
-         * @param level set z coordinate of water surface at the scene.
-         * @param transform set global shift of cell center.
+         * @param shift set global shift of cell center.
          * @return true if there was no water at given cell if cellSize != std::numeric_limits<int>::max() or there is
          * at least single object is added to the scene, false if there is already water for given cell or there is no
          * any other objects.
          */
-        virtual bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
-            const btTransform& transform) = 0;
+        virtual bool addWater(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift) = 0;
 
         /**
          * @brief removeWater to make it no more available at the scene.

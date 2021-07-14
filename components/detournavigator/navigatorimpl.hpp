@@ -35,8 +35,7 @@ namespace DetourNavigator
 
         bool removeObject(const ObjectId id) override;
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
-            const btTransform& transform) override;
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift) override;
 
         bool removeWater(const osg::Vec2i& cellPosition) override;
 

@@ -72,11 +72,11 @@ namespace DetourNavigator
         return true;
     }
 
-    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform)
+    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift)
     {
-        if (!mRecastMeshManager.addWater(cellPosition, cellSize, transform))
+        if (!mRecastMeshManager.addWater(cellPosition, cellSize, shift))
             return false;
-        addChangedTiles(cellSize, transform, ChangeType::add);
+        addChangedTiles(cellSize, shift, ChangeType::add);
         return true;
     }
 
@@ -85,7 +85,7 @@ namespace DetourNavigator
         const auto water = mRecastMeshManager.removeWater(cellPosition);
         if (!water)
             return false;
-        addChangedTiles(water->mCellSize, water->mTransform, ChangeType::remove);
+        addChangedTiles(water->mCellSize, water->mShift, ChangeType::remove);
         return true;
     }
 
@@ -231,13 +231,13 @@ namespace DetourNavigator
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 
-    void NavMeshManager::addChangedTiles(const int cellSize, const btTransform& transform,
+    void NavMeshManager::addChangedTiles(const int cellSize, const osg::Vec3f& shift,
             const ChangeType changeType)
     {
         if (cellSize == std::numeric_limits<int>::max())
             return;
 
-        getTilesPositions(cellSize, transform, mSettings,
+        getTilesPositions(cellSize, shift, mSettings,
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 

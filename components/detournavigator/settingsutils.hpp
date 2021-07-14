@@ -82,12 +82,12 @@ namespace DetourNavigator
         return - settings.mSwimHeightScale * agentHalfExtentsZ;
     }
 
-    inline btTransform getSwimLevelTransform(const Settings& settings, const btTransform& transform,
+    inline btTransform getSwimLevelTransform(const Settings& settings, const osg::Vec3f& shift,
         const float agentHalfExtentsZ)
     {
         return btTransform(
-            transform.getBasis(),
-            transform.getOrigin() + btVector3(0, 0, getSwimLevel(settings, agentHalfExtentsZ) - agentHalfExtentsZ)
+            btMatrix3x3::getIdentity(),
+            btVector3(shift.x(), shift.y(), shift.z() + getSwimLevel(settings, agentHalfExtentsZ) - agentHalfExtentsZ)
         );
     }
 

@@ -39,7 +39,7 @@ namespace
     {
         if (water.mCellSize == std::numeric_limits<int>::max())
         {
-            const auto transform = getSwimLevelTransform(settings, water.mTransform, agentHalfExtents.z());
+            const auto transform = getSwimLevelTransform(settings, water.mShift, agentHalfExtents.z());
             const auto min = toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(-1, -1, 0))));
             const auto max = toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(1, 1, 0))));
             return WaterBounds {
@@ -49,7 +49,7 @@ namespace
         }
         else
         {
-            const auto transform = getSwimLevelTransform(settings, water.mTransform, agentHalfExtents.z());
+            const auto transform = getSwimLevelTransform(settings, water.mShift, agentHalfExtents.z());
             const auto halfCellSize = water.mCellSize / 2.0f;
             return WaterBounds {
                 toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(-halfCellSize, -halfCellSize, 0)))),

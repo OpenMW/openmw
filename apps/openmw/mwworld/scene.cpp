@@ -470,13 +470,18 @@ namespace MWWorld
                 if (cell->getCell()->isExterior())
                 {
                     if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
+                    {
+                        const btTransform& transform =heightField->getCollisionObject()->getWorldTransform();
                         mNavigator.addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE,
-                                cell->getWaterLevel(), heightField->getCollisionObject()->getWorldTransform());
+                                            osg::Vec3f(static_cast<float>(transform.getOrigin().x()),
+                                                       static_cast<float>(transform.getOrigin().y()),
+                                                       waterLevel));
+                    }
                 }
                 else
                 {
                     mNavigator.addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(),
-                            cell->getWaterLevel(), btTransform::getIdentity());
+                                        osg::Vec3f(0, 0, waterLevel));
                 }
             }
             else

@@ -452,7 +452,7 @@ namespace
         shape.setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, 300, btTransform::getIdentity());
+        mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, osg::Vec3f(0, 0, 300));
         mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -499,7 +499,7 @@ namespace
         shape.setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, -25, btTransform::getIdentity());
+        mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, osg::Vec3f(0, 0, -25));
         mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -546,7 +546,7 @@ namespace
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
-        mNavigator->addWater(osg::Vec2i(0, 0), std::numeric_limits<int>::max(), -25, btTransform::getIdentity());
+        mNavigator->addWater(osg::Vec2i(0, 0), std::numeric_limits<int>::max(), osg::Vec3f(0, 0, -25));
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -591,7 +591,7 @@ namespace
         shape.setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, -25, btTransform::getIdentity());
+        mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, osg::Vec3f(0, 0, -25));
         mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);

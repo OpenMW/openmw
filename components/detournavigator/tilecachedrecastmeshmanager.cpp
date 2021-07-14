@@ -54,7 +54,7 @@ namespace DetourNavigator
     }
 
     bool TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
-        const btTransform& transform)
+        const osg::Vec3f& shift)
     {
         const auto border = getBorderSize(mSettings);
 
@@ -67,7 +67,7 @@ namespace DetourNavigator
             const auto tiles = mTiles.lock();
             for (auto& tile : *tiles)
             {
-                if (tile.second.addWater(cellPosition, cellSize, transform))
+                if (tile.second.addWater(cellPosition, cellSize, shift))
                 {
                     tilesPositions.push_back(tile.first);
                     result = true;
@@ -76,7 +76,7 @@ namespace DetourNavigator
         }
         else
         {
-            getTilesPositions(cellSize, transform, mSettings, [&] (const TilePosition& tilePosition)
+            getTilesPositions(cellSize, shift, mSettings, [&] (const TilePosition& tilePosition)
                 {
                     const auto tiles = mTiles.lock();
                     auto tile = tiles->find(tilePosition);
@@ -88,7 +88,7 @@ namespace DetourNavigator
                         tile = tiles->insert(std::make_pair(tilePosition,
                                 CachedRecastMeshManager(mSettings, tileBounds, mTilesGeneration))).first;
                     }
-                    if (tile->second.addWater(cellPosition, cellSize, transform))
+                    if (tile->second.addWater(cellPosition, cellSize, shift))
                     {
                         tilesPositions.push_back(tilePosition);
                         result = true;

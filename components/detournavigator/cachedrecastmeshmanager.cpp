@@ -34,9 +34,9 @@ namespace DetourNavigator
     }
 
     bool CachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
-        const btTransform& transform)
+        const osg::Vec3f& shift)
     {
-        if (!mImpl.addWater(cellPosition, cellSize, transform))
+        if (!mImpl.addWater(cellPosition, cellSize, shift))
             return false;
         mCached.reset();
         return true;

@@ -80,10 +80,10 @@ namespace
     template <typename OutputIterator, typename Random>
     void generateWater(OutputIterator out, std::size_t count, Random& random)
     {
-        std::uniform_real_distribution<btScalar> distribution(0.0, 1.0);
+        std::uniform_real_distribution<float> distribution(0.0, 1.0);
         std::generate_n(out, count, [&] {
-            const btVector3 shift(distribution(random), distribution(random), distribution(random));
-            return Water {1, btTransform(btMatrix3x3::getIdentity(), shift)};
+            const osg::Vec3f shift(distribution(random), distribution(random), distribution(random));
+            return Water {1, shift};
         });
     }
 

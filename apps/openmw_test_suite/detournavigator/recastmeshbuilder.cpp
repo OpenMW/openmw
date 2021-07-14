@@ -21,7 +21,7 @@ namespace DetourNavigator
 {
     static inline bool operator ==(const Water& lhs, const Water& rhs)
     {
-        return lhs.mCellSize == rhs.mCellSize && lhs.mTransform == rhs.mTransform;
+        return lhs.mCellSize == rhs.mCellSize && lhs.mShift == rhs.mShift;
     }
 }
 
@@ -402,10 +402,10 @@ namespace
     TEST_F(DetourNavigatorRecastMeshBuilderTest, add_water_then_get_water_should_return_it)
     {
         RecastMeshBuilder builder(mBounds);
-        builder.addWater(1000, btTransform(btMatrix3x3::getIdentity(), btVector3(100, 200, 300)));
+        builder.addWater(1000, osg::Vec3f(100, 200, 300));
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getWater(), std::vector<Water>({
-            Water {1000, btTransform(btMatrix3x3::getIdentity(), btVector3(100, 200, 300))}
+            Water {1000, osg::Vec3f(100, 200, 300)}
         }));
     }
 
