@@ -45,15 +45,15 @@ namespace DetourNavigator
         }
     };
 
+    struct Water
+    {
+        int mCellSize;
+        btTransform mTransform;
+    };
+
     class RecastMesh
     {
     public:
-        struct Water
-        {
-            int mCellSize;
-            btTransform mTransform;
-        };
-
         RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Water> water);
 
         std::size_t getGeneration() const
@@ -92,11 +92,11 @@ namespace DetourNavigator
 
         friend inline std::size_t getSize(const RecastMesh& value) noexcept
         {
-            return getSize(value.mMesh) + value.mWater.size() * sizeof(RecastMesh::Water);
+            return getSize(value.mMesh) + value.mWater.size() * sizeof(Water);
         }
     };
 
-    inline bool operator<(const RecastMesh::Water& lhs, const RecastMesh::Water& rhs) noexcept
+    inline bool operator<(const Water& lhs, const Water& rhs) noexcept
     {
         return std::tie(lhs.mCellSize, lhs.mTransform) < std::tie(rhs.mCellSize, rhs.mTransform);
     }

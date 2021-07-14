@@ -83,7 +83,7 @@ namespace
         std::uniform_real_distribution<btScalar> distribution(0.0, 1.0);
         std::generate_n(out, count, [&] {
             const btVector3 shift(distribution(random), distribution(random), distribution(random));
-            return RecastMesh::Water {1, btTransform(btMatrix3x3::getIdentity(), shift)};
+            return Water {1, btTransform(btMatrix3x3::getIdentity(), shift)};
         });
     }
 
@@ -108,7 +108,7 @@ namespace
         const std::size_t generation = std::uniform_int_distribution<std::size_t>(0, 100)(random);
         const std::size_t revision = std::uniform_int_distribution<std::size_t>(0, 10000)(random);
         Mesh mesh = generateMesh(triangles, random);
-        std::vector<RecastMesh::Water> water;
+        std::vector<Water> water;
         generateWater(std::back_inserter(water), 2, random);
         RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water));
         return Key {agentHalfExtents, tilePosition, std::move(recastMesh)};

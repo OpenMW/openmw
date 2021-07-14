@@ -160,7 +160,7 @@ namespace DetourNavigator
 
     void RecastMeshBuilder::addWater(const int cellSize, const btTransform& transform)
     {
-        mWater.push_back(RecastMesh::Water {cellSize, transform});
+        mWater.push_back(Water {cellSize, transform});
     }
 
     std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision) &&

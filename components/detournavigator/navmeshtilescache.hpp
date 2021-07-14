@@ -23,7 +23,7 @@ namespace DetourNavigator
     struct RecastMeshData
     {
         Mesh mMesh;
-        std::vector<RecastMesh::Water> mWater;
+        std::vector<Water> mWater;
     };
 
     inline bool operator <(const RecastMeshData& lhs, const RecastMeshData& rhs)

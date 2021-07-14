@@ -34,7 +34,7 @@ namespace
         osg::Vec3f mMax;
     };
 
-    WaterBounds getWaterBounds(const RecastMesh::Water& water, const Settings& settings,
+    WaterBounds getWaterBounds(const Water& water, const Settings& settings,
         const osg::Vec3f& agentHalfExtents)
     {
         if (water.mCellSize == std::numeric_limits<int>::max())
