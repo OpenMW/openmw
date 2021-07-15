@@ -302,4 +302,9 @@ namespace MWGui
         return mModel->onTakeItem(item.mBase, count);
     }
 
+    void ContainerWindow::onDeleteCustomData(const MWWorld::Ptr& ptr)
+    {
+        if(mModel && mModel->usesContainer(ptr))
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
+    }
 }

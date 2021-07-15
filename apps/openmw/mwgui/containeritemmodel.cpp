@@ -249,4 +249,14 @@ bool ContainerItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
     return true;
 }
 
+bool ContainerItemModel::usesContainer(const MWWorld::Ptr& container)
+{
+    for(const auto& source : mItemSources)
+    {
+        if(source.first == container)
+            return true;
+    }
+    return false;
+}
+
 }

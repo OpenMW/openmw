@@ -1205,6 +1205,7 @@ namespace MWScript
                         bool wasEnabled = ptr.getRefData().isEnabled();
                         MWBase::Environment::get().getWorld()->undeleteObject(ptr);
                         MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
+                        MWBase::Environment::get().getWindowManager()->onDeleteCustomData(ptr);
 
                         // HACK: disable/enable object to re-add it to the scene properly (need a new Animation).
                         MWBase::Environment::get().getWorld()->disable(ptr);

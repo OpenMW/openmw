@@ -47,6 +47,8 @@ namespace MWGui
         /// Called when GUI viewport changes size
         virtual void onResChange(int width, int height) {}
 
+        virtual void onDeleteCustomData(const MWWorld::Ptr& ptr) {}
+
     protected:
         virtual void onTitleDoubleClicked();
 

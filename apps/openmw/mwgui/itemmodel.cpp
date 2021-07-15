@@ -162,4 +162,9 @@ namespace MWGui
     {
         return mSourceModel->onTakeItem(item, count);
     }
+
+    bool ProxyItemModel::usesContainer(const MWWorld::Ptr& container)
+    {
+        return mSourceModel->usesContainer(container);
+    }
 }

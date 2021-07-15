@@ -388,6 +388,8 @@ namespace MWGui
 
     const std::string& getVersionDescription() const override;
 
+    void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
+
   private:
     unsigned int mOldUpdateMask; unsigned int mOldCullMask;
 

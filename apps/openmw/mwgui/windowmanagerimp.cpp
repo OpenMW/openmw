@@ -2220,4 +2220,10 @@ namespace MWGui
             messageBox(v.mMessage, v.mShowInDialogueMode);
         scheduledMessageBoxes->clear();
     }
+
+    void WindowManager::onDeleteCustomData(const MWWorld::Ptr& ptr)
+    {
+        for(auto* window : mWindows)
+            window->onDeleteCustomData(ptr);
+    }
 }
