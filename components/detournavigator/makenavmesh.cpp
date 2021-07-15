@@ -28,32 +28,35 @@ namespace
 {
     using namespace DetourNavigator;
 
-    struct WaterBounds
+    struct Rectangle
     {
-        osg::Vec3f mMin;
-        osg::Vec3f mMax;
+        TileBounds mBounds;
+        float mHeight;
     };
 
-    WaterBounds getWaterBounds(const Cell& water, const Settings& settings,
+    Rectangle getSwimRectangle(const Cell& water, const Settings& settings,
         const osg::Vec3f& agentHalfExtents)
     {
         if (water.mSize == std::numeric_limits<int>::max())
         {
-            const auto transform = getSwimLevelTransform(settings, water.mShift, agentHalfExtents.z());
-            const auto min = toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(-1, -1, 0))));
-            const auto max = toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(1, 1, 0))));
-            return WaterBounds {
-                osg::Vec3f(-std::numeric_limits<float>::max(), min.y(), -std::numeric_limits<float>::max()),
-                osg::Vec3f(std::numeric_limits<float>::max(), max.y(), std::numeric_limits<float>::max())
+            return Rectangle {
+                TileBounds {
+                    osg::Vec2f(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()),
+                    osg::Vec2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
+                },
+                toNavMeshCoordinates(settings, getSwimLevel(settings, water.mShift.z(), agentHalfExtents.z()))
             };
         }
         else
         {
-            const auto transform = getSwimLevelTransform(settings, water.mShift, agentHalfExtents.z());
-            const auto halfCellSize = water.mSize / 2.0f;
-            return WaterBounds {
-                toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(-halfCellSize, -halfCellSize, 0)))),
-                toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(halfCellSize, halfCellSize, 0))))
+            const osg::Vec2f shift(water.mShift.x(), water.mShift.y());
+            const float halfCellSize = water.mSize / 2.0f;
+            return Rectangle {
+                TileBounds{
+                    toNavMeshCoordinates(settings, shift + osg::Vec2f(-halfCellSize, -halfCellSize)),
+                    toNavMeshCoordinates(settings, shift + osg::Vec2f(halfCellSize, halfCellSize))
+                },
+                toNavMeshCoordinates(settings, getSwimLevel(settings, water.mShift.z(), agentHalfExtents.z()))
             };
         }
     }
@@ -192,49 +195,43 @@ namespace
         );
     }
 
-    void rasterizeWaterTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
+    void rasterizeWaterTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const std::vector<Cell>& cells,
         const Settings& settings, const rcConfig& config, rcHeightfield& solid)
     {
         const std::array<unsigned char, 2> areas {{AreaType_water, AreaType_water}};
 
-        for (const auto& water : recastMesh.getWater())
+        for (const Cell& cell : cells)
         {
-            const auto bounds = getWaterBounds(water, settings, agentHalfExtents);
+            const auto rectangle = getSwimRectangle(cell, settings, agentHalfExtents);
 
             const osg::Vec2f tileBoundsMin(
-                std::min(config.bmax[0], std::max(config.bmin[0], bounds.mMin.x())),
-                std::min(config.bmax[2], std::max(config.bmin[2], bounds.mMin.z()))
+                std::min(config.bmax[0], std::max(config.bmin[0], rectangle.mBounds.mMin.x())),
+                std::min(config.bmax[2], std::max(config.bmin[2], rectangle.mBounds.mMin.y()))
             );
             const osg::Vec2f tileBoundsMax(
-                std::min(config.bmax[0], std::max(config.bmin[0], bounds.mMax.x())),
-                std::min(config.bmax[2], std::max(config.bmin[2], bounds.mMax.z()))
+                std::min(config.bmax[0], std::max(config.bmin[0], rectangle.mBounds.mMax.x())),
+                std::min(config.bmax[2], std::max(config.bmin[2], rectangle.mBounds.mMax.y()))
             );
 
             if (tileBoundsMax == tileBoundsMin)
                 continue;
 
-            const std::array<osg::Vec3f, 4> vertices {{
-                osg::Vec3f(tileBoundsMin.x(), bounds.mMin.y(), tileBoundsMin.y()),
-                osg::Vec3f(tileBoundsMin.x(), bounds.mMin.y(), tileBoundsMax.y()),
-                osg::Vec3f(tileBoundsMax.x(), bounds.mMin.y(), tileBoundsMax.y()),
-                osg::Vec3f(tileBoundsMax.x(), bounds.mMin.y(), tileBoundsMin.y()),
-            }};
+            const std::array vertices {
+                tileBoundsMin.x(), rectangle.mHeight, tileBoundsMin.y(),
+                tileBoundsMin.x(), rectangle.mHeight, tileBoundsMax.y(),
+                tileBoundsMax.x(), rectangle.mHeight, tileBoundsMax.y(),
+                tileBoundsMax.x(), rectangle.mHeight, tileBoundsMin.y(),
+            };
 
-            std::array<float, 4 * 3> convertedVertices;
-            auto convertedVerticesIt = convertedVertices.begin();
-
-            for (const auto& vertex : vertices)
-                convertedVerticesIt = std::copy(vertex.ptr(), vertex.ptr() + 3, convertedVerticesIt);
-
-            const std::array<int, 6> indices {{
+            const std::array indices {
                 0, 1, 2,
                 0, 2, 3,
-            }};
+            };
 
             const auto trianglesRasterized = rcRasterizeTriangles(
                 &context,
-                convertedVertices.data(),
-                static_cast<int>(convertedVertices.size() / 3),
+                vertices.data(),
+                static_cast<int>(vertices.size() / 3),
                 indices.data(),
                 areas.data(),
                 static_cast<int>(areas.size()),
@@ -253,7 +250,7 @@ namespace
         if (!rasterizeTriangles(context, recastMesh.getMesh(), settings, config, solid))
             return false;
 
-        rasterizeWaterTriangles(context, agentHalfExtents, recastMesh, settings, config, solid);
+        rasterizeWaterTriangles(context, agentHalfExtents, recastMesh.getWater(), settings, config, solid);
 
         return true;
     }
@@ -504,9 +501,9 @@ namespace DetourNavigator
 
         for (const auto& water : recastMesh->getWater())
         {
-            const auto waterBounds = getWaterBounds(water, settings, agentHalfExtents);
-            recastMeshBounds.mMin.y() = std::min(recastMeshBounds.mMin.y(), waterBounds.mMin.y());
-            recastMeshBounds.mMax.y() = std::max(recastMeshBounds.mMax.y(), waterBounds.mMax.y());
+            const float height = toNavMeshCoordinates(settings, getSwimLevel(settings, water.mShift.z(), agentHalfExtents.z()));
+            recastMeshBounds.mMin.y() = std::min(recastMeshBounds.mMin.y(), height);
+            recastMeshBounds.mMax.y() = std::max(recastMeshBounds.mMax.y(), height);
         }
 
         if (isEmpty(recastMeshBounds))
