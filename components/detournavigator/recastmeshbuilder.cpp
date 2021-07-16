@@ -1,12 +1,11 @@
 #include "recastmeshbuilder.hpp"
 #include "debug.hpp"
-#include "settings.hpp"
-#include "settingsutils.hpp"
 #include "exceptions.hpp"
 
 #include <components/bullethelpers/transformboundingbox.hpp>
 #include <components/bullethelpers/processtrianglecallback.hpp>
 #include <components/misc/convert.hpp>
+#include <components/debug/debuglog.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
@@ -26,12 +25,12 @@ namespace DetourNavigator
 
     namespace
     {
-        RecastMeshTriangle makeRecastMeshTriangle(const btVector3* vertices, const AreaType areaType, const Settings& settings)
+        RecastMeshTriangle makeRecastMeshTriangle(const btVector3* vertices, const AreaType areaType)
         {
             RecastMeshTriangle result;
             result.mAreaType = areaType;
             for (std::size_t i = 0; i < 3; ++i)
-                result.mVertices[i] = toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(vertices[i]));
+                result.mVertices[i] = Misc::Convert::makeOsgVec3f(vertices[i]);
             return result;
         }
     }
@@ -81,12 +80,9 @@ namespace DetourNavigator
         return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));
     }
 
-    RecastMeshBuilder::RecastMeshBuilder(const Settings& settings, const TileBounds& bounds)
-        : mSettings(settings)
-        , mBounds(bounds)
+    RecastMeshBuilder::RecastMeshBuilder(const TileBounds& bounds) noexcept
+        : mBounds(bounds)
     {
-        mBounds.mMin /= mSettings.get().mRecastScaleFactor;
-        mBounds.mMax /= mSettings.get().mRecastScaleFactor;
     }
 
     void RecastMeshBuilder::addObject(const btCollisionShape& shape, const btTransform& transform,
@@ -117,7 +113,7 @@ namespace DetourNavigator
     {
         return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
         {
-            RecastMeshTriangle triangle = makeRecastMeshTriangle(vertices, areaType, mSettings);
+            RecastMeshTriangle triangle = makeRecastMeshTriangle(vertices, areaType);
             std::reverse(triangle.mVertices.begin(), triangle.mVertices.end());
             mTriangles.emplace_back(triangle);
         }));
@@ -128,7 +124,7 @@ namespace DetourNavigator
     {
         return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
         {
-            mTriangles.emplace_back(makeRecastMeshTriangle(vertices, areaType, mSettings));
+            mTriangles.emplace_back(makeRecastMeshTriangle(vertices, areaType));
         }));
     }
 
@@ -158,7 +154,7 @@ namespace DetourNavigator
                 shape.getVertex(indices[i + j], position);
                 vertices[j] = transform(position);
             }
-            mTriangles.emplace_back(makeRecastMeshTriangle(vertices.data(), areaType, mSettings));
+            mTriangles.emplace_back(makeRecastMeshTriangle(vertices.data(), areaType));
         }
     }
 

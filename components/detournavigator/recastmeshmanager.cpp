@@ -1,5 +1,6 @@
 #include "recastmeshmanager.hpp"
 #include "recastmeshbuilder.hpp"
+#include "settings.hpp"
 
 namespace DetourNavigator
 {
@@ -68,7 +69,10 @@ namespace DetourNavigator
 
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh()
     {
-        RecastMeshBuilder builder(mSettings, mTileBounds);
+        TileBounds tileBounds = mTileBounds;
+        tileBounds.mMin /= mSettings.mRecastScaleFactor;
+        tileBounds.mMax /= mSettings.mRecastScaleFactor;
+        RecastMeshBuilder builder(tileBounds);
         for (const auto& [k, v] : mWater)
             builder.addWater(v.mCellSize, v.mTransform);
         for (const auto& [k, object] : mObjects)

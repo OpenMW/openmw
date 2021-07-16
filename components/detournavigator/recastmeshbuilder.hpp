@@ -23,8 +23,6 @@ class btTriangleCallback;
 
 namespace DetourNavigator
 {
-    struct Settings;
-
     struct RecastMeshTriangle
     {
         AreaType mAreaType;
@@ -39,7 +37,7 @@ namespace DetourNavigator
     class RecastMeshBuilder
     {
     public:
-        RecastMeshBuilder(const Settings& settings, const TileBounds& bounds);
+        explicit RecastMeshBuilder(const TileBounds& bounds) noexcept;
 
         void addObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType);
 
@@ -56,8 +54,7 @@ namespace DetourNavigator
         std::shared_ptr<RecastMesh> create(std::size_t generation, std::size_t revision) &&;
 
     private:
-        std::reference_wrapper<const Settings> mSettings;
-        TileBounds mBounds;
+        const TileBounds mBounds;
         std::vector<RecastMeshTriangle> mTriangles;
         std::vector<RecastMesh::Water> mWater;
 

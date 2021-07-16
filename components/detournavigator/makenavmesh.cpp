@@ -157,15 +157,23 @@ namespace
             throw NavigatorException("Failed to create heightfield for navmesh");
     }
 
-    bool rasterizeTriangles(rcContext& context, const Mesh& mesh, const rcConfig& config,
+    bool rasterizeTriangles(rcContext& context, const Mesh& mesh, const Settings& settings, const rcConfig& config,
         rcHeightfield& solid)
     {
         std::vector<unsigned char> areas(mesh.getAreaTypes().begin(), mesh.getAreaTypes().end());
+        std::vector<float> vertices = mesh.getVertices();
+
+        for (std::size_t i = 0; i < vertices.size(); i += 3)
+        {
+            for (std::size_t j = 0; j < 3; ++j)
+                vertices[i + j] = toNavMeshCoordinates(settings, vertices[i + j]);
+            std::swap(vertices[i + 1], vertices[i + 2]);
+        }
 
         rcClearUnwalkableTriangles(
             &context,
             config.walkableSlopeAngle,
-            mesh.getVertices().data(),
+            vertices.data(),
             static_cast<int>(mesh.getVerticesCount()),
             mesh.getIndices().data(),
             static_cast<int>(areas.size()),
@@ -174,7 +182,7 @@ namespace
 
         return rcRasterizeTriangles(
             &context,
-            mesh.getVertices().data(),
+            vertices.data(),
             static_cast<int>(mesh.getVerticesCount()),
             mesh.getIndices().data(),
             areas.data(),
@@ -242,7 +250,7 @@ namespace
     bool rasterizeTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
         const rcConfig& config, const Settings& settings, rcHeightfield& solid)
     {
-        if (!rasterizeTriangles(context, recastMesh.getMesh(), config, solid))
+        if (!rasterizeTriangles(context, recastMesh.getMesh(), settings, config, solid))
             return false;
 
         rasterizeWaterTriangles(context, agentHalfExtents, recastMesh, settings, config, solid);
@@ -491,6 +499,8 @@ namespace DetourNavigator
         }
 
         auto recastMeshBounds = recastMesh->getBounds();
+        recastMeshBounds.mMin = toNavMeshCoordinates(settings, recastMeshBounds.mMin);
+        recastMeshBounds.mMax = toNavMeshCoordinates(settings, recastMeshBounds.mMax);
 
         for (const auto& water : recastMesh->getWater())
         {
