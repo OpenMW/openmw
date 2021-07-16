@@ -4,9 +4,9 @@ export HOMEBREW_NO_EMOJI=1
 brew update --quiet
 
 # workaround python issue on travis
-[ -z "${TRAVIS}" ] brew uninstall --ignore-dependencies python@3.8 || true
-[ -z "${TRAVIS}" ] brew uninstall --ignore-dependencies python@3.9 || true
-[ -z "${TRAVIS}" ] brew uninstall --ignore-dependencies qt@6 || true
+[ -z "${TRAVIS}" ] && brew uninstall --ignore-dependencies python@3.8 || true
+[ -z "${TRAVIS}" ] && brew uninstall --ignore-dependencies python@3.9 || true
+[ -z "${TRAVIS}" ] && brew uninstall --ignore-dependencies qt@6 || true
 
 # Some of these tools can come from places other than brew, so check before installing
 [ -z "${TRAVIS}" ] brew install fontconfig
