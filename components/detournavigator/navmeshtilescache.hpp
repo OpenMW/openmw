@@ -1,8 +1,7 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVMESHTILESCACHE_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVMESHTILESCACHE_H
 
-#include "offmeshconnection.hpp"
-#include "navmeshdata.hpp"
+#include "preparednavmeshdata.hpp"
 #include "recastmesh.hpp"
 #include "tileposition.hpp"
 
@@ -21,12 +20,6 @@ namespace osg
 
 namespace DetourNavigator
 {
-    struct NavMeshDataRef
-    {
-        unsigned char* mValue;
-        int mSize;
-    };
-
     struct RecastMeshData
     {
         std::vector<int> mIndices;
@@ -53,71 +46,6 @@ namespace DetourNavigator
                 < std::tie(rhs.mIndices, rhs.mVertices, rhs.mAreaTypes, rhs.mWater);
     }
 
-    struct NavMeshKey
-    {
-        RecastMeshData mRecastMesh;
-        std::vector<OffMeshConnection> mOffMeshConnections;
-    };
-
-    inline bool operator <(const NavMeshKey& lhs, const NavMeshKey& rhs)
-    {
-        return std::tie(lhs.mRecastMesh, lhs.mOffMeshConnections)
-                < std::tie(rhs.mRecastMesh, rhs.mOffMeshConnections);
-    }
-
-    struct NavMeshKeyRef
-    {
-        std::reference_wrapper<const NavMeshKey> mRef;
-
-        explicit NavMeshKeyRef(const NavMeshKey& ref) : mRef(ref) {}
-    };
-
-    inline bool operator <(const NavMeshKeyRef& lhs, const NavMeshKeyRef& rhs)
-    {
-        return lhs.mRef.get() < rhs.mRef.get();
-    }
-
-    struct NavMeshKeyView
-    {
-        std::reference_wrapper<const RecastMesh> mRecastMesh;
-        std::reference_wrapper<const std::vector<OffMeshConnection>> mOffMeshConnections;
-
-        NavMeshKeyView(const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections)
-            : mRecastMesh(recastMesh), mOffMeshConnections(offMeshConnections) {}
-    };
-
-    inline bool operator <(const NavMeshKeyView& lhs, const NavMeshKey& rhs)
-    {
-        return std::tie(lhs.mRecastMesh.get(), lhs.mOffMeshConnections.get())
-                < std::tie(rhs.mRecastMesh, rhs.mOffMeshConnections);
-    }
-
-    inline bool operator <(const NavMeshKey& lhs, const NavMeshKeyView& rhs)
-    {
-        return std::tie(lhs.mRecastMesh, lhs.mOffMeshConnections)
-                < std::tie(rhs.mRecastMesh.get(), rhs.mOffMeshConnections.get());
-    }
-
-    template <class R>
-    inline bool operator <(const NavMeshKeyRef& lhs, const R& rhs)
-    {
-        return lhs.mRef.get() < rhs;
-    }
-
-    template <class L>
-    inline bool operator <(const L& lhs, const NavMeshKeyRef& rhs)
-    {
-        return lhs < rhs.mRef.get();
-    }
-
-    template <class L, class R>
-    inline bool operator <(const std::tuple<osg::Vec3f, TilePosition, L>& lhs, const std::tuple<osg::Vec3f, TilePosition, R>& rhs)
-    {
-        const auto left = std::tie(std::get<0>(lhs), std::get<1>(lhs));
-        const auto right = std::tie(std::get<0>(rhs), std::get<1>(rhs));
-        return std::tie(left, std::get<2>(lhs)) < std::tie(right, std::get<2>(rhs));
-    }
-
     class NavMeshTilesCache
     {
     public:
@@ -126,15 +54,16 @@ namespace DetourNavigator
             std::atomic<std::int64_t> mUseCount;
             osg::Vec3f mAgentHalfExtents;
             TilePosition mChangedTile;
-            NavMeshKey mNavMeshKey;
-            NavMeshData mNavMeshData;
+            RecastMeshData mRecastMeshData;
+            std::unique_ptr<PreparedNavMeshData> mPreparedNavMeshData;
             std::size_t mSize;
 
-            Item(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile, NavMeshKey&& navMeshKey, std::size_t size)
+            Item(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
+                 RecastMeshData&& recastMeshData, std::size_t size)
                 : mUseCount(0)
                 , mAgentHalfExtents(agentHalfExtents)
                 , mChangedTile(changedTile)
-                , mNavMeshKey(navMeshKey)
+                , mRecastMeshData(std::move(recastMeshData))
                 , mSize(size)
             {}
         };
@@ -181,9 +110,9 @@ namespace DetourNavigator
                 return *this;
             }
 
-            NavMeshDataRef get() const
+            const PreparedNavMeshData& get() const
             {
-                return NavMeshDataRef {mIterator->mNavMeshData.mValue.get(), mIterator->mNavMeshData.mSize};
+                return *mIterator->mPreparedNavMeshData;
             }
 
             operator bool() const
@@ -208,11 +137,10 @@ namespace DetourNavigator
         NavMeshTilesCache(const std::size_t maxNavMeshDataSize);
 
         Value get(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
-            const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections);
+            const RecastMesh& recastMesh);
 
         Value set(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
-            const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections,
-            NavMeshData&& value);
+            const RecastMesh& recastMesh, std::unique_ptr<PreparedNavMeshData>&& value);
 
         Stats getStats() const;
 
@@ -227,7 +155,7 @@ namespace DetourNavigator
         std::size_t mGetCount;
         std::list<Item> mBusyItems;
         std::list<Item> mFreeItems;
-        std::map<std::tuple<osg::Vec3f, TilePosition, NavMeshKeyRef>, ItemIterator, std::less<>> mValues;
+        std::map<std::tuple<osg::Vec3f, TilePosition, std::reference_wrapper<const RecastMeshData>>, ItemIterator, std::less<>> mValues;
 
         void removeLeastRecentlyUsed();
 

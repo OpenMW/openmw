@@ -193,6 +193,8 @@ add_component_dir(detournavigator
     navmeshtileview
     oscillatingrecastmeshobject
     offmeshconnectionsmanager
+    preparednavmeshdata
+    navmeshcacheitem
     )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
