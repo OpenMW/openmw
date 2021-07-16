@@ -678,7 +678,7 @@ if (WIN32)
     if (BUILD_OPENMW)
         # \bigobj is required:
         #  1) for OPENMW_UNITY_BUILD;
-        #  2) to compile lua binginds, because sol3 is heavily templated.
+        #  2) to compile lua bindings, because sol3 is heavily templated.
         set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD} /bigobj")
     endif()
 
