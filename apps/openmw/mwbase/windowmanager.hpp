@@ -353,6 +353,8 @@ namespace MWBase
             virtual MWWorld::Ptr getWatchedActor() const = 0;
 
             virtual const std::string& getVersionDescription() const = 0;
+
+            virtual void onDeleteCustomData(const MWWorld::Ptr& ptr) = 0;
     };
 }
 

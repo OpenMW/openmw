@@ -57,6 +57,7 @@ namespace MWGui
         void update() override {}
         size_t getItemCount() override { return 0; }
         ItemStack getItem (ModelIndex index) override { throw std::runtime_error("getItem not implemented"); }
+        bool usesContainer(const MWWorld::Ptr&) override { return false; }
 
     private:
         // Where to drop the item

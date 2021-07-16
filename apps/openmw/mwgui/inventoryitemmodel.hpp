@@ -25,6 +25,8 @@ namespace MWGui
 
         void update() override;
 
+        bool usesContainer(const MWWorld::Ptr& container) override;
+
     protected:
         MWWorld::Ptr mActor;
     private:

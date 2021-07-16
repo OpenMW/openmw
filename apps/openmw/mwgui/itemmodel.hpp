@@ -75,6 +75,8 @@ namespace MWGui
         virtual bool onDropItem(const MWWorld::Ptr &item, int count);
         virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
 
+        virtual bool usesContainer(const MWWorld::Ptr& container) = 0;
+
     private:
         ItemModel(const ItemModel&);
         ItemModel& operator=(const ItemModel&);
@@ -103,6 +105,8 @@ namespace MWGui
 
         ModelIndex mapToSource (ModelIndex index);
         ModelIndex mapFromSource (ModelIndex index);
+
+        bool usesContainer(const MWWorld::Ptr& container) override;
     protected:
         ItemModel* mSourceModel;
     };

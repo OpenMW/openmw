@@ -4,6 +4,7 @@
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
     Bug #3905: Great House Dagoth issues
+    Bug #4203: Resurrecting an actor should close the loot GUI
     Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
     Bug #5379: Wandering NPCs falling through cantons

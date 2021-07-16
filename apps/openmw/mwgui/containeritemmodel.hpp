@@ -36,6 +36,8 @@ namespace MWGui
 
         void update() override;
 
+        bool usesContainer(const MWWorld::Ptr& container) override;
+
     private:
         std::vector<std::pair<MWWorld::Ptr, MWWorld::ResolutionHandle>> mItemSources;
         std::vector<MWWorld::Ptr> mWorldItems;

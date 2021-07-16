@@ -131,4 +131,9 @@ bool InventoryItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
     return true;
 }
 
+bool InventoryItemModel::usesContainer(const MWWorld::Ptr& container)
+{
+    return mActor == container;
+}
+
 }
