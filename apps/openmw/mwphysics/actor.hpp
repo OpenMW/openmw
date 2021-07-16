@@ -204,6 +204,7 @@ namespace MWPhysics
         osg::Vec3f mVelocity;
         bool mWorldPositionChanged;
         bool mSkipCollisions;
+        bool mSkipSimulation;
         btTransform mLocalTransform;
         mutable std::mutex mPositionMutex;
 
