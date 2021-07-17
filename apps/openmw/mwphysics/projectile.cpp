@@ -3,14 +3,11 @@
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
-#include <LinearMath/btVector3.h>
-
 #include <components/misc/convert.hpp>
 
 #include "../mwworld/class.hpp"
 
 #include "collisiontype.hpp"
-#include "memory"
 #include "mtphysics.hpp"
 #include "projectile.hpp"
 
@@ -55,7 +52,9 @@ void Projectile::commitPositionChange()
     std::scoped_lock lock(mMutex);
     if (mTransformUpdatePending)
     {
-        mCollisionObject->setWorldTransform(mLocalTransform);
+        auto& trans = mCollisionObject->getWorldTransform();
+        trans.setOrigin(Misc::Convert::toBullet(mPosition));
+        mCollisionObject->setWorldTransform(trans);
         mTransformUpdatePending = false;
     }
 }
@@ -63,14 +62,14 @@ void Projectile::commitPositionChange()
 void Projectile::setPosition(const osg::Vec3f &position)
 {
     std::scoped_lock lock(mMutex);
-    mLocalTransform.setOrigin(Misc::Convert::toBullet(position));
+    mPosition = position;
     mTransformUpdatePending = true;
 }
 
 osg::Vec3f Projectile::getPosition() const
 {
     std::scoped_lock lock(mMutex);
-    return Misc::Convert::toOsg(mLocalTransform.getOrigin());
+    return mPosition;
 }
 
 bool Projectile::canTraverseWater() const
