@@ -42,8 +42,8 @@ Coverity:
     - tar xfz /tmp/cov-analysis-linux64.tgz
   script:
     - CI/before_script.linux.sh
-    # Add more than just `openmw` once we can build everything under 3h
-    - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
+    # Remove the specific targets and build everything once we can do it under 3h
+    - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc) openmw esmtool bsatool openmw-wizard openmw-launcher openmw-iniimporter openmw-essimporter
   after_script:
     - tar cfz cov-int.tar.gz cov-int
     - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
