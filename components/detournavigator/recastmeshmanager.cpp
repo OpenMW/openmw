@@ -84,7 +84,7 @@ namespace DetourNavigator
 
     bool RecastMeshManager::isEmpty() const
     {
-        return mObjects.empty();
+        return mObjects.empty() && mWater.empty();
     }
 
     void RecastMeshManager::reportNavMeshChange(const Version& recastMeshVersion, const Version& navMeshVersion)

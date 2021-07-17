@@ -323,4 +323,18 @@ namespace
             for (int y = -6; y < 6; ++y)
                 ASSERT_EQ(manager.hasTile(TilePosition(x, y)), -1 <= x && x <= 0 && -1 <= y && y <= 0);
     }
+
+    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_object_should_not_remove_tile_with_water)
+    {
+        TileCachedRecastMeshManager manager(mSettings);
+        const osg::Vec2i cellPosition(0, 0);
+        const int cellSize = 8192;
+        const btBoxShape boxShape(btVector3(20, 20, 100));
+        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground));
+        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
+        ASSERT_TRUE(manager.removeObject(ObjectId(&boxShape)));
+        for (int x = -6; x < 6; ++x)
+            for (int y = -6; y < 6; ++y)
+                ASSERT_TRUE(manager.hasTile(TilePosition(x, y)));
+    }
 }
