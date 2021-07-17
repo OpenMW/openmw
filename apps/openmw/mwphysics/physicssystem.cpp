@@ -630,7 +630,7 @@ namespace MWPhysics
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
         {
-            found->second->setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
+            found->second->setRotation(ptr.getRefData().getBaseNode()->getAttitude());
             mTaskScheduler->updateSingleAabb(found->second);
             return;
         }
@@ -651,7 +651,7 @@ namespace MWPhysics
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
         {
-            found->second->setOrigin(Misc::Convert::toBullet(ptr.getRefData().getPosition().asVec3()));
+            found->second->updatePosition();
             mTaskScheduler->updateSingleAabb(found->second);
             return;
         }
