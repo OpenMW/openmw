@@ -28,7 +28,7 @@ namespace MWPhysics
 
         setScale(ptr.getCellRef().getScale());
         setRotation(rotation);
-        setOrigin(Misc::Convert::toBullet(ptr.getRefData().getPosition().asVec3()));
+        updatePosition();
         commitPositionChange();
 
         mTaskScheduler->addCollisionObject(mCollisionObject.get(), collisionType, CollisionType_Actor|CollisionType_HeightMap|CollisionType_Projectile);
@@ -54,14 +54,14 @@ namespace MWPhysics
     void Object::setRotation(osg::Quat quat)
     {
         std::unique_lock<std::mutex> lock(mPositionMutex);
-        mLocalTransform.setRotation(Misc::Convert::toBullet(quat));
+        mRotation = quat;
         mTransformUpdatePending = true;
     }
 
-    void Object::setOrigin(const btVector3& vec)
+    void Object::updatePosition()
     {
         std::unique_lock<std::mutex> lock(mPositionMutex);
-        mLocalTransform.setOrigin(vec);
+        mPosition = mPtr.getRefData().getPosition().asVec3();
         mTransformUpdatePending = true;
     }
 
@@ -75,7 +75,10 @@ namespace MWPhysics
         }
         if (mTransformUpdatePending)
         {
-            mCollisionObject->setWorldTransform(mLocalTransform);
+            btTransform trans;
+            trans.setOrigin(Misc::Convert::toBullet(mPosition));
+            trans.setRotation(Misc::Convert::toBullet(mRotation));
+            mCollisionObject->setWorldTransform(trans);
             mTransformUpdatePending = false;
         }
     }
@@ -93,7 +96,10 @@ namespace MWPhysics
     btTransform Object::getTransform() const
     {
         std::unique_lock<std::mutex> lock(mPositionMutex);
-        return mLocalTransform;
+        btTransform trans;
+        trans.setOrigin(Misc::Convert::toBullet(mPosition));
+        trans.setRotation(Misc::Convert::toBullet(mRotation));
+        return trans;
     }
 
     bool Object::isSolid() const
