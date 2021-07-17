@@ -74,9 +74,6 @@ namespace MWPhysics
          */
         osg::Vec3f getOriginalHalfExtents() const;
 
-        /// Returns the mesh translation, scaled and rotated as necessary
-        osg::Vec3f getScaledMeshTranslation() const;
-
         /**
          * Returns the position of the collision body
          * @note The collision shape's origin is in its center, so the position returned can be described as center of the actor collision box in world space.
@@ -181,6 +178,9 @@ namespace MWPhysics
         void addCollisionMask(int collisionMask);
         int getCollisionMask() const;
 
+        /// Returns the mesh translation, scaled and rotated as necessary
+        osg::Vec3f getScaledMeshTranslation() const;
+
         bool mCanWaterWalk;
         std::atomic<bool> mWalkingOnWater;
 
@@ -205,7 +205,6 @@ namespace MWPhysics
         bool mWorldPositionChanged;
         bool mSkipCollisions;
         bool mSkipSimulation;
-        btTransform mLocalTransform;
         mutable std::mutex mPositionMutex;
 
         unsigned int mStuckFrames;

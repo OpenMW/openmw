@@ -147,18 +147,20 @@ void Actor::updateCollisionObjectPosition()
 {
     std::scoped_lock lock(mPositionMutex);
     mShape->setLocalScaling(Misc::Convert::toBullet(mScale));
-    osg::Vec3f scaledTranslation = mRotation * osg::componentMultiply(mMeshTranslation, mScale);
-    osg::Vec3f newPosition = scaledTranslation + mPosition;
-    mLocalTransform.setOrigin(Misc::Convert::toBullet(newPosition));
-    mLocalTransform.setRotation(Misc::Convert::toBullet(mRotation));
-    mCollisionObject->setWorldTransform(mLocalTransform);
+    osg::Vec3f newPosition = getScaledMeshTranslation() + mPosition;
+
+    auto& trans = mCollisionObject->getWorldTransform();
+    trans.setOrigin(Misc::Convert::toBullet(newPosition));
+    trans.setRotation(Misc::Convert::toBullet(mRotation));
+    mCollisionObject->setWorldTransform(trans);
+
     mWorldPositionChanged = false;
 }
 
 osg::Vec3f Actor::getCollisionObjectPosition() const
 {
     std::scoped_lock lock(mPositionMutex);
-    return Misc::Convert::toOsg(mLocalTransform.getOrigin());
+    return getScaledMeshTranslation() + mPosition;
 }
 
 bool Actor::setPosition(const osg::Vec3f& position)
