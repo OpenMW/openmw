@@ -70,6 +70,7 @@ namespace MWLua
     private:
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr);
 
+        bool mInitialized = false;
         LuaUtil::LuaState mLua;
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;

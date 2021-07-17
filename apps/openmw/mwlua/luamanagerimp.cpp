@@ -31,7 +31,10 @@ namespace MWLua
         mLocalLoader = createUserdataSerializer(true, mWorldView.getObjectRegistry(), &mContentFileMapping);
 
         mGlobalScripts.setSerializer(mGlobalSerializer.get());
+    }
 
+    void LuaManager::init()
+    {
         Context context;
         context.mIsGlobal = true;
         context.mLuaManager = this;
@@ -60,14 +63,12 @@ namespace MWLua
         mCameraPackage = initCameraPackage(localContext);
         mUserInterfacePackage = initUserInterfacePackage(localContext);
         mNearbyPackage = initNearbyPackage(localContext);
-    }
 
-    void LuaManager::init()
-    {
         mKeyPressEvents.clear();
         for (const std::string& path : mGlobalScriptList)
             if (mGlobalScripts.addNewScript(path))
                 Log(Debug::Info) << "Global script started: " << path;
+        mInitialized = true;
     }
 
     void LuaManager::update(bool paused, float dt)
@@ -198,6 +199,8 @@ namespace MWLua
 
     void LuaManager::setupPlayer(const MWWorld::Ptr& ptr)
     {
+        if (!mInitialized)
+            return;
         if (!mPlayer.isEmpty())
             throw std::logic_error("Player is initialized twice");
         mWorldView.objectAddedToScene(ptr);
@@ -279,6 +282,7 @@ namespace MWLua
 
     LocalScripts* LuaManager::createLocalScripts(const MWWorld::Ptr& ptr)
     {
+        assert(mInitialized);
         std::shared_ptr<LocalScripts> scripts;
         // When loading a game, it can be called before LuaManager::setPlayer,
         // so we can't just check ptr == mPlayer here.
