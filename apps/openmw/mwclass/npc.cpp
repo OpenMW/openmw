@@ -383,14 +383,14 @@ namespace MWClass
             if (!spellsInitialised)
                 data->mNpcStats.getSpells().addAllToInstance(ref->mBase->mSpells.mList);
 
-            // inventory
-            // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
-            data->mInventoryStore.fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
-
             data->mNpcStats.setGoldPool(gold);
 
             // store
             ptr.getRefData().setCustomData(std::move(data));
+
+            // inventory
+            // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
+            getInventoryStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
 
             getInventoryStore(ptr).autoEquip(ptr);
         }
