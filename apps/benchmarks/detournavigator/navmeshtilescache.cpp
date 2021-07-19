@@ -94,8 +94,8 @@ namespace
         std::vector<float> vertices;
         std::vector<int> indices;
         std::vector<AreaType> areaTypes;
-        generateVertices(std::back_inserter(vertices), triangles * 1.98, random);
-        generateIndices(std::back_inserter(indices), static_cast<int>(vertices.size() / 3) - 1, vertices.size() * 1.53, random);
+        generateVertices(std::back_inserter(vertices), triangles * 1.946, random);
+        generateIndices(std::back_inserter(indices), static_cast<int>(vertices.size() / 3) - 1, vertices.size() * 1.545, random);
         generateAreaTypes(std::back_inserter(areaTypes), indices.size() / 3, random);
         return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));
     }
@@ -109,12 +109,12 @@ namespace
         const std::size_t revision = std::uniform_int_distribution<std::size_t>(0, 10000)(random);
         Mesh mesh = generateMesh(triangles, random);
         std::vector<Cell> water;
-        generateWater(std::back_inserter(water), 2, random);
+        generateWater(std::back_inserter(water), 1, random);
         RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water));
         return Key {agentHalfExtents, tilePosition, std::move(recastMesh)};
     }
 
-    constexpr std::size_t trianglesPerTile = 310;
+    constexpr std::size_t trianglesPerTile = 438;
 
     template <typename OutputIterator, typename Random>
     void generateKeys(OutputIterator out, std::size_t count, Random& random)
