@@ -658,7 +658,7 @@ namespace MWPhysics
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
         {
-            found->second->setOrigin(Misc::Convert::toBullet(ptr.getRefData().getPosition().asVec3()));
+            found->second->updatePosition();
             mTaskScheduler->updateSingleAabb(found->second);
             return;
         }
