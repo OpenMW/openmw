@@ -603,7 +603,7 @@ namespace Shader
             for (auto itr = writableStateSet->getUniformList().begin(); itr != writableStateSet->getUniformList().end();)
             {
                 if (addedState->hasUniform(itr->first))
-                    writableStateSet->getUniformList().erase(itr);
+                    writableStateSet->getUniformList().erase(itr++);
                 else
                     ++itr;
             }
@@ -611,7 +611,7 @@ namespace Shader
             for (auto itr = writableStateSet->getModeList().begin(); itr != writableStateSet->getModeList().end();)
             {
                 if (addedState->hasMode(itr->first))
-                    writableStateSet->getModeList().erase(itr);
+                    writableStateSet->getModeList().erase(itr++);
                 else
                     ++itr;
             }
