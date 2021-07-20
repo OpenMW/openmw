@@ -120,13 +120,6 @@ namespace MWPhysics
     {
         auto* physicActor = actor.mActorRaw;
         const ESM::Position& refpos = actor.mRefpos;
-        // Early-out for totally static creatures
-        // (Not sure if gravity should still apply?)
-        {
-            const auto ptr = physicActor->getPtr();
-            if (!ptr.getClass().isMobile(ptr))
-                return;
-        }
 
         // Reset per-frame data
         physicActor->setWalkingOnWater(false);
@@ -432,10 +425,6 @@ namespace MWPhysics
 
     void MovementSolver::unstuck(ActorFrameData& actor, const btCollisionWorld* collisionWorld)
     {
-        const auto& ptr = actor.mActorRaw->getPtr();
-        if (!ptr.getClass().isMobile(ptr))
-            return;
-
         auto* physicActor = actor.mActorRaw;
         if(!physicActor->getCollisionMode() || actor.mSkipCollisionDetection) // noclipping/tcl
             return;

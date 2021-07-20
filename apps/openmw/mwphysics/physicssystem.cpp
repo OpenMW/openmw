@@ -757,6 +757,8 @@ namespace MWPhysics
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         for (const auto& [ptr, physicActor] : mActors)
         {
+            if (!ptr.getClass().isMobile(physicActor->getPtr()))
+                continue;
             float waterlevel = -std::numeric_limits<float>::max();
             const MWWorld::CellStore *cell = ptr.getCell();
             if(cell->getCell()->hasWater())
