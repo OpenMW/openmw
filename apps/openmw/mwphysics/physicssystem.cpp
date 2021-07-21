@@ -950,9 +950,24 @@ namespace MWPhysics
 
     ActorFrameData::ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn,
             bool waterCollision, float slowFall, float waterlevel)
-        : mActor(actor), mActorRaw(actor.get()), mStandingOn(standingOn),
-        mDidJump(false), mNeedLand(false), mWaterCollision(waterCollision), mSkipCollisionDetection(actor->skipCollisions()),
-        mWaterlevel(waterlevel), mSlowFall(slowFall), mOldHeight(0), mFallHeight(0), mMovement(actor->velocity()), mPosition(), mRefpos()
+        : mActor(actor)
+        , mActorRaw(actor.get())
+        , mStandingOn(standingOn)
+        , mWasOnGround(actor->getOnGround())
+        , mIsOnGround(actor->getOnGround())
+        , mIsOnSlope(actor->getOnSlope())
+        , mDidJump(false)
+        , mNeedLand(false)
+        , mWaterCollision(waterCollision)
+        , mWalkingOnWater(false)
+        , mSkipCollisionDetection(actor->skipCollisions() || !actor->getCollisionMode())
+        , mWaterlevel(waterlevel)
+        , mSlowFall(slowFall)
+        , mOldHeight(0)
+        , mFallHeight(0)
+        , mMovement(actor->velocity())
+        , mPosition()
+        , mRotation()
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const auto ptr = actor->getPtr();
@@ -961,8 +976,7 @@ namespace MWPhysics
         mWantJump = ptr.getClass().getMovementSettings(ptr).mPosition[2] != 0;
         auto& stats = ptr.getClass().getCreatureStats(ptr);
         const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
-        mFloatToSurface = stats.isDead() || (!godmode && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0);
-        mWasOnGround = actor->getOnGround();
+        mInert = stats.isDead() || (!godmode && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0);
     }
 
     void ActorFrameData::updatePosition(btCollisionWorld* world)
@@ -975,7 +989,8 @@ namespace MWPhysics
             MWBase::Environment::get().getWorld()->moveObject(mActorRaw->getPtr(), mPosition, false);
         }
         mOldHeight = mPosition.z();
-        mRefpos = mActorRaw->getPtr().getRefData().getPosition();
+        const auto rotation = mActorRaw->getPtr().getRefData().getPosition().asRotationVec3();
+        mRotation = osg::Vec2f(rotation.x(), rotation.z());
     }
 
     WorldFrameData::WorldFrameData()

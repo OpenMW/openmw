@@ -54,7 +54,7 @@ namespace
     {
         const float heightDiff = actorData.mPosition.z() - actorData.mOldHeight;
 
-        const bool isStillOnGround = (simulationPerformed && actorData.mWasOnGround && actorData.mActorRaw->getOnGround());
+        const bool isStillOnGround = (simulationPerformed && actorData.mWasOnGround && actorData.mIsOnGround);
 
         if (isStillOnGround || actorData.mFlying || actorData.mSwimming || actorData.mSlowFall < 1)
             actorData.mNeedLand = true;
@@ -256,7 +256,12 @@ namespace MWPhysics
 
                     // these variables are accessed directly from the main thread, update them here to prevent accessing "too new" values
                     if (mAdvanceSimulation)
+                    {
                         data.mActorRaw->setStandingOnPtr(data.mStandingOn);
+                        data.mActorRaw->setOnGround(data.mIsOnGround);
+                        data.mActorRaw->setOnSlope(data.mIsOnSlope);
+                        data.mActorRaw->setWalkingOnWater(data.mWalkingOnWater);
+                    }
                     data.mActorRaw->setSimulationPosition(interpolateMovements(data, mTimeAccum, mPhysicsDt));
                 }
             }
@@ -555,7 +560,12 @@ namespace MWPhysics
             actorData.mActorRaw->setSimulationPosition(interpolateMovements(actorData, mTimeAccum, mPhysicsDt));
             updateMechanics(actorData);
             if (mAdvanceSimulation)
+            {
                 actorData.mActorRaw->setStandingOnPtr(actorData.mStandingOn);
+                actorData.mActorRaw->setOnGround(actorData.mIsOnGround);
+                actorData.mActorRaw->setOnSlope(actorData.mIsOnSlope);
+                actorData.mActorRaw->setWalkingOnWater(actorData.mWalkingOnWater);
+            }
         }
         refreshLOSCache();
     }

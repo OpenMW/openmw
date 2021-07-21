@@ -1,7 +1,6 @@
 #ifndef OPENMW_MWPHYSICS_ACTOR_H
 #define OPENMW_MWPHYSICS_ACTOR_H
 
-#include <atomic>
 #include <memory>
 #include <mutex>
 
@@ -37,7 +36,7 @@ namespace MWPhysics
 
         bool getCollisionMode() const
         {
-            return mInternalCollisionMode.load(std::memory_order_acquire);
+            return mInternalCollisionMode;
         }
 
         btConvexShape* getConvexShape() const { return mConvexShape; }
@@ -123,14 +122,14 @@ namespace MWPhysics
 
         bool getOnGround() const
         {
-            return mInternalCollisionMode.load(std::memory_order_acquire) && mOnGround.load(std::memory_order_acquire);
+            return mInternalCollisionMode && mOnGround;
         }
 
         void setOnSlope(bool slope);
 
         bool getOnSlope() const
         {
-            return mInternalCollisionMode.load(std::memory_order_acquire) && mOnSlope.load(std::memory_order_acquire);
+            return mInternalCollisionMode && mOnSlope;
         }
 
         btCollisionObject* getCollisionObject() const
@@ -182,7 +181,7 @@ namespace MWPhysics
         osg::Vec3f getScaledMeshTranslation() const;
 
         bool mCanWaterWalk;
-        std::atomic<bool> mWalkingOnWater;
+        bool mWalkingOnWater;
 
         bool mRotationallyInvariant;
 
@@ -211,9 +210,9 @@ namespace MWPhysics
         osg::Vec3f mLastStuckPosition;
 
         osg::Vec3f mForce;
-        std::atomic<bool> mOnGround;
-        std::atomic<bool> mOnSlope;
-        std::atomic<bool> mInternalCollisionMode;
+        bool mOnGround;
+        bool mOnSlope;
+        bool mInternalCollisionMode;
         bool mExternalCollisionMode;
 
         PhysicsTaskScheduler* mTaskScheduler;

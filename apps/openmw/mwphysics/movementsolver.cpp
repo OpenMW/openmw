@@ -119,15 +119,14 @@ namespace MWPhysics
                                            WorldFrameData& worldData)
     {
         auto* physicActor = actor.mActorRaw;
-        const ESM::Position& refpos = actor.mRefpos;
 
         // Reset per-frame data
-        physicActor->setWalkingOnWater(false);
+        actor.mWalkingOnWater = false;
         // Anything to collide with?
-        if(!physicActor->getCollisionMode() || actor.mSkipCollisionDetection)
+        if(actor.mSkipCollisionDetection)
         {
-            actor.mPosition += (osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) *
-                                osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))
+            actor.mPosition += (osg::Quat(actor.mRotation.x(), osg::Vec3f(-1, 0, 0)) *
+                                osg::Quat(actor.mRotation.y(), osg::Vec3f(0, 0, -1))
                                 ) * actor.mMovement * time;
             return;
         }
@@ -151,22 +150,22 @@ namespace MWPhysics
 
         if (actor.mPosition.z() < swimlevel || actor.mFlying)
         {
-            velocity = (osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * actor.mMovement;
+            velocity = (osg::Quat(actor.mRotation.x(), osg::Vec3f(-1, 0, 0)) * osg::Quat(actor.mRotation.y(), osg::Vec3f(0, 0, -1))) * actor.mMovement;
         }
         else
         {
-            velocity = (osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * actor.mMovement;
+            velocity = (osg::Quat(actor.mRotation.y(), osg::Vec3f(0, 0, -1))) * actor.mMovement;
 
-            if ((velocity.z() > 0.f && physicActor->getOnGround() && !physicActor->getOnSlope())
-            || (velocity.z() > 0.f && velocity.z() + inertia.z() <= -velocity.z() && physicActor->getOnSlope()))
+            if ((velocity.z() > 0.f && actor.mIsOnGround && !actor.mIsOnSlope)
+            || (velocity.z() > 0.f && velocity.z() + inertia.z() <= -velocity.z() && actor.mIsOnSlope))
                 inertia = velocity;
-            else if (!physicActor->getOnGround() || physicActor->getOnSlope())
+            else if (!actor.mIsOnGround || actor.mIsOnSlope)
                 velocity = velocity + inertia;
         }
 
         // Dead and paralyzed actors underwater will float to the surface,
         // if the CharacterController tells us to do so
-        if (actor.mMovement.z() > 0 && actor.mFloatToSurface && actor.mPosition.z() < swimlevel)
+        if (actor.mMovement.z() > 0 && actor.mInert && actor.mPosition.z() < swimlevel)
             velocity = osg::Vec3f(0,0,1) * 25;
 
         if (actor.mWantJump)
@@ -190,7 +189,7 @@ namespace MWPhysics
          * The initial velocity was set earlier (see above).
         */
         float remainingTime = time;
-        bool seenGround = physicActor->getOnGround() && !physicActor->getOnSlope() && !actor.mFlying;
+        bool seenGround = actor.mIsOnGround && !actor.mIsOnSlope && !actor.mFlying;
 
         int numTimesSlid = 0;
         osg::Vec3f lastSlideNormal(0,0,1);
@@ -349,7 +348,7 @@ namespace MWPhysics
         if (forceGroundTest || (inertia.z() <= 0.f && newPosition.z() >= swimlevel))
         {
             osg::Vec3f from = newPosition;
-            auto dropDistance = 2*sGroundOffset + (physicActor->getOnGround() ? sStepSizeDown : 0);
+            auto dropDistance = 2*sGroundOffset + (actor.mIsOnGround ? sStepSizeDown : 0);
             osg::Vec3f to = newPosition - osg::Vec3f(0,0,dropDistance);
             tracer.doTrace(colobj, from, to, collisionWorld);
             if(tracer.mFraction < 1.0f)
@@ -365,7 +364,7 @@ namespace MWPhysics
                         actor.mStandingOn = ptrHolder->getPtr();
 
                     if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
-                        physicActor->setWalkingOnWater(true);
+                        actor.mWalkingOnWater = true;
                     if (!actor.mFlying && !isOnSlope)
                     {
                         if (tracer.mFraction*dropDistance > sGroundOffset)
@@ -408,8 +407,8 @@ namespace MWPhysics
             }
             physicActor->setInertialForce(inertia);
         }
-        physicActor->setOnGround(isOnGround);
-        physicActor->setOnSlope(isOnSlope);
+        actor.mIsOnGround = isOnGround;
+        actor.mIsOnSlope = isOnSlope;
 
         actor.mPosition = newPosition;
         // remove what was added earlier in compensating for doTrace not taking interior transformation into account
@@ -426,7 +425,7 @@ namespace MWPhysics
     void MovementSolver::unstuck(ActorFrameData& actor, const btCollisionWorld* collisionWorld)
     {
         auto* physicActor = actor.mActorRaw;
-        if(!physicActor->getCollisionMode() || actor.mSkipCollisionDetection) // noclipping/tcl
+        if(actor.mSkipCollisionDetection) // noclipping/tcl
             return;
 
         auto* collisionObject = physicActor->getCollisionObject();
@@ -448,9 +447,9 @@ namespace MWPhysics
         const auto verticalHalfExtent = osg::Vec3f(0.0, 0.0, physicActor->getHalfExtents().z());
 
         // use a 3d approximation of the movement vector to better judge player intent
-        auto velocity = (osg::Quat(actor.mRefpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(actor.mRefpos.rot[2], osg::Vec3f(0, 0, -1))) * actor.mMovement;
+        auto velocity = (osg::Quat(actor.mRotation.x(), osg::Vec3f(-1, 0, 0)) * osg::Quat(actor.mRotation.y(), osg::Vec3f(0, 0, -1))) * actor.mMovement;
         // try to pop outside of the world before doing anything else if we're inside of it
-        if (!physicActor->getOnGround() || physicActor->getOnSlope())
+        if (!actor.mIsOnGround || actor.mIsOnSlope)
                 velocity += physicActor->getInertialForce();
 
         // because of the internal collision box offset hack, and the fact that we're moving the collision box manually,

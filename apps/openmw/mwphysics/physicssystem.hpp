@@ -86,11 +86,14 @@ namespace MWPhysics
         bool mFlying;
         bool mSwimming;
         bool mWasOnGround;
+        bool mIsOnGround;
+        bool mIsOnSlope;
         bool mWantJump;
         bool mDidJump;
-        bool mFloatToSurface;
+        bool mInert;
         bool mNeedLand;
         bool mWaterCollision;
+        bool mWalkingOnWater;
         bool mSkipCollisionDetection;
         float mWaterlevel;
         float mSlowFall;
@@ -98,7 +101,7 @@ namespace MWPhysics
         float mFallHeight;
         osg::Vec3f mMovement;
         osg::Vec3f mPosition;
-        ESM::Position mRefpos;
+        osg::Vec2f mRotation;
     };
 
     struct WorldFrameData

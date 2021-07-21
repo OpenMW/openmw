@@ -82,7 +82,7 @@ Actor::~Actor()
 
 void Actor::enableCollisionMode(bool collision)
 {
-    mInternalCollisionMode.store(collision, std::memory_order_release);
+    mInternalCollisionMode = collision;
 }
 
 void Actor::enableCollisionBody(bool collision)
@@ -250,22 +250,22 @@ void Actor::setInertialForce(const osg::Vec3f &force)
 
 void Actor::setOnGround(bool grounded)
 {
-    mOnGround.store(grounded, std::memory_order_release);
+    mOnGround = grounded;
 }
 
 void Actor::setOnSlope(bool slope)
 {
-    mOnSlope.store(slope, std::memory_order_release);
+    mOnSlope = slope;
 }
 
 bool Actor::isWalkingOnWater() const
 {
-    return mWalkingOnWater.load(std::memory_order_acquire);
+    return mWalkingOnWater;
 }
 
 void Actor::setWalkingOnWater(bool walkingOnWater)
 {
-    mWalkingOnWater.store(walkingOnWater, std::memory_order_release);
+    mWalkingOnWater = walkingOnWater;
 }
 
 void Actor::setCanWaterWalk(bool waterWalk)
