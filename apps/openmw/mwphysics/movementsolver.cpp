@@ -148,7 +148,13 @@ namespace MWPhysics
         osg::Vec3f inertia = physicActor->getInertialForce();
         osg::Vec3f velocity;
 
-        if (actor.mPosition.z() < swimlevel || actor.mFlying)
+        // Dead and paralyzed actors underwater will float to the surface,
+        // if the CharacterController tells us to do so
+        if (actor.mMovement.z() > 0 && actor.mInert && actor.mPosition.z() < swimlevel)
+        {
+            velocity = osg::Vec3f(0,0,1) * 25;
+        }
+        else if (actor.mPosition.z() < swimlevel || actor.mFlying)
         {
             velocity = (osg::Quat(actor.mRotation.x(), osg::Vec3f(-1, 0, 0)) * osg::Quat(actor.mRotation.y(), osg::Vec3f(0, 0, -1))) * actor.mMovement;
         }
@@ -162,11 +168,6 @@ namespace MWPhysics
             else if (!actor.mIsOnGround || actor.mIsOnSlope)
                 velocity = velocity + inertia;
         }
-
-        // Dead and paralyzed actors underwater will float to the surface,
-        // if the CharacterController tells us to do so
-        if (actor.mMovement.z() > 0 && actor.mInert && actor.mPosition.z() < swimlevel)
-            velocity = osg::Vec3f(0,0,1) * 25;
 
         // Now that we have the effective movement vector, apply wind forces to it
         if (worldData.mIsInStorm)
@@ -186,7 +187,6 @@ namespace MWPhysics
          * The initial velocity was set earlier (see above).
         */
         float remainingTime = time;
-        bool seenGround = actor.mIsOnGround && !actor.mIsOnSlope && !actor.mFlying;
 
         int numTimesSlid = 0;
         osg::Vec3f lastSlideNormal(0,0,1);
@@ -196,9 +196,10 @@ namespace MWPhysics
         for (int iterations = 0; iterations < sMaxIterations && remainingTime > 0.0001f; ++iterations)
         {
             osg::Vec3f nextpos = newPosition + velocity * remainingTime;
+            bool underwater = newPosition.z() < swimlevel;
 
             // If not able to fly, don't allow to swim up into the air
-            if(!actor.mFlying && nextpos.z() > swimlevel && newPosition.z() < swimlevel)
+            if(!actor.mFlying && nextpos.z() > swimlevel && underwater)
             {
                 const osg::Vec3f down(0,0,-1);
                 velocity = reject(velocity, down);
@@ -230,8 +231,7 @@ namespace MWPhysics
                 break;
             }
 
-            if (isWalkableSlope(tracer.mPlaneNormal) && !actor.mFlying && newPosition.z() >= swimlevel)
-                seenGround = true;
+            bool seenGround = !actor.mFlying && !underwater && ((actor.mIsOnGround && !actor.mIsOnSlope) || isWalkableSlope(tracer.mPlaneNormal));
 
             // We hit something. Check if we can step up.
             float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
