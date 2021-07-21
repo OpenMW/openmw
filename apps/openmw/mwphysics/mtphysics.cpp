@@ -11,7 +11,6 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwrender/bulletdebugdraw.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 
 #include "actor.hpp"
 #include "contacttestwrapper.h"
@@ -62,36 +61,9 @@ namespace
             actorData.mFallHeight += heightDiff;
     }
 
-    void handleJump(const MWWorld::Ptr &ptr)
-    {
-        const bool isPlayer = (ptr == MWMechanics::getPlayer());
-        // Advance acrobatics and set flag for GetPCJumping
-        if (isPlayer)
-        {
-            ptr.getClass().skillUsageSucceeded(ptr, ESM::Skill::Acrobatics, 0);
-            MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
-        }
-
-        // Decrease fatigue
-        if (!isPlayer || !MWBase::Environment::get().getWorld()->getGodModeState())
-        {
-            const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-            const float fFatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
-            const float fFatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
-            const float normalizedEncumbrance = std::min(1.f, ptr.getClass().getNormalizedEncumbrance(ptr));
-            const float fatigueDecrease = fFatigueJumpBase + normalizedEncumbrance * fFatigueJumpMult;
-            MWMechanics::DynamicStat<float> fatigue = ptr.getClass().getCreatureStats(ptr).getFatigue();
-            fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-            ptr.getClass().getCreatureStats(ptr).setFatigue(fatigue);
-        }
-        ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
-    }
-
     void updateMechanics(MWPhysics::ActorFrameData& actorData)
     {
         auto ptr = actorData.mActorRaw->getPtr();
-        if (actorData.mDidJump)
-            handleJump(ptr);
 
         MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
         if (actorData.mNeedLand)

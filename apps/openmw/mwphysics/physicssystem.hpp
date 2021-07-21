@@ -88,8 +88,6 @@ namespace MWPhysics
         bool mWasOnGround;
         bool mIsOnGround;
         bool mIsOnSlope;
-        bool mWantJump;
-        bool mDidJump;
         bool mInert;
         bool mNeedLand;
         bool mWaterCollision;

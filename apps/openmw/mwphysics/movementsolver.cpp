@@ -168,9 +168,6 @@ namespace MWPhysics
         if (actor.mMovement.z() > 0 && actor.mInert && actor.mPosition.z() < swimlevel)
             velocity = osg::Vec3f(0,0,1) * 25;
 
-        if (actor.mWantJump)
-            actor.mDidJump = true;
-
         // Now that we have the effective movement vector, apply wind forces to it
         if (worldData.mIsInStorm)
         {
