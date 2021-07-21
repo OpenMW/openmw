@@ -22,6 +22,7 @@
     Bug #6131: Item selection in the avatar window not working correctly for large window sizes
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
+    Bug #6165: Paralyzed player character can pickup items when the inventory is open
     Feature #2780: A way to see current OpenMW version in the console
     Feature #5489: MCP: Telekinesis fix for activators
     Feature #5996: Support Lua scripts in OpenMW

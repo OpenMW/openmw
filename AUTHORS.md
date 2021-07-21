@@ -159,6 +159,7 @@ Programmers
     Nikolay Kasyanov (corristo)
     nobrakal
     Nolan Poe (nopoe)
+    Nurivan Gomez (Nuri-G)
     Oleg Chkan (mrcheko)
     Paul Cercueil (pcercuei)
     Paul McElroy (Greendogo)
