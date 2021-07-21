@@ -278,7 +278,7 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
             if (!ref.mDestCell.empty())
                 std::cout << "    Destination cell: " << ref.mDestCell << '\n';
         }
-        std::cout << "    Moved: " << std::boolalpha << moved << '\n';
+        std::cout << "    Moved: " << std::boolalpha << moved << std::noboolalpha << '\n';
         if (moved)
         {
             std::cout << "    Moved refnum: " << movedCellRef.mRefNum.mIndex << '\n';
