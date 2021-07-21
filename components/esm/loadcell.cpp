@@ -1,10 +1,12 @@
 #include "loadcell.hpp"
 
 #include <string>
+#include <limits>
 #include <list>
 
 #include <boost/concept_check.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "esmreader.hpp"
@@ -109,6 +111,7 @@ namespace ESM
 
     void Cell::loadCell(ESMReader &esm, bool saveContext)
     {
+        bool overriding = !mName.empty();
         bool isLoaded = false;
         mHasAmbi = false;
         while (!isLoaded && esm.hasMoreSubs())
@@ -123,8 +126,17 @@ namespace ESM
                     mWaterInt = true;
                     break;
                 case ESM::FourCC<'W','H','G','T'>::value:
-                    esm.getHT(mWater);
+                    float waterLevel;
+                    esm.getHT(waterLevel);
                     mWaterInt = false;
+                    if(!std::isfinite(waterLevel))
+                    {
+                        if(!overriding)
+                            mWater = std::numeric_limits<float>::max();
+                        Log(Debug::Warning) << "Warning: Encountered invalid water level in cell " << mName << " defined in " << esm.getContext().filename;
+                    }
+                    else
+                        mWater = waterLevel;
                     break;
                 case ESM::FourCC<'A','M','B','I'>::value:
                     esm.getHT(mAmbi);
