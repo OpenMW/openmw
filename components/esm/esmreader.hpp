@@ -258,7 +258,7 @@ public:
 
 private:
   [[noreturn]] void reportSubSizeMismatch(size_t want, size_t got) {
-          fail("subrecord size mismatch, requested " +
+          fail("record size mismatch, requested " +
                   std::to_string(want) +
                   ", got" +
                   std::to_string(got));
