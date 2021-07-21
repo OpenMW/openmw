@@ -49,13 +49,18 @@ namespace
             bool mCanBeSharedLock;
     };
 
+    bool isUnderWater(const MWPhysics::ActorFrameData& actorData)
+    {
+        return actorData.mPosition.z() < actorData.mSwimLevel;
+    }
+
     void handleFall(MWPhysics::ActorFrameData& actorData, bool simulationPerformed)
     {
         const float heightDiff = actorData.mPosition.z() - actorData.mOldHeight;
 
         const bool isStillOnGround = (simulationPerformed && actorData.mWasOnGround && actorData.mIsOnGround);
 
-        if (isStillOnGround || actorData.mFlying || actorData.mSwimming || actorData.mSlowFall < 1)
+        if (isStillOnGround || actorData.mFlying || isUnderWater(actorData) || actorData.mSlowFall < 1)
             actorData.mNeedLand = true;
         else if (heightDiff < 0)
             actorData.mFallHeight += heightDiff;
@@ -67,7 +72,7 @@ namespace
 
         MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
         if (actorData.mNeedLand)
-            stats.land(ptr == MWMechanics::getPlayer() && (actorData.mFlying || actorData.mSwimming));
+            stats.land(ptr == MWMechanics::getPlayer() && (actorData.mFlying || isUnderWater(actorData)));
         else if (actorData.mFallHeight < 0)
             stats.addToFallHeight(-actorData.mFallHeight);
     }

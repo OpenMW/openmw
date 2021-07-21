@@ -84,7 +84,6 @@ namespace MWPhysics
         Actor* mActorRaw;
         MWWorld::Ptr mStandingOn;
         bool mFlying;
-        bool mSwimming;
         bool mWasOnGround;
         bool mIsOnGround;
         bool mIsOnSlope;
@@ -94,6 +93,7 @@ namespace MWPhysics
         bool mWalkingOnWater;
         bool mSkipCollisionDetection;
         float mWaterlevel;
+        float mSwimLevel;
         float mSlowFall;
         float mOldHeight;
         float mFallHeight;

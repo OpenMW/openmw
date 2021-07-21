@@ -140,8 +140,7 @@ namespace MWPhysics
         osg::Vec3f halfExtents = physicActor->getHalfExtents();
         actor.mPosition.z() += halfExtents.z(); // vanilla-accurate
 
-        static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
-        float swimlevel = actor.mWaterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
+        float swimlevel = actor.mSwimLevel + halfExtents.z();
 
         ActorTracer tracer;
 

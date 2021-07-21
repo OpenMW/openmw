@@ -1007,10 +1007,11 @@ namespace MWPhysics
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const auto ptr = actor->getPtr();
         mFlying = world->isFlying(ptr);
-        mSwimming = world->isSwimming(ptr);
         const auto& stats = ptr.getClass().getCreatureStats(ptr);
         const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
         mInert = stats.isDead() || (!godmode && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0);
+        static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
+        mSwimLevel = mWaterlevel - (actor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
     }
 
     void ActorFrameData::updatePosition(btCollisionWorld* world)
