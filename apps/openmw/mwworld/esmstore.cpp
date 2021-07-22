@@ -274,9 +274,9 @@ void ESMStore::countRecords()
     std::vector<Ref> refs;
     std::vector<std::string> refIDs;
     std::vector<ESM::ESMReader> readers;
-    for(auto it = mCells.intBegin(); it != mCells.intEnd(); it++)
+    for(auto it = mCells.intBegin(); it != mCells.intEnd(); ++it)
         readRefs(*it, refs, refIDs, readers);
-    for(auto it = mCells.extBegin(); it != mCells.extEnd(); it++)
+    for(auto it = mCells.extBegin(); it != mCells.extEnd(); ++it)
         readRefs(*it, refs, refIDs, readers);
     const auto lessByRefNum = [] (const Ref& l, const Ref& r) { return l.mRefNum < r.mRefNum; };
     std::stable_sort(refs.begin(), refs.end(), lessByRefNum);
