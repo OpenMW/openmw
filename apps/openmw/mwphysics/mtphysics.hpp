@@ -90,7 +90,6 @@ namespace MWPhysics
             int mNumJobs;
             int mRemainingSteps;
             int mLOSCacheExpiry;
-            bool mDeferAabbUpdate;
             bool mNewFrame;
             bool mAdvanceSimulation;
             bool mThreadSafeBullet;

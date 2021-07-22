@@ -137,7 +137,6 @@ namespace MWPhysics
           , mNumJobs(0)
           , mRemainingSteps(0)
           , mLOSCacheExpiry(Settings::Manager::getInt("lineofsight keep inactive cache", "Physics"))
-          , mDeferAabbUpdate(Settings::Manager::getBool("defer aabb update", "Physics"))
           , mNewFrame(false)
           , mAdvanceSimulation(false)
           , mQuit(false)
@@ -163,8 +162,7 @@ namespace MWPhysics
         }
         else
         {
-            mLOSCacheExpiry = -1;
-            mDeferAabbUpdate = false;
+            mLOSCacheExpiry = 0;
         }
 
         mPreStepBarrier = std::make_unique<Misc::Barrier>(mNumThreads);
@@ -392,7 +390,7 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::updateSingleAabb(std::weak_ptr<PtrHolder> ptr, bool immediate)
     {
-        if (!mDeferAabbUpdate || immediate)
+        if (immediate)
         {
             updatePtrAabb(ptr);
         }
@@ -417,8 +415,7 @@ namespace MWPhysics
         if (result == mLOSCache.end())
         {
             req.mResult = hasLineOfSight(actorPtr1.get(), actorPtr2.get());
-            if (mLOSCacheExpiry >= 0)
-                mLOSCache.push_back(req);
+            mLOSCache.push_back(req);
             return req.mResult;
         }
         result->mAge = 0;
@@ -508,8 +505,7 @@ namespace MWPhysics
                     }
                 }
 
-                if (mLOSCacheExpiry >= 0)
-                    refreshLOSCache();
+                refreshLOSCache();
                 mPostSimBarrier->wait([this] { afterPostSim(); });
             }
         }
@@ -594,8 +590,7 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::afterPreStep()
     {
-        if (mDeferAabbUpdate)
-            updateAabbs();
+        updateAabbs();
         if (!mRemainingSteps)
             return;
         for (auto& data : mActorsFrameData)
@@ -619,7 +614,6 @@ namespace MWPhysics
     void PhysicsTaskScheduler::afterPostSim()
     {
         mNewFrame = false;
-        if (mLOSCacheExpiry >= 0)
         {
             std::unique_lock lock(mLOSCacheMutex);
             mLOSCache.erase(
