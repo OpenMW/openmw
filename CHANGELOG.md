@@ -25,6 +25,7 @@
     Feature #5489: MCP: Telekinesis fix for activators
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
+    Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
 
 0.47.0
 ------

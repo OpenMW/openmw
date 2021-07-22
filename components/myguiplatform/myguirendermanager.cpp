@@ -14,6 +14,7 @@
 #include <osgGA/GUIEventHandler>
 
 #include <components/resource/imagemanager.hpp>
+#include <components/shader/shadermanager.hpp>
 
 #include <components/debug/debuglog.hpp>
 
@@ -127,9 +128,13 @@ public:
                 state->apply();
             }
 
+            // A GUI element without an associated texture would be extremely rare.
+            // It is worth it to use a dummy 1x1 black texture sampler instead of either adding a conditional or relinking shaders.
             osg::Texture2D* texture = batch.mTexture;
             if(texture)
                 state->applyTextureAttribute(0, texture);
+            else
+                state->applyTextureAttribute(0, mDummyTexture);
 
             osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : nullptr;
             if (bufferobject)
@@ -189,6 +194,10 @@ public:
         mStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         mStateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
 
+        mDummyTexture = new osg::Texture2D;
+        mDummyTexture->setInternalFormat(GL_RGB);
+        mDummyTexture->setTextureSize(1,1);
+
         // need to flip tex coords since MyGUI uses DirectX convention of top left image origin
         osg::Matrix flipMat;
         flipMat.preMultTranslate(osg::Vec3f(0,1,0));
@@ -201,6 +210,7 @@ public:
         , mStateSet(copy.mStateSet)
         , mWriteTo(0)
         , mReadFrom(0)
+        , mDummyTexture(copy.mDummyTexture)
     {
     }
 
@@ -231,6 +241,11 @@ public:
         mBatchVector[mWriteTo].clear();
     }
 
+    osg::StateSet* getDrawableStateSet()
+    {
+        return mStateSet;
+    }
+
     META_Object(osgMyGUI, Drawable)
 
 private:
@@ -242,6 +257,8 @@ private:
 
     int mWriteTo;
     mutable int mReadFrom;
+
+    osg::ref_ptr<osg::Texture2D> mDummyTexture;
 };
 
 class OSGVertexBuffer : public MyGUI::IVertexBuffer
@@ -415,6 +432,16 @@ void RenderManager::shutdown()
 {
     mGuiRoot->removeChildren(0, mGuiRoot->getNumChildren());
     mSceneRoot->removeChild(mGuiRoot);
+}
+
+void RenderManager::enableShaders(Shader::ShaderManager& shaderManager)
+{
+    auto vertexShader = shaderManager.getShader("gui_vertex.glsl", {}, osg::Shader::VERTEX);
+    auto fragmentShader = shaderManager.getShader("gui_fragment.glsl", {}, osg::Shader::FRAGMENT);
+    auto program = shaderManager.getProgram(vertexShader, fragmentShader);
+
+    mDrawable->getDrawableStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON);
+    mDrawable->getDrawableStateSet()->addUniform(new osg::Uniform("diffuseMap", 0));
 }
 
 MyGUI::IVertexBuffer* RenderManager::createVertexBuffer()
