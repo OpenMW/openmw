@@ -66,9 +66,9 @@ namespace
             actorData.mFallHeight += heightDiff;
     }
 
-    void updateMechanics(MWPhysics::ActorFrameData& actorData)
+    void updateMechanics(MWPhysics::Actor& actor, MWPhysics::ActorFrameData& actorData)
     {
-        auto ptr = actorData.mActorRaw->getPtr();
+        auto ptr = actor.getPtr();
 
         MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
         if (actorData.mNeedLand)
@@ -77,21 +77,24 @@ namespace
             stats.addToFallHeight(-actorData.mFallHeight);
     }
 
-    osg::Vec3f interpolateMovements(MWPhysics::ActorFrameData& actorData, float timeAccum, float physicsDt)
+    osg::Vec3f interpolateMovements(MWPhysics::Actor& actor, MWPhysics::ActorFrameData& actorData, float timeAccum, float physicsDt)
     {
         const float interpolationFactor = std::clamp(timeAccum / physicsDt, 0.0f, 1.0f);
-        return actorData.mPosition * interpolationFactor + actorData.mActorRaw->getPreviousPosition() * (1.f - interpolationFactor);
+        return actorData.mPosition * interpolationFactor + actor.getPreviousPosition() * (1.f - interpolationFactor);
     }
 
-    void updateActor(MWPhysics::ActorFrameData& actorData, bool simulationPerformed, float timeAccum, float dt)
+    void updateActor(MWPhysics::Actor& actor, MWPhysics::ActorFrameData& actorData, bool simulationPerformed, float timeAccum, float dt)
     {
-        actorData.mActorRaw->setSimulationPosition(interpolateMovements(actorData, timeAccum, dt));
+        actor.setSimulationPosition(interpolateMovements(actor, actorData, timeAccum, dt));
+        actor.setLastStuckPosition(actorData.mLastStuckPosition);
+        actor.setStuckFrames(actorData.mStuckFrames);
         if (simulationPerformed)
         {
-            actorData.mActorRaw->setStandingOnPtr(actorData.mStandingOn);
-            actorData.mActorRaw->setOnGround(actorData.mIsOnGround);
-            actorData.mActorRaw->setOnSlope(actorData.mIsOnSlope);
-            actorData.mActorRaw->setWalkingOnWater(actorData.mWalkingOnWater);
+            actor.setStandingOnPtr(actorData.mStandingOn);
+            actor.setOnGround(actorData.mIsOnGround);
+            actor.setOnSlope(actorData.mIsOnSlope);
+            actor.setWalkingOnWater(actorData.mWalkingOnWater);
+            actor.setInertialForce(actorData.mInertia);
         }
     }
 
@@ -233,16 +236,10 @@ namespace MWPhysics
         {
             for (auto& data : mActorsFrameData)
             {
-                const auto actorActive = [&data](const auto& newFrameData) -> bool
+                if (auto actor = data.mActor.lock())
                 {
-                    const auto actor = data.mActor.lock();
-                    return actor && actor->getPtr() == newFrameData.mActorRaw->getPtr();
-                };
-                // Only return actors that are still part of the scene
-                if (std::any_of(actorsData.begin(), actorsData.end(), actorActive))
-                {
-                    updateMechanics(data);
-                    updateActor(data, mAdvanceSimulation, mTimeAccum, mPhysicsDt);
+                    updateMechanics(*actor, data);
+                    updateActor(*actor, data, mAdvanceSimulation, mTimeAccum, mPhysicsDt);
                 }
             }
             if(mAdvanceSimulation)
@@ -255,7 +252,10 @@ namespace MWPhysics
 
         // init
         for (auto& data : actorsData)
-            data.updatePosition(mCollisionWorld);
+        {
+            assert(data.mActor.lock());
+            data.updatePosition(*data.mActor.lock(), mCollisionWorld);
+        }
         mPrevStepCount = numSteps;
         mRemainingSteps = numSteps;
         mTimeAccum = timeAccum;
@@ -536,9 +536,11 @@ namespace MWPhysics
 
         for (auto& actorData : mActorsFrameData)
         {
+            auto actor = actorData.mActor.lock();
+            assert(actor);
             handleFall(actorData, mAdvanceSimulation);
-            updateMechanics(actorData);
-            updateActor(actorData, mAdvanceSimulation, mTimeAccum, mPhysicsDt);
+            updateMechanics(*actor, actorData);
+            updateActor(*actor, actorData, mAdvanceSimulation, mTimeAccum, mPhysicsDt);
         }
         refreshLOSCache();
     }
