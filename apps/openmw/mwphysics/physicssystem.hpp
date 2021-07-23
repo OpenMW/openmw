@@ -78,9 +78,8 @@ namespace MWPhysics
 
     struct ActorFrameData
     {
-        ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn, bool moveToWaterSurface, float slowFall, float waterlevel);
+        ActorFrameData(Actor& actor, const MWWorld::Ptr standingOn, bool moveToWaterSurface, float slowFall, float waterlevel);
         void  updatePosition(Actor& actor, btCollisionWorld* world);
-        std::weak_ptr<Actor> mActor;
         btCollisionObject* mCollisionObject;
         MWWorld::Ptr mStandingOn;
         bool mFlying;
@@ -260,7 +259,7 @@ namespace MWPhysics
 
             void updateWater();
 
-            std::vector<ActorFrameData> prepareFrameData(bool willSimulate);
+            std::pair<std::vector<std::weak_ptr<Actor>>, std::vector<ActorFrameData>> prepareFrameData(bool willSimulate);
 
             osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
