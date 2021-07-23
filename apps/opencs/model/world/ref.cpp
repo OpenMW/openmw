@@ -2,7 +2,7 @@
 
 #include "cellcoordinates.hpp"
 
-CSMWorld::CellRef::CellRef() : mNew (true)
+CSMWorld::CellRef::CellRef() : mNew (true), mIdNum(0)
 {
     mRefNum.mIndex = 0;
     mRefNum.mContentFile = 0;
