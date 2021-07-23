@@ -811,13 +811,8 @@ namespace MWPhysics
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
             const float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
 
-            // Ue current value only if we don't advance the simulation. Otherwise we might get a stale value.
-            MWWorld::Ptr standingOn;
-            if (!willSimulate)
-                standingOn = physicActor->getStandingOnPtr();
-
             framedata.first.emplace_back(physicActor);
-            framedata.second.emplace_back(*physicActor, standingOn, waterCollision, slowFall, waterlevel);
+            framedata.second.emplace_back(*physicActor, waterCollision, slowFall, waterlevel);
 
             // if the simulation will run, a jump request will be fulfilled. Update mechanics accordingly.
             if (willSimulate)
@@ -989,10 +984,9 @@ namespace MWPhysics
             mDebugDrawer->addCollision(position, normal);
     }
 
-    ActorFrameData::ActorFrameData(Actor& actor, const MWWorld::Ptr standingOn,
-            bool waterCollision, float slowFall, float waterlevel)
+    ActorFrameData::ActorFrameData(Actor& actor, bool waterCollision, float slowFall, float waterlevel)
         : mCollisionObject(actor.getCollisionObject())
-        , mStandingOn(standingOn)
+        , mStandingOn(nullptr)
         , mWasOnGround(actor.getOnGround())
         , mIsOnGround(actor.getOnGround())
         , mIsOnSlope(actor.getOnSlope())

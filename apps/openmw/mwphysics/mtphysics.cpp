@@ -83,21 +83,6 @@ namespace
         return actorData.mPosition * interpolationFactor + actor.getPreviousPosition() * (1.f - interpolationFactor);
     }
 
-    void updateActor(MWPhysics::Actor& actor, MWPhysics::ActorFrameData& actorData, bool simulationPerformed, float timeAccum, float dt)
-    {
-        actor.setSimulationPosition(interpolateMovements(actor, actorData, timeAccum, dt));
-        actor.setLastStuckPosition(actorData.mLastStuckPosition);
-        actor.setStuckFrames(actorData.mStuckFrames);
-        if (simulationPerformed)
-        {
-            actor.setStandingOnPtr(actorData.mStandingOn);
-            actor.setOnGround(actorData.mIsOnGround);
-            actor.setOnSlope(actorData.mIsOnSlope);
-            actor.setWalkingOnWater(actorData.mWalkingOnWater);
-            actor.setInertialForce(actorData.mInertia);
-        }
-    }
-
     namespace Config
     {
         /// @return either the number of thread as configured by the user, or 1 if Bullet doesn't support multithreading
@@ -357,12 +342,14 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::addCollisionObject(btCollisionObject* collisionObject, int collisionFilterGroup, int collisionFilterMask)
     {
+        mCollisionObjects.insert(collisionObject);
         std::unique_lock lock(mCollisionWorldMutex);
         mCollisionWorld->addCollisionObject(collisionObject, collisionFilterGroup, collisionFilterMask);
     }
 
     void PhysicsTaskScheduler::removeCollisionObject(btCollisionObject* collisionObject)
     {
+        mCollisionObjects.erase(collisionObject);
         std::unique_lock lock(mCollisionWorldMutex);
         mCollisionWorld->removeCollisionObject(collisionObject);
     }
@@ -506,6 +493,27 @@ namespace MWPhysics
         }
     }
 
+    void PhysicsTaskScheduler::updateActor(Actor& actor, ActorFrameData& actorData, bool simulationPerformed, float timeAccum, float dt) const
+    {
+        actor.setSimulationPosition(interpolateMovements(actor, actorData, timeAccum, dt));
+        actor.setLastStuckPosition(actorData.mLastStuckPosition);
+        actor.setStuckFrames(actorData.mStuckFrames);
+        if (simulationPerformed)
+        {
+            MWWorld::Ptr standingOn;
+            auto* ptrHolder = static_cast<MWPhysics::PtrHolder*>(getUserPointer(actorData.mStandingOn));
+            if (ptrHolder)
+                standingOn = ptrHolder->getPtr();
+            actor.setStandingOnPtr(standingOn);
+            // the "on ground" state of an actor might have been updated by a traceDown, don't overwrite the change
+            if (actor.getOnGround() == actorData.mWasOnGround)
+                actor.setOnGround(actorData.mIsOnGround);
+            actor.setOnSlope(actorData.mIsOnSlope);
+            actor.setWalkingOnWater(actorData.mWalkingOnWater);
+            actor.setInertialForce(actorData.mInertia);
+        }
+    }
+
     bool PhysicsTaskScheduler::hasLineOfSight(const Actor* actor1, const Actor* actor2)
     {
         btVector3 pos1  = Misc::Convert::toBullet(actor1->getCollisionObjectPosition() + osg::Vec3f(0,0,actor1->getHalfExtents().z() * 0.9)); // eye level
@@ -564,6 +572,14 @@ namespace MWPhysics
     {
         std::shared_lock lock(mCollisionWorldMutex);
         mDebugDrawer->step();
+    }
+
+    void* PhysicsTaskScheduler::getUserPointer(const btCollisionObject* object) const
+    {
+        auto it = mCollisionObjects.find(object);
+        if (it == mCollisionObjects.end())
+            return nullptr;
+        return (*it)->getUserPointer();
     }
 
     void PhysicsTaskScheduler::afterPreStep()

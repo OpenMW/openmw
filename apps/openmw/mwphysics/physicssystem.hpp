@@ -78,10 +78,10 @@ namespace MWPhysics
 
     struct ActorFrameData
     {
-        ActorFrameData(Actor& actor, const MWWorld::Ptr standingOn, bool moveToWaterSurface, float slowFall, float waterlevel);
+        ActorFrameData(Actor& actor, bool moveToWaterSurface, float slowFall, float waterlevel);
         void  updatePosition(Actor& actor, btCollisionWorld* world);
         btCollisionObject* mCollisionObject;
-        MWWorld::Ptr mStandingOn;
+        const btCollisionObject* mStandingOn;
         bool mFlying;
         bool mWasOnGround;
         bool mIsOnGround;
