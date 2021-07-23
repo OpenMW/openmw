@@ -269,12 +269,6 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
-    setSortingEnabled (sorting);
-    if (sorting)
-    {
-        sortByColumn (mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id), Qt::AscendingOrder);
-    }
-
     int columns = mModel->columnCount();
     for (int i=0; i<columns; ++i)
     {
@@ -294,6 +288,13 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
         else
             hideColumn (i);
     }
+
+    if (sorting)
+    {
+        // FIXME: some tables (e.g. CellRef) have this column hidden, which makes it confusing
+        sortByColumn (mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id), Qt::AscendingOrder);
+    }
+    setSortingEnabled (sorting);
 
     mEditAction = new QAction (tr ("Edit Record"), this);
     connect (mEditAction, SIGNAL (triggered()), this, SLOT (editRecord()));
