@@ -99,8 +99,8 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
 int CSMWorld::InfoCollection::getInfoIndex (const std::string& id, const std::string& topic) const
 {
     // find the topic first
-    std::map<StringHash, std::vector<std::pair<std::string, int> > >::const_iterator iter
-        = mInfoIndex.find(StringHash(std::make_shared<std::string>(Misc::StringUtils::lowerCase(topic))));
+    std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::const_iterator iter
+        = mInfoIndex.find(Misc::StringUtils::lowerCase(topic));
 
     if (iter == mInfoIndex.end())
         return -1;
@@ -187,16 +187,10 @@ bool CSMWorld::InfoCollection::reorderRows (int baseIndex, const std::vector<int
 
     // adjust index
     int size = static_cast<int>(newOrder.size());
-    for (std::map<StringHash, std::vector<std::pair<std::string, int> > >::iterator iter
-            = mInfoIndex.begin(); iter != mInfoIndex.end(); ++iter)
-    {
-        for (std::vector<std::pair<std::string, int> >::iterator it = iter->second.begin();
-                it != iter->second.end(); ++it)
-        {
-            if (it->second >= baseIndex && it->second < baseIndex+size)
-                it->second = newOrder.at(it->second-baseIndex)+baseIndex;
-        }
-    }
+    for (auto& [hash, infos] : mInfoIndex)
+        for (auto& [a, b] : infos)
+            if (b >= baseIndex && b < baseIndex + size)
+                b = newOrder.at(b - baseIndex) + baseIndex;
 
     return true;
 }
@@ -244,8 +238,8 @@ CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const s
     std::string lowerTopic = Misc::StringUtils::lowerCase (topic);
 
     // find the topic
-    std::map<StringHash, std::vector<std::pair<std::string, int> > >::const_iterator iter
-        = mInfoIndex.find(StringHash(std::make_shared<std::string>(lowerTopic)));
+    std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::const_iterator iter
+        = mInfoIndex.find(lowerTopic);
 
     if (iter == mInfoIndex.end())
         return Range (getRecords().end(), getRecords().end());
@@ -310,7 +304,7 @@ void CSMWorld::InfoCollection::removeRows (int index, int count)
 {
     Collection<Info, IdAccessor<Info> >::removeRows(index, count); // erase records only
 
-    for (std::map<StringHash, std::vector<std::pair<std::string, int> > >::iterator iter
+    for (std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::iterator iter
         = mInfoIndex.begin(); iter != mInfoIndex.end();)
     {
         for (std::vector<std::pair<std::string, int> >::iterator it = iter->second.begin();
@@ -383,7 +377,7 @@ void CSMWorld::InfoCollection::insertRecord (std::unique_ptr<RecordBase> record,
     // adjust index
     if (index < size-1)
     {
-        for (std::map<StringHash, std::vector<std::pair<std::string, int> > >::iterator iter
+        for (std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::iterator iter
             = mInfoIndex.begin(); iter != mInfoIndex.end(); ++iter)
         {
             for (std::vector<std::pair<std::string, int> >::iterator it = iter->second.begin();
@@ -397,9 +391,9 @@ void CSMWorld::InfoCollection::insertRecord (std::unique_ptr<RecordBase> record,
 
     // get iterator for existing topic or a new topic
     std::string lowerId = Misc::StringUtils::lowerCase(id);
-    std::pair<std::map<StringHash, std::vector<std::pair<std::string, int> > >::iterator, bool> res
+    std::pair<std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::iterator, bool> res
         = mInfoIndex.insert(
-                std::make_pair(StringHash(std::make_shared<std::string>(lowerId.substr(0, separator))),
+                std::make_pair(lowerId.substr(0, separator),
                                std::vector<std::pair<std::string, int> >())); // empty vector
 
     // insert info and index

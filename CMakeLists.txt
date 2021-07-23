@@ -536,7 +536,6 @@ endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clan
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 add_subdirectory (extern/Base64)
-add_subdirectory (extern/murmurhash)
 if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)
 endif()

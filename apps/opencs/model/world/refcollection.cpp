@@ -1,5 +1,7 @@
 #include "refcollection.hpp"
 
+#include <charconv>
+
 #include <components/esm/loadcell.hpp>
 
 #include "ref.hpp"
@@ -120,9 +122,9 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             }
             else
             {
-                std::unique_ptr<Record<CellRef> > record2(new Record<CellRef>(getRecord(index)));
-                record2->mState = RecordBase::State_Deleted;
-                setRecord(index, std::move(record2));
+                std::unique_ptr<Record<CellRef> > record(new Record<CellRef>(getRecord(index)));
+                record->mState = RecordBase::State_Deleted;
+                setRecord(index, std::move(record));
             }
 
             continue;
@@ -181,14 +183,19 @@ std::string CSMWorld::RefCollection::getNewId()
     return "ref#" + std::to_string(mNextId++);
 }
 
-unsigned int CSMWorld::RefCollection::extractIdNum (const std::string& id) const
+unsigned int CSMWorld::RefCollection::extractIdNum(std::string_view id) const
 {
-    std::string::size_type separator = id.find_last_of('#');
+    const auto separator = id.find_last_of('#');
 
-    if (separator == std::string::npos)
-        throw std::runtime_error("invalid ref ID: " + id);
+    if (separator == std::string_view::npos)
+        throw std::runtime_error("invalid ref ID: " + std::string(id));
 
-    return static_cast<unsigned int>(std::stoi(id.substr(separator+1)));
+    const std::string_view number = id.substr(separator + 1);
+    unsigned int result;
+    if (std::from_chars(number.data(), number.data() + number.size(), result).ec != std::errc())
+        throw std::runtime_error("invalid ref ID number: " + std::string(number));
+
+    return result;
 }
 
 int CSMWorld::RefCollection::getIntIndex (unsigned int id) const
@@ -235,15 +242,15 @@ void CSMWorld::RefCollection::removeRows (int index, int count)
 
 void  CSMWorld::RefCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
 {
-    std::unique_ptr<Record<CellRef> > record2(new Record<CellRef>);
+    std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
 
-    record2->mState = Record<CellRef>::State_ModifiedOnly;
-    record2->mModified.blank();
+    record->mState = Record<CellRef>::State_ModifiedOnly;
+    record->mModified.blank();
 
-    record2->get().mId = id;
-    record2->get().mIdNum = extractIdNum(id);
+    record->get().mId = id;
+    record->get().mIdNum = extractIdNum(id);
 
-    Collection<CellRef, IdAccessor<CellRef> >::appendRecord(std::move(record2));
+    Collection<CellRef, IdAccessor<CellRef> >::appendRecord(std::move(record));
 }
 
 void CSMWorld::RefCollection::cloneRecord (const std::string& origin,

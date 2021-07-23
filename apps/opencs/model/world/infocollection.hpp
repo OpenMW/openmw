@@ -1,45 +1,12 @@
 #ifndef CSM_WOLRD_INFOCOLLECTION_H
 #define CSM_WOLRD_INFOCOLLECTION_H
 
-#include <extern/murmurhash/MurmurHash2.h>
-
 #include "collection.hpp"
 #include "info.hpp"
 
 namespace ESM
 {
     struct Dialogue;
-}
-
-namespace CSMWorld
-{
-    struct StringHash
-    {
-        uint64_t mHash;
-        std::shared_ptr<std::string> mString;
-
-        StringHash (std::shared_ptr<std::string> str) : mString(str)
-        {
-            mHash = MurmurHash64A(str->c_str(), str->size(), /*seed*/1);
-        }
-    };
-}
-
-namespace std
-{
-    template<> struct less<CSMWorld::StringHash>
-    {
-        bool operator() (const CSMWorld::StringHash& lhs, const CSMWorld::StringHash& rhs) const
-        {
-            if (lhs.mHash < rhs.mHash)
-                return true;
-
-            if (lhs.mHash > rhs.mHash)
-                return false;
-
-            return *lhs.mString < *rhs.mString;
-        }
-    };
 }
 
 namespace CSMWorld
@@ -69,8 +36,8 @@ namespace CSMWorld
             // each topic has a small number of infos, which allows the use of vectors for
             // iterating through them without too much penalty.
             //
-            // NOTE: hashed topic string as well as id string are stored in lower case.
-            std::map<StringHash, std::vector<std::pair<std::string, int> > > mInfoIndex;
+            // NOTE: topic string as well as id string are stored in lower case.
+            std::unordered_map<std::string, std::vector<std::pair<std::string, int> > > mInfoIndex;
 
             void load (const Info& record, bool base);
 

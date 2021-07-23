@@ -94,13 +94,13 @@ namespace CSMWorld
     template<typename RecordT>
     void RefIdDataContainer<RecordT>::insertRecord(std::unique_ptr<RecordBase> record)
     {
-        Record<RecordT> *tmp = dynamic_cast<Record<RecordT>*>(record.get());
-        if(tmp != nullptr)
+        // convert base pointer to record type pointer first
+        if(Record<RecordT> *tmp = dynamic_cast<Record<RecordT>*>(record.get()))
         {
-            record.release();
             std::unique_ptr<Record<RecordT> > newRecord;
             newRecord.reset(tmp);
             mContainer.push_back(std::move(newRecord));
+            record.release();
         }
         else
             throw std::runtime_error ("invalid record for RefIdDataContainer");
