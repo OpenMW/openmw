@@ -35,7 +35,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             ref.mCell = "#" + std::to_string(index.first) + " " + std::to_string(index.second);
 
             // Handle non-base moved references
-            if (!base && !isMoved)
+            if (!base && isMoved)
             {
                 // Moved references must have a link back to their original cell
                 // See discussion: https://forum.openmw.org/viewtopic.php?f=6&t=577&start=30
