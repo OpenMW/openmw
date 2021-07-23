@@ -228,23 +228,24 @@ QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column)
     return QModelIndex();
 }
 
-void CSMWorld::IdTable::setRecord (const std::string& id, const RecordBase& record, CSMWorld::UniversalId::Type type)
+void CSMWorld::IdTable::setRecord (const std::string& id,
+        std::unique_ptr<RecordBase> record, CSMWorld::UniversalId::Type type)
 {
     int index = mIdCollection->searchId (id);
 
     if (index==-1)
     {
-        index = mIdCollection->getAppendIndex (id, type);
+        int index2 = mIdCollection->getAppendIndex (id, type);
 
-        beginInsertRows (QModelIndex(), index, index);
+        beginInsertRows (QModelIndex(), index2, index2);
 
-        mIdCollection->appendRecord (record, type);
+        mIdCollection->appendRecord (std::move(record), type);
 
         endInsertRows();
     }
     else
     {
-        mIdCollection->replace (index, record);
+        mIdCollection->replace (index, std::move(record));
         emit dataChanged (CSMWorld::IdTable::index (index, 0),
             CSMWorld::IdTable::index (index, mIdCollection->getColumns()-1));
     }

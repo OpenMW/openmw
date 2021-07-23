@@ -15,23 +15,23 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
     if (index==-1)
     {
         // new record
-        Record<Info> record2;
-        record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
-        (base ? record2.mBase : record2.mModified) = record;
+        std::unique_ptr<Record<Info> > record2(new Record<Info>);
+        record2->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+        (base ? record2->mBase : record2->mModified) = record;
 
-        std::string topic = Misc::StringUtils::lowerCase (record2.get().mTopicId);
+        std::string topic = Misc::StringUtils::lowerCase (record2->get().mTopicId);
 
-        if (!record2.get().mPrev.empty())
+        if (!record2->get().mPrev.empty())
         {
-            index = getInfoIndex (record2.get().mPrev, topic);
+            index = getInfoIndex (record2->get().mPrev, topic); // WARN: index repurposed
 
             if (index!=-1)
                 ++index;
         }
 
-        if (index==-1 && !record2.get().mNext.empty())
+        if (index==-1 && !record2->get().mNext.empty())
         {
-            index = getInfoIndex (record2.get().mNext, topic);
+            index = getInfoIndex (record2->get().mNext, topic);
         }
 
         if (index==-1)
@@ -41,19 +41,19 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
             index = std::distance (getRecords().begin(), range.second);
         }
 
-        insertRecord (record2, index);
+        insertRecord (std::move(record2), index);
     }
     else
     {
         // old record
-        Record<Info> record2 = getRecord (index);
+        std::unique_ptr<Record<Info> > record2(new Record<Info>(getRecord(index)));
 
         if (base)
-            record2.mBase = record;
+            record2->mBase = record;
         else
-            record2.setModified (record);
+            record2->setModified (record);
 
-        setRecord (index, record2);
+        setRecord (index, std::move(record2));
     }
 }
 
@@ -64,7 +64,7 @@ int CSMWorld::InfoCollection::getInfoIndex (const std::string& id, const std::st
     std::pair<RecordConstIterator, RecordConstIterator> range = getTopicRange (topic);
 
     for (; range.first!=range.second; ++range.first)
-        if (Misc::StringUtils::ciEqual(range.first->get().mId, fullId))
+        if (Misc::StringUtils::ciEqual((*range.first).get()->get().mId, fullId))
             return std::distance (getRecords().begin(), range.first);
 
     return -1;
@@ -126,9 +126,9 @@ void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ES
         }
         else
         {
-            Record<Info> record = getRecord (index);
-            record.mState = RecordBase::State_Deleted;
-            setRecord (index, record);
+            std::unique_ptr<Record<Info> > record(new Record<Info>(getRecord(index)));
+            record->mState = RecordBase::State_Deleted;
+            setRecord (index, std::move(record));
         }
     }
     else
@@ -169,7 +169,7 @@ CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const s
 
     while (begin != getRecords().begin())
     {
-        if (!Misc::StringUtils::ciEqual(begin->get().mTopicId, topic2))
+        if (!Misc::StringUtils::ciEqual((*begin)->get().mTopicId, topic2))
         {
             // we've gone one too far, go back
             ++begin;
@@ -182,7 +182,7 @@ CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const s
     RecordConstIterator end = begin;
 
     for (; end!=getRecords().end(); ++end)
-        if (!Misc::StringUtils::ciEqual(end->get().mTopicId, topic2))
+        if (!Misc::StringUtils::ciEqual((*end)->get().mTopicId, topic2))
             break;
 
     return Range (begin, end);
@@ -197,7 +197,7 @@ void CSMWorld::InfoCollection::removeDialogueInfos(const std::string& dialogueId
     std::map<std::string, int>::const_iterator end = getIdMap().end();
     for (; current != end; ++current)
     {
-        Record<Info> record = getRecord(current->second);
+        const Record<Info>& record = getRecord(current->second);
 
         if (Misc::StringUtils::ciEqual(dialogueId, record.get().mTopicId))
         {
@@ -207,8 +207,9 @@ void CSMWorld::InfoCollection::removeDialogueInfos(const std::string& dialogueId
             }
             else
             {
-                record.mState = RecordBase::State_Deleted;
-                setRecord(current->second, record);
+                std::unique_ptr<Record<Info> > record2(new Record<Info>(record));
+                record2->mState = RecordBase::State_Deleted;
+                setRecord(current->second, std::move(record2));
             }
         }
         else

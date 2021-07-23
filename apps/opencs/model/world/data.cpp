@@ -917,8 +917,8 @@ const CSMWorld::MetaData& CSMWorld::Data::getMetaData() const
 
 void CSMWorld::Data::setMetaData (const MetaData& metaData)
 {
-    Record<MetaData> record (RecordBase::State_ModifiedOnly, nullptr, &metaData);
-    mMetaData.setRecord (0, record);
+    mMetaData.setRecord (0, std::make_unique<Record<MetaData> >(
+            Record<MetaData>(RecordBase::State_ModifiedOnly, nullptr, &metaData)));
 }
 
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
@@ -983,7 +983,8 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
         metaData.mId = "sys::meta";
         metaData.load (*mReader);
 
-        mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, nullptr, &metaData));
+        mMetaData.setRecord (0, std::make_unique<Record<MetaData> >(
+                    Record<MetaData> (RecordBase::State_ModifiedOnly, nullptr, &metaData)));
     }
 
     return mReader->getRecordCount();
@@ -1011,10 +1012,10 @@ void CSMWorld::Data::loadFallbackEntries()
             ESM::Static newMarker;
             newMarker.mId = marker.first;
             newMarker.mModel = marker.second;
-            CSMWorld::Record<ESM::Static> record;
-            record.mBase = newMarker;
-            record.mState = CSMWorld::RecordBase::State_BaseOnly;
-            mReferenceables.appendRecord (record, CSMWorld::UniversalId::Type_Static);
+            std::unique_ptr<CSMWorld::Record<ESM::Static> > record(new CSMWorld::Record<ESM::Static>);
+            record->mBase = newMarker;
+            record->mState = CSMWorld::RecordBase::State_BaseOnly;
+            mReferenceables.appendRecord (std::move(record), CSMWorld::UniversalId::Type_Static);
         }
     }
 
@@ -1025,10 +1026,10 @@ void CSMWorld::Data::loadFallbackEntries()
             ESM::Door newMarker;
             newMarker.mId = marker.first;
             newMarker.mModel = marker.second;
-            CSMWorld::Record<ESM::Door> record;
-            record.mBase = newMarker;
-            record.mState = CSMWorld::RecordBase::State_BaseOnly;
-            mReferenceables.appendRecord (record, CSMWorld::UniversalId::Type_Door);
+            std::unique_ptr<CSMWorld::Record<ESM::Door> > record(new CSMWorld::Record<ESM::Door>);
+            record->mBase = newMarker;
+            record->mState = CSMWorld::RecordBase::State_BaseOnly;
+            mReferenceables.appendRecord (std::move(record), CSMWorld::UniversalId::Type_Door);
         }
     }
 }

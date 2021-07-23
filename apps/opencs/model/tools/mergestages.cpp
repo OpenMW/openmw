@@ -103,10 +103,9 @@ void CSMTools::MergeReferencesStage::perform (int stage, CSMDoc::Messages& messa
         ref.mRefNum.mContentFile = 0;
         ref.mNew = false;
 
-        CSMWorld::Record<CSMWorld::CellRef> newRecord (
-            CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &ref);
-
-        mState.mTarget->getData().getReferences().appendRecord (newRecord);
+        mState.mTarget->getData().getReferences().appendRecord (
+                std::make_unique<CSMWorld::Record<CSMWorld::CellRef> >(
+                    CSMWorld::Record<CSMWorld::CellRef>(CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &ref)));
     }
 }
 
@@ -128,7 +127,9 @@ void CSMTools::PopulateLandTexturesMergeStage::perform (int stage, CSMDoc::Messa
 
     if (!record.isDeleted())
     {
-        mState.mTarget->getData().getLandTextures().appendRecord(record);
+        mState.mTarget->getData().getLandTextures().appendRecord(
+            std::make_unique<CSMWorld::Record<CSMWorld::LandTexture> >(
+                CSMWorld::Record<CSMWorld::LandTexture>(CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &record.get())));
     }
 }
 
@@ -150,7 +151,9 @@ void CSMTools::MergeLandStage::perform (int stage, CSMDoc::Messages& messages)
 
     if (!record.isDeleted())
     {
-        mState.mTarget->getData().getLand().appendRecord (record);
+        mState.mTarget->getData().getLand().appendRecord (
+            std::make_unique<CSMWorld::Record<CSMWorld::Land> >(
+                CSMWorld::Record<CSMWorld::Land>(CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &record.get())));
     }
 }
 
@@ -185,10 +188,9 @@ void CSMTools::FixLandsAndLandTexturesMergeStage::perform (int stage, CSMDoc::Me
         const CSMWorld::Record<CSMWorld::Land>& oldRecord =
             mState.mTarget->getData().getLand().getRecord (stage);
 
-        CSMWorld::Record<CSMWorld::Land> newRecord(CSMWorld::RecordBase::State_ModifiedOnly,
-            nullptr, &oldRecord.get());
-
-        mState.mTarget->getData().getLand().setRecord(stage, newRecord);
+          mState.mTarget->getData().getLand().setRecord (stage,
+                std::make_unique<CSMWorld::Record<CSMWorld::Land> >(
+                    CSMWorld::Record<CSMWorld::Land>(CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &oldRecord.get())));
     }
 }
 

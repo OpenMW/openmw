@@ -84,8 +84,6 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             int index = getIndex (iter->second);
 
-            Record<CellRef> record = getRecord (index);
-
             if (base)
             {
                 removeRows (index, 1);
@@ -93,8 +91,9 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             }
             else
             {
-                record.mState = RecordBase::State_Deleted;
-                setRecord (index, record);
+                std::unique_ptr<Record<CellRef> > record2(new Record<CellRef>(getRecord(index)));
+                record2->mState = RecordBase::State_Deleted;
+                setRecord(index, std::move(record2));
             }
 
             continue;
@@ -105,13 +104,13 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             // new reference
             ref.mId = getNewId();
 
-            Record<CellRef> record;
-            record.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+            std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
+            record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
             const ESM::RefNum refNum = ref.mRefNum;
             std::string refId = ref.mId;
-            (base ? record.mBase : record.mModified) = std::move(ref);
+            (base ? record->mBase : record->mModified) = std::move(ref);
 
-            appendRecord (record);
+            appendRecord(std::move(record));
 
             cache.emplace(refNum, std::move(refId));
         }
@@ -122,11 +121,11 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             int index = getIndex (ref.mId);
 
-            Record<CellRef> record = getRecord (index);
-            record.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_Modified;
-            (base ? record.mBase : record.mModified) = std::move(ref);
+            std::unique_ptr<Record<CellRef> > record(new Record<CellRef>(getRecord(index)));
+            record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_Modified;
+            (base ? record->mBase : record->mModified) = std::move(ref);
 
-            setRecord (index, record);
+            setRecord(index, std::move(record));
         }
     }
 }

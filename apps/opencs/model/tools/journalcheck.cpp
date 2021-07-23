@@ -35,7 +35,7 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
 
     for (CSMWorld::InfoCollection::RecordConstIterator it = range.first; it != range.second; ++it)
     {
-        const CSMWorld::Record<CSMWorld::Info> infoRecord = (*it);
+        const CSMWorld::Record<CSMWorld::Info> infoRecord = (*it->get());
 
         if (infoRecord.isDeleted())
             continue;

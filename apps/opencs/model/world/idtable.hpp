@@ -2,6 +2,7 @@
 #define CSM_WOLRD_IDTABLE_H
 
 #include <vector>
+#include <memory>
 
 #include "idtablebase.hpp"
 #include "universalid.hpp"
@@ -67,7 +68,7 @@ namespace CSMWorld
 
             QModelIndex getModelIndex (const std::string& id, int column) const override;
 
-            void setRecord (const std::string& id, const RecordBase& record,
+            void setRecord (const std::string& id, std::unique_ptr<RecordBase> record,
                     UniversalId::Type type = UniversalId::Type_None);
             ///< Add record or overwrite existing record.
 
