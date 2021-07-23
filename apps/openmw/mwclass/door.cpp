@@ -55,7 +55,7 @@ namespace MWClass
         }
     }
 
-    void Door::insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
+    void Door::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
     {
         insertObjectPhysics(ptr, model, rotation, physics, skipAnimated);
 
@@ -70,7 +70,7 @@ namespace MWClass
         }
     }
 
-    void Door::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
+    void Door::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
     {
         if(!model.empty())
             physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_Door, skipAnimated);
