@@ -966,6 +966,9 @@ int CSMWorld::Data::getTotalRecords (const std::vector<boost::filesystem::path>&
 
     for (unsigned int i = 0; i < files.size(); ++i)
     {
+        if (!boost::filesystem::exists(files[i]))
+            continue;
+
         reader->open(files[i].string());
         records += reader->getRecordCount();
         reader->close();
