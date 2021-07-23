@@ -8,7 +8,7 @@
 #include "record.hpp"
 
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
-    std::map<ESM::RefNum, std::string>& cache, CSMDoc::Messages& messages)
+    std::map<unsigned int, std::string>& cache, CSMDoc::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord (cellIndex);
 
@@ -60,16 +60,12 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         else
             ref.mCell = cell2.mId;
 
-        // ignore content file number
-        std::map<ESM::RefNum, std::string>::iterator iter = cache.begin();
-        unsigned int thisIndex = ref.mRefNum.mIndex & 0x00ffffff;
-        if (ref.mRefNum.mContentFile != -1 && !base) ref.mRefNum.mContentFile = ref.mRefNum.mIndex >> 24;
+        unsigned int  refNum = (ref.mRefNum.mIndex & 0x00ffffff) |
+            (ref.mRefNum.hasContentFile() ? ref.mRefNum.mContentFile : 0xff) << 24;
 
-        for (; iter != cache.end(); ++iter)
-        {
-            if (thisIndex == iter->first.mIndex)
-                break;
-        }
+        std::map<unsigned int, std::string>::iterator iter = cache.find(refNum);
+
+        if (ref.mRefNum.mContentFile != -1 && !base) ref.mRefNum.mContentFile = ref.mRefNum.mIndex >> 24;
 
         if (isDeleted)
         {
@@ -104,15 +100,13 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             // new reference
             ref.mId = getNewId();
 
+            cache.emplace(refNum, ref.mId);
+
             std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
-            const ESM::RefNum refNum = ref.mRefNum;
-            std::string refId = ref.mId;
             (base ? record->mBase : record->mModified) = std::move(ref);
 
             appendRecord(std::move(record));
-
-            cache.emplace(refNum, std::move(refId));
         }
         else
         {
