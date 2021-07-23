@@ -78,32 +78,32 @@ namespace MWPhysics
 
     struct ActorFrameData
     {
-        ActorFrameData(Actor& actor, bool moveToWaterSurface, float slowFall, float waterlevel);
+        ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel);
         void  updatePosition(Actor& actor, btCollisionWorld* world);
-        btCollisionObject* mCollisionObject;
+        osg::Vec3f mPosition;
+        osg::Vec3f mInertia;
         const btCollisionObject* mStandingOn;
-        bool mFlying;
-        bool mWasOnGround;
         bool mIsOnGround;
         bool mIsOnSlope;
-        bool mInert;
-        bool mNeedLand;
-        bool mIsAquatic;
-        bool mWaterCollision;
         bool mWalkingOnWater;
-        bool mSkipCollisionDetection;
-        unsigned int mStuckFrames;
-        float mWaterlevel;
-        float mSwimLevel;
-        float mSlowFall;
+        const bool mInert;
+        btCollisionObject* mCollisionObject;
+        const float mSwimLevel;
+        const float mSlowFall;
+        osg::Vec2f mRotation;
+        osg::Vec3f mMovement;
+        osg::Vec3f mLastStuckPosition;
+        const float mWaterlevel;
+        const float mHalfExtentsZ;
         float mOldHeight;
         float mFallHeight;
-        float mHalfExtentsZ;
-        osg::Vec3f mMovement;
-        osg::Vec3f mPosition;
-        osg::Vec2f mRotation;
-        osg::Vec3f mInertia;
-        osg::Vec3f mLastStuckPosition;
+        unsigned int mStuckFrames;
+        const bool mFlying;
+        const bool mWasOnGround;
+        const bool mIsAquatic;
+        const bool mWaterCollision;
+        const bool mSkipCollisionDetection;
+        bool mNeedLand;
     };
 
     struct WorldFrameData

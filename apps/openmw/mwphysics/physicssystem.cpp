@@ -797,7 +797,8 @@ namespace MWPhysics
             if(cell->getCell()->hasWater())
                 waterlevel = cell->getWaterLevel();
 
-            const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(ptr).getMagicEffects();
+            const auto& stats = ptr.getClass().getCreatureStats(ptr);
+            const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
 
             bool waterCollision = false;
             if (cell->getCell()->hasWater() && effects.get(ESM::MagicEffect::WaterWalking).getMagnitude())
@@ -810,9 +811,11 @@ namespace MWPhysics
 
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
             const float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
+            const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
+            const bool inert = stats.isDead() || (!godmode && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0);
 
             framedata.first.emplace_back(physicActor);
-            framedata.second.emplace_back(*physicActor, waterCollision, slowFall, waterlevel);
+            framedata.second.emplace_back(*physicActor, inert, waterCollision, slowFall, waterlevel);
 
             // if the simulation will run, a jump request will be fulfilled. Update mechanics accordingly.
             if (willSimulate)
@@ -984,34 +987,29 @@ namespace MWPhysics
             mDebugDrawer->addCollision(position, normal);
     }
 
-    ActorFrameData::ActorFrameData(Actor& actor, bool waterCollision, float slowFall, float waterlevel)
-        : mCollisionObject(actor.getCollisionObject())
+    ActorFrameData::ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel)
+        : mPosition()
         , mStandingOn(nullptr)
-        , mWasOnGround(actor.getOnGround())
         , mIsOnGround(actor.getOnGround())
         , mIsOnSlope(actor.getOnSlope())
-        , mNeedLand(false)
-        , mWaterCollision(waterCollision)
         , mWalkingOnWater(false)
-        , mSkipCollisionDetection(actor.skipCollisions() || !actor.getCollisionMode())
-        , mWaterlevel(waterlevel)
+        , mInert(inert)
+        , mCollisionObject(actor.getCollisionObject())
+        , mSwimLevel(waterlevel - (actor.getRenderingHalfExtents().z() * 2 * MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat()))
         , mSlowFall(slowFall)
+        , mRotation()
+        , mMovement(actor.velocity())
+        , mWaterlevel(waterlevel)
+        , mHalfExtentsZ(actor.getHalfExtents().z())
         , mOldHeight(0)
         , mFallHeight(0)
-        , mHalfExtentsZ(actor.getHalfExtents().z())
-        , mMovement(actor.velocity())
-        , mPosition()
-        , mRotation()
+        , mFlying(MWBase::Environment::get().getWorld()->isFlying(actor.getPtr()))
+        , mWasOnGround(actor.getOnGround())
+        , mIsAquatic(actor.getPtr().getClass().isPureWaterCreature(actor.getPtr()))
+        , mWaterCollision(waterCollision)
+        , mSkipCollisionDetection(actor.skipCollisions() || !actor.getCollisionMode())
+        , mNeedLand(false)
     {
-        const MWBase::World *world = MWBase::Environment::get().getWorld();
-        const auto ptr = actor.getPtr();
-        mFlying = world->isFlying(ptr);
-        mIsAquatic = ptr.getClass().isPureWaterCreature(ptr);
-        const auto& stats = ptr.getClass().getCreatureStats(ptr);
-        const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
-        mInert = stats.isDead() || (!godmode && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0);
-        static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
-        mSwimLevel = mWaterlevel - (actor.getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
     }
 
     void ActorFrameData::updatePosition(Actor& actor, btCollisionWorld* world)
