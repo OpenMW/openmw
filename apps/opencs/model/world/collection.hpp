@@ -543,20 +543,25 @@ namespace CSMWorld
     void Collection<ESXRecordT, IdAccessorT>::insertRecord (std::unique_ptr<RecordBase> record, int index,
         UniversalId::Type type)
     {
-        if (index<0 || index>static_cast<int> (mRecords.size()))
+        int size = static_cast<int>(mRecords.size());
+        if (index < 0 || index > size)
             throw std::runtime_error ("index out of range");
 
         std::unique_ptr<Record<ESXRecordT> > record2(static_cast<Record<ESXRecordT>*>(record.release()));
         std::string lowerId = Misc::StringUtils::lowerCase(IdAccessorT().getId(record2->get()));
 
-        mRecords.insert (mRecords.begin()+index, std::move(record2));
+        if (index == size)
+            mRecords.push_back (std::move(record2));
+        else
+            mRecords.insert (mRecords.begin()+index, std::move(record2));
 
-        if (index<static_cast<int> (mRecords.size())-1)
+        if (index < size-1)
         {
-            for (std::map<std::string, int>::iterator iter (mIndex.begin()); iter!=mIndex.end();
-                ++iter)
-                 if (iter->second>=index)
-                     ++(iter->second);
+            for (std::map<std::string, int>::iterator iter (mIndex.begin()); iter!=mIndex.end(); ++iter)
+            {
+                if (iter->second >= index)
+                    ++(iter->second);
+            }
         }
 
         mIndex.insert (std::make_pair (lowerId, index));
