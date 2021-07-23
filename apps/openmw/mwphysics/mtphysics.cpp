@@ -83,6 +83,18 @@ namespace
         return actorData.mPosition * interpolationFactor + actorData.mActorRaw->getPreviousPosition() * (1.f - interpolationFactor);
     }
 
+    void updateActor(MWPhysics::ActorFrameData& actorData, bool simulationPerformed, float timeAccum, float dt)
+    {
+        actorData.mActorRaw->setSimulationPosition(interpolateMovements(actorData, timeAccum, dt));
+        if (simulationPerformed)
+        {
+            actorData.mActorRaw->setStandingOnPtr(actorData.mStandingOn);
+            actorData.mActorRaw->setOnGround(actorData.mIsOnGround);
+            actorData.mActorRaw->setOnSlope(actorData.mIsOnSlope);
+            actorData.mActorRaw->setWalkingOnWater(actorData.mWalkingOnWater);
+        }
+    }
+
     namespace Config
     {
         /// @return either the number of thread as configured by the user, or 1 if Bullet doesn't support multithreading
@@ -230,16 +242,7 @@ namespace MWPhysics
                 if (std::any_of(actorsData.begin(), actorsData.end(), actorActive))
                 {
                     updateMechanics(data);
-
-                    // these variables are accessed directly from the main thread, update them here to prevent accessing "too new" values
-                    if (mAdvanceSimulation)
-                    {
-                        data.mActorRaw->setStandingOnPtr(data.mStandingOn);
-                        data.mActorRaw->setOnGround(data.mIsOnGround);
-                        data.mActorRaw->setOnSlope(data.mIsOnSlope);
-                        data.mActorRaw->setWalkingOnWater(data.mWalkingOnWater);
-                    }
-                    data.mActorRaw->setSimulationPosition(interpolateMovements(data, mTimeAccum, mPhysicsDt));
+                    updateActor(data, mAdvanceSimulation, mTimeAccum, mPhysicsDt);
                 }
             }
             if(mAdvanceSimulation)
@@ -534,15 +537,8 @@ namespace MWPhysics
         for (auto& actorData : mActorsFrameData)
         {
             handleFall(actorData, mAdvanceSimulation);
-            actorData.mActorRaw->setSimulationPosition(interpolateMovements(actorData, mTimeAccum, mPhysicsDt));
             updateMechanics(actorData);
-            if (mAdvanceSimulation)
-            {
-                actorData.mActorRaw->setStandingOnPtr(actorData.mStandingOn);
-                actorData.mActorRaw->setOnGround(actorData.mIsOnGround);
-                actorData.mActorRaw->setOnSlope(actorData.mIsOnSlope);
-                actorData.mActorRaw->setWalkingOnWater(actorData.mWalkingOnWater);
-            }
+            updateActor(actorData, mAdvanceSimulation, mTimeAccum, mPhysicsDt);
         }
         refreshLOSCache();
     }
