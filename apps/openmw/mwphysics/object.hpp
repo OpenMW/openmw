@@ -16,7 +16,6 @@ namespace Resource
 }
 
 class btCollisionObject;
-class btQuaternion;
 class btVector3;
 
 namespace MWPhysics
@@ -31,8 +30,8 @@ namespace MWPhysics
 
         const Resource::BulletShapeInstance* getShapeInstance() const;
         void setScale(float scale);
-        void setRotation(const btQuaternion& quat);
-        void setOrigin(const btVector3& vec);
+        void setRotation(const osg::Quat& quat);
+        void updatePosition();
         void commitPositionChange();
         btCollisionObject* getCollisionObject();
         const btCollisionObject* getCollisionObject() const;
@@ -51,7 +50,8 @@ namespace MWPhysics
         std::map<int, osg::NodePath> mRecIndexToNodePath;
         bool mSolid;
         btVector3 mScale;
-        btTransform mLocalTransform;
+        osg::Vec3f mPosition;
+        osg::Quat mRotation;
         bool mScaleUpdatePending;
         bool mTransformUpdatePending;
         mutable std::mutex mPositionMutex;

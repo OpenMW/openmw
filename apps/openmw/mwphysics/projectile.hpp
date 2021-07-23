@@ -6,12 +6,13 @@
 #include <mutex>
 #include <optional>
 
+#include <LinearMath/btVector3.h>
+
 #include "ptrholder.hpp"
 
 class btCollisionObject;
 class btCollisionShape;
 class btConvexShape;
-class btVector3;
 
 namespace osg
 {
@@ -76,7 +77,6 @@ namespace MWPhysics
         btConvexShape* mConvexShape;
 
         std::unique_ptr<btCollisionObject> mCollisionObject;
-        btTransform mLocalTransform;
         bool mTransformUpdatePending;
         bool mCanCrossWaterSurface;
         bool mCrossedWaterSurface;
@@ -84,6 +84,7 @@ namespace MWPhysics
         MWWorld::Ptr mCaster;
         MWWorld::Ptr mHitTarget;
         std::optional<btVector3> mWaterHitPosition;
+        osg::Vec3f mPosition;
         btVector3 mHitPosition;
         btVector3 mHitNormal;
 
