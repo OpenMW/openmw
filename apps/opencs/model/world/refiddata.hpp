@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <cassert>
 
 #include <components/esm/loadacti.hpp>
 #include <components/esm/loadalch.hpp>
@@ -94,16 +95,11 @@ namespace CSMWorld
     template<typename RecordT>
     void RefIdDataContainer<RecordT>::insertRecord(std::unique_ptr<RecordBase> record)
     {
-        // convert base pointer to record type pointer first
-        if(Record<RecordT> *tmp = dynamic_cast<Record<RecordT>*>(record.get()))
-        {
-            std::unique_ptr<Record<RecordT> > newRecord;
-            newRecord.reset(tmp);
-            mContainer.push_back(std::move(newRecord));
-            record.release();
-        }
-        else
-            throw std::runtime_error ("invalid record for RefIdDataContainer");
+        assert(record != nullptr);
+        // convert base pointer to record type pointer
+        std::unique_ptr<Record<RecordT>> typedRecord(&dynamic_cast<Record<RecordT>&>(*record));
+        record.release();
+        mContainer.push_back(std::move(typedRecord));
     }
 
     template<typename RecordT>
