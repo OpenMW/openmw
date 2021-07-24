@@ -191,11 +191,12 @@ namespace MWPhysics
         std::unique_ptr<btCollisionObject> mCollisionObject;
 
         osg::Vec3f mMeshTranslation;
+        osg::Vec3f mOriginalHalfExtents;
         osg::Vec3f mHalfExtents;
+        osg::Vec3f mRenderingHalfExtents;
         osg::Quat mRotation;
 
         osg::Vec3f mScale;
-        osg::Vec3f mRenderingScale;
         osg::Vec3f mSimulationPosition;
         osg::Vec3f mPosition;
         osg::Vec3f mPreviousPosition;

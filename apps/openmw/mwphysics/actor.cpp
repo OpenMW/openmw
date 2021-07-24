@@ -21,7 +21,7 @@ namespace MWPhysics
 
 Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler, bool canWaterWalk)
   : mStandingOnPtr(nullptr), mCanWaterWalk(canWaterWalk), mWalkingOnWater(false)
-  , mCollisionObject(nullptr), mMeshTranslation(shape->mCollisionBox.center), mHalfExtents(shape->mCollisionBox.extents)
+  , mCollisionObject(nullptr), mMeshTranslation(shape->mCollisionBox.center), mOriginalHalfExtents(shape->mCollisionBox.extents)
   , mVelocity(0,0,0), mStuckFrames(0), mLastStuckPosition{0, 0, 0}
   , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
   , mInternalCollisionMode(true)
@@ -33,7 +33,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     // We can not create actor without collisions - he will fall through the ground.
     // In this case we should autogenerate collision box based on mesh shape
     // (NPCs have bodyparts and use a different approach)
-    if (!ptr.getClass().isNpc() && mHalfExtents.length2() == 0.f)
+    if (!ptr.getClass().isNpc() && mOriginalHalfExtents.length2() == 0.f)
     {
         if (shape->mCollisionShape)
         {
@@ -43,19 +43,19 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
             btVector3 max;
 
             shape->mCollisionShape->getAabb(transform, min, max);
-            mHalfExtents.x() = (max[0] - min[0])/2.f;
-            mHalfExtents.y() = (max[1] - min[1])/2.f;
-            mHalfExtents.z() = (max[2] - min[2])/2.f;
+            mOriginalHalfExtents.x() = (max[0] - min[0])/2.f;
+            mOriginalHalfExtents.y() = (max[1] - min[1])/2.f;
+            mOriginalHalfExtents.z() = (max[2] - min[2])/2.f;
 
-            mMeshTranslation = osg::Vec3f(0.f, 0.f, mHalfExtents.z());
+            mMeshTranslation = osg::Vec3f(0.f, 0.f, mOriginalHalfExtents.z());
         }
 
-        if (mHalfExtents.length2() == 0.f)
+        if (mOriginalHalfExtents.length2() == 0.f)
             Log(Debug::Error) << "Error: Failed to calculate bounding box for actor \"" << ptr.getCellRef().getRefId() << "\".";
     }
 
-    mShape.reset(new btBoxShape(Misc::Convert::toBullet(mHalfExtents)));
-    mRotationallyInvariant = (mMeshTranslation.x() == 0.0 && mMeshTranslation.y() == 0.0) && std::fabs(mHalfExtents.x() - mHalfExtents.y()) < 2.2;
+    mShape.reset(new btBoxShape(Misc::Convert::toBullet(mOriginalHalfExtents)));
+    mRotationallyInvariant = (mMeshTranslation.x() == 0.0 && mMeshTranslation.y() == 0.0) && std::fabs(mOriginalHalfExtents.x() - mOriginalHalfExtents.y()) < 2.2;
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
@@ -220,27 +220,26 @@ void Actor::updateScale()
 
     mPtr.getClass().adjustScale(mPtr, scaleVec, false);
     mScale = scaleVec;
+    mHalfExtents = osg::componentMultiply(mOriginalHalfExtents, scaleVec);
 
     scaleVec = osg::Vec3f(scale,scale,scale);
     mPtr.getClass().adjustScale(mPtr, scaleVec, true);
-    mRenderingScale = scaleVec;
+    mRenderingHalfExtents = osg::componentMultiply(mOriginalHalfExtents, scaleVec);
 }
 
 osg::Vec3f Actor::getHalfExtents() const
 {
-    std::scoped_lock lock(mPositionMutex);
-    return osg::componentMultiply(mHalfExtents, mScale);
+    return mHalfExtents;
 }
 
 osg::Vec3f Actor::getOriginalHalfExtents() const
 {
-    return mHalfExtents;
+    return mOriginalHalfExtents;
 }
 
 osg::Vec3f Actor::getRenderingHalfExtents() const
 {
-    std::scoped_lock lock(mPositionMutex);
-    return osg::componentMultiply(mHalfExtents, mRenderingScale);
+    return mRenderingHalfExtents;
 }
 
 void Actor::setInertialForce(const osg::Vec3f &force)
