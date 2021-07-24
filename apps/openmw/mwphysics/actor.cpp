@@ -19,8 +19,8 @@ namespace MWPhysics
 {
 
 
-Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler)
-  : mStandingOnPtr(nullptr), mCanWaterWalk(false), mWalkingOnWater(false)
+Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler, bool canWaterWalk)
+  : mStandingOnPtr(nullptr), mCanWaterWalk(canWaterWalk), mWalkingOnWater(false)
   , mCollisionObject(nullptr), mMeshTranslation(shape->mCollisionBox.center), mHalfExtents(shape->mCollisionBox.extents)
   , mVelocity(0,0,0), mStuckFrames(0), mLastStuckPosition{0, 0, 0}
   , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)

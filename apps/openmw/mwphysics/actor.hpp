@@ -27,7 +27,7 @@ namespace MWPhysics
     class Actor final : public PtrHolder
     {
     public:
-        Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler);
+        Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler, bool canWaterWalk);
         ~Actor() override;
 
         /**
