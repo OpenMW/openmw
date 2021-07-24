@@ -1831,7 +1831,7 @@ namespace MWMechanics
             osg::Vec2f baseSpeed = origMovement * maxSpeed;
             osg::Vec3f basePos = ptr.getRefData().getPosition().asVec3();
             float baseRotZ = ptr.getRefData().getPosition().rot[2];
-            osg::Vec3f halfExtents = world->getHalfExtents(ptr);
+            const osg::Vec3f halfExtents = world->getHalfExtents(ptr);
             float maxDistToCheck = isMoving ? maxDistForPartialAvoiding : maxDistForStrictAvoiding;
 
             float timeToCollision = maxTimeToCheck;
@@ -1849,7 +1849,7 @@ namespace MWMechanics
                 if (otherPtr == ptr || otherPtr == currentTarget)
                     continue;
 
-                osg::Vec3f otherHalfExtents = world->getHalfExtents(otherPtr);
+                const osg::Vec3f otherHalfExtents = world->getHalfExtents(otherPtr);
                 osg::Vec3f deltaPos = otherPtr.getRefData().getPosition().asVec3() - basePos;
                 osg::Vec2f relPos = Misc::rotateVec2f(osg::Vec2f(deltaPos.x(), deltaPos.y()), baseRotZ);
                 float dist = deltaPos.length();
@@ -1867,7 +1867,7 @@ namespace MWMechanics
                 float rotZ = otherPtr.getRefData().getPosition().rot[2];
                 osg::Vec2f relSpeed = Misc::rotateVec2f(osg::Vec2f(speed.x(), speed.y()), baseRotZ - rotZ) - baseSpeed;
 
-                float collisionDist = minGap + world->getHalfExtents(ptr).x() + world->getHalfExtents(otherPtr).x();
+                float collisionDist = minGap + halfExtents.x() + otherHalfExtents.x();
                 collisionDist = std::min(collisionDist, relPos.length());
 
                 // Find the earliest `t` when |relPos + relSpeed * t| == collisionDist.
