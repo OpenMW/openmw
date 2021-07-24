@@ -192,6 +192,7 @@ bool Launcher::AdvancedPage::loadSettings()
         if (showOwnedIndex >= 0 && showOwnedIndex <= 3)
             showOwnedComboBox->setCurrentIndex(showOwnedIndex);
         loadSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
+        loadSettingBool(useZoomOnMapCheckBox, "allow zooming", "Map");
         loadSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
         scalingSpinBox->setValue(Settings::Manager::getFloat("scaling factor", "GUI"));
     }
@@ -352,6 +353,7 @@ void Launcher::AdvancedPage::saveSettings()
         if (showOwnedCurrentIndex != Settings::Manager::getInt("show owned", "Game"))
             Settings::Manager::setInt("show owned", "Game", showOwnedCurrentIndex);
         saveSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
+        saveSettingBool(useZoomOnMapCheckBox, "allow zooming", "Map");
         saveSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
         float uiScalingFactor = scalingSpinBox->value();
         if (uiScalingFactor != Settings::Manager::getFloat("scaling factor", "GUI"))
