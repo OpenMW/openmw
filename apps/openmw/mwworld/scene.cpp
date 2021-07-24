@@ -446,12 +446,6 @@ namespace MWWorld
 
                 const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-                // By default the player is grounded, with the scene fully loaded, we validate and correct this.
-                if (player.mCell == cell) // Only run once, during initial cell load.
-                {
-                    mPhysics->traceDown(player, player.getRefData().getPosition().asVec3(), 10.f);
-                }
-
                 navigator->update(player.getRefData().getPosition().asVec3());
 
                 if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
