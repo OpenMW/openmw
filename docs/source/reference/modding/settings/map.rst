@@ -103,3 +103,14 @@ and typically require more panning to see all available portions of the map.
 This larger size also enables an overall greater level of detail if the local map resolution setting is also increased.
 
 This setting can not be configured except by editing the settings configuration file.
+
+allow zooming
+-------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true the user can zoom in/out on local and global map with the mouse wheel.
+
+This setting can be controlled in Advanced tab of the launcher.
