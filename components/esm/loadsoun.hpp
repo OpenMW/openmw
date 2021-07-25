@@ -21,6 +21,7 @@ struct Sound
     static std::string getRecordType() { return "Sound"; }
 
     SOUNstruct mData;
+    unsigned int mRecordFlags;
     std::string mId, mSound;
 
     void load(ESMReader &esm, bool &isDeleted);

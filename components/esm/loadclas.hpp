@@ -70,6 +70,7 @@ struct Class
         ///< Throws an exception for invalid values of \a index.
     }; // 60 bytes
 
+    unsigned int mRecordFlags;
     std::string mId, mName, mDescription;
     CLDTstruct mData;
 

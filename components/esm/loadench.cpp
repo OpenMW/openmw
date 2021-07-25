@@ -11,6 +11,7 @@ namespace ESM
     void Enchantment::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
         mEffects.mList.clear();
 
         bool hasName = false;

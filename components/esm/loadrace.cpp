@@ -21,6 +21,7 @@ namespace ESM
     void Race::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
 
         mPowers.mList.clear();
 
