@@ -24,6 +24,7 @@
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
     Bug #6165: Paralyzed player character can pickup items when the inventory is open
+    Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #5489: MCP: Telekinesis fix for activators
