@@ -6,7 +6,6 @@
 #include <QDate>
 #include <QMessageBox>
 #include <QFontDatabase>
-#include <QInputDialog>
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QTextCodec>

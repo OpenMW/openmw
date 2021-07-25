@@ -17,7 +17,6 @@
 
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
-#include <iostream>
 
 #include "utils/textinputdialog.hpp"
 #include "utils/profilescombobox.hpp"

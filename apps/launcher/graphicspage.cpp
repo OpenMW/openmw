@@ -15,8 +15,6 @@
 
 #include <numeric>
 
-#include <components/files/configurationmanager.hpp>
-
 QString getAspect(int x, int y)
 {
     int gcd = std::gcd (x, y);
