@@ -390,7 +390,7 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::updateSingleAabb(std::weak_ptr<PtrHolder> ptr, bool immediate)
     {
-        if (immediate)
+        if (immediate || mNumThreads == 0)
         {
             updatePtrAabb(ptr);
         }
