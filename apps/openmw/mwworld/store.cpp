@@ -11,25 +11,6 @@
 #include <iterator>
 #include <stdexcept>
 
-namespace
-{
-    struct Compare
-    {
-        bool operator()(const ESM::Land *x, const ESM::Land *y) {
-            if (x->mX == y->mX) {
-                return x->mY < y->mY;
-            }
-            return x->mX < y->mX;
-        }
-        bool operator()(const ESM::Land *x, const std::pair<int, int>& y) {
-            if (x->mX == y.first) {
-                return x->mY < y.second;
-            }
-            return x->mX < y.first;
-        }
-    };
-}
-
 namespace MWWorld
 {
     RecordId::RecordId(const std::string &id, bool isDeleted)
@@ -412,11 +393,6 @@ namespace MWWorld
     //=========================================================================
     Store<ESM::Land>::~Store()
     {
-        for (const ESM::Land* staticLand : mStatic)
-        {
-            delete staticLand;
-        }
-
     }
     size_t Store<ESM::Land>::getSize() const
     {
@@ -433,13 +409,8 @@ namespace MWWorld
     const ESM::Land *Store<ESM::Land>::search(int x, int y) const
     {
         std::pair<int, int> comp(x,y);
-
-        std::vector<ESM::Land *>::const_iterator it =
-            std::lower_bound(mStatic.begin(), mStatic.end(), comp, Compare());
-
-        if (it != mStatic.end() && (*it)->mX == x && (*it)->mY == y) {
-            return *it;
-        }
+        if (auto it = mStatic.find(comp); it != mStatic.end() && it->mX == x && it->mY == y)
+            return &*it;
         return nullptr;
     }
     const ESM::Land *Store<ESM::Land>::find(int x, int y) const
@@ -454,24 +425,13 @@ namespace MWWorld
     }
     RecordId Store<ESM::Land>::load(ESM::ESMReader &esm)
     {
-        ESM::Land *ptr = new ESM::Land();
+        ESM::Land land;
         bool isDeleted = false;
 
-        ptr->load(esm, isDeleted);
+        land.load(esm, isDeleted);
 
         // Same area defined in multiple plugins? -> last plugin wins
-        // Can't use search() because we aren't sorted yet - is there any other way to speed this up?
-        for (std::vector<ESM::Land*>::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
-        {
-            if ((*it)->mX == ptr->mX && (*it)->mY == ptr->mY)
-            {
-                delete *it;
-                mStatic.erase(it);
-                break;
-            }
-        }
-
-        mStatic.push_back(ptr);
+        mStatic.insert(std::move(land));
 
         return RecordId("", isDeleted);
     }
@@ -481,7 +441,6 @@ namespace MWWorld
         if (mBuilt)
             return;
 
-        std::sort(mStatic.begin(), mStatic.end(), Compare());
         mBuilt = true;
     }
 

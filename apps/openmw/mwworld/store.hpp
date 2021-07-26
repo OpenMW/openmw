@@ -3,7 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <map>
+#include <set>
 
 #include "recordcmp.hpp"
 
@@ -74,10 +76,10 @@ namespace MWWorld
         const T *find(int index) const;
     };
 
-    template <class T>
+    template <class T, class Container=std::vector<T*>>
     class SharedIterator
     {
-        typedef typename std::vector<T *>::const_iterator Iter;
+        typedef typename Container::const_iterator Iter;
 
         Iter mIter;
 
@@ -233,10 +235,28 @@ namespace MWWorld
     template <>
     class Store<ESM::Land> : public StoreBase
     {
-        std::vector<ESM::Land *> mStatic;
+        struct SpatialComparator
+        {
+            using is_transparent = void;
+
+            bool operator()(const ESM::Land& x, const ESM::Land& y) const
+            {
+                return std::tie(x.mX, x.mY) < std::tie(y.mX, y.mY);
+            }
+            bool operator()(const ESM::Land& x, const std::pair<int, int>& y) const
+            {
+                return std::tie(x.mX, x.mY) < std::tie(y.first, y.second);
+            }
+            bool operator()(const std::pair<int, int>& x, const ESM::Land& y) const
+            {
+                return std::tie(x.first, x.second) < std::tie(y.mX, y.mY);
+            }
+        };
+        using Statics = std::set<ESM::Land, SpatialComparator>;
+        Statics mStatic;
 
     public:
-        typedef SharedIterator<ESM::Land> iterator;
+        typedef typename Statics::iterator iterator;
 
         virtual ~Store();
 
