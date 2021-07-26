@@ -34,20 +34,37 @@ namespace DetourNavigator
     }
 
     bool CachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
-        const btTransform& transform)
+        const osg::Vec3f& shift)
     {
-        if (!mImpl.addWater(cellPosition, cellSize, transform))
+        if (!mImpl.addWater(cellPosition, cellSize, shift))
             return false;
         mCached.reset();
         return true;
     }
 
-    std::optional<RecastMeshManager::Water> CachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<Cell> CachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto water = mImpl.removeWater(cellPosition);
         if (water)
             mCached.reset();
         return water;
+    }
+
+    bool CachedRecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
+        const osg::Vec3f& shift, const HeightfieldShape& shape)
+    {
+        if (!mImpl.addHeightfield(cellPosition, cellSize, shift, shape))
+            return false;
+        mCached.reset();
+        return true;
+    }
+
+    std::optional<Cell> CachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    {
+        const auto cell = mImpl.removeHeightfield(cellPosition);
+        if (cell)
+            mCached.reset();
+        return cell;
     }
 
     std::shared_ptr<RecastMesh> CachedRecastMeshManager::getMesh()

@@ -42,7 +42,8 @@ namespace DetourNavigator
         while (!mFreeItems.empty() && mUsedNavMeshDataSize + itemSize > mMaxNavMeshDataSize)
             removeLeastRecentlyUsed();
 
-        RecastMeshData key {recastMesh.getIndices(), recastMesh.getVertices(), recastMesh.getAreaTypes(), recastMesh.getWater()};
+        RecastMeshData key {recastMesh.getMesh(), recastMesh.getWater(),
+                    recastMesh.getHeightfields(), recastMesh.getFlatHeightfields()};
 
         const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, std::move(key), itemSize);
         const auto emplaced = mValues.emplace(std::make_tuple(agentHalfExtents, changedTile, std::cref(iterator->mRecastMeshData)), iterator);

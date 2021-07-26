@@ -2,6 +2,7 @@
 #include "debug.hpp"
 #include "settingsutils.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadpgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
@@ -102,16 +103,25 @@ namespace DetourNavigator
         return result;
     }
 
-    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
-        const btTransform& transform)
+    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift)
     {
-        return mNavMeshManager.addWater(cellPosition, cellSize,
-            btTransform(transform.getBasis(), btVector3(transform.getOrigin().x(), transform.getOrigin().y(), level)));
+        return mNavMeshManager.addWater(cellPosition, cellSize, shift);
     }
 
     bool NavigatorImpl::removeWater(const osg::Vec2i& cellPosition)
     {
         return mNavMeshManager.removeWater(cellPosition);
+    }
+
+    bool NavigatorImpl::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+        const HeightfieldShape& shape)
+    {
+        return mNavMeshManager.addHeightfield(cellPosition, cellSize, shift, shape);
+    }
+
+    bool NavigatorImpl::removeHeightfield(const osg::Vec2i& cellPosition)
+    {
+        return mNavMeshManager.removeHeightfield(cellPosition);
     }
 
     void NavigatorImpl::addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid)

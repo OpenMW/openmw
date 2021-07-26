@@ -7,9 +7,9 @@
 #include <components/detournavigator/ref.hpp>
 #include <components/detournavigator/preparednavmeshdatatuple.hpp>
 
-#include <RecastAlloc.h>
+#include <osg/Vec3f>
 
-#include <LinearMath/btTransform.h>
+#include <RecastAlloc.h>
 
 #include <gtest/gtest.h>
 
@@ -128,21 +128,29 @@ namespace
         return result;
     }
 
+    Mesh makeMesh()
+    {
+        std::vector<int> indices {{0, 1, 2}};
+        std::vector<float> vertices {{0, 0, 0, 1, 0, 0, 1, 1, 0}};
+        std::vector<AreaType> areaTypes {1, AreaType_ground};
+        return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));
+    }
+
     struct DetourNavigatorNavMeshTilesCacheTest : Test
     {
         const osg::Vec3f mAgentHalfExtents {1, 2, 3};
         const TilePosition mTilePosition {0, 0};
         const std::size_t mGeneration = 0;
         const std::size_t mRevision = 0;
-        const std::vector<int> mIndices {{0, 1, 2}};
-        const std::vector<float> mVertices {{0, 0, 0, 1, 0, 0, 1, 1, 0}};
-        const std::vector<AreaType> mAreaTypes {1, AreaType_ground};
-        const std::vector<RecastMesh::Water> mWater {};
-        const RecastMesh mRecastMesh {mGeneration, mRevision, mIndices, mVertices, mAreaTypes, mWater};
+        const Mesh mMesh {makeMesh()};
+        const std::vector<Cell> mWater {};
+        const std::vector<Heightfield> mHeightfields {};
+        const std::vector<FlatHeightfield> mFlatHeightfields {};
+        const RecastMesh mRecastMesh {mGeneration, mRevision, mMesh, mWater, mHeightfields, mFlatHeightfields};
         std::unique_ptr<PreparedNavMeshData> mPreparedNavMeshData {makePeparedNavMeshData(3)};
 
         const std::size_t mRecastMeshSize = sizeof(mRecastMesh) + getSize(mRecastMesh);
-        const std::size_t mRecastMeshWithWaterSize = mRecastMeshSize + sizeof(RecastMesh::Water);
+        const std::size_t mRecastMeshWithWaterSize = mRecastMeshSize + sizeof(Cell);
         const std::size_t mPreparedNavMeshDataSize = sizeof(*mPreparedNavMeshData) + getSize(*mPreparedNavMeshData);
     };
 
@@ -225,8 +233,8 @@ namespace
     {
         const std::size_t maxSize = 1;
         NavMeshTilesCache cache(maxSize);
-        const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
-        const RecastMesh unexistentRecastMesh {mGeneration, mRevision, mIndices, mVertices, mAreaTypes, water};
+        const std::vector<Cell> water {1, Cell {1, osg::Vec3f()}};
+        const RecastMesh unexistentRecastMesh {mGeneration, mRevision, mMesh, water, mHeightfields, mFlatHeightfields};
 
         cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
         EXPECT_FALSE(cache.get(mAgentHalfExtents, mTilePosition, unexistentRecastMesh));
@@ -237,8 +245,8 @@ namespace
         const std::size_t maxSize = mRecastMeshWithWaterSize + mPreparedNavMeshDataSize;
         NavMeshTilesCache cache(maxSize);
 
-        const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
-        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mIndices, mVertices, mAreaTypes, water};
+        const std::vector<Cell> water {1, Cell {1, osg::Vec3f()}};
+        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mMesh, water, mHeightfields, mFlatHeightfields};
         auto anotherPreparedNavMeshData = makePeparedNavMeshData(3);
         const auto copy = clone(*anotherPreparedNavMeshData);
 
@@ -255,8 +263,8 @@ namespace
         const std::size_t maxSize = mRecastMeshWithWaterSize + mPreparedNavMeshDataSize;
         NavMeshTilesCache cache(maxSize);
 
-        const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
-        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mIndices, mVertices, mAreaTypes, water};
+        const std::vector<Cell> water {1, Cell {1, osg::Vec3f()}};
+        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mMesh, water, mHeightfields, mFlatHeightfields};
         auto anotherPreparedNavMeshData = makePeparedNavMeshData(3);
 
         const auto value = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh,
@@ -271,14 +279,14 @@ namespace
         NavMeshTilesCache cache(maxSize);
         const auto copy = clone(*mPreparedNavMeshData);
 
-        const std::vector<RecastMesh::Water> leastRecentlySetWater {1, RecastMesh::Water {1, btTransform::getIdentity()}};
-        const RecastMesh leastRecentlySetRecastMesh {mGeneration, mRevision, mIndices, mVertices,
-            mAreaTypes, leastRecentlySetWater};
+        const std::vector<Cell> leastRecentlySetWater {1, Cell {1, osg::Vec3f()}};
+        const RecastMesh leastRecentlySetRecastMesh {mGeneration, mRevision, mMesh, leastRecentlySetWater,
+                    mHeightfields, mFlatHeightfields};
         auto leastRecentlySetData = makePeparedNavMeshData(3);
 
-        const std::vector<RecastMesh::Water> mostRecentlySetWater {1, RecastMesh::Water {2, btTransform::getIdentity()}};
-        const RecastMesh mostRecentlySetRecastMesh {mGeneration, mRevision, mIndices, mVertices,
-            mAreaTypes, mostRecentlySetWater};
+        const std::vector<Cell> mostRecentlySetWater {1, Cell {2, osg::Vec3f()}};
+        const RecastMesh mostRecentlySetRecastMesh {mGeneration, mRevision, mMesh, mostRecentlySetWater,
+                    mHeightfields, mFlatHeightfields};
         auto mostRecentlySetData = makePeparedNavMeshData(3);
 
         ASSERT_TRUE(cache.set(mAgentHalfExtents, mTilePosition, leastRecentlySetRecastMesh,
@@ -299,15 +307,15 @@ namespace
         const std::size_t maxSize = 2 * (mRecastMeshWithWaterSize + mPreparedNavMeshDataSize);
         NavMeshTilesCache cache(maxSize);
 
-        const std::vector<RecastMesh::Water> leastRecentlyUsedWater {1, RecastMesh::Water {1, btTransform::getIdentity()}};
-        const RecastMesh leastRecentlyUsedRecastMesh {mGeneration, mRevision, mIndices, mVertices,
-            mAreaTypes, leastRecentlyUsedWater};
+        const std::vector<Cell> leastRecentlyUsedWater {1, Cell {1, osg::Vec3f()}};
+        const RecastMesh leastRecentlyUsedRecastMesh {mGeneration, mRevision, mMesh, leastRecentlyUsedWater,
+                    mHeightfields, mFlatHeightfields};
         auto leastRecentlyUsedData = makePeparedNavMeshData(3);
         const auto leastRecentlyUsedCopy = clone(*leastRecentlyUsedData);
 
-        const std::vector<RecastMesh::Water> mostRecentlyUsedWater {1, RecastMesh::Water {2, btTransform::getIdentity()}};
-        const RecastMesh mostRecentlyUsedRecastMesh {mGeneration, mRevision, mIndices, mVertices,
-            mAreaTypes, mostRecentlyUsedWater};
+        const std::vector<Cell> mostRecentlyUsedWater {1, Cell {2, osg::Vec3f()}};
+        const RecastMesh mostRecentlyUsedRecastMesh {mGeneration, mRevision, mMesh, mostRecentlyUsedWater,
+                    mHeightfields, mFlatHeightfields};
         auto mostRecentlyUsedData = makePeparedNavMeshData(3);
         const auto mostRecentlyUsedCopy = clone(*mostRecentlyUsedData);
 
@@ -340,8 +348,9 @@ namespace
         const std::size_t maxSize = 2 * (mRecastMeshWithWaterSize + mPreparedNavMeshDataSize);
         NavMeshTilesCache cache(maxSize);
 
-        const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
-        const RecastMesh tooLargeRecastMesh {mGeneration, mRevision, mIndices, mVertices, mAreaTypes, water};
+        const std::vector<Cell> water {1, Cell {1, osg::Vec3f()}};
+        const RecastMesh tooLargeRecastMesh {mGeneration, mRevision, mMesh, water,
+                    mHeightfields, mFlatHeightfields};
         auto tooLargeData = makePeparedNavMeshData(10);
 
         cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
@@ -354,13 +363,14 @@ namespace
         const std::size_t maxSize = 2 * (mRecastMeshWithWaterSize + mPreparedNavMeshDataSize);
         NavMeshTilesCache cache(maxSize);
 
-        const std::vector<RecastMesh::Water> anotherWater {1, RecastMesh::Water {1, btTransform::getIdentity()}};
-        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mIndices, mVertices, mAreaTypes, anotherWater};
+        const std::vector<Cell> anotherWater {1, Cell {1, osg::Vec3f()}};
+        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mMesh, anotherWater,
+                    mHeightfields, mFlatHeightfields};
         auto anotherData = makePeparedNavMeshData(3);
 
-        const std::vector<RecastMesh::Water> tooLargeWater {1, RecastMesh::Water {2, btTransform::getIdentity()}};
-        const RecastMesh tooLargeRecastMesh {mGeneration, mRevision, mIndices, mVertices,
-            mAreaTypes, tooLargeWater};
+        const std::vector<Cell> tooLargeWater {1, Cell {2, osg::Vec3f()}};
+        const RecastMesh tooLargeRecastMesh {mGeneration, mRevision, mMesh, tooLargeWater,
+                    mHeightfields, mFlatHeightfields};
         auto tooLargeData = makePeparedNavMeshData(10);
 
         const auto value = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh,
@@ -379,9 +389,8 @@ namespace
         const std::size_t maxSize = mRecastMeshWithWaterSize + mPreparedNavMeshDataSize;
         NavMeshTilesCache cache(maxSize);
 
-        const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
-        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mIndices, mVertices,
-            mAreaTypes, water};
+        const std::vector<Cell> water {1, Cell {1, osg::Vec3f()}};
+        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mMesh, water, mHeightfields, mFlatHeightfields};
         auto anotherData = makePeparedNavMeshData(3);
 
         const auto firstCopy = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
@@ -399,8 +408,8 @@ namespace
         const std::size_t maxSize = mRecastMeshWithWaterSize + mPreparedNavMeshDataSize;
         NavMeshTilesCache cache(maxSize);
 
-        const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
-        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mIndices, mVertices, mAreaTypes, water};
+        const std::vector<Cell> water {1, Cell {1, osg::Vec3f()}};
+        const RecastMesh anotherRecastMesh {mGeneration, mRevision, mMesh, water, mHeightfields, mFlatHeightfields};
         auto anotherData = makePeparedNavMeshData(3);
 
         cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));

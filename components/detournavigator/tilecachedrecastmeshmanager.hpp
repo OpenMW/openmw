@@ -6,6 +6,7 @@
 #include "settingsutils.hpp"
 #include "gettilespositions.hpp"
 #include "version.hpp"
+#include "heightfieldshape.hpp"
 
 #include <components/misc/guarded.hpp>
 
@@ -76,9 +77,14 @@ namespace DetourNavigator
 
         std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
+        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
 
-        std::optional<RecastMeshManager::Water> removeWater(const osg::Vec2i& cellPosition);
+        std::optional<Cell> removeWater(const osg::Vec2i& cellPosition);
+
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+            const HeightfieldShape& shape);
+
+        std::optional<Cell> removeHeightfield(const osg::Vec2i& cellPosition);
 
         std::shared_ptr<RecastMesh> getMesh(const TilePosition& tilePosition);
 
@@ -100,6 +106,7 @@ namespace DetourNavigator
         Misc::ScopeGuarded<std::map<TilePosition, CachedRecastMeshManager>> mTiles;
         std::unordered_map<ObjectId, std::vector<TilePosition>> mObjectsTilesPositions;
         std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;
+        std::map<osg::Vec2i, std::vector<TilePosition>> mHeightfieldTilesPositions;
         std::size_t mRevision = 0;
         std::size_t mTilesGeneration = 0;
 

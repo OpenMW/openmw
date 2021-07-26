@@ -3,6 +3,7 @@
 
 #include "recastmeshmanager.hpp"
 #include "version.hpp"
+#include "heightfieldshape.hpp"
 
 namespace DetourNavigator
 {
@@ -16,11 +17,16 @@ namespace DetourNavigator
 
         bool updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
-
-        std::optional<RecastMeshManager::Water> removeWater(const osg::Vec2i& cellPosition);
-
         std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
+
+        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
+
+        std::optional<Cell> removeWater(const osg::Vec2i& cellPosition);
+
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+            const HeightfieldShape& shape);
+
+        std::optional<Cell> removeHeightfield(const osg::Vec2i& cellPosition);
 
         std::shared_ptr<RecastMesh> getMesh();
 
