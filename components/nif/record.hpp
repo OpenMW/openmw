@@ -72,6 +72,7 @@ enum RecordType
   RC_NiBSAnimationNode,
   RC_NiLight,
   RC_NiTextureEffect,
+  RC_NiExtraData,
   RC_NiVertWeightsExtraData,
   RC_NiTextKeyExtraData,
   RC_NiStringExtraData,
