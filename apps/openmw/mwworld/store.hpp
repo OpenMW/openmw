@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 #include <map>
-#include <boost/container/flat_set.hpp>
+#include <set>
 
 #include "recordcmp.hpp"
 
@@ -239,30 +239,24 @@ namespace MWWorld
         {
             using is_transparent = void;
 
-            bool operator()(const std::unique_ptr<ESM::Land>& x, const std::unique_ptr<ESM::Land>& y) const {
-                if (x->mX == y->mX) {
-                    return x->mY < y->mY;
-                }
-                return x->mX < y->mX;
+            bool operator()(const ESM::Land& x, const ESM::Land& y) const
+            {
+                return std::tie(x.mX, x.mY) < std::tie(y.mX, y.mY);
             }
-            bool operator()(const std::unique_ptr<ESM::Land>& x, const std::pair<int, int>& y) const {
-                if (x->mX == y.first) {
-                    return x->mY < y.second;
-                }
-                return x->mX < y.first;
+            bool operator()(const ESM::Land& x, const std::pair<int, int>& y) const
+            {
+                return std::tie(x.mX, x.mY) < std::tie(y.first, y.second);
             }
-            bool operator()(const std::pair<int, int>& x, const std::unique_ptr<ESM::Land>& y) const {
-                if (x.first == y->mX) {
-                    return x.second < y->mY;
-                }
-                return x.first < y->mX;
+            bool operator()(const std::pair<int, int>& x, const ESM::Land& y) const
+            {
+                return std::tie(x.first, x.second) < std::tie(y.mX, y.mY);
             }
         };
-        using Statics = boost::container::flat_set<std::unique_ptr<ESM::Land>, SpatialComparator>;
+        using Statics = std::set<ESM::Land, SpatialComparator>;
         Statics mStatic;
 
     public:
-        typedef SharedIterator<ESM::Land, Statics> iterator;
+        typedef typename Statics::iterator iterator;
 
         virtual ~Store();
 

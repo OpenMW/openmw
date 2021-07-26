@@ -422,9 +422,8 @@ namespace MWWorld
     const ESM::Land *Store<ESM::Land>::search(int x, int y) const
     {
         std::pair<int, int> comp(x,y);
-        if (auto it = mStatic.find(comp); it != mStatic.end() && (*it)->mX == x && (*it)->mY == y) {
-            return it->get();
-        }
+        if (auto it = mStatic.find(comp); it != mStatic.end() && it->mX == x && it->mY == y)
+            return &*it;
         return nullptr;
     }
     const ESM::Land *Store<ESM::Land>::find(int x, int y) const
@@ -439,13 +438,13 @@ namespace MWWorld
     }
     RecordId Store<ESM::Land>::load(ESM::ESMReader &esm)
     {
-        auto ptr = std::make_unique<ESM::Land>();
+        ESM::Land land;
         bool isDeleted = false;
 
-        ptr->load(esm, isDeleted);
+        land.load(esm, isDeleted);
 
         // Same area defined in multiple plugins? -> last plugin wins
-        mStatic.insert(std::move(ptr));
+        mStatic.insert(std::move(land));
 
         return RecordId("", isDeleted);
     }
