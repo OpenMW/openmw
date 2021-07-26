@@ -14,6 +14,7 @@
 #include <SDL_video.h>
 
 #include <numeric>
+#include <array>
 
 QString getAspect(int x, int y)
 {
