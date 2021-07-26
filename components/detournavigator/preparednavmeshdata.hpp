@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_PREPAREDNAVMESHDATA_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_PREPAREDNAVMESHDATA_H
 
+#include "recast.hpp"
+
 #include <Recast.h>
 
 #include <cstddef>
@@ -25,18 +27,18 @@ namespace DetourNavigator
 
     inline constexpr std::size_t getSize(const rcPolyMesh& value) noexcept
     {
-        return static_cast<std::size_t>(3 * value.nverts) * sizeof(*value.verts)
-            + static_cast<std::size_t>(value.maxpolys * 2 * value.nvp) * sizeof(*value.polys)
-            + static_cast<std::size_t>(value.maxpolys) * sizeof(*value.regs)
-            + static_cast<std::size_t>(value.maxpolys) * sizeof(*value.flags)
-            + static_cast<std::size_t>(value.maxpolys) * sizeof(*value.areas);
+        return getVertsLength(value) * sizeof(*value.verts)
+            + getPolysLength(value) * sizeof(*value.polys)
+            + getRegsLength(value) * sizeof(*value.regs)
+            + getFlagsLength(value) * sizeof(*value.flags)
+            + getAreasLength(value) * sizeof(*value.areas);
     }
 
     inline constexpr std::size_t getSize(const rcPolyMeshDetail& value) noexcept
     {
-        return static_cast<std::size_t>(4 * value.nmeshes) * sizeof(*value.meshes)
-            + static_cast<std::size_t>(4 * value.ntris) * sizeof(*value.tris)
-            + static_cast<std::size_t>(3 * value.nverts) * sizeof(*value.verts);
+        return getMeshesLength(value) * sizeof(*value.meshes)
+            + getVertsLength(value) * sizeof(*value.verts)
+            + getTrisLength(value) * sizeof(*value.tris);
     }
 
     inline constexpr std::size_t getSize(const PreparedNavMeshData& value) noexcept

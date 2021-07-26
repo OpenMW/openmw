@@ -3,6 +3,7 @@
 
 #include "preparednavmeshdata.hpp"
 #include "ref.hpp"
+#include "recast.hpp"
 
 #include <Recast.h>
 
@@ -13,11 +14,11 @@ namespace DetourNavigator
     constexpr auto makeTuple(const rcPolyMesh& v) noexcept
     {
         return std::tuple(
-            Span(v.verts, 3 * v.nverts),
-            Span(v.polys, v.maxpolys * 2 * v.nvp),
-            Span(v.regs, v.maxpolys),
-            Span(v.flags, v.maxpolys),
-            Span(v.areas, v.maxpolys),
+            Span(v.verts, getVertsLength(v)),
+            Span(v.polys, getPolysLength(v)),
+            Span(v.regs, getRegsLength(v)),
+            Span(v.flags, getFlagsLength(v)),
+            Span(v.areas, getAreasLength(v)),
             ArrayRef(v.bmin),
             ArrayRef(v.bmax),
             v.cs,
@@ -30,9 +31,9 @@ namespace DetourNavigator
     constexpr auto makeTuple(const rcPolyMeshDetail& v) noexcept
     {
         return std::tuple(
-            Span(v.meshes, 4 * v.nmeshes),
-            Span(v.verts, 3 * v.nverts),
-            Span(v.tris, 4 * v.ntris)
+            Span(v.meshes, getMeshesLength(v)),
+            Span(v.verts, getVertsLength(v)),
+            Span(v.tris, getTrisLength(v))
         );
     }
 
