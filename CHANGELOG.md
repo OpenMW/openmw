@@ -18,6 +18,7 @@
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
     Bug #6107: Fatigue is incorrectly recalculated when fortify effect is applied or removed
     Bug #6115: Showmap overzealous matching
+    Bug #6118: Creature landing sound counts as a footstep
     Bug #6123: NPC with broken script freezes the game on hello
     Bug #6129: Player avatar not displayed correctly for large window sizes when GUI scaling active
     Bug #6131: Item selection in the avatar window not working correctly for large window sizes
