@@ -397,8 +397,8 @@ namespace MWWorld
 
         if (cell->getCell()->isExterior())
         {
-            if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                mNavigator.removeObject(DetourNavigator::ObjectId(heightField));
+            if (mPhysics->getHeightField(cellX, cellY) != nullptr)
+                mNavigator.removeHeightfield(osg::Vec2i(cellX, cellY));
         }
 
         if (cell->getCell()->hasWater())
