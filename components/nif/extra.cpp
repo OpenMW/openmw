@@ -3,6 +3,13 @@
 namespace Nif
 {
 
+void NiExtraData::read(NIFStream *nif)
+{
+    Extra::read(nif);
+    if (recordSize)
+        nif->getChars(data, recordSize);
+}
+
 void NiStringExtraData::read(NIFStream *nif)
 {
     Extra::read(nif);

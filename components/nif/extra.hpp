@@ -29,6 +29,13 @@
 namespace Nif
 {
 
+struct NiExtraData : public Extra
+{
+    std::vector<char> data;
+
+    void read(NIFStream *nif) override;
+};
+
 struct NiVertWeightsExtraData : public Extra
 {
     void read(NIFStream *nif) override;

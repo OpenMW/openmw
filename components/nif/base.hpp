@@ -15,6 +15,7 @@ struct Extra : public Record
 {
     std::string name;
     ExtraPtr next; // Next extra data record in the list
+    unsigned int recordSize{0u};
 
     void read(NIFStream *nif) override
     {
@@ -23,7 +24,7 @@ struct Extra : public Record
         else if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0))
         {
             next.read(nif);
-            nif->getUInt(); // Size of the record
+            recordSize = nif->getUInt();
         }
     }
 
