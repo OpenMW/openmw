@@ -286,37 +286,36 @@ NpcAnimation::NpcType NpcAnimation::getNpcType(const MWWorld::Ptr& ptr)
     return curType;
 }
 
-static NpcAnimation::PartBoneMap createPartListMap()
+static const inline NpcAnimation::PartBoneMap createPartListMap()
 {
-    NpcAnimation::PartBoneMap result;
-    result.insert(std::make_pair(ESM::PRT_Head, "Head"));
-    result.insert(std::make_pair(ESM::PRT_Hair, "Head")); // note it uses "Head" as attach bone, but "Hair" as filter
-    result.insert(std::make_pair(ESM::PRT_Neck, "Neck"));
-    result.insert(std::make_pair(ESM::PRT_Cuirass, "Chest"));
-    result.insert(std::make_pair(ESM::PRT_Groin, "Groin"));
-    result.insert(std::make_pair(ESM::PRT_Skirt, "Groin"));
-    result.insert(std::make_pair(ESM::PRT_RHand, "Right Hand"));
-    result.insert(std::make_pair(ESM::PRT_LHand, "Left Hand"));
-    result.insert(std::make_pair(ESM::PRT_RWrist, "Right Wrist"));
-    result.insert(std::make_pair(ESM::PRT_LWrist, "Left Wrist"));
-    result.insert(std::make_pair(ESM::PRT_Shield, "Shield Bone"));
-    result.insert(std::make_pair(ESM::PRT_RForearm, "Right Forearm"));
-    result.insert(std::make_pair(ESM::PRT_LForearm, "Left Forearm"));
-    result.insert(std::make_pair(ESM::PRT_RUpperarm, "Right Upper Arm"));
-    result.insert(std::make_pair(ESM::PRT_LUpperarm, "Left Upper Arm"));
-    result.insert(std::make_pair(ESM::PRT_RFoot, "Right Foot"));
-    result.insert(std::make_pair(ESM::PRT_LFoot, "Left Foot"));
-    result.insert(std::make_pair(ESM::PRT_RAnkle, "Right Ankle"));
-    result.insert(std::make_pair(ESM::PRT_LAnkle, "Left Ankle"));
-    result.insert(std::make_pair(ESM::PRT_RKnee, "Right Knee"));
-    result.insert(std::make_pair(ESM::PRT_LKnee, "Left Knee"));
-    result.insert(std::make_pair(ESM::PRT_RLeg, "Right Upper Leg"));
-    result.insert(std::make_pair(ESM::PRT_LLeg, "Left Upper Leg"));
-    result.insert(std::make_pair(ESM::PRT_RPauldron, "Right Clavicle"));
-    result.insert(std::make_pair(ESM::PRT_LPauldron, "Left Clavicle"));
-    result.insert(std::make_pair(ESM::PRT_Weapon, "Weapon Bone")); // Fallback. The real node name depends on the current weapon type.
-    result.insert(std::make_pair(ESM::PRT_Tail, "Tail"));
-    return result;
+    return {
+        {ESM::PRT_Head, "Head"},
+        {ESM::PRT_Hair, "Head"}, // note it uses "Head" as attach bone, but "Hair" as filter
+        {ESM::PRT_Neck, "Neck"},
+        {ESM::PRT_Cuirass, "Chest"},
+        {ESM::PRT_Groin, "Groin"},
+        {ESM::PRT_Skirt, "Groin"},
+        {ESM::PRT_RHand, "Right Hand"},
+        {ESM::PRT_LHand, "Left Hand"},
+        {ESM::PRT_RWrist, "Right Wrist"},
+        {ESM::PRT_LWrist, "Left Wrist"},
+        {ESM::PRT_Shield, "Shield Bone"},
+        {ESM::PRT_RForearm, "Right Forearm"},
+        {ESM::PRT_LForearm, "Left Forearm"},
+        {ESM::PRT_RUpperarm, "Right Upper Arm"},
+        {ESM::PRT_LUpperarm, "Left Upper Arm"},
+        {ESM::PRT_RFoot, "Right Foot"},
+        {ESM::PRT_LFoot, "Left Foot"},
+        {ESM::PRT_RAnkle, "Right Ankle"},
+        {ESM::PRT_LAnkle, "Left Ankle"},
+        {ESM::PRT_RKnee, "Right Knee"},
+        {ESM::PRT_LKnee, "Left Knee"},
+        {ESM::PRT_RLeg, "Right Upper Leg"},
+        {ESM::PRT_LLeg, "Left Upper Leg"},
+        {ESM::PRT_RPauldron, "Right Clavicle"},
+        {ESM::PRT_LPauldron, "Left Clavicle"},
+        {ESM::PRT_Weapon, "Weapon Bone"}, // Fallback. The real node name depends on the current weapon type.
+        {ESM::PRT_Tail, "Tail"}};
 }
 const NpcAnimation::PartBoneMap NpcAnimation::sPartList = createPartListMap();
 
