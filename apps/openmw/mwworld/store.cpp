@@ -431,7 +431,12 @@ namespace MWWorld
         land.load(esm, isDeleted);
 
         // Same area defined in multiple plugins? -> last plugin wins
-        mStatic.insert(std::move(land));
+        auto [it, inserted] = mStatic.insert(std::move(land));
+        if (!inserted) {
+            auto nh = mStatic.extract(it);
+            nh.value() = std::move(land);
+            mStatic.insert(std::move(nh));
+        }
 
         return RecordId("", isDeleted);
     }
