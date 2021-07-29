@@ -1158,21 +1158,15 @@ namespace MWMechanics
 
         // AI setting modifiers
         int creature = !ptr.getClass().isNpc();
-        if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Humanoid)
-            creature = false;
-        // Note: the Creature variants only work on normal creatures, not on daedra or undead creatures.
-        if (!creature || ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Creatures)
-        {
-            Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Fight);
-            stat.setModifier(static_cast<int>(effects.get(ESM::MagicEffect::FrenzyHumanoid + creature).getMagnitude()
-                - effects.get(ESM::MagicEffect::CalmHumanoid+creature).getMagnitude()));
-            creatureStats.setAiSetting(CreatureStats::AI_Fight, stat);
+        Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Fight);
+        stat.setModifier(static_cast<int>(effects.get(ESM::MagicEffect::FrenzyHumanoid + creature).getMagnitude()
+            - effects.get(ESM::MagicEffect::CalmHumanoid+creature).getMagnitude()));
+        creatureStats.setAiSetting(CreatureStats::AI_Fight, stat);
 
-            stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
-            stat.setModifier(static_cast<int>(effects.get(ESM::MagicEffect::DemoralizeHumanoid + creature).getMagnitude()
-                - effects.get(ESM::MagicEffect::RallyHumanoid+creature).getMagnitude()));
-            creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
-        }
+        stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
+        stat.setModifier(static_cast<int>(effects.get(ESM::MagicEffect::DemoralizeHumanoid + creature).getMagnitude()
+            - effects.get(ESM::MagicEffect::RallyHumanoid+creature).getMagnitude()));
+        creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Undead)
         {
             Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);

@@ -383,6 +383,25 @@ namespace MWMechanics
             target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude, true);
             return true;
         }
+        else if(target.getClass().isActor() && effectId >= ESM::MagicEffect::CalmHumanoid && effectId <= ESM::MagicEffect::RallyCreature)
+        {
+            // Treat X Humanoid spells on creatures and X Creature spells on NPCs as instant effects and remove their VFX
+            bool affectsCreatures = (effectId - ESM::MagicEffect::CalmHumanoid) & 1;
+            if(affectsCreatures == target.getClass().isNpc())
+            {
+                MWBase::Environment::get().getWorld()->getAnimation(target)->removeEffect(effectId);
+                return true;
+            }
+        }
+        else if(target.getClass().isActor() && effectId == ESM::MagicEffect::TurnUndead)
+        {
+            // Diverge from vanilla by giving scripts a chance to detect Turn Undead on non-undead, but still remove the effect and VFX
+            if(target.getClass().isNpc() || target.get<ESM::Creature>()->mBase->mData.mType != ESM::Creature::Undead)
+            {
+                MWBase::Environment::get().getWorld()->getAnimation(target)->removeEffect(effectId);
+                return true;
+            }
+        }
         else if (target.getClass().isActor() && target == getPlayer())
         {
             MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
