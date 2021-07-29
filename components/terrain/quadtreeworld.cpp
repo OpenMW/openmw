@@ -367,7 +367,7 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
-        osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
+        osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0)->asGroup()->getChild(0))->getWaterBoundingBox();
         if (!bb.valid())
             continue;
         osg::Vec3f ofs (entry.mNode->getCenter().x()*cellworldsize, entry.mNode->getCenter().y()*cellworldsize, 0.f);

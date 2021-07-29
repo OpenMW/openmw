@@ -100,6 +100,15 @@ max composite geometry size
 Controls the maximum size of simple composite geometry chunk in cell units. With small values there will more draw calls and small textures,
 but higher values create more overdraw (not every texture layer is used everywhere).
 
+debug chunks
+------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+This debug setting allows you to see the borders of each chunks of the world by drawing lines arround them (as with toggleborder).
+
 object paging
 -------------
 
