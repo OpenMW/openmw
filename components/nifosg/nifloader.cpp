@@ -1503,11 +1503,14 @@ namespace NifOsg
         osg::ref_ptr<osg::TexEnvCombine> createEmissiveTexEnv()
         {
             osg::ref_ptr<osg::TexEnvCombine> texEnv(new osg::TexEnvCombine);
-            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+            // Sum the previous colour and the emissive colour.
             texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
             texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
             texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+            // Keep the previous alpha.
+            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+            texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
             return texEnv;
         }
 
@@ -1602,27 +1605,31 @@ namespace NifOsg
                     else if (i == Nif::NiTexturingProperty::DarkTexture)
                     {
                         osg::TexEnv* texEnv = new osg::TexEnv;
+                        // Modulate both the colour and the alpha with the dark map.
                         texEnv->setMode(osg::TexEnv::MODULATE);
                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
                     else if (i == Nif::NiTexturingProperty::DetailTexture)
                     {
                         osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-                        texEnv->setScale_RGB(2.f);
-                        texEnv->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
-                        texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
-                        texEnv->setOperand1_Alpha(osg::TexEnvCombine::SRC_ALPHA);
-                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-                        texEnv->setSource1_Alpha(osg::TexEnvCombine::TEXTURE);
+                        // Modulate previous colour...
                         texEnv->setCombine_RGB(osg::TexEnvCombine::MODULATE);
-                        texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
-                        texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
                         texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        // with the detail map's colour,
                         texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+                        texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        // and a twist:
+                        texEnv->setScale_RGB(2.f);
+                        // Keep the previous alpha.
+                        texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
                     else if (i == Nif::NiTexturingProperty::BumpTexture)
                     {
+                        // Bump maps offset the environment map.
                         // Set this texture to Off by default since we can't render it with the fixed-function pipeline
                         stateset->setTextureMode(texUnit, GL_TEXTURE_2D, osg::StateAttribute::OFF);
                         osg::Matrix2 bumpMapMatrix(texprop->bumpMapMatrix.x(), texprop->bumpMapMatrix.y(),
@@ -1632,18 +1639,22 @@ namespace NifOsg
                     }
                     else if (i == Nif::NiTexturingProperty::DecalTexture)
                     {
-                         osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-                         texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
-                         texEnv->setSource0_RGB(osg::TexEnvCombine::TEXTURE);
-                         texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
-                         texEnv->setSource1_RGB(osg::TexEnvCombine::PREVIOUS);
-                         texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
-                         texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
-                         texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_ALPHA);
-                         texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-                         texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-                         texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
-                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+                        osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
+                        // Interpolate to the decal texture's colour...
+                        texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
+                        texEnv->setSource0_RGB(osg::TexEnvCombine::TEXTURE);
+                        texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        // ...from the previous colour...
+                        texEnv->setSource1_RGB(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        // using the decal texture's alpha as the factor.
+                        texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
+                        texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_ALPHA);
+                        // Keep the previous alpha.
+                        texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
+                        stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
 
                     switch (i)
