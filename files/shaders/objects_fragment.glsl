@@ -134,7 +134,7 @@ void main()
 #endif
 
 #if @darkMap
-    gl_FragData[0].xyz *= texture2D(darkMap, darkMapUV).xyz;
+    gl_FragData[0] *= texture2D(darkMap, darkMapUV);
 #endif
 
 #if @decalMap
