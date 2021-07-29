@@ -43,7 +43,7 @@ Coverity:
   script:
     - CI/before_script.linux.sh
     # Remove the specific targets and build everything once we can do it under 3h
-    - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc) openmw esmtool bsatool openmw-wizard openmw-launcher openmw-iniimporter openmw-essimporter
+    - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc) openmw esmtool bsatool niftest openmw-cs openmw-wizard openmw-launcher openmw-iniimporter openmw-essimporter
   after_script:
     - tar cfz cov-int.tar.gz cov-int
     - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
@@ -97,6 +97,7 @@ Debian_GCC_Static_Deps:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-static
   variables:
     CI_OPENMW_USE_STATIC_DEPS: 1
+  timeout: 3h
 
 Debian_GCC_Static_Deps_tests:
   extends: Debian_GCC_Static_Deps
