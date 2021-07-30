@@ -72,6 +72,7 @@ namespace MWRender
         bool mInterior;
 
         osg::Callback* mCullCallback;
+        osg::ref_ptr<osg::NodeCallback> mShaderWaterStateSetUpdater;
 
         osg::Vec3f getSceneNodeCoordinates(int gridX, int gridY);
         void updateVisible();
@@ -116,8 +117,8 @@ namespace MWRender
 
         void update(float dt);
 
-        osg::Camera *getReflectionCamera();
-        osg::Camera *getRefractionCamera();
+        osg::Node* getReflectionNode();
+        osg::Node* getRefractionNode();
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);
     };
