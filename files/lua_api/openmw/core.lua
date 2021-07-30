@@ -7,8 +7,8 @@
 
 
 -------------------------------------------------------------------------------
--- The version of OpenMW Lua API. It is an integer that is incremented every time the API is changed.
--- @field [parent=#core] #number API_VERSION
+-- The revision of OpenMW Lua API. It is an integer that is incremented every time the API is changed.
+-- @field [parent=#core] #number API_REVISION
 
 -------------------------------------------------------------------------------
 -- Send an event to global scripts.

@@ -31,7 +31,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_VERSION"] = 0;
+        api["API_REVISION"] = 1;
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData)
         {
             context.mGlobalEventQueue->push_back({std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
