@@ -751,17 +751,6 @@ namespace MWPhysics
             actor->setVelocity(osg::Vec3f());
     }
 
-    const std::vector<MWWorld::Ptr>& PhysicsSystem::applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
-    {
-        mTimeAccum += dt;
-
-        if (skipSimulation)
-            return mTaskScheduler->resetSimulation(mActors);
-
-        // modifies mTimeAccum
-        return mTaskScheduler->moveActors(mTimeAccum, prepareFrameData(mTimeAccum >= mPhysicsDt), frameStart, frameNumber, stats);
-    }
-
     std::vector<ActorFrameData> PhysicsSystem::prepareFrameData(bool willSimulate)
     {
         std::vector<ActorFrameData> actorsFrameData;
@@ -798,20 +787,43 @@ namespace MWPhysics
         return actorsFrameData;
     }
 
-    void PhysicsSystem::stepSimulation()
+    void PhysicsSystem::stepSimulation(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         for (Object* animatedObject : mAnimatedObjects)
+        {
             if (animatedObject->animateCollisionShapes())
             {
                 auto obj = mObjects.find(animatedObject->getPtr());
                 assert(obj != mObjects.end());
                 mTaskScheduler->updateSingleAabb(obj->second);
             }
+        }
 
 #ifndef BT_NO_PROFILE
         CProfileManager::Reset();
         CProfileManager::Increment_Frame_Counter();
 #endif
+
+        mTimeAccum += dt;
+
+        if (skipSimulation)
+            mTaskScheduler->resetSimulation(mActors);
+        else
+            // modifies mTimeAccum
+            mTaskScheduler->applyQueuedMovements(mTimeAccum, prepareFrameData(mTimeAccum >= mPhysicsDt), frameStart, frameNumber, stats);
+    }
+
+    void PhysicsSystem::moveActors()
+    {
+        auto* player = getActor(MWMechanics::getPlayer());
+        auto* world = MWBase::Environment::get().getWorld();
+        for (auto& [ptr, physicActor] : mActors)
+        {
+            if (physicActor.get() == player)
+                continue;
+            world->moveObject(physicActor->getPtr(), physicActor->getSimulationPosition(), false, false);
+        }
+        world->moveObject(player->getPtr(), player->getSimulationPosition(), false, false);
     }
 
     void PhysicsSystem::updateAnimatedCollisionShape(const MWWorld::Ptr& object)
