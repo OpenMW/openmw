@@ -565,6 +565,7 @@ namespace MWPhysics
             if (mAdvanceSimulation)
                 actorData.mActorRaw->setStandingOnPtr(actorData.mStandingOn);
         }
+        refreshLOSCache();
     }
 
     void PhysicsTaskScheduler::updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
