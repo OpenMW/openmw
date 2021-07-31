@@ -230,7 +230,7 @@ namespace MWPhysics
         return std::make_tuple(numSteps, actualDelta);
     }
 
-    const std::vector<MWWorld::Ptr>& PhysicsTaskScheduler::moveActors(float & timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    void PhysicsTaskScheduler::applyQueuedMovements(float & timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
@@ -238,8 +238,6 @@ namespace MWPhysics
         std::unique_lock lock(mSimulationMutex);
 
         double timeStart = mTimer->tick();
-
-        mMovedActors.clear();
 
         // start by finishing previous background computation
         if (mNumThreads != 0)
@@ -260,7 +258,6 @@ namespace MWPhysics
                     if (mAdvanceSimulation)
                         data.mActorRaw->setStandingOnPtr(data.mStandingOn);
                     data.mActorRaw->setSimulationPosition(interpolateMovements(data, mTimeAccum, mPhysicsDt));
-                    mMovedActors.emplace_back(data.mActorRaw->getPtr());
                 }
             }
             if(mAdvanceSimulation)
@@ -296,7 +293,7 @@ namespace MWPhysics
             syncComputation();
             if(mAdvanceSimulation)
                 mBudget.update(mTimer->delta_s(timeStart, mTimer->tick()), numSteps, mBudgetCursor);
-            return mMovedActors;
+            return;
         }
 
         mAsyncStartTime = mTimer->tick();
@@ -304,23 +301,19 @@ namespace MWPhysics
         mHasJob.notify_all();
         if (mAdvanceSimulation)
             mBudget.update(mTimer->delta_s(timeStart, mTimer->tick()), 1, mBudgetCursor);
-        return mMovedActors;
     }
 
-    const std::vector<MWWorld::Ptr>& PhysicsTaskScheduler::resetSimulation(const ActorMap& actors)
+    void PhysicsTaskScheduler::resetSimulation(const ActorMap& actors)
     {
         std::unique_lock lock(mSimulationMutex);
         mBudget.reset(mDefaultPhysicsDt);
         mAsyncBudget.reset(0.0f);
-        mMovedActors.clear();
         mActorsFrameData.clear();
         for (const auto& [_, actor] : actors)
         {
             actor->updatePosition();
             actor->updateCollisionObjectPosition();
-            mMovedActors.emplace_back(actor->getPtr());
         }
-        return mMovedActors;
     }
 
     void PhysicsTaskScheduler::rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const
@@ -561,7 +554,6 @@ namespace MWPhysics
             handleFall(actorData, mAdvanceSimulation);
             actorData.mActorRaw->setSimulationPosition(interpolateMovements(actorData, mTimeAccum, mPhysicsDt));
             updateMechanics(actorData);
-            mMovedActors.emplace_back(actorData.mActorRaw->getPtr());
             if (mAdvanceSimulation)
                 actorData.mActorRaw->setStandingOnPtr(actorData.mStandingOn);
         }

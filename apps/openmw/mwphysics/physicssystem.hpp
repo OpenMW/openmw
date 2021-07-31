@@ -154,7 +154,11 @@ namespace MWPhysics
 
             bool toggleCollisionMode();
 
-            void stepSimulation();
+            /// Determine new position based on all queued movements, then clear the list.
+            void stepSimulation(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+
+            /// Apply new positions to actors
+            void moveActors();
             void debugDraw();
 
             std::vector<MWWorld::Ptr> getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
@@ -204,11 +208,8 @@ namespace MWPhysics
             osg::BoundingBox getBoundingBox(const MWWorld::ConstPtr &object) const;
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
-            /// be overwritten. Valid until the next call to applyQueuedMovement.
+            /// be overwritten. Valid until the next call to stepSimulation
             void queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity);
-
-            /// Apply all queued movements, then clear the list.
-            const std::vector<MWWorld::Ptr>& applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             /// Clear the queued movements list without applying.
             void clearQueuedMovement();
