@@ -57,7 +57,7 @@ namespace MWInput
         }
         else if (key == "playerlooking" && !value)
         {
-            MWBase::Environment::get().getWorld()->rotateObject(player.getPlayer(), 0.f, 0.f, 0.f);
+            MWBase::Environment::get().getWorld()->rotateObject(player.getPlayer(), osg::Vec3f());
         }
         mSwitches[key] = value;
     }

@@ -190,7 +190,7 @@ namespace
                     const ESM::Position & newpos = iter->mData.getPosition();
                     const MWWorld::Ptr ptr(&*iter, cellstore);
                     if ((oldscale != iter->mRef.getScale() || oldpos.asVec3() != newpos.asVec3() || oldpos.rot[0] != newpos.rot[0] || oldpos.rot[1] != newpos.rot[1] || oldpos.rot[2] != newpos.rot[2]) && !ptr.getClass().isActor())
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, newpos.pos[0], newpos.pos[1], newpos.pos[2]);
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, newpos.asVec3());
                     if (!iter->mData.isEnabled())
                     {
                         iter->mData.enable();

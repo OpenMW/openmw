@@ -55,10 +55,10 @@ namespace MWWorld
                 int cellY;
                 world->positionToIndex(mPosition.pos[0],mPosition.pos[1],cellX,cellY);
                 world->moveObject(actor,world->getExterior(cellX,cellY),
-                    mPosition.pos[0],mPosition.pos[1],mPosition.pos[2]);
+                    mPosition.asVec3());
             }
             else
-                world->moveObject(actor,world->getInterior(mCellName),mPosition.pos[0],mPosition.pos[1],mPosition.pos[2]);
+                world->moveObject(actor,world->getInterior(mCellName),mPosition.asVec3());
         }
     }
 

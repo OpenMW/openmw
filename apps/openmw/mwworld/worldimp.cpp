@@ -1128,17 +1128,11 @@ namespace MWWorld
         }
     }
 
-    MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z, bool movePhysics)
+    MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, const osg::Vec3f& position, bool movePhysics)
     {
         ESM::Position pos = ptr.getRefData().getPosition();
-
-        pos.pos[0] = x;
-        pos.pos[1] = y;
-        pos.pos[2] = z;
-
+        std::memcpy(pos.pos, &position, sizeof(osg::Vec3f));
         ptr.getRefData().setPosition(pos);
-
-        osg::Vec3f vec(x, y, z);
 
         CellStore *currCell = ptr.isInCell() ? ptr.getCell() : nullptr; // currCell == nullptr should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
@@ -1228,7 +1222,7 @@ namespace MWWorld
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
-            mWorldScene->updateObjectPosition(newPtr, vec, movePhysics);
+            mWorldScene->updateObjectPosition(newPtr, position, movePhysics);
             if (movePhysics)
             {
                 if (const auto object = mPhysics->getObject(ptr))
@@ -1237,7 +1231,7 @@ namespace MWWorld
         }
 
         if (isPlayer)
-            mWorldScene->playerMoved(vec);
+            mWorldScene->playerMoved(position);
         else
         {
             mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
@@ -1247,10 +1241,10 @@ namespace MWWorld
         return newPtr;
     }
 
-    MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z, bool movePhysics, bool moveToActive)
+    MWWorld::Ptr World::moveObject(const Ptr& ptr, const osg::Vec3f& position, bool movePhysics, bool moveToActive)
     {
         int cellX, cellY;
-        positionToIndex(x, y, cellX, cellY);
+        positionToIndex(position.x(), position.y(), cellX, cellY);
 
         CellStore* cell = ptr.getCell();
         CellStore* newCell = getExterior(cellX, cellY);
@@ -1259,7 +1253,7 @@ namespace MWWorld
         if (cell->isExterior() || (moveToActive && isCellActive && ptr.getClass().isActor()))
             cell = newCell;
 
-        return moveObject(ptr, cell, x, y, z, movePhysics);
+        return moveObject(ptr, cell, position, movePhysics);
     }
 
     MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, osg::Vec3f vec, bool moveToActive, bool ignoreCollisions)
@@ -1269,8 +1263,8 @@ namespace MWWorld
         if (actor)
             actor->adjustPosition(vec, ignoreCollisions);
         if (ptr.getClass().isActor())
-            return moveObject(ptr, newpos.x(), newpos.y(), newpos.z(), false, moveToActive && ptr != getPlayerPtr());
-        return moveObject(ptr, newpos.x(), newpos.y(), newpos.z());
+            return moveObject(ptr, newpos, false, moveToActive && ptr != getPlayerPtr());
+        return moveObject(ptr, newpos);
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
@@ -1294,7 +1288,7 @@ namespace MWWorld
             updateNavigatorObject(*object);
     }
 
-    void World::rotateObjectImp(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
+    void World::rotateObject(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
     {
         const float pi = static_cast<float>(osg::PI);
 
@@ -1377,7 +1371,7 @@ namespace MWWorld
             pos.z() = std::min(pos.z(), traced.z());
         }
 
-        moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
+        moveObject(ptr, ptr.getCell(), pos);
     }
 
     void World::fixPosition()
@@ -1414,11 +1408,6 @@ namespace MWWorld
             esmPos.pos[2] = traced.z();
             MWWorld::ActionTeleport(actor.getCell()->isExterior() ? "" : actor.getCell()->getCell()->mName, esmPos, false).execute(actor);
         }
-    }
-
-    void World::rotateObject (const Ptr& ptr, float x, float y, float z, MWBase::RotationFlags flags)
-    {
-        rotateObjectImp(ptr, osg::Vec3f(x, y, z), flags);
     }
 
     void World::rotateWorldObject (const Ptr& ptr, osg::Quat rotate)
@@ -1536,7 +1525,7 @@ namespace MWWorld
                 auto* physactor = mPhysics->getActor(actor);
                 assert(physactor);
                 const auto position = physactor->getSimulationPosition();
-                moveObject(actor, position.x(), position.y(), position.z(), false, false);
+                moveObject(actor, position, false, false);
             }
         }
 
@@ -1546,7 +1535,7 @@ namespace MWWorld
             auto* physactor = mPhysics->getActor(*player);
             assert(physactor);
             const auto position = physactor->getSimulationPosition();
-            moveObject(*player, position.x(), position.y(), position.z(), false, false);
+            moveObject(*player, position, false, false);
         }
     }
 
@@ -1604,14 +1593,16 @@ namespace MWWorld
     bool World::rotateDoor(const Ptr door, MWWorld::DoorState state, float duration)
     {
         const ESM::Position& objPos = door.getRefData().getPosition();
-        float oldRot = objPos.rot[2];
+        auto oldRot = objPos.asRotationVec3();
+        auto newRot = oldRot;
 
         float minRot = door.getCellRef().getPosition().rot[2];
         float maxRot = minRot + osg::DegreesToRadians(90.f);
 
         float diff = duration * osg::DegreesToRadians(90.f) * (state == MWWorld::DoorState::Opening ? 1 : -1);
-        float targetRot = std::min(std::max(minRot, oldRot + diff), maxRot);
-        rotateObject(door, objPos.rot[0], objPos.rot[1], targetRot, MWBase::RotationFlag_none);
+        float targetRot = std::clamp(oldRot.z() + diff, minRot, maxRot);
+        newRot.z() = targetRot;
+        rotateObject(door, newRot, MWBase::RotationFlag_none);
 
         bool reached = (targetRot == maxRot && state != MWWorld::DoorState::Idle) || targetRot == minRot;
 
@@ -1662,7 +1653,7 @@ namespace MWWorld
                     MWBase::Environment::get().getSoundManager()->stopSound3D(door, closeSound);
             }
 
-            rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot, MWBase::RotationFlag_none);
+            rotateObject(door, oldRot, MWBase::RotationFlag_none);
         }
 
         return reached;
@@ -2279,7 +2270,7 @@ namespace MWWorld
                 pos.pos[0] -= adjust.x();
                 pos.pos[1] -= adjust.y();
                 pos.pos[2] -= adjust.z();
-                moveObject(dropped, pos.pos[0], pos.pos[1], pos.pos[2]);
+                moveObject(dropped, pos.asVec3());
             }
         }
 
@@ -2513,7 +2504,7 @@ namespace MWWorld
         player.getClass().getInventoryStore(player).setContListener(anim);
 
         scaleObject(player, player.getCellRef().getScale()); // apply race height
-        rotateObject(player, 0.f, 0.f, 0.f, MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
+        rotateObject(player, osg::Vec3f(), MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
@@ -3859,8 +3850,8 @@ namespace MWWorld
                     return true;
 
                 const ESM::Position& origPos = ptr.getCellRef().getPosition();
-                MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.pos[0], origPos.pos[1], origPos.pos[2]);
-                MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.rot[0], origPos.rot[1], origPos.rot[2]);
+                MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.asVec3());
+                MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.asRotationVec3());
                 ptr.getClass().adjustPosition(ptr, true);
             }
             return true;
