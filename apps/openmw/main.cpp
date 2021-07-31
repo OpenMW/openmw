@@ -60,7 +60,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "set initial cell")
 
         ("content", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
-            ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
+            ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
         ("groundcover", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
             ->multitoken()->composing(), "groundcover content file(s): esm/esp, or omwgame/omwaddon")
