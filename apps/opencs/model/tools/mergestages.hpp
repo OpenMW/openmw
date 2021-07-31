@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <map>
+#include <memory>
 
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -82,7 +83,8 @@ namespace CSMTools
         const CSMWorld::Record<RecordType>& record = source.getRecord (stage);
 
         if (!record.isDeleted())
-            target.appendRecord (CSMWorld::Record<RecordType> (CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &record.get()));
+            target.appendRecord (std::make_unique<CSMWorld::Record<RecordType> >(
+                    CSMWorld::Record<RecordType>(CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &record.get())));
     }
 
     class MergeRefIdsStage : public CSMDoc::Stage

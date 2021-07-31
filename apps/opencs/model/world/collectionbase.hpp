@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "universalid.hpp"
 #include "columns.hpp"
@@ -64,13 +65,13 @@ namespace CSMWorld
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
 
-            virtual void replace (int index, const RecordBase& record) = 0;
+            virtual void replace (int index, std::unique_ptr<RecordBase> record) = 0;
             ///< If the record type does not match, an exception is thrown.
             ///
             /// \attention \a record must not change the ID.
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual void appendRecord (const RecordBase& record,
+            virtual void appendRecord (std::unique_ptr<RecordBase> record,
                 UniversalId::Type type = UniversalId::Type_None) = 0;
             ///< If the record type does not match, an exception is thrown.
 
@@ -98,6 +99,12 @@ namespace CSMWorld
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
             ///
             /// \return Success?
+
+            virtual int getInsertIndex (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None,
+                RecordBase *record = nullptr) const;
+            ///< Works like getAppendIndex unless an overloaded method uses the record pointer
+            /// to get additional info about the record that results in an alternative index.
 
             int searchColumnIndex (Columns::ColumnId id) const;
             ///< Return index of column with the given \a id. If no such column exists, -1 is returned.
