@@ -12,14 +12,14 @@ namespace DetourNavigator
         : mSettings(settings)
     {}
 
-    bool TileCachedRecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape,
+    bool TileCachedRecastMeshManager::addObject(const ObjectId id, const CollisionShape& shape,
                                                 const btTransform& transform, const AreaType areaType)
     {
         std::vector<TilePosition> tilesPositions;
         const auto border = getBorderSize(mSettings);
         {
             auto tiles = mTiles.lock();
-            getTilesPositions(shape, transform, mSettings, [&] (const TilePosition& tilePosition)
+            getTilesPositions(shape.getShape(), transform, mSettings, [&] (const TilePosition& tilePosition)
                 {
                     if (addTile(id, shape, transform, areaType, tilePosition, border, tiles.get()))
                         tilesPositions.push_back(tilePosition);
@@ -156,7 +156,7 @@ namespace DetourNavigator
         it->second.reportNavMeshChange(recastMeshVersion, navMeshVersion);
     }
 
-    bool TileCachedRecastMeshManager::addTile(const ObjectId id, const btCollisionShape& shape,
+    bool TileCachedRecastMeshManager::addTile(const ObjectId id, const CollisionShape& shape,
         const btTransform& transform, const AreaType areaType, const TilePosition& tilePosition, float border,
         std::map<TilePosition, CachedRecastMeshManager>& tiles)
     {

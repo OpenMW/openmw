@@ -443,7 +443,7 @@ namespace MWPhysics
 
     void PhysicsSystem::addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject)
     {
-        mHeightFields[std::make_pair(x,y)] = std::make_unique<HeightField>(heights, x, y, triSize, sqrtVerts, minH, maxH, holdObject, mTaskScheduler.get());
+        mHeightFields[std::make_pair(x,y)] = osg::ref_ptr<HeightField>(new HeightField(heights, x, y, triSize, sqrtVerts, minH, maxH, holdObject, mTaskScheduler.get()));
     }
 
     void PhysicsSystem::removeHeightField (int x, int y)

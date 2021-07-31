@@ -8,7 +8,7 @@ namespace DetourNavigator
         : mImpl(settings, bounds, generation)
     {}
 
-    bool CachedRecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape,
+    bool CachedRecastMeshManager::addObject(const ObjectId id, const CollisionShape& shape,
                                             const btTransform& transform, const AreaType areaType)
     {
         if (!mImpl.addObject(id, shape, transform, areaType))

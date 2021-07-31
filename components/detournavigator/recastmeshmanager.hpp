@@ -38,7 +38,7 @@ namespace DetourNavigator
 
         RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation);
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+        bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
         bool updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType);

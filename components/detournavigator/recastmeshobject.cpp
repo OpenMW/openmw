@@ -22,15 +22,36 @@ namespace DetourNavigator
             }
             return result;
         }
+
+        std::vector<RecastMeshObject> makeChildrenObjects(const osg::ref_ptr<const osg::Object>& holder,
+                                                          const btCompoundShape& shape, const AreaType areaType)
+        {
+            std::vector<RecastMeshObject> result;
+            for (int i = 0, num = shape.getNumChildShapes(); i < num; ++i)
+            {
+                const CollisionShape collisionShape {holder, *shape.getChildShape(i)};
+                result.emplace_back(collisionShape, shape.getChildTransform(i), areaType);
+            }
+            return result;
+        }
+
+        std::vector<RecastMeshObject> makeChildrenObjects(const osg::ref_ptr<const osg::Object>& holder,
+                                                          const btCollisionShape& shape, const AreaType areaType)
+        {
+            if (shape.isCompound())
+                return makeChildrenObjects(holder, static_cast<const btCompoundShape&>(shape), areaType);
+            return std::vector<RecastMeshObject>();
+        }
     }
 
-    RecastMeshObject::RecastMeshObject(const btCollisionShape& shape, const btTransform& transform,
+    RecastMeshObject::RecastMeshObject(const CollisionShape& shape, const btTransform& transform,
             const AreaType areaType)
-        : mShape(shape)
+        : mHolder(shape.getHolder())
+        , mShape(shape.getShape())
         , mTransform(transform)
         , mAreaType(areaType)
-        , mLocalScaling(shape.getLocalScaling())
-        , mChildren(makeChildrenObjects(shape, mAreaType))
+        , mLocalScaling(mShape.get().getLocalScaling())
+        , mChildren(makeChildrenObjects(mHolder, mShape.get(), mAreaType))
     {
     }
 
@@ -55,22 +76,6 @@ namespace DetourNavigator
         if (mShape.get().isCompound())
             result = updateCompoundObject(static_cast<const btCompoundShape&>(mShape.get()), mAreaType, mChildren)
                     || result;
-        return result;
-    }
-
-    std::vector<RecastMeshObject> makeChildrenObjects(const btCollisionShape& shape, const AreaType areaType)
-    {
-        if (shape.isCompound())
-            return makeChildrenObjects(static_cast<const btCompoundShape&>(shape), areaType);
-        else
-            return std::vector<RecastMeshObject>();
-    }
-
-    std::vector<RecastMeshObject> makeChildrenObjects(const btCompoundShape& shape, const AreaType areaType)
-    {
-        std::vector<RecastMeshObject> result;
-        for (int i = 0, num = shape.getNumChildShapes(); i < num; ++i)
-            result.emplace_back(*shape.getChildShape(i), shape.getChildTransform(i), areaType);
         return result;
     }
 }
