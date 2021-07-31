@@ -221,7 +221,7 @@ namespace
             Vec3fEq(204, -204, 1.99998295307159423828125)
         )) << mPath;
 
-        mNavigator->addObject(ObjectId(&compoundShape), compoundShape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&compoundShape), ObjectShapes(compoundShape, nullptr), btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -273,7 +273,7 @@ namespace
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addHeightfield(mCellPosition, mHeightfieldTileSize * (surface.mSize - 1), mShift, surface);
-        mNavigator->addObject(ObjectId(&compoundShape), compoundShape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&compoundShape), ObjectShapes(compoundShape, nullptr), btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -307,7 +307,7 @@ namespace
 
         compoundShape.updateChildTransform(0, btTransform(btMatrix3x3::getIdentity(), btVector3(1000, 0, 0)));
 
-        mNavigator->updateObject(ObjectId(&compoundShape), compoundShape, btTransform::getIdentity());
+        mNavigator->updateObject(ObjectId(&compoundShape), ObjectShapes(compoundShape, nullptr), btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -364,8 +364,8 @@ namespace
         shape2.setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
-        mNavigator->addObject(ObjectId(&shape2), shape2, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), ObjectShapes(shape, nullptr), btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape2), ObjectShapes(shape2, nullptr), btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -670,7 +670,7 @@ namespace
         shape.setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), ObjectShapes(shape, nullptr), btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -678,7 +678,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), ObjectShapes(shape, nullptr), btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -813,7 +813,7 @@ namespace
         for (std::size_t i = 0; i < boxShapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 10, i * 10, i * 10));
-            mNavigator->addObject(ObjectId(&boxShapes[i]), boxShapes[i], transform);
+            mNavigator->addObject(ObjectId(&boxShapes[i]), ObjectShapes(boxShapes[i], nullptr), transform);
         }
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -821,7 +821,7 @@ namespace
         for (std::size_t i = 0; i < boxShapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 10 + 1, i * 10 + 1, i * 10 + 1));
-            mNavigator->updateObject(ObjectId(&boxShapes[i]), boxShapes[i], transform);
+            mNavigator->updateObject(ObjectId(&boxShapes[i]), ObjectShapes(boxShapes[i], nullptr), transform);
         }
 
         mNavigator->update(mPlayerPosition);
@@ -865,7 +865,7 @@ namespace
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32, i * 32, i * 32));
-            mNavigator->addObject(ObjectId(&shapes[i]), shapes[i], transform);
+            mNavigator->addObject(ObjectId(&shapes[i]), ObjectShapes(shapes[i], nullptr), transform);
         }
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -874,7 +874,7 @@ namespace
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 1, i * 32 + 1, i * 32 + 1));
-            mNavigator->updateObject(ObjectId(&shapes[i]), shapes[i], transform);
+            mNavigator->updateObject(ObjectId(&shapes[i]), ObjectShapes(shapes[i], nullptr), transform);
         }
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -882,7 +882,7 @@ namespace
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 2, i * 32 + 2, i * 32 + 2));
-            mNavigator->updateObject(ObjectId(&shapes[i]), shapes[i], transform);
+            mNavigator->updateObject(ObjectId(&shapes[i]), ObjectShapes(shapes[i], nullptr), transform);
         }
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -932,10 +932,10 @@ namespace
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addHeightfield(mCellPosition, mHeightfieldTileSize * (surface.mSize - 1), mShift, surface);
-        mNavigator->addObject(ObjectId(&oscillatingBoxShape), oscillatingBoxShape,
+        mNavigator->addObject(ObjectId(&oscillatingBoxShape), ObjectShapes(oscillatingBoxShape, nullptr),
                               btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition));
         // add this box to make navmesh bound box independent from oscillatingBoxShape rotations
-        mNavigator->addObject(ObjectId(&boderBoxShape), boderBoxShape,
+        mNavigator->addObject(ObjectId(&boderBoxShape), ObjectShapes(boderBoxShape, nullptr),
                               btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition + btVector3(0, 0, 200)));
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -952,7 +952,7 @@ namespace
         {
             const btTransform transform(btQuaternion(btVector3(0, 0, 1), n * 2 * osg::PI / 10),
                                         oscillatingBoxShapePosition);
-            mNavigator->updateObject(ObjectId(&oscillatingBoxShape), oscillatingBoxShape, transform);
+            mNavigator->updateObject(ObjectId(&oscillatingBoxShape), ObjectShapes(oscillatingBoxShape, nullptr), transform);
             mNavigator->update(mPlayerPosition);
             mNavigator->wait(mListener, WaitConditionType::allJobsDone);
         }

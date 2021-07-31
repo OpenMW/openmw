@@ -32,14 +32,9 @@ namespace DetourNavigator
             --it->second;
     }
 
-    bool NavigatorImpl::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
-    {
-        return mNavMeshManager.addObject(id, shape, transform, AreaType_ground);
-    }
-
     bool NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        bool result = addObject(id, shapes.mShape, transform);
+        bool result = mNavMeshManager.addObject(id, shapes.mShape, transform, AreaType_ground);
         if (shapes.mAvoid)
         {
             const ObjectId avoidId(shapes.mAvoid);
@@ -65,14 +60,9 @@ namespace DetourNavigator
         return false;
     }
 
-    bool NavigatorImpl::updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
-    {
-        return mNavMeshManager.updateObject(id, shape, transform, AreaType_ground);
-    }
-
     bool NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        bool result = updateObject(id, shapes.mShape, transform);
+        bool result = mNavMeshManager.updateObject(id, shapes.mShape, transform, AreaType_ground);
         if (shapes.mAvoid)
         {
             const ObjectId avoidId(shapes.mAvoid);

@@ -21,13 +21,9 @@ namespace DetourNavigator
 
         void removeAgent(const osg::Vec3f& agentHalfExtents) override;
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) override;
-
         bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
 
         bool addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) override;
-
-        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) override;
 
         bool updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
 

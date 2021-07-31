@@ -73,15 +73,6 @@ namespace DetourNavigator
         virtual void removeAgent(const osg::Vec3f& agentHalfExtents) = 0;
 
         /**
-         * @brief addObject is used to add object represented by single btCollisionShape and btTransform.
-         * @param id is used to distinguish different objects.
-         * @param shape must live until object is updated by another shape removed from Navigator.
-         * @param transform allows to setup object geometry according to its world state.
-         * @return true if object is added, false if there is already object with given id.
-         */
-        virtual bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) = 0;
-
-        /**
          * @brief addObject is used to add complex object with allowed to walk and avoided to walk shapes
          * @param id is used to distinguish different objects
          * @param shape members must live until object is updated by another shape removed from Navigator
@@ -98,15 +89,6 @@ namespace DetourNavigator
          * @return true if object is added, false if there is already object with given id.
          */
         virtual bool addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) = 0;
-
-        /**
-         * @brief updateObject replace object geometry by given data.
-         * @param id is used to find object.
-         * @param shape must live until object is updated by another shape removed from Navigator.
-         * @param transform allows to setup objects geometry according to its world state.
-         * @return true if object is updated, false if there is no object with given id.
-         */
-        virtual bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
