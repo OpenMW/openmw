@@ -401,6 +401,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "",
             "Physics Actors",
             "Physics Objects",
+            "Physics Projectiles",
             "Physics HeightFields",
         });
 
