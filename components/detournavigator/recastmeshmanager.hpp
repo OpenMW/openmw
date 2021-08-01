@@ -13,6 +13,7 @@
 #include <map>
 #include <optional>
 #include <memory>
+#include <mutex>
 
 class btCollisionShape;
 
@@ -65,9 +66,10 @@ namespace DetourNavigator
         };
 
         const Settings& mSettings;
+        const std::size_t mGeneration;
+        const TileBounds mTileBounds;
+        mutable std::mutex mMutex;
         std::size_t mRevision = 0;
-        std::size_t mGeneration;
-        TileBounds mTileBounds;
         std::list<OscillatingRecastMeshObject> mObjectsOrder;
         std::map<ObjectId, std::list<OscillatingRecastMeshObject>::iterator> mObjects;
         std::list<Water> mWaterOrder;

@@ -4,6 +4,8 @@
 #include "recastmeshmanager.hpp"
 #include "version.hpp"
 
+#include <components/misc/guarded.hpp>
+
 namespace DetourNavigator
 {
     class CachedRecastMeshManager
@@ -32,7 +34,7 @@ namespace DetourNavigator
 
     private:
         RecastMeshManager mImpl;
-        std::shared_ptr<RecastMesh> mCached;
+        Misc::ScopeGuarded<std::shared_ptr<RecastMesh>> mCached;
     };
 }
 
