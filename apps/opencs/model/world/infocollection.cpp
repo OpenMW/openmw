@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <iterator>
+#include <cassert>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/loaddial.hpp>
@@ -256,8 +257,8 @@ CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const s
 
     // Find end (one past the range)
     RecordConstIterator end = begin + iter->second.size();
-    if (end != getRecords().end())
-        ++end;
+
+    assert(static_cast<size_t>(std::distance(begin, end)) == iter->second.size());
 
     return Range (begin, end);
 }
