@@ -46,9 +46,9 @@ namespace CSMWorld
         Record(State state,
                 const ESXRecordT *base = 0, const ESXRecordT *modified = 0);
 
-        std::unique_ptr<RecordBase> clone() const;
+        std::unique_ptr<RecordBase> clone() const override;
 
-        std::unique_ptr<RecordBase> modifiedCopy() const;
+        std::unique_ptr<RecordBase> modifiedCopy() const override;
 
         void assign (const RecordBase& record) override;
 
