@@ -764,7 +764,6 @@ void CSMWorld::RefIdCollection::setNestedData(int row, int column, const QVarian
     const CSMWorld::NestedRefIdAdapterBase& nestedAdapter = getNestedAdapter(mColumns.at(column), localIndex.second);
 
     nestedAdapter.setNestedData(&mColumns.at (column), mData, localIndex.first, data, subRow, subColumn);
-    return;
 }
 
 void CSMWorld::RefIdCollection::removeRows (int index, int count)
@@ -778,7 +777,6 @@ void CSMWorld::RefIdCollection::removeNestedRows(int row, int column, int subRow
     const CSMWorld::NestedRefIdAdapterBase& nestedAdapter = getNestedAdapter(mColumns.at(column), localIndex.second);
 
     nestedAdapter.removeNestedRow(&mColumns.at (column), mData, localIndex.first, subRow);
-    return;
 }
 
 void CSMWorld::RefIdCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
@@ -895,7 +893,6 @@ void CSMWorld::RefIdCollection::addNestedRow(int row, int col, int position)
     const CSMWorld::NestedRefIdAdapterBase& nestedAdapter = getNestedAdapter(mColumns.at(col), localIndex.second);
 
     nestedAdapter.addNestedRow(&mColumns.at(col), mData, localIndex.first, position);
-    return;
 }
 
 void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWorld::NestedTableWrapperBase& nestedTable)
@@ -904,7 +901,6 @@ void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWor
     const CSMWorld::NestedRefIdAdapterBase& nestedAdapter = getNestedAdapter(mColumns.at(column), localIndex.second);
 
     nestedAdapter.setNestedTable(&mColumns.at(column), mData, localIndex.first, nestedTable);
-    return;
 }
 
 CSMWorld::NestedTableWrapperBase* CSMWorld::RefIdCollection::nestedTable(int row, int column) const
