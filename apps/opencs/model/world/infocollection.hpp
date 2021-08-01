@@ -1,6 +1,8 @@
 #ifndef CSM_WOLRD_INFOCOLLECTION_H
 #define CSM_WOLRD_INFOCOLLECTION_H
 
+#include <unordered_map>
+
 #include "collection.hpp"
 #include "info.hpp"
 
@@ -72,19 +74,19 @@ namespace CSMWorld
 
             void removeDialogueInfos(const std::string& dialogueId);
 
-            void removeRows (int index, int count);
+            void removeRows (int index, int count) override;
 
             void appendBlankRecord (const std::string& id,
-                                            UniversalId::Type type = UniversalId::Type_None);
+                                            UniversalId::Type type = UniversalId::Type_None) override;
 
-            int searchId (const std::string& id) const;
+            int searchId (const std::string& id) const override;
 
             void appendRecord (std::unique_ptr<RecordBase> record,
-                UniversalId::Type type = UniversalId::Type_None);
+                UniversalId::Type type = UniversalId::Type_None) override;
 
             void insertRecord (std::unique_ptr<RecordBase> record,
                                        int index,
-                                       UniversalId::Type type = UniversalId::Type_None);
+                                       UniversalId::Type type = UniversalId::Type_None) override;
     };
 }
 
