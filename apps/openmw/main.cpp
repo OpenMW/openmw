@@ -44,6 +44,10 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     desc.add_options()
         ("help", "print help message")
         ("version", "print version information and quit")
+
+        ("replace", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+            ->multitoken()->composing(), "settings where the values from the current source should replace those from lower-priority sources instead of being appended")
+
         ("data", bpo::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")
             ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
