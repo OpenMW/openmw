@@ -100,6 +100,17 @@ boost::program_options::variables_map ConfigurationManager::separateComposingVar
 
 void ConfigurationManager::mergeComposingVariables(boost::program_options::variables_map & first, boost::program_options::variables_map & second, boost::program_options::options_description& description)
 {
+    // There are a few places this assumes all variables are present in second, but it's never crashed in the wild, so it looks like that's guaranteed.
+    std::set<std::string> replacedVariables;
+    if (description.find_nothrow("replace", false))
+    {
+        auto replace = second["replace"];
+        if (!replace.defaulted() && !replace.empty())
+        {
+            std::vector<std::string> replaceVector = replace.as<Files::EscapeStringVector>().toStdStringVector();
+            replacedVariables.insert(replaceVector.begin(), replaceVector.end());
+        }
+    }
     for (const auto& option : description.options())
     {
         if (option->semantic()->is_composing())
@@ -110,6 +121,12 @@ void ConfigurationManager::mergeComposingVariables(boost::program_options::varia
             if (firstPosition == first.end())
             {
                 first.emplace(name, second[name]);
+                continue;
+            }
+
+            if (replacedVariables.count(name))
+            {
+                firstPosition->second = second[name];
                 continue;
             }
 
