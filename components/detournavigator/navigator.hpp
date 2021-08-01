@@ -10,6 +10,8 @@
 #include "waitconditiontype.hpp"
 #include "heightfieldshape.hpp"
 
+#include <components/resource/bulletshape.hpp>
+
 #include <variant>
 
 namespace ESM
@@ -27,11 +29,10 @@ namespace DetourNavigator
 {
     struct ObjectShapes
     {
-        const btCollisionShape& mShape;
-        const btCollisionShape* mAvoid;
+        osg::ref_ptr<const Resource::BulletShapeInstance> mShapeInstance;
 
-        ObjectShapes(const btCollisionShape& shape, const btCollisionShape* avoid)
-            : mShape(shape), mAvoid(avoid)
+        ObjectShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance)
+            : mShapeInstance(shapeInstance)
         {}
     };
 
@@ -40,9 +41,9 @@ namespace DetourNavigator
         osg::Vec3f mConnectionStart;
         osg::Vec3f mConnectionEnd;
 
-        DoorShapes(const btCollisionShape& shape, const btCollisionShape* avoid,
+        DoorShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance,
                    const osg::Vec3f& connectionStart,const osg::Vec3f& connectionEnd)
-            : ObjectShapes(shape, avoid)
+            : ObjectShapes(shapeInstance)
             , mConnectionStart(connectionStart)
             , mConnectionEnd(connectionEnd)
         {}

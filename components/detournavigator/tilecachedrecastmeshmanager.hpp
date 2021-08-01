@@ -22,11 +22,11 @@ namespace DetourNavigator
     public:
         TileCachedRecastMeshManager(const Settings& settings);
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+        bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
         template <class OnChangedTile>
-        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+        bool updateObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
             const AreaType areaType, OnChangedTile&& onChangedTile)
         {
             const auto object = mObjectsTilesPositions.find(id);
@@ -56,7 +56,7 @@ namespace DetourNavigator
                         changed = true;
                     }
                 };
-                getTilesPositions(shape, transform, mSettings, onTilePosition);
+                getTilesPositions(shape.getShape(), transform, mSettings, onTilePosition);
                 std::sort(newTiles.begin(), newTiles.end());
                 for (const auto& tile : currentTiles)
                 {
@@ -110,7 +110,7 @@ namespace DetourNavigator
         std::size_t mRevision = 0;
         std::size_t mTilesGeneration = 0;
 
-        bool addTile(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+        bool addTile(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                      const AreaType areaType, const TilePosition& tilePosition, float border,
                      std::map<TilePosition, CachedRecastMeshManager>& tiles);
 

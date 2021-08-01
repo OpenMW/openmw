@@ -35,7 +35,7 @@ namespace DetourNavigator
     {
     }
 
-    bool RecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+    bool RecastMeshManager::addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
         const auto object = mObjects.lower_bound(id);
