@@ -1,6 +1,8 @@
 #ifndef CSM_WOLRD_INFOCOLLECTION_H
 #define CSM_WOLRD_INFOCOLLECTION_H
 
+#include <unordered_map>
+
 #include "collection.hpp"
 #include "info.hpp"
 
