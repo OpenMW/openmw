@@ -805,8 +805,7 @@ void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const CSMWorld::UniversalId::Type type)
 {
-        std::unique_ptr<RecordBase> newRecord =
-            std::move(mData.getRecord(mData.searchId(origin)).modifiedCopy());
+        std::unique_ptr<RecordBase> newRecord = mData.getRecord(mData.searchId(origin)).modifiedCopy();
         mAdapters.find(type)->second->setId(*newRecord, destination);
         mData.insertRecord(std::move(newRecord), type, destination);
 }
