@@ -16,6 +16,7 @@
 #include <memory>
 #include <variant>
 #include <tuple>
+#include <mutex>
 
 class btCollisionShape;
 
@@ -73,9 +74,10 @@ namespace DetourNavigator
         };
 
         const Settings& mSettings;
+        const std::size_t mGeneration;
+        const TileBounds mTileBounds;
+        mutable std::mutex mMutex;
         std::size_t mRevision = 0;
-        std::size_t mGeneration;
-        TileBounds mTileBounds;
         std::map<ObjectId, OscillatingRecastMeshObject> mObjects;
         std::map<osg::Vec2i, Cell> mWater;
         std::map<osg::Vec2i, Heightfield> mHeightfields;

@@ -5,6 +5,8 @@
 #include "version.hpp"
 #include "heightfieldshape.hpp"
 
+#include <components/misc/guarded.hpp>
+
 namespace DetourNavigator
 {
     class CachedRecastMeshManager
@@ -38,7 +40,7 @@ namespace DetourNavigator
 
     private:
         RecastMeshManager mImpl;
-        std::shared_ptr<RecastMesh> mCached;
+        Misc::ScopeGuarded<std::shared_ptr<RecastMesh>> mCached;
     };
 }
 
