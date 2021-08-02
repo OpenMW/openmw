@@ -443,7 +443,7 @@
                             </Widget>
                             <Widget type="HBox" skin="" position="4 56 350 24">
                                 <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 115 24" align="Left Top" name="WaterReflectionDetail">
-                                    <Property key="AddItem" value="Off"/>
+                                    <Property key="AddItem" value="Sky"/>
                                     <Property key="AddItem" value="Terrain"/>
                                     <Property key="AddItem" value="World"/>
                                     <Property key="AddItem" value="Objects"/>
