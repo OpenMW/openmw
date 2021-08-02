@@ -884,8 +884,6 @@ namespace SceneUtil
         std::string lightingMethodString = Settings::Manager::getString("lighting method", "Shaders");
         auto lightingMethod = LightManager::getLightingMethodFromString(lightingMethodString);
 
-        updateSettings();
-
         static bool hasLoggedWarnings = false;
 
         if (lightingMethod == LightingMethod::SingleUBO && !hasLoggedWarnings)
@@ -903,6 +901,8 @@ namespace SceneUtil
             initPerObjectUniform(targetLights);
         else
             initSingleUBO(targetLights);
+
+        updateSettings();
 
         getOrCreateStateSet()->addUniform(new osg::Uniform("PointLightCount", 0));
 
