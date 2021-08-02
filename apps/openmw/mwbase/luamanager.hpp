@@ -43,7 +43,7 @@ namespace MWBase
         struct ActorControls
         {
             bool mDisableAI = false;
-            bool mControlledFromLua = false;
+            bool mChanged = false;
 
             bool mJump = false;
             bool mRun = false;

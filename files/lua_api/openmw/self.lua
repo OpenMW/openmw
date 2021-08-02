@@ -26,20 +26,13 @@
 -- @field [parent=#self] #ActorControls controls
 
 -------------------------------------------------------------------------------
--- Allows to view and/or modify controls of an actor. Makes an effect only if
--- `setDirectControl(true)` was called. All fields are mutable.
+-- Allows to view and/or modify controls of an actor. All fields are mutable.
 -- @type ActorControls
 -- @field [parent=#ActorControls] #number movement +1 - move forward, -1 - move backward
 -- @field [parent=#ActorControls] #number sideMovement +1 - move right, -1 - move left
 -- @field [parent=#ActorControls] #number turn Turn right (radians); if negative - turn left
 -- @field [parent=#ActorControls] #boolean run true - run, false - walk
 -- @field [parent=#ActorControls] #boolean jump If true - initiate a jump
-
--------------------------------------------------------------------------------
--- Enables or disables direct movement control (disabled by default).
--- @function [parent=#self] setDirectControl
--- @param self
--- @param #boolean control
 
 -------------------------------------------------------------------------------
 -- Enables or disables standart AI (enabled by default).
