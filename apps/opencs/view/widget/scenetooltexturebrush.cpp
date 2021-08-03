@@ -179,10 +179,10 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
         undoStack.endMacro();
     }
 
-    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
+    if (index != -1 && !landtexturesCollection.getRecord(rowInNew).isDeleted())
     {
         mBrushTextureLabel = "Selected texture: " + newBrushTextureId + " ";
-        mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(index, landTextureFilename).value<QString>());
+        mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(rowInNew, landTextureFilename).value<QString>());
     } else
     {
         newBrushTextureId = "";
