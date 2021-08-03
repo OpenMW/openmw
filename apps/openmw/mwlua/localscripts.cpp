@@ -22,11 +22,15 @@ namespace MWLua
     {
         using ActorControls = MWBase::LuaManager::ActorControls;
         sol::usertype<ActorControls> controls = context.mLua->sol().new_usertype<ActorControls>("ActorControls");
-        controls["movement"] = &ActorControls::mMovement;
-        controls["sideMovement"] = &ActorControls::mSideMovement;
-        controls["turn"] = &ActorControls::mTurn;
-        controls["run"] = &ActorControls::mRun;
-        controls["jump"] = &ActorControls::mJump;
+
+#define CONTROL(TYPE, FIELD) sol::property([](const ActorControls& c) { return c.FIELD; },\
+                                           [](ActorControls& c, const TYPE& v) { c.FIELD = v; c.mChanged = true; })
+        controls["movement"] = CONTROL(float, mMovement);
+        controls["sideMovement"] = CONTROL(float, mSideMovement);
+        controls["turn"] = CONTROL(float, mTurn);
+        controls["run"] = CONTROL(bool, mRun);
+        controls["jump"] = CONTROL(bool, mJump);
+#undef CONTROL
 
         sol::usertype<SelfObject> selfAPI =
             context.mLua->sol().new_usertype<SelfObject>("SelfObject", sol::base_classes, sol::bases<LObject>());
@@ -34,7 +38,6 @@ namespace MWLua
         selfAPI["object"] = sol::readonly_property([](SelfObject& self) -> LObject { return LObject(self); });
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
-        selfAPI["setDirectControl"] = [](SelfObject& self, bool v) { self.mControls.mControlledFromLua = v; };
         selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
         selfAPI["setEquipment"] = [manager=context.mLuaManager](const SelfObject& obj, sol::table equipment)
         {
@@ -82,8 +85,6 @@ namespace MWLua
     LocalScripts::LocalScripts(LuaUtil::LuaState* lua, const LObject& obj)
         : LuaUtil::ScriptsContainer(lua, "L" + idToString(obj.id())), mData(obj)
     {
-        mData.mControls.mControlledFromLua = false;
-        mData.mControls.mDisableAI = false;
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
         registerEngineHandlers({&mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers});
     }

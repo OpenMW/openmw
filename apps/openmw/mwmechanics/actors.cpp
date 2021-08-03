@@ -2095,7 +2095,7 @@ namespace MWMechanics
                         float rotationZ = mov.mRotation[2];
                         bool jump = mov.mPosition[2] == 1;
                         bool runFlag = stats.getMovementFlag(MWMechanics::CreatureStats::Flag_Run);
-                        if (luaControls->mControlledFromLua)
+                        if (luaControls->mChanged)
                         {
                             mov.mPosition[0] = luaControls->mSideMovement;
                             mov.mPosition[1] = luaControls->mMovement;
@@ -2104,6 +2104,7 @@ namespace MWMechanics
                             mov.mRotation[2] = luaControls->mTurn;
                             mov.mSpeedFactor = osg::Vec2(luaControls->mMovement, luaControls->mSideMovement).length();
                             stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, luaControls->mRun);
+                            luaControls->mChanged = false;
                         }
                         luaControls->mSideMovement = movement.x();
                         luaControls->mMovement = movement.y();
