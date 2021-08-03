@@ -1533,10 +1533,7 @@ namespace MWWorld
 
     void World::updateNavigatorObject(const MWPhysics::Object& object)
     {
-        const DetourNavigator::ObjectShapes shapes {
-            *object.getShapeInstance()->getCollisionShape(),
-            object.getShapeInstance()->getAvoidCollisionShape()
-        };
+        const DetourNavigator::ObjectShapes shapes(object.getShapeInstance());
         mShouldUpdateNavigator = mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform())
             || mShouldUpdateNavigator;
     }
