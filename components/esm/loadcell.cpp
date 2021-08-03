@@ -311,7 +311,7 @@ namespace ESM
         mWater = 0;
         mWaterInt = false;
         mMapColor = 0;
-        mRefNumCounter = -1;
+        mRefNumCounter = 0;
 
         mData.mFlags = 0;
         mData.mX = 0;
