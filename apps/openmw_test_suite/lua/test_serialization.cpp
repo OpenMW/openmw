@@ -193,9 +193,9 @@ namespace
         table["y"] = TestStruct2{4, 3};
         TestSerializer serializer;
 
-        EXPECT_ERROR(LuaUtil::serialize(table), "Unknown userdata");
+        EXPECT_ERROR(LuaUtil::serialize(table), "Value is not serializable.");
         std::string serialized = LuaUtil::serialize(table, &serializer);
-        EXPECT_ERROR(LuaUtil::deserialize(lua, serialized), "Unknown type:");
+        EXPECT_ERROR(LuaUtil::deserialize(lua, serialized), "Unknown type in serialized data:");
         sol::table res = LuaUtil::deserialize(lua, serialized, &serializer);
 
         TestStruct1 rx = res.get<TestStruct1>("x");
