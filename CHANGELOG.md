@@ -11,6 +11,7 @@
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
     Bug #5755: Active grid object paging - disappearing textures
+    Bug #5788: Texture editing parses the selected indexes wrongly
     Bug #5842: GetDisposition adds temporary disposition change from different actors
     Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
     Bug #6051: NaN water height in ESM file is not handled gracefully
