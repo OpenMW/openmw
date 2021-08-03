@@ -29,7 +29,7 @@ namespace CSMWorld
 
             int mNextId;
 
-            unsigned int extractIdNum(const std::string& id) const;
+            unsigned int extractIdNum(std::string_view id) const;
 
             int getIntIndex (unsigned int id) const;
 

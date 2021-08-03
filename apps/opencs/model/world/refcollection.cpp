@@ -181,14 +181,14 @@ std::string CSMWorld::RefCollection::getNewId()
     return "ref#" + std::to_string(mNextId++);
 }
 
-unsigned int CSMWorld::RefCollection::extractIdNum (const std::string& id) const
+unsigned int CSMWorld::RefCollection::extractIdNum(std::string_view id) const
 {
     std::string::size_type separator = id.find_last_of('#');
 
     if (separator == std::string::npos)
-        throw std::runtime_error("invalid ref ID: " + id);
+        throw std::runtime_error("invalid ref ID: " + std::string(id));
 
-    return static_cast<unsigned int>(std::stoi(id.substr(separator+1)));
+    return static_cast<unsigned int>(std::stoi(std::string(id.substr(separator+1))));
 }
 
 int CSMWorld::RefCollection::getIntIndex (unsigned int id) const
