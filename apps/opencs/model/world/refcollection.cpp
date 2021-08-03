@@ -1,7 +1,5 @@
 #include "refcollection.hpp"
 
-#include <charconv>
-
 #include <components/esm/loadcell.hpp>
 
 #include "ref.hpp"
@@ -185,17 +183,12 @@ std::string CSMWorld::RefCollection::getNewId()
 
 unsigned int CSMWorld::RefCollection::extractIdNum(std::string_view id) const
 {
-    const auto separator = id.find_last_of('#');
+    std::string::size_type separator = id.find_last_of('#');
 
-    if (separator == std::string_view::npos)
+    if (separator == std::string::npos)
         throw std::runtime_error("invalid ref ID: " + std::string(id));
 
-    const std::string_view number = id.substr(separator + 1);
-    unsigned int result;
-    if (std::from_chars(number.data(), number.data() + number.size(), result).ec != std::errc())
-        throw std::runtime_error("invalid ref ID number: " + std::string(number));
-
-    return result;
+    return static_cast<unsigned int>(std::stoi(std::string(id.substr(separator+1))));
 }
 
 int CSMWorld::RefCollection::getIntIndex (unsigned int id) const
