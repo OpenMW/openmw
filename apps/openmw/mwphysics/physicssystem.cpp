@@ -519,13 +519,12 @@ namespace MWPhysics
             mObjects.emplace(updated, std::move(obj));
         }
 
-        ActorMap::iterator foundActor = mActors.find(old);
-        if (foundActor != mActors.end())
+        auto actorNode = mActors.extract(old);
+        if (!actorNode.empty())
         {
-            auto actor = foundActor->second;
-            actor->updatePtr(updated);
-            mActors.erase(foundActor);
-            mActors.emplace(updated, std::move(actor));
+            actorNode.key() = updated;
+            actorNode.mapped()->updatePtr(updated);
+            mActors.insert(std::move(actorNode));
         }
 
         for (auto& [_, actor] : mActors)
