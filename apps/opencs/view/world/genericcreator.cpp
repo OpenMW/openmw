@@ -184,6 +184,11 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
     connect (&mData, SIGNAL (idListChanged()), this, SLOT (dataIdListChanged()));
 }
 
+void CSVWorld::GenericCreator::setEditorMaxLength (int length)
+{
+    mId->setMaxLength (length);
+}
+
 void CSVWorld::GenericCreator::setEditLock (bool locked)
 {
     mLocked = locked;

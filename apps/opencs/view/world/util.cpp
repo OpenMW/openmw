@@ -291,6 +291,14 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return widget;
         }
 
+        case CSMWorld::ColumnBase::Display_String64:
+        {
+        // For other Display types (that represent record IDs) with drop support IdCompletionDelegate is used
+            CSVWidget::DropLineEdit *widget = new CSVWidget::DropLineEdit(display, parent);
+            widget->setMaxLength (64);
+            return widget;
+        }
+
         default:
 
             return QStyledItemDelegate::createEditor (parent, option, index);

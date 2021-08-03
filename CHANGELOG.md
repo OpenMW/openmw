@@ -1942,6 +1942,7 @@
     Bug #2025: Missing mouse-over text for non affordable items
     Bug #2028: [MOD: Tamriel Rebuilt] Crashing when trying to enter interior cell "Ruinous Keep, Great Hall"
     Bug #2029: Ienith Brothers Thiev's Guild quest journal entry not adding
+    Bug #3066: Editor doesn't check if IDs and other strings are longer than their hardcoded field length
     Feature #471: Editor: Special case implementation for top-level window with single sub-window
     Feature #472: Editor: Sub-Window re-use settings
     Feature #704: Font colors import from fallback settings

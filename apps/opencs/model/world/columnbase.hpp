@@ -135,6 +135,7 @@ namespace CSMWorld
             Display_InfoCondVar,
             Display_InfoCondComp,
             Display_String32,
+            Display_String64,
             Display_LongString256,
             Display_BookType,
             Display_BloodType,

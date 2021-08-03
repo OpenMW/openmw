@@ -130,7 +130,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mFactions.addColumn (new StringIdColumn<ESM::Faction>);
     mFactions.addColumn (new RecordStateColumn<ESM::Faction>);
     mFactions.addColumn (new FixedRecordTypeColumn<ESM::Faction> (UniversalId::Type_Faction));
-    mFactions.addColumn (new NameColumn<ESM::Faction>);
+    mFactions.addColumn (new NameColumn<ESM::Faction>(ColumnBase::Display_String32));
     mFactions.addColumn (new AttributesColumn<ESM::Faction> (0));
     mFactions.addColumn (new AttributesColumn<ESM::Faction> (1));
     mFactions.addColumn (new HiddenColumn<ESM::Faction>);
@@ -339,7 +339,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
-    mCells.addColumn (new NameColumn<Cell>);
+    mCells.addColumn (new NameColumn<Cell>(ColumnBase::Display_String64));
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_SleepForbidden, ESM::Cell::NoSleep));
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM::Cell::HasWater,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
