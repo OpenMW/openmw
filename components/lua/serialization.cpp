@@ -43,7 +43,7 @@ namespace LuaUtil
     static T getValue(std::string_view& binaryData)
     {
         if (binaryData.size() < sizeof(T))
-            throw std::runtime_error("Unexpected end");
+            throw std::runtime_error("Unexpected end of serialized data.");
         T v;
         std::memcpy(&v, binaryData.data(), sizeof(T));
         binaryData = binaryData.substr(sizeof(T));
@@ -107,15 +107,15 @@ namespace LuaUtil
         if (customSerializer && customSerializer->serialize(out, data))
             return;
         else
-            throw std::runtime_error("Unknown userdata");
+            throw std::runtime_error("Value is not serializable.");
     }
 
     static void serialize(BinaryData& out, const sol::object& obj, const UserdataSerializer* customSerializer, int recursionCounter)
     {
         if (obj.get_type() == sol::type::lightuserdata)
-            throw std::runtime_error("light userdata is not allowed to be serialized");
+            throw std::runtime_error("Light userdata is not allowed to be serialized.");
         if (obj.is<sol::function>())
-            throw std::runtime_error("functions are not allowed to be serialized");
+            throw std::runtime_error("Functions are not allowed to be serialized.");
         else if (obj.is<sol::userdata>())
             serializeUserdata(out, obj, customSerializer);
         else if (obj.is<sol::lua_table>())
@@ -144,13 +144,13 @@ namespace LuaUtil
             appendType(out, SerializedType::BOOLEAN);
             out.push_back(v);
         } else
-            throw std::runtime_error("Unknown lua type");
+            throw std::runtime_error("Unknown Lua type.");
     }
 
     static void deserializeImpl(sol::state& lua, std::string_view& binaryData, const UserdataSerializer* customSerializer)
     {
         if (binaryData.empty())
-            throw std::runtime_error("Unexpected end");
+            throw std::runtime_error("Unexpected end of serialized data.");
         unsigned char type = binaryData[0];
         binaryData = binaryData.substr(1);
         if (type & (CUSTOM_COMPACT_FLAG | CUSTOM_FULL_FLAG))
@@ -170,7 +170,7 @@ namespace LuaUtil
             std::string_view data = binaryData.substr(typeNameSize, dataSize);
             binaryData = binaryData.substr(typeNameSize + dataSize);
             if (!customSerializer || !customSerializer->deserialize(typeName, data, lua))
-                throw std::runtime_error("Unknown type: " + std::string(typeName));
+                throw std::runtime_error("Unknown type in serialized data: " + std::string(typeName));
             return;
         }
         if (type & SHORT_STRING_FLAG)
@@ -205,12 +205,12 @@ namespace LuaUtil
                     lua_settable(lua, -3);
                 }
                 if (binaryData.empty())
-                    throw std::runtime_error("Unexpected end");
+                    throw std::runtime_error("Unexpected end of serialized data.");
                 binaryData = binaryData.substr(1);
                 return;
             }
             case SerializedType::TABLE_END:
-                throw std::runtime_error("Unexpected table end");
+                throw std::runtime_error("Unexpected end of table during deserialization.");
             case SerializedType::VEC2:
             {
                 float x = getValue<float>(binaryData);
@@ -227,7 +227,7 @@ namespace LuaUtil
                 return;
             }
         }
-        throw std::runtime_error("Unknown type: " + std::to_string(type));
+        throw std::runtime_error("Unknown type in serialized data: " + std::to_string(type));
     }
 
     BinaryData serialize(const sol::object& obj, const UserdataSerializer* customSerializer)
