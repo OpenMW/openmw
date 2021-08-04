@@ -137,11 +137,9 @@ namespace
         {
             if (ptr.getClass().isDoor() && !ptr.getCellRef().getTeleport())
             {
-                const auto shape = object->getShapeInstance()->getCollisionShape();
-
                 btVector3 aabbMin;
                 btVector3 aabbMax;
-                shape->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+                object->getShapeInstance()->getCollisionShape()->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
 
                 const auto center = (aabbMax + aabbMin) * 0.5f;
 
@@ -168,12 +166,7 @@ namespace
 
                 navigator.addObject(
                     DetourNavigator::ObjectId(object),
-                    DetourNavigator::DoorShapes(
-                        *shape,
-                        object->getShapeInstance()->getAvoidCollisionShape(),
-                        connectionStart,
-                        connectionEnd
-                    ),
+                    DetourNavigator::DoorShapes(object->getShapeInstance(), connectionStart, connectionEnd),
                     transform
                 );
             }
@@ -181,10 +174,7 @@ namespace
             {
                 navigator.addObject(
                     DetourNavigator::ObjectId(object),
-                    DetourNavigator::ObjectShapes {
-                        *object->getShapeInstance()->getCollisionShape(),
-                        object->getShapeInstance()->getAvoidCollisionShape()
-                    },
+                    DetourNavigator::ObjectShapes(object->getShapeInstance()),
                     object->getTransform()
                 );
             }
@@ -400,7 +390,7 @@ namespace MWWorld
                 }
 
                 if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                    navigator->addObject(DetourNavigator::ObjectId(heightField), *heightField->getShape(),
+                    navigator->addObject(DetourNavigator::ObjectId(heightField), heightField, *heightField->getShape(),
                             heightField->getCollisionObject()->getWorldTransform());
             }
 

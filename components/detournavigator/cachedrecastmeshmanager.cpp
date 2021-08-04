@@ -8,12 +8,12 @@ namespace DetourNavigator
         : mImpl(settings, bounds, generation)
     {}
 
-    bool CachedRecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape,
+    bool CachedRecastMeshManager::addObject(const ObjectId id, const CollisionShape& shape,
                                             const btTransform& transform, const AreaType areaType)
     {
         if (!mImpl.addObject(id, shape, transform, areaType))
             return false;
-        mCached.reset();
+        mCached.lock()->reset();
         return true;
     }
 
@@ -21,7 +21,7 @@ namespace DetourNavigator
     {
         if (!mImpl.updateObject(id, transform, areaType))
             return false;
-        mCached.reset();
+        mCached.lock()->reset();
         return true;
     }
 
@@ -29,7 +29,7 @@ namespace DetourNavigator
     {
         const auto object = mImpl.removeObject(id);
         if (object)
-            mCached.reset();
+            mCached.lock()->reset();
         return object;
     }
 
@@ -38,7 +38,7 @@ namespace DetourNavigator
     {
         if (!mImpl.addWater(cellPosition, cellSize, transform))
             return false;
-        mCached.reset();
+        mCached.lock()->reset();
         return true;
     }
 
@@ -46,15 +46,18 @@ namespace DetourNavigator
     {
         const auto water = mImpl.removeWater(cellPosition);
         if (water)
-            mCached.reset();
+            mCached.lock()->reset();
         return water;
     }
 
     std::shared_ptr<RecastMesh> CachedRecastMeshManager::getMesh()
     {
-        if (!mCached)
-            mCached = mImpl.getMesh();
-        return mCached;
+        std::shared_ptr<RecastMesh> cached = *mCached.lock();
+        if (cached != nullptr)
+            return cached;
+        cached = mImpl.getMesh();
+        *mCached.lock() = cached;
+        return cached;
     }
 
     bool CachedRecastMeshManager::isEmpty() const

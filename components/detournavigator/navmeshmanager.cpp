@@ -47,16 +47,17 @@ namespace DetourNavigator
         , mAsyncNavMeshUpdater(settings, mRecastMeshManager, mOffMeshConnectionsManager)
     {}
 
-    bool NavMeshManager::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+    bool NavMeshManager::addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                                    const AreaType areaType)
     {
+        const btCollisionShape& collisionShape = shape.getShape();
         if (!mRecastMeshManager.addObject(id, shape, transform, areaType))
             return false;
-        addChangedTiles(shape, transform, ChangeType::add);
+        addChangedTiles(collisionShape, transform, ChangeType::add);
         return true;
     }
 
-    bool NavMeshManager::updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+    bool NavMeshManager::updateObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
         return mRecastMeshManager.updateObject(id, shape, transform, areaType,

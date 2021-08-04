@@ -4,6 +4,8 @@
 #include "recastmeshmanager.hpp"
 #include "version.hpp"
 
+#include <components/misc/guarded.hpp>
+
 namespace DetourNavigator
 {
     class CachedRecastMeshManager
@@ -11,7 +13,7 @@ namespace DetourNavigator
     public:
         CachedRecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation);
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+        bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
         bool updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType);
@@ -32,7 +34,7 @@ namespace DetourNavigator
 
     private:
         RecastMeshManager mImpl;
-        std::shared_ptr<RecastMesh> mCached;
+        Misc::ScopeGuarded<std::shared_ptr<RecastMesh>> mCached;
     };
 }
 

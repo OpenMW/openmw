@@ -5,6 +5,9 @@
 
 #include <LinearMath/btTransform.h>
 
+#include <osg/ref_ptr>
+#include <osg/Object>
+
 #include <functional>
 #include <vector>
 
@@ -13,12 +16,33 @@ class btCompoundShape;
 
 namespace DetourNavigator
 {
+    class CollisionShape
+    {
+    public:
+        CollisionShape(osg::ref_ptr<const osg::Object> holder, const btCollisionShape& shape)
+            : mHolder(std::move(holder))
+            , mShape(shape)
+        {}
+
+        const osg::ref_ptr<const osg::Object>& getHolder() const { return mHolder; }
+        const btCollisionShape& getShape() const { return mShape; }
+
+    private:
+        osg::ref_ptr<const osg::Object> mHolder;
+        std::reference_wrapper<const btCollisionShape> mShape;
+    };
+
     class RecastMeshObject
     {
         public:
-            RecastMeshObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType);
+            RecastMeshObject(const CollisionShape& shape, const btTransform& transform, const AreaType areaType);
 
             bool update(const btTransform& transform, const AreaType areaType);
+
+            const osg::ref_ptr<const osg::Object>& getHolder() const
+            {
+                return mHolder;
+            }
 
             const btCollisionShape& getShape() const
             {
@@ -36,16 +60,13 @@ namespace DetourNavigator
             }
 
         private:
+            osg::ref_ptr<const osg::Object> mHolder;
             std::reference_wrapper<const btCollisionShape> mShape;
             btTransform mTransform;
             AreaType mAreaType;
             btVector3 mLocalScaling;
             std::vector<RecastMeshObject> mChildren;
     };
-
-    std::vector<RecastMeshObject> makeChildrenObjects(const btCollisionShape& shape, const AreaType areaType);
-
-    std::vector<RecastMeshObject> makeChildrenObjects(const btCompoundShape& shape, const AreaType areaType);
 }
 
 #endif
