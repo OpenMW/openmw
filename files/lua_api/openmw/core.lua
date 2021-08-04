@@ -11,6 +11,10 @@
 -- @field [parent=#core] #number API_REVISION
 
 -------------------------------------------------------------------------------
+-- Terminates the game and quits to the OS. Should be used only for testing purposes.
+-- @function [parent=#core] quit
+
+-------------------------------------------------------------------------------
 -- Send an event to global scripts.
 -- @function [parent=#core] sendGlobalEvent
 -- @param #string eventName
