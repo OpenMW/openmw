@@ -39,6 +39,11 @@ namespace DetourNavigator
 
             bool update(const btTransform& transform, const AreaType areaType);
 
+            const osg::ref_ptr<const osg::Referenced>& getHolder() const
+            {
+                return mHolder;
+            }
+
             const btCollisionShape& getShape() const
             {
                 return mShape;
