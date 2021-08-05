@@ -635,19 +635,7 @@ namespace MWPhysics
         if (btFrom == btTo)
             return;
 
-        const auto casterPtr = projectile->getCaster();
-        const auto* caster = [this,&casterPtr]() -> const btCollisionObject*
-        {
-            const Actor* actor = getActor(casterPtr);
-            if (actor)
-                return actor->getCollisionObject();
-            const Object* object = getObject(casterPtr);
-            if (object)
-                return object->getCollisionObject();
-            return nullptr;
-        }();
-
-        ProjectileConvexCallback resultCallback(caster, btFrom, btTo, projectile);
+        ProjectileConvexCallback resultCallback(projectile->getCasterCollisionObject(), projectile->getCollisionObject(), btFrom, btTo, projectile);
         resultCallback.m_collisionFilterMask = 0xff;
         resultCallback.m_collisionFilterGroup = CollisionType_Projectile;
 

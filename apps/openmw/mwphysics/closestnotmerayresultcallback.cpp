@@ -7,6 +7,7 @@
 
 #include "../mwworld/class.hpp"
 
+#include "collisiontype.hpp"
 #include "ptrholder.hpp"
 
 namespace MWPhysics
@@ -19,17 +20,14 @@ namespace MWPhysics
 
     btScalar ClosestNotMeRayResultCallback::addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
     {
-        if (rayResult.m_collisionObject == mMe)
+        const auto* hitObject = rayResult.m_collisionObject;
+        if (hitObject == mMe)
             return 1.f;
 
-        if (!mTargets.empty())
+        if (hitObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor && !mTargets.empty())
         {
-            if ((std::find(mTargets.begin(), mTargets.end(), rayResult.m_collisionObject) == mTargets.end()))
-            {
-                auto* holder = static_cast<PtrHolder*>(rayResult.m_collisionObject->getUserPointer());
-                if (holder && !holder->getPtr().isEmpty() && holder->getPtr().getClass().isActor())
-                    return 1.f;
-            }
+            if ((std::find(mTargets.begin(), mTargets.end(), hitObject) == mTargets.end()))
+                return 1.f;
         }
 
         return btCollisionWorld::ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);

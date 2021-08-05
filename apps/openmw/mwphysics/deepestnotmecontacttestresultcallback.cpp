@@ -6,6 +6,7 @@
 
 #include "../mwworld/class.hpp"
 
+#include "collisiontype.hpp"
 #include "ptrholder.hpp"
 
 namespace MWPhysics
@@ -23,14 +24,10 @@ namespace MWPhysics
         const btCollisionObject* collisionObject = col1Wrap->m_collisionObject;
         if (collisionObject != mMe)
         {
-            if (!mTargets.empty())
+            if (collisionObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor && !mTargets.empty())
             {
                 if ((std::find(mTargets.begin(), mTargets.end(), collisionObject) == mTargets.end()))
-                {
-                    PtrHolder* holder = static_cast<PtrHolder*>(collisionObject->getUserPointer());
-                    if (holder && !holder->getPtr().isEmpty() && holder->getPtr().getClass().isActor())
-                        return 0.f;
-                }
+                    return 0.f;
             }
 
             btScalar distsqr = mOrigin.distance2(cp.getPositionWorldOnA());
