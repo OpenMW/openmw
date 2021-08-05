@@ -36,10 +36,10 @@ namespace
     class CullCallback : public osg::NodeCallback
     {
     public:
-        CullCallback(MWRender::PostProcessor* postProcessor)
-            : mPostProcessor(postProcessor)
-            , mLastFrameNumber(0)
-        {}
+        CullCallback()
+            : mLastFrameNumber(0)
+        {
+        }
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
@@ -49,14 +49,24 @@ namespace
             if (frame != mLastFrameNumber)
             {
                 mLastFrameNumber = frame;
-                if (!mPostProcessor->getMsaaFbo())
+
+                MWRender::PostProcessor* postProcessor = dynamic_cast<MWRender::PostProcessor*>(nv->asCullVisitor()->getCurrentCamera()->getUserData());
+
+                if (!postProcessor)
                 {
-                    renderStage->setFrameBufferObject(mPostProcessor->getFbo());
+                    Log(Debug::Error) << "Failed retrieving user data for master camera: FBO setup failed";
+                    traverse(node, nv);
+                    return;
+                }
+
+                if (!postProcessor->getMsaaFbo())
+                {
+                    renderStage->setFrameBufferObject(postProcessor->getFbo());
                 }
                 else
                 {
-                    renderStage->setMultisampleResolveFramebufferObject(mPostProcessor->getFbo());
-                    renderStage->setFrameBufferObject(mPostProcessor->getMsaaFbo());
+                    renderStage->setMultisampleResolveFramebufferObject(postProcessor->getFbo());
+                    renderStage->setFrameBufferObject(postProcessor->getMsaaFbo());
                 }
             }
 
@@ -64,7 +74,6 @@ namespace
         }
 
     private:
-        MWRender::PostProcessor* mPostProcessor;
         unsigned int mLastFrameNumber;
     };
 
@@ -117,7 +126,7 @@ namespace MWRender
         else
         {
             // TODO: Once we have post-processing implemented we want to skip this return and continue with setup.
-            // Rendering to a FBO to fullscreen geometry has overhead (especially when MSAA is enabled) and there are no 
+            // Rendering to a FBO to fullscreen geometry has overhead (especially when MSAA is enabled) and there are no
             // benefits if no floating point depth formats are supported.
             mDepthFormat = GL_DEPTH_COMPONENT24;
             Log(Debug::Warning) << errPreamble << "'GL_ARB_depth_buffer_float' and 'GL_NV_depth_buffer_float' unsupported.";
@@ -136,12 +145,13 @@ namespace MWRender
 
         // We need to manually set the FBO and resolve FBO during the cull callback. If we were using a separate
         // RTT camera this would not be needed.
-        mViewer->getCamera()->addCullCallback(new CullCallback(this));
+        mViewer->getCamera()->addCullCallback(new CullCallback);
         mViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         mViewer->getCamera()->attach(osg::Camera::COLOR_BUFFER0, mSceneTex);
         mViewer->getCamera()->attach(osg::Camera::DEPTH_BUFFER, mDepthTex);
 
         mViewer->getCamera()->getGraphicsContext()->setResizedCallback(new ResizedCallback(this));
+        mViewer->getCamera()->setUserData(this);
     }
 
     void PostProcessor::resize(int width, int height, bool init)
@@ -156,8 +166,6 @@ namespace MWRender
         mFbo = new osg::FrameBufferObject;
         mFbo->setAttachment(osg::Camera::COLOR_BUFFER0, osg::FrameBufferAttachment(mSceneTex));
         mFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(mDepthTex));
-
-        mViewer->getCamera()->setUserData(mFbo);
 
         // When MSAA is enabled we must first render to a render buffer, then
         // blit the result to the FBO which is either passed to the main frame

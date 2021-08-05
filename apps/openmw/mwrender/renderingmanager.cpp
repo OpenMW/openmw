@@ -79,6 +79,8 @@ namespace MWRender
     public:
         SharedUniformStateUpdater()
             : mLinearFac(0.f)
+            , mNear(0.f)
+            , mFar(0.f)
         {
         }
 
@@ -86,6 +88,8 @@ namespace MWRender
         {
             stateset->addUniform(new osg::Uniform("projectionMatrix", osg::Matrixf{}));
             stateset->addUniform(new osg::Uniform("linearFac", 0.f));
+            stateset->addUniform(new osg::Uniform("near", 0.f));
+            stateset->addUniform(new osg::Uniform("far", 0.f));
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
@@ -97,6 +101,15 @@ namespace MWRender
             auto* uLinearFac = stateset->getUniform("linearFac");
             if (uLinearFac)
                 uLinearFac->set(mLinearFac);
+
+            auto* uNear = stateset->getUniform("near");
+            if (uNear)
+                uNear->set(mNear);
+
+            auto* uFar = stateset->getUniform("far");
+            if (uFar)
+                uFar->set(mFar);
+
         }
 
         void setProjectionMatrix(const osg::Matrixf& projectionMatrix)
@@ -109,9 +122,21 @@ namespace MWRender
             mLinearFac = linearFac;
         }
 
+        void setNear(float near)
+        {
+            mNear = near;
+        }
+
+        void setFar(float far)
+        {
+            mFar = far;
+        }
+
     private:
         osg::Matrixf mProjectionMatrix;
         float mLinearFac;
+        float mNear;
+        float mFar;
     };
 
     class StateUpdater : public SceneUtil::StateSetUpdater
@@ -240,8 +265,7 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
     {
-        auto ext = osg::GLExtensions::Get(0, false);
-        bool reverseZ = Settings::Manager::getBool("reverse z", "Camera") && ext && ext->isClipControlSupported;
+        bool reverseZ = SceneUtil::getReverseZ();
 
         if (reverseZ)
             Log(Debug::Info) << "Using reverse-z depth buffer";
@@ -267,7 +291,6 @@ namespace MWRender
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
         resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1);
-        resourceSystem->getSceneManager()->setReverseZ(reverseZ);
 
         // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this depends on support for various OpenGL extensions.
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(lightingMethod == SceneUtil::LightingMethod::FFP);
@@ -294,7 +317,7 @@ namespace MWRender
         if (Settings::Manager::getBool("object shadows", "Shadows"))
             shadowCastingTraversalMask |= (Mask_Object|Mask_Static);
 
-        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager(), reverseZ));
+        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
 
         Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
         Shader::ShaderManager::DefineMap lightDefines = sceneRoot->getLightDefines();
@@ -408,8 +431,11 @@ namespace MWRender
             mGroundcoverWorld->setActiveGrid(osg::Vec4i(0, 0, 0, 0));
         }
 
-        mPostProcessor.reset(new PostProcessor(*this, viewer, mRootNode));
+        mPostProcessor = new PostProcessor(*this, viewer, mRootNode);
         resourceSystem->getSceneManager()->setDepthFormat(mPostProcessor->getDepthFormat());
+
+        if (reverseZ && !SceneUtil::isFloatingPointDepthFormat(mPostProcessor->getDepthFormat()))
+            Log(Debug::Warning) << "Floating point depth format not in use but reverse-z buffer is enabled, consider disabling it.";
 
         // water goes after terrain for correct waterculling order
         mWater.reset(new Water(sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
@@ -474,7 +500,6 @@ namespace MWRender
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
-        NifOsg::Loader::setReverseZ(reverseZ);
         Nif::NIFFile::setLoadUnsupportedFiles(Settings::Manager::getBool("load unsupported nif files", "Models"));
 
         // TODO: Near clip should not need to be bounded like this, but too small values break OSG shadow calculations CPU-side.
@@ -487,8 +512,6 @@ namespace MWRender
         mFirstPersonFieldOfView = std::min(std::max(1.f, firstPersonFov), 179.f);
         mStateUpdater->setFogEnd(mViewDistance);
 
-        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
-        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
 
         // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
@@ -496,17 +519,14 @@ namespace MWRender
         // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
         mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF);
 
-        mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
-        mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
-
         if (reverseZ)
         {
-            auto depth = SceneUtil::createDepth(reverseZ);
             osg::ref_ptr<osg::ClipControl> clipcontrol = new osg::ClipControl(osg::ClipControl::LOWER_LEFT, osg::ClipControl::ZERO_TO_ONE);
-            mViewer->getCamera()->setClearDepth(0.0);
-            mRootNode->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+            mRootNode->getOrCreateStateSet()->setAttributeAndModes(SceneUtil::createDepth(), osg::StateAttribute::ON);
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(clipcontrol, osg::StateAttribute::ON);
         }
+
+        SceneUtil::setCameraClearDepth(mViewer->getCamera());
 
         updateProjectionMatrix();
     }
@@ -1143,7 +1163,7 @@ namespace MWRender
 
         mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
 
-        if (mResourceSystem->getSceneManager()->getReverseZ())
+        if (SceneUtil::getReverseZ())
         {
             mSharedUniformStateUpdater->setLinearFac(-mNearClip / (mViewDistance - mNearClip) - 1.f);
             mSharedUniformStateUpdater->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance));
@@ -1151,8 +1171,8 @@ namespace MWRender
         else
             mSharedUniformStateUpdater->setProjectionMatrix(mViewer->getCamera()->getProjectionMatrix());
 
-        mUniformNear->set(mNearClip);
-        mUniformFar->set(mViewDistance);
+        mSharedUniformStateUpdater->setNear(mNearClip);
+        mSharedUniformStateUpdater->setFar(mViewDistance);
 
         // Since our fog is not radial yet, we should take FOV in account, otherwise terrain near viewing distance may disappear.
         // Limit FOV here just for sure, otherwise viewing distance can be too high.

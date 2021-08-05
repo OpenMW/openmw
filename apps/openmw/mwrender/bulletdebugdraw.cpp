@@ -4,21 +4,19 @@
 
 #include <osg/Geometry>
 #include <osg/Group>
+#include <osg/Material>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
 #include <osg/PolygonMode>
 #include <osg/ShapeDrawable>
 #include <osg/StateSet>
-#include <osg/Fog>
 
 #include "bulletdebugdraw.hpp"
 #include "vismask.hpp"
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
-
-#include <components/sceneutil/util.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -39,6 +37,7 @@ void DebugDrawer::createGeometry()
     {
         mGeometry = new osg::Geometry;
         mGeometry->setNodeMask(Mask_Debug);
+
         mVertices = new osg::Vec3Array;
         mColors = new osg::Vec4Array;
 
@@ -50,8 +49,10 @@ void DebugDrawer::createGeometry()
         mGeometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
         mGeometry->setDataVariance(osg::Object::DYNAMIC);
         mGeometry->addPrimitiveSet(mDrawArrays);
-        // make this friendly to recreateShaders()
-        mGeometry->setStateSet(new osg::StateSet);
+
+        osg::ref_ptr<osg::Material> material = new osg::Material;
+        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        mGeometry->getOrCreateStateSet()->setAttribute(material);
 
         mParentNode->addChild(mGeometry);
 

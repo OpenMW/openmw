@@ -8,7 +8,6 @@
 #include <osg/Texture2D>
 #include <osg/Vec4f>
 #include <osg/Depth>
-#include <osg/FrameBufferObject>
 
 #include <components/resource/resourcesystem.hpp>
 
@@ -49,22 +48,6 @@ namespace SceneUtil
         bool mDone;
     };
 
-    // Allows camera to render to a color and floating point depth texture with a multisampled framebuffer.
-    // Must be set on a camera's cull callback.
-    // When the depth texture isn't needed as a sampler, use osg::Camera::attach(osg::Camera::DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F) instead.
-    // If multisampling is not being used on the color buffer attachment, use the osg::Camera::attach() method.
-    class AttachMultisampledDepthColorCallback : public osg::NodeCallback
-    {
-    public:
-        AttachMultisampledDepthColorCallback(const osg::ref_ptr<osg::Texture2D>& colorTex, const osg::ref_ptr<osg::Texture2D>& depthTex, int samples, int colorSamples);
-
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
-
-    private:
-        osg::ref_ptr<osg::FrameBufferObject> mFbo;
-        osg::ref_ptr<osg::FrameBufferObject> mMsaaFbo;
-    };
-
     // Transform a bounding sphere by a matrix
     // based off private code in osg::Transform
     // TODO: patch osg to make public
@@ -83,9 +66,15 @@ namespace SceneUtil
     // Alpha-to-coverage requires a multisampled framebuffer, so we need to set that up for RTTs
     bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer, osg::Texture* texture, unsigned int level = 0, unsigned int face = 0, bool mipMapGeneration = false);
 
+    void attachAlphaToCoverageFriendlyDepthColor(osg::Camera* camera, osg::Texture2D* colorTex, osg::Texture2D* depthTex, GLenum depthFormat);
+
+    bool getReverseZ();
+
+    void setCameraClearDepth(osg::Camera* camera);
+
     // Returns a suitable depth state attribute dependent on whether a reverse-z
     // depth buffer is in use.
-    osg::ref_ptr<osg::Depth> createDepth(bool reverseZ);
+    osg::ref_ptr<osg::Depth> createDepth();
 
     // Returns a perspective projection matrix for use with a reversed z-buffer
     // and an infinite far plane. This is derived by mapping the default z-range
@@ -100,7 +89,7 @@ namespace SceneUtil
     osg::Matrix getReversedZProjectionMatrixAsOrtho(double left, double right, double bottom, double top, double near, double far);
 
     // Returns true if the GL format is a floating point depth format
-    bool isFloatingPointDepthFormat(GLenum format); 
+    bool isFloatingPointDepthFormat(GLenum format);
 }
 
 #endif

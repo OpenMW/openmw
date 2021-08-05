@@ -178,7 +178,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 {
     osg::ref_ptr<osg::Camera> camera (new osg::Camera);
 
-    if (getReverseZ())
+    if (SceneUtil::getReverseZ())
         camera->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10));
     else
         camera->setProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10);
@@ -201,12 +201,10 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
     stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
 
-    if (getReverseZ())
-    {
-        camera->setClearDepth(0.0);
-        auto depth = SceneUtil::createDepth(true);
-        stateset->setAttributeAndModes(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-    }
+    if (SceneUtil::getReverseZ())
+        stateset->setAttributeAndModes(SceneUtil::createDepth(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+    SceneUtil::setCameraClearDepth(camera);
 
     stateset->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(camera->getProjectionMatrix())), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 

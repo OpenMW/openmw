@@ -13,7 +13,7 @@ namespace SceneUtil
 {
     osg::ref_ptr<osg::Geometry> createWaterGeometry(float size, int segments, float textureRepeats);
 
-    osg::ref_ptr<osg::StateSet> createSimpleWaterStateSet(float alpha, int renderBin, bool reverseZ);
+    osg::ref_ptr<osg::StateSet> createSimpleWaterStateSet(float alpha, int renderBin);
 }
 
 #endif

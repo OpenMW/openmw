@@ -161,7 +161,7 @@ namespace CSVRender
         }
 
         mWaterGeometry = SceneUtil::createWaterGeometry(size, segments, textureRepeats);
-        mWaterGeometry->setStateSet(SceneUtil::createSimpleWaterStateSet(Alpha, RenderBin, false));
+        mWaterGeometry->setStateSet(SceneUtil::createSimpleWaterStateSet(Alpha, RenderBin));
 
         // Add water texture
         std::string textureName = Fallback::Map::getString("Water_SurfaceTexture");

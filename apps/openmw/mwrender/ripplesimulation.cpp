@@ -56,13 +56,13 @@ namespace
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
         stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);
 
-        auto depth = SceneUtil::createDepth(resourceSystem->getSceneManager()->getReverseZ());
+        auto depth = SceneUtil::createDepth();
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
         osg::ref_ptr<osg::PolygonOffset> polygonOffset (new osg::PolygonOffset);
-        polygonOffset->setUnits(-1);
-        polygonOffset->setFactor(-1);
+        polygonOffset->setUnits(SceneUtil::getReverseZ() ? 1 : -1);
+        polygonOffset->setFactor(SceneUtil::getReverseZ() ? 1 : -1);
         stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
 
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);

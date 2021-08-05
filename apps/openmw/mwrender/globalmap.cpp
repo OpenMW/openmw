@@ -325,7 +325,7 @@ namespace MWRender
         if (texture)
         {
             osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(srcLeft, srcTop, srcRight, srcBottom);
-            auto depth = SceneUtil::createDepth(getReverseZ());
+            auto depth = SceneUtil::createDepth();
             depth->setWriteMask(0);
             osg::StateSet* stateset = geom->getOrCreateStateSet();
             stateset->setAttribute(depth);

@@ -110,9 +110,6 @@ namespace MWRender
         SceneUtil::UnrefQueue* getUnrefQueue();
         Terrain::World* getTerrain();
 
-        osg::Uniform* mUniformNear;
-        osg::Uniform* mUniformFar;
-
         void preloadCommonAssets();
 
         double getReferenceTime() const;
@@ -241,8 +238,9 @@ namespace MWRender
         void pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr);
         bool pagingUnlockCache();
         void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
-        
+
         void updateProjectionMatrix();
+
     private:
         void updateTextureFiltering();
         void updateAmbient();
@@ -289,7 +287,7 @@ namespace MWRender
         std::unique_ptr<ScreenshotManager> mScreenshotManager;
         std::unique_ptr<EffectManager> mEffectManager;
         std::unique_ptr<SceneUtil::ShadowManager> mShadowManager;
-        std::unique_ptr<PostProcessor> mPostProcessor;
+        osg::ref_ptr<PostProcessor> mPostProcessor;
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::unique_ptr<Camera> mCamera;

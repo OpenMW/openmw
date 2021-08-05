@@ -23,6 +23,7 @@
 #include "util.hpp"
 #include "vismask.hpp"
 #include "water.hpp"
+#include "postprocessor.hpp"
 
 namespace MWRender
 {
@@ -92,14 +93,13 @@ namespace MWRender
 
             // Ensure we are reading from the resolved framebuffer and not the multisampled render buffer when in use.
             // glReadPixel() cannot read from multisampled targets.
+            PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
 
-            osg::FrameBufferObject* fbo = dynamic_cast<osg::FrameBufferObject*>(renderInfo.getCurrentCamera()->getUserData());
-
-            if (fbo)
+            if (postProcessor && postProcessor->getFbo() && postProcessor->getMsaaFbo())
             {
                 osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getContextID(), false);
                 if (ext)
-                    ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo->getHandle(renderInfo.getContextID()));
+                    ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, postProcessor->getFbo()->getHandle(renderInfo.getContextID()));
             }
 
             mImage->readPixels(leftPadding, topPadding, width, height, GL_RGB, GL_UNSIGNED_BYTE);
@@ -297,11 +297,9 @@ namespace MWRender
         camera->setRenderOrder(osg::Camera::PRE_RENDER);
         camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT,osg::Camera::PIXEL_BUFFER_RTT);
-
-        if (getReverseZ())
-            camera->setClearDepth(0.0);
-
         camera->setViewport(0, 0, w, h);
+
+        SceneUtil::setCameraClearDepth(camera);
 
         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
         texture->setInternalFormat(GL_RGB);
@@ -336,7 +334,7 @@ namespace MWRender
         float nearClip = Settings::Manager::getFloat("near clip", "Camera");
         float viewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         // each cubemap side sees 90 degrees
-        if (getReverseZ())
+        if (SceneUtil::getReverseZ())
             rttCamera->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspectiveInf(90.0, w/float(h), nearClip));
         else
             rttCamera->setProjectionMatrixAsPerspective(90.0, w/float(h), nearClip, viewDistance);

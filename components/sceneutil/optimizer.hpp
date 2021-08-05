@@ -65,7 +65,7 @@ class Optimizer
 
     public:
 
-        Optimizer() : _mergeAlphaBlending(false), _reverseZ(false) {}
+        Optimizer() : _mergeAlphaBlending(false) {}
         virtual ~Optimizer() {}
 
         enum OptimizationOptions
@@ -119,7 +119,6 @@ class Optimizer
         };
 
         void setMergeAlphaBlending(bool merge) { _mergeAlphaBlending = merge; }
-        void setReverseZ(bool reverseZ) { _reverseZ = reverseZ; }
         void setViewPoint(const osg::Vec3f& viewPoint) { _viewPoint = viewPoint; }
 
         /** Reset internal data to initial state - the getPermissibleOptionsMap is cleared.*/
@@ -258,7 +257,6 @@ class Optimizer
 
         osg::Vec3f _viewPoint;
         bool _mergeAlphaBlending;
-        bool _reverseZ;
 
     public:
 
@@ -379,18 +377,12 @@ class Optimizer
                 /// default to traversing all children.
                 MergeGeometryVisitor(Optimizer* optimizer=0) :
                     BaseOptimizerVisitor(optimizer, MERGE_GEOMETRY),
-                    _targetMaximumNumberOfVertices(10000), _alphaBlendingActive(false), _mergeAlphaBlending(false), _reverseZ(false) {}
+                    _targetMaximumNumberOfVertices(10000), _alphaBlendingActive(false), _mergeAlphaBlending(false) {}
 
                 void setMergeAlphaBlending(bool merge)
                 {
                     _mergeAlphaBlending = merge;
                 }
-
-                void setReverseZ(bool reverseZ)
-                {
-                    _reverseZ = reverseZ;
-                }
-
                 void setViewPoint(const osg::Vec3f& viewPoint)
                 {
                     _viewPoint = viewPoint;
@@ -429,7 +421,6 @@ class Optimizer
                 std::vector<osg::StateSet*> _stateSetStack;
                 bool _alphaBlendingActive;
                 bool _mergeAlphaBlending;
-                bool _reverseZ;
                 osg::Vec3f _viewPoint;
         };
 

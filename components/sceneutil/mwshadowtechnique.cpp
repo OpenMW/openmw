@@ -26,6 +26,9 @@
 #include <osg/ClipControl>
 
 #include <sstream>
+
+#include <components/sceneutil/util.hpp>
+
 #include "shadowsbin.hpp"
 
 namespace {
@@ -891,16 +894,6 @@ void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
     }
 }
 
-void SceneUtil::MWShadowTechnique::enableReverseZ()
-{
-    _reverseZ = true;
-}
-
-void SceneUtil::MWShadowTechnique::disableReverseZ()
-{
-    _reverseZ = false;
-}
-
 void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
 {
     // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
@@ -1647,7 +1640,7 @@ void MWShadowTechnique::createShaders()
     _shadowCastingStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(true);
-    if (_reverseZ)
+    if (SceneUtil::getReverseZ())
     {
         osg::ref_ptr<osg::ClipControl> clipcontrol = new osg::ClipControl(osg::ClipControl::LOWER_LEFT, osg::ClipControl::NEGATIVE_ONE_TO_ONE);
         _shadowCastingStateSet->setAttribute(clipcontrol, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);

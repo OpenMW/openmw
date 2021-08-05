@@ -92,9 +92,6 @@ namespace Resource
         void setClampLighting(bool clamp);
         bool getClampLighting() const;
 
-        void setReverseZ(bool reverseZ);
-        bool getReverseZ() const;
-
         void setDepthFormat(GLenum format);
         GLenum getDepthFormat() const;
 
@@ -208,7 +205,6 @@ namespace Resource
         SceneUtil::LightingMethod mLightingMethod;
         SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
         bool mConvertAlphaTestToAlphaToCoverage;
-        bool mReverseZ;
         GLenum mDepthFormat;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;

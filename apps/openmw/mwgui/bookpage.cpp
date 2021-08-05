@@ -8,11 +8,10 @@
 #include "MyGUI_FactoryManager.h"
 
 #include <components/misc/utf8stream.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-
-#include "../mwrender/util.hpp"
 
 namespace MWGui
 {
@@ -1219,7 +1218,7 @@ public:
 
         RenderXform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
 
-        float z = MWRender::getReverseZ() ? 1.f : -1.f;
+        float z = SceneUtil::getReverseZ() ? 1.f : -1.f;
 
         GlyphStream glyphStream(textFormat.mFont, static_cast<float>(mCoord.left), static_cast<float>(mCoord.top - mViewTop),
                                   z /*mNode->getNodeDepth()*/, vertices, renderXform);

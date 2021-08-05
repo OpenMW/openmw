@@ -1,8 +1,8 @@
 #version 120
 
-varying vec4 passColor;
+#include "vertexcolors.glsl"
 
 void main()
 {
-    gl_FragData[0] = passColor;
+    gl_FragData[0] = getDiffuseColor();
 }

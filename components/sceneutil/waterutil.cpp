@@ -64,7 +64,7 @@ namespace SceneUtil
         return waterGeom;
     }
 
-    osg::ref_ptr<osg::StateSet> createSimpleWaterStateSet(float alpha, int renderBin, bool reverseZ)
+    osg::ref_ptr<osg::StateSet> createSimpleWaterStateSet(float alpha, int renderBin)
     {
         osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
 
@@ -78,7 +78,7 @@ namespace SceneUtil
         stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 
-        auto depth = createDepth(reverseZ);
+        auto depth = createDepth();
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 

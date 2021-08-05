@@ -273,7 +273,7 @@ public:
 
     void setDefaults(osg::Camera* camera) override
     {
-        camera->setClearDepth(1.0);
+        SceneUtil::setCameraClearDepth(camera);
         camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
         camera->setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         camera->setName("RefractionCamera");
@@ -339,7 +339,7 @@ public:
 
     void setDefaults(osg::Camera* camera) override
     {
-        camera->setClearDepth(1.0);
+        SceneUtil::setCameraClearDepth(camera);
         camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
         camera->setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         camera->setName("ReflectionCamera");
@@ -546,7 +546,7 @@ osg::Node* Water::getRefractionNode()
 
 void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 {
-    osg::ref_ptr<osg::StateSet> stateset = SceneUtil::createSimpleWaterStateSet(alpha, MWRender::RenderBin_Water, mResourceSystem->getSceneManager()->getReverseZ());
+    osg::ref_ptr<osg::StateSet> stateset = SceneUtil::createSimpleWaterStateSet(alpha, MWRender::RenderBin_Water);
 
     node->setStateSet(stateset);
     node->setUpdateCallback(nullptr);
@@ -616,7 +616,7 @@ public:
         {
             stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
             stateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
-            osg::ref_ptr<osg::Depth> depth(new osg::Depth);
+            osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
             depth->setWriteMask(false);
             stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }

@@ -373,7 +373,7 @@ class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
 public:
     DepthClearCallback()
     {
-        mDepth = SceneUtil::createDepth(getReverseZ());
+        mDepth = SceneUtil::createDepth();
         mDepth->setWriteMask(true);
     }
 
