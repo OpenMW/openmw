@@ -80,51 +80,9 @@ namespace
         return result;
     }
 
-    template <class T>
-    void clone(const T* src, T*& dst, std::size_t size)
-    {
-        dst = static_cast<T*>(permRecastAlloc(static_cast<int>(size) * sizeof(T)));
-        std::memcpy(dst, src, size * sizeof(T));
-    }
-
-    void clone(const rcPolyMesh& src, rcPolyMesh& dst)
-    {
-        dst.nverts = src.nverts;
-        dst.npolys = src.npolys;
-        dst.maxpolys = src.maxpolys;
-        dst.nvp = src.nvp;
-        rcVcopy(dst.bmin, src.bmin);
-        rcVcopy(dst.bmax, src.bmax);
-        dst.cs = src.cs;
-        dst.ch = src.ch;
-        dst.borderSize = src.borderSize;
-        dst.maxEdgeError = src.maxEdgeError;
-        clone(src.verts, dst.verts, getVertsLength(dst));
-        clone(src.polys, dst.polys, getPolysLength(dst));
-        clone(src.regs, dst.regs, getRegsLength(dst));
-        clone(src.flags, dst.flags, getFlagsLength(dst));
-        clone(src.areas, dst.areas, getAreasLength(dst));
-    }
-
-    void clone(const rcPolyMeshDetail& src, rcPolyMeshDetail& dst)
-    {
-        dst.nmeshes = src.nmeshes;
-        dst.nverts = src.nverts;
-        dst.ntris = src.ntris;
-        clone(src.meshes, dst.meshes, getMeshesLength(dst));
-        clone(src.verts, dst.verts, getVertsLength(dst));
-        clone(src.tris, dst.tris, getTrisLength(dst));
-    }
-
     std::unique_ptr<PreparedNavMeshData> clone(const PreparedNavMeshData& value)
     {
-        auto result = std::make_unique<PreparedNavMeshData>();
-        result->mUserId = value.mUserId;
-        result->mCellHeight = value.mCellHeight;
-        result->mCellSize = value.mCellSize;
-        clone(value.mPolyMesh, result->mPolyMesh);
-        clone(value.mPolyMeshDetail, result->mPolyMeshDetail);
-        return result;
+        return std::make_unique<PreparedNavMeshData>(value);
     }
 
     Mesh makeMesh()

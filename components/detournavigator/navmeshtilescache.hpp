@@ -144,8 +144,6 @@ namespace DetourNavigator
 
         Stats getStats() const;
 
-        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
-
     private:
         mutable std::mutex mMutex;
         std::size_t mMaxNavMeshDataSize;
@@ -163,6 +161,8 @@ namespace DetourNavigator
 
         void releaseItem(ItemIterator iterator);
     };
+
+    void reportStats(const NavMeshTilesCache::Stats& stats, unsigned int frameNumber, osg::Stats& out);
 }
 
 #endif

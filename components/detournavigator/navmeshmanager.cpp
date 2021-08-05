@@ -211,7 +211,7 @@ namespace DetourNavigator
                 const auto shouldAdd = shouldAddTile(tile, playerTile, maxTiles);
                 const auto presentInNavMesh = bool(navMesh.getTileAt(tile.x(), tile.y(), 0));
                 if (shouldAdd && !presentInNavMesh)
-                    tilesToPost.insert(std::make_pair(tile, ChangeType::add));
+                    tilesToPost.insert(std::make_pair(tile, locked->isEmptyTile(tile) ? ChangeType::update : ChangeType::add));
                 else if (!shouldAdd && presentInNavMesh)
                     tilesToPost.insert(std::make_pair(tile, ChangeType::mixed));
                 else
@@ -243,7 +243,7 @@ namespace DetourNavigator
 
     void NavMeshManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        mAsyncNavMeshUpdater.reportStats(frameNumber, stats);
+        DetourNavigator::reportStats(mAsyncNavMeshUpdater.getStats(), frameNumber, stats);
     }
 
     RecastMeshTiles NavMeshManager::getRecastMeshTiles() const

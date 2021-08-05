@@ -65,6 +65,15 @@ If true navmesh cache stored on disk will be used in addition to memory cache.
 If navmesh tile is not present in memory cache, it will be looked up in the disk cache.
 If it's not found there it will be generated.
 
+write to navmeshdb
+------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If true generated navmesh tiles will be stored into disk cache while game is running.
+
 Advanced settings
 *****************
 

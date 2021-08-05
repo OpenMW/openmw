@@ -43,6 +43,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         detournavigator/tilecachedrecastmeshmanager.cpp
         detournavigator/navmeshdb.cpp
         detournavigator/serialization.cpp
+        detournavigator/asyncnavmeshupdater.cpp
 
         serialization/binaryreader.cpp
         serialization/binarywriter.cpp

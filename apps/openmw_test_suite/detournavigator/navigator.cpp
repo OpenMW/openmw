@@ -1,4 +1,5 @@
 #include "operators.hpp"
+#include "settings.hpp"
 
 #include <components/detournavigator/navigatorimpl.hpp>
 #include <components/detournavigator/exceptions.hpp>
@@ -32,10 +33,11 @@ namespace
 {
     using namespace testing;
     using namespace DetourNavigator;
+    using namespace DetourNavigator::Tests;
 
     struct DetourNavigatorNavigatorTest : Test
     {
-        Settings mSettings;
+        Settings mSettings = makeSettings();
         std::unique_ptr<Navigator> mNavigator;
         const osg::Vec3f mPlayerPosition;
         const std::string mWorldspace;
@@ -62,34 +64,6 @@ namespace
             , mOut(mPath)
             , mStepSize(28.333332061767578125f)
         {
-            mSettings.mEnableWriteRecastMeshToFile = false;
-            mSettings.mEnableWriteNavMeshToFile = false;
-            mSettings.mEnableRecastMeshFileNameRevision = false;
-            mSettings.mEnableNavMeshFileNameRevision = false;
-            mSettings.mRecast.mBorderSize = 16;
-            mSettings.mRecast.mCellHeight = 0.2f;
-            mSettings.mRecast.mCellSize = 0.2f;
-            mSettings.mRecast.mDetailSampleDist = 6;
-            mSettings.mRecast.mDetailSampleMaxError = 1;
-            mSettings.mRecast.mMaxClimb = 34;
-            mSettings.mRecast.mMaxSimplificationError = 1.3f;
-            mSettings.mRecast.mMaxSlope = 49;
-            mSettings.mRecast.mRecastScaleFactor = 0.017647058823529415f;
-            mSettings.mRecast.mSwimHeightScale = 0.89999997615814208984375f;
-            mSettings.mRecast.mMaxEdgeLen = 12;
-            mSettings.mDetour.mMaxNavMeshQueryNodes = 2048;
-            mSettings.mRecast.mMaxVertsPerPoly = 6;
-            mSettings.mRecast.mRegionMergeArea = 400;
-            mSettings.mRecast.mRegionMinArea = 64;
-            mSettings.mRecast.mTileSize = 64;
-            mSettings.mWaitUntilMinDistanceToPlayer = std::numeric_limits<int>::max();
-            mSettings.mAsyncNavMeshUpdaterThreads = 1;
-            mSettings.mMaxNavMeshTilesCacheSize = 1024 * 1024;
-            mSettings.mDetour.mMaxPolygonPathSize = 1024;
-            mSettings.mDetour.mMaxSmoothPathSize = 1024;
-            mSettings.mDetour.mMaxPolys = 4096;
-            mSettings.mMaxTilesNumber = 512;
-            mSettings.mMinUpdateInterval = std::chrono::milliseconds(50);
             mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:")));
         }
     };
@@ -1013,7 +987,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        const Version expectedVersion {1, 1};
+        const Version expectedVersion {1, 4};
 
         const auto navMeshes = mNavigator->getNavMeshes();
         ASSERT_EQ(navMeshes.size(), 1);

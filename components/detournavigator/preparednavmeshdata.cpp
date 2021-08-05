@@ -4,6 +4,8 @@
 
 #include <Recast.h>
 
+#include <cstring>
+
 namespace
 {
     void initPolyMeshDetail(rcPolyMeshDetail& value) noexcept
@@ -22,6 +24,15 @@ namespace DetourNavigator
     PreparedNavMeshData::PreparedNavMeshData() noexcept
     {
         initPolyMeshDetail(mPolyMeshDetail);
+    }
+
+    PreparedNavMeshData::PreparedNavMeshData(const PreparedNavMeshData& other)
+        : mUserId(other.mUserId)
+        , mCellSize(other.mCellSize)
+        , mCellHeight(other.mCellHeight)
+    {
+        copyPolyMesh(other.mPolyMesh, mPolyMesh);
+        copyPolyMeshDetail(other.mPolyMeshDetail, mPolyMeshDetail);
     }
 
     PreparedNavMeshData::~PreparedNavMeshData() noexcept
