@@ -17,6 +17,10 @@
 #include <components/settings/settings.hpp>
 #include <components/debug/debuglog.hpp>
 
+#ifndef GL_DEPTH32F_STENCIL8_NV
+#define GL_DEPTH32F_STENCIL8_NV 0x8DAC
+#endif
+
 namespace
 {
 
