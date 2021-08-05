@@ -2,6 +2,9 @@
 #define OPENMW_MWPHYSICS_PTRHOLDER_H
 
 #include <mutex>
+#include <memory>
+
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 #include "../mwworld/ptr.hpp"
 
@@ -10,7 +13,7 @@ namespace MWPhysics
     class PtrHolder
     {
     public:
-        virtual ~PtrHolder() {}
+        virtual ~PtrHolder() = default;
 
         void updatePtr(const MWWorld::Ptr& updated)
         {
@@ -24,14 +27,14 @@ namespace MWPhysics
             return mPtr;
         }
 
-        MWWorld::ConstPtr getPtr() const
+        btCollisionObject* getCollisionObject() const
         {
-            std::scoped_lock lock(mMutex);
-            return mPtr;
+            return mCollisionObject.get();
         }
 
     protected:
         MWWorld::Ptr mPtr;
+        std::unique_ptr<btCollisionObject> mCollisionObject;
 
     private:
         mutable std::mutex mMutex;

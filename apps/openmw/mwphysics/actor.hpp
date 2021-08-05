@@ -132,11 +132,6 @@ namespace MWPhysics
             return mInternalCollisionMode && mOnSlope;
         }
 
-        btCollisionObject* getCollisionObject() const
-        {
-            return mCollisionObject.get();
-        }
-
         /// Sets whether this actor should be able to collide with the water surface
         void setCanWaterWalk(bool waterWalk);
 
@@ -187,8 +182,6 @@ namespace MWPhysics
 
         std::unique_ptr<btCollisionShape> mShape;
         btConvexShape* mConvexShape;
-
-        std::unique_ptr<btCollisionObject> mCollisionObject;
 
         osg::Vec3f mMeshTranslation;
         osg::Vec3f mOriginalHalfExtents;

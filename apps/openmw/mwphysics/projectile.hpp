@@ -42,11 +42,6 @@ namespace MWPhysics
         void setPosition(const osg::Vec3f& position);
         osg::Vec3f getPosition() const;
 
-        btCollisionObject* getCollisionObject() const
-        {
-            return mCollisionObject.get();
-        }
-
         bool isActive() const
         {
             return mActive.load(std::memory_order_acquire);
@@ -76,7 +71,6 @@ namespace MWPhysics
         std::unique_ptr<btCollisionShape> mShape;
         btConvexShape* mConvexShape;
 
-        std::unique_ptr<btCollisionObject> mCollisionObject;
         bool mTransformUpdatePending;
         bool mCanCrossWaterSurface;
         bool mCrossedWaterSurface;
