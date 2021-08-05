@@ -8,13 +8,16 @@
 #include "world.hpp"
 #include "../esm/loadland.hpp"
 
+#include <components/resource/scenemanager.hpp>
+
 namespace Terrain
 {
 
-CellBorder::CellBorder(Terrain::World *world, osg::Group *root, int borderMask):
-    mWorld(world),
-    mRoot(root),
-    mBorderMask(borderMask)
+CellBorder::CellBorder(Terrain::World *world, osg::Group *root, int borderMask, Resource::SceneManager* sceneManager)
+    : mWorld(world)
+    , mSceneManager(sceneManager)
+    , mRoot(root)
+    , mBorderMask(borderMask)
 {
 }
 
@@ -72,6 +75,8 @@ void CellBorder::createCellBorderGeometry(int x, int y)
     osg::PolygonMode* polygonmode = new osg::PolygonMode;
     polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     stateSet->setAttributeAndModes(polygonmode,osg::StateAttribute::ON);
+
+    mSceneManager->recreateShaders(borderGeode, "debug");
 
     borderGeode->setNodeMask(mBorderMask);
 

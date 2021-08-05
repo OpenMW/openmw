@@ -39,12 +39,14 @@ centroid varying vec3 shadowDiffuseLighting;
 
 #include "shadows_vertex.glsl"
 #include "lighting.glsl"
+#include "depth.glsl"
 
 uniform float osg_SimulationTime;
 uniform mat4 osg_ViewMatrixInverse;
 uniform mat4 osg_ViewMatrix;
 uniform float windSpeed;
 uniform vec3 playerPos;
+uniform mat4 projectionMatrix;
 
 #if @groundcoverStompMode == 0
 #else
@@ -141,9 +143,9 @@ void main(void)
     if (length(gl_ModelViewMatrix * vec4(position, 1.0)) > @groundcoverFadeEnd)
         gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
     else
-        gl_Position = gl_ProjectionMatrix * viewPos;
+        gl_Position = projectionMatrix * viewPos;
 
-    linearDepth = gl_Position.z;
+    linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
 #if (!PER_PIXEL_LIGHTING || @shadows_enabled)
     vec3 viewNormal = normalize((gl_NormalMatrix * rotation3(rotation) * gl_Normal).xyz);

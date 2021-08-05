@@ -8,6 +8,7 @@
 #include <RecastDebugDraw.h>
 
 #include <osg/Group>
+#include <osg/Material>
 
 #include <algorithm>
 #include <vector>
@@ -65,6 +66,11 @@ namespace SceneUtil
         const auto texScale = 1.0f / (settings.mCellSize * 10.0f);
         duDebugDrawTriMesh(&debugDraw, vertices.data(), static_cast<int>(vertices.size() / 3),
             indices.data(), normals.data(), static_cast<int>(indices.size() / 3), nullptr, texScale);
+
+        osg::ref_ptr<osg::Material> material = new osg::Material;
+        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        group->getOrCreateStateSet()->setAttribute(material);
+
         return group;
     }
 }

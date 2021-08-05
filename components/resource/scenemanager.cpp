@@ -275,6 +275,16 @@ namespace Resource
         return mClampLighting;
     }
 
+    void SceneManager::setDepthFormat(GLenum format)
+    {
+        mDepthFormat = format;
+    }
+
+    GLenum SceneManager::getDepthFormat() const
+    {
+        return mDepthFormat;
+    }
+
     void SceneManager::setAutoUseNormalMaps(bool use)
     {
         mAutoUseNormalMaps = use;

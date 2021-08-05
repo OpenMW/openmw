@@ -8,6 +8,7 @@
 #include <osg/BlendFunc>
 
 #include <components/shader/shadermanager.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include <mutex>
 
@@ -105,9 +106,8 @@ namespace
         osg::ref_ptr<osg::Depth> mValue;
 
         LequalDepth()
-            : mValue(new osg::Depth)
+            : mValue(SceneUtil::createDepth())
         {
-            mValue->setFunction(osg::Depth::LEQUAL);
         }
     };
 

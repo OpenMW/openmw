@@ -4,6 +4,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <SDL_opengl_glext.h>
+
 #include <osg/Node>
 #include <osg/NodeVisitor>
 #include <osg/TexGen>
@@ -13,6 +15,20 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/settings/settings.hpp>
+#include <components/debug/debuglog.hpp>
+
+namespace
+{
+
+bool isReverseZSupported()
+{
+    if (!Settings::Manager::mDefaultSettings.count({"Camera", "reverse z"}))
+        return false;
+    auto ext = osg::GLExtensions::Get(0, false);
+    return Settings::Manager::getBool("reverse z", "Camera") && ext && ext->isClipControlSupported;
+}
+
+}
 
 namespace SceneUtil
 {
@@ -150,6 +166,43 @@ void GlowUpdater::setDuration(float duration)
     mDuration = duration;
 }
 
+// Allows camera to render to a color and floating point depth texture with a multisampled framebuffer.
+// Must be set on a camera's cull callback.
+class AttachMultisampledDepthColorCallback : public osg::NodeCallback
+{
+public:
+    AttachMultisampledDepthColorCallback(osg::Texture2D* colorTex, osg::Texture2D* depthTex, int samples, int colorSamples)
+    {
+        int width = colorTex->getTextureWidth();
+        int height = colorTex->getTextureHeight();
+
+        osg::ref_ptr<osg::RenderBuffer> rbColor = new osg::RenderBuffer(width, height, colorTex->getInternalFormat(), samples, colorSamples);
+        osg::ref_ptr<osg::RenderBuffer> rbDepth = new osg::RenderBuffer(width, height, depthTex->getInternalFormat(), samples, colorSamples);
+
+        mMsaaFbo = new osg::FrameBufferObject;
+        mMsaaFbo->setAttachment(osg::Camera::COLOR_BUFFER0, osg::FrameBufferAttachment(rbColor));
+        mMsaaFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(rbDepth));
+
+        mFbo = new osg::FrameBufferObject;
+        mFbo->setAttachment(osg::Camera::COLOR_BUFFER0, osg::FrameBufferAttachment(colorTex));
+        mFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(depthTex));
+    }
+
+    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+    {
+        osgUtil::RenderStage* renderStage = nv->asCullVisitor()->getCurrentRenderStage();
+
+        renderStage->setMultisampleResolveFramebufferObject(mFbo);
+        renderStage->setFrameBufferObject(mMsaaFbo);
+
+        traverse(node, nv);
+    }
+
+private:
+    osg::ref_ptr<osg::FrameBufferObject> mFbo;
+    osg::ref_ptr<osg::FrameBufferObject> mMsaaFbo;
+};
+
 void transformBoundingSphere (const osg::Matrixf& matrix, osg::BoundingSphere& bsphere)
 {
     osg::BoundingSphere::vec_type xdash = bsphere._center;
@@ -283,6 +336,83 @@ bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::
     }
     camera->attach(buffer, texture, level, face, mipMapGeneration, samples, colourSamples);
     return addMSAAIntermediateTarget;
+}
+
+void attachAlphaToCoverageFriendlyDepthColor(osg::Camera* camera, osg::Texture2D* colorTex, osg::Texture2D* depthTex, GLenum depthFormat)
+{
+    bool addMSAAIntermediateTarget = Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1;
+
+    if (isFloatingPointDepthFormat(depthFormat) && addMSAAIntermediateTarget)
+    {
+        camera->attach(osg::Camera::COLOR_BUFFER0, colorTex);
+        camera->attach(osg::Camera::DEPTH_BUFFER, depthTex);
+        camera->addCullCallback(new AttachMultisampledDepthColorCallback(colorTex, depthTex, 2, 1));
+    }
+    else
+    {
+        attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER, colorTex);
+        camera->attach(osg::Camera::DEPTH_BUFFER, depthTex);
+    }
+}
+
+bool getReverseZ()
+{
+    static bool reverseZ = isReverseZSupported();
+    return reverseZ;
+}
+
+void setCameraClearDepth(osg::Camera* camera)
+{
+    camera->setClearDepth(getReverseZ() ? 0.0 : 1.0);
+}
+
+osg::ref_ptr<osg::Depth> createDepth()
+{
+    return new osg::Depth(getReverseZ() ? osg::Depth::GEQUAL : osg::Depth::LEQUAL);
+}
+
+osg::Matrix getReversedZProjectionMatrixAsPerspectiveInf(double fov, double aspect, double near)
+{
+    double A = 1.0/std::tan(osg::DegreesToRadians(fov)/2.0);
+    return osg::Matrix(
+        A/aspect,   0,      0,      0,
+        0,          A,      0,      0,
+        0,          0,      0,      -1,
+        0,          0,      near,   0
+    );
+}
+
+osg::Matrix getReversedZProjectionMatrixAsPerspective(double fov, double aspect, double near, double far)
+{
+    double A = 1.0/std::tan(osg::DegreesToRadians(fov)/2.0);
+    return osg::Matrix(
+        A/aspect,   0,      0,                          0,
+        0,          A,      0,                          0,
+        0,          0,      near/(far-near),            -1,
+        0,          0,      (far*near)/(far - near),    0
+    );
+}
+
+osg::Matrix getReversedZProjectionMatrixAsOrtho(double left, double right, double bottom, double top, double near, double far)
+{
+    return osg::Matrix(
+        2/(right-left),             0,                          0,                  0,
+        0,                          2/(top-bottom),             0,                  0,
+        0,                          0,                          1/(far-near),       0,
+        (right+left)/(left-right),  (top+bottom)/(bottom-top),  far/(far-near),     1
+    );
+}
+
+bool isFloatingPointDepthFormat(GLenum format)
+{
+    constexpr std::array<GLenum, 4> formats = {
+        GL_DEPTH_COMPONENT32F,
+        GL_DEPTH_COMPONENT32F_NV,
+        GL_DEPTH32F_STENCIL8,
+        GL_DEPTH32F_STENCIL8_NV,
+    };
+
+    return std::find(formats.cbegin(), formats.cend(), format) != formats.cend();
 }
 
 }

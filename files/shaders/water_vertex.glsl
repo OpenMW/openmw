@@ -1,14 +1,17 @@
 #version 120
-    
+
+uniform mat4 projectionMatrix;
+
 varying vec3  screenCoordsPassthrough;
 varying vec4  position;
 varying float linearDepth;
 
 #include "shadows_vertex.glsl"
+#include "depth.glsl"
 
 void main(void)
 {
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = projectionMatrix * (gl_ModelViewMatrix * gl_Vertex);
 
     mat4 scalemat = mat4(0.5, 0.0, 0.0, 0.0,
                          0.0, -0.5, 0.0, 0.0,
@@ -20,7 +23,8 @@ void main(void)
 
     position = gl_Vertex;
 
-    linearDepth = gl_Position.z;
+    vec4 viewPos = gl_ModelViewMatrix * gl_Vertex;
+    linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
-    setupShadowCoords(gl_ModelViewMatrix * gl_Vertex, normalize((gl_NormalMatrix * gl_Normal).xyz));
+    setupShadowCoords(viewPos, normalize((gl_NormalMatrix * gl_Normal).xyz));
 }

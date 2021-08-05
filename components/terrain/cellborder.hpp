@@ -4,6 +4,11 @@
 #include <map>
 #include <osg/Group>
 
+namespace Resource
+{
+    class SceneManager;
+}
+
 namespace Terrain
 {
     class World;
@@ -16,7 +21,7 @@ namespace Terrain
     public:
         typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > CellGrid; 
 
-        CellBorder(Terrain::World *world, osg::Group *root, int borderMask);
+        CellBorder(Terrain::World *world, osg::Group *root, int borderMask, Resource::SceneManager* sceneManager);
 
         void createCellBorderGeometry(int x, int y);
         void destroyCellBorderGeometry(int x, int y);
@@ -28,6 +33,7 @@ namespace Terrain
 
     protected:
         Terrain::World *mWorld;
+        Resource::SceneManager* mSceneManager;
         osg::Group *mRoot;
 
         CellGrid mCellBorderNodes;

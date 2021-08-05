@@ -43,6 +43,7 @@
 #include "rotatecontroller.hpp"
 #include "renderbin.hpp"
 #include "vismask.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -372,7 +373,7 @@ class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
 public:
     DepthClearCallback()
     {
-        mDepth = new osg::Depth;
+        mDepth = SceneUtil::createDepth();
         mDepth->setWriteMask(true);
     }
 

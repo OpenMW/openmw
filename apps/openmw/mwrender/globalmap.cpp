@@ -15,6 +15,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include <components/esm/globalmap.hpp>
 
@@ -24,6 +25,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "vismask.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -323,7 +325,7 @@ namespace MWRender
         if (texture)
         {
             osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(srcLeft, srcTop, srcRight, srcBottom);
-            osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+            auto depth = SceneUtil::createDepth();
             depth->setWriteMask(0);
             osg::StateSet* stateset = geom->getOrCreateStateSet();
             stateset->setAttribute(depth);

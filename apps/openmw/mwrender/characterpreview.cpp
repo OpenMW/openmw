@@ -187,6 +187,10 @@ namespace MWRender
         defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
+        stateset->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(mCamera->getProjectionMatrix())));
+
+        osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+        stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
         SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 

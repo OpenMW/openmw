@@ -5,6 +5,8 @@
 #include <osg/Material>
 #include <osg/StateSet>
 
+#include "util.hpp"
+
 namespace SceneUtil
 {
     // disable nonsense test against a worldsize bb what will always pass
@@ -76,7 +78,7 @@ namespace SceneUtil
         stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 
-        osg::ref_ptr<osg::Depth> depth (new osg::Depth);
+        auto depth = createDepth();
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 

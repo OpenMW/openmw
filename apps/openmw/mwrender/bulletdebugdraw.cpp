@@ -4,6 +4,7 @@
 
 #include <osg/Geometry>
 #include <osg/Group>
+#include <osg/Material>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
@@ -13,6 +14,12 @@
 
 #include "bulletdebugdraw.hpp"
 #include "vismask.hpp"
+
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 
 namespace MWRender
 {
@@ -43,6 +50,10 @@ void DebugDrawer::createGeometry()
         mGeometry->setDataVariance(osg::Object::DYNAMIC);
         mGeometry->addPrimitiveSet(mDrawArrays);
 
+        osg::ref_ptr<osg::Material> material = new osg::Material;
+        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        mGeometry->getOrCreateStateSet()->setAttribute(material);
+
         mParentNode->addChild(mGeometry);
 
         auto* stateSet = new osg::StateSet;
@@ -52,6 +63,8 @@ void DebugDrawer::createGeometry()
         mShapesRoot->setDataVariance(osg::Object::DYNAMIC);
         mShapesRoot->setNodeMask(Mask_Debug);
         mParentNode->addChild(mShapesRoot);
+
+        MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(mGeometry, "debug");
     }
 }
 
