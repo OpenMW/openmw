@@ -17,13 +17,11 @@ namespace MWPhysics
 
         void updatePtr(const MWWorld::Ptr& updated)
         {
-            std::scoped_lock lock(mMutex);
             mPtr = updated;
         }
 
         MWWorld::Ptr getPtr()
         {
-            std::scoped_lock lock(mMutex);
             return mPtr;
         }
 
@@ -35,9 +33,6 @@ namespace MWPhysics
     protected:
         MWWorld::Ptr mPtr;
         std::unique_ptr<btCollisionObject> mCollisionObject;
-
-    private:
-        mutable std::mutex mMutex;
     };
 }
 
