@@ -65,6 +65,11 @@ namespace
         const auto it = std::upper_bound(queue.begin(), queue.end(), job, LessByJobPriority {});
         queue.insert(it, job);
     }
+
+    auto getAgentAndTile(const Job& job) noexcept
+    {
+        return std::make_tuple(job.mAgentHalfExtents, job.mChangedTile);
+    }
 }
 
 namespace DetourNavigator
@@ -127,7 +132,7 @@ namespace DetourNavigator
                 job.mDistanceToPlayer = getManhattanDistance(changedTile.first, playerTile);
                 job.mDistanceToOrigin = getManhattanDistance(changedTile.first, TilePosition {0, 0});
                 job.mProcessTime = job.mChangeType == ChangeType::update
-                    ? mLastUpdates[job.mAgentHalfExtents][job.mChangedTile] + mSettings.get().mMinUpdateInterval
+                    ? mLastUpdates[getAgentAndTile(job)] + mSettings.get().mMinUpdateInterval
                     : std::chrono::steady_clock::time_point();
 
                 const JobIt it = mJobs.insert(mJobs.end(), std::move(job));
@@ -387,7 +392,7 @@ namespace DetourNavigator
         jobs.pop_front();
 
         if (changeLastUpdate && job->mChangeType == ChangeType::update)
-            mLastUpdates[job->mAgentHalfExtents][job->mChangedTile] = now;
+            mLastUpdates[getAgentAndTile(*job)] = now;
 
         return job;
     }
@@ -477,20 +482,12 @@ namespace DetourNavigator
 
         const std::lock_guard<std::mutex> lock(mMutex);
 
-        for (auto agent = mLastUpdates.begin(); agent != mLastUpdates.end();)
+        for (auto it = mLastUpdates.begin(); it != mLastUpdates.end();)
         {
-            for (auto tile = agent->second.begin(); tile != agent->second.end();)
-            {
-                if (now - tile->second > mSettings.get().mMinUpdateInterval)
-                    tile = agent->second.erase(tile);
-                else
-                    ++tile;
-            }
-
-            if (agent->second.empty())
-                agent = mLastUpdates.erase(agent);
+            if (now - it->second > mSettings.get().mMinUpdateInterval)
+                it = mLastUpdates.erase(it);
             else
-                ++agent;
+                ++it;
         }
     }
 
