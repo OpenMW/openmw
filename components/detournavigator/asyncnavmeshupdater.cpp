@@ -29,14 +29,13 @@ namespace
     }
 
     int getMinDistanceTo(const TilePosition& position, int maxDistance,
-                         const std::map<osg::Vec3f, std::set<TilePosition>>& tilesPerHalfExtents,
+                         const std::set<std::tuple<osg::Vec3f, TilePosition>>& pushedTiles,
                          const std::set<std::tuple<osg::Vec3f, TilePosition>>& presentTiles)
     {
         int result = maxDistance;
-        for (const auto& [halfExtents, tiles] : tilesPerHalfExtents)
-            for (const TilePosition& tile : tiles)
-                if (presentTiles.find(std::make_tuple(halfExtents, tile)) == presentTiles.end())
-                    result = std::min(result, getManhattanDistance(position, tile));
+        for (const auto& [halfExtents, tile] : pushedTiles)
+            if (presentTiles.find(std::tie(halfExtents, tile)) == presentTiles.end())
+                result = std::min(result, getManhattanDistance(position, tile));
         return result;
     }
 
@@ -120,7 +119,7 @@ namespace DetourNavigator
 
         for (const auto& changedTile : changedTiles)
         {
-            if (mPushed[agentHalfExtents].insert(changedTile.first).second)
+            if (mPushed.emplace(agentHalfExtents, changedTile.first).second)
             {
                 Job job;
 
@@ -367,13 +366,7 @@ namespace DetourNavigator
 
             if (owner == threadId)
             {
-                const auto it = mPushed.find(job->mAgentHalfExtents);
-                if (it != mPushed.end())
-                {
-                    it->second.erase(job->mChangedTile);
-                    if (it->second.empty())
-                        mPushed.erase(it);
-                }
+                mPushed.erase(getAgentAndTile(*job));
                 return job;
             }
 
@@ -427,7 +420,7 @@ namespace DetourNavigator
 
         const std::lock_guard<std::mutex> lock(mMutex);
 
-        if (mPushed[job->mAgentHalfExtents].insert(job->mChangedTile).second)
+        if (mPushed.emplace(job->mAgentHalfExtents, job->mChangedTile).second)
         {
             ++job->mTryNumber;
             mWaiting.push_back(job);

@@ -92,7 +92,7 @@ namespace DetourNavigator
         std::condition_variable mProcessed;
         std::list<Job> mJobs;
         std::deque<JobIt> mWaiting;
-        std::map<osg::Vec3f, std::set<TilePosition>> mPushed;
+        std::set<std::tuple<osg::Vec3f, TilePosition>> mPushed;
         Misc::ScopeGuarded<TilePosition> mPlayerTile;
         NavMeshTilesCache mNavMeshTilesCache;
         Misc::ScopeGuarded<std::map<std::tuple<osg::Vec3f, TilePosition>, std::thread::id>> mProcessingTiles;
