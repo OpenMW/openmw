@@ -234,13 +234,20 @@ namespace DetourNavigator
     void AsyncNavMeshUpdater::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
         std::size_t jobs = 0;
+        std::size_t waiting = 0;
+        std::size_t pushed = 0;
 
         {
             const std::lock_guard<std::mutex> lock(mMutex);
             jobs = mJobs.size();
+            waiting = mWaiting.size();
+            pushed = mPushed.size();
         }
 
-        stats.setAttribute(frameNumber, "NavMesh UpdateJobs", jobs);
+        stats.setAttribute(frameNumber, "NavMesh Jobs", jobs);
+        stats.setAttribute(frameNumber, "NavMesh Waiting", waiting);
+        stats.setAttribute(frameNumber, "NavMesh Pushed", pushed);
+        stats.setAttribute(frameNumber, "NavMesh Processing", mProcessingTiles.lockConst()->size());
 
         mNavMeshTilesCache.reportStats(frameNumber, stats);
     }
