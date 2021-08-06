@@ -117,19 +117,19 @@ namespace DetourNavigator
             for (JobIt job : mWaiting)
                 job->mDistanceToPlayer = getManhattanDistance(job->mChangedTile, playerTile);
 
-        for (const auto& changedTile : changedTiles)
+        for (const auto& [changedTile, changeType] : changedTiles)
         {
-            if (mPushed.emplace(agentHalfExtents, changedTile.first).second)
+            if (mPushed.emplace(agentHalfExtents, changedTile).second)
             {
                 Job job;
 
                 job.mAgentHalfExtents = agentHalfExtents;
                 job.mNavMeshCacheItem = navMeshCacheItem;
-                job.mChangedTile = changedTile.first;
+                job.mChangedTile = changedTile;
                 job.mTryNumber = 0;
-                job.mChangeType = changedTile.second;
-                job.mDistanceToPlayer = getManhattanDistance(changedTile.first, playerTile);
-                job.mDistanceToOrigin = getManhattanDistance(changedTile.first, TilePosition {0, 0});
+                job.mChangeType = changeType;
+                job.mDistanceToPlayer = getManhattanDistance(changedTile, playerTile);
+                job.mDistanceToOrigin = getManhattanDistance(changedTile, TilePosition {0, 0});
                 job.mProcessTime = job.mChangeType == ChangeType::update
                     ? mLastUpdates[getAgentAndTile(job)] + mSettings.get().mMinUpdateInterval
                     : std::chrono::steady_clock::time_point();
