@@ -84,6 +84,13 @@ void CSVWorld::CellCreator::setType (int index)
     mYLabel->setVisible (index==1);
     mY->setVisible (index==1);
 
+    // The cell name is limited to 64 characters. (ESM::Header::GMDT::mCurrentCell)
+    std::string text = mType->currentText().toStdString();
+    if (text == "Interior Cell")
+        GenericCreator::setEditorMaxLength (64);
+    else
+        GenericCreator::setEditorMaxLength (32767);
+
     update();
 }
 

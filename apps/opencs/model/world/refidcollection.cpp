@@ -59,7 +59,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     NameColumns nameColumns (modelColumns);
 
-    mColumns.emplace_back(Columns::ColumnId_Name, ColumnBase::Display_String);
+    // Only items that can be placed in a container have the 32 character limit, but enforce
+    // that for all referenceable types for now.
+    mColumns.emplace_back(Columns::ColumnId_Name, ColumnBase::Display_String32);
     nameColumns.mName = &mColumns.back();
     mColumns.emplace_back(Columns::ColumnId_Script, ColumnBase::Display_Script);
     nameColumns.mScript = &mColumns.back();
@@ -231,9 +233,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_Boolean));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_AiActivateName, CSMWorld::ColumnBase::Display_String));
+            new RefIdColumn (Columns::ColumnId_AiActivateName, CSMWorld::ColumnBase::Display_String32));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_AiTargetId, CSMWorld::ColumnBase::Display_String));
+            new RefIdColumn (Columns::ColumnId_AiTargetId, CSMWorld::ColumnBase::Display_String32));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiTargetCell, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(
@@ -479,6 +481,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.emplace_back(Columns::ColumnId_Class, ColumnBase::Display_Class);
     npcColumns.mClass = &mColumns.back();
 
+    // NAME32 enforced in IdCompletionDelegate::createEditor()
     mColumns.emplace_back(Columns::ColumnId_Faction, ColumnBase::Display_Faction);
     npcColumns.mFaction = &mColumns.back();
 
