@@ -445,23 +445,13 @@ namespace DetourNavigator
             return std::this_thread::get_id();
 
         auto locked = mProcessingTiles.lock();
-
-        auto agent = locked->find(agentHalfExtents);
-        if (agent == locked->end())
+        const auto tile = locked->find(std::make_tuple(agentHalfExtents, changedTile));
+        if (tile == locked->end())
         {
             const auto threadId = std::this_thread::get_id();
-            locked->emplace(agentHalfExtents, std::map<TilePosition, std::thread::id>({{changedTile, threadId}}));
+            locked->emplace(std::tie(agentHalfExtents, changedTile), threadId);
             return threadId;
         }
-
-        auto tile = agent->second.find(changedTile);
-        if (tile == agent->second.end())
-        {
-            const auto threadId = std::this_thread::get_id();
-            agent->second.emplace(changedTile, threadId);
-            return threadId;
-        }
-
         return tile->second;
     }
 
@@ -469,22 +459,8 @@ namespace DetourNavigator
     {
         if (mSettings.get().mAsyncNavMeshUpdaterThreads <= 1)
             return;
-
         auto locked = mProcessingTiles.lock();
-
-        auto agent = locked->find(agentHalfExtents);
-        if (agent == locked->end())
-            return;
-
-        auto tile = agent->second.find(changedTile);
-        if (tile == agent->second.end())
-            return;
-
-        agent->second.erase(tile);
-
-        if (agent->second.empty())
-            locked->erase(agent);
-
+        locked->erase(std::tie(agentHalfExtents, changedTile));
         if (locked->empty())
             mProcessed.notify_all();
     }

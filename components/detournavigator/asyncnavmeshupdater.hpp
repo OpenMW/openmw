@@ -95,7 +95,7 @@ namespace DetourNavigator
         std::map<osg::Vec3f, std::set<TilePosition>> mPushed;
         Misc::ScopeGuarded<TilePosition> mPlayerTile;
         NavMeshTilesCache mNavMeshTilesCache;
-        Misc::ScopeGuarded<std::map<osg::Vec3f, std::map<TilePosition, std::thread::id>>> mProcessingTiles;
+        Misc::ScopeGuarded<std::map<std::tuple<osg::Vec3f, TilePosition>, std::thread::id>> mProcessingTiles;
         std::map<osg::Vec3f, std::map<TilePosition, std::chrono::steady_clock::time_point>> mLastUpdates;
         std::set<std::tuple<osg::Vec3f, TilePosition>> mPresentTiles;
         std::map<std::thread::id, std::deque<JobIt>> mThreadsQueues;
