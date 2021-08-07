@@ -3,11 +3,10 @@
 
 #include "areatype.hpp"
 
-#include <components/resource/bulletshape.hpp>
-
 #include <LinearMath/btTransform.h>
 
 #include <osg/ref_ptr>
+#include <osg/Referenced>
 
 #include <functional>
 #include <vector>
@@ -20,16 +19,16 @@ namespace DetourNavigator
     class CollisionShape
     {
     public:
-        CollisionShape(osg::ref_ptr<const Resource::BulletShapeInstance> instance, const btCollisionShape& shape)
-            : mShapeInstance(std::move(instance))
+        CollisionShape(osg::ref_ptr<const osg::Referenced> holder, const btCollisionShape& shape)
+            : mHolder(std::move(holder))
             , mShape(shape)
         {}
 
-        const osg::ref_ptr<const Resource::BulletShapeInstance>& getShapeInstance() const { return mShapeInstance; }
+        const osg::ref_ptr<const osg::Referenced>& getHolder() const { return mHolder; }
         const btCollisionShape& getShape() const { return mShape; }
 
     private:
-        osg::ref_ptr<const Resource::BulletShapeInstance> mShapeInstance;
+        osg::ref_ptr<const osg::Referenced> mHolder;
         std::reference_wrapper<const btCollisionShape> mShape;
     };
 
@@ -39,6 +38,11 @@ namespace DetourNavigator
             RecastMeshObject(const CollisionShape& shape, const btTransform& transform, const AreaType areaType);
 
             bool update(const btTransform& transform, const AreaType areaType);
+
+            const osg::ref_ptr<const osg::Referenced>& getHolder() const
+            {
+                return mHolder;
+            }
 
             const btCollisionShape& getShape() const
             {
@@ -56,7 +60,7 @@ namespace DetourNavigator
             }
 
         private:
-            osg::ref_ptr<const Resource::BulletShapeInstance> mShapeInstance;
+            osg::ref_ptr<const osg::Referenced> mHolder;
             std::reference_wrapper<const btCollisionShape> mShape;
             btTransform mTransform;
             AreaType mAreaType;

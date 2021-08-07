@@ -123,7 +123,13 @@ namespace DetourNavigator
         tileBounds.mMin /= mSettings.mRecastScaleFactor;
         tileBounds.mMax /= mSettings.mRecastScaleFactor;
         RecastMeshBuilder builder(tileBounds);
-        std::vector<RecastMeshObject> objects;
+        using Object = std::tuple<
+            osg::ref_ptr<const osg::Referenced>,
+            std::reference_wrapper<const btCollisionShape>,
+            btTransform,
+            AreaType
+        >;
+        std::vector<Object> objects;
         std::size_t revision;
         {
             const std::lock_guard lock(mMutex);
@@ -133,11 +139,14 @@ namespace DetourNavigator
                 std::visit(AddHeightfield {v.mCell, builder}, v.mShape);
             objects.reserve(mObjects.size());
             for (const auto& [k, object] : mObjects)
-                objects.push_back(object.getImpl());
+            {
+                const RecastMeshObject& impl = object.getImpl();
+                objects.emplace_back(impl.getHolder(), impl.getShape(), impl.getTransform(), impl.getAreaType());
+            }
             revision = mRevision;
         }
-        for (const auto& v : objects)
-            builder.addObject(v.getShape(), v.getTransform(), v.getAreaType());
+        for (const auto& [holder, shape, transform, areaType] : objects)
+            builder.addObject(shape, transform, areaType);
         return std::move(builder).create(mGeneration, revision);
     }
 

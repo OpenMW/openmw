@@ -23,35 +23,35 @@ namespace DetourNavigator
             return result;
         }
 
-        std::vector<RecastMeshObject> makeChildrenObjects(const osg::ref_ptr<const Resource::BulletShapeInstance>& instance,
+        std::vector<RecastMeshObject> makeChildrenObjects(const osg::ref_ptr<const osg::Referenced>& holder,
                                                           const btCompoundShape& shape, const AreaType areaType)
         {
             std::vector<RecastMeshObject> result;
             for (int i = 0, num = shape.getNumChildShapes(); i < num; ++i)
             {
-                const CollisionShape collisionShape {instance, *shape.getChildShape(i)};
+                const CollisionShape collisionShape {holder, *shape.getChildShape(i)};
                 result.emplace_back(collisionShape, shape.getChildTransform(i), areaType);
             }
             return result;
         }
 
-        std::vector<RecastMeshObject> makeChildrenObjects(const osg::ref_ptr<const Resource::BulletShapeInstance>& instance,
+        std::vector<RecastMeshObject> makeChildrenObjects(const osg::ref_ptr<const osg::Referenced>& holder,
                                                           const btCollisionShape& shape, const AreaType areaType)
         {
             if (shape.isCompound())
-                return makeChildrenObjects(std::move(instance), static_cast<const btCompoundShape&>(shape), areaType);
+                return makeChildrenObjects(holder, static_cast<const btCompoundShape&>(shape), areaType);
             return std::vector<RecastMeshObject>();
         }
     }
 
     RecastMeshObject::RecastMeshObject(const CollisionShape& shape, const btTransform& transform,
             const AreaType areaType)
-        : mShapeInstance(shape.getShapeInstance())
+        : mHolder(shape.getHolder())
         , mShape(shape.getShape())
         , mTransform(transform)
         , mAreaType(areaType)
         , mLocalScaling(mShape.get().getLocalScaling())
-        , mChildren(makeChildrenObjects(mShapeInstance, mShape.get(), mAreaType))
+        , mChildren(makeChildrenObjects(mHolder, mShape.get(), mAreaType))
     {
     }
 
