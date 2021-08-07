@@ -55,14 +55,18 @@ namespace DetourNavigator
 
     struct Job
     {
-        osg::Vec3f mAgentHalfExtents;
-        std::weak_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItem;
-        TilePosition mChangedTile;
-        unsigned mTryNumber;
-        ChangeType mChangeType;
+        const osg::Vec3f mAgentHalfExtents;
+        const std::weak_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItem;
+        const TilePosition mChangedTile;
+        const std::chrono::steady_clock::time_point mProcessTime;
+        unsigned mTryNumber = 0;
+        const ChangeType mChangeType;
         int mDistanceToPlayer;
-        int mDistanceToOrigin;
-        std::chrono::steady_clock::time_point mProcessTime;
+        const int mDistanceToOrigin;
+
+        Job(const osg::Vec3f& agentHalfExtents, std::weak_ptr<GuardedNavMeshCacheItem> navMeshCacheItem,
+            const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
+            std::chrono::steady_clock::time_point processTime);
     };
 
     using JobIt = std::list<Job>::iterator;

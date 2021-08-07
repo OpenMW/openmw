@@ -73,6 +73,19 @@ namespace
 
 namespace DetourNavigator
 {
+    Job::Job(const osg::Vec3f& agentHalfExtents, std::weak_ptr<GuardedNavMeshCacheItem> navMeshCacheItem,
+        const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
+        std::chrono::steady_clock::time_point processTime)
+        : mAgentHalfExtents(agentHalfExtents)
+        , mNavMeshCacheItem(std::move(navMeshCacheItem))
+        , mChangedTile(changedTile)
+        , mProcessTime(processTime)
+        , mChangeType(changeType)
+        , mDistanceToPlayer(distanceToPlayer)
+        , mDistanceToOrigin(getManhattanDistance(changedTile, TilePosition {0, 0}))
+    {
+    }
+
     AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager,
             OffMeshConnectionsManager& offMeshConnectionsManager)
         : mSettings(settings)
@@ -121,20 +134,12 @@ namespace DetourNavigator
         {
             if (mPushed.emplace(agentHalfExtents, changedTile).second)
             {
-                Job job;
-
-                job.mAgentHalfExtents = agentHalfExtents;
-                job.mNavMeshCacheItem = navMeshCacheItem;
-                job.mChangedTile = changedTile;
-                job.mTryNumber = 0;
-                job.mChangeType = changeType;
-                job.mDistanceToPlayer = getManhattanDistance(changedTile, playerTile);
-                job.mDistanceToOrigin = getManhattanDistance(changedTile, TilePosition {0, 0});
-                job.mProcessTime = job.mChangeType == ChangeType::update
-                    ? mLastUpdates[getAgentAndTile(job)] + mSettings.get().mMinUpdateInterval
+                const auto processTime = changeType == ChangeType::update
+                    ? mLastUpdates[std::tie(agentHalfExtents, changedTile)] + mSettings.get().mMinUpdateInterval
                     : std::chrono::steady_clock::time_point();
 
-                const JobIt it = mJobs.insert(mJobs.end(), std::move(job));
+                const JobIt it = mJobs.emplace(mJobs.end(), agentHalfExtents, navMeshCacheItem, changedTile,
+                    changeType, getManhattanDistance(changedTile, playerTile), processTime);
 
                 if (playerTileChanged)
                     mWaiting.push_back(it);
