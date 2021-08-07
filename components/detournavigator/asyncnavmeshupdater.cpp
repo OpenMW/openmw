@@ -18,6 +18,8 @@ namespace
 {
     using DetourNavigator::ChangeType;
     using DetourNavigator::TilePosition;
+    using DetourNavigator::UpdateType;
+    using DetourNavigator::ChangeType;
 
     int getManhattanDistance(const TilePosition& lhs, const TilePosition& rhs)
     {
@@ -34,6 +36,13 @@ namespace
                 if (presentTiles.find(std::make_tuple(halfExtents, tile)) == presentTiles.end())
                     result = std::min(result, getManhattanDistance(position, tile));
         return result;
+    }
+
+    UpdateType getUpdateType(ChangeType changeType) noexcept
+    {
+        if (changeType == ChangeType::update)
+            return UpdateType::Temporary;
+        return UpdateType::Persistent;
     }
 }
 
@@ -282,7 +291,7 @@ namespace DetourNavigator
         const auto offMeshConnections = mOffMeshConnectionsManager.get().get(job.mChangedTile);
 
         const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mChangedTile, playerTile,
-            offMeshConnections, mSettings, navMeshCacheItem, mNavMeshTilesCache);
+            offMeshConnections, mSettings, navMeshCacheItem, mNavMeshTilesCache, getUpdateType(job.mChangeType));
 
         if (recastMesh != nullptr)
         {
