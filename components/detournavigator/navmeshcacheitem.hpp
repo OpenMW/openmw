@@ -10,6 +10,7 @@
 #include <components/misc/guarded.hpp>
 
 #include <map>
+#include <ostream>
 
 struct dtMeshTile;
 
@@ -31,6 +32,32 @@ namespace DetourNavigator
     inline bool isSuccess(UpdateNavMeshStatus value)
     {
         return (static_cast<unsigned>(value) & static_cast<unsigned>(UpdateNavMeshStatus::failed)) == 0;
+    }
+
+    inline std::ostream& operator <<(std::ostream& stream, UpdateNavMeshStatus value)
+    {
+        switch (value)
+        {
+            case UpdateNavMeshStatus::ignored:
+                return stream << "ignore";
+            case UpdateNavMeshStatus::removed:
+                return stream << "removed";
+            case UpdateNavMeshStatus::added:
+                return stream << "add";
+            case UpdateNavMeshStatus::replaced:
+                return stream << "replaced";
+            case UpdateNavMeshStatus::failed:
+                return stream << "failed";
+            case UpdateNavMeshStatus::lost:
+                return stream << "lost";
+            case UpdateNavMeshStatus::cached:
+                return stream << "cached";
+            case UpdateNavMeshStatus::unchanged:
+                return stream << "unchanged";
+            case UpdateNavMeshStatus::restored:
+                return stream << "restored";
+        }
+        return stream << "unknown(" << static_cast<unsigned>(value) << ")";
     }
 
     class UpdateNavMeshStatusBuilder
