@@ -361,11 +361,12 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
     // insert new package in correct place depending on priority
     for (auto it = mPackages.begin(); it != mPackages.end(); ++it)
     {
-        // We should keep current AiCast package, if we try to add a new one.
+        // We should override current AiCast package, if we try to add a new one.
         if ((*it)->getTypeId() == MWMechanics::AiPackageTypeId::Cast &&
             package.getTypeId() == MWMechanics::AiPackageTypeId::Cast)
         {
-            continue;
+            *it = package.clone();
+            return;
         }
 
         if((*it)->getPriority() <= package.getPriority())

@@ -25,6 +25,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -1233,8 +1234,11 @@ namespace MWScript
 
                 if (ptr.getClass().isActor())
                 {
-                    MWMechanics::AiCast castPackage(targetId, spellId, true);
-                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    if (!MWBase::Environment::get().getMechanicsManager()->isCastingSpell(ptr))
+                    {
+                        MWMechanics::AiCast castPackage(targetId, spellId, true);
+                        ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    }
                     return;
                 }
 
@@ -1276,8 +1280,11 @@ namespace MWScript
 
                 if (ptr.getClass().isActor())
                 {
-                    MWMechanics::AiCast castPackage(ptr.getCellRef().getRefId(), spellId, true);
-                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    if (!MWBase::Environment::get().getMechanicsManager()->isCastingSpell(ptr))
+                    {
+                        MWMechanics::AiCast castPackage(ptr.getCellRef().getRefId(), spellId, true);
+                        ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    }
                     return;
                 }
 
