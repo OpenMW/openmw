@@ -517,8 +517,6 @@ namespace DetourNavigator
             " playerTile=(" << playerTile << ")" <<
             " changedTileDistance=" << getDistance(changedTile, playerTile);
 
-        const auto params = *navMeshCacheItem->lockConst()->getImpl().getParams();
-
         if (!recastMesh)
         {
             Log(Debug::Debug) << "Ignore add tile: recastMesh is null";
@@ -541,6 +539,8 @@ namespace DetourNavigator
             Log(Debug::Debug) << "Ignore add tile: recastMesh is empty";
             return navMeshCacheItem->lock()->removeTile(changedTile);
         }
+
+        const dtNavMeshParams params = *navMeshCacheItem->lockConst()->getImpl().getParams();
 
         if (!shouldAddTile(changedTile, playerTile, std::min(settings.mMaxTilesNumber, params.maxTiles)))
         {
