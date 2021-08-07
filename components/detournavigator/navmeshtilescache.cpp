@@ -85,7 +85,8 @@ namespace DetourNavigator
         out.setAttribute(frameNumber, "NavMesh CacheSize", stats.mNavMeshCacheSize);
         out.setAttribute(frameNumber, "NavMesh UsedTiles", stats.mUsedNavMeshTiles);
         out.setAttribute(frameNumber, "NavMesh CachedTiles", stats.mCachedNavMeshTiles);
-        out.setAttribute(frameNumber, "NavMesh CacheHitRate", static_cast<double>(stats.mHitCount) / stats.mGetCount * 100.0);
+        if (stats.mGetCount > 0)
+            out.setAttribute(frameNumber, "NavMesh CacheHitRate", static_cast<double>(stats.mHitCount) / stats.mGetCount * 100.0);
     }
 
     void NavMeshTilesCache::removeLeastRecentlyUsed()
