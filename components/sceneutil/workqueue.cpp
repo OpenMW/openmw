@@ -46,9 +46,12 @@ WorkQueue::~WorkQueue()
 
 void WorkQueue::start(std::size_t workerThreads)
 {
+    {
+        const std::lock_guard lock(mMutex);
+        mIsReleased = false;
+    }
     while (mThreads.size() < workerThreads)
         mThreads.emplace_back(std::make_unique<WorkThread>(*this));
-    mIsReleased = false;
 }
 
 void WorkQueue::stop()
