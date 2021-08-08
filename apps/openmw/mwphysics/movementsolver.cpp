@@ -163,7 +163,7 @@ namespace MWPhysics
         }
 
         // Now that we have the effective movement vector, apply wind forces to it
-        if (worldData.mIsInStorm)
+        if (worldData.mIsInStorm && velocity.length() > 0)
         {
             osg::Vec3f stormDirection = worldData.mStormDirection;
             float angleDegrees = osg::RadiansToDegrees(std::acos(stormDirection * velocity / (stormDirection.length() * velocity.length())));
