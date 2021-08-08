@@ -33,8 +33,6 @@ namespace MWPhysics
         void setRotation(osg::Quat quat);
         void updatePosition();
         void commitPositionChange();
-        btCollisionObject* getCollisionObject();
-        const btCollisionObject* getCollisionObject() const;
         btTransform getTransform() const;
         /// Return solid flag. Not used by the object itself, true by default.
         bool isSolid() const;
@@ -45,7 +43,6 @@ namespace MWPhysics
         bool animateCollisionShapes();
 
     private:
-        std::unique_ptr<btCollisionObject> mCollisionObject;
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
         std::map<int, osg::NodePath> mRecIndexToNodePath;
         bool mSolid;

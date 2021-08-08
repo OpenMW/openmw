@@ -83,16 +83,6 @@ namespace MWPhysics
         }
     }
 
-    btCollisionObject* Object::getCollisionObject()
-    {
-        return mCollisionObject.get();
-    }
-
-    const btCollisionObject* Object::getCollisionObject() const
-    {
-        return mCollisionObject.get();
-    }
-
     btTransform Object::getTransform() const
     {
         std::unique_lock<std::mutex> lock(mPositionMutex);

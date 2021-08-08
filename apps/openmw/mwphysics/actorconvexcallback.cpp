@@ -77,10 +77,8 @@ namespace MWPhysics
             auto* projectileHolder = static_cast<Projectile*>(convexResult.m_hitCollisionObject->getUserPointer());
             if (!projectileHolder->isActive())
                 return btScalar(1);
-            auto* targetHolder = static_cast<PtrHolder*>(mMe->getUserPointer());
-            const MWWorld::Ptr target = targetHolder->getPtr();
-            if (projectileHolder->isValidTarget(target))
-                projectileHolder->hit(target, convexResult.m_hitPointLocal, convexResult.m_hitNormalLocal);
+            if (projectileHolder->isValidTarget(mMe))
+                projectileHolder->hit(mMe, convexResult.m_hitPointLocal, convexResult.m_hitNormalLocal);
             return btScalar(1);
         }
 

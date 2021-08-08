@@ -42,31 +42,26 @@ namespace MWPhysics
         void setPosition(const osg::Vec3f& position);
         osg::Vec3f getPosition() const;
 
-        btCollisionObject* getCollisionObject() const
-        {
-            return mCollisionObject.get();
-        }
-
         bool isActive() const
         {
             return mActive.load(std::memory_order_acquire);
         }
 
-        MWWorld::Ptr getTarget() const
-        {
-            assert(!mActive);
-            return mHitTarget;
-        }
+        MWWorld::Ptr getTarget() const;
 
         MWWorld::Ptr getCaster() const;
         void setCaster(const MWWorld::Ptr& caster);
+        const btCollisionObject* getCasterCollisionObject() const
+        {
+            return mCasterColObj;
+        }
 
         bool canTraverseWater() const;
 
-        void hit(const MWWorld::Ptr& target, btVector3 pos, btVector3 normal);
+        void hit(const btCollisionObject* target, btVector3 pos, btVector3 normal);
 
         void setValidTargets(const std::vector<MWWorld::Ptr>& targets);
-        bool isValidTarget(const MWWorld::Ptr& target) const;
+        bool isValidTarget(const btCollisionObject* target) const;
 
         std::optional<btVector3> getWaterHitPosition();
         void setWaterHitPosition(btVector3 pos);
@@ -76,19 +71,19 @@ namespace MWPhysics
         std::unique_ptr<btCollisionShape> mShape;
         btConvexShape* mConvexShape;
 
-        std::unique_ptr<btCollisionObject> mCollisionObject;
         bool mTransformUpdatePending;
         bool mCanCrossWaterSurface;
         bool mCrossedWaterSurface;
         std::atomic<bool> mActive;
         MWWorld::Ptr mCaster;
-        MWWorld::Ptr mHitTarget;
+        const btCollisionObject* mCasterColObj;
+        const btCollisionObject* mHitTarget;
         std::optional<btVector3> mWaterHitPosition;
         osg::Vec3f mPosition;
         btVector3 mHitPosition;
         btVector3 mHitNormal;
 
-        std::vector<MWWorld::Ptr> mValidTargets;
+        std::vector<const btCollisionObject*> mValidTargets;
 
         mutable std::mutex mMutex;
 
