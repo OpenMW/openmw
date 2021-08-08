@@ -2,7 +2,7 @@
 
 uniform mat4 projectionMatrix;
 
-varying vec4 passColor;
+centroid varying vec4 passColor;
 
 void main()
 {
