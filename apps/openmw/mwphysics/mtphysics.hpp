@@ -6,6 +6,7 @@
 #include <optional>
 #include <shared_mutex>
 #include <thread>
+#include <unordered_set>
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
@@ -38,7 +39,7 @@ namespace MWPhysics
             /// @param timeAccum accumulated time from previous run to interpolate movements
             /// @param actorsData per actor data needed to compute new positions
             /// @return new position of each actor
-            void applyQueuedMovements(float & timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            void applyQueuedMovements(float & timeAccum, std::vector<std::weak_ptr<Actor>>&& actors, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             void resetSimulation(const ActorMap& actors);
 
@@ -55,11 +56,13 @@ namespace MWPhysics
             void updateSingleAabb(std::weak_ptr<PtrHolder> ptr, bool immediate=false);
             bool getLineOfSight(const std::weak_ptr<Actor>& actor1, const std::weak_ptr<Actor>& actor2);
             void debugDraw();
+            void* getUserPointer(const btCollisionObject* object) const;
 
         private:
             void syncComputation();
             void worker();
             void updateActorsPositions();
+            void updateActor(Actor& actor, ActorFrameData& actorData, bool simulationPerformed, float timeAccum, float dt) const;
             bool hasLineOfSight(const Actor* actor1, const Actor* actor2);
             void refreshLOSCache();
             void updateAabbs();
@@ -71,7 +74,9 @@ namespace MWPhysics
             void afterPostSim();
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
+            std::vector<std::weak_ptr<Actor>> mActors;
             std::vector<ActorFrameData> mActorsFrameData;
+            std::unordered_set<const btCollisionObject*> mCollisionObjects;
             float mDefaultPhysicsDt;
             float mPhysicsDt;
             float mTimeAccum;

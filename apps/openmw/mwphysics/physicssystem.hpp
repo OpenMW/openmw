@@ -78,27 +78,32 @@ namespace MWPhysics
 
     struct ActorFrameData
     {
-        ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn, bool moveToWaterSurface, float slowFall, float waterlevel);
-        void  updatePosition(btCollisionWorld* world);
-        std::weak_ptr<Actor> mActor;
-        Actor* mActorRaw;
-        MWWorld::Ptr mStandingOn;
-        bool mFlying;
-        bool mSwimming;
-        bool mWasOnGround;
-        bool mWantJump;
-        bool mDidJump;
-        bool mFloatToSurface;
-        bool mNeedLand;
-        bool mWaterCollision;
-        bool mSkipCollisionDetection;
-        float mWaterlevel;
-        float mSlowFall;
+        ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel);
+        void  updatePosition(Actor& actor, btCollisionWorld* world);
+        osg::Vec3f mPosition;
+        osg::Vec3f mInertia;
+        const btCollisionObject* mStandingOn;
+        bool mIsOnGround;
+        bool mIsOnSlope;
+        bool mWalkingOnWater;
+        const bool mInert;
+        btCollisionObject* mCollisionObject;
+        const float mSwimLevel;
+        const float mSlowFall;
+        osg::Vec2f mRotation;
+        osg::Vec3f mMovement;
+        osg::Vec3f mLastStuckPosition;
+        const float mWaterlevel;
+        const float mHalfExtentsZ;
         float mOldHeight;
         float mFallHeight;
-        osg::Vec3f mMovement;
-        osg::Vec3f mPosition;
-        ESM::Position mRefpos;
+        unsigned int mStuckFrames;
+        const bool mFlying;
+        const bool mWasOnGround;
+        const bool mIsAquatic;
+        const bool mWaterCollision;
+        const bool mSkipCollisionDetection;
+        bool mNeedLand;
     };
 
     struct WorldFrameData
@@ -254,7 +259,7 @@ namespace MWPhysics
 
             void updateWater();
 
-            std::vector<ActorFrameData> prepareFrameData(bool willSimulate);
+            std::pair<std::vector<std::weak_ptr<Actor>>, std::vector<ActorFrameData>> prepareFrameData(bool willSimulate);
 
             osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
