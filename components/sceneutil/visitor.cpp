@@ -46,17 +46,6 @@ namespace SceneUtil
     {
     }
 
-    void DisableFreezeOnCullVisitor::apply(osg::MatrixTransform &node)
-    {
-        traverse(node);
-    }
-
-    void DisableFreezeOnCullVisitor::apply(osg::Drawable& drw)
-    {
-        if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
-            partsys->setFreezeOnCull(false);
-    }
-
     void NodeMapVisitor::apply(osg::MatrixTransform& trans)
     {
         // Take transformation for first found node in file

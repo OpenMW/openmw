@@ -1678,9 +1678,6 @@ namespace MWRender
         SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
         node->accept(findMaxLengthVisitor);
 
-        // FreezeOnCull doesn't work so well with effect particles, that tend to have moving emitters
-        SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
-        node->accept(disableFreezeOnCullVisitor);
         node->setNodeMask(Mask_Effect);
 
         params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();

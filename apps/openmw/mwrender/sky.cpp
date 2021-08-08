@@ -1731,9 +1731,6 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
             mParticleEffect->accept(alphaFaderSetupVisitor);
 
-            SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
-            mParticleEffect->accept(disableFreezeOnCullVisitor);
-
             SceneUtil::FindByClassVisitor findPSVisitor(std::string("ParticleSystem"));
             mParticleEffect->accept(findPSVisitor);
 
