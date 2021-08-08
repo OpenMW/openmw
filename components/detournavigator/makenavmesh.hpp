@@ -47,10 +47,16 @@ namespace DetourNavigator
 
     NavMeshPtr makeEmptyNavMesh(const Settings& settings);
 
+    enum class UpdateType
+    {
+        Persistent,
+        Temporary
+    };
+
     UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
         const TilePosition& changedTile, const TilePosition& playerTile,
         const std::vector<OffMeshConnection>& offMeshConnections, const Settings& settings,
-        const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache);
+        const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache, UpdateType updateType);
 }
 
 #endif

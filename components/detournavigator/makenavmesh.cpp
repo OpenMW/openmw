@@ -506,7 +506,7 @@ namespace DetourNavigator
     UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
         const TilePosition& changedTile, const TilePosition& playerTile,
         const std::vector<OffMeshConnection>& offMeshConnections, const Settings& settings,
-        const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache)
+        const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache, UpdateType updateType)
     {
         Log(Debug::Debug) << std::fixed << std::setprecision(2) <<
             "Update NavMesh with multiple tiles:" <<
@@ -516,8 +516,6 @@ namespace DetourNavigator
             " changedTile=(" << changedTile << ")" <<
             " playerTile=(" << playerTile << ")" <<
             " changedTileDistance=" << getDistance(changedTile, playerTile);
-
-        const auto params = *navMeshCacheItem->lockConst()->getImpl().getParams();
 
         if (!recastMesh)
         {
@@ -542,6 +540,8 @@ namespace DetourNavigator
             return navMeshCacheItem->lock()->removeTile(changedTile);
         }
 
+        const dtNavMeshParams params = *navMeshCacheItem->lockConst()->getImpl().getParams();
+
         if (!shouldAddTile(changedTile, playerTile, std::min(settings.mMaxTilesNumber, params.maxTiles)))
         {
             Log(Debug::Debug) << "Ignore add tile: too far from player";
@@ -561,6 +561,10 @@ namespace DetourNavigator
                 Log(Debug::Debug) << "Ignore add tile: NavMeshData is null";
                 return navMeshCacheItem->lock()->removeTile(changedTile);
             }
+
+            if (updateType == UpdateType::Temporary)
+                return navMeshCacheItem->lock()->updateTile(changedTile, NavMeshTilesCache::Value(),
+                    makeNavMeshTileData(*prepared, offMeshConnections, agentHalfExtents, changedTile, settings));
 
             cachedNavMeshData = navMeshTilesCache.set(agentHalfExtents, changedTile, *recastMesh, std::move(prepared));
 
