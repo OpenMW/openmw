@@ -52,7 +52,7 @@ namespace DetourNavigator
 
         std::optional<Cell> removeHeightfield(const osg::Vec2i& cellPosition);
 
-        std::shared_ptr<RecastMesh> getMesh();
+        std::shared_ptr<RecastMesh> getMesh() const;
 
         bool isEmpty() const;
 
