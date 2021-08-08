@@ -99,10 +99,9 @@ namespace
             return Constants::CellGridRadius;
         if (!Settings::Manager::getBool("distant terrain", "Terrain"))
             return Constants::CellGridRadius;
-        const float localViewingDistanceCoef = Settings::Manager::getFloat("local viewing distance coef", "Map");
-        const int viewingDistance = Settings::Manager::getInt("viewing distance", "Camera");
-        const int localViewingDistanceInCells = (viewingDistance * localViewingDistanceCoef) / double(Constants::CellSizeInUnits);
-        return std::max(Constants::CellGridRadius, localViewingDistanceInCells);
+        const int maxLocalViewingDistance = std::max(Settings::Manager::getInt("max local viewing distance", "Map"), Constants::CellGridRadius);
+        const int viewingDistanceInCells = Settings::Manager::getFloat("viewing distance", "Camera") / Constants::CellSizeInUnits;
+        return std::min(maxLocalViewingDistance, viewingDistanceInCells);
     }
 }
 

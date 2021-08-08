@@ -115,14 +115,18 @@ If this setting is true the user can zoom in/out on local and global map with th
 
 This setting can be controlled in Advanced tab of the launcher.
 
-local viewing distance coef
+max local viewing distance
 ---------------------------
 
-:Type:		float
-:Range:		> 0 and <= 1
-:Default:	0.5
+:Type:		integer
+:Range:		> 0
+:Default:	10
 
-This setting controls viewing distance on local map. It is the coefficient of the viewing distance viewable on the local map if 'distant terrain' is enabled otherwise you will see the default value (a 3x3 square centered on the player).
+This setting controls the viewing distance on local map when 'distant terrain' is enabled.
+If this setting is greater than the viewing distance then only up to the viewing distance is used for local map, otherwise the viewing distance is used.
 If view distance is changed in settings menu during the game, then viewable distance on the local map is not updated.
+.. warning::
+	Increasing this setting can increase cell load times,
+	because the localmap take a snapshot of each cell contained in a square of 2 x (max local viewing distance) + 1 square.
 
 This setting can not be configured except by editing the settings configuration file.
