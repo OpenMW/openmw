@@ -1103,8 +1103,6 @@ namespace NifOsg
             partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(osg::Vec4f(1.f,1.f,1.f,1.f), osg::Vec4f(1.f,1.f,1.f,1.f)));
             partsys->getDefaultParticleTemplate().setAlphaRange(osgParticle::rangef(1.f, 1.f));
 
-            partsys->setFreezeOnCull(true);
-
             if (!partctrl->emitter.empty())
             {
                 osg::ref_ptr<Emitter> emitter = handleParticleEmitter(partctrl);

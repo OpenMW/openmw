@@ -238,9 +238,6 @@ namespace MWWorld
             state.mNode->addChild(projectileLightSource);
             projectileLightSource->setLight(projectileLight);
         }
-        
-        SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
-        state.mNode->accept(disableFreezeOnCullVisitor);
 
         state.mNode->addCullCallback(new SceneUtil::LightListCallback);
 

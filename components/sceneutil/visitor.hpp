@@ -45,20 +45,6 @@ namespace SceneUtil
         std::vector<osg::Node *> mFoundNodes;
     };
 
-    // Disable freezeOnCull for all visited particlesystems
-    class DisableFreezeOnCullVisitor : public osg::NodeVisitor
-    {
-    public:
-        DisableFreezeOnCullVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-        {
-        }
-
-        void apply(osg::MatrixTransform& node) override;
-
-        void apply(osg::Drawable& drw) override;
-    };
-
     /// Maps names to nodes
     class NodeMapVisitor : public osg::NodeVisitor
     {
