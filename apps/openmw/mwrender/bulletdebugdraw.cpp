@@ -70,6 +70,7 @@ void DebugDrawer::createGeometry()
         osg::ref_ptr<osg::Material> material = new osg::Material;
         material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
         stateSet->setAttribute(material);
+        mLinesGeometry->setStateSet(stateSet);
         mTrisGeometry->setStateSet(stateSet);
         mShapesRoot = new osg::Group;
         mShapesRoot->setStateSet(stateSet);
