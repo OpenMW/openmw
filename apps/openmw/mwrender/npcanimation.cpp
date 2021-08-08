@@ -837,14 +837,18 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
                     }
                 }
             }
+            SceneUtil::ForceControllerSourcesVisitor assignVisitor(src);
+            node->accept(assignVisitor);
         }
-        else if (type == ESM::PRT_Weapon)
-            src = mWeaponAnimationTime;
         else
-            src.reset(new NullAnimationTime);
-
-        SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
-        node->accept(assignVisitor);
+        {
+            if (type == ESM::PRT_Weapon)
+                src = mWeaponAnimationTime;
+            else
+                src.reset(new NullAnimationTime);
+            SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
+            node->accept(assignVisitor);
+        }
     }
 
     return true;
