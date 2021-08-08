@@ -38,12 +38,6 @@ namespace
         EXPECT_EQ(manager.getMesh(TilePosition(0, 0)), nullptr);
     }
 
-    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, has_tile_for_empty_should_return_false)
-    {
-        TileCachedRecastMeshManager manager(mSettings);
-        EXPECT_FALSE(manager.hasTile(TilePosition(0, 0)));
-    }
-
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_revision_for_empty_should_return_zero)
     {
         const TileCachedRecastMeshManager manager(mSettings);
@@ -83,7 +77,7 @@ namespace
         ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
         for (int x = -1; x < 1; ++x)
             for (int y = -1; y < 1; ++y)
-                ASSERT_TRUE(manager.hasTile(TilePosition(x, y)));
+                ASSERT_NE(manager.getMesh(TilePosition(x, y)), nullptr);
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, update_object_for_changed_object_should_return_changed_tiles)
@@ -281,7 +275,7 @@ namespace
         ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
-                ASSERT_TRUE(manager.hasTile(TilePosition(x, y)));
+                ASSERT_NE(manager.getMesh(TilePosition(x, y)), nullptr);
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_water_for_max_int_should_not_add_new_tiles)
@@ -295,7 +289,7 @@ namespace
         ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
-                ASSERT_EQ(manager.hasTile(TilePosition(x, y)), -1 <= x && x <= 0 && -1 <= y && y <= 0);
+                ASSERT_EQ(manager.getMesh(TilePosition(x, y)) != nullptr, -1 <= x && x <= 0 && -1 <= y && y <= 0);
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_water_for_absent_cell_should_return_nullopt)
@@ -324,7 +318,7 @@ namespace
         ASSERT_TRUE(manager.removeWater(cellPosition));
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
-                ASSERT_FALSE(manager.hasTile(TilePosition(x, y)));
+                ASSERT_EQ(manager.getMesh(TilePosition(x, y)), nullptr);
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_water_for_existing_cell_should_leave_not_empty_tiles)
@@ -339,7 +333,7 @@ namespace
         ASSERT_TRUE(manager.removeWater(cellPosition));
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
-                ASSERT_EQ(manager.hasTile(TilePosition(x, y)), -1 <= x && x <= 0 && -1 <= y && y <= 0);
+                ASSERT_EQ(manager.getMesh(TilePosition(x, y)) != nullptr, -1 <= x && x <= 0 && -1 <= y && y <= 0);
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_object_should_not_remove_tile_with_water)
@@ -354,6 +348,6 @@ namespace
         ASSERT_TRUE(manager.removeObject(ObjectId(&boxShape)));
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
-                ASSERT_TRUE(manager.hasTile(TilePosition(x, y)));
+                ASSERT_NE(manager.getMesh(TilePosition(x, y)), nullptr);
     }
 }

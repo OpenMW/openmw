@@ -205,11 +205,6 @@ namespace DetourNavigator
         return manager->getMesh();
     }
 
-    bool TileCachedRecastMeshManager::hasTile(const TilePosition& tilePosition) const
-    {
-        return mTiles.lockConst()->count(tilePosition);
-    }
-
     std::size_t TileCachedRecastMeshManager::getRevision() const
     {
         return mRevision;
