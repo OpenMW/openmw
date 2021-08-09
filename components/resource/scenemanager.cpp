@@ -237,6 +237,7 @@ namespace Resource
         , mMaxAnisotropy(1)
         , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
+        , mDepthFormat(0)
     {
     }
 
