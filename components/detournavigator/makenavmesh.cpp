@@ -495,6 +495,10 @@ namespace DetourNavigator
         params.maxPolys = 1 << polysBits;
 
         NavMeshPtr navMesh(dtAllocNavMesh(), &dtFreeNavMesh);
+
+        if (navMesh == nullptr)
+            throw NavigatorException("Failed to allocate navmesh");
+
         const auto status = navMesh->init(&params);
 
         if (!dtStatusSucceed(status))
