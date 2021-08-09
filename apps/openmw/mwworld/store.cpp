@@ -478,15 +478,6 @@ namespace MWWorld
         //  implementation when the oher implementation works as well.
         while (cell->getNextRef(esm, ref, deleted, cMRef, moved))
         {
-
-            auto x = static_cast<int>(std::floor(ref.mPos.pos[0] / float(ESM::Land::REAL_SIZE)));
-            auto y = static_cast<int>(std::floor(ref.mPos.pos[1] / float(ESM::Land::REAL_SIZE)));
-            if (x != cell->getGridX() || y != cell->getGridY())
-            {
-                ESM::Cell* cellAlt = const_cast<ESM::Cell*>(searchOrCreate(x, y));
-                cellAlt->mLeasedRefsByPos.emplace_back(ref, deleted);
-                cell->mMovedRefsByPos.push_back(ref.mRefNum);
-            }
             if (!moved)
                 continue;
 
@@ -686,9 +677,6 @@ namespace MWWorld
                     else
                         oldcell->mMovedRefs.push_back(*it);
                 }
-
-                oldcell->mLeasedRefsByPos.splice(oldcell->mLeasedRefsByPos.end(), cell.mLeasedRefsByPos);
-                oldcell->mMovedRefsByPos.splice(oldcell->mMovedRefsByPos.end(), cell.mMovedRefsByPos);
 
                 // We don't need to merge mLeasedRefs of cell / oldcell. This list is filled when another cell moves a
                 // reference to this cell, so the list for the new cell should be empty. The list for oldcell,
