@@ -996,6 +996,7 @@ namespace MWPhysics
         , mWaterCollision(waterCollision)
         , mSkipCollisionDetection(actor.skipCollisions() || !actor.getCollisionMode())
         , mNeedLand(false)
+        , mStuckFrames(0)
     {
     }
 
