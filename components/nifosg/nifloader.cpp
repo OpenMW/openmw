@@ -845,8 +845,10 @@ namespace NifOsg
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
                     if (matctrl->data.empty() && matctrl->interpolator.empty())
                         continue;
-                    osg::ref_ptr<MaterialColorController> osgctrl;
                     auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->targetColor);
+                    if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW && targetColor == MaterialColorController::TargetColor::Specular)
+                        continue;
+                    osg::ref_ptr<MaterialColorController> osgctrl;
                     if (!matctrl->interpolator.empty())
                         osgctrl = new MaterialColorController(matctrl->interpolator.getPtr(), targetColor, baseMaterial);
                     else // if (!matctrl->data.empty())
@@ -1967,6 +1969,7 @@ namespace NifOsg
                 case Nif::RC_NiSpecularProperty:
                 {
                     // Specular property can turn specular lighting off.
+                    // FIXME: NiMaterialColorController doesn't care about this.
                     auto specprop = static_cast<const Nif::NiSpecularProperty*>(property);
                     specEnabled = specprop->flags & 1;
                     break;
