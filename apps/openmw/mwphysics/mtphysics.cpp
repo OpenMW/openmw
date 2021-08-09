@@ -279,6 +279,7 @@ namespace MWPhysics
         std::unique_lock lock(mSimulationMutex);
         mBudget.reset(mDefaultPhysicsDt);
         mAsyncBudget.reset(0.0f);
+        mActors.clear();
         mActorsFrameData.clear();
         for (const auto& [_, actor] : actors)
         {
