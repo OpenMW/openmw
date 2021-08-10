@@ -36,7 +36,7 @@ namespace
 {
 
     const int cellSize = Constants::CellSizeInUnits;
-    constexpr float speed = 1.08;   //the zoom speed, it should be greater than 1
+    constexpr float speed = 1.08f;   //the zoom speed, it should be greater than 1
 
     enum LocalMapWidgetDepth
     {
@@ -99,10 +99,9 @@ namespace
             return Constants::CellGridRadius;
         if (!Settings::Manager::getBool("distant terrain", "Terrain"))
             return Constants::CellGridRadius;
-        const float localViewingDistanceCoef = Settings::Manager::getFloat("local viewing distance coef", "Map");
-        const int viewingDistance = Settings::Manager::getInt("viewing distance", "Camera");
-        const int localViewingDistanceInCells = (viewingDistance * localViewingDistanceCoef) / double(Constants::CellSizeInUnits);
-        return std::max(Constants::CellGridRadius, localViewingDistanceInCells);
+        const int maxLocalViewingDistance = std::max(Settings::Manager::getInt("max local viewing distance", "Map"), Constants::CellGridRadius);
+        const int viewingDistanceInCells = Settings::Manager::getFloat("viewing distance", "Camera") / Constants::CellSizeInUnits;
+        return std::min(maxLocalViewingDistance, viewingDistanceInCells);
     }
 }
 
@@ -791,14 +790,17 @@ namespace MWGui
         getWidget(mEventBoxGlobal, "EventBoxGlobal");
         mEventBoxGlobal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         mEventBoxGlobal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
-        mEventBoxGlobal->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
+        const bool allowZooming = Settings::Manager::getBool("allow zooming", "Map");
+        if(allowZooming)
+            mEventBoxGlobal->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
         mEventBoxGlobal->setDepth(Global_ExploreOverlayLayer);
 
         getWidget(mEventBoxLocal, "EventBoxLocal");
         mEventBoxLocal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         mEventBoxLocal->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onMapDoubleClicked);
-        mEventBoxLocal->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
+        if (allowZooming)
+            mEventBoxLocal->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
 
         LocalMapBase::init(mLocalMap, mPlayerArrowLocal, getLocalViewingDistance());
 
