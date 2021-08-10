@@ -24,7 +24,7 @@ namespace DetourNavigator
 
     constexpr std::size_t getFlagsLength(const rcPolyMesh& value) noexcept
     {
-        return static_cast<std::size_t>(value.maxpolys);
+        return static_cast<std::size_t>(value.npolys);
     }
 
     constexpr std::size_t getAreasLength(const rcPolyMesh& value) noexcept
