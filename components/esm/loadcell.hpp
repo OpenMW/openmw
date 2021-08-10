@@ -124,11 +124,6 @@ struct Cell
   CellRefTracker mLeasedRefs;
   MovedCellRefTracker mMovedRefs;
 
-  // References "adopted" from another cell (i.e. a different cell
-  //  introduced this ref, and it has been moved here as it geographically in this cell)
-  CellRefTracker mLeasedRefsByPos;
-  std::list<RefNum> mMovedRefsByPos;
-
   void postLoad(ESMReader &esm);
 
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires
