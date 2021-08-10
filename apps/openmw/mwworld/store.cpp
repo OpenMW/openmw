@@ -866,16 +866,46 @@ namespace MWWorld
 
         pathgrid.load(esm, isDeleted);
 
-        // deal with MODs that have empty pathgrid records (Issue #6209)
-        if (pathgrid.mPoints.empty() || pathgrid.mEdges.empty())
-            return RecordId("", isDeleted);
-
         // Unfortunately the Pathgrid record model does not specify whether the pathgrid belongs to an interior or exterior cell.
         // For interior cells, mCell is the cell name, but for exterior cells it is either the cell name or if that doesn't exist, the cell's region name.
         // mX and mY will be (0,0) for interior cells, but there is also an exterior cell with the coordinates of (0,0), so that doesn't help.
         // Check whether mCell is an interior cell. This isn't perfect, will break if a Region with the same name as an interior cell is created.
         // A proper fix should be made for future versions of the file format.
         bool interior = pathgrid.mData.mX == 0 && pathgrid.mData.mY == 0 && mCells->search(pathgrid.mCell) != nullptr;
+
+        // deal with MODs that have empty pathgrid records (Issue #6209)
+        // we assume that these records are empty on purpose (i.e. to remove old pathgrid on an updated cell)
+        if (pathgrid.mPoints.empty() || pathgrid.mEdges.empty())
+        {
+            std::string contentfile = esm.getContext().filename;
+            size_t pos = contentfile.find_last_of("/\\");
+            if (pos != std::string::npos)
+                contentfile = contentfile.substr(pos+1);
+
+            if (interior)
+            {
+                Interior::iterator it = mInt.find(pathgrid.mCell);
+                if (it != mInt.end())
+                {
+                    mInt.erase(it);
+
+                    Log(Debug::Warning) << "Warning: Empty pathgrid overwriting cell '"
+                        << pathgrid.mCell << "' : " << contentfile;
+                }
+            }
+            else
+            {
+                Exterior::iterator it = mExt.find(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY));
+                if (it != mExt.end())
+                {
+                    mExt.erase(it);
+                    Log(Debug::Warning) << "Warning: Empty pathgrid overwriting cell ("
+                        << pathgrid.mData.mX << ", " << pathgrid.mData.mY << ") : " << contentfile;
+                }
+            }
+
+            return RecordId("", isDeleted);
+        }
 
         // Try to overwrite existing record
         if (interior)
