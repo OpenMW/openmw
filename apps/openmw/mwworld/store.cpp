@@ -866,6 +866,10 @@ namespace MWWorld
 
         pathgrid.load(esm, isDeleted);
 
+        // deal with MODs that have empty pathgrid records (Issue #6209)
+        if (pathgrid.mPoints.empty() || pathgrid.mEdges.empty())
+            return RecordId("", isDeleted);
+
         // Unfortunately the Pathgrid record model does not specify whether the pathgrid belongs to an interior or exterior cell.
         // For interior cells, mCell is the cell name, but for exterior cells it is either the cell name or if that doesn't exist, the cell's region name.
         // mX and mY will be (0,0) for interior cells, but there is also an exterior cell with the coordinates of (0,0), so that doesn't help.
