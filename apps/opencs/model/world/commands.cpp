@@ -24,11 +24,11 @@ CSMWorld::TouchCommand::TouchCommand(IdTable& table, const std::string& id, QUnd
     , mChanged(false)
 {
     setText(("Touch " + mId).c_str());
-    mOld.reset(mTable.getRecord(mId).clone().get());
 }
 
 void CSMWorld::TouchCommand::redo()
 {
+    mOld.reset(mTable.getRecord(mId).clone().get());
     mChanged = mTable.touchRecord(mId);
 }
 
@@ -159,7 +159,6 @@ CSMWorld::TouchLandCommand::TouchLandCommand(IdTable& landTable, IdTable& ltexTa
     , mChanged(false)
 {
     setText(("Touch " + mId).c_str());
-    mOld.reset(mLands.getRecord(mId).clone().get());
 }
 
 const std::string& CSMWorld::TouchLandCommand::getOriginId() const
@@ -174,6 +173,7 @@ const std::string& CSMWorld::TouchLandCommand::getDestinationId() const
 
 void CSMWorld::TouchLandCommand::onRedo()
 {
+    mOld.reset(mLands.getRecord(mId).clone().get());
     mChanged = mLands.touchRecord(mId);
 }
 
@@ -291,11 +291,9 @@ void CSMWorld::CreateCommand::undo()
 }
 
 CSMWorld::RevertCommand::RevertCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id)
+: QUndoCommand (parent), mModel (model), mId (id), mOld(nullptr)
 {
     setText (("Revert record " + id).c_str());
-
-    mOld = model.getRecord (id).clone();
 }
 
 CSMWorld::RevertCommand::~RevertCommand()
@@ -304,6 +302,8 @@ CSMWorld::RevertCommand::~RevertCommand()
 
 void CSMWorld::RevertCommand::redo()
 {
+    mOld = mModel.getRecord (mId).clone();
+
     int column = mModel.findColumnIndex (Columns::ColumnId_Modification);
 
     QModelIndex index = mModel.getModelIndex (mId, column);
@@ -326,11 +326,9 @@ void CSMWorld::RevertCommand::undo()
 
 CSMWorld::DeleteCommand::DeleteCommand (IdTable& model,
         const std::string& id, CSMWorld::UniversalId::Type type, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id), mType(type)
+: QUndoCommand (parent), mModel (model), mId (id), mOld(nullptr), mType(type)
 {
     setText (("Delete record " + id).c_str());
-
-    mOld = model.getRecord (id).clone();
 }
 
 CSMWorld::DeleteCommand::~DeleteCommand()
@@ -339,6 +337,8 @@ CSMWorld::DeleteCommand::~DeleteCommand()
 
 void CSMWorld::DeleteCommand::redo()
 {
+    mOld = mModel.getRecord (mId).clone();
+
     int column = mModel.findColumnIndex (Columns::ColumnId_Modification);
 
     QModelIndex index = mModel.getModelIndex (mId, column);
