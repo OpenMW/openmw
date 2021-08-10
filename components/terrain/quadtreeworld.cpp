@@ -65,8 +65,7 @@ public:
     {
         const osg::Vec2f& center = node->getCenter();
         bool activeGrid = (center.x() > mActiveGrid.x() && center.y() > mActiveGrid.y() && center.x() < mActiveGrid.z() && center.y() < mActiveGrid.w());
-        if (dist > mViewDistance && !activeGrid) // for Scene<->ObjectPaging sync the activegrid must remain loaded
-            return StopTraversal;
+
         if (node->getSize()>1)
         {
             float halfSize = node->getSize()/2;
@@ -76,6 +75,9 @@ public:
             if (intersects)
                 return Deeper;
         }
+
+        if (dist > mViewDistance && !activeGrid) // for Scene<->ObjectPaging sync the activegrid must remain loaded
+            return StopTraversal;
 
         int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
         int lodLevel = Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize*mFactor)));
