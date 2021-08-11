@@ -713,7 +713,8 @@ namespace MWPhysics
         auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get(), canWaterWalk);
         
         // check if Actor is on the ground or in the air
-        MovementSolver::traceDown(ptr, ptr.getRefData().getPosition().asVec3(), actor.get(), mCollisionWorld.get(), 10);
+        traceDown(ptr, ptr.getRefData().getPosition().asVec3(), 10.f);
+
         mActors.emplace(ptr, std::move(actor));
     }
 
