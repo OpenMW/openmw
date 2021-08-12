@@ -1363,17 +1363,18 @@ namespace MWScript
                 std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
                 msg << std::put_time(std::gmtime(&currentTime), "%Y.%m.%d %T UTC") << std::endl;
 
-                msg << "Content file: ";
+                msg << "Content file: " << ptr.getCellRef().getRefNum().mContentFile;
 
                 if (!ptr.getCellRef().hasContentFile())
-                    msg << "[None]" << std::endl;
+                    msg << " [None]" << std::endl;
                 else
                 {
                     std::vector<std::string> contentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
 
-                    msg << contentFiles.at (ptr.getCellRef().getRefNum().mContentFile) << std::endl;
-                    msg << "RefNum: " << ptr.getCellRef().getRefNum().mIndex << std::endl;
+                    msg << " [" << contentFiles.at (ptr.getCellRef().getRefNum().mContentFile) << "]" << std::endl;
                 }
+
+                msg << "RefNum: " << ptr.getCellRef().getRefNum().mIndex << std::endl;
 
                 if (ptr.getRefData().isDeletedByContentFile())
                     msg << "[Deleted by content file]" << std::endl;
