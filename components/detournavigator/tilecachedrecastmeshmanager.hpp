@@ -86,20 +86,18 @@ namespace DetourNavigator
 
         std::optional<Cell> removeHeightfield(const osg::Vec2i& cellPosition);
 
-        std::shared_ptr<RecastMesh> getMesh(const TilePosition& tilePosition);
-
-        bool hasTile(const TilePosition& tilePosition);
+        std::shared_ptr<RecastMesh> getMesh(const TilePosition& tilePosition) const;
 
         template <class Function>
-        void forEachTile(Function&& function)
+        void forEachTile(Function&& function) const
         {
-            for (auto& [tilePosition, recastMeshManager] : *mTiles.lock())
+            for (auto& [tilePosition, recastMeshManager] : *mTiles.lockConst())
                 function(tilePosition, *recastMeshManager);
         }
 
         std::size_t getRevision() const;
 
-        void reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion);
+        void reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion) const;
 
     private:
         using TilesMap = std::map<TilePosition, std::shared_ptr<CachedRecastMeshManager>>;

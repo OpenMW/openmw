@@ -190,11 +190,11 @@ namespace DetourNavigator
         return result;
     }
 
-    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getMesh(const TilePosition& tilePosition)
+    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getMesh(const TilePosition& tilePosition) const
     {
         const auto manager = [&] () -> std::shared_ptr<CachedRecastMeshManager>
         {
-            const auto tiles = mTiles.lock();
+            const auto tiles = mTiles.lockConst();
             const auto it = tiles->find(tilePosition);
             if (it == tiles->end())
                 return nullptr;
@@ -205,19 +205,14 @@ namespace DetourNavigator
         return manager->getMesh();
     }
 
-    bool TileCachedRecastMeshManager::hasTile(const TilePosition& tilePosition)
-    {
-        return mTiles.lockConst()->count(tilePosition);
-    }
-
     std::size_t TileCachedRecastMeshManager::getRevision() const
     {
         return mRevision;
     }
 
-    void TileCachedRecastMeshManager::reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion)
+    void TileCachedRecastMeshManager::reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion) const
     {
-        const auto tiles = mTiles.lock();
+        const auto tiles = mTiles.lockConst();
         const auto it = tiles->find(tilePosition);
         if (it == tiles->end())
             return;

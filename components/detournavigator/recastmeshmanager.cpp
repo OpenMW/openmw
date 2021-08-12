@@ -117,7 +117,7 @@ namespace DetourNavigator
         return result;
     }
 
-    std::shared_ptr<RecastMesh> RecastMeshManager::getMesh()
+    std::shared_ptr<RecastMesh> RecastMeshManager::getMesh() const
     {
         TileBounds tileBounds = mTileBounds;
         tileBounds.mMin /= mSettings.mRecastScaleFactor;
