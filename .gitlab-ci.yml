@@ -217,6 +217,7 @@ variables: &tests-targets
     - cmake --build . --config $config --target ($targets.Split(','))
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
+    - Get-ChildItem -Recurse *.ilk | Remove-Item
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip ..\..\OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' CI-ID.txt
@@ -318,6 +319,7 @@ Windows_Ninja_Tests_RelWithDebInfo:
     - cmake --build . --config $config --target ($targets.Split(','))
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
+    - Get-ChildItem -Recurse *.ilk | Remove-Item
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip ..\..\OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' CI-ID.txt
