@@ -36,6 +36,7 @@
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
+    Feature #4595: Unique object identifier
     Feature #4737: Handle instance move from one cell to another
     Feature #5489: MCP: Telekinesis fix for activators
     Feature #5996: Support Lua scripts in OpenMW
