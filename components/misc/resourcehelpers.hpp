@@ -2,6 +2,7 @@
 #define MISC_RESOURCEHELPERS_H
 
 #include <string>
+#include <string_view>
 
 namespace VFS
 {
@@ -23,6 +24,9 @@ namespace Misc
         std::string correctBookartPath(const std::string &resPath, int width, int height, const VFS::Manager* vfs);
         /// Use "xfoo.nif" instead of "foo.nif" if available
         std::string correctActorModelPath(const std::string &resPath, const VFS::Manager* vfs);
+
+        /// marker objects that have a hardcoded function in the game logic, should be hidden from the player
+        bool isHiddenMarker(std::string_view id);
     }
 }
 
