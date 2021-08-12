@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <memory>
 
+#include <QAbstractItemModel>
+#include <QAbstractProxyModel>
+
 #include <components/misc/stringops.hpp>
 #include <components/misc/constants.hpp>
 
@@ -134,7 +137,7 @@ std::vector<CSMWorld::UniversalId> CSMWorld::CommandDispatcher::getExtendedTypes
     return tables;
 }
 
-void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, const QModelIndex& index, const QVariant& new_)
+void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *sourceModel, const QModelIndex& sourceIndex, const QVariant& new_)
 {
     if (mLocked)
         return;
@@ -146,6 +149,16 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
 
     std::unique_ptr<CSMWorld::ModifyCommand> modifyData;
     std::unique_ptr<CSMWorld::UpdateCellCommand> modifyCell;
+
+    QAbstractItemModel *model;
+    QModelIndex index;
+
+    if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (sourceModel))
+    {
+        // Replace proxy with actual model
+        index = proxy->mapToSource (sourceIndex);
+        model = proxy->sourceModel();
+    }
 
     int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
 
