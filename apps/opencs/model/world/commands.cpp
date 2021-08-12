@@ -190,10 +190,14 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
                                         const QVariant& new_, QUndoCommand* parent)
     : QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false), mOldRecordState(CSMWorld::RecordBase::State_BaseOnly)
 {
-    if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (&model))
+}
+
+void CSMWorld::ModifyCommand::redo()
+{
+    if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (mModel))
     {
         // Replace proxy with actual model
-        mIndex = proxy->mapToSource (index);
+        mIndex = proxy->mapToSource (mIndex);
         mModel = proxy->sourceModel();
     }
 
@@ -223,10 +227,7 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
         mRecordStateIndex = table->index(rowIndex, stateColumnIndex);
         mOldRecordState = static_cast<CSMWorld::RecordBase::State>(table->data(mRecordStateIndex).toInt());
     }
-}
 
-void CSMWorld::ModifyCommand::redo()
-{
     mOld = mModel->data (mIndex, Qt::EditRole);
     mModel->setData (mIndex, mNew);
 }
