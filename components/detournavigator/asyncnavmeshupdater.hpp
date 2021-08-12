@@ -92,14 +92,6 @@ namespace DetourNavigator
         using Jobs = std::deque<Job>;
         using Pushed = std::map<osg::Vec3f, std::set<TilePosition>>;
 
-        struct Queue
-        {
-            Jobs mJobs;
-            Pushed mPushed;
-
-            Queue() = default;
-        };
-
         std::reference_wrapper<const Settings> mSettings;
         std::reference_wrapper<TileCachedRecastMeshManager> mRecastMeshManager;
         std::reference_wrapper<OffMeshConnectionsManager> mOffMeshConnectionsManager;
@@ -115,7 +107,7 @@ namespace DetourNavigator
         Misc::ScopeGuarded<std::map<osg::Vec3f, std::map<TilePosition, std::thread::id>>> mProcessingTiles;
         std::map<osg::Vec3f, std::map<TilePosition, std::chrono::steady_clock::time_point>> mLastUpdates;
         std::set<std::tuple<osg::Vec3f, TilePosition>> mPresentTiles;
-        std::map<std::thread::id, Queue> mThreadsQueues;
+        std::map<std::thread::id, Jobs> mThreadsQueues;
         std::vector<std::thread> mThreads;
 
         void process() noexcept;
@@ -124,9 +116,9 @@ namespace DetourNavigator
 
         std::optional<Job> getNextJob();
 
-        std::optional<Job> getJob(Jobs& jobs, Pushed& pushed, bool changeLastUpdate);
+        std::optional<Job> getJob(Jobs& jobs, bool changeLastUpdate);
 
-        void postThreadJob(Job&& job, Queue& queue);
+        void postThreadJob(Job&& job, Jobs& queue);
 
         void writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const;
 

@@ -173,8 +173,6 @@ namespace DetourNavigator
                 return true;
             }
             minDistanceToPlayer = getMinDistanceTo(playerPosition, maxDistanceToPlayer, mPushed, mPresentTiles);
-            for (const auto& [threadId, queue] : mThreadsQueues)
-                minDistanceToPlayer = getMinDistanceTo(playerPosition, minDistanceToPlayer, queue.mPushed, mPresentTiles);
             return minDistanceToPlayer >= maxDistanceToPlayer;
         };
         std::unique_lock<std::mutex> lock(mMutex);
@@ -319,7 +317,7 @@ namespace DetourNavigator
         {
             const auto hasJob = [&] {
                 return (!mJobs.empty() && mJobs.front().mProcessTime <= std::chrono::steady_clock::now())
-                    || !threadQueue.mJobs.empty();
+                    || !threadQueue.empty();
             };
 
             if (!mHasJob.wait_for(lock, std::chrono::milliseconds(10), hasJob))
@@ -330,11 +328,11 @@ namespace DetourNavigator
             }
 
             Log(Debug::Debug) << "Got " << mJobs.size() << " navigator jobs and "
-                << threadQueue.mJobs.size() << " thread jobs by thread=" << std::this_thread::get_id();
+                << threadQueue.size() << " thread jobs by thread=" << std::this_thread::get_id();
 
-            auto job = threadQueue.mJobs.empty()
-                ? getJob(mJobs, mPushed, true)
-                : getJob(threadQueue.mJobs, threadQueue.mPushed, false);
+            auto job = threadQueue.empty()
+                ? getJob(mJobs, true)
+                : getJob(threadQueue, false);
 
             if (!job)
                 continue;
@@ -342,13 +340,22 @@ namespace DetourNavigator
             const auto owner = lockTile(job->mAgentHalfExtents, job->mChangedTile);
 
             if (owner == threadId)
+            {
+                const auto it = mPushed.find(job->mAgentHalfExtents);
+                if (it != mPushed.end())
+                {
+                    it->second.erase(job->mChangedTile);
+                    if (it->second.empty())
+                        mPushed.erase(it);
+                }
                 return job;
+            }
 
             postThreadJob(std::move(*job), mThreadsQueues[owner]);
         }
     }
 
-    std::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getJob(Jobs& jobs, Pushed& pushed, bool changeLastUpdate)
+    std::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getJob(Jobs& jobs, bool changeLastUpdate)
     {
         const auto now = std::chrono::steady_clock::now();
 
@@ -360,11 +367,6 @@ namespace DetourNavigator
 
         if (changeLastUpdate && job.mChangeType == ChangeType::update)
             mLastUpdates[job.mAgentHalfExtents][job.mChangedTile] = now;
-
-        const auto it = pushed.find(job.mAgentHalfExtents);
-        it->second.erase(job.mChangedTile);
-        if (it->second.empty())
-            pushed.erase(it);
 
         return job;
     }
@@ -407,13 +409,10 @@ namespace DetourNavigator
         }
     }
 
-    void AsyncNavMeshUpdater::postThreadJob(Job&& job, Queue& queue)
+    void AsyncNavMeshUpdater::postThreadJob(Job&& job, Jobs& queue)
     {
-        if (queue.mPushed[job.mAgentHalfExtents].insert(job.mChangedTile).second)
-        {
-            queue.mJobs.push_back(std::move(job));
-            mHasJob.notify_all();
-        }
+        queue.push_back(std::move(job));
+        mHasJob.notify_all();
     }
 
     std::thread::id AsyncNavMeshUpdater::lockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile)
@@ -475,7 +474,7 @@ namespace DetourNavigator
     std::size_t AsyncNavMeshUpdater::getTotalThreadJobsUnsafe() const
     {
         return std::accumulate(mThreadsQueues.begin(), mThreadsQueues.end(), std::size_t(0),
-            [] (auto r, const auto& v) { return r + v.second.mJobs.size(); });
+            [] (auto r, const auto& v) { return r + v.second.size(); });
     }
 
     void AsyncNavMeshUpdater::cleanupLastUpdates()
