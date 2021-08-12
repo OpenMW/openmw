@@ -150,7 +150,7 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *sourceModel
     std::unique_ptr<CSMWorld::ModifyCommand> modifyData;
     std::unique_ptr<CSMWorld::UpdateCellCommand> modifyCell;
 
-    QAbstractItemModel *model;
+    QAbstractItemModel *model(nullptr);
     QModelIndex index;
 
     if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (sourceModel))
@@ -159,6 +159,8 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *sourceModel
         index = proxy->mapToSource (sourceIndex);
         model = proxy->sourceModel();
     }
+
+    if (!model) return;
 
     int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
 
