@@ -111,7 +111,6 @@ namespace DetourNavigator
         Jobs mJobs;
         std::map<osg::Vec3f, std::set<TilePosition>> mPushed;
         Misc::ScopeGuarded<TilePosition> mPlayerTile;
-        Misc::ScopeGuarded<std::optional<std::chrono::steady_clock::time_point>> mFirstStart;
         NavMeshTilesCache mNavMeshTilesCache;
         Misc::ScopeGuarded<std::map<osg::Vec3f, std::map<TilePosition, std::thread::id>>> mProcessingTiles;
         std::map<osg::Vec3f, std::map<TilePosition, std::chrono::steady_clock::time_point>> mLastUpdates;
@@ -130,8 +129,6 @@ namespace DetourNavigator
         void postThreadJob(Job&& job, Queue& queue);
 
         void writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const;
-
-        std::chrono::steady_clock::time_point setFirstStart(const std::chrono::steady_clock::time_point& value);
 
         void repost(Job&& job);
 

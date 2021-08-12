@@ -253,8 +253,6 @@ namespace DetourNavigator
 
         const auto start = std::chrono::steady_clock::now();
 
-        const auto firstStart = setFirstStart(start);
-
         const auto navMeshCacheItem = job.mNavMeshCacheItem.lock();
 
         if (!navMeshCacheItem)
@@ -305,7 +303,6 @@ namespace DetourNavigator
             " generation=" << locked->getGeneration() <<
             " revision=" << locked->getNavMeshRevision() <<
             " time=" << std::chrono::duration_cast<FloatMs>(finish - start).count() << "ms" <<
-            " total_time=" << std::chrono::duration_cast<FloatMs>(finish - firstStart).count() << "ms"
             " thread=" << std::this_thread::get_id();
 
         return isSuccess(status);
@@ -327,7 +324,6 @@ namespace DetourNavigator
 
             if (!mHasJob.wait_for(lock, std::chrono::milliseconds(10), hasJob))
             {
-                mFirstStart.lock()->reset();
                 if (mJobs.empty() && getTotalThreadJobsUnsafe() == 0)
                     mDone.notify_all();
                 return std::nullopt;
@@ -394,14 +390,6 @@ namespace DetourNavigator
         if (mSettings.get().mEnableWriteNavMeshToFile)
             if (const auto shared = job.mNavMeshCacheItem.lock())
                 writeToFile(shared->lockConst()->getImpl(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
-    }
-
-    std::chrono::steady_clock::time_point AsyncNavMeshUpdater::setFirstStart(const std::chrono::steady_clock::time_point& value)
-    {
-        const auto locked = mFirstStart.lock();
-        if (!*locked)
-            *locked = value;
-        return *locked.get();
     }
 
     void AsyncNavMeshUpdater::repost(Job&& job)
