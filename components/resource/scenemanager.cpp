@@ -228,6 +228,7 @@ namespace Resource
         , mApplyLightingToEnvMaps(false)
         , mLightingMethod(SceneUtil::LightingMethod::FFP)
         , mConvertAlphaTestToAlphaToCoverage(false)
+        , mDepthFormat(0)
         , mInstanceCache(new MultiObjectCache)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
@@ -237,7 +238,6 @@ namespace Resource
         , mMaxAnisotropy(1)
         , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
-        , mDepthFormat(0)
     {
     }
 
