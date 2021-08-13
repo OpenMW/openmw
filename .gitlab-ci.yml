@@ -53,7 +53,7 @@ Coverity:
   variables:
     CC: gcc
     CXX: g++
-  timeout: 8h
+  artifacts:
 
 Debian_GCC:
   extends: .Debian
