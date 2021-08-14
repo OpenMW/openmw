@@ -120,6 +120,8 @@ namespace MWRender
         osg::Node* getReflectionNode();
         osg::Node* getRefractionNode();
 
+        osg::Vec3d getPosition() const;
+
         void processChangedSettings(const Settings::CategorySettingVector& settings);
     };
 
