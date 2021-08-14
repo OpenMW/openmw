@@ -153,6 +153,7 @@ namespace MWPhysics
         if (mWaterCollisionObject)
             mTaskScheduler->removeCollisionObject(mWaterCollisionObject.get());
 
+        mTaskScheduler->releaseSharedStates();
         mHeightFields.clear();
         mObjects.clear();
         mActors.clear();
@@ -373,15 +374,12 @@ namespace MWPhysics
 
     bool PhysicsSystem::getLineOfSight(const MWWorld::ConstPtr &actor1, const MWWorld::ConstPtr &actor2) const
     {
-        const auto getWeakPtr = [&](const MWWorld::ConstPtr &ptr) -> std::weak_ptr<Actor>
-        {
-            const auto found = mActors.find(ptr);
-            if (found != mActors.end())
-                return { found->second };
-            return {};
-        };
+        const auto it1 = mActors.find(actor1);
+        const auto it2 = mActors.find(actor2);
+        if (it1 == mActors.end() || it2 == mActors.end())
+            return false;
 
-        return mTaskScheduler->getLineOfSight(getWeakPtr(actor1), getWeakPtr(actor2));
+        return mTaskScheduler->getLineOfSight(it1->second, it2->second);
     }
 
     bool PhysicsSystem::isOnGround(const MWWorld::Ptr &actor)
@@ -769,9 +767,9 @@ namespace MWPhysics
             actor->setVelocity(osg::Vec3f());
     }
 
-    std::pair<std::vector<std::weak_ptr<Actor>>, std::vector<ActorFrameData>> PhysicsSystem::prepareFrameData(bool willSimulate)
+    std::pair<std::vector<std::shared_ptr<Actor>>, std::vector<ActorFrameData>> PhysicsSystem::prepareFrameData(bool willSimulate)
     {
-        std::pair<std::vector<std::weak_ptr<Actor>>, std::vector<ActorFrameData>> framedata;
+        std::pair<std::vector<std::shared_ptr<Actor>>, std::vector<ActorFrameData>> framedata;
         framedata.first.reserve(mActors.size());
         framedata.second.reserve(mActors.size());
         const MWBase::World *world = MWBase::Environment::get().getWorld();

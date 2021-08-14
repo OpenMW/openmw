@@ -39,7 +39,7 @@ namespace MWPhysics
             /// @param timeAccum accumulated time from previous run to interpolate movements
             /// @param actorsData per actor data needed to compute new positions
             /// @return new position of each actor
-            void applyQueuedMovements(float & timeAccum, std::vector<std::weak_ptr<Actor>>&& actors, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            void applyQueuedMovements(float & timeAccum, std::vector<std::shared_ptr<Actor>>&& actors, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             void resetSimulation(const ActorMap& actors);
 
@@ -53,10 +53,12 @@ namespace MWPhysics
             void setCollisionFilterMask(btCollisionObject* collisionObject, int collisionFilterMask);
             void addCollisionObject(btCollisionObject* collisionObject, int collisionFilterGroup, int collisionFilterMask);
             void removeCollisionObject(btCollisionObject* collisionObject);
-            void updateSingleAabb(std::weak_ptr<PtrHolder> ptr, bool immediate=false);
-            bool getLineOfSight(const std::weak_ptr<Actor>& actor1, const std::weak_ptr<Actor>& actor2);
+            void updateSingleAabb(std::shared_ptr<PtrHolder> ptr, bool immediate=false);
+            bool getLineOfSight(const std::shared_ptr<Actor>& actor1, const std::shared_ptr<Actor>& actor2);
             void debugDraw();
             void* getUserPointer(const btCollisionObject* object) const;
+
+            void releaseSharedStates(); // destroy all objects whose destructor can't be safely called from ~PhysicsTaskScheduler()
 
         private:
             void syncComputation();
@@ -66,7 +68,7 @@ namespace MWPhysics
             bool hasLineOfSight(const Actor* actor1, const Actor* actor2);
             void refreshLOSCache();
             void updateAabbs();
-            void updatePtrAabb(const std::weak_ptr<PtrHolder>& ptr);
+            void updatePtrAabb(const std::shared_ptr<PtrHolder>& ptr);
             void updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
             std::tuple<int, float> calculateStepConfig(float timeAccum) const;
             void afterPreStep();
@@ -74,7 +76,7 @@ namespace MWPhysics
             void afterPostSim();
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
-            std::vector<std::weak_ptr<Actor>> mActors;
+            std::vector<std::shared_ptr<Actor>> mActors;
             std::vector<ActorFrameData> mActorsFrameData;
             std::unordered_set<const btCollisionObject*> mCollisionObjects;
             float mDefaultPhysicsDt;
@@ -83,7 +85,7 @@ namespace MWPhysics
             btCollisionWorld* mCollisionWorld;
             MWRender::DebugDrawer* mDebugDrawer;
             std::vector<LOSRequest> mLOSCache;
-            std::set<std::weak_ptr<PtrHolder>, std::owner_less<std::weak_ptr<PtrHolder>>> mUpdateAabb;
+            std::set<std::shared_ptr<PtrHolder>> mUpdateAabb;
 
             // TODO: use std::experimental::flex_barrier or std::barrier once it becomes a thing
             std::unique_ptr<Misc::Barrier> mPreStepBarrier;

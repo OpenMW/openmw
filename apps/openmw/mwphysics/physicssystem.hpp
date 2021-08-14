@@ -259,7 +259,7 @@ namespace MWPhysics
 
             void updateWater();
 
-            std::pair<std::vector<std::weak_ptr<Actor>>, std::vector<ActorFrameData>> prepareFrameData(bool willSimulate);
+            std::pair<std::vector<std::shared_ptr<Actor>>, std::vector<ActorFrameData>> prepareFrameData(bool willSimulate);
 
             osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
