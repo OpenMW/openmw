@@ -544,6 +544,11 @@ osg::Node* Water::getRefractionNode()
     return mRefraction;
 }
 
+osg::Vec3d Water::getPosition() const
+{
+    return mWaterNode->getPosition();
+}
+
 void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 {
     osg::ref_ptr<osg::StateSet> stateset = SceneUtil::createSimpleWaterStateSet(alpha, MWRender::RenderBin_Water);
@@ -620,6 +625,7 @@ public:
             depth->setWriteMask(false);
             stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
+        stateset->addUniform(new osg::Uniform("nodePosition", osg::Vec3f(mWater->getPosition())));
     }
 
     void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
@@ -632,6 +638,7 @@ public:
             stateset->setTextureAttributeAndModes(2, mRefraction->getColorTexture(cv), osg::StateAttribute::ON);
             stateset->setTextureAttributeAndModes(3, mRefraction->getDepthTexture(cv), osg::StateAttribute::ON);
         }
+        stateset->getUniform("nodePosition")->set(osg::Vec3f(mWater->getPosition()));
     }
 
 private:
@@ -728,11 +735,6 @@ void Water::changeCell(const MWWorld::CellStore* store)
     }
     if(mInterior != wasInterior && mReflection)
         mReflection->setInterior(mInterior);
-
-    // create a new StateSet to prevent threading issues
-    osg::ref_ptr<osg::StateSet> nodeStateSet (new osg::StateSet);
-    nodeStateSet->addUniform(new osg::Uniform("nodePosition", osg::Vec3f(mWaterNode->getPosition())));
-    mWaterNode->setStateSet(nodeStateSet);
 }
 
 void Water::setHeight(const float height)
