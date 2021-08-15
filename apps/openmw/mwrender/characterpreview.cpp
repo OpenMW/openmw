@@ -145,12 +145,18 @@ namespace MWRender
                     {
                         case osg::Depth::LESS:
                             newDepth->setFunction(osg::Depth::GREATER);
+                            break;
                         case osg::Depth::LEQUAL:
                             newDepth->setFunction(osg::Depth::GEQUAL);
+                            break;
                         case osg::Depth::GREATER:
                             newDepth->setFunction(osg::Depth::LESS);
+                            break;
                         case osg::Depth::GEQUAL:
                             newDepth->setFunction(osg::Depth::LEQUAL);
+                            break;
+                        default:
+                            break;
                     }
                     newStateSet->setAttribute(newDepth, osg::StateAttribute::ON);
                 }
