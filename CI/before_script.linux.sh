@@ -34,6 +34,13 @@ if [[ $CI_OPENMW_USE_STATIC_DEPS ]]; then
     )
 fi
 
+if [[ $CI_CLANG_TIDY ]]; then
+	CMAKE_CONF_OPTS+=(
+	      -DCMAKE_CXX_CLANG_TIDY='clang-tidy;-checks=-*,boost-*,clang-analyzer-*,concurrency-*,performance-*,-header-filter=.*,bugprone-*,misc-definitions-in-headers,misc-misplaced-const,misc-redundant-expression'
+	)
+fi
+
+
 if [[ "${CMAKE_BUILD_TYPE}" ]]; then
     CMAKE_CONF_OPTS+=(
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
