@@ -86,7 +86,7 @@ namespace
         return rot;
     }
 
-    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, osg::Quat rotation)
+    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, const osg::Quat &rotation)
     {
         if (ptr.getRefData().getBaseNode())
             rendering.rotateObject(ptr, rotation);

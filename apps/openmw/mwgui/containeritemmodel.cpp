@@ -86,7 +86,7 @@ size_t ContainerItemModel::getItemCount()
     return mItems.size();
 }
 
-ItemModel::ModelIndex ContainerItemModel::getIndex (ItemStack item)
+ItemModel::ModelIndex ContainerItemModel::getIndex (const ItemStack& item)
 {
     size_t i = 0;
     for (ItemStack& itemStack : mItems)

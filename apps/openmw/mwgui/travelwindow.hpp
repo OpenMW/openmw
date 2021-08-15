@@ -31,7 +31,7 @@ namespace MWGui
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onTravelButtonClick(MyGUI::Widget* _sender);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-            void addDestination(const std::string& name, ESM::Position pos, bool interior);
+            void addDestination(const std::string& name, const ESM::Position& pos, bool interior);
             void clearDestinations();
             int mCurrentY;
 

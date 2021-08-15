@@ -551,7 +551,7 @@ void NpcAnimation::updateNpcBase()
     mWeaponAnimationTime->updateStartTime();
 }
 
-std::string NpcAnimation::getShieldMesh(MWWorld::ConstPtr shield) const
+std::string NpcAnimation::getShieldMesh(const MWWorld::ConstPtr& shield) const
 {
     std::string mesh = shield.getClass().getModel(shield);
     const ESM::Armor *armor = shield.get<ESM::Armor>()->mBase;

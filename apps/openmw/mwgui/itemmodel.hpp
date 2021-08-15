@@ -55,7 +55,7 @@ namespace MWGui
         virtual size_t getItemCount() = 0;
 
         /// Returns an invalid index if the item was not found
-        virtual ModelIndex getIndex (ItemStack item) = 0;
+        virtual ModelIndex getIndex (const ItemStack &item) = 0;
 
         /// Rebuild the item model, this will invalidate existing model indices
         virtual void update() = 0;
@@ -98,7 +98,7 @@ namespace MWGui
 
         MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
         void removeItem (const ItemStack& item, size_t count) override;
-        ModelIndex getIndex (ItemStack item) override;
+        ModelIndex getIndex (const ItemStack &item) override;
 
         /// @note Takes ownership of the passed pointer.
         void setSourceModel(ItemModel* sourceModel);

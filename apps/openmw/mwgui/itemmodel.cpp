@@ -129,7 +129,7 @@ namespace MWGui
         return -1;
     }
 
-    ItemModel::ModelIndex ProxyItemModel::getIndex (ItemStack item)
+    ItemModel::ModelIndex ProxyItemModel::getIndex (const ItemStack& item)
     {
         return mSourceModel->getIndex(item);
     }

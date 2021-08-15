@@ -56,7 +56,7 @@ namespace Shader
 
         bool hasUniform(const std::string& name) { return mUniforms.count(name); }
         bool hasMode(osg::StateAttribute::GLMode mode) { return mModes.count(mode); }
-        bool hasAttribute(osg::StateAttribute::TypeMemberPair typeMemberPair) { return mAttributes.count(typeMemberPair); }
+        bool hasAttribute(const osg::StateAttribute::TypeMemberPair &typeMemberPair) { return mAttributes.count(typeMemberPair); }
         bool hasAttribute(osg::StateAttribute::Type type, unsigned int member) { return hasAttribute(osg::StateAttribute::TypeMemberPair(type, member)); }
 
         const std::set<osg::StateAttribute::TypeMemberPair>& getAttributes() { return mAttributes; }

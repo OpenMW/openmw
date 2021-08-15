@@ -1256,7 +1256,7 @@ namespace MWWorld
         return moveObject(ptr, cell, position, movePhysics);
     }
 
-    MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, osg::Vec3f vec, bool moveToActive, bool ignoreCollisions)
+    MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec, bool moveToActive, bool ignoreCollisions)
     {
         auto* actor = mPhysics->getActor(ptr);
         osg::Vec3f newpos = ptr.getRefData().getPosition().asVec3() + vec;
@@ -1410,7 +1410,7 @@ namespace MWWorld
         }
     }
 
-    void World::rotateWorldObject (const Ptr& ptr, osg::Quat rotate)
+    void World::rotateWorldObject (const Ptr& ptr, const osg::Quat& rotate)
     {
         if(ptr.getRefData().getBaseNode() != nullptr)
         {
@@ -1425,7 +1425,7 @@ namespace MWWorld
         }
     }
 
-    MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
+    MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, const ESM::Position& pos)
     {
         return copyObjectToCell(ptr,cell,pos,ptr.getRefData().getCount(),false);
     }

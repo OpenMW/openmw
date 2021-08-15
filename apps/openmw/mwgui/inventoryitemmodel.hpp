@@ -12,7 +12,7 @@ namespace MWGui
         InventoryItemModel (const MWWorld::Ptr& actor);
 
         ItemStack getItem (ModelIndex index) override;
-        ModelIndex getIndex (ItemStack item) override;
+        ModelIndex getIndex (const ItemStack &item) override;
         size_t getItemCount() override;
 
         bool onTakeItem(const MWWorld::Ptr &item, int count) override;

@@ -289,14 +289,14 @@ namespace MWBase
             virtual MWWorld::Ptr moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore* newCell, const osg::Vec3f& position, bool movePhysics=true) = 0;
             ///< @return an updated Ptr
 
-            virtual MWWorld::Ptr moveObjectBy(const MWWorld::Ptr &ptr, osg::Vec3f vec, bool moveToActive, bool ignoreCollisions) = 0;
+            virtual MWWorld::Ptr moveObjectBy(const MWWorld::Ptr &ptr, const osg::Vec3f& vec, bool moveToActive, bool ignoreCollisions) = 0;
             ///< @return an updated Ptr
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
             virtual void rotateObject(const MWWorld::Ptr& ptr, const osg::Vec3f& rot, RotationFlags flags = RotationFlag_inverseOrder) = 0;
 
-            virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
+            virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, const ESM::Position& pos) = 0;
             ///< Place an object. Makes a copy of the Ptr.
 
             virtual MWWorld::Ptr safePlaceObject (const MWWorld::ConstPtr& ptr, const MWWorld::ConstPtr& referenceObject, MWWorld::CellStore* referenceCell, int direction, float distance) = 0;
@@ -624,7 +624,7 @@ namespace MWBase
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;
 
-            virtual void rotateWorldObject (const MWWorld::Ptr& ptr, osg::Quat rotate) = 0;
+            virtual void rotateWorldObject (const MWWorld::Ptr& ptr, const osg::Quat& rotate) = 0;
 
             /// Return terrain height at \a worldPos position.
             virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const = 0;

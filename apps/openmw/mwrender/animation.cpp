@@ -1839,7 +1839,7 @@ namespace MWRender
         mRootController = addRotateController("bip01");
     }
 
-    RotateController* Animation::addRotateController(std::string bone)
+    RotateController* Animation::addRotateController(const std::string &bone)
     {
         auto iter = getNodeMap().find(bone);
         if (iter == getNodeMap().end())

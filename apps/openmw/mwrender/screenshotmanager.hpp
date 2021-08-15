@@ -37,7 +37,7 @@ namespace MWRender
 
         void traversalsAndWait(unsigned int frame);
         void renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h);
-        void makeCubemapScreenshot(osg::Image* image, int w, int h, osg::Matrixd cameraTransform=osg::Matrixd());
+        void makeCubemapScreenshot(osg::Image* image, int w, int h, const osg::Matrixd &cameraTransform=osg::Matrixd());
     };
 }
 
