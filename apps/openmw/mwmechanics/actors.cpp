@@ -60,22 +60,24 @@ int getBoundItemSlot (const std::string& itemId)
     static std::map<std::string, int> boundItemsMap;
     if (boundItemsMap.empty())
     {
-        std::string boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundBootsID")->mValue.getString();
+        const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        std::string boundId = store.find("sMagicBoundBootsID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Boots;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundCuirassID")->mValue.getString();
+        boundId = store.find("sMagicBoundCuirassID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Cuirass;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundLeftGauntletID")->mValue.getString();
+        boundId = store.find("sMagicBoundLeftGauntletID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_LeftGauntlet;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundRightGauntletID")->mValue.getString();
+        boundId = store.find("sMagicBoundRightGauntletID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_RightGauntlet;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundHelmID")->mValue.getString();
+        boundId = store.find("sMagicBoundHelmID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Helmet;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundShieldID")->mValue.getString();
+        boundId = store.find("sMagicBoundShieldID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_CarriedLeft;
     }
 
