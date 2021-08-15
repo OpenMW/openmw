@@ -2141,7 +2141,7 @@ struct ConvexHull
                 finalEdges.push_back(edge);
         }
 
-        _edges = finalEdges;
+        _edges = std::move(finalEdges);
     }
 
     void transform(const osg::Matrixd& m)

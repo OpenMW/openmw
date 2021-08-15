@@ -40,7 +40,7 @@ namespace Resource
                         }
 
                         osg::ref_ptr<Resource::Animation> mergedAnimationTrack = new Resource::Animation;
-                        std::string animationName = animation->getName();
+                        const std::string animationName = animation->getName();
                         mergedAnimationTrack->setName(animationName);
 
                         const osgAnimation::ChannelList& channels = animation->getChannels();
