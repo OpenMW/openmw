@@ -131,6 +131,29 @@ namespace MWRender
                     newStateSet->setTextureMode(7, GL_TEXTURE_2D, osg::StateAttribute::OFF);
                     newStateSet->addUniform(mNoAlphaUniform);
                 }
+                if (SceneUtil::getReverseZ() && stateset->getAttribute(osg::StateAttribute::DEPTH))
+                {
+                    if (!newStateSet)
+                    {
+                        newStateSet = new osg::StateSet(*stateset, osg::CopyOp::SHALLOW_COPY);
+                        node.setStateSet(newStateSet);
+                    }
+                    // Setup standard depth ranges
+                    osg::Depth* depth = static_cast<osg::Depth*>(stateset->getAttribute(osg::StateAttribute::DEPTH));
+                    osg::ref_ptr<osg::Depth> newDepth = new osg::Depth(*depth);
+                    switch (newDepth->getFunction())
+                    {
+                        case osg::Depth::LESS:
+                            newDepth->setFunction(osg::Depth::GREATER);
+                        case osg::Depth::LEQUAL:
+                            newDepth->setFunction(osg::Depth::GEQUAL);
+                        case osg::Depth::GREATER:
+                            newDepth->setFunction(osg::Depth::LESS);
+                        case osg::Depth::GEQUAL:
+                            newDepth->setFunction(osg::Depth::LEQUAL);
+                    }
+                    newStateSet->setAttribute(newDepth, osg::StateAttribute::ON);
+                }
             }
             traverse(node);
         }
@@ -189,8 +212,7 @@ namespace MWRender
         stateset->setAttribute(defaultMat);
         stateset->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(mCamera->getProjectionMatrix())));
 
-        osg::ref_ptr<osg::Depth> depth = new osg::Depth;
-        stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(new osg::Depth, osg::StateAttribute::ON);
 
         SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 
