@@ -41,7 +41,7 @@ Clang_Tidy:
   script:
     - CI/before_script.linux.sh
     - cd build
-    - cmake --build . -- -j $(nproc)
+    - cmake --build . -- -j $(nproc) openmw esmtool bsatool niftest openmw-wizard openmw-launcher openmw-iniimporter openmw-essimporter
   variables:
     CC: clang
     CXX: clang++
