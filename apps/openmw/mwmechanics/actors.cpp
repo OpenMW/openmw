@@ -1609,7 +1609,7 @@ namespace MWMechanics
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if (!anim)
             return;
-        mActors.insert(std::make_pair(ptr, new Actor(ptr, anim)));
+        mActors.emplace(ptr, new Actor(ptr, anim));
 
         CharacterController* ctrl = mActors[ptr]->getCharacterController();
         if (updateImmediately)
