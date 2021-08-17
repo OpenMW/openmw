@@ -221,7 +221,7 @@ void ShadowsBin::sortImplementation()
     }
     if (!noTestRoot->_leaves.empty())
         newList.push_back(noTestRoot);
-    _stateGraphList = newList;
+    _stateGraphList = std::move(newList);
 }
 
 }
