@@ -1,5 +1,7 @@
 #include "creature.hpp"
 
+#include <climits> // INT_MIN
+
 #include <components/misc/rng.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadcrea.hpp>
@@ -748,26 +750,35 @@ namespace MWClass
         if (!state.mHasCustomState)
             return;
 
+        const ESM::CreatureState& creatureState = state.asCreatureState();
+
         if (state.mVersion > 0)
         {
             if (!ptr.getRefData().getCustomData())
             {
-                // Create a CustomData, but don't fill it from ESM records (not needed)
-                std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
-
-                if (hasInventoryStore(ptr))
-                    data->mContainerStore = std::make_unique<MWWorld::InventoryStore>();
+                // FIXME: the use of mGoldPool can be replaced with another flag the next time
+                // the save file format is changed
+                if (creatureState.mCreatureStats.mGoldPool == INT_MIN)
+                    ensureCustomData(ptr);
                 else
-                    data->mContainerStore = std::make_unique<MWWorld::ContainerStore>();
+                {
+                    // Create a CustomData, but don't fill it from ESM records (not needed)
+                    std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
 
-                ptr.getRefData().setCustomData (std::move(data));
+                    if (hasInventoryStore(ptr))
+                        data->mContainerStore = std::make_unique<MWWorld::InventoryStore>();
+                    else
+                        data->mContainerStore = std::make_unique<MWWorld::ContainerStore>();
+
+                    ptr.getRefData().setCustomData (std::move(data));
+                }
             }
         }
         else
             ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
-        const ESM::CreatureState& creatureState = state.asCreatureState();
+
         customData.mContainerStore->readState (creatureState.mInventory);
         bool spellsInitialised = customData.mCreatureStats.getSpells().setSpells(ptr.get<ESM::Creature>()->mBase->mId);
         if(spellsInitialised)

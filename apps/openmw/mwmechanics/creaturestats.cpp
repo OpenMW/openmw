@@ -1,6 +1,7 @@
 #include "creaturestats.hpp"
 
 #include <algorithm>
+#include <climits>
 
 #include <components/esm/creaturestats.hpp>
 #include <components/esm/esmreader.hpp>
@@ -562,22 +563,27 @@ namespace MWMechanics
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
     {
-        for (int i=0; i<ESM::Attribute::Length; ++i)
-            mAttributes[i].readState (state.mAttributes[i]);
+        // HACK: using mGoldPool as an indicator for lack of ACDT during .ess import
+        if (state.mGoldPool != INT_MIN)
+        {
+            for (int i=0; i<ESM::Attribute::Length; ++i)
+                mAttributes[i].readState (state.mAttributes[i]);
 
-        for (int i=0; i<3; ++i)
-            mDynamic[i].readState (state.mDynamic[i]);
+            for (int i=0; i<3; ++i)
+                mDynamic[i].readState (state.mDynamic[i]);
+
+            mGoldPool = state.mGoldPool;
+            mTalkedTo = state.mTalkedTo;
+            mAttacked = state.mAttacked;
+        }
 
         mLastRestock = MWWorld::TimeStamp(state.mTradeTime);
-        mGoldPool = state.mGoldPool;
 
         mDead = state.mDead;
         mDeathAnimationFinished = state.mDeathAnimationFinished;
         mDied = state.mDied;
         mMurdered = state.mMurdered;
-        mTalkedTo = state.mTalkedTo;
         mAlarmed = state.mAlarmed;
-        mAttacked = state.mAttacked;
         // TODO: rewrite. does this really need 3 separate bools?
         mKnockdown = state.mKnockdown;
         mKnockdownOneFrame = state.mKnockdownOneFrame;
