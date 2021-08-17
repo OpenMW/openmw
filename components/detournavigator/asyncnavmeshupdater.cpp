@@ -8,6 +8,8 @@
 #include <components/misc/thread.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
+#include <DetourNavMesh.h>
+
 #include <osg/Stats>
 
 #include <algorithm>
@@ -48,7 +50,7 @@ namespace
 
     auto getPriority(const Job& job) noexcept
     {
-        return std::make_tuple(job.mProcessTime, job.mTryNumber, job.mChangeType, job.mDistanceToPlayer, job.mDistanceToOrigin);
+        return std::make_tuple(job.mProcessTime, job.mChangeType, job.mTryNumber, job.mDistanceToPlayer, job.mDistanceToOrigin);
     }
 
     struct LessByJobPriority
@@ -123,11 +125,19 @@ namespace DetourNavigator
         if (!playerTileChanged && changedTiles.empty())
             return;
 
+        const dtNavMeshParams params = *navMeshCacheItem->lockConst()->getImpl().getParams();
+
         const std::lock_guard<std::mutex> lock(mMutex);
 
         if (playerTileChanged)
+        {
             for (JobIt job : mWaiting)
+            {
                 job->mDistanceToPlayer = getManhattanDistance(job->mChangedTile, playerTile);
+                if (!shouldAddTile(job->mChangedTile, playerTile, std::min(mSettings.get().mMaxTilesNumber, params.maxTiles)))
+                    job->mChangeType = ChangeType::remove;
+            }
+        }
 
         for (const auto& [changedTile, changeType] : changedTiles)
         {

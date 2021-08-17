@@ -60,7 +60,7 @@ namespace DetourNavigator
         const TilePosition mChangedTile;
         const std::chrono::steady_clock::time_point mProcessTime;
         unsigned mTryNumber = 0;
-        const ChangeType mChangeType;
+        ChangeType mChangeType;
         int mDistanceToPlayer;
         const int mDistanceToOrigin;
 
