@@ -108,7 +108,7 @@ struct TypesetBookImpl : TypesetBook
 
     virtual ~TypesetBookImpl () {}
 
-    Range addContent (BookTypesetter::Utf8Span text)
+    Range addContent (const BookTypesetter::Utf8Span &text)
     {
         Contents::iterator i = mContents.insert (mContents.end (), Content (text.first, text.second));
 

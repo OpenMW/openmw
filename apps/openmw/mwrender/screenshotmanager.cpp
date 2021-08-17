@@ -328,7 +328,7 @@ namespace MWRender
         mRootNode->removeChild(camera);
     }
 
-    void ScreenshotManager::makeCubemapScreenshot(osg::Image *image, int w, int h, osg::Matrixd cameraTransform)
+    void ScreenshotManager::makeCubemapScreenshot(osg::Image *image, int w, int h, const osg::Matrixd& cameraTransform)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
         float nearClip = Settings::Manager::getFloat("near clip", "Camera");

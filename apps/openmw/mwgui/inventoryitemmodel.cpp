@@ -34,7 +34,7 @@ size_t InventoryItemModel::getItemCount()
     return mItems.size();
 }
 
-ItemModel::ModelIndex InventoryItemModel::getIndex (ItemStack item)
+ItemModel::ModelIndex InventoryItemModel::getIndex (const ItemStack& item)
 {
     size_t i = 0;
     for (ItemStack& itemStack : mItems)

@@ -84,7 +84,7 @@ PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::st
     return PartHolderPtr(new PartHolder(instance));
 }
 
-std::string ActorAnimation::getShieldMesh(MWWorld::ConstPtr shield) const
+std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield) const
 {
     std::string mesh = shield.getClass().getModel(shield);
     const ESM::Armor *armor = shield.get<ESM::Armor>()->mBase;

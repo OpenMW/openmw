@@ -44,7 +44,7 @@ namespace MWGui
                           mSelect->getHeight());
     }
 
-    void TravelWindow::addDestination(const std::string& name, ESM::Position pos, bool interior)
+    void TravelWindow::addDestination(const std::string& name, const ESM::Position &pos, bool interior)
     {
         int price;
 

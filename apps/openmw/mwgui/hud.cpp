@@ -53,7 +53,7 @@ namespace MWGui
         }
 
         void removeItem (const ItemStack& item, size_t count) override { throw std::runtime_error("removeItem not implemented"); }
-        ModelIndex getIndex (ItemStack item) override { throw std::runtime_error("getIndex not implemented"); }
+        ModelIndex getIndex (const ItemStack &item) override { throw std::runtime_error("getIndex not implemented"); }
         void update() override {}
         size_t getItemCount() override { return 0; }
         ItemStack getItem (ModelIndex index) override { throw std::runtime_error("getItem not implemented"); }

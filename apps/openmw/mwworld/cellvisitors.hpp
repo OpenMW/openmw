@@ -29,7 +29,7 @@ namespace MWWorld
     {
         std::vector<MWWorld::Ptr> mObjects;
 
-        bool operator() (MWWorld::Ptr ptr)
+        bool operator() (const MWWorld::Ptr& ptr)
         {
             mObjects.push_back (ptr);
             return true;
