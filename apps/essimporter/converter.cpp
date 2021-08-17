@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <climits> // INT_MIN
 
 #include <osgDB/WriteFile>
 
@@ -369,6 +370,8 @@ namespace ESSImport
                     // from the ESM with default values
                     if (cellref.mHasACDT)
                         convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    else
+                        objstate.mCreatureStats.mGoldPool = INT_MIN; // HACK: indicates no ACDT
                     if (cellref.mHasACSC)
                         convertACSC(cellref.mACSC, objstate.mCreatureStats);
                     convertNpcData(cellref, objstate.mNpcStats);
@@ -410,6 +413,8 @@ namespace ESSImport
                     // from the ESM with default values
                     if (cellref.mHasACDT)
                         convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    else
+                        objstate.mCreatureStats.mGoldPool = INT_MIN; // HACK: indicates no ACDT
                     if (cellref.mHasACSC)
                         convertACSC(cellref.mACSC, objstate.mCreatureStats);
                     convertCREC(crecIt->second, objstate);

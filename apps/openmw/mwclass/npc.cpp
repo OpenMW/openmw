@@ -1291,19 +1291,26 @@ namespace MWClass
         if (!state.mHasCustomState)
             return;
 
+        const ESM::NpcState& npcState = state.asNpcState();
+
         if (state.mVersion > 0)
         {
             if (!ptr.getRefData().getCustomData())
             {
-                // Create a CustomData, but don't fill it from ESM records (not needed)
-                ptr.getRefData().setCustomData(std::make_unique<NpcCustomData>());
+                // FIXME: the use of mGoldPool can be replaced with another flag the next time
+                // the save file format is changed
+                if (npcState.mCreatureStats.mGoldPool == INT_MIN)
+                    ensureCustomData(ptr);
+                else
+                    // Create a CustomData, but don't fill it from ESM records (not needed)
+                    ptr.getRefData().setCustomData(std::make_unique<NpcCustomData>());
             }
         }
         else
             ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
-        const ESM::NpcState& npcState = state.asNpcState();
+
         customData.mInventoryStore.readState (npcState.mInventory);
         customData.mNpcStats.readState (npcState.mNpcStats);
         bool spellsInitialised = customData.mNpcStats.getSpells().setSpells(ptr.get<ESM::NPC>()->mBase->mId);
