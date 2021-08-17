@@ -1,6 +1,7 @@
 0.48.0
 ------
 
+    Bug #3246: ESSImporter: Most NPCs are dead on save load
     Bug #3514: Editing a reference's position after loading an esp file makes the reference disappear
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
