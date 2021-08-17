@@ -1,5 +1,7 @@
 #include "creature.hpp"
 
+#include <climits> // INT_MIN
+
 #include <components/misc/rng.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadcrea.hpp>

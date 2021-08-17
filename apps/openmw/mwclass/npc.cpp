@@ -1,6 +1,7 @@
 ﻿#include "npc.hpp"
 
 #include <memory>
+#include <climits> // INT_MIN
 
 #include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
