@@ -6,6 +6,7 @@
 #include <components/detournavigator/preparednavmeshdata.hpp>
 #include <components/detournavigator/ref.hpp>
 #include <components/detournavigator/preparednavmeshdatatuple.hpp>
+#include <components/detournavigator/recast.hpp>
 
 #include <osg/Vec3f>
 
@@ -48,11 +49,11 @@ namespace
         value.ch = 1.0f / (std::rand() % 999 + 1);
         value.borderSize = std::rand();
         value.maxEdgeError = 1.0f / (std::rand() % 999 + 1);
-        generate(value.verts, 3 * value.nverts);
-        generate(value.polys, value.maxpolys * 2 * value.nvp);
-        generate(value.regs, value.maxpolys);
-        generate(value.flags, value.maxpolys);
-        generate(value.areas, value.maxpolys);
+        generate(value.verts, getVertsLength(value));
+        generate(value.polys, getPolysLength(value));
+        generate(value.regs, getRegsLength(value));
+        generate(value.flags, getFlagsLength(value));
+        generate(value.areas, getAreasLength(value));
     }
 
     void generate(rcPolyMeshDetail& value, int size)
@@ -60,9 +61,9 @@ namespace
         value.nmeshes = size;
         value.nverts = size;
         value.ntris = size;
-        generate(value.meshes, 4 * value.nmeshes);
-        generate(value.verts, 3 * value.nverts);
-        generate(value.tris, 4 * value.ntris);
+        generate(value.meshes, getMeshesLength(value));
+        generate(value.verts, getVertsLength(value));
+        generate(value.tris, getTrisLength(value));
     }
 
     void generate(PreparedNavMeshData& value, int size)
@@ -82,10 +83,10 @@ namespace
     }
 
     template <class T>
-    void clone(const T* src, T*& dst, int size)
+    void clone(const T* src, T*& dst, std::size_t size)
     {
-        dst = static_cast<T*>(permRecastAlloc(size * sizeof(T)));
-        std::memcpy(dst, src, static_cast<std::size_t>(size) * sizeof(T));
+        dst = static_cast<T*>(permRecastAlloc(static_cast<int>(size) * sizeof(T)));
+        std::memcpy(dst, src, size * sizeof(T));
     }
 
     void clone(const rcPolyMesh& src, rcPolyMesh& dst)
@@ -100,11 +101,11 @@ namespace
         dst.ch = src.ch;
         dst.borderSize = src.borderSize;
         dst.maxEdgeError = src.maxEdgeError;
-        clone(src.verts, dst.verts, 3 * dst.nverts);
-        clone(src.polys, dst.polys, dst.maxpolys * 2 * dst.nvp);
-        clone(src.regs, dst.regs, dst.maxpolys);
-        clone(src.flags, dst.flags, dst.maxpolys);
-        clone(src.areas, dst.areas, dst.maxpolys);
+        clone(src.verts, dst.verts, getVertsLength(dst));
+        clone(src.polys, dst.polys, getPolysLength(dst));
+        clone(src.regs, dst.regs, getRegsLength(dst));
+        clone(src.flags, dst.flags, getFlagsLength(dst));
+        clone(src.areas, dst.areas, getAreasLength(dst));
     }
 
     void clone(const rcPolyMeshDetail& src, rcPolyMeshDetail& dst)
@@ -112,9 +113,9 @@ namespace
         dst.nmeshes = src.nmeshes;
         dst.nverts = src.nverts;
         dst.ntris = src.ntris;
-        clone(src.meshes, dst.meshes, 4 * dst.nmeshes);
-        clone(src.verts, dst.verts, 3 * dst.nverts);
-        clone(src.tris, dst.tris, 4 * dst.ntris);
+        clone(src.meshes, dst.meshes, getMeshesLength(dst));
+        clone(src.verts, dst.verts, getVertsLength(dst));
+        clone(src.tris, dst.tris, getTrisLength(dst));
     }
 
     std::unique_ptr<PreparedNavMeshData> clone(const PreparedNavMeshData& value)
