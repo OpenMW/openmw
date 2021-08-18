@@ -194,7 +194,7 @@ public:
 
     void operator()(osg::Node* node, osg::NodeVisitor* nv) override
     {
-        osgUtil::RenderStage* renderStage = nv->asCullVisitor()->getCurrentRenderStage();
+        osgUtil::RenderStage* renderStage = static_cast<osgUtil::CullVisitor*>(nv)->getCurrentRenderStage();
 
         renderStage->setMultisampleResolveFramebufferObject(mFbo);
         renderStage->setFrameBufferObject(mMsaaFbo);
