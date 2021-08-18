@@ -99,7 +99,7 @@ openmw_add_executable(openmw-wizard
 )
 
 target_link_libraries(openmw-wizard
-    components
+    components_qt
 )
 
 target_link_libraries(openmw-wizard Qt5::Widgets Qt5::Core)
