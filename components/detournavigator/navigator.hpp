@@ -173,13 +173,14 @@ namespace DetourNavigator
          * @param end path at given point.
          * @param includeFlags setup allowed surfaces for actor to walk.
          * @param out the beginning of the destination range.
+         * @param endTolerance defines maximum allowed distance to end path point in addition to agentHalfExtents
          * @return Output iterator to the element in the destination range, one past the last element of found path.
          * Equal to out if no path is found.
          */
         template <class OutputIterator>
         Status findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
             const osg::Vec3f& end, const Flags includeFlags, const DetourNavigator::AreaCosts& areaCosts,
-            OutputIterator& out) const
+            float endTolerance, OutputIterator& out) const
         {
             static_assert(
                 std::is_same<
@@ -194,7 +195,7 @@ namespace DetourNavigator
             const auto settings = getSettings();
             return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings, agentHalfExtents),
                 toNavMeshCoordinates(settings, stepSize), toNavMeshCoordinates(settings, start),
-                toNavMeshCoordinates(settings, end), includeFlags, areaCosts, settings, out);
+                toNavMeshCoordinates(settings, end), includeFlags, areaCosts, settings, endTolerance, out);
         }
 
         /**

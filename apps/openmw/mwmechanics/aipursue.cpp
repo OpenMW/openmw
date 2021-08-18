@@ -53,7 +53,7 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     const float pathTolerance = 100.f;
 
     // check the true distance in case the target is far away in Z-direction
-    bool reached = pathTo(actor, dest, duration, pathTolerance) &&
+    bool reached = pathTo(actor, dest, duration, pathTolerance, (actorPos - dest).length(), PathType::Partial) &&
                    std::abs(dest.z() - actorPos.z()) < pathTolerance;
 
     if (reached)
