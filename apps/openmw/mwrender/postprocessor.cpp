@@ -43,14 +43,15 @@ namespace
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
-            osgUtil::RenderStage* renderStage = nv->asCullVisitor()->getCurrentRenderStage();
+            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+            osgUtil::RenderStage* renderStage = cv->getCurrentRenderStage();
 
             unsigned int frame = nv->getTraversalNumber();
             if (frame != mLastFrameNumber)
             {
                 mLastFrameNumber = frame;
 
-                MWRender::PostProcessor* postProcessor = dynamic_cast<MWRender::PostProcessor*>(nv->asCullVisitor()->getCurrentCamera()->getUserData());
+                MWRender::PostProcessor* postProcessor = dynamic_cast<MWRender::PostProcessor*>(cv->getCurrentCamera()->getUserData());
 
                 if (!postProcessor)
                 {
@@ -99,8 +100,12 @@ namespace MWRender
     PostProcessor::PostProcessor(RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode)
         : mViewer(viewer)
         , mRootNode(new osg::Group)
+        , mDepthFormat(GL_DEPTH_COMPONENT24)
         , mRendering(rendering)
     {
+        if (!SceneUtil::getReverseZ())
+            return;
+
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
         unsigned int contextID = gc->getState()->getContextID();
         osg::GLExtensions* ext = gc->getState()->get<osg::GLExtensions>();
@@ -128,7 +133,6 @@ namespace MWRender
             // TODO: Once we have post-processing implemented we want to skip this return and continue with setup.
             // Rendering to a FBO to fullscreen geometry has overhead (especially when MSAA is enabled) and there are no
             // benefits if no floating point depth formats are supported.
-            mDepthFormat = GL_DEPTH_COMPONENT24;
             Log(Debug::Warning) << errPreamble << "'GL_ARB_depth_buffer_float' and 'GL_NV_depth_buffer_float' unsupported.";
             return;
         }
@@ -137,7 +141,7 @@ namespace MWRender
         int height = viewer->getCamera()->getViewport()->height();
 
         createTexturesAndCamera(width, height);
-        resize(width, height, true);
+        resize(width, height);
 
         mRootNode->addChild(mHUDCamera);
         mRootNode->addChild(rootNode);
@@ -154,7 +158,7 @@ namespace MWRender
         mViewer->getCamera()->setUserData(this);
     }
 
-    void PostProcessor::resize(int width, int height, bool init)
+    void PostProcessor::resize(int width, int height)
     {
         mDepthTex->setTextureSize(width, height);
         mSceneTex->setTextureSize(width, height);
@@ -170,7 +174,7 @@ namespace MWRender
         // When MSAA is enabled we must first render to a render buffer, then
         // blit the result to the FBO which is either passed to the main frame
         // buffer for display or used as the entry point for a post process chain.
-        if (samples > 0)
+        if (samples > 1)
         {
             mMsaaFbo = new osg::FrameBufferObject;
             osg::ref_ptr<osg::RenderBuffer> colorRB = new osg::RenderBuffer(width, height, mSceneTex->getInternalFormat(), samples);
@@ -179,12 +183,8 @@ namespace MWRender
             mMsaaFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(depthRB));
         }
 
-        if (init)
-            return;
-
         mViewer->getCamera()->resize(width, height);
         mHUDCamera->resize(width, height);
-
         mRendering.updateProjectionMatrix();
     }
 

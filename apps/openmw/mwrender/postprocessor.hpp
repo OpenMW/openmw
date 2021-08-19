@@ -26,7 +26,7 @@ namespace MWRender
 
         int getDepthFormat() { return mDepthFormat; }
 
-        void resize(int width, int height, bool init=false);
+        void resize(int width, int height);
 
     private:
         void createTexturesAndCamera(int width, int height);
