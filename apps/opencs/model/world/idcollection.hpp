@@ -5,6 +5,7 @@
 
 #include "collection.hpp"
 #include "land.hpp"
+#include "pathgrid.hpp"
 
 namespace CSMWorld
 {
@@ -153,6 +154,9 @@ namespace CSMWorld
 
         return true;
     }
+
+    template<>
+    int IdCollection<Pathgrid, IdAccessor<Pathgrid> >::load(ESM::ESMReader& reader, bool base);
 }
 
 #endif
