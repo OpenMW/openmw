@@ -345,8 +345,12 @@ namespace DetourNavigator
 
         while (true)
         {
+            bool shouldStop = false;
+
             const auto hasJob = [&] {
-                return (!mWaiting.empty() && mWaiting.front()->mProcessTime <= std::chrono::steady_clock::now())
+                shouldStop = mShouldStop;
+                return shouldStop
+                    || (!mWaiting.empty() && mWaiting.front()->mProcessTime <= std::chrono::steady_clock::now())
                     || !threadQueue.empty();
             };
 
@@ -356,6 +360,9 @@ namespace DetourNavigator
                     mDone.notify_all();
                 return mJobs.end();
             }
+
+            if (shouldStop)
+                return mJobs.end();
 
             Log(Debug::Debug) << "Got " << mJobs.size() << " navigator jobs and "
                 << threadQueue.size() << " thread jobs by thread=" << std::this_thread::get_id();
