@@ -875,7 +875,7 @@ namespace MWWorld
 
         // deal with mods that have empty pathgrid records (Issue #6209)
         // we assume that these records are empty on purpose (i.e. to remove old pathgrid on an updated cell)
-        if (pathgrid.mPoints.empty() || pathgrid.mEdges.empty())
+        if (isDeleted || pathgrid.mPoints.empty() || pathgrid.mEdges.empty())
         {
             if (interior)
             {
