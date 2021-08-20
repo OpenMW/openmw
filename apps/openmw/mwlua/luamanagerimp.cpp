@@ -53,7 +53,6 @@ namespace MWLua
         initObjectBindingsForLocalScripts(localContext);
         initCellBindingsForLocalScripts(localContext);
         LocalScripts::initializeSelfPackage(localContext);
-        initInputBindings(localContext);
 
         mLua.addCommonPackage("openmw.async", getAsyncPackageInitializer(context));
         mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
@@ -63,11 +62,12 @@ namespace MWLua
         mGlobalScripts.addPackage("openmw.settings", initGlobalSettingsPackage(context));
         mCameraPackage = initCameraPackage(localContext);
         mUserInterfacePackage = initUserInterfacePackage(localContext);
+        mInputPackage = initInputPackage(localContext);
         mNearbyPackage = initNearbyPackage(localContext);
         mLocalSettingsPackage = initLocalSettingsPackage(localContext);
         mPlayerSettingsPackage = initPlayerSettingsPackage(localContext);
 
-        mKeyPressEvents.clear();
+        mInputEvents.clear();
         for (const std::string& path : mGlobalScriptList)
             if (mGlobalScripts.addNewScript(path))
                 Log(Debug::Info) << "Global script started: " << path;
@@ -93,7 +93,7 @@ namespace MWLua
 
         if (paused)
         {
-            mKeyPressEvents.clear();
+            mInputEvents.clear();
             return;
         }
 
@@ -130,10 +130,10 @@ namespace MWLua
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
         if (playerScripts)
         {
-            for (const SDL_Keysym& key : mKeyPressEvents)
-                playerScripts->keyPress(key);
+            for (const auto& event : mInputEvents)
+                playerScripts->processInputEvent(event);
         }
-        mKeyPressEvents.clear();
+        mInputEvents.clear();
 
         for (const LocalEngineEvent& e : mLocalEngineEvents)
         {
@@ -187,7 +187,7 @@ namespace MWLua
         mActiveLocalScripts.clear();
         mLocalEvents.clear();
         mGlobalEvents.clear();
-        mKeyPressEvents.clear();
+        mInputEvents.clear();
         mActorAddedEvents.clear();
         mLocalEngineEvents.clear();
         mPlayerChanged = false;
@@ -253,11 +253,6 @@ namespace MWLua
         mWorldView.getObjectRegistry()->deregisterPtr(ptr);
     }
 
-    void LuaManager::keyPressed(const SDL_KeyboardEvent& arg)
-    {
-        mKeyPressEvents.push_back(arg.keysym);
-    }
-
     void LuaManager::appliedToObject(const MWWorld::Ptr& toPtr, std::string_view recordId, const MWWorld::Ptr& fromPtr)
     {
         mLocalEngineEvents.push_back({getId(toPtr), LocalScripts::OnConsume{std::string(recordId)}});
@@ -294,6 +289,7 @@ namespace MWLua
             scripts = std::make_shared<PlayerScripts>(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
             scripts->addPackage("openmw.ui", mUserInterfacePackage);
             scripts->addPackage("openmw.camera", mCameraPackage);
+            scripts->addPackage("openmw.input", mInputPackage);
             scripts->addPackage("openmw.settings", mPlayerSettingsPackage);
         }
         else

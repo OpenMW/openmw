@@ -1,7 +1,5 @@
 #include "luabindings.hpp"
 
-#include <SDL_events.h>
-
 #include <components/lua/luastate.hpp>
 #include <components/queries/luabindings.hpp>
 
@@ -11,12 +9,6 @@
 
 #include "eventqueue.hpp"
 #include "worldview.hpp"
-
-namespace sol
-{
-    template <>
-    struct is_automagical<SDL_Keysym> : std::false_type {};
-}
 
 namespace MWLua
 {
@@ -33,7 +25,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 3;
+        api["API_REVISION"] = 4;
         api["quit"] = [lua]()
         {
             std::string traceback = lua->sol()["debug"]["traceback"]().get<std::string>();
@@ -177,18 +169,6 @@ namespace MWLua
             subgroup[field->path().back()] = field;
         }
         return context.mLua->makeReadOnly(res);
-    }
-
-    void initInputBindings(const Context& context)
-    {
-        sol::usertype<SDL_Keysym> keyEvent = context.mLua->sol().new_usertype<SDL_Keysym>("KeyEvent");
-        keyEvent["symbol"] = sol::readonly_property([](const SDL_Keysym& e) { return std::string(1, static_cast<char>(e.sym)); });
-        keyEvent["code"] = sol::readonly_property([](const SDL_Keysym& e) -> int { return e.sym; });
-        keyEvent["modifiers"] = sol::readonly_property([](const SDL_Keysym& e) -> int { return e.mod; });
-        keyEvent["withShift"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_SHIFT; });
-        keyEvent["withCtrl"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_CTRL; });
-        keyEvent["withAlt"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_ALT; });
-        keyEvent["withSuper"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_GUI; });
     }
 
 }

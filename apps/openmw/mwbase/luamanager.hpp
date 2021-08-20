@@ -1,6 +1,7 @@
 #ifndef GAME_MWBASE_LUAMANAGER_H
 #define GAME_MWBASE_LUAMANAGER_H
 
+#include <variant>
 #include <SDL_events.h>
 
 namespace MWWorld
@@ -29,8 +30,6 @@ namespace MWBase
         virtual ~LuaManager() = default;
 
         virtual void newGameStarted() = 0;
-        virtual void keyPressed(const SDL_KeyboardEvent &arg) = 0;
-
         virtual void registerObject(const MWWorld::Ptr& ptr) = 0;
         virtual void deregisterObject(const MWWorld::Ptr& ptr) = 0;
         virtual void objectAddedToScene(const MWWorld::Ptr& ptr) = 0;
@@ -39,6 +38,13 @@ namespace MWBase
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,
         //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) = 0;
+
+        struct InputEvent
+        {
+            enum {KeyPressed, KeyReleased, ControllerPressed, ControllerReleased, Action} mType;
+            std::variant<SDL_Keysym, int> mValue;
+        };
+        virtual void inputEvent(const InputEvent& event) = 0;
 
         struct ActorControls
         {

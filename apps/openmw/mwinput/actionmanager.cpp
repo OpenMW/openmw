@@ -9,6 +9,7 @@
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -195,6 +196,7 @@ namespace MWInput
 
     void ActionManager::executeAction(int action)
     {
+        MWBase::Environment::get().getLuaManager()->inputEvent({MWBase::LuaManager::InputEvent::Action, action});
         auto* inputManager = MWBase::Environment::get().getInputManager();
         auto* windowManager = MWBase::Environment::get().getWindowManager();
         // trigger action activated

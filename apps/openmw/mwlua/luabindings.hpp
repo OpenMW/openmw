@@ -26,8 +26,6 @@ namespace MWLua
 
     sol::table initFieldGroup(const Context&, const QueryFieldGroup&);
 
-    void initInputBindings(const Context&);
-
     // Implemented in objectbindings.cpp
     void initObjectBindingsForLocalScripts(const Context&);
     void initObjectBindingsForGlobalScripts(const Context&);
@@ -58,6 +56,9 @@ namespace MWLua
 
     // Implemented in uibindings.cpp
     sol::table initUserInterfacePackage(const Context&);
+
+    // Implemented in inputbindings.cpp
+    sol::table initInputPackage(const Context&);
 
     // Implemented in settingsbindings.cpp
     sol::table initGlobalSettingsPackage(const Context&);

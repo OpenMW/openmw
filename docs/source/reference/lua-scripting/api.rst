@@ -14,6 +14,7 @@ Lua API reference
     openmw_world
     openmw_self
     openmw_nearby
+    openmw_input
     openmw_ui
     openmw_aux_util
 
@@ -52,6 +53,8 @@ Player scripts are local scripts that are attached to a player.
 |:ref:`openmw.self <Package openmw.self>`                 | by local scripts   | | Full access to the object the script is attached to.        |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.nearby <Package openmw.nearby>`             | by local scripts   | | Read-only access to the nearest area of the game world.     |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input                                                  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls user interface                                     |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+

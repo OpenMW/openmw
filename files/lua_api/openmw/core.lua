@@ -318,15 +318,5 @@
 -- @return #ObjectList
 
 
--------------------------------------------------------------------------------
--- Argument of `onKeyPress` engine handler
--- @type KeyboardEvent
--- @field [parent=#KeyboardEvent] #string symbol The pressed symbol (1-symbol string).
--- @field [parent=#KeyboardEvent] #string code Key code.
--- @field [parent=#KeyboardEvent] #boolean withShift Is `Shift` key pressed.
--- @field [parent=#KeyboardEvent] #boolean withCtrl Is `Control` key pressed.
--- @field [parent=#KeyboardEvent] #boolean withAlt Is `Alt` key pressed.
--- @field [parent=#KeyboardEvent] #boolean withSuper Is `Super`/`Win` key pressed.
-
 return nil
 
