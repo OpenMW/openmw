@@ -137,7 +137,7 @@ std::vector<CSMWorld::UniversalId> CSMWorld::CommandDispatcher::getExtendedTypes
     return tables;
 }
 
-void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *sourceModel, const QModelIndex& sourceIndex, const QVariant& new_)
+void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, const QModelIndex& index, const QVariant& new_)
 {
     if (mLocked)
         return;
@@ -150,25 +150,16 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *sourceModel
     std::unique_ptr<CSMWorld::ModifyCommand> modifyData;
     std::unique_ptr<CSMWorld::UpdateCellCommand> modifyCell;
 
-    QAbstractItemModel *model(nullptr);
-    QModelIndex index;
+    QAbstractItemModel* sourceModel = model;
+    if (IdTableProxyModel* proxy = dynamic_cast<IdTableProxyModel*> (model))
+        sourceModel = proxy->sourceModel();
 
-    if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (sourceModel))
-    {
-        // Replace proxy with actual model
-        index = proxy->mapToSource (sourceIndex);
-        model = proxy->sourceModel();
-    }
-
-    if (!model) return;
+    CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*sourceModel); // for getId()
+    int stateColumn = table.findColumnIndex(Columns::ColumnId_Modification);
+    QModelIndex stateIndex = table.getModelIndex(table.getId(index.row()), stateColumn);
+    RecordBase::State state = static_cast<RecordBase::State> (sourceModel->data(stateIndex).toInt());
 
     int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
-
-    int stateColumn = dynamic_cast<CSMWorld::IdTable&>(*model).findColumnIndex(Columns::ColumnId_Modification);
-
-    CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*model); // for getId()
-    QModelIndex stateIndex = table.getModelIndex(table.getId(index.row()), stateColumn);
-    RecordBase::State state = static_cast<RecordBase::State> (model->data(stateIndex).toInt());
 
     // This is not guaranteed to be the same as \a model, since a proxy could be used.
     IdTable& model2 = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel(mId));

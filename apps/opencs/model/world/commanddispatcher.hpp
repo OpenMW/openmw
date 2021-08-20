@@ -60,7 +60,7 @@ namespace CSMWorld
             ///
             /// \attention model must either be a model for the table operated on by this
             /// dispatcher or a proxy of it.
-            void executeModify (QAbstractItemModel *sourceModel, const QModelIndex& sourceIndex, const QVariant& new_);
+            void executeModify (QAbstractItemModel *model, const QModelIndex& index, const QVariant& new_);
 
         public slots:
 
