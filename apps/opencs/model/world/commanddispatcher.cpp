@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <memory>
 
+#include <QAbstractItemModel>
+#include <QAbstractProxyModel>
+
 #include <components/misc/stringops.hpp>
 #include <components/misc/constants.hpp>
 
@@ -147,13 +150,16 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
     std::unique_ptr<CSMWorld::ModifyCommand> modifyData;
     std::unique_ptr<CSMWorld::UpdateCellCommand> modifyCell;
 
-    int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
+    QAbstractItemModel* sourceModel = model;
+    if (IdTableProxyModel* proxy = dynamic_cast<IdTableProxyModel*> (model))
+        sourceModel = proxy->sourceModel();
 
-    int stateColumn = dynamic_cast<CSMWorld::IdTable&>(*model).findColumnIndex(Columns::ColumnId_Modification);
-
-    CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*model); // for getId()
+    CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*sourceModel); // for getId()
+    int stateColumn = table.findColumnIndex(Columns::ColumnId_Modification);
     QModelIndex stateIndex = table.getModelIndex(table.getId(index.row()), stateColumn);
-    RecordBase::State state = static_cast<RecordBase::State> (model->data(stateIndex).toInt());
+    RecordBase::State state = static_cast<RecordBase::State> (sourceModel->data(stateIndex).toInt());
+
+    int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
 
     // This is not guaranteed to be the same as \a model, since a proxy could be used.
     IdTable& model2 = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel(mId));
