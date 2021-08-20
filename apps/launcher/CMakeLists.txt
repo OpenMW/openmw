@@ -99,7 +99,7 @@ endif (WIN32)
 target_link_libraries(openmw-launcher
     ${SDL2_LIBRARY_ONLY}
     ${OPENAL_LIBRARY}
-    components
+    components_qt
 )
 
 target_link_libraries(openmw-launcher Qt5::Widgets Qt5::Core)

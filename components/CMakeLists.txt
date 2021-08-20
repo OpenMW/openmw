@@ -217,7 +217,7 @@ if (USE_QT)
         processinvoker
         )
 
-    add_component_dir (misc
+    add_component_qt_dir (misc
         helpviewer
         )
 
@@ -233,7 +233,7 @@ endif ()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
-add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
+add_library(components STATIC ${COMPONENT_FILES})
 
 target_link_libraries(components
     # CMake's built-in OSG finder does not use pkgconfig, so we have to
@@ -276,7 +276,9 @@ if (WIN32)
 endif()
 
 if (USE_QT)
-    target_link_libraries(components Qt5::Widgets Qt5::Core)
+    add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
+    target_link_libraries(components_qt components Qt5::Widgets Qt5::Core)
+    target_compile_definitions(components_qt PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
 endif()
 
 if (GIT_CHECKOUT)

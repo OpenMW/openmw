@@ -14,6 +14,7 @@
     Bug #5379: Wandering NPCs falling through cantons
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
+    Bug #5508: Engine binary links to Qt without using it
     Bug #5755: Active grid object paging - disappearing textures
     Bug #5788: Texture editing parses the selected indexes wrongly
     Bug #5842: GetDisposition adds temporary disposition change from different actors
