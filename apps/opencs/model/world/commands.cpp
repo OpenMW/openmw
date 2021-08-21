@@ -498,8 +498,8 @@ CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTree& model,
 void CSMWorld::DeleteNestedCommand::redo()
 {
     QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    mModel.removeRows (mNestedRow, 1, parentIndex);
     mModifyParentCommand->redo();
+    mModel.removeRows (mNestedRow, 1, parentIndex);
 }
 
 
@@ -529,8 +529,8 @@ CSMWorld::AddNestedCommand::AddNestedCommand(IdTree& model, const std::string& i
 void CSMWorld::AddNestedCommand::redo()
 {
     QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    mModel.addNestedRow (parentIndex, mNewRow);
     mModifyParentCommand->redo();
+    mModel.addNestedRow (parentIndex, mNewRow);
 }
 
 void CSMWorld::AddNestedCommand::undo()
