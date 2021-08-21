@@ -190,17 +190,16 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
                                         const QVariant& new_, QUndoCommand* parent)
     : QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false), mOldRecordState(CSMWorld::RecordBase::State_BaseOnly)
 {
-}
-
-void CSMWorld::ModifyCommand::redo()
-{
     if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (mModel))
     {
         // Replace proxy with actual model
         mIndex = proxy->mapToSource (mIndex);
         mModel = proxy->sourceModel();
     }
+}
 
+void CSMWorld::ModifyCommand::redo()
+{
     if (mIndex.parent().isValid())
     {
         CSMWorld::IdTree* tree = &dynamic_cast<CSMWorld::IdTree&>(*mModel);
