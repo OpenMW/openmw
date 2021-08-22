@@ -1,6 +1,8 @@
 #ifndef CSV_RENDER_COMMANDS_HPP
 #define CSV_RENDER_COMMANDS_HPP
 
+#include <QPointer>
+
 #include <QUndoCommand>
 
 #include "worldspacewidget.hpp"
@@ -23,10 +25,9 @@ namespace CSVRender
     */
     class DrawTerrainSelectionCommand : public QUndoCommand
     {
-        friend class WorldspaceWidget;
 
     private:
-        WorldspaceWidget *mWorldspaceWidget;
+        QPointer<WorldspaceWidget> mWorldspaceWidget;
 
     public:
         DrawTerrainSelectionCommand(WorldspaceWidget* worldspaceWidget, QUndoCommand* parent = nullptr);

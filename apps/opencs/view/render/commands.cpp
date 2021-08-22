@@ -1,5 +1,7 @@
 #include "commands.hpp"
 
+#include <QPointer>
+
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadland.hpp>
 
@@ -15,26 +17,38 @@ CSVRender::DrawTerrainSelectionCommand::DrawTerrainSelectionCommand(WorldspaceWi
 
 void CSVRender::DrawTerrainSelectionCommand::redo()
 {
-    if (CSVRender::WorldspaceWidget* worldspaceWidget = dynamic_cast<CSVRender::WorldspaceWidget *> (mWorldspaceWidget))
+    if (mWorldspaceWidget)
     {
-        if (CSVRender::TerrainShapeMode* terrainMode = dynamic_cast<CSVRender::TerrainShapeMode *> (worldspaceWidget->getEditMode()) )
-            {
-                terrainMode->getTerrainSelection()->update();
-                return;
-            }
+        if (CSVRender::TerrainShapeMode* terrainMode = dynamic_cast<CSVRender::TerrainShapeMode *> (mWorldspaceWidget->getEditMode()) )
+        {
+            terrainMode->getTerrainSelection()->update();
+            return;
+        }
+        else
+        {
+            Log(Debug::Verbose) << "Can't update terrain selection in current EditMode";
+            return;
+        }
     }
-    Log(Debug::Warning) << "Error in redoing terrain selection";
+    else
+        Log(Debug::Verbose) << "Can't update terrain selection, no WorldspaceWidget found!";
 }
 
 void CSVRender::DrawTerrainSelectionCommand::undo()
 {
-    if (CSVRender::WorldspaceWidget* worldspaceWidget = dynamic_cast<CSVRender::WorldspaceWidget *> (mWorldspaceWidget))
+    if (mWorldspaceWidget)
     {
-        if (CSVRender::TerrainShapeMode* terrainMode = dynamic_cast<CSVRender::TerrainShapeMode *> (worldspaceWidget->getEditMode()) )
-            {
-                terrainMode->getTerrainSelection()->update();
-                return;
-            }
+        if (CSVRender::TerrainShapeMode* terrainMode = dynamic_cast<CSVRender::TerrainShapeMode *> (mWorldspaceWidget->getEditMode()) )
+        {
+            terrainMode->getTerrainSelection()->update();
+            return;
+        }
+        else
+        {
+            Log(Debug::Verbose) << "Can't undo terrain selection in current EditMode";
+            return;
+        }
     }
-    Log(Debug::Warning) << "Error in undoing terrain selection";
+    else
+        Log(Debug::Verbose) << "Can't undo terrain selection, no WorldspaceWidget found!";
 }
