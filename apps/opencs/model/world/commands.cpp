@@ -173,8 +173,8 @@ const std::string& CSMWorld::TouchLandCommand::getDestinationId() const
 
 void CSMWorld::TouchLandCommand::onRedo()
 {
-    mOld.reset(mLands.getRecord(mId).clone().get());
     mChanged = mLands.touchRecord(mId);
+    if (mChanged) mOld.reset(mLands.getRecord(mId).clone().get());
 }
 
 void CSMWorld::TouchLandCommand::onUndo()
