@@ -3,6 +3,8 @@
 
 #include <QUndoCommand>
 
+#include "worldspacewidget.hpp"
+
 namespace CSVRender
 {
     class TerrainSelection;
@@ -21,11 +23,13 @@ namespace CSVRender
     */
     class DrawTerrainSelectionCommand : public QUndoCommand
     {
+        friend class WorldspaceWidget;
+
     private:
-        TerrainSelection& mTerrainSelection;
+        WorldspaceWidget *mWorldspaceWidget;
 
     public:
-        DrawTerrainSelectionCommand(TerrainSelection& terrainSelection, QUndoCommand* parent = nullptr);
+        DrawTerrainSelectionCommand(WorldspaceWidget* worldspaceWidget, QUndoCommand* parent = nullptr);
 
         void redo() override;
         void undo() override;

@@ -1,19 +1,40 @@
 #include "commands.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadland.hpp>
 
+#include "editmode.hpp"
 #include "terrainselection.hpp"
+#include "terrainshapemode.hpp"
+#include "terraintexturemode.hpp"
+#include "worldspacewidget.hpp"
 
-CSVRender::DrawTerrainSelectionCommand::DrawTerrainSelectionCommand(TerrainSelection& terrainSelection, QUndoCommand* parent)
-    : mTerrainSelection(terrainSelection)
+CSVRender::DrawTerrainSelectionCommand::DrawTerrainSelectionCommand(WorldspaceWidget* worldspaceWidget, QUndoCommand* parent)
+    : mWorldspaceWidget(worldspaceWidget)
 { }
 
 void CSVRender::DrawTerrainSelectionCommand::redo()
 {
-    mTerrainSelection.update();
+    if (CSVRender::WorldspaceWidget* worldspaceWidget = dynamic_cast<CSVRender::WorldspaceWidget *> (mWorldspaceWidget))
+    {
+        if (CSVRender::TerrainShapeMode* terrainMode = dynamic_cast<CSVRender::TerrainShapeMode *> (worldspaceWidget->getEditMode()) )
+            {
+                terrainMode->getTerrainSelection()->update();
+                return;
+            }
+    }
+    Log(Debug::Warning) << "Error in redoing terrain selection";
 }
 
 void CSVRender::DrawTerrainSelectionCommand::undo()
 {
-    mTerrainSelection.update();
+    if (CSVRender::WorldspaceWidget* worldspaceWidget = dynamic_cast<CSVRender::WorldspaceWidget *> (mWorldspaceWidget))
+    {
+        if (CSVRender::TerrainShapeMode* terrainMode = dynamic_cast<CSVRender::TerrainShapeMode *> (worldspaceWidget->getEditMode()) )
+            {
+                terrainMode->getTerrainSelection()->update();
+                return;
+            }
+    }
+    Log(Debug::Warning) << "Error in undoing terrain selection";
 }

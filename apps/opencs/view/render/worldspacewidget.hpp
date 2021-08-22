@@ -49,6 +49,8 @@ namespace CSVRender
     {
             Q_OBJECT
 
+            friend class DrawTerrainSelectionCommand;
+
             CSVWidget::SceneToolToggle2 *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
