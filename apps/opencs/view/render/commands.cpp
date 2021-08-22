@@ -17,38 +17,28 @@ CSVRender::DrawTerrainSelectionCommand::DrawTerrainSelectionCommand(WorldspaceWi
 
 void CSVRender::DrawTerrainSelectionCommand::redo()
 {
-    if (mWorldspaceWidget)
-    {
-        if (CSVRender::TerrainShapeMode* terrainMode = dynamic_cast<CSVRender::TerrainShapeMode *> (mWorldspaceWidget->getEditMode()) )
-        {
-            terrainMode->getTerrainSelection()->update();
-            return;
-        }
-        else
-        {
-            Log(Debug::Verbose) << "Can't update terrain selection in current EditMode";
-            return;
-        }
-    }
-    else
-        Log(Debug::Verbose) << "Can't update terrain selection, no WorldspaceWidget found!";
+    tryUpdate();
 }
 
 void CSVRender::DrawTerrainSelectionCommand::undo()
 {
-    if (mWorldspaceWidget)
+    tryUpdate();
+}
+
+void CSVRender::DrawTerrainSelectionCommand::tryUpdate()
+{
+    if (!mWorldspaceWidget)
     {
-        if (CSVRender::TerrainShapeMode* terrainMode = dynamic_cast<CSVRender::TerrainShapeMode *> (mWorldspaceWidget->getEditMode()) )
-        {
-            terrainMode->getTerrainSelection()->update();
-            return;
-        }
-        else
-        {
-            Log(Debug::Verbose) << "Can't undo terrain selection in current EditMode";
-            return;
-        }
-    }
-    else
         Log(Debug::Verbose) << "Can't undo terrain selection, no WorldspaceWidget found!";
+        return;
+    }
+
+    auto terrainMode = dynamic_cast<CSVRender::TerrainShapeMode*>(mWorldspaceWidget->getEditMode());
+    if (!terrainMode)
+    {
+        Log(Debug::Verbose) << "Can't undo terrain selection in current EditMode";
+        return;
+    }
+
+    terrainMode->getTerrainSelection()->update();
 }

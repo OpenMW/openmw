@@ -34,6 +34,8 @@ namespace CSVRender
 
         void redo() override;
         void undo() override;
+
+        void tryUpdate();
     };
 }
 
