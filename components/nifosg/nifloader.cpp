@@ -153,37 +153,14 @@ namespace
     {
         for(size_t i = 0;i < tk->list.size();i++)
         {
-            const std::string &str = tk->list[i].text;
-            std::string::size_type pos = 0;
-            while(pos < str.length())
+            std::vector<std::string> results;
+            Misc::StringUtils::split(tk->list[i].text, results, "\r\n");
+            for (std::string &result : results)
             {
-                if(::isspace(str[pos]))
-                {
-                    pos++;
-                    continue;
-                }
-
-                std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
-                if(nextpos != std::string::npos)
-                {
-                    do {
-                        nextpos--;
-                    } while(nextpos > pos && ::isspace(str[nextpos]));
-                    nextpos++;
-                }
-                else if(::isspace(*str.rbegin()))
-                {
-                    std::string::const_iterator last = str.end();
-                    do {
-                        --last;
-                    } while(last != str.begin() && ::isspace(*last));
-                    nextpos = std::distance(str.begin(), ++last);
-                }
-                std::string result = str.substr(pos, nextpos-pos);
+                Misc::StringUtils::trim(result);
                 Misc::StringUtils::lowerCaseInPlace(result);
-                textkeys.emplace(tk->list[i].time, std::move(result));
-
-                pos = nextpos;
+                if (!result.empty())
+                    textkeys.emplace(tk->list[i].time, std::move(result));
             }
         }
     }
