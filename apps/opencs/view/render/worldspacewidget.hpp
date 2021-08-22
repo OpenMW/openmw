@@ -49,8 +49,6 @@ namespace CSVRender
     {
             Q_OBJECT
 
-            friend class DrawTerrainSelectionCommand;
-
             CSVWidget::SceneToolToggle2 *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
@@ -191,6 +189,8 @@ namespace CSVRender
             /// Erase all overrides and restore the visual representation to its true state.
             virtual void reset (unsigned int elementMask) = 0;
 
+            EditMode *getEditMode();
+
         protected:
 
             /// Visual elements in a scene
@@ -216,8 +216,6 @@ namespace CSVRender
             virtual void handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type);
 
             void settingChanged (const CSMPrefs::Setting *setting) override;
-
-            EditMode *getEditMode();
 
             bool getSpeedMode();
 
