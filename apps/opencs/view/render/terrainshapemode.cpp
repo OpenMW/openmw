@@ -287,7 +287,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
     undoStack.beginMacro ("Edit shape and normal records");
 
     // One command at the beginning of the macro for redrawing the terrain-selection grid when undoing the changes.
-    undoStack.push(new DrawTerrainSelectionCommand(*mTerrainShapeSelection));
+    undoStack.push(new DrawTerrainSelectionCommand(&getWorldspaceWidget()));
 
     for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
     {
@@ -358,7 +358,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         pushNormalsEditToCommand(landNormalsNew, document, landTable, cellId);
     }
     // One command at the end of the macro for redrawing the terrain-selection grid when redoing the changes.
-    undoStack.push(new DrawTerrainSelectionCommand(*mTerrainShapeSelection));
+    undoStack.push(new DrawTerrainSelectionCommand(&getWorldspaceWidget()));
 
     undoStack.endMacro();
     clearTransientEdits();
@@ -1049,7 +1049,7 @@ void CSVRender::TerrainShapeMode::handleSelection(int globalSelectionX, int glob
         */
         if (xIsAtCellBorder && yIsAtCellBorder)
         {
-            /* 
+            /*
                 Handle the NW, NE, and SE corner vertices.
                 NW corner: (+1, -1) offset to reach current cell.
                 NE corner: (-1, -1) offset to reach current cell.
@@ -1132,7 +1132,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
         selectAction = CSMPrefs::get()["3D Scene Editing"]["primary-select-action"].toString();
     else
         selectAction = CSMPrefs::get()["3D Scene Editing"]["secondary-select-action"].toString();
-        
+
     if (selectAction == "Select only")
         mTerrainShapeSelection->onlySelect(selections);
     else if (selectAction == "Add to selection")
@@ -1442,6 +1442,11 @@ void CSVRender::TerrainShapeMode::mouseMoveEvent (QMouseEvent *event)
         mBrushDraw->update(hit.worldPos, mBrushSize, mBrushShape);
     if (!hit.hit && mBrushDraw && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing))
         mBrushDraw->hide();
+}
+
+std::shared_ptr<CSVRender::TerrainSelection> CSVRender::TerrainShapeMode::getTerrainSelection()
+{
+    return mTerrainShapeSelection;
 }
 
 void CSVRender::TerrainShapeMode::setBrushSize(int brushSize)
