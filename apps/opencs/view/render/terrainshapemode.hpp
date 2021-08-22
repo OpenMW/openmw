@@ -92,6 +92,8 @@ namespace CSVRender
             void dragMoveEvent (QDragMoveEvent *event) override;
             void mouseMoveEvent (QMouseEvent *event) override;
 
+            std::shared_ptr<TerrainSelection> getTerrainSelection();
+
         private:
 
             /// Remove duplicates and sort mAlteredCells, then limitAlteredHeights forward and reverse
@@ -176,7 +178,7 @@ namespace CSVRender
             int mDragMode = InteractionType_None;
             osg::Group* mParentNode;
             bool mIsEditing = false;
-            std::unique_ptr<TerrainSelection> mTerrainShapeSelection;
+            std::shared_ptr<TerrainSelection> mTerrainShapeSelection;
             int mTotalDiffY = 0;
             std::vector<CSMWorld::CellCoordinates> mAlteredCells;
             osg::Vec3d mEditingPos;

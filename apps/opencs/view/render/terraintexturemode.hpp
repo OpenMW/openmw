@@ -85,6 +85,8 @@ namespace CSVRender
 
             void mouseMoveEvent (QMouseEvent *event) override;
 
+            std::shared_ptr<TerrainSelection> getTerrainSelection();
+
         private:
             /// \brief Handle brush mechanics, maths regarding worldspace hit etc.
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
@@ -115,7 +117,7 @@ namespace CSVRender
             int mDragMode;
             osg::Group* mParentNode;
             bool mIsEditing;
-            std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
+            std::shared_ptr<TerrainSelection> mTerrainTextureSelection;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
