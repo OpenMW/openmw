@@ -1,7 +1,11 @@
 #ifndef CSV_RENDER_COMMANDS_HPP
 #define CSV_RENDER_COMMANDS_HPP
 
+#include <QPointer>
+
 #include <QUndoCommand>
+
+#include "worldspacewidget.hpp"
 
 namespace CSVRender
 {
@@ -21,14 +25,17 @@ namespace CSVRender
     */
     class DrawTerrainSelectionCommand : public QUndoCommand
     {
+
     private:
-        TerrainSelection& mTerrainSelection;
+        QPointer<WorldspaceWidget> mWorldspaceWidget;
 
     public:
-        DrawTerrainSelectionCommand(TerrainSelection& terrainSelection, QUndoCommand* parent = nullptr);
+        DrawTerrainSelectionCommand(WorldspaceWidget* worldspaceWidget, QUndoCommand* parent = nullptr);
 
         void redo() override;
         void undo() override;
+
+        void tryUpdate();
     };
 }
 
