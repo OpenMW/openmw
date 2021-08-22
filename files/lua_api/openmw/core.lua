@@ -128,6 +128,36 @@
 -- @return #number
 
 -------------------------------------------------------------------------------
+-- Current speed. Can be called only from a local script.
+-- @function [parent=#GameObject] getCurrentSpeed
+-- @param self
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Is the actor standing on ground. Can be called only from a local script.
+-- @function [parent=#GameObject] isOnGround
+-- @param self
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is the actor in water. Can be called only from a local script.
+-- @function [parent=#GameObject] isSwimming
+-- @param self
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is the actor in weapon stance. Can be called only from a local script.
+-- @function [parent=#GameObject] isInWeaponStance
+-- @param self
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is the actor in magic stance. Can be called only from a local script.
+-- @function [parent=#GameObject] isInMagicStance
+-- @param self
+-- @return #boolean
+
+-------------------------------------------------------------------------------
 -- Send local event to the object.
 -- @function [parent=#GameObject] sendEvent
 -- @param self
