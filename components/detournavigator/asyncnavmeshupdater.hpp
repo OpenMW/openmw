@@ -60,7 +60,7 @@ namespace DetourNavigator
         const TilePosition mChangedTile;
         const std::chrono::steady_clock::time_point mProcessTime;
         unsigned mTryNumber = 0;
-        const ChangeType mChangeType;
+        ChangeType mChangeType;
         int mDistanceToPlayer;
         const int mDistanceToOrigin;
 
@@ -99,10 +99,9 @@ namespace DetourNavigator
         std::set<std::tuple<osg::Vec3f, TilePosition>> mPushed;
         Misc::ScopeGuarded<TilePosition> mPlayerTile;
         NavMeshTilesCache mNavMeshTilesCache;
-        Misc::ScopeGuarded<std::map<std::tuple<osg::Vec3f, TilePosition>, std::thread::id>> mProcessingTiles;
+        Misc::ScopeGuarded<std::set<std::tuple<osg::Vec3f, TilePosition>>> mProcessingTiles;
         std::map<std::tuple<osg::Vec3f, TilePosition>, std::chrono::steady_clock::time_point> mLastUpdates;
         std::set<std::tuple<osg::Vec3f, TilePosition>> mPresentTiles;
-        std::map<std::thread::id, std::deque<JobIt>> mThreadsQueues;
         std::vector<std::thread> mThreads;
 
         void process() noexcept;
@@ -119,7 +118,7 @@ namespace DetourNavigator
 
         void repost(JobIt job);
 
-        std::thread::id lockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
+        bool lockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
 
         void unlockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
 
