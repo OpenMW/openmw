@@ -36,7 +36,7 @@ namespace DetourNavigator
 
         TileBounds maxCellTileBounds(int size, const osg::Vec3f& shift)
         {
-            const float halfCellSize = size / 2;
+            const float halfCellSize = static_cast<float>(size) / 2;
             return TileBounds {
                 osg::Vec2f(shift.x() - halfCellSize, shift.y() - halfCellSize),
                 osg::Vec2f(shift.x() + halfCellSize, shift.y() + halfCellSize)
