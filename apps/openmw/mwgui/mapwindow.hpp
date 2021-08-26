@@ -187,6 +187,8 @@ namespace MWGui
         float mLastDirectionX;
         float mLastDirectionY;
 
+        bool mNeedDoorMarkersUpdate;
+
     private:
         void updateDoorMarkers();
     };

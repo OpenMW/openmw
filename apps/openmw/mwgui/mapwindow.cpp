@@ -192,6 +192,7 @@ namespace MWGui
         , mMarkerUpdateTimer(0.0f)
         , mLastDirectionX(0.0f)
         , mLastDirectionY(0.0f)
+        , mNeedDoorMarkersUpdate(false)
     {
         mCustomMarkers.eventMarkersChanged += MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
     }
@@ -440,6 +441,10 @@ namespace MWGui
             }
         }
 
+        // Delay the door markers update until scripts have been given a chance to run.
+        // If we don't do this, door markers that should be disabled will still appear on the map.
+        mNeedDoorMarkersUpdate = true;
+
         for (MyGUI::Widget* widget : currentDoorMarkersWidgets())
             widget->setCoord(getMarkerCoordinates(widget, 8));
 
@@ -544,7 +549,11 @@ namespace MWGui
 
     void LocalMapBase::onFrame(float dt)
     {
-        updateDoorMarkers();
+        if (mNeedDoorMarkersUpdate)
+        {
+            updateDoorMarkers();
+            mNeedDoorMarkersUpdate = false;
+        }
 
         mMarkerUpdateTimer += dt;
 
@@ -950,6 +959,9 @@ namespace MWGui
                 zoomOnCursor(zoomRatio);
                 return; //the zoom out is too big, we switch to the global map
             }
+
+            if (zoomOut)
+                mNeedDoorMarkersUpdate = true;
         }
         zoomOnCursor(speedDiff);
     }
@@ -1172,7 +1184,10 @@ namespace MWGui
         MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
 
         if (!mGlobal)
+        {
+            mNeedDoorMarkersUpdate = true;
             mLocalMap->setViewOffset( mLocalMap->getViewOffset() + diff );
+        }
         else
             mGlobalMap->setViewOffset( mGlobalMap->getViewOffset() + diff );
 
