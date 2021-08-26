@@ -364,13 +364,13 @@ namespace MWMechanics
 
     void PathFinder::buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
         const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
-        const DetourNavigator::AreaCosts& areaCosts)
+        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType)
     {
         mPath.clear();
 
         // If it's not possible to build path over navmesh due to disabled navmesh generation fallback to straight path
         DetourNavigator::Status status = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags,
-                                                                  areaCosts, std::back_inserter(mPath));
+            areaCosts, endTolerance, pathType, std::back_inserter(mPath));
 
         if (status != DetourNavigator::Status::Success)
             mPath.clear();
@@ -383,7 +383,8 @@ namespace MWMechanics
 
     void PathFinder::buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
         const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
-        const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts)
+        const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
+        PathType pathType)
     {
         mPath.clear();
         mCell = cell;
@@ -392,7 +393,8 @@ namespace MWMechanics
 
         if (!actor.getClass().isPureWaterCreature(actor) && !actor.getClass().isPureFlyingCreature(actor))
         {
-            status = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, areaCosts, std::back_inserter(mPath));
+            status = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, areaCosts,
+                                              endTolerance, pathType, std::back_inserter(mPath));
             if (status != DetourNavigator::Status::Success)
                 mPath.clear();
         }
@@ -400,7 +402,7 @@ namespace MWMechanics
         if (status != DetourNavigator::Status::NavMeshNotFound && mPath.empty())
         {
             status = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents,
-                                     flags | DetourNavigator::Flag_usePathgrid, areaCosts, std::back_inserter(mPath));
+                flags | DetourNavigator::Flag_usePathgrid, areaCosts, endTolerance, pathType, std::back_inserter(mPath));
             if (status != DetourNavigator::Status::Success)
                 mPath.clear();
         }
@@ -416,12 +418,17 @@ namespace MWMechanics
 
     DetourNavigator::Status PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
         const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
-        const DetourNavigator::AreaCosts& areaCosts, std::back_insert_iterator<std::deque<osg::Vec3f>> out)
+        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType,
+        std::back_insert_iterator<std::deque<osg::Vec3f>> out)
     {
         const auto world = MWBase::Environment::get().getWorld();
         const auto stepSize = getPathStepSize(actor);
         const auto navigator = world->getNavigator();
-        const auto status = navigator->findPath(halfExtents, stepSize, startPoint, endPoint, flags, areaCosts, out);
+        const auto status = navigator->findPath(halfExtents, stepSize, startPoint, endPoint, flags, areaCosts,
+                                                endTolerance, out);
+
+        if (pathType == PathType::Partial && status == DetourNavigator::Status::PartialPath)
+            return DetourNavigator::Status::Success;
 
         if (status != DetourNavigator::Status::Success)
         {
@@ -449,8 +456,9 @@ namespace MWMechanics
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         std::deque<osg::Vec3f> prePath;
         auto prePathInserter = std::back_inserter(prePath);
+        const float endTolerance = 0;
         const auto status = navigator->findPath(halfExtents, stepSize, startPoint, mPath.front(), flags, areaCosts,
-                                                prePathInserter);
+                                                endTolerance, prePathInserter);
 
         if (status == DetourNavigator::Status::NavMeshNotFound)
             return;
@@ -475,7 +483,8 @@ namespace MWMechanics
 
     void PathFinder::buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
         const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
-        const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts)
+        const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
+        PathType pathType)
     {
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         const auto maxDistance = std::min(
@@ -485,8 +494,9 @@ namespace MWMechanics
         const auto startToEnd = endPoint - startPoint;
         const auto distance = startToEnd.length();
         if (distance <= maxDistance)
-            return buildPath(actor, startPoint, endPoint, cell, pathgridGraph, halfExtents, flags, areaCosts);
+            return buildPath(actor, startPoint, endPoint, cell, pathgridGraph, halfExtents, flags, areaCosts,
+                             endTolerance, pathType);
         const auto end = startPoint + startToEnd * maxDistance / distance;
-        buildPath(actor, startPoint, end, cell, pathgridGraph, halfExtents, flags, areaCosts);
+        buildPath(actor, startPoint, end, cell, pathgridGraph, halfExtents, flags, areaCosts, endTolerance, pathType);
     }
 }

@@ -46,6 +46,7 @@ namespace
         const osg::Vec2i mCellPosition {0, 0};
         const int mHeightfieldTileSize = ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1);
         const osg::Vec3f mShift {0, 0, 0};
+        const float mEndTolerance = 0;
 
         DetourNavigatorNavigatorTest()
             : mPlayerPosition(0, 0, 0)
@@ -135,7 +136,7 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_empty_should_return_empty)
     {
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::NavMeshNotFound);
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>());
     }
@@ -143,7 +144,7 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_existing_agent_with_no_navmesh_should_throw_exception)
     {
         mNavigator->addAgent(mAgentHalfExtents);
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::StartPolygonNotFound);
     }
 
@@ -152,7 +153,7 @@ namespace
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->removeAgent(mAgentHalfExtents);
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::StartPolygonNotFound);
     }
 
@@ -172,7 +173,8 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204.0000152587890625, 204, 1.99998295307159423828125),
@@ -219,7 +221,8 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 1.99998295307159423828125),
@@ -252,7 +255,8 @@ namespace
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 1.99998295307159423828125),
@@ -301,7 +305,8 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 1.99998295307159423828125),
@@ -337,7 +342,8 @@ namespace
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 1.99998295307159423828125),
@@ -393,7 +399,8 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 1.999981403350830078125),
@@ -479,7 +486,8 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 1.99997997283935546875),
@@ -530,7 +538,8 @@ namespace
         mEnd.x() = 0;
         mEnd.z() = 300;
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(0, 204, 185.33331298828125),
@@ -574,7 +583,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -619,7 +628,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -664,7 +673,8 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(0, 204, -98.000030517578125),
@@ -712,7 +722,8 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 1.99998295307159423828125),
@@ -764,7 +775,8 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 1.99998295307159423828125),
@@ -858,7 +870,8 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 1.99998295307159423828125),
@@ -1006,7 +1019,8 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-204, 204, 101.99999237060546875),
@@ -1031,6 +1045,100 @@ namespace
             Vec3fEq(176.6591339111328125, -176.6591339111328125, 101.99999237060546875),
             Vec3fEq(196.693817138671875, -196.693817138671875, 101.99999237060546875),
             Vec3fEq(204, -204, 101.99999237060546875)
+        )) << mPath;
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, for_not_reachable_destination_find_path_should_provide_partial_path)
+    {
+        const std::array<float, 5 * 5> heightfieldData {{
+            0,   0,    0,    0,    0,
+            0, -25,  -25,  -25,  -25,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+        }};
+        const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
+
+        CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
+        compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(204, -204, 0)),
+                                       new btBoxShape(btVector3(200, 200, 1000)));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addHeightfield(mCellPosition, mHeightfieldTileSize * (surface.mSize - 1), mShift, surface);
+        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance()), btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+                  Status::PartialPath);
+
+        EXPECT_THAT(mPath, ElementsAre(
+            Vec3fEq(-204, 204, -2.666739940643310546875),
+            Vec3fEq(-193.730682373046875, 177.59320068359375, -3.9535934925079345703125),
+            Vec3fEq(-183.4613800048828125, 151.1864166259765625, -5.240451335906982421875),
+            Vec3fEq(-173.1920623779296875, 124.77962493896484375, -6.527309417724609375),
+            Vec3fEq(-162.922760009765625, 98.37282562255859375, -7.814167022705078125),
+            Vec3fEq(-152.6534423828125, 71.96602630615234375, -9.898590087890625),
+            Vec3fEq(-142.384124755859375, 45.559230804443359375, -17.641445159912109375),
+            Vec3fEq(-132.1148223876953125, 19.152431488037109375, -25.3843059539794921875),
+            Vec3fEq(-121.8455047607421875, -7.254369258880615234375, -27.97742462158203125),
+            Vec3fEq(-111.57619476318359375, -33.66117095947265625, -16.974590301513671875),
+            Vec3fEq(-101.30689239501953125, -60.06797027587890625, -5.9717559814453125),
+            Vec3fEq(-91.0375823974609375, -86.47476959228515625, -2.6667339801788330078125),
+            Vec3fEq(-80.76827239990234375, -112.88156890869140625, -2.6667339801788330078125),
+            Vec3fEq(-70.49897003173828125, -139.2883758544921875, -2.6667339801788330078125),
+            Vec3fEq(-60.229663848876953125, -165.6951751708984375, -2.6667339801788330078125),
+            Vec3fEq(-49.96035003662109375, -192.1019744873046875, -2.6667339801788330078125),
+            Vec3fEq(-45.333343505859375, -204, -2.6667339801788330078125)
+        )) << mPath;
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, end_tolerance_should_extent_available_destinations)
+    {
+        const std::array<float, 5 * 5> heightfieldData {{
+            0,   0,    0,    0,    0,
+            0, -25,  -25,  -25,  -25,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+        }};
+        const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
+
+        CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
+        compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(204, -204, 0)),
+                                       new btBoxShape(btVector3(100, 100, 1000)));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addHeightfield(mCellPosition, mHeightfieldTileSize * (surface.mSize - 1), mShift, surface);
+        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance()), btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+
+        const float endTolerance = 1000.0f;
+
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, endTolerance, mOut),
+                  Status::Success);
+
+        EXPECT_THAT(mPath, ElementsAre(
+            Vec3fEq(-204, 204, -2.666739940643310546875),
+            Vec3fEq(-188.745635986328125, 180.1236114501953125, -4.578275203704833984375),
+            Vec3fEq(-173.49127197265625, 156.247222900390625, -6.489814281463623046875),
+            Vec3fEq(-158.2369232177734375, 132.370819091796875, -8.4013538360595703125),
+            Vec3fEq(-142.9825592041015625, 108.49443817138671875, -10.31289386749267578125),
+            Vec3fEq(-127.7281951904296875, 84.6180419921875, -17.4810466766357421875),
+            Vec3fEq(-112.47383880615234375, 60.7416534423828125, -27.6026020050048828125),
+            Vec3fEq(-97.21947479248046875, 36.865261077880859375, -37.724163055419921875),
+            Vec3fEq(-81.965118408203125, 12.98886966705322265625, -47.84572601318359375),
+            Vec3fEq(-66.71075439453125, -10.887523651123046875, -46.691577911376953125),
+            Vec3fEq(-51.45639801025390625, -34.763916015625, -32.085445404052734375),
+            Vec3fEq(-36.202037811279296875, -58.640308380126953125, -28.5217914581298828125),
+            Vec3fEq(-20.947673797607421875, -82.5167083740234375, -32.16143035888671875),
+            Vec3fEq(-5.693310260772705078125, -106.393096923828125, -35.8010711669921875),
+            Vec3fEq(9.56105327606201171875, -130.2694854736328125, -29.6399688720703125),
+            Vec3fEq(24.8154163360595703125, -154.1458740234375, -17.6428318023681640625),
+            Vec3fEq(40.0697784423828125, -178.0222625732421875, -10.46006107330322265625),
+            Vec3fEq(55.3241424560546875, -201.8986663818359375, -3.297139644622802734375),
+            Vec3fEq(56.66666412353515625, -204, -2.6667373180389404296875)
         )) << mPath;
     }
 }

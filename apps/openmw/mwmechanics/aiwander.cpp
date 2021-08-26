@@ -201,8 +201,10 @@ namespace MWMechanics
             else
             {
                 const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+                constexpr float endTolerance = 0;
                 mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(),
-                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor), getAreaCosts(actor));
+                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor), getAreaCosts(actor),
+                    endTolerance, PathType::Full);
             }
 
             if (mPathFinder.isPathConstructed())
@@ -361,11 +363,13 @@ namespace MWMechanics
             if (isAreaOccupiedByOtherActor(actor, mDestination))
                 continue;
 
+            constexpr float endTolerance = 0;
+
             if (isWaterCreature || isFlyingCreature)
                 mPathFinder.buildStraightPath(mDestination);
             else
                 mPathFinder.buildPathByNavMesh(actor, currentPosition, mDestination, halfExtents, navigatorFlags,
-                                               areaCosts);
+                                               areaCosts, endTolerance, PathType::Full);
 
             if (mPathFinder.isPathConstructed())
             {
