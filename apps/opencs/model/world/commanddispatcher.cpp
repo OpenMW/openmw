@@ -3,9 +3,6 @@
 #include <algorithm>
 #include <memory>
 
-#include <QAbstractItemModel>
-#include <QAbstractProxyModel>
-
 #include <components/misc/stringops.hpp>
 #include <components/misc/constants.hpp>
 
@@ -142,31 +139,13 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
     if (mLocked)
         return;
 
-    std::unique_ptr<CSMWorld::CloneCommand> clonedData;
-    std::unique_ptr<CSMWorld::DeleteCommand> deleteData;
-
-    std::string newId;
-
-    std::unique_ptr<CSMWorld::ModifyCommand> modifyData;
     std::unique_ptr<CSMWorld::UpdateCellCommand> modifyCell;
 
-    QAbstractItemModel* sourceModel = model;
-    if (IdTableProxyModel* proxy = dynamic_cast<IdTableProxyModel*> (model))
-        sourceModel = proxy->sourceModel();
-
-    CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*sourceModel); // for getId()
-    int stateColumn = table.findColumnIndex(Columns::ColumnId_Modification);
-    QModelIndex stateIndex = table.getModelIndex(table.getId(index.row()), stateColumn);
-    RecordBase::State state = static_cast<RecordBase::State> (sourceModel->data(stateIndex).toInt());
+    std::unique_ptr<CSMWorld::ModifyCommand> modifyDataRefNum;
 
     int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
 
-    // This is not guaranteed to be the same as \a model, since a proxy could be used.
-    IdTable& model2 = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel(mId));
-
-    // DeleteCommand triggers a signal to the whole row from IdTable::setData(), so ignore the second call
-    if (state != RecordBase::State_Deleted &&
-        (columnId==Columns::ColumnId_PositionXPos || columnId==Columns::ColumnId_PositionYPos))
+    if (columnId==Columns::ColumnId_PositionXPos || columnId==Columns::ColumnId_PositionYPos)
     {
         const float oldPosition = model->data (index).toFloat();
 
@@ -178,9 +157,12 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
 
             int row = proxy ? proxy->mapToSource (index).row() : index.row();
 
+            // This is not guaranteed to be the same as \a model, since a proxy could be used.
+            IdTable& model2 = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel (mId));
+
             int cellColumn = model2.searchColumnIndex (Columns::ColumnId_Cell);
 
-            if (cellColumn != -1)
+            if (cellColumn!=-1)
             {
                 QModelIndex cellIndex = model2.index (row, cellColumn);
 
@@ -188,46 +170,31 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
 
                 if (cellId.find ('#')!=std::string::npos)
                 {
-                    RefCollection& collection = mDocument.getData().getReferences();
-                    newId = collection.getNewId();
+                    // Need to recalculate the cell and (if necessary) clear the instance's refNum
+                    modifyCell.reset (new UpdateCellCommand (model2, row));
 
-                    clonedData.reset(new CloneCommand(table,
-                                table.getId(row),
-                                newId,
-                                CSMWorld::UniversalId::Type_Reference));
+                    // Not sure which model this should be applied to
+                    int refNumColumn = model2.searchColumnIndex (Columns::ColumnId_RefNum);
 
-                    deleteData.reset(new DeleteCommand(table,
-                                table.getId(row),
-                                CSMWorld::UniversalId::Type_Reference));
+                    if (refNumColumn!=-1)
+                        modifyDataRefNum.reset (new ModifyCommand(*model, model->index(row, refNumColumn), 0));
                 }
             }
         }
     }
 
-    if (!clonedData.get())
-    {
-        // DeleteCommand will trigger executeModify after setting the state to State_Deleted
-        // from CommandDelegate::setModelDataImp() - ignore
-        if (state != RecordBase::State_Deleted)
-            modifyData.reset(new CSMWorld::ModifyCommand(*model, index, new_));
-    }
+    std::unique_ptr<CSMWorld::ModifyCommand> modifyData (
+        new CSMWorld::ModifyCommand (*model, index, new_));
 
-    if (clonedData.get())
+    if (modifyCell.get())
     {
         CommandMacro macro (mDocument.getUndoStack());
-        macro.push(clonedData.release());
-        macro.push(deleteData.release());
-
-        // cannot do these earlier because newIndex is not available until CloneCommand is executed
-        QModelIndex newIndex = model2.getModelIndex (newId, index.column());
-        modifyData.reset (new CSMWorld::ModifyCommand (*model, newIndex, new_));
-        macro.push(modifyData.release());
-
-        // once the data is updated update the cell location
-        modifyCell.reset(new UpdateCellCommand(model2, newIndex.row()));
-        macro.push(modifyCell.release());
+        macro.push (modifyData.release());
+        macro.push (modifyCell.release());
+        if (modifyDataRefNum.get())
+            macro.push (modifyDataRefNum.release());
     }
-    else if (!clonedData.get() && modifyData.get())
+    else
         mDocument.getUndoStack().push (modifyData.release());
 }
 
