@@ -47,9 +47,9 @@ namespace MWLua
     // Implemented in asyncbindings.cpp
     struct AsyncPackageId
     {
-        // TODO: add ObjectId mLocalObject;
         LuaUtil::ScriptsContainer* mContainer;
         std::string mScript;
+        sol::table mHiddenData;
     };
     sol::function getAsyncPackageInitializer(const Context&);
 

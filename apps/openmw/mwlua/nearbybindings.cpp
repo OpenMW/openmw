@@ -79,6 +79,20 @@ namespace MWLua
                 return rayCasting->castSphere(from, to, radius, collisionType);
             }
         };
+        // TODO: async raycasting
+        /*api["asyncCastRay"] = [luaManager = context.mLuaManager, defaultCollisionType](
+            const Callback& luaCallback, const osg::Vec3f& from, const osg::Vec3f& to, sol::optional<sol::table> options)
+        {
+            std::function<void(MWPhysics::RayCastingResult)> callback =
+                luaManager->wrapLuaCallback<MWPhysics::RayCastingResult>(luaCallback);
+            MWPhysics::RayCastingInterface* rayCasting = MWBase::Environment::get().getWorld()->getRayCasting();
+
+            // Handle options the same way as in `castRay`.
+
+            // NOTE: `callback` is not thread safe. If MWPhysics works in separate thread, it must put results to a queue
+            //       and use this callback from the main thread at the beginning of the next frame processing.
+            rayCasting->asyncCastRay(callback, from, to, ignore, std::vector<MWWorld::Ptr>(), collisionType);
+        };*/
 
         api["activators"] = LObjectList{worldView->getActivatorsInScene()};
         api["actors"] = LObjectList{worldView->getActorsInScene()};
