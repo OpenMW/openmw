@@ -24,11 +24,11 @@ CSMWorld::TouchCommand::TouchCommand(IdTable& table, const std::string& id, QUnd
     , mChanged(false)
 {
     setText(("Touch " + mId).c_str());
-    mOld.reset(mTable.getRecord(mId).clone().get());
 }
 
 void CSMWorld::TouchCommand::redo()
 {
+    mOld.reset(mTable.getRecord(mId).clone().get());
     mChanged = mTable.touchRecord(mId);
 }
 
@@ -159,7 +159,6 @@ CSMWorld::TouchLandCommand::TouchLandCommand(IdTable& landTable, IdTable& ltexTa
     , mChanged(false)
 {
     setText(("Touch " + mId).c_str());
-    mOld.reset(mLands.getRecord(mId).clone().get());
 }
 
 const std::string& CSMWorld::TouchLandCommand::getOriginId() const
@@ -175,6 +174,7 @@ const std::string& CSMWorld::TouchLandCommand::getDestinationId() const
 void CSMWorld::TouchLandCommand::onRedo()
 {
     mChanged = mLands.touchRecord(mId);
+    if (mChanged) mOld.reset(mLands.getRecord(mId).clone().get());
 }
 
 void CSMWorld::TouchLandCommand::onUndo()
@@ -190,13 +190,16 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
                                         const QVariant& new_, QUndoCommand* parent)
     : QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false), mOldRecordState(CSMWorld::RecordBase::State_BaseOnly)
 {
-    if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (&model))
+    if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (mModel))
     {
         // Replace proxy with actual model
-        mIndex = proxy->mapToSource (index);
+        mIndex = proxy->mapToSource (mIndex);
         mModel = proxy->sourceModel();
     }
+}
 
+void CSMWorld::ModifyCommand::redo()
+{
     if (mIndex.parent().isValid())
     {
         CSMWorld::IdTree* tree = &dynamic_cast<CSMWorld::IdTree&>(*mModel);
@@ -223,10 +226,7 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
         mRecordStateIndex = table->index(rowIndex, stateColumnIndex);
         mOldRecordState = static_cast<CSMWorld::RecordBase::State>(table->data(mRecordStateIndex).toInt());
     }
-}
 
-void CSMWorld::ModifyCommand::redo()
-{
     mOld = mModel->data (mIndex, Qt::EditRole);
     mModel->setData (mIndex, mNew);
 }
@@ -291,11 +291,9 @@ void CSMWorld::CreateCommand::undo()
 }
 
 CSMWorld::RevertCommand::RevertCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id)
+: QUndoCommand (parent), mModel (model), mId (id), mOld(nullptr)
 {
     setText (("Revert record " + id).c_str());
-
-    mOld = model.getRecord (id).clone();
 }
 
 CSMWorld::RevertCommand::~RevertCommand()
@@ -304,6 +302,8 @@ CSMWorld::RevertCommand::~RevertCommand()
 
 void CSMWorld::RevertCommand::redo()
 {
+    mOld = mModel.getRecord (mId).clone();
+
     int column = mModel.findColumnIndex (Columns::ColumnId_Modification);
 
     QModelIndex index = mModel.getModelIndex (mId, column);
@@ -326,11 +326,9 @@ void CSMWorld::RevertCommand::undo()
 
 CSMWorld::DeleteCommand::DeleteCommand (IdTable& model,
         const std::string& id, CSMWorld::UniversalId::Type type, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id), mType(type)
+: QUndoCommand (parent), mModel (model), mId (id), mOld(nullptr), mType(type)
 {
     setText (("Delete record " + id).c_str());
-
-    mOld = model.getRecord (id).clone();
 }
 
 CSMWorld::DeleteCommand::~DeleteCommand()
@@ -339,6 +337,8 @@ CSMWorld::DeleteCommand::~DeleteCommand()
 
 void CSMWorld::DeleteCommand::redo()
 {
+    mOld = mModel.getRecord (mId).clone();
+
     int column = mModel.findColumnIndex (Columns::ColumnId_Modification);
 
     QModelIndex index = mModel.getModelIndex (mId, column);
@@ -498,8 +498,8 @@ CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTree& model,
 void CSMWorld::DeleteNestedCommand::redo()
 {
     QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    mModel.removeRows (mNestedRow, 1, parentIndex);
     mModifyParentCommand->redo();
+    mModel.removeRows (mNestedRow, 1, parentIndex);
 }
 
 
@@ -529,8 +529,8 @@ CSMWorld::AddNestedCommand::AddNestedCommand(IdTree& model, const std::string& i
 void CSMWorld::AddNestedCommand::redo()
 {
     QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    mModel.addNestedRow (parentIndex, mNewRow);
     mModifyParentCommand->redo();
+    mModel.addNestedRow (parentIndex, mNewRow);
 }
 
 void CSMWorld::AddNestedCommand::undo()
