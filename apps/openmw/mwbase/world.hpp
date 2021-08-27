@@ -539,7 +539,7 @@ namespace MWBase
 
             virtual void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) = 0;
 
-            virtual void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) = 0;
+            virtual void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot) = 0;
             virtual void launchProjectile (MWWorld::Ptr& actor, MWWorld::Ptr& projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) = 0;
             virtual void updateProjectilesCasters() = 0;
@@ -591,7 +591,7 @@ namespace MWBase
 
             virtual void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster,
                                       const MWWorld::Ptr& ignore, ESM::RangeType rangeType, const std::string& id,
-                                      const std::string& sourceName, const bool fromProjectile=false) = 0;
+                                      const std::string& sourceName, const bool fromProjectile=false, int slot = 0) = 0;
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
 

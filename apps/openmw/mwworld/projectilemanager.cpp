@@ -256,7 +256,7 @@ namespace MWWorld
         state.mEffectAnimationTime->addTime(duration);
     }
 
-    void ProjectileManager::launchMagicBolt(const std::string &spellId, const Ptr &caster, const osg::Vec3f& fallbackDirection)
+    void ProjectileManager::launchMagicBolt(const std::string &spellId, const Ptr &caster, const osg::Vec3f& fallbackDirection, int slot)
     {
         osg::Vec3f pos = caster.getRefData().getPosition().asVec3();
         if (caster.getClass().isActor())
@@ -278,6 +278,7 @@ namespace MWWorld
         MagicBoltState state;
         state.mSpellId = spellId;
         state.mCasterHandle = caster;
+        state.mSlot = slot;
         if (caster.getClass().isActor())
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
@@ -545,10 +546,10 @@ namespace MWWorld
             cast.mHitPosition = pos;
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
-            cast.mStack = false;
+            cast.mSlot = magicBoltState.mSlot;
             cast.inflict(target, caster, magicBoltState.mEffects, ESM::RT_Target, false, true);
 
-            MWBase::Environment::get().getWorld()->explodeSpell(pos, magicBoltState.mEffects, caster, target, ESM::RT_Target, magicBoltState.mSpellId, magicBoltState.mSourceName);
+            MWBase::Environment::get().getWorld()->explodeSpell(pos, magicBoltState.mEffects, caster, target, ESM::RT_Target, magicBoltState.mSpellId, magicBoltState.mSourceName, false, magicBoltState.mSlot);
             magicBoltState.mToDelete = true;
         }
 
@@ -628,7 +629,7 @@ namespace MWWorld
             state.mPosition = ESM::Vector3(osg::Vec3f(it->mNode->getPosition()));
             state.mOrientation = ESM::Quaternion(osg::Quat(it->mNode->getAttitude()));
             state.mActorId = it->mActorId;
-
+            state.mSlot = it->mSlot;
             state.mSpellId = it->mSpellId;
             state.mSpeed = it->mSpeed;
 
@@ -684,6 +685,7 @@ namespace MWWorld
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
             state.mToDelete = false;
+            state.mSlot = esm.mSlot;
             std::string texture;
 
             try

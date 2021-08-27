@@ -1101,34 +1101,6 @@ Resource::ResourceSystem* NpcAnimation::getResourceSystem()
     return mResourceSystem;
 }
 
-void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew)
-{
-    // During first auto equip, we don't play any sounds.
-    // Basically we don't want sounds when the actor is first loaded,
-    // the items should appear as if they'd always been equipped.
-    if (isNew)
-    {
-        static const std::string schools[] = {
-            "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-        };
-
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        if(!magicEffect->mHitSound.empty())
-            sndMgr->playSound3D(mPtr, magicEffect->mHitSound, 1.0f, 1.0f);
-        else
-            sndMgr->playSound3D(mPtr, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
-    }
-
-    if (!magicEffect->mHit.empty())
-    {
-        const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-        bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
-        // Don't play particle VFX unless the effect is new or it should be looping.
-        if (isNew || loop)
-            addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "", magicEffect->mParticle);
-    }
-}
-
 void NpcAnimation::enableHeadAnimation(bool enable)
 {
     mHeadAnimationTime->setEnabled(enable);

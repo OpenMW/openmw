@@ -11,32 +11,15 @@
 
 namespace MWMechanics
 {
-    class CreatureStats;
-
     bool isSummoningEffect(int effectId);
 
     std::string getSummonedCreature(int effectId);
 
-    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<const ESM::SummonKey, int>& summon);
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<int, int>& summon);
 
-    struct UpdateSummonedCreatures : public EffectSourceVisitor
-    {
-        UpdateSummonedCreatures(const MWWorld::Ptr& actor);
-        virtual ~UpdateSummonedCreatures() = default;
+    int summonCreature(int effectId, const MWWorld::Ptr& summoner);
 
-        void visit (MWMechanics::EffectKey key, int effectIndex,
-                            const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1) override;
-
-        /// To call after all effect sources have been visited
-        void process(bool cleanup);
-
-    private:
-        MWWorld::Ptr mActor;
-
-        std::set<ESM::SummonKey> mActiveEffects;
-    };
-
+    void updateSummons(const MWWorld::Ptr& summoner, bool cleanup);
 }
 
 #endif

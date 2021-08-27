@@ -22,9 +22,10 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellutil.hpp"
 
-#include "class.hpp"
-#include "ptr.hpp"
 #include "cellstore.hpp"
+#include "class.hpp"
+#include "esmloader.hpp"
+#include "ptr.hpp"
 
 namespace MWWorld
 {
@@ -380,6 +381,14 @@ namespace MWWorld
             {
                 // this is the one object we can not silently drop.
                 throw std::runtime_error ("invalid player state record (object state)");
+            }
+            if (reader.getFormat() < 17)
+            {
+                convertMagicEffects(player.mObject.mCreatureStats, player.mObject.mInventory, &player.mObject.mNpcStats);
+                for(std::size_t i = 0; i < ESM::Attribute::Length; ++i)
+                    player.mSaveAttributes[i].mMod = 0.f;
+                for(std::size_t i = 0; i < ESM::Skill::Length; ++i)
+                    player.mSaveSkills[i].mMod = 0.f;
             }
 
             if (!player.mObject.mEnabled)

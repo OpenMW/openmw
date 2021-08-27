@@ -13,6 +13,9 @@ namespace ToUTF8
 namespace ESM
 {
     class ESMReader;
+    struct CreatureStats;
+    struct InventoryState;
+    struct NpcStats;
 }
 
 namespace MWWorld
@@ -32,6 +35,8 @@ struct EsmLoader : public ContentLoader
       MWWorld::ESMStore& mStore;
       ToUTF8::Utf8Encoder* mEncoder;
 };
+
+void convertMagicEffects(ESM::CreatureStats& creatureStats, ESM::InventoryState& inventory, ESM::NpcStats* npcStats = nullptr);
 
 } /* namespace MWWorld */
 

@@ -262,7 +262,7 @@ namespace MWGui
                     }
 
                     // Clean up summoned creatures as well
-                    std::map<ESM::SummonKey, int>& creatureMap = creatureStats.getSummonedCreatureMap();
+                    auto& creatureMap = creatureStats.getSummonedCreatureMap();
                     for (const auto& creature : creatureMap)
                         MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(ptr, creature.second);
                     creatureMap.clear();

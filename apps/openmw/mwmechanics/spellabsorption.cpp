@@ -16,33 +16,30 @@
 
 namespace MWMechanics
 {
-
-    class GetAbsorptionProbability : public MWMechanics::EffectSourceVisitor
+    float getProbability(const MWMechanics::ActiveSpells& activeSpells)
     {
-    public:
-        float mProbability{0.f};
-
-        GetAbsorptionProbability() = default;
-
-        void visit (MWMechanics::EffectKey key, int /*effectIndex*/,
-                            const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
-                            float magnitude, float /*remainingTime*/, float /*totalTime*/) override
+        float probability = 0.f;
+        for(const auto& params : activeSpells)
         {
-            if (key.mId == ESM::MagicEffect::SpellAbsorption)
+            for(const auto& effect : params.getEffects())
             {
-                if (mProbability == 0.f)
-                    mProbability = magnitude / 100;
-                else
+                if(effect.mEffectId == ESM::MagicEffect::SpellAbsorption)
                 {
-                    // If there are different sources of SpellAbsorption effect, multiply failing probability for all effects.
-                    // Real absorption probability will be the (1 - total fail chance) in this case.
-                    float failProbability = 1.f - mProbability;
-                    failProbability *= 1.f - magnitude / 100;
-                    mProbability = 1.f - failProbability;
+                    if(probability == 0.f)
+                        probability = effect.mMagnitude / 100;
+                    else
+                    {
+                        // If there are different sources of SpellAbsorption effect, multiply failing probability for all effects.
+                        // Real absorption probability will be the (1 - total fail chance) in this case.
+                        float failProbability = 1.f - probability;
+                        failProbability *= 1.f - effect.mMagnitude / 100;
+                        probability = 1.f - failProbability;
+                    }
                 }
             }
         }
-    };
+        return static_cast<int>(probability * 100);
+    }
 
     bool absorbSpell (const std::string& spellId, const MWWorld::Ptr& caster, const MWWorld::Ptr& target)
     {
@@ -53,13 +50,7 @@ namespace MWMechanics
         if (stats.getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude() <= 0.f)
             return false;
 
-        GetAbsorptionProbability check;
-        stats.getActiveSpells().visitEffectSources(check);
-        stats.getSpells().visitEffectSources(check);
-        if (target.getClass().hasInventoryStore(target))
-            target.getClass().getInventoryStore(target).visitEffectSources(check);
-
-        int chance = check.mProbability * 100;
+        int chance = getProbability(stats.getActiveSpells());
         if (Misc::Rng::roll0to99() >= chance)
             return false;
 

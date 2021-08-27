@@ -8,10 +8,11 @@ namespace ESM
 
 void MagicEffects::save(ESMWriter &esm) const
 {
-    for (std::map<int, int>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    for (const auto& [key, params] : mEffects)
     {
-        esm.writeHNT("EFID", it->first);
-        esm.writeHNT("BASE", it->second);
+        esm.writeHNT("EFID", key);
+        esm.writeHNT("BASE", params.first);
+        esm.writeHNT("MODI", params.second);
     }
 }
 
@@ -19,10 +20,15 @@ void MagicEffects::load(ESMReader &esm)
 {
     while (esm.isNextSub("EFID"))
     {
-        int id, base;
+        int id;
+        std::pair<int, float> params;
         esm.getHT(id);
-        esm.getHNT(base, "BASE");
-        mEffects.insert(std::make_pair(id, base));
+        esm.getHNT(params.first, "BASE");
+        if(esm.getFormat() < 17)
+            params.second = 0.f;
+        else
+            esm.getHNT(params.second, "MODI");
+        mEffects.emplace(id, params);
     }
 }
 

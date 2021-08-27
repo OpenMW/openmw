@@ -230,8 +230,6 @@ namespace MWMechanics
             GreetingState getGreetingState(const MWWorld::Ptr& ptr) const override;
             bool isTurningToPlayer(const MWWorld::Ptr& ptr) const override;
 
-            void restoreStatsAfterCorprus(const MWWorld::Ptr& actor, const std::string& sourceId) override;
-
         private:
             bool canCommitCrimeAgainst(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
             bool canReportCrime(const MWWorld::Ptr &actor, const MWWorld::Ptr &victim, std::set<MWWorld::Ptr> &playerFollowers);

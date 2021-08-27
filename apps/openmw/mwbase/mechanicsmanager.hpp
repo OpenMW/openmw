@@ -277,8 +277,6 @@ namespace MWBase
             virtual float getAngleToPlayer(const MWWorld::Ptr& ptr) const  = 0;
             virtual MWMechanics::GreetingState getGreetingState(const MWWorld::Ptr& ptr) const = 0;
             virtual bool isTurningToPlayer(const MWWorld::Ptr& ptr) const = 0;
-
-            virtual void restoreStatsAfterCorprus(const MWWorld::Ptr& actor, const std::string& sourceId) = 0;
     };
 }
 

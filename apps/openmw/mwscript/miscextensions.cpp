@@ -563,13 +563,7 @@ namespace MWScript
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                    MWMechanics::MagicEffects effects = stats.getSpells().getMagicEffects();
-                    effects += stats.getActiveSpells().getMagicEffects();
-                    if (ptr.getClass().hasInventoryStore(ptr) && !stats.isDeathAnimationFinished())
-                    {
-                        MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                        effects += store.getMagicEffects();
-                    }
+                    const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
 
                     for (const auto& activeEffect : effects)
                     {
@@ -821,7 +815,7 @@ namespace MWScript
                     }
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                    runtime.push(stats.getActiveSpells().isSpellActive(id) || stats.getSpells().isSpellActive(id));
+                    runtime.push(stats.getActiveSpells().isSpellActive(id));
                 }
         };
 
