@@ -25,7 +25,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 5;
+        api["API_REVISION"] = 6;
         api["quit"] = [lua]()
         {
             std::string traceback = lua->sol()["debug"]["traceback"]().get<std::string>();
@@ -107,36 +107,6 @@ namespace MWLua
             // return GObjectList{worldView->selectObjects(query, false)};
         };
         // TODO: add world.placeNewObject(recordId, cell, pos, [rot])
-        return LuaUtil::makeReadOnly(api);
-    }
-
-    sol::table initNearbyPackage(const Context& context)
-    {
-        sol::table api(context.mLua->sol(), sol::create);
-        WorldView* worldView = context.mWorldView;
-        api["activators"] = LObjectList{worldView->getActivatorsInScene()};
-        api["actors"] = LObjectList{worldView->getActorsInScene()};
-        api["containers"] = LObjectList{worldView->getContainersInScene()};
-        api["doors"] = LObjectList{worldView->getDoorsInScene()};
-        api["items"] = LObjectList{worldView->getItemsInScene()};
-        api["selectObjects"] = [context](const Queries::Query& query)
-        {
-            ObjectIdList list;
-            WorldView* worldView = context.mWorldView;
-            if (query.mQueryType == "activators")
-                list = worldView->getActivatorsInScene();
-            else if (query.mQueryType == "actors")
-                list = worldView->getActorsInScene();
-            else if (query.mQueryType == "containers")
-                list = worldView->getContainersInScene();
-            else if (query.mQueryType == "doors")
-                list = worldView->getDoorsInScene();
-            else if (query.mQueryType == "items")
-                list = worldView->getItemsInScene();
-            return LObjectList{selectObjectsFromList(query, list, context)};
-            // TODO: Maybe use sqlite
-            // return LObjectList{worldView->selectObjects(query, true)};
-        };
         return LuaUtil::makeReadOnly(api);
     }
 
