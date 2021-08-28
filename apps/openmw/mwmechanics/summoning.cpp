@@ -125,8 +125,9 @@ namespace MWMechanics
             if (!ptr.isEmpty() && ptr.getClass().getCreatureStats(ptr).isDead() && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished())
             {
                 // Purge the magic effect so a new creature can be summoned if desired
-                purgeSummonEffect(summoner, *it);
+                auto summon = *it;
                 creatureMap.erase(it++);
+                purgeSummonEffect(summoner, summon);
             }
             else
                 ++it;

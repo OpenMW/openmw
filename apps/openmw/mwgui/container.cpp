@@ -277,8 +277,9 @@ namespace MWGui
                             auto it = std::find_if(summons.begin(), summons.end(), [&] (const auto& entry) { return entry.second == creatureStats.getActorId(); });
                             if(it != summons.end())
                             {
-                                MWMechanics::purgeSummonEffect(summoner, *it);
+                                auto summon = *it;
                                 summons.erase(it);
+                                MWMechanics::purgeSummonEffect(summoner, summon);
                                 break;
                             }
                         }
