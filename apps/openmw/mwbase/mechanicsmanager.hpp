@@ -58,7 +58,7 @@ namespace MWBase
             virtual void add (const MWWorld::Ptr& ptr) = 0;
             ///< Register an object for management
 
-            virtual void remove (const MWWorld::Ptr& ptr) = 0;
+            virtual void remove (const MWWorld::Ptr& ptr, bool keepActive) = 0;
             ///< Deregister an object for management
 
             virtual void updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr) = 0;

@@ -373,7 +373,7 @@ namespace MWWorld
             MWWorld::Ptr moveObject (const Ptr& ptr, const osg::Vec3f& position, bool movePhysics=true, bool moveToActive=false) override;
             ///< @return an updated Ptr in case the Ptr's cell changes
 
-            MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, const osg::Vec3f& position, bool movePhysics=true) override;
+            MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, const osg::Vec3f& position, bool movePhysics=true, bool keepActive=false) override;
             ///< @return an updated Ptr
 
             MWWorld::Ptr moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec, bool moveToActive, bool ignoreCollisions) override;

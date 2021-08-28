@@ -90,7 +90,7 @@ namespace MWMechanics
             ///
             /// \note Dead actors are ignored.
 
-            void removeActor (const MWWorld::Ptr& ptr);
+            void removeActor (const MWWorld::Ptr& ptr, bool keepActive);
             ///< Deregister an actor for stats management
             ///
             /// \note Ignored, if \a ptr is not a registered actor.

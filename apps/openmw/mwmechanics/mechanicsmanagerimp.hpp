@@ -45,7 +45,7 @@ namespace MWMechanics
             void add (const MWWorld::Ptr& ptr) override;
             ///< Register an object for management
 
-            void remove (const MWWorld::Ptr& ptr) override;
+            void remove (const MWWorld::Ptr& ptr, bool keepActive) override;
             ///< Deregister an object for management
 
             void updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr) override;

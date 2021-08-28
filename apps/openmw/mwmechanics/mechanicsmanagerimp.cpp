@@ -259,11 +259,11 @@ namespace MWMechanics
             mActors.castSpell(ptr, spellId, manualSpell);
     }
 
-    void MechanicsManager::remove(const MWWorld::Ptr& ptr)
+    void MechanicsManager::remove(const MWWorld::Ptr& ptr, bool keepActive)
     {
         if(ptr == MWBase::Environment::get().getWindowManager()->getWatchedActor())
             MWBase::Environment::get().getWindowManager()->watchActor(MWWorld::Ptr());
-        mActors.removeActor(ptr);
+        mActors.removeActor(ptr, keepActive);
         mObjects.removeObject(ptr);
     }
 
@@ -317,7 +317,7 @@ namespace MWMechanics
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
-            mActors.removeActor(ptr);
+            mActors.removeActor(ptr, true);
             mActors.addActor(ptr, true);
         }
 

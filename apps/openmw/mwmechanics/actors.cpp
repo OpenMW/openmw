@@ -210,6 +210,14 @@ void soulTrap(const MWWorld::Ptr& creature)
         }
     }
 }
+
+void removeTemporaryEffects(const MWWorld::Ptr& ptr)
+{
+    ptr.getClass().getCreatureStats(ptr).getActiveSpells().purge([] (const auto& spell)
+    {
+        return spell.getType() == ESM::ActiveSpells::Type_Consumable || spell.getType() == ESM::ActiveSpells::Type_Temporary;
+    }, ptr);
+}
 }
 
 namespace MWMechanics
@@ -1050,7 +1058,7 @@ namespace MWMechanics
 
     void Actors::addActor (const MWWorld::Ptr& ptr, bool updateImmediately)
     {
-        removeActor(ptr);
+        removeActor(ptr, true);
 
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if (!anim)
@@ -1098,11 +1106,13 @@ namespace MWMechanics
         ctrl->setVisibility(visibilityRatio);
     }
 
-    void Actors::removeActor (const MWWorld::Ptr& ptr)
+    void Actors::removeActor (const MWWorld::Ptr& ptr, bool keepActive)
     {
         PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
         {
+            if(!keepActive)
+                removeTemporaryEffects(iter->first);
             delete iter->second;
             mActors.erase(iter);
         }
@@ -1167,6 +1177,7 @@ namespace MWMechanics
         {
             if((iter->first.isInCell() && iter->first.getCell()==cellStore) && iter->first != ignore)
             {
+                removeTemporaryEffects(iter->first);
                 delete iter->second;
                 mActors.erase(iter++);
             }

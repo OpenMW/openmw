@@ -56,6 +56,7 @@
     Feature #4595: Unique object identifier
     Feature #4737: Handle instance move from one cell to another
     Feature #5198: Implement "Magic effect expired" event
+    Feature #5454: Clear active spells from actor when he disappears from scene
     Feature #5489: MCP: Telekinesis fix for activators
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving

@@ -161,7 +161,7 @@ namespace MWWorld
             void addObjectToScene (const Ptr& ptr);
             ///< Add an object that already exists in the world model to the scene.
 
-            void removeObjectFromScene (const Ptr& ptr);
+            void removeObjectFromScene (const Ptr& ptr, bool keepActive = false);
             ///< Remove an object from the scene, but not from the world model.
 
             void removeFromPagedRefs(const Ptr &ptr);
