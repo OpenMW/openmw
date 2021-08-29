@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 
+#include <osg/AlphaFunc>
 #include <osg/Node>
 #include <osg/UserDataContainer>
 
@@ -217,7 +218,52 @@ namespace Resource
         int mMaxAnisotropy;
     };
 
+    // Check Collada extra descriptions
+    class ColladaAlphaTrickVisitor : public osg::NodeVisitor
+    {
+    public:
+        ColladaAlphaTrickVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
 
+        osg::AlphaFunc::ComparisonFunction getTestMode(std::string mode)
+        {
+            if (mode == "ALWAYS") return osg::AlphaFunc::ALWAYS;
+            if (mode == "LESS") return osg::AlphaFunc::LESS;
+            if (mode == "EQUAL") return osg::AlphaFunc::EQUAL;
+            if (mode == "LEQUAL") return osg::AlphaFunc::LEQUAL;
+            if (mode == "GREATER") return osg::AlphaFunc::GREATER;
+            if (mode == "NOTEQUAL") return osg::AlphaFunc::NOTEQUAL;
+            if (mode == "GEQUAL") return osg::AlphaFunc::GEQUAL;
+            if (mode == "NEVER") return osg::AlphaFunc::NEVER;
+
+            Log(Debug::Info) << "Unexpected alpha testing mode: " << mode;
+            return osg::AlphaFunc::LEQUAL;
+        }
+
+        void apply(osg::Node& node) override
+        {
+            std::vector<std::string> descriptions = node.getDescriptions();
+            for (auto description : descriptions)
+            {
+                std::vector<std::string> descriptionParts;
+
+                std::istringstream descriptionStringStream(description);
+                for (std::string part; std::getline(descriptionStringStream, part, ' ');)
+                    descriptionParts.emplace_back(part);
+
+                if (descriptionParts.at(0) == "alphatest")
+                {
+                    osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
+                    osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.back())));
+                    node.getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                    Log(Debug::Info) << "Setting collada alpha test " << description << " for " << node.getName();
+                }
+            }
+            traverse(node);
+        }
+    };
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
@@ -423,6 +469,18 @@ namespace Resource
             result.getNode()->accept(nameFinder);
             if (nameFinder.mFoundNode)
                 nameFinder.mFoundNode->setNodeMask(hiddenNodeMask);
+
+            if (ext == "dae")
+            {
+                // Collada alpha testing
+                Resource::ColladaAlphaTrickVisitor colladaAlphaTrickVisitor;
+                result.getNode()->accept(colladaAlphaTrickVisitor);
+
+                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
+                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
+                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
+            }
+
 
             return result.getNode();
         }
