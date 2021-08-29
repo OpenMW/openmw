@@ -248,7 +248,7 @@ namespace DetourNavigator
         const auto tile = tiles.find(tilePosition);
         if (tile == tiles.end())
             return std::optional<RemovedRecastMeshObject>();
-        const auto tileResult = tile->second->removeObject(id);
+        auto tileResult = tile->second->removeObject(id);
         if (tile->second->isEmpty())
         {
             tiles.erase(tile);
