@@ -30,7 +30,7 @@ namespace Resource
 
                 std::vector<SceneUtil::EmulatedAnimation> emulatedAnimations;
 
-                for (auto animation : mAnimationManager->getAnimationList())
+                for (const auto& animation : mAnimationManager->getAnimationList())
                 {
                     if (animation)
                     {
