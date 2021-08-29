@@ -58,7 +58,7 @@ btCollisionShape* BulletShape::duplicateCollisionShape(const btCollisionShape *s
         for(int i = 0;i < numShapes;++i)
         {
             btCollisionShape *child = duplicateCollisionShape(comp->getChildShape(i));
-            btTransform trans = comp->getChildTransform(i);
+            const btTransform& trans = comp->getChildTransform(i);
             newShape->addChildShape(trans, child);
         }
 
