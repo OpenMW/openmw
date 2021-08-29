@@ -123,6 +123,14 @@ Qt::ItemFlags CSMWorld::IdTable::flags (const QModelIndex & index) const
     if (mIdCollection->getColumn (index.column()).isUserEditable())
         flags |= Qt::ItemIsEditable;
 
+    int blockedColumn = searchColumnIndex(Columns::ColumnId_Blocked);
+    if (blockedColumn != -1 && blockedColumn != index.column())
+    {
+        bool isBlocked = mIdCollection->getData(index.row(), blockedColumn).toInt();
+        if (isBlocked)
+            flags = Qt::ItemIsSelectable; // not enabled (to grey out)
+    }
+
     return flags;
 }
 

@@ -371,6 +371,7 @@ namespace CSMWorld
             { ColumnId_Skill7, "Skill 7" },
 
             { ColumnId_Persistent, "Persistent" },
+            { ColumnId_Blocked, "Blocked" },
 
             { -1, 0 } // end marker
         };
