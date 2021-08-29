@@ -305,6 +305,9 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
             if (mSubModeId == "move")
             {
                 objectTag->mObject->setEdited (Object::Override_Position);
+                mDragStart.x() = objectTag->mObject->getPosition().pos[0];
+                mDragStart.y() = objectTag->mObject->getPosition().pos[1];
+                mDragStart.z() = objectTag->mObject->getPosition().pos[2];
                 mDragMode = DragMode_Move;
             }
             else if (mSubModeId == "rotate")
@@ -392,29 +395,7 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
 
     std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getEdited (Mask_Reference);
 
-    if (mDragMode == DragMode_Move)
-    {
-        osg::Vec3f eye, centre, up;
-        getWorldspaceWidget().getCamera()->getViewMatrix().getLookAt (eye, centre, up);
-
-        if (diffY)
-        {
-            offset += up * diffY * speedFactor;
-        }
-        if (diffX)
-        {
-            offset += ((centre-eye) ^ up) * diffX * speedFactor;
-        }
-
-        if (mDragAxis!=-1)
-        {
-            for (int i=0; i<3; ++i)
-            {
-                if (i!=mDragAxis)
-                    offset[i] = 0;
-            }
-        }
-    }
+    if (mDragMode == DragMode_Move) {}
     else if (mDragMode == DragMode_Rotate)
     {
         osg::Vec3f eye, centre, up;
@@ -522,10 +503,10 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
             if (mDragMode == DragMode_Move)
             {
                 ESM::Position position = objectTag->mObject->getPosition();
-                for (int i=0; i<3; ++i)
-                {
-                    position.pos[i] += offset[i];
-                }
+                osg::Vec3d mousePos = getMousePlaneCoords(pos, getProjectionSpaceCoords(mDragStart));
+                position.pos[0] = mousePos.x();
+                position.pos[1] = mousePos.y();
+                position.pos[2] = mousePos.z();
 
                 objectTag->mObject->setPosition(position.pos);
             }
