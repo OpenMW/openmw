@@ -143,7 +143,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
     if (allowAutoEquip && actorPtr != MWMechanics::getPlayer()
             && actorPtr.getClass().isNpc() && !actorPtr.getClass().getNpcStats(actorPtr).isWerewolf())
     {
-        std::string type = itemPtr.getTypeName();
+        const std::string& type = itemPtr.getTypeName();
         if (type == typeid(ESM::Armor).name() || type == typeid(ESM::Clothing).name())
             autoEquip(actorPtr);
     }
@@ -748,7 +748,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     if (equipReplacement && wasEquipped && (actor != MWMechanics::getPlayer())
             && actor.getClass().isNpc() && !actor.getClass().getNpcStats(actor).isWerewolf())
     {
-        std::string type = item.getTypeName();
+        const std::string& type = item.getTypeName();
         if (type == typeid(ESM::Armor).name() || type == typeid(ESM::Clothing).name())
             autoEquip(actor);
     }

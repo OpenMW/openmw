@@ -704,7 +704,7 @@ namespace MWGui
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(GW_Inventory))
             return;
         // make sure the object is of a type that can be picked up
-        std::string type = object.getTypeName();
+        const std::string& type = object.getTypeName();
         if ( (type != typeid(ESM::Apparatus).name())
             && (type != typeid(ESM::Armor).name())
             && (type != typeid(ESM::Book).name())
