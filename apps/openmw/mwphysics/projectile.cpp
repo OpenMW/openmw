@@ -13,12 +13,10 @@
 
 namespace MWPhysics
 {
-Projectile::Projectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, float radius, bool canCrossWaterSurface, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem)
-    : mCanCrossWaterSurface(canCrossWaterSurface)
-    , mCrossedWaterSurface(false)
+Projectile::Projectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, float radius, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem)
+    : mHitWater(false)
     , mActive(true)
     , mCaster(caster)
-    , mWaterHitPosition(std::nullopt)
     , mPhysics(physicssystem)
     , mTaskScheduler(scheduler)
 {
@@ -72,11 +70,6 @@ osg::Vec3f Projectile::getPosition() const
     return mPosition;
 }
 
-bool Projectile::canTraverseWater() const
-{
-    return mCanCrossWaterSurface;
-}
-
 void Projectile::hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal)
 {
     if (!mActive.load(std::memory_order_acquire))
@@ -125,19 +118,6 @@ bool Projectile::isValidTarget(const MWWorld::Ptr& target) const
         }
     }
     return validTarget;
-}
-
-std::optional<btVector3> Projectile::getWaterHitPosition()
-{
-    return std::exchange(mWaterHitPosition, std::nullopt);
-}
-
-void Projectile::setWaterHitPosition(btVector3 pos)
-{
-    if (mCrossedWaterSurface)
-        return;
-    mCrossedWaterSurface = true;
-    mWaterHitPosition = pos;
 }
 
 }

@@ -320,7 +320,7 @@ namespace MWWorld
         // in case there are multiple effects, the model is a dummy without geometry. Use the second effect for physics shape
         if (state.mIdMagic.size() > 1)
             model = "meshes\\" + MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find(state.mIdMagic.at(1))->mModel;
-        state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true, false);
+        state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true);
         state.mToDelete = false;
         mMagicBolts.push_back(state);
     }
@@ -345,7 +345,7 @@ namespace MWWorld
         if (!ptr.getClass().getEnchantment(ptr).empty())
             SceneUtil::addEnchantedGlow(state.mNode, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
 
-        state.mProjectileId = mPhysics->addProjectile(actor, pos, model, false, true);
+        state.mProjectileId = mPhysics->addProjectile(actor, pos, model, false);
         state.mToDelete = false;
         mProjectiles.push_back(state);
     }
@@ -496,9 +496,6 @@ namespace MWWorld
 
             auto* projectile = mPhysics->getProjectile(projectileState.mProjectileId);
 
-            if (const auto hitWaterPos = projectile->getWaterHitPosition())
-                mRendering->emitWaterRipple(Misc::Convert::toOsg(*hitWaterPos));
-
             const auto pos = projectile->getPosition();
             projectileState.mNode->setPosition(pos);
 
@@ -522,6 +519,8 @@ namespace MWWorld
                 if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), projectileState.mBowId))
                     bow = *invIt;
             }
+            if (projectile->getHitWater())
+                mRendering->emitWaterRipple(pos);
 
             MWMechanics::projectileHit(caster, target, bow, projectileRef.getPtr(), pos, projectileState.mAttackStrength);
             cleanupProjectile(projectileState);
@@ -654,7 +653,7 @@ namespace MWWorld
                 int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
                 state.mThrown = MWMechanics::getWeaponType(weaponType)->mWeaponClass == ESM::WeaponType::Thrown;
 
-                state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, false, true);
+                state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, false);
             }
             catch(...)
             {
@@ -707,7 +706,7 @@ namespace MWWorld
 
             osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
             createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, true, lightDiffuseColor, texture);
-            state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, true, false);
+            state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, true);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             for (const std::string &soundid : state.mSoundIds)
