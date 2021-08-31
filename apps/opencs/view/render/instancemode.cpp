@@ -518,6 +518,16 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
                 position.pos[1] = mObjectsAtDragStart[i].y() + addToY;
                 position.pos[2] = mObjectsAtDragStart[i].z() + addToZ;
 
+                // XYZ-locking
+                if (mDragAxis != -1)
+                {
+                    for (int j = 0; j < 3; ++j)
+                    {
+                        if (j != mDragAxis)
+                            position.pos[j] = mObjectsAtDragStart[i][j];
+                    }
+                }
+
                 objectTag->mObject->setPosition(position.pos);
             }
             else if (mDragMode == DragMode_Rotate)
@@ -625,8 +635,10 @@ void CSVRender::InstanceMode::dragWheel (int diff, double speedFactor)
         std::vector<osg::ref_ptr<TagBase> > selection =
             getWorldspaceWidget().getEdited (Mask_Reference);
 
+        int j = 0;
+
         for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
-            iter!=selection.end(); ++iter)
+            iter!=selection.end(); ++iter, j++)
         {
             if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))
             {
@@ -634,6 +646,9 @@ void CSVRender::InstanceMode::dragWheel (int diff, double speedFactor)
                 for (int i=0; i<3; ++i)
                     position.pos[i] += offset[i];
                 objectTag->mObject->setPosition (position.pos);
+                osg::Vec3f thisPoint(position.pos[0], position.pos[1], position.pos[2]);
+                mDragStart = getMousePlaneCoords(getWorldspaceWidget().mapFromGlobal(QCursor::pos()), getProjectionSpaceCoords(thisPoint));
+                mObjectsAtDragStart[j] = thisPoint;
             }
         }
     }
