@@ -520,7 +520,8 @@ namespace MWWorld
     const ESM::Cell *Store<ESM::Cell>::search(int x, int y) const
     {
         ESM::Cell cell;
-        cell.mData.mX = x, cell.mData.mY = y;
+        cell.mData.mX = x;
+        cell.mData.mY = y;
 
         std::pair<int, int> key(x, y);
         DynamicExt::const_iterator it = mExt.find(key);
@@ -538,7 +539,8 @@ namespace MWWorld
     const ESM::Cell *Store<ESM::Cell>::searchStatic(int x, int y) const
     {
         ESM::Cell cell;
-        cell.mData.mX = x, cell.mData.mY = y;
+        cell.mData.mX = x;
+        cell.mData.mY = y;
 
         std::pair<int, int> key(x, y);
         DynamicExt::const_iterator it = mExt.find(key);
