@@ -46,6 +46,7 @@ namespace CSVRender
             float mUnitScaleDist;
             osg::ref_ptr<osg::Group> mParentNode;
             osg::Vec3d mDragStart;
+            std::vector<osg::Vec3d> mObjectsAtDragStart;
 
             int getSubModeFromId (const std::string& id) const;
 

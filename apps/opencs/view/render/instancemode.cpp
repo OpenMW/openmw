@@ -297,6 +297,8 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
             return false;
     }
 
+    mObjectsAtDragStart.clear();
+
     for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
         iter!=selection.end(); ++iter)
     {
@@ -305,9 +307,12 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
             if (mSubModeId == "move")
             {
                 objectTag->mObject->setEdited (Object::Override_Position);
-                mDragStart.x() = objectTag->mObject->getPosition().pos[0];
-                mDragStart.y() = objectTag->mObject->getPosition().pos[1];
-                mDragStart.z() = objectTag->mObject->getPosition().pos[2];
+                double x = objectTag->mObject->getPosition().pos[0];
+                double y = objectTag->mObject->getPosition().pos[1];
+                double z = objectTag->mObject->getPosition().pos[2];
+                osg::Vec3d thisPoint(x, y, z);
+                mDragStart = getMousePlaneCoords(pos, getProjectionSpaceCoords(thisPoint));
+                mObjectsAtDragStart.emplace_back(thisPoint);
                 mDragMode = DragMode_Move;
             }
             else if (mSubModeId == "rotate")
@@ -495,8 +500,10 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
         return;
     }
 
+    int i = 0;
+
     // Apply
-    for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin()); iter!=selection.end(); ++iter)
+    for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin()); iter!=selection.end(); ++iter, i++)
     {
         if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))
         {
@@ -504,9 +511,12 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
             {
                 ESM::Position position = objectTag->mObject->getPosition();
                 osg::Vec3d mousePos = getMousePlaneCoords(pos, getProjectionSpaceCoords(mDragStart));
-                position.pos[0] = mousePos.x();
-                position.pos[1] = mousePos.y();
-                position.pos[2] = mousePos.z();
+                float addToX = mousePos.x() - mDragStart.x();
+                float addToY = mousePos.y() - mDragStart.y();
+                float addToZ = mousePos.z() - mDragStart.z();
+                position.pos[0] = mObjectsAtDragStart[i].x() + addToX;
+                position.pos[1] = mObjectsAtDragStart[i].y() + addToY;
+                position.pos[2] = mObjectsAtDragStart[i].z() + addToZ;
 
                 objectTag->mObject->setPosition(position.pos);
             }
