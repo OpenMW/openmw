@@ -1,6 +1,7 @@
 #include "gmock/gmock.h"
 #include <gtest/gtest.h>
 
+#include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
 
 #include "testing_util.hpp"
@@ -45,6 +46,7 @@ namespace
         EXPECT_FLOAT_EQ(lua.safe_script("return v.y").get<float>(), 12);
         EXPECT_FLOAT_EQ(lua.safe_script("return v.z").get<float>(), 13);
         EXPECT_EQ(lua.safe_script("return tostring(v)").get<std::string>(), "(5, 12, 13)");
+        EXPECT_EQ(LuaUtil::toString(lua.safe_script("return v")), "(5, 12, 13)");
         EXPECT_FLOAT_EQ(lua.safe_script("return util.vector3(4, 0, 3):length()").get<float>(), 5);
         EXPECT_FLOAT_EQ(lua.safe_script("return util.vector3(4, 0, 3):length2()").get<float>(), 25);
         EXPECT_FALSE(lua.safe_script("return util.vector3(1, 2, 3) == util.vector3(1, 3, 2)").get<bool>());
