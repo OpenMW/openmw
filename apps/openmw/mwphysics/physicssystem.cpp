@@ -643,7 +643,7 @@ namespace MWPhysics
 
         mTaskScheduler->convexSweepTest(projectile->getConvexShape(), from_, to_, resultCallback);
 
-        const auto newpos = projectile->isActive() ? position : Misc::Convert::toOsg(resultCallback.m_hitPointWorld);
+        const auto newpos = projectile->isActive() ? position : Misc::Convert::toOsg(projectile->getHitPosition());
         projectile->setPosition(newpos);
         mTaskScheduler->updateSingleAabb(foundProjectile->second);
     }
@@ -713,7 +713,7 @@ namespace MWPhysics
         mActors.emplace(ptr, std::move(actor));
     }
 
-    int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius, bool canTraverseWater)
+    int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius)
     {
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
         assert(shapeInstance);
@@ -721,7 +721,7 @@ namespace MWPhysics
 
         mProjectileId++;
 
-        auto projectile = std::make_shared<Projectile>(caster, position, radius, canTraverseWater, mTaskScheduler.get(), this);
+        auto projectile = std::make_shared<Projectile>(caster, position, radius, mTaskScheduler.get(), this);
         mProjectiles.emplace(mProjectileId, std::move(projectile));
 
         return mProjectileId;

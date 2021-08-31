@@ -3145,6 +3145,7 @@ namespace MWWorld
         bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), worldPos);
         if (underwater)
         {
+            MWMechanics::projectileHit(actor, Ptr(), bow, projectile, worldPos, attackStrength);
             mRendering->emitWaterRipple(worldPos);
             return;
         }
