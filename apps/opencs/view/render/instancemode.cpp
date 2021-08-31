@@ -609,6 +609,7 @@ void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
         }
     }
 
+    mObjectsAtDragStart.clear();
     mDragMode = DragMode_None;
 }
 
