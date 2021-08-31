@@ -141,7 +141,7 @@ namespace MWMechanics
             const ESM::Spell *spell = *iter;
             if (filter(spell))
             {
-                mSpells.erase(iter++);
+                iter = mSpells.erase(iter);
                 purged.push_back(spell->mId);
             }
             else
@@ -204,7 +204,7 @@ namespace MWMechanics
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(id);
             if (spell)
             {
-                mSpells.emplace_back(spell);
+                addSpell(spell);
 
                 if (id == state.mSelectedSpell)
                     mSelectedSpell = id;
