@@ -53,6 +53,7 @@
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
     Feature #4297: Implement APPLIED_ONCE flag for magic effects
+    Feature #4414: Handle duration of EXTRA SPELL magic effect
     Feature #4595: Unique object identifier
     Feature #4737: Handle instance move from one cell to another
     Feature #5198: Implement "Magic effect expired" event
