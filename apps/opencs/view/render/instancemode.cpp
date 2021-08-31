@@ -307,10 +307,10 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
             if (mSubModeId == "move")
             {
                 objectTag->mObject->setEdited (Object::Override_Position);
-                double x = objectTag->mObject->getPosition().pos[0];
-                double y = objectTag->mObject->getPosition().pos[1];
-                double z = objectTag->mObject->getPosition().pos[2];
-                osg::Vec3d thisPoint(x, y, z);
+                float x = objectTag->mObject->getPosition().pos[0];
+                float y = objectTag->mObject->getPosition().pos[1];
+                float z = objectTag->mObject->getPosition().pos[2];
+                osg::Vec3f thisPoint(x, y, z);
                 mDragStart = getMousePlaneCoords(pos, getProjectionSpaceCoords(thisPoint));
                 mObjectsAtDragStart.emplace_back(thisPoint);
                 mDragMode = DragMode_Move;
@@ -510,7 +510,7 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
             if (mDragMode == DragMode_Move)
             {
                 ESM::Position position = objectTag->mObject->getPosition();
-                osg::Vec3d mousePos = getMousePlaneCoords(pos, getProjectionSpaceCoords(mDragStart));
+                osg::Vec3f mousePos = getMousePlaneCoords(pos, getProjectionSpaceCoords(mDragStart));
                 float addToX = mousePos.x() - mDragStart.x();
                 float addToY = mousePos.y() - mDragStart.y();
                 float addToZ = mousePos.z() - mDragStart.z();
