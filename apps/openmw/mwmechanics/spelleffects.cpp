@@ -705,10 +705,15 @@ bool applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, Ac
         return true;
     }
     const auto* magicEffect = world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
-    if(effect.mFlags & ESM::ActiveEffect::Flag_Applied && magicEffect->mData.mFlags & ESM::MagicEffect::Flags::AppliedOnce)
+    if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
     {
-        effect.mTimeLeft -= dt;
-        return false;
+        if(magicEffect->mData.mFlags & ESM::MagicEffect::Flags::AppliedOnce)
+        {
+            effect.mTimeLeft -= dt;
+            return false;
+        }
+        else if(!dt)
+            return false;
     }
     if(effect.mEffectId == ESM::MagicEffect::Lock)
     {
@@ -786,8 +791,9 @@ bool applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, Ac
         float oldMagnitude = 0.f;
         if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
             oldMagnitude = effect.mMagnitude;
+        float magnitude = roll(effect);
         //Note that there's an early out for Flag_Applied AppliedOnce effects so we don't have to exclude them here
-        effect.mMagnitude = roll(effect);
+        effect.mMagnitude = magnitude;
         if(!(magicEffect->mData.mFlags & (ESM::MagicEffect::Flags::NoMagnitude | ESM::MagicEffect::Flags::AppliedOnce)))
         {
             if(effect.mDuration != 0)
@@ -808,6 +814,7 @@ bool applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, Ac
             spellParams.worsen();
         else
             applyMagicEffect(target, caster, spellParams, effect, invalid, receivedMagicDamage);
+        effect.mMagnitude = magnitude;
         magnitudes.add(EffectKey(effect.mEffectId, effect.mArg), EffectParam(effect.mMagnitude - oldMagnitude));
     }
     effect.mTimeLeft -= dt;

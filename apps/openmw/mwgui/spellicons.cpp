@@ -34,7 +34,7 @@ namespace MWGui
         {
             for(const auto& effect : params.getEffects())
             {
-                if(!effect.mMagnitude)
+                if(!(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
                     continue;
                 MagicEffectInfo newEffectSource;
                 newEffectSource.mKey = MWMechanics::EffectKey(effect.mEffectId, effect.mArg);
