@@ -742,14 +742,12 @@ namespace MWWorld
         {
             loadingListener->setLabel("Testing exterior cells ("+std::to_string(i)+"/"+std::to_string(cells.getExtSize())+")...");
 
-            CellStoreCollection::iterator iter = mActiveCells.begin();
-
             CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(it->mData.mX, it->mData.mY);
             loadInactiveCell (cell, loadingListener, true);
             activateCell (cell, loadingListener, false, true);
 
-            iter = mActiveCells.begin();
-            while (iter != mActiveCells.end())
+            auto iter = mInactiveCells.begin();
+            while (iter != mInactiveCells.end())
             {
                 if (it->isExterior() && it->mData.mX == (*iter)->getCell()->getGridX() &&
                     it->mData.mY == (*iter)->getCell()->getGridY())
@@ -796,8 +794,8 @@ namespace MWWorld
             loadInactiveCell (cell, loadingListener, true);
             activateCell (cell, loadingListener, false, true);
 
-            CellStoreCollection::iterator iter = mActiveCells.begin();
-            while (iter != mActiveCells.end())
+            auto iter = mInactiveCells.begin();
+            while (iter != mInactiveCells.end())
             {
                 assert (!(*iter)->getCell()->isExterior());
 
