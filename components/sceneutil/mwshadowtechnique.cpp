@@ -282,7 +282,7 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
     static osg::ref_ptr<osg::StateSet> ss;
     if (!ss)
     {
-        ShadowsBinAdder adder("ShadowsBin", _vdsm->getCastingPrograms());
+        ShadowsBin::addPrototype("ShadowsBin", _vdsm->getCastingPrograms());
         ss = new osg::StateSet;
         ss->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, "ShadowsBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
     }

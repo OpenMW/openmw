@@ -67,13 +67,6 @@ namespace SceneUtil
 
         static void addPrototype(const std::string& name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1>& castingPrograms);
     };
-
-    class ShadowsBinAdder
-    {
-        public:
-        ShadowsBinAdder(const std::string& name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1>& castingPrograms){ ShadowsBin::addPrototype(name, castingPrograms); }
-    };
-
 }
 
 #endif
