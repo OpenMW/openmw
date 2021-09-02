@@ -21,6 +21,7 @@
 
 #include <array>
 #include <mutex>
+#include <string>
 
 #include <osg/Camera>
 #include <osg/Material>
@@ -215,8 +216,6 @@ namespace SceneUtil {
 
         virtual void createShaders();
 
-        virtual std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1> getCastingPrograms() const { return _castingPrograms; }
-
         virtual bool selectActiveLights(osgUtil::CullVisitor* cv, ViewDependentData* vdd) const;
 
         virtual osg::Polytope computeLightViewFrustumPolytope(Frustum& frustum, LightData& positionedLight);
@@ -236,6 +235,8 @@ namespace SceneUtil {
         virtual osg::StateSet* prepareStateSetForRenderingShadow(ViewDependentData& vdd, unsigned int traversalNumber) const;
 
         void setWorldMask(unsigned int worldMask) { _worldMask = worldMask; }
+
+        osg::ref_ptr<osg::StateSet> getOrCreateShadowsBinStateSet();
 
     protected:
         virtual ~MWShadowTechnique();
@@ -297,6 +298,9 @@ namespace SceneUtil {
 
         osg::ref_ptr<DebugHUD>                  _debugHud;
         std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1> _castingPrograms;
+        const std::string _shadowsBinName = "ShadowsBin_" + std::to_string(reinterpret_cast<std::uint64_t>(this));
+        osg::ref_ptr<osgUtil::RenderBin> _shadowsBin;
+        osg::ref_ptr<osg::StateSet> _shadowsBinStateSet;
     };
 
 }

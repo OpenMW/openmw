@@ -62,8 +62,6 @@ namespace SceneUtil
 
         osgUtil::StateGraph* cullStateGraph(osgUtil::StateGraph* sg, osgUtil::StateGraph* root, std::unordered_set<osgUtil::StateGraph*>& uninteresting, bool cullFaceOverridden);
 
-        static void addPrototype(const std::string& name, const CastingPrograms& castingPrograms);
-
     private:
         ShadowsBin() {}
 

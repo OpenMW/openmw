@@ -146,12 +146,6 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
     return sg;
 }
 
-void ShadowsBin::addPrototype(const std::string & name, const CastingPrograms& castingPrograms)
-{
-    osg::ref_ptr<osgUtil::RenderBin> bin(new ShadowsBin(castingPrograms));
-    osgUtil::RenderBin::addRenderBinPrototype(name, bin);
-}
-
 inline bool ShadowsBin::State::needTexture() const
 {
     return mAlphaBlend || (mAlphaFunc && mAlphaFunc->getFunction() != GL_ALWAYS);
