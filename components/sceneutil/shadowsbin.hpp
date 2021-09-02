@@ -22,7 +22,7 @@ namespace SceneUtil
         using CastingPrograms = Array<osg::ref_ptr<osg::Program>>;
 
         META_Object(SceneUtil, ShadowsBin)
-        ShadowsBin();
+        ShadowsBin(const CastingPrograms& castingPrograms);
         ShadowsBin(const ShadowsBin& rhs, const osg::CopyOp& copyop)
             : osgUtil::RenderBin(rhs, copyop)
             , mNoTestStateSet(rhs.mNoTestStateSet)
@@ -65,7 +65,7 @@ namespace SceneUtil
         static void addPrototype(const std::string& name, const CastingPrograms& castingPrograms);
 
     private:
-        static CastingPrograms sCastingPrograms;
+        ShadowsBin() {}
 
         osg::ref_ptr<osg::StateSet> mNoTestStateSet;
         osg::ref_ptr<osg::StateSet> mShaderAlphaTestStateSet;
