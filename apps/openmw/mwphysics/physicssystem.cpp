@@ -181,7 +181,7 @@ namespace MWPhysics
 
     void PhysicsSystem::markAsNonSolid(const MWWorld::ConstPtr &ptr)
     {
-        ObjectMap::iterator found = mObjects.find(ptr);
+        ObjectMap::iterator found = mObjects.find(ptr.mRef);
         if (found == mObjects.end())
             return;
 
@@ -198,7 +198,7 @@ namespace MWPhysics
         if (obj.isEmpty())
             return true; // assume standing on terrain (which is a non-object, so not collision tracked)
 
-        ObjectMap::const_iterator foundObj = mObjects.find(obj);
+        ObjectMap::const_iterator foundObj = mObjects.find(obj.mRef);
         if (foundObj == mObjects.end())
             return false;
 
@@ -374,8 +374,8 @@ namespace MWPhysics
 
     bool PhysicsSystem::getLineOfSight(const MWWorld::ConstPtr &actor1, const MWWorld::ConstPtr &actor2) const
     {
-        const auto it1 = mActors.find(actor1);
-        const auto it2 = mActors.find(actor2);
+        const auto it1 = mActors.find(actor1.mRef);
+        const auto it2 = mActors.find(actor2.mRef);
         if (it1 == mActors.end() || it2 == mActors.end())
             return false;
 
@@ -441,7 +441,7 @@ namespace MWPhysics
     {
         btCollisionObject* me = nullptr;
 
-        auto found = mObjects.find(ptr);
+        auto found = mObjects.find(ptr.mRef);
         if (found != mObjects.end())
             me = found->second->getCollisionObject();
         else
@@ -464,7 +464,7 @@ namespace MWPhysics
 
     osg::Vec3f PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, float maxHeight)
     {
-        ActorMap::iterator found = mActors.find(ptr);
+        ActorMap::iterator found = mActors.find(ptr.mRef);
         if (found ==  mActors.end())
             return ptr.getRefData().getPosition().asVec3();
         return MovementSolver::traceDown(ptr, position, found->second.get(), mCollisionWorld.get(), maxHeight);
@@ -504,7 +504,7 @@ namespace MWPhysics
         assert(!getObject(ptr));
 
         auto obj = std::make_shared<Object>(ptr, shapeInstance, rotation, collisionType, mTaskScheduler.get());
-        mObjects.emplace(ptr, obj);
+        mObjects.emplace(ptr.mRef, obj);
 
         if (obj->isAnimated())
             mAnimatedObjects.insert(obj.get());
@@ -512,8 +512,7 @@ namespace MWPhysics
 
     void PhysicsSystem::remove(const MWWorld::Ptr &ptr)
     {
-        ObjectMap::iterator found = mObjects.find(ptr);
-        if (found != mObjects.end())
+        if (auto found = mObjects.find(ptr.mRef); found != mObjects.end())
         {
             if (mUnrefQueue.get())
                 mUnrefQueue->push(found->second->getShapeInstance());
@@ -522,11 +521,9 @@ namespace MWPhysics
 
             mObjects.erase(found);
         }
-
-        ActorMap::iterator foundActor = mActors.find(ptr);
-        if (foundActor != mActors.end())
+        else if (auto found = mActors.find(ptr.mRef); found != mActors.end())
         {
-            mActors.erase(foundActor);
+            mActors.erase(found);
         }
     }
 
@@ -539,22 +536,10 @@ namespace MWPhysics
 
     void PhysicsSystem::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
-        ObjectMap::iterator found = mObjects.find(old);
-        if (found != mObjects.end())
-        {
-            auto obj = found->second;
-            obj->updatePtr(updated);
-            mObjects.erase(found);
-            mObjects.emplace(updated, std::move(obj));
-        }
-
-        auto actorNode = mActors.extract(old);
-        if (!actorNode.empty())
-        {
-            actorNode.key() = updated;
-            actorNode.mapped()->updatePtr(updated);
-            mActors.insert(std::move(actorNode));
-        }
+        if (auto found = mObjects.find(old.mRef); found != mObjects.end())
+            found->second->updatePtr(updated);
+        else if (auto found = mActors.find(old.mRef); found != mActors.end())
+            found->second->updatePtr(updated);
 
         for (auto& [_, actor] : mActors)
         {
@@ -572,7 +557,7 @@ namespace MWPhysics
 
     Actor *PhysicsSystem::getActor(const MWWorld::Ptr &ptr)
     {
-        ActorMap::iterator found = mActors.find(ptr);
+        ActorMap::iterator found = mActors.find(ptr.mRef);
         if (found != mActors.end())
             return found->second.get();
         return nullptr;
@@ -580,7 +565,7 @@ namespace MWPhysics
 
     const Actor *PhysicsSystem::getActor(const MWWorld::ConstPtr &ptr) const
     {
-        ActorMap::const_iterator found = mActors.find(ptr);
+        ActorMap::const_iterator found = mActors.find(ptr.mRef);
         if (found != mActors.end())
             return found->second.get();
         return nullptr;
@@ -588,7 +573,7 @@ namespace MWPhysics
 
     const Object* PhysicsSystem::getObject(const MWWorld::ConstPtr &ptr) const
     {
-        ObjectMap::const_iterator found = mObjects.find(ptr);
+        ObjectMap::const_iterator found = mObjects.find(ptr.mRef);
         if (found != mObjects.end())
             return found->second.get();
         return nullptr;
@@ -604,20 +589,16 @@ namespace MWPhysics
 
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)
     {
-        ObjectMap::iterator found = mObjects.find(ptr);
-        if (found != mObjects.end())
+        if (auto found = mObjects.find(ptr.mRef); found != mObjects.end())
         {
             float scale = ptr.getCellRef().getScale();
             found->second->setScale(scale);
             mTaskScheduler->updateSingleAabb(found->second);
-            return;
         }
-        ActorMap::iterator foundActor = mActors.find(ptr);
-        if (foundActor != mActors.end())
+        else if (auto found = mActors.find(ptr.mRef); found != mActors.end())
         {
-            foundActor->second->updateScale();
-            mTaskScheduler->updateSingleAabb(foundActor->second);
-            return;
+            found->second->updateScale();
+            mTaskScheduler->updateSingleAabb(found->second);
         }
     }
 
@@ -650,40 +631,32 @@ namespace MWPhysics
 
     void PhysicsSystem::updateRotation(const MWWorld::Ptr &ptr, osg::Quat rotate)
     {
-        ObjectMap::iterator found = mObjects.find(ptr);
-        if (found != mObjects.end())
+        if (auto found = mObjects.find(ptr.mRef); found != mObjects.end())
         {
             found->second->setRotation(rotate);
             mTaskScheduler->updateSingleAabb(found->second);
-            return;
         }
-        ActorMap::iterator foundActor = mActors.find(ptr);
-        if (foundActor != mActors.end())
+        else if (auto found = mActors.find(ptr.mRef); found != mActors.end())
         {
-            if (!foundActor->second->isRotationallyInvariant())
+            if (!found->second->isRotationallyInvariant())
             {
-                foundActor->second->setRotation(rotate);
-                mTaskScheduler->updateSingleAabb(foundActor->second);
+                found->second->setRotation(rotate);
+                mTaskScheduler->updateSingleAabb(found->second);
             }
-            return;
         }
     }
 
     void PhysicsSystem::updatePosition(const MWWorld::Ptr &ptr)
     {
-        ObjectMap::iterator found = mObjects.find(ptr);
-        if (found != mObjects.end())
+        if (auto found = mObjects.find(ptr.mRef); found != mObjects.end())
         {
             found->second->updatePosition();
             mTaskScheduler->updateSingleAabb(found->second);
-            return;
         }
-        ActorMap::iterator foundActor = mActors.find(ptr);
-        if (foundActor != mActors.end())
+        else if (auto found = mActors.find(ptr.mRef); found != mActors.end())
         {
-            foundActor->second->updatePosition();
-            mTaskScheduler->updateSingleAabb(foundActor->second, true);
-            return;
+            found->second->updatePosition();
+            mTaskScheduler->updateSingleAabb(found->second, true);
         }
     }
 
@@ -710,7 +683,7 @@ namespace MWPhysics
 
         auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get(), canWaterWalk);
         
-        mActors.emplace(ptr, std::move(actor));
+        mActors.emplace(ptr.mRef, std::move(actor));
     }
 
     int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius, bool canTraverseWater)
@@ -738,7 +711,7 @@ namespace MWPhysics
 
     bool PhysicsSystem::toggleCollisionMode()
     {
-        ActorMap::iterator found = mActors.find(MWMechanics::getPlayer());
+        ActorMap::iterator found = mActors.find(MWMechanics::getPlayer().mRef);
         if (found != mActors.end())
         {
             bool cmode = found->second->getCollisionMode();
@@ -753,7 +726,7 @@ namespace MWPhysics
 
     void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity)
     {
-        ActorMap::iterator found = mActors.find(ptr);
+        ActorMap::iterator found = mActors.find(ptr.mRef);
         if (found != mActors.end())
             found->second->setVelocity(velocity);
     }
@@ -770,13 +743,13 @@ namespace MWPhysics
         framedata.first.reserve(mActors.size());
         framedata.second.reserve(mActors.size());
         const MWBase::World *world = MWBase::Environment::get().getWorld();
-        for (const auto& [actor, physicActor] : mActors)
+        for (const auto& [ref, physicActor] : mActors)
         {
             auto ptr = physicActor->getPtr();
-            if (!actor.getClass().isMobile(ptr))
+            if (!ptr.getClass().isMobile(ptr))
                 continue;
             float waterlevel = -std::numeric_limits<float>::max();
-            const MWWorld::CellStore *cell = actor.getCell();
+            const MWWorld::CellStore *cell = ptr.getCell();
             if(cell->getCell()->hasWater())
                 waterlevel = cell->getWaterLevel();
 
@@ -786,7 +759,7 @@ namespace MWPhysics
             bool waterCollision = false;
             if (cell->getCell()->hasWater() && effects.get(ESM::MagicEffect::WaterWalking).getMagnitude())
             {
-                if (physicActor->getCollisionMode() || !world->isUnderwater(actor.getCell(), actor.getRefData().getPosition().asVec3()))
+                if (physicActor->getCollisionMode() || !world->isUnderwater(ptr.getCell(), ptr.getRefData().getPosition().asVec3()))
                     waterCollision = true;
             }
 
@@ -813,7 +786,7 @@ namespace MWPhysics
         {
             if (animatedObject->animateCollisionShapes())
             {
-                auto obj = mObjects.find(animatedObject->getPtr());
+                auto obj = mObjects.find(animatedObject->getPtr().mRef);
                 assert(obj != mObjects.end());
                 mTaskScheduler->updateSingleAabb(obj->second);
             }
@@ -851,7 +824,7 @@ namespace MWPhysics
 
     void PhysicsSystem::updateAnimatedCollisionShape(const MWWorld::Ptr& object)
     {
-        ObjectMap::iterator found = mObjects.find(object);
+        ObjectMap::iterator found = mObjects.find(object.mRef);
         if (found != mObjects.end())
             if (found->second->animateCollisionShapes())
                 mTaskScheduler->updateSingleAabb(found->second);
@@ -865,7 +838,7 @@ namespace MWPhysics
 
     bool PhysicsSystem::isActorStandingOn(const MWWorld::Ptr &actor, const MWWorld::ConstPtr &object) const
     {
-        const auto physActor = mActors.find(actor);
+        const auto physActor = mActors.find(actor.mRef);
         if (physActor != mActors.end())
             return physActor->second->getStandingOnPtr() == object;
         return false;
@@ -943,7 +916,7 @@ namespace MWPhysics
     bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
     {
         btCollisionObject* object = nullptr;
-        const auto it = mActors.find(ignore);
+        const auto it = mActors.find(ignore.mRef);
         if (it != mActors.end())
             object = it->second->getCollisionObject();
         const auto bulletPosition = Misc::Convert::toBullet(position);

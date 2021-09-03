@@ -5,6 +5,7 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <unordered_map>
 #include <algorithm>
 
 #include <osg/Quat>
@@ -56,7 +57,7 @@ namespace MWPhysics
     class PhysicsTaskScheduler;
     class Projectile;
 
-    using ActorMap = std::map<MWWorld::ConstPtr, std::shared_ptr<Actor>>;
+    using ActorMap = std::unordered_map<const MWWorld::LiveCellRefBase*, std::shared_ptr<Actor>>;
 
     struct ContactPoint
     {
@@ -272,7 +273,7 @@ namespace MWPhysics
             std::unique_ptr<Resource::BulletShapeManager> mShapeManager;
             Resource::ResourceSystem* mResourceSystem;
 
-            using ObjectMap = std::map<MWWorld::ConstPtr, std::shared_ptr<Object>>;
+            using ObjectMap = std::unordered_map<const MWWorld::LiveCellRefBase*, std::shared_ptr<Object>>;
             ObjectMap mObjects;
 
             std::set<Object*> mAnimatedObjects; // stores pointers to elements in mObjects
