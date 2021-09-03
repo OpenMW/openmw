@@ -77,6 +77,14 @@ return {
         EXPECT_EQ(LuaUtil::call(script1["get"]).get<int>(), 45);
     }
 
+    TEST_F(LuaStateTest, ToString)
+    {
+        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), 3.14)), "3.14");
+        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), true)), "true");
+        EXPECT_EQ(LuaUtil::toString(sol::nil), "nil");
+        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), "something")), "\"something\"");
+    }
+
     TEST_F(LuaStateTest, ErrorHandling)
     {
         EXPECT_ERROR(mLua.runInNewSandbox("invalid.lua"), "[string \"invalid.lua\"]:1:");

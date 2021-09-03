@@ -167,4 +167,14 @@ namespace LuaUtil
         #endif
     }
 
+    std::string toString(const sol::object& obj)
+    {
+        if (obj == sol::nil)
+            return "nil";
+        else if (obj.get_type() == sol::type::string)
+            return "\"" + obj.as<std::string>() + "\"";
+        else
+            return call(sol::state_view(obj.lua_state())["tostring"], obj);
+    }
+
 }
