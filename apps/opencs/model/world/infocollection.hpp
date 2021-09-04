@@ -2,6 +2,7 @@
 #define CSM_WOLRD_INFOCOLLECTION_H
 
 #include <unordered_map>
+#include <string_view>
 
 #include "collection.hpp"
 #include "info.hpp"
@@ -43,7 +44,7 @@ namespace CSMWorld
 
             void load (const Info& record, bool base);
 
-            int getInfoIndex (const std::string& id, const std::string& topic) const;
+            int getInfoIndex(std::string_view id, std::string_view topic) const;
             ///< Return index for record \a id or -1 (if not present; deleted records are considered)
             ///
             /// \param id info ID without topic prefix
@@ -79,7 +80,7 @@ namespace CSMWorld
             void appendBlankRecord (const std::string& id,
                                             UniversalId::Type type = UniversalId::Type_None) override;
 
-            int searchId (const std::string& id) const override;
+            int searchId(std::string_view id) const override;
 
             void appendRecord (std::unique_ptr<RecordBase> record,
                 UniversalId::Type type = UniversalId::Type_None) override;

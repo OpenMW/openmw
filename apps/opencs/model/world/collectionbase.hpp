@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <string_view>
 
 #include "universalid.hpp"
 #include "columns.hpp"
@@ -61,7 +62,7 @@ namespace CSMWorld
                 UniversalId::Type type = UniversalId::Type_None) = 0;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual int searchId (const std::string& id) const = 0;
+            virtual int searchId(std::string_view id) const = 0;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
 

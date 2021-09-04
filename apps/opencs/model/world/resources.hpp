@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <string_view>
 
 #include "universalid.hpp"
 
@@ -35,7 +36,7 @@ namespace CSMWorld
 
             int getIndex (const std::string& id) const;
 
-            int searchId (const std::string& id) const;
+            int searchId(std::string_view id) const;
 
             UniversalId::Type getType() const;
     };

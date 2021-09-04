@@ -145,8 +145,7 @@ namespace CSMWorld
             return {};
         }
 
-        const std::string& partName = it->second.first;
-        return partName;
+        return it->second.first;
     }
 
     bool ActorAdapter::ActorData::hasDependency(const std::string& id) const

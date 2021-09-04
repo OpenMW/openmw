@@ -9,6 +9,7 @@
 #include <string>
 #include <functional>
 #include <memory>
+#include <string_view>
 
 #include <QVariant>
 
@@ -153,7 +154,7 @@ namespace CSMWorld
             ///< Change the state of a record from base to modified, if it is not already.
             ///  \return True if the record was changed.
 
-            int searchId (const std::string& id) const override;
+            int searchId(std::string_view id) const override;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
 
@@ -476,7 +477,7 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int Collection<ESXRecordT, IdAccessorT>::searchId (const std::string& id) const
+    int Collection<ESXRecordT, IdAccessorT>::searchId(std::string_view id) const
     {
         std::string id2 = Misc::StringUtils::lowerCase(id);
 
