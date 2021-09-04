@@ -96,7 +96,7 @@ namespace CSVRender
         for (int i = 0; i < ESM::PRT_Count; ++i)
         {
             auto type = (ESM::PartReferenceType) i;
-            std::string partId = mActorData->getPart(type);
+            const std::string partId(mActorData->getPart(type));
             attachBodyPart(type, getBodyPartMesh(partId));
         }
     }
