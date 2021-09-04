@@ -27,7 +27,7 @@ namespace DetourNavigator
 
     std::optional<RemovedRecastMeshObject> CachedRecastMeshManager::removeObject(const ObjectId id)
     {
-        const auto object = mImpl.removeObject(id);
+        auto object = mImpl.removeObject(id);
         if (object)
             mCached.lock()->reset();
         return object;

@@ -93,7 +93,7 @@ namespace CSMWorld
             /// Returns the skeleton the actor should use for attaching parts to
             std::string getSkeleton() const;
             /// Retrieves the associated actor part
-            const std::string getPart(ESM::PartReferenceType index) const;
+            const std::string& getPart(ESM::PartReferenceType index) const;
             /// Checks if the actor has a data dependency
             bool hasDependency(const std::string& id) const;
 
