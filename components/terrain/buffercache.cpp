@@ -245,13 +245,13 @@ namespace Terrain
     {
         {
             std::lock_guard<std::mutex> lock(mIndexBufferMutex);
-            for (auto indexbuffer : mIndexBufferMap)
-                indexbuffer.second->releaseGLObjects(state);
+            for (const auto& [_, indexbuffer] : mIndexBufferMap)
+                indexbuffer->releaseGLObjects(state);
         }
         {
             std::lock_guard<std::mutex> lock(mUvBufferMutex);
-            for (auto uvbuffer : mUvBufferMap)
-                uvbuffer.second->releaseGLObjects(state);
+            for (const auto& [_, uvbuffer] : mUvBufferMap)
+                uvbuffer->releaseGLObjects(state);
         }
     }
 
