@@ -15,6 +15,7 @@
 #include <components/sceneutil/skeleton.hpp>
 
 #include "visitor.hpp"
+#include "clone.hpp"
 
 namespace SceneUtil
 {
@@ -49,10 +50,10 @@ namespace SceneUtil
                 return;
 
             osg::Node* node = &drawable;
-            while (node->getNumParents())
+            for (auto it = getNodePath().rbegin()+1; it != getNodePath().rend(); ++it)
             {
-                osg::Group* parent = node->getParent(0);
-                if (!parent || !filterMatches(parent->getName()))
+                osg::Group* parent = *it;
+                if (!filterMatches(parent->getName()))
                     break;
                 node = parent;
             }
@@ -63,12 +64,8 @@ namespace SceneUtil
         {
             for (const osg::ref_ptr<osg::Node>& node : mToCopy)
             {
-                if (node->getNumParents() > 1)
-                    Log(Debug::Error) << "Error CopyRigVisitor: node has " << node->getNumParents() << " parents";
-                while (node->getNumParents())
-                    node->getParent(0)->removeChild(node);
-
-                mParent->addChild(node);
+                CopyOp copyOp;
+                mParent->addChild(osg::clone(node, copyOp));
             }
             mToCopy.clear();
         }
@@ -101,7 +98,7 @@ namespace SceneUtil
         }
     }
 
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode, osg::Node*& parent)
     {
         if (dynamic_cast<SceneUtil::Skeleton*>(toAttach.get()))
         {
@@ -111,23 +108,27 @@ namespace SceneUtil
             toAttach->accept(copyVisitor);
             copyVisitor.doCopy();
 
-            if (handle->getNumChildren() == 1)
+            parent = master->asGroup();
+
+            if (handle->getNumChildren() == 1 && handle->getChild(0)->referenceCount() == 1)
             {
                 osg::ref_ptr<osg::Node> newHandle = handle->getChild(0);
                 handle->removeChild(newHandle);
-                master->asGroup()->addChild(newHandle);
+                parent->addChild(newHandle);
                 mergeUserData(toAttach->getUserDataContainer(), newHandle);
                 return newHandle;
             }
             else
             {
-                master->asGroup()->addChild(handle);
+                parent->addChild(handle);
                 handle->setUserDataContainer(toAttach->getUserDataContainer());
                 return handle;
             }
         }
         else
         {
+            CopyOp copyOp;
+            toAttach = osg::clone(toAttach, copyOp);
             FindByNameVisitor findBoneOffset("BoneOffset");
             toAttach->accept(findBoneOffset);
 
@@ -169,11 +170,19 @@ namespace SceneUtil
                 trans->setStateSet(frontFaceStateSet);
             }
 
+            parent = attachNode;
             if (trans)
             {
                 attachNode->addChild(trans);
                 trans->addChild(toAttach);
                 return trans;
+            }
+            else if (toAttach->referenceCount() > 1)
+            {
+                osg::ref_ptr<osg::Group> group = new osg::Group;
+                group->addChild(toAttach);
+                attachNode->addChild(group);
+                return group;
             }
             else
             {
