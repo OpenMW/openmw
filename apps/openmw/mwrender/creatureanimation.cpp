@@ -158,9 +158,9 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
 
     try
     {
-        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(itemModel);
+        osg::ref_ptr<const osg::Node> node = mResourceSystem->getSceneManager()->getTemplate(itemModel);
 
-        const NodeMap& nodeMap = getNodeMap();
+        const Map& nodeMap = getNodeMap();
         NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
         if (found == nodeMap.end())
             throw std::runtime_error("Can't find attachment node " + bonename);
