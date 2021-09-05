@@ -52,7 +52,7 @@ namespace SceneUtil
             osg::Node* node = &drawable;
             for (auto it = getNodePath().rbegin()+1; it != getNodePath().rend(); ++it)
             {
-                osg::Group* parent = *it;
+                osg::Node* parent = *it;
                 if (!filterMatches(parent->getName()))
                     break;
                 node = parent;
