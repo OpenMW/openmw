@@ -9,6 +9,9 @@
 
 #include "data.hpp"
 
+#include <string>
+#include <string_view>
+
 namespace CSMWorld
 {
     const std::string& ActorAdapter::RaceData::getId() const
@@ -121,7 +124,7 @@ namespace CSMWorld
         return SceneUtil::getActorSkeleton(firstPerson, mFemale, beast, werewolf);
     }
 
-    const std::string& ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
+    std::string_view ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
     {
         auto it = mParts.find(index);
         if (it == mParts.end())
@@ -139,7 +142,7 @@ namespace CSMWorld
                 return mRaceData->getMalePart(index);
             }
 
-            return "";
+            return {};
         }
 
         const std::string& partName = it->second.first;
