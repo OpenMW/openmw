@@ -98,17 +98,17 @@ namespace SceneUtil
         }
     }
 
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
     {
-        if (dynamic_cast<SceneUtil::Skeleton*>(toAttach.get()))
+        if (dynamic_cast<const SceneUtil::Skeleton*>(toAttach.get()))
         {
             osg::ref_ptr<osg::Group> handle = new osg::Group;
 
             CopyRigVisitor copyVisitor(handle, filter);
-            toAttach->accept(copyVisitor);
+            const_cast<osg::Node*>(toAttach.get())->accept(copyVisitor);
             copyVisitor.doCopy();
 
-            if (handle->getNumChildren() == 1 && handle->getChild(0)->referenceCount() == 1)
+            if (handle->getNumChildren() == 1)
             {
                 osg::ref_ptr<osg::Node> newHandle = handle->getChild(0);
                 handle->removeChild(newHandle);
@@ -126,9 +126,9 @@ namespace SceneUtil
         else
         {
             CopyOp copyOp;
-            toAttach = osg::clone(toAttach, copyOp);
+            osg::ref_ptr<osg::Node> clonedToAttach = osg::clone(toAttach, copyOp);
             FindByNameVisitor findBoneOffset("BoneOffset");
-            toAttach->accept(findBoneOffset);
+            clonedToAttach->accept(findBoneOffset);
 
             osg::ref_ptr<osg::PositionAttitudeTransform> trans;
 
@@ -171,19 +171,12 @@ namespace SceneUtil
             if (trans)
             {
                 attachNode->addChild(trans);
-                trans->addChild(toAttach);
+                trans->addChild(clonedToAttach);
                 return trans;
-            }
-            else if (toAttach->referenceCount() > 1)
-            {
-                osg::ref_ptr<osg::Group> group = new osg::Group;
-                group->addChild(toAttach);
-                attachNode->addChild(group);
-                return group;
             }
             else
             {
-                attachNode->addChild(toAttach);
+                attachNode->addChild(clonedToAttach);
                 return toAttach;
             }
         }
