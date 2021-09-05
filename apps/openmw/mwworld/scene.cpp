@@ -296,6 +296,13 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
+        if (mChangeCellGridRequest.has_value())
+        {
+            changeCellGrid(mChangeCellGridRequest->mPosition, mChangeCellGridRequest->mCell.x(),
+                           mChangeCellGridRequest->mCell.y(), mChangeCellGridRequest->mChangeEvent);
+            mChangeCellGridRequest.reset();
+        }
+
         mPreloader->updateCache(mRendering.getReferenceTime());
         preloadCells(duration);
 
@@ -515,7 +522,12 @@ namespace MWWorld
 
         osg::Vec2i newCell = getNewGridCenter(pos, &mCurrentGridCenter);
         if (newCell != mCurrentGridCenter)
-            changeCellGrid(pos, newCell.x(), newCell.y());
+            requestChangeCellGrid(pos, newCell);
+    }
+
+    void Scene::requestChangeCellGrid(const osg::Vec3f &position, const osg::Vec2i& cell, bool changeEvent)
+    {
+        mChangeCellGridRequest = ChangeCellGridRequest {position, cell, changeEvent};
     }
 
     void Scene::changeCellGrid (const osg::Vec3f &pos, int playerCellX, int playerCellY, bool changeEvent)
