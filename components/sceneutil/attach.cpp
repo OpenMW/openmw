@@ -64,8 +64,7 @@ namespace SceneUtil
         {
             for (const osg::ref_ptr<osg::Node>& node : mToCopy)
             {
-                CopyOp copyOp;
-                mParent->addChild(osg::clone(node, copyOp));
+                mParent->addChild(static_cast<osg::Node*>(node->clone(SceneUtil::CopyOp())));
             }
             mToCopy.clear();
         }
@@ -125,8 +124,8 @@ namespace SceneUtil
         }
         else
         {
-            CopyOp copyOp;
-            osg::ref_ptr<osg::Node> clonedToAttach = osg::clone(toAttach, copyOp);
+            osg::ref_ptr<osg::Node> clonedToAttach = static_cast<osg::Node*>(toAttach->clone(SceneUtil::CopyOp()));
+
             FindByNameVisitor findBoneOffset("BoneOffset");
             clonedToAttach->accept(findBoneOffset);
 
