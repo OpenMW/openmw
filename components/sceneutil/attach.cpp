@@ -98,7 +98,7 @@ namespace SceneUtil
         }
     }
 
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode, osg::Node*& parent)
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
     {
         if (dynamic_cast<SceneUtil::Skeleton*>(toAttach.get()))
         {
@@ -108,19 +108,17 @@ namespace SceneUtil
             toAttach->accept(copyVisitor);
             copyVisitor.doCopy();
 
-            parent = master->asGroup();
-
             if (handle->getNumChildren() == 1 && handle->getChild(0)->referenceCount() == 1)
             {
                 osg::ref_ptr<osg::Node> newHandle = handle->getChild(0);
                 handle->removeChild(newHandle);
-                parent->addChild(newHandle);
+                master->asGroup()->addChild(newHandle);
                 mergeUserData(toAttach->getUserDataContainer(), newHandle);
                 return newHandle;
             }
             else
             {
-                parent->addChild(handle);
+                master->asGroup()->addChild(handle);
                 handle->setUserDataContainer(toAttach->getUserDataContainer());
                 return handle;
             }
@@ -170,7 +168,6 @@ namespace SceneUtil
                 trans->setStateSet(frontFaceStateSet);
             }
 
-            parent = attachNode;
             if (trans)
             {
                 attachNode->addChild(trans);
