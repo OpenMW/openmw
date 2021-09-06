@@ -238,19 +238,20 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     }
     geometry->setNodeMask(mNodeMask);
 
-    osg::ref_ptr<osg::Group> result(new osg::Group);
-    result->addChild(geometry);
     if (mDebugChunks)
     {
+        osg::ref_ptr<osg::Group> result(new osg::Group);
+        result->addChild(geometry);
         auto chunkBorder = CellBorder::createBorderGeometry(chunkCenter.x() - chunkSize / 2.f, chunkCenter.y() - chunkSize / 2.f, chunkSize, mStorage, mSceneManager, getNodeMask());
         osg::Vec3f center = { chunkCenter.x(), chunkCenter.y(), 0 };
         osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(osg::Matrixf::translate(-center*Constants::CellSizeInUnits));
         trans->setDataVariance(osg::Object::STATIC);
         trans->addChild(chunkBorder);
         result->addChild(trans);
+        return result;
     }
 
-    return result;
+    return geometry;
 }
 
 }
