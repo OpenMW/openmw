@@ -47,6 +47,7 @@
     Feature #6032: Reverse-z depth buffer
     Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Feature #6199: Support FBO Rendering
+    Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
 
 0.47.0
 ------
