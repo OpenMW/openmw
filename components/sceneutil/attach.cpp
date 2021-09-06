@@ -86,14 +86,14 @@ namespace SceneUtil
         std::string mFilter2;
     };
 
-    void mergeUserData(osg::UserDataContainer* source, osg::Object* target)
+    void mergeUserData(const osg::UserDataContainer* source, osg::Object* target)
     {
         if (!target->getUserDataContainer())
-            target->setUserDataContainer(source);
+            target->setUserDataContainer(osg::clone(source, osg::CopyOp::SHALLOW_COPY));
         else
         {
             for (unsigned int i=0; i<source->getNumUserObjects(); ++i)
-                target->getUserDataContainer()->addUserObject(source->getUserObject(i));
+                target->getUserDataContainer()->addUserObject(osg::clone(source->getUserObject(i), osg::CopyOp::SHALLOW_COPY));
         }
     }
 
@@ -176,7 +176,7 @@ namespace SceneUtil
             else
             {
                 attachNode->addChild(clonedToAttach);
-                return toAttach;
+                return clonedToAttach;
             }
         }
     }
