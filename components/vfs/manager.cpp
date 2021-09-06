@@ -86,11 +86,6 @@ namespace VFS
         return mIndex.find(normalized) != mIndex.end();
     }
 
-    const std::map<std::string, File*>& Manager::getIndex() const
-    {
-        return mIndex;
-    }
-
     void Manager::normalizeFilename(std::string &name) const
     {
         normalize_path(name, mStrict);
@@ -106,5 +101,10 @@ namespace VFS
                 return (*it)->getDescription();
         }
         return {};
+    }
+
+    RecursiveDirectoryIterator Manager::getRecursiveDirectoryIterator(const std::string& path) const
+    {
+        return RecursiveDirectoryIterator(mIndex, path);
     }
 }

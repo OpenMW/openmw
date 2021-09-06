@@ -66,35 +66,26 @@ namespace MWGui
 
     void LoadingScreen::findSplashScreens()
     {
-        const std::map<std::string, VFS::File*>& index = mResourceSystem->getVFS()->getIndex();
         std::string pattern = "Splash/";
         mResourceSystem->getVFS()->normalizeFilename(pattern);
 
         /* priority given to the left */
         const std::array<std::string, 7> supported_extensions {{".tga", ".dds", ".ktx", ".png", ".bmp", ".jpeg", ".jpg"}};
 
-        auto found = index.lower_bound(pattern);
-        while (found != index.end())
+        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(pattern))
         {
-            const std::string& name = found->first;
-            if (name.size() >= pattern.size() && name.substr(0, pattern.size()) == pattern)
+            size_t pos = name.find_last_of('.');
+            if (pos != std::string::npos)
             {
-                size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos)
+                for (auto const& extension : supported_extensions)
                 {
-                    for(auto const& extension: supported_extensions)
+                    if (name.compare(pos, name.size() - pos, extension) == 0)
                     {
-                        if (name.compare(pos, name.size() - pos, extension) == 0)
-                        {
-                            mSplashScreens.push_back(found->first);
-                            break;  /* based on priority */
-                        }
+                        mSplashScreens.push_back(name);
+                        break;  /* based on priority */
                     }
                 }
             }
-            else
-                break;
-            ++found;
         }
         if (mSplashScreens.empty())
             Log(Debug::Warning) << "Warning: no splash screens found!";
