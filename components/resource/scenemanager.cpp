@@ -358,10 +358,7 @@ namespace Resource
 
     bool SceneManager::checkLoaded(const std::string &name, double timeStamp)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
-
-        return mCache->checkInObjectCache(normalized, timeStamp);
+        return mCache->checkInObjectCache(mVFS->normalizeFilename(name), timeStamp);
     }
 
     /// @brief Callback to read image files from the VFS.
@@ -533,8 +530,7 @@ namespace Resource
 
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name, bool compile)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
+        std::string normalized = mVFS->normalizeFilename(name);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)
@@ -603,8 +599,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::cacheInstance(const std::string &name)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
+        const std::string normalized = mVFS->normalizeFilename(name);
 
         osg::ref_ptr<osg::Node> node = createInstance(normalized);
 
@@ -642,8 +637,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
+        const std::string normalized = mVFS->normalizeFilename(name);
 
         osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
         if (obj.get())

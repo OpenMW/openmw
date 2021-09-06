@@ -87,7 +87,7 @@ namespace VFS
 
         /// Normalize the given filename, making slashes/backslashes consistent, and lower-casing if mStrict is false.
         /// @note May be called from any thread once the index has been built.
-        void normalizeFilename(std::string& name) const;
+        [[nodiscard]] std::string normalizeFilename(const std::string& name) const;
 
         /// Retrieve a file by name.
         /// @note Throws an exception if the file can not be found.

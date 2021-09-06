@@ -121,8 +121,7 @@ BulletShapeManager::~BulletShapeManager()
 
 osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &name)
 {
-    std::string normalized = name;
-    mVFS->normalizeFilename(normalized);
+    const std::string normalized = mVFS->normalizeFilename(name);
 
     osg::ref_ptr<BulletShape> shape;
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
@@ -180,8 +179,7 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
 
 osg::ref_ptr<BulletShapeInstance> BulletShapeManager::cacheInstance(const std::string &name)
 {
-    std::string normalized = name;
-    mVFS->normalizeFilename(normalized);
+    const std::string normalized = mVFS->normalizeFilename(name);
 
     osg::ref_ptr<BulletShapeInstance> instance = createInstance(normalized);
     if (instance)
@@ -191,8 +189,7 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::cacheInstance(const std::s
 
 osg::ref_ptr<BulletShapeInstance> BulletShapeManager::getInstance(const std::string &name)
 {
-    std::string normalized = name;
-    mVFS->normalizeFilename(normalized);
+    const std::string normalized = mVFS->normalizeFilename(name);
 
     osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
     if (obj.get())

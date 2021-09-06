@@ -598,8 +598,6 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size()-3, 3, "/");
 
-        mResourceSystem->getVFS()->normalizeFilename(animationPath);
-
         for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
             size_t pos = name.find_last_of('.');
@@ -1291,8 +1289,6 @@ namespace MWRender
             animationPath.replace(0, 6, "animations");
         }
         animationPath.replace(animationPath.size()-4, 4, "/");
-
-        resourceSystem->getVFS()->normalizeFilename(animationPath);
 
         for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {

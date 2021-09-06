@@ -191,10 +191,7 @@ namespace Gui
 
     void FontLoader::loadBitmapFonts(bool exportToFile)
     {
-        std::string pattern = "Fonts/";
-        mVFS->normalizeFilename(pattern);
-
-        for (const auto& name : mVFS->getRecursiveDirectoryIterator(pattern))
+        for (const auto& name : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
             size_t pos = name.find_last_of('.');
             if (pos != std::string::npos && name.compare(pos, name.size() - pos, ".fnt") == 0)

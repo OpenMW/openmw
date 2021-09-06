@@ -295,10 +295,7 @@ namespace MWSound
         {
             std::vector<std::string> filelist;
 
-            std::string pattern = "Music/" + playlist;
-            mVFS->normalizeFilename(pattern);
-
-            for (const auto& name : mVFS->getRecursiveDirectoryIterator(pattern))
+            for (const auto& name : mVFS->getRecursiveDirectoryIterator("Music/" + playlist))
                 filelist.push_back(name);
 
             mMusicFiles[playlist] = filelist;
@@ -345,10 +342,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
 
-        std::string voicefile = "Sound/"+filename;
-
-        mVFS->normalizeFilename(voicefile);
-        DecoderPtr decoder = loadVoice(voicefile);
+        DecoderPtr decoder = loadVoice(mVFS->normalizeFilename("Sound/" + filename));
         if (!decoder)
             return;
 
@@ -379,10 +373,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
 
-        std::string voicefile = "Sound/"+filename;
-
-        mVFS->normalizeFilename(voicefile);
-        DecoderPtr decoder = loadVoice(voicefile);
+        DecoderPtr decoder = loadVoice(mVFS->normalizeFilename("Sound/" + filename));
         if (!decoder)
             return;
 

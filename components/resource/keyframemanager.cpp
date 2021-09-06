@@ -133,8 +133,7 @@ namespace Resource
 
     osg::ref_ptr<const SceneUtil::KeyframeHolder> KeyframeManager::get(const std::string &name)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
+        const std::string normalized = mVFS->normalizeFilename(name);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)

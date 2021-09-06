@@ -66,13 +66,10 @@ namespace MWGui
 
     void LoadingScreen::findSplashScreens()
     {
-        std::string pattern = "Splash/";
-        mResourceSystem->getVFS()->normalizeFilename(pattern);
-
         /* priority given to the left */
         const std::array<std::string, 7> supported_extensions {{".tga", ".dds", ".ktx", ".png", ".bmp", ".jpeg", ".jpg"}};
 
-        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(pattern))
+        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator("Splash/"))
         {
             size_t pos = name.find_last_of('.');
             if (pos != std::string::npos)

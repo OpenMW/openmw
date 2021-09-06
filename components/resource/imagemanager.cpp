@@ -83,8 +83,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Image> ImageManager::getImage(const std::string &filename)
     {
-        std::string normalized = filename;
-        mVFS->normalizeFilename(normalized);
+        const std::string normalized = mVFS->normalizeFilename(filename);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)
