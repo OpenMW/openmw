@@ -118,7 +118,7 @@ namespace SceneUtil
             else
             {
                 master->asGroup()->addChild(handle);
-                handle->setUserDataContainer(toAttach->getUserDataContainer());
+                mergeUserData(toAttach->getUserDataContainer(), handle);
                 return handle;
             }
         }
