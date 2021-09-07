@@ -1,4 +1,3 @@
-
 set(WIZARD
     componentselectionpage.cpp
     conclusionpage.cpp
@@ -34,21 +33,6 @@ set(WIZARD_HEADER
     utils/componentlistwidget.hpp
 )
 
-# Headers that must be pre-processed
-set(WIZARD_HEADER_MOC
-    componentselectionpage.hpp
-    conclusionpage.hpp
-    existinginstallationpage.hpp
-    importpage.hpp
-    installationtargetpage.hpp
-    intropage.hpp
-    languageselectionpage.hpp
-    mainwizard.hpp
-    methodselectionpage.hpp
-
-    utils/componentlistwidget.hpp
-)
-
 set(WIZARD_UI
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/componentselectionpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/conclusionpage.ui
@@ -63,7 +47,6 @@ set(WIZARD_UI
 if (OPENMW_USE_UNSHIELD)
     set (WIZARD ${WIZARD} installationpage.cpp unshield/unshieldworker.cpp)
     set (WIZARD_HEADER ${WIZARD_HEADER} installationpage.hpp unshield/unshieldworker.hpp)
-    set (WIZARD_HEADER_MOC ${WIZARD_HEADER_MOC} installationpage.hpp unshield/unshieldworker.hpp)
     set (WIZARD_UI ${WIZARD_UI} ${CMAKE_SOURCE_DIR}/files/ui/wizard/installationpage.ui)
     add_definitions(-DOPENMW_USE_UNSHIELD)
 endif (OPENMW_USE_UNSHIELD)
@@ -80,7 +63,6 @@ if(WIN32)
 endif(WIN32)
 
 QT5_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
-QT5_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
 QT5_WRAP_UI(UI_HDRS ${WIZARD_UI})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -94,7 +76,6 @@ openmw_add_executable(openmw-wizard
     ${WIZARD}
     ${WIZARD_HEADER}
     ${RCC_SRCS}
-    ${MOC_SRCS}
     ${UI_HDRS}
 )
 
@@ -125,3 +106,7 @@ endif()
 if (WIN32)
     INSTALL(TARGETS openmw-wizard RUNTIME DESTINATION ".")
 endif(WIN32)
+
+if(USE_QT)
+    set_property(TARGET openmw-wizard PROPERTY AUTOMOC ON)
+endif(USE_QT)

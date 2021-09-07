@@ -202,8 +202,6 @@ if (USE_QT)
     find_package(Qt5Widgets REQUIRED)
     find_package(Qt5Network REQUIRED)
     find_package(Qt5OpenGL REQUIRED)
-    # Instruct CMake to run moc automatically when needed.
-    #set(CMAKE_AUTOMOC ON)
 endif()
 
 set(USED_OSG_COMPONENTS

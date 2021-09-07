@@ -1,5 +1,5 @@
-#ifndef CSV_TOOLS_REPORTTABLE_H
-#define CSV_TOOLS_REPORTTABLE_H
+#ifndef CSV_TOOLS_MERGE_H
+#define CSV_TOOLS_MERGE_H
 
 #include <QWidget>
 
