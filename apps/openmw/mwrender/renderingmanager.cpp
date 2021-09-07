@@ -398,7 +398,7 @@ namespace MWRender
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
         mTerrain->setWorkQueue(mWorkQueue.get());
 
-       osg::ref_ptr<CompositeStateSetUpdater> composite = new CompositeStateSetUpdater;
+       osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
         if (Settings::Manager::getBool("enabled", "Groundcover"))
         {
