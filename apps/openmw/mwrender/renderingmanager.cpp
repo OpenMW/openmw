@@ -398,13 +398,15 @@ namespace MWRender
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
         mTerrain->setWorkQueue(mWorkQueue.get());
 
+       osg::ref_ptr<CompositeStateSetUpdater> composite = new CompositeStateSetUpdater;
+
         if (Settings::Manager::getBool("enabled", "Groundcover"))
         {
             float density = Settings::Manager::getFloat("density", "Groundcover");
             density = std::clamp(density, 0.f, 1.f);
 
             mGroundcoverUpdater = new GroundcoverUpdater;
-            sceneRoot->addUpdateCallback(mGroundcoverUpdater);
+            composite->addController(mGroundcoverUpdater);
 
             mGroundcover.reset(new Groundcover(mResourceSystem->getSceneManager(), density));
             static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mGroundcover.get());
@@ -412,7 +414,8 @@ namespace MWRender
         }
 
         mStateUpdater = new StateUpdater;
-        sceneRoot->addUpdateCallback(mStateUpdater);
+        composite->addController(mStateUpdater);
+        sceneRoot->addUpdateCallback(composite);
 
         mSharedUniformStateUpdater = new SharedUniformStateUpdater;
         rootNode->addUpdateCallback(mSharedUniformStateUpdater);
