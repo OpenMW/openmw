@@ -400,35 +400,12 @@ namespace MWRender
 
         if (Settings::Manager::getBool("enabled", "Groundcover"))
         {
-            osg::ref_ptr<osg::Group> groundcoverRoot = new osg::Group;
-            groundcoverRoot->setNodeMask(Mask_Groundcover);
-            groundcoverRoot->setName("Groundcover Root");
-            sceneRoot->addChild(groundcoverRoot);
-
-            mGroundcoverUpdater = new GroundcoverUpdater;
-            groundcoverRoot->addUpdateCallback(mGroundcoverUpdater);
-
-            float chunkSize = Settings::Manager::getFloat("min chunk size", "Groundcover");
-            if (chunkSize >= 1.0f)
-                chunkSize = 1.0f;
-            else if (chunkSize >= 0.5f)
-                chunkSize = 0.5f;
-            else if (chunkSize >= 0.25f)
-                chunkSize = 0.25f;
-            else if (chunkSize != 0.125f)
-                chunkSize = 0.125f;
-
             float density = Settings::Manager::getFloat("density", "Groundcover");
             density = std::clamp(density, 0.f, 1.f);
 
-            mGroundcoverWorld.reset(new Terrain::QuadTreeWorld(groundcoverRoot, mTerrainStorage.get(), Mask_Groundcover, lodFactor, chunkSize));
             mGroundcover.reset(new Groundcover(mResourceSystem->getSceneManager(), density));
-            static_cast<Terrain::QuadTreeWorld*>(mGroundcoverWorld.get())->addChunkManager(mGroundcover.get());
+            static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mGroundcover.get());
             mResourceSystem->addResourceManager(mGroundcover.get());
-
-            // Groundcover it is handled in the same way indifferently from if it is from active grid or from distant cell.
-            // Use a stub grid to avoid splitting between chunks for active grid and chunks for distant cells.
-            mGroundcoverWorld->setActiveGrid(osg::Vec4i(0, 0, 0, 0));
         }
 
         mStateUpdater = new StateUpdater;
@@ -693,8 +670,6 @@ namespace MWRender
         if (store->getCell()->isExterior())
         {
             mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
-            if (mGroundcoverWorld)
-                mGroundcoverWorld->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
         }
     }
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
@@ -706,8 +681,6 @@ namespace MWRender
         if (store->getCell()->isExterior())
         {
             mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
-            if (mGroundcoverWorld)
-                mGroundcoverWorld->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
         }
 
         mWater->removeCell(store);
@@ -718,8 +691,6 @@ namespace MWRender
         if (!enable)
             mWater->setCullCallback(nullptr);
         mTerrain->enable(enable);
-        if (mGroundcoverWorld)
-            mGroundcoverWorld->enable(enable);
     }
 
     void RenderingManager::setSkyEnabled(bool enabled)
@@ -1180,10 +1151,10 @@ namespace MWRender
         float distanceMult = std::cos(osg::DegreesToRadians(fov)/2.f);
         mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f/distanceMult : 1.f));
 
-        if (mGroundcoverWorld)
+        if (mGroundcover)
         {
             float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
-            mGroundcoverWorld->setViewDistance(groundcoverDistance * (distanceMult ? 1.f/distanceMult : 1.f));
+            mGroundcover->setViewDistance(groundcoverDistance * (distanceMult ? 1.f/distanceMult : 1.f));
         }
     }
 
