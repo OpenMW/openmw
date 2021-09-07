@@ -403,6 +403,9 @@ namespace MWRender
             float density = Settings::Manager::getFloat("density", "Groundcover");
             density = std::clamp(density, 0.f, 1.f);
 
+            mGroundcoverUpdater = new GroundcoverUpdater;
+            sceneRoot->addUpdateCallback(mGroundcoverUpdater);
+
             mGroundcover.reset(new Groundcover(mResourceSystem->getSceneManager(), density));
             static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mGroundcover.get());
             mResourceSystem->addResourceManager(mGroundcover.get());
