@@ -51,6 +51,7 @@ namespace Terrain
         void releaseGLObjects(osg::State* state) override;
 
         void setViewDistance(float viewDistance) { mViewDistance = viewDistance; }
+        float getViewDistance() const { return mViewDistance; }
 
     private:
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool compile);
