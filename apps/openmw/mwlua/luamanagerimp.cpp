@@ -284,7 +284,7 @@ namespace MWLua
         std::shared_ptr<LocalScripts> scripts;
         // When loading a game, it can be called before LuaManager::setPlayer,
         // so we can't just check ptr == mPlayer here.
-        if (*ptr.getCellRef().getRefIdPtr() == "player")
+        if (ptr.getCellRef().getRefIdRef() == "player")
         {
             scripts = std::make_shared<PlayerScripts>(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
             scripts->addPackage("openmw.ui", mUserInterfacePackage);
