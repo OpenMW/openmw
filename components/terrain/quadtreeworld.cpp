@@ -352,6 +352,8 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, f
 
         for (QuadTreeWorld::ChunkManager* m : chunkManagers)
         {
+            if (m->getViewDistance() && entry.mNode->distance(vd->getViewPoint()) > m->getViewDistance())
+                continue;
             osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
             if (n) pat->addChild(n);
         }
