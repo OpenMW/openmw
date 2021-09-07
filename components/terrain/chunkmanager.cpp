@@ -32,7 +32,6 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     , mCompositeMapSize(512)
     , mCompositeMapLevel(1.f)
     , mMaxCompGeometrySize(1.f)
-    , mViewDistance(0.f)
 {
     mMultiPassRoot = new osg::StateSet;
     mMultiPassRoot->setRenderingHint(osg::StateSet::OPAQUE_BIN);
