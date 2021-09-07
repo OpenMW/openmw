@@ -180,7 +180,7 @@ namespace MWRender
 
     osg::ref_ptr<osg::Node> Groundcover::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
-        ChunkId id = std::make_tuple(center, size, activeGrid);
+        ChunkId id = std::make_tuple(center, size);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
         if (obj)
