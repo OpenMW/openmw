@@ -206,9 +206,6 @@ namespace MWMechanics
             endPointInLocalCoords,
                 startNode);
 
-        if (!endNode.second)
-            return;
-
         // if it's shorter for actor to travel from start to end, than to travel from either
         // start or end to nearest pathgrid point, just travel from start to end.
         float startToEndLength2 = (endPointInLocalCoords - startPointInLocalCoords).length2();
@@ -279,7 +276,8 @@ namespace MWMechanics
         // unreachable pathgrid point.
         //
         // The AI routines will have to deal with such situations.
-        *out++ = endPoint;
+        if (endNode.second)
+            *out++ = endPoint;
     }
 
     float PathFinder::getZAngleToNext(float x, float y) const
