@@ -1029,7 +1029,7 @@ void onMagicEffectRemoved(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellP
     auto& magnitudes = target.getClass().getCreatureStats(target).getMagicEffects();
     const auto* magicEffect = world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
     if(magicEffect->mData.mFlags & ESM::MagicEffect::Flags::AppliedOnce)
-        magnitudes.add(EffectKey(effect.mEffectId, effect.mArg), EffectParam(-effect.mMinMagnitude));
+        magnitudes.add(EffectKey(effect.mEffectId, effect.mArg), EffectParam(-effect.mMagnitude));
     removeMagicEffect(target, spellParams, effect);
     auto anim = world->getAnimation(target);
     if(anim)
