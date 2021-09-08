@@ -1250,23 +1250,10 @@ namespace MWWorld
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
-        int progress = 0, initialProgress = -1, progressRange = 0;
-        while (!mPreloader->syncTerrainLoad(vec, progress, progressRange, mRendering.getReferenceTime()))
-        {
-            if (initialProgress == -1)
-            {
-                loadingListener->setLabel("#{sLoadingMessage4}");
-                initialProgress = progress;
-            }
-            if (progress)
-            {
-                loadingListener->setProgressRange(std::max(0, progressRange-initialProgress));
-                loadingListener->setProgress(progress-initialProgress);
-            }
-            else
-                loadingListener->setProgress(0);
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        }
+
+        loadingListener->setLabel("#{sLoadingMessage4}");
+
+        while (!mPreloader->syncTerrainLoad(vec, mRendering.getReferenceTime(), *loadingListener)) {}
     }
 
     void Scene::reloadTerrain()

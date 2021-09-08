@@ -51,13 +51,13 @@ namespace MWLua
 
     bool isMarker(const MWWorld::Ptr& ptr)
     {
-        std::string_view id = *ptr.getCellRef().getRefIdPtr();
+        std::string_view id = ptr.getCellRef().getRefIdRef();
         return id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker";
     }
 
     std::string_view getMWClassName(const MWWorld::Ptr& ptr)
     {
-        if (*ptr.getCellRef().getRefIdPtr() == "player")
+        if (ptr.getCellRef().getRefIdRef() == "player")
             return "Player";
         if (isMarker(ptr))
             return "Marker";
@@ -71,7 +71,7 @@ namespace MWLua
         res.append(" (");
         res.append(getMWClassName(ptr));
         res.append(", ");
-        res.append(*ptr.getCellRef().getRefIdPtr());
+        res.append(ptr.getCellRef().getRefIdRef());
         res.append(")");
         return res;
     }
