@@ -95,6 +95,8 @@ namespace Terrain
         void rebuildViews();
         bool storeView(const ViewData* view, double referenceTime);
 
+        float getReuseDistance() const { return mReuseDistance; }
+
     private:
         std::list<ViewData> mViewVector;
 
