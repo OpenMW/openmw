@@ -413,6 +413,9 @@ namespace MWRender
             mGroundcover.reset(new Groundcover(mResourceSystem->getSceneManager(), density));
             static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mGroundcover.get());
             mResourceSystem->addResourceManager(mGroundcover.get());
+
+            float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
+            mGroundcover->setViewDistance(groundcoverDistance);
         }
 
         mStateUpdater = new StateUpdater;
@@ -1158,12 +1161,6 @@ namespace MWRender
         fov = std::min(mFieldOfView, 140.f);
         float distanceMult = std::cos(osg::DegreesToRadians(fov)/2.f);
         mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f/distanceMult : 1.f));
-
-        if (mGroundcover)
-        {
-            float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
-            mGroundcover->setViewDistance(groundcoverDistance * (distanceMult ? 1.f/distanceMult : 1.f));
-        }
     }
 
     void RenderingManager::updateTextureFiltering()
