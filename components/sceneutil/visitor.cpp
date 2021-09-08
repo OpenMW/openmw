@@ -32,13 +32,13 @@ namespace SceneUtil
 
     void FindByNameVisitor::apply(osg::Group &group)
     {
-        if (!checkGroup(group))
+        if (!mFoundNode && !checkGroup(group))
             traverse(group);
     }
 
     void FindByNameVisitor::apply(osg::MatrixTransform &node)
     {
-        if (!checkGroup(node))
+        if (!mFoundNode && !checkGroup(node))
             traverse(node);
     }
 
