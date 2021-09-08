@@ -10,6 +10,7 @@
 #include <components/misc/constants.hpp>
 #include <components/sceneutil/mwshadowtechnique.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/loadinglistener/reporter.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
@@ -496,7 +497,7 @@ View* QuadTreeWorld::createView()
     return mViewDataMap->createIndependentView();
 }
 
-void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::Vec4i &grid, std::atomic<bool> &abort, std::atomic<int> &progress, int& progressTotal)
+void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::Vec4i &grid, std::atomic<bool> &abort, Loading::Reporter& reporter)
 {
     ensureQuadTreeBuilt();
 
@@ -506,16 +507,18 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
     DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid);
     mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
 
-    if (!progressTotal)
-        for (unsigned int i=0; i<vd->getNumEntries(); ++i)
-            progressTotal += vd->getEntry(i).mNode->getSize();
+    std::size_t progressTotal = 0;
+    for (unsigned int i = 0, n = vd->getNumEntries(); i < n; ++i)
+        progressTotal += vd->getEntry(i).mNode->getSize();
+
+    reporter.addTotal(progressTotal);
 
     const float cellWorldSize = mStorage->getCellWorldSize();
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
         loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, grid, mChunkManagers, true);
-        progress += entry.mNode->getSize();
+        reporter.addProgress(entry.mNode->getSize());
     }
     vd->markUnchanged();
 }

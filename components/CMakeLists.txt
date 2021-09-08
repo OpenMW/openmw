@@ -197,6 +197,10 @@ add_component_dir(detournavigator
     navmeshcacheitem
     )
 
+add_component_dir(loadinglistener
+    reporter
+    )
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
