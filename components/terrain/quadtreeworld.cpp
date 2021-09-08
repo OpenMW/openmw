@@ -313,7 +313,7 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, const
     return lodFlags;
 }
 
-void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, float cellWorldSize, const osg::Vec4i &gridbounds, const std::vector<QuadTreeWorld::ChunkManager*>& chunkManagers, bool compile)
+void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, float cellWorldSize, const osg::Vec4i &gridbounds, const std::vector<QuadTreeWorld::ChunkManager*>& chunkManagers, bool compile, float reuseDistance)
 {
     if (!vd->hasChanged() && entry.mRenderingNode)
         return;
@@ -341,7 +341,7 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, f
 
         for (QuadTreeWorld::ChunkManager* m : chunkManagers)
         {
-            if (m->getViewDistance() && entry.mNode->distance(vd->getViewPoint()) > m->getViewDistance())
+            if (m->getViewDistance() && entry.mNode->distance(vd->getViewPoint()) > m->getViewDistance() + reuseDistance*10)
                 continue;
             osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
             if (n) pat->addChild(n);
@@ -437,7 +437,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
-        loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, mActiveGrid, mChunkManagers, false);
+        loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, mActiveGrid, mChunkManagers, false, mViewDataMap->getReuseDistance());
         entry.mRenderingNode->accept(nv);
     }
 
@@ -505,7 +505,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
-        loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, grid, mChunkManagers, true);
+        loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, grid, mChunkManagers, true, mViewDataMap->getReuseDistance());
         progress += entry.mNode->getSize();
     }
     vd->markUnchanged();
