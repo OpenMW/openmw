@@ -373,7 +373,9 @@ namespace MWRender
         mTerrainStorage.reset(new TerrainStorage(mResourceSystem, normalMapPattern, heightMapPattern, useTerrainNormalMaps, specularMapPattern, useTerrainSpecularMaps));
         const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
 
-        if (Settings::Manager::getBool("distant terrain", "Terrain"))
+        bool groundcover = Settings::Manager::getBool("enabled", "Groundcover");
+        bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
+        if (distantTerrain || groundcover)
         {
             const int compMapResolution = Settings::Manager::getInt("composite map resolution", "Terrain");
             int compMapPower = Settings::Manager::getInt("composite map level", "Terrain");
@@ -400,7 +402,7 @@ namespace MWRender
 
        osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
-        if (Settings::Manager::getBool("enabled", "Groundcover"))
+        if (groundcover)
         {
             float density = Settings::Manager::getFloat("density", "Groundcover");
             density = std::clamp(density, 0.f, 1.f);
