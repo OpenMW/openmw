@@ -3,6 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <algorithm>
+#include <string_view>
 
 #include <components/vfs/manager.hpp>
 
@@ -83,7 +84,7 @@ int CSMWorld::Resources::getIndex (const std::string& id) const
     return index;
 }
 
-int CSMWorld::Resources::searchId (const std::string& id) const
+int CSMWorld::Resources::searchId(std::string_view id) const
 {
     std::string id2 = Misc::StringUtils::lowerCase (id);
 

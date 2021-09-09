@@ -9,6 +9,9 @@
 
 #include <components/misc/stringops.hpp>
 
+#include <cstring>
+#include <string_view>
+
 namespace SceneUtil
 {
 
@@ -24,7 +27,7 @@ namespace SceneUtil
 
     void FindByClassVisitor::apply(osg::Node &node)
     {
-        if (Misc::StringUtils::ciEqual(node.className(), mNameToFind))
+        if (Misc::StringUtils::ciEqual(std::string_view(node.className()), mNameToFind))
             mFoundNodes.push_back(&node);
 
         traverse(node);

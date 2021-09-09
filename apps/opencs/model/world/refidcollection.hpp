@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <deque>
+#include <string_view>
 
 #include "columnbase.hpp"
 #include "collectionbase.hpp"
@@ -85,7 +86,7 @@ namespace CSMWorld
             void appendBlankRecord (const std::string& id, UniversalId::Type type) override;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            int searchId (const std::string& id) const override;
+            int searchId(std::string_view id) const override;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
 

@@ -7,6 +7,8 @@
 #include "universalid.hpp"
 #include "record.hpp"
 
+#include <string_view>
+
 namespace CSMWorld
 {
     template<>
@@ -261,7 +263,7 @@ void CSMWorld::RefCollection::cloneRecord (const std::string& origin,
    insertRecord(std::move(copy), getAppendIndex(destination, type)); // call RefCollection::insertRecord()
 }
 
-int CSMWorld::RefCollection::searchId (const std::string& id) const
+int CSMWorld::RefCollection::searchId(std::string_view id) const
 {
     return searchId(extractIdNum(id));
 }

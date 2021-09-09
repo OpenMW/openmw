@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <cassert>
+#include <string_view>
 
 #include <components/esm/loadacti.hpp>
 #include <components/esm/loadalch.hpp>
@@ -277,7 +278,7 @@ namespace CSMWorld
 
             int localToGlobalIndex (const LocalIndex& index) const;
 
-            LocalIndex searchId (const std::string& id) const;
+            LocalIndex searchId(std::string_view id) const;
 
             void erase (int index, int count);
 

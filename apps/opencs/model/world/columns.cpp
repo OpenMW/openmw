@@ -391,7 +391,7 @@ int CSMWorld::Columns::getId (const std::string& name)
     std::string name2 = Misc::StringUtils::lowerCase (name);
 
     for (int i=0; sNames[i].mName; ++i)
-        if (Misc::StringUtils::ciEqual(sNames[i].mName, name2))
+        if (Misc::StringUtils::ciEqual(std::string_view(sNames[i].mName), name2))
             return sNames[i].mId;
 
     return -1;
