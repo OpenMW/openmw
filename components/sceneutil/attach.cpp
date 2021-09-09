@@ -15,6 +15,7 @@
 #include <components/sceneutil/skeleton.hpp>
 
 #include "visitor.hpp"
+#include "clone.hpp"
 
 namespace SceneUtil
 {
@@ -49,10 +50,10 @@ namespace SceneUtil
                 return;
 
             osg::Node* node = &drawable;
-            while (node->getNumParents())
+            for (auto it = getNodePath().rbegin()+1; it != getNodePath().rend(); ++it)
             {
-                osg::Group* parent = node->getParent(0);
-                if (!parent || !filterMatches(parent->getName()))
+                osg::Node* parent = *it;
+                if (!filterMatches(parent->getName()))
                     break;
                 node = parent;
             }
@@ -63,12 +64,7 @@ namespace SceneUtil
         {
             for (const osg::ref_ptr<osg::Node>& node : mToCopy)
             {
-                if (node->getNumParents() > 1)
-                    Log(Debug::Error) << "Error CopyRigVisitor: node has " << node->getNumParents() << " parents";
-                while (node->getNumParents())
-                    node->getParent(0)->removeChild(node);
-
-                mParent->addChild(node);
+                mParent->addChild(static_cast<osg::Node*>(node->clone(SceneUtil::CopyOp())));
             }
             mToCopy.clear();
         }
@@ -90,25 +86,25 @@ namespace SceneUtil
         std::string mFilter2;
     };
 
-    void mergeUserData(osg::UserDataContainer* source, osg::Object* target)
+    void mergeUserData(const osg::UserDataContainer* source, osg::Object* target)
     {
         if (!target->getUserDataContainer())
-            target->setUserDataContainer(source);
+            target->setUserDataContainer(osg::clone(source, osg::CopyOp::SHALLOW_COPY));
         else
         {
             for (unsigned int i=0; i<source->getNumUserObjects(); ++i)
-                target->getUserDataContainer()->addUserObject(source->getUserObject(i));
+                target->getUserDataContainer()->addUserObject(osg::clone(source->getUserObject(i), osg::CopyOp::SHALLOW_COPY));
         }
     }
 
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
     {
-        if (dynamic_cast<SceneUtil::Skeleton*>(toAttach.get()))
+        if (dynamic_cast<const SceneUtil::Skeleton*>(toAttach.get()))
         {
             osg::ref_ptr<osg::Group> handle = new osg::Group;
 
             CopyRigVisitor copyVisitor(handle, filter);
-            toAttach->accept(copyVisitor);
+            const_cast<osg::Node*>(toAttach.get())->accept(copyVisitor);
             copyVisitor.doCopy();
 
             if (handle->getNumChildren() == 1)
@@ -122,14 +118,16 @@ namespace SceneUtil
             else
             {
                 master->asGroup()->addChild(handle);
-                handle->setUserDataContainer(toAttach->getUserDataContainer());
+                mergeUserData(toAttach->getUserDataContainer(), handle);
                 return handle;
             }
         }
         else
         {
+            osg::ref_ptr<osg::Node> clonedToAttach = static_cast<osg::Node*>(toAttach->clone(SceneUtil::CopyOp()));
+
             FindByNameVisitor findBoneOffset("BoneOffset");
-            toAttach->accept(findBoneOffset);
+            clonedToAttach->accept(findBoneOffset);
 
             osg::ref_ptr<osg::PositionAttitudeTransform> trans;
 
@@ -172,13 +170,13 @@ namespace SceneUtil
             if (trans)
             {
                 attachNode->addChild(trans);
-                trans->addChild(toAttach);
+                trans->addChild(clonedToAttach);
                 return trans;
             }
             else
             {
-                attachNode->addChild(toAttach);
-                return toAttach;
+                attachNode->addChild(clonedToAttach);
+                return clonedToAttach;
             }
         }
     }

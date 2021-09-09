@@ -114,10 +114,7 @@ namespace MWWorld
                             }
                         }
                     }
-                    if (mPreloadInstances && animated)
-                        mPreloadedObjects.insert(mSceneManager->cacheInstance(mesh));
-                    else
-                        mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
+                    mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
                     if (mPreloadInstances)
                         mPreloadedObjects.insert(mBulletShapeManager->cacheInstance(mesh));
                     else

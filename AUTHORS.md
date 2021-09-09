@@ -44,6 +44,7 @@ Programmers
     Austin Salgat (Salgat)
     Ben Shealy (bentsherman)
     Berulacks
+    Bo Svensson
     Britt Mathis (galdor557)
     Capostrophic
     Carl Maxwell
