@@ -45,7 +45,7 @@ osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f& cen
     ChunkId id = std::make_tuple(center, lod, lodFlags);
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
     if (obj)
-        return obj->asNode();
+        return static_cast<osg::Node*>(obj.get());
     else
     {
         osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags, compile);
