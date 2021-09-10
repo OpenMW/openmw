@@ -88,6 +88,9 @@ namespace SceneUtil
 
     void mergeUserData(const osg::UserDataContainer* source, osg::Object* target)
     {
+        if (!source)
+            return;
+    
         if (!target->getUserDataContainer())
             target->setUserDataContainer(osg::clone(source, osg::CopyOp::SHALLOW_COPY));
         else
