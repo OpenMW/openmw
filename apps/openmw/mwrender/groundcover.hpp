@@ -56,6 +56,7 @@ namespace MWRender
     private:
         Resource::SceneManager* mSceneManager;
         float mDensity;
+        osg::ref_ptr<osg::StateSet> mStateset;
 
         typedef std::map<std::string, std::vector<GroundcoverEntry>> InstanceMap;
         osg::ref_ptr<osg::Node> createChunk(InstanceMap& instances, const osg::Vec2f& center);
