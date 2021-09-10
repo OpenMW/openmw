@@ -13,11 +13,14 @@ import statistics
 import sys
 import termtables
 
+
 @click.command()
 @click.option('--print_keys', is_flag=True,
               help='Print a list of all present keys in the input file.')
 @click.option('--timeseries', type=str, multiple=True,
               help='Show a graph for given metric over time.')
+@click.option('--commulative_timeseries', type=str, multiple=True,
+              help='Show a graph for commulative sum of a given metric over time.')
 @click.option('--hist', type=str, multiple=True,
               help='Show a histogram for all values of given metric.')
 @click.option('--hist_ratio', nargs=2, type=str, multiple=True,
@@ -34,6 +37,8 @@ import termtables
               help='Print table with stats for a given metric containing min, max, mean, median etc.')
 @click.option('--timeseries_sum', is_flag=True,
               help='Add a graph to timeseries for a sum per frame of all given timeseries metrics.')
+@click.option('--commulative_timeseries_sum', is_flag=True,
+            help='Add a graph to timeseries for a sum per frame of all given commulative timeseries.')
 @click.option('--stats_sum', is_flag=True,
               help='Add a row to stats table for a sum per frame of all given stats metrics.')
 @click.option('--begin_frame', type=int, default=0,
@@ -42,7 +47,8 @@ import termtables
               help='End processing at this frame.')
 @click.argument('path', default='', type=click.Path())
 def main(print_keys, timeseries, hist, hist_ratio, stdev_hist, plot, stats,
-         timeseries_sum, stats_sum, begin_frame, end_frame, path):
+         timeseries_sum, stats_sum, begin_frame, end_frame, path,
+         commulative_timeseries, commulative_timeseries_sum):
     data = list(read_data(path))
     keys = collect_unique_keys(data)
     frames = collect_per_frame(data=data, keys=keys, begin_frame=begin_frame, end_frame=end_frame)
@@ -50,7 +56,9 @@ def main(print_keys, timeseries, hist, hist_ratio, stdev_hist, plot, stats,
         for v in keys:
             print(v)
     if timeseries:
-        draw_timeseries(frames=frames, keys=timeseries, timeseries_sum=timeseries_sum)
+        draw_timeseries(frames=frames, keys=timeseries, add_sum=timeseries_sum)
+    if commulative_timeseries:
+        draw_commulative_timeseries(frames=frames, keys=commulative_timeseries, add_sum=commulative_timeseries_sum)
     if hist:
         draw_hists(frames=frames, keys=hist)
     if hist_ratio:
@@ -105,16 +113,28 @@ def collect_unique_keys(frames):
     return sorted(result)
 
 
-def draw_timeseries(frames, keys, timeseries_sum):
+def draw_timeseries(frames, keys, add_sum):
     fig, ax = matplotlib.pyplot.subplots()
     x = numpy.array(range(max(len(v) for k, v in frames.items() if k in keys)))
     for key in keys:
         ax.plot(x, frames[key], label=key)
-    if timeseries_sum:
+    if add_sum:
         ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label='sum')
     ax.grid(True)
     ax.legend()
     fig.canvas.set_window_title('timeseries')
+
+
+def draw_commulative_timeseries(frames, keys, add_sum):
+    fig, ax = matplotlib.pyplot.subplots()
+    x = numpy.array(range(max(len(v) for k, v in frames.items() if k in keys)))
+    for key in keys:
+        ax.plot(x, numpy.cumsum(frames[key]), label=key)
+    if add_sum:
+        ax.plot(x, numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0)), label='sum')
+    ax.grid(True)
+    ax.legend()
+    fig.canvas.set_window_title('commulative_timeseries')
 
 
 def draw_hists(frames, keys):

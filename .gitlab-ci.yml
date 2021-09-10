@@ -223,6 +223,18 @@ variables: &tests-targets
   - choco install ninja -y
   - choco install python -y
   - refreshenv
+  - |
+    function Make-SafeFileName {
+      param(
+        [Parameter(Mandatory=$true)]
+        [String]
+        $FileName
+      )
+      [IO.Path]::GetInvalidFileNameChars() | ForEach-Object {
+        $FileName = $FileName.Replace($_, '_')
+      }
+      return $FileName
+    }
   stage: build
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
@@ -237,10 +249,10 @@ variables: &tests-targets
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip ..\..\OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' CI-ID.txt
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip '*'
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
@@ -326,6 +338,18 @@ Windows_Ninja_Tests_RelWithDebInfo:
   - choco install vswhere -y
   - choco install python -y
   - refreshenv
+  - |
+    function Make-SafeFileName {
+      param(
+        [Parameter(Mandatory=$true)]
+        [String]
+        $FileName
+      )
+      [IO.Path]::GetInvalidFileNameChars() | ForEach-Object {
+        $FileName = $FileName.Replace($_, '_')
+      }
+      return $FileName
+    }
   stage: build
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
@@ -339,10 +363,10 @@ Windows_Ninja_Tests_RelWithDebInfo:
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip ..\..\OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' CI-ID.txt
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip '*'
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log

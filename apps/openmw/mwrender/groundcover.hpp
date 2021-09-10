@@ -29,8 +29,8 @@ namespace MWRender
         osg::Vec3f mPlayerPos;
     };
 
-    typedef std::tuple<osg::Vec2f, float, bool> ChunkId; // Center, Size, ActiveGrid
-    class Groundcover : public Resource::GenericResourceManager<ChunkId>, public Terrain::QuadTreeWorld::ChunkManager
+    typedef std::tuple<osg::Vec2f, float> GroundcoverChunkId; // Center, Size
+    class Groundcover : public Resource::GenericResourceManager<GroundcoverChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
     public:
         Groundcover(Resource::SceneManager* sceneManager, float density);

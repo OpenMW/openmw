@@ -97,7 +97,7 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
     }
 }
 
-int CSMWorld::InfoCollection::getInfoIndex (const std::string& id, const std::string& topic) const
+int CSMWorld::InfoCollection::getInfoIndex(std::string_view id, std::string_view topic) const
 {
     // find the topic first
     std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::const_iterator iter
@@ -345,12 +345,12 @@ void  CSMWorld::InfoCollection::appendBlankRecord (const std::string& id, Univer
     insertRecord(std::move(record2), getInsertIndex(id, type, nullptr), type); // call InfoCollection::insertRecord()
 }
 
-int CSMWorld::InfoCollection::searchId (const std::string& id) const
+int CSMWorld::InfoCollection::searchId(std::string_view id) const
 {
     std::string::size_type separator = id.find_last_of('#');
 
     if (separator == std::string::npos)
-        throw std::runtime_error("invalid info ID: " + id);
+        throw std::runtime_error("invalid info ID: " + std::string(id));
 
     return getInfoIndex(id.substr(separator+1), id.substr(0, separator));
 }

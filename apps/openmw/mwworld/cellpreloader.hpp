@@ -29,6 +29,11 @@ namespace MWRender
     class LandManager;
 }
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace MWWorld
 {
     class CellStore;
@@ -72,7 +77,7 @@ namespace MWWorld
         typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
         void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
 
-        bool syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, int& progress, int& progressRange, double timestamp);
+        bool syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, double timestamp, Loading::Listener& listener);
         void abortTerrainPreloadExcept(const PositionCellGrid *exceptPos);
 
     private:

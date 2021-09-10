@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <memory>
+#include <string_view>
 
 #include <components/esm/esmreader.hpp>
 
@@ -787,7 +788,7 @@ void CSMWorld::RefIdCollection::appendBlankRecord (const std::string& id, Univer
     mData.appendRecord (type, id, false);
 }
 
-int CSMWorld::RefIdCollection::searchId (const std::string& id) const
+int CSMWorld::RefIdCollection::searchId(std::string_view id) const
 {
     RefIdData::LocalIndex localIndex = mData.searchId (id);
 

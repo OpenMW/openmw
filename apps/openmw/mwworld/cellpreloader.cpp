@@ -14,6 +14,7 @@
 #include <components/terrain/world.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/esm/loadcell.hpp>
+#include <components/loadinglistener/reporter.hpp>
 
 #include "../mwrender/landmanager.hpp"
 
@@ -113,10 +114,7 @@ namespace MWWorld
                             }
                         }
                     }
-                    if (mPreloadInstances && animated)
-                        mPreloadedObjects.insert(mSceneManager->cacheInstance(mesh));
-                    else
-                        mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
+                    mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
                     if (mPreloadInstances)
                         mPreloadedObjects.insert(mBulletShapeManager->cacheInstance(mesh));
                     else
@@ -157,8 +155,6 @@ namespace MWWorld
     public:
         TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View> >& views, Terrain::World* world, const std::vector<CellPreloader::PositionCellGrid>& preloadPositions)
             : mAbort(false)
-            , mProgress(views.size())
-            , mProgressRange(0)
             , mTerrainViews(views)
             , mWorld(world)
             , mPreloadPositions(preloadPositions)
@@ -178,8 +174,9 @@ namespace MWWorld
             for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size() && !mAbort; ++i)
             {
                 mTerrainViews[i]->reset();
-                mWorld->preload(mTerrainViews[i], mPreloadPositions[i].first, mPreloadPositions[i].second, mAbort, mProgress[i], mProgressRange);
+                mWorld->preload(mTerrainViews[i], mPreloadPositions[i].first, mPreloadPositions[i].second, mAbort, mLoadingReporter);
             }
+            mLoadingReporter.complete();
         }
 
         void abort() override
@@ -187,16 +184,17 @@ namespace MWWorld
             mAbort = true;
         }
 
-        int getProgress() const { return !mProgress.empty() ? mProgress[0].load() : 0; }
-        int getProgressRange() const { return !mProgress.empty() && mProgress[0].load() ? mProgressRange : 0; }
+        void wait(Loading::Listener& listener) const
+        {
+            mLoadingReporter.wait(listener);
+        }
 
     private:
         std::atomic<bool> mAbort;
-        std::vector<std::atomic<int>> mProgress;
-        int mProgressRange;
         std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
         Terrain::World* mWorld;
         std::vector<CellPreloader::PositionCellGrid> mPreloadPositions;
+        Loading::Reporter mLoadingReporter;
     };
 
     /// Worker thread item: update the resource system's cache, effectively deleting unused entries.
@@ -415,7 +413,7 @@ namespace MWWorld
         mUnrefQueue = unrefQueue;
     }
 
-    bool CellPreloader::syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, int& progress, int& progressRange, double timestamp)
+    bool CellPreloader::syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, double timestamp, Loading::Listener& listener)
     {
         if (!mTerrainPreloadItem)
             return true;
@@ -435,9 +433,8 @@ namespace MWWorld
         }
         else
         {
-            progress = mTerrainPreloadItem->getProgress();
-            progressRange = mTerrainPreloadItem->getProgressRange();
-            return false;
+            mTerrainPreloadItem->wait(listener);
+            return true;
         }
     }
 
