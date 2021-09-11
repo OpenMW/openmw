@@ -255,31 +255,47 @@ namespace Resource
                 node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
             }
 
+            /* Check if the <node> has <extra type="Node"> <technique profile="OpenSceneGraph"> <Descriptions> <Description>
+               correct format for OpenMW: <Description>alphatest mode value MaterialName</Description>
+                                      e.g <Description>alphatest GEQUAL 0.8 MyAlphaTestedMaterial</Description> */
             std::vector<std::string> descriptions = node.getDescriptions();
             for (auto description : descriptions)
             {
-                std::vector<std::string> descriptionParts;
+                mDescriptions.emplace_back(description);
+            }
 
+            // Iterate each description, and see if the current node uses the specified material for alpha testing
+            for (auto description : mDescriptions)
+            {
+                std::vector<std::string> descriptionParts;
                 std::istringstream descriptionStringStream(description);
                 for (std::string part; std::getline(descriptionStringStream, part, ' ');)
-                    descriptionParts.emplace_back(part);
-
-                if (descriptionParts.at(0) == "alphatest")
                 {
-                    if (!osgDepthCreated)
-                    {
-                        osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
-                        node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
-                    }
+                    descriptionParts.emplace_back(part);
+                }
 
-                    osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
-                    osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.back())));
-                    node.getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
-                    Log(Debug::Info) << "Setting collada alpha test " << description << " for " << node.getName();
+                if (descriptionParts.size() > (3) && descriptionParts.at(3) == node.getOrCreateStateSet()->getName())
+                {
+                    if (descriptionParts.at(0) == "alphatest")
+                    {
+                        if (!osgDepthCreated)
+                        {
+                            osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                            node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                        }
+
+                        osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
+                        osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.at(2))));
+                        node.getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                        Log(Debug::Info) << "Setting collada alpha test for " << node.getName();
+                    }
                 }
             }
+
             traverse(node);
         }
+        private:
+            std::vector<std::string> mDescriptions;
     };
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
