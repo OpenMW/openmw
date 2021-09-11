@@ -242,7 +242,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     {
         osg::ref_ptr<osg::Group> result(new osg::Group);
         result->addChild(geometry);
-        auto chunkBorder = CellBorder::createBorderGeometry(chunkCenter.x() - chunkSize / 2.f, chunkCenter.y() - chunkSize / 2.f, chunkSize, mStorage, mSceneManager, getNodeMask());
+        auto chunkBorder = CellBorder::createBorderGeometry(chunkCenter.x() - chunkSize / 2.f, chunkCenter.y() - chunkSize / 2.f, chunkSize, mStorage, mSceneManager, getNodeMask(), 5.f, { 1, 0, 0, 0 });
         osg::Vec3f center = { chunkCenter.x(), chunkCenter.y(), 0 };
         osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(osg::Matrixf::translate(-center*Constants::CellSizeInUnits));
         trans->setDataVariance(osg::Object::STATIC);

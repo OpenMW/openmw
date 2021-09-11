@@ -22,11 +22,11 @@ CellBorder::CellBorder(Terrain::World *world, osg::Group *root, int borderMask, 
 {
 }
 
-osg::ref_ptr<osg::Geode> CellBorder::createBorderGeometry(float x, float y, float size, Terrain::Storage* terrain, Resource::SceneManager* sceneManager, int mask)
+osg::ref_ptr<osg::Geode> CellBorder::createBorderGeometry(float x, float y, float size, Terrain::Storage* terrain, Resource::SceneManager* sceneManager, int mask,
+    float offset, osg::Vec4f color)
 {
     const int cellSize = ESM::Land::REAL_SIZE;
     const int borderSegments = 40;
-    const float offset = 10.0;
 
     osg::Vec3 cellCorner = osg::Vec3(x * cellSize,y * cellSize,0);
     size *= cellSize;
@@ -52,7 +52,7 @@ osg::ref_ptr<osg::Geode> CellBorder::createBorderGeometry(float x, float y, floa
 
         osg::Vec4f col = i % 2 == 0 ?
             osg::Vec4f(0,0,0,1) :
-            osg::Vec4f(1,1,0,1);
+            color;
 
         colors->push_back(col);
     }
