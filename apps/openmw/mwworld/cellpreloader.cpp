@@ -373,7 +373,11 @@ namespace MWWorld
                 setTerrainPreloadPositions(std::vector<PositionCellGrid>());
             }
             else
+            {
                 mStoreViewsFailCount = 0;
+                mLoadedTerrainPositions = mTerrainPreloadPositions;
+                mLoadedTerrainTimestamp = timestamp;
+            }
             mTerrainPreloadItem = nullptr;
         }
     }
@@ -438,28 +442,14 @@ namespace MWWorld
         }
     }
 
-    void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid *exceptPos)
-    {
-        const float resetThreshold = ESM::Land::REAL_SIZE;
-        for (const auto& pos : mTerrainPreloadPositions)
-            if (exceptPos && (pos.first-exceptPos->first).length2() < resetThreshold*resetThreshold && pos.second == exceptPos->second)
-                return;
-        if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
-        {
-            mTerrainPreloadItem->abort();
-            mTerrainPreloadItem->waitTillDone();
-        }
-        setTerrainPreloadPositions(std::vector<CellPreloader::PositionCellGrid>());
-    }
-
-    bool contains(const std::vector<CellPreloader::PositionCellGrid>& container, const std::vector<CellPreloader::PositionCellGrid>& contained)
+    bool contains(const std::vector<CellPreloader::PositionCellGrid>& container, const std::vector<CellPreloader::PositionCellGrid>& contained, float tolerance=1.f)
     {
         for (const auto& pos : contained)
         {
             bool found = false;
             for (const auto& pos2 : container)
             {
-                if ((pos.first-pos2.first).length2() < 1 && pos.second == pos2.second)
+                if ((pos.first-pos2.first).length2() < tolerance*tolerance && pos.second == pos2.second)
                 {
                     found = true;
                     break;
@@ -468,6 +458,18 @@ namespace MWWorld
             if (!found) return false;
         }
         return true;
+    }
+
+    void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid *exceptPos)
+    {
+        if (exceptPos && contains(mTerrainPreloadPositions, {*exceptPos}, ESM::Land::REAL_SIZE))
+            return;
+        if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
+        {
+            mTerrainPreloadItem->abort();
+            mTerrainPreloadItem->waitTillDone();
+        }
+        setTerrainPreloadPositions(std::vector<CellPreloader::PositionCellGrid>());
     }
 
     void CellPreloader::setTerrainPreloadPositions(const std::vector<CellPreloader::PositionCellGrid> &positions)
@@ -499,6 +501,11 @@ namespace MWWorld
                 mWorkQueue->addWorkItem(mTerrainPreloadItem);
             }
         }
+    }
+    
+    bool CellPreloader::isTerrainLoaded(const CellPreloader::PositionCellGrid &positions, double referenceTime) const
+    {
+        return mLoadedTerrainTimestamp + mResourceSystem()->getSceneManager()->getExpiryDelay() > referenceTime && contains(mLoadedTerrainPositions, positions, ESM::Land::REAL_SIZE);
     }
 
 }
