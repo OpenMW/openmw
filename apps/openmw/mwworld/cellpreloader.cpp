@@ -475,7 +475,10 @@ namespace MWWorld
     void CellPreloader::setTerrainPreloadPositions(const std::vector<CellPreloader::PositionCellGrid> &positions)
     {
         if (positions.empty())
+        {
             mTerrainPreloadPositions.clear();
+            mLoadedTerrainPositions.clear();
+        }
         else if (contains(mTerrainPreloadPositions, positions))
             return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
