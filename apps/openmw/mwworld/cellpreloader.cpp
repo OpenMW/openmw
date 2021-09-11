@@ -95,7 +95,6 @@ namespace MWWorld
                 {
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
 
-                    bool animated = false;
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size()-1)
                     {
@@ -107,10 +106,7 @@ namespace MWWorld
                             {
                                 kfname.replace(kfname.size()-4, 4, ".kf");
                                 if (mSceneManager->getVFS()->exists(kfname))
-                                {
                                     mPreloadedObjects.insert(mKeyframeManager->get(kfname));
-                                    animated = true;
-                                }
                             }
                         }
                     }
