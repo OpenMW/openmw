@@ -45,30 +45,30 @@ import termtables
               help='Start processing from this frame.')
 @click.option('--end_frame', type=int, default=sys.maxsize,
               help='End processing at this frame.')
-@click.argument('path', default='', type=click.Path())
+@click.argument('path', type=click.Path(), nargs=-1)
 def main(print_keys, timeseries, hist, hist_ratio, stdev_hist, plot, stats,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
          commulative_timeseries, commulative_timeseries_sum):
-    data = list(read_data(path))
-    keys = collect_unique_keys(data)
-    frames = collect_per_frame(data=data, keys=keys, begin_frame=begin_frame, end_frame=end_frame)
+    sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
+    keys = collect_unique_keys(sources)
+    frames = collect_per_frame(sources=sources, keys=keys, begin_frame=begin_frame, end_frame=end_frame)
     if print_keys:
         for v in keys:
             print(v)
     if timeseries:
-        draw_timeseries(frames=frames, keys=timeseries, add_sum=timeseries_sum)
+        draw_timeseries(sources=frames, keys=timeseries, add_sum=timeseries_sum)
     if commulative_timeseries:
-        draw_commulative_timeseries(frames=frames, keys=commulative_timeseries, add_sum=commulative_timeseries_sum)
+        draw_commulative_timeseries(sources=frames, keys=commulative_timeseries, add_sum=commulative_timeseries_sum)
     if hist:
-        draw_hists(frames=frames, keys=hist)
+        draw_hists(sources=frames, keys=hist)
     if hist_ratio:
-        draw_hist_ratio(frames=frames, pairs=hist_ratio)
+        draw_hist_ratio(sources=frames, pairs=hist_ratio)
     if stdev_hist:
-        draw_stdev_hists(frames=frames, stdev_hists=stdev_hist)
+        draw_stdev_hists(sources=frames, stdev_hists=stdev_hist)
     if plot:
-        draw_plots(frames=frames, plots=plot)
+        draw_plots(sources=frames, plots=plot)
     if stats:
-        print_stats(frames=frames, keys=stats, stats_sum=stats_sum)
+        print_stats(sources=frames, keys=stats, stats_sum=stats_sum)
     matplotlib.pyplot.show()
 
 
@@ -92,126 +92,140 @@ def read_data(path):
                 frame[key] = to_number(value)
 
 
-def collect_per_frame(data, keys, begin_frame, end_frame):
-    result = collections.defaultdict(list)
-    for frame in data:
-        for key in keys:
-            if key in frame:
-                result[key].append(frame[key])
-            else:
-                result[key].append(None)
-    for key, values in result.items():
-        result[key] = numpy.array(values[begin_frame:end_frame])
+def collect_per_frame(sources, keys, begin_frame, end_frame):
+    result = collections.defaultdict(lambda: collections.defaultdict(list))
+    for name, frames in sources.items():
+        for frame in frames:
+            for key in keys:
+                if key in frame:
+                    result[name][key].append(frame[key])
+                else:
+                    result[name][key].append(None)
+    for name, sources in result.items():
+        for key, values in sources.items():
+            result[name][key] = numpy.array(values[begin_frame:end_frame])
     return result
 
 
-def collect_unique_keys(frames):
+def collect_unique_keys(sources):
     result = set()
-    for frame in frames:
-        for key in frame.keys():
-            result.add(key)
+    for frames in sources.values():
+        for frame in frames:
+            for key in frame.keys():
+                result.add(key)
     return sorted(result)
 
 
-def draw_timeseries(frames, keys, add_sum):
+def draw_timeseries(sources, keys, add_sum):
     fig, ax = matplotlib.pyplot.subplots()
-    x = numpy.array(range(max(len(v) for k, v in frames.items() if k in keys)))
-    for key in keys:
-        ax.plot(x, frames[key], label=key)
-    if add_sum:
-        ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label='sum')
+    for name, frames in sources.items():
+        x = numpy.array(range(max(len(v) for k, v in frames.items() if k in keys)))
+        for key in keys:
+            print(key, name)
+            ax.plot(x, frames[key], label=f'{key}:{name}')
+        if add_sum:
+            ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label=f'sum:{name}')
     ax.grid(True)
     ax.legend()
     fig.canvas.set_window_title('timeseries')
 
 
-def draw_commulative_timeseries(frames, keys, add_sum):
+def draw_commulative_timeseries(sources, keys, add_sum):
     fig, ax = matplotlib.pyplot.subplots()
-    x = numpy.array(range(max(len(v) for k, v in frames.items() if k in keys)))
-    for key in keys:
-        ax.plot(x, numpy.cumsum(frames[key]), label=key)
-    if add_sum:
-        ax.plot(x, numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0)), label='sum')
+    for name, frames in sources.items():
+        x = numpy.array(range(max(len(v) for k, v in frames.items() if k in keys)))
+        for key in keys:
+            ax.plot(x, numpy.cumsum(frames[key]), label=f'{key}:{name}')
+        if add_sum:
+            ax.plot(x, numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}')
     ax.grid(True)
     ax.legend()
     fig.canvas.set_window_title('commulative_timeseries')
 
 
-def draw_hists(frames, keys):
+def draw_hists(sources, keys):
     fig, ax = matplotlib.pyplot.subplots()
     bins = numpy.linspace(
-        start=min(min(v) for k, v in frames.items() if k in keys),
-        stop=max(max(v) for k, v in frames.items() if k in keys),
+        start=min(min(min(v) for k, v in f.items() if k in keys) for f in sources.values()),
+        stop=max(max(max(v) for k, v in f.items() if k in keys) for f in sources.values()),
         num=20,
     )
-    for key in keys:
-        ax.hist(frames[key], bins=bins, label=key, alpha=1 / len(keys))
+    for name, frames in sources.items():
+        for key in keys:
+            ax.hist(frames[key], bins=bins, label=f'{key}:{name}', alpha=1 / (len(keys) * len(sources)))
     ax.set_xticks(bins)
     ax.grid(True)
     ax.legend()
     fig.canvas.set_window_title('hists')
 
 
-def draw_hist_ratio(frames, pairs):
+def draw_hist_ratio(sources, pairs):
     fig, ax = matplotlib.pyplot.subplots()
     bins = numpy.linspace(
-        start=min(min(a / b for a, b in zip(frames[a], frames[b])) for a, b in pairs),
-        stop=max(max(a / b for a, b in zip(frames[a], frames[b])) for a, b in pairs),
+        start=min(min(min(a / b for a, b in zip(f[a], f[b])) for a, b in pairs) for f in sources.values()),
+        stop=max(max(max(a / b for a, b in zip(f[a], f[b])) for a, b in pairs) for f in sources.values()),
         num=20,
     )
-    for a, b in pairs:
-        ax.hist(frames[a] / frames[b], bins=bins, label=f'{a} / {b}', alpha=1 / len(pairs))
+    for name, frames in sources.items():
+        for a, b in pairs:
+            ax.hist(frames[a] / frames[b], bins=bins, label=f'{a} / {b}:{name}', alpha=1 / (len(pairs) * len(sources)))
     ax.set_xticks(bins)
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('hists')
+    fig.canvas.set_window_title('hists_ratio')
 
 
-def draw_stdev_hists(frames, stdev_hists):
+def draw_stdev_hists(sources, stdev_hists):
     for key, scale in stdev_hists:
         scale = float(scale)
         fig, ax = matplotlib.pyplot.subplots()
-        median = statistics.median(frames[key])
-        stdev = statistics.stdev(frames[key])
+        first_frames = next(v for v in sources.values())
+        median = statistics.median(first_frames[key])
+        stdev = statistics.stdev(first_frames[key])
         start = median - stdev / 2 * scale
         stop = median + stdev / 2 * scale
         bins = numpy.linspace(start=start, stop=stop, num=9)
-        values = [v for v in frames[key] if start <= v <= stop]
-        ax.hist(values, bins=bins, label=key, alpha=1 / len(stdev_hists))
+        for name, frames in sources.items():
+            values = [v for v in frames[key] if start <= v <= stop]
+            ax.hist(values, bins=bins, label=f'{key}:{name}', alpha=1 / (len(stdev_hists) * len(sources)))
         ax.set_xticks(bins)
         ax.grid(True)
         ax.legend()
         fig.canvas.set_window_title('stdev_hists')
 
 
-def draw_plots(frames, plots):
+def draw_plots(sources, plots):
     fig, ax = matplotlib.pyplot.subplots()
-    for x_key, y_key, agg in plots:
-        if agg is None:
-            ax.plot(frames[x_key], frames[y_key], label=f'x={x_key}, y={y_key}')
-        elif agg:
-            agg_f = dict(
-                mean=statistics.mean,
-                median=statistics.median,
-            )[agg]
-            grouped = collections.defaultdict(list)
-            for x, y in zip(frames[x_key], frames[y_key]):
-                grouped[x].append(y)
-            aggregated = sorted((k, agg_f(v)) for k, v in grouped.items())
-            ax.plot(
-                numpy.array([v[0] for v in aggregated]),
-                numpy.array([v[1] for v in aggregated]),
-                label=f'x={x_key}, y={y_key}, agg={agg}',
-            )
+    for name, frames in sources.items():
+        for x_key, y_key, agg in plots:
+            if agg is None:
+                ax.plot(frames[x_key], frames[y_key], label=f'x={x_key}, y={y_key}:{name}')
+            elif agg:
+                agg_f = dict(
+                    mean=statistics.mean,
+                    median=statistics.median,
+                )[agg]
+                grouped = collections.defaultdict(list)
+                for x, y in zip(frames[x_key], frames[y_key]):
+                    grouped[x].append(y)
+                aggregated = sorted((k, agg_f(v)) for k, v in grouped.items())
+                ax.plot(
+                    numpy.array([v[0] for v in aggregated]),
+                    numpy.array([v[1] for v in aggregated]),
+                    label=f'x={x_key}, y={y_key}, agg={agg}:{name}',
+                )
     ax.grid(True)
     ax.legend()
     fig.canvas.set_window_title('plots')
 
 
-def print_stats(frames, keys, stats_sum):
-    stats = [make_stats(key=key, values=filter_not_none(frames[key])) for key in keys]
-    if stats_sum:
-        stats.append(make_stats(key='sum', values=sum_multiple(frames, keys)))
+def print_stats(sources, keys, stats_sum):
+    stats = list()
+    for name, frames in sources.items():
+        for key in keys:
+            stats.append(make_stats(source=name, key=key, values=filter_not_none(frames[key])))
+        if stats_sum:
+            stats.append(make_stats(source=name, key='sum', values=sum_multiple(frames, keys)))
     metrics = list(stats[0].keys())
     max_key_size = max(len(tuple(v.values())[0]) for v in stats)
     termtables.print(
@@ -235,8 +249,9 @@ def sum_multiple(frames, keys):
     return numpy.array([result[k] for k in sorted(result.keys())])
 
 
-def make_stats(key, values):
+def make_stats(source, key, values):
     return collections.OrderedDict(
+        source=source,
         key=key,
         number=len(values),
         min=min(values),
