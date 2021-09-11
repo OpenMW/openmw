@@ -228,6 +228,7 @@ namespace MWWorld
         , mPreloadInstances(true)
         , mLastResourceCacheUpdate(0.0)
         , mStoreViewsFailCount(0)
+        , mLoadedTerrainTimestamp(0.0)
     {
     }
 
