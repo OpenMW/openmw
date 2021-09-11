@@ -13,6 +13,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_TextBox.h>
 
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/rng.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
@@ -66,23 +67,15 @@ namespace MWGui
 
     void LoadingScreen::findSplashScreens()
     {
-        /* priority given to the left */
-        const std::array<std::string, 7> supported_extensions {{".tga", ".dds", ".ktx", ".png", ".bmp", ".jpeg", ".jpg"}};
+        auto isSupportedExtension = [](const std::string_view& ext) {
+            static const std::array<std::string, 7> supported_extensions{ {"tga", "dds", "ktx", "png", "bmp", "jpeg", "jpg"} };
+            return !ext.empty() && std::find(supported_extensions.begin(), supported_extensions.end(), ext) != supported_extensions.end();
+        };
 
         for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator("Splash/"))
         {
-            size_t pos = name.find_last_of('.');
-            if (pos != std::string::npos)
-            {
-                for (auto const& extension : supported_extensions)
-                {
-                    if (name.compare(pos, name.size() - pos, extension) == 0)
-                    {
-                        mSplashScreens.push_back(name);
-                        break;  /* based on priority */
-                    }
-                }
-            }
+            if (isSupportedExtension(Misc::getFileExtension(name)))
+                mSplashScreens.push_back(name);
         }
         if (mSplashScreens.empty())
             Log(Debug::Warning) << "Warning: no splash screens found!";

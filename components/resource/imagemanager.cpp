@@ -4,6 +4,7 @@
 #include <osgDB/Registry>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "objectcache.hpp"
@@ -102,10 +103,7 @@ namespace Resource
                 return mWarningImage;
             }
 
-            size_t extPos = normalized.find_last_of('.');
-            std::string ext;
-            if (extPos != std::string::npos && extPos+1 < normalized.size())
-                ext = normalized.substr(extPos+1);
+            const std::string ext(Misc::getFileExtension(normalized));
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
             if (!reader)
             {

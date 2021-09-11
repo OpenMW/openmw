@@ -9,6 +9,7 @@
 #include <components/nifosg/nifloader.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/osgacontroller.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "animation.hpp"
@@ -141,8 +142,7 @@ namespace Resource
         else
         {
             osg::ref_ptr<SceneUtil::KeyframeHolder> loaded (new SceneUtil::KeyframeHolder);
-            std::string ext = Resource::getFileExtension(normalized);
-            if (ext == "kf")
+            if (Misc::getFileExtension(normalized) == "kf")
             {
                 NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(mVFS->getNormalized(normalized), normalized)), *loaded.get());
             }

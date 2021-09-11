@@ -17,6 +17,7 @@
 #include <components/resource/keyframemanager.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
@@ -600,8 +601,7 @@ namespace MWRender
 
         for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
-            size_t pos = name.find_last_of('.');
-            if (pos != std::string::npos && name.compare(pos, name.size() - pos, ".kf") == 0)
+            if (Misc::getFileExtension(name) == "kf")
                 addSingleAnimSource(name, baseModel);
         }
     }
@@ -1292,8 +1292,7 @@ namespace MWRender
 
         for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
-            size_t pos = name.find_last_of('.');
-            if (pos != std::string::npos && name.compare(pos, name.size() - pos, ".nif") == 0)
+            if (Misc::getFileExtension(name) == "nif")
                 loadBonesFromFile(node, name, resourceSystem);
         }
     }

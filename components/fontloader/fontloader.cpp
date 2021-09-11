@@ -17,6 +17,7 @@
 
 #include <components/vfs/manager.hpp>
 
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/stringops.hpp>
 
 #include <components/myguiplatform/myguitexture.hpp>
@@ -193,8 +194,7 @@ namespace Gui
     {
         for (const auto& name : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
-            size_t pos = name.find_last_of('.');
-            if (pos != std::string::npos && name.compare(pos, name.size() - pos, ".fnt") == 0)
+            if (Misc::getFileExtension(name) == "fnt")
                 loadBitmapFont(name, exportToFile);
         }
     }

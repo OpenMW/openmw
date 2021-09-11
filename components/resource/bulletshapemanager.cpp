@@ -8,6 +8,7 @@
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
+#include <components/misc/pathhelpers.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/vfs/manager.hpp>
 
@@ -129,12 +130,7 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
         shape = osg::ref_ptr<BulletShape>(static_cast<BulletShape*>(obj.get()));
     else
     {
-        size_t extPos = normalized.find_last_of('.');
-        std::string ext;
-        if (extPos != std::string::npos && extPos+1 < normalized.size())
-            ext = normalized.substr(extPos+1);
-
-        if (ext == "nif")
+        if (Misc::getFileExtension(normalized) == "nif")
         {
             NifBullet::BulletNifLoader loader;
             shape = loader.load(*mNifFileManager->get(normalized));
