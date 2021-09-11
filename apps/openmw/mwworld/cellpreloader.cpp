@@ -503,9 +503,9 @@ namespace MWWorld
         }
     }
     
-    bool CellPreloader::isTerrainLoaded(const CellPreloader::PositionCellGrid &positions, double referenceTime) const
+    bool CellPreloader::isTerrainLoaded(const CellPreloader::PositionCellGrid &position, double referenceTime) const
     {
-        return mLoadedTerrainTimestamp + mResourceSystem()->getSceneManager()->getExpiryDelay() > referenceTime && contains(mLoadedTerrainPositions, positions, ESM::Land::REAL_SIZE);
+        return mLoadedTerrainTimestamp + mResourceSystem()->getSceneManager()->getExpiryDelay() > referenceTime && contains(mLoadedTerrainPositions, {position}, ESM::Land::REAL_SIZE);
     }
 
 }
