@@ -628,7 +628,8 @@ namespace MWWorld
         osg::Vec4i newGrid = gridCenterToBounds(mCurrentGridCenter);
         mRendering.setActiveGrid(newGrid);
 
-        preloadTerrain(pos, true);
+        if (!mPreloader->isTerrainLoaded(std::make_pair(pos, newGrid)))
+            preloadTerrain(pos, true);
         mPagedRefs.clear();
         mRendering.getPagedRefnums(newGrid, mPagedRefs);
 
