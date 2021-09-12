@@ -442,9 +442,9 @@ namespace Shader
         mRequirements.pop_back();
     }
 
-    void addUniformIfRequired(osg::StateSet* writableStateSet, const osg::StateSet* defaults, osg::StateSet* addedState, osg::ref_ptr<osg::Uniform> uniform)
+    void addUniformIfRequired(osg::StateSet* writableStateSet, const osg::StateSet* defaults, AddedState* addedState, osg::ref_ptr<osg::Uniform> uniform)
     {
-        osg::Uniform* defaultUniform = defaults ? defaults->getUniform(uniform->getName()) : nullptr;
+        const osg::Uniform* defaultUniform = defaults ? defaults->getUniform(uniform->getName()) : nullptr;
         if (defaultUniform && *uniform == *defaultUniform)
             return;
         writableStateSet->addUniform(uniform);
