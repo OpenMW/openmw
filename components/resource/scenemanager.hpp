@@ -85,8 +85,7 @@ namespace Resource
         /// When editing such state, it should be reinstated before the edits, and shaders should be recreated afterwards.
         void reinstateRemovedState(osg::ref_ptr<osg::Node> node);
 
-        /// @see ShaderVisitor::setForceShaders
-        void setForceShaders(bool force);
+        osg::StateSet* setForceShaders(bool force);
         bool getForceShaders() const;
 
         void setClampLighting(bool clamp);
