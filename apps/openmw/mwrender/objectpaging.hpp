@@ -31,6 +31,8 @@ namespace MWRender
 
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, bool activeGrid, const osg::Vec3f& viewPoint, bool compile);
 
+        void setStateSet(osg::StateSet* stateset) { mStateSet = stateset; }
+
         unsigned int getNodeMask() override;
 
         /// @return true if view needs rebuild
@@ -50,6 +52,7 @@ namespace MWRender
         void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
 
     private:
+        osg::ref_ptr<osg::StateSet> mStateSet;
         Resource::SceneManager* mSceneManager;
         bool mActiveGrid;
         bool mDebugBatches;
