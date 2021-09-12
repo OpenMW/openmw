@@ -23,6 +23,10 @@ namespace Shader
         /// Setting force = true will cause all objects to render using shaders, regardless of having a bump map.
         void setForceShaders(bool force);
 
+        /// Set the default shader state that the user has applied to the top of the scene graph.
+        /// For the sake of efficiency, we will try to avoid setting this state again on individual nodes.
+        void setDefaults(const osg::StateSet* defaults);
+
         /// Set if we are allowed to modify StateSets encountered in the graph (default true).
         /// @par If set to false, then instead of modifying, the StateSet will be cloned and this new StateSet will be assigned to the node.
         /// @par This option is useful when the ShaderVisitor is run on a "live" subgraph that may have already been submitted for rendering.
@@ -105,6 +109,8 @@ namespace Shader
         std::vector<ShaderRequirements> mRequirements;
 
         std::string mDefaultShaderPrefix;
+
+        const osg::StateSet* mDefaults;
 
         void createProgram(const ShaderRequirements& reqs);
         void ensureFFP(osg::Node& node);
