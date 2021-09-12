@@ -834,7 +834,8 @@ namespace Resource
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
         shaderVisitor->setTranslucentFramebuffer(translucentFramebuffer);
-        shaderVisitor->setDefaults(mDefaultShaderState);
+        if (shaderPrefix == "objects")
+            shaderVisitor->setDefaults(mDefaultShaderState);
         return shaderVisitor;
     }
 
