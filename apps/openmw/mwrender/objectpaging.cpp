@@ -684,6 +684,7 @@ namespace MWRender
         }
 
         group->getBound();
+        group->setStateSet(mSceneManager->getDefaultShaderState());
         group->setNodeMask(Mask_Static);
         osg::UserDataContainer* udc = group->getOrCreateUserDataContainer();
         if (activeGrid)
