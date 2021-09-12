@@ -238,7 +238,7 @@ namespace Resource
             if (mode == "GEQUAL") return osg::AlphaFunc::GEQUAL;
             if (mode == "NEVER") return osg::AlphaFunc::NEVER;
 
-            Log(Debug::Info) << "Unexpected alpha testing mode: " << mode;
+            Log(Debug::Warning) << "Unexpected alpha testing mode: " << mode;
             return osg::AlphaFunc::LEQUAL;
         }
 
@@ -278,7 +278,6 @@ namespace Resource
                         osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
                         osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.at(2))));
                         node.getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
-                        Log(Debug::Info) << "Setting collada alpha test for " << node.getName();
                     }
                 }
             }
