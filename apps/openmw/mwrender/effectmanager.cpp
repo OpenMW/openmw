@@ -42,6 +42,7 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
     trans->setPosition(worldPosition);
     trans->setScale(osg::Vec3f(scale, scale, scale));
     trans->addChild(node);
+    trans->setStateSet(mResourceSystem->getSceneManager()->getDefaultShaderState());
 
     SceneUtil::AssignControllerSourcesVisitor assignVisitor(effect.mAnimTime);
     node->accept(assignVisitor);
