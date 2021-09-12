@@ -244,13 +244,10 @@ namespace Resource
 
         void apply(osg::Node& node) override
         {
-            bool osgDepthCreated(false);
-
             if (node.getOrCreateStateSet()->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
             {
                 osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
                 depth->setWriteMask(false);
-                osgDepthCreated = true;
 
                 node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
             }
@@ -278,12 +275,6 @@ namespace Resource
                 {
                     if (descriptionParts.at(0) == "alphatest")
                     {
-                        if (!osgDepthCreated)
-                        {
-                            osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
-                            node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
-                        }
-
                         osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
                         osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.at(2))));
                         node.getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
