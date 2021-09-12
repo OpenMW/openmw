@@ -255,7 +255,7 @@ namespace Resource
             reqs.mNode = dummy.get();
             reqs.mColorMode = 2;
             shaderVisitor->createProgram(reqs);
-            mDefaultShaderState = dummy.getStateSet();
+            mDefaultShaderState = dummy->getStateSet();
         }
         else
             mDefaultShaderState = nullptr;
