@@ -88,6 +88,8 @@ namespace Resource
         osg::StateSet* setForceShaders(bool force);
         bool getForceShaders() const;
 
+        osg::StateSet* getDefaultShaderState() { return mDefaultShaderState; }
+
         void setClampLighting(bool clamp);
         bool getClampLighting() const;
 
