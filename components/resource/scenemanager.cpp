@@ -244,6 +244,20 @@ namespace Resource
     void SceneManager::setForceShaders(bool force)
     {
         mForceShaders = force;
+
+        if (force)
+        {
+            osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor());
+            shaderVisitor->setDefaults(nullptr);
+            osg::ref_ptr<osg::Node> dummy = new osg::Group;
+            Shader::ShaderVisitor::ShaderRequirements reqs;
+            reqs.mTextures[0]="diffuseMap";
+            reqs.mNode = dummy.get();
+            shaderVisitor->createProgram(reqs);
+            mDefaultShaderState = dummy.getStateSet();
+        }
+        else
+            mDefaultShaderState = nullptr;
     }
 
     bool SceneManager::getForceShaders() const
@@ -820,6 +834,7 @@ namespace Resource
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
         shaderVisitor->setTranslucentFramebuffer(translucentFramebuffer);
+        shaderVisitor->setDefaults(mDefaultShaderState);
         return shaderVisitor;
     }
 
