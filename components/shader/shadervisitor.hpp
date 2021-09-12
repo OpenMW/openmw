@@ -58,26 +58,6 @@ namespace Shader
         void pushRequirements(osg::Node& node);
         void popRequirements();
 
-    private:
-        bool mForceShaders;
-        bool mAllowedToModifyStateSets;
-
-        bool mAutoUseNormalMaps;
-        std::string mNormalMapPattern;
-        std::string mNormalHeightMapPattern;
-
-        bool mAutoUseSpecularMaps;
-        std::string mSpecularMapPattern;
-
-        bool mApplyLightingToEnvMaps;
-
-        bool mConvertAlphaTestToAlphaToCoverage;
-
-        bool mTranslucentFramebuffer;
-
-        ShaderManager& mShaderManager;
-        Resource::ImageManager& mImageManager;
-
         struct ShaderRequirements
         {
             ShaderRequirements();
@@ -106,13 +86,35 @@ namespace Shader
             // the Node that requested these requirements
             osg::Node* mNode;
         };
+
+        void createProgram(const ShaderRequirements& reqs);
+
+    private:
+        bool mForceShaders;
+        bool mAllowedToModifyStateSets;
+
+        bool mAutoUseNormalMaps;
+        std::string mNormalMapPattern;
+        std::string mNormalHeightMapPattern;
+
+        bool mAutoUseSpecularMaps;
+        std::string mSpecularMapPattern;
+
+        bool mApplyLightingToEnvMaps;
+
+        bool mConvertAlphaTestToAlphaToCoverage;
+
+        bool mTranslucentFramebuffer;
+
+        ShaderManager& mShaderManager;
+        Resource::ImageManager& mImageManager;
+
         std::vector<ShaderRequirements> mRequirements;
 
         std::string mDefaultShaderPrefix;
 
         const osg::StateSet* mDefaults;
 
-        void createProgram(const ShaderRequirements& reqs);
         void ensureFFP(osg::Node& node);
         bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
     };
