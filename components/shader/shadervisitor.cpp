@@ -112,6 +112,7 @@ namespace Shader
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
         , mDefaultShaderPrefix(defaultShaderPrefix)
+        , mDefaults(nullptr)
     {
         mRequirements.emplace_back();
     }
@@ -119,6 +120,11 @@ namespace Shader
     void ShaderVisitor::setForceShaders(bool force)
     {
         mForceShaders = force;
+    }
+
+    void ShaderVisitor::setDefaults(const osg::StateSet* defaults)
+    {
+        mDefaults = defaults;
     }
 
     void ShaderVisitor::apply(osg::Node& node)
@@ -436,6 +442,15 @@ namespace Shader
         mRequirements.pop_back();
     }
 
+    void addUniformIfRequired(osg::StateSet* writableStateSet, const osg::StateSet* defaults, osg::StateSet* addedState, osg::ref_ptr<osg::Uniform> uniform)
+    {
+        osg::Uniform* defaultUniform = defaults ? defaults->getUniform(uniform->getName()) : nullptr;
+        if (defaultUniform && *uniform == *defaultUniform)
+            return;
+        writableStateSet->addUniform(uniform);
+        addedState->addUniform(uniform->getName());
+    }
+
     void ShaderVisitor::createProgram(const ShaderRequirements &reqs)
     {
         if (!reqs.mShaderRequired && !mForceShaders)
@@ -469,8 +484,7 @@ namespace Shader
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
 
-        writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
-        addedState->addUniform("colorMode");
+        addUniformIfRequired(writableStateSet, mDefaults, addedState, new osg::Uniform("colorMode", reqs.mColorMode));
 
         defineMap["alphaFunc"] = std::to_string(reqs.mAlphaFunc);
 
@@ -485,8 +499,7 @@ namespace Shader
         defineMap["adjustCoverage"] = "0";
         if (reqs.mAlphaFunc != osg::AlphaFunc::ALWAYS)
         {
-            writableStateSet->addUniform(new osg::Uniform("alphaRef", reqs.mAlphaRef));
-            addedState->addUniform("alphaRef");
+            addUniformIfRequired(writableStateSet, mDefaults, addedState, new osg::Uniform("alphaRef", reqs.mAlphaRef));
 
             if (!removedState->getAttributePair(osg::StateAttribute::ALPHAFUNC))
             {
@@ -560,13 +573,15 @@ namespace Shader
         if (vertexShader && fragmentShader)
         {
             auto program = mShaderManager.getProgram(vertexShader, fragmentShader);
-            writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
-            addedState->setAttributeAndModes(program);
+            if (!mDefaults || program != mDefaults->getAttribute(osg::StateAttribute::PROGRAM))
+            {
+                writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
+                addedState->setAttributeAndModes(program);
+            }
 
             for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
             {
-                writableStateSet->addUniform(new osg::Uniform(texIt->second.c_str(), texIt->first), osg::StateAttribute::ON);
-                addedState->addUniform(texIt->second);
+                addUniformIfRequired(writableStateSet, mDefaults, addedState, new osg::Uniform(texIt->second.c_str(), texIt->first));
             }
         }
     }
