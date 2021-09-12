@@ -241,7 +241,7 @@ namespace Resource
     {
     }
 
-    void SceneManager::setForceShaders(bool force)
+    osg::StateSet* SceneManager::setForceShaders(bool force)
     {
         mForceShaders = force;
 
@@ -258,6 +258,7 @@ namespace Resource
         }
         else
             mDefaultShaderState = nullptr;
+        return mDefaultShaderState;
     }
 
     bool SceneManager::getForceShaders() const
