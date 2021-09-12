@@ -45,6 +45,7 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     {
         cellnode = new osg::Group;
         cellnode->setName("Cell Root");
+        cellnode->setStateSet(mResourceSystem->getSceneManager()->getDefaultShaderState());
         mRootNode->addChild(cellnode);
         mCellSceneNodes[ptr.getCell()] = cellnode;
     }
