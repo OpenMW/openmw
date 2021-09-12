@@ -206,6 +206,7 @@ namespace Resource
         SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
         bool mConvertAlphaTestToAlphaToCoverage;
         GLenum mDepthFormat;
+        osg::ref_ptr<osg::StateSet> mDefaultShaderState;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
