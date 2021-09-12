@@ -85,7 +85,8 @@ namespace Resource
         /// When editing such state, it should be reinstated before the edits, and shaders should be recreated afterwards.
         void reinstateRemovedState(osg::ref_ptr<osg::Node> node);
 
-        osg::StateSet* setForceShaders(bool force);
+        /// Note if forcing shaders, you must use the getDefaultShaderState stateset on top of your scene graph.
+        void setForceShaders(bool force);
         bool getForceShaders() const;
 
         osg::StateSet* getDefaultShaderState() { return mDefaultShaderState; }
