@@ -5,6 +5,8 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
