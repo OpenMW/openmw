@@ -737,7 +737,7 @@ namespace SceneUtil
             // Needed to query the layout of the buffer object. The layout specifier needed to use the std140 layout is not reliably
             // available, regardless of extensions, until GLSL 140.
             mDummyProgram->addShader(new osg::Shader(osg::Shader::VERTEX, dummyVertSource));
-            mDummyProgram->addBindUniformBlock("LightBufferBinding", static_cast<int>(Shader::UBOBinding::LightBuffer));
+            mDummyProgram->addBindUniformBlock("LightBufferBinding", static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer));
         }
 
         LightManagerStateAttribute(const LightManagerStateAttribute& copy, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
