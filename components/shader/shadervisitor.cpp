@@ -1,5 +1,8 @@
 #include "shadervisitor.hpp"
 
+#include <unordered_set>
+#include <set>
+
 #include <osg/AlphaFunc>
 #include <osg/Geometry>
 #include <osg/GLExtensions>
