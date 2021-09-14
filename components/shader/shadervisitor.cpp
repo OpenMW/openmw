@@ -559,7 +559,7 @@ namespace Shader
 
         if (vertexShader && fragmentShader)
         {
-            auto program = mShaderManager.getProgram(vertexShader, fragmentShader);
+            auto program = mShaderManager.getProgram(vertexShader, fragmentShader, mProgramTemplate);
             writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
             addedState->setAttributeAndModes(program);
 
