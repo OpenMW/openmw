@@ -113,6 +113,10 @@ namespace Resource
         void setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported);
         bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
 
+        enum class UBOBinding
+        {
+            LightBuffer
+        };
         void setLightingMethod(SceneUtil::LightingMethod method);
         SceneUtil::LightingMethod getLightingMethod() const;
         
