@@ -341,8 +341,8 @@ namespace MWRender
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
-        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders")
-                            || Settings::Manager::getBool("force shaders", "Shaders")
+        bool forceShaders = Settings::Manager::getBool("force shaders", "Shaders")
+                            || Settings::Manager::getBool("radial fog", "Shaders")
                             || Settings::Manager::getBool("enable shadows", "Shadows")
                             || lightingMethod != SceneUtil::LightingMethod::FFP
                             || reverseZ;
