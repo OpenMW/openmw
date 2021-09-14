@@ -458,6 +458,9 @@ namespace Shader
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
 
+        if (defineMap["diffuseMap"] == 0)
+            writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
+
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
 
         writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
