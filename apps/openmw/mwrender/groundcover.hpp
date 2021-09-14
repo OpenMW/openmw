@@ -5,6 +5,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/esm/loadcell.hpp>
+#include <osg/Program>
 
 namespace MWRender
 {
@@ -57,6 +58,7 @@ namespace MWRender
         Resource::SceneManager* mSceneManager;
         float mDensity;
         osg::ref_ptr<osg::StateSet> mStateset;
+        osg::ref_ptr<osg::Program> mProgramTemplate;
 
         typedef std::map<std::string, std::vector<GroundcoverEntry>> InstanceMap;
         osg::ref_ptr<osg::Node> createChunk(InstanceMap& instances, const osg::Vec2f& center);
