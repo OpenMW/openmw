@@ -37,6 +37,7 @@
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
+    Bug #6273: Respawning NPCs rotation is inconsistent
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
