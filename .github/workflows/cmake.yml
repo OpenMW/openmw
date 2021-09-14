@@ -17,7 +17,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Install Dependancies
+    - name: Add OpenMW PPA Dependancies
+      run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
+    
+    - name: Install Building Dependancies
       run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
     - name: Configure CMake
