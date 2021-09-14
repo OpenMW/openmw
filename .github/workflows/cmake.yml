@@ -12,10 +12,13 @@ env:
 
 jobs:
   build:
-    runs-on: debian-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Install Dependancies
+      run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
