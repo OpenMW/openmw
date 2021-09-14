@@ -334,10 +334,6 @@ namespace Resource
 
         if (mLightingMethod == SceneUtil::LightingMethod::SingleUBO)
         {
-            enum class UBOBinding
-            {
-                LightBuffer
-            };
             osg::ref_ptr<osg::Program> program = new osg::Program;
             program->addBindUniformBlock("LightBufferBinding", static_cast<int>(UBOBinding::LightBuffer));
             mShaderManager->setProgramTemplate(program);
