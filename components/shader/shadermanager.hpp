@@ -8,6 +8,7 @@
 #include <osg/ref_ptr>
 
 #include <osg/Shader>
+#include <osg/Program>
 
 namespace Shader
 {
@@ -65,7 +66,7 @@ namespace Shader
 
         std::mutex mMutex;
 
-        const osg::Program* mProgramTemplate;
+        osg::ref_ptr<const osg::Program> mProgramTemplate;
     };
 
     bool parseFors(std::string& source, const std::string& templateName);
