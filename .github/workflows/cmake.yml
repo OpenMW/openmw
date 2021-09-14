@@ -29,7 +29,7 @@ jobs:
         cmake -S . -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=instdir
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel 3
+      run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
 
     - name: Test
       working-directory: ${{github.workspace}}/build
