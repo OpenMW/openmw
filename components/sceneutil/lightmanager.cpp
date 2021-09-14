@@ -677,9 +677,9 @@ namespace SceneUtil
                     auto bo = mLightManager->getLightBuffer(mLastFrameNumber);
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,5,7)
-                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), bo->getData(), 0, bo->getData()->getTotalDataSize());
+                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), bo->getData(), 0, bo->getData()->getTotalDataSize());
 #else
-                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), bo->getData()->getBufferObject(), 0, bo->getData()->getTotalDataSize());
+                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), bo->getData()->getBufferObject(), 0, bo->getData()->getTotalDataSize());
 #endif
                     stateset->setAttributeAndModes(ubb, osg::StateAttribute::ON);
                 }
