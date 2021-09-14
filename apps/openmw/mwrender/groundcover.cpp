@@ -7,6 +7,7 @@
 
 #include <components/esm/esmreader.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/shader/shadermanager.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwbase/environment.hpp"
@@ -180,6 +181,10 @@ namespace MWRender
          mStateset->setRenderBinDetails(0, "RenderBin", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
          mStateset->setAttribute(new osg::VertexAttribDivisor(6, 1));
          mStateset->setAttribute(new osg::VertexAttribDivisor(7, 1));
+    
+         mProgramTemplate = static_cast<osg::Program*>(mSceneManager->getShaderManager()->getProgramTemplate()->clone(osg::CopyOp::SHALLOW_COPY));
+         mProgramTemplate->addBindAttribLocation("aOffset", 6);
+         mProgramTemplate->addBindAttribLocation("aRotation", 7);
     }
 
     void Groundcover::collectInstances(InstanceMap& instances, float size, const osg::Vec2f& center)
@@ -249,7 +254,7 @@ namespace MWRender
         group->setNodeMask(Mask_Groundcover);
         if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
             group->setCullCallback(new SceneUtil::LightListCallback);
-        mSceneManager->recreateShaders(group, "groundcover", false, true);
+        mSceneManager->recreateShaders(group, "groundcover", false, true, mProgramTemplate);
         mSceneManager->shareState(group);
         group->getBound();
         return group;
