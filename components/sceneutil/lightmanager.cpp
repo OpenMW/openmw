@@ -11,6 +11,7 @@
 #include <osgUtil/CullVisitor>
 
 #include <components/sceneutil/util.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/misc/hash.hpp>
 #include <components/misc/stringops.hpp>
@@ -294,9 +295,9 @@ namespace SceneUtil
                 osg::ref_ptr<osg::UniformBufferObject> ubo = new osg::UniformBufferObject;
                 buffer->getData()->setBufferObject(ubo);
 #if OSG_VERSION_GREATER_OR_EQUAL(3,5,7)
-                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), buffer->getData(), 0, buffer->getData()->getTotalDataSize());
+                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), buffer->getData(), 0, buffer->getData()->getTotalDataSize());
 #else
-                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), ubo, 0, buffer->getData()->getTotalDataSize());
+                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), ubo, 0, buffer->getData()->getTotalDataSize());
 #endif
                 stateset->setAttributeAndModes(ubb, mode);
 
