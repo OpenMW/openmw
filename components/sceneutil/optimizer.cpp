@@ -30,6 +30,8 @@
 #include <osg/io_utils>
 #include <osg/Depth>
 
+#include <osgDB/SharedStateManager>
+
 #include <osgUtil/TransformAttributeFunctor>
 #include <osgUtil/Statistics>
 #include <osgUtil/MeshOptimizers>
@@ -99,6 +101,13 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         MergeGroupsVisitor mgrp(this);
         node->accept(mgrp);
     }
+
+    if (options & SHARE_DUPLICATE_STATE && _sharedStateManager)
+    (
+        if (_sharedStateMutex) _sharedStateMutex->lock();
+        _sharedStateManager->share(node);
+        if (_sharedStateMutex) _sharedStateMutex->unlock();
+    )
 
     if (options & MERGE_GEOMETRY)
     {
