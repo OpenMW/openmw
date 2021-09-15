@@ -1,12 +1,8 @@
 #version 120
 
-varying vec2 diffuseMapUV;
-
 varying float alphaPassthrough;
 
 uniform int colorMode;
-uniform bool useDiffuseMapForShadowAlpha = true;
-uniform bool alphaTestShadows = true;
 
 void main(void)
 {
@@ -15,10 +11,10 @@ void main(void)
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
 
-    if (useDiffuseMapForShadowAlpha)
-        diffuseMapUV = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
-    else
-        diffuseMapUV = vec2(0.0); // Avoid undefined behaviour if running on hardware predating the concept of dynamically uniform expressions
+#if @diffuseMap
+    diffuseMapUV = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+#endif
+
     if (colorMode == 2)
         alphaPassthrough = gl_Color.a;
     else
