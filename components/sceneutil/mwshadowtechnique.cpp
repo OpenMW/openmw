@@ -2996,7 +2996,7 @@ osg::StateSet* MWShadowTechnique::prepareStateSetForRenderingShadow(ViewDependen
     OSG_INFO<<"   prepareStateSetForRenderingShadow() "<<vdd.getStateSet(traversalNumber)<<std::endl;
 
     osg::ref_ptr<osg::StateSet> stateset = vdd.getStateSet(traversalNumber);
-
+    stateset->clear();
     for(const auto& uniform : _uniforms[traversalNumber % 2])
     {
         OSG_INFO<<"addUniform("<<uniform->getName()<<")"<<std::endl;
