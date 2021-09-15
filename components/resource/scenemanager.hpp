@@ -115,6 +115,7 @@ namespace Resource
 
         enum class UBOBinding
         {
+            // If we add more UBO's, we should probably assign their bindings dynamically according to the current count of UBO's in the programTemplate
             LightBuffer
         };
         void setLightingMethod(SceneUtil::LightingMethod method);
