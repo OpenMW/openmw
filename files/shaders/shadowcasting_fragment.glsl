@@ -1,25 +1,16 @@
-#version 120
-
-#if @useGPUShader4
-    #extension GL_EXT_gpu_shader4: require
-#endif
-
-uniform sampler2D diffuseMap;
-varying vec2 diffuseMapUV;
-
 varying float alphaPassthrough;
 
 uniform bool useDiffuseMapForShadowAlpha;
 uniform bool alphaTestShadows;
 
-#include "alpha.glsl"
-
 void main()
 {
     gl_FragData[0].rgb = vec3(1.0);
+#if @diffuseMap
     if (useDiffuseMapForShadowAlpha)
         gl_FragData[0].a = texture2D(diffuseMap, diffuseMapUV).a * alphaPassthrough;
     else
+#endif
         gl_FragData[0].a = alphaPassthrough;
 
     alphaTest();
