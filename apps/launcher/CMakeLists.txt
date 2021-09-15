@@ -36,23 +36,6 @@ set(LAUNCHER_HEADER
 )
 
 # Headers that must be pre-processed
-set(LAUNCHER_HEADER_MOC
-    datafilespage.hpp
-    graphicspage.hpp
-    maindialog.hpp
-    playpage.hpp
-    textslotmsgbox.hpp
-    settingspage.hpp
-    advancedpage.hpp
-
-    utils/cellnameloader.hpp
-    utils/textinputdialog.hpp
-    utils/profilescombobox.hpp
-    utils/lineedit.hpp
-    utils/openalutil.hpp
-
-)
-
 set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/graphicspage.ui
@@ -74,7 +57,6 @@ if(WIN32)
 endif(WIN32)
 
 QT5_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
-QT5_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
 QT5_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -109,4 +91,7 @@ if (BUILD_WITH_CODE_COVERAGE)
   target_link_libraries(openmw-launcher gcov)
 endif()
 
+if(USE_QT)
+    set_property(TARGET openmw-launcher PROPERTY AUTOMOC ON)
+endif(USE_QT)
 
