@@ -29,8 +29,6 @@
 
 #include <components/sceneutil/util.hpp>
 
-#include "shadowsbin.hpp"
-
 namespace {
 
 using namespace osgShadow;
@@ -278,20 +276,10 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
         cv->pushCullingSet();
     }
 #endif
-    // bin has to go inside camera cull or the rendertexture stage will override it
-    static osg::ref_ptr<osg::StateSet> ss;
-    if (!ss)
-    {
-        ShadowsBinAdder adder("ShadowsBin", _vdsm->getCastingPrograms());
-        ss = new osg::StateSet;
-        ss->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, "ShadowsBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
-    }
-    cv->pushStateSet(ss);
     if (_vdsm->getShadowedScene())
     {
         _vdsm->getShadowedScene()->osg::Group::traverse(*nv);
     }
-    cv->popStateSet();
 #if 1
     if (!_polytope.empty())
     {
@@ -891,26 +879,6 @@ void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
     {
         _shadowCastingStateSet->removeAttribute(osg::StateAttribute::CULLFACE);
         _shadowCastingStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
-    }
-}
-
-void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
-{
-    // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
-
-    osg::ref_ptr<osg::Shader> castingVertexShader = shaderManager.getShader("shadowcasting_vertex.glsl", {}, osg::Shader::VERTEX);
-    osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
-    std::string useGPUShader4 = exts && exts->isGpuShader4Supported ? "1" : "0";
-    for (int alphaFunc = GL_NEVER; alphaFunc <= GL_ALWAYS; ++alphaFunc)
-    {
-        auto& program = _castingPrograms[alphaFunc - GL_NEVER];
-        program = new osg::Program();
-        program->addShader(castingVertexShader);
-        program->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", { {"alphaFunc", std::to_string(alphaFunc)},
-                                                                                    {"alphaToCoverage", "0"},
-                                                                                    {"adjustCoverage", "1"},
-                                                                                    {"useGPUShader4", useGPUShader4}
-                                                                                  }, osg::Shader::FRAGMENT));
     }
 }
 
@@ -1629,13 +1597,9 @@ void MWShadowTechnique::createShaders()
 
     }
 
-    if (!_castingPrograms[GL_ALWAYS - GL_NEVER])
-        OSG_NOTICE << "Shadow casting shader has not been set up. Remember to call setupCastingShader(Shader::ShaderManager &)" << std::endl;
+    _shadowCastingStateSet->setDefine("CAST_SHADOWS", osg::StateAttribute::ON);
 
-    // Always use the GL_ALWAYS shader as the shadows bin will change it if necessary
-    _shadowCastingStateSet->setAttributeAndModes(_castingPrograms[GL_ALWAYS - GL_NEVER], osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-    // The casting program uses a sampler, so to avoid undefined behaviour, we must bind a dummy texture in case no other is supplied
-    _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
+    _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::OFF|osg::StateAttribute::PROTECTED);
     _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
     _shadowCastingStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
@@ -1647,7 +1611,7 @@ void MWShadowTechnique::createShaders()
     }
     _shadowCastingStateSet->setAttribute(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
-
+    _shadowCastingStateSet->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, "RenderBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
     // TODO: compare performance when alpha testing is handled here versus using a discard in the fragment shader
 }
 
