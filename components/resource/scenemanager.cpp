@@ -574,22 +574,26 @@ namespace Resource
             osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor());
             loaded->accept(*shaderVisitor);
 
-            // share state
-            // do this before optimizing so the optimizer will be able to combine nodes more aggressively
-            // note, because StateSets will be shared at this point, StateSets can not be modified inside the optimizer
-            mSharedStateMutex.lock();
-            mSharedStateManager->share(loaded.get());
-            mSharedStateMutex.unlock();
-
             if (canOptimize(normalized))
             {
                 SceneUtil::Optimizer optimizer;
+                optimizer.setSharedStateManager(mSharedStateManager, &mSharedStateMutex);
                 optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
 
-                static const unsigned int options = getOptimizationOptions();
+                // Because of limitations with the optimizer API, the optimizer can not replace the root node. Create a wrapper root node to allow the real root node to be optimised.
+                osg::ref_ptr<osg::Group> wrapper = new osg::Group;
+                wrapper->addChild(loaded);
 
-                optimizer.optimize(loaded, options);
+                static const unsigned int options = getOptimizationOptions()|Optimizer::SHARE_DUPLICATE_STATE;
+
+                optimizer.optimize(wrapper, options);
+                if (wrapper->getNumChildren()==1)
+                    loaded = wrapper->getChild(0);
+                else
+                    loaded = wrapper;
             }
+            else
+                shareState(loaded);
 
             if (compile && mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
