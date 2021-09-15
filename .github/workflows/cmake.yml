@@ -1,8 +1,6 @@
 name: CMake
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -24,29 +22,34 @@ jobs:
 
     - name: Configure CMake
       run: |
-        mkdir build
         mkdir instdir
         cmake -S . -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=instdir
 
     - name: Build
       run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
  
     - name: Install OpenMW
       shell: bash
       run: cmake --install .
       
-    - name: Upload OpenMW Artifact
+    - name: Create OpenMW Artifact Deb
+      shell: bash
+      run: make package
+
+    - name: Upload Deb
+      uses: actions/upload-artifact@v1
+      with:
+        path: ./*.deb
+        name: openmw_artefact.deb
+
+    - name: Create OpenMW Artifact Zip
       shell: bash
       working-directory: instdir
       run: |
         ls -laR
         7z a ../build_artifact.7z .
         
-    - name: Upload
+    - name: Upload Zip
       uses: actions/upload-artifact@v1
       with:
         path: ./build_artifact.7z
