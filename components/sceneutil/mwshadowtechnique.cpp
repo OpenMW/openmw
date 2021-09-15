@@ -776,7 +776,6 @@ MWShadowTechnique::MWShadowTechnique():
     ShadowTechnique(),
     _enableShadows(false),
     _debugHud(nullptr),
-    _castingPrograms{ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
     mSetDummyStateWhenDisabled = false;
@@ -784,7 +783,6 @@ MWShadowTechnique::MWShadowTechnique():
 
 MWShadowTechnique::MWShadowTechnique(const MWShadowTechnique& vdsm, const osg::CopyOp& copyop):
     ShadowTechnique(vdsm,copyop)
-    , _castingPrograms(vdsm._castingPrograms)
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
     _enableShadows = vdsm._enableShadows;
