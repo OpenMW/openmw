@@ -249,7 +249,7 @@ namespace Shader
                             else if (texName == "diffuseMap")
                             {
                                 diffuseMap = texture;
-                                reqs.mDiffuseMapNode = &node;
+                                mRequirements.back().mDiffuseMapNode = &node;
                             }
                             else if (texName == "specularMap")
                                 specularMap = texture;
@@ -466,7 +466,7 @@ namespace Shader
             if (reqs.mDiffuseMapNode)
             {
                 // Shadow casting usually disables textures. We need to keep textures involving alpha.
-                osg::StateSet* diffuseMapStateSet = getWritableStateSet(reqs.mDiffuseMapNode);
+                osg::StateSet* diffuseMapStateSet = getWritableStateSet(*reqs.mDiffuseMapNode);
                 diffuseMapStateSet->setTextureAttributeAndModes(0, diffuseMapStateSet->getTextureAttribute(0, osg::StateAttribute::TEXTURE), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
                 writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
             }
