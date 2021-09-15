@@ -241,7 +241,6 @@ namespace SceneUtil {
 
         osg::ref_ptr<osg::StateSet>             _shadowCastingStateSet;
         osg::ref_ptr<osg::PolygonOffset>        _polygonOffset;
-        osg::ref_ptr<osg::Texture2D>            _fallbackBaseTexture;
         osg::ref_ptr<osg::Texture2D>            _fallbackShadowMapTexture;
 
         typedef std::vector< osg::ref_ptr<osg::Uniform> > Uniforms;
