@@ -15,6 +15,7 @@
 #include <osg/ClipControl>
 
 #include <osgUtil/LineSegmentIntersector>
+#include <osgUtil/RenderBin>
 
 #include <osgViewer/Viewer>
 
@@ -27,7 +28,6 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 
-#include <components/shader/removedalphafunc.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include <components/settings/settings.hpp>
@@ -265,6 +265,11 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
     {
+        // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
+        // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
+        osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setStateSet(nullptr);
+        osgUtil::RenderBin::getRenderBinPrototype("SORT_BACK_TO_FRONT")->setStateSet(nullptr);
+
         bool reverseZ = SceneUtil::getReverseZ();
 
         if (reverseZ)
@@ -501,11 +506,6 @@ namespace MWRender
         mStateUpdater->setFogEnd(mViewDistance);
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
-
-        // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
-        mRootNode->getOrCreateStateSet()->setAttribute(Shader::RemovedAlphaFunc::getInstance(GL_ALWAYS));
-        // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
-        mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF);
 
         if (reverseZ)
         {
