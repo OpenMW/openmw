@@ -101,6 +101,7 @@ namespace Shader
 
             // the Node that requested these requirements
             osg::Node* mNode;
+            osg::Node* mDiffuseMapNode;
         };
         std::vector<ShaderRequirements> mRequirements;
 
