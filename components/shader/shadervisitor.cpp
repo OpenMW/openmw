@@ -501,6 +501,10 @@ namespace Shader
                     removedState->setAttribute(alphaFunc->first, alphaFunc->second);
             }
 
+            // This prevents redundant glAlphaFunc calls. ToDo: set higher up when possible
+            writableStateSet->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            addedState->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc));
+
             // Blending won't work with A2C as we use the alpha channel for coverage. gl_SampleCoverage from ARB_sample_shading would save the day, but requires GLSL 130
             if (mConvertAlphaTestToAlphaToCoverage && !reqs.mAlphaBlend)
             {
