@@ -8,10 +8,16 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
+#include "alpha.glsl"
+
 #if @diffuseMap
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 #endif
+
+#ifdef CAST_SHADOWS
+#include "shadowcasting_fragment.glsl"
+#else
 
 #if @darkMap
 uniform sampler2D darkMap;
@@ -78,7 +84,6 @@ varying vec3 passNormal;
 #include "shadows_fragment.glsl"
 #include "lighting.glsl"
 #include "parallax.glsl"
-#include "alpha.glsl"
 
 void main()
 {
@@ -228,3 +233,5 @@ void main()
 
     applyShadowDebugOverlay();
 }
+
+#endif
