@@ -1,8 +1,6 @@
 name: CMake
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -22,31 +20,30 @@ jobs:
     - name: Install Building Dependancies
       run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
-    - name: Configure CMake
-      run: |
-        mkdir build
-        mkdir instdir
-        cmake -S . -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=instdir
+    - name: Prime ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
+        max-size: 1000M
 
-    - name: Build
+    - name: Configure
+      run: cmake -S . -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+    - name: Buil
       run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
  
-    - name: Install OpenMW
+    - name: Install
       shell: bash
       run: cmake --install .
       
-    - name: Upload OpenMW Artifact
+    - name: Create Artifact
       shell: bash
-      working-directory: instdir
+      working-directory: install
       run: |
         ls -laR
         7z a ../build_artifact.7z .
         
-    - name: Upload
+    - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
         path: ./build_artifact.7z
