@@ -150,7 +150,6 @@ if(WIN32)
 endif(WIN32)
 
 qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt5_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
 qt5_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 # for compiled .ui files
@@ -259,3 +258,7 @@ endif (MSVC)
 if(APPLE)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION "." COMPONENT Bundle)
 endif()
+
+if(USE_QT)
+    set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
+endif(USE_QT)

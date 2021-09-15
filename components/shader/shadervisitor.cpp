@@ -343,15 +343,6 @@ namespace Shader
                     mRequirements.back().mShaderRequired = true;
                 }
             }
-
-            if (diffuseMap)
-            {
-                if (!writableStateSet)
-                    writableStateSet = getWritableStateSet(node);
-                // We probably shouldn't construct a new version of this each time as Uniforms use pointer comparison for early-out.
-                // Also it should probably belong to the shader manager or be applied by the shadows bin
-                writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
-            }
         }
 
         const osg::StateSet::AttributeList& attributes = stateset->getAttributeList();
@@ -469,6 +460,9 @@ namespace Shader
             defineMap[texIt->second] = "1";
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
+
+        if (defineMap["diffuseMap"] == "0")
+            writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
 

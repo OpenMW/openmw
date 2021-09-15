@@ -1,0 +1,53 @@
+name: CMake
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  BUILD_TYPE: RelWithDebInfo
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Add OpenMW PPA Dependancies
+      run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
+    
+    - name: Install Building Dependancies
+      run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        mkdir instdir
+        cmake -S . -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=instdir
+
+    - name: Build
+      run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C ${{env.BUILD_TYPE}}
+ 
+    - name: Install OpenMW
+      shell: bash
+      run: cmake --install .
+      
+    - name: Upload OpenMW Artifact
+      shell: bash
+      working-directory: instdir
+      run: |
+        ls -laR
+        7z a ../build_artifact.7z .
+        
+    - name: Upload
+      uses: actions/upload-artifact@v1
+      with:
+        path: ./build_artifact.7z
+        name: build_artifact.7z
