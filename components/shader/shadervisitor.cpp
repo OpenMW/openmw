@@ -18,6 +18,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 
 #include "shadermanager.hpp"
+#include "removedalphafunc.hpp"
 
 namespace Shader
 {
