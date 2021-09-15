@@ -775,7 +775,7 @@ void MWShadowTechnique::ViewDependentData::releaseGLObjects(osg::State* state) c
 MWShadowTechnique::MWShadowTechnique():
     ShadowTechnique(),
     _enableShadows(false),
-    _debugHud(nullptr),
+    _debugHud(nullptr)
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
     mSetDummyStateWhenDisabled = false;
