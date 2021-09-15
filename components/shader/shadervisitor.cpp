@@ -17,7 +17,6 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
-#include "removedalphafunc.hpp"
 #include "shadermanager.hpp"
 
 namespace Shader
@@ -97,6 +96,7 @@ namespace Shader
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
         , mNode(nullptr)
+        , mDiffuseMapNode(nullptr)
     {
     }
 
@@ -247,7 +247,10 @@ namespace Shader
                                 normalMap = texture;
                             }
                             else if (texName == "diffuseMap")
+                            {
                                 diffuseMap = texture;
+                                reqs.mDiffuseMapNode = &node;
+                            }
                             else if (texName == "specularMap")
                                 specularMap = texture;
                             else if (texName == "bumpMap")
@@ -458,8 +461,13 @@ namespace Shader
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
 
-        if (defineMap["diffuseMap"] == "0")
-            writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
+        if (reqs.mDiffuseMapNode && reqs.mAlphaFunc != GL_ALWAYS || reqs.mAlphaBlend)
+        {
+            // Shadow casting usually disables textures. We need to keep textures involving alpha.
+            osg::StateSet* diffuseMapStateSet = getWritableStateSet(reqs.mDiffuseMapNode);
+            diffuseMapStateSet->setTextureAttributeAndModes(0, diffuseMapStateSet->getTextureAttribute(0, osg::StateAttribute::TEXTURE), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            diffuseMapStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
+        }
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
 
@@ -488,9 +496,6 @@ namespace Shader
                 if (alphaFunc && !previousAddedState->hasAttribute(osg::StateAttribute::ALPHAFUNC, 0))
                     removedState->setAttribute(alphaFunc->first, alphaFunc->second);
             }
-            // This prevents redundant glAlphaFunc calls while letting the shadows bin still see the test
-            writableStateSet->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-            addedState->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc));
 
             // Blending won't work with A2C as we use the alpha channel for coverage. gl_SampleCoverage from ARB_sample_shading would save the day, but requires GLSL 130
             if (mConvertAlphaTestToAlphaToCoverage && !reqs.mAlphaBlend)
