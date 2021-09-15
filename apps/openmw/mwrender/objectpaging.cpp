@@ -658,7 +658,7 @@ namespace MWRender
             }
             optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
             unsigned int options = SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES|SceneUtil::Optimizer::MERGE_GEOMETRY;
-            mSceneManager->shareState(mergeGroup);
+
             optimizer.optimize(mergeGroup, options);
 
             group->addChild(mergeGroup);
