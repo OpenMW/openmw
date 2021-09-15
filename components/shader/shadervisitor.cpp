@@ -17,8 +17,8 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
-#include "shadermanager.hpp"
 #include "removedalphafunc.hpp"
+#include "shadermanager.hpp"
 
 namespace Shader
 {
