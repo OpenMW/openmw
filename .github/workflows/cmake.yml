@@ -13,6 +13,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
+        max-size: 1000M
     
     - name: Add OpenMW PPA Dependancies
       run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
@@ -24,7 +28,9 @@ jobs:
       run: cmake -S . -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=./install
 
     - name: Build
-      run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
+      run: |
+        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+        cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
  
     - name: Install OpenMW
       shell: bash
