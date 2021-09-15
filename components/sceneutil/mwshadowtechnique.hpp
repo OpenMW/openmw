@@ -30,7 +30,6 @@
 
 #include <osgShadow/ShadowTechnique>
 
-#include <components/shader/shadermanager.hpp>
 #include <components/terrain/quadtreeworld.hpp>
 
 namespace SceneUtil {
@@ -84,8 +83,6 @@ namespace SceneUtil {
         virtual void enableFrontFaceCulling();
 
         virtual void disableFrontFaceCulling();
-
-        virtual void setupCastingShader(Shader::ShaderManager &shaderManager);
 
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
         {
