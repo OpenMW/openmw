@@ -21,9 +21,7 @@ jobs:
       run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
     - name: Configure CMake
-      run: |
-        mkdir instdir
-        cmake -S . -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=instdir
+      run: cmake -S . -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=./install
 
     - name: Build
       run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
@@ -32,19 +30,9 @@ jobs:
       shell: bash
       run: cmake --install .
       
-    - name: Create OpenMW Artifact Deb
-      shell: bash
-      run: make package
-
-    - name: Upload Deb
-      uses: actions/upload-artifact@v1
-      with:
-        path: ./*.deb
-        name: openmw_artefact.deb
-
     - name: Create OpenMW Artifact Zip
       shell: bash
-      working-directory: instdir
+      working-directory: install
       run: |
         ls -laR
         7z a ../build_artifact.7z .
