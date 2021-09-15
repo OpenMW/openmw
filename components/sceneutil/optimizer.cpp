@@ -103,11 +103,11 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
     }
 
     if (options & SHARE_DUPLICATE_STATE && _sharedStateManager)
-    (
+    {
         if (_sharedStateMutex) _sharedStateMutex->lock();
         _sharedStateManager->share(node);
         if (_sharedStateMutex) _sharedStateMutex->unlock();
-    )
+    }
 
     if (options & MERGE_GEOMETRY)
     {
