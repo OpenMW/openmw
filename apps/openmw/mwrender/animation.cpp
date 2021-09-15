@@ -17,6 +17,7 @@
 #include <components/resource/keyframemanager.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
@@ -591,8 +592,6 @@ namespace MWRender
 
     void Animation::loadAllAnimationsInFolder(const std::string &model, const std::string &baseModel)
     {
-        const std::map<std::string, VFS::File*>& index = mResourceSystem->getVFS()->getIndex();
-
         std::string animationPath = model;
         if (animationPath.find("meshes") == 0)
         {
@@ -600,21 +599,10 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size()-3, 3, "/");
 
-        mResourceSystem->getVFS()->normalizeFilename(animationPath);
-
-        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(animationPath);
-        while (found != index.end())
+        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
-            const std::string& name = found->first;
-            if (name.size() >= animationPath.size() && name.substr(0, animationPath.size()) == animationPath)
-            {
-                size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".kf") == 0)
-                    addSingleAnimSource(name, baseModel);
-            }
-            else
-                break;
-            ++found;
+            if (Misc::getFileExtension(name) == "kf")
+                addSingleAnimSource(name, baseModel);
         }
     }
 
@@ -1295,8 +1283,6 @@ namespace MWRender
         if (model.empty())
             return;
 
-        const std::map<std::string, VFS::File*>& index = resourceSystem->getVFS()->getIndex();
-
         std::string animationPath = model;
         if (animationPath.find("meshes") == 0)
         {
@@ -1304,21 +1290,10 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size()-4, 4, "/");
 
-        resourceSystem->getVFS()->normalizeFilename(animationPath);
-
-        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(animationPath);
-        while (found != index.end())
+        for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
-            const std::string& name = found->first;
-            if (name.size() >= animationPath.size() && name.substr(0, animationPath.size()) == animationPath)
-            {
-                size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".nif") == 0)
-                    loadBonesFromFile(node, name, resourceSystem);
-            }
-            else
-                break;
-            ++found;
+            if (Misc::getFileExtension(name) == "nif")
+                loadBonesFromFile(node, name, resourceSystem);
         }
     }
 

@@ -23,10 +23,8 @@ void CSMWorld::Resources::recreate(const VFS::Manager* vfs, const char * const *
 
     size_t baseSize = mBaseDirectory.size();
 
-    const std::map<std::string, VFS::File*>& index = vfs->getIndex();
-    for (std::map<std::string, VFS::File*>::const_iterator it = index.begin(); it != index.end(); ++it)
+    for (const auto& filepath : vfs->getRecursiveDirectoryIterator(""))
     {
-        std::string filepath = it->first;
         if (filepath.size()<baseSize+1 ||
             filepath.substr (0, baseSize)!=mBaseDirectory ||
             (filepath[baseSize]!='/' && filepath[baseSize]!='\\'))

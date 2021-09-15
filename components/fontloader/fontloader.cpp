@@ -17,6 +17,7 @@
 
 #include <components/vfs/manager.hpp>
 
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/stringops.hpp>
 
 #include <components/myguiplatform/myguitexture.hpp>
@@ -191,24 +192,10 @@ namespace Gui
 
     void FontLoader::loadBitmapFonts(bool exportToFile)
     {
-        const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
-
-        std::string pattern = "Fonts/";
-        mVFS->normalizeFilename(pattern);
-
-        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
-        while (found != index.end())
+        for (const auto& name : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
-            const std::string& name = found->first;
-            if (name.size() >= pattern.size() && name.substr(0, pattern.size()) == pattern)
-            {
-                size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".fnt") == 0)
-                    loadBitmapFont(name, exportToFile);
-            }
-            else
-                break;
-            ++found;
+            if (Misc::getFileExtension(name) == "fnt")
+                loadBitmapFont(name, exportToFile);
         }
     }
 
