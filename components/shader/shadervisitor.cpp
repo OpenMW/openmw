@@ -461,12 +461,16 @@ namespace Shader
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
 
-        if (reqs.mDiffuseMapNode && reqs.mAlphaFunc != GL_ALWAYS || reqs.mAlphaBlend)
+        if (reqs.mAlphaFunc != GL_ALWAYS || reqs.mAlphaBlend)
         {
-            // Shadow casting usually disables textures. We need to keep textures involving alpha.
-            osg::StateSet* diffuseMapStateSet = getWritableStateSet(reqs.mDiffuseMapNode);
-            diffuseMapStateSet->setTextureAttributeAndModes(0, diffuseMapStateSet->getTextureAttribute(0, osg::StateAttribute::TEXTURE), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-            diffuseMapStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
+            if (reqs.mDiffuseMapNode)
+            {
+                // Shadow casting usually disables textures. We need to keep textures involving alpha.
+                osg::StateSet* diffuseMapStateSet = getWritableStateSet(reqs.mDiffuseMapNode);
+                diffuseMapStateSet->setTextureAttributeAndModes(0, diffuseMapStateSet->getTextureAttribute(0, osg::StateAttribute::TEXTURE), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
+            }
+            writableStateSet->addUniform(new osg::Uniform("alphaTestShadows", true));
         }
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
