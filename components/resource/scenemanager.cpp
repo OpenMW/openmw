@@ -584,7 +584,7 @@ namespace Resource
                 osg::ref_ptr<osg::Group> wrapper = new osg::Group;
                 wrapper->addChild(loaded);
 
-                static const unsigned int options = getOptimizationOptions()|Optimizer::SHARE_DUPLICATE_STATE;
+                static const unsigned int options = getOptimizationOptions()|SceneUtil::Optimizer::SHARE_DUPLICATE_STATE;
 
                 optimizer.optimize(wrapper, options);
                 if (wrapper->getNumChildren()==1)
