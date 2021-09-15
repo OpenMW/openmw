@@ -1,5 +1,3 @@
-#version 120
-
 varying float alphaPassthrough;
 
 uniform int colorMode;
