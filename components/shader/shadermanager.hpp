@@ -35,7 +35,7 @@ namespace Shader
 
         osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader, const osg::Program* programTemplate=nullptr);
 
-        const osg::Program* getProgamTemplate() const { return mProgramTemplate; }
+        const osg::Program* getProgramTemplate() const { return mProgramTemplate; }
         void setProgramTemplate(const osg::Program* program) { mProgramTemplate = program; }
 
         /// Get (a copy of) the DefineMap used to construct all shaders
