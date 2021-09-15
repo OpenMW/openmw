@@ -8,11 +8,15 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
-uniform mat4 projectionMatrix;
-
 #if @diffuseMap
 varying vec2 diffuseMapUV;
 #endif
+
+#ifdef CAST_SHADOWS
+#include "shadowcasting_vertex.glsl"
+#else
+
+uniform mat4 projectionMatrix;
 
 #if @darkMap
 varying vec2 darkMapUV;
@@ -137,3 +141,5 @@ void main(void)
     setupShadowCoords(viewPos, viewNormal);
 #endif
 }
+
+#endif
