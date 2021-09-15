@@ -752,7 +752,7 @@ namespace SceneUtil
 
         void initSharedLayout(osg::GLExtensions* ext, int handle) const
         {
-            constexpr std::array<unsigned int, 1> index = { static_cast<unsigned int>(Shader::UBOBinding::LightBuffer) };
+            constexpr std::array<unsigned int, 1> index = { static_cast<unsigned int>(Resource::SceneManager::UBOBinding::LightBuffer) };
             int totalBlockSize = -1;
             int stride = -1;
 
