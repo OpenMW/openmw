@@ -59,6 +59,7 @@ namespace Resource
 
         /// How long to keep objects in cache after no longer being referenced.
         void setExpiryDelay (double expiryDelay) override { mExpiryDelay = expiryDelay; }
+        float getExpiryDelay() const { return mExpiryDelay; }
 
         const VFS::Manager* getVFS() const { return mVFS; }
 
