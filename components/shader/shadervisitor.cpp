@@ -467,7 +467,7 @@ namespace Shader
             if (reqs.mDiffuseMapNode)
             {
                 // Shadow casting usually disables textures. We need to keep textures involving alpha.
-                osg::StateSet* diffuseMapStateSet = getWritableStateSet(*reqs.mDiffuseMapNode);
+                osg::StateSet* diffuseMapStateSet = (reqs.mDiffuseMapNode == reqs.mNode) ? writableStateSet : getWritableStateSet(*reqs.mDiffuseMapNode);
                 diffuseMapStateSet->setTextureAttributeAndModes(0, diffuseMapStateSet->getTextureAttribute(0, osg::StateAttribute::TEXTURE), osg::StateAttribute::ON|osg::StateAttribute::PROTECTED);
                 writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
             }
