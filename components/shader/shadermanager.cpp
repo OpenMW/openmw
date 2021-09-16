@@ -282,7 +282,7 @@ namespace Shader
                     Log(Debug::Error) << "Shader " << templateName << " error: Unexpected EOF";
                     return false;
                 }
-                std::string definedDefine = source.substr(iterNameStart, endPos - iterNameStart));
+                std::string definedDefine = source.substr(iterNameStart, endPos - iterNameStart);
                 bool defined = defines.find(definedDefine) != defines.end() || globalDefines.find(definedDefine) != globalDefines.end();
                 suppressErrors.insert(definedDefine);
                 source.replace(foundPos, endPos - foundPos, defined ? "1" : "0");
