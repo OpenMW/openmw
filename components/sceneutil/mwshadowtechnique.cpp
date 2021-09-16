@@ -1579,6 +1579,12 @@ void MWShadowTechnique::createShaders()
         image->allocateImage( 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE );
         *(osg::Vec4ub*)image->data() = osg::Vec4ub( 0xFF, 0xFF, 0xFF, 0xFF );
 
+        _fallbackBaseTexture = new osg::Texture2D(image.get());
+        _fallbackBaseTexture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::REPEAT);
+        _fallbackBaseTexture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::REPEAT);
+        _fallbackBaseTexture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::NEAREST);
+        _fallbackBaseTexture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::NEAREST);
+
         _fallbackShadowMapTexture = new osg::Texture2D(image.get());
         _fallbackShadowMapTexture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::REPEAT);
         _fallbackShadowMapTexture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::REPEAT);
@@ -1591,7 +1597,7 @@ void MWShadowTechnique::createShaders()
 
     _shadowCastingStateSet->setDefine("CAST_SHADOWS", osg::StateAttribute::ON);
 
-    _shadowCastingStateSet->setTextureAttributeAndModes(0, new osg::Texture2D, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+    _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
     _shadowCastingStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
@@ -2994,7 +3000,11 @@ osg::StateSet* MWShadowTechnique::prepareStateSetForRenderingShadow(ViewDependen
     OSG_INFO<<"   prepareStateSetForRenderingShadow() "<<vdd.getStateSet(traversalNumber)<<std::endl;
 
     osg::ref_ptr<osg::StateSet> stateset = vdd.getStateSet(traversalNumber);
+
     stateset->clear();
+
+    stateset->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
+
     for(const auto& uniform : _uniforms[traversalNumber % 2])
     {
         OSG_INFO<<"addUniform("<<uniform->getName()<<")"<<std::endl;
