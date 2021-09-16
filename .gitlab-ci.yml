@@ -378,7 +378,10 @@ variables: &tests-targets
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
-    - cmake --build . --config $config --target ($targets.Split(','))
+    - export CCACHE_BASEDIR="`pwd`"
+    - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
+    - ccache -z -M "${CCACHE_SIZE}"
+    - cmake --build . --config $config --target ($targets.Split(',')) -DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - Get-ChildItem -Recurse *.ilk | Remove-Item
@@ -394,8 +397,11 @@ variables: &tests-targets
   cache:
     key: ninja-v2
     paths:
+    - ccache
     - deps
     - MSVC2019_64_Ninja/deps/Qt
+  variables:
+    CCACHE_SIZE: 2G    
   artifacts:
     when: always
     paths:
