@@ -101,8 +101,8 @@ while [ $# -gt 0 ]; do
 			e )
 				SKIP_EXTRACT=true ;;
 
-			f )
-				USE_CCACHE=TRUE ;;
+			C )
+				USE_CCACHE=true ;;
 			k )
 				KEEP=true ;;
 
@@ -148,12 +148,12 @@ Options:
 		Set the configuration, can also be set with environment variable CONFIGURATION.
 		For mutli-config generators, this is ignored, and all configurations are set up.
 		For single-config generators, several configurations can be set up at once by specifying -c multiple times.
+	-C
+	    Use ccache.		
 	-d
 		Skip checking the downloads.
 	-e
 		Skip extracting dependencies.
-	-f
-	    Use ccache
 	-h
 		Show this message.
 	-k
@@ -509,7 +509,8 @@ if ! [ -z $UNITY_BUILD ]; then
 fi
 
 if ! [ -z $USE_CCACHE ]; then
-	add_cmake_opts " -DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+fi
 
 echo
 echo "==================================="
