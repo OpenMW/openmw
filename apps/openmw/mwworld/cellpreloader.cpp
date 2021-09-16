@@ -21,6 +21,29 @@
 #include "cellstore.hpp"
 #include "class.hpp"
 
+namespace
+{
+    template <class Contained>
+    bool contains(const std::vector<MWWorld::CellPreloader::PositionCellGrid>& container,
+           const Contained& contained, float tolerance=1.f)
+    {
+        for (const auto& pos : contained)
+        {
+            bool found = false;
+            for (const auto& pos2 : container)
+            {
+                if ((pos.first-pos2.first).length2() < tolerance*tolerance && pos.second == pos2.second)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return false;
+        }
+        return true;
+    }
+}
+
 namespace MWWorld
 {
 
@@ -443,27 +466,9 @@ namespace MWWorld
         }
     }
 
-    bool contains(const std::vector<CellPreloader::PositionCellGrid>& container, const std::vector<CellPreloader::PositionCellGrid>& contained, float tolerance=1.f)
-    {
-        for (const auto& pos : contained)
-        {
-            bool found = false;
-            for (const auto& pos2 : container)
-            {
-                if ((pos.first-pos2.first).length2() < tolerance*tolerance && pos.second == pos2.second)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) return false;
-        }
-        return true;
-    }
-
     void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid *exceptPos)
     {
-        if (exceptPos && contains(mTerrainPreloadPositions, {*exceptPos}, ESM::Land::REAL_SIZE))
+        if (exceptPos && contains(mTerrainPreloadPositions, std::array {*exceptPos}, ESM::Land::REAL_SIZE))
             return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
         {
