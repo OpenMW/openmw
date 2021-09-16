@@ -375,10 +375,10 @@ variables: &tests-targets
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - export CCACHE_BASEDIR="`pwd`"
-    - export CCACHE_DIR="`pwd`/ccache"
-    - mkdir -pv "$CCACHE_DIR"
-    - ccache -z -M "${CCACHE_SIZE}"
+    - $env:CCACHE_BASEDIR = Get-Location
+    - $env:CCACHE_DIR = "$(Get-Location)\ccache"
+    - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - ccache -z -M $CCACHE_SIZE
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -f
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
