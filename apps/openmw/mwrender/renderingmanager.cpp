@@ -15,6 +15,7 @@
 #include <osg/ClipControl>
 
 #include <osgUtil/LineSegmentIntersector>
+#include <osgUtil/RenderBin>
 
 #include <osgViewer/Viewer>
 
@@ -506,6 +507,8 @@ namespace MWRender
         mRootNode->getOrCreateStateSet()->setAttribute(Shader::RemovedAlphaFunc::getInstance(GL_ALWAYS));
         // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
         mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF);
+        osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setStateSet(nullptr);
+        osgUtil::RenderBin::getRenderBinPrototype("SORT_BACK_TO_FRONT")->setStateSet(nullptr);
 
         if (reverseZ)
         {
