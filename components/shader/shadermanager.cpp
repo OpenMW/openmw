@@ -238,6 +238,7 @@ namespace Shader
         const char escapeCharacter = '@';
         size_t foundPos = 0;
         std::vector<std::string> forIterators;
+        std::set<std::string> suppressErrors;
         while ((foundPos = source.find(escapeCharacter)) != std::string::npos)
         {
             size_t endPos = source.find_first_of(" \n\r()[].;,", foundPos);
@@ -272,6 +273,20 @@ namespace Shader
                 else
                     forIterators.pop_back();
             }
+            else if (define == "defined")
+            {
+                size_t iterNameStart = endPos + 1;
+                endPos = source.find_first_of(" \n\r()[].;,", iterNameStart);
+                if (endPos == std::string::npos)
+                {
+                    Log(Debug::Error) << "Shader " << templateName << " error: Unexpected EOF";
+                    return false;
+                }
+                std::string definedDefine = source.substr(iterNameStart, endPos - iterNameStart));
+                bool defined = defines.find(definedDefine) != defines.end() || globalDefines.find(definedDefine) != globalDefines.end();
+                suppressErrors.insert(definedDefine);
+                source.replace(foundPos, endPos - foundPos, defined ? "1" : "0");
+            }
             else if (std::find(forIterators.begin(), forIterators.end(), define) != forIterators.end())
             {
                 source.replace(foundPos, 1, "$");
@@ -283,6 +298,10 @@ namespace Shader
             else if (globalDefineFound != globalDefines.end())
             {
                 source.replace(foundPos, endPos - foundPos, globalDefineFound->second);
+            }
+            else if (suppressErrors.count(define))
+            {
+                source.replace(foundPos, 1, " ");
             }
             else
             {
