@@ -375,13 +375,14 @@ variables: &tests-targets
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t
+    - export CCACHE_BASEDIR="`pwd`"
+    - export CCACHE_DIR="`pwd`/ccache"
+    - mkdir -pv "$CCACHE_DIR"
+    - ccache -z -M "${CCACHE_SIZE}"
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -f
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
-    - export CCACHE_BASEDIR="`pwd`"
-    - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
-    - ccache -z -M "${CCACHE_SIZE}"
-    - cmake --build . --config $config --target ($targets.Split(',')) -DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+    - cmake --build . --config $config --target ($targets.Split(','))
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - Get-ChildItem -Recurse *.ilk | Remove-Item

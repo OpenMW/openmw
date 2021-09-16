@@ -62,6 +62,7 @@ VERBOSE=""
 STRIP=""
 SKIP_DOWNLOAD=""
 SKIP_EXTRACT=""
+USE_CCACHE=""
 KEEP=""
 UNITY_BUILD=""
 VS_VERSION=""
@@ -100,6 +101,8 @@ while [ $# -gt 0 ]; do
 			e )
 				SKIP_EXTRACT=true ;;
 
+			f )
+				USE_CCACHE=TRUE ;;
 			k )
 				KEEP=true ;;
 
@@ -149,6 +152,8 @@ Options:
 		Skip checking the downloads.
 	-e
 		Skip extracting dependencies.
+	-f
+	    Use ccache
 	-h
 		Show this message.
 	-k
@@ -502,6 +507,9 @@ fi
 if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
+
+if ! [ -z $USE_CCACHE ]; then
+	add_cmake_opts " -DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 
 echo
 echo "==================================="
