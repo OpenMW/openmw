@@ -62,7 +62,7 @@ VERBOSE=""
 STRIP=""
 SKIP_DOWNLOAD=""
 SKIP_EXTRACT=""
-USE_CCACHE=""
+USE_SCCACHE=""
 KEEP=""
 UNITY_BUILD=""
 VS_VERSION=""
@@ -102,7 +102,7 @@ while [ $# -gt 0 ]; do
 				SKIP_EXTRACT=true ;;
 
 			C )
-				USE_CCACHE=true ;;
+				USE_SCCACHE=true ;;
 			k )
 				KEEP=true ;;
 
@@ -149,7 +149,7 @@ Options:
 		For mutli-config generators, this is ignored, and all configurations are set up.
 		For single-config generators, several configurations can be set up at once by specifying -c multiple times.
 	-C
-	    Use ccache.		
+	    Use sccache.		
 	-d
 		Skip checking the downloads.
 	-e
@@ -508,8 +508,8 @@ if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
-if ! [ -z $USE_CCACHE ]; then
-	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+if ! [ -z $USE_SCCACHE ]; then
+	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=sccache  -DCMAKE_CXX_COMPILER_LAUNCHER=sccache"
 fi
 
 echo
