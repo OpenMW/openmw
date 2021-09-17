@@ -429,13 +429,21 @@ namespace Shader
 
     void ShaderVisitor::createProgram(const ShaderRequirements &reqs)
     {
+        osg::Node& node = *reqs.mNode;
+        for (auto it = getNodePath().rbegin()+1; it != getNodePath().rend(); ++it)
+        {
+            osg::Node* parent = *it;
+            if (parent->getNumChildren()>1)
+                break;
+            node = *parent;
+        }
+
         if (!reqs.mShaderRequired && !mForceShaders)
         {
-            ensureFFP(*reqs.mNode);
+            ensureFFP(node);
             return;
         }
 
-        osg::Node& node = *reqs.mNode;
         osg::StateSet* writableStateSet = nullptr;
         if (mAllowedToModifyStateSets)
             writableStateSet = node.getOrCreateStateSet();
