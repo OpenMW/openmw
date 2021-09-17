@@ -166,6 +166,29 @@ namespace
             mValue->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
         }
     };
+
+    class UniformCollection
+    {
+    public:
+        static const UniformCollection& value()
+        {
+            static UniformCollection instance;
+            return instance;
+        }
+
+        osg::ref_ptr<osg::Uniform> mDiffuseMap;
+        osg::ref_ptr<osg::Uniform> mBlendMap;
+        osg::ref_ptr<osg::Uniform> mNormalMap;
+        osg::ref_ptr<osg::Uniform> mColorMode;
+
+        UniformCollection()
+            : mDiffuseMap(new osg::Uniform("diffuseMap", 0))
+            , mBlendMap(new osg::Uniform("blendMap", 1))
+            , mNormalMap(new osg::Uniform("normalMap", 2))
+            , mColorMode(new osg::Uniform("colorMode", 2))
+        {
+        }
+    };
 }
 
 namespace Terrain
@@ -199,32 +222,28 @@ namespace Terrain
                 }
             }
 
-            int texunit = 0;
-
             if (useShaders)
             {
-                stateset->setTextureAttributeAndModes(texunit, it->mDiffuseMap);
+                stateset->setTextureAttributeAndModes(0, it->mDiffuseMap);
 
                 if (layerTileSize != 1.f)
-                    stateset->setTextureAttributeAndModes(texunit, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
+                    stateset->setTextureAttributeAndModes(0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
 
-                stateset->addUniform(new osg::Uniform("diffuseMap", texunit));
+                stateset->addUniform(UniformCollection::value().mDiffuseMap);
 
                 if (!blendmaps.empty())
                 {
-                    ++texunit;
                     osg::ref_ptr<osg::Texture2D> blendmap = blendmaps.at(blendmapIndex++);
 
-                    stateset->setTextureAttributeAndModes(texunit, blendmap.get());
-                    stateset->setTextureAttributeAndModes(texunit, BlendmapTexMat::value(blendmapScale));
-                    stateset->addUniform(new osg::Uniform("blendMap", texunit));
+                    stateset->setTextureAttributeAndModes(1, blendmap.get());
+                    stateset->setTextureAttributeAndModes(1, BlendmapTexMat::value(blendmapScale));
+                    stateset->addUniform(UniformCollection::value().mBlendMap);
                 }
 
                 if (it->mNormalMap)
                 {
-                    ++texunit;
-                    stateset->setTextureAttributeAndModes(texunit, it->mNormalMap);
-                    stateset->addUniform(new osg::Uniform("normalMap", texunit));
+                    stateset->setTextureAttributeAndModes(2, it->mNormalMap);
+                    stateset->addUniform(UniformCollection::value().mNormalMap);
                 }
 
                 Shader::ShaderManager::DefineMap defineMap;
@@ -242,31 +261,27 @@ namespace Terrain
                 }
 
                 stateset->setAttributeAndModes(shaderManager->getProgram(vertexShader, fragmentShader));
-                stateset->addUniform(new osg::Uniform("colorMode", 2));
+                stateset->addUniform(UniformCollection::value().mColorMode);
             }
             else
             {
                 // Add the actual layer texture
                 osg::ref_ptr<osg::Texture2D> tex = it->mDiffuseMap;
-                stateset->setTextureAttributeAndModes(texunit, tex.get());
+                stateset->setTextureAttributeAndModes(0, tex.get());
 
                 if (layerTileSize != 1.f)
-                    stateset->setTextureAttributeAndModes(texunit, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
-
-                ++texunit;
+                    stateset->setTextureAttributeAndModes(0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
 
                 // Multiply by the alpha map
                 if (!blendmaps.empty())
                 {
                     osg::ref_ptr<osg::Texture2D> blendmap = blendmaps.at(blendmapIndex++);
 
-                    stateset->setTextureAttributeAndModes(texunit, blendmap.get());
+                    stateset->setTextureAttributeAndModes(1, blendmap.get());
 
                     // This is to map corner vertices directly to the center of a blendmap texel.
-                    stateset->setTextureAttributeAndModes(texunit, BlendmapTexMat::value(blendmapScale));
-                    stateset->setTextureAttributeAndModes(texunit, TexEnvCombine::value(), osg::StateAttribute::ON);
-
-                    ++texunit;
+                    stateset->setTextureAttributeAndModes(1, BlendmapTexMat::value(blendmapScale));
+                    stateset->setTextureAttributeAndModes(1, TexEnvCombine::value(), osg::StateAttribute::ON);
                 }
 
             }
