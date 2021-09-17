@@ -429,14 +429,14 @@ namespace Shader
 
     void ShaderVisitor::createProgram(const ShaderRequirements &reqs)
     {
-        osg::Node& node = *reqs.mNode;
+        osg::Node* parent = nullptr;
         for (auto it = getNodePath().rbegin()+1; it != getNodePath().rend(); ++it)
         {
-            osg::Node* parent = *it;
-            if (parent->getNumChildren()>1)
+            if (*it->getNumChildren()>1)
                 break;
-            node = *parent;
+            parent = *it;
         }
+        osg::Node& node = parent ? *parent : *reqs.mNode;
 
         if (!reqs.mShaderRequired && !mForceShaders)
         {
