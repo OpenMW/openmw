@@ -422,7 +422,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         return;
     }
 
-    osg::CullSettings::CullingMode cullingmode = cullsettings ?  static_cast<osg::CullSettings*>(&nv)->getCullingMode() : 0;
+    osg::CullSettings::CullingMode cullingmode = isCullVisitor ?  static_cast<osgUtil::CullVisitor*>(&nv)->getCullingMode() : 0;
     if (cullingmode)
         static_cast<osgUtil::CullVisitor*>(&nv)->setCullingMode(cullingmode & ~osg::CullSettings::SMALL_FEATURE_CULLING);
 
