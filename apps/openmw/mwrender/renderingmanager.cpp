@@ -506,7 +506,6 @@ namespace MWRender
         // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
         mRootNode->getOrCreateStateSet()->setAttribute(Shader::RemovedAlphaFunc::getInstance(GL_ALWAYS));
         // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
-        mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF);
         osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setStateSet(nullptr);
         osgUtil::RenderBin::getRenderBinPrototype("SORT_BACK_TO_FRONT")->setStateSet(nullptr);
 
