@@ -376,10 +376,10 @@ variables: &tests-targets
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
     - $env:SCCACHE_BASEDIR = Get-Location
-    - $env:SCCACHE_DIR = "$(Get-Location)\ccache"
+    - $env:SCCACHE_DIR = "$(Get-Location)\sccache"
     - New-Item -Type Directory -Force -Path $env:SCCACHE_DIR
     - sccache --show-stats
-    - sccache --start-server
+    # - sccache --start-server
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
