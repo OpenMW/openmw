@@ -432,7 +432,7 @@ namespace Shader
         osg::Node* parent = nullptr;
         for (auto it = getNodePath().rbegin()+1; it != getNodePath().rend(); ++it)
         {
-            if (*it->getNumChildren()>1)
+            if ((*it)->getNumChildren()>1)
                 break;
             parent = *it;
         }
