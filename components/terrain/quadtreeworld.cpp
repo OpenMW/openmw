@@ -422,6 +422,10 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         return;
     }
 
+    osg::CullSettings::CullingMode cullingmode = cullsettings ?  static_cast<osg::CullSettings*>(&nv)->getCullingMode() : 0;
+    if (cullingmode)
+        static_cast<osgUtil::CullVisitor*>(&nv)->setCullingMode(cullingmode & ~osg::CullSettings::SMALL_FEATURE_CULLING);
+
     osg::Object * viewer = isCullVisitor ? static_cast<osgUtil::CullVisitor*>(&nv)->getCurrentCamera() : nullptr;
     bool needsUpdate = true;
     ViewData *vd = mViewDataMap->getViewData(viewer, nv.getViewPoint(), mActiveGrid, needsUpdate);
@@ -453,6 +457,9 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         vd->setLastUsageTimeStamp(referenceTime);
         mViewDataMap->clearUnusedViews(referenceTime);
     }
+
+    if (cullingmode)
+        static_cast<osgUtil::CullVisitor*>(&nv)->setCullingMode(cullingmode);
 }
 
 void QuadTreeWorld::ensureQuadTreeBuilt()
