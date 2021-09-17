@@ -186,7 +186,7 @@ namespace Terrain
             if (!blendmaps.empty())
             {
                 stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-                stateset->setRenderBinDetails(passIndex++, "RenderBin");
+                stateset->setRenderBinDetails(std::min(passIndex++,1), "RenderBin");
                 if (!firstLayer)
                 {
                     stateset->setAttributeAndModes(BlendFunc::value(), osg::StateAttribute::ON);
