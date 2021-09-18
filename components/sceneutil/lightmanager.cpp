@@ -1315,42 +1315,38 @@ namespace SceneUtil
         // - organize lights in a quad tree
 
 
-        // update light list if necessary
-        // makes sure we don't update it more than once per frame when rendering with multiple cameras
-        if (mLastFrameNumber != cv->getTraversalNumber())
+        mLastFrameNumber = cv->getTraversalNumber();
+
+        // Don't use Camera::getViewMatrix, that one might be relative to another camera!
+        const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
+        const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv, viewMatrix, mLastFrameNumber);
+
+        // get the node bounds in view space
+        // NB do not node->getBound() * modelView, that would apply the node's transformation twice
+        osg::BoundingSphere nodeBound;
+        osg::Transform* transform = node->asTransform();
+        if (transform)
         {
-            mLastFrameNumber = cv->getTraversalNumber();
-
-            // Don't use Camera::getViewMatrix, that one might be relative to another camera!
-            const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
-            const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv, viewMatrix, mLastFrameNumber);
-
-            // get the node bounds in view space
-            // NB do not node->getBound() * modelView, that would apply the node's transformation twice
-            osg::BoundingSphere nodeBound;
-            osg::Transform* transform = node->asTransform();
-            if (transform)
-            {
-                for (size_t i = 0; i < transform->getNumChildren(); ++i)
-                    nodeBound.expandBy(transform->getChild(i)->getBound());
-            }
-            else
-                nodeBound = node->getBound();
-            osg::Matrixf mat = *cv->getModelViewMatrix();
-            transformBoundingSphere(mat, nodeBound);
-
-            mLightList.clear();
-            for (size_t i = 0; i < lights.size(); ++i)
-            {
-                const LightManager::LightSourceViewBound& l = lights[i];
-
-                if (mIgnoredLightSources.count(l.mLightSource))
-                    continue;
-
-                if (l.mViewBound.intersects(nodeBound))
-                    mLightList.push_back(&l);
-            }
+            for (size_t i = 0; i < transform->getNumChildren(); ++i)
+                nodeBound.expandBy(transform->getChild(i)->getBound());
         }
+        else
+            nodeBound = node->getBound();
+        osg::Matrixf mat = *cv->getModelViewMatrix();
+        transformBoundingSphere(mat, nodeBound);
+
+        mLightList.clear();
+        for (size_t i = 0; i < lights.size(); ++i)
+        {
+            const LightManager::LightSourceViewBound& l = lights[i];
+
+            if (mIgnoredLightSources.count(l.mLightSource))
+                continue;
+
+            if (l.mViewBound.intersects(nodeBound))
+                mLightList.push_back(&l);
+        }
+
         if (!mLightList.empty())
         {
             size_t maxLights = mLightManager->getMaxLights() - mLightManager->getStartLight();
