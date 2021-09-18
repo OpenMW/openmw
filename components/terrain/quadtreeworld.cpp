@@ -406,8 +406,8 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
 
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
-    bool isCullVisitor = nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR;
-    if (!isCullVisitor && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
+    osgUtil::CullVisitor* cv = (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR) ? static_cast<osgUtil::CullVisitor*>(&nv) : nullptr;
+    if (!cv && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
     {
         if (nv.getName().find("AcceptedByComponentsTerrainQuadTreeWorld") != std::string::npos)
         {
@@ -422,11 +422,15 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         return;
     }
 
-    osg::CullSettings::CullingMode cullingmode = isCullVisitor ?  static_cast<osgUtil::CullVisitor*>(&nv)->getCullingMode() : 0;
-    if (cullingmode)
-        static_cast<osgUtil::CullVisitor*>(&nv)->setCullingMode(cullingmode & ~osg::CullSettings::SMALL_FEATURE_CULLING);
+    osg::CullingSet::MaskValues projcullingmask = cv ? cv->getProjectionCullingStack().back().getCullingMask() : 0;
+    osg::CullingSet::MaskValues cullingmask = cv ? cv->getCurrentCullingSet().getCullingMask() : 0;
+    if (cv)
+    {
+        cv->getProjectionCullingStack().back().setCullingMask(projcullingmask & ~osg::CullingSet::SMALL_FEATURE_CULLING);
+        cv->getCurrentCullingSet().setCullingMask(cullingmask & ~osg::CullingSet::SMALL_FEATURE_CULLING);
+    }
 
-    osg::Object * viewer = isCullVisitor ? static_cast<osgUtil::CullVisitor*>(&nv)->getCurrentCamera() : nullptr;
+    osg::Object * viewer = cv ? cv->getCurrentCamera() : nullptr;
     bool needsUpdate = true;
     ViewData *vd = mViewDataMap->getViewData(viewer, nv.getViewPoint(), mActiveGrid, needsUpdate);
 
@@ -446,8 +450,8 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         entry.mRenderingNode->accept(nv);
     }
 
-    if (mHeightCullCallback && isCullVisitor)
-        updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty());
+    if (mHeightCullCallback && cv)
+        updateWaterCullingView(mHeightCullCallback, vd, cv, mStorage->getCellWorldSize(), !isGridEmpty());
 
     vd->markUnchanged();
 
@@ -458,8 +462,11 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         mViewDataMap->clearUnusedViews(referenceTime);
     }
 
-    if (cullingmode)
-        static_cast<osgUtil::CullVisitor*>(&nv)->setCullingMode(cullingmode);
+    if (cv)
+    {
+        cv->getProjectionCullingStack().back().setCullingMask(projcullingmask);
+        cv->getCurrentCullingSet().setCullingMask(cullingmask);
+    }
 }
 
 void QuadTreeWorld::ensureQuadTreeBuilt()
