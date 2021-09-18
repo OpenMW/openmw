@@ -439,8 +439,17 @@ namespace
         const int cellSize2 = mHeightfieldTileSize * (surface2.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        EXPECT_TRUE(mNavigator->addHeightfield(mCellPosition, cellSize1, surface1));
-        EXPECT_FALSE(mNavigator->addHeightfield(mCellPosition, cellSize2, surface2));
+        mNavigator->addHeightfield(mCellPosition, cellSize1, surface1);
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+
+        const Version version = mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion();
+
+        mNavigator->addHeightfield(mCellPosition, cellSize2, surface2);
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+
+        EXPECT_EQ(mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion(), version);
     }
 
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_around_avoid_shape)
@@ -1142,7 +1151,16 @@ namespace
         const float level2 = 2;
 
         mNavigator->addAgent(mAgentBounds);
-        EXPECT_TRUE(mNavigator->addWater(mCellPosition, cellSize1, level1));
-        EXPECT_FALSE(mNavigator->addWater(mCellPosition, cellSize2, level2));
+        mNavigator->addWater(mCellPosition, cellSize1, level1);
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+
+        const Version version = mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion();
+
+        mNavigator->addWater(mCellPosition, cellSize2, level2);
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+
+        EXPECT_EQ(mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion(), version);
     }
 }

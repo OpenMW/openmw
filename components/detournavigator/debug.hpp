@@ -18,6 +18,8 @@ class dtNavMesh;
 
 namespace DetourNavigator
 {
+    struct Version;
+
     std::ostream& operator<<(std::ostream& stream, const TileBounds& value);
 
     std::ostream& operator<<(std::ostream& stream, Status value);
@@ -53,6 +55,8 @@ namespace DetourNavigator
     std::ostream& operator<<(std::ostream& stream, AreaType value);
 
     std::ostream& operator<<(std::ostream& stream, ChangeType value);
+
+    std::ostream& operator<<(std::ostream& stream, const Version& value);
 
     class RecastMesh;
     struct RecastSettings;

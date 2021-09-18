@@ -113,7 +113,6 @@ namespace MWWorld
 
             osg::Vec3f mDefaultHalfExtents;
             DetourNavigator::CollisionShapeType mDefaultActorCollisionShapeType;
-            bool mShouldUpdateNavigator;
 
             int mActivationDistanceOverride;
 

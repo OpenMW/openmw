@@ -3,6 +3,7 @@
 #include "recastmesh.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
+#include "version.hpp"
 
 #include <components/bullethelpers/operators.hpp>
 
@@ -189,6 +190,11 @@ namespace DetourNavigator
                 return stream << "ChangeType::update";
         }
         return stream << "ChangeType::" << static_cast<int>(value);
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const Version& value)
+    {
+        return stream << "Version {" << value.mGeneration << ", " << value.mRevision << "}";
     }
 
     void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix,

@@ -365,8 +365,6 @@ namespace MWWorld
         if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
             mNavigator.removePathgrid(*pathgrid);
 
-        mNavigator.update(mWorld.getPlayerPtr().getRefData().getPosition().asVec3());
-
         MWBase::Environment::get().getMechanicsManager()->drop (cell);
 
         mRendering.removeCell(cell);
@@ -514,12 +512,7 @@ namespace MWWorld
 
     void Scene::playerMoved(const osg::Vec3f &pos)
     {
-        if (mCurrentCell == nullptr)
-            return;
-
-        mNavigator.updatePlayerPosition(pos);
-
-        if (!mCurrentCell->isExterior())
+        if (!mCurrentCell || !mCurrentCell->isExterior())
             return;
 
         osg::Vec2i newCell = getNewGridCenter(pos, &mCurrentGridCenter);
@@ -619,7 +612,7 @@ namespace MWWorld
         if (changeEvent)
             mCellChanged = true;
 
-        mNavigator.wait(*loadingListener, DetourNavigator::WaitConditionType::requiredTilesPresent);
+        mCellLoaded = true;
     }
 
     void Scene::addPostponedPhysicsObjects()
@@ -868,12 +861,12 @@ namespace MWWorld
         if (changeEvent)
             mCellChanged = true;
 
+        mCellLoaded = true;
+
         if (useFading)
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
-
-        mNavigator.wait(*loadingListener, DetourNavigator::WaitConditionType::requiredTilesPresent);
 
         MWBase::Environment::get().getWorld()->getPostProcessor()->setExteriorFlag(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx);
     }
@@ -921,11 +914,6 @@ namespace MWWorld
             addObject(ptr, mWorld, mPagedRefs, *mPhysics, mRendering);
             addObject(ptr, mWorld, *mPhysics, mNavigator);
             mWorld.scaleObject(ptr, ptr.getCellRef().getScale());
-            if (mCurrentCell != nullptr)
-            {
-                const auto player = mWorld.getPlayerPtr();
-                mNavigator.update(player.getRefData().getPosition().asVec3());
-            }
         }
         catch (std::exception& e)
         {
@@ -945,11 +933,6 @@ namespace MWWorld
         if (const auto object = mPhysics->getObject(ptr))
         {
             mNavigator.removeObject(DetourNavigator::ObjectId(object));
-            if (mCurrentCell != nullptr)
-            {
-                const auto player = mWorld.getPlayerPtr();
-                mNavigator.update(player.getRefData().getPosition().asVec3());
-            }
         }
         else if (mPhysics->getActor(ptr))
         {

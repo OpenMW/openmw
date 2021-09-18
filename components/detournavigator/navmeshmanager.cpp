@@ -107,51 +107,46 @@ namespace DetourNavigator
             [&] (const TilePosition& tile, ChangeType changeType) { addChangedTile(tile, changeType); });
     }
 
-    bool NavMeshManager::removeObject(const ObjectId id)
+    void NavMeshManager::removeObject(const ObjectId id)
     {
         const auto object = mRecastMeshManager.removeObject(id);
         if (!object)
-            return false;
+            return;
         addChangedTiles(object->mShape, object->mTransform, ChangeType::remove);
-        return true;
     }
 
-    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
+    void NavMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
         if (!mRecastMeshManager.addWater(cellPosition, cellSize, level))
-            return false;
+            return;
         const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
         addChangedTiles(cellSize, shift, ChangeType::add);
-        return true;
     }
 
-    bool NavMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    void NavMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto water = mRecastMeshManager.removeWater(cellPosition);
         if (!water)
-            return false;
+            return;
         const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, water->mCellSize, water->mLevel));
         addChangedTiles(water->mCellSize, shift, ChangeType::remove);
-        return true;
     }
 
-    bool NavMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape)
+    void NavMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape)
     {
         if (!mRecastMeshManager.addHeightfield(cellPosition, cellSize, shape))
-            return false;
+            return;
         const btVector3 shift = getHeightfieldShift(shape, cellPosition, cellSize);
         addChangedTiles(cellSize, shift, ChangeType::add);
-        return true;
     }
 
-    bool NavMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    void NavMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
     {
         const auto heightfield = mRecastMeshManager.removeHeightfield(cellPosition);
         if (!heightfield)
-            return false;
+            return;
         const btVector3 shift = getHeightfieldShift(heightfield->mShape, cellPosition, heightfield->mCellSize);
         addChangedTiles(heightfield->mCellSize, shift, ChangeType::remove);
-        return true;
     }
 
     void NavMeshManager::addAgent(const AgentBounds& agentBounds)

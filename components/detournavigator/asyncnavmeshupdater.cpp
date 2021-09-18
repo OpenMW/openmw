@@ -216,27 +216,13 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::wait(Loading::Listener& listener, WaitConditionType waitConditionType)
     {
-        if (mSettings.get().mWaitUntilMinDistanceToPlayer == 0)
-            return;
-        listener.setLabel("#{Navigation:BuildingNavigationMesh}");
-        const std::size_t initialJobsLeft = getTotalJobs();
-        std::size_t maxProgress = initialJobsLeft + mThreads.size();
-        listener.setProgressRange(maxProgress);
         switch (waitConditionType)
         {
             case WaitConditionType::requiredTilesPresent:
-            {
-                const int minDistanceToPlayer = waitUntilJobsDoneForNotPresentTiles(initialJobsLeft, maxProgress, listener);
-                if (minDistanceToPlayer < mSettings.get().mWaitUntilMinDistanceToPlayer)
-                {
-                    mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
-                    listener.setProgress(maxProgress);
-                }
+                waitUntilJobsDoneForNotPresentTiles(listener);
                 break;
-            }
             case WaitConditionType::allJobsDone:
                 waitUntilAllJobsDone();
-                listener.setProgress(maxProgress);
                 break;
         }
     }
@@ -255,8 +241,10 @@ namespace DetourNavigator
                 thread.join();
     }
 
-    int AsyncNavMeshUpdater::waitUntilJobsDoneForNotPresentTiles(const std::size_t initialJobsLeft, std::size_t& maxProgress, Loading::Listener& listener)
+    void AsyncNavMeshUpdater::waitUntilJobsDoneForNotPresentTiles(Loading::Listener& listener)
     {
+        const std::size_t initialJobsLeft = getTotalJobs();
+        std::size_t maxProgress = initialJobsLeft + mThreads.size();
         std::size_t prevJobsLeft = initialJobsLeft;
         std::size_t jobsDone = 0;
         std::size_t jobsLeft = 0;
@@ -275,7 +263,13 @@ namespace DetourNavigator
             return minDistanceToPlayer >= maxDistanceToPlayer;
         };
         std::unique_lock<std::mutex> lock(mMutex);
-        while (!mDone.wait_for(lock, std::chrono::milliseconds(250), isDone))
+        if (getMinDistanceTo(playerPosition, maxDistanceToPlayer, mPushed, mPresentTiles) >= maxDistanceToPlayer
+                || (mJobs.empty() && mProcessingTiles.lockConst()->empty()))
+            return;
+        Loading::ScopedLoad load(&listener);
+        listener.setLabel("#{Navigation:BuildingNavigationMesh}");
+        listener.setProgressRange(maxProgress);
+        while (!mDone.wait_for(lock, std::chrono::milliseconds(20), isDone))
         {
             if (maxProgress < jobsLeft)
             {
@@ -291,14 +285,19 @@ namespace DetourNavigator
                 listener.increaseProgress(newJobsDone);
             }
         }
-        return minDistanceToPlayer;
+        lock.unlock();
+        if (minDistanceToPlayer < maxDistanceToPlayer)
+        {
+            mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
+            listener.setProgress(maxProgress);
+        }
     }
 
     void AsyncNavMeshUpdater::waitUntilAllJobsDone()
     {
         {
             std::unique_lock<std::mutex> lock(mMutex);
-            mDone.wait(lock, [this] { return mJobs.size() == 0; });
+            mDone.wait(lock, [this] { return mJobs.empty(); });
         }
         mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
     }
