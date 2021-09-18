@@ -1323,7 +1323,7 @@ namespace SceneUtil
 
             // Don't use Camera::getViewMatrix, that one might be relative to another camera!
             const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
-            const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix, mLastFrameNumber);
+            const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv, viewMatrix, mLastFrameNumber);
 
             // get the node bounds in view space
             // NB do not node->getBound() * modelView, that would apply the node's transformation twice
