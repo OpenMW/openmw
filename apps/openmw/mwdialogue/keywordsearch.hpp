@@ -68,6 +68,19 @@ public:
         return false;
     }
 
+    static bool isWhitespaceUTF8(const int utf8Char)
+    {
+        if (utf8Char >= 0 && utf8Char <= UCHAR_MAX)
+        {
+            //That function has undefined behavior if the character doesn't fit in unsigned char
+            return std::isspace(utf8Char);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     static bool sortMatches(const Match& left, const Match& right)
     {
         return left.mBeg < right.mBeg;
@@ -83,7 +96,7 @@ public:
             {
                 Point prev = i;
                 --prev;
-                if(isalpha(*prev))
+                if(!isWhitespaceUTF8(*prev))
                     continue;
             }
 
