@@ -1204,7 +1204,6 @@ namespace SceneUtil
 
     const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(osg::Camera *camera, const osg::RefMatrix* viewMatrix, size_t frameNum)
     {
-        bool isReflection = isReflectionCamera(camera);
         osg::observer_ptr<osg::Camera> camPtr (camera);
         auto it = mLightsInViewSpace.find(camPtr);
 
@@ -1212,6 +1211,8 @@ namespace SceneUtil
         {
             it = mLightsInViewSpace.insert(std::make_pair(camPtr, LightSourceViewBoundCollection())).first;
 
+            bool isReflection = isReflectionCamera(camera);
+        
             for (const auto& transform : mLights)
             {
                 osg::Matrixf worldViewMat = transform.mWorldMatrix * (*viewMatrix);
