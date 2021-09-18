@@ -184,7 +184,7 @@ int MWWorld::ContainerStore::count(const std::string &id) const
 {
     int total=0;
     for (const auto&& iter : *this)
-        if (Misc::StringUtils::ciEqual(iter.getCellRef().getRefId(), id))
+        if (Misc::StringUtils::ciEqual(iter.getCellRef().getRefIdRef(), id))
             total += iter.getRefData().getCount();
     return total;
 }
@@ -249,7 +249,7 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
     const MWWorld::Class& cls1 = ptr1.getClass();
     const MWWorld::Class& cls2 = ptr2.getClass();
 
-    if (!Misc::StringUtils::ciEqual(ptr1.getCellRef().getRefId(), ptr2.getCellRef().getRefId()))
+    if (!Misc::StringUtils::ciEqual(ptr1.getCellRef().getRefIdRef(), ptr2.getCellRef().getRefIdRef()))
         return false;
 
     // If it has an enchantment, don't stack when some of the charge is already used
@@ -364,7 +364,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
-            if (Misc::StringUtils::ciEqual((*iter).getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
+            if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefIdRef(), MWWorld::ContainerStore::sGoldId))
             {
                 iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), realCount));
                 flagAsModified();
@@ -465,7 +465,7 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
     int toRemove = count;
 
     for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
-        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), itemId))
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefIdRef(), itemId))
             toRemove -= remove(*iter, toRemove, actor, equipReplacement, resolveFirst);
 
     flagAsModified();
@@ -740,7 +740,7 @@ MWWorld::Ptr MWWorld::ContainerStore::findReplacement(const std::string& id)
     for (auto&& iter : *this)
     {
         int iterHealth = iter.getClass().hasItemHealth(iter) ? iter.getClass().getItemHealth(iter) : 1;
-        if (Misc::StringUtils::ciEqual(iter.getCellRef().getRefId(), id))
+        if (Misc::StringUtils::ciEqual(iter.getCellRef().getRefIdRef(), id))
         {
             // Prefer the stack with the lowest remaining uses
             // Try to get item with zero durability only if there are no other items found

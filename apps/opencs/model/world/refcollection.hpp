@@ -2,6 +2,7 @@
 #define CSM_WOLRD_REFCOLLECTION_H
 
 #include <map>
+#include <string_view>
 
 #include "../doc/stage.hpp"
 
@@ -56,7 +57,7 @@ namespace CSMWorld
                                       const std::string& destination,
                                       const UniversalId::Type type);
 
-            virtual int searchId (const std::string& id) const;
+            virtual int searchId(std::string_view id) const;
 
             virtual void appendRecord (std::unique_ptr<RecordBase> record,
                                        UniversalId::Type type = UniversalId::Type_None);

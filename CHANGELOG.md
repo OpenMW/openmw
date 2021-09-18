@@ -7,6 +7,7 @@
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
     Bug #3905: Great House Dagoth issues
     Bug #4203: Resurrecting an actor should close the loot GUI
+    Bug #4602: Robert's Bodies: crash inside createInstance()
     Bug #4700: Editor: Incorrect command implementation
     Bug #4744: Invisible particles must still be processed
     Bug #4752: UpdateCellCommand doesn't undo properly
@@ -36,6 +37,7 @@
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
+    Bug #6273: Respawning NPCs rotation is inconsistent
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
@@ -47,7 +49,11 @@
     Feature #6032: Reverse-z depth buffer
     Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Feature #6199: Support FBO Rendering
-    Editor: Preserve the "blocked" record flag for referenceable objects.
+    Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
+    Feature #6288: Preserve the "blocked" record flag for referenceable objects.
+    Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
+    Task #6264: Remove the old classes in animation.cpp
+
 
 0.47.0
 ------

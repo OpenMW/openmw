@@ -271,7 +271,7 @@ bool ActorAnimation::useShieldAnimations() const
     return false;
 }
 
-osg::Group* ActorAnimation::getBoneByName(const std::string& boneName)
+osg::Group* ActorAnimation::getBoneByName(const std::string& boneName) const
 {
     if (!mObjectRoot)
         return nullptr;

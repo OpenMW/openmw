@@ -17,6 +17,7 @@
 #include <components/resource/keyframemanager.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
@@ -196,32 +197,6 @@ namespace
         return 0.0f;
     }
 
-    /// @brief Base class for visitors that remove nodes from a scene graph.
-    /// Subclasses need to fill the mToRemove vector.
-    /// To use, node->accept(removeVisitor); removeVisitor.remove();
-    class RemoveVisitor : public osg::NodeVisitor
-    {
-    public:
-        RemoveVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-        {
-        }
-
-        void remove()
-        {
-            for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-            {
-                if (!it->second->removeChild(it->first))
-                    Log(Debug::Error) << "Error removing " << it->first->getName();
-            }
-        }
-
-    protected:
-        // <node to remove, parent node to remove it from>
-        typedef std::vector<std::pair<osg::Node*, osg::Group*> > RemoveVec;
-        std::vector<std::pair<osg::Node*, osg::Group*> > mToRemove;
-    };
-
     class GetExtendedBonesVisitor : public osg::NodeVisitor
     {
     public:
@@ -244,7 +219,7 @@ namespace
         std::vector<std::pair<osg::Node*, osg::Group*> > mFoundBones;
     };
 
-    class RemoveFinishedCallbackVisitor : public RemoveVisitor
+    class RemoveFinishedCallbackVisitor : public SceneUtil::RemoveVisitor
     {
     public:
         bool mHasMagicEffects;
@@ -289,7 +264,7 @@ namespace
         }
     };
 
-    class RemoveCallbackVisitor : public RemoveVisitor
+    class RemoveCallbackVisitor : public SceneUtil::RemoveVisitor
     {
     public:
         bool mHasMagicEffects;
@@ -396,90 +371,6 @@ namespace
 
     private:
         int mEffectId;
-    };
-
-    // Removes all drawables from a graph.
-    class CleanObjectRootVisitor : public RemoveVisitor
-    {
-    public:
-        void apply(osg::Drawable& drw) override
-        {
-            applyDrawable(drw);
-        }
-
-        void apply(osg::Group& node) override
-        {
-            applyNode(node);
-        }
-        void apply(osg::MatrixTransform& node) override
-        {
-            applyNode(node);
-        }
-        void apply(osg::Node& node) override
-        {
-            applyNode(node);
-        }
-
-        void applyNode(osg::Node& node)
-        {
-            if (node.getStateSet())
-                node.setStateSet(nullptr);
-
-            if (node.getNodeMask() == 0x1 && node.getNumParents() == 1)
-                mToRemove.emplace_back(&node, node.getParent(0));
-            else
-                traverse(node);
-        }
-        void applyDrawable(osg::Node& node)
-        {
-            osg::NodePath::iterator parent = getNodePath().end()-2;
-            // We know that the parent is a Group because only Groups can have children.
-            osg::Group* parentGroup = static_cast<osg::Group*>(*parent);
-
-            // Try to prune nodes that would be empty after the removal
-            if (parent != getNodePath().begin())
-            {
-                // This could be extended to remove the parent's parent, and so on if they are empty as well.
-                // But for NIF files, there won't be a benefit since only TriShapes can be set to STATIC dataVariance.
-                osg::Group* parentParent = static_cast<osg::Group*>(*(parent - 1));
-                if (parentGroup->getNumChildren() == 1 && parentGroup->getDataVariance() == osg::Object::STATIC)
-                {
-                    mToRemove.emplace_back(parentGroup, parentParent);
-                    return;
-                }
-            }
-
-            mToRemove.emplace_back(&node, parentGroup);
-        }
-    };
-
-    class RemoveTriBipVisitor : public RemoveVisitor
-    {
-    public:
-        void apply(osg::Drawable& drw) override
-        {
-            applyImpl(drw);
-        }
-
-        void apply(osg::Group& node) override
-        {
-            traverse(node);
-        }
-        void apply(osg::MatrixTransform& node) override
-        {
-            traverse(node);
-        }
-
-        void applyImpl(osg::Node& node)
-        {
-            const std::string toFind = "tri bip";
-            if (Misc::StringUtils::ciCompareLen(node.getName(), toFind, toFind.size()) == 0)
-            {
-                osg::Group* parent = static_cast<osg::Group*>(*(getNodePath().end()-2));
-                // Not safe to remove in apply(), since the visitor is still iterating the child list
-                mToRemove.emplace_back(&node, parent);
-            }
-        }
     };
 }
 
@@ -701,8 +592,6 @@ namespace MWRender
 
     void Animation::loadAllAnimationsInFolder(const std::string &model, const std::string &baseModel)
     {
-        const std::map<std::string, VFS::File*>& index = mResourceSystem->getVFS()->getIndex();
-
         std::string animationPath = model;
         if (animationPath.find("meshes") == 0)
         {
@@ -710,21 +599,10 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size()-3, 3, "/");
 
-        mResourceSystem->getVFS()->normalizeFilename(animationPath);
-
-        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(animationPath);
-        while (found != index.end())
+        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
-            const std::string& name = found->first;
-            if (name.size() >= animationPath.size() && name.substr(0, animationPath.size()) == animationPath)
-            {
-                size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".kf") == 0)
-                    addSingleAnimSource(name, baseModel);
-            }
-            else
-                break;
-            ++found;
+            if (Misc::getFileExtension(name) == "kf")
+                addSingleAnimSource(name, baseModel);
         }
     }
 
@@ -1405,8 +1283,6 @@ namespace MWRender
         if (model.empty())
             return;
 
-        const std::map<std::string, VFS::File*>& index = resourceSystem->getVFS()->getIndex();
-
         std::string animationPath = model;
         if (animationPath.find("meshes") == 0)
         {
@@ -1414,21 +1290,10 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size()-4, 4, "/");
 
-        resourceSystem->getVFS()->normalizeFilename(animationPath);
-
-        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(animationPath);
-        while (found != index.end())
+        for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
-            const std::string& name = found->first;
-            if (name.size() >= animationPath.size() && name.substr(0, animationPath.size()) == animationPath)
-            {
-                size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".nif") == 0)
-                    loadBonesFromFile(node, name, resourceSystem);
-            }
-            else
-                break;
-            ++found;
+            if (Misc::getFileExtension(name) == "nif")
+                loadBonesFromFile(node, name, resourceSystem);
         }
     }
 

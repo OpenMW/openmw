@@ -428,7 +428,7 @@ namespace MWWorld
         const ESM::WeaponType *search(const int id) const;
         const ESM::WeaponType *find(const int id) const;
 
-        RecordId load(ESM::ESMReader &esm) override { return RecordId(nullptr, false); }
+        RecordId load(ESM::ESMReader &esm) override { return RecordId({}, false); }
 
         ESM::WeaponType* insert(const ESM::WeaponType &weaponType);
 

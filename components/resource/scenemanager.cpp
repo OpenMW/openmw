@@ -17,6 +17,7 @@
 #include <components/nifosg/nifloader.hpp>
 #include <components/nif/niffile.hpp>
 
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/stringops.hpp>
 
 #include <components/vfs/manager.hpp>
@@ -358,10 +359,7 @@ namespace Resource
 
     bool SceneManager::checkLoaded(const std::string &name, double timeStamp)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
-
-        return mCache->checkInObjectCache(normalized, timeStamp);
+        return mCache->checkInObjectCache(mVFS->normalizeFilename(name), timeStamp);
     }
 
     /// @brief Callback to read image files from the VFS.
@@ -391,12 +389,12 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> load (const std::string& normalizedFilename, const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
     {
-        std::string ext = Resource::getFileExtension(normalizedFilename);
+        auto ext = Misc::getFileExtension(normalizedFilename);
         if (ext == "nif")
             return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), imageManager);
         else
         {
-            osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
+            osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(std::string(ext));
             if (!reader)
             {
                 std::stringstream errormsg;
@@ -533,8 +531,7 @@ namespace Resource
 
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name, bool compile)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
+        std::string normalized = mVFS->normalizeFilename(name);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)
@@ -603,8 +600,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::cacheInstance(const std::string &name)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
+        const std::string normalized = mVFS->normalizeFilename(name);
 
         osg::ref_ptr<osg::Node> node = createInstance(normalized);
 
@@ -642,8 +638,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
+        const std::string normalized = mVFS->normalizeFilename(name);
 
         osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
         if (obj.get())
@@ -821,13 +816,5 @@ namespace Resource
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
         shaderVisitor->setTranslucentFramebuffer(translucentFramebuffer);
         return shaderVisitor;
-    }
-
-    std::string getFileExtension(const std::string& file)
-    {
-        size_t extPos = file.find_last_of('.');
-        if (extPos != std::string::npos && extPos+1 < file.size())
-            return file.substr(extPos+1);
-        return std::string();
     }
 }

@@ -44,6 +44,7 @@ Programmers
     Austin Salgat (Salgat)
     Ben Shealy (bentsherman)
     Berulacks
+    Bo Svensson
     Britt Mathis (galdor557)
     Capostrophic
     Carl Maxwell
@@ -99,6 +100,7 @@ Programmers
     James Stephens (james-h-stephens)
     Jan-Peter Nilsson (peppe)
     Jan Borsodi (am0s)
+    JanuarySnow
     Jason Hooks (jhooks)
     jeaye
     jefetienne

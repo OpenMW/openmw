@@ -22,8 +22,6 @@ namespace Terrain
     public:
         QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask, int compMapResolution, float comMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize);
 
-        QuadTreeWorld(osg::Group *parent, Storage *storage, unsigned int nodeMask, float lodFactor, float chunkSize);
-
         ~QuadTreeWorld();
 
         void accept(osg::NodeVisitor& nv);
@@ -39,7 +37,7 @@ namespace Terrain
         void unloadCell(int x, int y) override;
 
         View* createView() override;
-        void preload(View* view, const osg::Vec3f& eyePoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, std::atomic<int>& progress, int& progressRange) override;
+        void preload(View* view, const osg::Vec3f& eyePoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, Loading::Reporter& reporter) override;
         bool storeView(const View* view, double referenceTime) override;
         void rebuildViews() override;
 
@@ -51,6 +49,11 @@ namespace Terrain
             virtual ~ChunkManager(){}
             virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile) = 0;
             virtual unsigned int getNodeMask() { return 0; }
+
+            void setViewDistance(float viewDistance) { mViewDistance = viewDistance; }
+            float getViewDistance() const { return mViewDistance; }
+        private:
+            float mViewDistance = 0.f;
         };
         void addChunkManager(ChunkManager*);
 

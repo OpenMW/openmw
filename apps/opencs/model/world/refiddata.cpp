@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <memory>
+#include <string_view>
 
 CSMWorld::RefIdDataContainerBase::~RefIdDataContainerBase() {}
 
@@ -74,8 +75,7 @@ int CSMWorld::RefIdData::localToGlobalIndex (const LocalIndex& index)
     return globalIndex;
 }
 
-CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId (
-    const std::string& id) const
+CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId(std::string_view id) const
 {
     std::string id2 = Misc::StringUtils::lowerCase (id);
 

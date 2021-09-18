@@ -103,6 +103,9 @@ namespace LuaUtil
             return getFieldOrNil(table.as<sol::table>()[first], str...);
     }
 
+    // String representation of a Lua object. Should be used for debugging/logging purposes only.
+    std::string toString(const sol::object&);
+
 }
 
 #endif // COMPONENTS_LUA_LUASTATE_H

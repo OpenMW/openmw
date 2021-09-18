@@ -8,6 +8,7 @@
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
+#include <components/misc/pathhelpers.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/vfs/manager.hpp>
 
@@ -121,8 +122,7 @@ BulletShapeManager::~BulletShapeManager()
 
 osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &name)
 {
-    std::string normalized = name;
-    mVFS->normalizeFilename(normalized);
+    const std::string normalized = mVFS->normalizeFilename(name);
 
     osg::ref_ptr<BulletShape> shape;
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
@@ -130,12 +130,7 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
         shape = osg::ref_ptr<BulletShape>(static_cast<BulletShape*>(obj.get()));
     else
     {
-        size_t extPos = normalized.find_last_of('.');
-        std::string ext;
-        if (extPos != std::string::npos && extPos+1 < normalized.size())
-            ext = normalized.substr(extPos+1);
-
-        if (ext == "nif")
+        if (Misc::getFileExtension(normalized) == "nif")
         {
             NifBullet::BulletNifLoader loader;
             shape = loader.load(*mNifFileManager->get(normalized));
@@ -180,8 +175,7 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
 
 osg::ref_ptr<BulletShapeInstance> BulletShapeManager::cacheInstance(const std::string &name)
 {
-    std::string normalized = name;
-    mVFS->normalizeFilename(normalized);
+    const std::string normalized = mVFS->normalizeFilename(name);
 
     osg::ref_ptr<BulletShapeInstance> instance = createInstance(normalized);
     if (instance)
@@ -191,8 +185,7 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::cacheInstance(const std::s
 
 osg::ref_ptr<BulletShapeInstance> BulletShapeManager::getInstance(const std::string &name)
 {
-    std::string normalized = name;
-    mVFS->normalizeFilename(normalized);
+    const std::string normalized = mVFS->normalizeFilename(name);
 
     osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
     if (obj.get())

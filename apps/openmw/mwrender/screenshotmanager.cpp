@@ -191,6 +191,7 @@ namespace MWRender
             screenshotH = screenshotW;   // use square resolution for planet mapping
 
         std::vector<osg::ref_ptr<osg::Image>> images;
+        images.reserve(6);
 
         for (int i = 0; i < 6; ++i)
             images.push_back(new osg::Image);

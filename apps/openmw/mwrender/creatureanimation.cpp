@@ -158,7 +158,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
 
     try
     {
-        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(itemModel);
+        osg::ref_ptr<const osg::Node> node = mResourceSystem->getSceneManager()->getTemplate(itemModel);
 
         const NodeMap& nodeMap = getNodeMap();
         NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));

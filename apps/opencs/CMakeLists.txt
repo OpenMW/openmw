@@ -8,11 +8,11 @@ opencs_units (model/doc
     document operation saving documentmanager loader runner operationholder
     )
 
-opencs_units_noqt (model/doc
+opencs_units (model/doc
     stage savingstate savingstages blacklist messages
     )
 
-opencs_hdrs_noqt (model/doc
+opencs_hdrs (model/doc
     state
     )
 
@@ -23,14 +23,14 @@ opencs_units (model/world
     )
 
 
-opencs_units_noqt (model/world
+opencs_units (model/world
     universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
     idcompletionmanager metadata defaultgmsts infoselectwrapper commandmacro
     )
 
-opencs_hdrs_noqt (model/world
+opencs_hdrs (model/world
     columnimp idcollection collection info subcellcollection
     )
 
@@ -39,14 +39,14 @@ opencs_units (model/tools
     tools reportmodel mergeoperation
     )
 
-opencs_units_noqt (model/tools
+opencs_units (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
     mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck
     )
 
-opencs_hdrs_noqt (model/tools
+opencs_hdrs (model/tools
     mergestate
     )
 
@@ -57,11 +57,11 @@ opencs_units (view/doc
     )
 
 
-opencs_units_noqt (view/doc
+opencs_units (view/doc
     subviewfactory
     )
 
-opencs_hdrs_noqt (view/doc
+opencs_hdrs (view/doc
     subviewfactoryimp
     )
 
@@ -74,7 +74,7 @@ opencs_units (view/world
     bodypartcreator landtexturecreator landcreator
     )
 
-opencs_units_noqt (view/world
+opencs_units (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
     scripthighlighter idvalidator dialoguecreator idcompletiondelegate
     colordelegate dragdroputils
@@ -92,12 +92,12 @@ opencs_units (view/render
     cellwater terraintexturemode actor terrainselection terrainshapemode brushdraw commands
     )
 
-opencs_units_noqt (view/render
+opencs_units (view/render
     lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
     cellarrow cellmarker cellborder pathgrid
     )
 
-opencs_hdrs_noqt (view/render
+opencs_hdrs (view/render
     mask
     )
 
@@ -106,7 +106,7 @@ opencs_units (view/tools
     reportsubview reporttable searchsubview searchbox merge
     )
 
-opencs_units_noqt (view/tools
+opencs_units (view/tools
     subviews
     )
 
@@ -119,11 +119,11 @@ opencs_units (model/prefs
     shortcuteventhandler shortcutmanager shortcutsetting modifiersetting stringsetting
     )
 
-opencs_units_noqt (model/prefs
+opencs_units (model/prefs
     category
     )
 
-opencs_units_noqt (model/filter
+opencs_units (model/filter
     node unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
     )
 
@@ -150,7 +150,6 @@ if(WIN32)
 endif(WIN32)
 
 qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt5_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
 qt5_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 # for compiled .ui files
@@ -232,31 +231,6 @@ target_link_libraries(openmw-cs
     components_qt
 )
 
-if(OSG_STATIC)
-    unset(_osg_plugins_static_files)
-    add_library(openmw_cs_osg_plugins INTERFACE)
-    foreach(_plugin ${USED_OSG_PLUGINS})
-        string(TOUPPER ${_plugin} _plugin_uc)
-        if(OPENMW_USE_SYSTEM_OSG)
-            list(APPEND _osg_plugins_static_files ${${_plugin_uc}_LIBRARY})
-        else()
-            list(APPEND _osg_plugins_static_files $<TARGET_FILE:${${_plugin_uc}_LIBRARY}>)
-            target_link_libraries(openmw_cs_osg_plugins INTERFACE $<TARGET_PROPERTY:${${_plugin_uc}_LIBRARY},LINK_LIBRARIES>)
-            add_dependencies(openmw_cs_osg_plugins ${${_plugin_uc}_LIBRARY})
-        endif()
-    endforeach()
-    # We use --whole-archive because OSG plugins use registration.
-    get_whole_archive_options(_opts ${_osg_plugins_static_files})
-    target_link_options(openmw_cs_osg_plugins INTERFACE ${_opts})
-    target_link_libraries(openmw-cs openmw_cs_osg_plugins)
-
-    if(OPENMW_USE_SYSTEM_OSG)
-        # OSG plugin pkgconfig files are missing these dependencies.
-        # https://github.com/openscenegraph/OpenSceneGraph/issues/1052
-        target_link_libraries(openmw freetype jpeg png)
-    endif()
-endif(OSG_STATIC)
-
 target_link_libraries(openmw-cs Qt5::Widgets Qt5::Core Qt5::Network Qt5::OpenGL)
 
 if (WIN32)
@@ -284,3 +258,7 @@ endif (MSVC)
 if(APPLE)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION "." COMPONENT Bundle)
 endif()
+
+if(USE_QT)
+    set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
+endif(USE_QT)

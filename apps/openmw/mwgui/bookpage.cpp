@@ -491,7 +491,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             {
                 add_partial_text();
                 stream.consume ();
-                mLine = nullptr, mRun = nullptr;
+                mLine = nullptr;
+                mRun = nullptr;
                 continue;
             }
 
@@ -551,7 +552,9 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
         if (left + space_width + word_width > mPageWidth)
         {
-            mLine = nullptr, mRun = nullptr, left = 0;
+            mLine = nullptr;
+            mRun = nullptr;
+            left = 0;
         }
         else
         {

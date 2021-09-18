@@ -988,7 +988,8 @@ namespace MWGui
         if (mInterior)
         {
             auto pos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
-            x = pos.x(), y = pos.y();
+            x = pos.x();
+            y = pos.y();
         }
         setGlobalMapPlayerPosition(x, y);
 
@@ -1160,7 +1161,8 @@ namespace MWGui
     void MapWindow::worldPosToGlobalMapImageSpace(float x, float y, float& imageX, float& imageY) const
     {
         mGlobalMapRender->worldPosToImageSpace(x, y, imageX, imageY);
-        imageX *= mGlobalMapZoom, imageY *= mGlobalMapZoom;
+        imageX *= mGlobalMapZoom;
+        imageY *= mGlobalMapZoom;
     }
 
     void MapWindow::updateCustomMarkers()

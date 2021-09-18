@@ -376,7 +376,9 @@ namespace MWGui
         {
             for (const std::string& keyword : keywords)
             {
-                if(Misc::StringUtils::ciEqual(MyGUI::LanguageManager::getInstance().replaceTags("#{" + keyword + "}"), button->getCaption()))
+                if (Misc::StringUtils::ciEqual(
+                        MyGUI::LanguageManager::getInstance().replaceTags("#{" + keyword + "}").asUTF8(),
+                        button->getCaption().asUTF8()))
                 {
                     return button;
                 }

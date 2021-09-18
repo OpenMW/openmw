@@ -36,7 +36,7 @@ void CSVTools::SearchSubView::replace (bool selection)
     // in a single string.
     for (std::vector<int>::const_reverse_iterator iter (indices.rbegin()); iter!=indices.rend(); ++iter)
     {
-        CSMWorld::UniversalId id = model.getUniversalId (*iter);
+        const CSMWorld::UniversalId& id = model.getUniversalId (*iter);
 
         CSMWorld::UniversalId::Type type = CSMWorld::UniversalId::getParentType (id.getType());
 

@@ -77,7 +77,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
         if (obj)
-            return obj->asNode();
+            return static_cast<osg::Node*>(obj.get());
         else
         {
             osg::ref_ptr<osg::Node> node = createChunk(size, center, activeGrid, viewPoint, compile);

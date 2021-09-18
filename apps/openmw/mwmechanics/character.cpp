@@ -1653,7 +1653,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                                  MWRender::Animation::BlendMask_All, false,
                                  weapSpeed, startKey, stopKey,
                                  0.0f, 0);
-                if(mAnimation->isPlaying(mCurrentWeapon))
+                if(mAnimation->getCurrentTime(mCurrentWeapon) != -1.f)
                     mUpperBodyState = UpperCharState_StartToMinAttack;
             }
         }

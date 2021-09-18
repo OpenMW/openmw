@@ -628,7 +628,10 @@ namespace MWWorld
         osg::Vec4i newGrid = gridCenterToBounds(mCurrentGridCenter);
         mRendering.setActiveGrid(newGrid);
 
-        preloadTerrain(pos, true);
+        if (mRendering.pagingUnlockCache())
+            mPreloader->abortTerrainPreloadExcept(nullptr);
+        if (!mPreloader->isTerrainLoaded(std::make_pair(pos, newGrid), mRendering.getReferenceTime()))
+            preloadTerrain(pos, true);
         mPagedRefs.clear();
         mRendering.getPagedRefnums(newGrid, mPagedRefs);
 
@@ -742,14 +745,12 @@ namespace MWWorld
         {
             loadingListener->setLabel("Testing exterior cells ("+std::to_string(i)+"/"+std::to_string(cells.getExtSize())+")...");
 
-            CellStoreCollection::iterator iter = mActiveCells.begin();
-
             CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(it->mData.mX, it->mData.mY);
             loadInactiveCell (cell, loadingListener, true);
             activateCell (cell, loadingListener, false, true);
 
-            iter = mActiveCells.begin();
-            while (iter != mActiveCells.end())
+            auto iter = mInactiveCells.begin();
+            while (iter != mInactiveCells.end())
             {
                 if (it->isExterior() && it->mData.mX == (*iter)->getCell()->getGridX() &&
                     it->mData.mY == (*iter)->getCell()->getGridY())
@@ -796,8 +797,8 @@ namespace MWWorld
             loadInactiveCell (cell, loadingListener, true);
             activateCell (cell, loadingListener, false, true);
 
-            CellStoreCollection::iterator iter = mActiveCells.begin();
-            while (iter != mActiveCells.end())
+            auto iter = mInactiveCells.begin();
+            while (iter != mInactiveCells.end())
             {
                 assert (!(*iter)->getCell()->isExterior());
 
@@ -1243,32 +1244,16 @@ namespace MWWorld
     {
         std::vector<PositionCellGrid> vec;
         vec.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
-        if (sync && mRendering.pagingUnlockCache())
-            mPreloader->abortTerrainPreloadExcept(nullptr);
-        else
-            mPreloader->abortTerrainPreloadExcept(&vec[0]);
+        mPreloader->abortTerrainPreloadExcept(&vec[0]);
         mPreloader->setTerrainPreloadPositions(vec);
         if (!sync) return;
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
-        int progress = 0, initialProgress = -1, progressRange = 0;
-        while (!mPreloader->syncTerrainLoad(vec, progress, progressRange, mRendering.getReferenceTime()))
-        {
-            if (initialProgress == -1)
-            {
-                loadingListener->setLabel("#{sLoadingMessage4}");
-                initialProgress = progress;
-            }
-            if (progress)
-            {
-                loadingListener->setProgressRange(std::max(0, progressRange-initialProgress));
-                loadingListener->setProgress(progress-initialProgress);
-            }
-            else
-                loadingListener->setProgress(0);
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        }
+
+        loadingListener->setLabel("#{sLoadingMessage4}");
+
+        while (!mPreloader->syncTerrainLoad(vec, mRendering.getReferenceTime(), *loadingListener)) {}
     }
 
     void Scene::reloadTerrain()
