@@ -8,11 +8,11 @@ opencs_units (model/doc
     document operation saving documentmanager loader runner operationholder
     )
 
-opencs_units_noqt (model/doc
+opencs_units (model/doc
     stage savingstate savingstages blacklist messages
     )
 
-opencs_hdrs_noqt (model/doc
+opencs_hdrs (model/doc
     state
     )
 
@@ -23,14 +23,14 @@ opencs_units (model/world
     )
 
 
-opencs_units_noqt (model/world
+opencs_units (model/world
     universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
     idcompletionmanager metadata defaultgmsts infoselectwrapper commandmacro
     )
 
-opencs_hdrs_noqt (model/world
+opencs_hdrs (model/world
     columnimp idcollection collection info subcellcollection
     )
 
@@ -39,14 +39,14 @@ opencs_units (model/tools
     tools reportmodel mergeoperation
     )
 
-opencs_units_noqt (model/tools
+opencs_units (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
     mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck
     )
 
-opencs_hdrs_noqt (model/tools
+opencs_hdrs (model/tools
     mergestate
     )
 
@@ -57,11 +57,11 @@ opencs_units (view/doc
     )
 
 
-opencs_units_noqt (view/doc
+opencs_units (view/doc
     subviewfactory
     )
 
-opencs_hdrs_noqt (view/doc
+opencs_hdrs (view/doc
     subviewfactoryimp
     )
 
@@ -74,7 +74,7 @@ opencs_units (view/world
     bodypartcreator landtexturecreator landcreator
     )
 
-opencs_units_noqt (view/world
+opencs_units (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
     scripthighlighter idvalidator dialoguecreator idcompletiondelegate
     colordelegate dragdroputils
@@ -92,12 +92,12 @@ opencs_units (view/render
     cellwater terraintexturemode actor terrainselection terrainshapemode brushdraw commands
     )
 
-opencs_units_noqt (view/render
+opencs_units (view/render
     lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
     cellarrow cellmarker cellborder pathgrid
     )
 
-opencs_hdrs_noqt (view/render
+opencs_hdrs (view/render
     mask
     )
 
@@ -106,7 +106,7 @@ opencs_units (view/tools
     reportsubview reporttable searchsubview searchbox merge
     )
 
-opencs_units_noqt (view/tools
+opencs_units (view/tools
     subviews
     )
 
@@ -119,11 +119,11 @@ opencs_units (model/prefs
     shortcuteventhandler shortcutmanager shortcutsetting modifiersetting stringsetting
     )
 
-opencs_units_noqt (model/prefs
+opencs_units (model/prefs
     category
     )
 
-opencs_units_noqt (model/filter
+opencs_units (model/filter
     node unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
     )
 
