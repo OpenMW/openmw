@@ -252,6 +252,7 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     , mVertexLodMod(vertexLodMod)
     , mViewDistance(std::numeric_limits<float>::max())
     , mMinSize(1/8.f)
+    , mDebugTerrainChunks(Settings::Manager::getBool("debug chunks", "Terrain"))
 {
     mChunkManager->setCompositeMapSize(compMapResolution);
     mChunkManager->setCompositeMapLevel(compMapLevel);
@@ -351,7 +352,7 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, f
     }
 }
 
-void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld)
+void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld, bool debugTerrainChunk)
 {
     if (!(cv->getTraversalMask() & callback->getCullMask()))
         return;
@@ -367,7 +368,11 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
-        osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
+        osg::BoundingBox bb;
+        if(debugTerrainChunk)
+            bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0)->asGroup()->getChild(0))->getWaterBoundingBox();
+        else
+            bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
         if (!bb.valid())
             continue;
         osg::Vec3f ofs (entry.mNode->getCenter().x()*cellworldsize, entry.mNode->getCenter().y()*cellworldsize, 0.f);
@@ -443,7 +448,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     }
 
     if (mHeightCullCallback && isCullVisitor)
-        updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty());
+        updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty(), mDebugTerrainChunks);
 
     vd->markUnchanged();
 
