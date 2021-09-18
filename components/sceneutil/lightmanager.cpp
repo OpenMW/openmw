@@ -1212,7 +1212,7 @@ namespace SceneUtil
             it = mLightsInViewSpace.insert(std::make_pair(camPtr, LightSourceViewBoundCollection())).first;
 
             bool isReflection = isReflectionCamera(camera);
-        
+
             for (const auto& transform : mLights)
             {
                 osg::Matrixf worldViewMat = transform.mWorldMatrix * (*viewMatrix);
