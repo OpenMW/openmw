@@ -1202,8 +1202,9 @@ namespace SceneUtil
         return stateset;
     }
 
-    const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(osg::Camera *camera, const osg::RefMatrix* viewMatrix, size_t frameNum)
+    const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(osgUtil::CullVisitor *cv, const osg::RefMatrix* viewMatrix, size_t frameNum)
     {
+        osg::Camera* camera = cv->getCurrentCamera();
         bool isReflection = isReflectionCamera(camera);
         osg::observer_ptr<osg::Camera> camPtr (camera);
         auto it = mLightsInViewSpace.find(camPtr);
@@ -1231,6 +1232,11 @@ namespace SceneUtil
                     auto* light = transform.mLightSource->getLight(frameNum);
                     light->setDiffuse(light->getDiffuse() * fade);
                 }
+
+                // remove lights culled by this camera
+                osg::CullStack::CullingStack& stack = cv->getModelViewCullingStack();
+                if (stack.front().isCulled(viewBound))
+                    continue;
 
                 LightSourceViewBound l;
                 l.mLightSource = transform.mLightSource;
@@ -1306,7 +1312,6 @@ namespace SceneUtil
             return false;
 
         // Possible optimizations:
-        // - cull list of lights by the camera frustum
         // - organize lights in a quad tree
 
 
@@ -1354,23 +1359,7 @@ namespace SceneUtil
 
             if (mLightList.size() > maxLights)
             {
-                // remove lights culled by this camera
-                LightManager::LightList lightList = mLightList;
-                for (auto it = lightList.begin(); it != lightList.end() && lightList.size() > maxLights;)
-                {
-                    osg::CullStack::CullingStack& stack = cv->getModelViewCullingStack();
-
-                    osg::BoundingSphere bs = (*it)->mViewBound;
-                    bs._radius = bs._radius * 2.0;
-                    osg::CullingSet& cullingSet = stack.front();
-                    if (cullingSet.isCulled(bs))
-                    {
-                        it = lightList.erase(it);
-                        continue;
-                    }
-                    else
-                        ++it;
-                }
+                
 
                 if (lightList.size() > maxLights)
                 {
