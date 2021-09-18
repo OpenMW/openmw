@@ -1359,15 +1359,11 @@ namespace SceneUtil
 
             if (mLightList.size() > maxLights)
             {
-                
-
-                if (lightList.size() > maxLights)
-                {
-                    // sort by proximity to camera, then get rid of furthest away lights
-                    std::sort(lightList.begin(), lightList.end(), sortLights);
-                    while (lightList.size() > maxLights)
-                        lightList.pop_back();
-                }
+                LightManager::LightList lightList = mLightList;
+                // sort by proximity to camera, then get rid of furthest away lights
+                std::sort(lightList.begin(), lightList.end(), sortLights);
+                while (lightList.size() > maxLights)
+                    lightList.pop_back();
                 stateset = mLightManager->getLightListStateSet(lightList, cv->getTraversalNumber(), cv->getCurrentRenderStage()->getInitialViewMatrix());
             }
             else
