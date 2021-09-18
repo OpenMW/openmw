@@ -12,6 +12,7 @@
 varying vec2 diffuseMapUV;
 #endif
 
+#pragma import_defines(CAST_SHADOWS)
 #ifdef CAST_SHADOWS
 #include "shadowcasting_vertex.glsl"
 #else
