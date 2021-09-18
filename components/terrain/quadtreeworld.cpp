@@ -7,6 +7,7 @@
 #include <limits>
 #include <sstream>
 
+#include <components/settings/settings.hpp>
 #include <components/misc/constants.hpp>
 #include <components/sceneutil/mwshadowtechnique.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
