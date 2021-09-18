@@ -251,6 +251,13 @@ namespace Resource
 
                 node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
             }
+            else if (node.getOrCreateStateSet()->getRenderingHint() == osg::StateSet::OPAQUE_BIN)
+            {
+                osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                depth->setWriteMask(true);
+
+                node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+            }
 
             /* Check if the <node> has <extra type="Node"> <technique profile="OpenSceneGraph"> <Descriptions> <Description>
                correct format for OpenMW: <Description>alphatest mode value MaterialName</Description>
