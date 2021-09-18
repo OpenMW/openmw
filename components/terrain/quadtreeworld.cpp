@@ -422,8 +422,8 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         return;
     }
 
-    osg::CullingSet::MaskValues projcullingmask = cv ? cv->getProjectionCullingStack().back().getCullingMask() : 0;
-    osg::CullingSet::MaskValues cullingmask = cv ? cv->getCurrentCullingSet().getCullingMask() : 0;
+    osg::CullingSet::Mask projcullingmask = cv ? cv->getProjectionCullingStack().back().getCullingMask() : 0;
+    osg::CullingSet::Mask cullingmask = cv ? cv->getCurrentCullingSet().getCullingMask() : 0;
     if (cv)
     {
         cv->getProjectionCullingStack().back().setCullingMask(projcullingmask & ~osg::CullingSet::SMALL_FEATURE_CULLING);
