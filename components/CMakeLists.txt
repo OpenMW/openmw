@@ -288,6 +288,15 @@ if (GIT_CHECKOUT)
     add_dependencies (components git-version)
 endif (GIT_CHECKOUT)
 
+if (OSG_STATIC AND CMAKE_SYSTEM_NAME MATCHES "Linux")
+    find_package(X11 REQUIRED COMPONENTS Xinerama Xrandr)
+    target_link_libraries(components ${CMAKE_DL_LIBS} X11::X11 X11::Xinerama X11::Xrandr)
+    find_package(Fontconfig MODULE)
+    if(Fontconfig_FOUND)
+        target_link_libraries(components Fontconfig::Fontconfig)
+    endif()
+endif()
+
 if (WIN32)
     target_link_libraries(components shlwapi)
 endif()
@@ -329,7 +338,10 @@ if(OSG_STATIC)
     if(OPENMW_USE_SYSTEM_OSG)
         # OSG plugin pkgconfig files are missing these dependencies.
         # https://github.com/openscenegraph/OpenSceneGraph/issues/1052
-        target_link_libraries(components freetype jpeg png)
+        find_package(Freetype REQUIRED)
+        find_package(JPEG REQUIRED)
+        find_package(PNG REQUIRED)
+        target_link_libraries(components Freetype::Freetype JPEG::JPEG PNG::PNG)
     endif()
 endif(OSG_STATIC)
 
