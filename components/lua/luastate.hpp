@@ -3,7 +3,6 @@
 
 #include <map>
 
-#include <limits> // missing from sol/sol.hpp
 #include <sol/sol.hpp>
 
 #include <components/vfs/manager.hpp>
@@ -36,11 +35,6 @@ namespace LuaUtil
 
         // A shortcut to create a new Lua table.
         sol::table newTable() { return sol::table(mLua, sol::create); }
-
-        // Makes a table read only (when accessed from Lua) by wrapping it with an empty userdata.
-        // Needed to forbid any changes in common resources that can accessed from different sandboxes.
-        sol::table makeReadOnly(sol::table);
-        sol::table getMutableFromReadOnly(const sol::userdata&);
 
         // Registers a package that will be available from every sandbox via `require(name)`.
         // The package can be either a sol::table with an API or a sol::function. If it is a function,
@@ -105,6 +99,11 @@ namespace LuaUtil
 
     // String representation of a Lua object. Should be used for debugging/logging purposes only.
     std::string toString(const sol::object&);
+
+    // Makes a table read only (when accessed from Lua) by wrapping it with an empty userdata.
+    // Needed to forbid any changes in common resources that can accessed from different sandboxes.
+    sol::table makeReadOnly(sol::table);
+    sol::table getMutableFromReadOnly(const sol::userdata&);
 
 }
 
