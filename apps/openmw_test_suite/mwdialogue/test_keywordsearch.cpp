@@ -71,20 +71,18 @@ TEST_F(KeywordSearchTest, keyword_test_utf8_word_begin)
 {
     // We make sure that the search works well even if the character is not ASCII
     MWDialogue::KeywordSearch<std::string, int> search;
-    search.seed("états", 0);
-    search.seed("ïrradiés", 0);
-    search.seed("ça nous déçois", 0);
+    search.seed("Ã©tats", 0);
+    search.seed("Ã¯rradiÃ©s", 0);
+    search.seed("Ã§a nous dÃ©Ã§ois", 0);
 
 
-    std::string text = "les nations unis ont réunis le monde entier, états units inclus pour parler du problème des gens ïrradiés et ça nous déçois";
+    std::string text = "les nations unis ont rÃ©unis le monde entier, Ã©tats units inclus pour parler du problÃ¨me des gens Ã¯rradiÃ©s et Ã§a nous dÃ©Ã§ois";
 
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
 
     ASSERT_TRUE (matches.size() == 3);
-    ASSERT_TRUE(std::string( matches[0].mBeg, matches[0].mEnd) == "états");
-    ASSERT_TRUE(std::string( matches[1].mBeg, matches[1].mEnd) == "ïrradiés");
-    ASSERT_TRUE(std::string( matches[2].mBeg, matches[2].mEnd) == "ça nous déçois");
-
-    //ASSERT_TRUE (std::string(matches.front().mBeg, matches.front().mEnd) == "bar lock");
+    ASSERT_TRUE(std::string( matches[0].mBeg, matches[0].mEnd) == "Ã©tats");
+    ASSERT_TRUE(std::string( matches[1].mBeg, matches[1].mEnd) == "Ã¯rradiÃ©s");
+    ASSERT_TRUE(std::string( matches[2].mBeg, matches[2].mEnd) == "Ã§a nous dÃ©Ã§ois");
 }
