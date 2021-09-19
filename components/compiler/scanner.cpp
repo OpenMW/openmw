@@ -265,7 +265,6 @@ namespace Compiler
         "return",
         "messagebox",
         "set", "to",
-        "getsquareroot",
         nullptr
     };
 

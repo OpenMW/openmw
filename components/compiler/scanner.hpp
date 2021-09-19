@@ -205,8 +205,7 @@ namespace Compiler
                 K_while, K_endwhile,
                 K_return,
                 K_messagebox,
-                K_set, K_to,
-                K_getsquareroot
+                K_set, K_to
             };
 
             enum special
