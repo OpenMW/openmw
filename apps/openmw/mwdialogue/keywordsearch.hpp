@@ -2,6 +2,7 @@
 #define GAME_MWDIALOGUE_KEYWORDSEARCH_H
 
 #include <map>
+#include <climits>
 #include <cctype>
 #include <stdexcept>
 #include <vector>
