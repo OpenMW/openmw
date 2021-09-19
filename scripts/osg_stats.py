@@ -38,7 +38,7 @@ import termtables
 @click.option('--timeseries_sum', is_flag=True,
               help='Add a graph to timeseries for a sum per frame of all given timeseries metrics.')
 @click.option('--commulative_timeseries_sum', is_flag=True,
-            help='Add a graph to timeseries for a sum per frame of all given commulative timeseries.')
+              help='Add a graph to timeseries for a sum per frame of all given commulative timeseries.')
 @click.option('--stats_sum', is_flag=True,
               help='Add a row to stats table for a sum per frame of all given stats metrics.')
 @click.option('--begin_frame', type=int, default=0,
@@ -47,10 +47,17 @@ import termtables
               help='End processing at this frame.')
 @click.option('--frame_number_name', type=str, default='FrameNumber',
               help='Frame number metric name.')
+@click.option('--hist_threshold', type=str, multiple=True,
+              help='Show a histogram for given metric only for frames with threshold_name metric over threshold_value.')
+@click.option('--threshold_name', type=str, default='Frame duration',
+              help='Frame duration metric name.')
+@click.option('--threshold_value', type=float, default=1.05/60,
+              help='Threshold for hist_over.')
 @click.argument('path', type=click.Path(), nargs=-1)
 def main(print_keys, timeseries, hist, hist_ratio, stdev_hist, plot, stats,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
-         commulative_timeseries, commulative_timeseries_sum, frame_number_name):
+         commulative_timeseries, commulative_timeseries_sum, frame_number_name,
+         hist_threshold, threshold_name, threshold_value):
     sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
     keys = collect_unique_keys(sources)
     frames, begin_frame, end_frame = collect_per_frame(
@@ -76,6 +83,9 @@ def main(print_keys, timeseries, hist, hist_ratio, stdev_hist, plot, stats,
         draw_plots(sources=frames, plots=plot)
     if stats:
         print_stats(sources=frames, keys=stats, stats_sum=stats_sum)
+    if hist_threshold:
+        draw_hist_threshold(sources=frames, keys=hist_threshold, begin_frame=begin_frame,
+                            threshold_name=threshold_name, threshold_value=threshold_value)
     matplotlib.pyplot.show()
 
 
@@ -240,12 +250,32 @@ def print_stats(sources, keys, stats_sum):
         if stats_sum:
             stats.append(make_stats(source=name, key='sum', values=sum_multiple(frames, keys)))
     metrics = list(stats[0].keys())
-    max_key_size = max(len(tuple(v.values())[0]) for v in stats)
     termtables.print(
         [list(v.values()) for v in stats],
         header=metrics,
         style=termtables.styles.markdown,
     )
+
+
+def draw_hist_threshold(sources, keys, begin_frame, threshold_name, threshold_value):
+    for name, frames in sources.items():
+        indices = [n for n, v in enumerate(frames[threshold_name]) if v > threshold_value]
+        numbers = [v + begin_frame for v in indices]
+        x = [v for v in range(0, len(indices))]
+        fig, ax = matplotlib.pyplot.subplots()
+        ax.set_title(f'Frames with "{threshold_name}" > {threshold_value} ({len(indices)})')
+        ax.bar(x, [frames[threshold_name][v] for v in indices], label=threshold_name, color='black', alpha=0.2)
+        prev = 0
+        for key in keys:
+            values = [frames[key][v] for v in indices]
+            ax.bar(x, values, bottom=prev, label=key)
+            prev = values
+        ax.hlines(threshold_value, x[0] - 1, x[-1] + 1, color='black', label='threshold', linestyles='dashed')
+        ax.xaxis.set_major_locator(matplotlib.pyplot.FixedLocator(x))
+        ax.xaxis.set_major_formatter(matplotlib.pyplot.FixedFormatter(numbers))
+        ax.grid(True)
+        ax.legend()
+        fig.canvas.set_window_title(f'hist_threshold:{name}')
 
 
 def filter_not_none(values):
@@ -281,6 +311,7 @@ def to_number(value):
         return int(value)
     except ValueError:
         return float(value)
+
 
 if __name__ == '__main__':
     main()
