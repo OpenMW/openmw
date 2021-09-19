@@ -45,20 +45,27 @@ import termtables
               help='Start processing from this frame.')
 @click.option('--end_frame', type=int, default=sys.maxsize,
               help='End processing at this frame.')
+@click.option('--frame_number_name', type=str, default='FrameNumber',
+              help='Frame number metric name.')
 @click.argument('path', type=click.Path(), nargs=-1)
 def main(print_keys, timeseries, hist, hist_ratio, stdev_hist, plot, stats,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
-         commulative_timeseries, commulative_timeseries_sum):
+         commulative_timeseries, commulative_timeseries_sum, frame_number_name):
     sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
     keys = collect_unique_keys(sources)
-    frames = collect_per_frame(sources=sources, keys=keys, begin_frame=begin_frame, end_frame=end_frame)
+    frames, begin_frame, end_frame = collect_per_frame(
+        sources=sources, keys=keys, begin_frame=begin_frame,
+        end_frame=end_frame, frame_number_name=frame_number_name,
+    )
     if print_keys:
         for v in keys:
             print(v)
     if timeseries:
-        draw_timeseries(sources=frames, keys=timeseries, add_sum=timeseries_sum)
+        draw_timeseries(sources=frames, keys=timeseries, add_sum=timeseries_sum,
+                        begin_frame=begin_frame, end_frame=end_frame)
     if commulative_timeseries:
-        draw_commulative_timeseries(sources=frames, keys=commulative_timeseries, add_sum=commulative_timeseries_sum)
+        draw_commulative_timeseries(sources=frames, keys=commulative_timeseries, add_sum=commulative_timeseries_sum,
+                                    begin_frame=begin_frame, end_frame=end_frame)
     if hist:
         draw_hists(sources=frames, keys=hist)
     if hist_ratio:
@@ -92,19 +99,26 @@ def read_data(path):
                 frame[key] = to_number(value)
 
 
-def collect_per_frame(sources, keys, begin_frame, end_frame):
+def collect_per_frame(sources, keys, begin_frame, end_frame, frame_number_name):
+    assert begin_frame < end_frame
     result = collections.defaultdict(lambda: collections.defaultdict(list))
+    begin_frame = max(begin_frame, min(v[0][frame_number_name] for v in sources.values()))
+    end_frame = min(end_frame, begin_frame + max(len(v) for v in sources.values()))
+    for name in sources.keys():
+        for key in keys:
+            result[name][key] = [0] * (end_frame - begin_frame)
     for name, frames in sources.items():
         for frame in frames:
-            for key in keys:
-                if key in frame:
-                    result[name][key].append(frame[key])
-                else:
-                    result[name][key].append(None)
-    for name, sources in result.items():
-        for key, values in sources.items():
-            result[name][key] = numpy.array(values[begin_frame:end_frame])
-    return result
+            number = frame[frame_number_name]
+            if begin_frame <= number < end_frame:
+                index = number - begin_frame
+                for key in keys:
+                    if key in frame:
+                        result[name][key][index] = frame[key]
+    for name in result.keys():
+        for key in keys:
+            result[name][key] = numpy.array(result[name][key])
+    return result, begin_frame, end_frame
 
 
 def collect_unique_keys(sources):
@@ -116,12 +130,11 @@ def collect_unique_keys(sources):
     return sorted(result)
 
 
-def draw_timeseries(sources, keys, add_sum):
+def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     fig, ax = matplotlib.pyplot.subplots()
+    x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
-        x = numpy.array(range(max(len(v) for k, v in frames.items() if k in keys)))
         for key in keys:
-            print(key, name)
             ax.plot(x, frames[key], label=f'{key}:{name}')
         if add_sum:
             ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label=f'sum:{name}')
@@ -130,10 +143,10 @@ def draw_timeseries(sources, keys, add_sum):
     fig.canvas.set_window_title('timeseries')
 
 
-def draw_commulative_timeseries(sources, keys, add_sum):
+def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     fig, ax = matplotlib.pyplot.subplots()
+    x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
-        x = numpy.array(range(max(len(v) for k, v in frames.items() if k in keys)))
         for key in keys:
             ax.plot(x, numpy.cumsum(frames[key]), label=f'{key}:{name}')
         if add_sum:
