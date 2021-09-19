@@ -95,7 +95,7 @@ namespace MWRender
             if (mUsePlayerUniforms)
             {
                 stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
-                stateset->addUniform(new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f));
+                stateset->addUniform(new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f)));
             }
         }
 
