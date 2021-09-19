@@ -628,7 +628,10 @@ namespace MWWorld
         osg::Vec4i newGrid = gridCenterToBounds(mCurrentGridCenter);
         mRendering.setActiveGrid(newGrid);
 
-        preloadTerrain(pos, true);
+        if (mRendering.pagingUnlockCache())
+            mPreloader->abortTerrainPreloadExcept(nullptr);
+        if (!mPreloader->isTerrainLoaded(std::make_pair(pos, newGrid), mRendering.getReferenceTime()))
+            preloadTerrain(pos, true);
         mPagedRefs.clear();
         mRendering.getPagedRefnums(newGrid, mPagedRefs);
 
@@ -1241,10 +1244,7 @@ namespace MWWorld
     {
         std::vector<PositionCellGrid> vec;
         vec.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
-        if (sync && mRendering.pagingUnlockCache())
-            mPreloader->abortTerrainPreloadExcept(nullptr);
-        else
-            mPreloader->abortTerrainPreloadExcept(&vec[0]);
+        mPreloader->abortTerrainPreloadExcept(&vec[0]);
         mPreloader->setTerrainPreloadPositions(vec);
         if (!sync) return;
 
