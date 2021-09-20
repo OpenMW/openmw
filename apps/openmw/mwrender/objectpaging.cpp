@@ -105,6 +105,7 @@ namespace MWRender
         bool mOptimizeBillboards = true;
         float mSqrDistance = 0.f;
         osg::Vec3f mViewVector;
+        osg::Node::NodeMask mCopyMask = ~0u;
         mutable std::vector<const osg::Node*> mNodePath;
 
         void copy(const osg::Node* toCopy, osg::Group* attachTo)
@@ -121,6 +122,9 @@ namespace MWRender
 
         osg::Node* operator() (const osg::Node* node) const override
         {
+            if (!(node->getNodeMask() & mCopyMask))
+                return nullptr;
+
             if (const osg::Drawable* d = node->asDrawable())
                 return operator()(d);
 
@@ -224,6 +228,9 @@ namespace MWRender
         }
         osg::Drawable* operator() (const osg::Drawable* drawable) const override
         {
+            if (!(drawable->getNodeMask() & mCopyMask))
+                return nullptr;
+
             if (dynamic_cast<const osgParticle::ParticleSystem*>(drawable))
                 return nullptr;
 
@@ -557,7 +564,7 @@ namespace MWRender
         osg::ref_ptr<Resource::TemplateMultiRef> templateRefs = new Resource::TemplateMultiRef;
         osgUtil::StateToCompile stateToCompile(0, nullptr);
         CopyOp copyop;
-        copyop.setTraversalMask(copyMask);
+        copyop.mCopyMask = copyMask;
         for (const auto& pair : nodes)
         {
             const osg::Node* cnode = pair.first;
