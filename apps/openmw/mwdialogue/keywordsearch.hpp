@@ -1,9 +1,9 @@
 #ifndef GAME_MWDIALOGUE_KEYWORDSEARCH_H
 #define GAME_MWDIALOGUE_KEYWORDSEARCH_H
 
-#include <map>
-#include <climits>
 #include <cctype>
+#include <map>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 #include <algorithm>    // std::reverse
@@ -71,7 +71,7 @@ public:
 
     static bool isWhitespaceUTF8(const int utf8Char)
     {
-        if (utf8Char >= 0 && utf8Char <= UCHAR_MAX)
+        if (utf8Char >= 0 && utf8Char <= static_cast<int>( std::numeric_limits<unsigned char>::max()))
         {
             //That function has undefined behavior if the character doesn't fit in unsigned char
             return std::isspace(utf8Char);
