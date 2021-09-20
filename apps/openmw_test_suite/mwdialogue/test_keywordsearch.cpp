@@ -27,9 +27,9 @@ TEST_F(KeywordSearchTest, keyword_test_conflict_resolution)
     search.highlightKeywords(text.begin(), text.end(), matches);
 
     // Should contain: "foo bar", "lock switch"
-    ASSERT_TRUE (matches.size() == 2);
-    ASSERT_TRUE (std::string(matches.front().mBeg, matches.front().mEnd) == "foo bar");
-    ASSERT_TRUE (std::string(matches.rbegin()->mBeg, matches.rbegin()->mEnd) == "lock switch");
+    EXPECT_EQ (matches.size() , 2);
+    EXPECT_EQ (std::string(matches.front().mBeg, matches.front().mEnd) , "foo bar");
+    EXPECT_EQ (std::string(matches.rbegin()->mBeg, matches.rbegin()->mEnd) , "lock switch");
 }
 
 TEST_F(KeywordSearchTest, keyword_test_conflict_resolution2)
@@ -43,8 +43,8 @@ TEST_F(KeywordSearchTest, keyword_test_conflict_resolution2)
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
 
-    ASSERT_TRUE (matches.size() == 1);
-    ASSERT_TRUE (std::string(matches.front().mBeg, matches.front().mEnd) == "dwemer language");
+    EXPECT_EQ (matches.size() , 1);
+    EXPECT_EQ (std::string(matches.front().mBeg, matches.front().mEnd) , "dwemer language");
 }
 
 
@@ -62,8 +62,8 @@ TEST_F(KeywordSearchTest, keyword_test_conflict_resolution3)
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
 
-    ASSERT_TRUE (matches.size() == 1);
-    ASSERT_TRUE (std::string(matches.front().mBeg, matches.front().mEnd) == "bar lock");
+    EXPECT_EQ (matches.size() , 1);
+    EXPECT_EQ (std::string(matches.front().mBeg, matches.front().mEnd) , "bar lock");
 }
 
 
@@ -81,8 +81,8 @@ TEST_F(KeywordSearchTest, keyword_test_utf8_word_begin)
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
 
-    ASSERT_TRUE (matches.size() == 3);
-    ASSERT_TRUE(std::string( matches[0].mBeg, matches[0].mEnd) == "états");
-    ASSERT_TRUE(std::string( matches[1].mBeg, matches[1].mEnd) == "ïrradiés");
-    ASSERT_TRUE(std::string( matches[2].mBeg, matches[2].mEnd) == "ça nous déçois");
+    EXPECT_EQ (matches.size() , 3);
+    EXPECT_EQ (std::string( matches[0].mBeg, matches[0].mEnd) , "états");
+    EXPECT_EQ (std::string( matches[1].mBeg, matches[1].mEnd) , "ïrradiés");
+    EXPECT_EQ (std::string( matches[2].mBeg, matches[2].mEnd) , "ça nous déçois");
 }
