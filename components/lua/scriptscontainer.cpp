@@ -25,7 +25,7 @@ namespace LuaUtil
 
     void ScriptsContainer::addPackage(const std::string& packageName, sol::object package)
     {
-        API[packageName] = mLua.makeReadOnly(std::move(package));
+        API[packageName] = makeReadOnly(std::move(package));
     }
 
     bool ScriptsContainer::addNewScript(const std::string& path)
@@ -63,7 +63,7 @@ namespace LuaUtil
             if (interfaceName.empty() != (publicInterface == sol::nil))
                 Log(Debug::Error) << mNamePrefix << "[" << path << "]: 'interfaceName' should always be used together with 'interface'";
             else if (!interfaceName.empty())
-                script.as<sol::table>()[INTERFACE] = mPublicInterfaces[interfaceName] = mLua.makeReadOnly(publicInterface);
+                script.as<sol::table>()[INTERFACE] = mPublicInterfaces[interfaceName] = makeReadOnly(publicInterface);
             mScriptOrder.push_back(path);
             mScripts[path].mInterface = std::move(script);
             return true;
@@ -329,7 +329,7 @@ namespace LuaUtil
         mHoursTimersQueue.clear();
 
         mPublicInterfaces.clear();
-        // Assigned by mLua.makeReadOnly, but `clear` removes it, so we need to assign it again.
+        // Assigned by LuaUtil::makeReadOnly, but `clear` removes it, so we need to assign it again.
         mPublicInterfaces[sol::meta_function::index] = mPublicInterfaces;
     }
 

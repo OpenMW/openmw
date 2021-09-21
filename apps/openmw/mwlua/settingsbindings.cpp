@@ -62,7 +62,7 @@ namespace MWLua
             else
                 return sol::make_object<float>(lua->sol(), value.getFloat());
         };
-        return lua->makeReadOnly(config);
+        return LuaUtil::makeReadOnly(config);
     }
 
     sol::table initGlobalSettingsPackage(const Context& context) { return initSettingsPackage(context, true, false); }

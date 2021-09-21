@@ -76,7 +76,7 @@ namespace LuaUtil
         virtual ~ScriptsContainer() {}
 
         // Adds package that will be available (via `require`) for all scripts in the container.
-        // Automatically applies LuaState::makeReadOnly to the package.
+        // Automatically applies LuaUtil::makeReadOnly to the package.
         void addPackage(const std::string& packageName, sol::object package);
 
         // Finds a file with given path in the virtual file system, starts as a new script, and adds it to the container.
