@@ -199,7 +199,6 @@ namespace Terrain
         std::vector<osg::ref_ptr<osg::StateSet> > passes;
 
         unsigned int blendmapIndex = 0;
-        unsigned int passIndex = 0;
         for (std::vector<TextureLayer>::const_iterator it = layers.begin(); it != layers.end(); ++it)
         {
             bool firstLayer = (it == layers.begin());
@@ -209,7 +208,7 @@ namespace Terrain
             if (!blendmaps.empty())
             {
                 stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-                stateset->setRenderBinDetails(passIndex++, "RenderBin");
+                stateset->setRenderBinDetails(firstLayer ? 0 : 1, "RenderBin");
                 if (!firstLayer)
                 {
                     stateset->setAttributeAndModes(BlendFunc::value(), osg::StateAttribute::ON);
