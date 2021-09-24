@@ -12,50 +12,18 @@ namespace VFS
     class Archive;
     class File;
 
-    class RecursiveDirectoryIterator;
-    RecursiveDirectoryIterator end(const RecursiveDirectoryIterator& iter);
-
-    class RecursiveDirectoryIterator
+    template <typename Iterator>
+    class IteratorPair
     {
     public:
-        RecursiveDirectoryIterator(const std::map<std::string, File*>& index, const std::string& path)
-            : mPath(path)
-            , mIndex(&index)
-            , mIt(index.lower_bound(path))
-        {}
-
-        RecursiveDirectoryIterator(const RecursiveDirectoryIterator&) = default;
-
-        const std::string& operator*() const { return mIt->first; }
-        const std::string* operator->() const { return &mIt->first; }
-
-        bool operator!=(const RecursiveDirectoryIterator& other) { return mPath != other.mPath || mIt != other.mIt; }
-
-        RecursiveDirectoryIterator& operator++()
-        {
-            if (++mIt == mIndex->end() || !starts_with(mIt->first, mPath))
-                *this = end(*this);
-            return *this;
-        }
-
-        friend RecursiveDirectoryIterator end(const RecursiveDirectoryIterator& iter);
+        IteratorPair(Iterator first, Iterator last) : mFirst(first), mLast(last) {}
+        Iterator begin() const { return mFirst; }
+        Iterator end() const { return mLast; }
 
     private:
-        static bool starts_with(const std::string& text, const std::string& start) { return text.rfind(start, 0) == 0; }
-
-        std::string mPath;
-        const std::map<std::string, File*>* mIndex;
-        std::map<std::string, File*>::const_iterator mIt;
+        Iterator mFirst;
+        Iterator mLast;
     };
-
-    inline RecursiveDirectoryIterator begin(RecursiveDirectoryIterator iter) { return iter; }
-
-    inline RecursiveDirectoryIterator end(const RecursiveDirectoryIterator& iter)
-    {
-        RecursiveDirectoryIterator result(iter);
-        result.mIt = result.mIndex->end();
-        return result;
-    }
 
     /// @brief The main class responsible for loading files from a virtual file system.
     /// @par Various archive types (e.g. directories on the filesystem, or compressed archives)
@@ -64,6 +32,21 @@ namespace VFS
     /// @par Most of the methods in this class are considered thread-safe, see each method documentation for details.
     class Manager
     {
+        class RecursiveDirectoryIterator
+        {
+        public:
+            RecursiveDirectoryIterator(std::map<std::string, File*>::const_iterator it) : mIt(it) {}
+            const std::string& operator*() const { return mIt->first; }
+            const std::string* operator->() const { return &mIt->first; }
+            bool operator!=(const RecursiveDirectoryIterator& other) { return mIt != other.mIt; }
+            RecursiveDirectoryIterator& operator++() { ++mIt; return *this; }
+
+        private:
+            std::map<std::string, File*>::const_iterator mIt;
+        };
+
+        using RecursiveDirectoryRange = IteratorPair<RecursiveDirectoryIterator>;
+
     public:
         /// @param strict Use strict path handling? If enabled, no case folding will
         /// be done, but slash/backslash conversions are always done.
@@ -105,7 +88,7 @@ namespace VFS
         /// In practice it return all files of the VFS starting with the given path
         /// @note the path is normalized
         /// @note May be called from any thread once the index has been built.
-        RecursiveDirectoryIterator getRecursiveDirectoryIterator(const std::string& path) const;
+        RecursiveDirectoryRange getRecursiveDirectoryIterator(const std::string& path) const;
 
     private:
         bool mStrict;
