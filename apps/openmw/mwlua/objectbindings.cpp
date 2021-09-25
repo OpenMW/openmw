@@ -140,9 +140,43 @@ namespace MWLua
 
         if constexpr (std::is_same_v<ObjectT, GObject>)
         {  // Only for global scripts
-            objectT["addScript"] = [luaManager=context.mLuaManager](const GObject& object, const std::string& path)
+            objectT["addScript"] = [lua=context.mLua, luaManager=context.mLuaManager](const GObject& object, std::string_view path)
             {
-                luaManager->addLocalScript(object.ptr(), path);
+                const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
+                std::optional<int> scriptId = cfg.findId(path);
+                if (!scriptId)
+                    throw std::runtime_error("Unknown script: " + std::string(path));
+                if (!(cfg[*scriptId].mFlags & ESM::LuaScriptCfg::sCustom))
+                    throw std::runtime_error("Script without CUSTOM tag can not be added dynamically: " + std::string(path));
+                luaManager->addCustomLocalScript(object.ptr(), *scriptId);
+            };
+            objectT["hasScript"] = [lua=context.mLua](const GObject& object, std::string_view path)
+            {
+                const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
+                std::optional<int> scriptId = cfg.findId(path);
+                if (!scriptId)
+                    return false;
+                MWWorld::Ptr ptr = object.ptr();
+                LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
+                if (localScripts)
+                    return localScripts->hasScript(*scriptId);
+                else
+                    return false;
+            };
+            objectT["removeScript"] = [lua=context.mLua](const GObject& object, std::string_view path)
+            {
+                const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
+                std::optional<int> scriptId = cfg.findId(path);
+                if (!scriptId)
+                    throw std::runtime_error("Unknown script: " + std::string(path));
+                MWWorld::Ptr ptr = object.ptr();
+                LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
+                if (!localScripts || !localScripts->hasScript(*scriptId))
+                    throw std::runtime_error("There is no script " + std::string(path) + " on " + ptrToString(ptr));
+                ESM::LuaScriptCfg::Flags flags = cfg[*scriptId].mFlags;
+                if ((flags & (localScripts->getAutoStartMode() | ESM::LuaScriptCfg::sCustom)) != ESM::LuaScriptCfg::sCustom)
+                    throw std::runtime_error("Autostarted script can not be removed: " + std::string(path));
+                localScripts->removeScript(*scriptId);
             };
 
             objectT["teleport"] = [luaManager=context.mLuaManager](const GObject& object, std::string_view cell,

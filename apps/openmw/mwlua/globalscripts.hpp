@@ -16,7 +16,8 @@ namespace MWLua
     class GlobalScripts : public LuaUtil::ScriptsContainer
     {
     public:
-        GlobalScripts(LuaUtil::LuaState* lua) : LuaUtil::ScriptsContainer(lua, "Global")
+        GlobalScripts(LuaUtil::LuaState* lua) :
+            LuaUtil::ScriptsContainer(lua, "Global", ESM::LuaScriptCfg::sGlobal)
         {
             registerEngineHandlers({&mActorActiveHandlers, &mNewGameHandlers, &mPlayerAddedHandlers});
         }

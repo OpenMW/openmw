@@ -25,7 +25,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 7;
+        api["API_REVISION"] = 8;
         api["quit"] = [lua]()
         {
             std::string traceback = lua->sol()["debug"]["traceback"]().get<std::string>();

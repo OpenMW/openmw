@@ -20,7 +20,7 @@ namespace MWLua
     {
     public:
         static void initializeSelfPackage(const Context&);
-        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
+        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj, ESM::LuaScriptCfg::Flags autoStartMode);
 
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
 
@@ -39,7 +39,7 @@ namespace MWLua
         };
         using EngineEvent = std::variant<OnActive, OnInactive, OnConsume>;
 
-        void receiveEngineEvent(const EngineEvent&, ObjectRegistry*);
+        void receiveEngineEvent(const EngineEvent&);
 
     protected:
         SelfObject mData;

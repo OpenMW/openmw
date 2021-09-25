@@ -48,7 +48,7 @@ namespace MWLua
     struct AsyncPackageId
     {
         LuaUtil::ScriptsContainer* mContainer;
-        std::string mScript;
+        int mScriptId;
         sol::table mHiddenData;
     };
     sol::function getAsyncPackageInitializer(const Context&);
