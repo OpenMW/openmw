@@ -54,29 +54,6 @@ namespace
         return actorData.mPosition.z() < actorData.mSwimLevel;
     }
 
-    void handleFall(MWPhysics::ActorFrameData& actorData, bool simulationPerformed)
-    {
-        const float heightDiff = actorData.mPosition.z() - actorData.mOldHeight;
-
-        const bool isStillOnGround = (simulationPerformed && actorData.mWasOnGround && actorData.mIsOnGround);
-
-        if (isStillOnGround || actorData.mFlying || isUnderWater(actorData) || actorData.mSlowFall < 1)
-            actorData.mNeedLand = true;
-        else if (heightDiff < 0)
-            actorData.mFallHeight += heightDiff;
-    }
-
-    void updateMechanics(MWPhysics::Actor& actor, MWPhysics::ActorFrameData& actorData)
-    {
-        auto ptr = actor.getPtr();
-
-        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-        if (actorData.mNeedLand)
-            stats.land(ptr == MWMechanics::getPlayer() && (actorData.mFlying || isUnderWater(actorData)));
-        else if (actorData.mFallHeight < 0)
-            stats.addToFallHeight(-actorData.mFallHeight);
-    }
-
     osg::Vec3f interpolateMovements(MWPhysics::Actor& actor, MWPhysics::ActorFrameData& actorData, float timeAccum, float physicsDt)
     {
         const float interpolationFactor = std::clamp(timeAccum / physicsDt, 0.0f, 1.0f);
@@ -221,10 +198,8 @@ namespace MWPhysics
         if (mNumThreads != 0)
         {
             for (size_t i = 0; i < mActors.size(); ++i)
-            {
-                updateMechanics(*mActors[i], mActorsFrameData[i]);
                 updateActor(*mActors[i], mActorsFrameData[i], mAdvanceSimulation, mTimeAccum, mPhysicsDt);
-            }
+
             if(mAdvanceSimulation)
                 mAsyncBudget.update(mTimer->delta_s(mAsyncStartTime, mTimeEnd), mPrevStepCount, mBudgetCursor);
             updateStats(frameStart, frameNumber, stats);
@@ -449,11 +424,6 @@ namespace MWPhysics
 
             if (!mRemainingSteps)
             {
-                while ((job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
-                {
-                    handleFall(mActorsFrameData[job], mAdvanceSimulation);
-                }
-
                 refreshLOSCache();
                 mPostSimBarrier->wait([this] { afterPostSim(); });
             }
@@ -476,6 +446,17 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::updateActor(Actor& actor, ActorFrameData& actorData, bool simulationPerformed, float timeAccum, float dt) const
     {
+        auto ptr = actor.getPtr();
+
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        const float heightDiff = actorData.mPosition.z() - actorData.mOldHeight;
+        const bool isStillOnGround = (simulationPerformed && actorData.mWasOnGround && actorData.mIsOnGround);
+
+        if (isStillOnGround || actorData.mFlying || isUnderWater(actorData) || actorData.mSlowFall < 1)
+            stats.land(ptr == MWMechanics::getPlayer() && (actorData.mFlying || isUnderWater(actorData)));
+        else if (heightDiff < 0)
+            stats.addToFallHeight(-heightDiff);
+
         actor.setSimulationPosition(interpolateMovements(actor, actorData, timeAccum, dt));
         actor.setLastStuckPosition(actorData.mLastStuckPosition);
         actor.setStuckFrames(actorData.mStuckFrames);
@@ -524,11 +505,8 @@ namespace MWPhysics
         }
 
         for (size_t i = 0; i < mActors.size(); ++i)
-        {
-            handleFall(mActorsFrameData[i], mAdvanceSimulation);
-            updateMechanics(*mActors[i], mActorsFrameData[i]);
             updateActor(*mActors[i], mActorsFrameData[i], mAdvanceSimulation, mTimeAccum, mPhysicsDt);
-        }
+
         refreshLOSCache();
     }
 
