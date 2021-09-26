@@ -580,17 +580,9 @@ namespace Resource
                 optimizer.setSharedStateManager(mSharedStateManager, &mSharedStateMutex);
                 optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
 
-                // Because of limitations with the optimizer API, the optimizer can not replace the root node. Create a wrapper root node to allow the real root node to be optimised.
-                osg::ref_ptr<osg::Group> wrapper = new osg::Group;
-                wrapper->addChild(loaded);
-
                 static const unsigned int options = getOptimizationOptions()|SceneUtil::Optimizer::SHARE_DUPLICATE_STATE;
 
-                optimizer.optimize(wrapper, options);
-                if (wrapper->getNumChildren()==1)
-                    loaded = wrapper->getChild(0);
-                else
-                    loaded = wrapper;
+                optimizer.optimize(loaded, options);
             }
             else
                 shareState(loaded);
