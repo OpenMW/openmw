@@ -180,14 +180,6 @@ namespace MWWorld
         {
         }
 
-        bool storeViews(double referenceTime)
-        {
-            for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size(); ++i)
-                if (!mWorld->storeView(mTerrainViews[i], referenceTime))
-                    return false;
-            return true;
-        }
-
         void doWork() override
         {
             for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size() && !mAbort; ++i)
@@ -246,7 +238,6 @@ namespace MWWorld
         , mMaxCacheSize(0)
         , mPreloadInstances(true)
         , mLastResourceCacheUpdate(0.0)
-        , mStoreViewsFailCount(0)
         , mLoadedTerrainTimestamp(0.0)
     {
     }
@@ -380,26 +371,6 @@ namespace MWWorld
             mWorkQueue->addWorkItem(mUpdateCacheItem, true);
             mLastResourceCacheUpdate = timestamp;
         }
-
-        if (mTerrainPreloadItem && mTerrainPreloadItem->isDone())
-        {
-            if (!mTerrainPreloadItem->storeViews(timestamp))
-            {
-                if (++mStoreViewsFailCount > 100)
-                {
-                    OSG_ALWAYS << "paging views are rebuilt every frame, please check for faulty enable/disable scripts." << std::endl;
-                    mStoreViewsFailCount = 0;
-                }
-                setTerrainPreloadPositions(std::vector<PositionCellGrid>());
-            }
-            else
-            {
-                mStoreViewsFailCount = 0;
-                mLoadedTerrainPositions = mTerrainPreloadPositions;
-                mLoadedTerrainTimestamp = timestamp;
-            }
-            mTerrainPreloadItem = nullptr;
-        }
     }
 
     void CellPreloader::setExpiryDelay(double expiryDelay)
@@ -443,17 +414,7 @@ namespace MWWorld
             return true;
         else if (mTerrainPreloadItem->isDone())
         {
-            if (mTerrainPreloadItem->storeViews(timestamp))
-            {
-                mTerrainPreloadItem = nullptr;
-                return true;
-            }
-            else
-            {
-                setTerrainPreloadPositions(std::vector<CellPreloader::PositionCellGrid>());
-                setTerrainPreloadPositions(positions);
-                return false;
-            }
+            return true;
         }
         else
         {
