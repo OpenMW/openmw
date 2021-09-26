@@ -25,7 +25,7 @@ namespace
 {
     template <class Contained>
     bool contains(const std::vector<MWWorld::CellPreloader::PositionCellGrid>& container,
-           const Contained& contained, float tolerance=1.f)
+           const Contained& contained, float tolerance)
     {
         for (const auto& pos : contained)
         {
@@ -371,6 +371,12 @@ namespace MWWorld
             mWorkQueue->addWorkItem(mUpdateCacheItem, true);
             mLastResourceCacheUpdate = timestamp;
         }
+        
+        if (mTerrainPreloadItem && mTerrainPreloadItem->isDone())
+        {
+            mLoadedTerrainPositions = mTerrainPreloadPositions;
+            mLoadedTerrainTimestamp = timestamp;
+        }
     }
 
     void CellPreloader::setExpiryDelay(double expiryDelay)
@@ -442,7 +448,7 @@ namespace MWWorld
             mTerrainPreloadPositions.clear();
             mLoadedTerrainPositions.clear();
         }
-        else if (contains(mTerrainPreloadPositions, positions))
+        else if (contains(mTerrainPreloadPositions, positions, 128.f))
             return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
             return;
