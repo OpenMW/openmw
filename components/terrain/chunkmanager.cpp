@@ -48,11 +48,11 @@ struct FindChunkTemplate
 {
 void operator()(ChunkId id, osg::Object* obj)
 {
-    if (id[0] == mId[0] && id[1] == mId[1])
-        mFoundChunk = obj;
+    if (id(0) == mId(0) && id(1) == mId(1))
+        mFoundTemplate = obj;
 }
 ChunkId mId;
-osg::ref<osg::Object> mFoundChunk;
+osg::ref_ptr<osg::Object> mFoundTemplate;
 };
 
 osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
