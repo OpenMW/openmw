@@ -24,7 +24,6 @@ TerrainDrawable::TerrainDrawable(const TerrainDrawable &copy, const osg::CopyOp 
     : osg::Geometry(copy, copyop)
     , mPasses(copy.mPasses)
     , mLightListCallback(copy.mLightListCallback)
-    , mCompositeMapCompiled(false)
 {
 
 }
@@ -95,10 +94,10 @@ void TerrainDrawable::cull(osgUtil::CullVisitor *cv)
         return;
     }
 
-    if (mCompositeMap && !mCompositeMapCompiled)
+    if (mCompositeMap && mCompositeMapRenderer)
     {
         mCompositeMapRenderer->setImmediate(mCompositeMap);
-        mCompositeMapCompiled = true;
+        mCompositeMapRenderer = nullptr;
     }
 
     bool pushedLight = mLightListCallback && mLightListCallback->pushLightState(this, cv);
