@@ -11,7 +11,7 @@
 #include <components/sceneutil/mwshadowtechnique.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/loadinglistener/reporter.hpp>
-#include <components/resource/resourcesystem.cpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
