@@ -247,8 +247,9 @@ private:
 
 class DebugChunkManager : public QuadTreeWorld::ChunkManager
 {
+public:
     DebugChunkManager(Resource::SceneManager* sceneManager, Storage* storage, unsigned int nodeMask) : mSceneManager(sceneManager), mStorage(storage), mNodeMask(nodeMask) {}
-    virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& chunkCenter, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
+    osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& chunkCenter, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
         osg::Vec3f center = { chunkCenter.x(), chunkCenter.y(), 0 };
         auto chunkBorder = CellBorder::createBorderGeometry(center.x() - size / 2.f, center.y() - size / 2.f, size, mStorage, mSceneManager, mNodeMask, 5.f, { 1, 0, 0, 0 });
@@ -257,7 +258,7 @@ class DebugChunkManager : public QuadTreeWorld::ChunkManager
         trans->addChild(chunkBorder);
         return trans;
     }
-    virtual unsigned int getNodeMask() { return mNodeMask; }
+    unsigned int getNodeMask() { return mNodeMask; }
 private:
     Resource::SceneManager* mSceneManager;
     Storage* mStorage;
