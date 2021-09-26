@@ -10,7 +10,6 @@
     Bug #4602: Robert's Bodies: crash inside createInstance()
     Bug #4700: Editor: Incorrect command implementation
     Bug #4744: Invisible particles must still be processed
-    Bug #4752: UpdateCellCommand doesn't undo properly
     Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
     Bug #5379: Wandering NPCs falling through cantons

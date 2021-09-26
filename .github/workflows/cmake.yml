@@ -29,7 +29,7 @@ jobs:
     - name: Configure
       run: cmake -S . -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
-    - name: Buil
+    - name: Build
       run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
  
     - name: Install

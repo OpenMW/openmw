@@ -12,7 +12,7 @@ namespace MWLua
         {
             luaManager->addUIMessage(message);
         };
-        return context.mLua->makeReadOnly(api);
+        return LuaUtil::makeReadOnly(api);
     }
     
 }

@@ -26,7 +26,7 @@ namespace CSMWorld
     class RefCollection : public Collection<CellRef>
     {
             Collection<Cell>& mCells;
-            std::map<unsigned int, int> mRefIndex;
+            std::map<unsigned int, int> mRefIndex; // CellRef index keyed by CSMWorld::CellRef::mIdNum
 
             int mNextId;
 

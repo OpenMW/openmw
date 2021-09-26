@@ -71,6 +71,7 @@ namespace Terrain
         int mVertexLodMod;
         float mViewDistance;
         float mMinSize;
+        bool mDebugTerrainChunks;
     };
 
 }
