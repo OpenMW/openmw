@@ -379,7 +379,7 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, f
     }
 }
 
-void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld, bool debugTerrainChunk)
+void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld)
 {
     if (!(cv->getTraversalMask() & callback->getCullMask()))
         return;
@@ -471,7 +471,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     }
 
     if (mHeightCullCallback && isCullVisitor)
-        updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty(), mDebugTerrainChunks);
+        updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty());
 
     vd->markUnchanged();
 
