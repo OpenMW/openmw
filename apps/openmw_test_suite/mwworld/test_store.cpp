@@ -7,6 +7,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwmechanics/spelllist.hpp"
@@ -88,7 +89,10 @@ struct ContentFileTest : public ::testing::Test
 
         std::vector<std::string> contentFiles = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
         for (auto & contentFile : contentFiles)
-            mContentFiles.push_back(collections.getPath(contentFile));
+        {
+            if (!Misc::StringUtils::ciEndsWith(contentFile, ".omwscripts"))
+                mContentFiles.push_back(collections.getPath(contentFile));
+        }
     }
 
 protected:

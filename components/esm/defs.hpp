@@ -165,6 +165,7 @@ enum RecNameInts
     // format 1
     REC_FILT = FourCC<'F','I','L','T'>::value,
     REC_DBGP = FourCC<'D','B','G','P'>::value, ///< only used in project files
+    REC_LUAL = FourCC<'L','U','A','L'>::value,  // LuaScriptsCfg
 
     // format 16 - Lua scripts in saved games
     REC_LUAM = FourCC<'L','U','A','M'>::value,  // LuaManager data

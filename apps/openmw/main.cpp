@@ -124,9 +124,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         engine.addGroundcoverFile(file);
     }
 
-    StringsVector luaScriptLists = variables["lua-scripts"].as<Files::EscapeStringVector>().toStdStringVector();
-    for (const auto& file : luaScriptLists)
-        engine.addLuaScriptListFile(file);
+    if (variables.count("lua-scripts"))
+    {
+        Log(Debug::Warning) << "Lua scripts have been specified via the old lua-scripts option and will not be loaded. "
+                               "Please update them to a version which uses the new omwscripts format.";
+    }
 
     // startup-settings
     engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());

@@ -35,7 +35,7 @@ namespace MWLua
     class LuaManager : public MWBase::LuaManager
     {
     public:
-        LuaManager(const VFS::Manager* vfs, std::vector<std::string> OMWScriptsFiles);
+        LuaManager(const VFS::Manager* vfs);
 
         // Called by engine.cpp when the environment is fully initialized.
         void init();
@@ -96,9 +96,6 @@ namespace MWLua
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScriptCfg::Flags);
-
-        const VFS::Manager* mVFS;
-        const std::vector<std::string> mOMWScriptsFiles;
 
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;

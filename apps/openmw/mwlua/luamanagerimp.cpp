@@ -11,6 +11,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include "luabindings.hpp"
@@ -19,8 +20,7 @@
 namespace MWLua
 {
 
-    LuaManager::LuaManager(const VFS::Manager* vfs, std::vector<std::string> OMWScriptsFiles) :
-        mVFS(vfs), mOMWScriptsFiles(std::move(OMWScriptsFiles)), mLua(vfs, &mConfiguration)
+    LuaManager::LuaManager(const VFS::Manager* vfs) : mLua(vfs, &mConfiguration)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
 
@@ -34,23 +34,7 @@ namespace MWLua
 
     void LuaManager::initConfiguration()
     {
-        ESM::LuaScriptsCfg cfg;
-        for (const std::string& file : mOMWScriptsFiles)
-        {
-            if (!Misc::StringUtils::endsWith(file, ".omwscripts"))
-            {
-                Log(Debug::Error) << "Script list should have suffix '.omwscripts', got: '" << file << "'";
-                continue;
-            }
-            try
-            {
-                std::string content(std::istreambuf_iterator<char>(*mVFS->get(file)), {});
-                LuaUtil::parseOMWScripts(cfg, content);
-            }
-            catch (std::exception& e) { Log(Debug::Error) << e.what(); }
-        }
-        // TODO: Add data from content files
-        mConfiguration.init(cfg);
+        mConfiguration.init(MWBase::Environment::get().getWorld()->getStore().getLuaScriptsCfg());
         Log(Debug::Verbose) << "Lua scripts configuration (" << mConfiguration.size() << " scripts):";
         for (size_t i = 0; i < mConfiguration.size(); ++i)
             Log(Debug::Verbose) << "#" << i << " " << LuaUtil::scriptCfgToString(mConfiguration[i]);

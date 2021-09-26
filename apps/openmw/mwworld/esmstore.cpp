@@ -1,14 +1,16 @@
 #include "esmstore.hpp"
 
 #include <algorithm>
+#include <fstream>
 #include <set>
 
 #include <boost/filesystem/operations.hpp>
 
 #include <components/debug/debuglog.hpp>
-#include <components/loadinglistener/loadinglistener.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
+#include <components/lua/configuration.hpp>
 #include <components/misc/algorithm.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
@@ -166,7 +168,10 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         std::string fname = mast.name;
         int index = ~0;
         for (int i = 0; i < esm.getIndex(); i++) {
-            const std::string candidate = allPlugins->at(i).getContext().filename;
+            ESM::ESMReader& reader = allPlugins->at(i);
+            if (reader.getFileSize() == 0)
+                continue;  // Content file in non-ESM format
+            const std::string candidate = reader.getContext().filename;
             std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
             if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
                 index = i;
@@ -213,6 +218,13 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 // ignore project file only records
                 esm.skipRecord();
             }
+            else if (n.toInt() == ESM::REC_LUAL)
+            {
+                ESM::LuaScriptsCfg cfg;
+                cfg.load(esm);
+                // TODO: update refnums in cfg.mScripts[].mInitializationData according to load order
+                mLuaContent.push_back(std::move(cfg));
+            }
             else {
                 throw std::runtime_error("Unknown record: " + n.toString());
             }
@@ -232,6 +244,32 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         }
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
     }
+}
+
+ESM::LuaScriptsCfg ESMStore::getLuaScriptsCfg() const
+{
+    ESM::LuaScriptsCfg cfg;
+    for (const LuaContent& c : mLuaContent)
+    {
+        if (std::holds_alternative<std::string>(c))
+        {
+            // *.omwscripts are intentionally reloaded every time when `getLuaScriptsCfg` is called.
+            // It is important for the `reloadlua` console command.
+            try
+            {
+                auto file = std::ifstream(std::get<std::string>(c));
+                std::string fileContent(std::istreambuf_iterator<char>(file), {});
+                LuaUtil::parseOMWScripts(cfg, fileContent);
+            }
+            catch (std::exception& e) { Log(Debug::Error) << e.what(); }
+        }
+        else
+        {
+            const ESM::LuaScriptsCfg& addition = std::get<ESM::LuaScriptsCfg>(c);
+            cfg.mScripts.insert(cfg.mScripts.end(), addition.mScripts.begin(), addition.mScripts.end());
+        }
+    }
+    return cfg;
 }
 
 void ESMStore::setUp(bool validateRecords)
