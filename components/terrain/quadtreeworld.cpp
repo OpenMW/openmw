@@ -528,7 +528,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
         {
             ViewData::Entry& entry = vd->getEntry(i);
 
-            loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, grid, mChunkManagers, true, mViewDataMap->getReuseDistance());
+            loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, grid, mChunkManagers, true, std::max(mViewDataMap->getReuseDistance(), std::abs(distanceModifier)));
             if (pass==0) reporter.addProgress(entry.mNode->getSize());
             entry.mNode = nullptr; // Clear node lest we break the neighbours search for the next pass
         }
