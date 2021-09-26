@@ -42,13 +42,12 @@ namespace MWLua
     template <typename ObjT>
     using Cell = std::conditional_t<std::is_same_v<ObjT, LObject>, LCell, GCell>;
 
-    template <class Class>
-    static const MWWorld::Ptr& requireClass(const MWWorld::Ptr& ptr)
+    static const MWWorld::Ptr& requireRecord(ESM::RecNameInts recordType, const MWWorld::Ptr& ptr)
     {
-        if (typeid(Class) != typeid(ptr.getClass()))
+        if (ptr.getType() != recordType)
         {
             std::string msg = "Requires type '";
-            msg.append(getMWClassName(typeid(Class)));
+            msg.append(getLuaObjectTypeName(recordType));
             msg.append("', but applied to ");
             msg.append(ptrToString(ptr));
             throw std::runtime_error(msg);
@@ -189,7 +188,7 @@ namespace MWLua
     template <class ObjectT>
     static void addDoorBindings(sol::usertype<ObjectT>& objectT, const Context& context)
     {
-        auto ptr = [](const ObjectT& o) -> const MWWorld::Ptr& { return requireClass<MWClass::Door>(o.ptr()); };
+        auto ptr = [](const ObjectT& o) -> const MWWorld::Ptr& { return requireRecord(ESM::REC_DOOR, o.ptr()); };
 
         objectT["isTeleport"] = sol::readonly_property([ptr](const ObjectT& o)
         {
