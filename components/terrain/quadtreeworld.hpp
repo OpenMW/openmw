@@ -5,6 +5,7 @@
 #include "terraingrid.hpp"
 
 #include <mutex>
+#include <memory>
 
 namespace osg
 {
@@ -74,7 +75,7 @@ namespace Terrain
         float mViewDistance;
         float mMinSize;
         bool mDebugTerrainChunks;
-        osg::ref_ptr<DebugChunkManager> mDebugChunkManager;
+        std::unique_ptr<DebugChunkManager> mDebugChunkManager;
     };
 
 }
