@@ -15,6 +15,7 @@
 #include <components/esm/cellref.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/mathutil.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/convert.hpp>
@@ -75,21 +76,6 @@
 
 #include "contentloader.hpp"
 #include "esmloader.hpp"
-
-namespace
-{
-
-// Wraps a value to (-PI, PI]
-void wrap(float& rad)
-{
-    const float pi = static_cast<float>(osg::PI);
-    if (rad>0)
-        rad = std::fmod(rad+pi, 2.0f*pi)-pi;
-    else
-        rad = std::fmod(rad-pi, 2.0f*pi)+pi;
-}
-
-}
 
 namespace MWWorld
 {
@@ -1290,8 +1276,6 @@ namespace MWWorld
 
     void World::rotateObject(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
     {
-        const float pi = static_cast<float>(osg::PI);
-
         ESM::Position pos = ptr.getRefData().getPosition();
         float *objRot = pos.rot;
         if (flags & MWBase::RotationFlag_adjust)
@@ -1313,13 +1297,9 @@ namespace MWWorld
              * currently it's done so for rotating the camera, which needs
              * clamping.
              */
-            const float half_pi = pi/2.f;
-
-            if(objRot[0] < -half_pi)     objRot[0] = -half_pi;
-            else if(objRot[0] > half_pi) objRot[0] =  half_pi;
-
-            wrap(objRot[1]);
-            wrap(objRot[2]);
+            objRot[0] = osg::clampBetween(objRot[0], -osg::PIf / 2, osg::PIf / 2);
+            objRot[1] = Misc::normalizeAngle(objRot[1]);
+            objRot[2] = Misc::normalizeAngle(objRot[2]);
         }
 
         ptr.getRefData().setPosition(pos);
