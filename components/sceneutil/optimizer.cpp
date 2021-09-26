@@ -750,7 +750,7 @@ bool Optimizer::CombineStaticTransformsVisitor::removeTransforms(osg::Node* node
         if (transform->getNumChildren()==1 &&
             transform->getChild(0)->asTransform()!=0 &&
             transform->getChild(0)->asTransform()->asMatrixTransform()!=0 &&
-            (!transform->getChild(0)->getStateSet() || transform->getChild(0)->getStateSet()->referenceCount()==0) &&
+            (!transform->getChild(0)->getStateSet() || transform->getChild(0)->getStateSet()->referenceCount()==1) &&
             transform->getChild(0)->getDataVariance()==osg::Object::STATIC)
         {
             // now combine with its child.
