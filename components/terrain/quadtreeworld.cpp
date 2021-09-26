@@ -11,6 +11,7 @@
 #include <components/sceneutil/mwshadowtechnique.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/loadinglistener/reporter.hpp>
+#include <components/resource/resourcesystem.cpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
@@ -247,7 +248,7 @@ private:
 class DebugChunkManager : public QuadTreeWorld::ChunkManager
 {
     DebugChunkManager(Resource::SceneManager* sceneManager, Storage* storage, unsigned int nodeMask) : mSceneManager(sceneManager), mStorage(storage), mNodeMask(nodeMask) {}
-    virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
+    virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& chunkCenter, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
         auto chunkBorder = CellBorder::createBorderGeometry(center.x() - size / 2.f, center.y() - size / 2.f, size, mStorage, mSceneManager, mNodeMask, 5.f, { 1, 0, 0, 0 });
         osg::Vec3f center = { chunkCenter.x(), chunkCenter.y(), 0 };
@@ -261,7 +262,7 @@ private:
     Resource::SceneManager* mSceneManager;
     Storage* mStorage;
     unsigned int mNodeMask;
-}
+};
 
 QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
     : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
