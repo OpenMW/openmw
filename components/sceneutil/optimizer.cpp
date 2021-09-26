@@ -86,6 +86,13 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         cstv.removeTransforms(node);
     }
 
+    if (options & SHARE_DUPLICATE_STATE && _sharedStateManager)
+    {
+        if (_sharedStateMutex) _sharedStateMutex->lock();
+        _sharedStateManager->share(node);
+        if (_sharedStateMutex) _sharedStateMutex->unlock();
+    }
+
     if (options & REMOVE_REDUNDANT_NODES)
     {
         OSG_INFO<<"Optimizer::optimize() doing REMOVE_REDUNDANT_NODES"<<std::endl;
@@ -100,13 +107,6 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
 
         MergeGroupsVisitor mgrp(this);
         node->accept(mgrp);
-    }
-
-    if (options & SHARE_DUPLICATE_STATE && _sharedStateManager)
-    {
-        if (_sharedStateMutex) _sharedStateMutex->lock();
-        _sharedStateManager->share(node);
-        if (_sharedStateMutex) _sharedStateMutex->unlock();
     }
 
     if (options & MERGE_GEOMETRY)
