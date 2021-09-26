@@ -48,7 +48,7 @@ struct FindChunkTemplate
 {
 void operator()(ChunkId id, osg::Object* obj)
 {
-    if (id(0) == mId(0) && id(1) == mId(1))
+    if (std::get<0>(id) == std::get<0>(mId) && std::get<1>(id) == std::get<1>(mId))
         mFoundTemplate = obj;
 }
 ChunkId mId;
