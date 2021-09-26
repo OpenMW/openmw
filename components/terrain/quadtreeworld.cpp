@@ -282,8 +282,8 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
 
     if (mDebugTerrainChunks)
     {
-        mDebugChunkManager = new DebugChunkManager(mResourceSystem->getSceneManager(), mStorage, borderMask);
-        addChunkManager(mDebugChunkManager);
+        mDebugChunkManager = std::unique_ptr<DebugChunkManager>(new DebugChunkManager(mResourceSystem->getSceneManager(), mStorage, borderMask));
+        addChunkManager(mDebugChunkManager.get());
     }
 }
 
