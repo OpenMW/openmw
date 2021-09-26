@@ -20,6 +20,7 @@
 
 #include <osgShadow/ShadowedScene>
 #include <osg/CullFace>
+#include <osg/BlendFunc>
 #include <osg/Geometry>
 #include <osg/io_utils>
 #include <osg/Depth>
@@ -1597,7 +1598,7 @@ void MWShadowTechnique::createShaders()
 
     _shadowCastingStateSet->setDefine("CAST_SHADOWS", osg::StateAttribute::ON);
 
-    _shadowCastingStateSet->setMode(GL_BLEND, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+    _shadowCastingStateSet->setAttributeAndModes(new osg::BlendFunc, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
     _shadowCastingStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
