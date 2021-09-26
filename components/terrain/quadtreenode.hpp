@@ -27,7 +27,8 @@ namespace Terrain
         {
             Deeper,
             StopTraversal,
-            StopTraversalAndUse
+            StopTraversalAndUse,
+            UseAndDeeper
         };
         virtual ReturnValue isSufficientDetail(QuadTreeNode *node, float dist) = 0;
     };
