@@ -143,7 +143,7 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
 
     if (!(vd->suitableToUse(activeGrid) && (vd->getViewPoint()-viewPoint).length2() < mReuseDistance*mReuseDistance && vd->getWorldUpdateRevision() >= mWorldUpdateRevision))
     {
-        float shortestDist = std::numeric_limits<float>::max();
+        float shortestDist = mReuseDistance*mReuseDistance;
         const ViewData* mostSuitableView = nullptr;
         for (const ViewData* other : mUsedViews)
         {
@@ -157,10 +157,15 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
                 }
             }
         }
-        if (mostSuitableView && mostSuitableView != vd)
+        if (mostSuitableView)
         {
             vd->copyFrom(*mostSuitableView);
             return vd;
+        }
+        else
+        {
+            vd->setViewPoint(viewPoint);
+            needsUpdate = true;
         }
     }
     if (!vd->suitableToUse(activeGrid))
