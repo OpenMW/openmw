@@ -165,26 +165,12 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
         else
         {
             vd->setViewPoint(viewPoint);
+            vd->setActiveGrid(activeGrid);
+            vd->setWorldUpdateRevision(mWorldUpdateRevision);
             needsUpdate = true;
         }
     }
-    if (!vd->suitableToUse(activeGrid))
-    {
-        vd->setViewPoint(viewPoint);
-        vd->setActiveGrid(activeGrid);
-        needsUpdate = true;
-    }
     return vd;
-}
-
-bool ViewDataMap::storeView(const ViewData* view, double referenceTime)
-{
-    if (view->getWorldUpdateRevision() < mWorldUpdateRevision)
-        return false;
-    ViewData* store = createOrReuseView();
-    store->copyFrom(*view);
-    store->setLastUsageTimeStamp(referenceTime);
-    return true;
 }
 
 ViewData *ViewDataMap::createOrReuseView()
