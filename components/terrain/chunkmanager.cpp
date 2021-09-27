@@ -19,7 +19,6 @@
 #include "storage.hpp"
 #include "texturemanager.hpp"
 #include "compositemaprenderer.hpp"
-#include <components/misc/constants.hpp>
 
 namespace Terrain
 {
