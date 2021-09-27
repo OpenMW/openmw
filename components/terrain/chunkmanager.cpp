@@ -3,9 +3,7 @@
 #include <sstream>
 
 #include <osg/Texture2D>
-#include <osg/ClusterCullingCallback>
 #include <osg/Material>
-#include <osg/MatrixTransform>
 
 #include <osgUtil/IncrementalCompileOperation>
 
