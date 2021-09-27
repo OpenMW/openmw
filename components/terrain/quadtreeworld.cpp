@@ -511,7 +511,10 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
         unsigned int startEntry = vd->getNumEntries();
 
         float distanceModifier=0.f;
-        if (pass>0) distanceModifier = (pass==1) ? 1024 : -1024;
+        if (pass == 1)
+            distanceModifier = 1024;
+        else if (pass == 2)
+            distanceModifier = -1024;
         DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid, distanceModifier);
         mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
 
@@ -524,11 +527,12 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
             reporter.addTotal(progressTotal);
         }
 
+        const float reuseDistance = std::max(mViewDataMap->getReuseDistance(), std::abs(distanceModifier));
         for (unsigned int i=startEntry; i<vd->getNumEntries() && !abort; ++i)
         {
             ViewData::Entry& entry = vd->getEntry(i);
 
-            loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, grid, mChunkManagers, true, std::max(mViewDataMap->getReuseDistance(), std::abs(distanceModifier)));
+            loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, grid, mChunkManagers, true, reuseDistance);
             if (pass==0) reporter.addProgress(entry.mNode->getSize());
             entry.mNode = nullptr; // Clear node lest we break the neighbours search for the next pass
         }
