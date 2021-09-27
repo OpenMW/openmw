@@ -272,22 +272,25 @@ namespace Resource
             }
 
             // Iterate each description, and see if the current node uses the specified material for alpha testing
-            for (auto description : mDescriptions)
+            if (node.getStateSet())
             {
-                std::vector<std::string> descriptionParts;
-                std::istringstream descriptionStringStream(description);
-                for (std::string part; std::getline(descriptionStringStream, part, ' ');)
+                for (auto description : mDescriptions)
                 {
-                    descriptionParts.emplace_back(part);
-                }
-
-                if (descriptionParts.size() > (3) && descriptionParts.at(3) == node.getOrCreateStateSet()->getName())
-                {
-                    if (descriptionParts.at(0) == "alphatest")
+                    std::vector<std::string> descriptionParts;
+                    std::istringstream descriptionStringStream(description);
+                    for (std::string part; std::getline(descriptionStringStream, part, ' ');)
                     {
-                        osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
-                        osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.at(2))));
-                        node.getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                        descriptionParts.emplace_back(part);
+                    }
+
+                    if (descriptionParts.size() > (3) && descriptionParts.at(3) == node.getStateSet()->getName())
+                    {
+                        if (descriptionParts.at(0) == "alphatest")
+                        {
+                            osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
+                            osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.at(2))));
+                            node.getStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                        }
                     }
                 }
             }
