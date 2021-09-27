@@ -244,19 +244,22 @@ namespace Resource
 
         void apply(osg::Node& node) override
         {
-            if (node.getOrCreateStateSet()->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
+            if (osg::StateSet* stateset = node.getStateSet())
             {
-                osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
-                depth->setWriteMask(false);
+                if (stateset->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
+                {
+                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    depth->setWriteMask(false);
 
-                node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
-            }
-            else if (node.getOrCreateStateSet()->getRenderingHint() == osg::StateSet::OPAQUE_BIN)
-            {
-                osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
-                depth->setWriteMask(true);
+                    stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                }
+                else if (stateset->getRenderingHint() == osg::StateSet::OPAQUE_BIN)
+                {
+                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    depth->setWriteMask(true);
 
-                node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                    stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                }
             }
 
             /* Check if the <node> has <extra type="Node"> <technique profile="OpenSceneGraph"> <Descriptions> <Description>
