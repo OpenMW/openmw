@@ -38,6 +38,7 @@
     Bug #6197: Infinite Casting Loop
     Bug #6273: Respawning NPCs rotation is inconsistent
     Bug #6282: Laura craft doesn't follow the player character
+    Bug #6283: Avis Dorsey follows you after her death
     Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
     Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
