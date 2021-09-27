@@ -376,7 +376,6 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "Texture",
             "StateSet",
             "Node",
-            "Node Instance",
             "Shape",
             "Shape Instance",
             "Image",
