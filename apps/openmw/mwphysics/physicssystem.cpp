@@ -348,11 +348,11 @@ namespace MWPhysics
         return result;
     }
 
-    RayCastingResult PhysicsSystem::castSphere(const osg::Vec3f &from, const osg::Vec3f &to, float radius) const
+    RayCastingResult PhysicsSystem::castSphere(const osg::Vec3f &from, const osg::Vec3f &to, float radius, int mask, int group) const
     {
         btCollisionWorld::ClosestConvexResultCallback callback(Misc::Convert::toBullet(from), Misc::Convert::toBullet(to));
-        callback.m_collisionFilterGroup = 0xff;
-        callback.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap|CollisionType_Door;
+        callback.m_collisionFilterGroup = group;
+        callback.m_collisionFilterMask = mask;
 
         btSphereShape shape(radius);
         const btQuaternion btrot = btQuaternion::getIdentity();
@@ -368,6 +368,8 @@ namespace MWPhysics
         {
             result.mHitPos = Misc::Convert::toOsg(callback.m_hitPointWorld);
             result.mHitNormal = Misc::Convert::toOsg(callback.m_hitNormalWorld);
+            if (auto* ptrHolder = static_cast<PtrHolder*>(callback.m_hitCollisionObject->getUserPointer()))
+                result.mHitObject = ptrHolder->getPtr();
         }
         return result;
     }

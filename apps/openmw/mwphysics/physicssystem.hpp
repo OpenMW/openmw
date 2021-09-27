@@ -186,9 +186,10 @@ namespace MWPhysics
             /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all other actors.
             RayCastingResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
                     const std::vector<MWWorld::Ptr>& targets = std::vector<MWWorld::Ptr>(),
-                    int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const override;
+                    int mask = CollisionType_Default, int group=0xff) const override;
 
-            RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius) const override;
+            RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius,
+                    int mask = CollisionType_Default, int group=0xff) const override;
 
             /// Return true if actor1 can see actor2.
             bool getLineOfSight(const MWWorld::ConstPtr& actor1, const MWWorld::ConstPtr& actor2) const override;
