@@ -61,7 +61,7 @@ osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f& cen
         FindChunkTemplate find;
         find.mId = id;
         mCache->call(find);
-        TerrainDrawable* templateGeometry = (find.mFoundTemplate && !mDebugChunks) ? static_cast<TerrainDrawable*>(find.mFoundTemplate.get()) : nullptr;
+        TerrainDrawable* templateGeometry = find.mFoundTemplate ? static_cast<TerrainDrawable*>(find.mFoundTemplate.get()) : nullptr;
         osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags, compile, templateGeometry);
         mCache->addEntryToObjectCache(id, node.get());
         return node;
