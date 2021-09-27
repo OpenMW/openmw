@@ -46,13 +46,13 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
 
 struct FindChunkTemplate
 {
-void operator()(ChunkId id, osg::Object* obj)
-{
-    if (std::get<0>(id) == std::get<0>(mId) && std::get<1>(id) == std::get<1>(mId))
-        mFoundTemplate = obj;
-}
-ChunkId mId;
-osg::ref_ptr<osg::Object> mFoundTemplate;
+    void operator() (ChunkId id, osg::Object* obj)
+    {
+        if (std::get<0>(id) == std::get<0>(mId) && std::get<1>(id) == std::get<1>(mId))
+            mFoundTemplate = obj;
+    }
+    ChunkId mId;
+    osg::ref_ptr<osg::Object> mFoundTemplate;
 };
 
 osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
