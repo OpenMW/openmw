@@ -11,6 +11,7 @@
 #include <components/sceneutil/mwshadowtechnique.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/loadinglistener/reporter.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
@@ -244,6 +245,26 @@ private:
     osg::ref_ptr<RootNode> mRootNode;
 };
 
+class DebugChunkManager : public QuadTreeWorld::ChunkManager
+{
+public:
+    DebugChunkManager(Resource::SceneManager* sceneManager, Storage* storage, unsigned int nodeMask) : mSceneManager(sceneManager), mStorage(storage), mNodeMask(nodeMask) {}
+    osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& chunkCenter, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
+    {
+        osg::Vec3f center = { chunkCenter.x(), chunkCenter.y(), 0 };
+        auto chunkBorder = CellBorder::createBorderGeometry(center.x() - size / 2.f, center.y() - size / 2.f, size, mStorage, mSceneManager, mNodeMask, 5.f, { 1, 0, 0, 0 });
+        osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(osg::Matrixf::translate(-center*Constants::CellSizeInUnits));
+        trans->setDataVariance(osg::Object::STATIC);
+        trans->addChild(chunkBorder);
+        return trans;
+    }
+    unsigned int getNodeMask() { return mNodeMask; }
+private:
+    Resource::SceneManager* mSceneManager;
+    Storage* mStorage;
+    unsigned int mNodeMask;
+};
+
 QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
     : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mViewDataMap(new ViewDataMap)
@@ -258,6 +279,12 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     mChunkManager->setCompositeMapLevel(compMapLevel);
     mChunkManager->setMaxCompositeGeometrySize(maxCompGeometrySize);
     mChunkManagers.push_back(mChunkManager.get());
+
+    if (mDebugTerrainChunks)
+    {
+        mDebugChunkManager = std::unique_ptr<DebugChunkManager>(new DebugChunkManager(mResourceSystem->getSceneManager(), mStorage, borderMask));
+        addChunkManager(mDebugChunkManager.get());
+    }
 }
 
 QuadTreeWorld::~QuadTreeWorld()
@@ -352,7 +379,7 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, f
     }
 }
 
-void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld, bool debugTerrainChunk)
+void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld)
 {
     if (!(cv->getTraversalMask() & callback->getCullMask()))
         return;
@@ -368,11 +395,7 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
-        osg::BoundingBox bb;
-        if(debugTerrainChunk)
-            bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0)->asGroup()->getChild(0))->getWaterBoundingBox();
-        else
-            bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
+        osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
         if (!bb.valid())
             continue;
         osg::Vec3f ofs (entry.mNode->getCenter().x()*cellworldsize, entry.mNode->getCenter().y()*cellworldsize, 0.f);
@@ -448,7 +471,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     }
 
     if (mHeightCullCallback && isCullVisitor)
-        updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty(), mDebugTerrainChunks);
+        updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty());
 
     vd->markUnchanged();
 
