@@ -371,7 +371,7 @@ namespace MWWorld
             mWorkQueue->addWorkItem(mUpdateCacheItem, true);
             mLastResourceCacheUpdate = timestamp;
         }
-        
+
         if (mTerrainPreloadItem && mTerrainPreloadItem->isDone())
         {
             mLoadedTerrainPositions = mTerrainPreloadPositions;
