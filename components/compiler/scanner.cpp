@@ -164,8 +164,6 @@ namespace Compiler
         std::string value;
         c.appendTo(value);
 
-        bool error = false;
-
         while (get (c))
         {
             if (c.isDigit())
@@ -174,16 +172,11 @@ namespace Compiler
             }
             else if (!c.isMinusSign() && isStringCharacter (c))
             {
-                error = true;
-                c.appendTo(value);
+                /// workaround that allows names to begin with digits
+                return scanName(c, parser, cont, value);
             }
             else if (c=='.')
             {
-                if (error)
-                {
-                    putback (c);
-                    break;
-                }
                 return scanFloat (value, parser, cont);
             }
             else
@@ -191,17 +184,6 @@ namespace Compiler
                 putback (c);
                 break;
             }
-        }
-
-        if (error)
-        {
-            /// workaround that allows names to begin with digits
-            /// \todo disable
-            TokenLoc loc (mLoc);
-            mLoc.mLiteral.clear();
-            cont = parser.parseName (value, loc, *this);
-            return true;
-//            return false;
         }
 
         TokenLoc loc (mLoc);
@@ -268,9 +250,8 @@ namespace Compiler
         nullptr
     };
 
-    bool Scanner::scanName (MultiChar& c, Parser& parser, bool& cont)
+    bool Scanner::scanName (MultiChar& c, Parser& parser, bool& cont, std::string name)
     {
-        std::string name;
         c.appendTo(name);
 
         if (!scanName (name))

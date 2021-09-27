@@ -49,9 +49,7 @@ namespace MWPhysics
                 }
             case CollisionType_Water:
                 {
-                    mProjectile->setWaterHitPosition(m_hitPointWorld);
-                    if (mProjectile->canTraverseWater())
-                        return 1.f;
+                    mProjectile->setHitWater();
                     break;
                 }
         }
