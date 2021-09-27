@@ -35,7 +35,6 @@
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
 #include "objectcache.hpp"
-#include "multiobjectcache.hpp"
 
 namespace
 {
