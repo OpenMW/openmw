@@ -236,7 +236,7 @@ namespace Compiler
 
             bool scanFloat (const std::string& intValue, Parser& parser, bool& cont);
 
-            bool scanName (MultiChar& c, Parser& parser, bool& cont);
+            bool scanName (MultiChar& c, Parser& parser, bool& cont, std::string name = {});
 
             /// \param name May contain the start of the name (one or more characters)
             bool scanName (std::string& name);
