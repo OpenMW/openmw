@@ -71,7 +71,7 @@ opencs_units (view/world
     cellcreator pathgridcreator referenceablecreator startscriptcreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
     dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
-    bodypartcreator landtexturecreator landcreator
+    bodypartcreator landtexturecreator landcreator tableheadermouseeventhandler
     )
 
 opencs_units (view/world
