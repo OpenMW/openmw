@@ -9,6 +9,7 @@ unsigned int ESM::Filter::sRecordId = REC_FILT;
 void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
 {
     isDeleted = false;
+    mRecordFlags = esm.getRecordFlags();
 
     while (esm.hasMoreSubs())
     {

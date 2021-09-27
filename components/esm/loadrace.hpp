@@ -65,6 +65,7 @@ struct Race
 
     RADTstruct mData;
 
+    unsigned int mRecordFlags;
     std::string mId, mName, mDescription;
     SpellList mPowers;
 

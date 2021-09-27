@@ -34,6 +34,7 @@ struct Faction
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string getRecordType() { return "Faction"; }
 
+    unsigned int mRecordFlags;
     std::string mId, mName;
 
     struct FADTstruct
