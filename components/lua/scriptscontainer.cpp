@@ -16,6 +16,15 @@ namespace LuaUtil
     static constexpr std::string_view REGISTERED_TIMER_CALLBACKS = "_timers";
     static constexpr std::string_view TEMPORARY_TIMER_CALLBACKS = "_temp_timers";
 
+    std::string ScriptsContainer::ScriptId::toString() const
+    {
+        std::string res = mContainer->mNamePrefix;
+        res.push_back('[');
+        res.append(mPath);
+        res.push_back(']');
+        return res;
+    }
+
     ScriptsContainer::ScriptsContainer(LuaUtil::LuaState* lua, std::string_view namePrefix) : mNamePrefix(namePrefix), mLua(*lua)
     {
         registerEngineHandlers({&mUpdateHandlers});
@@ -81,6 +90,7 @@ namespace LuaUtil
         auto scriptIter = mScripts.find(path);
         if (scriptIter == mScripts.end())
             return false;  // no such script
+        scriptIter->second.mHiddenData[ScriptId::KEY] = sol::nil;
         sol::object& script = scriptIter->second.mInterface;
         if (getFieldOrNil(script, INTERFACE_NAME) != sol::nil)
         {
@@ -320,6 +330,8 @@ namespace LuaUtil
 
     void ScriptsContainer::removeAllScripts()
     {
+        for (auto& [_, script] : mScripts)
+            script.mHiddenData[ScriptId::KEY] = sol::nil;
         mScripts.clear();
         mScriptOrder.clear();
         for (auto& [_, handlers] : mEngineHandlers)

@@ -66,6 +66,8 @@ namespace LuaUtil
 
             ScriptsContainer* mContainer;
             std::string mPath;
+
+            std::string toString() const;
         };
         using TimeUnit = ESM::LuaTimer::TimeUnit;
 
@@ -73,7 +75,7 @@ namespace LuaUtil
         ScriptsContainer(LuaUtil::LuaState* lua, std::string_view namePrefix);
         ScriptsContainer(const ScriptsContainer&) = delete;
         ScriptsContainer(ScriptsContainer&&) = delete;
-        virtual ~ScriptsContainer() {}
+        virtual ~ScriptsContainer() { removeAllScripts(); }
 
         // Adds package that will be available (via `require`) for all scripts in the container.
         // Automatically applies LuaUtil::makeReadOnly to the package.

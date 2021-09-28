@@ -48,5 +48,12 @@
 -- @param #number delay
 -- @param #function func
 
+-------------------------------------------------------------------------------
+-- Wraps Lua function with `Callback` object that can be used in async API calls.
+-- @function [parent=#async] callback
+-- @param self
+-- @param #function func
+-- @return #Callback
+
 return nil
 
