@@ -77,7 +77,7 @@ op  15: div (integer) stack[1] by stack[0], pop twice, push result
 op  16: div (float) stack[1] by stack[0], pop twice, push result
 op  17: convert stack[1] from integer to float
 op  18: convert stack[1] from float to integer
-op  19: take square root of stack[0] (float)
+opcode 19 unused
 op  20: return
 op  21: replace stack[0] with local short stack[0]
 op  22: replace stack[0] with local long stack[0]

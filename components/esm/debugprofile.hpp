@@ -19,6 +19,7 @@ namespace ESM
             Flag_Global = 4         // make available from main menu (i.e. not location specific)
         };
 
+        unsigned int mRecordFlags;
         std::string mId;
 
         std::string mDescription;

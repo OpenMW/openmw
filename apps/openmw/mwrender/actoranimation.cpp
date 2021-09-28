@@ -67,13 +67,16 @@ ActorAnimation::~ActorAnimation()
 
 PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor)
 {
+    osg::Group* parent = getBoneByName(bonename);
+    if (!parent)
+        return nullptr;
+
+    osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->getInstance(model, parent);
+
     const NodeMap& nodeMap = getNodeMap();
     NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
     if (found == nodeMap.end())
         return PartHolderPtr();
-
-    osg::Group* parent = found->second;
-    osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->getInstance(model, parent);
 
     if (enchantedGlow)
         mGlowUpdater = SceneUtil::addEnchantedGlow(instance, mResourceSystem, *glowColor);
@@ -133,9 +136,9 @@ bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
         MWMechanics::CreatureStats &stats = cls.getCreatureStats(mPtr);
         if (cls.hasInventoryStore(mPtr) && weaptype != ESM::Weapon::Spell)
         {
-            osg::Group* foundNode = getBoneByName ("Bip01 AttachShield");
-
-            if (foundNode || (mPtr == MWMechanics::getPlayer() && mPtr.isInCell() && MWBase::Environment::get().getWorld()->isFirstPerson()))
+            SceneUtil::FindByNameVisitor findVisitor ("Bip01 AttachShield");
+            mObjectRoot->accept(findVisitor);
+            if (findVisitor.mFoundNode || (mPtr == MWMechanics::getPlayer() && mPtr.isInCell() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
                 const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
                 const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
@@ -273,11 +276,10 @@ osg::Group* ActorAnimation::getBoneByName(const std::string& boneName) const
     if (!mObjectRoot)
         return nullptr;
 
-    const NodeMap& nodeMap = getNodeMap();
-    NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(boneName));
-    if (found == nodeMap.end())
-        return nullptr;
-    return found->second;
+    SceneUtil::FindByNameVisitor findVisitor (boneName);
+    mObjectRoot->accept(findVisitor);
+
+    return findVisitor.mFoundNode;
 }
 
 std::string ActorAnimation::getHolsteredWeaponBoneName(const MWWorld::ConstPtr& weapon)

@@ -19,6 +19,19 @@
 namespace MWLua
 {
 
+    // Wrapper for a single-argument Lua function.
+    // Holds information about the script the function belongs to.
+    // Needed to prevent callback calls if the script was removed.
+    struct Callback
+    {
+        static constexpr std::string_view SCRIPT_NAME_KEY = "name";
+
+        sol::function mFunc;
+        sol::table mHiddenData;
+
+        void operator()(sol::object arg) const;
+    };
+
     class LuaManager : public MWBase::LuaManager
     {
     public:
@@ -67,6 +80,18 @@ namespace MWLua
         // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
         void reloadAllScripts() override;
 
+        // Used to call Lua callbacks from C++
+        void queueCallback(Callback callback, sol::object arg) { mQueuedCallbacks.push_back({std::move(callback), std::move(arg)}); }
+
+        // Wraps Lua callback into an std::function.
+        // NOTE: Resulted function is not thread safe. Can not be used while LuaManager::update() or
+        //       any other Lua-related function is running.
+        template <class Arg>
+        std::function<void(Arg)> wrapLuaCallback(const Callback& c)
+        {
+            return [this, c](Arg arg) { this->queueCallback(c, sol::make_object(c.mFunc.lua_state(), arg)); };
+        }
+
     private:
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr);
 
@@ -99,6 +124,13 @@ namespace MWLua
 
         std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
         std::vector<ObjectId> mActorAddedEvents;
+
+        struct CallbackWithData
+        {
+            Callback mCallback;
+            sol::object mArg;
+        };
+        std::vector<CallbackWithData> mQueuedCallbacks;
 
         struct LocalEngineEvent
         {

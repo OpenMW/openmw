@@ -10,7 +10,6 @@
     Bug #4602: Robert's Bodies: crash inside createInstance()
     Bug #4700: Editor: Incorrect command implementation
     Bug #4744: Invisible particles must still be processed
-    Bug #4752: UpdateCellCommand doesn't undo properly
     Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
     Bug #5379: Wandering NPCs falling through cantons
@@ -37,6 +36,12 @@
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
+    Bug #6273: Respawning NPCs rotation is inconsistent
+    Bug #6282: Laura craft doesn't follow the player character
+    Bug #6283: Avis Dorsey follows you after her death
+    Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
+    Bug #6302: Teleporting disabled actor breaks its disabled state
+    Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
@@ -48,8 +53,12 @@
     Feature #6032: Reverse-z depth buffer
     Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Feature #6199: Support FBO Rendering
+    Feature #6249: Alpha testing support for Collada
     Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
+    Feature #6288: Preserve the "blocked" record flag for referenceable objects.
+    Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
+
 
 0.47.0
 ------

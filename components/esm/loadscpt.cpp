@@ -83,6 +83,7 @@ namespace ESM
     void Script::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
 
         mVarNames.clear();
 

@@ -1807,6 +1807,7 @@ namespace MWMechanics
             // Standing NPCs give way to moving ones if they are not in combat (or pursue) mode and either
             // follow player or have a AIWander package with non-empty wander area.
             bool shouldAvoidCollision = isMoving;
+            bool shouldGiveWay = false;
             bool shouldTurnToApproachingActor = !isMoving;
             MWWorld::Ptr currentTarget; // Combat or pursue target (NPCs should not avoid collision with their targets).
             const auto& aiSequence = ptr.getClass().getCreatureStats(ptr).getAiSequence();
@@ -1817,7 +1818,7 @@ namespace MWMechanics
                 else if (package->getTypeId() == AiPackageTypeId::Wander && giveWayWhenIdle)
                 {
                     if (!static_cast<const AiWander*>(package.get())->isStationary())
-                        shouldAvoidCollision = true;
+                        shouldGiveWay = true;
                 }
                 else if (package->getTypeId() == AiPackageTypeId::Combat || package->getTypeId() == AiPackageTypeId::Pursue)
                 {
@@ -1827,7 +1828,7 @@ namespace MWMechanics
                     break;
                 }
             }
-            if (!shouldAvoidCollision)
+            if (!shouldAvoidCollision && !shouldGiveWay)
                 continue;
 
             osg::Vec2f baseSpeed = origMovement * maxSpeed;
@@ -1836,13 +1837,13 @@ namespace MWMechanics
             const osg::Vec3f halfExtents = world->getHalfExtents(ptr);
             float maxDistToCheck = isMoving ? maxDistForPartialAvoiding : maxDistForStrictAvoiding;
 
-            float timeToCollision = maxTimeToCheck;
+            float timeToCheck = maxTimeToCheck;
+            if (!shouldGiveWay && !aiSequence.isEmpty())
+                timeToCheck = std::min(timeToCheck, getTimeToDestination(**aiSequence.begin(), basePos, maxSpeed, duration, halfExtents));
+
+            float timeToCollision = timeToCheck;
             osg::Vec2f movementCorrection(0, 0);
             float angleToApproachingActor = 0;
-
-            const float timeToDestination = aiSequence.isEmpty()
-                    ? std::numeric_limits<float>::max()
-                    : getTimeToDestination(**aiSequence.begin(), basePos, maxSpeed, duration, halfExtents);
 
             // Iterate through all other actors and predict collisions.
             for(PtrActorMap::iterator otherIter(mActors.begin()); otherIter != mActors.end(); ++otherIter)
@@ -1880,7 +1881,7 @@ namespace MWMechanics
                     continue; // No solution; distance is always >= collisionDist.
                 float t = (-vr - std::sqrt(Dh)) / v2;
 
-                if (t < 0 || t > timeToCollision || t > timeToDestination)
+                if (t < 0 || t > timeToCollision)
                     continue;
 
                 // Check visibility and awareness last as it's expensive.
@@ -1900,7 +1901,7 @@ namespace MWMechanics
                     movementCorrection.y() *= 0.5f;
             }
 
-            if (timeToCollision < maxTimeToCheck)
+            if (timeToCollision < timeToCheck)
             {
                 // Try to evade the nearest collision.
                 osg::Vec2f newMovement = origMovement + movementCorrection;

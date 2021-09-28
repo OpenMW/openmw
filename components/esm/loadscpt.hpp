@@ -35,6 +35,7 @@ public:
         Script::SCHDstruct  mData;
     };
 
+    unsigned int mRecordFlags;
     std::string mId;
 
     SCHDstruct mData;

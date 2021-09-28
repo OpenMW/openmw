@@ -52,11 +52,8 @@ void readVFS(VFS::Archive* anArchive,std::string archivePath = "")
     myManager.addArchive(anArchive);
     myManager.buildIndex();
 
-    std::map<std::string, VFS::File*> files=myManager.getIndex();
-    for(auto it=files.begin(); it!=files.end(); ++it)
+    for(const auto& name : myManager.getRecursiveDirectoryIterator(""))
     {
-        std::string name = it->first;
-
         try{
             if(isNIF(name))
             {

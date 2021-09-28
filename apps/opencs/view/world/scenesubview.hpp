@@ -32,7 +32,6 @@ namespace CSVWidget
 
 namespace CSVWorld
 {
-    class Table;
     class TableBottomBox;
     class CreatorFactoryBase;
 

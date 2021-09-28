@@ -65,8 +65,6 @@ namespace Resource
         std::vector<osg::ref_ptr<const Object>> mObjects;
     };
 
-    class MultiObjectCache;
-
     /// @brief Handles loading and caching of scenes, e.g. .nif files or .osg files
     /// @note Some methods of the scene manager can be used from any thread, see the methods documentation for more details.
     class SceneManager : public ResourceManager
@@ -130,12 +128,6 @@ namespace Resource
         ///  If even the error marker mesh can not be found, an exception is thrown.
         /// @note Thread safe.
         osg::ref_ptr<const osg::Node> getTemplate(const std::string& name, bool compile=true);
-
-        /// Create an instance of the given scene template and cache it for later use, so that future calls to getInstance() can simply
-        /// return this cached object instead of creating a new one.
-        /// @note The returned ref_ptr may be kept around by the caller to ensure that the object stays in cache for as long as needed.
-        /// @note Thread safe.
-        osg::ref_ptr<osg::Node> cacheInstance(const std::string& name);
 
         osg::ref_ptr<osg::Node> createInstance(const std::string& name);
 
@@ -209,8 +201,6 @@ namespace Resource
         bool mConvertAlphaTestToAlphaToCoverage;
         GLenum mDepthFormat;
         osg::ref_ptr<osg::StateSet> mDefaultShaderState;
-
-        osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
         mutable std::mutex mSharedStateMutex;
