@@ -1,5 +1,7 @@
 #include "luabindings.hpp"
 
+#include "luamanagerimp.hpp"
+
 namespace sol
 {
     template <>
@@ -48,11 +50,16 @@ namespace MWLua
             asyncId.mContainer->setupUnsavableTimer(
                 TimeUnit::HOURS, world->getGameTimeInHours() + delay, asyncId.mScript, std::move(callback));
         };
+        api["callback"] = [](const AsyncPackageId& asyncId, sol::function fn)
+        {
+            return Callback{std::move(fn), asyncId.mHiddenData};
+        };
 
         auto initializer = [](sol::table hiddenData)
         {
             LuaUtil::ScriptsContainer::ScriptId id = hiddenData[LuaUtil::ScriptsContainer::ScriptId::KEY];
-            return AsyncPackageId{id.mContainer, id.mPath};
+            hiddenData[Callback::SCRIPT_NAME_KEY] = id.toString();
+            return AsyncPackageId{id.mContainer, id.mPath, hiddenData};
         };
         return sol::make_object(context.mLua->sol(), initializer);
     }

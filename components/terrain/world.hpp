@@ -155,10 +155,6 @@ namespace Terrain
 
         virtual void preload(View* view, const osg::Vec3f& viewPoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, Loading::Reporter& reporter) {}
 
-        /// Store a preloaded view into the cache with the intent that the next rendering traversal can use it.
-        /// @note Not thread safe.
-        virtual bool storeView(const View* view, double referenceTime) {return true;}
-
         virtual void rebuildViews() {}
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}

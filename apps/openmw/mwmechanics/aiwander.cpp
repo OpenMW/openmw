@@ -758,6 +758,9 @@ namespace MWMechanics
         const ESM::Pathgrid *pathgrid =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*currentCell->getCell());
 
+        if (pathgrid == nullptr || pathgrid->mPoints.empty())
+            return;
+
         int index = PathFinder::getClosestPoint(pathgrid, PathFinder::makeOsgVec3(dest));
 
         getPathGridGraph(currentCell).getNeighbouringPoints(index, points);

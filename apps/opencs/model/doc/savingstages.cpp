@@ -285,8 +285,7 @@ void CSMDoc::WriteCellCollectionStage::writeReferences (const std::deque<int>& r
             {
                 refRecord.mRefNum.mIndex = newRefNum++;
             }
-
-            if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell)
+            else if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell)
                     != stream.str() && !interior)
             {
                 // An empty mOriginalCell is meant to indicate that it is the same as

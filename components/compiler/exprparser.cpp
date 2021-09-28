@@ -421,42 +421,26 @@ namespace Compiler
 
         if (mNextOperand)
         {
-            if (keyword==Scanner::K_getsquareroot)
+            // check for custom extensions
+            if (const Extensions *extensions = getContext().getExtensions())
             {
                 start();
 
-                mTokenLoc = loc;
-                parseArguments ("f", scanner);
+                char returnType;
+                std::string argumentType;
 
-                Generator::squareRoot (mCode);
-                mOperands.push_back ('f');
+                bool hasExplicit = false;
 
-                mNextOperand = false;
-                return true;
-            }
-            else
-            {
-                // check for custom extensions
-                if (const Extensions *extensions = getContext().getExtensions())
+                if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
                 {
-                    start();
+                    mTokenLoc = loc;
+                    int optionals = parseArguments (argumentType, scanner);
 
-                    char returnType;
-                    std::string argumentType;
+                    extensions->generateFunctionCode (keyword, mCode, mLiterals, "", optionals);
+                    mOperands.push_back (returnType);
 
-                    bool hasExplicit = false;
-
-                    if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
-                    {
-                        mTokenLoc = loc;
-                        int optionals = parseArguments (argumentType, scanner);
-
-                        extensions->generateFunctionCode (keyword, mCode, mLiterals, "", optionals);
-                        mOperands.push_back (returnType);
-
-                        mNextOperand = false;
-                        return true;
-                    }
+                    mNextOperand = false;
+                    return true;
                 }
             }
         }

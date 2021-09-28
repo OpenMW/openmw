@@ -348,7 +348,7 @@ namespace MWMechanics
 
                         bool runFallback = true;
 
-                        if (pathgrid && !actor.getClass().isPureWaterCreature(actor))
+                        if (pathgrid != nullptr && !pathgrid->mPoints.empty() && !actor.getClass().isPureWaterCreature(actor))
                         {
                             ESM::Pathgrid::PointList points;
                             Misc::CoordinateConverter coords(storage.mCell->getCell());

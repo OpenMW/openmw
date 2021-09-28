@@ -50,13 +50,16 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.emplace_back(Columns::ColumnId_RecordType, ColumnBase::Display_RefRecordType,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false);
     baseColumns.mType = &mColumns.back();
+    mColumns.emplace_back(Columns::ColumnId_Blocked, ColumnBase::Display_Boolean,
+            ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh);
+    baseColumns.mBlocked = &mColumns.back();
 
     ModelColumns modelColumns (baseColumns);
 
-    mColumns.emplace_back(Columns::ColumnId_Model, ColumnBase::Display_Mesh);
-    modelColumns.mModel = &mColumns.back();
     mColumns.emplace_back(Columns::ColumnId_Persistent, ColumnBase::Display_Boolean);
     modelColumns.mPersistence = &mColumns.back();
+    mColumns.emplace_back(Columns::ColumnId_Model, ColumnBase::Display_Mesh);
+    modelColumns.mModel = &mColumns.back();
 
     NameColumns nameColumns (modelColumns);
 

@@ -27,36 +27,6 @@ namespace MWRender
         }
     }
 
-    void GroundcoverUpdater::setWindSpeed(float windSpeed)
-    {
-        mWindSpeed = windSpeed;
-    }
-
-    void GroundcoverUpdater::setPlayerPos(osg::Vec3f playerPos)
-    {
-        mPlayerPos = playerPos;
-    }
-
-    void GroundcoverUpdater::setDefaults(osg::StateSet *stateset)
-    {
-        osg::ref_ptr<osg::Uniform> windUniform = new osg::Uniform("windSpeed", 0.0f);
-        stateset->addUniform(windUniform.get());
-
-        osg::ref_ptr<osg::Uniform> playerPosUniform = new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f));
-        stateset->addUniform(playerPosUniform.get());
-    }
-
-    void GroundcoverUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
-    {
-        osg::ref_ptr<osg::Uniform> windUniform = stateset->getUniform("windSpeed");
-        if (windUniform != nullptr)
-            windUniform->set(mWindSpeed);
-
-        osg::ref_ptr<osg::Uniform> playerPosUniform = stateset->getUniform("playerPos");
-        if (playerPosUniform != nullptr)
-            playerPosUniform->set(mPlayerPos);
-    }
-
     class InstancingVisitor : public osg::NodeVisitor
     {
     public:
