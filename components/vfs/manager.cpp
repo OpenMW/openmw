@@ -105,8 +105,23 @@ namespace VFS
         return {};
     }
 
-    RecursiveDirectoryIterator Manager::getRecursiveDirectoryIterator(const std::string& path) const
+    namespace
     {
-        return RecursiveDirectoryIterator(mIndex, normalizeFilename(path));
+        bool startsWith(std::string_view text, std::string_view start)
+        {
+            return text.rfind(start, 0) == 0;
+        }
+    }
+
+    Manager::RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(const std::string& path) const
+    {
+        if (path.empty())
+            return { mIndex.begin(), mIndex.end() };
+        auto normalized = normalizeFilename(path);
+        const auto it = mIndex.lower_bound(normalized);
+        if (it == mIndex.end() || !startsWith(it->first, normalized))
+            return { it, it };
+        ++normalized.back();
+        return { it, mIndex.lower_bound(normalized) };
     }
 }

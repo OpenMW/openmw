@@ -131,7 +131,7 @@ namespace MWPhysics
             void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType = CollisionType_World, bool skipAnimated = false);
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
-            int addProjectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius, bool canTraverseWater);
+            int addProjectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius);
             void setCaster(int projectileId, const MWWorld::Ptr& caster);
             void updateProjectile(const int projectileId, const osg::Vec3f &position) const;
             void removeProjectile(const int projectileId);
@@ -186,9 +186,10 @@ namespace MWPhysics
             /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all other actors.
             RayCastingResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
                     const std::vector<MWWorld::Ptr>& targets = std::vector<MWWorld::Ptr>(),
-                    int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const override;
+                    int mask = CollisionType_Default, int group=0xff) const override;
 
-            RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius) const override;
+            RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius,
+                    int mask = CollisionType_Default, int group=0xff) const override;
 
             /// Return true if actor1 can see actor2.
             bool getLineOfSight(const MWWorld::ConstPtr& actor1, const MWWorld::ConstPtr& actor2) const override;

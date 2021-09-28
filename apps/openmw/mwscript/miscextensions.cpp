@@ -864,6 +864,9 @@ namespace MWScript
                     float param = runtime[0].mFloat;
                     runtime.pop();
 
+                    if (param < 0)
+                        throw std::runtime_error("square root of negative number (we aren't that imaginary)");
+
                     runtime.push(std::sqrt (param));
                 }
         };

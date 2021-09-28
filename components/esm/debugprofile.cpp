@@ -9,6 +9,7 @@ unsigned int ESM::DebugProfile::sRecordId = REC_DBGP;
 void ESM::DebugProfile::load (ESMReader& esm, bool &isDeleted)
 {
     isDeleted = false;
+    mRecordFlags = esm.getRecordFlags();
 
     while (esm.hasMoreSubs())
     {

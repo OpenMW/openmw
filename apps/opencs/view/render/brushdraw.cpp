@@ -18,6 +18,8 @@ CSVRender::BrushDraw::BrushDraw(osg::ref_ptr<osg::Group> parentNode, bool textur
     mBrushDrawNode = new osg::Group();
     mGeometry = new osg::Geometry();
     mBrushDrawNode->addChild(mGeometry);
+    mBrushDrawNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+    mBrushDrawNode->getOrCreateStateSet()->setRenderBinDetails(11, "RenderBin");
     mParentNode->addChild(mBrushDrawNode);
     if (mTextureMode)
         mLandSizeFactor = static_cast<float>(ESM::Land::REAL_SIZE) / static_cast<float>(ESM::Land::LAND_TEXTURE_SIZE);
@@ -122,7 +124,14 @@ void CSVRender::BrushDraw::buildSquareGeometry(const float& radius, const osg::V
     const float brushOutlineHeight (1.0f);
     float diameter = radius * 2;
     int resolution = static_cast<int>(2.f * diameter / mLandSizeFactor); //half a vertex resolution
-    float resAdjustedLandSizeFactor = mLandSizeFactor / 2;
+    float resAdjustedLandSizeFactor = mLandSizeFactor / 2; //128
+
+    if (resolution > 128) // limit accuracy for performance
+    {
+        resolution = 128;
+        resAdjustedLandSizeFactor = diameter / resolution;
+    }
+
     osg::Vec4f lineColor(1.0f, 1.0f, 1.0f, 0.6f);
 
     for (int i = 0; i < resolution; i++)
@@ -215,7 +224,8 @@ void CSVRender::BrushDraw::buildCircleGeometry(const float& radius, const osg::V
     osg::ref_ptr<osg::Geometry> geom (new osg::Geometry());
     osg::ref_ptr<osg::Vec3Array> vertices (new osg::Vec3Array());
     osg::ref_ptr<osg::Vec4Array> colors (new osg::Vec4Array());
-    const int amountOfPoints = (osg::PI * 2.0f) * radius / 20;
+
+    const int amountOfPoints = 128;
     const float step ((osg::PI * 2.0f) / static_cast<float>(amountOfPoints));
     const float brushOutlineHeight (1.0f);
     osg::Vec4f lineColor(1.0f, 1.0f, 1.0f, 0.6f);

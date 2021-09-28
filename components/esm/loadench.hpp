@@ -42,6 +42,7 @@ struct Enchantment
         int mFlags;
     };
 
+    unsigned int mRecordFlags;
     std::string mId;
     ENDTstruct mData;
     EffectList mEffects;

@@ -24,6 +24,7 @@ struct StartScript
     static std::string getRecordType() { return "StartScript"; }
 
     std::string mData;
+    unsigned int mRecordFlags;
     std::string mId;
 
     // Load a record and add it to the list
