@@ -123,6 +123,9 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Node& node)
     {
+        if (!mForceShaders)
+            ensureFFP(node);
+
         if (node.getStateSet())
         {
             pushRequirements(node);
@@ -138,6 +141,8 @@ namespace Shader
     {
         if (!node.getStateSet())
             return node.getOrCreateStateSet();
+        else if (node.getStateSet()->referenceCount() == 1)
+            return node->getStateSet();
 
         osg::ref_ptr<osg::StateSet> newStateSet = new osg::StateSet(*node.getStateSet(), osg::CopyOp::SHALLOW_COPY);
         node.setStateSet(newStateSet);
@@ -438,12 +443,6 @@ namespace Shader
         }
         osg::Node& node = parent ? *parent : *reqs.mNode;
 
-        if (!reqs.mShaderRequired && !mForceShaders)
-        {
-            ensureFFP(node);
-            return;
-        }
-
         osg::StateSet* writableStateSet = nullptr;
         if (mAllowedToModifyStateSets)
             writableStateSet = node.getOrCreateStateSet();
@@ -676,7 +675,7 @@ namespace Shader
             applyStateSet(geometry.getStateSet(), geometry);
         }
 
-        if (!mRequirements.empty())
+        if (!mRequirements.empty() && (mRequirements.back().mShaderRequired || mForceShaders))
         {
             const ShaderRequirements& reqs = mRequirements.back();
 
@@ -702,7 +701,7 @@ namespace Shader
             applyStateSet(drawable.getStateSet(), drawable);
         }
 
-        if (!mRequirements.empty())
+        if (!mRequirements.empty() && (mRequirements.back().mShaderRequired || mForceShaders))
         {
             const ShaderRequirements& reqs = mRequirements.back();
             createProgram(reqs);
