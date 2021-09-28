@@ -41,6 +41,7 @@
     Bug #6283: Avis Dorsey follows you after her death
     Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
     Bug #6302: Teleporting disabled actor breaks its disabled state
+    Bug #6307: Pathfinding in Infidelities quest from Tribunal addon is broken
     Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
