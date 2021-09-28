@@ -52,10 +52,10 @@ namespace SceneUtil
 
         for (const Heightfield& heightfield : recastMesh.getHeightfields())
         {
-            const Mesh mesh = makeMesh(heightfield);
+            const Mesh heightfieldMesh = makeMesh(heightfield);
             const int indexShift = static_cast<int>(vertices.size() / 3);
-            std::copy(mesh.getVertices().begin(), mesh.getVertices().end(), std::back_inserter(vertices));
-            std::transform(mesh.getIndices().begin(), mesh.getIndices().end(), std::back_inserter(indices),
+            std::copy(heightfieldMesh.getVertices().begin(), heightfieldMesh.getVertices().end(), std::back_inserter(vertices));
+            std::transform(heightfieldMesh.getIndices().begin(), heightfieldMesh.getIndices().end(), std::back_inserter(indices),
                            [&] (int index) { return index + indexShift; });
         }
 

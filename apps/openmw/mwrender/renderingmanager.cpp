@@ -440,7 +440,6 @@ namespace MWRender
             static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mGroundcover.get());
             mResourceSystem->addResourceManager(mGroundcover.get());
 
-            float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
             mGroundcover->setViewDistance(groundcoverDistance);
         }
 
