@@ -299,8 +299,9 @@ namespace NifOsg
 
             osg::ref_ptr<SceneUtil::TextKeyMapHolder> textkeys (new SceneUtil::TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Group> created(new osg::Group);
-            created->setDataVariance(osg::Object::STATIC);
+            osg::ref_ptr<osg::Group> created(nif->getUseSkinning() ? new SceneUtil::Skeleton : new osg::Group);
+            if (!nif->getUseSkinning())
+                created->setDataVariance(osg::Object::STATIC);
             for (const Nif::Node* root : roots)
             {
                 auto node = handleNode(root, nullptr, imageManager, std::vector<unsigned int>(), 0, false, false, false, &textkeys->mTextKeys);
@@ -313,17 +314,6 @@ namespace NifOsg
 
             // Attach particle emitters to their nodes which should all be loaded by now.
             handleQueuedParticleEmitters(created, nif);
-
-            if (nif->getUseSkinning())
-            {
-                osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
-                skel->setStateSet(created->getStateSet());
-                skel->setName(created->getName());
-                for (unsigned int i=0; i < created->getNumChildren(); ++i)
-                    skel->addChild(created->getChild(i));
-                created->removeChildren(0, created->getNumChildren());
-                created = skel;
-            }
 
             if (!textkeys->mTextKeys.empty())
                 created->getOrCreateUserDataContainer()->addUserObject(textkeys);
