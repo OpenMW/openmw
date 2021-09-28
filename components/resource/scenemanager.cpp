@@ -35,7 +35,6 @@
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
 #include "objectcache.hpp"
-#include "multiobjectcache.hpp"
 
 namespace
 {
@@ -306,7 +305,6 @@ namespace Resource
         , mLightingMethod(SceneUtil::LightingMethod::FFP)
         , mConvertAlphaTestToAlphaToCoverage(false)
         , mDepthFormat(0)
-        , mInstanceCache(new MultiObjectCache)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
@@ -682,21 +680,6 @@ namespace Resource
         }
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::cacheInstance(const std::string &name)
-    {
-        const std::string normalized = mVFS->normalizeFilename(name);
-
-        osg::ref_ptr<osg::Node> node = createInstance(normalized);
-
-        // Note: osg::clone() does not calculate bound volumes.
-        // Do it immediately, otherwise we will need to update them for all objects
-        // during first update traversal, what may lead to stuttering during cell transitions
-        node->getBound();
-
-        mInstanceCache->addEntryToObjectCache(normalized, node.get());
-        return node;
-    }
-
     osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
@@ -722,14 +705,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name)
     {
-        const std::string normalized = mVFS->normalizeFilename(name);
-
-        osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
-        if (obj.get())
-            return static_cast<osg::Node*>(obj.get());
-
-        return createInstance(normalized);
-
+        return createInstance(name);
     }
 
     osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name, osg::Group* parentNode)
@@ -747,7 +723,6 @@ namespace Resource
     void SceneManager::releaseGLObjects(osg::State *state)
     {
         mCache->releaseGLObjects(state);
-        mInstanceCache->releaseGLObjects(state);
 
         mShaderManager->releaseGLObjects(state);
 
@@ -835,8 +810,6 @@ namespace Resource
     {
         ResourceManager::updateCache(referenceTime);
 
-        mInstanceCache->removeUnreferencedObjectsInCache();
-
         mSharedStateMutex.lock();
         mSharedStateManager->prune();
         mSharedStateMutex.unlock();
@@ -866,7 +839,6 @@ namespace Resource
 
         std::lock_guard<std::mutex> lock(mSharedStateMutex);
         mSharedStateManager->clearCache();
-        mInstanceCache->clear();
     }
 
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
@@ -884,7 +856,6 @@ namespace Resource
         }
 
         stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
-        stats->setAttribute(frameNumber, "Node Instance", mInstanceCache->getCacheSize());
     }
 
     Shader::ShaderVisitor *SceneManager::createShaderVisitor(const std::string& shaderPrefix, bool translucentFramebuffer)
