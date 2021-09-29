@@ -1369,7 +1369,7 @@ namespace SceneUtil
                     for (auto it = lightList.begin(); it != lightList.end() && lightList.size() > maxLights;)
                     {
                         osg::BoundingSphere bs = (*it)->mViewBound;
-                        bs._radius = bs._radius / mPointLightRadiusMultiplier * 2.0;
+                        bs._radius = bs._radius * 2.0;
                         if (cv->getModelViewCullingStack().front().isCulled(bs))
                             it = lightList.erase(it);
                         else
