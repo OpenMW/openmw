@@ -1222,7 +1222,7 @@ namespace SceneUtil
 
                 float radius = transform.mLightSource->getRadius();
 
-                osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), radius * mPointLightRadiusMultiplier);
+                osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), radius);
                 transformBoundingSphere(worldViewMat, viewBound);
 
                 if (!isReflection && mPointLightFadeEnd != 0.f)
@@ -1239,10 +1239,12 @@ namespace SceneUtil
                 // remove lights culled by this camera
                 if (!usingFFP())
                 {
+                    viewBound._radius *= 2.f;
                     if (cv->getModelViewCullingStack().front().isCulled(viewBound))
                         continue;
+                    viewBound._radius /= 2.f;
                 }
-
+                viewBound._radius *= mPointLightRadiusMultiplier;
                 LightSourceViewBound l;
                 l.mLightSource = transform.mLightSource;
                 l.mViewBound = viewBound;
@@ -1367,7 +1369,7 @@ namespace SceneUtil
                     for (auto it = lightList.begin(); it != lightList.end() && lightList.size() > maxLights;)
                     {
                         osg::BoundingSphere bs = (*it)->mViewBound;
-                        bs._radius = bs._radius * 2.0;
+                        bs._radius = bs._radius / mPointLightRadiusMultiplier * 2.0;
                         if (cv->getModelViewCullingStack().front().isCulled(bs))
                             it = lightList.erase(it);
                         else
