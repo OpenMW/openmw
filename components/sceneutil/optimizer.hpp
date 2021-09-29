@@ -25,6 +25,12 @@
 //#include <osgUtil/Export>
 
 #include <set>
+#include <mutex>
+
+namespace osgDB
+{
+    class SharedStateManager;
+}
 
 //namespace osgUtil {
 namespace SceneUtil {
@@ -65,7 +71,7 @@ class Optimizer
 
     public:
 
-        Optimizer() : _mergeAlphaBlending(false) {}
+        Optimizer() : _mergeAlphaBlending(false), _sharedStateManager(nullptr), _sharedStateMutex(nullptr) {}
         virtual ~Optimizer() {}
 
         enum OptimizationOptions
@@ -120,6 +126,8 @@ class Optimizer
 
         void setMergeAlphaBlending(bool merge) { _mergeAlphaBlending = merge; }
         void setViewPoint(const osg::Vec3f& viewPoint) { _viewPoint = viewPoint; }
+
+        void setSharedStateManager(osgDB::SharedStateManager* sharedStateManager, std::mutex* sharedStateMutex) { _sharedStateMutex = sharedStateMutex; _sharedStateManager = sharedStateManager; }
 
         /** Reset internal data to initial state - the getPermissibleOptionsMap is cleared.*/
         void reset();
@@ -257,6 +265,9 @@ class Optimizer
 
         osg::Vec3f _viewPoint;
         bool _mergeAlphaBlending;
+
+        osgDB::SharedStateManager* _sharedStateManager;
+        mutable std::mutex* _sharedStateMutex;
 
     public:
 

@@ -58,6 +58,7 @@ struct BodyPart
     };
 
     BYDTstruct mData;
+    unsigned int mRecordFlags;
     std::string mId, mModel, mRace;
 
     void load(ESMReader &esm, bool &isDeleted);

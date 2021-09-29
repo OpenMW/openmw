@@ -272,7 +272,7 @@ namespace MWRender
          : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
          , mCurrentStateSet(nullptr)
          , mCurrentDistance(0.f)
-         , mAnalyzeMask(analyzeMask) {}
+        { setTraversalMask(analyzeMask); }
 
         typedef std::unordered_map<osg::StateSet*, unsigned int> StateSetCounter;
         struct Result
@@ -283,9 +283,6 @@ namespace MWRender
 
         void apply(osg::Node& node) override
         {
-            if (!(node.getNodeMask() & mAnalyzeMask))
-                return;
-
             if (node.getStateSet())
                 mCurrentStateSet = node.getStateSet();
 
@@ -308,9 +305,6 @@ namespace MWRender
         }
         void apply(osg::Geometry& geom) override
         {
-            if (!(geom.getNodeMask() & mAnalyzeMask))
-                return;
-
             if (osg::Array* array = geom.getVertexArray())
                 mResult.mNumVerts += array->getNumElements();
 
@@ -345,7 +339,6 @@ namespace MWRender
         osg::StateSet* mCurrentStateSet;
         StateSetCounter mGlobalStateSetCounter;
         float mCurrentDistance;
-        osg::Node::NodeMask mAnalyzeMask;
     };
 
     class DebugVisitor : public osg::NodeVisitor
@@ -658,7 +651,7 @@ namespace MWRender
             }
             optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
             unsigned int options = SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES|SceneUtil::Optimizer::MERGE_GEOMETRY;
-            mSceneManager->shareState(mergeGroup);
+
             optimizer.optimize(mergeGroup, options);
 
             group->addChild(mergeGroup);

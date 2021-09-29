@@ -48,7 +48,7 @@ namespace MWLua
         api["getControlSwitch"] = [input](const std::string& key) { return input->getControlSwitch(key); };
         api["setControlSwitch"] = [input](const std::string& key, bool v) { input->toggleControlSwitch(key, v); };
 
-        api["ACTION"] = context.mLua->makeReadOnly(context.mLua->sol().create_table_with(
+        api["ACTION"] = LuaUtil::makeReadOnly(context.mLua->sol().create_table_with(
             "GameMenu", MWInput::A_GameMenu,
             "Screenshot", MWInput::A_Screenshot,
             "Inventory", MWInput::A_Inventory,
@@ -102,7 +102,7 @@ namespace MWLua
             "ZoomOut", MWInput::A_ZoomOut
         ));
 
-        api["CONTROL_SWITCH"] = context.mLua->makeReadOnly(context.mLua->sol().create_table_with(
+        api["CONTROL_SWITCH"] = LuaUtil::makeReadOnly(context.mLua->sol().create_table_with(
             "Controls", "playercontrols",
             "Fighting", "playerfighting",
             "Jumping", "playerjumping",
@@ -112,7 +112,7 @@ namespace MWLua
             "VanityMode", "vanitymode"
         ));
 
-        api["CONTROLLER_BUTTON"] = context.mLua->makeReadOnly(context.mLua->sol().create_table_with(
+        api["CONTROLLER_BUTTON"] = LuaUtil::makeReadOnly(context.mLua->sol().create_table_with(
             "A", SDL_CONTROLLER_BUTTON_A,
             "B", SDL_CONTROLLER_BUTTON_B,
             "X", SDL_CONTROLLER_BUTTON_X,
@@ -130,7 +130,7 @@ namespace MWLua
             "DPadRight", SDL_CONTROLLER_BUTTON_DPAD_RIGHT
         ));
 
-        api["CONTROLLER_AXIS"] = context.mLua->makeReadOnly(context.mLua->sol().create_table_with(
+        api["CONTROLLER_AXIS"] = LuaUtil::makeReadOnly(context.mLua->sol().create_table_with(
             "LeftX", SDL_CONTROLLER_AXIS_LEFTX,
             "LeftY", SDL_CONTROLLER_AXIS_LEFTY,
             "RightX", SDL_CONTROLLER_AXIS_RIGHTX,
@@ -144,7 +144,7 @@ namespace MWLua
             "MoveLeftRight", SDL_CONTROLLER_AXIS_MAX + MWInput::A_MoveLeftRight
         ));
 
-        return context.mLua->makeReadOnly(api);
+        return LuaUtil::makeReadOnly(api);
     }
 
 }

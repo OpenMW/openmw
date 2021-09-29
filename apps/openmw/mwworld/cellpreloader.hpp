@@ -94,7 +94,6 @@ namespace MWWorld
         bool mPreloadInstances;
 
         double mLastResourceCacheUpdate;
-        int mStoreViewsFailCount;
 
         struct PreloadEntry
         {

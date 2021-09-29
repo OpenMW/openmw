@@ -74,6 +74,16 @@ namespace MWLua
         mInitialized = true;
     }
 
+    void Callback::operator()(sol::object arg) const
+    {
+        if (mHiddenData[LuaUtil::ScriptsContainer::ScriptId::KEY] != sol::nil)
+            LuaUtil::call(mFunc, std::move(arg));
+        else
+        {
+            Log(Debug::Debug) << "Ignored callback to removed script " << mHiddenData.get<std::string>(SCRIPT_NAME_KEY);
+        }
+    }
+
     void LuaManager::update(bool paused, float dt)
     {
         ObjectRegistry* objectRegistry = mWorldView.getObjectRegistry();
@@ -125,6 +135,11 @@ namespace MWLua
                 Log(Debug::Debug) << "Ignored event " << e.mEventName << " to L" << idToString(e.mDest)
                                   << ". Object not found or has no attached scripts";
         }
+
+        // Run queued callbacks
+        for (CallbackWithData& c : mQueuedCallbacks)
+            c.mCallback(c.mArg);
+        mQueuedCallbacks.clear();
 
         // Engine handlers in local scripts
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());

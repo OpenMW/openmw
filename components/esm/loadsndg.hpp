@@ -34,6 +34,7 @@ struct SoundGenerator
     // Type
     int mType;
 
+    unsigned int mRecordFlags;
     std::string mId, mCreature, mSound;
 
     void load(ESMReader &esm, bool &isDeleted);

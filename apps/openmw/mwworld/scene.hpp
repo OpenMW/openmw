@@ -100,7 +100,7 @@ namespace MWWorld
 
             std::vector<osg::ref_ptr<SceneUtil::WorkItem>> mWorkItems;
 
-            void insertCell (CellStore &cell, Loading::Listener* loadingListener, bool onlyObjects, bool test = false);
+            void insertCell(CellStore &cell, Loading::Listener* loadingListener, bool onlyObjects);
             osg::Vec2i mCurrentGridCenter;
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
@@ -116,10 +116,10 @@ namespace MWWorld
             osg::Vec4i gridCenterToBounds(const osg::Vec2i &centerCell) const;
             osg::Vec2i getNewGridCenter(const osg::Vec3f &pos, const osg::Vec2i *currentGridCenter = nullptr) const;
 
-            void unloadInactiveCell (CellStore* cell, bool test = false);
-            void deactivateCell (CellStore* cell, bool test = false);
-            void activateCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn, bool test = false);
-            void loadInactiveCell (CellStore *cell, Loading::Listener* loadingListener, bool test = false);
+            void unloadInactiveCell(CellStore* cell);
+            void deactivateCell(CellStore* cell);
+            void activateCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn);
+            void loadInactiveCell(CellStore *cell, Loading::Listener* loadingListener);
 
         public:
 

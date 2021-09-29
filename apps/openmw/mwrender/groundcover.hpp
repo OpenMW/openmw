@@ -3,32 +3,11 @@
 
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/statesetupdater.hpp>
 #include <components/esm/loadcell.hpp>
+#include <osg/Program>
 
 namespace MWRender
 {
-    class GroundcoverUpdater : public SceneUtil::StateSetUpdater
-    {
-    public:
-        GroundcoverUpdater()
-            : mWindSpeed(0.f)
-            , mPlayerPos(osg::Vec3f())
-        {
-        }
-
-        void setWindSpeed(float windSpeed);
-        void setPlayerPos(osg::Vec3f playerPos);
-
-    protected:
-        void setDefaults(osg::StateSet *stateset) override;
-        void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override;
-
-    private:
-        float mWindSpeed;
-        osg::Vec3f mPlayerPos;
-    };
-
     typedef std::tuple<osg::Vec2f, float> GroundcoverChunkId; // Center, Size
     class Groundcover : public Resource::GenericResourceManager<GroundcoverChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
@@ -46,10 +25,8 @@ namespace MWRender
         {
             ESM::Position mPos;
             float mScale;
-            std::string mModel;
 
-            GroundcoverEntry(const ESM::CellRef& ref, const std::string& model):
-                mPos(ref.mPos), mScale(ref.mScale), mModel(model)
+            GroundcoverEntry(const ESM::CellRef& ref) : mPos(ref.mPos), mScale(ref.mScale)
             {}
         };
 
@@ -57,6 +34,7 @@ namespace MWRender
         Resource::SceneManager* mSceneManager;
         float mDensity;
         osg::ref_ptr<osg::StateSet> mStateset;
+        osg::ref_ptr<osg::Program> mProgramTemplate;
 
         typedef std::map<std::string, std::vector<GroundcoverEntry>> InstanceMap;
         osg::ref_ptr<osg::Node> createChunk(InstanceMap& instances, const osg::Vec2f& center);

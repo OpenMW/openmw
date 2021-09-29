@@ -29,6 +29,7 @@ namespace ESM
     void Faction::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;
+        mRecordFlags = esm.getRecordFlags();
 
         mReactions.clear();
         for (int i=0;i<10;++i)

@@ -7,7 +7,7 @@ namespace MWLua
     {
         sol::table api(context.mLua->sol(), sol::create);
         // TODO
-        return context.mLua->makeReadOnly(api);
+        return LuaUtil::makeReadOnly(api);
     }
 
 }

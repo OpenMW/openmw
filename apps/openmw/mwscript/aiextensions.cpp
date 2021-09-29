@@ -362,7 +362,15 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    const auto value = static_cast<Interpreter::Type_Integer>(ptr.getClass().getCreatureStats (ptr).getAiSequence().getLastRunTypeId());
+                    Interpreter::Type_Integer value = -1;
+                    if(ptr.getClass().isActor())
+                    {
+                        const auto& stats = ptr.getClass().getCreatureStats(ptr);
+                        if(!stats.isDead() || !stats.isDeathAnimationFinished())
+                        {
+                            value = static_cast<Interpreter::Type_Integer>(stats.getAiSequence().getLastRunTypeId());
+                        }
+                    }
 
                     runtime.push (value);
                 }
