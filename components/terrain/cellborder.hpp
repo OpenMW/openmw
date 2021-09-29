@@ -32,7 +32,7 @@ namespace Terrain
         */
         void destroyCellBorderGeometry();
 
-        static osg::ref_ptr<osg::Geode> createBorderGeometry(float x, float y, float size, Storage* terrain, Resource::SceneManager* sceneManager, int mask, float offset = 10.0, osg::Vec4f color = { 1,1,0,0 });
+        static osg::ref_ptr<osg::Group> createBorderGeometry(float x, float y, float size, Storage* terrain, Resource::SceneManager* sceneManager, int mask, float offset = 10.0, osg::Vec4f color = { 1,1,0,0 });
 
     protected:
         Terrain::World *mWorld;
