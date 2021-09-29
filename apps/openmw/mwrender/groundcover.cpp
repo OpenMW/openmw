@@ -151,7 +151,7 @@ namespace MWRender
          mStateset->setRenderBinDetails(0, "RenderBin", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
          mStateset->setAttribute(new osg::VertexAttribDivisor(6, 1));
          mStateset->setAttribute(new osg::VertexAttribDivisor(7, 1));
-    
+
          mProgramTemplate = mSceneManager->getShaderManager().getProgramTemplate() ? static_cast<osg::Program*>(mSceneManager->getShaderManager().getProgramTemplate()->clone(osg::CopyOp::SHALLOW_COPY)) : new osg::Program;
          mProgramTemplate->addBindAttribLocation("aOffset", 6);
          mProgramTemplate->addBindAttribLocation("aRotation", 7);

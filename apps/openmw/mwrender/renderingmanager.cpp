@@ -414,9 +414,10 @@ namespace MWRender
             const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
             float maxCompGeometrySize = Settings::Manager::getFloat("max composite geometry size", "Terrain");
             maxCompGeometrySize = std::max(maxCompGeometrySize, 1.f);
+            bool debugChunks = Settings::Manager::getBool("debug chunks", "Terrain");
             mTerrain.reset(new Terrain::QuadTreeWorld(
                 sceneRoot, mRootNode, mResourceSystem, mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug,
-                compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize));
+                compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks));
             if (Settings::Manager::getBool("object paging", "Terrain"))
             {
                 mObjectPaging.reset(new ObjectPaging(mResourceSystem->getSceneManager()));
@@ -485,7 +486,6 @@ namespace MWRender
         defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
-        sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
 
         mFog.reset(new FogManager());
 

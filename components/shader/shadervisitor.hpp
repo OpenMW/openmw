@@ -112,7 +112,7 @@ namespace Shader
         void createProgram(const ShaderRequirements& reqs);
         void ensureFFP(osg::Node& node);
         bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
-    
+
         osg::ref_ptr<const osg::Program> mProgramTemplate;
     };
 
