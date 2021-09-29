@@ -191,7 +191,7 @@ namespace MWRender
                         if (model.empty()) continue;
                         model = "meshes/" + model;
 
-                        instances[model].emplace_back(std::move(ref), std::move(model));
+                        instances[model].emplace_back(std::move(ref));
                     }
                 }
             }

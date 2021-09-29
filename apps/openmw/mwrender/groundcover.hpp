@@ -24,10 +24,8 @@ namespace MWRender
         {
             ESM::Position mPos;
             float mScale;
-            std::string mModel;
 
-            GroundcoverEntry(const ESM::CellRef& ref, const std::string& model):
-                mPos(ref.mPos), mScale(ref.mScale), mModel(model)
+            GroundcoverEntry(const ESM::CellRef& ref) : mPos(ref.mPos), mScale(ref.mScale)
             {}
         };
 
