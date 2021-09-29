@@ -1205,10 +1205,7 @@ namespace SceneUtil
 
     const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(osgUtil::CullVisitor *cv, const osg::RefMatrix* viewMatrix, size_t frameNum)
     {
-
         osg::Camera* camera = cv->getCurrentCamera();
-
-
 
         osg::observer_ptr<osg::Camera> camPtr (camera);
         auto it = mLightsInViewSpace.find(camPtr);
