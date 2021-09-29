@@ -917,9 +917,9 @@ namespace MWWorld
         // unload
         for (auto iter = mInactiveCells.begin(); iter!=mInactiveCells.end(); )
         {
-            auto* cell = *iter++;
-            deactivateCell(cell);
-            unloadInactiveCell(cell);
+            auto* cellToUnload = *iter++;
+            deactivateCell(cellToUnload);
+            unloadInactiveCell(cellToUnload);
         }
         assert(mActiveCells.empty());
         assert(mInactiveCells.empty());

@@ -11,6 +11,9 @@
 #include <osg/TexGen>
 #include <osg/TexEnvCombine>
 #include <osg/Version>
+#include <osg/FrameBufferObject>
+#include <osgUtil/RenderStage>
+#include <osgUtil/CullVisitor>
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
