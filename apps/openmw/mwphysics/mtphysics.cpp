@@ -22,31 +22,31 @@
 
 namespace
 {
-    /// @brief A scoped lock that is either shared or exclusive depending on configuration
+    /// @brief A scoped lock that is either shared, exclusive or inexistent depending on configuration
     template<class Mutex>
     class MaybeSharedLock
     {
         public:
             /// @param mutex a shared mutex
-            /// @param canBeSharedLock decide wether the lock will be shared or exclusive
-            MaybeSharedLock(Mutex& mutex, bool canBeSharedLock) : mMutex(mutex), mCanBeSharedLock(canBeSharedLock)
+            /// @param threadCount decide wether the lock will be shared, exclusive or inexistent
+            MaybeSharedLock(Mutex& mutex, int threadCount) : mMutex(mutex), mThreadCount(threadCount)
             {
-                if (mCanBeSharedLock)
+                if (mThreadCount > 1)
                     mMutex.lock_shared();
-                else
+                else if(mThreadCount == 1)
                     mMutex.lock();
             }
 
             ~MaybeSharedLock()
             {
-                if (mCanBeSharedLock)
+                if (mThreadCount > 1)
                     mMutex.unlock_shared();
-                else
+                else if(mThreadCount == 1)
                     mMutex.unlock();
             }
         private:
             Mutex& mMutex;
-            bool mCanBeSharedLock;
+            int mThreadCount;
     };
 
     bool isUnderWater(const MWPhysics::ActorFrameData& actorData)
@@ -62,14 +62,14 @@ namespace
 
     namespace Config
     {
-        /// @return either the number of thread as configured by the user, or 1 if Bullet doesn't support multithreading
-        int computeNumThreads(bool& threadSafeBullet)
+        /// @return either the number of thread as configured by the user, or 1 if Bullet doesn't support multithreading and user requested more than 1 background threads
+        int computeNumThreads()
         {
             int wantedThread = Settings::Manager::getInt("async num threads", "Physics");
 
             auto broad = std::make_unique<btDbvtBroadphase>();
             auto maxSupportedThreads = broad->m_rayTestStacks.size();
-            threadSafeBullet = (maxSupportedThreads > 1);
+            auto threadSafeBullet = (maxSupportedThreads > 1);
             if (!threadSafeBullet && wantedThread > 1)
             {
                 Log(Debug::Warning) << "Bullet was not compiled with multithreading support, 1 async thread will be used";
@@ -88,6 +88,7 @@ namespace MWPhysics
           , mTimeAccum(0.f)
           , mCollisionWorld(collisionWorld)
           , mDebugDrawer(debugDrawer)
+          , mNumThreads(Config::computeNumThreads())
           , mNumJobs(0)
           , mRemainingSteps(0)
           , mLOSCacheExpiry(Settings::Manager::getInt("lineofsight keep inactive cache", "Physics"))
@@ -107,8 +108,6 @@ namespace MWPhysics
           , mTimeEnd(0)
           , mFrameStart(0)
     {
-        mNumThreads = Config::computeNumThreads(mThreadSafeBullet);
-
         if (mNumThreads >= 1)
         {
             for (int i = 0; i < mNumThreads; ++i)
@@ -197,8 +196,7 @@ namespace MWPhysics
         // start by finishing previous background computation
         if (mNumThreads != 0)
         {
-            for (size_t i = 0; i < mActors.size(); ++i)
-                updateActor(*mActors[i], mActorsFrameData[i], mAdvanceSimulation, mTimeAccum, mPhysicsDt);
+            syncWithMainThread();
 
             if(mAdvanceSimulation)
                 mAsyncBudget.update(mTimer->delta_s(mAsyncStartTime, mTimeEnd), mPrevStepCount, mBudgetCursor);
@@ -233,7 +231,8 @@ namespace MWPhysics
 
         if (mNumThreads == 0)
         {
-            syncComputation();
+            doSimulation();
+            syncWithMainThread();
             if(mAdvanceSimulation)
                 mBudget.update(mTimer->delta_s(timeStart, mTimer->tick()), numSteps, mBudgetCursor);
             return;
@@ -262,13 +261,13 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const
     {
-        MaybeSharedLock lock(mCollisionWorldMutex, mThreadSafeBullet);
+        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
         mCollisionWorld->rayTest(rayFromWorld, rayToWorld, resultCallback);
     }
 
     void PhysicsTaskScheduler::convexSweepTest(const btConvexShape* castShape, const btTransform& from, const btTransform& to, btCollisionWorld::ConvexResultCallback& resultCallback) const
     {
-        MaybeSharedLock lock(mCollisionWorldMutex, mThreadSafeBullet);
+        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
         mCollisionWorld->convexSweepTest(castShape, from, to, resultCallback);
     }
 
@@ -280,7 +279,7 @@ namespace MWPhysics
 
     std::optional<btVector3> PhysicsTaskScheduler::getHitPoint(const btTransform& from, btCollisionObject* target)
     {
-        MaybeSharedLock lock(mCollisionWorldMutex, mThreadSafeBullet);
+        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
         // target the collision object's world origin, this should be the center of the collision object
         btTransform rayTo;
         rayTo.setIdentity();
@@ -411,22 +410,7 @@ namespace MWPhysics
             if (!mNewFrame)
                 mHasJob.wait(lock, [&]() { return mQuit || mNewFrame; });
 
-            mPreStepBarrier->wait([this] { afterPreStep(); });
-
-            int job = 0;
-            while (mRemainingSteps && (job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
-            {
-                MaybeSharedLock lockColWorld(mCollisionWorldMutex, mThreadSafeBullet);
-                MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld, *mWorldFrameData);
-            }
-
-            mPostStepBarrier->wait([this] { afterPostStep(); });
-
-            if (!mRemainingSteps)
-            {
-                refreshLOSCache();
-                mPostSimBarrier->wait([this] { afterPostSim(); });
-            }
+            doSimulation();
         }
     }
 
@@ -485,29 +469,29 @@ namespace MWPhysics
         resultCallback.m_collisionFilterGroup = 0xFF;
         resultCallback.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap|CollisionType_Door;
 
-        MaybeSharedLock lockColWorld(mCollisionWorldMutex, mThreadSafeBullet);
+        MaybeSharedLock lockColWorld(mCollisionWorldMutex, mNumThreads);
         mCollisionWorld->rayTest(pos1, pos2, resultCallback);
 
         return !resultCallback.hasHit();
     }
 
-    void PhysicsTaskScheduler::syncComputation()
+    void PhysicsTaskScheduler::doSimulation()
     {
-        while (mRemainingSteps--)
+        while (mRemainingSteps)
         {
-            for (auto& actorData : mActorsFrameData)
+            mPreStepBarrier->wait([this] { afterPreStep(); });
+            int job = 0;
+            while ((job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
             {
-                MovementSolver::unstuck(actorData, mCollisionWorld);
-                MovementSolver::move(actorData, mPhysicsDt, mCollisionWorld, *mWorldFrameData);
+                MaybeSharedLock lockColWorld(mCollisionWorldMutex, mNumThreads);
+                MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld, *mWorldFrameData);
             }
 
-            updateActorsPositions();
+            mPostStepBarrier->wait([this] { afterPostStep(); });
         }
 
-        for (size_t i = 0; i < mActors.size(); ++i)
-            updateActor(*mActors[i], mActorsFrameData[i], mAdvanceSimulation, mTimeAccum, mPhysicsDt);
-
         refreshLOSCache();
+        mPostSimBarrier->wait([this] { afterPostSim(); });
     }
 
     void PhysicsTaskScheduler::updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
@@ -579,5 +563,11 @@ namespace MWPhysics
                     mLOSCache.end());
         }
         mTimeEnd = mTimer->tick();
+    }
+
+    void PhysicsTaskScheduler::syncWithMainThread()
+    {
+        for (size_t i = 0; i < mActors.size(); ++i)
+            updateActor(*mActors[i], mActorsFrameData[i], mAdvanceSimulation, mTimeAccum, mPhysicsDt);
     }
 }
