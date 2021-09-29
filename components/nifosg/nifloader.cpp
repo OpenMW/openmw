@@ -2079,7 +2079,7 @@ namespace NifOsg
 
             mat = shareAttribute(mat);
 
-            osg::StateSet* stateset = node->getStateSet();
+            osg::StateSet* stateset = node->getOrCreateStateSet();
             stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
             if (emissiveMult != 1.f)
                 stateset->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
