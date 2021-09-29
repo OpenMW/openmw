@@ -11,6 +11,7 @@
 #include <osgUtil/CullVisitor>
 
 #include <components/sceneutil/util.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/misc/hash.hpp>
 #include <components/misc/stringops.hpp>
@@ -294,9 +295,9 @@ namespace SceneUtil
                 osg::ref_ptr<osg::UniformBufferObject> ubo = new osg::UniformBufferObject;
                 buffer->getData()->setBufferObject(ubo);
 #if OSG_VERSION_GREATER_OR_EQUAL(3,5,7)
-                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), buffer->getData(), 0, buffer->getData()->getTotalDataSize());
+                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), buffer->getData(), 0, buffer->getData()->getTotalDataSize());
 #else
-                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), ubo, 0, buffer->getData()->getTotalDataSize());
+                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), ubo, 0, buffer->getData()->getTotalDataSize());
 #endif
                 stateset->setAttributeAndModes(ubb, mode);
 
@@ -676,9 +677,9 @@ namespace SceneUtil
                     auto bo = mLightManager->getLightBuffer(mLastFrameNumber);
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,5,7)
-                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), bo->getData(), 0, bo->getData()->getTotalDataSize());
+                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), bo->getData(), 0, bo->getData()->getTotalDataSize());
 #else
-                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), bo->getData()->getBufferObject(), 0, bo->getData()->getTotalDataSize());
+                    osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), bo->getData()->getBufferObject(), 0, bo->getData()->getTotalDataSize());
 #endif
                     stateset->setAttributeAndModes(ubb, osg::StateAttribute::ON);
                 }
@@ -736,7 +737,7 @@ namespace SceneUtil
             // Needed to query the layout of the buffer object. The layout specifier needed to use the std140 layout is not reliably
             // available, regardless of extensions, until GLSL 140.
             mDummyProgram->addShader(new osg::Shader(osg::Shader::VERTEX, dummyVertSource));
-            mDummyProgram->addBindUniformBlock("LightBufferBinding", static_cast<int>(Shader::UBOBinding::LightBuffer));
+            mDummyProgram->addBindUniformBlock("LightBufferBinding", static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer));
         }
 
         LightManagerStateAttribute(const LightManagerStateAttribute& copy, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
@@ -751,7 +752,7 @@ namespace SceneUtil
 
         void initSharedLayout(osg::GLExtensions* ext, int handle) const
         {
-            constexpr std::array<unsigned int, 1> index = { static_cast<unsigned int>(Shader::UBOBinding::LightBuffer) };
+            constexpr std::array<unsigned int, 1> index = { static_cast<unsigned int>(Resource::SceneManager::UBOBinding::LightBuffer) };
             int totalBlockSize = -1;
             int stride = -1;
 

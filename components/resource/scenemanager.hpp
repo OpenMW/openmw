@@ -76,7 +76,7 @@ namespace Resource
         Shader::ShaderManager& getShaderManager();
 
         /// Re-create shaders for this node, need to call this if alpha testing, texture stages or vertex color mode have changed.
-        void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects", bool translucentFramebuffer = false, bool forceShadersForNode = false);
+        void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects", bool translucentFramebuffer = false, bool forceShadersForNode = false, const osg::Program* programTemplate = nullptr);
 
         /// Applying shaders to a node may replace some fixed-function state.
         /// This restores it.
@@ -111,6 +111,11 @@ namespace Resource
         void setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported);
         bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
 
+        enum class UBOBinding
+        {
+            // If we add more UBO's, we should probably assign their bindings dynamically according to the current count of UBO's in the programTemplate
+            LightBuffer
+        };
         void setLightingMethod(SceneUtil::LightingMethod method);
         SceneUtil::LightingMethod getLightingMethod() const;
         
