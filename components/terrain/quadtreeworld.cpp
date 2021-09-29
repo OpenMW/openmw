@@ -3,7 +3,6 @@
 #include <osgUtil/CullVisitor>
 #include <osg/ShapeDrawable>
 #include <osg/PolygonMode>
-#include <osg/Geode>
 
 #include <limits>
 #include <sstream>
@@ -13,7 +12,6 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/loadinglistener/reporter.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/settings/settings.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
