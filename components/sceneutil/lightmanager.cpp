@@ -1364,7 +1364,7 @@ namespace SceneUtil
             {
                 LightManager::LightList lightList = mLightList;
 
-                if (usingFFP())
+                if (mLightManager->usingFFP())
                 {
                     for (auto it = lightList.begin(); it != lightList.end() && lightList.size() > maxLights;)
                     {
