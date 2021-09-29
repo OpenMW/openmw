@@ -33,6 +33,7 @@
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
     Bug #6165: Paralyzed player character can pickup items when the inventory is open
+    Bug #6172: Some creatures can't open doors
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
