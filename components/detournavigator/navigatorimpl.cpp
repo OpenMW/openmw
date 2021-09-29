@@ -39,8 +39,8 @@ namespace DetourNavigator
         if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->getAvoidCollisionShape())
         {
             const ObjectId avoidId(avoidShape);
-            CollisionShape collisionShape {shapes.mShapeInstance, *avoidShape};
-            if (mNavMeshManager.addObject(avoidId, collisionShape, transform, AreaType_null))
+            CollisionShape avoidCollisionShape {shapes.mShapeInstance, *avoidShape};
+            if (mNavMeshManager.addObject(avoidId, avoidCollisionShape, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
                 result = true;

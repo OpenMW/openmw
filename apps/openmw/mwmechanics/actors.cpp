@@ -1171,7 +1171,7 @@ namespace MWMechanics
         creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Undead)
         {
-            Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
+            stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
             stat.setModifier(static_cast<int>(effects.get(ESM::MagicEffect::TurnUndead).getMagnitude()));
             creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         }
