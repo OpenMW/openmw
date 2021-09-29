@@ -1239,9 +1239,11 @@ namespace SceneUtil
                 }
 
                 // remove lights culled by this camera
-                osg::CullStack::CullingStack& stack = cv->getModelViewCullingStack();
-                if (stack.front().isCulled(viewBound))
-                    continue;
+                if (!usingFFP())
+                {
+                    if (cv->getModelViewCullingStack().front().isCulled(viewBound))
+                        continue;
+                }
 
                 LightSourceViewBound l;
                 l.mLightSource = transform.mLightSource;
@@ -1361,6 +1363,20 @@ namespace SceneUtil
             if (mLightList.size() > maxLights)
             {
                 LightManager::LightList lightList = mLightList;
+
+                if (usingFFP())
+                {
+                    for (auto it = lightList.begin(); it != lightList.end() && lightList.size() > maxLights;)
+                    {
+                        osg::BoundingSphere bs = (*it)->mViewBound;
+                        bs._radius = bs._radius * 2.0;
+                        if (cv->getModelViewCullingStack().front().isCulled(bs))
+                            it = lightList.erase(it);
+                        else
+                            ++it;
+                    }
+                }
+
                 // sort by proximity to camera, then get rid of furthest away lights
                 std::sort(lightList.begin(), lightList.end(), sortLights);
                 while (lightList.size() > maxLights)
