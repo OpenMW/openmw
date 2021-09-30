@@ -2,6 +2,7 @@
 set(GAME
     main.cpp
     engine.cpp
+    options.cpp
 
     ${CMAKE_SOURCE_DIR}/files/windows/openmw.rc
     ${CMAKE_SOURCE_DIR}/files/windows/openmw.exe.manifest
