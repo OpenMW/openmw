@@ -116,7 +116,6 @@ namespace Shader
         , mImageManager(imageManager)
         , mDefaultShaderPrefix(defaultShaderPrefix)
     {
-        mRequirements.emplace_back();
     }
 
     void ShaderVisitor::setForceShaders(bool force)
@@ -421,7 +420,10 @@ namespace Shader
 
     void ShaderVisitor::pushRequirements(osg::Node& node)
     {
-        mRequirements.push_back(mRequirements.back());
+        if (mRequirements.empty())
+            mRequirements.emplace_back();
+        else
+            mRequirements.push_back(mRequirements.back());
         mRequirements.back().mNode = &node;
     }
 
