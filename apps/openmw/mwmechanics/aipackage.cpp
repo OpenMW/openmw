@@ -34,6 +34,11 @@ namespace
         const float actorTolerance = 2 * speed * duration + 1.2 * std::max(halfExtents.x(), halfExtents.y());
         return std::max(MWMechanics::MIN_TOLERANCE, actorTolerance);
     }
+
+    bool canOpenDoors(const MWWorld::Ptr& ptr)
+    {
+        return ptr.getClass().isBipedal(ptr) || ptr.getClass().hasInventoryStore(ptr);
+    }
 }
 
 MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options) :
@@ -118,7 +123,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
     if (!isDestReached && timerStatus == Misc::TimerStatus::Elapsed)
     {
-        if (actor.getClass().isBipedal(actor))
+        if (canOpenDoors(actor))
             openDoors(actor);
 
         const bool wasShortcutting = mIsShortcutting;
@@ -232,7 +237,7 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
     static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
 
     const MWWorld::Ptr door = getNearbyDoor(actor, distance);
-    if (!door.isEmpty() && actor.getClass().isBipedal(actor))
+    if (!door.isEmpty() && canOpenDoors(actor))
     {
         openDoors(actor);
     }
@@ -445,7 +450,7 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
     if (actorClass.canWalk(actor) && actor.getClass().getWalkSpeed(actor) > 0)
         result |= DetourNavigator::Flag_walk;
 
-    if (actorClass.isBipedal(actor) && getTypeId() != AiPackageTypeId::Wander)
+    if (canOpenDoors(actor) && getTypeId() != AiPackageTypeId::Wander)
         result |= DetourNavigator::Flag_openDoor;
 
     return result;

@@ -3,7 +3,6 @@
 #include <osg/Material>
 #include <osg/PolygonMode>
 #include <osg/Geometry>
-#include <osg/Geode>
 
 #include "world.hpp"
 #include "../esm/loadland.hpp"
@@ -22,7 +21,7 @@ CellBorder::CellBorder(Terrain::World *world, osg::Group *root, int borderMask, 
 {
 }
 
-osg::ref_ptr<osg::Geode> CellBorder::createBorderGeometry(float x, float y, float size, Terrain::Storage* terrain, Resource::SceneManager* sceneManager, int mask,
+osg::ref_ptr<osg::Group> CellBorder::createBorderGeometry(float x, float y, float size, Terrain::Storage* terrain, Resource::SceneManager* sceneManager, int mask,
     float offset, osg::Vec4f color)
 {
     const int cellSize = ESM::Land::REAL_SIZE;
@@ -66,8 +65,8 @@ osg::ref_ptr<osg::Geode> CellBorder::createBorderGeometry(float x, float y, floa
 
     border->addPrimitiveSet(new osg::DrawArrays(GL_LINE_STRIP,0,vertices->size()));
 
-    osg::ref_ptr<osg::Geode> borderGeode = new osg::Geode;
-    borderGeode->addDrawable(border.get());
+    osg::ref_ptr<osg::Group> borderGeode = new osg::Group;
+    borderGeode->addChild(border.get());
 
     osg::StateSet *stateSet = borderGeode->getOrCreateStateSet();
     osg::ref_ptr<osg::Material> material (new osg::Material);

@@ -28,6 +28,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
@@ -347,10 +348,11 @@ namespace Resource
         return mForceShaders;
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer, bool forceShadersForNode)
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer, bool forceShadersForNode, const osg::Program* programTemplate)
     {
         osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix, translucentFramebuffer));
         shaderVisitor->setAllowedToModifyStateSets(false);
+        shaderVisitor->setProgramTemplate(programTemplate);
         if (forceShadersForNode)
             shaderVisitor->setForceShaders(true);
         node->accept(*shaderVisitor);
@@ -425,6 +427,13 @@ namespace Resource
     void SceneManager::setLightingMethod(SceneUtil::LightingMethod method)
     {
         mLightingMethod = method;
+
+        if (mLightingMethod == SceneUtil::LightingMethod::SingleUBO)
+        {
+            osg::ref_ptr<osg::Program> program = new osg::Program;
+            program->addBindUniformBlock("LightBufferBinding", static_cast<int>(UBOBinding::LightBuffer));
+            mShaderManager->setProgramTemplate(program);
+        }
     }
 
     SceneUtil::LightingMethod SceneManager::getLightingMethod() const

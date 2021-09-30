@@ -328,6 +328,12 @@ namespace LuaUtil
         std::make_heap(mHoursTimersQueue.begin(), mHoursTimersQueue.end());
     }
 
+    ScriptsContainer::~ScriptsContainer()
+    {
+        for (auto& [_, script] : mScripts)
+            script.mHiddenData[ScriptId::KEY] = sol::nil;
+    }
+
     void ScriptsContainer::removeAllScripts()
     {
         for (auto& [_, script] : mScripts)
