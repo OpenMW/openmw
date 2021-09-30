@@ -1,4 +1,5 @@
 #version 120
+#pragma import_defines(TRANSLUCENT_FRAMEBUFFER)
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -220,7 +221,7 @@ void main()
 #endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 
-#if @translucentFramebuffer
+#ifdef TRANSLUCENT_FRAMEBUFFER
     // having testing & blending isn't enough - we need to write an opaque pixel to be opaque
     if (noAlpha)
         gl_FragData[0].a = 1.0;
