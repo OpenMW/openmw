@@ -59,7 +59,6 @@ uniform mat2 bumpMapMatrix;
 #endif
 
 uniform bool simpleWater;
-uniform bool noAlpha;
 
 varying float euclideanDepth;
 varying float linearDepth;
@@ -223,8 +222,7 @@ void main()
 
 #ifdef TRANSLUCENT_FRAMEBUFFER
     // having testing & blending isn't enough - we need to write an opaque pixel to be opaque
-    if (noAlpha)
-        gl_FragData[0].a = 1.0;
+    gl_FragData[0].a = 1.0;
 #endif
 
     applyShadowDebugOverlay();
