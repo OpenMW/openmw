@@ -1,4 +1,5 @@
 #version 120
+#pragma import_defines(TRANSLUCENT_FRAMEBUFFER)
 
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
@@ -46,7 +47,7 @@ void main()
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
 
-#if @translucentFramebuffer
+#ifdef TRANSLUCENT_FRAMEBUFFER
     if (noAlpha)
         gl_FragData[0].a = 1.0;
 #endif
