@@ -25,8 +25,6 @@ varying vec2 normalMapUV;
 varying vec4 passTangent;
 #endif
 
-uniform bool noAlpha;
-
 varying float euclideanDepth;
 varying float linearDepth;
 
@@ -97,8 +95,7 @@ void main()
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 
 #ifdef TRANSLUCENT_FRAMEBUFFER
-    if (noAlpha)
-        gl_FragData[0].a = 1.0;
+    gl_FragData[0].a = 1.0;
 #endif
 
     applyShadowDebugOverlay();
