@@ -90,7 +90,7 @@ namespace MWRender
     class SetUpBlendVisitor : public osg::NodeVisitor
     {
     public:
-        SetUpBlendVisitor(): osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mNoAlphaUniform(new osg::Uniform("noAlpha", false))
+        SetUpBlendVisitor(): osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
         }
 
@@ -129,7 +129,7 @@ namespace MWRender
                     }
                     // Disable noBlendAlphaEnv
                     newStateSet->setTextureMode(7, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                    newStateSet->addUniform(mNoAlphaUniform);
+                    newStateSet->setDefine("TRANSLUCENT_FRAMEBUFFER", "0", osg::StateAttribute::ON);
                 }
                 if (SceneUtil::getReverseZ() && stateset->getAttribute(osg::StateAttribute::DEPTH))
                 {
@@ -171,8 +171,6 @@ namespace MWRender
             }
             traverse(node);
         }
-    private:
-        osg::ref_ptr<osg::Uniform> mNoAlphaUniform;
     };
 
     CharacterPreview::CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem,
@@ -215,7 +213,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(ffp);
         lightManager->setStartLight(1);
         osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();
-        stateset->setDefine("TRANSLUCENT_FRAMEBUFFER", osg::StateAttribute::ON);
+        stateset->setDefine("TRANSLUCENT_FRAMEBUFFER", "1", osg::StateAttribute::ON);
         stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
         stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
@@ -253,7 +251,6 @@ namespace MWRender
         dummyTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
         stateset->setTextureAttributeAndModes(7, dummyTexture, osg::StateAttribute::ON);
         stateset->setTextureAttribute(7, noBlendAlphaEnv, osg::StateAttribute::ON);
-        stateset->addUniform(new osg::Uniform("noAlpha", true));
 
         osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
         lightmodel->setAmbientIntensity(osg::Vec4(0.0, 0.0, 0.0, 1.0));
