@@ -46,7 +46,9 @@ void main()
 #endif
 
 #ifdef TRANSLUCENT_FRAMEBUFFER
+#if TRANSLUCENT_FRAMEBUFFER
     gl_FragData[0].a = 1.0;
+#endif
 #endif
 
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
