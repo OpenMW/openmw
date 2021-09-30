@@ -224,7 +224,7 @@ namespace MWRender
         group->setNodeMask(Mask_Groundcover);
         if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
             group->setCullCallback(new SceneUtil::LightListCallback);
-        mSceneManager->recreateShaders(group, "groundcover", false, true, mProgramTemplate);
+        mSceneManager->recreateShaders(group, "groundcover", true, mProgramTemplate);
         mSceneManager->shareState(group);
         group->getBound();
         return group;
