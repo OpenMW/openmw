@@ -48,6 +48,9 @@ namespace MWMechanics
             return mEngageCombat.update(duration);
         }
 
+        void setPositionAdjusted(bool adjusted);
+        bool getPositionAdjusted() const;
+
     private:
         std::unique_ptr<CharacterController> mCharacterController;
         int mGreetingTimer{0};
@@ -55,6 +58,7 @@ namespace MWMechanics
         GreetingState mGreetingState{Greet_None};
         bool mIsTurningToPlayer{false};
         Misc::DeviatingPeriodicTimer mEngageCombat{1.0f, 0.25f, Misc::Rng::deviate(0, 0.25f)};
+        bool mPositionAdjusted;
     };
 
 }
