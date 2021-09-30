@@ -215,6 +215,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(ffp);
         lightManager->setStartLight(1);
         osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();
+        stateset->setDefine("TRANSLUCENT_FRAMEBUFFER", osg::StateAttribute::ON);
         stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
         stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
@@ -327,7 +328,6 @@ namespace MWRender
 
     void CharacterPreview::setBlendMode()
     {
-        mResourceSystem->getSceneManager()->recreateShaders(mNode, "objects", true);
         SetUpBlendVisitor visitor;
         mNode->accept(visitor);
     }
