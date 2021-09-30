@@ -569,18 +569,12 @@ namespace Shader
 
         if (vertexShader && fragmentShader)
         {
-
             auto program = mShaderManager.getProgram(vertexShader, fragmentShader, mProgramTemplate);
             if (!mDefaults || program != mDefaults->getAttribute(osg::StateAttribute::PROGRAM))
             {
                 writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
                 addedState->setAttributeAndModes(program);
             }
-
-
-
-
-
 
             for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
             {
