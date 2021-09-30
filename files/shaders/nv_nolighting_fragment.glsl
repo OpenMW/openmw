@@ -10,8 +10,6 @@ uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 #endif
 
-uniform bool noAlpha;
-
 #if @radialFog
 varying float euclideanDepth;
 #else
@@ -48,8 +46,7 @@ void main()
 #endif
 
 #ifdef TRANSLUCENT_FRAMEBUFFER
-    if (noAlpha)
-        gl_FragData[0].a = 1.0;
+    gl_FragData[0].a = 1.0;
 #endif
 
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
