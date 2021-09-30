@@ -335,7 +335,7 @@ namespace Resource
             Shader::ShaderVisitor::ShaderRequirements reqs;
             reqs.mTextures[0]="diffuseMap";
             reqs.mNode = dummy.get();
-            reqs.mColorMode = 2;
+            reqs.mColorMode = 0;
             shaderVisitor->createProgram(reqs);
             mDefaultShaderState = dummy->getStateSet();
         }
