@@ -448,7 +448,11 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
         result |= DetourNavigator::Flag_swim;
 
     if (actorClass.canWalk(actor) && actor.getClass().getWalkSpeed(actor) > 0)
+    {
         result |= DetourNavigator::Flag_walk;
+        if (getTypeId() == AiPackageTypeId::Travel)
+            result |= DetourNavigator::Flag_usePathgrid;
+    }
 
     if (canOpenDoors(actor) && getTypeId() != AiPackageTypeId::Wander)
         result |= DetourNavigator::Flag_openDoor;
@@ -462,20 +466,31 @@ DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::P
     const DetourNavigator::Flags flags = getNavigatorFlags(actor);
     const MWWorld::Class& actorClass = actor.getClass();
 
-    if (flags & DetourNavigator::Flag_swim)
-        costs.mWater = divOrMax(costs.mWater, actorClass.getSwimSpeed(actor));
+    const float swimSpeed = (flags & DetourNavigator::Flag_swim) == 0
+            ? 0.0f
+            : actorClass.getSwimSpeed(actor);
 
-    if (flags & DetourNavigator::Flag_walk)
+    const float walkSpeed = [&]
     {
-        float walkCost;
+        if ((flags & DetourNavigator::Flag_walk) == 0)
+            return 0.0f;
         if (getTypeId() == AiPackageTypeId::Wander)
-            walkCost = divOrMax(1.0, actorClass.getWalkSpeed(actor));
-        else
-            walkCost = divOrMax(1.0, actorClass.getRunSpeed(actor));
-        costs.mDoor = costs.mDoor * walkCost;
-        costs.mPathgrid = costs.mPathgrid * walkCost;
-        costs.mGround = costs.mGround * walkCost;
-    }
+            return actorClass.getWalkSpeed(actor);
+        return actorClass.getRunSpeed(actor);
+    } ();
+
+    const float maxSpeed = std::max(swimSpeed, walkSpeed);
+
+    if (maxSpeed == 0)
+        return costs;
+
+    const float swimFactor = swimSpeed / maxSpeed;
+    const float walkFactor = walkSpeed / maxSpeed;
+
+    costs.mWater = divOrMax(costs.mWater, swimFactor);
+    costs.mDoor = divOrMax(costs.mDoor, walkFactor);
+    costs.mPathgrid = divOrMax(costs.mPathgrid, walkFactor);
+    costs.mGround = divOrMax(costs.mGround, walkFactor);
 
     return costs;
 }

@@ -920,7 +920,8 @@ namespace MWPhysics
                                                     CollisionType_Actor|CollisionType_Projectile);
     }
 
-    bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
+    bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
+        const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr>* occupyingActors) const
     {
         btCollisionObject* object = nullptr;
         const auto it = mActors.find(ignore.mRef);
@@ -931,7 +932,19 @@ namespace MWPhysics
         const auto aabbMax = bulletPosition + btVector3(radius, radius, radius);
         const int mask = MWPhysics::CollisionType_Actor;
         const int group = 0xff;
-        HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group);
+        if (occupyingActors == nullptr)
+        {
+            HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group,
+                                                static_cast<void (*)(const btCollisionObject*)>(nullptr));
+            mTaskScheduler->aabbTest(aabbMin, aabbMax, callback);
+            return callback.getResult();
+        }
+        const auto onCollision = [&] (const btCollisionObject* object)
+        {
+            if (PtrHolder* holder = static_cast<PtrHolder*>(object->getUserPointer()))
+                occupyingActors->push_back(holder->getPtr());
+        };
+        HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group, &onCollision);
         mTaskScheduler->aabbTest(aabbMin, aabbMax, callback);
         return callback.getResult();
     }
