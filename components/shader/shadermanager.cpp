@@ -327,7 +327,7 @@ namespace Shader
             }
 
             osg::ref_ptr<osg::Shader> shader (new osg::Shader(shaderType));
-            shader->setShaderSource(shaderSource);
+            shader->setShaderSource(std::move(shaderSource));
             // Assign a unique prefix to allow the SharedStateManager to compare shaders efficiently.
             // Append shader source filename for debugging.
             static unsigned int counter = 0;
