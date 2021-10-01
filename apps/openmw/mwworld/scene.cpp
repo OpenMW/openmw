@@ -829,7 +829,6 @@ namespace MWWorld
             unloadCell(cellToUnload);
         }
         assert(mActiveCells.empty());
-        assert(mInactiveCells.empty());
 
         loadingListener->setProgressRange(cell->count());
 
