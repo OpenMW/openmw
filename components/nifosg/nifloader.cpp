@@ -1134,8 +1134,6 @@ namespace NifOsg
                 trans->addChild(toAttach);
                 parentNode->addChild(trans);
             }
-            // create partsys stateset in order to pass in ShaderVisitor like all other Drawables
-            partsys->getOrCreateStateSet();
         }
 
         void handleNiGeometryData(osg::Geometry *geometry, const Nif::NiGeometryData* data, const std::vector<unsigned int>& boundTextures, const std::string& name)
@@ -1923,8 +1921,6 @@ namespace NifOsg
         void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
                                              bool hasVertexColors, int animflags)
         {
-            osg::StateSet* stateset = node->getOrCreateStateSet();
-
             // Specular lighting is enabled by default, but there's a quirk...
             bool specEnabled = true;
             osg::ref_ptr<osg::Material> mat (new osg::Material);
@@ -2006,15 +2002,15 @@ namespace NifOsg
                         if (blendFunc->getDestination() == GL_DST_ALPHA)
                             blendFunc->setDestination(GL_ONE);
                         blendFunc = shareAttribute(blendFunc);
-                        stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
+                        node->getOrCreateStateSet()->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
-                            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                            node->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
                         else
-                            stateset->setRenderBinToInherit();
+                            node->getOrCreateStateSet()->setRenderBinToInherit();
                     }
-                    else
+                    else if (osg::StateSet* stateset = node->getStateSet())
                     {
                         stateset->removeAttribute(osg::StateAttribute::BLENDFUNC);
                         stateset->removeMode(GL_BLEND);
@@ -2025,9 +2021,9 @@ namespace NifOsg
                     {
                         osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(getTestMode((alphaprop->flags>>10)&0x7), alphaprop->data.threshold/255.f));
                         alphaFunc = shareAttribute(alphaFunc);
-                        stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                        node->getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
                     }
-                    else
+                    else if (osg::StateSet* stateset = node->getStateSet())
                     {
                         stateset->removeAttribute(osg::StateAttribute::ALPHAFUNC);
                         stateset->removeMode(GL_ALPHA_TEST);
@@ -2083,8 +2079,10 @@ namespace NifOsg
 
             mat = shareAttribute(mat);
 
+            osg::StateSet* stateset = node->getOrCreateStateSet();
             stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
-            stateset->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
+            if (emissiveMult != 1.f)
+                stateset->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
         }
 
     };
