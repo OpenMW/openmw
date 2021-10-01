@@ -5,6 +5,7 @@
 namespace MWMechanics
 {
     Actor::Actor(const MWWorld::Ptr &ptr, MWRender::Animation *animation)
+     : mPositionAdjusted(false)
     {
         mCharacterController.reset(new CharacterController(ptr, animation));
     }
@@ -57,5 +58,15 @@ namespace MWMechanics
     void Actor::setTurningToPlayer(bool turning)
     {
         mIsTurningToPlayer = turning;
+    }
+
+    void Actor::setPositionAdjusted(bool adjusted)
+    {
+        mPositionAdjusted = adjusted;
+    }
+
+    bool Actor::getPositionAdjusted() const
+    {
+        return mPositionAdjusted;
     }
 }

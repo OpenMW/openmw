@@ -16,7 +16,7 @@
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
     Bug #5508: Engine binary links to Qt without using it
-    Bug #5755: Active grid object paging - disappearing textures
+    Bug #5766: Active grid object paging - disappearing textures
     Bug #5788: Texture editing parses the selected indexes wrongly
     Bug #5842: GetDisposition adds temporary disposition change from different actors
     Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
@@ -47,8 +47,8 @@
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
     Feature #4595: Unique object identifier
-    Feature #4737: Handle instance move from one cell to another
     Feature #5489: MCP: Telekinesis fix for activators
+    Feature #5737: Handle instance move from one cell to another
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
     Feature #6032: Reverse-z depth buffer
