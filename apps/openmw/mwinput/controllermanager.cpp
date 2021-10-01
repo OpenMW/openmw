@@ -98,8 +98,8 @@ namespace MWInput
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
             float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-            float xMove = xAxis * dt * 1500.0f / uiScale;
-            float yMove = yAxis * dt * 1500.0f / uiScale;
+            float xMove = xAxis * dt * 1500.0f / uiScale * mGamepadCursorSpeed;
+            float yMove = yAxis * dt * 1500.0f / uiScale * mGamepadCursorSpeed;
 
             float mouseWheelMove = -zAxis * dt * 1500.0f;
             if (xMove != 0 || yMove != 0 || mouseWheelMove != 0)
