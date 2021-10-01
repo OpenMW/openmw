@@ -129,7 +129,7 @@ namespace MWRender
                     }
                     // Disable noBlendAlphaEnv
                     newStateSet->setTextureMode(7, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                    newStateSet->setDefine("TRANSLUCENT_FRAMEBUFFER", "0", osg::StateAttribute::ON);
+                    newStateSet->setDefine("FORCE_OPAQUE", "0", osg::StateAttribute::ON);
                 }
                 if (SceneUtil::getReverseZ() && stateset->getAttribute(osg::StateAttribute::DEPTH))
                 {
@@ -213,7 +213,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(ffp);
         lightManager->setStartLight(1);
         osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();
-        stateset->setDefine("TRANSLUCENT_FRAMEBUFFER", "1", osg::StateAttribute::ON);
+        stateset->setDefine("FORCE_OPAQUE", "1", osg::StateAttribute::ON);
         stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
         stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
