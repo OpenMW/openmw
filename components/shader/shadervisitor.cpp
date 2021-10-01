@@ -571,12 +571,17 @@ namespace Shader
 
         if (vertexShader && fragmentShader)
         {
+            static int cnt_default = 0;
+            static int cnt_nondefault = 0;
             auto program = mShaderManager.getProgram(vertexShader, fragmentShader, mProgramTemplate);
             if (!mDefaults || program != mDefaults->getAttribute(osg::StateAttribute::PROGRAM))
             {
                 writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
                 addedState->setAttributeAndModes(program);
+if (mDefaults) ++cnt_nondefault;
             }
+else ++cnt_default;
+if (mDefaults) std::cout << "We used the default program " << cnt_default << " out of " << (cnt_default+cnt_nondefault) << " times." << std::endl;
 
             for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
             {
