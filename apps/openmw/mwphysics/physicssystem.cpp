@@ -492,15 +492,12 @@ namespace MWPhysics
         return heightField->second.get();
     }
 
-    void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType, bool skipAnimated)
+    void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType)
     {
         if (ptr.mRef->mData.mPhysicsPostponed)
             return;
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
         if (!shapeInstance || !shapeInstance->getCollisionShape())
-            return;
-
-        if (skipAnimated && shapeInstance->isAnimated())
             return;
 
         assert(!getObject(ptr));
@@ -923,7 +920,8 @@ namespace MWPhysics
                                                     CollisionType_Actor|CollisionType_Projectile);
     }
 
-    bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
+    bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
+        const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr>* occupyingActors) const
     {
         btCollisionObject* object = nullptr;
         const auto it = mActors.find(ignore.mRef);
@@ -934,7 +932,19 @@ namespace MWPhysics
         const auto aabbMax = bulletPosition + btVector3(radius, radius, radius);
         const int mask = MWPhysics::CollisionType_Actor;
         const int group = 0xff;
-        HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group);
+        if (occupyingActors == nullptr)
+        {
+            HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group,
+                                                static_cast<void (*)(const btCollisionObject*)>(nullptr));
+            mTaskScheduler->aabbTest(aabbMin, aabbMax, callback);
+            return callback.getResult();
+        }
+        const auto onCollision = [&] (const btCollisionObject* object)
+        {
+            if (PtrHolder* holder = static_cast<PtrHolder*>(object->getUserPointer()))
+                occupyingActors->push_back(holder->getPtr());
+        };
+        HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group, &onCollision);
         mTaskScheduler->aabbTest(aabbMin, aabbMax, callback);
         return callback.getResult();
     }

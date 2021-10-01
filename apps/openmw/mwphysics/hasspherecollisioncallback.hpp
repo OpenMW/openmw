@@ -22,28 +22,36 @@ namespace MWPhysics
         return nearest.distance(position) < radius;
     }
 
+    template <class OnCollision>
     class HasSphereCollisionCallback final : public btBroadphaseAabbCallback
     {
     public:
         HasSphereCollisionCallback(const btVector3& position, const btScalar radius, btCollisionObject* object,
-                const int mask, const int group)
+                const int mask, const int group, OnCollision* onCollision)
             : mPosition(position),
               mRadius(radius),
               mCollisionObject(object),
               mCollisionFilterMask(mask),
-              mCollisionFilterGroup(group)
+              mCollisionFilterGroup(group),
+              mOnCollision(onCollision)
         {
         }
 
         bool process(const btBroadphaseProxy* proxy) override
         {
-            if (mResult)
+            if (mResult && mOnCollision == nullptr)
                 return false;
             const auto collisionObject = static_cast<btCollisionObject*>(proxy->m_clientObject);
-            if (collisionObject == mCollisionObject)
+            if (collisionObject == mCollisionObject
+                || !needsCollision(*proxy)
+                || !testAabbAgainstSphere(proxy->m_aabbMin, proxy->m_aabbMax, mPosition, mRadius))
                 return true;
-            if (needsCollision(*proxy))
-                mResult = testAabbAgainstSphere(proxy->m_aabbMin, proxy->m_aabbMax, mPosition, mRadius);
+            mResult = true;
+            if (mOnCollision != nullptr)
+            {
+                (*mOnCollision)(collisionObject);
+                return true;
+            }
             return !mResult;
         }
 
@@ -58,6 +66,7 @@ namespace MWPhysics
         btCollisionObject* mCollisionObject;
         int mCollisionFilterMask;
         int mCollisionFilterGroup;
+        OnCollision* mOnCollision;
         bool mResult = false;
 
         bool needsCollision(const btBroadphaseProxy& proxy) const

@@ -47,8 +47,6 @@ namespace MWLua
                 return LObject(getId(r.mHitObject), worldView->getObjectRegistry());
         });
 
-        constexpr int defaultCollisionType = MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap |
-                                             MWPhysics::CollisionType_Actor | MWPhysics::CollisionType_Door;
         api["COLLISION_TYPE"] = LuaUtil::makeReadOnly(context.mLua->sol().create_table_with(
             "World", MWPhysics::CollisionType_World,
             "Door", MWPhysics::CollisionType_Door,
@@ -56,12 +54,12 @@ namespace MWLua
             "HeightMap", MWPhysics::CollisionType_HeightMap,
             "Projectile", MWPhysics::CollisionType_Projectile,
             "Water", MWPhysics::CollisionType_Water,
-            "Default", defaultCollisionType));
+            "Default", MWPhysics::CollisionType_Default));
 
-        api["castRay"] = [defaultCollisionType](const osg::Vec3f& from, const osg::Vec3f& to, sol::optional<sol::table> options)
+        api["castRay"] = [](const osg::Vec3f& from, const osg::Vec3f& to, sol::optional<sol::table> options)
         {
             MWWorld::Ptr ignore;
-            int collisionType = defaultCollisionType;
+            int collisionType = MWPhysics::CollisionType_Default;
             float radius = 0;
             if (options)
             {
@@ -80,7 +78,7 @@ namespace MWLua
             }
         };
         // TODO: async raycasting
-        /*api["asyncCastRay"] = [luaManager = context.mLuaManager, defaultCollisionType](
+        /*api["asyncCastRay"] = [luaManager = context.mLuaManager](
             const Callback& luaCallback, const osg::Vec3f& from, const osg::Vec3f& to, sol::optional<sol::table> options)
         {
             std::function<void(MWPhysics::RayCastingResult)> callback =

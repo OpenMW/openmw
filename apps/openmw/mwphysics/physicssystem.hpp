@@ -128,7 +128,7 @@ namespace MWPhysics
             void setWaterHeight(float height);
             void disableWater();
 
-            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType = CollisionType_World, bool skipAnimated = false);
+            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType = CollisionType_World);
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
             int addProjectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius);
@@ -252,7 +252,8 @@ namespace MWPhysics
                 std::for_each(mAnimatedObjects.begin(), mAnimatedObjects.end(), function);
             }
 
-            bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const;
+            bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
+                const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr>* occupyingActors) const;
 
             void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
             void reportCollision(const btVector3& position, const btVector3& normal);

@@ -77,7 +77,6 @@ namespace MWWorld
 
             CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
-            CellStoreCollection mInactiveCells;
             bool mCellChanged;
             MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
@@ -100,7 +99,7 @@ namespace MWWorld
 
             std::vector<osg::ref_ptr<SceneUtil::WorkItem>> mWorkItems;
 
-            void insertCell(CellStore &cell, Loading::Listener* loadingListener, bool onlyObjects);
+            void insertCell(CellStore &cell, Loading::Listener* loadingListener);
             osg::Vec2i mCurrentGridCenter;
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
@@ -116,10 +115,8 @@ namespace MWWorld
             osg::Vec4i gridCenterToBounds(const osg::Vec2i &centerCell) const;
             osg::Vec2i getNewGridCenter(const osg::Vec3f &pos, const osg::Vec2i *currentGridCenter = nullptr) const;
 
-            void unloadInactiveCell(CellStore* cell);
-            void deactivateCell(CellStore* cell);
-            void activateCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn);
-            void loadInactiveCell(CellStore *cell, Loading::Listener* loadingListener);
+            void unloadCell(CellStore* cell);
+            void loadCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn);
 
         public:
 
