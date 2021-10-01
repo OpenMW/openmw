@@ -51,8 +51,8 @@ namespace MWLua
         std::array<bool, MWWorld::InventoryStore::Slots> usedSlots;
         std::fill(usedSlots.begin(), usedSlots.end(), false);
 
-        constexpr int anySlot = -1;
-        auto tryEquipToSlot = [&actor, &store, &usedSlots, &worldView, anySlot](int slot, const Item& item) -> bool
+        static constexpr int anySlot = -1;
+        auto tryEquipToSlot = [&actor, &store, &usedSlots, &worldView](int slot, const Item& item) -> bool
         {
             auto old_it = slot != anySlot ? store.getSlot(slot) : store.end();
             MWWorld::Ptr itemPtr;
