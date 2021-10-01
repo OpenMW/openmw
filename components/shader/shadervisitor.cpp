@@ -266,6 +266,8 @@ namespace Shader
                                 mRequirements.back().mShaderRequired = true;
                             }
                         }
+                        else
+                            Log(Debug::Error) << "ShaderVisitor encountered unknown texture " << texture;
                     }
                 }
             }
