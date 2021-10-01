@@ -21,6 +21,7 @@ struct Global
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string getRecordType() { return "Global"; }
 
+    unsigned int mRecordFlags;
     std::string mId;
     Variant mValue;
 

@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 
+#include <osg/AlphaFunc>
 #include <osg/Node>
 #include <osg/UserDataContainer>
 
@@ -27,6 +28,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
@@ -34,7 +36,6 @@
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
 #include "objectcache.hpp"
-#include "multiobjectcache.hpp"
 
 namespace
 {
@@ -217,7 +218,88 @@ namespace Resource
         int mMaxAnisotropy;
     };
 
+    // Check Collada extra descriptions
+    class ColladaAlphaTrickVisitor : public osg::NodeVisitor
+    {
+    public:
+        ColladaAlphaTrickVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
 
+        osg::AlphaFunc::ComparisonFunction getTestMode(std::string mode)
+        {
+            if (mode == "ALWAYS") return osg::AlphaFunc::ALWAYS;
+            if (mode == "LESS") return osg::AlphaFunc::LESS;
+            if (mode == "EQUAL") return osg::AlphaFunc::EQUAL;
+            if (mode == "LEQUAL") return osg::AlphaFunc::LEQUAL;
+            if (mode == "GREATER") return osg::AlphaFunc::GREATER;
+            if (mode == "NOTEQUAL") return osg::AlphaFunc::NOTEQUAL;
+            if (mode == "GEQUAL") return osg::AlphaFunc::GEQUAL;
+            if (mode == "NEVER") return osg::AlphaFunc::NEVER;
+
+            Log(Debug::Warning) << "Unexpected alpha testing mode: " << mode;
+            return osg::AlphaFunc::LEQUAL;
+        }
+
+        void apply(osg::Node& node) override
+        {
+            if (osg::StateSet* stateset = node.getStateSet())
+            {
+                if (stateset->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
+                {
+                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    depth->setWriteMask(false);
+
+                    stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                }
+                else if (stateset->getRenderingHint() == osg::StateSet::OPAQUE_BIN)
+                {
+                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    depth->setWriteMask(true);
+
+                    stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                }
+            }
+
+            /* Check if the <node> has <extra type="Node"> <technique profile="OpenSceneGraph"> <Descriptions> <Description>
+               correct format for OpenMW: <Description>alphatest mode value MaterialName</Description>
+                                      e.g <Description>alphatest GEQUAL 0.8 MyAlphaTestedMaterial</Description> */
+            std::vector<std::string> descriptions = node.getDescriptions();
+            for (auto description : descriptions)
+            {
+                mDescriptions.emplace_back(description);
+            }
+
+            // Iterate each description, and see if the current node uses the specified material for alpha testing
+            if (node.getStateSet())
+            {
+                for (auto description : mDescriptions)
+                {
+                    std::vector<std::string> descriptionParts;
+                    std::istringstream descriptionStringStream(description);
+                    for (std::string part; std::getline(descriptionStringStream, part, ' ');)
+                    {
+                        descriptionParts.emplace_back(part);
+                    }
+
+                    if (descriptionParts.size() > (3) && descriptionParts.at(3) == node.getStateSet()->getName())
+                    {
+                        if (descriptionParts.at(0) == "alphatest")
+                        {
+                            osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
+                            osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.at(2))));
+                            node.getStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                        }
+                    }
+                }
+            }
+
+            traverse(node);
+        }
+        private:
+            std::vector<std::string> mDescriptions;
+    };
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
@@ -230,7 +312,6 @@ namespace Resource
         , mLightingMethod(SceneUtil::LightingMethod::FFP)
         , mConvertAlphaTestToAlphaToCoverage(false)
         , mDepthFormat(0)
-        , mInstanceCache(new MultiObjectCache)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
@@ -252,10 +333,11 @@ namespace Resource
         return mForceShaders;
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer, bool forceShadersForNode)
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer, bool forceShadersForNode, const osg::Program* programTemplate)
     {
         osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix, translucentFramebuffer));
         shaderVisitor->setAllowedToModifyStateSets(false);
+        shaderVisitor->setProgramTemplate(programTemplate);
         if (forceShadersForNode)
             shaderVisitor->setForceShaders(true);
         node->accept(*shaderVisitor);
@@ -330,6 +412,13 @@ namespace Resource
     void SceneManager::setLightingMethod(SceneUtil::LightingMethod method)
     {
         mLightingMethod = method;
+
+        if (mLightingMethod == SceneUtil::LightingMethod::SingleUBO)
+        {
+            osg::ref_ptr<osg::Program> program = new osg::Program;
+            program->addBindUniformBlock("LightBufferBinding", static_cast<int>(UBOBinding::LightBuffer));
+            mShaderManager->setProgramTemplate(program);
+        }
     }
 
     SceneUtil::LightingMethod SceneManager::getLightingMethod() const
@@ -423,6 +512,18 @@ namespace Resource
             result.getNode()->accept(nameFinder);
             if (nameFinder.mFoundNode)
                 nameFinder.mFoundNode->setNodeMask(hiddenNodeMask);
+
+            if (ext == "dae")
+            {
+                // Collada alpha testing
+                Resource::ColladaAlphaTrickVisitor colladaAlphaTrickVisitor;
+                result.getNode()->accept(colladaAlphaTrickVisitor);
+
+                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
+                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
+                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
+            }
+
 
             return result.getNode();
         }
@@ -571,22 +672,18 @@ namespace Resource
             osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor());
             loaded->accept(*shaderVisitor);
 
-            // share state
-            // do this before optimizing so the optimizer will be able to combine nodes more aggressively
-            // note, because StateSets will be shared at this point, StateSets can not be modified inside the optimizer
-            mSharedStateMutex.lock();
-            mSharedStateManager->share(loaded.get());
-            mSharedStateMutex.unlock();
-
             if (canOptimize(normalized))
             {
                 SceneUtil::Optimizer optimizer;
+                optimizer.setSharedStateManager(mSharedStateManager, &mSharedStateMutex);
                 optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
 
-                static const unsigned int options = getOptimizationOptions();
+                static const unsigned int options = getOptimizationOptions()|SceneUtil::Optimizer::SHARE_DUPLICATE_STATE;
 
                 optimizer.optimize(loaded, options);
             }
+            else
+                shareState(loaded);
 
             if (compile && mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
@@ -596,21 +693,6 @@ namespace Resource
             mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
         }
-    }
-
-    osg::ref_ptr<osg::Node> SceneManager::cacheInstance(const std::string &name)
-    {
-        const std::string normalized = mVFS->normalizeFilename(name);
-
-        osg::ref_ptr<osg::Node> node = createInstance(normalized);
-
-        // Note: osg::clone() does not calculate bound volumes.
-        // Do it immediately, otherwise we will need to update them for all objects
-        // during first update traversal, what may lead to stuttering during cell transitions
-        node->getBound();
-
-        mInstanceCache->addEntryToObjectCache(normalized, node.get());
-        return node;
     }
 
     osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
@@ -638,14 +720,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name)
     {
-        const std::string normalized = mVFS->normalizeFilename(name);
-
-        osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
-        if (obj.get())
-            return static_cast<osg::Node*>(obj.get());
-
-        return createInstance(normalized);
-
+        return createInstance(name);
     }
 
     osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name, osg::Group* parentNode)
@@ -663,7 +738,6 @@ namespace Resource
     void SceneManager::releaseGLObjects(osg::State *state)
     {
         mCache->releaseGLObjects(state);
-        mInstanceCache->releaseGLObjects(state);
 
         mShaderManager->releaseGLObjects(state);
 
@@ -751,8 +825,6 @@ namespace Resource
     {
         ResourceManager::updateCache(referenceTime);
 
-        mInstanceCache->removeUnreferencedObjectsInCache();
-
         mSharedStateMutex.lock();
         mSharedStateManager->prune();
         mSharedStateMutex.unlock();
@@ -782,7 +854,6 @@ namespace Resource
 
         std::lock_guard<std::mutex> lock(mSharedStateMutex);
         mSharedStateManager->clearCache();
-        mInstanceCache->clear();
     }
 
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
@@ -800,7 +871,6 @@ namespace Resource
         }
 
         stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
-        stats->setAttribute(frameNumber, "Node Instance", mInstanceCache->getCacheSize());
     }
 
     Shader::ShaderVisitor *SceneManager::createShaderVisitor(const std::string& shaderPrefix, bool translucentFramebuffer)

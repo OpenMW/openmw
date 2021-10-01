@@ -1,5 +1,8 @@
 #include "shadervisitor.hpp"
 
+#include <unordered_set>
+#include <set>
+
 #include <osg/AlphaFunc>
 #include <osg/Geometry>
 #include <osg/GLExtensions>
@@ -113,7 +116,6 @@ namespace Shader
         , mImageManager(imageManager)
         , mDefaultShaderPrefix(defaultShaderPrefix)
     {
-        mRequirements.emplace_back();
     }
 
     void ShaderVisitor::setForceShaders(bool force)
@@ -418,7 +420,10 @@ namespace Shader
 
     void ShaderVisitor::pushRequirements(osg::Node& node)
     {
-        mRequirements.push_back(mRequirements.back());
+        if (mRequirements.empty())
+            mRequirements.emplace_back();
+        else
+            mRequirements.push_back(mRequirements.back());
         mRequirements.back().mNode = &node;
     }
 
@@ -553,7 +558,7 @@ namespace Shader
 
         if (vertexShader && fragmentShader)
         {
-            auto program = mShaderManager.getProgram(vertexShader, fragmentShader);
+            auto program = mShaderManager.getProgram(vertexShader, fragmentShader, mProgramTemplate);
             writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
             addedState->setAttributeAndModes(program);
 

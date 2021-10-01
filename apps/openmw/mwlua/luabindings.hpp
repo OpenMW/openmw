@@ -21,10 +21,12 @@ namespace MWLua
 
     sol::table initCorePackage(const Context&);
     sol::table initWorldPackage(const Context&);
-    sol::table initNearbyPackage(const Context&);
     sol::table initQueryPackage(const Context&);
 
     sol::table initFieldGroup(const Context&, const QueryFieldGroup&);
+
+    // Implemented in nearbybindings.cpp
+    sol::table initNearbyPackage(const Context&);
 
     // Implemented in objectbindings.cpp
     void initObjectBindingsForLocalScripts(const Context&);
@@ -45,9 +47,9 @@ namespace MWLua
     // Implemented in asyncbindings.cpp
     struct AsyncPackageId
     {
-        // TODO: add ObjectId mLocalObject;
         LuaUtil::ScriptsContainer* mContainer;
         std::string mScript;
+        sol::table mHiddenData;
     };
     sol::function getAsyncPackageInitializer(const Context&);
 

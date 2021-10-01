@@ -93,42 +93,21 @@ add_file (${project} _HDR ${comp} "${dir}/${unit}.hpp")
 add_file (${project} _SRC ${comp} "${dir}/${unit}.cpp")
 endmacro (add_unit)
 
-macro (add_qt_unit project dir unit)
-add_file (${project} _HDR ${comp} "${dir}/${unit}.hpp")
-add_file (${project} _SRC ${comp} "${dir}/${unit}.cpp")
-endmacro (add_qt_unit)
-
 macro (add_hdr project dir unit)
 add_file (${project} _HDR ${comp} "${dir}/${unit}.hpp")
 endmacro (add_hdr)
 
-macro (add_qt_hdr project dir unit)
-add_file (${project} _HDR ${comp} "${dir}/${unit}.hpp")
-endmacro (add_qt_hdr)
-
 macro (opencs_units dir)
-foreach (u ${ARGN})
-add_qt_unit (OPENCS ${dir} ${u})
-endforeach (u)
-endmacro (opencs_units)
-
-macro (opencs_units_noqt dir)
 foreach (u ${ARGN})
 add_unit (OPENCS ${dir} ${u})
 endforeach (u)
-endmacro (opencs_units_noqt)
+endmacro (opencs_units)
 
 macro (opencs_hdrs dir)
 foreach (u ${ARGN})
-add_qt_hdr (OPENCS ${dir} ${u})
-endforeach (u)
-endmacro (opencs_hdrs)
-
-macro (opencs_hdrs_noqt dir)
-foreach (u ${ARGN})
 add_hdr (OPENCS ${dir} ${u})
 endforeach (u)
-endmacro (opencs_hdrs_noqt)
+endmacro (opencs_hdrs)
 
 include(CMakeParseArguments)
 

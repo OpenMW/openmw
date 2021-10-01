@@ -77,10 +77,12 @@ namespace MWRender
     class SharedUniformStateUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        SharedUniformStateUpdater()
+        SharedUniformStateUpdater(bool usePlayerUniforms)
             : mLinearFac(0.f)
             , mNear(0.f)
             , mFar(0.f)
+            , mUsePlayerUniforms(usePlayerUniforms)
+            , mWindSpeed(0.f)
         {
         }
 
@@ -90,6 +92,11 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("linearFac", 0.f));
             stateset->addUniform(new osg::Uniform("near", 0.f));
             stateset->addUniform(new osg::Uniform("far", 0.f));
+            if (mUsePlayerUniforms)
+            {
+                stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
+                stateset->addUniform(new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f)));
+            }
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
@@ -110,6 +117,16 @@ namespace MWRender
             if (uFar)
                 uFar->set(mFar);
 
+            if (mUsePlayerUniforms)
+            {
+                auto* windSpeed = stateset->getUniform("windSpeed");
+                if (windSpeed)
+                    windSpeed->set(mWindSpeed);
+
+                auto* playerPos = stateset->getUniform("playerPos");
+                if (playerPos)
+                    playerPos->set(mPlayerPos);
+            }
         }
 
         void setProjectionMatrix(const osg::Matrixf& projectionMatrix)
@@ -132,11 +149,25 @@ namespace MWRender
             mFar = far;
         }
 
+        void setWindSpeed(float windSpeed)
+        {
+            mWindSpeed = windSpeed;
+        }
+
+        void setPlayerPos(osg::Vec3f playerPos)
+        {
+            mPlayerPos = playerPos;
+        }
+
+
     private:
         osg::Matrixf mProjectionMatrix;
         float mLinearFac;
         float mNear;
         float mFar;
+        bool mUsePlayerUniforms;
+        float mWindSpeed;
+        osg::Vec3f mPlayerPos;
     };
 
     class StateUpdater : public SceneUtil::StateSetUpdater
@@ -231,7 +262,7 @@ namespace MWRender
             try
             {
                 for (std::vector<std::string>::const_iterator it = mModels.begin(); it != mModels.end(); ++it)
-                    mResourceSystem->getSceneManager()->cacheInstance(*it);
+                    mResourceSystem->getSceneManager()->getTemplate(*it);
                 for (std::vector<std::string>::const_iterator it = mTextures.begin(); it != mTextures.end(); ++it)
                     mResourceSystem->getImageManager()->getImage(*it);
                 for (std::vector<std::string>::const_iterator it = mKeyframes.begin(); it != mKeyframes.end(); ++it)
@@ -294,7 +325,6 @@ namespace MWRender
 
         // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this depends on support for various OpenGL extensions.
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(lightingMethod == SceneUtil::LightingMethod::FFP);
-        resourceSystem->getSceneManager()->getShaderManager().setLightingMethod(sceneRoot->getLightingMethod());
         resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
         resourceSystem->getSceneManager()->setSupportedLightingMethods(sceneRoot->getSupportedLightingMethods());
         mMinimumAmbientLuminance = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
@@ -384,9 +414,10 @@ namespace MWRender
             const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
             float maxCompGeometrySize = Settings::Manager::getFloat("max composite geometry size", "Terrain");
             maxCompGeometrySize = std::max(maxCompGeometrySize, 1.f);
+            bool debugChunks = Settings::Manager::getBool("debug chunks", "Terrain");
             mTerrain.reset(new Terrain::QuadTreeWorld(
                 sceneRoot, mRootNode, mResourceSystem, mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug,
-                compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize));
+                compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks));
             if (Settings::Manager::getBool("object paging", "Terrain"))
             {
                 mObjectPaging.reset(new ObjectPaging(mResourceSystem->getSceneManager()));
@@ -400,29 +431,22 @@ namespace MWRender
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
         mTerrain->setWorkQueue(mWorkQueue.get());
 
-       osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
-
         if (groundcover)
         {
             float density = Settings::Manager::getFloat("density", "Groundcover");
             density = std::clamp(density, 0.f, 1.f);
 
-            mGroundcoverUpdater = new GroundcoverUpdater;
-            composite->addController(mGroundcoverUpdater);
-
             mGroundcover.reset(new Groundcover(mResourceSystem->getSceneManager(), density));
             static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mGroundcover.get());
             mResourceSystem->addResourceManager(mGroundcover.get());
 
-            float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
             mGroundcover->setViewDistance(groundcoverDistance);
         }
 
         mStateUpdater = new StateUpdater;
-        composite->addController(mStateUpdater);
-        sceneRoot->addUpdateCallback(composite);
+        sceneRoot->addUpdateCallback(mStateUpdater);
 
-        mSharedUniformStateUpdater = new SharedUniformStateUpdater;
+        mSharedUniformStateUpdater = new SharedUniformStateUpdater(groundcover);
         rootNode->addUpdateCallback(mSharedUniformStateUpdater);
 
         mPostProcessor = new PostProcessor(*this, viewer, mRootNode);
@@ -462,6 +486,7 @@ namespace MWRender
         defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
+        sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
 
         mFog.reset(new FogManager());
 
@@ -791,15 +816,12 @@ namespace MWRender
             mSky->update(dt);
             mWater->update(dt);
 
-            if (mGroundcoverUpdater)
-            {
-                const MWWorld::Ptr& player = mPlayerAnimation->getPtr();
-                osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
+            const MWWorld::Ptr& player = mPlayerAnimation->getPtr();
+            osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
 
-                float windSpeed = mSky->getBaseWindSpeed();
-                mGroundcoverUpdater->setWindSpeed(windSpeed);
-                mGroundcoverUpdater->setPlayerPos(playerPos);
-            }
+            float windSpeed = mSky->getBaseWindSpeed();
+            mSharedUniformStateUpdater->setWindSpeed(windSpeed);
+            mSharedUniformStateUpdater->setPlayerPos(playerPos);
         }
 
         updateNavMesh();

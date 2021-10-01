@@ -205,8 +205,7 @@ namespace Compiler
                 K_while, K_endwhile,
                 K_return,
                 K_messagebox,
-                K_set, K_to,
-                K_getsquareroot
+                K_set, K_to
             };
 
             enum special
@@ -237,7 +236,7 @@ namespace Compiler
 
             bool scanFloat (const std::string& intValue, Parser& parser, bool& cont);
 
-            bool scanName (MultiChar& c, Parser& parser, bool& cont);
+            bool scanName (MultiChar& c, Parser& parser, bool& cont, std::string name = {});
 
             /// \param name May contain the start of the name (one or more characters)
             bool scanName (std::string& name);

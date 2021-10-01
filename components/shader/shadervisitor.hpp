@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_SHADERVISITOR_H
 
 #include <osg/NodeVisitor>
+#include <osg/Program>
 
 namespace Resource
 {
@@ -18,6 +19,8 @@ namespace Shader
     {
     public:
         ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string& defaultShaderPrefix);
+
+        void setProgramTemplate(const osg::Program* programTemplate) { mProgramTemplate = programTemplate; }
 
         /// By default, only bump mapped objects will have a shader added to them.
         /// Setting force = true will cause all objects to render using shaders, regardless of having a bump map.
@@ -109,6 +112,8 @@ namespace Shader
         void createProgram(const ShaderRequirements& reqs);
         void ensureFFP(osg::Node& node);
         bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
+
+        osg::ref_ptr<const osg::Program> mProgramTemplate;
     };
 
     class ReinstateRemovedStateVisitor : public osg::NodeVisitor

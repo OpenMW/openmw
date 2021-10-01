@@ -42,6 +42,7 @@ struct Spell
     };
 
     SPDTstruct mData;
+    unsigned int mRecordFlags;
     std::string mId, mName;
     EffectList mEffects;
 

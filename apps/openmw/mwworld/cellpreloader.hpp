@@ -79,6 +79,7 @@ namespace MWWorld
 
         bool syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, double timestamp, Loading::Listener& listener);
         void abortTerrainPreloadExcept(const PositionCellGrid *exceptPos);
+        bool isTerrainLoaded(const CellPreloader::PositionCellGrid &position, double referenceTime) const;
 
     private:
         Resource::ResourceSystem* mResourceSystem;
@@ -93,7 +94,6 @@ namespace MWWorld
         bool mPreloadInstances;
 
         double mLastResourceCacheUpdate;
-        int mStoreViewsFailCount;
 
         struct PreloadEntry
         {
@@ -119,6 +119,9 @@ namespace MWWorld
         std::vector<PositionCellGrid> mTerrainPreloadPositions;
         osg::ref_ptr<TerrainPreloadItem> mTerrainPreloadItem;
         osg::ref_ptr<SceneUtil::WorkItem> mUpdateCacheItem;
+
+        std::vector<PositionCellGrid> mLoadedTerrainPositions;
+        double mLoadedTerrainTimestamp;
     };
 
 }

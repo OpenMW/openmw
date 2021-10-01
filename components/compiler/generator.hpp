@@ -74,8 +74,6 @@ namespace Compiler
 
         void convert (CodeContainer& code, char fromType, char toType);
 
-        void squareRoot (CodeContainer& code);
-
         void exit (CodeContainer& code);
 
         void message (CodeContainer& code, Literals& literals, const std::string& message,
