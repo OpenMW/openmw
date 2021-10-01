@@ -2157,7 +2157,14 @@ namespace MWMechanics
                     continue;
                 }
                 else if (!isPlayer)
+                {
                     iter->first.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
+                    if (!iter->second->getPositionAdjusted())
+                    {
+                        iter->first.getClass().adjustPosition(iter->first, false);
+                        iter->second->setPositionAdjusted(true);
+                    }
+                }
 
                 const bool isDead = iter->first.getClass().getCreatureStats(iter->first).isDead();
                 if (!isDead && (!godmode || !isPlayer) && iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
