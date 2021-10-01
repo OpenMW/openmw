@@ -110,16 +110,31 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mAiSequence.load(esm);
     mMagicEffects.load(esm);
 
-    while (esm.isNextSub("SUMM"))
+    if (esm.getFormat() < 17)
     {
-        int magicEffect;
-        esm.getHT(magicEffect);
-        std::string source = esm.getHNOString("SOUR");
-        int effectIndex = -1;
-        esm.getHNOT (effectIndex, "EIND");
-        int actorId;
-        esm.getHNT (actorId, "ACID");
-        mSummonedCreatureMap[SummonKey(magicEffect, source, effectIndex)] = actorId;
+        while (esm.isNextSub("SUMM"))
+        {
+            int magicEffect;
+            esm.getHT(magicEffect);
+            std::string source = esm.getHNOString("SOUR");
+            int effectIndex = -1;
+            esm.getHNOT (effectIndex, "EIND");
+            int actorId;
+            esm.getHNT (actorId, "ACID");
+            mSummonedCreatureMap[SummonKey(magicEffect, source, effectIndex)] = actorId;
+            mSummonedCreatures.emplace(magicEffect, actorId);
+        }
+    }
+    else
+    {
+        while (esm.isNextSub("SUMM"))
+        {
+            int magicEffect;
+            esm.getHT(magicEffect);
+            int actorId;
+            esm.getHNT (actorId, "ACID");
+            mSummonedCreatures.emplace(magicEffect, actorId);
+        }
     }
 
     while (esm.isNextSub("GRAV"))
@@ -214,14 +229,10 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     mAiSequence.save(esm);
     mMagicEffects.save(esm);
 
-    for (const auto& summon : mSummonedCreatureMap)
+    for (const auto& [effectId, actorId] : mSummonedCreatures)
     {
-        esm.writeHNT ("SUMM", summon.first.mEffectId);
-        esm.writeHNString ("SOUR", summon.first.mSourceId);
-        int effectIndex = summon.first.mEffectIndex;
-        if (effectIndex != -1)
-            esm.writeHNT ("EIND", effectIndex);
-        esm.writeHNT ("ACID", summon.second);
+        esm.writeHNT ("SUMM", effectId);
+        esm.writeHNT ("ACID", actorId);
     }
 
     for (int key : mSummonGraveyard)
@@ -234,15 +245,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i].save(esm);
-    }
-
-    for (const auto& corprusSpell : mCorprusSpells)
-    {
-        esm.writeHNString("CORP", corprusSpell.first);
-
-        const CorprusStats & stats = corprusSpell.second;
-        esm.writeHNT("WORS", stats.mWorsenings);
-        esm.writeHNT("TIME", stats.mNextWorsening);
     }
 }
 

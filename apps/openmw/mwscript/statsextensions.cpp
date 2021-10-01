@@ -473,6 +473,8 @@ namespace MWScript
                     ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
                     if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Power)
                     {
+                        // Add spell effect to *this actor's* queue immediately
+                        creatureStats.getActiveSpells().addSpell(spell, ptr);
                         // Apply looping particles immediately for constant effects
                         MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
                     }
@@ -492,17 +494,6 @@ namespace MWScript
                     runtime.pop();
 
                     MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
-                    // The spell may have an instant effect which must be handled before the spell's removal.
-                    for (const auto& effect : creatureStats.getSpells().getMagicEffects())
-                    {
-                        if (effect.second.getMagnitude() <= 0)
-                            continue;
-                        MWMechanics::CastSpell cast(ptr, ptr);
-                        if (cast.applyInstantEffect(ptr, ptr, effect.first, effect.second.getMagnitude()))
-                            creatureStats.getSpells().purgeEffect(effect.first.mId);
-                    }
-
-                    MWBase::Environment::get().getMechanicsManager()->restoreStatsAfterCorprus(ptr, id);
                     creatureStats.getSpells().remove (id);
 
                     MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
@@ -527,8 +518,7 @@ namespace MWScript
                     std::string spellid = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    ptr.getClass().getCreatureStats (ptr).getActiveSpells().removeEffects(spellid);
-                    ptr.getClass().getCreatureStats (ptr).getSpells().removeEffects(spellid);
+                    ptr.getClass().getCreatureStats (ptr).getActiveSpells().removeEffects(ptr, spellid);
                 }
         };
 
@@ -544,7 +534,7 @@ namespace MWScript
                     Interpreter::Type_Integer effectId = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass().getCreatureStats (ptr).getActiveSpells().purgeEffect(effectId);
+                    ptr.getClass().getCreatureStats (ptr).getActiveSpells().purgeEffect(ptr, effectId);
                 }
         };
 

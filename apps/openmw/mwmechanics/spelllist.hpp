@@ -16,12 +16,6 @@ namespace ESM
 
 namespace MWMechanics
 {
-    struct SpellParams
-    {
-        std::map<int, float> mEffectRands; // <effect index, normalised random magnitude>
-        std::set<int> mPurgedEffects; // indices of purged effects
-    };
-
     class Spells;
 
     /// Multiple instances of the same actor share the same spell list in Morrowind.

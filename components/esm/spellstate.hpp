@@ -31,13 +31,13 @@ namespace ESM
 
         struct SpellParams
         {
-            std::map<int, float> mEffectRands;
-            std::set<int> mPurgedEffects;
+            std::map<int, float> mEffectRands; // <effect index, normalised random magnitude>
+            std::set<int> mPurgedEffects; // indices of purged effects
         };
-        typedef std::map<std::string, SpellParams> TContainer;
-        TContainer mSpells;
+        std::vector<std::string> mSpells;
 
         // FIXME: obsolete, used only for old saves
+        std::map<std::string, SpellParams> mSpellParams;
         std::map<std::string, std::vector<PermanentSpellEffectInfo> > mPermanentSpellEffects;
         std::map<std::string, CorprusStats> mCorprusSpells;
 

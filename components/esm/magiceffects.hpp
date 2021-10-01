@@ -12,8 +12,8 @@ namespace ESM
     // format 0, saved games only
     struct MagicEffects
     {
-        // <Effect Id, Base value>
-        std::map<int, int> mEffects;
+        // <Effect Id, Base value, Modifier>
+        std::map<int, std::pair<int, float>> mEffects;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

@@ -32,6 +32,7 @@ namespace ESM
     {
         std::string mSpellId;
         float mSpeed;
+        int mSlot;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

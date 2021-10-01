@@ -31,7 +31,6 @@ class NpcAnimation : public ActorAnimation, public WeaponAnimation, public MWWor
 {
 public:
     void equipmentChanged() override;
-    void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew) override;
 
 public:
     typedef std::map<ESM::PartReferenceType,std::string> PartBoneMap;

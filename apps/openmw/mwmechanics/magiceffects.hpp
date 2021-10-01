@@ -69,16 +69,6 @@ namespace MWMechanics
         return param -= right;
     }
 
-    // Used by effect management classes (ActiveSpells, InventoryStore, Spells) to list active effect sources for GUI display
-    struct EffectSourceVisitor
-    {
-        virtual ~EffectSourceVisitor() { }
-
-        virtual void visit (EffectKey key, int effectIndex,
-                            const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1) = 0;
-    };
-
     /// \brief Effects currently affecting a NPC or creature
     class MagicEffects
     {
