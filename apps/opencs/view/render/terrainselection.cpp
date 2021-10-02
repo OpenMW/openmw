@@ -96,7 +96,6 @@ void CSVRender::TerrainSelection::update()
 
 void CSVRender::TerrainSelection::drawShapeSelection(const osg::ref_ptr<osg::Vec3Array> vertices)
 {
-    resetMeasurements();
     if (!mSelection.empty())
     {
         for (std::pair<int, int> &localPos : mSelection)
@@ -129,12 +128,10 @@ void CSVRender::TerrainSelection::drawShapeSelection(const osg::ref_ptr<osg::Vec
             }
         }
     }
-    printMeasurements();
 }
 
 void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::Vec3Array> vertices)
 {
-    resetMeasurements();
     if (!mSelection.empty())
     {
         const int landHeightsNudge = (ESM::Land::REAL_SIZE / ESM::Land::LAND_SIZE) / (ESM::Land::LAND_SIZE - 1); // Does this work with all land size configurations?
@@ -203,7 +200,6 @@ void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::V
             }
         }
     }
-    printMeasurements();
 }
 
 void CSVRender::TerrainSelection::handleSelection(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress, SelectionMethod selectionMethod)
@@ -329,7 +325,6 @@ bool CSVRender::TerrainSelection::isLandLoaded(const std::string& cellId)
 
 int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global vertex coordinates
 {
-    auto start = std::chrono::high_resolution_clock::now();
     int cellX = std::floor(static_cast<float>(x) / (ESM::Land::LAND_SIZE - 1));
     int cellY = std::floor(static_cast<float>(y) / (ESM::Land::LAND_SIZE - 1));
     int localX = x - cellX * (ESM::Land::LAND_SIZE - 1);
@@ -347,69 +342,8 @@ int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global ver
         CSMDoc::Document& document = mWorldspaceWidget->getDocument();
         std::string cellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
         const ESM::Land::LandData* landData = document.getData().getLand().getRecord(cellId).get().getLandData(ESM::Land::DATA_VHGT);
-        auto stop = std::chrono::high_resolution_clock::now();
-        int duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
-        mDurationsA += duration;
-        mDurationsAMeasurements++;
         return landData->mHeights[localY*ESM::Land::LAND_SIZE + localX];
     }
 
-    auto stop = std::chrono::high_resolution_clock::now();
-    int duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
-    mDurationsB += duration;
-    mDurationsBMeasurements++;
     return landHeight;
-}
-
-/*int CSVRender::TerrainSelection::OldCalculateLandHeight(int x, int y) // global vertex coordinates
-{
-    auto start = std::chrono::high_resolution_clock::now();
-    int cellX = std::floor(static_cast<float>(x) / (ESM::Land::LAND_SIZE - 1));
-    int cellY = std::floor(static_cast<float>(y) / (ESM::Land::LAND_SIZE - 1));
-    int localX = x - cellX * (ESM::Land::LAND_SIZE - 1);
-    int localY = y - cellY * (ESM::Land::LAND_SIZE - 1);
-
-    CSMWorld::CellCoordinates coords (cellX, cellY);
-
-    float landHeight = 0.f;
-    if (CSVRender::Cell* cell = dynamic_cast<CSVRender::Cell*>(mWorldspaceWidget->getCell(coords)))
-    {
-        landHeight = cell->getSumOfAlteredAndTrueHeight(cellX, cellY, localX, localY);
-    }
-    else if (isLandLoaded(CSMWorld::CellCoordinates::generateId(cellX, cellY)))
-    {
-        CSMDoc::Document& document = mWorldspaceWidget->getDocument();
-        CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> ( *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
-        std::string cellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
-        int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
-        const CSMWorld::LandHeightsColumn::DataType mPointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-        auto stop = std::chrono::high_resolution_clock::now();
-        int duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
-        mDurationsA += duration;
-        mDurationsAMeasurements++;
-        return mPointer[localY*ESM::Land::LAND_SIZE + localX];
-    }
-    auto stop = std::chrono::high_resolution_clock::now();
-    int duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
-    mDurationsB += duration;
-    mDurationsBMeasurements++;
-    return landHeight;
-}*/
-
-
-void CSVRender::TerrainSelection::resetMeasurements()
-{
-    mDurationsA = 0;
-    mDurationsB = 0;
-    mDurationsAMeasurements = 0;
-    mDurationsBMeasurements = 0;
-}
-
-void CSVRender::TerrainSelection::printMeasurements()
-{
-    if (mDurationsAMeasurements != 0)
-        Log(Debug::Warning) << "A (total) " << mDurationsA << "(avg) " << mDurationsA / mDurationsAMeasurements << "(meas.) " << mDurationsAMeasurements;
-
-    if (mDurationsBMeasurements != 0)
-        Log(Debug::Warning) << "B (total) " << mDurationsB << "(avg) " << mDurationsB / mDurationsBMeasurements << "(meas.) " << mDurationsBMeasurements;
 }
