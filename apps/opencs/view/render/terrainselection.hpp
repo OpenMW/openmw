@@ -64,6 +64,10 @@ namespace CSVRender
 
         private:
 
+            void resetMeasurements();
+
+            void printMeasurements();
+
             void handleSelection(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress, SelectionMethod selectionMethod);
 
             bool noCell(const std::string& cellId);
@@ -73,7 +77,7 @@ namespace CSVRender
             bool noLandLoaded(const std::string& cellId);
 
             bool isLandLoaded(const std::string& cellId);
-            
+
             osg::Group* mParentNode;
             WorldspaceWidget *mWorldspaceWidget;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
@@ -83,6 +87,10 @@ namespace CSVRender
             std::vector<std::pair<int, int>> mTemporarySelection; // Used during toggle to compare the most recent drag operation
             bool mDraggedOperationFlag; //true during drag operation, false when click-operation
             TerrainSelectionType mSelectionType;
+            int mDurationsA;
+            int mDurationsB;
+            int mDurationsAMeasurements;
+            int mDurationsBMeasurements;
     };
 }
 
