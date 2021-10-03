@@ -27,7 +27,8 @@ public:
         return true;
     }
 
-    void traverse(osg::Object* object, osg::Object* data)
+    template <typename VT>
+    void traverse(osg::Object* object, VT data)
     {
         if (_nestedCallback.valid())
             _nestedCallback->run(object, data);
