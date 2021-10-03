@@ -11,9 +11,17 @@
 
 namespace SceneUtil
 {
-    class KeyframeController : public SceneUtil::Controller, public virtual osg::Referenced
+    class KeyframeController : public SceneUtil::Controller, public virtual osg::Object
     {
     public:
+        KeyframeController() {}
+
+        KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop)
+            : osg::Object(copy, copyop)
+            , SceneUtil::Controller(copy)
+        {}
+        META_Object(SceneUtil, KeyframeController)
+
         virtual osg::Vec3f getTranslation(float time) const  { return osg::Vec3f(); }
     };
 
