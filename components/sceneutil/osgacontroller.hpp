@@ -13,6 +13,7 @@
 #include <osgAnimation/UpdateMatrixTransform>
 
 #include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/resource/animation.hpp>
 
@@ -44,7 +45,7 @@ namespace SceneUtil
             Resource::Animation* mAnimation;
     };
 
-    class OsgAnimationController : public SceneUtil::KeyframeController
+    class OsgAnimationController : public SceneUtil::KeyframeController, public SceneUtil::NodeCallback<OsgAnimationController>
     {
     public:
         /// @brief Handles the animation for osgAnimation formats
@@ -61,7 +62,7 @@ namespace SceneUtil
         void update(float time, const std::string& animationName);
 
         /// @brief Called every frame for osgAnimation
-        void operator() (osg::Node*, osg::NodeVisitor*) override;
+        void operator() (osg::Node*, osg::NodeVisitor*);
 
         /// @brief Sets details of the animations
         void setEmulatedAnimations(const std::vector<EmulatedAnimation>& emulatedAnimations);
