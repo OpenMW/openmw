@@ -23,7 +23,7 @@ public:
 
     virtual bool run(osg::Object* object, osg::Object* data)
     {
-        static_cast<Derived*>(this)->operator()(static_cast<NodeType>(object), static_cast<VisitorType>(data));
+        static_cast<Derived*>(this)->operator()((NodeType)object, (VisitorType)data);
         return true;
     }
 
