@@ -605,14 +605,14 @@ namespace SceneUtil
 
     // Set on a LightSource. Adds the light source to its light manager for the current frame.
     // This allows us to keep track of the current lights in the scene graph without tying creation & destruction to the manager.
-    class CollectLightCallback : public osg::NodeCallback
+    class CollectLightCallback : public SceneUtil::NodeCallback<CollectLightCallback>
     {
     public:
         CollectLightCallback()
             : mLightManager(nullptr) { }
 
         CollectLightCallback(const CollectLightCallback& copy, const osg::CopyOp& copyop)
-            : osg::NodeCallback(copy, copyop)
+            : SceneUtil::NodeCallback<CollectLightCallback>(copy, copyop)
             , mLightManager(nullptr) { }
 
         META_Object(SceneUtil, SceneUtil::CollectLightCallback)
@@ -637,19 +637,11 @@ namespace SceneUtil
     };
 
     // Set on a LightManager. Clears the data from the previous frame.
-    class LightManagerUpdateCallback : public osg::NodeCallback
+    class LightManagerUpdateCallback : public SceneUtil::NodeCallback<LightManagerUpdateCallback>
     {
     public:
-        LightManagerUpdateCallback()
-            { }
 
-        LightManagerUpdateCallback(const LightManagerUpdateCallback& copy, const osg::CopyOp& copyop)
-            : osg::NodeCallback(copy, copyop)
-            { }
-
-        META_Object(SceneUtil, LightManagerUpdateCallback)
-
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
             LightManager* lightManager = static_cast<LightManager*>(node);
             lightManager->update(nv->getTraversalNumber());
@@ -1288,7 +1280,7 @@ namespace SceneUtil
     void LightListCallback::operator()(osg::Node *node, osgUtil::CullVisitor *cv)
     {
         bool pushedState = pushLightState(node, cv);
-        traverse(node, nv);
+        traverse(node, cv);
         if (pushedState)
             cv->popStateSet();
     }
