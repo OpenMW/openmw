@@ -64,7 +64,8 @@ namespace SceneUtil
             cb = cb->getNestedCallback();
         }
 
-        traverse( node );
+        if (node.getNumChildrenRequiringUpdateTraversal())
+            traverse( node );
     }
 
     OsgAnimationController::OsgAnimationController(const OsgAnimationController &copy, const osg::CopyOp &copyop) : SceneUtil::KeyframeController(copy, copyop)
