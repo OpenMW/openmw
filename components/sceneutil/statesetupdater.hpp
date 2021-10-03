@@ -46,8 +46,7 @@ namespace SceneUtil
         /// Set default state - optionally override in derived classes
         /// @par May be used e.g. to allocate StateAttributes.
         virtual void setDefaults(osg::StateSet* stateset) {}
-
-    protected:
+    
         /// Reset mStateSets, forcing a setDefaults() on the next frame. Can be used to change the defaults if needed.
         void reset();
 
