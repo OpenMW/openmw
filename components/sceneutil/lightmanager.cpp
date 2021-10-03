@@ -617,7 +617,7 @@ namespace SceneUtil
 
         META_Object(SceneUtil, SceneUtil::CollectLightCallback)
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
             if (!mLightManager)
             {
