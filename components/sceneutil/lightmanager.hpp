@@ -263,7 +263,7 @@ namespace SceneUtil
             , mLastFrameNumber(0)
         {}
         LightListCallback(const LightListCallback& copy, const osg::CopyOp& copyop)
-            : osg::Object(copy, copyop), osg::Callback(copy, copyop)
+            : osg::Object(copy, copyop), SceneUtil::NodeCallback<LightListCallback, osg::Node*, osgUtil::CullVisitor*>(copy, copyop)
             , mLightManager(copy.mLightManager)
             , mLastFrameNumber(0)
             , mIgnoredLightSources(copy.mIgnoredLightSources)
