@@ -115,6 +115,7 @@ void CSVRender::TerrainShapeMode::primarySelectPressed(const WorldspaceHitResult
     if(hit.hit && hit.tag == nullptr)
     {
         selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0);
+        mTerrainShapeSelection->clearTemporarySelection();
     }
 }
 
@@ -123,6 +124,7 @@ void CSVRender::TerrainShapeMode::secondarySelectPressed(const WorldspaceHitResu
     if(hit.hit && hit.tag == nullptr)
     {
         selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1);
+        mTerrainShapeSelection->clearTemporarySelection();
     }
 }
 

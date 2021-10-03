@@ -64,7 +64,6 @@ void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, 
 void CSVRender::TerrainSelection::clearTemporarySelection()
 {
     mTemporarySelection.clear();
-    update();
 }
 
 void CSVRender::TerrainSelection::activate()
@@ -211,45 +210,50 @@ void CSVRender::TerrainSelection::handleSelection(const std::vector<std::pair<in
 {
     for (auto const& localPos : localPositions)
     {
-        auto iterTemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
+        const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
 
-        if (iterTemp == mTemporarySelection.end())
+        switch (selectionMethod)
         {
-            const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
+            case SelectionMethod::OnlySelect:
+                break;
 
-            switch (selectionMethod)
-            {
             case SelectionMethod::AddSelect:
                 if (iter == mSelection.end())
                 {
                     mSelection.emplace_back(localPos);
                 }
-
                 break;
+
             case SelectionMethod::RemoveSelect:
                 if (iter != mSelection.end())
                 {
                     mSelection.erase(iter);
                 }
-
                 break;
+
             case SelectionMethod::ToggleSelect:
-                if (iter == mSelection.end())
+            {
+                const auto iterTemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
+                if (iterTemp == mTemporarySelection.end())
                 {
-                    mSelection.emplace_back(localPos);
+                    if (iter == mSelection.end())
+                    {
+                        mSelection.emplace_back(localPos);
+                    }
+                    else
+                    {
+                        mSelection.erase(iter);
+                    }
                 }
-                else
-                {
-                    mSelection.erase(iter);
-                }
-
+                mTemporarySelection.emplace_back(localPos);
                 break;
-            default: break;
             }
-        }
 
-        mTemporarySelection.emplace_back(localPos);
+            default:
+                break;
+        }
     }
+
     update();
 }
 

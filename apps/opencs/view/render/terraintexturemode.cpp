@@ -130,6 +130,7 @@ void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResu
     if(hit.hit && hit.tag == nullptr)
     {
         selectTerrainTextures(CSMWorld::CellCoordinates::toTextureCoords(hit.worldPos), 0);
+        mTerrainTextureSelection->clearTemporarySelection();
     }
 }
 
@@ -138,6 +139,7 @@ void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitRe
     if(hit.hit && hit.tag == nullptr)
     {
         selectTerrainTextures(CSMWorld::CellCoordinates::toTextureCoords(hit.worldPos), 1);
+        mTerrainTextureSelection->clearTemporarySelection();
     }
 }
 
