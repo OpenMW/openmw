@@ -41,9 +41,12 @@ namespace MWWorld
 
             /// separate delete flag used for deletion by a content file
             /// @note not stored in the save game file.
-            bool mDeletedByContentFile;
+            bool mDeletedByContentFile:1;
 
-            bool mEnabled;
+            bool mEnabled:1;
+public:
+            bool mPhysicsPostponed:1;
+private:
 
             /// 0: deleted
             int mCount;
@@ -62,10 +65,7 @@ namespace MWWorld
 
             unsigned int mFlags;
 
-        public:
-
-            bool mPhysicsPostponed;
-
+public:
             RefData();
 
             /// @param cellRef Used to copy constant data such as position into this class where it can
