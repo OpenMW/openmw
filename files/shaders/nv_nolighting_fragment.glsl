@@ -45,10 +45,8 @@ void main()
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
 
-#ifdef FORCE_OPAQUE
 #if FORCE_OPAQUE
     gl_FragData[0].a = 1.0;
-#endif
 #endif
 
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
