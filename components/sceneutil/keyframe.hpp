@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include <osg/Node>
+#include <osg/Callback>
 
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/textkeymap.hpp>
@@ -11,13 +11,13 @@
 
 namespace SceneUtil
 {
-    class KeyframeController : public SceneUtil::Controller, public virtual osg::Object
+    class KeyframeController : public SceneUtil::Controller, public virtual osg::Callback
     {
     public:
         KeyframeController() {}
 
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop)
-            : osg::Object(copy, copyop)
+            : osg::Callback(copy, copyop)
             , SceneUtil::Controller(copy)
         {}
         META_Object(SceneUtil, KeyframeController)
