@@ -7,6 +7,7 @@
 #include <components/nif/data.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
 #include <set>
