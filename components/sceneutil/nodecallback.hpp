@@ -21,7 +21,7 @@ public:
             osg::Callback(nc, copyop) {}
     META_Object(SceneUtil, NodeCallback)
 
-    virtual bool run(osg::Object* object, osg::Object* data)
+    bool run(osg::Object* object, osg::Object* data) override
     {
         static_cast<Derived*>(this)->operator()((NodeType)object, (VisitorType)data->asNodeVisitor());
         return true;
