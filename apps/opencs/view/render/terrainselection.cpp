@@ -116,20 +116,10 @@ void CSVRender::TerrainSelection::drawShapeSelection(const osg::ref_ptr<osg::Vec
             vertices->push_back(osg::Vec3f(xWorldCoord, CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(y - 1), calculateLandHeight(x, y - 1)));
             vertices->push_back(pointXY);
             vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(x - 1), yWorldCoord, calculateLandHeight(x - 1, y)));
-
-            const auto north = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y + 1));
-            if (north == mSelection.end())
-            {
-                vertices->push_back(pointXY);
-                vertices->push_back(osg::Vec3f(xWorldCoord, CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(y + 1), calculateLandHeight(x, y + 1)));
-            }
-
-            const auto east = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x + 1, y));
-            if (east == mSelection.end())
-            {
-                vertices->push_back(pointXY);
-                vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(x + 1), yWorldCoord, calculateLandHeight(x + 1, y)));
-            }
+            vertices->push_back(pointXY);
+            vertices->push_back(osg::Vec3f(xWorldCoord, CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(y + 1), calculateLandHeight(x, y + 1)));
+            vertices->push_back(pointXY);
+            vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(x + 1), yWorldCoord, calculateLandHeight(x + 1, y)));
         }
     }
 }
