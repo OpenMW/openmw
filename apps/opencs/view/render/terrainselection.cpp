@@ -8,7 +8,6 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadland.hpp>
-#include <components/debug/debuglog.hpp>
 
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/world/columnimp.hpp"
@@ -18,7 +17,7 @@
 #include "worldspacewidget.hpp"
 
 CSVRender::TerrainSelection::TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget, TerrainSelectionType type):
-mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget), mDraggedOperationFlag(false), mSelectionType(type)
+mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget), mSelectionType(type)
 {
     mGeometry = new osg::Geometry();
 
@@ -47,19 +46,25 @@ void CSVRender::TerrainSelection::onlySelect(const std::vector<std::pair<int, in
     update();
 }
 
-void CSVRender::TerrainSelection::addSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress)
+void CSVRender::TerrainSelection::addSelect(const std::vector<std::pair<int, int>>& localPositions)
 {
-    handleSelection(localPositions, toggleInProgress, SelectionMethod::AddSelect);
+    handleSelection(localPositions, SelectionMethod::AddSelect);
 }
 
-void CSVRender::TerrainSelection::removeSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress)
+void CSVRender::TerrainSelection::removeSelect(const std::vector<std::pair<int, int>>& localPositions)
 {
-    handleSelection(localPositions, toggleInProgress, SelectionMethod::RemoveSelect);
+    handleSelection(localPositions, SelectionMethod::RemoveSelect);
 }
 
-void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress)
+void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>>& localPositions)
 {
-    handleSelection(localPositions, toggleInProgress, SelectionMethod::ToggleSelect);
+    handleSelection(localPositions, SelectionMethod::ToggleSelect);
+}
+
+void CSVRender::TerrainSelection::clearTemporarySelection()
+{
+    mTemporarySelection.clear();
+    update();
 }
 
 void CSVRender::TerrainSelection::activate()
@@ -202,56 +207,13 @@ void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::V
     }
 }
 
-void CSVRender::TerrainSelection::handleSelection(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress, SelectionMethod selectionMethod)
+void CSVRender::TerrainSelection::handleSelection(const std::vector<std::pair<int, int>>& localPositions, SelectionMethod selectionMethod)
 {
-    if (toggleInProgress)
+    for (auto const& localPos : localPositions)
     {
-        for (auto const& localPos : localPositions)
-        {
-            auto iterTemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
-            mDraggedOperationFlag = true;
+        auto iterTemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
 
-            if (iterTemp == mTemporarySelection.end())
-            {
-                auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
-
-                switch (selectionMethod)
-                {
-                case SelectionMethod::AddSelect:
-                    if (iter == mSelection.end())
-                    {
-                        mSelection.emplace_back(localPos);
-                    }
-
-                    break;
-                case SelectionMethod::RemoveSelect:
-                    if (iter != mSelection.end())
-                    {
-                        mSelection.erase(iter);
-                    }
-
-                    break;
-                case SelectionMethod::ToggleSelect:
-                    if (iter == mSelection.end())
-                    {
-                        mSelection.emplace_back(localPos);
-                    }
-                    else
-                    {
-                        mSelection.erase(iter);
-                    }
-
-                    break;
-                default: break;
-                }
-            }
-
-            mTemporarySelection.push_back(localPos);
-        }
-    }
-    else if (mDraggedOperationFlag == false)
-    {
-        for (auto const& localPos : localPositions)
+        if (iterTemp == mTemporarySelection.end())
         {
             const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
 
@@ -285,14 +247,9 @@ void CSVRender::TerrainSelection::handleSelection(const std::vector<std::pair<in
             default: break;
             }
         }
-    }
-    else
-    {
-        mDraggedOperationFlag = false;
 
-        mTemporarySelection.clear();
+        mTemporarySelection.emplace_back(localPos);
     }
-
     update();
 }
 

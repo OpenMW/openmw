@@ -95,7 +95,7 @@ namespace CSVRender
             bool isInCellSelection(int globalSelectionX, int globalSelectionY);
 
             /// \brief Handle brush mechanics for texture selection
-            void selectTerrainTextures (const std::pair<int, int>& texCoords, unsigned char selectMode, bool dragOperation);
+            void selectTerrainTextures (const std::pair<int, int>& texCoords, unsigned char selectMode);
 
             /// \brief Push texture edits to command macro
             void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
