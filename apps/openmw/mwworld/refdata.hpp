@@ -44,9 +44,9 @@ namespace MWWorld
             bool mDeletedByContentFile:1;
 
             bool mEnabled:1;
-public:
+        public:
             bool mPhysicsPostponed:1;
-private:
+        private:
 
             /// 0: deleted
             int mCount;
@@ -65,7 +65,7 @@ private:
 
             unsigned int mFlags;
 
-public:
+        public:
             RefData();
 
             /// @param cellRef Used to copy constant data such as position into this class where it can
