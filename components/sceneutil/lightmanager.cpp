@@ -1285,10 +1285,8 @@ namespace SceneUtil
             mLight[i] = new osg::Light(*copy.mLight[i].get(), copyop);
     }
 
-    void LightListCallback::operator()(osg::Node *node, osg::NodeVisitor *nv)
+    void LightListCallback::operator()(osg::Node *node, osgUtil::CullVisitor *cv)
     {
-        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
         bool pushedState = pushLightState(node, cv);
         traverse(node, nv);
         if (pushedState)
