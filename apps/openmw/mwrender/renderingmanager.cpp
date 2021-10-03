@@ -1280,11 +1280,7 @@ namespace MWRender
                         defines[name] = key;
                     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
-                    mSceneRoot->removeUpdateCallback(mStateUpdater);
-                    mStateUpdater = new StateUpdater;
-                    mSceneRoot->addUpdateCallback(mStateUpdater);
-                    mStateUpdater->setFogEnd(mViewDistance);
-                    updateAmbient();
+                    mStateUpdater->reset();
 
                     mViewer->startThreading();
                 }
