@@ -22,7 +22,7 @@ public:
         return true;
     }
 
-    void traverse(NodeType object, VisitorType data);
+    void traverse(NodeType object, VisitorType data)
     {
         if (_nestedCallback.valid())
             _nestedCallback->run(object, data);
