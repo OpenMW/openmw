@@ -16,6 +16,7 @@
 #include <components/shader/shadermanager.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 namespace osgUtil
 {
@@ -254,7 +255,7 @@ namespace SceneUtil
     /// starting point is to attach a LightListCallback to each game object's base node.
     /// @note Not thread safe for CullThreadPerCamera threading mode.
     /// @note Due to lack of OSG support, the callback does not work on Drawables.
-    class LightListCallback : public osg::NodeCallback
+    class LightListCallback : public SceneUtil::NodeCallback<LightListCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         LightListCallback()
@@ -270,7 +271,7 @@ namespace SceneUtil
 
         META_Object(SceneUtil, LightListCallback)
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
+        void operator()(osg::Node* node, osgUtil::CullVisitor* nv);
 
         bool pushLightState(osg::Node* node, osgUtil::CullVisitor* nv);
 
