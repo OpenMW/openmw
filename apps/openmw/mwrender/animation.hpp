@@ -245,7 +245,7 @@ protected:
 
     // Keep track of controllers that we added to our scene graph.
     // We may need to rebuild these controllers when the active animation groups / sources change.
-    std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback>>> mActiveControllers;
+    std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>> mActiveControllers;
 
     std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
