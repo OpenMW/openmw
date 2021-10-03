@@ -60,7 +60,7 @@ void CSVRender::CellArrow::adjustTransform()
 {
     // position
     const int cellSize = Constants::CellSizeInUnits;
-    const int offset = cellSize / 2 + 800;
+    const int offset = cellSize / 2 + 600;
 
     int x = mCoordinates.getX()*cellSize + cellSize/2;
     int y = mCoordinates.getY()*cellSize + cellSize/2;
@@ -92,9 +92,9 @@ void CSVRender::CellArrow::buildShape()
 {
     osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
 
-    const int arrowWidth = 4000;
-    const int arrowLength = 1500;
-    const int arrowHeight = 500;
+    const int arrowWidth = 2700;
+    const int arrowLength = 1350;
+    const int arrowHeight = 300;
 
     osg::Vec3Array *vertices = new osg::Vec3Array;
     for (int i2=0; i2<2; ++i2)
