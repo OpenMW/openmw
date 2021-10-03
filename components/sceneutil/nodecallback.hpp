@@ -23,11 +23,11 @@ public:
 
     virtual bool run(osg::Object* object, osg::Object* data)
     {
-        static_cast<Derived*>(this)->operator()((NodeType)object, (VisitorType)data);
+        static_cast<Derived*>(this)->operator()((NodeType)object, (VisitorType)data->asNodeVisitor());
         return true;
     }
 
-    void traverse(NodeType object, VisitorType data)
+    void traverse(osg::Object* object, osg::Object* data)
     {
         if (_nestedCallback.valid())
             _nestedCallback->run(object, data);
