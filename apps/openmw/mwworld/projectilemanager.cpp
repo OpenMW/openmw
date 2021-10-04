@@ -162,7 +162,7 @@ namespace MWWorld
     }
 
     /// Rotates an osg::PositionAttitudeTransform over time.
-    class RotateCallback : public SceneUtil::NodeCallback<RotateController, osg::PositionAttitudeTransform*>
+    class RotateCallback : public SceneUtil::NodeCallback<RotateCallback, osg::PositionAttitudeTransform*>
     {
     public:
         RotateCallback(const osg::Vec3f& axis = osg::Vec3f(0,-1,0), float rotateSpeed = osg::PI*2)
