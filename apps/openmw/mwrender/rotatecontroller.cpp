@@ -22,6 +22,11 @@ void RotateController::setRotate(const osg::Quat &rotate)
     mRotate = rotate;
 }
 
+void RotateController::setOffset(const osg::Vec3f& offset)
+{
+    mOffset = offset;
+}
+
 void RotateController::operator()(osg::MatrixTransform *node, osg::NodeVisitor *nv)
 {
     if (!mEnabled)
@@ -31,9 +36,11 @@ void RotateController::operator()(osg::MatrixTransform *node, osg::NodeVisitor *
     }
     osg::Matrix matrix = node->getMatrix();
     osg::Quat worldOrient = getWorldOrientation(node);
+    osg::Quat worldOrientInverse = worldOrient.inverse();
 
-    osg::Quat orient = worldOrient * mRotate * worldOrient.inverse() * matrix.getRotate();
+    osg::Quat orient = worldOrient * mRotate * worldOrientInverse * matrix.getRotate();
     matrix.setRotate(orient);
+    matrix.setTrans(matrix.getTrans() + worldOrientInverse * mOffset;
 
     node->setMatrix(matrix);
 
