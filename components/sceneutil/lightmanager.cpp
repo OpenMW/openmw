@@ -661,7 +661,7 @@ namespace SceneUtil
             {
                 mLastFrameNumber = cv->getTraversalNumber();
 
-                if (mLightManager->getLightingMethod() == LightingMethod::SingleUBO)
+                if (node->getLightingMethod() == LightingMethod::SingleUBO)
                 {
                     auto stateset = node->getStateSet();
                     auto bo = node->getLightBuffer(mLastFrameNumber);
