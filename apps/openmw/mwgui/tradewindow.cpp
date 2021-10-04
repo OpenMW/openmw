@@ -52,6 +52,7 @@ namespace MWGui
         , mItemToSell(-1)
         , mCurrentBalance(0)
         , mCurrentMerchantOffer(0)
+        , mReceiveMoney(false)
     {
         getWidget(mFilterAll, "AllButton");
         getWidget(mFilterWeapon, "WeaponButton");
@@ -405,9 +406,14 @@ namespace MWGui
 
     void TradeWindow::onBalanceValueChanged(int value)
     {
+        int previousBalance = mCurrentBalance;
+
         // Entering a "-" sign inverts the buying/selling state
         mCurrentBalance = (mCurrentBalance >= 0 ? 1 : -1) * value;
         updateLabels();
+
+        if (mReceiveMoney && mCurrentBalance == 0)
+            mCurrentBalance = previousBalance;
 
         if (value != std::abs(value))
             mTotalBalance->setValue(std::abs(value));
@@ -434,10 +440,23 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
-
         mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + MyGUI::utility::toString(playerGold));
 
-        if (mCurrentBalance < 0)
+        TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
+        const std::vector<ItemStack>& playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
+        const std::vector<ItemStack>& merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
+
+        if (playerBorrowed.empty() && merchantBorrowed.empty()) {
+            mCurrentBalance = 0;
+        }
+        else if (playerBorrowed.empty()) {
+            mReceiveMoney = false;
+        }
+        else if (merchantBorrowed.empty()) {
+            mReceiveMoney = true;
+        }
+
+        if (mCurrentBalance < 0 || mReceiveMoney)
         {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
         }
