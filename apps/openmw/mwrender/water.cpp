@@ -200,7 +200,7 @@ public:
             cv->popModelViewMatrix();
         }
         else
-            traverse(node, nv);
+            traverse(node, cv);
     }
 };
 
