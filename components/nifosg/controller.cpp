@@ -72,6 +72,7 @@ KeyframeController::KeyframeController()
 
 KeyframeController::KeyframeController(const KeyframeController &copy, const osg::CopyOp &copyop)
     : SceneUtil::KeyframeController(copy, copyop)
+    , SceneUtil::NodeCallback<KeyframeController>(copy, copyop)
     , mRotations(copy.mRotations)
     , mXRotations(copy.mXRotations)
     , mYRotations(copy.mYRotations)

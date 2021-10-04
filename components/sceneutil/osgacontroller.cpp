@@ -102,7 +102,7 @@ namespace SceneUtil
         apply(static_cast<osg::Node&>(node));
     }
 
-    OsgAnimationController::OsgAnimationController(const OsgAnimationController &copy, const osg::CopyOp &copyop) : SceneUtil::KeyframeController(copy, copyop)
+    OsgAnimationController::OsgAnimationController(const OsgAnimationController &copy, const osg::CopyOp &copyop) : SceneUtil::KeyframeController(copy, copyop), SceneUtil::NodeCallback<OsgAnimationController>(copy, copyop)
     , mEmulatedAnimations(copy.mEmulatedAnimations)
     {
         mLinker = nullptr;
