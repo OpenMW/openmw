@@ -35,7 +35,7 @@ void RotateController::operator()(osg::MatrixTransform *node, osg::NodeVisitor *
     osg::Quat orient = worldOrient * mRotate * worldOrient.inverse() * matrix.getRotate();
     matrix.setRotate(orient);
 
-    transform->setMatrix(matrix);
+    node->setMatrix(matrix);
 
     traverse(node,nv);
 }
