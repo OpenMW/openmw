@@ -52,7 +52,6 @@ namespace MWGui
         , mItemToSell(-1)
         , mCurrentBalance(0)
         , mCurrentMerchantOffer(0)
-        , mReceiveMoney(false)
     {
         getWidget(mFilterAll, "AllButton");
         getWidget(mFilterWeapon, "WeaponButton");
@@ -412,7 +411,7 @@ namespace MWGui
         mCurrentBalance = (mCurrentBalance >= 0 ? 1 : -1) * value;
         updateLabels();
 
-        if (mReceiveMoney && mCurrentBalance == 0)
+        if (mCurrentBalance == 0)
             mCurrentBalance = previousBalance;
 
         if (value != std::abs(value))
@@ -424,6 +423,7 @@ namespace MWGui
         // prevent overflows, and prevent entering INT_MIN since abs(INT_MIN) is undefined
         if (mCurrentBalance == std::numeric_limits<int>::max() || mCurrentBalance == std::numeric_limits<int>::min()+1)
             return;
+        if (mTotalBalance->getValue() == 0) mCurrentBalance = 0;
         if (mCurrentBalance < 0) mCurrentBalance -= 1;
         else mCurrentBalance += 1;
         updateLabels();
@@ -431,6 +431,7 @@ namespace MWGui
 
     void TradeWindow::onDecreaseButtonTriggered()
     {
+        if (mTotalBalance->getValue() == 0) mCurrentBalance = 0;
         if (mCurrentBalance < 0) mCurrentBalance += 1;
         else mCurrentBalance -= 1;
         updateLabels();
@@ -450,16 +451,8 @@ namespace MWGui
         {
             mCurrentBalance = 0;
         }
-        else if (playerBorrowed.empty())
-        {
-            mReceiveMoney = false;
-        }
-        else if (merchantBorrowed.empty())
-        {
-            mReceiveMoney = true;
-        }
 
-        if (mCurrentBalance < 0 || mReceiveMoney)
+        if (mCurrentBalance < 0)
         {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
         }
