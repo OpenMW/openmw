@@ -177,6 +177,7 @@ Programmers
     PlutonicOverkill
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
+    Randy Davin (Kindi)
     rdimesio
     rexelion
     riothamus
