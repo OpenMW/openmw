@@ -209,6 +209,7 @@
     Bug #6043: Actor can have torch missing when torch animation is played
     Bug #6047: Mouse bindings can be triggered during save loading
     Bug #6136: Game freezes when NPCs try to open doors that are about to be closed
+    Bug #6294: Game crashes with empty pathgrid
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
@@ -238,6 +239,7 @@
     Feature #5519: Code Patch tab in launcher
     Feature #5524: Resume failed script execution after reload
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
+    Feature #5551: Do not reboot PC after OpenMW installation on Windows
     Feature #5563: Run physics update in background thread
     Feature #5579: MCP SetAngle enhancement
     Feature #5580: Service refusal filtering
@@ -252,6 +254,7 @@
     Feature #5814: Bsatool should be able to create BSA archives, not only to extract it
     Feature #5828: Support more than 8 lights
     Feature #5910: Fall back to delta time when physics can't keep up
+    Feature #5980: Support Bullet with double precision instead of one with single precision
     Feature #6024: OpenMW-CS: Selecting terrain in "Terrain land editing" should support "Add to selection" and "Remove from selection" modes
     Feature #6033: Include pathgrid to navigation mesh
     Feature #6034: Find path based on area cost depending on NPC stats
