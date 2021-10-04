@@ -20,6 +20,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -161,7 +162,7 @@ namespace MWWorld
     }
 
     /// Rotates an osg::PositionAttitudeTransform over time.
-    class RotateCallback : public osg::NodeCallback
+    class RotateCallback : public SceneUtil::NodeCallback<RotateController, osg::PositionAttitudeTransform*>
     {
     public:
         RotateCallback(const osg::Vec3f& axis = osg::Vec3f(0,-1,0), float rotateSpeed = osg::PI*2)
@@ -170,14 +171,12 @@ namespace MWWorld
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::PositionAttitudeTransform* node, osg::NodeVisitor* nv)
         {
-            osg::PositionAttitudeTransform* transform = static_cast<osg::PositionAttitudeTransform*>(node);
-
             double time = nv->getFrameStamp()->getSimulationTime();
 
             osg::Quat orient = osg::Quat(time * mRotateSpeed, mAxis);
-            transform->setAttitude(orient);
+            node->setAttitude(orient);
 
             traverse(node, nv);
         }
