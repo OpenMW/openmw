@@ -1,15 +1,16 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_LIGHTCONTROLLER_H
 #define OPENMW_COMPONENTS_SCENEUTIL_LIGHTCONTROLLER_H
 
-#include <osg/NodeCallback>
+#include <components/sceneutil/nodecallback.hpp>
 #include <osg/Vec4f>
 
 namespace SceneUtil
 {
 
+    class LightSource;
+
     /// @brief Controller class to handle a pulsing and/or flickering light
-    /// @note Must be set on a SceneUtil::LightSource.
-    class LightController : public osg::NodeCallback
+    class LightController : public SceneUtil::NodeCallback<LightController, SceneUtil::LightSource*>
     {
     public:
         enum LightType {
@@ -26,7 +27,7 @@ namespace SceneUtil
 
         void setDiffuse(const osg::Vec4f& color);
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
+        void operator()(SceneUtil::LightSource* node, osg::NodeVisitor* nv);
 
     private:
         LightType mType;
