@@ -446,13 +446,16 @@ namespace MWGui
         const std::vector<ItemStack>& playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
         const std::vector<ItemStack>& merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
 
-        if (playerBorrowed.empty() && merchantBorrowed.empty()) {
+        if (playerBorrowed.empty() && merchantBorrowed.empty())
+        {
             mCurrentBalance = 0;
         }
-        else if (playerBorrowed.empty()) {
+        else if (playerBorrowed.empty())
+        {
             mReceiveMoney = false;
         }
-        else if (merchantBorrowed.empty()) {
+        else if (merchantBorrowed.empty())
+        {
             mReceiveMoney = true;
         }
 
