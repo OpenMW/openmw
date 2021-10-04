@@ -46,12 +46,14 @@
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
     Bug #6223: Some Constant Effect Bound Items inconsistencies
+    Bug #6258: Barter menu glitches out when modifying prices
     Bug #6273: Respawning NPCs rotation is inconsistent
     Bug #6282: Laura craft doesn't follow the player character
     Bug #6283: Avis Dorsey follows you after her death
     Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
     Bug #6302: Teleporting disabled actor breaks its disabled state
     Bug #6307: Pathfinding in Infidelities quest from Tribunal addon is broken
+    Bug #6322: Total sold/cost should reset to 0 when there are no items offered
     Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
