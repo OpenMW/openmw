@@ -50,10 +50,11 @@ namespace DetourNavigator
     }
 
     template <class Callback>
-    void getTilesPositions(const int cellSize, const btTransform& transform,
+    void getTilesPositions(const int cellSize, const osg::Vec3f& shift,
         const Settings& settings, Callback&& callback)
     {
         const auto halfCellSize = cellSize / 2;
+        const btTransform transform(btMatrix3x3::getIdentity(), Misc::Convert::toBullet(shift));
         auto aabbMin = transform(btVector3(-halfCellSize, -halfCellSize, 0));
         auto aabbMax = transform(btVector3(halfCellSize, halfCellSize, 0));
 

@@ -2,8 +2,6 @@
 
 #include <osg/StateSet>
 
-#include <osgAnimation/Bone>
-#include <osgAnimation/Skeleton>
 #include <osgAnimation/MorphGeometry>
 #include <osgAnimation/RigGeometry>
 
@@ -34,11 +32,6 @@ namespace SceneUtil
             osgParticle::ParticleSystemUpdater* cloned = new osgParticle::ParticleSystemUpdater(*updater, osg::CopyOp::SHALLOW_COPY);
             mUpdaterToOldPs[cloned] = updater->getParticleSystem(0);
             return cloned;
-        }
-
-        if (dynamic_cast<const osgAnimation::Bone*>(node) || dynamic_cast<const osgAnimation::Skeleton*>(node))
-        {
-            return osg::clone(node, *this);
         }
         return osg::CopyOp::operator()(node);
     }

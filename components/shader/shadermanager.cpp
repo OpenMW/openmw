@@ -9,7 +9,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <components/sceneutil/lightmanager.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
@@ -17,18 +16,12 @@ namespace Shader
 {
 
     ShaderManager::ShaderManager()
-        : mLightingMethod(SceneUtil::LightingMethod::FFP)
     {
     }
 
     void ShaderManager::setShaderPath(const std::string &path)
     {
         mPath = path;
-    }
-
-    void ShaderManager::setLightingMethod(SceneUtil::LightingMethod method)
-    {
-        mLightingMethod = method;
     }
 
     bool addLineDirectivesAfterConditionalBlocks(std::string& source)
@@ -345,19 +338,16 @@ namespace Shader
         return shaderIt->second;
     }
 
-    osg::ref_ptr<osg::Program> ShaderManager::getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader)
+    osg::ref_ptr<osg::Program> ShaderManager::getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader, const osg::Program* programTemplate)
     {
         std::lock_guard<std::mutex> lock(mMutex);
         ProgramMap::iterator found = mPrograms.find(std::make_pair(vertexShader, fragmentShader));
         if (found == mPrograms.end())
         {
-            osg::ref_ptr<osg::Program> program (new osg::Program);
+            if (!programTemplate) programTemplate = mProgramTemplate;
+            osg::ref_ptr<osg::Program> program = programTemplate ? static_cast<osg::Program*>(programTemplate->clone(osg::CopyOp::SHALLOW_COPY)) : new osg::Program;
             program->addShader(vertexShader);
             program->addShader(fragmentShader);
-            program->addBindAttribLocation("aOffset", 6);
-            program->addBindAttribLocation("aRotation", 7);
-            if (mLightingMethod == SceneUtil::LightingMethod::SingleUBO)
-                program->addBindUniformBlock("LightBufferBinding", static_cast<int>(UBOBinding::LightBuffer));
             found = mPrograms.insert(std::make_pair(std::make_pair(vertexShader, fragmentShader), program)).first;
         }
         return found->second;
@@ -371,11 +361,10 @@ namespace Shader
     void ShaderManager::setGlobalDefines(DefineMap & globalDefines)
     {
         mGlobalDefines = globalDefines;
-        for (auto shaderMapElement: mShaders)
+        for (const auto& [key, shader]: mShaders)
         {
-            std::string templateId = shaderMapElement.first.first;
-            ShaderManager::DefineMap defines = shaderMapElement.first.second;
-            osg::ref_ptr<osg::Shader> shader = shaderMapElement.second;
+            std::string templateId = key.first;
+            ShaderManager::DefineMap defines = key.second;
             if (shader == nullptr)
                 // I'm not sure how to handle a shader that was already broken as there's no way to get a potential replacement to the nodes that need it.
                 continue;
@@ -391,13 +380,13 @@ namespace Shader
     void ShaderManager::releaseGLObjects(osg::State *state)
     {
         std::lock_guard<std::mutex> lock(mMutex);
-        for (auto shader : mShaders)
+        for (const auto& [_, shader] : mShaders)
         {
-            if (shader.second != nullptr)
-                shader.second->releaseGLObjects(state);
+            if (shader != nullptr)
+                shader->releaseGLObjects(state);
         }
-        for (auto program : mPrograms)
-            program.second->releaseGLObjects(state);
+        for (const auto& [_, program] : mPrograms)
+            program->releaseGLObjects(state);
     }
 
 }

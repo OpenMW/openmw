@@ -34,7 +34,7 @@ size_t InventoryItemModel::getItemCount()
     return mItems.size();
 }
 
-ItemModel::ModelIndex InventoryItemModel::getIndex (ItemStack item)
+ItemModel::ModelIndex InventoryItemModel::getIndex (const ItemStack& item)
 {
     size_t i = 0;
     for (ItemStack& itemStack : mItems)
@@ -129,6 +129,11 @@ bool InventoryItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
     MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item, mActor, count);
 
     return true;
+}
+
+bool InventoryItemModel::usesContainer(const MWWorld::Ptr& container)
+{
+    return mActor == container;
 }
 
 }

@@ -238,9 +238,6 @@ namespace MWWorld
             state.mNode->addChild(projectileLightSource);
             projectileLightSource->setLight(projectileLight);
         }
-        
-        SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
-        state.mNode->accept(disableFreezeOnCullVisitor);
 
         state.mNode->addCullCallback(new SceneUtil::LightListCallback);
 
@@ -259,7 +256,7 @@ namespace MWWorld
         state.mEffectAnimationTime->addTime(duration);
     }
 
-    void ProjectileManager::launchMagicBolt(const std::string &spellId, const Ptr &caster, const osg::Vec3f& fallbackDirection)
+    void ProjectileManager::launchMagicBolt(const std::string &spellId, const Ptr &caster, const osg::Vec3f& fallbackDirection, int slot)
     {
         osg::Vec3f pos = caster.getRefData().getPosition().asVec3();
         if (caster.getClass().isActor())
@@ -281,6 +278,7 @@ namespace MWWorld
         MagicBoltState state;
         state.mSpellId = spellId;
         state.mCasterHandle = caster;
+        state.mSlot = slot;
         if (caster.getClass().isActor())
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
@@ -320,7 +318,7 @@ namespace MWWorld
         // in case there are multiple effects, the model is a dummy without geometry. Use the second effect for physics shape
         if (state.mIdMagic.size() > 1)
             model = "meshes\\" + MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find(state.mIdMagic[1])->mModel;
-        state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true, false);
+        state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true);
         state.mToDelete = false;
         mMagicBolts.push_back(state);
     }
@@ -345,7 +343,7 @@ namespace MWWorld
         if (!ptr.getClass().getEnchantment(ptr).empty())
             SceneUtil::addEnchantedGlow(state.mNode, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
 
-        state.mProjectileId = mPhysics->addProjectile(actor, pos, model, false, true);
+        state.mProjectileId = mPhysics->addProjectile(actor, pos, model, false);
         state.mToDelete = false;
         mProjectiles.push_back(state);
     }
@@ -496,9 +494,6 @@ namespace MWWorld
 
             auto* projectile = mPhysics->getProjectile(projectileState.mProjectileId);
 
-            if (const auto hitWaterPos = projectile->getWaterHitPosition())
-                mRendering->emitWaterRipple(Misc::Convert::toOsg(*hitWaterPos));
-
             const auto pos = projectile->getPosition();
             projectileState.mNode->setPosition(pos);
 
@@ -522,9 +517,11 @@ namespace MWWorld
                 if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), projectileState.mBowId))
                     bow = *invIt;
             }
+            if (projectile->getHitWater())
+                mRendering->emitWaterRipple(pos);
 
             MWMechanics::projectileHit(caster, target, bow, projectileRef.getPtr(), pos, projectileState.mAttackStrength);
-            cleanupProjectile(projectileState);
+            projectileState.mToDelete = true;
         }
         for (auto& magicBoltState : mMagicBolts)
         {
@@ -549,11 +546,23 @@ namespace MWWorld
             cast.mHitPosition = pos;
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
-            cast.mStack = false;
+            cast.mSlot = magicBoltState.mSlot;
             cast.inflict(target, caster, magicBoltState.mEffects, ESM::RT_Target, false, true);
 
-            MWBase::Environment::get().getWorld()->explodeSpell(pos, magicBoltState.mEffects, caster, target, ESM::RT_Target, magicBoltState.mSpellId, magicBoltState.mSourceName);
-            cleanupMagicBolt(magicBoltState);
+            MWBase::Environment::get().getWorld()->explodeSpell(pos, magicBoltState.mEffects, caster, target, ESM::RT_Target, magicBoltState.mSpellId, magicBoltState.mSourceName, false, magicBoltState.mSlot);
+            magicBoltState.mToDelete = true;
+        }
+
+        for (auto& projectileState : mProjectiles)
+        {
+            if (projectileState.mToDelete)
+                cleanupProjectile(projectileState);
+        }
+
+        for (auto& magicBoltState : mMagicBolts)
+        {
+            if (magicBoltState.mToDelete)
+                cleanupMagicBolt(magicBoltState);
         }
         mProjectiles.erase(std::remove_if(mProjectiles.begin(), mProjectiles.end(), [](const State& state) { return state.mToDelete; }),
                 mProjectiles.end());
@@ -620,7 +629,7 @@ namespace MWWorld
             state.mPosition = ESM::Vector3(osg::Vec3f(it->mNode->getPosition()));
             state.mOrientation = ESM::Quaternion(osg::Quat(it->mNode->getAttitude()));
             state.mActorId = it->mActorId;
-
+            state.mSlot = it->mSlot;
             state.mSpellId = it->mSpellId;
             state.mSpeed = it->mSpeed;
 
@@ -654,7 +663,7 @@ namespace MWWorld
                 int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
                 state.mThrown = MWMechanics::getWeaponType(weaponType)->mWeaponClass == ESM::WeaponType::Thrown;
 
-                state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, false, true);
+                state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, false);
             }
             catch(...)
             {
@@ -676,6 +685,7 @@ namespace MWWorld
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
             state.mToDelete = false;
+            state.mSlot = esm.mSlot;
             std::string texture;
 
             try
@@ -707,7 +717,7 @@ namespace MWWorld
 
             osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
             createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, true, lightDiffuseColor, texture);
-            state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, true, false);
+            state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, true);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             for (const std::string &soundid : state.mSoundIds)

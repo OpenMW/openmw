@@ -79,6 +79,7 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["NiPointLight"]                 = {&construct <NiPointLight>                , RC_NiLight                    };
     factory["NiSpotLight"]                  = {&construct <NiSpotLight>                 , RC_NiLight                    };
     factory["NiTextureEffect"]              = {&construct <NiTextureEffect>             , RC_NiTextureEffect            };
+    factory["NiExtraData"]                  = {&construct <NiExtraData>                 , RC_NiExtraData                };
     factory["NiVertWeightsExtraData"]       = {&construct <NiVertWeightsExtraData>      , RC_NiVertWeightsExtraData     };
     factory["NiTextKeyExtraData"]           = {&construct <NiTextKeyExtraData>          , RC_NiTextKeyExtraData         };
     factory["NiStringExtraData"]            = {&construct <NiStringExtraData>           , RC_NiStringExtraData          };

@@ -17,7 +17,7 @@ void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
 }
 
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
-: mDocument (document), mAborted (false), mMessages (nullptr), mTotalRecords (0)
+: mDocument (document), mTotalRecordsLabel (0), mRecordsLabel (0), mAborted (false), mMessages (nullptr), mRecords(0)
 {
     setWindowTitle (QString::fromUtf8((std::string("Opening ") + document->getSavePath().filename().string()).c_str()));
 
@@ -25,26 +25,25 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 
     mLayout = new QVBoxLayout (this);
 
-    // file progress
-    mFile = new QLabel (this);
+    // total progress
+    mTotalRecordsLabel = new QLabel (this);
 
-    mLayout->addWidget (mFile);
+    mLayout->addWidget (mTotalRecordsLabel);
 
-    mFileProgress = new QProgressBar (this);
+    mTotalProgress = new QProgressBar (this);
 
-    mLayout->addWidget (mFileProgress);
+    mLayout->addWidget (mTotalProgress);
 
-    int size = static_cast<int> (document->getContentFiles().size())+1;
-    if (document->isNew())
-        --size;
+    mTotalProgress->setMinimum (0);
+    mTotalProgress->setMaximum (document->getData().getTotalRecords(document->getContentFiles()));
+    mTotalProgress->setTextVisible (true);
+    mTotalProgress->setValue (0);
+    mTotalRecords = 0;
 
-    mFileProgress->setMinimum (0);
-    mFileProgress->setMaximum (size);
-    mFileProgress->setTextVisible (true);
-    mFileProgress->setValue (0);
+    mFilesLoaded = 0;
 
     // record progress
-    mLayout->addWidget (mRecords = new QLabel ("Records", this));
+    mLayout->addWidget (mRecordsLabel = new QLabel ("Records", this));
 
     mRecordProgress = new QProgressBar (this);
 
@@ -74,29 +73,32 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     connect (mButtons, SIGNAL (rejected()), this, SLOT (cancel()));
 }
 
-void CSVDoc::LoadingDocument::nextStage (const std::string& name, int totalRecords)
+void CSVDoc::LoadingDocument::nextStage (const std::string& name, int fileRecords)
 {
-    mFile->setText (QString::fromUtf8 (("Loading: " + name).c_str()));
+    ++mFilesLoaded;
+    size_t numFiles = mDocument->getContentFiles().size();
 
-    mFileProgress->setValue (mFileProgress->value()+1);
+    mTotalRecordsLabel->setText (QString::fromUtf8 (("Loading: "+name
+                    +" ("+std::to_string(mFilesLoaded)+" of "+std::to_string((numFiles))+")").c_str()));
+
+    mTotalRecords = mTotalProgress->value();
 
     mRecordProgress->setValue (0);
-    mRecordProgress->setMaximum (totalRecords>0 ? totalRecords : 1);
+    mRecordProgress->setMaximum (fileRecords>0 ? fileRecords : 1);
 
-    mTotalRecords = totalRecords;
+    mRecords = fileRecords;
 }
 
 void CSVDoc::LoadingDocument::nextRecord (int records)
 {
-    if (records<=mTotalRecords)
+    if (records <= mRecords)
     {
-        mRecordProgress->setValue (records);
+        mTotalProgress->setValue (mTotalRecords+records);
 
-        std::ostringstream stream;
+        mRecordProgress->setValue(records);
 
-        stream << "Records: " << records << " of " << mTotalRecords;
-
-        mRecords->setText (QString::fromUtf8 (stream.str().c_str()));
+        mRecordsLabel->setText(QString::fromStdString(
+                    "Records: "+std::to_string(records)+" of "+std::to_string(mRecords)));
     }
 }
 
@@ -176,12 +178,12 @@ void CSVDoc::Loader::loadingStopped (CSMDoc::Document *document, bool completed,
 }
 
 void CSVDoc::Loader::nextStage (CSMDoc::Document *document, const std::string& name,
-    int totalRecords)
+    int fileRecords)
 {
     std::map<CSMDoc::Document *, LoadingDocument *>::iterator iter = mDocuments.find (document);
 
     if (iter!=mDocuments.end())
-        iter->second->nextStage (name, totalRecords);
+        iter->second->nextStage (name, fileRecords);
 }
 
 void CSVDoc::Loader::nextRecord (CSMDoc::Document *document, int records)

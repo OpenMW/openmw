@@ -30,6 +30,8 @@
 #include <osg/io_utils>
 #include <osg/Depth>
 
+#include <osgDB/SharedStateManager>
+
 #include <osgUtil/TransformAttributeFunctor>
 #include <osgUtil/Statistics>
 #include <osgUtil/MeshOptimizers>
@@ -39,6 +41,8 @@
 #include <numeric>
 
 #include <iterator>
+
+#include <components/sceneutil/util.hpp>
 
 using namespace osgUtil;
 
@@ -80,6 +84,13 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         CombineStaticTransformsVisitor cstv(this);
         node->accept(cstv);
         cstv.removeTransforms(node);
+    }
+
+    if (options & SHARE_DUPLICATE_STATE && _sharedStateManager)
+    {
+        if (_sharedStateMutex) _sharedStateMutex->lock();
+        _sharedStateManager->share(node);
+        if (_sharedStateMutex) _sharedStateMutex->unlock();
     }
 
     if (options & REMOVE_REDUNDANT_NODES)
@@ -739,7 +750,8 @@ bool Optimizer::CombineStaticTransformsVisitor::removeTransforms(osg::Node* node
         if (transform->getNumChildren()==1 &&
             transform->getChild(0)->asTransform()!=0 &&
             transform->getChild(0)->asTransform()->asMatrixTransform()!=0 &&
-            transform->getChild(0)->asTransform()->getDataVariance()==osg::Object::STATIC)
+            (!transform->getChild(0)->getStateSet() || transform->getChild(0)->getStateSet()->referenceCount()==1) &&
+            transform->getChild(0)->getDataVariance()==osg::Object::STATIC)
         {
             // now combine with its child.
             osg::MatrixTransform* child = transform->getChild(0)->asTransform()->asMatrixTransform();
@@ -1560,7 +1572,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                 }
                 if (_alphaBlendingActive && _mergeAlphaBlending && !geom->getStateSet())
                 {
-                    osg::Depth* d = new osg::Depth;
+                    auto d = createDepth();
                     d->setWriteMask(0);
                     geom->getOrCreateStateSet()->setAttribute(d);
                 }

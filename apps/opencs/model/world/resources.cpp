@@ -3,6 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <algorithm>
+#include <string_view>
 
 #include <components/vfs/manager.hpp>
 
@@ -22,10 +23,8 @@ void CSMWorld::Resources::recreate(const VFS::Manager* vfs, const char * const *
 
     size_t baseSize = mBaseDirectory.size();
 
-    const std::map<std::string, VFS::File*>& index = vfs->getIndex();
-    for (std::map<std::string, VFS::File*>::const_iterator it = index.begin(); it != index.end(); ++it)
+    for (const auto& filepath : vfs->getRecursiveDirectoryIterator(""))
     {
-        std::string filepath = it->first;
         if (filepath.size()<baseSize+1 ||
             filepath.substr (0, baseSize)!=mBaseDirectory ||
             (filepath[baseSize]!='/' && filepath[baseSize]!='\\'))
@@ -83,7 +82,7 @@ int CSMWorld::Resources::getIndex (const std::string& id) const
     return index;
 }
 
-int CSMWorld::Resources::searchId (const std::string& id) const
+int CSMWorld::Resources::searchId(std::string_view id) const
 {
     std::string id2 = Misc::StringUtils::lowerCase (id);
 

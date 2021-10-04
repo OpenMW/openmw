@@ -450,6 +450,7 @@ namespace MWGui
 
         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
         texture->setImage(result.getImage());
+        texture->setInternalFormat(GL_RGB);
         texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);

@@ -35,6 +35,8 @@ namespace MWGui
 
         void resetReference() override;
 
+        void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
+
     private:
         DragAndDrop* mDragAndDrop;
 

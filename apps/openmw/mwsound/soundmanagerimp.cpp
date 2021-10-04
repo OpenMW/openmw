@@ -294,20 +294,9 @@ namespace MWSound
         if (mMusicFiles.find(playlist) == mMusicFiles.end())
         {
             std::vector<std::string> filelist;
-            const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
 
-            std::string pattern = "Music/" + playlist;
-            mVFS->normalizeFilename(pattern);
-
-            std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
-            while (found != index.end())
-            {
-                if (found->first.size() >= pattern.size() && found->first.substr(0, pattern.size()) == pattern)
-                    filelist.push_back(found->first);
-                else
-                    break;
-                ++found;
-            }
+            for (const auto& name : mVFS->getRecursiveDirectoryIterator("Music/" + playlist))
+                filelist.push_back(name);
 
             mMusicFiles[playlist] = filelist;
         }
@@ -327,13 +316,11 @@ namespace MWSound
         if (mMusicFiles.find("Title") == mMusicFiles.end())
         {
             std::vector<std::string> filelist;
-            const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
             // Is there an ini setting for this filename or something?
             std::string filename = "music/special/morrowind title.mp3";
-            auto found = index.find(filename);
-            if (found != index.end())
+            if (mVFS->exists(filename))
             {
-                filelist.emplace_back(found->first);
+                filelist.emplace_back(filename);
                 mMusicFiles["Title"] = filelist;
             }
             else
@@ -355,10 +342,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
 
-        std::string voicefile = "Sound/"+filename;
-
-        mVFS->normalizeFilename(voicefile);
-        DecoderPtr decoder = loadVoice(voicefile);
+        DecoderPtr decoder = loadVoice(mVFS->normalizeFilename("Sound/" + filename));
         if (!decoder)
             return;
 
@@ -389,10 +373,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
 
-        std::string voicefile = "Sound/"+filename;
-
-        mVFS->normalizeFilename(voicefile);
-        DecoderPtr decoder = loadVoice(voicefile);
+        DecoderPtr decoder = loadVoice(mVFS->normalizeFilename("Sound/" + filename));
         if (!decoder)
             return;
 

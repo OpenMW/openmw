@@ -158,6 +158,32 @@ namespace MWLua
                     luaManager->addAction(std::move(action));
             };
         }
+        else
+        {  // Only for local scripts
+            objectT["isOnGround"] = [](const ObjectT& o)
+            {
+                return MWBase::Environment::get().getWorld()->isOnGround(o.ptr());
+            };
+            objectT["isSwimming"] = [](const ObjectT& o)
+            {
+                return MWBase::Environment::get().getWorld()->isSwimming(o.ptr());
+            };
+            objectT["isInWeaponStance"] = [](const ObjectT& o)
+            {
+                const MWWorld::Class& cls = o.ptr().getClass();
+                return cls.isActor() && cls.getCreatureStats(o.ptr()).getDrawState() == MWMechanics::DrawState_Weapon;
+            };
+            objectT["isInMagicStance"] = [](const ObjectT& o)
+            {
+                const MWWorld::Class& cls = o.ptr().getClass();
+                return cls.isActor() && cls.getCreatureStats(o.ptr()).getDrawState() == MWMechanics::DrawState_Spell;
+            };
+            objectT["getCurrentSpeed"] = [](const ObjectT& o)
+            {
+                const MWWorld::Class& cls = o.ptr().getClass();
+                return cls.getCurrentSpeed(o.ptr());
+            };
+        }
     }
 
     template <class ObjectT>

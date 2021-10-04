@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <climits> // INT_MIN
 
 #include <osgDB/WriteFile>
 
@@ -357,7 +358,7 @@ namespace ESSImport
 
                 std::string idLower = Misc::StringUtils::lowerCase(out.mRefID);
 
-                std::map<std::pair<int, std::string>, NPCC>::const_iterator npccIt = mContext->mNpcChanges.find(
+                auto npccIt = mContext->mNpcChanges.find(
                             std::make_pair(refIndex, out.mRefID));
                 if (npccIt != mContext->mNpcChanges.end())
                 {
@@ -369,6 +370,8 @@ namespace ESSImport
                     // from the ESM with default values
                     if (cellref.mHasACDT)
                         convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    else
+                        objstate.mCreatureStats.mGoldPool = INT_MIN; // HACK: indicates no ACDT
                     if (cellref.mHasACSC)
                         convertACSC(cellref.mACSC, objstate.mCreatureStats);
                     convertNpcData(cellref, objstate.mNpcStats);
@@ -383,7 +386,7 @@ namespace ESSImport
                     continue;
                 }
 
-                std::map<std::pair<int, std::string>, CNTC>::const_iterator cntcIt = mContext->mContainerChanges.find(
+                auto cntcIt = mContext->mContainerChanges.find(
                             std::make_pair(refIndex, out.mRefID));
                 if (cntcIt != mContext->mContainerChanges.end())
                 {
@@ -398,7 +401,7 @@ namespace ESSImport
                     continue;
                 }
 
-                std::map<std::pair<int, std::string>, CREC>::const_iterator crecIt = mContext->mCreatureChanges.find(
+                auto crecIt = mContext->mCreatureChanges.find(
                             std::make_pair(refIndex, out.mRefID));
                 if (crecIt != mContext->mCreatureChanges.end())
                 {
@@ -410,6 +413,8 @@ namespace ESSImport
                     // from the ESM with default values
                     if (cellref.mHasACDT)
                         convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    else
+                        objstate.mCreatureStats.mGoldPool = INT_MIN; // HACK: indicates no ACDT
                     if (cellref.mHasACSC)
                         convertACSC(cellref.mACSC, objstate.mCreatureStats);
                     convertCREC(crecIt->second, objstate);

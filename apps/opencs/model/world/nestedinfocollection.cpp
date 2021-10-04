@@ -35,22 +35,22 @@ namespace CSMWorld
 
     void NestedInfoCollection::addNestedRow(int row, int column, int position)
     {
-        Record<Info> record;
-        record.assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
+        std::unique_ptr<Record<Info> > record(new Record<Info>);
+        record->assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
 
-        getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).addRow(record, position);
+        getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).addRow(*record, position);
 
-        Collection<Info, IdAccessor<Info> >::setRecord(row, record);
+        Collection<Info, IdAccessor<Info> >::setRecord(row, std::move(record));
     }
 
     void NestedInfoCollection::removeNestedRows(int row, int column, int subRow)
     {
-        Record<Info> record;
-        record.assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
+        std::unique_ptr<Record<Info> > record(new Record<Info>);
+        record->assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
 
-        getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).removeRow(record, subRow);
+        getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).removeRow(*record, subRow);
 
-        Collection<Info, IdAccessor<Info> >::setRecord(row, record);
+        Collection<Info, IdAccessor<Info> >::setRecord(row, std::move(record));
     }
 
     QVariant NestedInfoCollection::getNestedData (int row,
@@ -63,13 +63,13 @@ namespace CSMWorld
     void NestedInfoCollection::setNestedData(int row,
             int column, const QVariant& data, int subRow, int subColumn)
     {
-        Record<Info> record;
-        record.assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
+        std::unique_ptr<Record<Info> > record(new Record<Info>);
+        record->assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
 
         getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).setData(
-                record, data, subRow, subColumn);
+                *record, data, subRow, subColumn);
 
-        Collection<Info, IdAccessor<Info> >::setRecord(row, record);
+        Collection<Info, IdAccessor<Info> >::setRecord(row, std::move(record));
     }
 
     CSMWorld::NestedTableWrapperBase* NestedInfoCollection::nestedTable(int row,
@@ -82,13 +82,13 @@ namespace CSMWorld
     void NestedInfoCollection::setNestedTable(int row,
             int column, const CSMWorld::NestedTableWrapperBase& nestedTable)
     {
-        Record<Info> record;
-        record.assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
+        std::unique_ptr<Record<Info> > record(new Record<Info>);
+        record->assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
 
         getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).setTable(
-                record, nestedTable);
+                *record, nestedTable);
 
-        Collection<Info, IdAccessor<Info> >::setRecord(row, record);
+        Collection<Info, IdAccessor<Info> >::setRecord(row, std::move(record));
     }
 
     int NestedInfoCollection::getNestedRowsCount(int row, int column) const

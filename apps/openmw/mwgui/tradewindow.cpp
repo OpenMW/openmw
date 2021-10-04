@@ -542,4 +542,10 @@ namespace MWGui
             return;
         resetReference();
     }
+
+    void TradeWindow::onDeleteCustomData(const MWWorld::Ptr& ptr)
+    {
+        if(mTradeModel && mTradeModel->usesContainer(ptr))
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+    }
 }

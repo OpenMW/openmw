@@ -34,7 +34,7 @@ namespace MWRender
         virtual ~WeaponAnimation();
 
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
-        void attachArrow(MWWorld::Ptr actor);
+        void attachArrow(const MWWorld::Ptr &actor);
 
         void detachArrow(MWWorld::Ptr actor);
 

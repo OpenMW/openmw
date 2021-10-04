@@ -1,5 +1,8 @@
 #include "shadervisitor.hpp"
 
+#include <unordered_set>
+#include <set>
+
 #include <osg/AlphaFunc>
 #include <osg/Geometry>
 #include <osg/GLExtensions>
@@ -56,7 +59,7 @@ namespace Shader
 
         bool hasUniform(const std::string& name) { return mUniforms.count(name); }
         bool hasMode(osg::StateAttribute::GLMode mode) { return mModes.count(mode); }
-        bool hasAttribute(osg::StateAttribute::TypeMemberPair typeMemberPair) { return mAttributes.count(typeMemberPair); }
+        bool hasAttribute(const osg::StateAttribute::TypeMemberPair &typeMemberPair) { return mAttributes.count(typeMemberPair); }
         bool hasAttribute(osg::StateAttribute::Type type, unsigned int member) { return hasAttribute(osg::StateAttribute::TypeMemberPair(type, member)); }
 
         const std::set<osg::StateAttribute::TypeMemberPair>& getAttributes() { return mAttributes; }
@@ -113,7 +116,6 @@ namespace Shader
         , mImageManager(imageManager)
         , mDefaultShaderPrefix(defaultShaderPrefix)
     {
-        mRequirements.emplace_back();
     }
 
     void ShaderVisitor::setForceShaders(bool force)
@@ -340,15 +342,6 @@ namespace Shader
                     mRequirements.back().mShaderRequired = true;
                 }
             }
-
-            if (diffuseMap)
-            {
-                if (!writableStateSet)
-                    writableStateSet = getWritableStateSet(node);
-                // We probably shouldn't construct a new version of this each time as Uniforms use pointer comparison for early-out.
-                // Also it should probably belong to the shader manager or be applied by the shadows bin
-                writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
-            }
         }
 
         const osg::StateSet::AttributeList& attributes = stateset->getAttributeList();
@@ -427,7 +420,10 @@ namespace Shader
 
     void ShaderVisitor::pushRequirements(osg::Node& node)
     {
-        mRequirements.push_back(mRequirements.back());
+        if (mRequirements.empty())
+            mRequirements.emplace_back();
+        else
+            mRequirements.push_back(mRequirements.back());
         mRequirements.back().mNode = &node;
     }
 
@@ -466,6 +462,9 @@ namespace Shader
             defineMap[texIt->second] = "1";
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
+
+        if (defineMap["diffuseMap"] == "0")
+            writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
 
@@ -559,7 +558,7 @@ namespace Shader
 
         if (vertexShader && fragmentShader)
         {
-            auto program = mShaderManager.getProgram(vertexShader, fragmentShader);
+            auto program = mShaderManager.getProgram(vertexShader, fragmentShader, mProgramTemplate);
             writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
             addedState->setAttributeAndModes(program);
 
@@ -598,7 +597,7 @@ namespace Shader
             for (auto itr = writableStateSet->getUniformList().begin(); itr != writableStateSet->getUniformList().end();)
             {
                 if (addedState->hasUniform(itr->first))
-                    writableStateSet->getUniformList().erase(itr);
+                    writableStateSet->getUniformList().erase(itr++);
                 else
                     ++itr;
             }
@@ -606,7 +605,7 @@ namespace Shader
             for (auto itr = writableStateSet->getModeList().begin(); itr != writableStateSet->getModeList().end();)
             {
                 if (addedState->hasMode(itr->first))
-                    writableStateSet->getModeList().erase(itr);
+                    writableStateSet->getModeList().erase(itr++);
                 else
                     ++itr;
             }

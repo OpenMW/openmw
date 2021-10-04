@@ -3,7 +3,6 @@
 #include <sstream>
 
 #include <osg/Texture2D>
-#include <osg/ClusterCullingCallback>
 #include <osg/Material>
 
 #include <osgUtil/IncrementalCompileOperation>
@@ -40,15 +39,30 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     mMultiPassRoot->setAttributeAndModes(material, osg::StateAttribute::ON);
 }
 
+struct FindChunkTemplate
+{
+    void operator() (ChunkId id, osg::Object* obj)
+    {
+        if (std::get<0>(id) == std::get<0>(mId) && std::get<1>(id) == std::get<1>(mId))
+            mFoundTemplate = obj;
+    }
+    ChunkId mId;
+    osg::ref_ptr<osg::Object> mFoundTemplate;
+};
+
 osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
 {
     ChunkId id = std::make_tuple(center, lod, lodFlags);
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
     if (obj)
-        return obj->asNode();
+        return static_cast<osg::Node*>(obj.get());
     else
     {
-        osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags, compile);
+        FindChunkTemplate find;
+        find.mId = id;
+        mCache->call(find);
+        TerrainDrawable* templateGeometry = find.mFoundTemplate ? static_cast<TerrainDrawable*>(find.mFoundTemplate.get()) : nullptr;
+        osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags, compile, templateGeometry);
         mCache->addEntryToObjectCache(id, node.get());
         return node;
     }
@@ -166,24 +180,45 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
     return ::Terrain::createPasses(useShaders, &mSceneManager->getShaderManager(), layers, blendmapTextures, blendmapScale, blendmapScale);
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, unsigned char lod, unsigned int lodFlags, bool compile)
+osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, unsigned char lod, unsigned int lodFlags, bool compile, TerrainDrawable* templateGeometry)
 {
-    osg::ref_ptr<osg::Vec3Array> positions (new osg::Vec3Array);
-    osg::ref_ptr<osg::Vec3Array> normals (new osg::Vec3Array);
-    osg::ref_ptr<osg::Vec4ubArray> colors (new osg::Vec4ubArray);
-    colors->setNormalize(true);
-
-    osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
-    positions->setVertexBufferObject(vbo);
-    normals->setVertexBufferObject(vbo);
-    colors->setVertexBufferObject(vbo);
-
-    mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, positions, normals, colors);
-
     osg::ref_ptr<TerrainDrawable> geometry (new TerrainDrawable);
-    geometry->setVertexArray(positions);
-    geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
-    geometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
+
+    if (!templateGeometry)
+    {
+        osg::ref_ptr<osg::Vec3Array> positions (new osg::Vec3Array);
+        osg::ref_ptr<osg::Vec3Array> normals (new osg::Vec3Array);
+        osg::ref_ptr<osg::Vec4ubArray> colors (new osg::Vec4ubArray);
+        colors->setNormalize(true);
+
+        mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, positions, normals, colors);
+
+        osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
+        positions->setVertexBufferObject(vbo);
+        normals->setVertexBufferObject(vbo);
+        colors->setVertexBufferObject(vbo);
+    
+        geometry->setVertexArray(positions);
+        geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
+        geometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
+    }
+    else
+    {
+        // Unfortunately we need to copy vertex data because of poor coupling with VertexBufferObject.
+        osg::ref_ptr<osg::Array> positions = static_cast<osg::Array*>(templateGeometry->getVertexArray()->clone(osg::CopyOp::DEEP_COPY_ALL));
+        osg::ref_ptr<osg::Array> normals = static_cast<osg::Array*>(templateGeometry->getNormalArray()->clone(osg::CopyOp::DEEP_COPY_ALL));
+        osg::ref_ptr<osg::Array> colors = static_cast<osg::Array*>(templateGeometry->getColorArray()->clone(osg::CopyOp::DEEP_COPY_ALL));
+
+        osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
+        positions->setVertexBufferObject(vbo);
+        normals->setVertexBufferObject(vbo);
+        colors->setVertexBufferObject(vbo);
+    
+        geometry->setVertexArray(positions);
+        geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
+        geometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
+    }
+    
     geometry->setUseDisplayList(false);
     geometry->setUseVertexBufferObjects(true);
 
@@ -203,32 +238,44 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     geometry->setStateSet(mMultiPassRoot);
 
-    if (useCompositeMap)
+    if (templateGeometry)
     {
-        osg::ref_ptr<CompositeMap> compositeMap = new CompositeMap;
-        compositeMap->mTexture = createCompositeMapRTT();
-
-        createCompositeMapGeometry(chunkSize, chunkCenter, osg::Vec4f(0,0,1,1), *compositeMap);
-
-        mCompositeMapRenderer->addCompositeMap(compositeMap.get(), false);
-
-        geometry->setCompositeMap(compositeMap);
-        geometry->setCompositeMapRenderer(mCompositeMapRenderer);
-
-        TextureLayer layer;
-        layer.mDiffuseMap = compositeMap->mTexture;
-        layer.mParallax = false;
-        layer.mSpecular = false;
-        geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
+        if (templateGeometry->getCompositeMap())
+        {
+            geometry->setCompositeMap(templateGeometry->getCompositeMap());
+            geometry->setCompositeMapRenderer(mCompositeMapRenderer);
+        }
+        geometry->setPasses(templateGeometry->getPasses());
     }
     else
     {
-        geometry->setPasses(createPasses(chunkSize, chunkCenter, false));
+        if (useCompositeMap)
+        {
+            osg::ref_ptr<CompositeMap> compositeMap = new CompositeMap;
+            compositeMap->mTexture = createCompositeMapRTT();
+
+            createCompositeMapGeometry(chunkSize, chunkCenter, osg::Vec4f(0,0,1,1), *compositeMap);
+
+            mCompositeMapRenderer->addCompositeMap(compositeMap.get(), false);
+
+            geometry->setCompositeMap(compositeMap);
+            geometry->setCompositeMapRenderer(mCompositeMapRenderer);
+
+            TextureLayer layer;
+            layer.mDiffuseMap = compositeMap->mTexture;
+            layer.mParallax = false;
+            layer.mSpecular = false;
+            geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
+        }
+        else
+        {
+            geometry->setPasses(createPasses(chunkSize, chunkCenter, false));
+        }
     }
 
     geometry->setupWaterBoundingBox(-1, chunkSize * mStorage->getCellWorldSize() / numVerts);
 
-    if (compile && mSceneManager->getIncrementalCompileOperation())
+    if (!templateGeometry && compile && mSceneManager->getIncrementalCompileOperation())
     {
         mSceneManager->getIncrementalCompileOperation()->add(geometry);
     }

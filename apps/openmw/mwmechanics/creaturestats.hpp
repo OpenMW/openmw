@@ -1,6 +1,7 @@
 #ifndef GAME_MWMECHANICS_CREATURESTATS_H
 #define GAME_MWMECHANICS_CREATURESTATS_H
 
+#include <map>
 #include <set>
 #include <string>
 #include <stdexcept>
@@ -70,6 +71,8 @@ namespace MWMechanics
         MWWorld::TimeStamp mLastRestock;
 
         // The pool of merchant gold (not in inventory)
+        // HACK: value of INT_MIN has a special meaning: indicates a converted .ess file
+        //       (this is a workaround to avoid changing the save file format)
         int mGoldPool;
 
         int mActorId;
@@ -85,13 +88,11 @@ namespace MWMechanics
         float mSideMovementAngle;
 
     private:
-        std::map<ESM::SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
+        std::multimap<int, int> mSummonedCreatures; // <Effect, ActorId>
 
         // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
         // This may be necessary when the creature is in an inactive cell.
         std::vector<int> mSummonGraveyard;
-
-        std::map<std::string, CorprusStats> mCorprusSpells;
 
     protected:
         int mLevel;
@@ -234,7 +235,7 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
-        std::map<ESM::SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
+        std::multimap<int, int>& getSummonedCreatureMap(); // <Effect, ActorId of summoned creature>
         std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
 
         enum Flag
@@ -294,12 +295,6 @@ namespace MWMechanics
         /// assigned this function will return false).
 
         static void cleanup();
-
-        std::map<std::string, CorprusStats> & getCorprusSpells();
-
-        void addCorprusSpell(const std::string& sourceId, CorprusStats& stats);
-
-        void removeCorprusSpell(const std::string& sourceId);
 
         float getSideMovementAngle() const { return mSideMovementAngle; }
         void setSideMovementAngle(float angle) { mSideMovementAngle = angle; }

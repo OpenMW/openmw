@@ -682,18 +682,20 @@ void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
 
             int cellColumn = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
                 CSMWorld::Columns::ColumnId_Cell));
-            int refNumColumn = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
-                CSMWorld::Columns::ColumnId_RefNum));
+            int origCellColumn = collection.findColumnIndex(static_cast<CSMWorld::Columns::ColumnId> (
+                CSMWorld::Columns::ColumnId_OriginalCell));
 
             if (cellIndex != originalIndex)
             {
                 /// \todo figure out worldspace (not important until multiple worldspaces are supported)
+                std::string origCellId = CSMWorld::CellCoordinates(originalIndex).getId("");
                 std::string cellId = CSMWorld::CellCoordinates (cellIndex).getId ("");
 
                 commands.push (new CSMWorld::ModifyCommand (*model,
-                    model->index (recordIndex, cellColumn), QString::fromUtf8 (cellId.c_str())));
-                commands.push (new CSMWorld::ModifyCommand( *model,
-                    model->index (recordIndex, refNumColumn), 0));
+                    model->index (recordIndex, origCellColumn), QString::fromUtf8 (origCellId.c_str())));
+                commands.push(new CSMWorld::ModifyCommand(*model,
+                    model->index(recordIndex, cellColumn), QString::fromUtf8(cellId.c_str())));
+                // NOTE: refnum is not modified for moving a reference to another cell
             }
         }
 

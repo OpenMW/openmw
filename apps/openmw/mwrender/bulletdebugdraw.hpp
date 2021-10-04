@@ -37,10 +37,13 @@ private:
 protected:
     osg::ref_ptr<osg::Group> mParentNode;
     btCollisionWorld *mWorld;
-    osg::ref_ptr<osg::Geometry> mGeometry;
-    osg::ref_ptr<osg::Vec3Array> mVertices;
-    osg::ref_ptr<osg::Vec4Array> mColors;
-    osg::ref_ptr<osg::DrawArrays> mDrawArrays;
+    osg::ref_ptr<osg::Geometry> mLinesGeometry;
+    osg::ref_ptr<osg::Geometry> mTrisGeometry;
+    osg::ref_ptr<osg::Vec3Array> mLinesVertices;
+    osg::ref_ptr<osg::Vec3Array> mTrisVertices;
+    osg::ref_ptr<osg::Vec4Array> mLinesColors;
+    osg::ref_ptr<osg::DrawArrays> mLinesDrawArrays;
+    osg::ref_ptr<osg::DrawArrays> mTrisDrawArrays;
 
     bool mDebugOn;
 
@@ -55,6 +58,8 @@ public:
     void step();
 
     void drawLine(const btVector3& from,const btVector3& to,const btVector3& color) override;
+
+    void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar) override;
 
     void addCollision(const btVector3& orig, const btVector3& normal);
 

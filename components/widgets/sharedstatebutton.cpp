@@ -18,7 +18,7 @@ namespace Gui
         }
     }
 
-    void SharedStateButton::shareStateWith(ButtonGroup shared)
+    void SharedStateButton::shareStateWith(const ButtonGroup &shared)
     {
         mSharedWith = shared;
     }

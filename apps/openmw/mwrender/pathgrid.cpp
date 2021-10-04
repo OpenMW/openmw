@@ -8,7 +8,10 @@
 
 #include <components/esm/loadpgrd.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/misc/coordinateconverter.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
@@ -111,6 +114,8 @@ void Pathgrid::enableCellPathgrid(const MWWorld::CellStore *store)
     cellPathGrid->setPosition(cellPathGridPos);
 
     osg::ref_ptr<osg::Geometry> geometry = SceneUtil::createPathgridGeometry(*pathgrid);
+
+    MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(geometry, "debug");
 
     cellPathGrid->addChild(geometry);
 

@@ -1,6 +1,7 @@
 ﻿#include "npc.hpp"
 
 #include <memory>
+#include <climits> // INT_MIN
 
 #include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
@@ -383,14 +384,14 @@ namespace MWClass
             if (!spellsInitialised)
                 data->mNpcStats.getSpells().addAllToInstance(ref->mBase->mSpells.mList);
 
-            // inventory
-            // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
-            data->mInventoryStore.fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
-
             data->mNpcStats.setGoldPool(gold);
 
             // store
             ptr.getRefData().setCustomData(std::move(data));
+
+            // inventory
+            // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
+            getInventoryStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
 
             getInventoryStore(ptr).autoEquip(ptr);
         }
@@ -1291,19 +1292,26 @@ namespace MWClass
         if (!state.mHasCustomState)
             return;
 
+        const ESM::NpcState& npcState = state.asNpcState();
+
         if (state.mVersion > 0)
         {
             if (!ptr.getRefData().getCustomData())
             {
-                // Create a CustomData, but don't fill it from ESM records (not needed)
-                ptr.getRefData().setCustomData(std::make_unique<NpcCustomData>());
+                // FIXME: the use of mGoldPool can be replaced with another flag the next time
+                // the save file format is changed
+                if (npcState.mCreatureStats.mGoldPool == INT_MIN)
+                    ensureCustomData(ptr);
+                else
+                    // Create a CustomData, but don't fill it from ESM records (not needed)
+                    ptr.getRefData().setCustomData(std::make_unique<NpcCustomData>());
             }
         }
         else
             ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
-        const ESM::NpcState& npcState = state.asNpcState();
+
         customData.mInventoryStore.readState (npcState.mInventory);
         customData.mNpcStats.readState (npcState.mNpcStats);
         bool spellsInitialised = customData.mNpcStats.getSpells().setSpells(ptr.get<ESM::NPC>()->mBase->mId);
@@ -1384,12 +1392,12 @@ namespace MWClass
                 }
 
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
+                MWBase::Environment::get().getWindowManager()->onDeleteCustomData(ptr);
                 ptr.getRefData().setCustomData(nullptr);
 
                 // Reset to original position
-                MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
-                        ptr.getCellRef().getPosition().pos[1],
-                        ptr.getCellRef().getPosition().pos[2]);
+                MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().asVec3());
+                MWBase::Environment::get().getWorld()->rotateObject(ptr, ptr.getCellRef().getPosition().asRotationVec3(), MWBase::RotationFlag_none);
             }
         }
     }

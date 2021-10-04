@@ -271,7 +271,7 @@ protected:
     float mLegsYawRadians;
     float mBodyPitchRadians;
 
-    RotateController* addRotateController(std::string bone);
+    RotateController* addRotateController(const std::string& bone);
 
     bool mHasMagicEffects;
 

@@ -1,20 +1,14 @@
 #include "luabindings.hpp"
 
-#include <SDL_events.h>
-
 #include <components/lua/luastate.hpp>
 #include <components/queries/luabindings.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "eventqueue.hpp"
 #include "worldview.hpp"
-
-namespace sol
-{
-    template <>
-    struct is_automagical<SDL_Keysym> : std::false_type {};
-}
 
 namespace MWLua
 {
@@ -24,14 +18,20 @@ namespace MWLua
         sol::table res(lua.sol(), sol::create);
         for (const std::string& v : values)
             res[v] = v;
-        return lua.makeReadOnly(res);
+        return LuaUtil::makeReadOnly(res);
     }
 
     sol::table initCorePackage(const Context& context)
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_VERSION"] = 0;
+        api["API_REVISION"] = 6;
+        api["quit"] = [lua]()
+        {
+            std::string traceback = lua->sol()["debug"]["traceback"]().get<std::string>();
+            Log(Debug::Warning) << "Quit requested by a Lua script.\n" << traceback;
+            MWBase::Environment::get().getStateManager()->requestQuit();
+        };
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData)
         {
             context.mGlobalEventQueue->push_back({std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
@@ -43,7 +43,7 @@ namespace MWLua
             "Activator", "Armor", "Book", "Clothing", "Creature", "Door", "Ingredient",
             "Light", "Miscellaneous", "NPC", "Player", "Potion", "Static", "Weapon"
         });
-        api["EQUIPMENT_SLOT"] = lua->makeReadOnly(lua->sol().create_table_with(
+        api["EQUIPMENT_SLOT"] = LuaUtil::makeReadOnly(lua->sol().create_table_with(
             "Helmet", MWWorld::InventoryStore::Slot_Helmet,
             "Cuirass", MWWorld::InventoryStore::Slot_Cuirass,
             "Greaves", MWWorld::InventoryStore::Slot_Greaves,
@@ -64,7 +64,7 @@ namespace MWLua
             "CarriedLeft", MWWorld::InventoryStore::Slot_CarriedLeft,
             "Ammunition", MWWorld::InventoryStore::Slot_Ammunition
         ));
-        return lua->makeReadOnly(api);
+        return LuaUtil::makeReadOnly(api);
     }
 
     sol::table initWorldPackage(const Context& context)
@@ -107,37 +107,7 @@ namespace MWLua
             // return GObjectList{worldView->selectObjects(query, false)};
         };
         // TODO: add world.placeNewObject(recordId, cell, pos, [rot])
-        return context.mLua->makeReadOnly(api);
-    }
-
-    sol::table initNearbyPackage(const Context& context)
-    {
-        sol::table api(context.mLua->sol(), sol::create);
-        WorldView* worldView = context.mWorldView;
-        api["activators"] = LObjectList{worldView->getActivatorsInScene()};
-        api["actors"] = LObjectList{worldView->getActorsInScene()};
-        api["containers"] = LObjectList{worldView->getContainersInScene()};
-        api["doors"] = LObjectList{worldView->getDoorsInScene()};
-        api["items"] = LObjectList{worldView->getItemsInScene()};
-        api["selectObjects"] = [context](const Queries::Query& query)
-        {
-            ObjectIdList list;
-            WorldView* worldView = context.mWorldView;
-            if (query.mQueryType == "activators")
-                list = worldView->getActivatorsInScene();
-            else if (query.mQueryType == "actors")
-                list = worldView->getActorsInScene();
-            else if (query.mQueryType == "containers")
-                list = worldView->getContainersInScene();
-            else if (query.mQueryType == "doors")
-                list = worldView->getDoorsInScene();
-            else if (query.mQueryType == "items")
-                list = worldView->getItemsInScene();
-            return LObjectList{selectObjectsFromList(query, list, context)};
-            // TODO: Maybe use sqlite
-            // return LObjectList{worldView->selectObjects(query, true)};
-        };
-        return context.mLua->makeReadOnly(api);
+        return LuaUtil::makeReadOnly(api);
     }
 
     sol::table initQueryPackage(const Context& context)
@@ -148,7 +118,7 @@ namespace MWLua
             query[t] = Queries::Query(std::string(t));
         for (const QueryFieldGroup& group : getBasicQueryFieldGroups())
             query[group.mName] = initFieldGroup(context, group);
-        return query;  // makeReadonly is applied by LuaState::addCommonPackage
+        return query;  // makeReadOnly is applied by LuaState::addCommonPackage
     }
 
     sol::table initFieldGroup(const Context& context, const QueryFieldGroup& group)
@@ -163,24 +133,12 @@ namespace MWLua
             {
                 const std::string& name = field->path()[i];
                 if (subgroup[name] == sol::nil)
-                    subgroup[name] = context.mLua->makeReadOnly(context.mLua->newTable());
-                subgroup = context.mLua->getMutableFromReadOnly(subgroup[name]);
+                    subgroup[name] = LuaUtil::makeReadOnly(context.mLua->newTable());
+                subgroup = LuaUtil::getMutableFromReadOnly(subgroup[name]);
             }
             subgroup[field->path().back()] = field;
         }
-        return context.mLua->makeReadOnly(res);
-    }
-
-    void initInputBindings(const Context& context)
-    {
-        sol::usertype<SDL_Keysym> keyEvent = context.mLua->sol().new_usertype<SDL_Keysym>("KeyEvent");
-        keyEvent["symbol"] = sol::readonly_property([](const SDL_Keysym& e) { return std::string(1, static_cast<char>(e.sym)); });
-        keyEvent["code"] = sol::readonly_property([](const SDL_Keysym& e) -> int { return e.sym; });
-        keyEvent["modifiers"] = sol::readonly_property([](const SDL_Keysym& e) -> int { return e.mod; });
-        keyEvent["withShift"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_SHIFT; });
-        keyEvent["withCtrl"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_CTRL; });
-        keyEvent["withAlt"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_ALT; });
-        keyEvent["withSuper"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_GUI; });
+        return LuaUtil::makeReadOnly(res);
     }
 
 }

@@ -1,6 +1,5 @@
 #include <cstring>
 #include <vector>
-#include <memory>
 
 #include <apps/openmw/mwsound/alext.h>
 

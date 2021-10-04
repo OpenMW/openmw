@@ -407,6 +407,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mExportFonts(false)
   , mRandomSeed(0)
   , mScriptContext (nullptr)
+  , mLuaManager (nullptr)
   , mFSStrict (false)
   , mScriptBlacklistUse (true)
   , mNewGame (false)
@@ -427,7 +428,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    mWorkQueue->stop();
+    if (mScreenCaptureOperation != nullptr)
+        mScreenCaptureOperation->stop();
 
     mEnvironment.cleanup();
 
@@ -519,7 +521,7 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
         throw std::runtime_error ("No default settings file found! Make sure the file \"defaults.bin\" was properly installed.");
 
     // load user settings if they exist
-    const std::string settingspath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
+    std::string settingspath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
 
@@ -703,8 +705,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
             mCfgMgr.getScreenshotPath().string(),
             Settings::Manager::getString("screenshot format", "General"),
             Settings::Manager::getBool("notify on saved screenshot", "General")
-                    ? std::function(ScheduleNonDialogMessageBox {})
-                    : std::function(IgnoreString {})
+                    ? std::function<void (std::string)>(ScheduleNonDialogMessageBox {})
+                    : std::function<void (std::string)>(IgnoreString {})
         )
     );
 
@@ -751,6 +753,12 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
+    // gui needs our shaders path before everything else
+    mResourceSystem->getSceneManager()->setShaderPath((mResDir / "shaders").string());
+
+    osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
+    bool shadersSupported = exts && (exts->glslLanguageVersion >= 1.2f);
+
     std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
     guiRoot->setName("GUI Root");
@@ -759,7 +767,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     MWGui::WindowManager* window = new MWGui::WindowManager(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
-                Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string());
+                Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string(), shadersSupported);
     mEnvironment.setWindowManager (window);
 
     MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
@@ -867,7 +875,14 @@ public:
     void join()
     {
         if (mThread)
+        {
+            {
+                std::lock_guard<std::mutex> lk(mMutex);
+                mJoinRequest = true;
+            }
+            mCV.notify_one();
             mThread->join();
+        }
     }
 
 private:
@@ -883,10 +898,12 @@ private:
 
     void threadBody()
     {
-        while (!mEngine->mViewer->done() && !mEngine->mEnvironment.getStateManager()->hasQuitRequest())
+        while (true)
         {
             std::unique_lock<std::mutex> lk(mMutex);
-            mCV.wait(lk, [&]{ return mUpdateRequest; });
+            mCV.wait(lk, [&]{ return mUpdateRequest || mJoinRequest; });
+            if (mJoinRequest)
+                break;
 
             update();
 
@@ -899,7 +916,8 @@ private:
     Engine* mEngine;
     std::mutex mMutex;
     std::condition_variable mCV;
-    bool mUpdateRequest;
+    bool mUpdateRequest = false;
+    bool mJoinRequest = false;
     double mDt = 0;
     bool mIsGuiMode = false;
     std::optional<std::thread> mThread;

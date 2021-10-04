@@ -6,6 +6,7 @@
 #include "offmeshconnectionsmanager.hpp"
 #include "recastmeshtiles.hpp"
 #include "waitconditiontype.hpp"
+#include "heightfieldshape.hpp"
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
@@ -23,19 +24,24 @@ namespace DetourNavigator
     public:
         NavMeshManager(const Settings& settings);
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+        bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
-        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+        bool updateObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                           const AreaType areaType);
 
         bool removeObject(const ObjectId id);
 
         void addAgent(const osg::Vec3f& agentHalfExtents);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
+        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
 
         bool removeWater(const osg::Vec2i& cellPosition);
+
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+            const HeightfieldShape& shape);
+
+        bool removeHeightfield(const osg::Vec2i& cellPosition);
 
         bool reset(const osg::Vec3f& agentHalfExtents);
 
@@ -68,7 +74,7 @@ namespace DetourNavigator
 
         void addChangedTiles(const btCollisionShape& shape, const btTransform& transform, const ChangeType changeType);
 
-        void addChangedTiles(const int cellSize, const btTransform& transform, const ChangeType changeType);
+        void addChangedTiles(const int cellSize, const osg::Vec3f& shift, const ChangeType changeType);
 
         void addChangedTile(const TilePosition& tilePosition, const ChangeType changeType);
 

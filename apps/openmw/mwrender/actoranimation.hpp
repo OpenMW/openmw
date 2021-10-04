@@ -41,11 +41,11 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
         bool updateCarriedLeftVisible(const int weaptype) const override;
 
     protected:
-        osg::Group* getBoneByName(const std::string& boneName);
+        osg::Group* getBoneByName(const std::string& boneName) const;
         virtual void updateHolsteredWeapon(bool showHolsteredWeapons);
         virtual void updateHolsteredShield(bool showCarriedLeft);
         virtual void updateQuiver();
-        virtual std::string getShieldMesh(MWWorld::ConstPtr shield) const;
+        virtual std::string getShieldMesh(const MWWorld::ConstPtr& shield) const;
         virtual std::string getHolsteredWeaponBoneName(const MWWorld::ConstPtr& weapon);
         virtual PartHolderPtr attachMesh(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor);
         virtual PartHolderPtr attachMesh(const std::string& model, const std::string& bonename)

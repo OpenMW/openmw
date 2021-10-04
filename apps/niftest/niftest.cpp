@@ -52,11 +52,8 @@ void readVFS(VFS::Archive* anArchive,std::string archivePath = "")
     myManager.addArchive(anArchive);
     myManager.buildIndex();
 
-    std::map<std::string, VFS::File*> files=myManager.getIndex();
-    for(std::map<std::string, VFS::File*>::const_iterator it=files.begin(); it!=files.end(); ++it)
+    for(const auto& name : myManager.getRecursiveDirectoryIterator(""))
     {
-        std::string name = it->first;
-
         try{
             if(isNIF(name))
             {
@@ -134,7 +131,7 @@ int main(int argc, char **argv)
 
     Nif::NIFFile::setLoadUnsupportedFiles(true);
 //     std::cout << "Reading Files" << std::endl;
-    for(std::vector<std::string>::const_iterator it=files.begin(); it!=files.end(); ++it)
+    for(auto it=files.begin(); it!=files.end(); ++it)
     {
         std::string name = *it;
 

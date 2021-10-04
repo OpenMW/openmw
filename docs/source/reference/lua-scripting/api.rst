@@ -7,12 +7,14 @@ Lua API reference
 
     engine_handlers
     openmw_util
+    openmw_settings
     openmw_core
     openmw_async
     openmw_query
     openmw_world
     openmw_self
     openmw_nearby
+    openmw_input
     openmw_ui
     openmw_aux_util
 
@@ -37,6 +39,9 @@ Player scripts are local scripts that are attached to a player.
 |:ref:`openmw.util <Package openmw.util>`                 | everywhere         | | Defines utility functions and classes like 3D vectors,      |
 |                                                         |                    | | that don't depend on the game world.                        |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.settings <Package openmw.settings>`         | everywhere         | | Access to GMST records in content files (implemented) and   |
+|                                                         |                    | | to mod settings (not implemented).                          |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.core <Package openmw.core>`                 | everywhere         | | Functions that are common for both global and local scripts |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.async <Package openmw.async>`               | everywhere         | | Timers (implemented) and coroutine utils (not implemented)  |
@@ -48,6 +53,8 @@ Player scripts are local scripts that are attached to a player.
 |:ref:`openmw.self <Package openmw.self>`                 | by local scripts   | | Full access to the object the script is attached to.        |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.nearby <Package openmw.nearby>`             | by local scripts   | | Read-only access to the nearest area of the game world.     |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input                                                  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls user interface                                     |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+

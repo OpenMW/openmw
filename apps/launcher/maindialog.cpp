@@ -6,7 +6,6 @@
 #include <QDate>
 #include <QMessageBox>
 #include <QFontDatabase>
-#include <QInputDialog>
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QTextCodec>
@@ -52,8 +51,8 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     iconWidget->setCurrentRow(0);
     iconWidget->setFlow(QListView::LeftToRight);
 
-    QPushButton *helpButton = new QPushButton(tr("Help"));
-    QPushButton *playButton = new QPushButton(tr("Play"));
+    auto *helpButton = new QPushButton(tr("Help"));
+    auto *playButton = new QPushButton(tr("Play"));
     buttonBox->button(QDialogButtonBox::Close)->setText(tr("Close"));
     buttonBox->addButton(helpButton, QDialogButtonBox::HelpRole);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
@@ -79,31 +78,31 @@ void Launcher::MainDialog::createIcons()
     if (!QIcon::hasThemeIcon("document-new"))
         QIcon::setThemeName("tango");
 
-    QListWidgetItem *playButton = new QListWidgetItem(iconWidget);
+    auto *playButton = new QListWidgetItem(iconWidget);
     playButton->setIcon(QIcon(":/images/openmw.png"));
     playButton->setText(tr("Play"));
     playButton->setTextAlignment(Qt::AlignCenter);
     playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *dataFilesButton = new QListWidgetItem(iconWidget);
+    auto *dataFilesButton = new QListWidgetItem(iconWidget);
     dataFilesButton->setIcon(QIcon(":/images/openmw-plugin.png"));
     dataFilesButton->setText(tr("Data Files"));
     dataFilesButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     dataFilesButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *graphicsButton = new QListWidgetItem(iconWidget);
+    auto *graphicsButton = new QListWidgetItem(iconWidget);
     graphicsButton->setIcon(QIcon(":/images/preferences-video.png"));
     graphicsButton->setText(tr("Graphics"));
     graphicsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
     graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *settingsButton = new QListWidgetItem(iconWidget);
+    auto *settingsButton = new QListWidgetItem(iconWidget);
     settingsButton->setIcon(QIcon(":/images/preferences.png"));
     settingsButton->setText(tr("Settings"));
     settingsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     settingsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *advancedButton = new QListWidgetItem(iconWidget);
+    auto *advancedButton = new QListWidgetItem(iconWidget);
     advancedButton->setIcon(QIcon(":/images/preferences-advanced.png"));
     advancedButton->setText(tr("Advanced"));
     advancedButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);

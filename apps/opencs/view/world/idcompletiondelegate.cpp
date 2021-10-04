@@ -81,6 +81,23 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
     CSMWorld::IdCompletionManager &completionManager = getDocument().getIdCompletionManager();
     CSVWidget::DropLineEdit *editor = new CSVWidget::DropLineEdit(display, parent);
     editor->setCompleter(completionManager.getCompleter(display).get());
+
+    // The savegame format limits the player faction string to 32 characters.
+    // The region sound name is limited to 32 characters. (ESM::Region::SoundRef::mSound)
+    // The script name is limited to 32 characters. (ESM::Script::SCHD::mName)
+    // The cell name is limited to 64 characters. (ESM::Header::GMDT::mCurrentCell)
+    if (display == CSMWorld::ColumnBase::Display_Faction ||
+        display == CSMWorld::ColumnBase::Display_Sound ||
+        display == CSMWorld::ColumnBase::Display_Script ||
+        display == CSMWorld::ColumnBase::Display_Referenceable)
+    {
+        editor->setMaxLength (32);
+    }
+    else if (display == CSMWorld::ColumnBase::Display_Cell)
+    {
+        editor->setMaxLength (64);
+    }
+
     return editor;
 }
 

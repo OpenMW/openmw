@@ -5,8 +5,8 @@ near clip
 ---------
 
 :Type:		floating point
-:Range:		> 0
-:Default:	3.0
+:Range:		>= 0.005
+:Default:	1.0
 
 This setting controls the distance to the near clipping plane. The value must be greater than zero.
 Values greater than approximately 18.0 will occasionally clip objects in the world in front of the character.
@@ -232,6 +232,26 @@ head bobbing roll
 
 Makes diffence only in first person mode if 'head bobbing' is enabled.
 Maximum roll angle in degrees.
+
+This setting can only be configured by editing the settings configuration file.
+
+reverse z
+---------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Enables a reverse-z depth buffer in which the depth range is reversed. This
+allows for small :ref:`near clip` values and removes almost all z-fighting with
+terrain and even tightly coupled meshes at extreme view distances. For this to
+be useful, a floating point depth buffer is required. These features require
+driver and hardware support, but should work on any semi-modern desktop hardware
+through OpenGL extensions. The exception is macOS, which has since dropped
+development of OpenGL drivers. If unsupported, this setting has no effect.
+
+Note, this will force OpenMW to use shaders as if :ref:`force shaders` was enabled.
+The performance impact of this feature should be negligible.
 
 This setting can only be configured by editing the settings configuration file.
 

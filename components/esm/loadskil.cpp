@@ -130,6 +130,7 @@ namespace ESM
     void Skill::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false; // Skill record can't be deleted now (may be changed in the future)
+        mRecordFlags = esm.getRecordFlags();
 
         bool hasIndex = false;
         bool hasData = false;

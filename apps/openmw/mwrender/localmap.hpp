@@ -50,6 +50,7 @@ namespace MWRender
         void requestMap (const MWWorld::CellStore* cell);
 
         void addCell(MWWorld::CellStore* cell);
+        void removeExteriorCell(int x, int y);
 
         void removeCell (MWWorld::CellStore* cell);
 
@@ -126,13 +127,14 @@ namespace MWRender
             osg::ref_ptr<osg::Texture2D> mFogOfWarTexture;
             osg::ref_ptr<osg::Image> mFogOfWarImage;
 
-            Grid mGrid; // the grid that was active at the time of rendering this segment
+            bool needUpdate = true;
 
             bool mHasFogState;
         };
 
         typedef std::map<std::pair<int, int>, MapSegment> SegmentMap;
-        SegmentMap mSegments;
+        SegmentMap mExteriorSegments;
+        SegmentMap mInteriorSegments;
 
         int mMapResolution;
 

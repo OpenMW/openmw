@@ -1,6 +1,8 @@
 #include "agentpath.hpp"
 #include "detourdebugdraw.hpp"
 
+#include <osg/Material>
+
 #include <components/detournavigator/settings.hpp>
 
 #include <algorithm>
@@ -64,6 +66,10 @@ namespace SceneUtil
         debugDraw.end();
 
         debugDraw.depthMask(true);
+
+        osg::ref_ptr<osg::Material> material = new osg::Material;
+        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        group->getOrCreateStateSet()->setAttribute(material);
 
         return group;
     }

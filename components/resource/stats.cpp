@@ -376,7 +376,6 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "Texture",
             "StateSet",
             "Node",
-            "Node Instance",
             "Shape",
             "Shape Instance",
             "Image",
@@ -390,7 +389,10 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "Land",
             "Composite",
             "",
-            "NavMesh UpdateJobs",
+            "NavMesh Jobs",
+            "NavMesh Waiting",
+            "NavMesh Pushed",
+            "NavMesh Processing",
             "NavMesh CacheSize",
             "NavMesh UsedTiles",
             "NavMesh CachedTiles",
@@ -401,6 +403,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "",
             "Physics Actors",
             "Physics Objects",
+            "Physics Projectiles",
             "Physics HeightFields",
         });
 

@@ -2,8 +2,13 @@
 #include "vismask.hpp"
 
 #include <components/sceneutil/navmesh.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <osg/PositionAttitudeTransform>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 
 namespace MWRender
 {
@@ -45,6 +50,7 @@ namespace MWRender
         mGroup = SceneUtil::createNavMeshGroup(navMesh, settings);
         if (mGroup)
         {
+            MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(mGroup, "debug");
             mGroup->setNodeMask(Mask_Debug);
             mRootNode->addChild(mGroup);
         }

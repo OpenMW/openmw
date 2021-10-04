@@ -15,6 +15,7 @@
 #include <components/esm/cellref.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/mathutil.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/convert.hpp>
@@ -75,21 +76,6 @@
 
 #include "contentloader.hpp"
 #include "esmloader.hpp"
-
-namespace
-{
-
-// Wraps a value to (-PI, PI]
-void wrap(float& rad)
-{
-    const float pi = static_cast<float>(osg::PI);
-    if (rad>0)
-        rad = std::fmod(rad+pi, 2.0f*pi)-pi;
-    else
-        rad = std::fmod(rad-pi, 2.0f*pi)+pi;
-}
-
-}
 
 namespace MWWorld
 {
@@ -1128,17 +1114,11 @@ namespace MWWorld
         }
     }
 
-    MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z, bool movePhysics)
+    MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, const osg::Vec3f& position, bool movePhysics, bool keepActive)
     {
         ESM::Position pos = ptr.getRefData().getPosition();
-
-        pos.pos[0] = x;
-        pos.pos[1] = y;
-        pos.pos[2] = z;
-
+        std::memcpy(pos.pos, &position, sizeof(osg::Vec3f));
         ptr.getRefData().setPosition(pos);
-
-        osg::Vec3f vec(x, y, z);
 
         CellStore *currCell = ptr.isInCell() ? ptr.getCell() : nullptr; // currCell == nullptr should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
@@ -1179,7 +1159,8 @@ namespace MWWorld
                 if (!currCellActive && newCellActive)
                 {
                     newPtr = currCell->moveTo(ptr, newCell);
-                    mWorldScene->addObjectToScene(newPtr);
+                    if(newPtr.getRefData().isEnabled())
+                        mWorldScene->addObjectToScene(newPtr);
 
                     std::string script = newPtr.getClass().getScript(newPtr);
                     if (!script.empty())
@@ -1190,7 +1171,7 @@ namespace MWWorld
                 }
                 else if (!newCellActive && currCellActive)
                 {
-                    mWorldScene->removeObjectFromScene(ptr);
+                    mWorldScene->removeObjectFromScene(ptr, keepActive);
                     mLocalScripts.remove(ptr);
                     removeContainerScripts (ptr);
                     haveToMove = false;
@@ -1228,7 +1209,7 @@ namespace MWWorld
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
-            mWorldScene->updateObjectPosition(newPtr, vec, movePhysics);
+            mWorldScene->updateObjectPosition(newPtr, position, movePhysics);
             if (movePhysics)
             {
                 if (const auto object = mPhysics->getObject(ptr))
@@ -1237,7 +1218,7 @@ namespace MWWorld
         }
 
         if (isPlayer)
-            mWorldScene->playerMoved(vec);
+            mWorldScene->playerMoved(position);
         else
         {
             mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
@@ -1247,10 +1228,10 @@ namespace MWWorld
         return newPtr;
     }
 
-    MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z, bool movePhysics, bool moveToActive)
+    MWWorld::Ptr World::moveObject(const Ptr& ptr, const osg::Vec3f& position, bool movePhysics, bool moveToActive)
     {
         int cellX, cellY;
-        positionToIndex(x, y, cellX, cellY);
+        positionToIndex(position.x(), position.y(), cellX, cellY);
 
         CellStore* cell = ptr.getCell();
         CellStore* newCell = getExterior(cellX, cellY);
@@ -1259,18 +1240,18 @@ namespace MWWorld
         if (cell->isExterior() || (moveToActive && isCellActive && ptr.getClass().isActor()))
             cell = newCell;
 
-        return moveObject(ptr, cell, x, y, z, movePhysics);
+        return moveObject(ptr, cell, position, movePhysics);
     }
 
-    MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, osg::Vec3f vec, bool moveToActive, bool ignoreCollisions)
+    MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec, bool moveToActive, bool ignoreCollisions)
     {
         auto* actor = mPhysics->getActor(ptr);
         osg::Vec3f newpos = ptr.getRefData().getPosition().asVec3() + vec;
         if (actor)
             actor->adjustPosition(vec, ignoreCollisions);
         if (ptr.getClass().isActor())
-            return moveObject(ptr, newpos.x(), newpos.y(), newpos.z(), false, moveToActive && ptr != getPlayerPtr());
-        return moveObject(ptr, newpos.x(), newpos.y(), newpos.z());
+            return moveObject(ptr, newpos, false, moveToActive && ptr != getPlayerPtr());
+        return moveObject(ptr, newpos);
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
@@ -1294,10 +1275,8 @@ namespace MWWorld
             updateNavigatorObject(*object);
     }
 
-    void World::rotateObjectImp(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
+    void World::rotateObject(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
     {
-        const float pi = static_cast<float>(osg::PI);
-
         ESM::Position pos = ptr.getRefData().getPosition();
         float *objRot = pos.rot;
         if (flags & MWBase::RotationFlag_adjust)
@@ -1319,13 +1298,9 @@ namespace MWWorld
              * currently it's done so for rotating the camera, which needs
              * clamping.
              */
-            const float half_pi = pi/2.f;
-
-            if(objRot[0] < -half_pi)     objRot[0] = -half_pi;
-            else if(objRot[0] > half_pi) objRot[0] =  half_pi;
-
-            wrap(objRot[1]);
-            wrap(objRot[2]);
+            objRot[0] = osg::clampBetween(objRot[0], -osg::PIf / 2, osg::PIf / 2);
+            objRot[1] = Misc::normalizeAngle(objRot[1]);
+            objRot[2] = Misc::normalizeAngle(objRot[2]);
         }
 
         ptr.getRefData().setPosition(pos);
@@ -1377,7 +1352,7 @@ namespace MWWorld
             pos.z() = std::min(pos.z(), traced.z());
         }
 
-        moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
+        moveObject(ptr, ptr.getCell(), pos);
     }
 
     void World::fixPosition()
@@ -1416,12 +1391,7 @@ namespace MWWorld
         }
     }
 
-    void World::rotateObject (const Ptr& ptr, float x, float y, float z, MWBase::RotationFlags flags)
-    {
-        rotateObjectImp(ptr, osg::Vec3f(x, y, z), flags);
-    }
-
-    void World::rotateWorldObject (const Ptr& ptr, osg::Quat rotate)
+    void World::rotateWorldObject (const Ptr& ptr, const osg::Quat& rotate)
     {
         if(ptr.getRefData().getBaseNode() != nullptr)
         {
@@ -1436,7 +1406,7 @@ namespace MWWorld
         }
     }
 
-    MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
+    MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, const ESM::Position& pos)
     {
         return copyObjectToCell(ptr,cell,pos,ptr.getRefData().getCount(),false);
     }
@@ -1519,35 +1489,12 @@ namespace MWWorld
 
     void World::doPhysics(float duration, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
-        mPhysics->stepSimulation();
         processDoors(duration);
-
         mProjectileManager->update(duration);
-
-        const auto& results = mPhysics->applyQueuedMovement(duration, mDiscardMovements, frameStart, frameNumber, stats);
+        mPhysics->stepSimulation(duration, mDiscardMovements, frameStart, frameNumber, stats);
         mProjectileManager->processHits();
         mDiscardMovements = false;
-
-        for(const auto& actor : results)
-        {
-            // Handle player last, in case a cell transition occurs
-            if(actor != getPlayerPtr())
-            {
-                auto* physactor = mPhysics->getActor(actor);
-                assert(physactor);
-                const auto position = physactor->getSimulationPosition();
-                moveObject(actor, position.x(), position.y(), position.z(), false, false);
-            }
-        }
-
-        const auto player = std::find(results.begin(), results.end(), getPlayerPtr());
-        if (player != results.end())
-        {
-            auto* physactor = mPhysics->getActor(*player);
-            assert(physactor);
-            const auto position = physactor->getSimulationPosition();
-            moveObject(*player, position.x(), position.y(), position.z(), false, false);
-        }
+        mPhysics->moveActors();
     }
 
     void World::updateNavigator()
@@ -1567,10 +1514,7 @@ namespace MWWorld
 
     void World::updateNavigatorObject(const MWPhysics::Object& object)
     {
-        const DetourNavigator::ObjectShapes shapes {
-            *object.getShapeInstance()->getCollisionShape(),
-            object.getShapeInstance()->getAvoidCollisionShape()
-        };
+        const DetourNavigator::ObjectShapes shapes(object.getShapeInstance());
         mShouldUpdateNavigator = mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform())
             || mShouldUpdateNavigator;
     }
@@ -1604,14 +1548,16 @@ namespace MWWorld
     bool World::rotateDoor(const Ptr door, MWWorld::DoorState state, float duration)
     {
         const ESM::Position& objPos = door.getRefData().getPosition();
-        float oldRot = objPos.rot[2];
+        auto oldRot = objPos.asRotationVec3();
+        auto newRot = oldRot;
 
         float minRot = door.getCellRef().getPosition().rot[2];
         float maxRot = minRot + osg::DegreesToRadians(90.f);
 
         float diff = duration * osg::DegreesToRadians(90.f) * (state == MWWorld::DoorState::Opening ? 1 : -1);
-        float targetRot = std::min(std::max(minRot, oldRot + diff), maxRot);
-        rotateObject(door, objPos.rot[0], objPos.rot[1], targetRot, MWBase::RotationFlag_none);
+        float targetRot = std::clamp(oldRot.z() + diff, minRot, maxRot);
+        newRot.z() = targetRot;
+        rotateObject(door, newRot, MWBase::RotationFlag_none);
 
         bool reached = (targetRot == maxRot && state != MWWorld::DoorState::Idle) || targetRot == minRot;
 
@@ -1662,7 +1608,7 @@ namespace MWWorld
                     MWBase::Environment::get().getSoundManager()->stopSound3D(door, closeSound);
             }
 
-            rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot, MWBase::RotationFlag_none);
+            rotateObject(door, oldRot, MWBase::RotationFlag_none);
         }
 
         return reached;
@@ -1916,7 +1862,7 @@ namespace MWWorld
             mRendering->getCamera()->setSneakOffset(0.f);
 
         int blind = 0;
-        auto& magicEffects = player.getClass().getCreatureStats(player).getMagicEffects();
+        const auto& magicEffects = player.getClass().getCreatureStats(player).getMagicEffects();
         if (!mGodMode)
             blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getMagnitude());
         MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
@@ -2279,7 +2225,7 @@ namespace MWWorld
                 pos.pos[0] -= adjust.x();
                 pos.pos[1] -= adjust.y();
                 pos.pos[2] -= adjust.z();
-                moveObject(dropped, pos.pos[0], pos.pos[1], pos.pos[2]);
+                moveObject(dropped, pos.asVec3());
             }
         }
 
@@ -2487,7 +2433,7 @@ namespace MWWorld
         else
         {
             // Remove the old CharacterController
-            MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
+            MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr(), true);
             mNavigator->removeAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
             mPhysics->remove(getPlayerPtr());
             mRendering->removePlayer(getPlayerPtr());
@@ -2503,7 +2449,7 @@ namespace MWWorld
 
     void World::renderPlayer()
     {
-        MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
+        MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr(), true);
 
         MWWorld::Ptr player = getPlayerPtr();
 
@@ -2513,7 +2459,7 @@ namespace MWWorld
         player.getClass().getInventoryStore(player).setContListener(anim);
 
         scaleObject(player, player.getCellRef().getScale()); // apply race height
-        rotateObject(player, 0.f, 0.f, 0.f, MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
+        rotateObject(player, osg::Vec3f(), MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
@@ -3163,7 +3109,20 @@ namespace MWWorld
         {
             MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
             if (inv.getSelectedEnchantItem() != inv.end())
-                cast.cast(*inv.getSelectedEnchantItem());
+            {
+                const auto& itemPtr = *inv.getSelectedEnchantItem();
+                auto [slots, _] = itemPtr.getClass().getEquipmentSlots(itemPtr);
+                int slot = 0;
+                for(std::size_t i = 0; i < slots.size(); ++i)
+                {
+                    if(inv.getSlot(slots[i]) == inv.getSelectedEnchantItem())
+                    {
+                        slot = slots[i];
+                        break;
+                    }
+                }
+                cast.cast(itemPtr, slot);
+            }
         }
     }
 
@@ -3180,6 +3139,7 @@ namespace MWWorld
         bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), worldPos);
         if (underwater)
         {
+            MWMechanics::projectileHit(actor, Ptr(), bow, projectile, worldPos, attackStrength);
             mRendering->emitWaterRipple(worldPos);
             return;
         }
@@ -3197,9 +3157,9 @@ namespace MWWorld
             mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
     }
 
-    void World::launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection)
+    void World::launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot)
     {
-        mProjectileManager->launchMagicBolt(spellId, caster, fallbackDirection);
+        mProjectileManager->launchMagicBolt(spellId, caster, fallbackDirection, slot);
     }
 
     void World::updateProjectilesCasters()
@@ -3207,46 +3167,24 @@ namespace MWWorld
         mProjectileManager->updateCasters();
     }
 
-    class ApplyLoopingParticlesVisitor : public MWMechanics::EffectSourceVisitor
-    {
-    private:
-        MWWorld::Ptr mActor;
-
-    public:
-        ApplyLoopingParticlesVisitor(const MWWorld::Ptr& actor)
-            : mActor(actor)
-        {
-        }
-
-        void visit (MWMechanics::EffectKey key, int /*effectIndex*/,
-                            const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
-                            float /*magnitude*/, float /*remainingTime*/ = -1, float /*totalTime*/ = -1) override
-        {
-            const ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-            const auto magicEffect = store.get<ESM::MagicEffect>().find(key.mId);
-            if ((magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) == 0)
-                return;
-            const ESM::Static* castStatic;
-            if (!magicEffect->mHit.empty())
-                castStatic = store.get<ESM::Static>().find (magicEffect->mHit);
-            else
-                castStatic = store.get<ESM::Static>().find ("VFX_DefaultHit");
-            MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mActor);
-            if (anim && !castStatic->mModel.empty())
-                anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, /*loop*/true, "", magicEffect->mParticle);
-        }
-    };
-
     void World::applyLoopingParticles(const MWWorld::Ptr& ptr)
     {
         const MWWorld::Class &cls = ptr.getClass();
         if (cls.isActor())
         {
-            ApplyLoopingParticlesVisitor visitor(ptr);
-            cls.getCreatureStats(ptr).getActiveSpells().visitEffectSources(visitor);
-            cls.getCreatureStats(ptr).getSpells().visitEffectSources(visitor);
-            if (cls.hasInventoryStore(ptr))
-                cls.getInventoryStore(ptr).visitEffectSources(visitor);
+            std::set<int> playing;
+            for(const auto& params : cls.getCreatureStats(ptr).getActiveSpells())
+            {
+                for(const auto& effect : params.getEffects())
+                {
+                    if(playing.insert(effect.mEffectId).second)
+                    {
+                        const auto magicEffect = getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
+                        if(magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx)
+                            MWMechanics::playEffects(ptr, *magicEffect, false);
+                    }
+                }
+            }
         }
     }
 
@@ -3257,10 +3195,7 @@ namespace MWWorld
 
     void World::breakInvisibility(const Ptr &actor)
     {
-        actor.getClass().getCreatureStats(actor).getSpells().purgeEffect(ESM::MagicEffect::Invisibility);
-        actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
-        if (actor.getClass().hasInventoryStore(actor))
-            actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
+        actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(actor, ESM::MagicEffect::Invisibility);
 
         // Normally updated once per frame, but here it is kinda important to do it right away.
         MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(actor);
@@ -3753,7 +3688,7 @@ namespace MWWorld
     }
 
     void World::explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const Ptr& caster, const Ptr& ignore, ESM::RangeType rangeType,
-                             const std::string& id, const std::string& sourceName, const bool fromProjectile)
+                             const std::string& id, const std::string& sourceName, const bool fromProjectile, int slot)
     {
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
         for (const ESM::ENAMstruct& effectInfo : effects.mList)
@@ -3831,7 +3766,7 @@ namespace MWWorld
             cast.mHitPosition = origin;
             cast.mId = id;
             cast.mSourceName = sourceName;
-            cast.mStack = false;
+            cast.mSlot = slot;
             ESM::EffectList effectsToApply;
             effectsToApply.mList = applyPair.second;
             cast.inflict(applyPair.first, caster, effectsToApply, rangeType, false, true);
@@ -3859,8 +3794,8 @@ namespace MWWorld
                     return true;
 
                 const ESM::Position& origPos = ptr.getCellRef().getPosition();
-                MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.pos[0], origPos.pos[1], origPos.pos[2]);
-                MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.rot[0], origPos.rot[1], origPos.rot[2]);
+                MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.asVec3());
+                MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.asRotationVec3());
                 ptr.getClass().adjustPosition(ptr, true);
             }
             return true;
@@ -3988,9 +3923,10 @@ namespace MWWorld
         return btRayAabb(localFrom, localTo, aabbMin, aabbMax, hitDistance, hitNormal);
     }
 
-    bool World::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
+    bool World::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
+        const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr>* occupyingActors) const
     {
-        return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore);
+        return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore, occupyingActors);
     }
 
     void World::reportStats(unsigned int frameNumber, osg::Stats& stats) const

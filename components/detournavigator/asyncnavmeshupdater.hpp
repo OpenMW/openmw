@@ -19,6 +19,7 @@
 #include <set>
 #include <thread>
 #include <tuple>
+#include <list>
 
 class dtNavMesh;
 
@@ -52,6 +53,24 @@ namespace DetourNavigator
         return stream << "ChangeType::" << static_cast<int>(value);
     }
 
+    struct Job
+    {
+        const osg::Vec3f mAgentHalfExtents;
+        const std::weak_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItem;
+        const TilePosition mChangedTile;
+        const std::chrono::steady_clock::time_point mProcessTime;
+        unsigned mTryNumber = 0;
+        ChangeType mChangeType;
+        int mDistanceToPlayer;
+        const int mDistanceToOrigin;
+
+        Job(const osg::Vec3f& agentHalfExtents, std::weak_ptr<GuardedNavMeshCacheItem> navMeshCacheItem,
+            const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
+            std::chrono::steady_clock::time_point processTime);
+    };
+
+    using JobIt = std::list<Job>::iterator;
+
     class AsyncNavMeshUpdater
     {
     public:
@@ -67,39 +86,6 @@ namespace DetourNavigator
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
 
     private:
-        struct Job
-        {
-            osg::Vec3f mAgentHalfExtents;
-            std::weak_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItem;
-            TilePosition mChangedTile;
-            unsigned mTryNumber;
-            ChangeType mChangeType;
-            int mDistanceToPlayer;
-            int mDistanceToOrigin;
-            std::chrono::steady_clock::time_point mProcessTime;
-
-            std::tuple<std::chrono::steady_clock::time_point, unsigned, ChangeType, int, int> getPriority() const
-            {
-                return std::make_tuple(mProcessTime, mTryNumber, mChangeType, mDistanceToPlayer, mDistanceToOrigin);
-            }
-
-            friend inline bool operator <(const Job& lhs, const Job& rhs)
-            {
-                return lhs.getPriority() < rhs.getPriority();
-            }
-        };
-
-        using Jobs = std::deque<Job>;
-        using Pushed = std::map<osg::Vec3f, std::set<TilePosition>>;
-
-        struct Queue
-        {
-            Jobs mJobs;
-            Pushed mPushed;
-
-            Queue() = default;
-        };
-
         std::reference_wrapper<const Settings> mSettings;
         std::reference_wrapper<TileCachedRecastMeshManager> mRecastMeshManager;
         std::reference_wrapper<OffMeshConnectionsManager> mOffMeshConnectionsManager;
@@ -108,46 +94,43 @@ namespace DetourNavigator
         std::condition_variable mHasJob;
         std::condition_variable mDone;
         std::condition_variable mProcessed;
-        Jobs mJobs;
-        std::map<osg::Vec3f, std::set<TilePosition>> mPushed;
+        std::list<Job> mJobs;
+        std::deque<JobIt> mWaiting;
+        std::set<std::tuple<osg::Vec3f, TilePosition>> mPushed;
         Misc::ScopeGuarded<TilePosition> mPlayerTile;
-        Misc::ScopeGuarded<std::optional<std::chrono::steady_clock::time_point>> mFirstStart;
         NavMeshTilesCache mNavMeshTilesCache;
-        Misc::ScopeGuarded<std::map<osg::Vec3f, std::map<TilePosition, std::thread::id>>> mProcessingTiles;
-        std::map<osg::Vec3f, std::map<TilePosition, std::chrono::steady_clock::time_point>> mLastUpdates;
+        Misc::ScopeGuarded<std::set<std::tuple<osg::Vec3f, TilePosition>>> mProcessingTiles;
+        std::map<std::tuple<osg::Vec3f, TilePosition>, std::chrono::steady_clock::time_point> mLastUpdates;
         std::set<std::tuple<osg::Vec3f, TilePosition>> mPresentTiles;
-        std::map<std::thread::id, Queue> mThreadsQueues;
         std::vector<std::thread> mThreads;
 
         void process() noexcept;
 
         bool processJob(const Job& job);
 
-        std::optional<Job> getNextJob();
+        JobIt getNextJob();
 
-        std::optional<Job> getJob(Jobs& jobs, Pushed& pushed, bool changeLastUpdate);
+        JobIt getJob(std::deque<JobIt>& jobs, bool changeLastUpdate);
 
-        void postThreadJob(Job&& job, Queue& queue);
+        void postThreadJob(JobIt job, std::deque<JobIt>& queue);
 
         void writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const;
 
-        std::chrono::steady_clock::time_point setFirstStart(const std::chrono::steady_clock::time_point& value);
+        void repost(JobIt job);
 
-        void repost(Job&& job);
-
-        std::thread::id lockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
+        bool lockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
 
         void unlockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
 
         inline std::size_t getTotalJobs() const;
-
-        inline std::size_t getTotalThreadJobsUnsafe() const;
 
         void cleanupLastUpdates();
 
         int waitUntilJobsDoneForNotPresentTiles(const std::size_t initialJobsLeft, std::size_t& maxJobsLeft, Loading::Listener& listener);
 
         void waitUntilAllJobsDone();
+
+        inline void removeJob(JobIt job);
     };
 }
 

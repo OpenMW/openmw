@@ -42,7 +42,8 @@ namespace MWInput
         bool isLeftOrRightButton(int action, bool joystick) const;
 
         bool actionIsActive(int id) const;
-        float getActionValue(int id) const;
+        float getActionValue(int id) const;  // returns value in range [0, 1]
+        float getControllerAxisValue(SDL_GameControllerAxis axis) const;  // returns value in range [-1, 1]
 
         void mousePressed(const SDL_MouseButtonEvent &evt, int deviceID);
         void mouseReleased(const SDL_MouseButtonEvent &arg, int deviceID);

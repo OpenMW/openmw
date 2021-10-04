@@ -6,6 +6,7 @@
 #include "settingsutils.hpp"
 #include "gettilespositions.hpp"
 #include "version.hpp"
+#include "heightfieldshape.hpp"
 
 #include <components/misc/guarded.hpp>
 
@@ -21,11 +22,11 @@ namespace DetourNavigator
     public:
         TileCachedRecastMeshManager(const Settings& settings);
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+        bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
         template <class OnChangedTile>
-        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+        bool updateObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
             const AreaType areaType, OnChangedTile&& onChangedTile)
         {
             const auto object = mObjectsTilesPositions.find(id);
@@ -55,7 +56,7 @@ namespace DetourNavigator
                         changed = true;
                     }
                 };
-                getTilesPositions(shape, transform, mSettings, onTilePosition);
+                getTilesPositions(shape.getShape(), transform, mSettings, onTilePosition);
                 std::sort(newTiles.begin(), newTiles.end());
                 for (const auto& tile : currentTiles)
                 {
@@ -76,42 +77,47 @@ namespace DetourNavigator
 
         std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
+        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
 
-        std::optional<RecastMeshManager::Water> removeWater(const osg::Vec2i& cellPosition);
+        std::optional<Cell> removeWater(const osg::Vec2i& cellPosition);
 
-        std::shared_ptr<RecastMesh> getMesh(const TilePosition& tilePosition);
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+            const HeightfieldShape& shape);
 
-        bool hasTile(const TilePosition& tilePosition);
+        std::optional<Cell> removeHeightfield(const osg::Vec2i& cellPosition);
+
+        std::shared_ptr<RecastMesh> getMesh(const TilePosition& tilePosition) const;
 
         template <class Function>
-        void forEachTile(Function&& function)
+        void forEachTile(Function&& function) const
         {
-            for (auto& [tilePosition, recastMeshManager] : *mTiles.lock())
-                function(tilePosition, recastMeshManager);
+            for (auto& [tilePosition, recastMeshManager] : *mTiles.lockConst())
+                function(tilePosition, *recastMeshManager);
         }
 
         std::size_t getRevision() const;
 
-        void reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion);
+        void reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion) const;
 
     private:
+        using TilesMap = std::map<TilePosition, std::shared_ptr<CachedRecastMeshManager>>;
+
         const Settings& mSettings;
-        Misc::ScopeGuarded<std::map<TilePosition, CachedRecastMeshManager>> mTiles;
+        Misc::ScopeGuarded<TilesMap> mTiles;
         std::unordered_map<ObjectId, std::vector<TilePosition>> mObjectsTilesPositions;
         std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;
+        std::map<osg::Vec2i, std::vector<TilePosition>> mHeightfieldTilesPositions;
         std::size_t mRevision = 0;
         std::size_t mTilesGeneration = 0;
 
-        bool addTile(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
-                     const AreaType areaType, const TilePosition& tilePosition, float border,
-                     std::map<TilePosition, CachedRecastMeshManager>& tiles);
+        bool addTile(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
+                const AreaType areaType, const TilePosition& tilePosition, float border, TilesMap& tiles);
 
         bool updateTile(const ObjectId id, const btTransform& transform, const AreaType areaType,
-                        const TilePosition& tilePosition, std::map<TilePosition, CachedRecastMeshManager>& tiles);
+                const TilePosition& tilePosition, TilesMap& tiles);
 
         std::optional<RemovedRecastMeshObject> removeTile(const ObjectId id, const TilePosition& tilePosition,
-                                                            std::map<TilePosition, CachedRecastMeshManager>& tiles);
+                TilesMap& tiles);
     };
 }
 

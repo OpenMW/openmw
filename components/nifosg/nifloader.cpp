@@ -153,37 +153,14 @@ namespace
     {
         for(size_t i = 0;i < tk->list.size();i++)
         {
-            const std::string &str = tk->list[i].text;
-            std::string::size_type pos = 0;
-            while(pos < str.length())
+            std::vector<std::string> results;
+            Misc::StringUtils::split(tk->list[i].text, results, "\r\n");
+            for (std::string &result : results)
             {
-                if(::isspace(str[pos]))
-                {
-                    pos++;
-                    continue;
-                }
-
-                std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
-                if(nextpos != std::string::npos)
-                {
-                    do {
-                        nextpos--;
-                    } while(nextpos > pos && ::isspace(str[nextpos]));
-                    nextpos++;
-                }
-                else if(::isspace(*str.rbegin()))
-                {
-                    std::string::const_iterator last = str.end();
-                    do {
-                        --last;
-                    } while(last != str.begin() && ::isspace(*last));
-                    nextpos = std::distance(str.begin(), ++last);
-                }
-                std::string result = str.substr(pos, nextpos-pos);
+                Misc::StringUtils::trim(result);
                 Misc::StringUtils::lowerCaseInPlace(result);
-                textkeys.emplace(tk->list[i].time, std::move(result));
-
-                pos = nextpos;
+                if (!result.empty())
+                    textkeys.emplace(tk->list[i].time, std::move(result));
             }
         }
     }
@@ -845,8 +822,10 @@ namespace NifOsg
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
                     if (matctrl->data.empty() && matctrl->interpolator.empty())
                         continue;
-                    osg::ref_ptr<MaterialColorController> osgctrl;
                     auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->targetColor);
+                    if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW && targetColor == MaterialColorController::TargetColor::Specular)
+                        continue;
+                    osg::ref_ptr<MaterialColorController> osgctrl;
                     if (!matctrl->interpolator.empty())
                         osgctrl = new MaterialColorController(matctrl->interpolator.getPtr(), targetColor, baseMaterial);
                     else // if (!matctrl->data.empty())
@@ -1103,8 +1082,6 @@ namespace NifOsg
             partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(osg::Vec4f(1.f,1.f,1.f,1.f), osg::Vec4f(1.f,1.f,1.f,1.f)));
             partsys->getDefaultParticleTemplate().setAlphaRange(osgParticle::rangef(1.f, 1.f));
 
-            partsys->setFreezeOnCull(true);
-
             if (!partctrl->emitter.empty())
             {
                 osg::ref_ptr<Emitter> emitter = handleParticleEmitter(partctrl);
@@ -1157,8 +1134,6 @@ namespace NifOsg
                 trans->addChild(toAttach);
                 parentNode->addChild(trans);
             }
-            // create partsys stateset in order to pass in ShaderVisitor like all other Drawables
-            partsys->getOrCreateStateSet();
         }
 
         void handleNiGeometryData(osg::Geometry *geometry, const Nif::NiGeometryData* data, const std::vector<unsigned int>& boundTextures, const std::string& name)
@@ -1503,11 +1478,14 @@ namespace NifOsg
         osg::ref_ptr<osg::TexEnvCombine> createEmissiveTexEnv()
         {
             osg::ref_ptr<osg::TexEnvCombine> texEnv(new osg::TexEnvCombine);
-            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+            // Sum the previous colour and the emissive colour.
             texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
             texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
             texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+            // Keep the previous alpha.
+            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+            texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
             return texEnv;
         }
 
@@ -1602,27 +1580,31 @@ namespace NifOsg
                     else if (i == Nif::NiTexturingProperty::DarkTexture)
                     {
                         osg::TexEnv* texEnv = new osg::TexEnv;
+                        // Modulate both the colour and the alpha with the dark map.
                         texEnv->setMode(osg::TexEnv::MODULATE);
                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
                     else if (i == Nif::NiTexturingProperty::DetailTexture)
                     {
                         osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-                        texEnv->setScale_RGB(2.f);
-                        texEnv->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
-                        texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
-                        texEnv->setOperand1_Alpha(osg::TexEnvCombine::SRC_ALPHA);
-                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-                        texEnv->setSource1_Alpha(osg::TexEnvCombine::TEXTURE);
+                        // Modulate previous colour...
                         texEnv->setCombine_RGB(osg::TexEnvCombine::MODULATE);
-                        texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
-                        texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
                         texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        // with the detail map's colour,
                         texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+                        texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        // and a twist:
+                        texEnv->setScale_RGB(2.f);
+                        // Keep the previous alpha.
+                        texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
                     else if (i == Nif::NiTexturingProperty::BumpTexture)
                     {
+                        // Bump maps offset the environment map.
                         // Set this texture to Off by default since we can't render it with the fixed-function pipeline
                         stateset->setTextureMode(texUnit, GL_TEXTURE_2D, osg::StateAttribute::OFF);
                         osg::Matrix2 bumpMapMatrix(texprop->bumpMapMatrix.x(), texprop->bumpMapMatrix.y(),
@@ -1632,18 +1614,22 @@ namespace NifOsg
                     }
                     else if (i == Nif::NiTexturingProperty::DecalTexture)
                     {
-                         osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-                         texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
-                         texEnv->setSource0_RGB(osg::TexEnvCombine::TEXTURE);
-                         texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
-                         texEnv->setSource1_RGB(osg::TexEnvCombine::PREVIOUS);
-                         texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
-                         texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
-                         texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_ALPHA);
-                         texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-                         texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-                         texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
-                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+                        osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
+                        // Interpolate to the decal texture's colour...
+                        texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
+                        texEnv->setSource0_RGB(osg::TexEnvCombine::TEXTURE);
+                        texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        // ...from the previous colour...
+                        texEnv->setSource1_RGB(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        // using the decal texture's alpha as the factor.
+                        texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
+                        texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_ALPHA);
+                        // Keep the previous alpha.
+                        texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
+                        stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
 
                     switch (i)
@@ -1812,7 +1798,7 @@ namespace NifOsg
                 // Depth test flag
                 stateset->setMode(GL_DEPTH_TEST, zprop->flags&1 ? osg::StateAttribute::ON
                                                                 : osg::StateAttribute::OFF);
-                osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+                auto depth = SceneUtil::createDepth();
                 // Depth write flag
                 depth->setWriteMask((zprop->flags>>1)&1);
                 // Morrowind ignores depth test function
@@ -1935,8 +1921,6 @@ namespace NifOsg
         void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
                                              bool hasVertexColors, int animflags)
         {
-            osg::StateSet* stateset = node->getOrCreateStateSet();
-
             // Specular lighting is enabled by default, but there's a quirk...
             bool specEnabled = true;
             osg::ref_ptr<osg::Material> mat (new osg::Material);
@@ -1958,6 +1942,7 @@ namespace NifOsg
                 case Nif::RC_NiSpecularProperty:
                 {
                     // Specular property can turn specular lighting off.
+                    // FIXME: NiMaterialColorController doesn't care about this.
                     auto specprop = static_cast<const Nif::NiSpecularProperty*>(property);
                     specEnabled = specprop->flags & 1;
                     break;
@@ -2017,15 +2002,15 @@ namespace NifOsg
                         if (blendFunc->getDestination() == GL_DST_ALPHA)
                             blendFunc->setDestination(GL_ONE);
                         blendFunc = shareAttribute(blendFunc);
-                        stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
+                        node->getOrCreateStateSet()->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
-                            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                            node->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
                         else
-                            stateset->setRenderBinToInherit();
+                            node->getOrCreateStateSet()->setRenderBinToInherit();
                     }
-                    else
+                    else if (osg::StateSet* stateset = node->getStateSet())
                     {
                         stateset->removeAttribute(osg::StateAttribute::BLENDFUNC);
                         stateset->removeMode(GL_BLEND);
@@ -2036,9 +2021,9 @@ namespace NifOsg
                     {
                         osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(getTestMode((alphaprop->flags>>10)&0x7), alphaprop->data.threshold/255.f));
                         alphaFunc = shareAttribute(alphaFunc);
-                        stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                        node->getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
                     }
-                    else
+                    else if (osg::StateSet* stateset = node->getStateSet())
                     {
                         stateset->removeAttribute(osg::StateAttribute::ALPHAFUNC);
                         stateset->removeMode(GL_ALPHA_TEST);
@@ -2094,8 +2079,10 @@ namespace NifOsg
 
             mat = shareAttribute(mat);
 
+            osg::StateSet* stateset = node->getOrCreateStateSet();
             stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
-            stateset->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
+            if (emissiveMult != 1.f)
+                stateset->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
         }
 
     };

@@ -6,6 +6,7 @@
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 namespace Resource
 {
@@ -57,7 +58,7 @@ btCollisionShape* BulletShape::duplicateCollisionShape(const btCollisionShape *s
         for(int i = 0;i < numShapes;++i)
         {
             btCollisionShape *child = duplicateCollisionShape(comp->getChildShape(i));
-            btTransform trans = comp->getChildTransform(i);
+            const btTransform& trans = comp->getChildTransform(i);
             newShape->addChildShape(trans, child);
         }
 
@@ -74,6 +75,9 @@ btCollisionShape* BulletShape::duplicateCollisionShape(const btCollisionShape *s
     {
         return new btBoxShape(*boxshape);
     }
+
+    if (shape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE)
+        return new btHeightfieldTerrainShape(static_cast<const btHeightfieldTerrainShape&>(*shape));
 
     throw std::logic_error(std::string("Unhandled Bullet shape duplication: ")+shape->getName());
 }

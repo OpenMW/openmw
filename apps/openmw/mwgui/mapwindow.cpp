@@ -30,10 +30,13 @@
 #include "confirmationdialog.hpp"
 #include "tooltips.hpp"
 
+#include <numeric>
+
 namespace
 {
 
     const int cellSize = Constants::CellSizeInUnits;
+    constexpr float speed = 1.08f;   //the zoom speed, it should be greater than 1
 
     enum LocalMapWidgetDepth
     {
@@ -84,6 +87,22 @@ namespace
             setColour(mHoverColour);
         }
     };
+
+    MyGUI::IntRect createRect(const MyGUI::IntPoint& center, int radius)
+    {
+        return { center.left - radius, center.top + radius, center.left + radius, center.top - radius };
+    }
+
+    int getLocalViewingDistance()
+    {
+        if (!Settings::Manager::getBool("allow zooming", "Map"))
+            return Constants::CellGridRadius;
+        if (!Settings::Manager::getBool("distant terrain", "Terrain"))
+            return Constants::CellGridRadius;
+        const int maxLocalViewingDistance = std::max(Settings::Manager::getInt("max local viewing distance", "Map"), Constants::CellGridRadius);
+        const int viewingDistanceInCells = Settings::Manager::getFloat("viewing distance", "Camera") / Constants::CellSizeInUnits;
+        return std::min(maxLocalViewingDistance, viewingDistanceInCells);
+    }
 }
 
 namespace MWGui
@@ -167,7 +186,7 @@ namespace MWGui
         , mFogOfWarToggled(true)
         , mFogOfWarEnabled(fogOfWarEnabled)
         , mMapWidgetSize(0)
-        , mNumCells(0)
+        , mNumCells(1)
         , mCellDistance(0)
         , mCustomMarkers(markers)
         , mMarkerUpdateTimer(0.0f)
@@ -183,12 +202,12 @@ namespace MWGui
         mCustomMarkers.eventMarkersChanged -= MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
     }
 
-    void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass)
+    void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int cellDistance)
     {
         mLocalMap = widget;
         mCompass = compass;
         mMapWidgetSize = std::max(1, Settings::Manager::getInt("local map widget size", "Map"));
-        mCellDistance = Constants::CellGridRadius;
+        mCellDistance = cellDistance;
         mNumCells = mCellDistance * 2 + 1;
 
         mLocalMap->setCanvasSize(mMapWidgetSize*mNumCells, mMapWidgetSize*mNumCells);
@@ -234,65 +253,94 @@ namespace MWGui
 
     void LocalMapBase::applyFogOfWar()
     {
-        for (int mx=0; mx<mNumCells; ++mx)
+        if (!mFogOfWarToggled || !mFogOfWarEnabled)
         {
-            for (int my=0; my<mNumCells; ++my)
+            for (auto& entry : mMaps)
             {
-                MapEntry& entry = mMaps[my + mNumCells*mx];
-                MyGUI::ImageBox* fog = entry.mFogWidget;
-
-                if (!mFogOfWarToggled || !mFogOfWarEnabled)
-                {
-                    fog->setImageTexture("");
-                    entry.mFogTexture.reset();
-                    continue;
-                }
+                entry.mFogWidget->setImageTexture("");
+                entry.mFogTexture.reset();
             }
         }
 
         redraw();
     }
 
-    MyGUI::IntPoint LocalMapBase::getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos)
+    MyGUI::IntPoint LocalMapBase::getPosition(int cellX, int cellY, float nX, float nY) const
     {
-        MyGUI::IntPoint widgetPos;
+        // normalized cell coordinates
+        auto mapWidgetSize = getWidgetSize();
+        return MyGUI::IntPoint(
+            std::round(nX * mapWidgetSize + (mCellDistance + (cellX - mCurX)) * mapWidgetSize),
+            std::round(nY * mapWidgetSize + (mCellDistance - (cellY - mCurY)) * mapWidgetSize)
+        );
+    }
+
+    MyGUI::IntPoint LocalMapBase::getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const
+    {
+        int cellX, cellY;
         // normalized cell coordinates
         float nX,nY;
 
         if (!mInterior)
         {
-            int cellX, cellY;
             MWBase::Environment::get().getWorld()->positionToIndex(worldX, worldY, cellX, cellY);
             nX = (worldX - cellSize * cellX) / cellSize;
             // Image space is -Y up, cells are Y up
             nY = 1 - (worldY - cellSize * cellY) / cellSize;
-
-            float cellDx = static_cast<float>(cellX - mCurX);
-            float cellDy = static_cast<float>(cellY - mCurY);
-
-            markerPos.cellX = cellX;
-            markerPos.cellY = cellY;
-
-            widgetPos = MyGUI::IntPoint(static_cast<int>(nX * mMapWidgetSize + (mCellDistance + cellDx) * mMapWidgetSize),
-                                        static_cast<int>(nY * mMapWidgetSize + (mCellDistance - cellDy) * mMapWidgetSize));
         }
         else
-        {
-            int cellX, cellY;
-            osg::Vec2f worldPos (worldX, worldY);
-            mLocalMapRender->worldToInteriorMapPosition(worldPos, nX, nY, cellX, cellY);
+            mLocalMapRender->worldToInteriorMapPosition({ worldX, worldY }, nX, nY, cellX, cellY);
 
-            markerPos.cellX = cellX;
-            markerPos.cellY = cellY;
-
-            // Image space is -Y up, cells are Y up
-            widgetPos = MyGUI::IntPoint(static_cast<int>(nX * mMapWidgetSize + (mCellDistance + (cellX - mCurX)) * mMapWidgetSize),
-                                        static_cast<int>(nY * mMapWidgetSize + (mCellDistance - (cellY - mCurY)) * mMapWidgetSize));
-        }
-
+        markerPos.cellX = cellX;
+        markerPos.cellY = cellY;
         markerPos.nX = nX;
         markerPos.nY = nY;
-        return widgetPos;
+        return getPosition(markerPos.cellX, markerPos.cellY, markerPos.nX, markerPos.nY);
+    }
+
+    MyGUI::IntCoord LocalMapBase::getMarkerCoordinates(float worldX, float worldY, MarkerUserData& markerPos, size_t markerSize) const
+    {
+        int halfMarkerSize = markerSize / 2;
+        auto position = getMarkerPosition(worldX, worldY, markerPos);
+        return MyGUI::IntCoord(position.left - halfMarkerSize, position.top - halfMarkerSize, markerSize, markerSize);
+    }
+
+    MyGUI::Widget* LocalMapBase::createDoorMarker(const std::string& name, const MyGUI::VectorString& notes, float x, float y) const
+    {
+        MarkerUserData data(mLocalMapRender);
+        data.notes = notes;
+        data.caption = name;
+        MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("MarkerButton",
+            getMarkerCoordinates(x, y, data, 8), MyGUI::Align::Default);
+        markerWidget->setNormalColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
+        markerWidget->setHoverColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal_over}")));
+        markerWidget->setDepth(Local_MarkerLayer);
+        markerWidget->setNeedMouseFocus(true);
+        // Used by tooltips to not show the tooltip if marker is hidden by fog of war
+        markerWidget->setUserString("ToolTipType", "MapMarker");
+
+        markerWidget->setUserData(data);
+        return markerWidget;
+    }
+
+    void LocalMapBase::centerView()
+    {
+        MyGUI::IntPoint pos = mCompass->getPosition() + MyGUI::IntPoint{ 16, 16 };
+        MyGUI::IntSize viewsize = mLocalMap->getSize();
+        MyGUI::IntPoint viewOffset((viewsize.width / 2) - pos.left, (viewsize.height / 2) - pos.top);
+        mLocalMap->setViewOffset(viewOffset);
+    }
+
+    MyGUI::IntCoord LocalMapBase::getMarkerCoordinates(MyGUI::Widget* widget, size_t markerSize) const
+    {
+        MarkerUserData& markerPos(*widget->getUserData<MarkerUserData>());
+        auto position = getPosition(markerPos.cellX, markerPos.cellY, markerPos.nX, markerPos.nY);
+        return MyGUI::IntCoord(position.left - markerSize / 2, position.top - markerSize / 2, markerSize, markerSize);
+    }
+
+    std::vector<MyGUI::Widget*>& LocalMapBase::currentDoorMarkersWidgets()
+    {
+        return mInterior ? mInteriorDoorMarkerWidgets : mExteriorDoorMarkerWidgets;
     }
 
     void LocalMapBase::updateCustomMarkers()
@@ -317,13 +365,8 @@ namespace MWGui
                     const ESM::CustomMarker& marker = it->second;
 
                     MarkerUserData markerPos (mLocalMapRender);
-                    MyGUI::IntPoint widgetPos = getMarkerPosition(marker.mWorldX, marker.mWorldY, markerPos);
-
-                    MyGUI::IntCoord widgetCoord(widgetPos.left - 8,
-                                                widgetPos.top - 8,
-                                                16, 16);
                     MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("CustomMarkerButton",
-                        widgetCoord, MyGUI::Align::Default);
+                        getMarkerCoordinates(marker.mWorldX, marker.mWorldY, markerPos, 16), MyGUI::Align::Default);
                     markerWidget->setDepth(Local_MarkerAboveFogLayer);
                     markerWidget->setUserString("ToolTipType", "Layout");
                     markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
@@ -345,6 +388,38 @@ namespace MWGui
     {
         if (x==mCurX && y==mCurY && mInterior==interior && !mChanged)
             return; // don't do anything if we're still in the same cell
+
+        if (!interior && !(x == mCurX && y == mCurY))
+        {
+            const MyGUI::IntRect intersection = {
+                std::max(x, mCurX) - mCellDistance, std::max(y, mCurY) - mCellDistance,
+                std::min(x, mCurX) + mCellDistance, std::min(y, mCurY) + mCellDistance
+            };
+
+            const MyGUI::IntRect activeGrid = createRect({ x, y }, Constants::CellGridRadius);
+            const MyGUI::IntRect currentView = createRect({ x, y }, mCellDistance);
+
+            mExteriorDoorMarkerWidgets.clear();
+            for (auto& [coord, doors] : mExteriorDoorsByCell)
+            {
+                if (!mHasALastActiveCell || !currentView.inside({ coord.first, coord.second }) || activeGrid.inside({ coord.first, coord.second }))
+                {
+                    mDoorMarkersToRecycle.insert(mDoorMarkersToRecycle.end(), doors.begin(), doors.end());
+                    doors.clear();
+                }
+                else
+                    mExteriorDoorMarkerWidgets.insert(mExteriorDoorMarkerWidgets.end(), doors.begin(), doors.end());
+            }
+
+            for (auto& widget : mDoorMarkersToRecycle)
+                widget->setVisible(false);
+
+            for (auto const& cell : mMaps)
+            {
+                if (mHasALastActiveCell && !intersection.inside({ cell.mCellX, cell.mCellY }))
+                    mLocalMapRender->removeExteriorCell(cell.mCellX, cell.mCellY);
+            }
+        }
 
         mCurX = x;
         mCurY = y;
@@ -370,6 +445,12 @@ namespace MWGui
         // If we don't do this, door markers that should be disabled will still appear on the map.
         mNeedDoorMarkersUpdate = true;
 
+        for (MyGUI::Widget* widget : currentDoorMarkersWidgets())
+            widget->setCoord(getMarkerCoordinates(widget, 8));
+
+        if (!mInterior)
+            mHasALastActiveCell = true;
+
         updateMagicMarkers();
         updateCustomMarkers();
     }
@@ -385,21 +466,26 @@ namespace MWGui
         mLocalMap->getParent()->_updateChilds();
     }
 
+    float LocalMapBase::getWidgetSize() const
+    {
+        return mLocalMapZoom * mMapWidgetSize;
+    }
+
     void LocalMapBase::setPlayerPos(int cellX, int cellY, const float nx, const float ny)
     {
-        MyGUI::IntPoint pos(static_cast<int>(mMapWidgetSize * mCellDistance + nx*mMapWidgetSize - 16), static_cast<int>(mMapWidgetSize * mCellDistance + ny*mMapWidgetSize - 16));
-        pos.left += (cellX - mCurX) * mMapWidgetSize;
-        pos.top -= (cellY - mCurY) * mMapWidgetSize;
+        MyGUI::IntPoint pos = getPosition(cellX, cellY, nx, ny) - MyGUI::IntPoint{ 16, 16 };
 
         if (pos != mCompass->getPosition())
         {
             notifyPlayerUpdate ();
 
             mCompass->setPosition(pos);
-            MyGUI::IntPoint middle (pos.left+16, pos.top+16);
-                    MyGUI::IntCoord viewsize = mLocalMap->getCoord();
-            MyGUI::IntPoint viewOffset((viewsize.width / 2) - middle.left, (viewsize.height / 2) - middle.top);
-            mLocalMap->setViewOffset(viewOffset);
+        }
+        osg::Vec2f curPos((cellX + nx) * cellSize, (cellY + 1 - ny) * cellSize);
+        if ((curPos - mCurPos).length2() > 0.001)
+        {
+            mCurPos = curPos;
+            centerView();
         }
     }
 
@@ -449,17 +535,14 @@ namespace MWGui
         {
             const ESM::Position& worldPos = ptr.getRefData().getPosition();
             MarkerUserData markerPos (mLocalMapRender);
-            MyGUI::IntPoint widgetPos = getMarkerPosition(worldPos.pos[0], worldPos.pos[1], markerPos);
-            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
-                                        widgetPos.top - 4,
-                                        8, 8);
             ++counter;
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                widgetCoord, MyGUI::Align::Default);
+                getMarkerCoordinates(worldPos.pos[0], worldPos.pos[1], markerPos, 8), MyGUI::Align::Default);
             markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setImageTexture(markerTexture);
             markerWidget->setImageCoord(MyGUI::IntCoord(0,0,8,8));
             markerWidget->setNeedMouseFocus(false);
+            markerWidget->setUserData(markerPos);
             mMagicMarkerWidgets.push_back(markerWidget);
         }
     }
@@ -545,34 +628,32 @@ namespace MWGui
 
     void LocalMapBase::updateDoorMarkers()
     {
-        // clear all previous door markers
-        for (MyGUI::Widget* widget : mDoorMarkerWidgets)
-            MyGUI::Gui::getInstance().destroyWidget(widget);
-        mDoorMarkerWidgets.clear();
-
+        std::vector<MWBase::World::DoorMarker> doors;
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        // Retrieve the door markers we want to show
-        std::vector<MWBase::World::DoorMarker> doors;
+        mDoorMarkersToRecycle.insert(mDoorMarkersToRecycle.end(), mInteriorDoorMarkerWidgets.begin(), mInteriorDoorMarkerWidgets.end());
+        mInteriorDoorMarkerWidgets.clear();
+
         if (mInterior)
         {
+            for (MyGUI::Widget* widget : mExteriorDoorMarkerWidgets)
+                widget->setVisible(false);
+
             MWWorld::CellStore* cell = world->getInterior (mPrefix);
             world->getDoorMarkers(cell, doors);
         }
         else
         {
-            for (int dX=-mCellDistance; dX<=mCellDistance; ++dX)
+            for (MapEntry& entry : mMaps)
             {
-                for (int dY=-mCellDistance; dY<=mCellDistance; ++dY)
-                {
-                    MWWorld::CellStore* cell = world->getExterior (mCurX+dX, mCurY+dY);
-                    world->getDoorMarkers(cell, doors);
-                }
+                if (!entry.mMapTexture && !widgetCropped(entry.mMapWidget, mLocalMap))
+                    world->getDoorMarkers(world->getExterior(entry.mCellX, entry.mCellY), doors);
             }
+            if (doors.empty())
+                return;
         }
 
         // Create a widget for each marker
-        int counter = 0;
         for (MWBase::World::DoorMarker& marker : doors)
         {
             std::vector<std::string> destNotes;
@@ -580,28 +661,33 @@ namespace MWGui
             for (CustomMarkerCollection::ContainerType::const_iterator iter = markers.first; iter != markers.second; ++iter)
                 destNotes.push_back(iter->second.mNote);
 
-            MarkerUserData data (mLocalMapRender);
-            data.notes = destNotes;
-            data.caption = marker.name;
-            MyGUI::IntPoint widgetPos = getMarkerPosition(marker.x, marker.y, data);
-            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
-                                        widgetPos.top - 4,
-                                        8, 8);
-            ++counter;
-            MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("MarkerButton",
-                widgetCoord, MyGUI::Align::Default);
-            markerWidget->setNormalColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
-            markerWidget->setHoverColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal_over}")));
-            markerWidget->setDepth(Local_MarkerLayer);
-            markerWidget->setNeedMouseFocus(true);
-            // Used by tooltips to not show the tooltip if marker is hidden by fog of war
-            markerWidget->setUserString("ToolTipType", "MapMarker");
+            MyGUI::Widget* markerWidget = nullptr;
+            MarkerUserData* data;
+            if (mDoorMarkersToRecycle.empty())
+            {
+                markerWidget = createDoorMarker(marker.name, destNotes, marker.x, marker.y);
+                data = markerWidget->getUserData<MarkerUserData>();
+                doorMarkerCreated(markerWidget);
+            }
+            else
+            {
+                markerWidget = (MarkerWidget*)mDoorMarkersToRecycle.back();
+                mDoorMarkersToRecycle.pop_back();
 
-            markerWidget->setUserData(data);
-            doorMarkerCreated(markerWidget);
+                data = markerWidget->getUserData<MarkerUserData>();
+                data->notes = destNotes;
+                data->caption = marker.name;
+                markerWidget->setCoord(getMarkerCoordinates(marker.x, marker.y, *data, 8));
+                markerWidget->setVisible(true);
+            }
 
-            mDoorMarkerWidgets.push_back(markerWidget);
+            currentDoorMarkersWidgets().push_back(markerWidget);
+            if (!mInterior)
+                mExteriorDoorsByCell[{data->cellX, data->cellY}].push_back(markerWidget);
         }
+
+        for (auto& widget : mDoorMarkersToRecycle)
+            widget->setVisible(false);
     }
 
     void LocalMapBase::updateMagicMarkers()
@@ -623,23 +709,46 @@ namespace MWGui
                 && (!mInterior || Misc::StringUtils::ciEqual(markedCell->getCell()->mName, mPrefix)))
         {
             MarkerUserData markerPos (mLocalMapRender);
-            MyGUI::IntPoint widgetPos = getMarkerPosition(markedPosition.pos[0], markedPosition.pos[1], markerPos);
-            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
-                                        widgetPos.top - 4,
-                                        8, 8);
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                widgetCoord, MyGUI::Align::Default);
+                getMarkerCoordinates(markedPosition.pos[0], markedPosition.pos[1], markerPos, 8), MyGUI::Align::Default);
             markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setImageTexture("textures\\menu_map_smark.dds");
             markerWidget->setNeedMouseFocus(false);
+            markerWidget->setUserData(markerPos);
             mMagicMarkerWidgets.push_back(markerWidget);
         }
 
         redraw();
     }
 
-    // ------------------------------------------------------------------------------------------
+    void LocalMapBase::updateLocalMap()
+    {
+        auto mapWidgetSize = getWidgetSize();
+        mLocalMap->setCanvasSize(mapWidgetSize * mNumCells, mapWidgetSize * mNumCells);
 
+        const auto size = MyGUI::IntSize(std::ceil(mapWidgetSize), std::ceil(mapWidgetSize));
+        for (auto& entry : mMaps)
+        {
+            const auto position = getPosition(entry.mCellX, entry.mCellY, 0, 0);
+            entry.mMapWidget->setCoord({ position, size });
+            entry.mFogWidget->setCoord({ position, size });
+        }
+
+        MarkerUserData markerPos(mLocalMapRender);
+        for (MyGUI::Widget* widget : currentDoorMarkersWidgets())
+            widget->setCoord(getMarkerCoordinates(widget, 8));
+
+        for (MyGUI::Widget* widget : mCustomMarkerWidgets)
+        {
+            const auto& marker = *widget->getUserData<ESM::CustomMarker>();
+            widget->setCoord(getMarkerCoordinates(marker.mWorldX, marker.mWorldY, markerPos, 16));
+        }
+
+        for (MyGUI::Widget* widget : mMagicMarkerWidgets)
+            widget->setCoord(getMarkerCoordinates(widget, 8));
+    }
+
+    // ------------------------------------------------------------------------------------------
     MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender, SceneUtil::WorkQueue* workQueue)
         : WindowPinnableBase("openmw_map_window.layout")
         , LocalMapBase(customMarkers, localMapRender)
@@ -690,14 +799,19 @@ namespace MWGui
         getWidget(mEventBoxGlobal, "EventBoxGlobal");
         mEventBoxGlobal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         mEventBoxGlobal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+        const bool allowZooming = Settings::Manager::getBool("allow zooming", "Map");
+        if(allowZooming)
+            mEventBoxGlobal->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
         mEventBoxGlobal->setDepth(Global_ExploreOverlayLayer);
 
         getWidget(mEventBoxLocal, "EventBoxLocal");
         mEventBoxLocal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         mEventBoxLocal->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onMapDoubleClicked);
+        if (allowZooming)
+            mEventBoxLocal->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
 
-        LocalMapBase::init(mLocalMap, mPlayerArrowLocal);
+        LocalMapBase::init(mLocalMap, mPlayerArrowLocal, getLocalViewingDistance());
 
         mGlobalMap->setVisible(mGlobal);
         mLocalMap->setVisible(!mGlobal);
@@ -745,10 +859,11 @@ namespace MWGui
         MyGUI::IntPoint clickedPos = MyGUI::InputManager::getInstance().getMousePosition();
 
         MyGUI::IntPoint widgetPos = clickedPos - mEventBoxLocal->getAbsolutePosition();
-        int x = int(widgetPos.left/float(mMapWidgetSize))-mCellDistance;
-        int y = (int(widgetPos.top/float(mMapWidgetSize))-mCellDistance)*-1;
-        float nX = widgetPos.left/float(mMapWidgetSize) - int(widgetPos.left/float(mMapWidgetSize));
-        float nY = widgetPos.top/float(mMapWidgetSize) - int(widgetPos.top/float(mMapWidgetSize));
+        auto mapWidgetSize = getWidgetSize();
+        int x = int(widgetPos.left/float(mapWidgetSize))-mCellDistance;
+        int y = (int(widgetPos.top/float(mapWidgetSize))-mCellDistance)*-1;
+        float nX = widgetPos.left/float(mapWidgetSize) - int(widgetPos.left/float(mapWidgetSize));
+        float nY = widgetPos.top/float(mapWidgetSize) - int(widgetPos.top/float(mapWidgetSize));
         x += mCurX;
         y += mCurY;
 
@@ -781,6 +896,110 @@ namespace MWGui
         mEditNoteDialog.setText("");
     }
 
+    void MapWindow::onMapZoomed(MyGUI::Widget* sender, int rel)
+    {
+        const static int localWidgetSize = Settings::Manager::getInt("local map widget size", "Map");
+        const static int globalCellSize = Settings::Manager::getInt("global map cell size", "Map");
+
+        const bool zoomOut = rel < 0;
+        const bool zoomIn = !zoomOut;
+        const double speedDiff = zoomOut ? 1.0 / speed : speed;
+        const float localMapSizeInUnits = localWidgetSize * mNumCells;
+
+        const float currentMinLocalMapZoom = std::max({
+            (float(globalCellSize) * 4.f) / float(localWidgetSize),
+            float(mLocalMap->getWidth()) / localMapSizeInUnits,
+            float(mLocalMap->getHeight()) / localMapSizeInUnits
+        });
+
+        if (mGlobal)
+        {
+            const float currentGlobalZoom = mGlobalMapZoom;
+            const float currentMinGlobalMapZoom = std::min(
+                float(mGlobalMap->getWidth()) / float(mGlobalMapRender->getWidth()),
+                float(mGlobalMap->getHeight()) / float(mGlobalMapRender->getHeight())
+            );
+
+            mGlobalMapZoom *= speedDiff;
+
+            if (zoomIn && mGlobalMapZoom > 4.f)
+            {
+                mGlobalMapZoom = currentGlobalZoom;
+                mLocalMapZoom = currentMinLocalMapZoom;
+                onWorldButtonClicked(nullptr);
+                updateLocalMap();
+                return; //the zoom in is too big
+            }
+
+            if (zoomOut && mGlobalMapZoom < currentMinGlobalMapZoom)
+            {
+                mGlobalMapZoom = currentGlobalZoom;
+                return; //the zoom out is too big, we have reach the borders of the widget
+            }
+        }
+        else
+        {
+            auto const currentLocalZoom = mLocalMapZoom;
+            mLocalMapZoom *= speedDiff;
+
+            if (zoomIn && mLocalMapZoom > 4.0f)
+            {
+                mLocalMapZoom = currentLocalZoom;
+                return; //the zoom in is too big
+            }
+
+            if (zoomOut && mLocalMapZoom < currentMinLocalMapZoom)
+            {
+                mLocalMapZoom = currentLocalZoom;
+
+                float zoomRatio = 4.f/ mGlobalMapZoom;
+                mGlobalMapZoom = 4.f;
+                onWorldButtonClicked(nullptr);
+
+                zoomOnCursor(zoomRatio);
+                return; //the zoom out is too big, we switch to the global map
+            }
+
+            if (zoomOut)
+                mNeedDoorMarkersUpdate = true;
+        }
+        zoomOnCursor(speedDiff);
+    }
+
+    void MapWindow::zoomOnCursor(float speedDiff)
+    {
+        auto map = mGlobal ? mGlobalMap : mLocalMap;
+        auto cursor = MyGUI::InputManager::getInstance().getMousePosition() - map->getAbsolutePosition();
+        auto centerView = map->getViewOffset() - cursor;
+
+        mGlobal? updateGlobalMap() : updateLocalMap();
+
+        map->setViewOffset(MyGUI::IntPoint(
+            std::round(centerView.left * speedDiff) + cursor.left,
+            std::round(centerView.top * speedDiff) + cursor.top
+        ));
+    }
+
+    void MapWindow::updateGlobalMap()
+    {
+        resizeGlobalMap();
+
+        float x = mCurPos.x(), y = mCurPos.y();
+        if (mInterior)
+        {
+            auto pos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
+            x = pos.x();
+            y = pos.y();
+        }
+        setGlobalMapPlayerPosition(x, y);
+
+        for (auto& [marker, col] : mGlobalMapMarkers)
+        {
+            marker.widget->setCoord(createMarkerCoords(marker.position.x(), marker.position.y(), col.size()));
+            marker.widget->setVisible(marker.widget->getHeight() >= 6);
+        }
+    }
+
     void MapWindow::onChangeScrollWindowCoord(MyGUI::Widget* sender)
     {
         MyGUI::IntCoord currentCoordinates = sender->getCoord();
@@ -804,8 +1023,7 @@ namespace MWGui
     void MapWindow::renderGlobalMap()
     {
         mGlobalMapRender->render();
-        mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
-        mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
+        resizeGlobalMap();
     }
 
     MapWindow::~MapWindow()
@@ -818,6 +1036,39 @@ namespace MWGui
         setTitle("#{sCell=" + cellName + "}");
     }
 
+    MyGUI::IntCoord MapWindow::createMarkerCoords(float x, float y, float agregatedWeight) const
+    {
+        float worldX, worldY;
+        worldPosToGlobalMapImageSpace((x + 0.5f) * Constants::CellSizeInUnits, (y + 0.5f)* Constants::CellSizeInUnits, worldX, worldY);
+
+        const float markerSize = getMarkerSize(agregatedWeight);
+        const float halfMarkerSize = markerSize / 2.0f;
+        return MyGUI::IntCoord(
+            static_cast<int>(worldX - halfMarkerSize),
+            static_cast<int>(worldY - halfMarkerSize),
+            markerSize, markerSize);
+    }
+
+    MyGUI::Widget* MapWindow::createMarker(const std::string& name, float x, float y, float agregatedWeight)
+    {
+        MyGUI::Widget* markerWidget = mGlobalMap->createWidget<MyGUI::Widget>("MarkerButton",
+            createMarkerCoords(x, y, agregatedWeight), MyGUI::Align::Default);
+        markerWidget->setVisible(markerWidget->getHeight() >= 6.0);
+        markerWidget->setUserString("Caption_TextOneLine", "#{sCell=" + name + "}");
+        setGlobalMapMarkerTooltip(markerWidget, x, y);
+
+        markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+
+        markerWidget->setNeedMouseFocus(true);
+        markerWidget->setColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
+        markerWidget->setDepth(Global_MarkerLayer);
+        markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+        markerWidget->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
+        markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+
+        return markerWidget;
+    }
+
     void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
     {
         CellId cell;
@@ -825,31 +1076,33 @@ namespace MWGui
         cell.second = y;
         if (mMarkers.insert(cell).second)
         {
-            float worldX, worldY;
-            mGlobalMapRender->cellTopLeftCornerToImageSpace (x, y, worldX, worldY);
+            MapMarkerType mapMarkerWidget = { osg::Vec2f(x, y), createMarker(name, x, y, 0) };
+            mGlobalMapMarkers.emplace(mapMarkerWidget, std::vector<MapMarkerType>());
 
-            int markerSize = 12;
-            int offset = mGlobalMapRender->getCellSize()/2 - markerSize/2;
-            MyGUI::IntCoord widgetCoord(
-                        static_cast<int>(worldX * mGlobalMapRender->getWidth()+offset),
-                        static_cast<int>(worldY * mGlobalMapRender->getHeight() + offset),
-                        markerSize, markerSize);
+            std::string name_ = name.substr(0, name.find(','));
+            auto& entry = mGlobalMapMarkersByName[name_];
+            if (!entry.widget)
+            {
+                entry = { osg::Vec2f(x, y), entry.widget };   //update the coords
 
-            MyGUI::Widget* markerWidget = mGlobalMap->createWidget<MyGUI::Widget>("MarkerButton",
-                widgetCoord, MyGUI::Align::Default);
+                entry.widget = createMarker(name_, entry.position.x(), entry.position.y(), 1);
+                mGlobalMapMarkers.emplace(entry, std::vector<MapMarkerType>{ entry });
+            }
+            else
+            {
+                auto it = mGlobalMapMarkers.find(entry);
+                auto& marker = const_cast<MapMarkerType&>(it->first);
+                auto& elements = it->second;
+                elements.emplace_back(mapMarkerWidget);
 
-            markerWidget->setUserString("Caption_TextOneLine", "#{sCell=" + name + "}");
+                //we compute the barycenter of the entry elements => it will be the place on the world map for the agregated widget
+                marker.position = std::accumulate(elements.begin(), elements.end(), osg::Vec2f(0.f, 0.f), [](const auto& left, const auto& right) {
+                    return left + right.position;
+                }) / float(elements.size());
 
-            setGlobalMapMarkerTooltip(markerWidget, x, y);
-
-            markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
-
-            markerWidget->setNeedMouseFocus(true);
-            markerWidget->setColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
-            markerWidget->setDepth(Global_MarkerLayer);
-            markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
-            markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
-            mGlobalMapMarkers[std::make_pair(x,y)] = markerWidget;
+                marker.widget->setCoord(createMarkerCoords(marker.position.x(), marker.position.y(), elements.size()));
+                marker.widget->setVisible(marker.widget->getHeight() >= 6);
+            }
         }
     }
 
@@ -891,17 +1144,33 @@ namespace MWGui
         }
     }
 
+    float MapWindow::getMarkerSize(size_t agregatedWeight) const
+    {
+        float markerSize = 12.f * mGlobalMapZoom;
+        if (mGlobalMapZoom < 1)
+            return markerSize * std::sqrt(agregatedWeight);  //we want to see agregated object
+        return agregatedWeight ? 0 : markerSize; //we want to see only original markers (i.e. non agregated)
+    }
+
+    void MapWindow::resizeGlobalMap()
+    {
+        mGlobalMap->setCanvasSize(mGlobalMapRender->getWidth() * mGlobalMapZoom, mGlobalMapRender->getHeight() * mGlobalMapZoom);
+        mGlobalMapImage->setSize(mGlobalMapRender->getWidth() * mGlobalMapZoom, mGlobalMapRender->getHeight() * mGlobalMapZoom);
+    }
+
+    void MapWindow::worldPosToGlobalMapImageSpace(float x, float y, float& imageX, float& imageY) const
+    {
+        mGlobalMapRender->worldPosToImageSpace(x, y, imageX, imageY);
+        imageX *= mGlobalMapZoom;
+        imageY *= mGlobalMapZoom;
+    }
+
     void MapWindow::updateCustomMarkers()
     {
         LocalMapBase::updateCustomMarkers();
 
-        for (auto& widgetPair : mGlobalMapMarkers)
-        {
-            int x = widgetPair.first.first;
-            int y = widgetPair.first.second;
-            MyGUI::Widget* markerWidget = widgetPair.second;
-            setGlobalMapMarkerTooltip(markerWidget, x, y);
-        }
+        for (auto& [widgetPair, ignore]: mGlobalMapMarkers)
+            setGlobalMapMarkerTooltip(widgetPair.widget, widgetPair.position.x(), widgetPair.position.y());
     }
 
     void MapWindow::onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
@@ -917,7 +1186,10 @@ namespace MWGui
         MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
 
         if (!mGlobal)
+        {
+            mNeedDoorMarkersUpdate = true;
             mLocalMap->setViewOffset( mLocalMap->getViewOffset() + diff );
+        }
         else
             mGlobalMap->setViewOffset( mGlobalMap->getViewOffset() + diff );
 
@@ -934,9 +1206,6 @@ namespace MWGui
 
         mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
                 "#{sWorld}");
-
-        if (mGlobal)
-            globalMapUpdatePlayer ();
     }
 
     void MapWindow::onPinToggled()
@@ -978,19 +1247,21 @@ namespace MWGui
         setGlobalMapPlayerDir(mLastDirectionX, mLastDirectionY);
     }
 
+    void MapWindow::centerView()
+    {
+        LocalMapBase::centerView();
+        // set the view offset so that player is in the center
+        MyGUI::IntSize viewsize = mGlobalMap->getSize();
+        MyGUI::IntPoint pos = mPlayerArrowGlobal->getPosition() + MyGUI::IntPoint{ 16,16 };
+        MyGUI::IntPoint viewoffs(static_cast<int>(viewsize.width * 0.5f - pos.left), static_cast<int>(viewsize.height * 0.5f - pos.top));
+        mGlobalMap->setViewOffset(viewoffs);
+    }
+
     void MapWindow::setGlobalMapPlayerPosition(float worldX, float worldY)
     {
         float x, y;
-        mGlobalMapRender->worldPosToImageSpace (worldX, worldY, x, y);
-        x *= mGlobalMapRender->getWidth();
-        y *= mGlobalMapRender->getHeight();
-
+        worldPosToGlobalMapImageSpace(worldX, worldY, x, y);
         mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(static_cast<int>(x - 16), static_cast<int>(y - 16)));
-
-        // set the view offset so that player is in the center
-        MyGUI::IntSize viewsize = mGlobalMap->getSize();
-        MyGUI::IntPoint viewoffs(static_cast<int>(viewsize.width * 0.5f - x), static_cast<int>(viewsize.height *0.5 - y));
-        mGlobalMap->setViewOffset(viewoffs);
     }
 
     void MapWindow::setGlobalMapPlayerDir(const float x, const float y)
@@ -1027,8 +1298,9 @@ namespace MWGui
         mChanged = true;
 
         for (auto& widgetPair : mGlobalMapMarkers)
-            MyGUI::Gui::getInstance().destroyWidget(widgetPair.second);
+            MyGUI::Gui::getInstance().destroyWidget(widgetPair.first.widget);
         mGlobalMapMarkers.clear();
+        mGlobalMapMarkersByName.clear();
     }
 
     void MapWindow::write(ESM::ESMWriter &writer, Loading::Listener& progress)
@@ -1075,12 +1347,14 @@ namespace MWGui
         marker->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         marker->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         marker->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onCustomMarkerDoubleClicked);
+        marker->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
     }
 
     void MapWindow::doorMarkerCreated(MyGUI::Widget *marker)
     {
         marker->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         marker->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+        marker->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
     }
 
     // -------------------------------------------------------------------

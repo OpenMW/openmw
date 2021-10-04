@@ -129,7 +129,7 @@ namespace MWGui
         return -1;
     }
 
-    ItemModel::ModelIndex ProxyItemModel::getIndex (ItemStack item)
+    ItemModel::ModelIndex ProxyItemModel::getIndex (const ItemStack& item)
     {
         return mSourceModel->getIndex(item);
     }
@@ -161,5 +161,10 @@ namespace MWGui
     bool ProxyItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
     {
         return mSourceModel->onTakeItem(item, count);
+    }
+
+    bool ProxyItemModel::usesContainer(const MWWorld::Ptr& container)
+    {
+        return mSourceModel->usesContainer(container);
     }
 }

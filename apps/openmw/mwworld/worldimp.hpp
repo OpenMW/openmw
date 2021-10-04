@@ -133,8 +133,6 @@ namespace MWWorld
 
             void updateWeather(float duration, bool paused = false);
 
-            void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags);
-
             Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
 
             void updateSoundListener();
@@ -226,7 +224,7 @@ namespace MWWorld
 
             void setWaterHeight(const float height) override;
 
-            void rotateWorldObject (const MWWorld::Ptr& ptr, osg::Quat rotate) override;
+            void rotateWorldObject (const MWWorld::Ptr& ptr, const osg::Quat& rotate) override;
 
             bool toggleWater() override;
             bool toggleWorld() override;
@@ -372,13 +370,13 @@ namespace MWWorld
 
             void undeleteObject (const Ptr& ptr) override;
 
-            MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z, bool movePhysics=true, bool moveToActive=false) override;
+            MWWorld::Ptr moveObject (const Ptr& ptr, const osg::Vec3f& position, bool movePhysics=true, bool moveToActive=false) override;
             ///< @return an updated Ptr in case the Ptr's cell changes
 
-            MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z, bool movePhysics=true) override;
+            MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, const osg::Vec3f& position, bool movePhysics=true, bool keepActive=false) override;
             ///< @return an updated Ptr
 
-            MWWorld::Ptr moveObjectBy(const Ptr& ptr, osg::Vec3f vec, bool moveToActive, bool ignoreCollisions) override;
+            MWWorld::Ptr moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec, bool moveToActive, bool ignoreCollisions) override;
             ///< @return an updated Ptr
 
             void scaleObject (const Ptr& ptr, float scale) override;
@@ -387,10 +385,9 @@ namespace MWWorld
             /// @note Rotations via this method use a different rotation order than the initial rotations in the CS. This
             /// could be considered a bug, but is needed for MW compatibility.
             /// \param adjust indicates rotation should be set or adjusted
-            void rotateObject (const Ptr& ptr, float x, float y, float z,
-                MWBase::RotationFlags flags = MWBase::RotationFlag_inverseOrder) override;
+            void rotateObject (const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags = MWBase::RotationFlag_inverseOrder) override;
 
-            MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) override;
+            MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, const ESM::Position& pos) override;
             ///< Place an object. Makes a copy of the Ptr.
 
             MWWorld::Ptr safePlaceObject (const MWWorld::ConstPtr& ptr, const MWWorld::ConstPtr& referenceObject, MWWorld::CellStore* referenceCell, int direction, float distance) override;
@@ -639,7 +636,7 @@ namespace MWWorld
              */
             void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) override;
 
-            void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) override;
+            void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot) override;
             void launchProjectile (MWWorld::Ptr& actor, MWWorld::Ptr& projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) override;
             void updateProjectilesCasters() override;
@@ -684,7 +681,7 @@ namespace MWWorld
 
             void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore,
                                       ESM::RangeType rangeType, const std::string& id, const std::string& sourceName,
-                                      const bool fromProjectile=false) override;
+                                      const bool fromProjectile=false, int slot = 0) override;
 
             void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override;
 
@@ -738,7 +735,8 @@ namespace MWWorld
 
             bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
 
-            bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const override;
+            bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
+                const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr>* occupyingActors) const override;
 
             void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
 

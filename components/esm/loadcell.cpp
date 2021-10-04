@@ -1,10 +1,12 @@
 #include "loadcell.hpp"
 
 #include <string>
+#include <limits>
 #include <list>
 
 #include <boost/concept_check.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "esmreader.hpp"
@@ -109,6 +111,7 @@ namespace ESM
 
     void Cell::loadCell(ESMReader &esm, bool saveContext)
     {
+        bool overriding = !mName.empty();
         bool isLoaded = false;
         mHasAmbi = false;
         while (!isLoaded && esm.hasMoreSubs())
@@ -123,8 +126,17 @@ namespace ESM
                     mWaterInt = true;
                     break;
                 case ESM::FourCC<'W','H','G','T'>::value:
-                    esm.getHT(mWater);
+                    float waterLevel;
+                    esm.getHT(waterLevel);
                     mWaterInt = false;
+                    if(!std::isfinite(waterLevel))
+                    {
+                        if(!overriding)
+                            mWater = std::numeric_limits<float>::max();
+                        Log(Debug::Warning) << "Warning: Encountered invalid water level in cell " << mName << " defined in " << esm.getContext().filename;
+                    }
+                    else
+                        mWater = waterLevel;
                     break;
                 case ESM::FourCC<'A','M','B','I'>::value:
                     esm.getHT(mAmbi);
@@ -224,7 +236,7 @@ namespace ESM
         return region + ' ' + cellGrid;
     }
 
-    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool &isDeleted, bool ignoreMoves, MovedCellRef *mref)
+    bool Cell::getNextRef(ESMReader& esm, CellRef& ref, bool& isDeleted)
     {
         isDeleted = false;
 
@@ -232,22 +244,18 @@ namespace ESM
         if (!esm.hasMoreSubs())
             return false;
 
-        // NOTE: We should not need this check. It is a safety check until we have checked
-        // more plugins, and how they treat these moved references.
-        if (esm.isNextSub("MVRF"))
+        // MVRF are FRMR are present in pairs. MVRF indicates that following FRMR describes moved CellRef.
+        // This function has to skip all moved CellRefs therefore read all such pairs to ignored values.
+        while (esm.isNextSub("MVRF"))
         {
-            if (ignoreMoves)
-            {
-                esm.getHT (mref->mRefNum.mIndex);
-                esm.getHNOT (mref->mTarget, "CNDT");
-                adjustRefNum (mref->mRefNum, esm);
-            }
-            else
-            {
-                // skip rest of cell record (moved references), they are handled elsewhere
-                esm.skipRecord(); // skip MVRF, CNDT
+            MovedCellRef movedCellRef;
+            esm.getHT(movedCellRef.mRefNum.mIndex);
+            esm.getHNOT(movedCellRef.mTarget, "CNDT");
+            CellRef skippedCellRef;
+            if (!esm.peekNextSub("FRMR"))
                 return false;
-            }
+            bool skippedDeleted;
+            skippedCellRef.load(esm, skippedDeleted);
         }
 
         if (esm.peekNextSub("FRMR"))
@@ -261,6 +269,29 @@ namespace ESM
             return true;
         }
         return false;
+    }
+
+    bool Cell::getNextRef(ESMReader& esm, CellRef& cellRef, bool& deleted, MovedCellRef& movedCellRef, bool& moved)
+    {
+        deleted = false;
+        moved = false;
+
+        if (!esm.hasMoreSubs())
+            return false;
+
+        if (esm.isNextSub("MVRF"))
+        {
+            moved = true;
+            getNextMVRF(esm, movedCellRef);
+        }
+
+        if (!esm.peekNextSub("FRMR"))
+            return false;
+
+        cellRef.load(esm, deleted);
+        adjustRefNum(cellRef.mRefNum, esm);
+
+        return true;
     }
 
     bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
@@ -280,7 +311,7 @@ namespace ESM
         mWater = 0;
         mWaterInt = false;
         mMapColor = 0;
-        mRefNumCounter = -1;
+        mRefNumCounter = 0;
 
         mData.mFlags = 0;
         mData.mX = 0;

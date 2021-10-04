@@ -653,6 +653,16 @@ namespace MWInput
         return mInputBinder->getKeyBinding(mInputBinder->getControl(actionId), ICS::Control::INCREASE);
     }
 
+    float BindingsManager::getControllerAxisValue(SDL_GameControllerAxis axis) const
+    {
+        const auto& controllers = mInputBinder->getJoystickInstanceMap();
+        if (controllers.empty())
+            return 0;
+        SDL_GameController* cntrl = controllers.begin()->second;
+        constexpr int AXIS_MAX_ABSOLUTE_VALUE = 32768;
+        return SDL_GameControllerGetAxis(cntrl, axis) / static_cast<float>(AXIS_MAX_ABSOLUTE_VALUE);
+    }
+
     void BindingsManager::actionValueChanged(int action, float currentValue, float previousValue)
     {
         MWBase::Environment::get().getInputManager()->resetIdleTime();

@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <atomic>
 
 namespace
 {
@@ -32,6 +33,9 @@ namespace
 
             void doWork() override
             {
+                if (mAborted)
+                    return;
+
                 try
                 {
                     (*mImpl)(*mImage, mContextId);
@@ -42,10 +46,16 @@ namespace
                 }
             }
 
+            void abort() override
+            {
+                mAborted = true;
+            }
+
         private:
             const osg::ref_ptr<osgViewer::ScreenCaptureHandler::CaptureOperation> mImpl;
             const osg::ref_ptr<const osg::Image> mImage;
             const unsigned int mContextId;
+            std::atomic_bool mAborted {false};
     };
 }
 
@@ -130,8 +140,27 @@ namespace SceneUtil
         assert(mImpl != nullptr);
     }
 
+    AsyncScreenCaptureOperation::~AsyncScreenCaptureOperation()
+    {
+        stop();
+    }
+
+    void AsyncScreenCaptureOperation::stop()
+    {
+        for (const osg::ref_ptr<SceneUtil::WorkItem>& item : *mWorkItems.lockConst())
+            item->abort();
+
+        for (const osg::ref_ptr<SceneUtil::WorkItem>& item : *mWorkItems.lockConst())
+            item->waitTillDone();
+    }
+
     void AsyncScreenCaptureOperation::operator()(const osg::Image& image, const unsigned int context_id)
     {
-        mQueue->addWorkItem(new ScreenCaptureWorkItem(mImpl, image, context_id));
+        osg::ref_ptr<SceneUtil::WorkItem> item(new ScreenCaptureWorkItem(mImpl, image, context_id));
+        mQueue->addWorkItem(item);
+        const auto isDone = [] (const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
+        const auto workItems = mWorkItems.lock();
+        workItems->erase(std::remove_if(workItems->begin(), workItems->end(), isDone), workItems->end());
+        workItems->emplace_back(std::move(item));
     }
 }

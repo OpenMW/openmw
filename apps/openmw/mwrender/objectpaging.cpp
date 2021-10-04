@@ -77,7 +77,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
         if (obj)
-            return obj->asNode();
+            return static_cast<osg::Node*>(obj.get());
         else
         {
             osg::ref_ptr<osg::Node> node = createChunk(size, center, activeGrid, viewPoint, compile);
@@ -272,7 +272,7 @@ namespace MWRender
          : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
          , mCurrentStateSet(nullptr)
          , mCurrentDistance(0.f)
-         , mAnalyzeMask(analyzeMask) {}
+        { setTraversalMask(analyzeMask); }
 
         typedef std::unordered_map<osg::StateSet*, unsigned int> StateSetCounter;
         struct Result
@@ -283,9 +283,6 @@ namespace MWRender
 
         void apply(osg::Node& node) override
         {
-            if (!(node.getNodeMask() & mAnalyzeMask))
-                return;
-
             if (node.getStateSet())
                 mCurrentStateSet = node.getStateSet();
 
@@ -308,9 +305,6 @@ namespace MWRender
         }
         void apply(osg::Geometry& geom) override
         {
-            if (!(geom.getNodeMask() & mAnalyzeMask))
-                return;
-
             if (osg::Array* array = geom.getVertexArray())
                 mResult.mNumVerts += array->getNumElements();
 
@@ -345,7 +339,6 @@ namespace MWRender
         osg::StateSet* mCurrentStateSet;
         StateSetCounter mGlobalStateSetCounter;
         float mCurrentDistance;
-        osg::Node::NodeMask mAnalyzeMask;
     };
 
     class DebugVisitor : public osg::NodeVisitor
@@ -364,6 +357,7 @@ namespace MWRender
             osg::ref_ptr<osg::StateSet> stateset = node.getStateSet() ? osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY) : new osg::StateSet;
             stateset->setAttribute(m);
             stateset->addUniform(new osg::Uniform("colorMode", 0));
+            stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
             node.setStateSet(stateset);
         }
     };
@@ -389,7 +383,7 @@ namespace MWRender
          , mRefTrackerLocked(false)
     {
         mActiveGrid = Settings::Manager::getBool("object paging active grid", "Terrain");
-        mDebugBatches = Settings::Manager::getBool("object paging debug batches", "Terrain");
+        mDebugBatches = Settings::Manager::getBool("debug chunks", "Terrain");
         mMergeFactor = Settings::Manager::getFloat("object paging merge factor", "Terrain");
         mMinSize = Settings::Manager::getFloat("object paging min size", "Terrain");
         mMinSizeMergeFactor = Settings::Manager::getFloat("object paging min size merge factor", "Terrain");
@@ -426,13 +420,11 @@ namespace MWRender
                         ESM::MovedCellRef cMRef;
                         cMRef.mRefNum.mIndex = 0;
                         bool deleted = false;
-                        while(cell->getNextRef(esm[index], ref, deleted, /*ignoreMoves*/true, &cMRef))
+                        bool moved = false;
+                        while(cell->getNextRef(esm[index], ref, deleted, cMRef, moved))
                         {
-                            if (cMRef.mRefNum.mIndex)
-                            {
-                                cMRef.mRefNum.mIndex = 0;
-                                continue; // ignore refs that are moved
-                            }
+                            if (moved)
+                                continue;
 
                             if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
                             Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
@@ -485,8 +477,7 @@ namespace MWRender
         constexpr auto copyMask = ~Mask_UpdateVisitor;
 
         AnalyzeVisitor analyzeVisitor(copyMask);
-        osg::Vec3f center3 = { center.x(), center.y(), 0.f };
-        analyzeVisitor.mCurrentDistance = (viewPoint - center3).length2();
+        analyzeVisitor.mCurrentDistance = (viewPoint - worldCenter).length2();
         float minSize = mMinSize;
         if (mMinSizeMergeFactor)
             minSize *= mMinSizeMergeFactor;
@@ -499,7 +490,7 @@ namespace MWRender
             {
                 osg::Vec3f cellPos = pos / ESM::Land::REAL_SIZE;
                 if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x()) || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y())
-                 || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x()) || (minBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
+                 || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x()) || (maxBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
                     continue;
             }
 
@@ -512,8 +503,8 @@ namespace MWRender
                     continue;
             }
 
-            if (ref.mRefID == "prisonmarker" || ref.mRefID == "divinemarker" || ref.mRefID == "templemarker" || ref.mRefID == "northmarker")
-                continue; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
+            if (Misc::ResourceHelpers::isHiddenMarker(ref.mRefID))
+                continue;
 
             int type = store.findStatic(ref.mRefID);
             std::string model = getModel(type, ref.mRefID, store);
@@ -660,7 +651,7 @@ namespace MWRender
             }
             optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
             unsigned int options = SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES|SceneUtil::Optimizer::MERGE_GEOMETRY;
-            mSceneManager->shareState(mergeGroup);
+
             optimizer.optimize(mergeGroup, options);
 
             group->addChild(mergeGroup);

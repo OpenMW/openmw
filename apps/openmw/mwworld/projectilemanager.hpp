@@ -49,7 +49,7 @@ namespace MWWorld
                 MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics);
 
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
-        void launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection);
+        void launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot);
 
         void launchProjectile (const MWWorld::Ptr& actor, const MWWorld::ConstPtr& projectile,
                                        const osg::Vec3f& pos, const osg::Quat& orient, const MWWorld::Ptr& bow, float speed, float attackStrength);
@@ -107,6 +107,7 @@ namespace MWWorld
             ESM::EffectList mEffects;
 
             float mSpeed;
+            int mSlot;
 
             std::vector<MWBase::Sound*> mSounds;
             std::set<std::string> mSoundIds;

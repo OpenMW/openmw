@@ -77,6 +77,14 @@ return {
         EXPECT_EQ(LuaUtil::call(script1["get"]).get<int>(), 45);
     }
 
+    TEST_F(LuaStateTest, ToString)
+    {
+        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), 3.14)), "3.14");
+        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), true)), "true");
+        EXPECT_EQ(LuaUtil::toString(sol::nil), "nil");
+        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), "something")), "\"something\"");
+    }
+
     TEST_F(LuaStateTest, ErrorHandling)
     {
         EXPECT_ERROR(mLua.runInNewSandbox("invalid.lua"), "[string \"invalid.lua\"]:1:");
@@ -111,7 +119,7 @@ return {
         EXPECT_ERROR(LuaUtil::call(script["rawsetSystemLib"]), "bad argument #1 to 'rawset' (table expected, got userdata)");
         EXPECT_ERROR(LuaUtil::call(script["modifySystemLib"]), "a userdata value");
 
-        EXPECT_EQ(mLua.getMutableFromReadOnly(mLua.makeReadOnly(script)), script);
+        EXPECT_EQ(LuaUtil::getMutableFromReadOnly(LuaUtil::makeReadOnly(script)), script);
     }
 
     TEST_F(LuaStateTest, Print)
@@ -142,8 +150,8 @@ return {
     {
         LuaUtil::LuaState lua(mVFS.get());
 
-        sol::table api1 = lua.makeReadOnly(lua.sol().create_table_with("name", "api1"));
-        sol::table api2 = lua.makeReadOnly(lua.sol().create_table_with("name", "api2"));
+        sol::table api1 = LuaUtil::makeReadOnly(lua.sol().create_table_with("name", "api1"));
+        sol::table api2 = LuaUtil::makeReadOnly(lua.sol().create_table_with("name", "api2"));
 
         sol::table script1 = lua.runInNewSandbox("bbb/tests.lua", "", {{"test.api", api1}});
 

@@ -54,6 +54,7 @@ ShadowsBin::ShadowsBin()
 
     mShaderAlphaTestStateSet = new osg::StateSet;
     mShaderAlphaTestStateSet->addUniform(new osg::Uniform("alphaTestShadows", true));
+    mShaderAlphaTestStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
     mShaderAlphaTestStateSet->setMode(GL_BLEND, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
 
     for (size_t i = 0; i < sCastingPrograms.size(); ++i)
@@ -221,7 +222,7 @@ void ShadowsBin::sortImplementation()
     }
     if (!noTestRoot->_leaves.empty())
         newList.push_back(noTestRoot);
-    _stateGraphList = newList;
+    _stateGraphList = std::move(newList);
 }
 
 }

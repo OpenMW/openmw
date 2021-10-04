@@ -127,14 +127,16 @@ void main()
 
     vec4 diffuseColor = getDiffuseColor();
     gl_FragData[0].a *= diffuseColor.a;
+
+#if @darkMap
+    gl_FragData[0] *= texture2D(darkMap, darkMapUV);
+    gl_FragData[0].a *= coveragePreservingAlphaScale(darkMap, darkMapUV);
+#endif
+
     alphaTest();
 
 #if @detailMap
     gl_FragData[0].xyz *= texture2D(detailMap, detailMapUV).xyz * 2.0;
-#endif
-
-#if @darkMap
-    gl_FragData[0].xyz *= texture2D(darkMap, darkMapUV).xyz;
 #endif
 
 #if @decalMap

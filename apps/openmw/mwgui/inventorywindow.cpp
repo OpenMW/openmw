@@ -29,6 +29,7 @@
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
@@ -703,7 +704,7 @@ namespace MWGui
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(GW_Inventory))
             return;
         // make sure the object is of a type that can be picked up
-        std::string type = object.getTypeName();
+        const std::string& type = object.getTypeName();
         if ( (type != typeid(ESM::Apparatus).name())
             && (type != typeid(ESM::Armor).name())
             && (type != typeid(ESM::Book).name())
@@ -730,6 +731,12 @@ namespace MWGui
         MWBase::Environment::get().getWorld()->breakInvisibility(player);
         
         if (!object.getRefData().activate())
+            return;
+
+        // Player must not be paralyzed, knocked down, or dead to pick up an item.
+        const MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats(player);
+        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
+        if ((!godmode && playerStats.isParalyzed()) || playerStats.getKnockedDown() || playerStats.isDead())
             return;
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);

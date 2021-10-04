@@ -40,6 +40,8 @@
             <Widget type="ScrollBar" skin="MW_HScroll" position="122 20 210 13" name="MagnitudeMinSlider">
                 <Property key="Range" value="100"/>
                 <Property key="Page" value="1"/>
+                <Property key="ViewPage" value="10"/>
+                <Property key="MoveToClick" value="false"/>
             </Widget>
 
             <Widget type="TextBox" skin="SandText" position="122 32 210 20" name="MagnitudeMaxValue">
@@ -49,6 +51,8 @@
             <Widget type="ScrollBar" skin="MW_HScroll" position="122 52 210 13" name="MagnitudeMaxSlider">
                 <Property key="Range" value="100"/>
                 <Property key="Page" value="1"/>
+                <Property key="ViewPage" value="10"/>
+                <Property key="MoveToClick" value="false"/>
             </Widget>
         </Widget>
 
@@ -70,6 +74,8 @@
             <Widget type="ScrollBar" skin="MW_HScroll" position="122 20 210 13" name="DurationSlider">
                 <Property key="Range" value="1440"/>
                 <Property key="Page" value="1"/>
+                <Property key="ViewPage" value="20"/>
+                <Property key="MoveToClick" value="false"/>
             </Widget>
         </Widget>
 
@@ -90,6 +96,8 @@
             <Widget type="ScrollBar" skin="MW_HScroll" position="122 20 210 13" name="AreaSlider">
                 <Property key="Range" value="51"/>
                 <Property key="Page" value="1"/>
+                <Property key="ViewPage" value="5"/>
+                <Property key="MoveToClick" value="false"/>
             </Widget>
         </Widget>
 

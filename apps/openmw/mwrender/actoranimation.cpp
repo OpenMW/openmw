@@ -84,7 +84,7 @@ PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::st
     return PartHolderPtr(new PartHolder(instance));
 }
 
-std::string ActorAnimation::getShieldMesh(MWWorld::ConstPtr shield) const
+std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield) const
 {
     std::string mesh = shield.getClass().getModel(shield);
     const ESM::Armor *armor = shield.get<ESM::Armor>()->mBase;
@@ -271,7 +271,7 @@ bool ActorAnimation::useShieldAnimations() const
     return false;
 }
 
-osg::Group* ActorAnimation::getBoneByName(const std::string& boneName)
+osg::Group* ActorAnimation::getBoneByName(const std::string& boneName) const
 {
     if (!mObjectRoot)
         return nullptr;

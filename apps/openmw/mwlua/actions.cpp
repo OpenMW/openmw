@@ -39,8 +39,8 @@ namespace MWLua
         }
         else
         {
-            MWWorld::Ptr newObj = world->moveObject(obj, cell, mPos.x(), mPos.y(), mPos.z());
-            world->rotateObject(newObj, mRot.x(), mRot.y(), mRot.z());
+            MWWorld::Ptr newObj = world->moveObject(obj, cell, mPos);
+            world->rotateObject(newObj, mRot);
         }
     }
 
@@ -51,8 +51,8 @@ namespace MWLua
         std::array<bool, MWWorld::InventoryStore::Slots> usedSlots;
         std::fill(usedSlots.begin(), usedSlots.end(), false);
 
-        constexpr int anySlot = -1;
-        auto tryEquipToSlot = [&actor, &store, &usedSlots, &worldView, anySlot](int slot, const Item& item) -> bool
+        static constexpr int anySlot = -1;
+        auto tryEquipToSlot = [&actor, &store, &usedSlots, &worldView](int slot, const Item& item) -> bool
         {
             auto old_it = slot != anySlot ? store.getSlot(slot) : store.end();
             MWWorld::Ptr itemPtr;
@@ -71,7 +71,7 @@ namespace MWLua
             else
             {
                 const std::string& recordId = std::get<std::string>(item);
-                if (old_it != store.end() && *old_it->getCellRef().getRefIdPtr() == recordId)
+                if (old_it != store.end() && old_it->getCellRef().getRefIdRef() == recordId)
                     return true;  // already equipped
                 itemPtr = store.search(recordId);
                 if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0)

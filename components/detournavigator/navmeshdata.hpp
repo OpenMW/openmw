@@ -3,7 +3,6 @@
 
 #include <DetourAlloc.h>
 
-#include <algorithm>
 #include <memory>
 
 namespace DetourNavigator
@@ -21,7 +20,7 @@ namespace DetourNavigator
     struct NavMeshData
     {
         NavMeshDataValue mValue;
-        int mSize;
+        int mSize = 0;
 
         NavMeshData() = default;
 

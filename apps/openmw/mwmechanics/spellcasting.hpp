@@ -1,6 +1,7 @@
 #ifndef MWMECHANICS_SPELLCASTING_H
 #define MWMECHANICS_SPELLCASTING_H
 
+#include <components/esm/activespells.hpp>
 #include <components/esm/effectlist.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -11,6 +12,7 @@ namespace ESM
     struct Ingredient;
     struct Potion;
     struct EffectList;
+    struct MagicEffect;
 }
 
 namespace MWMechanics
@@ -26,13 +28,14 @@ namespace MWMechanics
         void playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects);
 
     public:
-        bool mStack{false};
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
         osg::Vec3f mHitPosition{0,0,0}; // Used for spawning area orb
         bool mAlwaysSucceed{false}; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
         bool mFromProjectile; // True if spell is cast by enchantment of some projectile (arrow, bolt or thrown weapon)
         bool mManualSpell; // True if spell is casted from script and ignores some checks (mana level, success chance, etc.)
+        int mSlot{0};
+        ESM::ActiveSpells::EffectType mType{ESM::ActiveSpells::Type_Temporary};
 
     public:
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile=false, const bool manualSpell=false);
@@ -41,7 +44,7 @@ namespace MWMechanics
 
         /// @note mCaster must be an actor
         /// @param launchProjectile If set to false, "on target" effects are directly applied instead of being launched as projectile originating from the caster.
-        bool cast (const MWWorld::Ptr& item, bool launchProjectile=true);
+        bool cast (const MWWorld::Ptr& item, int slot, bool launchProjectile=true);
 
         /// @note mCaster must be an NPC
         bool cast (const ESM::Ingredient* ingredient);
@@ -60,11 +63,9 @@ namespace MWMechanics
         /// @note \a caster can be any type of object, or even an empty object.
         void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
                       const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
-
-        /// @note \a caster can be any type of object, or even an empty object.
-        /// @return was the target suitable for the effect?
-        bool applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
     };
+
+    void playEffects(const MWWorld::Ptr& target, const ESM::MagicEffect& magicEffect, bool playNonLooping = true);
 }
 
 #endif

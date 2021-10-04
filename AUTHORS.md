@@ -44,6 +44,7 @@ Programmers
     Austin Salgat (Salgat)
     Ben Shealy (bentsherman)
     Berulacks
+    Bo Svensson
     Britt Mathis (galdor557)
     Capostrophic
     Carl Maxwell
@@ -79,6 +80,7 @@ Programmers
     Federico Guerra (FedeWar)
     Fil Krynicki (filkry)
     Finbar Crago (finbar-crago)
+    Florent Teppe (Tetramir)
     Florian Weber (Florianjw)
     Frédéric Chardon (fr3dz10)
     Gaëtan Dezeiraud (Brouilles)
@@ -99,6 +101,7 @@ Programmers
     James Stephens (james-h-stephens)
     Jan-Peter Nilsson (peppe)
     Jan Borsodi (am0s)
+    JanuarySnow
     Jason Hooks (jhooks)
     jeaye
     jefetienne
@@ -159,6 +162,7 @@ Programmers
     Nikolay Kasyanov (corristo)
     nobrakal
     Nolan Poe (nopoe)
+    Nurivan Gomez (Nuri-G)
     Oleg Chkan (mrcheko)
     Paul Cercueil (pcercuei)
     Paul McElroy (Greendogo)
@@ -225,6 +229,7 @@ Programmers
     Yuri Krupenin
     zelurker
     Noah Gooder
+    Andrew Appuhamy (andrew-app)
 
 Documentation
 -------------

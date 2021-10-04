@@ -134,11 +134,7 @@ public:
   {
       getSubHeader();
       if (mCtx.leftSub != sizeof(X))
-      {
-          fail("getHT(): subrecord size mismatch,requested "
-                  + std::to_string(sizeof(X)) + ", got"
-                      + std::to_string(mCtx.leftSub));
-      }
+          reportSubSizeMismatch(sizeof(X), mCtx.leftSub);
       getT(x);
   }
 
@@ -261,6 +257,13 @@ public:
   size_t getFileSize() const { return mFileSize; }
 
 private:
+  [[noreturn]] void reportSubSizeMismatch(size_t want, size_t got) {
+          fail("record size mismatch, requested " +
+                  std::to_string(want) +
+                  ", got" +
+                  std::to_string(got));
+  }
+
   void clearCtx();
 
   Files::IStreamPtr mEsm;

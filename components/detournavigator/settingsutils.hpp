@@ -37,6 +37,11 @@ namespace DetourNavigator
         return value * settings.mRecastScaleFactor;
     }
 
+    inline osg::Vec2f toNavMeshCoordinates(const Settings& settings, osg::Vec2f position)
+    {
+        return position * settings.mRecastScaleFactor;
+    }
+
     inline osg::Vec3f toNavMeshCoordinates(const Settings& settings, osg::Vec3f position)
     {
         std::swap(position.y(), position.z());
@@ -77,18 +82,9 @@ namespace DetourNavigator
         return static_cast<float>(settings.mBorderSize) * settings.mCellSize;
     }
 
-    inline float getSwimLevel(const Settings& settings, const float agentHalfExtentsZ)
+    inline float getSwimLevel(const Settings& settings, const float waterLevel, const float agentHalfExtentsZ)
     {
-        return - settings.mSwimHeightScale * agentHalfExtentsZ;
-    }
-
-    inline btTransform getSwimLevelTransform(const Settings& settings, const btTransform& transform,
-        const float agentHalfExtentsZ)
-    {
-        return btTransform(
-            transform.getBasis(),
-            transform.getOrigin() + btVector3(0, 0, getSwimLevel(settings, agentHalfExtentsZ) - agentHalfExtentsZ)
-        );
+        return waterLevel - settings.mSwimHeightScale * agentHalfExtentsZ - agentHalfExtentsZ;;
     }
 
     inline float getRealTileSize(const Settings& settings)

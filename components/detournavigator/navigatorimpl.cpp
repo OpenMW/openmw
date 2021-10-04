@@ -2,6 +2,7 @@
 #include "debug.hpp"
 #include "settingsutils.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadpgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
@@ -31,18 +32,15 @@ namespace DetourNavigator
             --it->second;
     }
 
-    bool NavigatorImpl::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
-    {
-        return mNavMeshManager.addObject(id, shape, transform, AreaType_ground);
-    }
-
     bool NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        bool result = addObject(id, shapes.mShape, transform);
-        if (shapes.mAvoid)
+        CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->getCollisionShape()};
+        bool result = mNavMeshManager.addObject(id, collisionShape, transform, AreaType_ground);
+        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->getAvoidCollisionShape())
         {
-            const ObjectId avoidId(shapes.mAvoid);
-            if (mNavMeshManager.addObject(avoidId, *shapes.mAvoid, transform, AreaType_null))
+            const ObjectId avoidId(avoidShape);
+            CollisionShape avoidCollisionShape {shapes.mShapeInstance, *avoidShape};
+            if (mNavMeshManager.addObject(avoidId, avoidCollisionShape, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
                 result = true;
@@ -64,18 +62,15 @@ namespace DetourNavigator
         return false;
     }
 
-    bool NavigatorImpl::updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
-    {
-        return mNavMeshManager.updateObject(id, shape, transform, AreaType_ground);
-    }
-
     bool NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        bool result = updateObject(id, shapes.mShape, transform);
-        if (shapes.mAvoid)
+        const CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->getCollisionShape()};
+        bool result = mNavMeshManager.updateObject(id, collisionShape, transform, AreaType_ground);
+        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->getAvoidCollisionShape())
         {
-            const ObjectId avoidId(shapes.mAvoid);
-            if (mNavMeshManager.updateObject(avoidId, *shapes.mAvoid, transform, AreaType_null))
+            const ObjectId avoidId(avoidShape);
+            const CollisionShape collisionShape {shapes.mShapeInstance, *avoidShape};
+            if (mNavMeshManager.updateObject(avoidId, collisionShape, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
                 result = true;
@@ -102,16 +97,25 @@ namespace DetourNavigator
         return result;
     }
 
-    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
-        const btTransform& transform)
+    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift)
     {
-        return mNavMeshManager.addWater(cellPosition, cellSize,
-            btTransform(transform.getBasis(), btVector3(transform.getOrigin().x(), transform.getOrigin().y(), level)));
+        return mNavMeshManager.addWater(cellPosition, cellSize, shift);
     }
 
     bool NavigatorImpl::removeWater(const osg::Vec2i& cellPosition)
     {
         return mNavMeshManager.removeWater(cellPosition);
+    }
+
+    bool NavigatorImpl::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+        const HeightfieldShape& shape)
+    {
+        return mNavMeshManager.addHeightfield(cellPosition, cellSize, shift, shape);
+    }
+
+    bool NavigatorImpl::removeHeightfield(const osg::Vec2i& cellPosition)
+    {
+        return mNavMeshManager.removeHeightfield(cellPosition);
     }
 
     void NavigatorImpl::addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid)

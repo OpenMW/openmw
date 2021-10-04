@@ -24,7 +24,8 @@ namespace LuaUtil
 
     LuaState::LuaState(const VFS::Manager* vfs) : mVFS(vfs)
     {
-        mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::string, sol::lib::table);
+        mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math,
+                            sol::lib::string, sol::lib::table, sol::lib::debug);
 
         mLua["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
         mLua["math"]["randomseed"] = sol::nil;
@@ -66,25 +67,31 @@ namespace LuaUtil
         mSandboxEnv = sol::nil;
     }
 
-    sol::table LuaState::makeReadOnly(sol::table table)
+    sol::table makeReadOnly(sol::table table)
     {
+        if (table == sol::nil)
+            return table;
         if (table.is<sol::userdata>())
             return table;  // it is already userdata, no sense to wrap it again
 
+        lua_State* lua = table.lua_state();
         table[sol::meta_function::index] = table;
-        sol::stack::push(mLua, std::move(table));
-        lua_newuserdata(mLua, 0);
-        lua_pushvalue(mLua, -2);
-        lua_setmetatable(mLua, -2);
-        return sol::stack::pop<sol::table>(mLua);
+        sol::stack::push(lua, std::move(table));
+        lua_newuserdata(lua, 0);
+        lua_pushvalue(lua, -2);
+        lua_setmetatable(lua, -2);
+        return sol::stack::pop<sol::table>(lua);
     }
 
-    sol::table LuaState::getMutableFromReadOnly(const sol::userdata& ro)
+    sol::table getMutableFromReadOnly(const sol::userdata& ro)
     {
-        sol::stack::push(mLua, ro);
-        lua_getmetatable(mLua, -1);
-        sol::table res = sol::stack::pop<sol::table>(mLua);
-        lua_pop(mLua, 1);
+        lua_State* lua = ro.lua_state();
+        sol::stack::push(lua, ro);
+        int ok = lua_getmetatable(lua, -1);
+        assert(ok);
+        (void)ok;
+        sol::table res = sol::stack::pop<sol::table>(lua);
+        lua_pop(lua, 1);
         return res;
     }
 
@@ -162,6 +169,16 @@ namespace LuaUtil
         #else
         return LUA_RELEASE " (" LUAJIT_VERSION ")";
         #endif
+    }
+
+    std::string toString(const sol::object& obj)
+    {
+        if (obj == sol::nil)
+            return "nil";
+        else if (obj.get_type() == sol::type::string)
+            return "\"" + obj.as<std::string>() + "\"";
+        else
+            return call(sol::state_view(obj.lua_state())["tostring"], obj);
     }
 
 }

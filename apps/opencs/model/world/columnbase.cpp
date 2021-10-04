@@ -104,7 +104,8 @@ bool CSMWorld::ColumnBase::isId (Display display)
 bool CSMWorld::ColumnBase::isText (Display display)
 {
     return display==Display_String || display==Display_LongString ||
-        display==Display_String32 || display==Display_LongString256;
+        display==Display_String32 || display==Display_String64 ||
+        display==Display_LongString256;
 }
 
 bool CSMWorld::ColumnBase::isScript (Display display)

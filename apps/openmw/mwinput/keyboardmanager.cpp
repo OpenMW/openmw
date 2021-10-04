@@ -60,7 +60,10 @@ namespace MWInput
             mBindingsManager->keyPressed(arg);
 
         if (!consumed)
-            MWBase::Environment::get().getLuaManager()->keyPressed(arg);
+        {
+            MWBase::Environment::get().getLuaManager()->inputEvent(
+                {MWBase::LuaManager::InputEvent::KeyPressed, arg.keysym});
+        }
 
         input->setJoystickLastUsed(false);
     }
@@ -73,5 +76,6 @@ namespace MWInput
         if (!mBindingsManager->isDetectingBindingState())
             mBindingsManager->setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(kc));
         mBindingsManager->keyReleased(arg);
+        MWBase::Environment::get().getLuaManager()->inputEvent({MWBase::LuaManager::InputEvent::KeyReleased, arg.keysym});
     }
 }

@@ -1,28 +1,80 @@
 0.48.0
 ------
 
+    Bug #1751: Birthsign abilities increase modified attribute values instead of base ones
+    Bug #3246: ESSImporter: Most NPCs are dead on save load
+    Bug #3514: Editing a reference's position after loading an esp file makes the reference disappear
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
     Bug #3905: Great House Dagoth issues
+    Bug #4203: Resurrecting an actor should close the loot GUI
+    Bug #4602: Robert's Bodies: crash inside createInstance()
+    Bug #4700: Editor: Incorrect command implementation
+    Bug #4744: Invisible particles must still be processed
+    Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
+    Bug #5207: Loose summons can be present in scene
     Bug #5379: Wandering NPCs falling through cantons
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
+    Bug #5508: Engine binary links to Qt without using it
+    Bug #5596: Effects in constant spells should not be merged
+    Bug #5621: Drained stats cannot be restored
+    Bug #5755: Active grid object paging - disappearing textures
+    Bug #5766: Active grid object paging - disappearing textures
+    Bug #5788: Texture editing parses the selected indexes wrongly
+    Bug #5801: A multi-effect spell with the intervention effects and recall always favors Almsivi intervention
+    Bug #5842: GetDisposition adds temporary disposition change from different actors
+    Bug #5863: GetEffect should return true after the player has teleported
     Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
+    Bug #6051: NaN water height in ESM file is not handled gracefully
     Bug #6066: addtopic "return" does not work from within script. No errors thrown
     Bug #6067: esp loader fails in for certain subrecord orders
+    Bug #6087: Bound items added directly to the inventory disappear if their corresponding spell effect ends
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
     Bug #6107: Fatigue is incorrectly recalculated when fortify effect is applied or removed
     Bug #6115: Showmap overzealous matching
+    Bug #6118: Creature landing sound counts as a footstep
     Bug #6123: NPC with broken script freezes the game on hello
     Bug #6129: Player avatar not displayed correctly for large window sizes when GUI scaling active
     Bug #6131: Item selection in the avatar window not working correctly for large window sizes
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
+    Bug #6165: Paralyzed player character can pickup items when the inventory is open
+    Bug #6172: Some creatures can't open doors
+    Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
+    Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
+    Bug #6197: Infinite Casting Loop
+    Bug #6223: Some Constant Effect Bound Items inconsistencies
+    Bug #6273: Respawning NPCs rotation is inconsistent
+    Bug #6282: Laura craft doesn't follow the player character
+    Bug #6283: Avis Dorsey follows you after her death
+    Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
+    Bug #6302: Teleporting disabled actor breaks its disabled state
+    Bug #6307: Pathfinding in Infidelities quest from Tribunal addon is broken
+    Feature #890: OpenMW-CS: Column filtering
+    Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
+    Feature #3616: Allow Zoom levels on the World Map
+    Feature #4297: Implement APPLIED_ONCE flag for magic effects
+    Feature #4414: Handle duration of EXTRA SPELL magic effect
+    Feature #4595: Unique object identifier
+    Feature #4737: Handle instance move from one cell to another
+    Feature #5198: Implement "Magic effect expired" event
+    Feature #5454: Clear active spells from actor when he disappears from scene
     Feature #5489: MCP: Telekinesis fix for activators
+    Feature #5737: Handle instance move from one cell to another
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
+    Feature #6032: Reverse-z depth buffer
+    Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
+    Feature #6199: Support FBO Rendering
+    Feature #6249: Alpha testing support for Collada
+    Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
+    Feature #6288: Preserve the "blocked" record flag for referenceable objects.
+    Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
+    Task #6264: Remove the old classes in animation.cpp
+
 
 0.47.0
 ------
@@ -1930,6 +1982,7 @@
     Bug #2025: Missing mouse-over text for non affordable items
     Bug #2028: [MOD: Tamriel Rebuilt] Crashing when trying to enter interior cell "Ruinous Keep, Great Hall"
     Bug #2029: Ienith Brothers Thiev's Guild quest journal entry not adding
+    Bug #3066: Editor doesn't check if IDs and other strings are longer than their hardcoded field length
     Feature #471: Editor: Special case implementation for top-level window with single sub-window
     Feature #472: Editor: Sub-Window re-use settings
     Feature #704: Font colors import from fallback settings

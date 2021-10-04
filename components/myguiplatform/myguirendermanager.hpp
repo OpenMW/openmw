@@ -12,6 +12,11 @@ namespace Resource
     class ImageManager;
 }
 
+namespace Shader
+{
+    class ShaderManager;
+}
+
 namespace osgViewer
 {
     class Viewer;
@@ -61,6 +66,8 @@ public:
 
     void initialise();
     void shutdown();
+
+    void enableShaders(Shader::ShaderManager& shaderManager);
 
     void setScalingFactor(float factor);
 

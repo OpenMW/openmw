@@ -203,7 +203,7 @@ namespace CSMWorld
     {
             IdTable& mModel;
             std::string mId;
-            RecordBase *mOld;
+            std::unique_ptr<RecordBase> mOld;
 
             // not implemented
             RevertCommand (const RevertCommand&);
@@ -224,7 +224,7 @@ namespace CSMWorld
     {
             IdTable& mModel;
             std::string mId;
-            RecordBase *mOld;
+            std::unique_ptr<RecordBase> mOld;
             UniversalId::Type mType;
 
             // not implemented

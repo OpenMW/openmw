@@ -42,6 +42,8 @@ namespace MWGui
 
             void resetReference() override;
 
+            void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
+
             typedef MyGUI::delegates::CMultiDelegate0 EventHandle_TradeDone;
             EventHandle_TradeDone eventTradeDone;
 

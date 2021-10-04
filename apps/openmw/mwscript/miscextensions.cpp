@@ -25,6 +25,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -562,13 +563,7 @@ namespace MWScript
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                    MWMechanics::MagicEffects effects = stats.getSpells().getMagicEffects();
-                    effects += stats.getActiveSpells().getMagicEffects();
-                    if (ptr.getClass().hasInventoryStore(ptr) && !stats.isDeathAnimationFinished())
-                    {
-                        MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                        effects += store.getMagicEffects();
-                    }
+                    const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
 
                     for (const auto& activeEffect : effects)
                     {
@@ -820,7 +815,7 @@ namespace MWScript
                     }
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                    runtime.push(stats.getActiveSpells().isSpellActive(id) || stats.getSpells().isSpellActive(id));
+                    runtime.push(stats.getActiveSpells().isSpellActive(id));
                 }
         };
 
@@ -862,6 +857,9 @@ namespace MWScript
                 {
                     float param = runtime[0].mFloat;
                     runtime.pop();
+
+                    if (param < 0)
+                        throw std::runtime_error("square root of negative number (we aren't that imaginary)");
 
                     runtime.push(std::sqrt (param));
                 }
@@ -1233,8 +1231,11 @@ namespace MWScript
 
                 if (ptr.getClass().isActor())
                 {
-                    MWMechanics::AiCast castPackage(targetId, spellId, true);
-                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    if (!MWBase::Environment::get().getMechanicsManager()->isCastingSpell(ptr))
+                    {
+                        MWMechanics::AiCast castPackage(targetId, spellId, true);
+                        ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    }
                     return;
                 }
 
@@ -1276,8 +1277,11 @@ namespace MWScript
 
                 if (ptr.getClass().isActor())
                 {
-                    MWMechanics::AiCast castPackage(ptr.getCellRef().getRefId(), spellId, true);
-                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    if (!MWBase::Environment::get().getMechanicsManager()->isCastingSpell(ptr))
+                    {
+                        MWMechanics::AiCast castPackage(ptr.getCellRef().getRefId(), spellId, true);
+                        ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    }
                     return;
                 }
 
@@ -1356,17 +1360,18 @@ namespace MWScript
                 std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
                 msg << std::put_time(std::gmtime(&currentTime), "%Y.%m.%d %T UTC") << std::endl;
 
-                msg << "Content file: ";
+                msg << "Content file: " << ptr.getCellRef().getRefNum().mContentFile;
 
                 if (!ptr.getCellRef().hasContentFile())
-                    msg << "[None]" << std::endl;
+                    msg << " [None]" << std::endl;
                 else
                 {
                     std::vector<std::string> contentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
 
-                    msg << contentFiles.at (ptr.getCellRef().getRefNum().mContentFile) << std::endl;
-                    msg << "RefNum: " << ptr.getCellRef().getRefNum().mIndex << std::endl;
+                    msg << " [" << contentFiles.at (ptr.getCellRef().getRefNum().mContentFile) << "]" << std::endl;
                 }
+
+                msg << "RefNum: " << ptr.getCellRef().getRefNum().mIndex << std::endl;
 
                 if (ptr.getRefData().isDeletedByContentFile())
                     msg << "[Deleted by content file]" << std::endl;

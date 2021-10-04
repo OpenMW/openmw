@@ -712,6 +712,11 @@ void CSVRender::TerrainTextureMode::mouseMoveEvent (QMouseEvent *event)
         mBrushDraw->hide();
 }
 
+std::shared_ptr<CSVRender::TerrainSelection> CSVRender::TerrainTextureMode::getTerrainSelection()
+{
+    return mTerrainTextureSelection;
+}
+
 
 void CSVRender::TerrainTextureMode::setBrushSize(int brushSize)
 {

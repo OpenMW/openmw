@@ -1,5 +1,7 @@
 #include "aitravel.hpp"
 
+#include <algorithm>
+
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -23,6 +25,11 @@ bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
     return (pos1 - pos2).length2() <= 7168*7168;
 }
 
+    float getActorRadius(const MWWorld::ConstPtr& actor)
+    {
+        const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+        return std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
+    }
 }
 
 namespace MWMechanics
@@ -70,16 +77,24 @@ namespace MWMechanics
 
         // Unfortunately, with vanilla assets destination is sometimes blocked by other actor.
         // If we got close to target, check for actors nearby. If they are, finish AI package.
-        int destinationTolerance = 64;
-        if (distance(actorPos, targetPos) <= destinationTolerance)
+        if (mDestinationCheck.update(duration) == Misc::TimerStatus::Elapsed)
         {
-            std::vector<MWWorld::Ptr> targetActors;
-            std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(actor, destinationTolerance, targetActors);
-
-            if (!result.first.isEmpty())
+            std::vector<MWWorld::Ptr> occupyingActors;
+            if (isAreaOccupiedByOtherActor(actor, targetPos, &occupyingActors))
             {
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-                return true;
+                const float actorRadius = getActorRadius(actor);
+                const float distanceToTarget = distance(actorPos, targetPos);
+                for (const MWWorld::Ptr& other : occupyingActors)
+                {
+                    const float otherRadius = getActorRadius(other);
+                    const auto [minRadius, maxRadius] = std::minmax(actorRadius, otherRadius);
+                    constexpr float toleranceFactor = 1.25;
+                    if (minRadius * toleranceFactor + maxRadius > distanceToTarget)
+                    {
+                        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+                        return true;
+                    }
+                }
             }
         }
 
@@ -93,11 +108,12 @@ namespace MWMechanics
 
     void AiTravel::fastForward(const MWWorld::Ptr& actor, AiState& state)
     {
-        if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), actor.getRefData().getPosition().asVec3()))
+        osg::Vec3f pos(mX, mY, mZ);
+        if (!isWithinMaxRange(pos, actor.getRefData().getPosition().asVec3()))
             return;
         // does not do any validation on the travel target (whether it's in air, inside collision geometry, etc),
         // that is the user's responsibility
-        MWBase::Environment::get().getWorld()->moveObject(actor, mX, mY, mZ);
+        MWBase::Environment::get().getWorld()->moveObject(actor, pos);
         actor.getClass().adjustPosition(actor, false);
         reset();
     }

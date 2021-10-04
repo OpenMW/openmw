@@ -19,7 +19,7 @@ namespace DetourNavigator
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
 
-        dtPolyRef startRef = findNearestPolyExpanding(navMeshQuery, queryFilter, start, halfExtents);
+        dtPolyRef startRef = findNearestPoly(navMeshQuery, queryFilter, start, halfExtents * 4);
         if (startRef == 0)
             return std::optional<osg::Vec3f>();
 

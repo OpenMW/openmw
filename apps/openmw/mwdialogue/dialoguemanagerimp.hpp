@@ -47,8 +47,9 @@ namespace MWDialogue
 
             std::vector<std::pair<std::string, int> > mChoices;
 
-            float mTemporaryDispositionChange;
-            float mPermanentDispositionChange;
+            int mOriginalDisposition;
+            int mCurrentDisposition;
+            int mPermanentDispositionChange;
 
             void parseText (const std::string& text);
 
@@ -61,6 +62,8 @@ namespace MWDialogue
             void executeTopic (const std::string& topic, ResponseCallback* callback);
 
             const ESM::Dialogue* searchDialogue(const std::string& id);
+
+            void updateOriginalDisposition();
 
         public:
 
@@ -96,7 +99,6 @@ namespace MWDialogue
             void questionAnswered (int answer, ResponseCallback* callback) override;
 
             void persuade (int type, ResponseCallback* callback) override;
-            int getTemporaryDispositionChange () const override;
 
             /// @note Controlled by an option, gets discarded when dialogue ends by default
             void applyBarterDispositionChange (int delta) override;

@@ -16,7 +16,6 @@ namespace Resource
 }
 
 class btCollisionObject;
-class btQuaternion;
 class btVector3;
 
 namespace MWPhysics
@@ -32,10 +31,8 @@ namespace MWPhysics
         const Resource::BulletShapeInstance* getShapeInstance() const;
         void setScale(float scale);
         void setRotation(osg::Quat quat);
-        void setOrigin(const btVector3& vec);
+        void updatePosition();
         void commitPositionChange();
-        btCollisionObject* getCollisionObject();
-        const btCollisionObject* getCollisionObject() const;
         btTransform getTransform() const;
         /// Return solid flag. Not used by the object itself, true by default.
         bool isSolid() const;
@@ -46,12 +43,12 @@ namespace MWPhysics
         bool animateCollisionShapes();
 
     private:
-        std::unique_ptr<btCollisionObject> mCollisionObject;
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
         std::map<int, osg::NodePath> mRecIndexToNodePath;
         bool mSolid;
         btVector3 mScale;
-        btTransform mLocalTransform;
+        osg::Vec3f mPosition;
+        osg::Quat mRotation;
         bool mScaleUpdatePending;
         bool mTransformUpdatePending;
         mutable std::mutex mPositionMutex;

@@ -5,6 +5,7 @@
 
 #include "collection.hpp"
 #include "land.hpp"
+#include "pathgrid.hpp"
 
 namespace CSMWorld
 {
@@ -83,9 +84,9 @@ namespace CSMWorld
                 return -1;
             }
 
-            Record<ESXRecordT> baseRecord = this->getRecord (index);
-            baseRecord.mState = RecordBase::State_Deleted;
-            this->setRecord (index, baseRecord);
+            std::unique_ptr<Record<ESXRecordT> > baseRecord(new Record<ESXRecordT>(this->getRecord(index)));
+            baseRecord->mState = RecordBase::State_Deleted;
+            this->setRecord(index, std::move(baseRecord));
             return index;
         }
 
@@ -96,30 +97,31 @@ namespace CSMWorld
     int IdCollection<ESXRecordT, IdAccessorT>::load (const ESXRecordT& record, bool base,
         int index)
     {
-        if (index==-2)
+        if (index==-2) // index unknown
             index = this->searchId (IdAccessorT().getId (record));
 
         if (index==-1)
         {
             // new record
-            Record<ESXRecordT> record2;
-            record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
-            (base ? record2.mBase : record2.mModified) = record;
+            std::unique_ptr<Record<ESXRecordT> > record2(new Record<ESXRecordT>);
+            record2->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+            (base ? record2->mBase : record2->mModified) = record;
 
             index = this->getSize();
-            this->appendRecord (record2);
+            this->appendRecord(std::move(record2));
         }
         else
         {
             // old record
-            Record<ESXRecordT> record2 = Collection<ESXRecordT, IdAccessorT>::getRecord (index);
+            std::unique_ptr<Record<ESXRecordT> > record2(
+                    new Record<ESXRecordT>(Collection<ESXRecordT, IdAccessorT>::getRecord(index)));
 
             if (base)
-                record2.mBase = record;
+                record2->mBase = record;
             else
-                record2.setModified (record);
+                record2->setModified(record);
 
-            this->setRecord (index, record2);
+            this->setRecord(index, std::move(record2));
         }
 
         return index;
@@ -133,7 +135,7 @@ namespace CSMWorld
         if (index==-1)
             return false;
 
-        Record<ESXRecordT> record = Collection<ESXRecordT, IdAccessorT>::getRecord (index);
+        const Record<ESXRecordT>& record = Collection<ESXRecordT, IdAccessorT>::getRecord (index);
 
         if (record.isDeleted())
             return false;
@@ -144,12 +146,17 @@ namespace CSMWorld
         }
         else
         {
-            record.mState = RecordBase::State_Deleted;
-            this->setRecord (index, record);
+            std::unique_ptr<Record<ESXRecordT> > record2(
+                    new Record<ESXRecordT>(Collection<ESXRecordT, IdAccessorT>::getRecord(index)));
+            record2->mState = RecordBase::State_Deleted;
+            this->setRecord(index, std::move(record2));
         }
 
         return true;
     }
+
+    template<>
+    int IdCollection<Pathgrid, IdAccessor<Pathgrid> >::load(ESM::ESMReader& reader, bool base);
 }
 
 #endif

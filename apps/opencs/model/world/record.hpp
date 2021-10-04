@@ -1,6 +1,7 @@
 #ifndef CSM_WOLRD_RECORD_H
 #define CSM_WOLRD_RECORD_H
 
+#include <memory>
 #include <stdexcept>
 
 namespace CSMWorld
@@ -20,9 +21,9 @@ namespace CSMWorld
 
         virtual ~RecordBase();
 
-        virtual RecordBase *clone() const = 0;
+        virtual std::unique_ptr<RecordBase> clone() const = 0;
 
-        virtual RecordBase *modifiedCopy() const = 0;
+        virtual std::unique_ptr<RecordBase> modifiedCopy() const = 0;
 
         virtual void assign (const RecordBase& record) = 0;
         ///< Will throw an exception if the types don't match.
@@ -45,9 +46,9 @@ namespace CSMWorld
         Record(State state,
                 const ESXRecordT *base = 0, const ESXRecordT *modified = 0);
 
-        RecordBase *clone() const override;
+        std::unique_ptr<RecordBase> clone() const override;
 
-        RecordBase *modifiedCopy() const override;
+        std::unique_ptr<RecordBase> modifiedCopy() const override;
 
         void assign (const RecordBase& record) override;
 
@@ -85,15 +86,16 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT>
-    RecordBase *Record<ESXRecordT>::modifiedCopy() const
+    std::unique_ptr<RecordBase> Record<ESXRecordT>::modifiedCopy() const
     {
-        return new Record<ESXRecordT> (State_ModifiedOnly, nullptr, &(this->get()));
+        return std::make_unique<Record<ESXRecordT> >(
+                Record<ESXRecordT>(State_ModifiedOnly, nullptr, &(this->get())));
     }
 
     template <typename ESXRecordT>
-    RecordBase *Record<ESXRecordT>::clone() const
+    std::unique_ptr<RecordBase> Record<ESXRecordT>::clone() const
     {
-        return new Record<ESXRecordT> (*this);
+        return std::make_unique<Record<ESXRecordT> >(Record<ESXRecordT>(*this));
     }
 
     template <typename ESXRecordT>

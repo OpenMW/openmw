@@ -208,14 +208,14 @@ namespace MWMechanics
             }
         }
 
-        for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+        for (const ESM::Spell* spell : spells)
         {
-            float rating = rateSpell(it->first, actor, enemy);
+            float rating = rateSpell(spell, actor, enemy);
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;
-                bestAction.reset(new ActionSpell(it->first->mId));
-                antiFleeRating = vanillaRateSpell(it->first, actor, enemy);
+                bestAction.reset(new ActionSpell(spell->mId));
+                antiFleeRating = vanillaRateSpell(spell, actor, enemy);
             }
         }
 
@@ -266,9 +266,9 @@ namespace MWMechanics
             }
         }
 
-        for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+        for (const ESM::Spell* spell : spells)
         {
-            float rating = rateSpell(it->first, actor, enemy);
+            float rating = rateSpell(spell, actor, enemy);
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;

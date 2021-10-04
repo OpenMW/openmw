@@ -13,6 +13,11 @@ if(POLICY CMP0083)
   cmake_policy(SET CMP0083 NEW)
 endif()
 
+# to link with freetype library
+if(POLICY CMP0079)
+  cmake_policy(SET CMP0079 NEW)
+endif()
+
 option(OPENMW_GL4ES_MANUAL_INIT "Manually initialize gl4es. This is more reliable on platforms without a windowing system. Requires gl4es to be configured with -DNOEGL=ON -DNO_LOADER=ON -DNO_INIT_CONSTRUCTOR=ON." OFF)
 if(OPENMW_GL4ES_MANUAL_INIT)
     add_definitions(-DOPENMW_GL4ES_MANUAL_INIT)
@@ -202,8 +207,6 @@ if (USE_QT)
     find_package(Qt5Widgets REQUIRED)
     find_package(Qt5Network REQUIRED)
     find_package(Qt5OpenGL REQUIRED)
-    # Instruct CMake to run moc automatically when needed.
-    #set(CMAKE_AUTOMOC ON)
 endif()
 
 set(USED_OSG_COMPONENTS
@@ -404,11 +407,8 @@ else(USE_LUAJIT)
    add_compile_definitions(NO_LUAJIT)
 endif(USE_LUAJIT)
 
-# Download sol - C++ library binding to Lua
-file(DOWNLOAD
-     "https://github.com/ThePhD/sol2/releases/download/v3.2.2/sol.hpp" "${OpenMW_BINARY_DIR}/extern/sol3.2.2/sol/sol.hpp"
-     EXPECTED_MD5 ba113cf458f60672917108e69bb4d958)
-set(SOL_INCLUDE_DIRS ${OpenMW_BINARY_DIR}/extern/sol3.2.2 ${OpenMW_SOURCE_DIR}/extern/sol_config)
+# C++ library binding to Lua
+set(SOL_INCLUDE_DIRS ${OpenMW_SOURCE_DIR}/extern/sol3.2.2 ${OpenMW_SOURCE_DIR}/extern/sol_config)
 
 include_directories(
     BEFORE SYSTEM
@@ -515,7 +515,7 @@ endif()
 
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -pedantic -Wno-long-long")
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wundef -Wno-unused-parameter -pedantic -Wno-long-long ${CMAKE_CXX_FLAGS}")
     add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
 
     if (APPLE)
@@ -545,7 +545,6 @@ endif()
 
 # Components
 add_subdirectory (components)
-target_compile_definitions(components PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
 
 # Apps and tools
 if (BUILD_OPENMW)
@@ -681,7 +680,7 @@ if (WIN32)
     if (BUILD_OPENMW)
         # \bigobj is required:
         #  1) for OPENMW_UNITY_BUILD;
-        #  2) to compile lua binginds, because sol3 is heavily templated.
+        #  2) to compile lua bindings, because sol3 is heavily templated.
         set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD} /bigobj")
     endif()
 

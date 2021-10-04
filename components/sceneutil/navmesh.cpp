@@ -6,6 +6,7 @@
 #include <DetourDebugDraw.h>
 
 #include <osg/Group>
+#include <osg/Material>
 
 namespace SceneUtil
 {
@@ -17,6 +18,11 @@ namespace SceneUtil
         navMeshQuery.init(&navMesh, settings.mMaxNavMeshQueryNodes);
         duDebugDrawNavMeshWithClosedList(&debugDraw, navMesh, navMeshQuery,
                                          DU_DRAWNAVMESH_OFFMESHCONS | DU_DRAWNAVMESH_CLOSEDLIST);
+
+        osg::ref_ptr<osg::Material> material = new osg::Material;
+        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        group->getOrCreateStateSet()->setAttribute(material);
+
         return group;
     }
 }

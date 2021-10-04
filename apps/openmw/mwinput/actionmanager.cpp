@@ -9,6 +9,7 @@
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -195,6 +196,7 @@ namespace MWInput
 
     void ActionManager::executeAction(int action)
     {
+        MWBase::Environment::get().getLuaManager()->inputEvent({MWBase::LuaManager::InputEvent::Action, action});
         auto* inputManager = MWBase::Environment::get().getInputManager();
         auto* windowManager = MWBase::Environment::get().getWindowManager();
         // trigger action activated
@@ -490,16 +492,17 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
-                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu
-                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings
-                && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
+        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+        if (windowManager->getMode() != MWGui::GM_Journal
+                && windowManager->getMode() != MWGui::GM_MainMenu
+                && windowManager->getMode() != MWGui::GM_Settings
+                && windowManager->getJournalAllowed())
         {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
+            windowManager->pushGuiMode(MWGui::GM_Journal);
         }
-        else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
+        else if (windowManager->containsMode(MWGui::GM_Journal))
         {
-            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
+            windowManager->removeGuiMode(MWGui::GM_Journal);
         }
     }
 

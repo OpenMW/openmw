@@ -33,7 +33,10 @@ namespace MWRender
 
     void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY)
     {
-        minX = 0, minY = 0, maxX = 0, maxY = 0;
+        minX = 0;
+        minY = 0;
+        maxX = 0;
+        maxY = 0;
 
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();

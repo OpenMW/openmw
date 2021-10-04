@@ -8,6 +8,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -98,8 +99,8 @@ namespace MWInput
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
             float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-            float xMove = xAxis * dt * 1500.0f / uiScale;
-            float yMove = yAxis * dt * 1500.0f / uiScale;
+            float xMove = xAxis * dt * 1500.0f / uiScale * mGamepadCursorSpeed;
+            float yMove = yAxis * dt * 1500.0f / uiScale * mGamepadCursorSpeed;
 
             float mouseWheelMove = -zAxis * dt * 1500.0f;
             if (xMove != 0 || yMove != 0 || mouseWheelMove != 0)
@@ -198,6 +199,9 @@ namespace MWInput
         if (!mJoystickEnabled || mBindingsManager->isDetectingBindingState())
             return;
 
+        MWBase::Environment::get().getLuaManager()->inputEvent(
+            {MWBase::LuaManager::InputEvent::ControllerPressed, arg.button});
+
         mJoystickLastUsed = true;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
@@ -238,6 +242,12 @@ namespace MWInput
         {
             mBindingsManager->controllerButtonReleased(deviceID, arg);
             return;
+        }
+
+        if (mJoystickEnabled)
+        {
+            MWBase::Environment::get().getLuaManager()->inputEvent(
+                {MWBase::LuaManager::InputEvent::ControllerReleased, arg.button});
         }
 
         if (!mJoystickEnabled || MWBase::Environment::get().getInputManager()->controlsDisabled())

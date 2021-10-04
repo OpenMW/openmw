@@ -30,12 +30,11 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "fDiseaseXferChance")->mValue.getFloat();
 
-        MagicEffects& actorEffects = actor.getClass().getCreatureStats(actor).getMagicEffects();
+        const MagicEffects& actorEffects = actor.getClass().getCreatureStats(actor).getMagicEffects();
 
         Spells& spells = carrier.getClass().getCreatureStats(carrier).getSpells();
-        for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+        for (const ESM::Spell* spell : spells)
         {
-            const ESM::Spell* spell = it->first;
             if (actor.getClass().getCreatureStats(actor).getSpells().hasSpell(spell->mId))
                 continue;
 
@@ -56,7 +55,7 @@ namespace MWMechanics
             if (Misc::Rng::rollDice(10000) < x)
             {
                 // Contracted disease!
-                actor.getClass().getCreatureStats(actor).getSpells().add(it->first);
+                actor.getClass().getCreatureStats(actor).getSpells().add(spell);
                 MWBase::Environment::get().getWorld()->applyLoopingParticles(actor);
 
                 std::string msg = "sMagicContractDisease";

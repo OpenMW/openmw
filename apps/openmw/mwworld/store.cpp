@@ -11,25 +11,6 @@
 #include <iterator>
 #include <stdexcept>
 
-namespace
-{
-    struct Compare
-    {
-        bool operator()(const ESM::Land *x, const ESM::Land *y) {
-            if (x->mX == y->mX) {
-                return x->mY < y->mY;
-            }
-            return x->mX < y->mX;
-        }
-        bool operator()(const ESM::Land *x, const std::pair<int, int>& y) {
-            if (x->mX == y.first) {
-                return x->mY < y.second;
-            }
-            return x->mX < y.first;
-        }
-    };
-}
-
 namespace MWWorld
 {
     RecordId::RecordId(const std::string &id, bool isDeleted)
@@ -412,11 +393,6 @@ namespace MWWorld
     //=========================================================================
     Store<ESM::Land>::~Store()
     {
-        for (const ESM::Land* staticLand : mStatic)
-        {
-            delete staticLand;
-        }
-
     }
     size_t Store<ESM::Land>::getSize() const
     {
@@ -433,13 +409,8 @@ namespace MWWorld
     const ESM::Land *Store<ESM::Land>::search(int x, int y) const
     {
         std::pair<int, int> comp(x,y);
-
-        std::vector<ESM::Land *>::const_iterator it =
-            std::lower_bound(mStatic.begin(), mStatic.end(), comp, Compare());
-
-        if (it != mStatic.end() && (*it)->mX == x && (*it)->mY == y) {
-            return *it;
-        }
+        if (auto it = mStatic.find(comp); it != mStatic.end() && it->mX == x && it->mY == y)
+            return &*it;
         return nullptr;
     }
     const ESM::Land *Store<ESM::Land>::find(int x, int y) const
@@ -454,24 +425,18 @@ namespace MWWorld
     }
     RecordId Store<ESM::Land>::load(ESM::ESMReader &esm)
     {
-        ESM::Land *ptr = new ESM::Land();
+        ESM::Land land;
         bool isDeleted = false;
 
-        ptr->load(esm, isDeleted);
+        land.load(esm, isDeleted);
 
         // Same area defined in multiple plugins? -> last plugin wins
-        // Can't use search() because we aren't sorted yet - is there any other way to speed this up?
-        for (std::vector<ESM::Land*>::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
-        {
-            if ((*it)->mX == ptr->mX && (*it)->mY == ptr->mY)
-            {
-                delete *it;
-                mStatic.erase(it);
-                break;
-            }
+        auto [it, inserted] = mStatic.insert(std::move(land));
+        if (!inserted) {
+            auto nh = mStatic.extract(it);
+            nh.value() = std::move(land);
+            mStatic.insert(std::move(nh));
         }
-
-        mStatic.push_back(ptr);
 
         return RecordId("", isDeleted);
     }
@@ -481,7 +446,6 @@ namespace MWWorld
         if (mBuilt)
             return;
 
-        std::sort(mStatic.begin(), mStatic.end(), Compare());
         mBuilt = true;
     }
 
@@ -502,8 +466,8 @@ namespace MWWorld
     {
         ESM::CellRef ref;
         ESM::MovedCellRef cMRef;
-        cMRef.mRefNum.mIndex = 0;
         bool deleted = false;
+        bool moved = false;
 
         ESM::ESM_Context ctx = esm.getContext();
 
@@ -512,10 +476,10 @@ namespace MWWorld
         //
         // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
         //  implementation when the oher implementation works as well.
-        while (cell->getNextRef(esm, ref, deleted, /*ignoreMoves*/true, &cMRef))
+        while (cell->getNextRef(esm, ref, deleted, cMRef, moved))
         {
-            if (!cMRef.mRefNum.mIndex)
-                continue; // ignore refs that are not moved
+            if (!moved)
+                continue;
 
             ESM::Cell *cellAlt = const_cast<ESM::Cell*>(searchOrCreate(cMRef.mTarget[0], cMRef.mTarget[1]));
 
@@ -556,7 +520,8 @@ namespace MWWorld
     const ESM::Cell *Store<ESM::Cell>::search(int x, int y) const
     {
         ESM::Cell cell;
-        cell.mData.mX = x, cell.mData.mY = y;
+        cell.mData.mX = x;
+        cell.mData.mY = y;
 
         std::pair<int, int> key(x, y);
         DynamicExt::const_iterator it = mExt.find(key);
@@ -574,7 +539,8 @@ namespace MWWorld
     const ESM::Cell *Store<ESM::Cell>::searchStatic(int x, int y) const
     {
         ESM::Cell cell;
-        cell.mData.mX = x, cell.mData.mY = y;
+        cell.mData.mX = x;
+        cell.mData.mY = y;
 
         std::pair<int, int> key(x, y);
         DynamicExt::const_iterator it = mExt.find(key);
@@ -908,6 +874,26 @@ namespace MWWorld
         // Check whether mCell is an interior cell. This isn't perfect, will break if a Region with the same name as an interior cell is created.
         // A proper fix should be made for future versions of the file format.
         bool interior = pathgrid.mData.mX == 0 && pathgrid.mData.mY == 0 && mCells->search(pathgrid.mCell) != nullptr;
+
+        // deal with mods that have empty pathgrid records (Issue #6209)
+        // we assume that these records are empty on purpose (i.e. to remove old pathgrid on an updated cell)
+        if (isDeleted || pathgrid.mPoints.empty() || pathgrid.mEdges.empty())
+        {
+            if (interior)
+            {
+                Interior::iterator it = mInt.find(pathgrid.mCell);
+                if (it != mInt.end())
+                    mInt.erase(it);
+            }
+            else
+            {
+                Exterior::iterator it = mExt.find(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY));
+                if (it != mExt.end())
+                    mExt.erase(it);
+            }
+
+            return RecordId("", isDeleted);
+        }
 
         // Try to overwrite existing record
         if (interior)

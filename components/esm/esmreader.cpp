@@ -125,8 +125,7 @@ void ESMReader::getHExact(void*p, int size)
 {
     getSubHeader();
     if (size != static_cast<int> (mCtx.leftSub))
-        fail("Size mismatch, requested " + std::to_string(size) + " but got "
-                + std::to_string(mCtx.leftSub));
+        reportSubSizeMismatch(size, mCtx.leftSub);
     getExact(p, size);
 }
 
@@ -198,7 +197,7 @@ void ESMReader::skipHSubSize(int size)
 {
     skipHSub();
     if (static_cast<int> (mCtx.leftSub) != size)
-        fail("skipHSubSize() mismatch");
+        reportSubSizeMismatch(mCtx.leftSub, size);
 }
 
 void ESMReader::skipHSubUntil(const char *name)
@@ -264,7 +263,7 @@ void ESMReader::getRecHeader(uint32_t &flags)
 
     // Check that sizes add up
     if (mCtx.leftFile < mCtx.leftRec)
-        fail("Record size is larger than rest of file");
+        reportSubSizeMismatch(mCtx.leftFile, mCtx.leftRec);
 
     // Adjust number of bytes mCtx.left in file
     mCtx.leftFile -= mCtx.leftRec;

@@ -7,8 +7,12 @@
 
 
 -------------------------------------------------------------------------------
--- The version of OpenMW Lua API. It is an integer that is incremented every time the API is changed.
--- @field [parent=#core] #number API_VERSION
+-- The revision of OpenMW Lua API. It is an integer that is incremented every time the API is changed.
+-- @field [parent=#core] #number API_REVISION
+
+-------------------------------------------------------------------------------
+-- Terminates the game and quits to the OS. Should be used only for testing purposes.
+-- @function [parent=#core] quit
 
 -------------------------------------------------------------------------------
 -- Send an event to global scripts.
@@ -122,6 +126,36 @@
 -- @function [parent=#GameObject] getWalkSpeed
 -- @param self
 -- @return #number
+
+-------------------------------------------------------------------------------
+-- Current speed. Can be called only from a local script.
+-- @function [parent=#GameObject] getCurrentSpeed
+-- @param self
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Is the actor standing on ground. Can be called only from a local script.
+-- @function [parent=#GameObject] isOnGround
+-- @param self
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is the actor in water. Can be called only from a local script.
+-- @function [parent=#GameObject] isSwimming
+-- @param self
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is the actor in weapon stance. Can be called only from a local script.
+-- @function [parent=#GameObject] isInWeaponStance
+-- @param self
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is the actor in magic stance. Can be called only from a local script.
+-- @function [parent=#GameObject] isInMagicStance
+-- @param self
+-- @return #boolean
 
 -------------------------------------------------------------------------------
 -- Send local event to the object.
@@ -313,16 +347,6 @@
 -- @param self
 -- @return #ObjectList
 
-
--------------------------------------------------------------------------------
--- Argument of `onKeyPress` engine handler
--- @type KeyboardEvent
--- @field [parent=#KeyboardEvent] #string symbol The pressed symbol (1-symbol string).
--- @field [parent=#KeyboardEvent] #string code Key code.
--- @field [parent=#KeyboardEvent] #boolean withShift Is `Shift` key pressed.
--- @field [parent=#KeyboardEvent] #boolean withCtrl Is `Control` key pressed.
--- @field [parent=#KeyboardEvent] #boolean withAlt Is `Alt` key pressed.
--- @field [parent=#KeyboardEvent] #boolean withSuper Is `Super`/`Win` key pressed.
 
 return nil
 

@@ -52,8 +52,9 @@ namespace MWDialogue
       , mCompilerContext (MWScript::CompilerContext::Type_Dialogue)
       , mErrorHandler()
       , mTalkedTo(false)
-      , mTemporaryDispositionChange(0.f)
-      , mPermanentDispositionChange(0.f)
+      , mOriginalDisposition(0)
+      , mCurrentDisposition(0)
+      , mPermanentDispositionChange(0)
     {
         mChoice = -1;
         mIsInChoice = false;
@@ -65,7 +66,8 @@ namespace MWDialogue
     {
         mKnownTopics.clear();
         mTalkedTo = false;
-        mTemporaryDispositionChange = 0;
+        mOriginalDisposition = 0;
+        mCurrentDisposition = 0;
         mPermanentDispositionChange = 0;
     }
 
@@ -98,6 +100,20 @@ namespace MWDialogue
         }
     }
 
+    void DialogueManager::updateOriginalDisposition()
+    {
+        if(mActor.getClass().isNpc())
+        {
+            const auto& stats = mActor.getClass().getNpcStats(mActor);
+            // Disposition changed by script; discard our preconceived notions
+            if(stats.getBaseDisposition() != mCurrentDisposition)
+            {
+                mCurrentDisposition = stats.getBaseDisposition();
+                mOriginalDisposition = mCurrentDisposition;
+            }
+        }
+    }
+
     bool DialogueManager::startDialogue (const MWWorld::Ptr& actor, ResponseCallback* callback)
     {
         updateGlobals();
@@ -107,8 +123,7 @@ namespace MWDialogue
             return false;
 
         mLastTopic = "";
-        mPermanentDispositionChange = 0;
-        mTemporaryDispositionChange = 0;
+        // Note that we intentionally don't reset mPermanentDispositionChange
 
         mChoice = -1;
         mIsInChoice = false;
@@ -398,19 +413,21 @@ namespace MWDialogue
 
     void DialogueManager::goodbyeSelected()
     {
-        // Apply disposition change to NPC's base disposition
-        if (mActor.getClass().isNpc())
+        // Apply disposition change to NPC's base disposition if we **think** we need to change something
+        if ((mPermanentDispositionChange || mOriginalDisposition != mCurrentDisposition) && mActor.getClass().isNpc())
         {
-            // Clamp permanent disposition change so that final disposition doesn't go below 0 (could happen with intimidate)       
-            float curDisp = static_cast<float>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false));
-            if (curDisp + mPermanentDispositionChange < 0)
-                mPermanentDispositionChange = -curDisp;
-
+            updateOriginalDisposition();
             MWMechanics::NpcStats& npcStats = mActor.getClass().getNpcStats(mActor);
-            npcStats.setBaseDisposition(static_cast<int>(npcStats.getBaseDisposition() + mPermanentDispositionChange));
+            // Clamp permanent disposition change so that final disposition doesn't go below 0 (could happen with intimidate)
+            npcStats.setBaseDisposition(0);
+            int zero = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false);
+            int disposition = std::min(100 - zero, std::max(mOriginalDisposition + mPermanentDispositionChange, -zero));
+
+            npcStats.setBaseDisposition(disposition);
         }
         mPermanentDispositionChange = 0;
-        mTemporaryDispositionChange = 0;
+        mOriginalDisposition = 0;
+        mCurrentDisposition = 0;
     }
 
     void DialogueManager::questionAnswered (int answer, ResponseCallback* callback)
@@ -490,19 +507,16 @@ namespace MWDialogue
     void DialogueManager::persuade(int type, ResponseCallback* callback)
     {
         bool success;
-        float temp, perm;
+        int temp, perm;
         MWBase::Environment::get().getMechanicsManager()->getPersuasionDispositionChange(
                     mActor, MWBase::MechanicsManager::PersuasionType(type),
                     success, temp, perm);
-        mTemporaryDispositionChange += temp;
+        updateOriginalDisposition();
+        if(temp > 0 && perm > 0 && mOriginalDisposition + perm + mPermanentDispositionChange < 0)
+            perm = -(mOriginalDisposition + mPermanentDispositionChange);
+        mCurrentDisposition += temp;
+        mActor.getClass().getNpcStats(mActor).setBaseDisposition(mCurrentDisposition);
         mPermanentDispositionChange += perm;
-
-        // change temp disposition so that final disposition is between 0...100
-        float curDisp = static_cast<float>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false));
-        if (curDisp + mTemporaryDispositionChange < 0)
-            mTemporaryDispositionChange = -curDisp;
-        else if (curDisp + mTemporaryDispositionChange > 100)
-            mTemporaryDispositionChange = 100 - curDisp;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         player.getClass().skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
@@ -539,16 +553,16 @@ namespace MWDialogue
         executeTopic (text + (success ? " Success" : " Fail"), callback);
     }
 
-    int DialogueManager::getTemporaryDispositionChange() const
-    {
-        return static_cast<int>(mTemporaryDispositionChange);
-    }
-
     void DialogueManager::applyBarterDispositionChange(int delta)
     {
-        mTemporaryDispositionChange += delta;
-        if (Settings::Manager::getBool("barter disposition change is permanent", "Game"))
-            mPermanentDispositionChange += delta;
+        if(mActor.getClass().isNpc())
+        {
+            updateOriginalDisposition();
+            mCurrentDisposition += delta;
+            mActor.getClass().getNpcStats(mActor).setBaseDisposition(mCurrentDisposition);
+            if (Settings::Manager::getBool("barter disposition change is permanent", "Game"))
+                mPermanentDispositionChange += delta;
+        }
     }
 
     bool DialogueManager::checkServiceRefused(ResponseCallback* callback, ServiceType service)

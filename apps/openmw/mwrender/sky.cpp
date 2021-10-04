@@ -54,6 +54,7 @@
 
 #include "vismask.hpp"
 #include "renderbin.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -594,13 +595,13 @@ private:
         osg::StateSet* queryStateSet = new osg::StateSet;
         if (queryVisible)
         {
-            osg::ref_ptr<osg::Depth> depth (new osg::Depth);
-            depth->setFunction(osg::Depth::LEQUAL);
+            auto depth = SceneUtil::createDepth();
             // This is a trick to make fragments written by the query always use the maximum depth value,
             // without having to retrieve the current far clipping distance.
             // We want the sun glare to be "infinitely" far away.
-            depth->setZNear(1.0);
-            depth->setZFar(1.0);
+            double far = SceneUtil::getReverseZ() ? 0.0 : 1.0;
+            depth->setZNear(far);
+            depth->setZFar(far);
             depth->setWriteMask(false);
             queryStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
@@ -1209,7 +1210,7 @@ void SkyManager::create()
     mCloudMesh2->addUpdateCallback(mCloudUpdater2);
     mCloudMesh2->setNodeMask(0);
 
-    osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+    auto depth = SceneUtil::createDepth();
     depth->setWriteMask(false);
     mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
     mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
@@ -1349,11 +1350,9 @@ void SkyManager::setCamera(osg::Camera *camera)
 class WrapAroundOperator : public osgParticle::Operator
 {
 public:
-    WrapAroundOperator(osg::Camera *camera, const osg::Vec3 &wrapRange): osgParticle::Operator()
+    WrapAroundOperator(osg::Camera *camera, const osg::Vec3 &wrapRange): osgParticle::Operator(),
+        mCamera(camera), mWrapRange(wrapRange), mHalfWrapRange(mWrapRange / 2.0)
     {
-        mCamera = camera;
-        mWrapRange = wrapRange;
-        mHalfWrapRange = mWrapRange / 2.0;
         mPreviousCameraPosition = getCameraPosition();
     }
 
@@ -1729,9 +1728,6 @@ void SkyManager::setWeather(const WeatherResult& weather)
             AlphaFader::SetupVisitor alphaFaderSetupVisitor(mPrecipitationAlpha);
 
             mParticleEffect->accept(alphaFaderSetupVisitor);
-
-            SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
-            mParticleEffect->accept(disableFreezeOnCullVisitor);
 
             SceneUtil::FindByClassVisitor findPSVisitor(std::string("ParticleSystem"));
             mParticleEffect->accept(findPSVisitor);

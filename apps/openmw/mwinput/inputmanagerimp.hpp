@@ -73,9 +73,17 @@ namespace MWInput
         void toggleControlSwitch (const std::string& sw, bool value) override;
         bool getControlSwitch (const std::string& sw) override;
 
-        std::string getActionDescription (int action) override;
-        std::string getActionKeyBindingName (int action) override;
-        std::string getActionControllerBindingName (int action) override;
+        std::string getActionDescription (int action) const override;
+        std::string getActionKeyBindingName (int action) const override;
+        std::string getActionControllerBindingName (int action) const override;
+        bool actionIsActive(int action) const override;
+
+        float getActionValue(int action) const override;
+        float getControllerAxisValue(SDL_GameControllerAxis axis) const override;
+        uint32_t getMouseButtonsState() const override;
+        int getMouseMoveX() const override;
+        int getMouseMoveY() const override;
+
         int getNumActions() override { return A_Last; }
         std::vector<int> getActionKeySorting() override;
         std::vector<int> getActionControllerSorting() override;
@@ -91,6 +99,7 @@ namespace MWInput
         void readRecord(ESM::ESMReader& reader, uint32_t type) override;
 
         void resetIdleTime() override;
+        bool isIdle() const override;
 
         void executeAction(int action) override;
 

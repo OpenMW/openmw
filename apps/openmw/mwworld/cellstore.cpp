@@ -26,6 +26,7 @@
 #include "../mwmechanics/recharge.hpp"
 
 #include "ptr.hpp"
+#include "esmloader.hpp"
 #include "esmstore.hpp"
 #include "class.hpp"
 #include "containerstore.hpp"
@@ -176,12 +177,19 @@ namespace
 
         if (state.mVersion < 15)
             fixRestocking(record, state);
+        if (state.mVersion < 17)
+        {
+            if constexpr (std::is_same_v<T, ESM::Creature>)
+                MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory);
+            else if constexpr (std::is_same_v<T, ESM::NPC>)
+                MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory, &state.mNpcStats);
+        }
 
         if (state.mRef.mRefNum.hasContentFile())
         {
             for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
-                if (iter->mRef.getRefNum()==state.mRef.mRefNum && *iter->mRef.getRefIdPtr() == state.mRef.mRefID)
+                if (iter->mRef.getRefNum()==state.mRef.mRefNum && iter->mRef.getRefIdRef() == state.mRef.mRefID)
                 {
                     // overwrite existing reference
                     float oldscale = iter->mRef.getScale();
@@ -190,7 +198,7 @@ namespace
                     const ESM::Position & newpos = iter->mData.getPosition();
                     const MWWorld::Ptr ptr(&*iter, cellstore);
                     if ((oldscale != iter->mRef.getScale() || oldpos.asVec3() != newpos.asVec3() || oldpos.rot[0] != newpos.rot[0] || oldpos.rot[1] != newpos.rot[1] || oldpos.rot[2] != newpos.rot[2]) && !ptr.getClass().isActor())
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, newpos.pos[0], newpos.pos[1], newpos.pos[2]);
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, newpos.asVec3());
                     if (!iter->mData.isEnabled())
                     {
                         iter->mData.enable();
@@ -417,7 +425,7 @@ namespace MWWorld
         const std::string *mIdToFind;
         bool operator()(const PtrType& ptr)
         {
-            if (*ptr.getCellRef().getRefIdPtr() == *mIdToFind)
+            if (ptr.getCellRef().getRefIdRef() == *mIdToFind)
             {
                 mFound = ptr;
                 return false;
@@ -553,16 +561,11 @@ namespace MWWorld
                 ESM::MovedCellRef cMRef;
                 cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
-                while(mCell->getNextRef(esm[index], ref, deleted, /*ignoreMoves*/true, &cMRef))
+                bool moved = false;
+                while(mCell->getNextRef(esm[index], ref, deleted, cMRef, moved))
                 {
-                    if (deleted)
+                    if (deleted || moved)
                         continue;
-
-                    if (cMRef.mRefNum.mIndex)
-                    {
-                        cMRef.mRefNum.mIndex = 0;
-                        continue; // ignore refs that are moved
-                    }
 
                     // Don't list reference if it was moved to a different cell.
                     ESM::MovedCellRefTracker::const_iterator iter =
@@ -618,13 +621,11 @@ namespace MWWorld
                 ESM::MovedCellRef cMRef;
                 cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
-                while(mCell->getNextRef(esm[index], ref, deleted, /*ignoreMoves*/true, &cMRef))
+                bool moved = false;
+                while(mCell->getNextRef(esm[index], ref, deleted, cMRef, moved))
                 {
-                    if (cMRef.mRefNum.mIndex)
-                    {
-                        cMRef.mRefNum.mIndex = 0;
-                        continue; // ignore refs that are moved
-                    }
+                    if (moved)
+                        continue;
 
                     // Don't load reference if it was moved to a different cell.
                     ESM::MovedCellRefTracker::const_iterator iter =
@@ -844,7 +845,12 @@ namespace MWWorld
             if (type == 0)
             {
                 Log(Debug::Warning) << "Dropping reference to '" << cref.mRefID << "' (object no longer exists)";
-                reader.skipHSubUntil("OBJE");
+                // Skip until the next OBJE or MVRF
+                while(reader.hasMoreSubs() && !reader.peekNextSub("OBJE") && !reader.peekNextSub("MVRF"))
+                {
+                    reader.getSubName();
+                    reader.skipHSub();
+                }
                 continue;
             }
 

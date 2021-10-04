@@ -8,6 +8,7 @@
 #include "MyGUI_FactoryManager.h"
 
 #include <components/misc/utf8stream.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -107,7 +108,7 @@ struct TypesetBookImpl : TypesetBook
 
     virtual ~TypesetBookImpl () {}
 
-    Range addContent (BookTypesetter::Utf8Span text)
+    Range addContent (const BookTypesetter::Utf8Span &text)
     {
         Contents::iterator i = mContents.insert (mContents.end (), Content (text.first, text.second));
 
@@ -490,7 +491,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             {
                 add_partial_text();
                 stream.consume ();
-                mLine = nullptr, mRun = nullptr;
+                mLine = nullptr;
+                mRun = nullptr;
                 continue;
             }
 
@@ -550,7 +552,9 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
         if (left + space_width + word_width > mPageWidth)
         {
-            mLine = nullptr, mRun = nullptr, left = 0;
+            mLine = nullptr;
+            mRun = nullptr;
+            left = 0;
         }
         else
         {
@@ -1217,8 +1221,10 @@ public:
 
         RenderXform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
 
+        float z = SceneUtil::getReverseZ() ? 1.f : -1.f;
+
         GlyphStream glyphStream(textFormat.mFont, static_cast<float>(mCoord.left), static_cast<float>(mCoord.top - mViewTop),
-                                  -1 /*mNode->getNodeDepth()*/, vertices, renderXform);
+                                  z /*mNode->getNodeDepth()*/, vertices, renderXform);
 
         int visit_top    = (std::max) (mViewTop,    mViewTop + int (renderXform.clipTop   ));
         int visit_bottom = (std::min) (mViewBottom, mViewTop + int (renderXform.clipBottom));

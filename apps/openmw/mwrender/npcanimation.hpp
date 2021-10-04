@@ -31,7 +31,6 @@ class NpcAnimation : public ActorAnimation, public WeaponAnimation, public MWWor
 {
 public:
     void equipmentChanged() override;
-    void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew) override;
 
 public:
     typedef std::map<ESM::PartReferenceType,std::string> PartBoneMap;
@@ -106,7 +105,7 @@ private:
 protected:
     void addControllers() override;
     bool isArrowAttached() const override;
-    std::string getShieldMesh(MWWorld::ConstPtr shield) const override;
+    std::string getShieldMesh(const MWWorld::ConstPtr& shield) const override;
 
 public:
     /**

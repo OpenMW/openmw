@@ -21,13 +21,9 @@ namespace DetourNavigator
 
         void removeAgent(const osg::Vec3f& agentHalfExtents) override;
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) override;
-
         bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
 
         bool addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) override;
-
-        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) override;
 
         bool updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
 
@@ -35,10 +31,14 @@ namespace DetourNavigator
 
         bool removeObject(const ObjectId id) override;
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
-            const btTransform& transform) override;
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift) override;
 
         bool removeWater(const osg::Vec2i& cellPosition) override;
+
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+            const HeightfieldShape& shape) override;
+
+        bool removeHeightfield(const osg::Vec2i& cellPosition) override;
 
         void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) override;
 

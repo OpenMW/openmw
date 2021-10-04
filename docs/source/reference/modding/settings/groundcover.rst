@@ -40,20 +40,6 @@ May affect performance a lot.
 
 This setting can only be configured by editing the settings configuration file.
 
-min chunk size
---------------
-
-:Type:		floating point
-:Range:		0.125, 0.25, 0.5, 1.0
-:Default:	0.5
-
-Determines a minimum size of groundcover chunks in cells. For example, with 0.5 value
-chunks near player will have size 4096x4096 game units. Larger chunks reduce CPU usage
-(Draw and Cull bars), but can increase GPU usage (GPU bar) since culling becomes less efficient.
-Smaller values do an opposite.
-
-This setting can only be configured by editing the settings configuration file.
-
 stomp mode
 ----------
 

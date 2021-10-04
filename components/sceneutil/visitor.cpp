@@ -9,6 +9,9 @@
 
 #include <components/misc/stringops.hpp>
 
+#include <cstring>
+#include <string_view>
+
 namespace SceneUtil
 {
 
@@ -24,7 +27,7 @@ namespace SceneUtil
 
     void FindByClassVisitor::apply(osg::Node &node)
     {
-        if (Misc::StringUtils::ciEqual(node.className(), mNameToFind))
+        if (Misc::StringUtils::ciEqual(std::string_view(node.className()), mNameToFind))
             mFoundNodes.push_back(&node);
 
         traverse(node);
@@ -32,29 +35,18 @@ namespace SceneUtil
 
     void FindByNameVisitor::apply(osg::Group &group)
     {
-        if (!checkGroup(group))
+        if (!mFoundNode && !checkGroup(group))
             traverse(group);
     }
 
     void FindByNameVisitor::apply(osg::MatrixTransform &node)
     {
-        if (!checkGroup(node))
+        if (!mFoundNode && !checkGroup(node))
             traverse(node);
     }
 
     void FindByNameVisitor::apply(osg::Geometry&)
     {
-    }
-
-    void DisableFreezeOnCullVisitor::apply(osg::MatrixTransform &node)
-    {
-        traverse(node);
-    }
-
-    void DisableFreezeOnCullVisitor::apply(osg::Drawable& drw)
-    {
-        if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
-            partsys->setFreezeOnCull(false);
     }
 
     void NodeMapVisitor::apply(osg::MatrixTransform& trans)

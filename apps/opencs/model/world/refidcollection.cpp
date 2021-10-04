@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <memory>
+#include <string_view>
 
 #include <components/esm/esmreader.hpp>
 
@@ -49,17 +50,22 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.emplace_back(Columns::ColumnId_RecordType, ColumnBase::Display_RefRecordType,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false);
     baseColumns.mType = &mColumns.back();
+    mColumns.emplace_back(Columns::ColumnId_Blocked, ColumnBase::Display_Boolean,
+            ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh);
+    baseColumns.mBlocked = &mColumns.back();
 
     ModelColumns modelColumns (baseColumns);
 
-    mColumns.emplace_back(Columns::ColumnId_Model, ColumnBase::Display_Mesh);
-    modelColumns.mModel = &mColumns.back();
     mColumns.emplace_back(Columns::ColumnId_Persistent, ColumnBase::Display_Boolean);
     modelColumns.mPersistence = &mColumns.back();
+    mColumns.emplace_back(Columns::ColumnId_Model, ColumnBase::Display_Mesh);
+    modelColumns.mModel = &mColumns.back();
 
     NameColumns nameColumns (modelColumns);
 
-    mColumns.emplace_back(Columns::ColumnId_Name, ColumnBase::Display_String);
+    // Only items that can be placed in a container have the 32 character limit, but enforce
+    // that for all referenceable types for now.
+    mColumns.emplace_back(Columns::ColumnId_Name, ColumnBase::Display_String32);
     nameColumns.mName = &mColumns.back();
     mColumns.emplace_back(Columns::ColumnId_Script, ColumnBase::Display_Script);
     nameColumns.mScript = &mColumns.back();
@@ -231,9 +237,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_Boolean));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_AiActivateName, CSMWorld::ColumnBase::Display_String));
+            new RefIdColumn (Columns::ColumnId_AiActivateName, CSMWorld::ColumnBase::Display_String32));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_AiTargetId, CSMWorld::ColumnBase::Display_String));
+            new RefIdColumn (Columns::ColumnId_AiTargetId, CSMWorld::ColumnBase::Display_String32));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiTargetCell, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(
@@ -479,6 +485,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.emplace_back(Columns::ColumnId_Class, ColumnBase::Display_Class);
     npcColumns.mClass = &mColumns.back();
 
+    // NAME32 enforced in IdCompletionDelegate::createEditor()
     mColumns.emplace_back(Columns::ColumnId_Faction, ColumnBase::Display_Faction);
     npcColumns.mFaction = &mColumns.back();
 
@@ -764,7 +771,6 @@ void CSMWorld::RefIdCollection::setNestedData(int row, int column, const QVarian
     const CSMWorld::NestedRefIdAdapterBase& nestedAdapter = getNestedAdapter(mColumns.at(column), localIndex.second);
 
     nestedAdapter.setNestedData(&mColumns.at (column), mData, localIndex.first, data, subRow, subColumn);
-    return;
 }
 
 void CSMWorld::RefIdCollection::removeRows (int index, int count)
@@ -778,7 +784,6 @@ void CSMWorld::RefIdCollection::removeNestedRows(int row, int column, int subRow
     const CSMWorld::NestedRefIdAdapterBase& nestedAdapter = getNestedAdapter(mColumns.at(column), localIndex.second);
 
     nestedAdapter.removeNestedRow(&mColumns.at (column), mData, localIndex.first, subRow);
-    return;
 }
 
 void CSMWorld::RefIdCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
@@ -786,7 +791,7 @@ void CSMWorld::RefIdCollection::appendBlankRecord (const std::string& id, Univer
     mData.appendRecord (type, id, false);
 }
 
-int CSMWorld::RefIdCollection::searchId (const std::string& id) const
+int CSMWorld::RefIdCollection::searchId(std::string_view id) const
 {
     RefIdData::LocalIndex localIndex = mData.searchId (id);
 
@@ -796,18 +801,18 @@ int CSMWorld::RefIdCollection::searchId (const std::string& id) const
     return mData.localToGlobalIndex (localIndex);
 }
 
-void CSMWorld::RefIdCollection::replace (int index, const RecordBase& record)
+void CSMWorld::RefIdCollection::replace (int index, std::unique_ptr<RecordBase> record)
 {
-    mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
+    mData.getRecord (mData.globalToLocalIndex (index)).assign (*record.release());
 }
 
 void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const CSMWorld::UniversalId::Type type)
 {
-        std::unique_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).modifiedCopy());
+        std::unique_ptr<RecordBase> newRecord = mData.getRecord(mData.searchId(origin)).modifiedCopy();
         mAdapters.find(type)->second->setId(*newRecord, destination);
-        mData.insertRecord(*newRecord, type, destination);
+        mData.insertRecord(std::move(newRecord), type, destination);
 }
 
 bool CSMWorld::RefIdCollection::touchRecord(const std::string& id)
@@ -816,16 +821,16 @@ bool CSMWorld::RefIdCollection::touchRecord(const std::string& id)
     return false;
 }
 
-void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,
+void CSMWorld::RefIdCollection::appendRecord (std::unique_ptr<RecordBase> record,
     UniversalId::Type type)
 {
-    std::string id = findAdapter (type).getId (record);
+    std::string id = findAdapter (type).getId (*record.get());
 
     int index = mData.getAppendIndex (type);
 
     mData.appendRecord (type, id, false);
 
-    mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
+    mData.getRecord (mData.globalToLocalIndex (index)).assign (*record.release());
 }
 
 const CSMWorld::RecordBase& CSMWorld::RefIdCollection::getRecord (const std::string& id) const
@@ -895,7 +900,6 @@ void CSMWorld::RefIdCollection::addNestedRow(int row, int col, int position)
     const CSMWorld::NestedRefIdAdapterBase& nestedAdapter = getNestedAdapter(mColumns.at(col), localIndex.second);
 
     nestedAdapter.addNestedRow(&mColumns.at(col), mData, localIndex.first, position);
-    return;
 }
 
 void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWorld::NestedTableWrapperBase& nestedTable)
@@ -904,7 +908,6 @@ void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWor
     const CSMWorld::NestedRefIdAdapterBase& nestedAdapter = getNestedAdapter(mColumns.at(column), localIndex.second);
 
     nestedAdapter.setNestedTable(&mColumns.at(column), mData, localIndex.first, nestedTable);
-    return;
 }
 
 CSMWorld::NestedTableWrapperBase* CSMWorld::RefIdCollection::nestedTable(int row, int column) const

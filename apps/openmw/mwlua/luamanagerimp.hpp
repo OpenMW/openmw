@@ -19,6 +19,19 @@
 namespace MWLua
 {
 
+    // Wrapper for a single-argument Lua function.
+    // Holds information about the script the function belongs to.
+    // Needed to prevent callback calls if the script was removed.
+    struct Callback
+    {
+        static constexpr std::string_view SCRIPT_NAME_KEY = "name";
+
+        sol::function mFunc;
+        sol::table mHiddenData;
+
+        void operator()(sol::object arg) const;
+    };
+
     class LuaManager : public MWBase::LuaManager
     {
     public:
@@ -41,7 +54,7 @@ namespace MWLua
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
         void registerObject(const MWWorld::Ptr& ptr) override;
         void deregisterObject(const MWWorld::Ptr& ptr) override;
-        void keyPressed(const SDL_KeyboardEvent &arg) override;
+        void inputEvent(const InputEvent& event) override { mInputEvents.push_back(event); }
         void appliedToObject(const MWWorld::Ptr& toPtr, std::string_view recordId, const MWWorld::Ptr& fromPtr) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
@@ -67,13 +80,29 @@ namespace MWLua
         // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
         void reloadAllScripts() override;
 
+        // Used to call Lua callbacks from C++
+        void queueCallback(Callback callback, sol::object arg) { mQueuedCallbacks.push_back({std::move(callback), std::move(arg)}); }
+
+        // Wraps Lua callback into an std::function.
+        // NOTE: Resulted function is not thread safe. Can not be used while LuaManager::update() or
+        //       any other Lua-related function is running.
+        template <class Arg>
+        std::function<void(Arg)> wrapLuaCallback(const Callback& c)
+        {
+            return [this, c](Arg arg) { this->queueCallback(c, sol::make_object(c.mFunc.lua_state(), arg)); };
+        }
+
     private:
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr);
 
+        bool mInitialized = false;
         LuaUtil::LuaState mLua;
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;
         sol::table mCameraPackage;
+        sol::table mInputPackage;
+        sol::table mLocalSettingsPackage;
+        sol::table mPlayerSettingsPackage;
 
         std::vector<std::string> mGlobalScriptList;
         GlobalScripts mGlobalScripts{&mLua};
@@ -93,8 +122,15 @@ namespace MWLua
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalLoader;
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalLoader;
 
-        std::vector<SDL_Keysym> mKeyPressEvents;
+        std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
         std::vector<ObjectId> mActorAddedEvents;
+
+        struct CallbackWithData
+        {
+            Callback mCallback;
+            sol::object mArg;
+        };
+        std::vector<CallbackWithData> mQueuedCallbacks;
 
         struct LocalEngineEvent
         {

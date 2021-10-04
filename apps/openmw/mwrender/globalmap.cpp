@@ -15,6 +15,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include <components/esm/globalmap.hpp>
 
@@ -24,6 +25,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "vismask.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -270,17 +272,9 @@ namespace MWRender
 
     void GlobalMap::worldPosToImageSpace(float x, float z, float& imageX, float& imageY)
     {
-        imageX = float(x / float(Constants::CellSizeInUnits) - mMinX) / (mMaxX - mMinX + 1);
+        imageX = (float(x / float(Constants::CellSizeInUnits) - mMinX) / (mMaxX - mMinX + 1)) * getWidth();
 
-        imageY = 1.f-float(z / float(Constants::CellSizeInUnits) - mMinY) / (mMaxY - mMinY + 1);
-    }
-
-    void GlobalMap::cellTopLeftCornerToImageSpace(int x, int y, float& imageX, float& imageY)
-    {
-        imageX = float(x - mMinX) / (mMaxX - mMinX + 1);
-
-        // NB y + 1, because we want the top left corner, not bottom left where the origin of the cell is
-        imageY = 1.f-float(y - mMinY + 1) / (mMaxY - mMinY + 1);
+        imageY = (1.f-float(z / float(Constants::CellSizeInUnits) - mMinY) / (mMaxY - mMinY + 1)) * getHeight();
     }
 
     void GlobalMap::requestOverlayTextureUpdate(int x, int y, int width, int height, osg::ref_ptr<osg::Texture2D> texture, bool clear, bool cpuCopy,
@@ -331,7 +325,7 @@ namespace MWRender
         if (texture)
         {
             osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(srcLeft, srcTop, srcRight, srcBottom);
-            osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+            auto depth = SceneUtil::createDepth();
             depth->setWriteMask(0);
             osg::StateSet* stateset = geom->getOrCreateStateSet();
             stateset->setAttribute(depth);

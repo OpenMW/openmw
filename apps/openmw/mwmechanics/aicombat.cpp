@@ -269,7 +269,8 @@ namespace MWMechanics
             const auto navigatorFlags = getNavigatorFlags(actor);
             const auto areaCosts = getAreaCosts(actor);
             const auto pathGridGraph = getPathGridGraph(actor.getCell());
-            mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, halfExtents, navigatorFlags, areaCosts);
+            mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, halfExtents,
+                                  navigatorFlags, areaCosts, storage.mAttackRange, PathType::Full);
 
             if (!mPathFinder.isPathConstructed())
             {
@@ -281,7 +282,8 @@ namespace MWMechanics
                 if (hit.has_value() && (*hit - vTargetPos).length() <= rangeAttack)
                 {
                     // If the point is close enough, try to find a path to that point.
-                    mPathFinder.buildPath(actor, vActorPos, *hit, actor.getCell(), pathGridGraph, halfExtents, navigatorFlags, areaCosts);
+                    mPathFinder.buildPath(actor, vActorPos, *hit, actor.getCell(), pathGridGraph, halfExtents,
+                                          navigatorFlags, areaCosts, storage.mAttackRange, PathType::Full);
                     if (mPathFinder.isPathConstructed())
                     {
                         // If path to that point is found use it as custom destination.
@@ -346,7 +348,7 @@ namespace MWMechanics
 
                         bool runFallback = true;
 
-                        if (pathgrid && !actor.getClass().isPureWaterCreature(actor))
+                        if (pathgrid != nullptr && !pathgrid->mPoints.empty() && !actor.getClass().isPureWaterCreature(actor))
                         {
                             ESM::Pathgrid::PointList points;
                             Misc::CoordinateConverter coords(storage.mCell->getCell());

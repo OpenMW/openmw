@@ -517,6 +517,7 @@ namespace MWGui
     std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMajorSkills() const
     {
         std::vector<ESM::Skill::SkillEnum> v;
+        v.reserve(5);
         for(int i = 0; i < 5; i++)
         {
             v.push_back(mMajorSkill[i]->getSkillId());
@@ -527,6 +528,7 @@ namespace MWGui
     std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
     {
         std::vector<ESM::Skill::SkillEnum> v;
+        v.reserve(5);
         for(int i=0; i < 5; i++)
         {
             v.push_back(mMinorSkill[i]->getSkillId());
