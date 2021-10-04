@@ -3,13 +3,7 @@
 
 #include <osg/Node>
 #include <osg/NodeVisitor>
-#include <osg/StateSet>
 #include <osg/ref_ptr>
-#include <osgAnimation/Animation>
-#include <osgAnimation/AnimationUpdateCallback>
-#include <osgAnimation/Channel>
-#include <osgAnimation/BasicAnimationManager>
-#include <osgAnimation/StackedTransform>
 #include <osgAnimation/UpdateMatrixTransform>
 
 #include <components/sceneutil/controller.hpp>
@@ -33,13 +27,9 @@ namespace SceneUtil
 
             virtual void link(osgAnimation::UpdateMatrixTransform* umt);
 
-            virtual void handle_stateset(osg::StateSet* stateset);
-
             virtual void setAnimation(Resource::Animation* animation);
 
             virtual void apply(osg::Node& node) override;
-
-            virtual void apply(osg::Geode& node) override;
 
         protected:
             Resource::Animation* mAnimation;
