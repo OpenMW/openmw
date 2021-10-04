@@ -157,12 +157,12 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
                 }
             }
         }
-        if (mostSuitableView)
+        if (mostSuitableView && mostSuitableView != vd)
         {
             vd->copyFrom(*mostSuitableView);
             return vd;
         }
-        else
+        else if (!mostSuitableView)
         {
             vd->setViewPoint(viewPoint);
             vd->setActiveGrid(activeGrid);
