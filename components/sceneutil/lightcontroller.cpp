@@ -62,7 +62,7 @@ namespace SceneUtil
                 mPhase = mPhase <= 0.5f ? 1.f : 0.25f;
         }
 
-        node->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor * mBrightness * lightSource->getActorFade());
+        node->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor * mBrightness * node->getActorFade());
 
         traverse(node, nv);
     }
