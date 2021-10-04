@@ -94,7 +94,7 @@ namespace
         {
         }
 
-        void operator()(osg::Switch* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Switch* node, osg::NodeVisitor* nv)
         {
             unsigned int state = MWBase::Environment::get().getWorld()->getNightDayMode();
             const unsigned int newState = node->getNumChildren() > state ? state : 0;
@@ -475,7 +475,7 @@ namespace MWRender
     class ResetAccumRootCallback : public SceneUtil::NodeCallback<ResetAccumRootCallback, osg::MatrixTransform*>
     {
     public:
-        void operator()(osg::MatrixTransform* transform, osg::NodeVisitor* nv) override
+        void operator()(osg::MatrixTransform* transform, osg::NodeVisitor* nv)
         {
             osg::Matrix mat = transform->getMatrix();
             osg::Vec3f position = mat.getTrans();
