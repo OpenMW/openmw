@@ -456,8 +456,8 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
     osg::Object * viewer = isCullVisitor ? static_cast<osgUtil::CullVisitor*>(&nv)->getCurrentCamera() : nullptr;
     bool needsUpdate = true;
-    ViewData *vd = mViewDataMap->getViewData(viewer, nv.getViewPoint(), mActiveGrid, needsUpdate);
-
+    osg::Vec3f viewpoint = viewer ? nv.getViewPoint() : nv.getEyePoint();
+    ViewData *vd = mViewDataMap->getViewData(viewer, viewPoint, mActiveGrid, needsUpdate);
     if (needsUpdate)
     {
         vd->reset();
