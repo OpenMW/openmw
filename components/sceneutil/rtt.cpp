@@ -27,7 +27,7 @@ namespace SceneUtil
         , mRenderOrderNum(renderOrderNum)
         , mDoPerViewMapping(doPerViewMapping)
     {
-        addCullCallback(new CullCallback(this));
+        addCullCallback(new CullCallback);
         setCullingActive(false);
     }
 
