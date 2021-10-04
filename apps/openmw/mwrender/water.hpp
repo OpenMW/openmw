@@ -15,6 +15,7 @@ namespace osg
     class PositionAttitudeTransform;
     class Geometry;
     class Node;
+    class Callback;
 }
 
 namespace osgUtil
