@@ -63,8 +63,8 @@ namespace NifOsg
         InverseWorldMatrix()
         {
         }
-        InverseWorldMatrix(const InverseWorldMatrix& copy, const osg::CopyOp& op)
-            : osg::Object(), SceneUtil::NodeCallback<InverseWorldMatrix, osg::MatrixTransform*>(copy, copyop)
+        InverseWorldMatrix(const InverseWorldMatrix& copy, const osg::CopyOp& copyop)
+            : osg::Object(copy, copyop), SceneUtil::NodeCallback<InverseWorldMatrix, osg::MatrixTransform*>(copy, copyop)
         {
         }
 
