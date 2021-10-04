@@ -190,8 +190,8 @@ GeomMorpherController::GeomMorpherController()
 }
 
 GeomMorpherController::GeomMorpherController(const GeomMorpherController &copy, const osg::CopyOp &copyop)
-    : SceneUtil::NodeCallback<GeomMorpherController, SceneUtil::MorphGeometry*>(copy, copyop)
-    , Controller(copy)
+    : Controller(copy)
+    , SceneUtil::NodeCallback<GeomMorpherController, SceneUtil::MorphGeometry*>(copy, copyop)
     , mKeyFrames(copy.mKeyFrames)
 {
 }
