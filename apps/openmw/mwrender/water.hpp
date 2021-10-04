@@ -6,7 +6,6 @@
 
 #include <osg/ref_ptr>
 #include <osg/Vec3f>
-#include <osg/Camera>
 
 #include <components/settings/settings.hpp>
 
@@ -72,7 +71,7 @@ namespace MWRender
         bool mInterior;
 
         osg::Callback* mCullCallback;
-        osg::ref_ptr<osg::NodeCallback> mShaderWaterStateSetUpdater;
+        osg::ref_ptr<osg::Callback> mShaderWaterStateSetUpdater;
 
         osg::Vec3f getSceneNodeCoordinates(int gridX, int gridY);
         void updateVisible();
