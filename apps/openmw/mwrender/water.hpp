@@ -6,6 +6,7 @@
 
 #include <osg/ref_ptr>
 #include <osg/Vec3f>
+#include <osg/Vec3d>
 
 #include <components/settings/settings.hpp>
 
