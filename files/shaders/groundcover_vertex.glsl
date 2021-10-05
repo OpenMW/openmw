@@ -13,18 +13,18 @@
 attribute vec4 aOffset;
 attribute vec3 aRotation;
 
-#if @diffuseMap
+#if @defined diffuseMap
 varying vec2 diffuseMapUV;
 #endif
 
-#if @normalMap
+#if @defined normalMap
 varying vec2 normalMapUV;
 varying vec4 passTangent;
 #endif
 
 // Other shaders respect forcePPL, but legacy groundcover mods were designed to work with vertex lighting.
 // They may do not look as intended with per-pixel lighting, so ignore this setting for now.
-#define PER_PIXEL_LIGHTING @normalMap
+#define PER_PIXEL_LIGHTING @defined normalMap
 
 varying float euclideanDepth;
 varying float linearDepth;
@@ -151,12 +151,12 @@ void main(void)
     vec3 viewNormal = normalize((gl_NormalMatrix * rotation3(rotation) * gl_Normal).xyz);
 #endif
 
-#if @diffuseMap
-    diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
+#if @defined diffuseMap
+    diffuseMapUV = (gl_TextureMatrix[@diffuseMap] * gl_MultiTexCoord@diffuseMap).xy;
 #endif
 
-#if @normalMap
-    normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
+#if @defined normalMap
+    normalMapUV = (gl_TextureMatrix[@normalMap] * gl_MultiTexCoord@normalMap).xy;
     passTangent = gl_MultiTexCoord7.xyzw * rotation;
 #endif
 
