@@ -10,40 +10,40 @@
 
 uniform mat4 projectionMatrix;
 
-#if @diffuseMap
+#if @defined diffuseMap
 varying vec2 diffuseMapUV;
 #endif
 
-#if @darkMap
+#if @defined darkMap
 varying vec2 darkMapUV;
 #endif
 
-#if @detailMap
+#if @defined detailMap
 varying vec2 detailMapUV;
 #endif
 
-#if @decalMap
+#if @defined decalMap
 varying vec2 decalMapUV;
 #endif
 
-#if @emissiveMap
+#if @defined emissiveMap
 varying vec2 emissiveMapUV;
 #endif
 
-#if @normalMap
+#if @defined normalMap
 varying vec2 normalMapUV;
 varying vec4 passTangent;
 #endif
 
-#if @envMap
+#if @defined envMap
 varying vec2 envMapUV;
 #endif
 
-#if @bumpMap
+#if @defined bumpMap
 varying vec2 bumpMapUV;
 #endif
 
-#if @specularMap
+#if @defined specularMap
 varying vec2 specularMapUV;
 #endif
 
@@ -76,48 +76,48 @@ void main(void)
     euclideanDepth = length(viewPos.xyz);
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
-#if (@envMap || !PER_PIXEL_LIGHTING || @shadows_enabled)
+#if (@defined envMap || !PER_PIXEL_LIGHTING || @shadows_enabled)
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 #endif
 
-#if @envMap
+#if @defined envMap
     vec3 viewVec = normalize(viewPos.xyz);
     vec3 r = reflect( viewVec, viewNormal );
     float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );
     envMapUV = vec2(r.x/m + 0.5, r.y/m + 0.5);
 #endif
 
-#if @diffuseMap
-    diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
+#if @defined diffuseMap
+    diffuseMapUV = (gl_TextureMatrix[@diffuseMap] * gl_MultiTexCoord@diffuseMap).xy;
 #endif
 
-#if @darkMap
-    darkMapUV = (gl_TextureMatrix[@darkMapUV] * gl_MultiTexCoord@darkMapUV).xy;
+#if @defined darkMap
+    darkMapUV = (gl_TextureMatrix[@darkMap] * gl_MultiTexCoord@darkMap).xy;
 #endif
 
-#if @detailMap
-    detailMapUV = (gl_TextureMatrix[@detailMapUV] * gl_MultiTexCoord@detailMapUV).xy;
+#if @defined detailMap
+    detailMapUV = (gl_TextureMatrix[@detailMap] * gl_MultiTexCoord@detailMap).xy;
 #endif
 
-#if @decalMap
-    decalMapUV = (gl_TextureMatrix[@decalMapUV] * gl_MultiTexCoord@decalMapUV).xy;
+#if @defined decalMap
+    decalMapUV = (gl_TextureMatrix[@decalMap] * gl_MultiTexCoord@decalMap).xy;
 #endif
 
-#if @emissiveMap
-    emissiveMapUV = (gl_TextureMatrix[@emissiveMapUV] * gl_MultiTexCoord@emissiveMapUV).xy;
+#if @defined emissiveMap
+    emissiveMapUV = (gl_TextureMatrix[@emissiveMap] * gl_MultiTexCoord@emissiveMap).xy;
 #endif
 
-#if @normalMap
-    normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
+#if @defined normalMap
+    normalMapUV = (gl_TextureMatrix[@normalMap] * gl_MultiTexCoord@normalMap).xy;
     passTangent = gl_MultiTexCoord7.xyzw;
 #endif
 
-#if @bumpMap
-    bumpMapUV = (gl_TextureMatrix[@bumpMapUV] * gl_MultiTexCoord@bumpMapUV).xy;
+#if @defined bumpMap
+    bumpMapUV = (gl_TextureMatrix[@bumpMap] * gl_MultiTexCoord@bumpMap).xy;
 #endif
 
-#if @specularMap
-    specularMapUV = (gl_TextureMatrix[@specularMapUV] * gl_MultiTexCoord@specularMapUV).xy;
+#if @defined specularMap
+    specularMapUV = (gl_TextureMatrix[@specularMap] * gl_MultiTexCoord@specularMap).xy;
 #endif
 
     passColor = gl_Color;
