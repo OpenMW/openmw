@@ -55,7 +55,7 @@ namespace MWWorld
     }
 
     RefData::RefData()
-    : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true), mCount (1), mCustomData (nullptr), mChanged(false), mFlags(0), mPhysicsPostponed(false)
+    : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true), mPhysicsPostponed(false), mCount (1), mCustomData (nullptr), mChanged(false), mFlags(0)
     {
         for (int i=0; i<3; ++i)
         {
