@@ -403,7 +403,7 @@ public:
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
         float fov, aspect, zNear, zFar;
-        if (cv->getProjectionMatrix()->getPerspective(fov, aspect, zNear, zFar))
+        if (cv->getProjectionMatrix()->getPerspective(fov, aspect, zNear, zFar) && std::abs(fov-mFov) > 0.001)
         {
             fov = mFov;
             osg::ref_ptr<osg::RefMatrix> newProjectionMatrix = new osg::RefMatrix();
