@@ -897,14 +897,8 @@ namespace Resource
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
-
-
         if (shaderPrefix == "objects")
-
-
             shaderVisitor->setDefaults(mDefaultShaderState);
-
-
         return shaderVisitor;
     }
 }
