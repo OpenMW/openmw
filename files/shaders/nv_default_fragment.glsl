@@ -8,17 +8,17 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
-#if @diffuseMap
+#if @defined diffuseMap
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 #endif
 
-#if @emissiveMap
+#if @defined emissiveMap
 uniform sampler2D emissiveMap;
 varying vec2 emissiveMapUV;
 #endif
 
-#if @normalMap
+#if @defined normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
 varying vec4 passTangent;
@@ -43,7 +43,7 @@ uniform float emissiveMult;
 
 void main()
 {
-#if @diffuseMap
+#if @defined diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
     gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, adjustedDiffuseUV);
 #else
@@ -54,7 +54,7 @@ void main()
     gl_FragData[0].a *= diffuseColor.a;
     alphaTest();
 
-#if @normalMap
+#if @defined normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
 
     vec3 normalizedNormal = normalize(passNormal);
@@ -71,7 +71,7 @@ void main()
     vec3 diffuseLight, ambientLight;
     doLighting(passViewPos, normalize(viewNormal), shadowing, diffuseLight, ambientLight);
     vec3 emission = getEmissionColor().xyz * emissiveMult;
-#if @emissiveMap
+#if @defined emissiveMap
     emission *= texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
     vec3 lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
@@ -82,7 +82,7 @@ void main()
 
     float shininess = gl_FrontMaterial.shininess;
     vec3 matSpec = getSpecularColor().xyz;
-#if @normalMap
+#if @defined normalMap
     matSpec *= normalTex.a;
 #endif
 
