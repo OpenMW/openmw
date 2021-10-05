@@ -4,7 +4,7 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
-#if @diffuseMap
+#if @defined diffuseMap
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 #endif
@@ -26,7 +26,7 @@ varying float passFalloff;
 
 void main()
 {
-#if @diffuseMap
+#if @defined diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
     gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, diffuseMapUV);
 #else
