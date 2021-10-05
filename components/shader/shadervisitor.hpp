@@ -59,37 +59,6 @@ namespace Shader
         void pushRequirements(osg::Node& node);
         void popRequirements();
 
-
-
- 
-  
-
-
-
-
-        std::string mNormalHeightMapPattern;
-
-        bool mAutoUseSpecularMaps;
-        std::string mSpecularMapPattern;
-
-    
-
-        bool mConvertAlphaTestToAlphaToCoverage;
-
-        ShaderManager& mShaderManager;
-        Resource::ImageManager& mImageManager;
-
-
-
-
-
-
-
-
-
-
-
-
         struct ShaderRequirements
         {
             ShaderRequirements();
@@ -135,8 +104,6 @@ namespace Shader
         bool mApplyLightingToEnvMaps;
 
         bool mConvertAlphaTestToAlphaToCoverage;
-
-        bool mTranslucentFramebuffer;
 
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;
