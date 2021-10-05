@@ -2,7 +2,7 @@
 
 uniform mat4 projectionMatrix;
 
-#if @diffuseMap
+#if @defined diffuseMap
 varying vec2 diffuseMapUV;
 #endif
 
@@ -33,8 +33,8 @@ void main(void)
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 #endif
 
-#if @diffuseMap
-    diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
+#if @defined diffuseMap
+    diffuseMapUV = (gl_TextureMatrix[@diffuseMap] * gl_MultiTexCoord@diffuseMap).xy;
 #endif
 
     passColor = gl_Color;
