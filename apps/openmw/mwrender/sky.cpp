@@ -784,9 +784,11 @@ private:
                     stateset = new osg::StateSet;
                     stateset->setAttributeAndModes(mat, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
                 }
-
-                const float threshold = 0.6;
-                visibleRatio = visibleRatio * (1.f - threshold) + threshold;
+                else if (visibleRatio < 1.f)
+                {
+                    const float threshold = 0.6;
+                    visibleRatio = visibleRatio * (1.f - threshold) + threshold;
+                }
             }
 
             float scale = visibleRatio;
@@ -796,11 +798,13 @@ private:
                 // no traverse
                 return;
             }
+            else if (scale == 1.f)
+                traverse(node, cv);
             else
             {
                 osg::Matrix modelView = *cv->getModelViewMatrix();
 
-                modelView.preMultScale(osg::Vec3f(visibleRatio, visibleRatio, visibleRatio));
+                modelView.preMultScale(osg::Vec3f(scale, scale, scale));
 
                 if (stateset)
                     cv->pushStateSet(stateset);
