@@ -10,15 +10,15 @@
 
 uniform mat4 projectionMatrix;
 
-#if @diffuseMap
+#if @defined diffuseMap
 varying vec2 diffuseMapUV;
 #endif
 
-#if @emissiveMap
+#if @defined emissiveMap
 varying vec2 emissiveMapUV;
 #endif
 
-#if @normalMap
+#if @defined normalMap
 varying vec2 normalMapUV;
 varying vec4 passTangent;
 #endif
@@ -45,16 +45,16 @@ void main(void)
     euclideanDepth = length(viewPos.xyz);
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
-#if @diffuseMap
-    diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
+#if @defined diffuseMap
+    diffuseMapUV = (gl_TextureMatrix[@diffuseMap] * gl_MultiTexCoord@diffuseMap).xy;
 #endif
 
-#if @emissiveMap
-    emissiveMapUV = (gl_TextureMatrix[@emissiveMapUV] * gl_MultiTexCoord@emissiveMapUV).xy;
+#if @defined emissiveMap
+    emissiveMapUV = (gl_TextureMatrix[@emissiveMap] * gl_MultiTexCoord@emissiveMap).xy;
 #endif
 
-#if @normalMap
-    normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
+#if @defined normalMap
+    normalMapUV = (gl_TextureMatrix[@normalMap] * gl_MultiTexCoord@normalMap).xy;
     passTangent = gl_MultiTexCoord7.xyzw;
 #endif
 
