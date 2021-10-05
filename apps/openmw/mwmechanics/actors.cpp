@@ -44,7 +44,6 @@
 #include "actor.hpp"
 #include "summoning.hpp"
 #include "actorutil.hpp"
-#include "tickableeffects.hpp"
 
 namespace
 {
@@ -55,67 +54,26 @@ bool isConscious(const MWWorld::Ptr& ptr)
     return !stats.isDead() && !stats.getKnockedDown();
 }
 
-int getBoundItemSlot (const std::string& itemId)
+bool isCommanded(const MWWorld::Ptr& actor)
 {
-    static std::map<std::string, int> boundItemsMap;
-    if (boundItemsMap.empty())
+    const auto& stats = actor.getClass().getCreatureStats(actor);
+    for(const auto& params : stats.getActiveSpells())
     {
-        const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
-        std::string boundId = store.find("sMagicBoundBootsID")->mValue.getString();
-        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Boots;
-
-        boundId = store.find("sMagicBoundCuirassID")->mValue.getString();
-        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Cuirass;
-
-        boundId = store.find("sMagicBoundLeftGauntletID")->mValue.getString();
-        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_LeftGauntlet;
-
-        boundId = store.find("sMagicBoundRightGauntletID")->mValue.getString();
-        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_RightGauntlet;
-
-        boundId = store.find("sMagicBoundHelmID")->mValue.getString();
-        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Helmet;
-
-        boundId = store.find("sMagicBoundShieldID")->mValue.getString();
-        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_CarriedLeft;
+        for(const auto& effect : params.getEffects())
+        {
+            if(((effect.mEffectId == ESM::MagicEffect::CommandHumanoid && actor.getClass().isNpc())
+                || (effect.mEffectId == ESM::MagicEffect::CommandCreature && !actor.getClass().isNpc()))
+                && effect.mMagnitude >= stats.getLevel())
+                return true;
+        }
     }
-
-    int slot = MWWorld::InventoryStore::Slot_CarriedRight;
-    std::map<std::string, int>::iterator it = boundItemsMap.find(itemId);
-    if (it != boundItemsMap.end())
-        slot = it->second;
-
-    return slot;
+    return false;
 }
-
-class CheckActorCommanded : public MWMechanics::EffectSourceVisitor
-{
-    MWWorld::Ptr mActor;
-public:
-    bool mCommanded;
-
-    CheckActorCommanded(const MWWorld::Ptr& actor)
-        : mActor(actor)
-        , mCommanded(false){}
-
-    void visit (MWMechanics::EffectKey key, int effectIndex,
-                        const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                        float magnitude, float remainingTime = -1, float totalTime = -1) override
-    {
-        if (((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
-            || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
-            && magnitude >= mActor.getClass().getCreatureStats(mActor).getLevel())
-                mCommanded = true;
-    }
-};
 
 // Check for command effects having ended and remove package if necessary
 void adjustCommandedActor (const MWWorld::Ptr& actor)
 {
-    CheckActorCommanded check(actor);
     MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-    stats.getActiveSpells().visitEffectSources(check);
 
     bool hasCommandPackage = false;
 
@@ -130,7 +88,7 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
         }
     }
 
-    if (!check.mCommanded && hasCommandPackage)
+    if (!isCommanded(actor) && hasCommandPackage)
         stats.getAiSequence().erase(it);
 }
 
@@ -169,129 +127,43 @@ void forEachFollowingPackage(MWMechanics::Actors::PtrActorMap& actors, const MWW
     }
 }
 
-}
-
-namespace MWMechanics
+float getStuntedMagickaDuration(const MWWorld::Ptr& actor)
 {
-    static const int GREETING_SHOULD_START = 4; // how many updates should pass before NPC can greet player
-    static const int GREETING_SHOULD_END = 20;  // how many updates should pass before NPC stops turning to player
-    static const int GREETING_COOLDOWN = 40;    // how many updates should pass before NPC can continue movement
-    static const float DECELERATE_DISTANCE = 512.f;
-
-    namespace
+    float remainingTime = 0.f;
+    for(const auto& params : actor.getClass().getCreatureStats(actor).getActiveSpells())
     {
-        float getTimeToDestination(const AiPackage& package, const osg::Vec3f& position, float speed, float duration, const osg::Vec3f& halfExtents)
+        for(const auto& effect : params.getEffects())
         {
-            const auto distanceToNextPathPoint = (package.getNextPathPoint(package.getDestination()) - position).length();
-            return (distanceToNextPathPoint - package.getNextPathPointTolerance(speed, duration, halfExtents)) / speed;
-        }
-    }
-
-    class GetStuntedMagickaDuration : public MWMechanics::EffectSourceVisitor
-    {
-    public:
-        float mRemainingTime;
-
-        GetStuntedMagickaDuration(const MWWorld::Ptr& actor)
-            : mRemainingTime(0.f){}
-
-        void visit (MWMechanics::EffectKey key, int effectIndex,
-                            const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1) override
-        {
-            if (mRemainingTime == -1) return;
-
-            if (key.mId == ESM::MagicEffect::StuntedMagicka)
+            if(effect.mEffectId == ESM::MagicEffect::StuntedMagicka)
             {
-                if (totalTime == -1)
-                {
-                    mRemainingTime = -1;
-                    return;
-                }
-
-                if (remainingTime > mRemainingTime)
-                    mRemainingTime = remainingTime;
+                if(effect.mDuration == -1.f)
+                    return -1.f;
+                remainingTime = std::max(remainingTime, effect.mTimeLeft);
             }
         }
-    };
+    }
+    return remainingTime;
+}
 
-    class GetCurrentMagnitudes : public MWMechanics::EffectSourceVisitor
+void soulTrap(const MWWorld::Ptr& creature)
+{
+    const auto& stats = creature.getClass().getCreatureStats(creature);
+    if(!stats.getMagicEffects().get(ESM::MagicEffect::Soultrap).getMagnitude())
+        return;
+    int creatureSoulValue = creature.get<ESM::Creature>()->mBase->mData.mSoul;
+    if (creatureSoulValue == 0)
+        return;
+    MWBase::World* world = MWBase::Environment::get().getWorld();
+    static const float fSoulgemMult = world->getStore().get<ESM::GameSetting>().find("fSoulgemMult")->mValue.getFloat();
+    for(const auto& params : stats.getActiveSpells())
     {
-        std::string mSpellId;
-
-    public:
-        GetCurrentMagnitudes(const std::string& spellId)
-            : mSpellId(spellId)
+        for(const auto& effect : params.getEffects())
         {
-        }
-
-        void visit (MWMechanics::EffectKey key, int effectIndex,
-                            const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1) override
-        {
-            if (magnitude <= 0)
-                return;
-
-            if (sourceId != mSpellId)
-                return;
-
-            mMagnitudes.emplace_back(key, magnitude);
-        }
-
-        std::vector<std::pair<MWMechanics::EffectKey, float>> mMagnitudes;
-    };
-
-    class GetCorprusSpells : public MWMechanics::EffectSourceVisitor
-    {
-
-    public:
-        void visit (MWMechanics::EffectKey key, int effectIndex,
-                            const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1) override
-        {
-            if (key.mId != ESM::MagicEffect::Corprus)
-                return;
-
-            mSpells.push_back(sourceId);
-        }
-
-        std::vector<std::string> mSpells;
-    };
-
-    class SoulTrap : public MWMechanics::EffectSourceVisitor
-    {
-        MWWorld::Ptr mCreature;
-        MWWorld::Ptr mActor;
-        bool mTrapped;
-    public:
-        SoulTrap(const MWWorld::Ptr& trappedCreature)
-            : mCreature(trappedCreature)
-            , mTrapped(false)
-        {
-        }
-
-        void visit (MWMechanics::EffectKey key, int effectIndex,
-                            const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1) override
-        {
-            if (mTrapped)
-                return;
-            if (key.mId != ESM::MagicEffect::Soultrap)
-                return;
-            if (magnitude <= 0)
-                return;
-
-            MWBase::World* world = MWBase::Environment::get().getWorld();
-
-            MWWorld::Ptr caster = world->searchPtrViaActorId(casterActorId);
+            if(effect.mEffectId != ESM::MagicEffect::Soultrap || effect.mMagnitude <= 0.f)
+                continue;
+            MWWorld::Ptr caster = world->searchPtrViaActorId(params.getCasterActorId());
             if (caster.isEmpty() || !caster.getClass().isActor())
-                return;
-
-            static const float fSoulgemMult = world->getStore().get<ESM::GameSetting>().find("fSoulgemMult")->mValue.getFloat();
-
-            int creatureSoulValue = mCreature.get<ESM::Creature>()->mBase->mData.mSoul;
-            if (creatureSoulValue == 0)
-                return;
+                continue;
 
             // Use the smallest soulgem that is large enough to hold the soul
             MWWorld::ContainerStore& container = caster.getClass().getContainerStore(caster);
@@ -316,126 +188,58 @@ namespace MWMechanics
             }
 
             if (gem == container.end())
-                return;
+                continue;
 
             // Set the soul on just one of the gems, not the whole stack
             gem->getContainerStore()->unstack(*gem, caster);
-            gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
+            gem->getCellRef().setSoul(creature.getCellRef().getRefId());
 
             // Restack the gem with other gems with the same soul
             gem->getContainerStore()->restack(*gem);
 
-            mTrapped = true;
-
-            if (caster == getPlayer())
+            if (caster == MWMechanics::getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
 
-            const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+            const ESM::Static* fx = world->getStore().get<ESM::Static>()
                     .search("VFX_Soul_Trap");
             if (fx)
-                MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                    "", mCreature.getRefData().getPosition().asVec3());
+                world->spawnEffect("meshes\\" + fx->mModel, "", creature.getRefData().getPosition().asVec3());
 
-            MWBase::Environment::get().getSoundManager()->playSound3D(
-                mCreature.getRefData().getPosition().asVec3(), "conjuration hit", 1.f, 1.f
-            );
+            MWBase::Environment::get().getSoundManager()->playSound3D(creature.getRefData().getPosition().asVec3(), "conjuration hit", 1.f, 1.f);
+            return; //remove to get vanilla behaviour
         }
-    };
-
-    void Actors::addBoundItem (const std::string& itemId, const MWWorld::Ptr& actor)
-    {
-        MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
-        int slot = getBoundItemSlot(itemId);
-
-        if (actor.getClass().getContainerStore(actor).count(itemId) != 0)
-            return;
-
-        MWWorld::ContainerStoreIterator prevItem = store.getSlot(slot);
-
-        MWWorld::Ptr boundPtr = *store.MWWorld::ContainerStore::add(itemId, 1, actor);
-        MWWorld::ActionEquip action(boundPtr);
-        action.execute(actor);
-
-        if (actor != MWMechanics::getPlayer())
-            return;
-
-        MWWorld::Ptr newItem;
-        auto it = store.getSlot(slot);
-        // Equip can fail because beast races cannot equip boots/helmets
-        if(it != store.end())
-            newItem = *it;
-
-        if (newItem.isEmpty() || boundPtr != newItem)
-            return;
-
-        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-
-        // change draw state only if the item is in player's right hand
-        if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
-            player.setDrawState(MWMechanics::DrawState_Weapon);
-
-        if (prevItem != store.end())
-            player.setPreviousItem(itemId, prevItem->getCellRef().getRefId());
     }
+}
 
-    void Actors::removeBoundItem (const std::string& itemId, const MWWorld::Ptr& actor)
+void removeTemporaryEffects(const MWWorld::Ptr& ptr)
+{
+    ptr.getClass().getCreatureStats(ptr).getActiveSpells().purge([] (const auto& spell)
     {
-        MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
-        int slot = getBoundItemSlot(itemId);
+        return spell.getType() == ESM::ActiveSpells::Type_Consumable || spell.getType() == ESM::ActiveSpells::Type_Temporary;
+    }, ptr);
+}
+}
 
-        MWWorld::ContainerStoreIterator currentItem = store.getSlot(slot);
+namespace MWMechanics
+{
+    static const int GREETING_SHOULD_START = 4; // how many updates should pass before NPC can greet player
+    static const int GREETING_SHOULD_END = 20;  // how many updates should pass before NPC stops turning to player
+    static const int GREETING_COOLDOWN = 40;    // how many updates should pass before NPC can continue movement
+    static const float DECELERATE_DISTANCE = 512.f;
 
-        bool wasEquipped = currentItem != store.end() && Misc::StringUtils::ciEqual(currentItem->getCellRef().getRefId(), itemId);
-
-        if (actor != MWMechanics::getPlayer())
+    namespace
+    {
+        float getTimeToDestination(const AiPackage& package, const osg::Vec3f& position, float speed, float duration, const osg::Vec3f& halfExtents)
         {
-            store.remove(itemId, 1, actor);
-
-            // Equip a replacement
-            if (!wasEquipped)
-                return;
-
-            std::string type = currentItem->getTypeName();
-            if (type != typeid(ESM::Weapon).name() && type != typeid(ESM::Armor).name() && type != typeid(ESM::Clothing).name())
-                return;
-
-            if (actor.getClass().getCreatureStats(actor).isDead())
-                return;
-
-            if (!actor.getClass().hasInventoryStore(actor))
-                return;
-
-            if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
-                return;
-
-            actor.getClass().getInventoryStore(actor).autoEquip(actor);
-
-            return;
+            const auto distanceToNextPathPoint = (package.getNextPathPoint(package.getDestination()) - position).length();
+            return (distanceToNextPathPoint - package.getNextPathPointTolerance(speed, duration, halfExtents)) / speed;
         }
-
-        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-        std::string prevItemId = player.getPreviousItem(itemId);
-        player.erasePreviousItem(itemId);
-
-        if (!prevItemId.empty())
-        {
-            // Find previous item (or its replacement) by id.
-            // we should equip previous item only if expired bound item was equipped.
-            MWWorld::Ptr item = store.findReplacement(prevItemId);
-            if (!item.isEmpty() && wasEquipped)
-            {
-                MWWorld::ActionEquip action(item);
-                action.execute(actor);
-            }
-        }
-
-        store.remove(itemId, 1, actor);
     }
 
     void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
     {
         // magic effects
-        adjustMagicEffects (ptr);
+        adjustMagicEffects (ptr, duration);
         if (ptr.getClass().getCreatureStats(ptr).needToRecalcDynamicStats())
             calculateDynamicStats (ptr);
 
@@ -793,23 +597,61 @@ namespace MWMechanics
         }
     }
 
-    void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
+    void Actors::adjustMagicEffects (const MWWorld::Ptr& creature, float duration)
     {
-        CreatureStats& creatureStats =  creature.getClass().getCreatureStats (creature);
-        if (creatureStats.isDeathAnimationFinished())
-            return;
+        CreatureStats& creatureStats = creature.getClass().getCreatureStats (creature);
+        bool wasDead = creatureStats.isDead();
 
-        MagicEffects now = creatureStats.getSpells().getMagicEffects();
+        creatureStats.getActiveSpells().update(creature, duration);
 
-        if (creature.getClass().hasInventoryStore(creature))
+        if (!wasDead && creatureStats.isDead())
         {
-            MWWorld::InventoryStore& store = creature.getClass().getInventoryStore (creature);
-            now += store.getMagicEffects();
+            // The actor was killed by a magic effect. Figure out if the player was responsible for it.
+            const ActiveSpells& spells = creatureStats.getActiveSpells();
+            MWWorld::Ptr player = getPlayer();
+            std::set<MWWorld::Ptr> playerFollowers;
+            getActorsSidingWith(player, playerFollowers);
+
+            for (ActiveSpells::TIterator it = spells.begin(); it != spells.end(); ++it)
+            {
+                bool actorKilled = false;
+
+                const ActiveSpells::ActiveSpellParams& spell = *it;
+                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.getCasterActorId());
+                for (const auto& effect : spell.getEffects())
+                {
+                    static const std::array<int, 7> damageEffects{
+                        ESM::MagicEffect::FireDamage, ESM::MagicEffect::ShockDamage, ESM::MagicEffect::FrostDamage, ESM::MagicEffect::Poison,
+                        ESM::MagicEffect::SunDamage, ESM::MagicEffect::DamageHealth, ESM::MagicEffect::AbsorbHealth
+                    };
+
+                    bool isDamageEffect = std::find(damageEffects.begin(), damageEffects.end(), effect.mEffectId) != damageEffects.end();
+
+                    if (isDamageEffect)
+                    {
+                        if (caster.getClass().isNpc() && caster.getClass().getNpcStats(caster).isWerewolf())
+                            caster.getClass().getNpcStats(caster).addWerewolfKill();
+                        if (caster == player || playerFollowers.find(caster) != playerFollowers.end())
+                        {
+                            MWBase::Environment::get().getMechanicsManager()->actorKilled(creature, player);
+                            actorKilled = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (actorKilled)
+                    break;
+            }
         }
 
-        now += creatureStats.getActiveSpells().getMagicEffects();
+        // updateSummons assumes the actor belongs to a cell.
+        // This assumption isn't always valid for the player character.
+        if (!creature.isInCell())
+            return;
 
-        creatureStats.modifyMagicEffects(now);
+        if (!creatureStats.getSummonedCreatureMap().empty() || !creatureStats.getSummonedCreatureGraveyard().empty())
+            updateSummons(creature, mTimerDisposeSummonsCorpses == 0.f);
     }
 
     void Actors::calculateDynamicStats (const MWWorld::Ptr& ptr)
@@ -857,22 +699,18 @@ namespace MWMechanics
             if (stunted)
             {
                 // Stunted Magicka effect should be taken into account.
-                GetStuntedMagickaDuration visitor(ptr);
-                stats.getActiveSpells().visitEffectSources(visitor);
-                stats.getSpells().visitEffectSources(visitor);
-                if (ptr.getClass().hasInventoryStore(ptr))
-                    ptr.getClass().getInventoryStore(ptr).visitEffectSources(visitor);
+                float remainingTime = getStuntedMagickaDuration(ptr);
 
                 // Take a maximum remaining duration of Stunted Magicka effects (-1 is a constant one) in game hours.
-                if (visitor.mRemainingTime > 0)
+                if (remainingTime > 0)
                 {
                     double timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
                     if(timeScale == 0.0)
                         timeScale = 1;
 
-                    restoreHours = std::max(0.0, hours - visitor.mRemainingTime * timeScale / 3600.f);
+                    restoreHours = std::max(0.0, hours - remainingTime * timeScale / 3600.f);
                 }
-                else if (visitor.mRemainingTime == -1)
+                else if (remainingTime == -1)
                     restoreHours = 0;
             }
 
@@ -933,398 +771,12 @@ namespace MWMechanics
         stats.setFatigue (fatigue);
     }
 
-    class ExpiryVisitor : public EffectSourceVisitor
-    {
-        private:
-            MWWorld::Ptr mActor;
-            float mDuration;
-
-        public:
-            ExpiryVisitor(const MWWorld::Ptr& actor, float duration)
-                : mActor(actor), mDuration(duration)
-            {
-            }
-
-            void visit (MWMechanics::EffectKey key, int /*effectIndex*/,
-                                const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
-                                float magnitude, float remainingTime = -1, float /*totalTime*/ = -1) override
-            {
-                if (magnitude > 0 && remainingTime > 0 && remainingTime < mDuration)
-                {
-                    CreatureStats& creatureStats = mActor.getClass().getCreatureStats(mActor);
-                    if (effectTick(creatureStats, mActor, key, magnitude * remainingTime))
-                        creatureStats.getMagicEffects().add(key, -magnitude);
-                }
-            }
-    };
-
-    void Actors::applyCureEffects(const MWWorld::Ptr& actor)
-    {
-        CreatureStats &creatureStats = actor.getClass().getCreatureStats(actor);
-        const MagicEffects &effects = creatureStats.getMagicEffects();
-
-        if (effects.get(ESM::MagicEffect::CurePoison).getModifier() > 0)
-        {
-            creatureStats.getActiveSpells().purgeEffect(ESM::MagicEffect::Poison);
-            creatureStats.getSpells().purgeEffect(ESM::MagicEffect::Poison);
-            if (actor.getClass().hasInventoryStore(actor))
-                actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Poison);
-        }
-        if (effects.get(ESM::MagicEffect::CureParalyzation).getModifier() > 0)
-        {
-            creatureStats.getActiveSpells().purgeEffect(ESM::MagicEffect::Paralyze);
-            creatureStats.getSpells().purgeEffect(ESM::MagicEffect::Paralyze);
-            if (actor.getClass().hasInventoryStore(actor))
-                actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Paralyze);
-        }
-        if (effects.get(ESM::MagicEffect::CureCommonDisease).getModifier() > 0)
-        {
-            creatureStats.getSpells().purgeCommonDisease();
-        }
-        if (effects.get(ESM::MagicEffect::CureBlightDisease).getModifier() > 0)
-        {
-            creatureStats.getSpells().purgeBlightDisease();
-        }
-        if (effects.get(ESM::MagicEffect::CureCorprusDisease).getModifier() > 0)
-        {
-            creatureStats.getActiveSpells().purgeCorprusDisease();
-            creatureStats.getSpells().purgeCorprusDisease();
-            if (actor.getClass().hasInventoryStore(actor))
-                actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Corprus, true);
-        }
-        if (effects.get(ESM::MagicEffect::RemoveCurse).getModifier() > 0)
-        {
-            creatureStats.getSpells().purgeCurses();
-        }
-    }
-
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration)
     {
         CreatureStats &creatureStats = ptr.getClass().getCreatureStats(ptr);
-        const MagicEffects &effects = creatureStats.getMagicEffects();
-        bool godmode = ptr == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
-
-        applyCureEffects(ptr);
-
-        bool wasDead = creatureStats.isDead();
-
-        if (duration > 0)
-        {
-            // Apply correct magnitude for tickable effects that have just expired,
-            // in case duration > remaining time of effect.
-            // One case where this will happen is when the player uses the rest/wait command
-            // while there is a tickable effect active that should expire before the end of the rest/wait.
-            ExpiryVisitor visitor(ptr, duration);
-            creatureStats.getActiveSpells().visitEffectSources(visitor);
-
-            for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
-            {
-                // tickable effects (i.e. effects having a lasting impact after expiry)
-                effectTick(creatureStats, ptr, it->first, it->second.getMagnitude() * duration);
-
-                // instant effects are already applied on spell impact in spellcasting.cpp, but may also come from permanent abilities
-                if (it->second.getMagnitude() > 0)
-                {
-                    CastSpell cast(ptr, ptr);
-                    if (cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude()))
-                    {
-                        creatureStats.getSpells().purgeEffect(it->first.mId);
-                        creatureStats.getActiveSpells().purgeEffect(it->first.mId);
-                        if (ptr.getClass().hasInventoryStore(ptr))
-                            ptr.getClass().getInventoryStore(ptr).purgeEffect(it->first.mId);
-                    }
-                }
-            }
-        }
-
-        // purge levitate effect if levitation is disabled
-        // check only modifier, because base value can be setted from SetFlying console command.
-        if (MWBase::Environment::get().getWorld()->isLevitationEnabled() == false && effects.get(ESM::MagicEffect::Levitate).getModifier() > 0)
-        {
-            creatureStats.getSpells().purgeEffect(ESM::MagicEffect::Levitate);
-            creatureStats.getActiveSpells().purgeEffect(ESM::MagicEffect::Levitate);
-            if (ptr.getClass().hasInventoryStore(ptr))
-                ptr.getClass().getInventoryStore(ptr).purgeEffect(ESM::MagicEffect::Levitate);
-
-            if (ptr == getPlayer())
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox ("#{sLevitateDisabled}");
-            }
-        }
-
-        // dynamic stats
-        for (int i = 0; i < 3; ++i)
-        {
-            DynamicStat<float> stat = creatureStats.getDynamic(i);
-            float fortify = effects.get(ESM::MagicEffect::FortifyHealth + i).getMagnitude();
-            float drain = 0.f;
-            if (!godmode)
-                drain = effects.get(ESM::MagicEffect::DrainHealth + i).getMagnitude();
-            stat.setCurrentModifier(fortify - drain,
-                // Magicka can be decreased below zero due to a fortify effect wearing off
-                // Fatigue can be decreased below zero meaning the actor will be knocked out
-                i == 1 || i == 2);
-
-            creatureStats.setDynamic(i, stat);
-        }
-
-        // attributes
-        for(int i = 0;i < ESM::Attribute::Length;++i)
-        {
-            AttributeValue stat = creatureStats.getAttribute(i);
-            float fortify = effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).getMagnitude();
-            float drain = 0.f, absorb = 0.f;
-            if (!godmode)
-            {
-                drain = effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).getMagnitude();
-                absorb = effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).getMagnitude();
-            }
-            stat.setModifier(static_cast<int>(fortify - drain - absorb));
-
-            creatureStats.setAttribute(i, stat);
-        }
 
         if (creatureStats.needToRecalcDynamicStats())
             calculateDynamicStats(ptr);
-
-        if (ptr == getPlayer())
-        {
-            GetCorprusSpells getCorprusSpellsVisitor;
-            creatureStats.getSpells().visitEffectSources(getCorprusSpellsVisitor);
-            creatureStats.getActiveSpells().visitEffectSources(getCorprusSpellsVisitor);
-            ptr.getClass().getInventoryStore(ptr).visitEffectSources(getCorprusSpellsVisitor);
-            std::vector<std::string> corprusSpells = getCorprusSpellsVisitor.mSpells;
-            std::vector<std::string> corprusSpellsToRemove;
-
-            for (auto it = creatureStats.getCorprusSpells().begin(); it != creatureStats.getCorprusSpells().end(); ++it)
-            {
-                if(std::find(corprusSpells.begin(), corprusSpells.end(), it->first) == corprusSpells.end())
-                {
-                    // Corprus effect expired, remove entry and restore stats.
-                    MWBase::Environment::get().getMechanicsManager()->restoreStatsAfterCorprus(ptr, it->first);
-                    corprusSpellsToRemove.push_back(it->first);
-                    corprusSpells.erase(std::remove(corprusSpells.begin(), corprusSpells.end(), it->first), corprusSpells.end());
-                    continue;
-                }
-
-                corprusSpells.erase(std::remove(corprusSpells.begin(), corprusSpells.end(), it->first), corprusSpells.end());
-
-                if (MWBase::Environment::get().getWorld()->getTimeStamp() >= it->second.mNextWorsening)
-                {
-                    it->second.mNextWorsening += CorprusStats::sWorseningPeriod;
-                    GetCurrentMagnitudes getMagnitudesVisitor (it->first);
-                    creatureStats.getSpells().visitEffectSources(getMagnitudesVisitor);
-                    creatureStats.getActiveSpells().visitEffectSources(getMagnitudesVisitor);
-                    ptr.getClass().getInventoryStore(ptr).visitEffectSources(getMagnitudesVisitor);
-                    for (auto& effectMagnitude : getMagnitudesVisitor.mMagnitudes)
-                    {
-                        if (effectMagnitude.first.mId == ESM::MagicEffect::FortifyAttribute)
-                        {
-                            AttributeValue attr = creatureStats.getAttribute(effectMagnitude.first.mArg);
-                            attr.damage(-effectMagnitude.second);
-                            creatureStats.setAttribute(effectMagnitude.first.mArg, attr);
-                            it->second.mWorsenings[effectMagnitude.first.mArg] = 0;
-                        }
-                        else if (effectMagnitude.first.mId == ESM::MagicEffect::DrainAttribute)
-                        {
-                            AttributeValue attr = creatureStats.getAttribute(effectMagnitude.first.mArg);
-                            int currentDamage = attr.getDamage();
-                            if (currentDamage >= 0)
-                                it->second.mWorsenings[effectMagnitude.first.mArg] = std::min(it->second.mWorsenings[effectMagnitude.first.mArg], currentDamage);
-
-                            it->second.mWorsenings[effectMagnitude.first.mArg] += effectMagnitude.second;
-                            attr.damage(effectMagnitude.second);
-                            creatureStats.setAttribute(effectMagnitude.first.mArg, attr);
-                        }
-                    }
-
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
-                }
-            }
-
-            for (std::string& oldCorprusSpell : corprusSpellsToRemove)
-            {
-                 creatureStats.removeCorprusSpell(oldCorprusSpell);
-            }
-
-            for (std::string& newCorprusSpell : corprusSpells)
-            {
-                CorprusStats corprus;
-                for (int i=0; i<ESM::Attribute::Length; ++i)
-                    corprus.mWorsenings[i] = 0;
-                corprus.mNextWorsening = MWBase::Environment::get().getWorld()->getTimeStamp() + CorprusStats::sWorseningPeriod;
-
-                creatureStats.addCorprusSpell(newCorprusSpell, corprus);
-            }
-        }
-
-        // AI setting modifiers
-        int creature = !ptr.getClass().isNpc();
-        Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Fight);
-        stat.setModifier(static_cast<int>(effects.get(ESM::MagicEffect::FrenzyHumanoid + creature).getMagnitude()
-            - effects.get(ESM::MagicEffect::CalmHumanoid+creature).getMagnitude()));
-        creatureStats.setAiSetting(CreatureStats::AI_Fight, stat);
-
-        stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
-        stat.setModifier(static_cast<int>(effects.get(ESM::MagicEffect::DemoralizeHumanoid + creature).getMagnitude()
-            - effects.get(ESM::MagicEffect::RallyHumanoid+creature).getMagnitude()));
-        creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
-        if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Undead)
-        {
-            stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
-            stat.setModifier(static_cast<int>(effects.get(ESM::MagicEffect::TurnUndead).getMagnitude()));
-            creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
-        }
-
-        if (!wasDead && creatureStats.isDead())
-        {
-            // The actor was killed by a magic effect. Figure out if the player was responsible for it.
-            const ActiveSpells& spells = creatureStats.getActiveSpells();
-            MWWorld::Ptr player = getPlayer();
-            std::set<MWWorld::Ptr> playerFollowers;
-            getActorsSidingWith(player, playerFollowers);
-
-            for (ActiveSpells::TIterator it = spells.begin(); it != spells.end(); ++it)
-            {
-                bool actorKilled = false;
-
-                const ActiveSpells::ActiveSpellParams& spell = it->second;
-                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
-                for (std::vector<ActiveSpells::ActiveEffect>::const_iterator effectIt = spell.mEffects.begin();
-                     effectIt != spell.mEffects.end(); ++effectIt)
-                {
-                    int effectId = effectIt->mEffectId;
-                    bool isDamageEffect = false;
-
-                    int damageEffects[] = {
-                        ESM::MagicEffect::FireDamage, ESM::MagicEffect::ShockDamage, ESM::MagicEffect::FrostDamage, ESM::MagicEffect::Poison,
-                        ESM::MagicEffect::SunDamage, ESM::MagicEffect::DamageHealth, ESM::MagicEffect::AbsorbHealth
-                    };
-
-                    for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
-                    {
-                        if (damageEffects[i] == effectId)
-                            isDamageEffect = true;
-                    }
-
-                    if (isDamageEffect)
-                    {
-                        if (caster == player || playerFollowers.find(caster) != playerFollowers.end())
-                        {
-                            if (caster.getClass().isNpc() && caster.getClass().getNpcStats(caster).isWerewolf())
-                                caster.getClass().getNpcStats(caster).addWerewolfKill();
-
-                            MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, player);
-                            actorKilled = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (actorKilled)
-                    break;
-            }
-        }
-
-        // TODO: dirty flag for magic effects to avoid some unnecessary work below?
-
-        // any value of calm > 0 will stop the actor from fighting
-        if ((effects.get(ESM::MagicEffect::CalmHumanoid).getMagnitude() > 0 && ptr.getClass().isNpc())
-            || (effects.get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
-            creatureStats.getAiSequence().stopCombat();
-
-        // Update bound effects
-        // Note: in vanilla MW multiple bound items of the same type can be created by different spells.
-        // As these extra copies are kinda useless this may or may not be important.
-        static std::map<ESM::MagicEffect::Effects, std::string> boundItemsMap;
-        if (boundItemsMap.empty())
-        {
-            boundItemsMap[ESM::MagicEffect::BoundBattleAxe] = "sMagicBoundBattleAxeID";
-            boundItemsMap[ESM::MagicEffect::BoundBoots] = "sMagicBoundBootsID";
-            boundItemsMap[ESM::MagicEffect::BoundCuirass] = "sMagicBoundCuirassID";
-            boundItemsMap[ESM::MagicEffect::BoundDagger] = "sMagicBoundDaggerID";
-            boundItemsMap[ESM::MagicEffect::BoundGloves] = "sMagicBoundLeftGauntletID"; // Note: needs RightGauntlet variant too (see below)
-            boundItemsMap[ESM::MagicEffect::BoundHelm] = "sMagicBoundHelmID";
-            boundItemsMap[ESM::MagicEffect::BoundLongbow] = "sMagicBoundLongbowID";
-            boundItemsMap[ESM::MagicEffect::BoundLongsword] = "sMagicBoundLongswordID";
-            boundItemsMap[ESM::MagicEffect::BoundMace] = "sMagicBoundMaceID";
-            boundItemsMap[ESM::MagicEffect::BoundShield] = "sMagicBoundShieldID";
-            boundItemsMap[ESM::MagicEffect::BoundSpear] = "sMagicBoundSpearID";
-        }
-
-        if(ptr.getClass().hasInventoryStore(ptr))
-        {
-            for (const auto& [effect, itemGmst] : boundItemsMap)
-            {
-                bool found = creatureStats.mBoundItems.find(effect) != creatureStats.mBoundItems.end();
-                float magnitude = effects.get(effect).getMagnitude();
-                if (found != (magnitude > 0))
-                {
-                    if (magnitude > 0)
-                        creatureStats.mBoundItems.insert(effect);
-                    else
-                        creatureStats.mBoundItems.erase(effect);
-
-                    std::string item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                                itemGmst)->mValue.getString();
-
-                    magnitude > 0 ? addBoundItem(item, ptr) : removeBoundItem(item, ptr);
-
-                    if (effect == ESM::MagicEffect::BoundGloves)
-                    {
-                        item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                                    "sMagicBoundRightGauntletID")->mValue.getString();
-                        magnitude > 0 ? addBoundItem(item, ptr) : removeBoundItem(item, ptr);
-                    }
-                }
-            }
-        }
-
-        // Summoned creature update visitor assumes the actor belongs to a cell.
-        // This assumption isn't always valid for the player character.
-        if (!ptr.isInCell())
-            return;
-
-        bool hasSummonEffect = false;
-        for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
-        {
-            if (isSummoningEffect(it->first.mId))
-            {
-                hasSummonEffect = true;
-                break;
-            }
-        }
-
-        if (!creatureStats.getSummonedCreatureMap().empty() || !creatureStats.getSummonedCreatureGraveyard().empty() || hasSummonEffect)
-        {
-            UpdateSummonedCreatures updateSummonedCreatures(ptr);
-            creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
-            creatureStats.getSpells().visitEffectSources(updateSummonedCreatures);
-            if (ptr.getClass().hasInventoryStore(ptr))
-                ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
-            updateSummonedCreatures.process(mTimerDisposeSummonsCorpses == 0.f);
-        }
-    }
-
-    void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr, float duration)
-    {
-        NpcStats &npcStats = ptr.getClass().getNpcStats(ptr);
-        const MagicEffects &effects = npcStats.getMagicEffects();
-        bool godmode = ptr == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
-
-        // skills
-        for(int i = 0;i < ESM::Skill::Length;++i)
-        {
-            SkillValue& skill = npcStats.getSkill(i);
-            float fortify = effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).getMagnitude();
-            float drain = 0.f, absorb = 0.f;
-            if (!godmode)
-            {
-                drain = effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude();
-                absorb = effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude();
-            }
-            skill.setModifier(static_cast<int>(fortify - drain - absorb));
-        }
     }
 
     bool Actors::isAttackPreparing(const MWWorld::Ptr& ptr)
@@ -1606,7 +1058,7 @@ namespace MWMechanics
 
     void Actors::addActor (const MWWorld::Ptr& ptr, bool updateImmediately)
     {
-        removeActor(ptr);
+        removeActor(ptr, true);
 
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if (!anim)
@@ -1654,11 +1106,13 @@ namespace MWMechanics
         ctrl->setVisibility(visibilityRatio);
     }
 
-    void Actors::removeActor (const MWWorld::Ptr& ptr)
+    void Actors::removeActor (const MWWorld::Ptr& ptr, bool keepActive)
     {
         PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
         {
+            if(!keepActive)
+                removeTemporaryEffects(iter->first);
             delete iter->second;
             mActors.erase(iter);
         }
@@ -1723,6 +1177,7 @@ namespace MWMechanics
         {
             if((iter->first.isInCell() && iter->first.getCell()==cellStore) && iter->first != ignore)
             {
+                removeTemporaryEffects(iter->first);
                 delete iter->second;
                 mActors.erase(iter++);
             }
@@ -1979,8 +1434,6 @@ namespace MWMechanics
                         player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
                 }
 
-                iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
-
                 const Misc::TimerStatus engageCombatTimerStatus = iter->second->updateEngageCombatTimer(duration);
 
                 // For dead actors we need to update looping spell particles
@@ -1988,7 +1441,7 @@ namespace MWMechanics
                 {
                     // They can be added during the death animation
                     if (!iter->first.getClass().getCreatureStats(iter->first).isDeathAnimationFinished())
-                        adjustMagicEffects(iter->first);
+                        adjustMagicEffects(iter->first, duration);
                     ctrl->updateContinuousVfx();
                 }
                 else
@@ -2082,8 +1535,6 @@ namespace MWMechanics
                         // We can not update drowning state for actors outside of AI distance - they can not resurface to breathe
                         if (inProcessingRange)
                             updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
-
-                        calculateNpcStatModifiers(iter->first, duration);
 
                         if (timerUpdateEquippedLight == 0)
                             updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
@@ -2258,10 +1709,7 @@ namespace MWMechanics
 
                 // Apply soultrap
                 if (iter->first.getTypeName() == typeid(ESM::Creature).name())
-                {
-                    SoulTrap soulTrap (iter->first);
-                    stats.getActiveSpells().visitEffectSources(soulTrap);
-                }
+                    soulTrap(iter->first);
 
                 // Magic effects will be reset later, and the magic effect that could kill the actor
                 // needs to be determined now
@@ -2277,30 +1725,27 @@ namespace MWMechanics
 
                 // Reset magic effects and recalculate derived effects
                 // One case where we need this is to make sure bound items are removed upon death
-                stats.modifyMagicEffects(MWMechanics::MagicEffects());
-                stats.getActiveSpells().clear();
+                float vampirism = stats.getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude();
+                stats.getActiveSpells().clear(iter->first);
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
 
                 // Reset dynamic stats, attributes and skills
                 calculateCreatureStatModifiers(iter->first, 0);
-                if (iter->first.getClass().isNpc())
-                    calculateNpcStatModifiers(iter->first, 0);
+                stats.getMagicEffects().add(ESM::MagicEffect::Vampirism, vampirism);
 
                 if (isPlayer)
                 {
                     //player's death animation is over
                     MWBase::Environment::get().getStateManager()->askLoadRecent();
+                    // Play Death Music if it was the player dying
+                    MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
                 }
                 else
                 {
                     // NPC death animation is over, disable actor collision
                     MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
                 }
-
-                // Play Death Music if it was the player dying
-                if(iter->first == getPlayer())
-                    MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
             }
         }
     }
@@ -2320,7 +1765,7 @@ namespace MWMechanics
 
             // Remove the summoned creature's summoned creatures as well
             MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-            std::map<ESM::SummonKey, int>& creatureMap = stats.getSummonedCreatureMap();
+            auto& creatureMap = stats.getSummonedCreatureMap();
             for (const auto& creature : creatureMap)
                 cleanupSummonedCreature(stats, creature.second);
             creatureMap.clear();
@@ -2341,7 +1786,7 @@ namespace MWMechanics
         for (PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
             MWMechanics::ActiveSpells& spells = iter->first.getClass().getCreatureStats(iter->first).getActiveSpells();
-            spells.purge(casterActorId);
+            spells.purge(iter->first, casterActorId);
         }
     }
 
@@ -2359,7 +1804,7 @@ namespace MWMechanics
         {
             if (iter->first.getClass().getCreatureStats(iter->first).isDead())
             {
-                iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
+                adjustMagicEffects (iter->first, duration);
                 continue;
             }
 
@@ -2370,15 +1815,11 @@ namespace MWMechanics
                     (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() > mActorsProcessingRange*mActorsProcessingRange)
                 continue;
 
-            adjustMagicEffects (iter->first);
+            adjustMagicEffects (iter->first, duration);
             if (iter->first.getClass().getCreatureStats(iter->first).needToRecalcDynamicStats())
                 calculateDynamicStats (iter->first);
 
             calculateCreatureStatModifiers (iter->first, duration);
-            if (iter->first.getClass().isNpc())
-                calculateNpcStatModifiers(iter->first, duration);
-
-            iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
             if (animation)
@@ -2767,10 +2208,8 @@ namespace MWMechanics
 
     void Actors::updateMagicEffects(const MWWorld::Ptr &ptr)
     {
-        adjustMagicEffects(ptr);
+        adjustMagicEffects(ptr, 0.f);
         calculateCreatureStatModifiers(ptr, 0.f);
-        if (ptr.getClass().isNpc())
-            calculateNpcStatModifiers(ptr, 0.f);
     }
 
     bool Actors::isReadyToBlock(const MWWorld::Ptr &ptr) const

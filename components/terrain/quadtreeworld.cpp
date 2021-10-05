@@ -456,13 +456,13 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
     osg::Object * viewer = isCullVisitor ? static_cast<osgUtil::CullVisitor*>(&nv)->getCurrentCamera() : nullptr;
     bool needsUpdate = true;
-    ViewData *vd = mViewDataMap->getViewData(viewer, nv.getViewPoint(), mActiveGrid, needsUpdate);
-
+    osg::Vec3f viewPoint = viewer ? nv.getViewPoint() : nv.getEyePoint();
+    ViewData *vd = mViewDataMap->getViewData(viewer, viewPoint, mActiveGrid, needsUpdate);
     if (needsUpdate)
     {
         vd->reset();
         DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, mActiveGrid);
-        mRootNode->traverseNodes(vd, nv.getViewPoint(), &lodCallback);
+        mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
     }
 
     const float cellWorldSize = mStorage->getCellWorldSize();

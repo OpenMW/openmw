@@ -85,14 +85,6 @@ namespace MWMechanics
             return MWBase::Environment::get().getWorld()->castRay(position, visibleDestination, mask, actor);
         }
 
-        bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr &actor, const osg::Vec3f& destination)
-        {
-            const auto world = MWBase::Environment::get().getWorld();
-            const osg::Vec3f halfExtents = world->getPathfindingHalfExtents(actor);
-            const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
-            return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, actor);
-        }
-
         void stopMovement(const MWWorld::Ptr& actor)
         {
             actor.getClass().getMovementSettings(actor).mPosition[0] = 0;

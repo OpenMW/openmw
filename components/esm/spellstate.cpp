@@ -8,29 +8,38 @@ namespace ESM
 
     void SpellState::load(ESMReader &esm)
     {
-        while (esm.isNextSub("SPEL"))
+        if(esm.getFormat() < 17)
         {
-            std::string id = esm.getHString();
-
-            SpellParams state;
-            while (esm.isNextSub("INDX"))
+            while (esm.isNextSub("SPEL"))
             {
-                int index;
-                esm.getHT(index);
+                std::string id = esm.getHString();
 
-                float magnitude;
-                esm.getHNT(magnitude, "RAND");
+                SpellParams state;
+                while (esm.isNextSub("INDX"))
+                {
+                    int index;
+                    esm.getHT(index);
 
-                state.mEffectRands[index] = magnitude;
+                    float magnitude;
+                    esm.getHNT(magnitude, "RAND");
+
+                    state.mEffectRands[index] = magnitude;
+                }
+
+                while (esm.isNextSub("PURG")) {
+                    int index;
+                    esm.getHT(index);
+                    state.mPurgedEffects.insert(index);
+                }
+
+                mSpellParams[id] = state;
+                mSpells.emplace_back(id);
             }
-
-            while (esm.isNextSub("PURG")) {
-                int index;
-                esm.getHT(index);
-                state.mPurgedEffects.insert(index);
-            }
-
-            mSpells[id] = state;
+        }
+        else
+        {
+            while (esm.isNextSub("SPEL"))
+                mSpells.emplace_back(esm.getHString());
         }
 
         // Obsolete
@@ -88,30 +97,8 @@ namespace ESM
 
     void SpellState::save(ESMWriter &esm) const
     {
-        for (TContainer::const_iterator it = mSpells.begin(); it != mSpells.end(); ++it)
-        {
-            esm.writeHNString("SPEL", it->first);
-
-            const std::map<int, float>& random = it->second.mEffectRands;
-            for (std::map<int, float>::const_iterator rIt = random.begin(); rIt != random.end(); ++rIt)
-            {
-                esm.writeHNT("INDX", rIt->first);
-                esm.writeHNT("RAND", rIt->second);
-            }
-
-            const std::set<int>& purges = it->second.mPurgedEffects;
-            for (std::set<int>::const_iterator pIt = purges.begin(); pIt != purges.end(); ++pIt)
-                esm.writeHNT("PURG", *pIt);
-        }
-
-        for (std::map<std::string, CorprusStats>::const_iterator it = mCorprusSpells.begin(); it != mCorprusSpells.end(); ++it)
-        {
-            esm.writeHNString("CORP", it->first);
-
-            const CorprusStats & stats = it->second;
-            esm.writeHNT("WORS", stats.mWorsenings);
-            esm.writeHNT("TIME", stats.mNextWorsening);
-        }
+        for (const std::string& spell : mSpells)
+            esm.writeHNString("SPEL", spell);
 
         for (std::map<std::string, TimeStamp>::const_iterator it = mUsedPowers.begin(); it != mUsedPowers.end(); ++it)
         {

@@ -37,20 +37,6 @@ namespace MWGui
         bool mPermanent; // the effect is permanent
     };
 
-    class EffectSourceVisitor : public MWMechanics::EffectSourceVisitor
-    {
-    public:
-        bool mIsPermanent;
-
-        std::map <int, std::vector<MagicEffectInfo> > mEffectSources;
-
-        virtual ~EffectSourceVisitor() {}
-
-        void visit (MWMechanics::EffectKey key, int effectIndex,
-                            const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1) override;
-    };
-
     class SpellIcons
     {
     public:

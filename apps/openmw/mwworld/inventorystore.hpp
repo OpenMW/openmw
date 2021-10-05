@@ -25,15 +25,6 @@ namespace MWWorld
          */
         virtual void equipmentChanged () {}
 
-        /**
-         * @param effect
-         * @param isNew Is this effect new (e.g. the item for it was just now manually equipped)
-         *              or was it loaded from a savegame / initial game state? \n
-         *              If it isn't new, non-looping VFX should not be played.
-         * @param playSound Play effect sound?
-         */
-        virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew) {}
-
         virtual ~InventoryStoreListener() = default;
     };
 
@@ -68,8 +59,6 @@ namespace MWWorld
 
         private:
 
-            MWMechanics::MagicEffects mMagicEffects;
-
             InventoryStoreListener* mInventoryListener;
 
             // Enables updates of magic effects and actor model whenever items are equipped or unequipped.
@@ -77,19 +66,6 @@ namespace MWWorld
             bool mUpdatesEnabled;
 
             bool mFirstAutoEquip;
-
-            // Vanilla allows permanent effects with a random magnitude, so it needs to be stored here.
-            // We also need this to only play sounds and particle effects when the item is equipped, rather than on every update.
-            struct EffectParams
-            {
-                // Modifier to scale between min and max magnitude
-                float mRandom;
-                // Multiplier for when an effect was fully or partially resisted
-                float mMultiplier;
-            };
-
-            typedef std::map<std::string, std::vector<EffectParams> > TEffectMagnitudes;
-            TEffectMagnitudes mPermanentMagicEffectMagnitudes;
 
             typedef std::vector<ContainerStoreIterator> TSlots;
 
@@ -105,8 +81,6 @@ namespace MWWorld
             void copySlots (const InventoryStore& store);
 
             void initSlots (TSlots& slots_);
-
-            void updateMagicEffects(const Ptr& actor);
 
             void fireEquipmentChangedEvent(const Ptr& actor);
 
@@ -161,9 +135,6 @@ namespace MWWorld
             void autoEquip (const MWWorld::Ptr& actor);
             ///< Auto equip items according to stats and item value.
 
-            const MWMechanics::MagicEffects& getMagicEffects() const;
-            ///< Return magic effects from worn items.
-
             bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const override;
             ///< @return true if the two specified objects can stack with each other
 
@@ -198,22 +169,12 @@ namespace MWWorld
             void setInvListener (InventoryStoreListener* listener, const Ptr& actor);
             ///< Set a listener for various events, see \a InventoryStoreListener
 
-            InventoryStoreListener* getInvListener();
-
-            void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
-
-            void purgeEffect (short effectId, bool wholeSpell = false);
-            ///< Remove a magic effect
-
-            void purgeEffect (short effectId, const std::string& sourceId, bool wholeSpell = false, int effectIndex=-1);
-            ///< Remove a magic effect
+            InventoryStoreListener* getInvListener() const;
 
             void clear() override;
             ///< Empty container.
 
-            void writeState (ESM::InventoryState& state) const override;
-
-            void readState (const ESM::InventoryState& state) override;
+            bool isFirstEquip();
     };
 }
 

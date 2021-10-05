@@ -109,24 +109,21 @@ namespace
 
     // NodeCallback used to have a node always oriented towards the camera. The node can have translation and scale
     // set just like a regular MatrixTransform, but the rotation set will be overridden in order to face the camera.
-    // Must be set as a cull callback.
-    class BillboardCallback : public osg::NodeCallback
+    class BillboardCallback : public SceneUtil::NodeCallback<BillboardCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         BillboardCallback()
         {
         }
         BillboardCallback(const BillboardCallback& copy, const osg::CopyOp& copyop)
-            : osg::NodeCallback(copy, copyop)
+            : SceneUtil::NodeCallback<BillboardCallback, osg::Node*, osgUtil::CullVisitor*>(copy, copyop)
         {
         }
 
         META_Object(NifOsg, BillboardCallback)
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
             osg::Matrix modelView = *cv->getModelViewMatrix();
 
             // attempt to preserve scale
@@ -143,7 +140,7 @@ namespace
 
             cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
 
-            traverse(node, nv);
+            traverse(node, cv);
 
             cv->popModelViewMatrix();
         }

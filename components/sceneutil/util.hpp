@@ -4,7 +4,6 @@
 #include <osg/Matrix>
 #include <osg/BoundingSphere>
 #include <osg/Camera>
-#include <osg/NodeCallback>
 #include <osg/Texture2D>
 #include <osg/Vec4f>
 #include <osg/Depth>

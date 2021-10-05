@@ -5,6 +5,7 @@
 #include <components/misc/mathutil.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/settings/settings.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -25,7 +26,7 @@
 namespace
 {
 
-class UpdateRenderCameraCallback : public osg::NodeCallback
+class UpdateRenderCameraCallback : public SceneUtil::NodeCallback<UpdateRenderCameraCallback, osg::Camera*>
 {
 public:
     UpdateRenderCameraCallback(MWRender::Camera* cam)
@@ -33,12 +34,10 @@ public:
     {
     }
 
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+    void operator()(osg::Camera* cam, osg::NodeVisitor* nv)
     {
-        osg::Camera* cam = static_cast<osg::Camera*>(node);
-
         // traverse first to update animations, in case the camera is attached to an animated node
-        traverse(node, nv);
+        traverse(cam, nv);
 
         mCamera->updateCamera(cam);
     }

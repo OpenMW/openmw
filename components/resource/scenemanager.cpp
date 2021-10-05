@@ -40,16 +40,14 @@
 namespace
 {
 
-    class InitWorldSpaceParticlesCallback : public osg::NodeCallback
+    class InitWorldSpaceParticlesCallback : public SceneUtil::NodeCallback<InitWorldSpaceParticlesCallback, osgParticle::ParticleSystem*>
     {
     public:
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osgParticle::ParticleSystem* node, osg::NodeVisitor* nv)
         {
-            osgParticle::ParticleSystem* partsys = static_cast<osgParticle::ParticleSystem*>(node);
-
             // HACK: Ignore the InverseWorldMatrix transform the particle system is attached to
-            if (partsys->getNumParents() && partsys->getParent(0)->getNumParents())
-                transformInitialParticles(partsys, partsys->getParent(0)->getParent(0));
+            if (node->getNumParents() && node->getParent(0)->getNumParents())
+                transformInitialParticles(node, node->getParent(0)->getParent(0));
 
             node->removeUpdateCallback(this);
         }
@@ -348,9 +346,9 @@ namespace Resource
         return mForceShaders;
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer, bool forceShadersForNode, const osg::Program* programTemplate)
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool forceShadersForNode, const osg::Program* programTemplate)
     {
-        osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix, translucentFramebuffer));
+        osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix));
         shaderVisitor->setAllowedToModifyStateSets(false);
         shaderVisitor->setProgramTemplate(programTemplate);
         if (forceShadersForNode)
@@ -888,7 +886,7 @@ namespace Resource
         stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
     }
 
-    Shader::ShaderVisitor *SceneManager::createShaderVisitor(const std::string& shaderPrefix, bool translucentFramebuffer)
+    Shader::ShaderVisitor *SceneManager::createShaderVisitor(const std::string& shaderPrefix)
     {
         Shader::ShaderVisitor* shaderVisitor = new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, shaderPrefix);
         shaderVisitor->setForceShaders(mForceShaders);
@@ -899,9 +897,14 @@ namespace Resource
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
-        shaderVisitor->setTranslucentFramebuffer(translucentFramebuffer);
+
+
         if (shaderPrefix == "objects")
+
+
             shaderVisitor->setDefaults(mDefaultShaderState);
+
+
         return shaderVisitor;
     }
 }

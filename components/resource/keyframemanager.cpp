@@ -2,6 +2,7 @@
 
 #include <components/vfs/manager.hpp>
 
+#include <osg/Stats>
 #include <osgAnimation/Animation>
 #include <osgAnimation/BasicAnimationManager>
 #include <osgAnimation/Channel>

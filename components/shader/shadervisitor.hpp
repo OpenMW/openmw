@@ -49,8 +49,6 @@ namespace Shader
 
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
 
-        void setTranslucentFramebuffer(bool translucent);
-
         void apply(osg::Node& node) override;
 
         void apply(osg::Drawable& drawable) override;
@@ -60,6 +58,37 @@ namespace Shader
 
         void pushRequirements(osg::Node& node);
         void popRequirements();
+
+
+
+ 
+  
+
+
+
+
+        std::string mNormalHeightMapPattern;
+
+        bool mAutoUseSpecularMaps;
+        std::string mSpecularMapPattern;
+
+    
+
+        bool mConvertAlphaTestToAlphaToCoverage;
+
+        ShaderManager& mShaderManager;
+        Resource::ImageManager& mImageManager;
+
+
+
+
+
+
+
+
+
+
+
 
         struct ShaderRequirements
         {

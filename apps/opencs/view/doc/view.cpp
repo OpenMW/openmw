@@ -65,6 +65,8 @@ void CSVDoc::View::setupFileMenu()
     QAction* save = createMenuEntry("Save", ":./menu-save.png", file, "document-file-save");
     connect (save, SIGNAL (triggered()), this, SLOT (save()));
     mSave = save;
+    
+    file->addSeparator();
 
     QAction* verify = createMenuEntry("Verify", ":./menu-verify.png", file, "document-file-verify");
     connect (verify, SIGNAL (triggered()), this, SLOT (verify()));
@@ -80,6 +82,8 @@ void CSVDoc::View::setupFileMenu()
     QAction* meta = createMenuEntry(CSMWorld::UniversalId::Type_MetaDatas, file, "document-file-metadata");
     connect (meta, SIGNAL (triggered()), this, SLOT (addMetaDataSubView()));
 
+    file->addSeparator();
+    
     QAction* close = createMenuEntry("Close", ":./menu-close.png", file, "document-file-close");
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
 
@@ -156,17 +160,16 @@ void CSVDoc::View::setupWorldMenu()
 {
     QMenu *world = menuBar()->addMenu (tr ("World"));
 
-    QAction* regions = createMenuEntry(CSMWorld::UniversalId::Type_Regions, world, "document-world-regions");
-    connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
-
-    QAction* cells = createMenuEntry(CSMWorld::UniversalId::Type_Cells, world, "document-world-cells");
-    connect (cells, SIGNAL (triggered()), this, SLOT (addCellsSubView()));
-
     QAction* referenceables = createMenuEntry(CSMWorld::UniversalId::Type_Referenceables, world, "document-world-referencables");
     connect (referenceables, SIGNAL (triggered()), this, SLOT (addReferenceablesSubView()));
 
     QAction* references = createMenuEntry(CSMWorld::UniversalId::Type_References, world, "document-world-references");
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
+    
+    world->addSeparator();
+
+    QAction* cells = createMenuEntry(CSMWorld::UniversalId::Type_Cells, world, "document-world-cells");
+    connect (cells, SIGNAL (triggered()), this, SLOT (addCellsSubView()));
 
     QAction *lands = createMenuEntry(CSMWorld::UniversalId::Type_Lands, world, "document-world-lands");
     connect (lands, SIGNAL (triggered()), this, SLOT (addLandsSubView()));
@@ -177,7 +180,10 @@ void CSVDoc::View::setupWorldMenu()
     QAction *grid = createMenuEntry(CSMWorld::UniversalId::Type_Pathgrids, world, "document-world-pathgrid");
     connect (grid, SIGNAL (triggered()), this, SLOT (addPathgridSubView()));
 
-    world->addSeparator(); // items that don't represent single record lists follow here
+    world->addSeparator();
+
+    QAction* regions = createMenuEntry(CSMWorld::UniversalId::Type_Regions, world, "document-world-regions");
+    connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
 
     QAction *regionMap = createMenuEntry(CSMWorld::UniversalId::Type_RegionMap, world, "document-world-regionmap");
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
@@ -187,14 +193,19 @@ void CSVDoc::View::setupMechanicsMenu()
 {
     QMenu *mechanics = menuBar()->addMenu (tr ("Mechanics"));
 
+    QAction* scripts = createMenuEntry(CSMWorld::UniversalId::Type_Scripts, mechanics, "document-mechanics-scripts");
+    connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
+
+    QAction* startScripts = createMenuEntry(CSMWorld::UniversalId::Type_StartScripts, mechanics, "document-mechanics-startscripts");
+    connect (startScripts, SIGNAL (triggered()), this, SLOT (addStartScriptsSubView()));
+
     QAction* globals = createMenuEntry(CSMWorld::UniversalId::Type_Globals, mechanics, "document-mechanics-globals");
     connect (globals, SIGNAL (triggered()), this, SLOT (addGlobalsSubView()));
 
     QAction* gmsts = createMenuEntry(CSMWorld::UniversalId::Type_Gmsts, mechanics, "document-mechanics-gamesettings");
     connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
-
-    QAction* scripts = createMenuEntry(CSMWorld::UniversalId::Type_Scripts, mechanics, "document-mechanics-scripts");
-    connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
+    
+    mechanics->addSeparator();
 
     QAction* spells = createMenuEntry(CSMWorld::UniversalId::Type_Spells, mechanics, "document-mechanics-spells");
     connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
@@ -204,9 +215,6 @@ void CSVDoc::View::setupMechanicsMenu()
 
     QAction* magicEffects = createMenuEntry(CSMWorld::UniversalId::Type_MagicEffects, mechanics, "document-mechanics-magiceffects");
     connect (magicEffects, SIGNAL (triggered()), this, SLOT (addMagicEffectsSubView()));
-
-    QAction* startScripts = createMenuEntry(CSMWorld::UniversalId::Type_StartScripts, mechanics, "document-mechanics-startscripts");
-    connect (startScripts, SIGNAL (triggered()), this, SLOT (addStartScriptsSubView()));
 }
 
 void CSVDoc::View::setupCharacterMenu()
@@ -227,21 +235,25 @@ void CSVDoc::View::setupCharacterMenu()
 
     QAction* birthsigns = createMenuEntry(CSMWorld::UniversalId::Type_Birthsigns, characters, "document-character-birthsigns");
     connect (birthsigns, SIGNAL (triggered()), this, SLOT (addBirthsignsSubView()));
+    
+    QAction* bodyParts = createMenuEntry(CSMWorld::UniversalId::Type_BodyParts, characters, "document-character-bodyparts");
+    connect (bodyParts, SIGNAL (triggered()), this, SLOT (addBodyPartsSubView()));
 
+    characters->addSeparator();
+    
     QAction* topics = createMenuEntry(CSMWorld::UniversalId::Type_Topics, characters, "document-character-topics");
     connect (topics, SIGNAL (triggered()), this, SLOT (addTopicsSubView()));
 
+    QAction* topicInfos = createMenuEntry(CSMWorld::UniversalId::Type_TopicInfos, characters, "document-character-topicinfos");
+    connect (topicInfos, SIGNAL (triggered()), this, SLOT (addTopicInfosSubView()));
+    
+    characters->addSeparator();
+    
     QAction* journals = createMenuEntry(CSMWorld::UniversalId::Type_Journals, characters, "document-character-journals");
     connect (journals, SIGNAL (triggered()), this, SLOT (addJournalsSubView()));
 
-    QAction* topicInfos = createMenuEntry(CSMWorld::UniversalId::Type_TopicInfos, characters, "document-character-topicinfos");
-    connect (topicInfos, SIGNAL (triggered()), this, SLOT (addTopicInfosSubView()));
-
     QAction* journalInfos = createMenuEntry(CSMWorld::UniversalId::Type_JournalInfos, characters, "document-character-journalinfos");
     connect (journalInfos, SIGNAL (triggered()), this, SLOT (addJournalInfosSubView()));
-
-    QAction* bodyParts = createMenuEntry(CSMWorld::UniversalId::Type_BodyParts, characters, "document-character-bodyparts");
-    connect (bodyParts, SIGNAL (triggered()), this, SLOT (addBodyPartsSubView()));
 }
 
 void CSVDoc::View::setupAssetsMenu()

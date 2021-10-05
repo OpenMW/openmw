@@ -108,11 +108,9 @@ MWWorld::InventoryStore::InventoryStore()
 
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
  : ContainerStore (store)
- , mMagicEffects(store.mMagicEffects)
  , mInventoryListener(store.mInventoryListener)
  , mUpdatesEnabled(store.mUpdatesEnabled)
  , mFirstAutoEquip(store.mFirstAutoEquip)
- , mPermanentMagicEffectMagnitudes(store.mPermanentMagicEffectMagnitudes)
  , mSelectedEnchantItem(end())
 {
     copySlots (store);
@@ -125,9 +123,7 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
 
     mListener = store.mListener;
     mInventoryListener = store.mInventoryListener;
-    mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
-    mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
     mRechargingItemsUpToDate = false;
     ContainerStore::operator= (store);
     mSlots.clear();
@@ -186,8 +182,6 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     flagAsModified();
 
     fireEquipmentChangedEvent(actor);
-
-    updateMagicEffects(actor);
 }
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
@@ -199,7 +193,6 @@ void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
     mUpdatesEnabled = true;
 
     fireEquipmentChangedEvent(actor);
-    updateMagicEffects(actor);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
@@ -554,7 +547,6 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     {
         mSlots.swap (slots_);
         fireEquipmentChangedEvent(actor);
-        updateMagicEffects(actor);
         flagAsModified();
     }
 }
@@ -565,129 +557,6 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getPreferredShield(cons
     initSlots (slots);
     autoEquipArmor(actor, slots);
     return slots[Slot_CarriedLeft];
-}
-
-const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects() const
-{
-    return mMagicEffects;
-}
-
-void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
-{
-    // To avoid excessive updates during auto-equip
-    if (!mUpdatesEnabled)
-        return;
-
-    // Delay update until the listener is set up
-    if (!mInventoryListener)
-        return;
-
-    mMagicEffects = MWMechanics::MagicEffects();
-
-    const auto& stats = actor.getClass().getCreatureStats(actor);
-    if (stats.isDead() && stats.isDeathAnimationFinished())
-        return;
-
-    for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)
-    {
-        if (*iter==end())
-            continue;
-
-        std::string enchantmentId = (*iter)->getClass().getEnchantment (**iter);
-
-        if (!enchantmentId.empty())
-        {
-            const ESM::Enchantment& enchantment =
-                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find (enchantmentId);
-
-            if (enchantment.mData.mType != ESM::Enchantment::ConstantEffect)
-                continue;
-
-            std::vector<EffectParams> params;
-
-            bool existed = (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().getRefId()) != mPermanentMagicEffectMagnitudes.end());
-            if (!existed)
-            {
-                params.resize(enchantment.mEffects.mList.size());
-
-                int i=0;
-                for (const ESM::ENAMstruct& effect : enchantment.mEffects.mList)
-                {
-                    int delta = effect.mMagnMax - effect.mMagnMin;
-                    // Roll some dice, one for each effect
-                    if (delta)
-                        params[i].mRandom = Misc::Rng::rollDice(delta + 1) / static_cast<float>(delta);
-                    // Try resisting each effect
-                    params[i].mMultiplier = MWMechanics::getEffectMultiplier(effect.mEffectID, actor, actor);
-                    ++i;
-                }
-
-                // Note that using the RefID as a key here is not entirely correct.
-                // Consider equipping the same item twice (e.g. a ring)
-                // However, permanent enchantments with a random magnitude are kind of an exploit anyway,
-                // so it doesn't really matter if both items will get the same magnitude. *Extreme* edge case.
-                mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()] = params;
-            }
-            else
-                params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()];
-
-            int i=0;
-            for (const ESM::ENAMstruct& effect : enchantment.mEffects.mList)
-            {
-                const ESM::MagicEffect *magicEffect =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                    effect.mEffectID);
-
-                // Fully resisted or can't be applied to target?
-                if (params[i].mMultiplier == 0 || !MWMechanics::checkEffectTarget(effect.mEffectID, actor, actor, actor == MWMechanics::getPlayer()))
-                {
-                    i++;
-                    continue;
-                }
-
-                float magnitude = effect.mMagnMin + (effect.mMagnMax - effect.mMagnMin) * params[i].mRandom;
-                magnitude *= params[i].mMultiplier;
-
-                if (!existed)
-                {
-                    // During first auto equip, we don't play any sounds.
-                    // Basically we don't want sounds when the actor is first loaded,
-                    // the items should appear as if they'd always been equipped.
-                    mInventoryListener->permanentEffectAdded(magicEffect, !mFirstAutoEquip);
-                }
-
-                if (magnitude)
-                    mMagicEffects.add (effect, magnitude);
-
-                i++;
-            }
-        }
-    }
-
-    // Now drop expired effects
-    for (TEffectMagnitudes::iterator it = mPermanentMagicEffectMagnitudes.begin();
-         it != mPermanentMagicEffectMagnitudes.end();)
-    {
-        bool found = false;
-        for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)
-        {
-            if (*iter == end())
-                continue;
-            if ((**iter).getCellRef().getRefId() == it->first)
-            {
-                found = true;
-            }
-        }
-        if (!found)
-            mPermanentMagicEffectMagnitudes.erase(it++);
-        else
-            ++it;
-    }
-
-    // Magic effects are normally not updated when paused, but we need this to make resistances work immediately after equipping
-    MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(actor);
-
-    mFirstAutoEquip = false;
 }
 
 bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
@@ -800,7 +669,6 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
         if (applyUpdates)
         {
             fireEquipmentChangedEvent(actor);
-            updateMagicEffects(actor);
         }
 
         return retval;
@@ -848,7 +716,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(con
     return unstack(item, actor, item.getRefData().getCount() - count);
 }
 
-MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getInvListener()
+MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getInvListener() const
 {
     return mInventoryListener;
 }
@@ -856,7 +724,6 @@ MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getInvListener()
 void MWWorld::InventoryStore::setInvListener(InventoryStoreListener *listener, const Ptr& actor)
 {
     mInventoryListener = listener;
-    updateMagicEffects(actor);
 }
 
 void MWWorld::InventoryStore::fireEquipmentChangedEvent(const Ptr& actor)
@@ -873,105 +740,6 @@ void MWWorld::InventoryStore::fireEquipmentChangedEvent(const Ptr& actor)
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
     }
     */
-}
-
-void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisitor &visitor)
-{
-    for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)
-    {
-        if (*iter==end())
-            continue;
-
-        std::string enchantmentId = (*iter)->getClass().getEnchantment (**iter);
-        if (enchantmentId.empty())
-            continue;
-
-        const ESM::Enchantment& enchantment =
-            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find (enchantmentId);
-
-        if (enchantment.mData.mType != ESM::Enchantment::ConstantEffect)
-            continue;
-
-        if (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().getRefId()) == mPermanentMagicEffectMagnitudes.end())
-            continue;
-
-        int i=0;
-        for (const ESM::ENAMstruct& effect : enchantment.mEffects.mList)
-        {
-            i++;
-            // Don't get spell icon display information for enchantments that weren't actually applied
-            if (mMagicEffects.get(MWMechanics::EffectKey(effect)).getMagnitude() == 0)
-                continue;
-            const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()][i-1];
-            float magnitude = effect.mMagnMin + (effect.mMagnMax - effect.mMagnMin) * params.mRandom;
-            magnitude *= params.mMultiplier;
-            if (magnitude > 0)
-                visitor.visit(MWMechanics::EffectKey(effect), i-1, (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
-        }
-    }
-}
-
-void MWWorld::InventoryStore::purgeEffect(short effectId, bool wholeSpell)
-{
-    for (TSlots::const_iterator it = mSlots.begin(); it != mSlots.end(); ++it)
-    {
-        if (*it != end())
-            purgeEffect(effectId, (*it)->getCellRef().getRefId(), wholeSpell);
-    }
-}
-
-void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sourceId, bool wholeSpell, int effectIndex)
-{
-    TEffectMagnitudes::iterator effectMagnitudeIt = mPermanentMagicEffectMagnitudes.find(sourceId);
-    if (effectMagnitudeIt == mPermanentMagicEffectMagnitudes.end())
-        return;
-
-    for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)
-    {
-        if (*iter==end())
-            continue;
-
-        if ((*iter)->getCellRef().getRefId() != sourceId)
-            continue;
-
-        std::string enchantmentId = (*iter)->getClass().getEnchantment (**iter);
-
-        if (!enchantmentId.empty())
-        {
-            const ESM::Enchantment& enchantment =
-                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find (enchantmentId);
-
-            if (enchantment.mData.mType != ESM::Enchantment::ConstantEffect)
-                continue;
-
-            std::vector<EffectParams>& params = effectMagnitudeIt->second;
-
-            int i=0;
-            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
-                effectIt!=enchantment.mEffects.mList.end(); ++effectIt, ++i)
-            {
-                if (effectIt->mEffectID != effectId)
-                    continue;
-
-                if (effectIndex >= 0 && effectIndex != i)
-                    continue;
-
-                if (wholeSpell)
-                {
-                    mPermanentMagicEffectMagnitudes.erase(sourceId);
-                    return;
-                }
-
-                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params[i].mRandom;
-                magnitude *= params[i].mMultiplier;
-
-                if (magnitude)
-                    mMagicEffects.add (*effectIt, -magnitude);
-
-                params[i].mMultiplier = 0;
-            }
-        }
-    }
 }
 
 void MWWorld::InventoryStore::clear()
@@ -991,38 +759,9 @@ bool MWWorld::InventoryStore::isEquipped(const MWWorld::ConstPtr &item)
     return false;
 }
 
-void MWWorld::InventoryStore::writeState(ESM::InventoryState &state) const
+bool MWWorld::InventoryStore::isFirstEquip()
 {
-    MWWorld::ContainerStore::writeState(state);
-
-    for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin(); it != mPermanentMagicEffectMagnitudes.end(); ++it)
-    {
-        std::vector<std::pair<float, float> > params;
-        for (std::vector<EffectParams>::const_iterator pIt = it->second.begin(); pIt != it->second.end(); ++pIt)
-        {
-            params.emplace_back(pIt->mRandom, pIt->mMultiplier);
-        }
-
-        state.mPermanentMagicEffectMagnitudes[it->first] = params;
-    }
-}
-
-void MWWorld::InventoryStore::readState(const ESM::InventoryState &state)
-{
-    MWWorld::ContainerStore::readState(state);
-
-    for (ESM::InventoryState::TEffectMagnitudes::const_iterator it = state.mPermanentMagicEffectMagnitudes.begin();
-         it != state.mPermanentMagicEffectMagnitudes.end(); ++it)
-    {
-        std::vector<EffectParams> params;
-        for (std::vector<std::pair<float, float> >::const_iterator pIt = it->second.begin(); pIt != it->second.end(); ++pIt)
-        {
-            EffectParams p;
-            p.mRandom = pIt->first;
-            p.mMultiplier = pIt->second;
-            params.push_back(p);
-        }
-
-        mPermanentMagicEffectMagnitudes[it->first] = params;
-    }
+    bool first = mFirstAutoEquip;
+    mFirstAutoEquip = false;
+    return first;
 }

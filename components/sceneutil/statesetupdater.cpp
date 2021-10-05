@@ -68,7 +68,7 @@ namespace SceneUtil
     }
 
     StateSetUpdater::StateSetUpdater(const StateSetUpdater &copy, const osg::CopyOp &copyop)
-        : osg::NodeCallback(copy, copyop)
+        : SceneUtil::NodeCallback<StateSetUpdater>(copy, copyop)
     {
     }
 

@@ -908,9 +908,9 @@ namespace MWWorld
         }
     }
 
-    void Scene::removeObjectFromScene (const Ptr& ptr)
+    void Scene::removeObjectFromScene (const Ptr& ptr, bool keepActive)
     {
-        MWBase::Environment::get().getMechanicsManager()->remove (ptr);
+        MWBase::Environment::get().getMechanicsManager()->remove (ptr, keepActive);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(ptr);
         if (const auto object = mPhysics->getObject(ptr))

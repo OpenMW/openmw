@@ -26,7 +26,7 @@ namespace SceneUtil
         mType = type;
     }
 
-    void LightController::operator ()(osg::Node* node, osg::NodeVisitor* nv)
+    void LightController::operator ()(SceneUtil::LightSource* node, osg::NodeVisitor* nv)
     {
         double time = nv->getFrameStamp()->getSimulationTime();
         if (mStartTime == 0)
@@ -38,7 +38,7 @@ namespace SceneUtil
 
         if (mType == LT_Normal)
         {
-            static_cast<SceneUtil::LightSource*>(node)->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor);
+            node->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor);
             traverse(node, nv);
             return;
         }
@@ -62,8 +62,7 @@ namespace SceneUtil
                 mPhase = mPhase <= 0.5f ? 1.f : 0.25f;
         }
 
-        auto* lightSource = static_cast<SceneUtil::LightSource*>(node);
-        lightSource->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor * mBrightness * lightSource->getActorFade());
+        node->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor * mBrightness * node->getActorFade());
 
         traverse(node, nv);
     }
