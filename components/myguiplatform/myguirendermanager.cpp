@@ -67,8 +67,7 @@ public:
 
         void operator()(osg::Node*, osg::NodeVisitor*)
         {
-            if (mRenderManager)
-                mRenderManager->update();
+            mRenderManager->update();
         }
 
     private:
@@ -91,11 +90,7 @@ public:
 
         void operator()(osg::Node*, osg::NodeVisitor*)
         {
-            if (!mRenderManager)
-                return false;
-
             mRenderManager->collectDrawCalls();
-            return false;
         }
 
     private:
