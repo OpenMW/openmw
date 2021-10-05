@@ -111,7 +111,6 @@ namespace Shader
         , mAutoUseSpecularMaps(false)
         , mApplyLightingToEnvMaps(false)
         , mConvertAlphaTestToAlphaToCoverage(false)
-        , mTranslucentFramebuffer(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
         , mDefaultShaderPrefix(defaultShaderPrefix)
@@ -266,7 +265,7 @@ namespace Shader
                                 mRequirements.back().mShaderRequired = true;
                             }
                         }
-                        else if (!mTranslucentFramebuffer)
+                        else
                             Log(Debug::Error) << "ShaderVisitor encountered unknown texture " << texture;
                     }
                 }
@@ -547,8 +546,6 @@ namespace Shader
             updateAddedState(*writableUserData, addedState);
         }
 
-        defineMap["translucentFramebuffer"] = mTranslucentFramebuffer ? "1" : "0";
-
         std::string shaderPrefix;
         if (!node.getUserValue("shaderPrefix", shaderPrefix))
             shaderPrefix = mDefaultShaderPrefix;
@@ -762,11 +759,6 @@ namespace Shader
     void ShaderVisitor::setConvertAlphaTestToAlphaToCoverage(bool convert)
     {
         mConvertAlphaTestToAlphaToCoverage = convert;
-    }
-
-    void ShaderVisitor::setTranslucentFramebuffer(bool translucent)
-    {
-        mTranslucentFramebuffer = translucent;
     }
 
     ReinstateRemovedStateVisitor::ReinstateRemovedStateVisitor(bool allowedToModifyStateSets)

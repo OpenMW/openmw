@@ -331,9 +331,9 @@ namespace Resource
         return mForceShaders;
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer, bool forceShadersForNode, const osg::Program* programTemplate)
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool forceShadersForNode, const osg::Program* programTemplate)
     {
-        osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix, translucentFramebuffer));
+        osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix));
         shaderVisitor->setAllowedToModifyStateSets(false);
         shaderVisitor->setProgramTemplate(programTemplate);
         if (forceShadersForNode)
@@ -871,7 +871,7 @@ namespace Resource
         stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
     }
 
-    Shader::ShaderVisitor *SceneManager::createShaderVisitor(const std::string& shaderPrefix, bool translucentFramebuffer)
+    Shader::ShaderVisitor *SceneManager::createShaderVisitor(const std::string& shaderPrefix)
     {
         Shader::ShaderVisitor* shaderVisitor = new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, shaderPrefix);
         shaderVisitor->setForceShaders(mForceShaders);
@@ -882,7 +882,6 @@ namespace Resource
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
-        shaderVisitor->setTranslucentFramebuffer(translucentFramebuffer);
         return shaderVisitor;
     }
 }

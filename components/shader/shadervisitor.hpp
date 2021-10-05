@@ -45,8 +45,6 @@ namespace Shader
 
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
 
-        void setTranslucentFramebuffer(bool translucent);
-
         void apply(osg::Node& node) override;
 
         void apply(osg::Drawable& drawable) override;
@@ -71,8 +69,6 @@ namespace Shader
         bool mApplyLightingToEnvMaps;
 
         bool mConvertAlphaTestToAlphaToCoverage;
-
-        bool mTranslucentFramebuffer;
 
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;
