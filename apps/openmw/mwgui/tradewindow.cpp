@@ -265,6 +265,8 @@ namespace MWGui
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
+        if (mTotalBalance->getValue() == 0) mCurrentBalance = 0;
+        
         // were there any items traded at all?
         const std::vector<ItemStack>& playerBought = playerItemModel->getItemsBorrowedToUs();
         const std::vector<ItemStack>& merchantBought = mTradeModel->getItemsBorrowedToUs();
