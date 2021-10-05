@@ -87,22 +87,22 @@ namespace
         std::vector<osg::ref_ptr<osg::Node> > mToRemove;
     };
 
-    class DayNightCallback : public osg::NodeCallback
+    class DayNightCallback : public SceneUtil::NodeCallback<DayNightCallback, osg::Switch*>
     {
     public:
         DayNightCallback() : mCurrentState(0)
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Switch* node, osg::NodeVisitor* nv)
         {
             unsigned int state = MWBase::Environment::get().getWorld()->getNightDayMode();
-            const unsigned int newState = node->asGroup()->getNumChildren() > state ? state : 0;
+            const unsigned int newState = node->getNumChildren() > state ? state : 0;
 
             if (newState != mCurrentState)
             {
                 mCurrentState = newState;
-                node->asSwitch()->setSingleChildOn(mCurrentState);
+                node->setSingleChildOn(mCurrentState);
             }
 
             traverse(node, nv);
@@ -472,20 +472,18 @@ namespace MWRender
         }
     }
 
-    class ResetAccumRootCallback : public osg::NodeCallback
+    class ResetAccumRootCallback : public SceneUtil::NodeCallback<ResetAccumRootCallback, osg::MatrixTransform*>
     {
     public:
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::MatrixTransform* transform, osg::NodeVisitor* nv)
         {
-            osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
-
             osg::Matrix mat = transform->getMatrix();
             osg::Vec3f position = mat.getTrans();
             position = osg::componentMultiply(mResetAxes, position);
             mat.setTrans(position);
             transform->setMatrix(mat);
 
-            traverse(node, nv);
+            traverse(transform, nv);
         }
 
         void setAccumulate(const osg::Vec3f& accumulate)

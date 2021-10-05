@@ -16,6 +16,7 @@
 
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include <components/esm/globalmap.hpp>
 
@@ -62,7 +63,7 @@ namespace
     }
 
 
-    class CameraUpdateGlobalCallback : public osg::NodeCallback
+    class CameraUpdateGlobalCallback : public SceneUtil::NodeCallback<CameraUpdateGlobalCallback, osg::Camera*>
     {
     public:
         CameraUpdateGlobalCallback(MWRender::GlobalMap* parent)
@@ -71,14 +72,14 @@ namespace
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Camera* node, osg::NodeVisitor* nv)
         {
             if (mRendered)
             {
-                if (mParent->copyResult(static_cast<osg::Camera*>(node), nv->getTraversalNumber()))
+                if (mParent->copyResult(node, nv->getTraversalNumber()))
                 {
                     node->setNodeMask(0);
-                    mParent->markForRemoval(static_cast<osg::Camera*>(node));
+                    mParent->markForRemoval(node);
                 }
                 return;
             }

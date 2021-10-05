@@ -650,23 +650,21 @@ namespace SceneUtil
         }
     };
 
-    class LightManagerCullCallback : public osg::NodeCallback
+    class LightManagerCullCallback : public SceneUtil::NodeCallback<LightManagerCullCallback, LightManager*, osgUtil::CullVisitor*>
     {
     public:
-        LightManagerCullCallback(LightManager* lightManager) : mLightManager(lightManager), mLastFrameNumber(0) {}
+        LightManagerCullCallback() : mLastFrameNumber(0) {}
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(LightManager* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
             if (mLastFrameNumber != cv->getTraversalNumber())
             {
                 mLastFrameNumber = cv->getTraversalNumber();
 
-                if (mLightManager->getLightingMethod() == LightingMethod::SingleUBO)
+                if (node->getLightingMethod() == LightingMethod::SingleUBO)
                 {
-                    auto stateset = mLightManager->getStateSet();
-                    auto bo = mLightManager->getLightBuffer(mLastFrameNumber);
+                    auto stateset = node->getStateSet();
+                    auto bo = node->getLightBuffer(mLastFrameNumber);
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,5,7)
                     osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), bo->getData(), 0, bo->getData()->getTotalDataSize());
@@ -676,23 +674,23 @@ namespace SceneUtil
                     stateset->setAttributeAndModes(ubb, osg::StateAttribute::ON);
                 }
 
-                auto sun = mLightManager->getSunlight();
+                auto sun = node->getSunlight();
 
                 if (sun)
                 {
                     // we must defer uploading the transformation to view-space position to deal with different cameras (e.g. reflection RTT).
-                    if (mLightManager->getLightingMethod() == LightingMethod::PerObjectUniform)
+                    if (node->getLightingMethod() == LightingMethod::PerObjectUniform)
                     {
                         osg::Matrixf lightMat;
                         configurePosition(lightMat, sun->getPosition());
                         configureAmbient(lightMat, sun->getAmbient());
                         configureDiffuse(lightMat, sun->getDiffuse());
                         configureSpecular(lightMat, sun->getSpecular());
-                        mLightManager->setSunlightBuffer(lightMat, mLastFrameNumber);
+                        node->setSunlightBuffer(lightMat, mLastFrameNumber);
                     }
                     else
                     {
-                        auto buf = mLightManager->getLightBuffer(mLastFrameNumber);
+                        auto buf = node->getLightBuffer(mLastFrameNumber);
 
                         buf->setCachedSunPos(sun->getPosition());
                         buf->setAmbient(0, sun->getAmbient());
@@ -702,11 +700,10 @@ namespace SceneUtil
                 }
             }
 
-            traverse(node, nv);
+            traverse(node, cv);
         }
 
     private:
-        LightManager* mLightManager;
         size_t mLastFrameNumber;
     };
 
@@ -899,7 +896,7 @@ namespace SceneUtil
 
         getOrCreateStateSet()->addUniform(new osg::Uniform("PointLightCount", 0));
 
-        addCullCallback(new LightManagerCullCallback(this));
+        addCullCallback(new LightManagerCullCallback());
     }
 
     LightManager::LightManager(const LightManager &copy, const osg::CopyOp &copyop)

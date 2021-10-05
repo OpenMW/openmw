@@ -8,7 +8,7 @@
 #include <osgParticle/Placer>
 #include <osgParticle/Counter>
 
-#include <osg/NodeCallback>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include "controller.hpp" // ValueInterpolator
 
@@ -57,20 +57,20 @@ namespace NifOsg
     // Node callback used to set the inverse of the parent's world matrix on the MatrixTransform
     // that the callback is attached to. Used for certain particle systems,
     // so that the particles do not move with the node they are attached to.
-    class InverseWorldMatrix : public osg::NodeCallback
+    class InverseWorldMatrix : public SceneUtil::NodeCallback<InverseWorldMatrix, osg::MatrixTransform*>
     {
     public:
         InverseWorldMatrix()
         {
         }
-        InverseWorldMatrix(const InverseWorldMatrix& copy, const osg::CopyOp& op)
-            : osg::Object(), osg::NodeCallback()
+        InverseWorldMatrix(const InverseWorldMatrix& copy, const osg::CopyOp& copyop)
+            : osg::Object(copy, copyop), SceneUtil::NodeCallback<InverseWorldMatrix, osg::MatrixTransform*>(copy, copyop)
         {
         }
 
         META_Object(NifOsg, InverseWorldMatrix)
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
+        void operator()(osg::MatrixTransform* node, osg::NodeVisitor* nv);
     };
 
     class ParticleShooter : public osgParticle::Shooter

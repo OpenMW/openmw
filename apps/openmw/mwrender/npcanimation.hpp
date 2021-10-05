@@ -24,7 +24,7 @@ namespace MWSound
 namespace MWRender
 {
 
-class NeckController;
+class RotateController;
 class HeadAnimationTime;
 
 class NpcAnimation : public ActorAnimation, public WeaponAnimation, public MWWorld::InventoryStoreListener
@@ -96,7 +96,7 @@ private:
 
     void setRenderBin();
 
-    osg::ref_ptr<NeckController> mFirstPersonNeckController;
+    osg::ref_ptr<RotateController> mFirstPersonNeckController;
 
     static bool isFirstPersonPart(const ESM::BodyPart* bodypart);
     static bool isFemalePart(const ESM::BodyPart* bodypart);

@@ -44,6 +44,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -301,13 +302,11 @@ public:
         return osg::BoundingSphere(osg::Vec3f(0,0,0), 0);
     }
 
-    class CullCallback : public osg::NodeCallback
+    class CullCallback : public SceneUtil::NodeCallback<CullCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
-        void operator() (osg::Node* node, osg::NodeVisitor* nv) override
+        void operator() (osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
             // XXX have to remove unwanted culling plane of the water reflection camera
 
             // Remove all planes that aren't from the standard frustum
@@ -336,7 +335,7 @@ public:
             cv->getProjectionCullingStack().back().pushCurrentMask();
             cv->getCurrentCullingSet().pushCurrentMask();
 
-            traverse(node, nv);
+            traverse(node, cv);
 
             cv->getProjectionCullingStack().back().popCurrentMask();
             cv->getCurrentCullingSet().popCurrentMask();
@@ -398,7 +397,7 @@ private:
 /// @note Must be added as cull callback.
 /// @note Meant to be used on a node that is child of a CameraRelativeTransform.
 /// The current view point must be retrieved by the CameraRelativeTransform since we can't get it anymore once we are in camera-relative space.
-class UnderwaterSwitchCallback : public osg::NodeCallback
+class UnderwaterSwitchCallback : public SceneUtil::NodeCallback<UnderwaterSwitchCallback>
 {
 public:
     UnderwaterSwitchCallback(CameraRelativeTransform* cameraRelativeTransform)
@@ -414,7 +413,7 @@ public:
         return mEnabled && viewPoint.z() < mWaterLevel;
     }
 
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+    void operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
         if (isUnderwater())
             return;
@@ -716,7 +715,7 @@ private:
         }
     };
 
-    class OcclusionCallback : public osg::NodeCallback
+    class OcclusionCallback
     {
     public:
         OcclusionCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
@@ -759,7 +758,7 @@ private:
     };
 
     /// SunFlashCallback handles fading/scaling of a node depending on occlusion query result. Must be attached as a cull callback.
-    class SunFlashCallback : public OcclusionCallback
+    class SunFlashCallback : public OcclusionCallback, public SceneUtil::NodeCallback<SunFlashCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         SunFlashCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
@@ -768,10 +767,8 @@ private:
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
             float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
 
             osg::ref_ptr<osg::StateSet> stateset;
@@ -810,7 +807,7 @@ private:
 
                 cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
 
-                traverse(node, nv);
+                traverse(node, cv);
 
                 cv->popModelViewMatrix();
 
@@ -831,7 +828,7 @@ private:
 
     /// SunGlareCallback controls a full-screen glare effect depending on occlusion query result and the angle between sun and camera.
     /// Must be attached as a cull callback to the node above the glare node.
-    class SunGlareCallback : public OcclusionCallback
+    class SunGlareCallback : public OcclusionCallback, public SceneUtil::NodeCallback<SunGlareCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         SunGlareCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal,
@@ -853,10 +850,8 @@ private:
                 mColor[i] = std::min(1.f, mColor[i]);
         }
 
-        void operator ()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator ()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
             float angleRadians = getAngleToSunInRadians(*cv->getCurrentRenderStage()->getInitialViewMatrix());
             float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
 
@@ -884,7 +879,7 @@ private:
                 stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
 
                 cv->pushStateSet(stateset);
-                traverse(node, nv);
+                traverse(node, cv);
                 cv->popStateSet();
             }
         }

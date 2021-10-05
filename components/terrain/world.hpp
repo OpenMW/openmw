@@ -4,12 +4,13 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 #include <osg/Vec3f>
-#include <osg/NodeCallback>
 
 #include <atomic>
 #include <limits>
 #include <memory>
 #include <set>
+
+#include <components/sceneutil/nodecallback.hpp>
 
 #include "defs.hpp"
 #include "cellborder.hpp"
@@ -45,7 +46,7 @@ namespace Terrain
     class ChunkManager;
     class CompositeMapRenderer;
 
-    class HeightCullCallback : public osg::NodeCallback
+    class HeightCullCallback : public SceneUtil::NodeCallback<HeightCullCallback>
     {
     public:
         void setLowZ(float z)
@@ -75,7 +76,7 @@ namespace Terrain
             return mMask;
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
             if (mLowZ <= mHighZ)
                 traverse(node, nv);
