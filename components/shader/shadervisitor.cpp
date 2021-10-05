@@ -452,21 +452,14 @@ namespace Shader
             previousAddedState = new AddedState;
 
         ShaderManager::DefineMap defineMap;
-        for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
-        {
-            defineMap[defaultTextures[i]] = "0";
-            defineMap[std::string(defaultTextures[i]) + std::string("UV")] = "0";
-        }
         for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
-        {
-            defineMap[texIt->second] = "1";
-            defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
-        }
+            defineMap[texIt->second] = std::to_string(texIt->first);
 
-        if (defineMap["diffuseMap"] == "0")
+        if (defineMap.count("diffuseMap") == 0)
             writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
 
-        defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
+        if (reqs.mNormalHeight)
+            defineMap["parallax"] = "1";
 
         writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
         addedState->addUniform("colorMode");
@@ -480,8 +473,6 @@ namespace Shader
         if (!removedState)
             removedState = new osg::StateSet();
 
-        defineMap["alphaToCoverage"] = "0";
-        defineMap["adjustCoverage"] = "0";
         if (reqs.mAlphaFunc != osg::AlphaFunc::ALWAYS)
         {
             writableStateSet->addUniform(new osg::Uniform("alphaRef", reqs.mAlphaRef));
