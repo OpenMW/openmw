@@ -214,10 +214,8 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(ffp);
         lightManager->setStartLight(1);
         osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();
-
         if (mResourceSystem->getSceneManager()->getDefaultShaderState())
             stateset->merge(*mResourceSystem->getSceneManager()->getDefaultShaderState());
-
         stateset->setDefine("FORCE_OPAQUE", "1", osg::StateAttribute::ON);
 
         stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
