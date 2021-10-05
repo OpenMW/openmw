@@ -10,12 +10,12 @@
 
 #define GROUNDCOVER
 
-#if @diffuseMap
+#if @defined diffuseMap
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 #endif
 
-#if @normalMap
+#if @defined normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
 varying vec4 passTangent;
@@ -23,7 +23,7 @@ varying vec4 passTangent;
 
 // Other shaders respect forcePPL, but legacy groundcover mods were designed to work with vertex lighting.
 // They may do not look as intended with per-pixel lighting, so ignore this setting for now.
-#define PER_PIXEL_LIGHTING @normalMap
+#define PER_PIXEL_LIGHTING @defined normalMap
 
 varying float euclideanDepth;
 varying float linearDepth;
@@ -42,7 +42,7 @@ centroid varying vec3 shadowDiffuseLighting;
 
 void main()
 {
-#if @normalMap
+#if @defined normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
 
     vec3 normalizedNormal = normalize(passNormal);
@@ -53,7 +53,7 @@ void main()
     vec3 viewNormal = gl_NormalMatrix * normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
 #endif
 
-#if @diffuseMap
+#if @defined diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
 #else
     gl_FragData[0] = vec4(1.0);
