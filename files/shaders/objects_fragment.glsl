@@ -8,49 +8,49 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
-#if @diffuseMap
+#if @defined diffuseMap
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 #endif
 
-#if @darkMap
+#if @defined darkMap
 uniform sampler2D darkMap;
 varying vec2 darkMapUV;
 #endif
 
-#if @detailMap
+#if @defined detailMap
 uniform sampler2D detailMap;
 varying vec2 detailMapUV;
 #endif
 
-#if @decalMap
+#if @defined decalMap
 uniform sampler2D decalMap;
 varying vec2 decalMapUV;
 #endif
 
-#if @emissiveMap
+#if @defined emissiveMap
 uniform sampler2D emissiveMap;
 varying vec2 emissiveMapUV;
 #endif
 
-#if @normalMap
+#if @defined normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
 varying vec4 passTangent;
 #endif
 
-#if @envMap
+#if @defined envMap
 uniform sampler2D envMap;
 varying vec2 envMapUV;
 uniform vec4 envMapColor;
 #endif
 
-#if @specularMap
+#if @defined specularMap
 uniform sampler2D specularMap;
 varying vec2 specularMapUV;
 #endif
 
-#if @bumpMap
+#if @defined bumpMap
 uniform sampler2D bumpMap;
 varying vec2 bumpMapUV;
 uniform vec2 envMapLumaBias;
@@ -63,7 +63,7 @@ uniform bool noAlpha;
 varying float euclideanDepth;
 varying float linearDepth;
 
-#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
+#define PER_PIXEL_LIGHTING (@defined normalMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
@@ -82,11 +82,11 @@ varying vec3 passNormal;
 
 void main()
 {
-#if @diffuseMap
+#if @defined diffuseMap
     vec2 adjustedDiffuseUV = diffuseMapUV;
 #endif
 
-#if @normalMap
+#if @defined normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
 
     vec3 normalizedNormal = normalize(passNormal);
@@ -97,7 +97,7 @@ void main()
     vec3 viewNormal = gl_NormalMatrix * normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
 #endif
 
-#if (!@normalMap && (@parallax || @forcePPL))
+#if (!@defined normalMap && (@parallax || @forcePPL))
     vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
 #endif
 
@@ -118,7 +118,7 @@ void main()
 
 #endif
 
-#if @diffuseMap
+#if @defined diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, adjustedDiffuseUV);
     gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, adjustedDiffuseUV);
 #else
@@ -128,28 +128,28 @@ void main()
     vec4 diffuseColor = getDiffuseColor();
     gl_FragData[0].a *= diffuseColor.a;
 
-#if @darkMap
+#if @defined darkMap
     gl_FragData[0] *= texture2D(darkMap, darkMapUV);
     gl_FragData[0].a *= coveragePreservingAlphaScale(darkMap, darkMapUV);
 #endif
 
     alphaTest();
 
-#if @detailMap
+#if @defined detailMap
     gl_FragData[0].xyz *= texture2D(detailMap, detailMapUV).xyz * 2.0;
 #endif
 
-#if @decalMap
+#if @defined decalMap
     vec4 decalTex = texture2D(decalMap, decalMapUV);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a);
 #endif
 
-#if @envMap
+#if @defined envMap
 
     vec2 envTexCoordGen = envMapUV;
     float envLuma = 1.0;
 
-#if @normalMap
+#if @defined normalMap
     // if using normal map + env map, take advantage of per-pixel normals for envTexCoordGen
     vec3 viewVec = normalize(passViewPos.xyz);
     vec3 r = reflect( viewVec, viewNormal );
@@ -157,7 +157,7 @@ void main()
     envTexCoordGen = vec2(r.x/m + 0.5, r.y/m + 0.5);
 #endif
 
-#if @bumpMap
+#if @defined bumpMap
     vec4 bumpTex = texture2D(bumpMap, bumpMapUV);
     envTexCoordGen += bumpTex.rg * bumpMapMatrix;
     envLuma = clamp(bumpTex.b * envMapLumaBias.x + envMapLumaBias.y, 0.0, 1.0);
@@ -183,15 +183,15 @@ void main()
 
     gl_FragData[0].xyz *= lighting;
 
-#if @envMap && !@preLightEnv
+#if @defined envMap && !@preLightEnv
     gl_FragData[0].xyz += texture2D(envMap, envTexCoordGen).xyz * envMapColor.xyz * envLuma;
 #endif
 
-#if @emissiveMap
+#if @defined emissiveMap
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
 
-#if @specularMap
+#if @defined specularMap
     vec4 specTex = texture2D(specularMap, specularMapUV);
     float shininess = specTex.a * 255.0;
     vec3 matSpec = specTex.xyz;
@@ -202,7 +202,7 @@ void main()
 
     if (matSpec != vec3(0.0))
     {
-#if (!@normalMap && !@parallax && !@forcePPL)
+#if (!@defined normalMap && !@parallax && !@forcePPL)
         vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
 #endif
         gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
