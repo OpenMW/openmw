@@ -22,22 +22,73 @@
 
 namespace
 {
-    /// @brief A scoped lock that is either shared, exclusive or inexistent depending on configuration
+    /// @brief A scoped lock that is either exclusive or inexistent depending on configuration
+    template<class Mutex>
+    class MaybeExclusiveLock
+    {
+        public:
+            /// @param mutex a mutex
+            /// @param threadCount decide wether the excluse lock will be taken
+            MaybeExclusiveLock(Mutex& mutex, int threadCount) : mMutex(mutex), mThreadCount(threadCount)
+            {
+                assert(threadCount >= 0);
+                if (mThreadCount > 0)
+                    mMutex.lock();
+            }
+
+            ~MaybeExclusiveLock()
+            {
+                if (mThreadCount > 0)
+                    mMutex.unlock();
+            }
+
+        private:
+            Mutex& mMutex;
+            unsigned int mThreadCount;
+    };
+
+    /// @brief A scoped lock that is either shared or inexistent depending on configuration
     template<class Mutex>
     class MaybeSharedLock
     {
         public:
             /// @param mutex a shared mutex
-            /// @param threadCount decide wether the lock will be shared, exclusive or inexistent
+            /// @param threadCount decide wether the shared lock will be taken
             MaybeSharedLock(Mutex& mutex, int threadCount) : mMutex(mutex), mThreadCount(threadCount)
             {
+                assert(threadCount >= 0);
+                if (mThreadCount > 0)
+                    mMutex.lock_shared();
+            }
+
+            ~MaybeSharedLock()
+            {
+                if (mThreadCount > 0)
+                    mMutex.unlock_shared();
+            }
+
+        private:
+            Mutex& mMutex;
+            unsigned int mThreadCount;
+    };
+
+    /// @brief A scoped lock that is either shared, exclusive or inexistent depending on configuration
+    template<class Mutex>
+    class MaybeLock
+    {
+        public:
+            /// @param mutex a shared mutex
+            /// @param threadCount decide wether the lock will be shared, exclusive or inexistent
+            MaybeLock(Mutex& mutex, int threadCount) : mMutex(mutex), mThreadCount(threadCount)
+            {
+                assert(threadCount >= 0);
                 if (mThreadCount > 1)
                     mMutex.lock_shared();
                 else if(mThreadCount == 1)
                     mMutex.lock();
             }
 
-            ~MaybeSharedLock()
+            ~MaybeLock()
             {
                 if (mThreadCount > 1)
                     mMutex.unlock_shared();
@@ -46,7 +97,7 @@ namespace
             }
         private:
             Mutex& mMutex;
-            int mThreadCount;
+            unsigned int mThreadCount;
     };
 
     bool isUnderWater(const MWPhysics::ActorFrameData& actorData)
@@ -127,11 +178,12 @@ namespace MWPhysics
 
     PhysicsTaskScheduler::~PhysicsTaskScheduler()
     {
-        std::unique_lock lock(mSimulationMutex);
-        mQuit = true;
-        mNumJobs = 0;
-        mRemainingSteps = 0;
-        lock.unlock();
+        {
+            MaybeExclusiveLock lock(mSimulationMutex, mNumThreads);
+            mQuit = true;
+            mNumJobs = 0;
+            mRemainingSteps = 0;
+        }
         mHasJob.notify_all();
         for (auto& thread : mThreads)
             thread.join();
@@ -188,7 +240,7 @@ namespace MWPhysics
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
 
-        std::unique_lock lock(mSimulationMutex);
+        MaybeExclusiveLock lock(mSimulationMutex, mNumThreads);
         assert(actors.size() == actorsData.size());
 
         double timeStart = mTimer->tick();
@@ -239,7 +291,6 @@ namespace MWPhysics
         }
 
         mAsyncStartTime = mTimer->tick();
-        lock.unlock();
         mHasJob.notify_all();
         if (mAdvanceSimulation)
             mBudget.update(mTimer->delta_s(timeStart, mTimer->tick()), 1, mBudgetCursor);
@@ -247,7 +298,7 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::resetSimulation(const ActorMap& actors)
     {
-        std::unique_lock lock(mSimulationMutex);
+        MaybeExclusiveLock lock(mSimulationMutex, mNumThreads);
         mBudget.reset(mDefaultPhysicsDt);
         mAsyncBudget.reset(0.0f);
         mActors.clear();
@@ -261,25 +312,25 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const
     {
-        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
+        MaybeLock lock(mCollisionWorldMutex, mNumThreads);
         mCollisionWorld->rayTest(rayFromWorld, rayToWorld, resultCallback);
     }
 
     void PhysicsTaskScheduler::convexSweepTest(const btConvexShape* castShape, const btTransform& from, const btTransform& to, btCollisionWorld::ConvexResultCallback& resultCallback) const
     {
-        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
+        MaybeLock lock(mCollisionWorldMutex, mNumThreads);
         mCollisionWorld->convexSweepTest(castShape, from, to, resultCallback);
     }
 
     void PhysicsTaskScheduler::contactTest(btCollisionObject* colObj, btCollisionWorld::ContactResultCallback& resultCallback)
     {
-        std::shared_lock lock(mCollisionWorldMutex);
+        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
         ContactTestWrapper::contactTest(mCollisionWorld, colObj, resultCallback);
     }
 
     std::optional<btVector3> PhysicsTaskScheduler::getHitPoint(const btTransform& from, btCollisionObject* target)
     {
-        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
+        MaybeLock lock(mCollisionWorldMutex, mNumThreads);
         // target the collision object's world origin, this should be the center of the collision object
         btTransform rayTo;
         rayTo.setIdentity();
@@ -296,33 +347,33 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::aabbTest(const btVector3& aabbMin, const btVector3& aabbMax, btBroadphaseAabbCallback& callback)
     {
-        std::shared_lock lock(mCollisionWorldMutex);
+        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
         mCollisionWorld->getBroadphase()->aabbTest(aabbMin, aabbMax, callback);
     }
 
     void PhysicsTaskScheduler::getAabb(const btCollisionObject* obj, btVector3& min, btVector3& max)
     {
-        std::shared_lock lock(mCollisionWorldMutex);
+        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
         obj->getCollisionShape()->getAabb(obj->getWorldTransform(), min, max);
     }
 
     void PhysicsTaskScheduler::setCollisionFilterMask(btCollisionObject* collisionObject, int collisionFilterMask)
     {
-        std::unique_lock lock(mCollisionWorldMutex);
+        MaybeExclusiveLock lock(mCollisionWorldMutex, mNumThreads);
         collisionObject->getBroadphaseHandle()->m_collisionFilterMask = collisionFilterMask;
     }
 
     void PhysicsTaskScheduler::addCollisionObject(btCollisionObject* collisionObject, int collisionFilterGroup, int collisionFilterMask)
     {
         mCollisionObjects.insert(collisionObject);
-        std::unique_lock lock(mCollisionWorldMutex);
+        MaybeExclusiveLock lock(mCollisionWorldMutex, mNumThreads);
         mCollisionWorld->addCollisionObject(collisionObject, collisionFilterGroup, collisionFilterMask);
     }
 
     void PhysicsTaskScheduler::removeCollisionObject(btCollisionObject* collisionObject)
     {
         mCollisionObjects.erase(collisionObject);
-        std::unique_lock lock(mCollisionWorldMutex);
+        MaybeExclusiveLock lock(mCollisionWorldMutex, mNumThreads);
         mCollisionWorld->removeCollisionObject(collisionObject);
     }
 
@@ -334,14 +385,14 @@ namespace MWPhysics
         }
         else
         {
-            std::unique_lock lock(mUpdateAabbMutex);
+            MaybeExclusiveLock lock(mUpdateAabbMutex, mNumThreads);
             mUpdateAabb.insert(std::move(ptr));
         }
     }
 
     bool PhysicsTaskScheduler::getLineOfSight(const std::shared_ptr<Actor>& actor1, const std::shared_ptr<Actor>& actor2)
     {
-        std::unique_lock lock(mLOSCacheMutex);
+        MaybeExclusiveLock lock(mLOSCacheMutex, mNumThreads);
 
         auto req = LOSRequest(actor1, actor2);
         auto result = std::find(mLOSCache.begin(), mLOSCache.end(), req);
@@ -357,7 +408,7 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::refreshLOSCache()
     {
-        std::shared_lock lock(mLOSCacheMutex);
+        MaybeSharedLock lock(mLOSCacheMutex, mNumThreads);
         int job = 0;
         int numLOS = mLOSCache.size();
         while ((job = mNextLOS.fetch_add(1, std::memory_order_relaxed)) < numLOS)
@@ -376,7 +427,7 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::updateAabbs()
     {
-        std::scoped_lock lock(mUpdateAabbMutex);
+        MaybeExclusiveLock lock(mUpdateAabbMutex, mNumThreads);
         std::for_each(mUpdateAabb.begin(), mUpdateAabb.end(),
             [this](const std::shared_ptr<PtrHolder>& ptr) { updatePtrAabb(ptr); });
         mUpdateAabb.clear();
@@ -384,7 +435,7 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::updatePtrAabb(const std::shared_ptr<PtrHolder>& ptr)
     {
-        std::scoped_lock lock(mCollisionWorldMutex);
+        MaybeExclusiveLock lock(mCollisionWorldMutex, mNumThreads);
         if (const auto actor = std::dynamic_pointer_cast<Actor>(ptr))
         {
             actor->updateCollisionObjectPosition();
@@ -420,7 +471,7 @@ namespace MWPhysics
         {
             if (mActors[i]->setPosition(mActorsFrameData[i].mPosition))
             {
-                std::scoped_lock lock(mCollisionWorldMutex);
+                MaybeExclusiveLock lock(mCollisionWorldMutex, mNumThreads);
                 mActorsFrameData[i].mPosition = mActors[i]->getPosition(); // account for potential position change made by script
                 mActors[i]->updateCollisionObjectPosition();
                 mCollisionWorld->updateSingleAabb(mActors[i]->getCollisionObject());
@@ -469,7 +520,7 @@ namespace MWPhysics
         resultCallback.m_collisionFilterGroup = 0xFF;
         resultCallback.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap|CollisionType_Door;
 
-        MaybeSharedLock lockColWorld(mCollisionWorldMutex, mNumThreads);
+        MaybeLock lockColWorld(mCollisionWorldMutex, mNumThreads);
         mCollisionWorld->rayTest(pos1, pos2, resultCallback);
 
         return !resultCallback.hasHit();
@@ -483,7 +534,7 @@ namespace MWPhysics
             int job = 0;
             while ((job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
             {
-                MaybeSharedLock lockColWorld(mCollisionWorldMutex, mNumThreads);
+                MaybeLock lockColWorld(mCollisionWorldMutex, mNumThreads);
                 MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld, *mWorldFrameData);
             }
 
@@ -511,7 +562,7 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::debugDraw()
     {
-        std::shared_lock lock(mCollisionWorldMutex);
+        MaybeSharedLock lock(mCollisionWorldMutex, mNumThreads);
         mDebugDrawer->step();
     }
 
@@ -537,7 +588,7 @@ namespace MWPhysics
             return;
         for (size_t i = 0; i < mActors.size(); ++i)
         {
-            std::unique_lock lock(mCollisionWorldMutex);
+            MaybeExclusiveLock lock(mCollisionWorldMutex, mNumThreads);
             MovementSolver::unstuck(mActorsFrameData[i], mCollisionWorld);
         }
     }
@@ -556,7 +607,7 @@ namespace MWPhysics
     {
         mNewFrame = false;
         {
-            std::unique_lock lock(mLOSCacheMutex);
+            MaybeExclusiveLock lock(mLOSCacheMutex, mNumThreads);
             mLOSCache.erase(
                     std::remove_if(mLOSCache.begin(), mLOSCache.end(),
                         [](const LOSRequest& req) { return req.mStale; }),
