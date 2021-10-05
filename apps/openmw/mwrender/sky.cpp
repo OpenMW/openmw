@@ -80,15 +80,15 @@ namespace
         return mat;
     }
 
-    osg::ref_ptr<osg::Geometry> createTexturedQuad(int numUvSets=1)
+    osg::ref_ptr<osg::Geometry> createTexturedQuad(int numUvSets=1, float scale=1.f)
     {
         osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
 
         osg::ref_ptr<osg::Vec3Array> verts = new osg::Vec3Array;
-        verts->push_back(osg::Vec3f(-0.5, -0.5, 0));
-        verts->push_back(osg::Vec3f(-0.5, 0.5, 0));
-        verts->push_back(osg::Vec3f(0.5, 0.5, 0));
-        verts->push_back(osg::Vec3f(0.5, -0.5, 0));
+        verts->push_back(osg::Vec3f(-0.5*scale, -0.5*scale, 0));
+        verts->push_back(osg::Vec3f(-0.5*scale, 0.5*scale, 0));
+        verts->push_back(osg::Vec3f(0.5*scale, 0.5*scale, 0));
+        verts->push_back(osg::Vec3f(0.5*scale, -0.5*scale, 0));
 
         geom->setVertexArray(verts);
 
@@ -622,14 +622,13 @@ private:
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-        osg::ref_ptr<osg::PositionAttitudeTransform> transform (new osg::PositionAttitudeTransform);
+        osg::ref_ptr<osg::Group> group (new osg::Group);
+
+        mTransform->addChild(group);
+
         const float scale = 2.6f;
-        transform->setScale(osg::Vec3f(scale,scale,scale));
-
-        mTransform->addChild(transform);
-
-        osg::ref_ptr<osg::Geometry> geom = createTexturedQuad();
-        transform->addChild(geom);
+        osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(1, scale);
+        group->addChild(geom);
 
         osg::StateSet* stateset = geom->getOrCreateStateSet();
 
@@ -638,7 +637,7 @@ private:
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
 
-        mSunFlashNode = transform;
+        mSunFlashNode = group;
 
         mSunFlashCallback = new SunFlashCallback(mOcclusionQueryVisiblePixels, mOcclusionQueryTotalPixels);
         mSunFlashNode->addCullCallback(mSunFlashCallback);
