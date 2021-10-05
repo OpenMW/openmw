@@ -148,44 +148,6 @@ public:
     float getValue(osg::NodeVisitor* nv) override;
 };
 
-// --------------------------------------------------------------------------------
-
-/// Subclass RotateController to add a Z-offset for sneaking in first person mode.
-/// @note We use inheritance instead of adding another controller, so that we do not have to compute the worldOrient twice.
-/// @note Must be set on a MatrixTransform.
-class NeckController : public RotateController
-{
-public:
-    NeckController(osg::Node* relativeTo)
-        : RotateController(relativeTo)
-    {
-    }
-
-    void setOffset(const osg::Vec3f& offset)
-    {
-        mOffset = offset;
-    }
-
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
-    {
-        osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
-        osg::Matrix matrix = transform->getMatrix();
-
-        osg::Quat worldOrient = getWorldOrientation(node);
-        osg::Quat orient = worldOrient * mRotate * worldOrient.inverse() * matrix.getRotate();
-
-        matrix.setRotate(orient);
-        matrix.setTrans(matrix.getTrans() + worldOrient.inverse() * mOffset);
-
-        transform->setMatrix(matrix);
-
-        traverse(node,nv);
-    }
-
-private:
-    osg::Vec3f mOffset;
-};
-
 // --------------------------------------------------------------------------------------------------------------
 
 HeadAnimationTime::HeadAnimationTime(const MWWorld::Ptr& reference)
@@ -954,7 +916,7 @@ void NpcAnimation::addControllers()
         if (found != mNodeMap.end())
         {
             osg::MatrixTransform* node = found->second.get();
-            mFirstPersonNeckController = new NeckController(mObjectRoot.get());
+            mFirstPersonNeckController = new RotateController(mObjectRoot.get());
             node->addUpdateCallback(mFirstPersonNeckController);
             mActiveControllers.emplace_back(node, mFirstPersonNeckController);
         }

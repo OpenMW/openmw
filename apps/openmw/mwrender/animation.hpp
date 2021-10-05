@@ -6,6 +6,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include <vector>
 
@@ -506,7 +507,7 @@ public:
     bool canBeHarvested() const override;
 };
 
-class UpdateVfxCallback : public osg::NodeCallback
+class UpdateVfxCallback : public SceneUtil::NodeCallback<UpdateVfxCallback>
 {
 public:
     UpdateVfxCallback(EffectParams& params)
@@ -519,7 +520,7 @@ public:
     bool mFinished;
     EffectParams mParams;
 
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
+    void operator()(osg::Node* node, osg::NodeVisitor* nv);
 
 private:
     double mStartingTime;

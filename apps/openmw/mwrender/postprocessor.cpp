@@ -10,6 +10,7 @@
 
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/debug/debuglog.hpp>
 
 #include "vismask.hpp"
@@ -33,7 +34,7 @@ namespace
         return geom;
     }
 
-    class CullCallback : public osg::NodeCallback
+    class CullCallback : public SceneUtil::NodeCallback<CullCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         CullCallback()
@@ -41,12 +42,11 @@ namespace
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
             osgUtil::RenderStage* renderStage = cv->getCurrentRenderStage();
 
-            unsigned int frame = nv->getTraversalNumber();
+            unsigned int frame = cv->getTraversalNumber();
             if (frame != mLastFrameNumber)
             {
                 mLastFrameNumber = frame;
@@ -56,7 +56,7 @@ namespace
                 if (!postProcessor)
                 {
                     Log(Debug::Error) << "Failed retrieving user data for master camera: FBO setup failed";
-                    traverse(node, nv);
+                    traverse(node, cv);
                     return;
                 }
 
@@ -71,7 +71,7 @@ namespace
                 }
             }
 
-            traverse(node, nv);
+            traverse(node, cv);
         }
 
     private:

@@ -58,20 +58,17 @@ namespace MWRender
 /// To use, simply create the scene as subgraph of this node, then do setPlane(const osg::Plane& plane);
 class ClipCullNode : public osg::Group
 {
-    class PlaneCullCallback : public osg::NodeCallback
+    class PlaneCullCallback : public SceneUtil::NodeCallback<PlaneCullCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         /// @param cullPlane The culling plane (in world space).
         PlaneCullCallback(const osg::Plane* cullPlane)
-            : osg::NodeCallback()
-            , mCullPlane(cullPlane)
+            : mCullPlane(cullPlane)
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
             osg::Polytope::PlaneList origPlaneList = cv->getProjectionCullingStack().back().getFrustum().getPlaneList();
 
             osg::Plane plane = *mCullPlane;
@@ -83,7 +80,7 @@ class ClipCullNode : public osg::Group
 
             cv->getProjectionCullingStack().back().getFrustum().add(plane);
 
-            traverse(node, nv);
+            traverse(node, cv);
 
             // undo
             cv->getProjectionCullingStack().back().getFrustum().set(origPlaneList);
@@ -93,7 +90,7 @@ class ClipCullNode : public osg::Group
         const osg::Plane* mCullPlane;
     };
 
-    class FlipCallback : public osg::NodeCallback
+    class FlipCallback : public SceneUtil::NodeCallback<FlipCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         FlipCallback(const osg::Plane* cullPlane)
@@ -101,9 +98,8 @@ class ClipCullNode : public osg::Group
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
             osg::Vec3d eyePoint = cv->getEyePoint();
 
             osg::RefMatrix* modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
@@ -123,7 +119,7 @@ class ClipCullNode : public osg::Group
             modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * clipFudge);
 
             cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
-            traverse(node, nv);
+            traverse(node, cv);
             cv->popModelViewMatrix();
         }
 
@@ -166,31 +162,28 @@ private:
 
 /// This callback on the Camera has the effect of a RELATIVE_RF_INHERIT_VIEWPOINT transform mode (which does not exist in OSG).
 /// We want to keep the View Point of the parent camera so we will not have to recreate LODs.
-class InheritViewPointCallback : public osg::NodeCallback
+class InheritViewPointCallback : public SceneUtil::NodeCallback<InheritViewPointCallback, osg::Node*, osgUtil::CullVisitor*>
 {
 public:
-        InheritViewPointCallback() {}
+    InheritViewPointCallback() {}
 
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+    void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
     {
-        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
         osg::ref_ptr<osg::RefMatrix> modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
         cv->popModelViewMatrix();
         cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::ABSOLUTE_RF_INHERIT_VIEWPOINT);
-        traverse(node, nv);
+        traverse(node, cv);
     }
 };
 
 /// Moves water mesh away from the camera slightly if the camera gets too close on the Z axis.
 /// The offset works around graphics artifacts that occurred with the GL_DEPTH_CLAMP when the camera gets extremely close to the mesh (seen on NVIDIA at least).
 /// Must be added as a Cull callback.
-class FudgeCallback : public osg::NodeCallback
+class FudgeCallback : public SceneUtil::NodeCallback<FudgeCallback, osg::Node*, osgUtil::CullVisitor*>
 {
 public:
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+    void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
     {
-        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
         const float fudge = 0.2;
         if (std::abs(cv->getEyeLocal().z()) < fudge)
         {
@@ -203,11 +196,11 @@ public:
                 modelViewMatrix->preMultTranslate(osg::Vec3f(0,0,diff));
 
             cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
-            traverse(node, nv);
+            traverse(node, cv);
             cv->popModelViewMatrix();
         }
         else
-            traverse(node, nv);
+            traverse(node, cv);
     }
 };
 

@@ -68,19 +68,17 @@ void ParticleSystem::drawImplementation(osg::RenderInfo& renderInfo) const
      osgParticle::ParticleSystem::drawImplementation(renderInfo);
 }
 
-void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
+void InverseWorldMatrix::operator()(osg::MatrixTransform *node, osg::NodeVisitor *nv)
 {
     if (nv && nv->getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
     {
         osg::NodePath path = nv->getNodePath();
         path.pop_back();
 
-        osg::MatrixTransform* trans = static_cast<osg::MatrixTransform*>(node);
-
         osg::Matrix mat = osg::computeLocalToWorld( path );
         mat.orthoNormalize(mat); // don't undo the scale
         mat.invert(mat);
-        trans->setMatrix(mat);
+        node->setMatrix(mat);
     }
     traverse(node,nv);
 }

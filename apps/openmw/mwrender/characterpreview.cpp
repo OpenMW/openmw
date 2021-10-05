@@ -22,6 +22,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/settings/settings.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwworld/class.hpp"
@@ -36,7 +37,7 @@
 namespace MWRender
 {
 
-    class DrawOnceCallback : public osg::NodeCallback
+    class DrawOnceCallback : public SceneUtil::NodeCallback<DrawOnceCallback>
     {
     public:
         DrawOnceCallback ()
@@ -45,7 +46,7 @@ namespace MWRender
         {
         }
 
-        void operator () (osg::Node* node, osg::NodeVisitor* nv) override
+        void operator () (osg::Node* node, osg::NodeVisitor* nv)
         {
             if (!mRendered)
             {
@@ -523,7 +524,7 @@ namespace MWRender
         rebuild();
     }
 
-    class UpdateCameraCallback : public osg::NodeCallback
+    class UpdateCameraCallback : public SceneUtil::NodeCallback<UpdateCameraCallback, osg::Camera*>
     {
     public:
         UpdateCameraCallback(osg::ref_ptr<const osg::Node> nodeToFollow, const osg::Vec3& posOffset, const osg::Vec3& lookAtOffset)
@@ -533,12 +534,10 @@ namespace MWRender
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Camera* cam, osg::NodeVisitor* nv)
         {
-            osg::Camera* cam = static_cast<osg::Camera*>(node);
-
             // Update keyframe controllers in the scene graph first...
-            traverse(node, nv);
+            traverse(cam, nv);
 
             // Now update camera utilizing the updated head position
             osg::NodePathList nodepaths = mNodeToFollow->getParentalNodePaths();

@@ -6,23 +6,19 @@
 #include <osg/Texture2D>
 #include <osgUtil/CullVisitor>
 
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/settings/settings.hpp>
 
 namespace SceneUtil
 {
-    // RTTNode's cull callback
-    class CullCallback : public osg::NodeCallback
+    class CullCallback : public SceneUtil::NodeCallback<CullCallback, RTTNode*, osgUtil::CullVisitor*>
     {
     public:
-        CullCallback(RTTNode* group)
-            : mGroup(group) {}
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(RTTNode* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-            mGroup->cull(cv);
+            node->cull(cv);
         }
-        RTTNode* mGroup;
     };
 
     RTTNode::RTTNode(uint32_t textureWidth, uint32_t textureHeight, int renderOrderNum, bool doPerViewMapping)
@@ -31,7 +27,7 @@ namespace SceneUtil
         , mRenderOrderNum(renderOrderNum)
         , mDoPerViewMapping(doPerViewMapping)
     {
-        addCullCallback(new CullCallback(this));
+        addCullCallback(new CullCallback);
         setCullingActive(false);
     }
 

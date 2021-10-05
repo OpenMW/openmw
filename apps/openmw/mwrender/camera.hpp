@@ -12,7 +12,7 @@
 namespace osg
 {
     class Camera;
-    class NodeCallback;
+    class Callback;
     class Node;
 }
 
@@ -82,7 +82,7 @@ namespace MWRender
         void updatePosition();
         float getCameraDistanceCorrection() const;
 
-        osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
+        osg::ref_ptr<osg::Callback> mUpdateCallback;
 
         // Used to rotate player to the direction of view after exiting preview or vanity mode.
         osg::Vec3f mDeferredRotation;

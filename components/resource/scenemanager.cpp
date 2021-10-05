@@ -40,16 +40,14 @@
 namespace
 {
 
-    class InitWorldSpaceParticlesCallback : public osg::NodeCallback
+    class InitWorldSpaceParticlesCallback : public SceneUtil::NodeCallback<InitWorldSpaceParticlesCallback, osgParticle::ParticleSystem*>
     {
     public:
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osgParticle::ParticleSystem* node, osg::NodeVisitor* nv)
         {
-            osgParticle::ParticleSystem* partsys = static_cast<osgParticle::ParticleSystem*>(node);
-
             // HACK: Ignore the InverseWorldMatrix transform the particle system is attached to
-            if (partsys->getNumParents() && partsys->getParent(0)->getNumParents())
-                transformInitialParticles(partsys, partsys->getParent(0)->getParent(0));
+            if (node->getNumParents() && node->getParent(0)->getNumParents())
+                transformInitialParticles(node, node->getParent(0)->getParent(0));
 
             node->removeUpdateCallback(this);
         }
