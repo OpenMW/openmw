@@ -45,7 +45,7 @@ void main()
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
 
-#if FORCE_OPAQUE
+#if defined(FORCE_OPAQUE) && FORCE_OPAQUE
     gl_FragData[0].a = 1.0;
 #endif
 
