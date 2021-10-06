@@ -8,7 +8,6 @@
 #include <sstream>
 
 #include <components/misc/constants.hpp>
-#include <components/sceneutil/mwshadowtechnique.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/loadinglistener/reporter.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -440,19 +439,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     bool isCullVisitor = nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR;
     if (!isCullVisitor && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
-    {
-        if (nv.getName().find("AcceptedByComponentsTerrainQuadTreeWorld") != std::string::npos)
-        {
-            if (nv.getName().find("SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds") != std::string::npos)
-            {
-                SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds* clsb = static_cast<SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds*>(&nv);
-                clsb->apply(*this);
-            }
-            else
-                nv.apply(*mRootNode);
-        }
         return;
-    }
 
     osg::Object * viewer = isCullVisitor ? static_cast<osgUtil::CullVisitor*>(&nv)->getCurrentCamera() : nullptr;
     bool needsUpdate = true;
