@@ -361,8 +361,6 @@ MWShadowTechnique::ComputeLightSpaceBounds::ComputeLightSpaceBounds(osg::Viewpor
     pushViewport(viewport);
     pushProjectionMatrix(new osg::RefMatrix(projectionMatrix));
     pushModelViewMatrix(new osg::RefMatrix(viewMatrix), osg::Transform::ABSOLUTE_RF);
-
-    setName("SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds,AcceptedByComponentsTerrainQuadTreeWorld");
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Node& node)
@@ -389,14 +387,6 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
 
     // pop the culling mode.
     popCurrentMask();
-}
-
-void MWShadowTechnique::ComputeLightSpaceBounds::apply(Terrain::QuadTreeWorld & quadTreeWorld)
-{
-    // For now, just expand the bounds fully as terrain will fill them up and possible ways to detect which terrain definitely won't cast shadows aren't implemented.
-
-    update(osg::Vec3(-1.0, -1.0, 0.0));
-    update(osg::Vec3(1.0, 1.0, 0.0));
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Billboard&)
@@ -1120,7 +1110,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
         // if we are using multiple shadow maps and CastShadowTraversalMask is being used
         // traverse the scene to compute the extents of the objects
-        if (/*numShadowMapsPerLight>1 &&*/ _shadowedScene->getCastsShadowTraversalMask()!=0xffffffff)
+        if (/*numShadowMapsPerLight>1 &&*/ (_shadowedScene->getCastsShadowTraversalMask() & _worldMask) != _worldMask)
         {
             // osg::ElapsedTime timer;
 
