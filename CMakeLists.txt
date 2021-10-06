@@ -543,8 +543,8 @@ if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=implicit-fallthrough")
+if (OPENMW_CXX_FLAGS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMW_CXX_FLAGS}")
 endif()
 
 # Components
