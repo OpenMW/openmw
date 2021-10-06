@@ -1,6 +1,7 @@
 #include "configurationmanager.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/configfileparser.hpp>
 #include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>
 
@@ -239,7 +240,7 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
         configFileStream.push(configFileStreamUnfiltered);
         if (configFileStreamUnfiltered.is_open())
         {
-            boost::program_options::store(boost::program_options::parse_config_file(
+            boost::program_options::store(Files::parse_config_file(
                 configFileStream, description, true), variables);
 
             return true;
