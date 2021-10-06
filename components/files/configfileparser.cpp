@@ -1,3 +1,11 @@
+// This file's contents is largely lifted from boost::program_options with only minor modification.
+// Its original preamble (without updated dates) from those source files is below:
+
+// Copyright Vladimir Prus 2002-2004.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt
+// or copy at http://www.boost.org/LICENSE_1_0.txt)
+
 #include "configfileparser.hpp"
 
 #include <boost/program_options/detail/config_file.hpp>
