@@ -25,6 +25,7 @@ namespace SceneUtil
         static Shader::ShaderManager::DefineMap getShadowsDisabledDefines();
 
         ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, unsigned int worldMask, Shader::ShaderManager &shaderManager);
+        ~ShadowManager();
 
         void setupShadowSettings();
 
