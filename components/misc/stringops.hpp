@@ -25,6 +25,7 @@ class StringUtils
     template <typename T>
     static T argument(T value) noexcept
     {
+        static_assert(!std::is_same_v<T, std::string_view>, "std::string_view is not supported");
         return value;
     }
 
@@ -324,14 +325,20 @@ public:
         }
     }
 
-     static inline void replaceLast(std::string& str, const std::string& substr, const std::string& with)
-     {
-         size_t pos = str.rfind(substr);
-         if (pos == std::string::npos)
-             return;
+    static inline void replaceLast(std::string& str, const std::string& substr, const std::string& with)
+    {
+        size_t pos = str.rfind(substr);
+        if (pos == std::string::npos)
+            return;
 
-         str.replace(pos, substr.size(), with);
-     }
+        str.replace(pos, substr.size(), with);
+    }
+
+    static inline bool ciEndsWith(std::string_view s, std::string_view suffix)
+    {
+        return s.size() >= suffix.size() && std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(),
+                                                       [](char l, char r) { return toLower(l) == toLower(r); });
+    };
 };
 
 }
