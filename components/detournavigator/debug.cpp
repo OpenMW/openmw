@@ -1,6 +1,8 @@
 #include "debug.hpp"
 #include "exceptions.hpp"
 #include "recastmesh.hpp"
+#include "settings.hpp"
+#include "settingsutils.hpp"
 
 #include <DetourNavMesh.h>
 
@@ -9,7 +11,7 @@
 
 namespace DetourNavigator
 {
-    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision)
+    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision, const Settings& settings)
     {
         const auto path = pathPrefix + "recastmesh" + revision + ".obj";
         boost::filesystem::ofstream file(boost::filesystem::path(path), std::ios::out);
@@ -17,20 +19,14 @@ namespace DetourNavigator
             throw NavigatorException("Open file failed: " + path);
         file.exceptions(std::ios::failbit | std::ios::badbit);
         file.precision(std::numeric_limits<float>::max_exponent10);
-        std::size_t count = 0;
-        for (float v : recastMesh.getMesh().getVertices())
+        std::vector<float> vertices = recastMesh.getMesh().getVertices();
+        for (std::size_t i = 0; i < vertices.size(); i += 3)
         {
-            if (count % 3 == 0)
-            {
-                if (count != 0)
-                    file << '\n';
-                file << 'v';
-            }
-            file << ' ' << v;
-            ++count;
+            file << "v " << toNavMeshCoordinates(settings, vertices[i]) << ' '
+                 << toNavMeshCoordinates(settings, vertices[i + 2]) << ' '
+                 << toNavMeshCoordinates(settings, vertices[i + 1]) << '\n';
         }
-        file << '\n';
-        count = 0;
+        std::size_t count = 0;
         for (int v : recastMesh.getMesh().getIndices())
         {
             if (count % 3 == 0)
