@@ -256,10 +256,10 @@ public:
     {
         osg::Vec3f center = { chunkCenter.x(), chunkCenter.y(), 0 };
         auto chunkBorder = CellBorder::createBorderGeometry(center.x() - size / 2.f, center.y() - size / 2.f, size, mStorage, mSceneManager, mNodeMask, 5.f, { 1, 0, 0, 0 });
-        osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(osg::Matrixf::translate(-center*Constants::CellSizeInUnits));
-        trans->setDataVariance(osg::Object::STATIC);
-        trans->addChild(chunkBorder);
-        return trans;
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pat = new SceneUtil::PositionAttitudeTransform;
+        pat->setPosition(-center*Constants::CellSizeInUnits);
+        pat->addChild(chunkBorder);
+        return pat;
     }
     unsigned int getNodeMask() { return mNodeMask; }
 private:
