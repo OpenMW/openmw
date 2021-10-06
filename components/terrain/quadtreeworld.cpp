@@ -3,6 +3,7 @@
 #include <osgUtil/CullVisitor>
 #include <osg/ShapeDrawable>
 #include <osg/PolygonMode>
+#include <osg/Material>
 
 #include <limits>
 #include <sstream>
