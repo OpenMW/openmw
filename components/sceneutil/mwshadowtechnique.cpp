@@ -604,7 +604,6 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
     }
     else
     {
-        // clear the depth and colour bufferson each clear.
         _camera->setClearMask(GL_DEPTH_BUFFER_BIT);
 
         // set the camera to render before the main camera.
