@@ -112,6 +112,8 @@ namespace SceneUtil {
 
             void update(const osg::Vec3& v);
 
+            void reset() override;
+
             osg::BoundingBox _bb;
         };
 
@@ -237,6 +239,8 @@ namespace SceneUtil {
 
     protected:
         virtual ~MWShadowTechnique();
+
+        osg::ref_ptr<ComputeLightSpaceBounds>   _clsb;
 
         typedef std::map< osgUtil::CullVisitor*, osg::ref_ptr<ViewDependentData> >  ViewDependentDataMap;
         mutable std::mutex                      _viewDependentDataMapMutex;
