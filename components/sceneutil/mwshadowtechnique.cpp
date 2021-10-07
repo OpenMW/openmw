@@ -570,9 +570,7 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
     _camera = new osg::Camera;
     _camera->setName("ShadowCamera");
     _camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT);
-#ifndef __APPLE__ // workaround shadow issue on macOS, https://gitlab.com/OpenMW/openmw/-/issues/6057
     _camera->setImplicitBufferAttachmentMask(0, 0);
-#endif
     //_camera->setClearColor(osg::Vec4(1.0f,1.0f,1.0f,1.0f));
     _camera->setClearColor(osg::Vec4(0.0f,0.0f,0.0f,0.0f));
 
@@ -595,8 +593,7 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
 
     if (debug)
     {
-        // clear just the depth buffer
-        _camera->setClearMask(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        _camera->setClearMask(GL_COLOR_BUFFER_BIT);
 
         // render after the main camera
         _camera->setRenderOrder(osg::Camera::POST_RENDER);
@@ -608,7 +605,7 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
     else
     {
         // clear the depth and colour bufferson each clear.
-        _camera->setClearMask(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        _camera->setClearMask(GL_DEPTH_BUFFER_BIT);
 
         // set the camera to render before the main camera.
         _camera->setRenderOrder(osg::Camera::PRE_RENDER);
