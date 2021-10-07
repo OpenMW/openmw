@@ -116,7 +116,7 @@ namespace MWPhysics
     }
 
     void MovementSolver::move(ActorFrameData& actor, float time, const btCollisionWorld* collisionWorld,
-                                           WorldFrameData& worldData)
+                                           const WorldFrameData& worldData)
     {
         // Reset per-frame data
         actor.mWalkingOnWater = false;

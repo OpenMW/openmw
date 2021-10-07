@@ -7,6 +7,7 @@
 #include <set>
 #include <unordered_map>
 #include <algorithm>
+#include <variant>
 
 #include <osg/Quat>
 #include <osg/BoundingBox>
@@ -106,6 +107,9 @@ namespace MWPhysics
         bool mIsInStorm;
         osg::Vec3f mStormDirection;
     };
+
+    using ActorSimulation = std::pair<std::shared_ptr<Actor>, ActorFrameData>;
+    using Simulation = std::variant<ActorSimulation>;
 
     class PhysicsSystem : public RayCastingInterface
     {
@@ -253,7 +257,7 @@ namespace MWPhysics
 
             void updateWater();
 
-            std::pair<std::vector<std::shared_ptr<Actor>>, std::vector<ActorFrameData>> prepareFrameData(bool willSimulate);
+            std::vector<Simulation> prepareSimulation(bool willSimulate);
 
             std::unique_ptr<btBroadphaseInterface> mBroadphase;
             std::unique_ptr<btDefaultCollisionConfiguration> mCollisionConfiguration;

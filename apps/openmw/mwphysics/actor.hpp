@@ -12,6 +12,7 @@
 
 class btCollisionShape;
 class btCollisionObject;
+class btCollisionWorld;
 class btConvexShape;
 
 namespace Resource
@@ -164,6 +165,8 @@ namespace MWPhysics
 
         void setVelocity(osg::Vec3f velocity);
         osg::Vec3f velocity();
+
+        bool canMoveToWaterSurface(float waterlevel, const btCollisionWorld* world) const;
 
     private:
         MWWorld::Ptr mStandingOnPtr;

@@ -12,6 +12,7 @@
 
 #include "collisiontype.hpp"
 #include "mtphysics.hpp"
+#include "trace.h"
 
 #include <cmath>
 
@@ -301,6 +302,17 @@ void Actor::setVelocity(osg::Vec3f velocity)
 osg::Vec3f Actor::velocity()
 {
     return std::exchange(mVelocity, osg::Vec3f());
+}
+
+bool Actor::canMoveToWaterSurface(float waterlevel, const btCollisionWorld* world) const
+{
+    const float halfZ = getHalfExtents().z();
+    const osg::Vec3f actorPosition = getPosition();
+    const osg::Vec3f startingPosition(actorPosition.x(), actorPosition.y(), actorPosition.z() + halfZ);
+    const osg::Vec3f destinationPosition(actorPosition.x(), actorPosition.y(), waterlevel + halfZ);
+    MWPhysics::ActorTracer tracer;
+    tracer.doTrace(getCollisionObject(), startingPosition, destinationPosition, world);
+    return (tracer.mFraction >= 1.0f);
 }
 
 }
