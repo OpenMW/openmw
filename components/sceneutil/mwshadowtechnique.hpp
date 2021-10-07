@@ -90,7 +90,7 @@ namespace SceneUtil {
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
         {
         public:
-            ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix);
+            ComputeLightSpaceBounds();
 
             void apply(osg::Node& node) override;
 
