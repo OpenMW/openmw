@@ -13,6 +13,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/optimizer.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/vfs/manager.hpp>
@@ -590,14 +591,31 @@ namespace MWRender
                 if (!activeGrid && minSizeMerged != minSize && cnode->getBound().radius2() * cref->mScale*cref->mScale < (viewPoint-pos).length2()*minSizeMerged*minSizeMerged)
                     continue;
 
-                osg::Matrixf matrix;
-                matrix.preMultTranslate(pos - worldCenter);
-                matrix.preMultRotate( osg::Quat(ref.mPos.rot[2], osg::Vec3f(0,0,-1)) *
+                osg::Vec3f nodePos = pos - worldCenter;
+                osg::Quat nodeAttitude = osg::Quat(ref.mPos.rot[2], osg::Vec3f(0,0,-1)) *
                                         osg::Quat(ref.mPos.rot[1], osg::Vec3f(0,-1,0)) *
-                                        osg::Quat(ref.mPos.rot[0], osg::Vec3f(-1,0,0)) );
-                matrix.preMultScale(osg::Vec3f(ref.mScale, ref.mScale, ref.mScale));
-                osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(matrix);
-                trans->setDataVariance(osg::Object::STATIC);
+                                        osg::Quat(ref.mPos.rot[0], osg::Vec3f(-1,0,0));
+                osg::Vec3f nodeScale = osg::Vec3f(ref.mScale, ref.mScale, ref.mScale);
+
+                osg::ref_ptr<osg::Group> trans;
+                if (merge)
+                {
+                    // Optimizer currently supports only MatrixTransforms.
+                    osg::Matrixf matrix;
+                    matrix.preMultTranslate(nodePos);
+                    matrix.preMultRotate(nodeAttitude);
+                    matrix.preMultScale(nodePos);
+                    trans = new osg::MatrixTransform(matrix);
+                    trans->setDataVariance(osg::Object::STATIC);
+                }
+                else
+                {
+                    trans = new SceneUtil::PositionAttitudeTransform;
+                    SceneUtil::PositionAttitudeTransform* pat = static_cast<SceneUtil::PositionAttitudeTransform*>(trans.get());
+                    pat->setPosition(nodePos);
+                    pat->setScale(nodeScale);
+                    pat->setAttitude(nodeAttitude);
+                }
 
                 copyop.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES : osg::CopyOp::DEEP_COPY_NODES);
                 copyop.mOptimizeBillboards = (size > 1/4.f);
@@ -654,8 +672,6 @@ namespace MWRender
 
             optimizer.optimize(mergeGroup, options);
 
-            group->addChild(mergeGroup);
-
             if (mDebugBatches)
             {
                 DebugVisitor dv;
@@ -666,6 +682,9 @@ namespace MWRender
                 stateToCompile._mode = osgUtil::GLObjectsVisitor::COMPILE_DISPLAY_LISTS;
                 mergeGroup->accept(stateToCompile);
             }
+
+            for (unsigned int i=0; i<mergeGroup->getNumChildren(); ++i)
+                group->addChild(mergeGroup->getChild(i));
         }
 
         auto ico = mSceneManager->getIncrementalCompileOperation();
