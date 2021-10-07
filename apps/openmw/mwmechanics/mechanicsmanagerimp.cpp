@@ -1761,17 +1761,6 @@ namespace MWMechanics
 
         MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
 
-        if (actor == player->getPlayer())
-        {
-            if (werewolf)
-            {
-                player->saveStats();
-                player->setWerewolfStats();
-            }
-            else
-                player->restoreStats();
-        }
-
         // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.
         if (npcStats.getDrawState() == MWMechanics::DrawState_Spell)
             npcStats.setDrawState(MWMechanics::DrawState_Nothing);
@@ -1800,11 +1789,16 @@ namespace MWMechanics
 
             if (werewolf)
             {
+                // Remove CE enchantments before saving stats
+                mActors.updateActor(actor, 0.f);
+                player->saveStats();
+                player->setWerewolfStats();
                 windowManager->forceHide(MWGui::GW_Inventory);
                 windowManager->forceHide(MWGui::GW_Magic);
             }
             else
             {
+                player->restoreStats();
                 windowManager->unsetForceHide(MWGui::GW_Inventory);
                 windowManager->unsetForceHide(MWGui::GW_Magic);
             }
