@@ -1128,7 +1128,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
             osg::ref_ptr<osg::Viewport> viewport = new osg::Viewport(0,0,2048,2048);
             if (!_clsb) _clsb = new ComputeLightSpaceBounds;
-            ComputeLightSpaceBounds* clsb = _clsb;
+            ComputeLightSpaceBounds& clsb = *_clsb;
             clsb.reset();
             clsb.pushViewport(viewport);
             clsb.pushProjectionMatrix(new osg::RefMatrix(projectionMatrix));
