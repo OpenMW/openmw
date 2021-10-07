@@ -3,7 +3,6 @@
 
 #include <cctype>
 #include <map>
-#include <limits>
 #include <stdexcept>
 #include <vector>
 #include <algorithm>    // std::reverse
@@ -69,18 +68,6 @@ public:
         return false;
     }
 
-    static bool isWhitespaceUTF8(const int utf8Char)
-    {
-        if (utf8Char >= 0 && utf8Char <= static_cast<int>( std::numeric_limits<unsigned char>::max()))
-        {
-            //That function has undefined behavior if the character doesn't fit in unsigned char
-            return std::isspace(utf8Char);
-        }
-        else
-        {
-            return false;
-        }
-    }
 
     static bool sortMatches(const Match& left, const Match& right)
     {
@@ -92,16 +79,6 @@ public:
         std::vector<Match> matches;
         for (Point i = beg; i != end; ++i)
         {
-            // check if previous character marked start of new word
-            if (i != beg)
-            {
-                Point prev = i;
-                --prev;
-                if(!isWhitespaceUTF8(*prev))
-                    continue;
-            }
-
-
             // check first character
             typename Entry::childen_t::iterator candidate = mRoot.mChildren.find (Misc::StringUtils::toLower (*i));
 
