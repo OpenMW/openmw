@@ -543,6 +543,10 @@ if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)
 endif()
 
+if (OPENMW_CXX_FLAGS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMW_CXX_FLAGS}")
+endif()
+
 # Components
 add_subdirectory (components)
 

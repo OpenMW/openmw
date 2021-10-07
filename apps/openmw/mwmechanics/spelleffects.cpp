@@ -453,6 +453,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
             }
             addBoundItem(world->getStore().get<ESM::GameSetting>().find("sMagicBoundRightGauntletID")->mValue.getString(), target);
             // left gauntlet added below
+            [[fallthrough]];
         case ESM::MagicEffect::BoundDagger:
         case ESM::MagicEffect::BoundLongsword:
         case ESM::MagicEffect::BoundMace:
@@ -920,6 +921,7 @@ void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellPara
             break;
         case ESM::MagicEffect::BoundGloves:
             removeBoundItem(world->getStore().get<ESM::GameSetting>().find("sMagicBoundRightGauntletID")->mValue.getString(), target);
+            [[fallthrough]];
         case ESM::MagicEffect::BoundDagger:
         case ESM::MagicEffect::BoundLongsword:
         case ESM::MagicEffect::BoundMace:
