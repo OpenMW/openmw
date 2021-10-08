@@ -4,7 +4,7 @@
 #include <components/files/constrainedfilestream.hpp>
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 namespace VFS
 {
@@ -95,7 +95,7 @@ namespace VFS
 
         std::vector<Archive*> mArchives;
 
-        std::map<std::string, File*> mIndex;
+        std::unordered_map<std::string, File*> mIndex;
     };
 
 }
