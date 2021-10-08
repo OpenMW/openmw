@@ -429,7 +429,7 @@ namespace MWRender
     {
         osg::ref_ptr<const SceneUtil::KeyframeHolder> mKeyframes;
 
-        typedef std::map<std::string, osg::ref_ptr<SceneUtil::KeyframeController> > ControllerMap;
+        typedef std::unordered_map<std::string, osg::ref_ptr<SceneUtil::KeyframeController> > ControllerMap;
 
         ControllerMap mControllerMap[Animation::sNumBlendMasks];
 
@@ -1058,7 +1058,7 @@ namespace MWRender
         if (!mAccumRoot)
             return 0.0f;
 
-        std::map<std::string, float>::const_iterator found = mAnimVelocities.find(groupname);
+        std::unordered_map<std::string, float>::const_iterator found = mAnimVelocities.find(groupname);
         if (found != mAnimVelocities.end())
             return found->second;
 
@@ -1300,7 +1300,7 @@ namespace MWRender
         Resource::SceneManager* sceneMgr = resourceSystem->getSceneManager();
         if (baseonly)
         {
-            typedef std::map<std::string, osg::ref_ptr<osg::Node> > Cache;
+            typedef std::unordered_map<std::string, osg::ref_ptr<osg::Node> > Cache;
             static Cache cache;
             Cache::iterator found = cache.find(model);
             if (found == cache.end())
