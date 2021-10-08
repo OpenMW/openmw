@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_CLASS_H
 #define GAME_MWWORLD_CLASS_H
 
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -54,7 +54,7 @@ namespace MWWorld
     /// \brief Base class for referenceable esm records
     class Class
     {
-            static std::map<std::string, std::shared_ptr<Class> > sClasses;
+            static std::unordered_map<std::string, std::shared_ptr<Class> > sClasses;
 
             std::string mTypeName;
 
