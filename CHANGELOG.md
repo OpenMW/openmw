@@ -51,6 +51,7 @@
     Bug #6291: Can't pickup the dead mage's journal from the mysterious hunter mod
     Bug #6302: Teleporting disabled actor breaks its disabled state
     Bug #6307: Pathfinding in Infidelities quest from Tribunal addon is broken
+    Bug #6323: Wyrmhaven: Alboin doesn't follower the player character out of his house
     Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
