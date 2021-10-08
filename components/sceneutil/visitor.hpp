@@ -4,6 +4,8 @@
 #include <osg/MatrixTransform>
 #include <osg/NodeVisitor>
 
+#include <unordered_map>
+
 // Commonly used scene graph visitors
 namespace SceneUtil
 {
