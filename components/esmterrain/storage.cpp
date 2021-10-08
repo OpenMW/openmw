@@ -549,7 +549,7 @@ namespace ESMTerrain
         std::lock_guard<std::mutex> lock(mLayerInfoMutex);
 
         // Already have this cached?
-        std::map<std::string, Terrain::LayerInfo>::iterator found = mLayerInfoMap.find(texture);
+        std::unordered_map<std::string, Terrain::LayerInfo>::iterator found = mLayerInfoMap.find(texture);
         if (found != mLayerInfoMap.end())
             return found->second;
 
