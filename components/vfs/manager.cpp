@@ -126,7 +126,7 @@ namespace VFS
                 if (startsWith(pair.first, normalized))
                     dir[pair.first] = pair.second;
         }
-        auto& dir = mDirectoryIndex[normalized];
+        const auto& dir = mDirectoryIndex[normalized];
         return { dir.begin(), dir.end() }
     }
 }
