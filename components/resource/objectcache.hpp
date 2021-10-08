@@ -25,6 +25,7 @@
 #include <osg/Node>
 
 #include <string>
+#include <map>
 #include <unordered_map>
 #include <mutex>
 
@@ -37,7 +38,7 @@ namespace osg
 
 namespace Resource {
 
-template <typename KeyType>
+template <typename KeyType, typename MapType=std::map>
 class GenericObjectCache : public osg::Referenced
 {
     public:
@@ -183,14 +184,14 @@ class GenericObjectCache : public osg::Referenced
         virtual ~GenericObjectCache() {}
 
         typedef std::pair<osg::ref_ptr<osg::Object>, double >           ObjectTimeStampPair;
-        typedef std::unordered_map<KeyType, ObjectTimeStampPair >             ObjectCacheMap;
+        typedef MapType<KeyType, ObjectTimeStampPair >             ObjectCacheMap;
 
         ObjectCacheMap                          _objectCache;
         mutable std::mutex                      _objectCacheMutex;
 
 };
 
-class ObjectCache : public GenericObjectCache<std::string>
+class ObjectCache : public GenericObjectCache<std::string, std::unordered_map>
 {
 };
 
