@@ -1787,10 +1787,15 @@ namespace MWMechanics
             // Update the GUI only when called on the player
             MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
+            // Transforming removes all temporary effects
+            actor.getClass().getCreatureStats(actor).getActiveSpells().purge([] (const auto& params)
+            {
+                return params.getType() == ESM::ActiveSpells::Type_Consumable || params.getType() == ESM::ActiveSpells::Type_Temporary;
+            }, actor);
+            mActors.updateActor(actor, 0.f);
+
             if (werewolf)
             {
-                // Remove CE enchantments before saving stats
-                mActors.updateActor(actor, 0.f);
                 player->saveStats();
                 player->setWerewolfStats();
                 windowManager->forceHide(MWGui::GW_Inventory);
