@@ -49,7 +49,7 @@ namespace SceneUtil
     class NodeMapVisitor : public osg::NodeVisitor
     {
     public:
-        typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
+        typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
 
         NodeMapVisitor(NodeMap& map)
             : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
