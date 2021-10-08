@@ -30,7 +30,7 @@ namespace MWWorld
 
             /// @param includeHostiles If true, include hostile followers (which won't actually be teleported) in the output,
             ///                        e.g. so that the teleport action can calm them.
-            static void getFollowers(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out, bool includeHostiles = false);
+            static void getFollowers(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out, bool toExterior, bool includeHostiles = false);
     };
 }
 

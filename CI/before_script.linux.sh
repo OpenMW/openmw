@@ -32,6 +32,7 @@ declare -a CMAKE_CONF_OPTS=(
     -DCMAKE_INSTALL_PREFIX=install
     -DCMAKE_C_FLAGS='-Werror'
     -DCMAKE_CXX_FLAGS="${CXX_FLAGS}"
+    -DOPENMW_CXX_FLAGS="-Werror=implicit-fallthrough"
 )
 
 if [[ $CI_OPENMW_USE_STATIC_DEPS ]]; then

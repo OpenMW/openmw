@@ -157,7 +157,7 @@ namespace SceneUtil
         /// Internal use only, called automatically by the LightSource's UpdateCallback
         void addLight(LightSource* lightSource, const osg::Matrixf& worldMat, size_t frameNum);
 
-        const std::vector<LightSourceViewBound>& getLightsInViewSpace(osg::Camera* camera, const osg::RefMatrix* viewMatrix, size_t frameNum);
+        const std::vector<LightSourceViewBound>& getLightsInViewSpace(osgUtil::CullVisitor* cv, const osg::RefMatrix* viewMatrix, size_t frameNum);
 
         osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList, size_t frameNum, const osg::RefMatrix* viewMatrix);
 

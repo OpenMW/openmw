@@ -61,7 +61,7 @@ namespace MWPhysics
             void releaseSharedStates(); // destroy all objects whose destructor can't be safely called from ~PhysicsTaskScheduler()
 
         private:
-            void syncComputation();
+            void doSimulation();
             void worker();
             void updateActorsPositions();
             void updateActor(Actor& actor, ActorFrameData& actorData, bool simulationPerformed, float timeAccum, float dt) const;
@@ -74,6 +74,7 @@ namespace MWPhysics
             void afterPreStep();
             void afterPostStep();
             void afterPostSim();
+            void syncWithMainThread();
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
             std::vector<std::shared_ptr<Actor>> mActors;
@@ -98,7 +99,6 @@ namespace MWPhysics
             int mLOSCacheExpiry;
             bool mNewFrame;
             bool mAdvanceSimulation;
-            bool mThreadSafeBullet;
             bool mQuit;
             std::atomic<int> mNextJob;
             std::atomic<int> mNextLOS;

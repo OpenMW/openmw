@@ -6,6 +6,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 
 #include "player.hpp"
@@ -24,7 +25,7 @@ namespace MWWorld
         {
             // Find any NPCs that are following the actor and teleport them with him
             std::set<MWWorld::Ptr> followers;
-            getFollowers(actor, followers, true);
+            getFollowers(actor, followers, mCellName.empty(), true);
 
             for (std::set<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
                 teleport(*it);
@@ -62,7 +63,7 @@ namespace MWWorld
         }
     }
 
-    void ActionTeleport::getFollowers(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out, bool includeHostiles) {
+    void ActionTeleport::getFollowers(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out, bool toExterior, bool includeHostiles) {
         std::set<MWWorld::Ptr> followers;
         MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor, followers);
 
@@ -75,7 +76,7 @@ namespace MWWorld
             if (!includeHostiles && follower.getClass().getCreatureStats(follower).getAiSequence().isInCombat(actor))
                 continue;
 
-            if (!script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1)
+            if (!toExterior && !script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1 && follower.getCell()->getCell()->isExterior())
                 continue;
 
             if ((follower.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3()).length2() > 800 * 800)
