@@ -147,14 +147,13 @@ namespace MWWorld
     template <class T>
     class Store : public StoreBase
     {
-        std::map<std::string, T>      mStatic;
+        typedef std::unordered_map<std::string, T> Dynamic;
+        typedef std::unordered_map<std::string, T> Static;
+        Static      mStatic;
         std::vector<T *>    mShared; // Preserves the record order as it came from the content files (this
                                      // is relevant for the spell autocalc code and selection order
                                      // for heads/hairs in the character creation)
-        std::map<std::string, T> mDynamic;
-
-        typedef std::map<std::string, T> Dynamic;
-        typedef std::map<std::string, T> Static;
+        Dynamic mDynamic;
 
         friend class ESMStore;
 
@@ -294,7 +293,7 @@ namespace MWWorld
             }
         };
 
-        typedef std::map<std::string, ESM::Cell>                           DynamicInt;
+        typedef std::unordered_map<std::string, ESM::Cell>                           DynamicInt;
         typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp>    DynamicExt;
 
         DynamicInt      mInt;
@@ -354,7 +353,7 @@ namespace MWWorld
     class Store<ESM::Pathgrid> : public StoreBase
     {
     private:
-        typedef std::map<std::string, ESM::Pathgrid> Interior;
+        typedef std::unordered_map<std::string, ESM::Pathgrid> Interior;
         typedef std::map<std::pair<int, int>, ESM::Pathgrid> Exterior;
 
         Interior mInt;
