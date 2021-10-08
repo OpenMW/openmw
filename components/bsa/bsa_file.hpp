@@ -27,7 +27,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <map>
 
 #include <components/misc/stringops.hpp>
 
@@ -90,20 +89,6 @@ protected:
 
     /// Used for error messages
     std::string mFilename;
-
-    /// Case insensitive string comparison
-    struct iltstr
-    {
-        bool operator()(const std::string& s1, const std::string& s2) const
-        { return Misc::StringUtils::ciLess(s1, s2); }
-    };
-
-    /** A map used for fast file name lookup. The value is the index into
-        the files[] vector above. The iltstr ensures that file name
-        checks are case insensitive.
-    */
-    typedef std::map<std::string, size_t, iltstr> Lookup;
-    Lookup mLookup;
 
     /// Error handling
     [[noreturn]] void fail(const std::string &msg);
