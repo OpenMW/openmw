@@ -35,14 +35,14 @@ namespace VFS
         class RecursiveDirectoryIterator
         {
         public:
-            RecursiveDirectoryIterator(std::map<std::string, File*>::const_iterator it) : mIt(it) {}
+            RecursiveDirectoryIterator(std::unordered_map<std::string, File*>::const_iterator it) : mIt(it) {}
             const std::string& operator*() const { return mIt->first; }
             const std::string* operator->() const { return &mIt->first; }
             bool operator!=(const RecursiveDirectoryIterator& other) { return mIt != other.mIt; }
             RecursiveDirectoryIterator& operator++() { ++mIt; return *this; }
 
         private:
-            std::map<std::string, File*>::const_iterator mIt;
+            std::unordered_map<std::string, File*>::const_iterator mIt;
         };
 
         using RecursiveDirectoryRange = IteratorPair<RecursiveDirectoryIterator>;
