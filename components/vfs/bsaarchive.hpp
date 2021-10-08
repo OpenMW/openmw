@@ -23,7 +23,7 @@ namespace VFS
     public:
         BsaArchive(const std::string& filename);
         virtual ~BsaArchive();
-        void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
+        void listResources(std::unordered_map<std::string, File*>& out, char (*normalize_function) (char)) override;
         bool contains(const std::string& file, char (*normalize_function) (char)) const override;
         std::string getDescription() const override;
 
