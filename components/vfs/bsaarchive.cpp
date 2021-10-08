@@ -28,7 +28,7 @@ BsaArchive::BsaArchive(const std::string &filename)
 BsaArchive::~BsaArchive() {
 }
 
-void BsaArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
+void BsaArchive::listResources(std::unordered_map<std::string, File *> &out, char (*normalize_function)(char))
 {
     for (std::vector<BsaArchiveFile>::iterator it = mResources.begin(); it != mResources.end(); ++it)
     {
