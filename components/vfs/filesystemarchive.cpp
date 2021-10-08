@@ -14,7 +14,7 @@ namespace VFS
 
     }
 
-    void FileSystemArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
+    void FileSystemArchive::listResources(std::unordered_map<std::string, File *> &out, char (*normalize_function)(char))
     {
         if (!mBuiltIndex)
         {
