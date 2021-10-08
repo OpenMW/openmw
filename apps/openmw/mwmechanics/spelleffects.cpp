@@ -63,9 +63,9 @@ namespace
         auto& creatureStats = target.getClass().getCreatureStats(target);
         auto stat = creatureStats.getDynamic(index);
         float current = stat.getCurrent();
-        stat.setModified(stat.getModified() - magnitude, 0);
-        stat.setCurrentModified(stat.getCurrentModified() - magnitude);
-        stat.setCurrent(current - magnitude);
+        stat.setModified(stat.getModified() + magnitude, 0);
+        stat.setCurrentModified(stat.getCurrentModified() + magnitude);
+        stat.setCurrent(current + magnitude);
         creatureStats.setDynamic(index, stat);
     }
 
@@ -488,7 +488,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                     index = 2;
                 // Damage "Dynamic" abilities reduce the base value
                 if(spellParams.getType() == ESM::ActiveSpells::Type_Ability)
-                    modDynamicStat(target, index, effect.mMagnitude);
+                    modDynamicStat(target, index, -effect.mMagnitude);
                 else
                 {
                     static const bool uncappedDamageFatigue = Settings::Manager::getBool("uncapped damage fatigue", "Game");
