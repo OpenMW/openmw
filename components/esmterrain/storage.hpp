@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <mutex>
+#include <unordered_map>
 
 #include <components/terrain/storage.hpp>
 
@@ -136,7 +137,7 @@ namespace ESMTerrain
         inline UniqueTextureId getVtexIndexAt(int cellX, int cellY, int x, int y, LandCache&);
         std::string getTextureName (UniqueTextureId id);
 
-        std::map<std::string, Terrain::LayerInfo> mLayerInfoMap;
+        std::unordered_map<std::string, Terrain::LayerInfo> mLayerInfoMap;
         std::mutex mLayerInfoMutex;
 
         std::string mNormalMapPattern;
