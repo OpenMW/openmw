@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_MULTIOBJECTCACHE_H
 #define OPENMW_COMPONENTS_MULTIOBJECTCACHE_H
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <mutex>
 
@@ -41,7 +41,7 @@ namespace Resource
 
     protected:
 
-        typedef std::multimap<std::string, osg::ref_ptr<osg::Object> >             ObjectCacheMap;
+        typedef std::unordered_multimap<std::string, osg::ref_ptr<osg::Object> >             ObjectCacheMap;
 
         ObjectCacheMap                          _objectCache;
         mutable std::mutex                      _objectCacheMutex;
