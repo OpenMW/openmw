@@ -1,7 +1,7 @@
 // Resource ObjectCache for OpenMW, forked from osgDB ObjectCache by Robert Osfield, see copyright notice below.
 // Changes:
 // - removeExpiredObjectsInCache no longer keeps a lock while the unref happens.
-// - template allows customized KeyType.
+// - template allows customized KeyType, MapType.
 // - objects with uninitialized time stamp are not removed.
 
 /* -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2006 Robert Osfield
