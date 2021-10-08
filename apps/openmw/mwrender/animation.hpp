@@ -9,6 +9,7 @@
 #include <components/sceneutil/nodecallback.hpp>
 
 #include <vector>
+#include <unordered_map>
 
 namespace ESM
 {
@@ -224,7 +225,7 @@ protected:
             return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0;
         }
     };
-    typedef std::map<std::string,AnimState> AnimStateMap;
+    typedef std::unordered_map<std::string,AnimState> AnimStateMap;
     AnimStateMap mStates;
 
     typedef std::vector<std::shared_ptr<AnimSource> > AnimSourceList;
@@ -251,7 +252,7 @@ protected:
     std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
     // Stored in all lowercase for a case-insensitive lookup
-    typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
+    typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
     mutable NodeMap mNodeMap;
     mutable bool mNodeMapCreated;
 
@@ -283,7 +284,7 @@ protected:
 
     float mAlpha;
 
-    mutable std::map<std::string, float> mAnimVelocities;
+    mutable std::unordered_map<std::string, float> mAnimVelocities;
 
     osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
 
