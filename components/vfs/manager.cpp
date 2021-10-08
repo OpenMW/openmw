@@ -127,6 +127,6 @@ namespace VFS
                     dir[pair.first] = pair.second;
         }
         const auto& dir = mDirectoryIndex[normalized];
-        return { dir.begin(), dir.end() }
+        return { dir.begin(), dir.end() };
     }
 }
