@@ -74,8 +74,8 @@ namespace MWWorld
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
-        std::map<std::string, int> mIds;
-        std::map<std::string, int> mStaticIds;
+        std::unordered_map<std::string, int> mIds;
+        std::unordered_map<std::string, int> mStaticIds;
 
         std::unordered_map<std::string, int> mRefCount;
 
@@ -108,7 +108,7 @@ namespace MWWorld
         /// \note id must be in lower case.
         int find(const std::string &id) const
         {
-            std::map<std::string, int>::const_iterator it = mIds.find(id);
+            std::unordered_map<std::string, int>::const_iterator it = mIds.find(id);
             if (it == mIds.end()) {
                 return 0;
             }
@@ -116,7 +116,7 @@ namespace MWWorld
         }
         int findStatic(const std::string &id) const
         {
-            std::map<std::string, int>::const_iterator it = mStaticIds.find(id);
+            std::unordered_map<std::string, int>::const_iterator it = mStaticIds.find(id);
             if (it == mStaticIds.end()) {
                 return 0;
             }
