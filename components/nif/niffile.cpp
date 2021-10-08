@@ -33,9 +33,9 @@ struct RecordFactoryEntry {
 };
 
 ///These are all the record types we know how to read.
-static std::map<std::string,RecordFactoryEntry> makeFactory()
+static std::unordered_map<std::string,RecordFactoryEntry> makeFactory()
 {
-    std::map<std::string,RecordFactoryEntry> factory;
+    std::unordered_map<std::string,RecordFactoryEntry> factory;
     factory["NiNode"]                       = {&construct <NiNode>                      , RC_NiNode                     };
     factory["NiSwitchNode"]                 = {&construct <NiSwitchNode>                , RC_NiSwitchNode               };
     factory["NiLODNode"]                    = {&construct <NiLODNode>                   , RC_NiLODNode                  };
@@ -140,7 +140,7 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
 }
 
 ///Make the factory map used for parsing the file
-static const std::map<std::string,RecordFactoryEntry> factories = makeFactory();
+static const std::unordered_map<std::string,RecordFactoryEntry> factories = makeFactory();
 
 std::string NIFFile::printVersion(unsigned int version)
 {
@@ -288,7 +288,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
             }
         }
 
-        std::map<std::string,RecordFactoryEntry>::const_iterator entry = factories.find(rec);
+        std::unordered_map<std::string,RecordFactoryEntry>::const_iterator entry = factories.find(rec);
 
         if (entry != factories.end())
         {
