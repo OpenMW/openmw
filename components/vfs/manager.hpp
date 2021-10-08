@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <map>
 
 namespace VFS
 {
@@ -35,14 +36,14 @@ namespace VFS
         class RecursiveDirectoryIterator
         {
         public:
-            RecursiveDirectoryIterator(std::unordered_map<std::string, File*>::const_iterator it) : mIt(it) {}
+            RecursiveDirectoryIterator(std::map<std::string, File*>::const_iterator it) : mIt(it) {}
             const std::string& operator*() const { return mIt->first; }
             const std::string* operator->() const { return &mIt->first; }
             bool operator!=(const RecursiveDirectoryIterator& other) { return mIt != other.mIt; }
             RecursiveDirectoryIterator& operator++() { ++mIt; return *this; }
 
         private:
-            std::unordered_map<std::string, File*>::const_iterator mIt;
+            std::map<std::string, File*>::const_iterator mIt;
         };
 
         using RecursiveDirectoryRange = IteratorPair<RecursiveDirectoryIterator>;
@@ -87,7 +88,6 @@ namespace VFS
         /// Recursivly iterate over the elements of the given path
         /// In practice it return all files of the VFS starting with the given path
         /// @note the path is normalized
-        /// @note May be called from any thread once the index has been built.
         RecursiveDirectoryRange getRecursiveDirectoryIterator(const std::string& path) const;
 
     private:
@@ -96,6 +96,8 @@ namespace VFS
         std::vector<Archive*> mArchives;
 
         std::unordered_map<std::string, File*> mIndex;
+
+        std::map<std::string, std::map<std::string, File*>> mDirectoryIndex;
     };
 
 }
