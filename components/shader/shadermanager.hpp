@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <mutex>
 
 #include <osg/ref_ptr>
@@ -54,7 +55,7 @@ namespace Shader
         DefineMap mGlobalDefines;
 
         // <name, code>
-        typedef std::map<std::string, std::string> TemplateMap;
+        typedef std::unordered_map<std::string, std::string> TemplateMap;
         TemplateMap mShaderTemplates;
 
         typedef std::pair<std::string, DefineMap> MapKey;
