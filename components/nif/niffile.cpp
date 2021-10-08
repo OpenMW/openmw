@@ -2,7 +2,7 @@
 #include "effect.hpp"
 
 #include <array>
-#include <map>
+#include <unordered_map>
 #include <sstream>
 
 namespace Nif
