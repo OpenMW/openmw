@@ -161,7 +161,7 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
     bool isNew = (mAction == ContentAction_New);
 
     if (isNew)
-        success = success && !(name.isEmpty());
+        success = !name.isEmpty();
     else if (success)
     {
         ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();

@@ -1870,6 +1870,7 @@ namespace CSMWorld
                         content.mWander.mDuration = static_cast<short>(value.toInt());
                     else
                         return; // return without saving
+                    break;
                 case 3:
                     if (content.mType == ESM::AI_Wander)
                         content.mWander.mTimeOfDay = static_cast<unsigned char>(value.toInt());

@@ -1,6 +1,7 @@
 #ifndef OPENMW_BARRIER_H
 #define OPENMW_BARRIER_H
 
+#include <cassert>
 #include <condition_variable>
 #include <mutex>
 
@@ -12,7 +13,9 @@ namespace Misc
         public:
             /// @param count number of threads to wait on
             explicit Barrier(int count) : mThreadCount(count), mRendezvousCount(0), mGeneration(0)
-            {}
+            {
+                assert(count >= 0);
+            }
 
             /// @brief stop execution of threads until count distinct threads reach this point
             /// @param func callable to be executed once after all threads have met
@@ -22,8 +25,8 @@ namespace Misc
                 std::unique_lock lock(mMutex);
 
                 ++mRendezvousCount;
-                const int currentGeneration = mGeneration;
-                if (mRendezvousCount == mThreadCount)
+                const unsigned int currentGeneration = mGeneration;
+                if (mRendezvousCount == mThreadCount || mThreadCount == 0)
                 {
                     ++mGeneration;
                     mRendezvousCount = 0;
@@ -37,9 +40,9 @@ namespace Misc
             }
 
         private:
-            int mThreadCount;
-            int mRendezvousCount;
-            int mGeneration;
+            unsigned int mThreadCount;
+            unsigned int mRendezvousCount;
+            unsigned int mGeneration;
             mutable std::mutex mMutex;
             std::condition_variable mRendezvous;
     };

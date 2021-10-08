@@ -89,7 +89,7 @@ namespace SceneUtil {
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
         {
         public:
-            ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix);
+            ComputeLightSpaceBounds();
 
             void apply(osg::Node& node) override;
 
@@ -108,6 +108,8 @@ namespace SceneUtil {
             void updateBound(const osg::BoundingBox& bb);
 
             void update(const osg::Vec3& v);
+
+            void reset() override;
 
             osg::BoundingBox _bb;
         };
@@ -236,6 +238,8 @@ namespace SceneUtil {
 
     protected:
         virtual ~MWShadowTechnique();
+
+        osg::ref_ptr<ComputeLightSpaceBounds>   _clsb;
 
         typedef std::map< osgUtil::CullVisitor*, osg::ref_ptr<ViewDependentData> >  ViewDependentDataMap;
         mutable std::mutex                      _viewDependentDataMapMutex;

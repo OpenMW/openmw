@@ -97,14 +97,12 @@ namespace MWPhysics
         const float mWaterlevel;
         const float mHalfExtentsZ;
         float mOldHeight;
-        float mFallHeight;
         unsigned int mStuckFrames;
         const bool mFlying;
         const bool mWasOnGround;
         const bool mIsAquatic;
         const bool mWaterCollision;
         const bool mSkipCollisionDetection;
-        bool mNeedLand;
     };
 
     struct WorldFrameData

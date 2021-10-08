@@ -978,14 +978,12 @@ namespace MWPhysics
         , mWaterlevel(waterlevel)
         , mHalfExtentsZ(actor.getHalfExtents().z())
         , mOldHeight(0)
-        , mFallHeight(0)
         , mStuckFrames(0)
         , mFlying(MWBase::Environment::get().getWorld()->isFlying(actor.getPtr()))
         , mWasOnGround(actor.getOnGround())
         , mIsAquatic(actor.getPtr().getClass().isPureWaterCreature(actor.getPtr()))
         , mWaterCollision(waterCollision)
         , mSkipCollisionDetection(actor.skipCollisions() || !actor.getCollisionMode())
-        , mNeedLand(false)
     {
     }
 
