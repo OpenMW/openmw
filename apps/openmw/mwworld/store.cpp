@@ -103,7 +103,7 @@ namespace MWWorld
         if (dit != mDynamic.end())
             return &dit->second;
 
-        typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
+        typename Static::const_iterator it = mStatic.find(idLower);
         if (it != mStatic.end())
             return &(it->second);
 
@@ -113,7 +113,7 @@ namespace MWWorld
     const T *Store<T>::searchStatic(const std::string &id) const
     {
         std::string idLower = Misc::StringUtils::lowerCase(id);
-        typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
+        typename Static::const_iterator it = mStatic.find(idLower);
         if (it != mStatic.end())
             return &(it->second);
 
@@ -232,7 +232,7 @@ namespace MWWorld
     {
         std::string idLower = Misc::StringUtils::lowerCase(id);
 
-        typename std::map<std::string, T>::iterator it = mStatic.find(idLower);
+        typename Static::iterator it = mStatic.find(idLower);
 
         if (it != mStatic.end()) {
             // delete from the static part of mShared
@@ -504,7 +504,7 @@ namespace MWWorld
         ESM::Cell cell;
         cell.mName = Misc::StringUtils::lowerCase(id);
 
-        std::map<std::string, ESM::Cell>::const_iterator it = mInt.find(cell.mName);
+        DynamicInt::const_iterator it = mInt.find(cell.mName);
 
         if (it != mInt.end()) {
             return &(it->second);
@@ -1061,7 +1061,7 @@ namespace MWWorld
         dialogue.loadId(esm);
 
         std::string idLower = Misc::StringUtils::lowerCase(dialogue.mId);
-        std::map<std::string, ESM::Dialogue>::iterator found = mStatic.find(idLower);
+        typename Static::iterator found = mStatic.find(idLower);
         if (found == mStatic.end())
         {
             dialogue.loadData(esm, isDeleted);
