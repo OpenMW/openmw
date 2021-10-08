@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_KEYFRAME_HPP
 #define OPENMW_COMPONENTS_SCENEUTIL_KEYFRAME_HPP
 
-#include <map>
+#include <unordered_map>
 
 #include <osg/Callback>
 
@@ -57,7 +57,7 @@ namespace SceneUtil
         META_Object(SceneUtil, KeyframeHolder)
 
         /// Controllers mapped to node name.
-        typedef std::map<std::string, osg::ref_ptr<const KeyframeController> > KeyframeControllerMap;
+        typedef std::unordered_map<std::string, osg::ref_ptr<const KeyframeController> > KeyframeControllerMap;
         KeyframeControllerMap mKeyframeControllers;
     };
 
