@@ -357,14 +357,6 @@ MWShadowTechnique::ComputeLightSpaceBounds::ComputeLightSpaceBounds() :
     osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
 {
     setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
-
-
-
-
-
-
-
-
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::reset()
