@@ -3,7 +3,7 @@
 
 #include <string>
 #include <list>
-#include <map>
+#include <unordered_map>
 
 #include "loadinfo.hpp"
 
@@ -40,7 +40,7 @@ struct Dialogue
     typedef std::list<DialInfo> InfoContainer;
 
     // Parameters: Info ID, (Info iterator, Deleted flag)
-    typedef std::map<std::string, std::pair<InfoContainer::iterator, bool> > LookupMap;
+    typedef std::unordered_map<std::string, std::pair<InfoContainer::iterator, bool> > LookupMap;
 
     InfoContainer mInfo;
 
