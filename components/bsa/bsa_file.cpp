@@ -189,13 +189,6 @@ void BSAFile::readHeader()
         return left.offset < right.offset;
     });
 
-    for (size_t i = 0; i < filenum; i++)
-    {
-        FileStruct& fs = mFiles[i];
-        // Add the file name to the lookup
-        mLookup[fs.name()] = i;
-    }
-
     mIsLoaded = true;
 }
 
