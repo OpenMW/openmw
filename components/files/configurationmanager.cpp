@@ -82,7 +82,8 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
     mSilent = silent;
 }
 
-boost::program_options::variables_map ConfigurationManager::separateComposingVariables(boost::program_options::variables_map & variables, boost::program_options::options_description& description)
+boost::program_options::variables_map separateComposingVariables(boost::program_options::variables_map & variables,
+    boost::program_options::options_description& description)
 {
     boost::program_options::variables_map composingVariables;
     for (auto itr = variables.begin(); itr != variables.end();)
@@ -98,7 +99,8 @@ boost::program_options::variables_map ConfigurationManager::separateComposingVar
     return composingVariables;
 }
 
-void ConfigurationManager::mergeComposingVariables(boost::program_options::variables_map & first, boost::program_options::variables_map & second, boost::program_options::options_description& description)
+void mergeComposingVariables(boost::program_options::variables_map& first, boost::program_options::variables_map& second,
+    boost::program_options::options_description& description)
 {
     // There are a few places this assumes all variables are present in second, but it's never crashed in the wild, so it looks like that's guaranteed.
     std::set<std::string> replacedVariables;
@@ -234,13 +236,10 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
             Log(Debug::Info) << "Loading config file: " << cfgFile.string();
 
         boost::filesystem::ifstream configFileStreamUnfiltered(cfgFile);
-        boost::iostreams::filtering_istream configFileStream;
-        configFileStream.push(escape_hash_filter());
-        configFileStream.push(configFileStreamUnfiltered);
+
         if (configFileStreamUnfiltered.is_open())
         {
-            boost::program_options::store(boost::program_options::parse_config_file(
-                configFileStream, description, true), variables);
+            parseConfig(configFileStreamUnfiltered, variables, description);
 
             return true;
         }
@@ -298,6 +297,28 @@ const boost::filesystem::path& ConfigurationManager::getLogPath() const
 const boost::filesystem::path& ConfigurationManager::getScreenshotPath() const
 {
     return mScreenshotPath;
+}
+
+void parseArgs(int argc, const char* const argv[], boost::program_options::variables_map& variables,
+    boost::program_options::options_description& description)
+{
+    boost::program_options::store(
+        boost::program_options::command_line_parser(argc, argv).options(description).allow_unregistered().run(),
+        variables
+    );
+}
+
+void parseConfig(std::istream& stream, boost::program_options::variables_map& variables,
+    boost::program_options::options_description& description)
+{
+    boost::iostreams::filtering_istream configFileStream;
+    configFileStream.push(escape_hash_filter());
+    configFileStream.push(stream);
+
+    boost::program_options::store(
+        boost::program_options::parse_config_file(configFileStream, description, true),
+        variables
+    );
 }
 
 } /* namespace Cfg */

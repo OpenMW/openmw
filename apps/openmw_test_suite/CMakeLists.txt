@@ -40,6 +40,9 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         shader/parsedefines.cpp
         shader/parsefors.cpp
         shader/shadermanager.cpp
+
+        ../openmw/options.cpp
+        openmw/options.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
