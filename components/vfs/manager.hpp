@@ -97,7 +97,7 @@ namespace VFS
 
         std::unordered_map<std::string, File*> mIndex;
 
-        std::map<std::string, std::map<std::string, File*>> mDirectoryIndex;
+        mutable std::map<std::string, std::map<std::string, File*>> mDirectoryIndex;
     };
 
 }
