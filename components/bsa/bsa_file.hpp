@@ -125,7 +125,7 @@ public:
     /** Open a file contained in the archive.
      * @note Thread safe.
     */
-    Files::IStreamPtr getFile(const FileStruct* file);
+    virtual Files::IStreamPtr getFile(const FileStruct* file);
 
     virtual void addFile(const std::string& filename, std::istream& file);
 
