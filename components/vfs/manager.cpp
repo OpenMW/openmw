@@ -72,7 +72,7 @@ namespace VFS
 
     Files::IStreamPtr Manager::getNormalized(const std::string &normalizedName) const
     {
-        std::map<std::string, File*>::const_iterator found = mIndex.find(normalizedName);
+        std::unordered_map<std::string, File*>::const_iterator found = mIndex.find(normalizedName);
         if (found == mIndex.end())
             throw std::runtime_error("Resource '" + normalizedName + "' not found");
         return found->second->open();
