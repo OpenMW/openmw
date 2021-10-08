@@ -4,6 +4,7 @@
 #include <MyGUI_RenderManager.h>
 
 #include <osg/ref_ptr>
+#include <unordered_map>
 
 #include "myguicompat.h"
 
@@ -47,7 +48,7 @@ class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget
     MyGUI::VertexColourType mVertexFormat;
     MyGUI::RenderTargetInfo mInfo;
 
-    typedef std::map<std::string, MyGUI::ITexture*> MapTexture;
+    typedef std::unordered_map<std::string, MyGUI::ITexture*> MapTexture;
     MapTexture mTextures;
 
     bool mIsInitialise;
