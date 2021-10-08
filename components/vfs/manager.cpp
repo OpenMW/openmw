@@ -44,6 +44,7 @@ namespace VFS
     void Manager::reset()
     {
         mIndex.clear();
+        mDirectoryIndex.clear();
         for (std::vector<Archive*>::iterator it = mArchives.begin(); it != mArchives.end(); ++it)
             delete *it;
         mArchives.clear();
@@ -57,6 +58,7 @@ namespace VFS
     void Manager::buildIndex()
     {
         mIndex.clear();
+        mDirectoryIndex.clear();
 
         for (std::vector<Archive*>::const_iterator it = mArchives.begin(); it != mArchives.end(); ++it)
             (*it)->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
@@ -115,13 +117,16 @@ namespace VFS
 
     Manager::RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(const std::string& path) const
     {
-        if (path.empty())
-            return { mIndex.begin(), mIndex.end() };
         auto normalized = normalizeFilename(path);
-        const auto it = mIndex.lower_bound(normalized);
-        if (it == mIndex.end() || !startsWith(it->first, normalized))
-            return { it, it };
-        ++normalized.back();
-        return { it, mIndex.lower_bound(normalized) };
+
+        if (mDirectoryIndex.find(normalized) == mDirectoryIndex.end())
+        {
+            auto& dir = mDirectoryIndex[normalized];
+            for (const auto& pair : mIndex)
+                if (startsWith(pair.first, normalized))
+                    dir[pair.first] = pair.second;
+        }
+        auto& dir = mDirectoryIndex[normalized];
+        return { dir.begin(), dir.end() }
     }
 }
