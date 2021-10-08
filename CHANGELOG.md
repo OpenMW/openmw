@@ -48,6 +48,7 @@
     Bug #6282: Laura craft doesn't follow the player character
     Bug #6283: Avis Dorsey follows you after her death
     Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
+    Bug #6291: Can't pickup the dead mage's journal from the mysterious hunter mod
     Bug #6302: Teleporting disabled actor breaks its disabled state
     Bug #6307: Pathfinding in Infidelities quest from Tribunal addon is broken
     Feature #890: OpenMW-CS: Column filtering
