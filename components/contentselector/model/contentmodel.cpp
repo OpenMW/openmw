@@ -107,34 +107,28 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
 
     // addon can be checked if its gamefile is
     // ... special case, addon with no dependency can be used with any gamefile.
-    bool gamefileChecked = (file->gameFiles().count() == 0);
+    bool gamefileChecked = false;
+    bool noGameFiles = true;
     for (const QString &fileName : file->gameFiles())
     {
         for (QListIterator<EsmFile *> dependencyIter(mFiles); dependencyIter.hasNext(); dependencyIter.next())
         {
             //compare filenames only.  Multiple instances
             //of the filename (with different paths) is not relevant here.
-            bool depFound = (dependencyIter.peekNext()->fileName().compare(fileName, Qt::CaseInsensitive) == 0);
-
-            if (!depFound)
+            EsmFile* depFile = dependencyIter.peekNext();
+            if (!depFile->isGameFile() || depFile->fileName().compare(fileName, Qt::CaseInsensitive) != 0)
                 continue;
 
-            if (!gamefileChecked)
+            noGameFiles = false;
+            if (isChecked(depFile->filePath()))
             {
-                if (isChecked (dependencyIter.peekNext()->filePath()))
-                    gamefileChecked = (dependencyIter.peekNext()->isGameFile());
-            }
-
-            // force it to iterate all files in cases where the current
-            // dependency is a game file to ensure that a later duplicate
-            // game file is / is not checked.
-            // (i.e., break only if it's not a gamefile or the game file has been checked previously)
-            if (gamefileChecked || !(dependencyIter.peekNext()->isGameFile()))
+                gamefileChecked = true;
                 break;
+            }
         }
     }
 
-    if (gamefileChecked)
+    if (gamefileChecked || noGameFiles)
     {
         returnFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
     }
