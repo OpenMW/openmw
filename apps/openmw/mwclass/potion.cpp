@@ -74,7 +74,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Potion);
 
-        registerClass (typeid (ESM::Potion).name(), instance);
+        registerClass (ESM::Potion::sRecordId, instance);
     }
 
     std::string Potion::getUpSoundId (const MWWorld::ConstPtr& ptr) const
