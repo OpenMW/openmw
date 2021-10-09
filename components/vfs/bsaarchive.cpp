@@ -66,6 +66,16 @@ CompressedBsaArchive::CompressedBsaArchive(const std::string &filename)
     }
 }
 
+void CompressedBsaArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
+{
+    for (std::vector<CompressedBsaArchiveFile>::iterator it = mCompressedResources.begin(); it != mCompressedResources.end(); ++it)
+    {
+        std::string ent = it->mInfo->name();
+        std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
+
+        out[ent] = &*it;
+    }
+}
 
 // ------------------------------------------------------------------------------
 
@@ -91,17 +101,6 @@ CompressedBsaArchiveFile::CompressedBsaArchiveFile(const Bsa::BSAFile::FileStruc
 Files::IStreamPtr CompressedBsaArchiveFile::open()
 {
     return mCompressedFile->getFile(mInfo);
-}
-
-void CompressedBsaArchiveFile::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
-{
-    for (std::vector<CompressedBsaArchiveFile>::iterator it = mCompressedResources.begin(); it != mCompressedResources.end(); ++it)
-    {
-        std::string ent = it->mInfo->name();
-        std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
-
-        out[ent] = &*it;
-    }
 }
 
 }
