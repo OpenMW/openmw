@@ -672,6 +672,8 @@ namespace MWRender
 
             optimizer.optimize(mergeGroup, options);
 
+            group->addChild(mergeGroup);
+
             if (mDebugBatches)
             {
                 DebugVisitor dv;
@@ -682,9 +684,6 @@ namespace MWRender
                 stateToCompile._mode = osgUtil::GLObjectsVisitor::COMPILE_DISPLAY_LISTS;
                 mergeGroup->accept(stateToCompile);
             }
-
-            for (unsigned int i=0; i<mergeGroup->getNumChildren(); ++i)
-                group->addChild(mergeGroup->getChild(i));
         }
 
         auto ico = mSceneManager->getIncrementalCompileOperation();
