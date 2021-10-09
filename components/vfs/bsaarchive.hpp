@@ -54,6 +54,7 @@ namespace VFS
         virtual ~CompressedBsaArchive();
 
     private:
+        std::unique_ptr<Bsa::CompressedBSAFile> mCompressedFile;
         std::vector<CompressedBsaArchiveFile> mCompressedResources;
     };
 
