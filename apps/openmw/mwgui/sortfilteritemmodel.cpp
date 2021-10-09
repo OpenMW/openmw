@@ -62,15 +62,15 @@ namespace
             float result = 0;
 
             // compare items by type
-            std::string leftName = left.mBase.getType();
-            std::string rightName = right.mBase.getType();
+            auto leftType = left.mBase.getType();
+            auto rightType = right.mBase.getType();
 
-            if (leftName != rightName)
-                return compareType(leftName, rightName);
+            if (leftType != rightType)
+                return compareType(leftType, rightType);
 
             // compare items by name
-            leftName = Misc::StringUtils::lowerCaseUtf8(left.mBase.getClass().getName(left.mBase));
-            rightName = Misc::StringUtils::lowerCaseUtf8(right.mBase.getClass().getName(right.mBase));
+            std::string leftName = Misc::StringUtils::lowerCaseUtf8(left.mBase.getClass().getName(left.mBase));
+            std::string rightName = Misc::StringUtils::lowerCaseUtf8(right.mBase.getClass().getName(right.mBase));
 
             result = leftName.compare(rightName);
             if (result != 0)
