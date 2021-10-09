@@ -39,7 +39,7 @@ namespace VFS
         bool contains(const std::string& file, char (*normalize_function) (char)) const override;
         std::string getDescription() const override;
 
-    private:
+    protected:
         std::unique_ptr<Bsa::BSAFile> mFile;
         std::vector<BsaArchiveFile> mResources;
     };
