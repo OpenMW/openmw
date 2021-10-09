@@ -59,10 +59,10 @@ struct ContentFileTest : public ::testing::Test
 
         boost::program_options::options_description desc("Allowed options");
         desc.add_options()
-        ("data", boost::program_options::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")->multitoken()->composing())
-        ("content", boost::program_options::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+        ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
+        ("content", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
             ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
-        ("data-local", boost::program_options::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""));
+        ("data-local", boost::program_options::value<Files::PathContainer::value_type>()->default_value(Files::PathContainer::value_type(), ""));
 
         boost::program_options::notify(variables);
 
@@ -70,10 +70,10 @@ struct ContentFileTest : public ::testing::Test
 
         Files::PathContainer dataDirs, dataLocal;
         if (!variables["data"].empty()) {
-            dataDirs = Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>());
+            dataDirs = variables["data"].as<Files::PathContainer>();
         }
 
-        Files::PathContainer::value_type local(variables["data-local"].as<Files::EscapePath>().mPath);
+        Files::PathContainer::value_type local(variables["data-local"].as<Files::PathContainer::value_type>());
         if (!local.empty()) {
             dataLocal.push_back(local);
         }
@@ -86,7 +86,7 @@ struct ContentFileTest : public ::testing::Test
 
         Files::Collections collections (dataDirs, true);
 
-        std::vector<std::string> contentFiles = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
+        std::vector<std::string> contentFiles = variables["content"].as<std::vector<std::string>>();
         for (auto & contentFile : contentFiles)
             mContentFiles.push_back(collections.getPath(contentFile));
     }

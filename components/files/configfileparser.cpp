@@ -158,8 +158,8 @@ namespace Files
             while (this->getline(s)) {
 
                 // strip '#' comments and whitespace
-                if ((n = s.find('#')) != std::string::npos)
-                    s = s.substr(0, n);
+                if (s.find('#') == s.find_first_not_of(" \t\r\n"))
+                    continue;
                 s = trim_ws(s);
 
                 if (!s.empty()) {

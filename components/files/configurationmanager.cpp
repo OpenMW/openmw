@@ -108,7 +108,7 @@ void ConfigurationManager::mergeComposingVariables(boost::program_options::varia
         auto replace = second["replace"];
         if (!replace.defaulted() && !replace.empty())
         {
-            std::vector<std::string> replaceVector = replace.as<Files::EscapeStringVector>().toStdStringVector();
+            std::vector<std::string> replaceVector = replace.as<std::vector<std::string>>();
             replacedVariables.insert(replaceVector.begin(), replaceVector.end());
         }
     }
@@ -137,19 +137,19 @@ void ConfigurationManager::mergeComposingVariables(boost::program_options::varia
             boost::any& firstValue = firstPosition->second.value();
             const boost::any& secondValue = second[name].value();
             
-            if (firstValue.type() == typeid(Files::EscapePathContainer))
+            if (firstValue.type() == typeid(Files::PathContainer))
             {
-                auto& firstPathContainer = boost::any_cast<Files::EscapePathContainer&>(firstValue);
-                const auto& secondPathContainer = boost::any_cast<const Files::EscapePathContainer&>(secondValue);
+                auto& firstPathContainer = boost::any_cast<Files::PathContainer&>(firstValue);
+                const auto& secondPathContainer = boost::any_cast<const Files::PathContainer&>(secondValue);
 
                 firstPathContainer.insert(firstPathContainer.end(), secondPathContainer.begin(), secondPathContainer.end());
             }
-            else if (firstValue.type() == typeid(Files::EscapeStringVector))
+            else if (firstValue.type() == typeid(std::vector<std::string>))
             {
-                auto& firstVector = boost::any_cast<Files::EscapeStringVector&>(firstValue);
-                const auto& secondVector = boost::any_cast<const Files::EscapeStringVector&>(secondValue);
+                auto& firstVector = boost::any_cast<std::vector<std::string>&>(firstValue);
+                const auto& secondVector = boost::any_cast<const std::vector<std::string>&>(secondValue);
 
-                firstVector.mVector.insert(firstVector.mVector.end(), secondVector.mVector.begin(), secondVector.mVector.end());
+                firstVector.insert(firstVector.end(), secondVector.begin(), secondVector.end());
             }
             else if (firstValue.type() == typeid(Fallback::FallbackMap))
             {
@@ -234,11 +234,8 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
         if (!mSilent)
             Log(Debug::Info) << "Loading config file: " << cfgFile.string();
 
-        boost::filesystem::ifstream configFileStreamUnfiltered(cfgFile);
-        boost::iostreams::filtering_istream configFileStream;
-        configFileStream.push(escape_hash_filter());
-        configFileStream.push(configFileStreamUnfiltered);
-        if (configFileStreamUnfiltered.is_open())
+        boost::filesystem::ifstream configFileStream(cfgFile);
+        if (configFileStream.is_open())
         {
             boost::program_options::store(Files::parse_config_file(
                 configFileStream, description, true), variables);

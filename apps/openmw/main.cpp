@@ -45,31 +45,31 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("help", "print help message")
         ("version", "print version information and quit")
 
-        ("replace", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+        ("replace", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken()->composing(), "settings where the values from the current source should replace those from lower-priority sources instead of being appended")
 
-        ("data", bpo::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")
+        ("data", bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
             ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
-        ("data-local", bpo::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""),
+        ("data-local", bpo::value<Files::PathContainer::value_type>()->default_value(Files::PathContainer::value_type(), ""),
             "set local data directory (highest priority)")
 
-        ("fallback-archive", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "fallback-archive")
+        ("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
             ->multitoken()->composing(), "set fallback BSA archives (later archives have higher priority)")
 
-        ("resources", bpo::value<Files::EscapePath>()->default_value(Files::EscapePath(), "resources"),
+        ("resources", bpo::value<boost::filesystem::path>()->default_value(boost::filesystem::path(), "resources"),
             "set resources directory")
 
-        ("start", bpo::value<Files::EscapeHashString>()->default_value(""),
+        ("start", bpo::value<std::string>()->default_value(""),
             "set initial cell")
 
-        ("content", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+        ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
 
-        ("groundcover", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+        ("groundcover", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken()->composing(), "groundcover content file(s): esm/esp, or omwgame/omwaddon")
 
-        ("lua-scripts", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+        ("lua-scripts", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken()->composing(), "file(s) with a list of global Lua scripts: omwscripts")
 
         ("no-sound", bpo::value<bool>()->implicit_value(true)
@@ -84,7 +84,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-console", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "enable console-only script functionality")
 
-        ("script-run", bpo::value<Files::EscapeHashString>()->default_value(""),
+        ("script-run", bpo::value<std::string>()->default_value(""),
             "select a file containing a list of console commands that is executed on startup")
 
         ("script-warn", bpo::value<int>()->implicit_value (1)
@@ -94,13 +94,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "\t1 - show warning but consider script as correctly compiled anyway\n"
             "\t2 - treat warnings as errors")
 
-        ("script-blacklist", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+        ("script-blacklist", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken()->composing(), "ignore the specified script (if the use of the blacklist is enabled)")
 
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
             ->default_value(true), "enable script blacklisting")
 
-        ("load-savegame", bpo::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""),
+        ("load-savegame", bpo::value<boost::filesystem::path>()->default_value(boost::filesystem::path(), ""),
             "load a save game file on game startup (specify an absolute filename or a filename relative to the current working directory)")
 
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
@@ -112,7 +112,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
 
-        ("encoding", bpo::value<Files::EscapeHashString>()->
+        ("encoding", bpo::value<std::string>()->
             default_value("win1252"),
             "Character encoding used in OpenMW game messages:\n"
             "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
@@ -153,7 +153,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         cfgMgr.readConfiguration(variables, desc, true);
 
-        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapePath>().mPath.string());
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<boost::filesystem::path>().string());
         getRawStdout() << v.describe() << std::endl;
         return false;
     }
@@ -162,38 +162,38 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.readConfiguration(variables, desc);
     cfgMgr.mergeComposingVariables(variables, composingVariables, desc);
 
-    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapePath>().mPath.string());
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<boost::filesystem::path>().string());
     Log(Debug::Info) << v.describe();
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
 
     // Font encoding settings
-    std::string encoding(variables["encoding"].as<Files::EscapeHashString>().toStdString());
+    std::string encoding(variables["encoding"].as<std::string>());
     Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
     engine.setEncoding(ToUTF8::calculateEncoding(encoding));
 
     // directory settings
     engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
-    Files::PathContainer dataDirs(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
+    Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::EscapePath>().mPath);
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::PathContainer::value_type>());
     if (!local.empty())
         dataDirs.push_back(local);
 
     cfgMgr.processPaths(dataDirs);
 
-    engine.setResourceDir(variables["resources"].as<Files::EscapePath>().mPath);
+    engine.setResourceDir(variables["resources"].as<boost::filesystem::path>());
     engine.setDataDirs(dataDirs);
 
     // fallback archives
-    StringsVector archives = variables["fallback-archive"].as<Files::EscapeStringVector>().toStdStringVector();
+    StringsVector archives = variables["fallback-archive"].as<StringsVector>();
     for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); ++it)
     {
         engine.addArchive(*it);
     }
 
-    StringsVector content = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
+    StringsVector content = variables["content"].as<StringsVector>();
     if (content.empty())
     {
         Log(Debug::Error) << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting...";
@@ -214,18 +214,18 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         engine.addContentFile(file);
     }
 
-    StringsVector groundcover = variables["groundcover"].as<Files::EscapeStringVector>().toStdStringVector();
+    StringsVector groundcover = variables["groundcover"].as<StringsVector>();
     for (auto& file : groundcover)
     {
         engine.addGroundcoverFile(file);
     }
 
-    StringsVector luaScriptLists = variables["lua-scripts"].as<Files::EscapeStringVector>().toStdStringVector();
+    StringsVector luaScriptLists = variables["lua-scripts"].as<StringsVector>();
     for (const auto& file : luaScriptLists)
         engine.addLuaScriptListFile(file);
 
     // startup-settings
-    engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());
+    engine.setCell(variables["start"].as<std::string>());
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
         Log(Debug::Warning) << "Warning: new-game used without skip-menu -> ignoring it";
@@ -234,11 +234,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setCompileAllDialogue(variables["script-all-dialogue"].as<bool>());
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
-    engine.setStartupScript (variables["script-run"].as<Files::EscapeHashString>().toStdString());
+    engine.setStartupScript (variables["script-run"].as<std::string>());
     engine.setWarningsMode (variables["script-warn"].as<int>());
-    engine.setScriptBlacklist (variables["script-blacklist"].as<Files::EscapeStringVector>().toStdStringVector());
+    engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
-    engine.setSaveGameFile (variables["load-savegame"].as<Files::EscapePath>().mPath.string());
+    engine.setSaveGameFile (variables["load-savegame"].as<boost::filesystem::path>().string());
 
     // other settings
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
