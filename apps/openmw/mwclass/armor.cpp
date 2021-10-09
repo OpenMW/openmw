@@ -163,7 +163,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Armor);
 
-        registerClass (typeid (ESM::Armor).name(), instance);
+        registerClass (ESM::Armor::sRecordId, instance);
     }
 
     std::string Armor::getUpSoundId (const MWWorld::ConstPtr& ptr) const
