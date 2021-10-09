@@ -1,8 +1,6 @@
 #ifndef GAME_MWWORLD_LIVECELLREF_H
 #define GAME_MWWORLD_LIVECELLREF_H
 
-#include <typeinfo>
-
 #include "cellref.hpp"
 
 #include "refdata.hpp"
@@ -31,7 +29,7 @@ namespace MWWorld
         /** runtime-data */
         RefData mData;
 
-        LiveCellRefBase(const std::string& type, const ESM::CellRef &cref=ESM::CellRef());
+        LiveCellRefBase(unsigned int type, const ESM::CellRef &cref=ESM::CellRef());
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase() { }
 
@@ -77,11 +75,11 @@ namespace MWWorld
     struct LiveCellRef : public LiveCellRefBase
     {
         LiveCellRef(const ESM::CellRef& cref, const X* b = nullptr)
-            : LiveCellRefBase(typeid(X).name(), cref), mBase(b)
+            : LiveCellRefBase(X::sRecordId, cref), mBase(b)
         {}
 
         LiveCellRef(const X* b = nullptr)
-            : LiveCellRefBase(typeid(X).name()), mBase(b)
+            : LiveCellRefBase(X::sRecordId), mBase(b)
         {}
 
         // The object that this instance is based on.
