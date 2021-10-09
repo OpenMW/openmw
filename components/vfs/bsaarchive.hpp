@@ -49,7 +49,7 @@ namespace VFS
     public:
         CompressedBsaArchive(const std::string& filename);
         void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
-        virtual ~CompressedBsaArchive();
+        virtual ~CompressedBsaArchive() {}
 
     private:
         std::unique_ptr<Bsa::CompressedBSAFile> mCompressedFile;
