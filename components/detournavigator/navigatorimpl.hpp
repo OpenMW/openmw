@@ -60,7 +60,7 @@ namespace DetourNavigator
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
 
-        RecastMeshTiles getRecastMeshTiles() override;
+        RecastMeshTiles getRecastMeshTiles() const override;
 
         float getMaxNavmeshAreaRealRadius() const override;
 

@@ -59,7 +59,7 @@ namespace DetourNavigator
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
 
-        RecastMeshTiles getRecastMeshTiles();
+        RecastMeshTiles getRecastMeshTiles() const;
 
     private:
         const Settings& mSettings;

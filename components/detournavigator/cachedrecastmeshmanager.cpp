@@ -13,7 +13,7 @@ namespace DetourNavigator
     {
         if (!mImpl.addObject(id, shape, transform, areaType))
             return false;
-        mCached.lock()->reset();
+        mOutdatedCache = true;
         return true;
     }
 
@@ -21,7 +21,7 @@ namespace DetourNavigator
     {
         if (!mImpl.updateObject(id, transform, areaType))
             return false;
-        mCached.lock()->reset();
+        mOutdatedCache = true;
         return true;
     }
 
@@ -29,7 +29,7 @@ namespace DetourNavigator
     {
         auto object = mImpl.removeObject(id);
         if (object)
-            mCached.lock()->reset();
+            mOutdatedCache = true;
         return object;
     }
 
@@ -38,7 +38,7 @@ namespace DetourNavigator
     {
         if (!mImpl.addWater(cellPosition, cellSize, shift))
             return false;
-        mCached.lock()->reset();
+        mOutdatedCache = true;
         return true;
     }
 
@@ -46,7 +46,7 @@ namespace DetourNavigator
     {
         const auto water = mImpl.removeWater(cellPosition);
         if (water)
-            mCached.lock()->reset();
+            mOutdatedCache = true;
         return water;
     }
 
@@ -55,7 +55,7 @@ namespace DetourNavigator
     {
         if (!mImpl.addHeightfield(cellPosition, cellSize, shift, shape))
             return false;
-        mCached.lock()->reset();
+        mOutdatedCache = true;
         return true;
     }
 
@@ -63,18 +63,27 @@ namespace DetourNavigator
     {
         const auto cell = mImpl.removeHeightfield(cellPosition);
         if (cell)
-            mCached.lock()->reset();
+            mOutdatedCache = true;
         return cell;
     }
 
     std::shared_ptr<RecastMesh> CachedRecastMeshManager::getMesh()
     {
-        std::shared_ptr<RecastMesh> cached = *mCached.lock();
-        if (cached != nullptr)
-            return cached;
-        cached = mImpl.getMesh();
-        *mCached.lock() = cached;
-        return cached;
+        bool outdated = true;
+        if (!mOutdatedCache.compare_exchange_strong(outdated, false))
+        {
+            std::shared_ptr<RecastMesh> cached = getCachedMesh();
+            if (cached != nullptr)
+                return cached;
+        }
+        std::shared_ptr<RecastMesh> mesh = mImpl.getMesh();
+        *mCached.lock() = mesh;
+        return mesh;
+    }
+
+    std::shared_ptr<RecastMesh> CachedRecastMeshManager::getCachedMesh() const
+    {
+        return *mCached.lockConst();
     }
 
     bool CachedRecastMeshManager::isEmpty() const

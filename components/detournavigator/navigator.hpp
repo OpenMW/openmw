@@ -236,7 +236,7 @@ namespace DetourNavigator
         std::optional<osg::Vec3f> raycast(const osg::Vec3f& agentHalfExtents, const osg::Vec3f& start,
             const osg::Vec3f& end, const Flags includeFlags) const;
 
-        virtual RecastMeshTiles getRecastMeshTiles() = 0;
+        virtual RecastMeshTiles getRecastMeshTiles() const = 0;
 
         virtual float getMaxNavmeshAreaRealRadius() const = 0;
     };
