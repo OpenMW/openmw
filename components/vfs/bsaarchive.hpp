@@ -4,6 +4,7 @@
 #include "archive.hpp"
 
 #include <components/bsa/bsa_file.hpp>
+#include <components/bsa/compressedbsafile.hpp>
 
 namespace VFS
 {
@@ -18,6 +19,19 @@ namespace VFS
         Bsa::BSAFile* mFile;
     };
 
+    class CompressedBsaArchiveFile : public File
+    {
+    public:
+        CompressedBsaArchiveFile(const Bsa::BSAFile::FileStruct* info, const Bsa::CompressedBSAFile::FileRecord* record, Bsa::CompressedBSAFile* bsa);
+
+        Files::IStreamPtr open() override;
+
+        const Bsa::BSAFile::FileStruct* mInfo;
+        const Bsa::CompressedBSAFile::FileRecord* mRecord;
+        Bsa::CompressedBSAFile* mFile;
+    };
+
+
     class BsaArchive : public Archive
     {
     public:
@@ -31,6 +45,18 @@ namespace VFS
         std::unique_ptr<Bsa::BSAFile> mFile;
         std::vector<BsaArchiveFile> mResources;
     };
+
+    class CompressedBsaArchive : public BsaArchive
+    {
+    public:
+        CompressedBsaArchive(const std::string& filename);
+        void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
+        virtual ~CompressedBsaArchive();
+
+    private:
+        std::vector<CompressedBsaArchiveFile> mCompressedResources;
+    };
+
 }
 
 #endif
