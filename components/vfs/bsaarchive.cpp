@@ -7,15 +7,7 @@ namespace VFS
 
 BsaArchive::BsaArchive(const std::string &filename)
 {
-    Bsa::BsaVersion bsaVersion = Bsa::CompressedBSAFile::detectVersion(filename);
-
-    if (bsaVersion == Bsa::BSAVER_COMPRESSED) {
-        mFile = std::make_unique<Bsa::CompressedBSAFile>(Bsa::CompressedBSAFile());
-    }
-    else {
-        mFile = std::make_unique<Bsa::BSAFile>(Bsa::BSAFile());
-    }
-
+    mFile = std::make_unique<Bsa::BSAFile>(Bsa::BSAFile());
     mFile->open(filename);
 
     const Bsa::BSAFile::FileList &filelist = mFile->getList();
@@ -23,6 +15,10 @@ BsaArchive::BsaArchive(const std::string &filename)
     {
         mResources.emplace_back(&*it, mFile.get());
     }
+}
+
+BsaArchive::BsaArchive()
+{
 }
 
 BsaArchive::~BsaArchive() {
@@ -56,6 +52,21 @@ std::string BsaArchive::getDescription() const
     return std::string{"BSA: "} + mFile->getFilename();
 }
 
+CompressedBsaArchive::CompressedBsaArchive(const std::string &filename)
+    : BsaArchive()
+{
+    mFile = std::make_unique<Bsa::BSAFile>(Bsa::CompressedBSAFile());
+    mFile->open(filename);
+
+    const Bsa::BSAFile::FileList &filelist = mFile->getList();
+    for(Bsa::BSAFile::FileList::const_iterator it = filelist.begin();it != filelist.end();++it)
+    {
+        mResources.emplace_back(&*it, mFile.get());
+        mCompressedResources.emplace_back(&*it, static_cast<CompressedBSAFile*>(mFile.get()));
+    }
+}
+
+
 // ------------------------------------------------------------------------------
 
 BsaArchiveFile::BsaArchiveFile(const Bsa::BSAFile::FileStruct *info, Bsa::BSAFile* bsa)
@@ -68,6 +79,18 @@ BsaArchiveFile::BsaArchiveFile(const Bsa::BSAFile::FileStruct *info, Bsa::BSAFil
 Files::IStreamPtr BsaArchiveFile::open()
 {
     return mFile->getFile(mInfo);
+}
+
+CompressedBsaArchiveFile::CompressedBsaArchiveFile(const Bsa::BSAFile::FileStruct *info, Bsa::CompressedBSAFile* bsa)
+    : BsaArchiveFile(info, bsa)
+    , mCompressedFile(bsa)
+{
+
+}
+
+Files::IStreamPtr CompressedBsaArchiveFile::open()
+{
+    return mCompressedFile->getFile(mInfo);
 }
 
 }
