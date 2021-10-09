@@ -27,22 +27,22 @@
 
 namespace
 {
-    bool compareType(const std::string& type1, const std::string& type2)
+    bool compareType(unsigned int type1, unsigned int type2)
     {
         // this defines the sorting order of types. types that are first in the vector appear before other types.
-        std::vector<std::string> mapping;
-        mapping.emplace_back(typeid(ESM::Weapon).name() );
-        mapping.emplace_back(typeid(ESM::Armor).name() );
-        mapping.emplace_back(typeid(ESM::Clothing).name() );
-        mapping.emplace_back(typeid(ESM::Potion).name() );
-        mapping.emplace_back(typeid(ESM::Ingredient).name() );
-        mapping.emplace_back(typeid(ESM::Apparatus).name() );
-        mapping.emplace_back(typeid(ESM::Book).name() );
-        mapping.emplace_back(typeid(ESM::Light).name() );
-        mapping.emplace_back(typeid(ESM::Miscellaneous).name() );
-        mapping.emplace_back(typeid(ESM::Lockpick).name() );
-        mapping.emplace_back(typeid(ESM::Repair).name() );
-        mapping.emplace_back(typeid(ESM::Probe).name() );
+        std::vector<unsigned int> mapping;
+        mapping.emplace_back(ESM::Weapon::sRecordId );
+        mapping.emplace_back(ESM::Armor::sRecordId );
+        mapping.emplace_back(ESM::Clothing::sRecordId );
+        mapping.emplace_back(ESM::Potion::sRecordId );
+        mapping.emplace_back(ESM::Ingredient::sRecordId );
+        mapping.emplace_back(ESM::Apparatus::sRecordId );
+        mapping.emplace_back(ESM::Book::sRecordId );
+        mapping.emplace_back(ESM::Light::sRecordId );
+        mapping.emplace_back(ESM::Miscellaneous::sRecordId );
+        mapping.emplace_back(ESM::Lockpick::sRecordId );
+        mapping.emplace_back(ESM::Repair::sRecordId );
+        mapping.emplace_back(ESM::Probe::sRecordId );
 
         assert( std::find(mapping.begin(), mapping.end(), type1) != mapping.end() );
         assert( std::find(mapping.begin(), mapping.end(), type2) != mapping.end() );
@@ -179,10 +179,10 @@ namespace MWGui
         MWWorld::Ptr base = item.mBase;
 
         int category = 0;
-        if (base.getTypeName() == typeid(ESM::Armor).name()
-                || base.getTypeName() == typeid(ESM::Clothing).name())
+        if (base.getType() == ESM::Armor::sRecordId
+                || base.getType() == ESM::Clothing::sRecordId)
             category = Category_Apparel;
-        else if (base.getTypeName() == typeid(ESM::Weapon).name())
+        else if (base.getType() == ESM::Weapon::sRecordId)
             category = Category_Weapon;
         else if (base.getTypeName() == typeid(ESM::Ingredient).name()
                      || base.getTypeName() == typeid(ESM::Potion).name())
