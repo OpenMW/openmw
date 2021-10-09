@@ -62,7 +62,7 @@ CompressedBsaArchive::CompressedBsaArchive(const std::string &filename)
     for(Bsa::BSAFile::FileList::const_iterator it = filelist.begin();it != filelist.end();++it)
     {
         mResources.emplace_back(&*it, mFile.get());
-        mCompressedResources.emplace_back(&*it, static_cast<CompressedBSAFile*>(mFile.get()));
+        mCompressedResources.emplace_back(&*it, static_cast<Bsa::CompressedBSAFile*>(mFile.get()));
     }
 }
 
