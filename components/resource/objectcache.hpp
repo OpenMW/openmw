@@ -38,7 +38,7 @@ namespace osg
 
 namespace Resource {
 
-template <typename KeyType, class MapType=std::map>
+template <typename KeyType, typename MapType=std::map>
 class GenericObjectCache : public osg::Referenced
 {
     public:
