@@ -69,7 +69,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Repair);
 
-        registerClass (typeid (ESM::Repair).name(), instance);
+        registerClass (ESM::Repair::sRecordId, instance);
     }
 
     std::string Repair::getUpSoundId (const MWWorld::ConstPtr& ptr) const
