@@ -22,11 +22,9 @@ namespace VFS
     class CompressedBsaArchiveFile : public BsaArchiveFile
     {
     public:
-        CompressedBsaArchiveFile(const Bsa::BSAFile::FileStruct* info, const Bsa::CompressedBSAFile::FileRecord* record, Bsa::CompressedBSAFile* bsa);
+        CompressedBsaArchiveFile(const Bsa::BSAFile::FileStruct* info, Bsa::CompressedBSAFile* bsa);
 
         Files::IStreamPtr open() override;
-
-        const Bsa::CompressedBSAFile::FileRecord* mRecord;
         Bsa::CompressedBSAFile* mFile;
     };
 
