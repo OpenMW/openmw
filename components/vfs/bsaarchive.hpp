@@ -25,7 +25,7 @@ namespace VFS
         CompressedBsaArchiveFile(const Bsa::BSAFile::FileStruct* info, Bsa::CompressedBSAFile* bsa);
 
         Files::IStreamPtr open() override;
-        Bsa::CompressedBSAFile* mFile;
+        Bsa::CompressedBSAFile* mCompressedFile;
     };
 
 
