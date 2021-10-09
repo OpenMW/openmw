@@ -242,7 +242,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Container);
 
-        registerClass (typeid (ESM::Container).name(), instance);
+        registerClass (ESM::Container::sRecordId, instance);
     }
 
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
