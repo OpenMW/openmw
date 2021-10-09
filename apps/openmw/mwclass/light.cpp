@@ -124,7 +124,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Light);
 
-        registerClass (typeid (ESM::Light).name(), instance);
+        registerClass (ESM::Light::sRecordId, instance);
     }
 
     std::string Light::getUpSoundId (const MWWorld::ConstPtr& ptr) const
