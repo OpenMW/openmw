@@ -55,7 +55,7 @@ namespace MWWorld
     class Class
     {
             static std::map<unsigned int, std::shared_ptr<Class> > sClasses;
-            std::string mTypeName;
+            unsigned int mType;
 
         protected:
 
@@ -72,8 +72,8 @@ namespace MWWorld
             Class (const Class&) = delete;
             Class& operator= (const Class&) = delete;
 
-            const std::string& getTypeName() const {
-                return mTypeName;
+            unsigned int getType() {
+                return mType;
             }
 
             virtual void insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const;
