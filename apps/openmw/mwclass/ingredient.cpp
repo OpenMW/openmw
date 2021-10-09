@@ -81,7 +81,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Ingredient);
 
-        registerClass (typeid (ESM::Ingredient).name(), instance);
+        registerClass (ESM::Ingredient::sRecordId, instance);
     }
 
     std::string Ingredient::getUpSoundId (const MWWorld::ConstPtr& ptr) const
