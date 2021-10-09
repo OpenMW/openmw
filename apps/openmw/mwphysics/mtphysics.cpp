@@ -546,7 +546,7 @@ namespace MWPhysics
         }
         else if (const auto projectile = std::dynamic_pointer_cast<Projectile>(ptr))
         {
-            projectile->commitPositionChange();
+            projectile->updateCollisionObjectPosition();
             mCollisionWorld->updateSingleAabb(projectile->getCollisionObject());
         }
     }
