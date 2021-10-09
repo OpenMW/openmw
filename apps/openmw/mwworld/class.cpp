@@ -23,7 +23,7 @@
 
 namespace MWWorld
 {
-    std::unordered_map<std::string, std::shared_ptr<Class> > Class::sClasses;
+    std::map<std::string, std::shared_ptr<Class> > Class::sClasses;
 
     void Class::insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const
     {
