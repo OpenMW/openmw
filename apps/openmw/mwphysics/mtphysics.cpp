@@ -105,10 +105,10 @@ namespace
         return actorData.mPosition.z() < actorData.mSwimLevel;
     }
 
-    osg::Vec3f interpolateMovements(MWPhysics::Actor& actor, MWPhysics::ActorFrameData& actorData, float timeAccum, float physicsDt)
+    osg::Vec3f interpolateMovements(const MWPhysics::PtrHolder& ptr, float timeAccum, float physicsDt)
     {
         const float interpolationFactor = std::clamp(timeAccum / physicsDt, 0.0f, 1.0f);
-        return actorData.mPosition * interpolationFactor + actor.getPreviousPosition() * (1.f - interpolationFactor);
+        return ptr.getPosition() * interpolationFactor + ptr.getPreviousPosition() * (1.f - interpolationFactor);
     }
 
     namespace Visitors
@@ -190,7 +190,7 @@ namespace
                 else if (heightDiff < 0)
                     stats.addToFallHeight(-heightDiff);
 
-                actor->setSimulationPosition(::interpolateMovements(*actor, frameData, mTimeAccum, mPhysicsDt));
+                actor->setSimulationPosition(::interpolateMovements(*actor, mTimeAccum, mPhysicsDt));
                 actor->setLastStuckPosition(frameData.mLastStuckPosition);
                 actor->setStuckFrames(frameData.mStuckFrames);
                 if (mAdvanceSimulation)
