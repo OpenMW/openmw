@@ -154,7 +154,10 @@ public:
     /** Open a file contained in the archive.
      * @note Thread safe.
     */
-    virtual Files::IStreamPtr getFile(const FileStruct* file);
+    Files::IStreamPtr getFile(const FileStruct *file)
+    {
+        return Files::openConstrainedFileStream (mFilename.c_str (), file->offset, file->fileSize);
+    }
 
     virtual void addFile(const std::string& filename, std::istream& file);
 
