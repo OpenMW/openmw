@@ -580,33 +580,6 @@ namespace MWPhysics
         }
     }
 
-    void PhysicsSystem::updateProjectile(const int projectileId, const osg::Vec3f &position) const
-    {
-        const auto foundProjectile = mProjectiles.find(projectileId);
-        assert(foundProjectile != mProjectiles.end());
-        auto* projectile = foundProjectile->second.get();
-
-        btVector3 btFrom = Misc::Convert::toBullet(projectile->getPosition());
-        btVector3 btTo = Misc::Convert::toBullet(position);
-
-        if (btFrom == btTo)
-            return;
-
-        ProjectileConvexCallback resultCallback(projectile->getCasterCollisionObject(), projectile->getCollisionObject(), btFrom, btTo, projectile);
-        resultCallback.m_collisionFilterMask = 0xff;
-        resultCallback.m_collisionFilterGroup = CollisionType_Projectile;
-
-        const btQuaternion btrot = btQuaternion::getIdentity();
-        btTransform from_ (btrot, btFrom);
-        btTransform to_ (btrot, btTo);
-
-        mTaskScheduler->convexSweepTest(projectile->getConvexShape(), from_, to_, resultCallback);
-
-        const auto newpos = projectile->isActive() ? position : Misc::Convert::toOsg(projectile->getHitPosition());
-        projectile->setPosition(newpos);
-        mTaskScheduler->updateSingleAabb(foundProjectile->second);
-    }
-
     void PhysicsSystem::updateRotation(const MWWorld::Ptr &ptr, osg::Quat rotate)
     {
         if (auto foundObject = mObjects.find(ptr.mRef); foundObject != mObjects.end())
@@ -718,7 +691,7 @@ namespace MWPhysics
     std::vector<Simulation> PhysicsSystem::prepareSimulation(bool willSimulate)
     {
         std::vector<Simulation> simulations;
-        simulations.reserve(mActors.size());
+        simulations.reserve(mActors.size() + mProjectiles.size());
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         for (const auto& [ref, physicActor] : mActors)
         {
@@ -753,6 +726,12 @@ namespace MWPhysics
             if (willSimulate)
                 handleJump(ptr);
         }
+
+        for (const auto& [id, projectile] : mProjectiles)
+        {
+            simulations.emplace_back(ProjectileSimulation{projectile, ProjectileFrameData{*projectile}});
+        }
+
         return simulations;
     }
 
@@ -979,6 +958,15 @@ namespace MWPhysics
         mInertia = actor.getInertialForce();
         mStuckFrames = actor.getStuckFrames();
         mLastStuckPosition = actor.getLastStuckPosition();
+    }
+
+    ProjectileFrameData::ProjectileFrameData(Projectile& projectile)
+        : mPosition(projectile.getPosition())
+        , mMovement(projectile.velocity())
+        , mCaster(projectile.getCasterCollisionObject())
+        , mCollisionObject(projectile.getCollisionObject())
+        , mProjectile(&projectile)
+    {
     }
 
     WorldFrameData::WorldFrameData()

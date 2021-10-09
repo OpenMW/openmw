@@ -133,6 +133,9 @@ namespace
                 frameData.mStuckFrames = actor->getStuckFrames();
                 frameData.mLastStuckPosition = actor->getLastStuckPosition();
             }
+            void operator()(MWPhysics::ProjectileSimulation& sim) const
+            {
+            }
         };
 
         struct PreStep
@@ -141,6 +144,9 @@ namespace
             void operator()(MWPhysics::ActorSimulation& sim) const
             {
                 MWPhysics::MovementSolver::unstuck(sim.second, mCollisionWorld);
+            }
+            void operator()(MWPhysics::ProjectileSimulation& sim) const
+            {
             }
         };
 
@@ -157,6 +163,13 @@ namespace
                     mCollisionWorld->updateSingleAabb(actor->getCollisionObject());
                 }
             }
+            void operator()(MWPhysics::ProjectileSimulation& sim) const
+            {
+                auto& [proj, frameData] = sim;
+                proj->setPosition(frameData.mPosition);
+                proj->updateCollisionObjectPosition();
+                mCollisionWorld->updateSingleAabb(proj->getCollisionObject());
+            }
         };
 
         struct Move
@@ -167,6 +180,10 @@ namespace
             void operator()(MWPhysics::ActorSimulation& sim) const
             {
                 MWPhysics::MovementSolver::move(sim.second, mPhysicsDt, mCollisionWorld, mWorldFrameData);
+            }
+            void operator()(MWPhysics::ProjectileSimulation& sim) const
+            {
+                MWPhysics::MovementSolver::move(sim.second, mPhysicsDt, mCollisionWorld);
             }
         };
 
@@ -207,6 +224,11 @@ namespace
                     actor->setWalkingOnWater(frameData.mWalkingOnWater);
                     actor->setInertialForce(frameData.mInertia);
                 }
+            }
+            void operator()(MWPhysics::ProjectileSimulation& sim) const
+            {
+                auto& [proj, frameData] = sim;
+                proj->setSimulationPosition(::interpolateMovements(*proj, mTimeAccum, mPhysicsDt));
             }
         };
     }

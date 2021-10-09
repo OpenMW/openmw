@@ -101,6 +101,16 @@ namespace MWPhysics
         const bool mSkipCollisionDetection;
     };
 
+    struct ProjectileFrameData
+    {
+        explicit ProjectileFrameData(Projectile& projectile);
+        osg::Vec3f mPosition;
+        osg::Vec3f mMovement;
+        const btCollisionObject* mCaster;
+        const btCollisionObject* mCollisionObject;
+        Projectile* mProjectile;
+    };
+
     struct WorldFrameData
     {
         WorldFrameData();
@@ -109,7 +119,8 @@ namespace MWPhysics
     };
 
     using ActorSimulation = std::pair<std::shared_ptr<Actor>, ActorFrameData>;
-    using Simulation = std::variant<ActorSimulation>;
+    using ProjectileSimulation = std::pair<std::shared_ptr<Projectile>, ProjectileFrameData>;
+    using Simulation = std::variant<ActorSimulation, ProjectileSimulation>;
 
     class PhysicsSystem : public RayCastingInterface
     {
@@ -128,7 +139,6 @@ namespace MWPhysics
 
             int addProjectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius);
             void setCaster(int projectileId, const MWWorld::Ptr& caster);
-            void updateProjectile(const int projectileId, const osg::Vec3f &position) const;
             void removeProjectile(const int projectileId);
 
             void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
