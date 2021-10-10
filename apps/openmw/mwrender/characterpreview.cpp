@@ -395,7 +395,7 @@ namespace MWRender
         if(iter != inv.end())
         {
             groupname = "inventoryweapononehand";
-            if(iter->getTypeName() == typeid(ESM::Weapon).name())
+            if(iter->getType() == ESM::Weapon::sRecordId)
             {
                 MWWorld::LiveCellRef<ESM::Weapon> *ref = iter->get<ESM::Weapon>();
                 int type = ref->mBase->mData.mType;
@@ -428,7 +428,7 @@ namespace MWRender
         mAnimation->play(mCurrentAnimGroup, 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name() && showCarriedLeft)
+        if(torch != inv.end() && torch->getType() == ESM::Light::sRecordId && showCarriedLeft)
         {
             if(!mAnimation->getInfo("torch"))
                 mAnimation->play("torch", 2, Animation::BlendMask_LeftArm, false,
