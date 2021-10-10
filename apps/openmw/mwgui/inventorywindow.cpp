@@ -704,7 +704,7 @@ namespace MWGui
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(GW_Inventory))
             return;
         // make sure the object is of a type that can be picked up
-        auto type = object.getTypeName();
+        auto type = object.getType();
         if ( (type != ESM::Apparatus::sRecordId)
             && (type != ESM::Armor::sRecordId)
             && (type != ESM::Book::sRecordId)
