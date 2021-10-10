@@ -209,7 +209,7 @@ bool ContainerItemModel::onDropItem(const MWWorld::Ptr &item, int count)
 
     MWWorld::Ptr target = mItemSources[0].first;
 
-    if (target.getTypeName() != typeid(ESM::Container).name())
+    if (target.getType() != ESM::Container::sRecordId)
         return true;
 
     // check container organic flag
