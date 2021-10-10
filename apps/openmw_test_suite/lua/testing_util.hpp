@@ -25,11 +25,11 @@ namespace
 
     struct TestData : public VFS::Archive
     {
-        std::map<std::string, VFS::File*> mFiles;
+        std::unordered_map<std::string, VFS::File*> mFiles;
 
-        TestData(std::map<std::string, VFS::File*> files) : mFiles(std::move(files)) {}
+        TestData(std::unordered_map<std::string, VFS::File*> files) : mFiles(std::move(files)) {}
 
-        void listResources(std::map<std::string, VFS::File*>& out, char (*normalize_function) (char)) override
+        void listResources(std::unordered_map<std::string, VFS::File*>& out, char (*normalize_function) (char)) override
         {
             out = mFiles;
         }
@@ -43,7 +43,7 @@ namespace
 
     };
 
-    inline std::unique_ptr<VFS::Manager> createTestVFS(std::map<std::string, VFS::File*> files)
+    inline std::unique_ptr<VFS::Manager> createTestVFS(std::unordered_map<std::string, VFS::File*> files)
     {
         auto vfs = std::make_unique<VFS::Manager>(true);
         vfs->addArchive(new TestData(std::move(files)));
