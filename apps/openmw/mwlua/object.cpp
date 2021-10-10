@@ -40,7 +40,7 @@ namespace MWLua
         {typeid(MWClass::Weapon), "Weapon"},
     };
 
-    std::string getMWClassName(const std::type_index& cls_type, const std::string& fallback)
+    std::string getMWClassName(const std::type_index& cls_type, std::string fallback)
     {
         auto it = classNames.find(cls_type);
         if (it != classNames.end())
