@@ -15,9 +15,6 @@ namespace LuaUtil
     static constexpr std::string_view HANDLER_LOAD = "onLoad";
     static constexpr std::string_view HANDLER_INTERFACE_OVERRIDE = "onInterfaceOverride";
 
-    static constexpr std::string_view REGISTERED_TIMER_CALLBACKS = "_timers";
-    static constexpr std::string_view TEMPORARY_TIMER_CALLBACKS = "_temp_timers";
-
     std::string ScriptsContainer::ScriptId::toString() const
     {
         std::string res = mContainer->mNamePrefix;
@@ -78,8 +75,6 @@ namespace LuaUtil
             Script& script = mScripts[scriptId];
             script.mHiddenData = mLua.newTable();
             script.mHiddenData[ScriptId::KEY] = ScriptId{this, scriptId, path};
-            script.mHiddenData[REGISTERED_TIMER_CALLBACKS] = mLua.newTable();
-            script.mHiddenData[TEMPORARY_TIMER_CALLBACKS] = mLua.newTable();
             sol::object scriptOutput = mLua.runInNewSandbox(path, mNamePrefix, mAPI, script.mHiddenData);
             if (scriptOutput == sol::nil)
                 return true;
@@ -449,17 +444,17 @@ namespace LuaUtil
         mPublicInterfaces[sol::meta_function::index] = mPublicInterfaces;
     }
 
-    sol::table ScriptsContainer::getHiddenData(int scriptId)
+    ScriptsContainer::Script& ScriptsContainer::getScript(int scriptId)
     {
         auto it = mScripts.find(scriptId);
         if (it == mScripts.end())
-            throw std::logic_error("ScriptsContainer::getHiddenData: script doesn't exist");
-        return it->second.mHiddenData;
+            throw std::logic_error("Script doesn't exist");
+        return it->second;
     }
 
     void ScriptsContainer::registerTimerCallback(int scriptId, std::string_view callbackName, sol::function callback)
     {
-        getHiddenData(scriptId)[REGISTERED_TIMER_CALLBACKS][callbackName] = std::move(callback);
+        getScript(scriptId).mRegisteredCallbacks.emplace(std::string(callbackName), std::move(callback));
     }
 
     void ScriptsContainer::insertTimer(std::vector<Timer>& timerQueue, Timer&& t)
@@ -489,7 +484,7 @@ namespace LuaUtil
         t.mTime = time;
 
         t.mCallback = mTemporaryCallbackCounter;
-        getHiddenData(scriptId)[TEMPORARY_TIMER_CALLBACKS][mTemporaryCallbackCounter] = std::move(callback);
+        getScript(t.mScriptId).mTemporaryCallbacks.emplace(mTemporaryCallbackCounter, std::move(callback));
         mTemporaryCallbackCounter++;
 
         insertTimer(timeUnit == TimeUnit::HOURS ? mHoursTimersQueue : mSecondsTimersQueue, std::move(t));
@@ -499,24 +494,20 @@ namespace LuaUtil
     {
         try
         {
-            sol::table data = getHiddenData(t.mScriptId);
+            Script& script = getScript(t.mScriptId);
             if (t.mSerializable)
             {
                 const std::string& callbackName = std::get<std::string>(t.mCallback);
-                sol::object callback = data[REGISTERED_TIMER_CALLBACKS][callbackName];
-                if (!callback.is<sol::function>())
+                auto it = script.mRegisteredCallbacks.find(callbackName);
+                if (it == script.mRegisteredCallbacks.end())
                     throw std::logic_error("Callback '" + callbackName + "' doesn't exist");
-                LuaUtil::call(callback, t.mArg);
+                LuaUtil::call(it->second, t.mArg);
             }
             else
             {
                 int64_t id = std::get<int64_t>(t.mCallback);
-                sol::table callbacks = data[TEMPORARY_TIMER_CALLBACKS];
-                sol::object callback = callbacks[id];
-                if (!callback.is<sol::function>())
-                    throw std::logic_error("Temporary timer callback doesn't exist");
-                LuaUtil::call(callback);
-                callbacks[id] = sol::nil;
+                LuaUtil::call(script.mTemporaryCallbacks.at(id));
+                script.mTemporaryCallbacks.erase(id);
             }
         }
         catch (std::exception& e) { printError(t.mScriptId, "callTimer failed", e); }

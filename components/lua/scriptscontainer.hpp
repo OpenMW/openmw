@@ -190,6 +190,8 @@ namespace LuaUtil
             std::optional<sol::table> mInterface;
             std::string mInterfaceName;
             sol::table mHiddenData;
+            std::map<std::string, sol::function> mRegisteredCallbacks;
+            std::map<int64_t, sol::function> mTemporaryCallbacks;
         };
         struct Timer
         {
@@ -207,10 +209,8 @@ namespace LuaUtil
         // Add to container without calling onInit/onLoad.
         bool addScript(int scriptId, std::optional<sol::function>& onInit, std::optional<sol::function>& onLoad);
 
-        // Returns the hidden data of a script.
-        // Each script has a corresponding "hidden data" - a lua table that is not accessible from the script itself,
-        // but can be used by built-in packages. It contains ScriptId and can contain any arbitrary data.
-        sol::table getHiddenData(int scriptId);
+        // Returns script by id (throws an exception if doesn't exist)
+        Script& getScript(int scriptId);
 
         void printError(int scriptId, std::string_view msg, const std::exception& e);
         const std::string& scriptPath(int scriptId) const { return mLua.getConfiguration()[scriptId].mScriptPath; }
