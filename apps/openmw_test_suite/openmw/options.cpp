@@ -22,15 +22,10 @@ namespace
     {
         std::vector<std::string> result = std::move(base);
         for (int i = 1; i <= std::numeric_limits<char>::max(); ++i)
-            if (i != '&' && i != '"' && i != ' ' && i != '@' && i != '\n')
+            if (i != '&' && i != '"' && i != ' ' && i != '\n')
                 result.push_back(std::string(1, i));
         return result;
     }
-
-    constexpr std::array supportedAtSignEscapings {
-        std::pair {'a', '@'},
-        std::pair {'h', '#'},
-    };
 
     MATCHER_P(IsPath, v, "") { return arg.string() == v; }
 
@@ -101,7 +96,6 @@ namespace
         const std::array arguments {"openmw", "--load-savegame", "my@save.omwsave"};
         bpo::variables_map variables;
         parseArgs(arguments, variables, description);
-//        EXPECT_EQ(variables["load-savegame"].as<boost::filesystem::path>().string(), "my?ave.omwsave");
         EXPECT_EQ(variables["load-savegame"].as<boost::filesystem::path>().string(), "my@save.omwsave");
     }
 
@@ -204,25 +198,6 @@ namespace
         OpenMWOptionsFromArgumentsStrings,
         ValuesIn(generateSupportedCharacters({u8"👍", u8"Ъ", u8"Ǽ", "\n"}))
     );
-
-    struct OpenMWOptionsFromArgumentsEscapings : TestWithParam<std::pair<char, char>> {};
-
-/*    TEST_P(OpenMWOptionsFromArgumentsEscapings, should_support_escaping_with_at_sign_in_load_savegame_path)
-    {
-        bpo::options_description description = makeOptionsDescription();
-        const std::string path = "save_@" + std::string(1, GetParam().first) + ".omwsave";
-        const std::array arguments {"openmw", "--load-savegame", path.c_str()};
-        bpo::variables_map variables;
-        parseArgs(arguments, variables, description);
-        EXPECT_EQ(variables["load-savegame"].as<boost::filesystem::path>().string(),
-                  "save_" + std::string(1, GetParam().second) + ".omwsave");
-    }
-
-    INSTANTIATE_TEST_SUITE_P(
-        SupportedEscapingsWithAtSign,
-        OpenMWOptionsFromArgumentsEscapings,
-        ValuesIn(supportedAtSignEscapings)
-    );*/
 
     TEST(OpenMWOptionsFromConfig, should_support_single_word_load_savegame_path)
     {
