@@ -3,6 +3,7 @@
 #include <osg/Version>
 
 #include <components/debug/debuglog.hpp>
+#include <osg/MatrixTransform>
 
 #include "skeleton.hpp"
 #include "util.hpp"
@@ -114,9 +115,11 @@ osg::ref_ptr<osg::Geometry> RigGeometry::getSourceGeometry() const
 bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
 {
     const osg::NodePath& path = nv->getNodePath();
-    for (osg::NodePath::const_reverse_iterator it = path.rbegin(); it != path.rend(); ++it)
+    for (osg::NodePath::const_reverse_iterator it = path.rbegin()+1; it != path.rend(); ++it)
     {
         osg::Node* node = *it;
+        if (node->asTransform())
+            continue;
         if (Skeleton* skel = dynamic_cast<Skeleton*>(node))
         {
             mSkeleton = skel;
@@ -310,8 +313,10 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
 void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
 {
     bool foundSkel = false;
-    osg::ref_ptr<osg::RefMatrix> geomToSkelMatrix;
-    for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end(); ++it)
+    osg::RefMatrix* geomToSkelMatrix = mGeomToSkelMatrix;
+    if (geomToSkelMatrix)
+        geomToSkelMatrix->makeIdentity();
+    for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end()-1; ++it)
     {
         osg::Node* node = *it;
         if (!foundSkel)
@@ -323,14 +328,15 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
         {
             if (osg::Transform* trans = node->asTransform())
             {
+                osg::MatrixTransform* matrixTrans = trans->asMatrixTransform();
+                if (matrixTrans && matrixTrans->getMatrix().isIdentity())
+                    continue;
                 if (!geomToSkelMatrix)
-                    geomToSkelMatrix = new osg::RefMatrix;
+                    geomToSkelMatrix = mGeomToSkelMatrix = new osg::RefMatrix;
                 trans->computeWorldToLocalMatrix(*geomToSkelMatrix, nullptr);
             }
         }
     }
-    if (geomToSkelMatrix && !geomToSkelMatrix->isIdentity())
-        mGeomToSkelMatrix = geomToSkelMatrix;
 }
 
 void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)
