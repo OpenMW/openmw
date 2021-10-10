@@ -72,7 +72,7 @@ namespace MWWorld
             Class (const Class&) = delete;
             Class& operator= (const Class&) = delete;
 
-            unsigned int getType() {
+            unsigned int getType() const {
                 return mType;
             }
 
