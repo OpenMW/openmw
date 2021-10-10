@@ -286,6 +286,7 @@ class Optimizer
 
                 void apply(osg::Node& geode) override;
                 void apply(osg::Geometry& drawable) override;
+                void apply(osg::Drawable& drawable) override;
                 void apply(osg::Billboard& geode) override;
                 void apply(osg::Transform& transform) override final;
                 void apply(osg::MatrixTransform& transform) override;
