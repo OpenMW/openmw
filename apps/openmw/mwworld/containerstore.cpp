@@ -1,7 +1,6 @@
 #include "containerstore.hpp"
 
 #include <cassert>
-#include <typeinfo>
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
