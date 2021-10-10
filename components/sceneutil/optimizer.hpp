@@ -288,7 +288,7 @@ class Optimizer
                 void apply(osg::Geometry& drawable) override;
                 void apply(osg::Billboard& geode) override;
                 void apply(osg::Transform& transform) override final;
-                void apply(osg::MatrixTransform& transform) override { apply(static_cast<osg::Transform&>(transform)); }
+                void apply(osg::MatrixTransform& transform) override;
 
                 bool removeTransforms(osg::Node* nodeWeCannotRemove);
 
