@@ -313,7 +313,8 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
 {
     bool foundSkel = false;
     osg::RefMatrix* geomToSkelMatrix = mGeomToSkelMatrix;
-    if (geomToSkelMatrix) geomToSkelMatrix->makeIdentity();
+    if (geomToSkelMatrix)
+        geomToSkelMatrix->makeIdentity();
     for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end()-1; ++it)
     {
         osg::Node* node = *it;
@@ -329,7 +330,8 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
                 osg::MatrixTransform* matrixTrans = trans->asMatrixTransform();
                 if (matrixTrans && matrixTrans->getMatrix().isIdentity())
                     continue;
-                if (!geomToSkelMatrix) geomToSkelMatrix = mGeomToSkelMatrix = new osg::RefMatrix;
+                if (!geomToSkelMatrix)
+                    geomToSkelMatrix = mGeomToSkelMatrix = new osg::RefMatrix;
                 trans->computeWorldToLocalMatrix(*geomToSkelMatrix, nullptr);
             }
         }
