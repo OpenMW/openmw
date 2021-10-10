@@ -879,7 +879,7 @@ namespace MWMechanics
             MWWorld::ContainerStoreIterator torch = inventoryStore.end();
             for (MWWorld::ContainerStoreIterator it = inventoryStore.begin(); it != inventoryStore.end(); ++it)
             {
-                if (it->getTypeName() == typeid(ESM::Light).name() &&
+                if (it->getType() == ESM::Light::sRecordId &&
                     it->getClass().canBeEquipped(*it, ptr).first)
                 {
                     torch = it;
@@ -894,10 +894,10 @@ namespace MWMechanics
                     if (!ptr.getClass().getCreatureStats (ptr).getAiSequence().isInCombat())
                     {
                         // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
-                        if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
+                        if (heldIter != inventoryStore.end() && heldIter->getType() != ESM::Light::sRecordId)
                             inventoryStore.unequipItem(*heldIter, ptr);
                     }
-                    else if (heldIter == inventoryStore.end() || heldIter->getTypeName() == typeid(ESM::Light).name())
+                    else if (heldIter == inventoryStore.end() || heldIter->getType() == ESM::Light::sRecordId)
                     {
                         // For hostile NPCs, see if they have anything better to equip first
                         auto shield = inventoryStore.getPreferredShield(ptr);
@@ -916,7 +916,7 @@ namespace MWMechanics
             }
             else
             {
-                if (heldIter != inventoryStore.end() && heldIter->getTypeName() == typeid(ESM::Light).name())
+                if (heldIter != inventoryStore.end() && heldIter->getType() == ESM::Light::sRecordId)
                 {
                     // At day, unequip lights and auto equip shields or other suitable items
                     // (Note: autoEquip will ignore lights)
@@ -1708,7 +1708,7 @@ namespace MWMechanics
                 MWBase::Environment::get().getDialogueManager()->say(iter->first, "hit");
 
                 // Apply soultrap
-                if (iter->first.getTypeName() == typeid(ESM::Creature).name())
+                if (iter->first.getType() == ESM::Creature::sRecordId)
                     soulTrap(iter->first);
 
                 // Magic effects will be reset later, and the magic effect that could kill the actor
