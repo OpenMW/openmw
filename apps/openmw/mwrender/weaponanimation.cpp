@@ -66,7 +66,7 @@ void WeaponAnimation::attachArrow(const MWWorld::Ptr& actor)
     MWWorld::ConstContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weaponSlot == inv.end())
         return;
-    if (weaponSlot->getType() != typeid(ESM::Weapon).name())
+    if (weaponSlot->getType() != ESM::Weapon::sRecordId)
         return;
 
     int type = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
@@ -109,7 +109,7 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
     MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weapon == inv.end())
         return;
-    if (weapon->getType() != typeid(ESM::Weapon).name())
+    if (weapon->getType() != ESM::Weapon::sRecordId)
         return;
 
     // The orientation of the launched projectile. Always the same as the actor orientation, even if the ArrowBone's orientation dictates otherwise.

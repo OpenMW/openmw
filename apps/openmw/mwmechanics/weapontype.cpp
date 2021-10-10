@@ -22,12 +22,12 @@ namespace MWMechanics
             else
             {
                 const std::string &type = weapon->getType();
-                if(type == typeid(ESM::Weapon).name())
+                if(type == ESM::Weapon::sRecordId)
                 {
                     const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
                     *weaptype = ref->mBase->mData.mType;
                 }
-                else if (type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                else if (type == ESM::Lockpick::sRecordId || type == ESM::Probe::sRecordId)
                     *weaptype = ESM::Weapon::PickProbe;
             }
 
