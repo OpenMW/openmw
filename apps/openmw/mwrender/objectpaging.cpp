@@ -604,7 +604,7 @@ namespace MWRender
                     osg::Matrixf matrix;
                     matrix.preMultTranslate(nodePos);
                     matrix.preMultRotate(nodeAttitude);
-                    matrix.preMultScale(nodePos);
+                    matrix.preMultScale(nodeScale);
                     trans = new osg::MatrixTransform(matrix);
                     trans->setDataVariance(osg::Object::STATIC);
                 }
