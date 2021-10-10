@@ -647,10 +647,9 @@ osg::Array* cloneArray(osg::Array* array, osg::VertexBufferObject*& vbo, const o
     return array;
 }
 
-void Optimizer::FlattenStaticTransformsVisitor::apply(osg::Drawable& drawable)
+void Optimizer::FlattenStaticTransformsVisitor::apply(osg::Geometry& geometry)
 {
-    osg::Geometry *geometry = drawable.asGeometry();
-    if((geometry) && (isOperationPermissibleForObject(&drawable)))
+    if(isOperationPermissibleForObject(&geometry))
     {
         osg::VertexBufferObject* vbo = nullptr;
         if(geometry->getVertexArray() && geometry->getVertexArray()->referenceCount() > 1)
@@ -660,6 +659,11 @@ void Optimizer::FlattenStaticTransformsVisitor::apply(osg::Drawable& drawable)
         if(geometry->getTexCoordArray(7) && geometry->getTexCoordArray(7)->referenceCount() > 1) // tangents
             geometry->setTexCoordArray(7, cloneArray(geometry->getTexCoordArray(7), vbo, geometry));
     }
+    _drawableSet.insert(&geometry);
+}
+
+void Optimizer::FlattenStaticTransformsVisitor::apply(osg::Drawable& drawable)
+{
     _drawableSet.insert(&drawable);
 }
 
@@ -1133,7 +1137,7 @@ bool isAbleToMerge(const osg::Geometry& g1, const osg::Geometry& g2)
 
 bool Optimizer::MergeGeometryVisitor::pushStateSet(osg::StateSet *stateSet)
 {
-    if (_mergeAlphaBlending || !stateset || stateset->getRenderBinMode() & osg::StateSet::INHERIT_RENDERBIN_DETAILS)
+    if (_mergeAlphaBlending || !stateSet || stateSet->getRenderBinMode() & osg::StateSet::INHERIT_RENDERBIN_DETAILS)
         return false;
     _stateSetStack.push_back(stateSet);
     checkAlphaBlendingActive();
