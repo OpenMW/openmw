@@ -29,7 +29,7 @@ namespace MWMechanics
     {
         mOldItemPtr=oldItem;
         mWeaponType = -1;
-        mObjectType.clear();
+        mObjectType = 0;
         if(!itemEmpty())
         {
             mObjectType = mOldItemPtr.getType();
