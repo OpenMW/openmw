@@ -44,14 +44,14 @@ namespace MWMechanics
         }
     };
 
-    bool absorbSpell (const std::string& spellId, const MWWorld::Ptr& caster, const MWWorld::Ptr& target)
+    int getAbsorbChance(const MWWorld::Ptr& caster, const MWWorld::Ptr& target)
     {
-        if (spellId.empty() || target.isEmpty() || caster == target || !target.getClass().isActor())
-            return false;
+        if(target.isEmpty() || caster == target || !target.getClass().isActor())
+            return 0;
 
         CreatureStats& stats = target.getClass().getCreatureStats(target);
         if (stats.getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude() <= 0.f)
-            return false;
+            return 0;
 
         GetAbsorptionProbability check;
         stats.getActiveSpells().visitEffectSources(check);
@@ -59,9 +59,12 @@ namespace MWMechanics
         if (target.getClass().hasInventoryStore(target))
             target.getClass().getInventoryStore(target).visitEffectSources(check);
 
-        int chance = check.mProbability * 100;
-        if (Misc::Rng::roll0to99() >= chance)
-            return false;
+        return check.mProbability * 100;
+    }
+
+    void absorbSpell (const std::string& spellId, const MWWorld::Ptr& caster, const MWWorld::Ptr& target)
+    {
+        CreatureStats& stats = target.getClass().getCreatureStats(target);
 
         const auto& esmStore = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Static* absorbStatic = esmStore.get<ESM::Static>().find("VFX_Absorb");
@@ -85,7 +88,6 @@ namespace MWMechanics
         DynamicStat<float> magicka = stats.getMagicka();
         magicka.setCurrent(magicka.getCurrent() + spellCost);
         stats.setMagicka(magicka);
-        return true;
     }
 
 }

@@ -119,8 +119,7 @@ namespace MWMechanics
                                          // throughout the iteration of this spell's 
                                          // effects, we display a "can't re-cast" message
 
-        // Try absorbing the spell. Some handling must still happen for absorbed effects.
-        bool absorbed = absorbSpell(mId, caster, target);
+        int absorbChance = getAbsorbChance(caster, target);
 
         int currentEffectIndex = 0;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
@@ -142,6 +141,13 @@ namespace MWMechanics
             }
             canCastAnEffect = true;
 
+            // Try absorbing the effect
+            if(absorbChance && Misc::Rng::roll0to99() < absorbChance)
+            {
+                absorbSpell(mId, caster, target);
+                continue;
+            }
+
             if (!checkEffectTarget(effectIt->mEffectID, target, caster, castByPlayer))
                 continue;
 
@@ -154,10 +160,6 @@ namespace MWMechanics
             bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
             if (target.getClass().isActor() && target != caster && !caster.isEmpty() && isHarmful)
                 target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
-
-            // Avoid proceeding further for absorbed spells.
-            if (absorbed)
-                continue;
 
             // Reflect harmful effects
             if (!reflected && reflectEffect(*effectIt, magicEffect, caster, target, reflectedEffects))
