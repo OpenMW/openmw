@@ -3791,7 +3791,7 @@ namespace MWWorld
             cast.mSlot = slot;
             ESM::EffectList effectsToApply;
             effectsToApply.mList = applyPair.second;
-            cast.inflict(applyPair.first, caster, effectsToApply, rangeType, false, true);
+            cast.inflict(applyPair.first, caster, effectsToApply, rangeType, true);
         }
     }
 
