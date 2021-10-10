@@ -30,7 +30,7 @@ public:
     {
         if (keyword.empty())
             return;
-        seed_impl  (/*std::move*/ (keyword), /*std::move*/ (value), 0, mRoot);
+        seed_impl  (std::move(keyword), std::move (value), 0, mRoot);
     }
 
     void clear ()
@@ -209,8 +209,8 @@ private:
 
         if (j == entry.mChildren.end ())
         {
-            entry.mChildren [ch].mValue = /*std::move*/ (value);
-            entry.mChildren [ch].mKeyword = /*std::move*/ (keyword);
+            entry.mChildren [ch].mValue = std::move (value);
+            entry.mChildren [ch].mKeyword = std::move (keyword);
         }
         else
         {
@@ -219,22 +219,22 @@ private:
                 if (keyword == j->second.mKeyword)
                     throw std::runtime_error ("duplicate keyword inserted");
 
-                value_t pushValue = /*std::move*/ (j->second.mValue);
-                string_t pushKeyword = /*std::move*/ (j->second.mKeyword);
+                value_t pushValue = j->second.mValue;
+                string_t pushKeyword = j->second.mKeyword;
 
                 if (depth >= pushKeyword.size ())
                     throw std::runtime_error ("unexpected");
 
                 if (depth+1 < pushKeyword.size())
                 {
-                    seed_impl (/*std::move*/ (pushKeyword), /*std::move*/ (pushValue), depth+1, j->second);
+                    seed_impl (std::move (pushKeyword), std::move (pushValue), depth+1, j->second);
                     j->second.mKeyword.clear ();
                 }
             }
             if (depth+1 == keyword.size())
                 j->second.mKeyword = value;
             else // depth+1 < keyword.size()
-                seed_impl (/*std::move*/ (keyword), /*std::move*/ (value), depth+1, j->second);
+                seed_impl (std::move (keyword), std::move (value), depth+1, j->second);
         }
 
     }
