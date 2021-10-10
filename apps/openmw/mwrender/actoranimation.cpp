@@ -150,7 +150,7 @@ bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
 
                     if (weapon != inv.end())
                     {
-                        const std::string &type = weapon->getType();
+                        auto type = weapon->getType();
                         if(type == ESM::Weapon::sRecordId)
                         {
                             const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
@@ -192,7 +192,7 @@ void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
     if(weapon == inv.end())
         return;
 
-    const std::string &type = weapon->getType();
+    auto type = weapon->getType();
     if(type == ESM::Weapon::sRecordId)
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
@@ -257,7 +257,7 @@ bool ActorAnimation::useShieldAnimations() const
         shield->getType() == ESM::Armor::sRecordId &&
         !getShieldMesh(*shield).empty())
     {
-        const std::string &type = weapon->getType();
+        auto type = weapon->getType();
         if(type == ESM::Weapon::sRecordId)
         {
             const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
@@ -288,7 +288,7 @@ std::string ActorAnimation::getHolsteredWeaponBoneName(const MWWorld::ConstPtr& 
     if(weapon.isEmpty())
         return boneName;
 
-    const std::string &type = weapon.getClass().getType();
+    auto type = weapon.getClass().getType();
     if(type == ESM::Weapon::sRecordId)
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon.get<ESM::Weapon>();
