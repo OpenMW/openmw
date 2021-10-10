@@ -213,7 +213,7 @@ namespace
             if (!wasEquipped)
                 return;
 
-            std::string type = currentItem->getType();
+            auto type = currentItem->getType();
             if (type != ESM::Weapon::sRecordId && type != ESM::Armor::sRecordId && type != ESM::Clothing::sRecordId)
                 return;
 
