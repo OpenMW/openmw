@@ -567,7 +567,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const std::string& owner, int count,
                                                Misc::Rng::Seed* seed, bool topLevel)
 {
-    if (ptr.getTypeName()==typeid (ESM::ItemLevList).name())
+    if (ptr.getType()==typeid (ESM::ItemLevList).name())
     {
         if(!seed)
             return;
@@ -693,44 +693,44 @@ int MWWorld::ContainerStore::getType (const ConstPtr& ptr)
     if (ptr.isEmpty())
         throw std::runtime_error ("can't put a non-existent object into a container");
 
-    if (ptr.getTypeName()==typeid (ESM::Potion).name())
+    if (ptr.getType()==typeid (ESM::Potion).name())
         return Type_Potion;
 
-    if (ptr.getTypeName()==typeid (ESM::Apparatus).name())
+    if (ptr.getType()==typeid (ESM::Apparatus).name())
         return Type_Apparatus;
 
-    if (ptr.getTypeName()==typeid (ESM::Armor).name())
+    if (ptr.getType()==typeid (ESM::Armor).name())
         return Type_Armor;
 
-    if (ptr.getTypeName()==typeid (ESM::Book).name())
+    if (ptr.getType()==typeid (ESM::Book).name())
         return Type_Book;
 
-    if (ptr.getTypeName()==typeid (ESM::Clothing).name())
+    if (ptr.getType()==typeid (ESM::Clothing).name())
         return Type_Clothing;
 
-    if (ptr.getTypeName()==typeid (ESM::Ingredient).name())
+    if (ptr.getType()==typeid (ESM::Ingredient).name())
         return Type_Ingredient;
 
-    if (ptr.getTypeName()==typeid (ESM::Light).name())
+    if (ptr.getType()==typeid (ESM::Light).name())
         return Type_Light;
 
-    if (ptr.getTypeName()==typeid (ESM::Lockpick).name())
+    if (ptr.getType()==typeid (ESM::Lockpick).name())
         return Type_Lockpick;
 
-    if (ptr.getTypeName()==typeid (ESM::Miscellaneous).name())
+    if (ptr.getType()==typeid (ESM::Miscellaneous).name())
         return Type_Miscellaneous;
 
-    if (ptr.getTypeName()==typeid (ESM::Probe).name())
+    if (ptr.getType()==typeid (ESM::Probe).name())
         return Type_Probe;
 
-    if (ptr.getTypeName()==typeid (ESM::Repair).name())
+    if (ptr.getType()==typeid (ESM::Repair).name())
         return Type_Repair;
 
-    if (ptr.getTypeName()==typeid (ESM::Weapon).name())
+    if (ptr.getType()==typeid (ESM::Weapon).name())
         return Type_Weapon;
 
     throw std::runtime_error (
-        "Object '" + ptr.getCellRef().getRefId() + "' of type " + ptr.getTypeName() + " can not be placed into a container");
+        "Object '" + ptr.getCellRef().getRefId() + "' of type " + ptr.getType() + " can not be placed into a container");
 }
 
 MWWorld::Ptr MWWorld::ContainerStore::findReplacement(const std::string& id)

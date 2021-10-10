@@ -32,7 +32,7 @@ namespace MWMechanics
         mObjectType.clear();
         if(!itemEmpty())
         {
-            mObjectType = mOldItemPtr.getTypeName();
+            mObjectType = mOldItemPtr.getType();
             if (mObjectType == typeid(ESM::Weapon).name())
                 mWeaponType = mOldItemPtr.get<ESM::Weapon>()->mBase->mData.mType;
         }

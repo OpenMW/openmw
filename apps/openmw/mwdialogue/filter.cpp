@@ -23,7 +23,7 @@
 
 bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 {
-    bool isCreature = (mActor.getType() != typeid (ESM::NPC::sRecordId);
+    bool isCreature = (mActor.getType() != ESM::NPC::sRecordId);
 
     // actor id
     if (!info.mActor.empty())
@@ -160,7 +160,7 @@ bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
 
 bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert) const
 {
-    bool isCreature = (mActor.getType() != typeid (ESM::NPC::sRecordId);
+    bool isCreature = (mActor.getType() != ESM::NPC::sRecordId);
 
     if (isCreature)
         return true;
@@ -207,7 +207,7 @@ bool MWDialogue::Filter::testFunctionLocal(const MWDialogue::SelectWrapper& sele
 
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
-    if (select.isNpcOnly() && (mActor.getType() != typeid (ESM::NPC::sRecordId))
+    if (select.isNpcOnly() && (mActor.getType() != ESM::NPC::sRecordId))
         // If the actor is a creature, we pass all conditions only applicable to NPCs.
         return true;
 

@@ -21,7 +21,7 @@ namespace MWMechanics
                 *weaptype = ESM::Weapon::HandToHand;
             else
             {
-                const std::string &type = weapon->getTypeName();
+                const std::string &type = weapon->getType();
                 if(type == typeid(ESM::Weapon).name())
                 {
                     const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
