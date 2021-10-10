@@ -39,7 +39,7 @@ public:
         mRoot.mKeyword.clear ();
     }
 
-    bool containsKeyword (string_t keyword, value_t& value)
+    bool containsKeyword (const string_t& keyword, value_t& value)
     {
         typename Entry::childen_t::iterator current;
         typename Entry::childen_t::iterator next;
