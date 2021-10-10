@@ -23,45 +23,19 @@ namespace MWLua
         return std::to_string(id.mIndex) + "_" + std::to_string(id.mContentFile);
     }
 
-    const static std::map<std::type_index, std::string_view> classNames = {
-        {typeid(MWClass::Activator), "Activator"},
-        {typeid(MWClass::Armor), "Armor"},
-        {typeid(MWClass::Book), "Book"},
-        {typeid(MWClass::Clothing), "Clothing"},
-        {typeid(MWClass::Container), "Container"},
-        {typeid(MWClass::Creature), "Creature"},
-        {typeid(MWClass::Door), "Door"},
-        {typeid(MWClass::Ingredient), "Ingredient"},
-        {typeid(MWClass::Light), "Light"},
-        {typeid(MWClass::Miscellaneous), "Miscellaneous"},
-        {typeid(MWClass::Npc), "NPC"},
-        {typeid(MWClass::Potion), "Potion"},
-        {typeid(MWClass::Static), "Static"},
-        {typeid(MWClass::Weapon), "Weapon"},
-    };
-
-    std::string_view getMWClassName(const std::type_index& cls_type, std::string_view fallback)
-    {
-        auto it = classNames.find(cls_type);
-        if (it != classNames.end())
-            return it->second;
-        else
-            return fallback;
-    }
-
     bool isMarker(const MWWorld::Ptr& ptr)
     {
         std::string_view id = ptr.getCellRef().getRefIdRef();
         return id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker";
     }
 
-    std::string_view getMWClassName(const MWWorld::Ptr& ptr)
+    std::string getMWClassName(const MWWorld::Ptr& ptr)
     {
         if (ptr.getCellRef().getRefIdRef() == "player")
             return "Player";
         if (isMarker(ptr))
             return "Marker";
-        return getMWClassName(typeid(ptr.getClass()), ptr.getTypeName());
+        return ptr.getTypeName();
     }
 
     std::string ptrToString(const MWWorld::Ptr& ptr)
