@@ -1,7 +1,5 @@
 #include "riggeometry.hpp"
 
-#include <osg/Version>
-
 #include <components/debug/debuglog.hpp>
 
 #include "skeleton.hpp"
