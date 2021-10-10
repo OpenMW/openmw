@@ -117,7 +117,7 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
     for (osg::NodePath::const_reverse_iterator it = path.rbegin()+1; it != path.rend(); ++it)
     {
         osg::Node* node = *it;
-        if (!node->asTransform())
+        if (node->asTransform())
             continue;
         if (Skeleton* skel = dynamic_cast<Skeleton*>(node))
         {
