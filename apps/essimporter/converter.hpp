@@ -124,11 +124,9 @@ public:
         {
             mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt.mLevel;
             mContext->mPlayerBase = npc;
-            ESM::SpellState::SpellParams empty;
             // FIXME: player start spells and birthsign spells aren't listed here,
             // need to fix openmw to account for this
-            for (const auto & spell : npc.mSpells.mList)
-                mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[spell] = empty;
+            mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells = npc.mSpells.mList;
 
             // Clear the list now that we've written it, this prevents issues cropping up with
             // ensureCustomData() in OpenMW tripping over no longer existing spells, where an error would be fatal.

@@ -49,9 +49,9 @@ namespace DetourNavigator
         std::vector<osg::Vec3f> uniqueVertices;
         uniqueVertices.reserve(3 * triangles.size());
 
-        for (const RecastMeshTriangle& v : triangles)
-            for (const osg::Vec3f& v : v.mVertices)
-                uniqueVertices.push_back(v);
+        for (const RecastMeshTriangle& triangle : triangles)
+            for (const osg::Vec3f& vertex : triangle.mVertices)
+                uniqueVertices.push_back(vertex);
 
         std::sort(uniqueVertices.begin(), uniqueVertices.end());
         uniqueVertices.erase(std::unique(uniqueVertices.begin(), uniqueVertices.end()), uniqueVertices.end());
@@ -61,15 +61,15 @@ namespace DetourNavigator
         std::vector<AreaType> areaTypes;
         areaTypes.reserve(triangles.size());
 
-        for (const RecastMeshTriangle& v : triangles)
+        for (const RecastMeshTriangle& triangle : triangles)
         {
-            areaTypes.push_back(v.mAreaType);
+            areaTypes.push_back(triangle.mAreaType);
 
-            for (const osg::Vec3f& v : v.mVertices)
+            for (const osg::Vec3f& vertex : triangle.mVertices)
             {
-                const auto it = std::lower_bound(uniqueVertices.begin(), uniqueVertices.end(), v);
+                const auto it = std::lower_bound(uniqueVertices.begin(), uniqueVertices.end(), vertex);
                 assert(it != uniqueVertices.end());
-                assert(*it == v);
+                assert(*it == vertex);
                 indices.push_back(static_cast<int>(it - uniqueVertices.begin()));
             }
         }
@@ -79,11 +79,11 @@ namespace DetourNavigator
         std::vector<float> vertices;
         vertices.reserve(3 * uniqueVertices.size());
 
-        for (const osg::Vec3f& v : uniqueVertices)
+        for (const osg::Vec3f& vertex : uniqueVertices)
         {
-            vertices.push_back(v.x() + shift.x());
-            vertices.push_back(v.y() + shift.y());
-            vertices.push_back(v.z() + shift.z());
+            vertices.push_back(vertex.x() + shift.x());
+            vertices.push_back(vertex.y() + shift.y());
+            vertices.push_back(vertex.z() + shift.z());
         }
 
         return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));

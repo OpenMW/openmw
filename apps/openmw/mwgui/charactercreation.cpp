@@ -72,13 +72,6 @@ namespace
                 return {question, {r2, r1, r0}, sound};
         }
     }
-
-    void updatePlayerHealth()
-    {
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-        MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
-        npcStats.updateHealth();
-    }
 }
 
 namespace MWGui
@@ -372,8 +365,6 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeDialog(mPickClassDialog);
             mPickClassDialog = nullptr;
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onPickClassDialogDone(WindowBase* parWindow)
@@ -448,8 +439,6 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeDialog(mRaceDialog);
             mRaceDialog = nullptr;
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onRaceDialogBack()
@@ -477,8 +466,6 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeDialog(mBirthSignDialog);
             mBirthSignDialog = nullptr;
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
@@ -527,7 +514,6 @@ namespace MWGui
             // Do not delete dialog, so that choices are remembered in case we want to go back and adjust them later
             mCreateClassDialog->setVisible(false);
         }
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
@@ -719,8 +705,6 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mGenerateClass);
 
         mPlayerClass = *klass;
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onGenerateClassBack()

@@ -30,6 +30,8 @@
 #include <osg/io_utils>
 #include <osg/Depth>
 
+#include <osgDB/SharedStateManager>
+
 #include <osgUtil/TransformAttributeFunctor>
 #include <osgUtil/Statistics>
 #include <osgUtil/MeshOptimizers>
@@ -82,6 +84,13 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         CombineStaticTransformsVisitor cstv(this);
         node->accept(cstv);
         cstv.removeTransforms(node);
+    }
+
+    if (options & SHARE_DUPLICATE_STATE && _sharedStateManager)
+    {
+        if (_sharedStateMutex) _sharedStateMutex->lock();
+        _sharedStateManager->share(node);
+        if (_sharedStateMutex) _sharedStateMutex->unlock();
     }
 
     if (options & REMOVE_REDUNDANT_NODES)
@@ -741,7 +750,8 @@ bool Optimizer::CombineStaticTransformsVisitor::removeTransforms(osg::Node* node
         if (transform->getNumChildren()==1 &&
             transform->getChild(0)->asTransform()!=0 &&
             transform->getChild(0)->asTransform()->asMatrixTransform()!=0 &&
-            transform->getChild(0)->asTransform()->getDataVariance()==osg::Object::STATIC)
+            (!transform->getChild(0)->getStateSet() || transform->getChild(0)->getStateSet()->referenceCount()==1) &&
+            transform->getChild(0)->getDataVariance()==osg::Object::STATIC)
         {
             // now combine with its child.
             osg::MatrixTransform* child = transform->getChild(0)->asTransform()->asMatrixTransform();
@@ -903,11 +913,11 @@ void Optimizer::RemoveRedundantNodesVisitor::removeRedundantNodes()
                 unsigned int childIndex = (*pitr)->getChildIndex(group);
                 for (unsigned int i=0; i<group->getNumChildren(); ++i)
                 {
-                    osg::Node* child = group->getChild(i);
-                    (*pitr)->insertChild(childIndex++, child);
+                    if (i==0)
+                        (*pitr)->setChild(childIndex, group->getChild(i));
+                    else
+                        (*pitr)->insertChild(childIndex+i, group->getChild(i));
                 }
-
-                (*pitr)->removeChild(group);
             }
 
             group->removeChildren(0, group->getNumChildren());

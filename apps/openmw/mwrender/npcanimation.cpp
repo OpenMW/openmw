@@ -148,44 +148,6 @@ public:
     float getValue(osg::NodeVisitor* nv) override;
 };
 
-// --------------------------------------------------------------------------------
-
-/// Subclass RotateController to add a Z-offset for sneaking in first person mode.
-/// @note We use inheritance instead of adding another controller, so that we do not have to compute the worldOrient twice.
-/// @note Must be set on a MatrixTransform.
-class NeckController : public RotateController
-{
-public:
-    NeckController(osg::Node* relativeTo)
-        : RotateController(relativeTo)
-    {
-    }
-
-    void setOffset(const osg::Vec3f& offset)
-    {
-        mOffset = offset;
-    }
-
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
-    {
-        osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
-        osg::Matrix matrix = transform->getMatrix();
-
-        osg::Quat worldOrient = getWorldOrientation(node);
-        osg::Quat orient = worldOrient * mRotate * worldOrient.inverse() * matrix.getRotate();
-
-        matrix.setRotate(orient);
-        matrix.setTrans(matrix.getTrans() + worldOrient.inverse() * mOffset);
-
-        transform->setMatrix(matrix);
-
-        traverse(node,nv);
-    }
-
-private:
-    osg::Vec3f mOffset;
-};
-
 // --------------------------------------------------------------------------------------------------------------
 
 HeadAnimationTime::HeadAnimationTime(const MWWorld::Ptr& reference)
@@ -403,7 +365,7 @@ public:
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
         float fov, aspect, zNear, zFar;
-        if (cv->getProjectionMatrix()->getPerspective(fov, aspect, zNear, zFar))
+        if (cv->getProjectionMatrix()->getPerspective(fov, aspect, zNear, zFar) && std::abs(fov-mFov) > 0.001)
         {
             fov = mFov;
             osg::ref_ptr<osg::RefMatrix> newProjectionMatrix = new osg::RefMatrix();
@@ -954,7 +916,7 @@ void NpcAnimation::addControllers()
         if (found != mNodeMap.end())
         {
             osg::MatrixTransform* node = found->second.get();
-            mFirstPersonNeckController = new NeckController(mObjectRoot.get());
+            mFirstPersonNeckController = new RotateController(mObjectRoot.get());
             node->addUpdateCallback(mFirstPersonNeckController);
             mActiveControllers.emplace_back(node, mFirstPersonNeckController);
         }
@@ -1099,34 +1061,6 @@ osg::Node* NpcAnimation::getWeaponNode()
 Resource::ResourceSystem* NpcAnimation::getResourceSystem()
 {
     return mResourceSystem;
-}
-
-void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew)
-{
-    // During first auto equip, we don't play any sounds.
-    // Basically we don't want sounds when the actor is first loaded,
-    // the items should appear as if they'd always been equipped.
-    if (isNew)
-    {
-        static const std::string schools[] = {
-            "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-        };
-
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        if(!magicEffect->mHitSound.empty())
-            sndMgr->playSound3D(mPtr, magicEffect->mHitSound, 1.0f, 1.0f);
-        else
-            sndMgr->playSound3D(mPtr, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
-    }
-
-    if (!magicEffect->mHit.empty())
-    {
-        const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-        bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
-        // Don't play particle VFX unless the effect is new or it should be looping.
-        if (isNew || loop)
-            addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "", magicEffect->mParticle);
-    }
 }
 
 void NpcAnimation::enableHeadAnimation(bool enable)

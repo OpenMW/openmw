@@ -11,11 +11,15 @@
 #include <osg/TexGen>
 #include <osg/TexEnvCombine>
 #include <osg/Version>
+#include <osg/FrameBufferObject>
+#include <osgUtil/RenderStage>
+#include <osgUtil/CullVisitor>
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/settings/settings.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #ifndef GL_DEPTH32F_STENCIL8_NV
 #define GL_DEPTH32F_STENCIL8_NV 0x8DAC
@@ -171,8 +175,7 @@ void GlowUpdater::setDuration(float duration)
 }
 
 // Allows camera to render to a color and floating point depth texture with a multisampled framebuffer.
-// Must be set on a camera's cull callback.
-class AttachMultisampledDepthColorCallback : public osg::NodeCallback
+class AttachMultisampledDepthColorCallback : public SceneUtil::NodeCallback<AttachMultisampledDepthColorCallback, osg::Node*, osgUtil::CullVisitor*>
 {
 public:
     AttachMultisampledDepthColorCallback(osg::Texture2D* colorTex, osg::Texture2D* depthTex, int samples, int colorSamples)
@@ -192,14 +195,14 @@ public:
         mFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(depthTex));
     }
 
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+    void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
     {
-        osgUtil::RenderStage* renderStage = static_cast<osgUtil::CullVisitor*>(nv)->getCurrentRenderStage();
+        osgUtil::RenderStage* renderStage = cv->getCurrentRenderStage();
 
         renderStage->setMultisampleResolveFramebufferObject(mFbo);
         renderStage->setFrameBufferObject(mMsaaFbo);
 
-        traverse(node, nv);
+        traverse(node, cv);
     }
 
 private:

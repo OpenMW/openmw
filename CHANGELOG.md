@@ -1,6 +1,7 @@
 0.48.0
 ------
 
+    Bug #1751: Birthsign abilities increase modified attribute values instead of base ones
     Bug #3246: ESSImporter: Most NPCs are dead on save load
     Bug #3514: Editing a reference's position after loading an esp file makes the reference disappear
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
@@ -10,20 +11,25 @@
     Bug #4602: Robert's Bodies: crash inside createInstance()
     Bug #4700: Editor: Incorrect command implementation
     Bug #4744: Invisible particles must still be processed
-    Bug #4752: UpdateCellCommand doesn't undo properly
     Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
+    Bug #5207: Loose summons can be present in scene
     Bug #5379: Wandering NPCs falling through cantons
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
     Bug #5508: Engine binary links to Qt without using it
-    Bug #5755: Active grid object paging - disappearing textures
+    Bug #5596: Effects in constant spells should not be merged
+    Bug #5621: Drained stats cannot be restored
+    Bug #5766: Active grid object paging - disappearing textures
     Bug #5788: Texture editing parses the selected indexes wrongly
+    Bug #5801: A multi-effect spell with the intervention effects and recall always favors Almsivi intervention
     Bug #5842: GetDisposition adds temporary disposition change from different actors
+    Bug #5863: GetEffect should return true after the player has teleported
     Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
     Bug #6051: NaN water height in ESM file is not handled gracefully
     Bug #6066: addtopic "return" does not work from within script. No errors thrown
     Bug #6067: esp loader fails in for certain subrecord orders
+    Bug #6087: Bound items added directly to the inventory disappear if their corresponding spell effect ends
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
     Bug #6107: Fatigue is incorrectly recalculated when fortify effect is applied or removed
     Bug #6115: Showmap overzealous matching
@@ -34,22 +40,40 @@
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
     Bug #6165: Paralyzed player character can pickup items when the inventory is open
+    Bug #6172: Some creatures can't open doors
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
+    Bug #6273: Respawning NPCs rotation is inconsistent
+    Bug #6282: Laura craft doesn't follow the player character
+    Bug #6283: Avis Dorsey follows you after her death
+    Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
+    Bug #6291: Can't pickup the dead mage's journal from the mysterious hunter mod
+    Bug #6302: Teleporting disabled actor breaks its disabled state
+    Bug #6307: Pathfinding in Infidelities quest from Tribunal addon is broken
+    Bug #6323: Wyrmhaven: Alboin doesn't follower the player character out of his house
+    Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
+    Feature #4297: Implement APPLIED_ONCE flag for magic effects
+    Feature #4414: Handle duration of EXTRA SPELL magic effect
     Feature #4595: Unique object identifier
-    Feature #4737: Handle instance move from one cell to another
+    Feature #5198: Implement "Magic effect expired" event
+    Feature #5454: Clear active spells from actor when he disappears from scene
     Feature #5489: MCP: Telekinesis fix for activators
+    Feature #5737: Handle instance move from one cell to another
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
     Feature #6032: Reverse-z depth buffer
     Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Feature #6199: Support FBO Rendering
+    Feature #6249: Alpha testing support for Collada
     Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
+    Feature #6288: Preserve the "blocked" record flag for referenceable objects.
+    Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
+
 
 0.47.0
 ------
@@ -184,6 +208,7 @@
     Bug #6043: Actor can have torch missing when torch animation is played
     Bug #6047: Mouse bindings can be triggered during save loading
     Bug #6136: Game freezes when NPCs try to open doors that are about to be closed
+    Bug #6294: Game crashes with empty pathgrid
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
@@ -213,6 +238,7 @@
     Feature #5519: Code Patch tab in launcher
     Feature #5524: Resume failed script execution after reload
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
+    Feature #5551: Do not reboot PC after OpenMW installation on Windows
     Feature #5563: Run physics update in background thread
     Feature #5579: MCP SetAngle enhancement
     Feature #5580: Service refusal filtering
@@ -227,6 +253,7 @@
     Feature #5814: Bsatool should be able to create BSA archives, not only to extract it
     Feature #5828: Support more than 8 lights
     Feature #5910: Fall back to delta time when physics can't keep up
+    Feature #5980: Support Bullet with double precision instead of one with single precision
     Feature #6024: OpenMW-CS: Selecting terrain in "Terrain land editing" should support "Add to selection" and "Remove from selection" modes
     Feature #6033: Include pathgrid to navigation mesh
     Feature #6034: Find path based on area cost depending on NPC stats

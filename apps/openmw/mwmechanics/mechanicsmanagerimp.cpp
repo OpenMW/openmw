@@ -84,7 +84,7 @@ namespace MWMechanics
         // reset
         creatureStats.setLevel(player->mNpdt.mLevel);
         creatureStats.getSpells().clear(true);
-        creatureStats.modifyMagicEffects(MagicEffects());
+        creatureStats.getActiveSpells().clear(ptr);
 
         for (int i=0; i<27; ++i)
             npcStats.getSkill (i).setBase (player->mNpdt.mSkills[i]);
@@ -213,6 +213,7 @@ namespace MWMechanics
         int attributes[ESM::Attribute::Length];
         for (int i=0; i<ESM::Attribute::Length; ++i)
             attributes[i] = npcStats.getAttribute(i).getBase();
+        npcStats.updateHealth();
 
         std::vector<std::string> selectedSpells = autoCalcPlayerSpells(skills, attributes, race);
 
@@ -220,6 +221,7 @@ namespace MWMechanics
             creatureStats.getSpells().add(spell);
 
         // forced update and current value adjustments
+        mActors.updateActor (ptr, 0);
         mActors.updateActor (ptr, 0);
 
         for (int i=0; i<3; ++i)
@@ -257,11 +259,11 @@ namespace MWMechanics
             mActors.castSpell(ptr, spellId, manualSpell);
     }
 
-    void MechanicsManager::remove(const MWWorld::Ptr& ptr)
+    void MechanicsManager::remove(const MWWorld::Ptr& ptr, bool keepActive)
     {
         if(ptr == MWBase::Environment::get().getWindowManager()->getWatchedActor())
             MWBase::Environment::get().getWindowManager()->watchActor(MWWorld::Ptr());
-        mActors.removeActor(ptr);
+        mActors.removeActor(ptr, keepActive);
         mObjects.removeObject(ptr);
     }
 
@@ -280,24 +282,6 @@ namespace MWMechanics
     {
         mActors.dropActors(cellStore, getPlayer());
         mObjects.dropObjects(cellStore);
-    }
-
-    void MechanicsManager::restoreStatsAfterCorprus(const MWWorld::Ptr& actor, const std::string& sourceId)
-    {
-        auto& stats = actor.getClass().getCreatureStats (actor);
-        auto& corprusSpells = stats.getCorprusSpells();
-
-        auto corprusIt = corprusSpells.find(sourceId);
-
-        if (corprusIt != corprusSpells.end())
-        {
-            for (int i = 0; i < ESM::Attribute::Length; ++i)
-            {
-                MWMechanics::AttributeValue attr = stats.getAttribute(i);
-                attr.restore(corprusIt->second.mWorsenings[i]);
-                actor.getClass().getCreatureStats(actor).setAttribute(i, attr);
-            }
-        }
     }
 
     void MechanicsManager::update(float duration, bool paused)
@@ -333,7 +317,7 @@ namespace MWMechanics
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
-            mActors.removeActor(ptr);
+            mActors.removeActor(ptr, true);
             mActors.addActor(ptr, true);
         }
 

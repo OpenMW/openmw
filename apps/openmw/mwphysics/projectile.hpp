@@ -4,7 +4,6 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
-#include <optional>
 
 #include <LinearMath/btVector3.h>
 
@@ -32,7 +31,7 @@ namespace MWPhysics
     class Projectile final : public PtrHolder
     {
     public:
-        Projectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, float radius, bool canCrossWaterSurface, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem);
+        Projectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, float radius, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem);
         ~Projectile() override;
 
         btConvexShape* getConvexShape() const { return mConvexShape; }
@@ -56,15 +55,25 @@ namespace MWPhysics
             return mCasterColObj;
         }
 
-        bool canTraverseWater() const;
+        void setHitWater()
+        {
+            mHitWater = true;
+        }
+
+        bool getHitWater() const
+        {
+            return mHitWater;
+        }
 
         void hit(const btCollisionObject* target, btVector3 pos, btVector3 normal);
 
         void setValidTargets(const std::vector<MWWorld::Ptr>& targets);
         bool isValidTarget(const btCollisionObject* target) const;
 
-        std::optional<btVector3> getWaterHitPosition();
-        void setWaterHitPosition(btVector3 pos);
+        btVector3 getHitPosition() const
+        {
+            return mHitPosition;
+        }
 
     private:
 
@@ -72,13 +81,11 @@ namespace MWPhysics
         btConvexShape* mConvexShape;
 
         bool mTransformUpdatePending;
-        bool mCanCrossWaterSurface;
-        bool mCrossedWaterSurface;
+        bool mHitWater;
         std::atomic<bool> mActive;
         MWWorld::Ptr mCaster;
         const btCollisionObject* mCasterColObj;
         const btCollisionObject* mHitTarget;
-        std::optional<btVector3> mWaterHitPosition;
         osg::Vec3f mPosition;
         btVector3 mHitPosition;
         btVector3 mHitNormal;

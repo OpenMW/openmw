@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_STATESETCONTROLLER_H
 #define OPENMW_COMPONENTS_SCENEUTIL_STATESETCONTROLLER_H
 
-#include <osg/NodeCallback>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include <map>
 #include <array>
@@ -28,7 +28,7 @@ namespace SceneUtil
     /// @note When used as a CullCallback, StateSetUpdater will have no effect on leaf nodes such as osg::Geometry and must be used on branch nodes only.
     /// @note Do not add the same StateSetUpdater to multiple nodes.
     /// @note Do not add multiple StateSetUpdaters on the same Node as they will conflict - instead use the CompositeStateSetUpdater.
-    class StateSetUpdater : public osg::NodeCallback
+    class StateSetUpdater : public SceneUtil::NodeCallback<StateSetUpdater>
     {
     public:
         StateSetUpdater();
@@ -36,7 +36,7 @@ namespace SceneUtil
 
         META_Object(SceneUtil, StateSetUpdater)
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
+        void operator()(osg::Node* node, osg::NodeVisitor* nv);
 
         /// Apply state - to override in derived classes
         /// @note Due to the double buffering approach you *have* to apply all state
@@ -46,8 +46,7 @@ namespace SceneUtil
         /// Set default state - optionally override in derived classes
         /// @par May be used e.g. to allocate StateAttributes.
         virtual void setDefaults(osg::StateSet* stateset) {}
-
-    protected:
+    
         /// Reset mStateSets, forcing a setDefaults() on the next frame. Can be used to change the defaults if needed.
         void reset();
 

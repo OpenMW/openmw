@@ -6,7 +6,7 @@
 
 
 -------------------------------------------------------------------------------
--- Limits given value to the interval [`from`, `to`]
+-- Limits given value to the interval [`from`, `to`].
 -- @function [parent=#util] clamp
 -- @param #number value
 -- @param #number from
@@ -14,7 +14,7 @@
 -- @return #number min(max(value, from), to)
 
 -------------------------------------------------------------------------------
--- Adds `2pi*k` and puts the angle in range `[-pi, pi]`
+-- Adds `2pi*k` and puts the angle in range `[-pi, pi]`.
 -- @function [parent=#util] normalizeAngle
 -- @param #number angle Angle in radians
 -- @return #number Angle in range `[-pi, pi]`
@@ -48,13 +48,13 @@
 -- @return #Vector2.
 
 -------------------------------------------------------------------------------
--- Length of the vector
+-- Length of the vector.
 -- @function [parent=#Vector2] length
 -- @param self
 -- @return #number
 
 -------------------------------------------------------------------------------
--- Square of the length of the vector
+-- Square of the length of the vector.
 -- @function [parent=#Vector2] length2
 -- @param self
 -- @return #number
@@ -145,6 +145,85 @@
 -- @param self
 -- @param #Vector3 v
 -- @return #Vector3
+
+-------------------------------------------------------------------------------
+-- @type Transform
+
+-------------------------------------------------------------------------------
+-- Returns the inverse transform.
+-- @function [parent=#Transform] inverse
+-- @param self
+-- @return #Transform.
+
+-------------------------------------------------------------------------------
+-- @type TRANSFORM
+-- @field [parent=#TRANSFORM] #Transform identity Empty transform.
+
+-------------------------------------------------------------------------------
+-- Movement by given vector.
+-- @function [parent=#TRANSFORM] move
+-- @param #Vector3 offset.
+-- @return #Transform.
+-- @usage
+-- -- Accepts either 3 numbers or a 3D vector
+-- util.transform.move(x, y, z)
+-- util.transform.move(util.vector3(x, y, z))
+
+-------------------------------------------------------------------------------
+-- Scale transform.
+-- @function [parent=#TRANSFORM] scale
+-- @param #number scaleX.
+-- @param #number scaleY.
+-- @param #number scaleZ.
+-- @return #Transform.
+-- @usage
+-- -- Accepts either 3 numbers or a 3D vector
+-- util.transform.scale(x, y, z)
+-- util.transform.scale(util.vector3(x, y, z))
+
+
+-------------------------------------------------------------------------------
+-- Rotation (any axis).
+-- @function [parent=#TRANSFORM] rotate
+-- @param #number angle
+-- @param #Vector3 axis.
+-- @return #Transform.
+
+-------------------------------------------------------------------------------
+-- X-axis rotation.
+-- @function [parent=#TRANSFORM] rotateX
+-- @param #number angle
+-- @return #Transform.
+
+-------------------------------------------------------------------------------
+-- Y-axis rotation.
+-- @function [parent=#TRANSFORM] rotateY
+-- @param #number angle
+-- @return #Transform.
+
+-------------------------------------------------------------------------------
+-- Z-axis rotation.
+-- @function [parent=#TRANSFORM] rotateZ
+-- @param #number angle
+-- @return #Transform.
+
+-------------------------------------------------------------------------------
+-- 3D transforms (scale/move/rotate) that can be applied to 3D vectors.
+-- Several transforms can be combined and applied to a vector using multiplication.
+-- Combined transforms apply in reverse order (from right to left).
+-- @field [parent=#util] #TRANSFORM transform
+-- @usage
+-- local util = require('openmw.util')
+-- local trans = util.transform
+-- local fromActorSpace = trans.move(actor.position) * trans.rotateZ(actor.rotation.z)
+--
+-- -- rotation is applied first, movement is second
+-- local posBehindActor = fromActorSpace * util.vector3(0, -100, 0)
+--
+-- -- equivalent to trans.rotateZ(-actor.rotation.z) * trans.move(-actor.position)
+-- local toActorSpace = fromActorSpace:inverse()
+-- local relativeTargetPos = toActorSpace * target.position
+-- local deltaAngle = math.atan2(relativeTargetPos.y, relativeTargetPos.x)
 
 return nil
 

@@ -34,6 +34,11 @@ namespace
         const float actorTolerance = 2 * speed * duration + 1.2 * std::max(halfExtents.x(), halfExtents.y());
         return std::max(MWMechanics::MIN_TOLERANCE, actorTolerance);
     }
+
+    bool canOpenDoors(const MWWorld::Ptr& ptr)
+    {
+        return ptr.getClass().isBipedal(ptr) || ptr.getClass().hasInventoryStore(ptr);
+    }
 }
 
 MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options) :
@@ -118,7 +123,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
     if (!isDestReached && timerStatus == Misc::TimerStatus::Elapsed)
     {
-        if (actor.getClass().isBipedal(actor))
+        if (canOpenDoors(actor))
             openDoors(actor);
 
         const bool wasShortcutting = mIsShortcutting;
@@ -232,7 +237,7 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
     static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
 
     const MWWorld::Ptr door = getNearbyDoor(actor, distance);
-    if (!door.isEmpty() && actor.getClass().isBipedal(actor))
+    if (!door.isEmpty() && canOpenDoors(actor))
     {
         openDoors(actor);
     }
@@ -443,9 +448,13 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
         result |= DetourNavigator::Flag_swim;
 
     if (actorClass.canWalk(actor) && actor.getClass().getWalkSpeed(actor) > 0)
+    {
         result |= DetourNavigator::Flag_walk;
+        if (getTypeId() == AiPackageTypeId::Travel)
+            result |= DetourNavigator::Flag_usePathgrid;
+    }
 
-    if (actorClass.isBipedal(actor) && getTypeId() != AiPackageTypeId::Wander)
+    if (canOpenDoors(actor) && getTypeId() != AiPackageTypeId::Wander)
         result |= DetourNavigator::Flag_openDoor;
 
     return result;
@@ -457,20 +466,31 @@ DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::P
     const DetourNavigator::Flags flags = getNavigatorFlags(actor);
     const MWWorld::Class& actorClass = actor.getClass();
 
-    if (flags & DetourNavigator::Flag_swim)
-        costs.mWater = divOrMax(costs.mWater, actorClass.getSwimSpeed(actor));
+    const float swimSpeed = (flags & DetourNavigator::Flag_swim) == 0
+            ? 0.0f
+            : actorClass.getSwimSpeed(actor);
 
-    if (flags & DetourNavigator::Flag_walk)
+    const float walkSpeed = [&]
     {
-        float walkCost;
+        if ((flags & DetourNavigator::Flag_walk) == 0)
+            return 0.0f;
         if (getTypeId() == AiPackageTypeId::Wander)
-            walkCost = divOrMax(1.0, actorClass.getWalkSpeed(actor));
-        else
-            walkCost = divOrMax(1.0, actorClass.getRunSpeed(actor));
-        costs.mDoor = costs.mDoor * walkCost;
-        costs.mPathgrid = costs.mPathgrid * walkCost;
-        costs.mGround = costs.mGround * walkCost;
-    }
+            return actorClass.getWalkSpeed(actor);
+        return actorClass.getRunSpeed(actor);
+    } ();
+
+    const float maxSpeed = std::max(swimSpeed, walkSpeed);
+
+    if (maxSpeed == 0)
+        return costs;
+
+    const float swimFactor = swimSpeed / maxSpeed;
+    const float walkFactor = walkSpeed / maxSpeed;
+
+    costs.mWater = divOrMax(costs.mWater, swimFactor);
+    costs.mDoor = divOrMax(costs.mDoor, walkFactor);
+    costs.mPathgrid = divOrMax(costs.mPathgrid, walkFactor);
+    costs.mGround = divOrMax(costs.mGround, walkFactor);
 
     return costs;
 }

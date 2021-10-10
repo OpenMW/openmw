@@ -8,28 +8,10 @@
 #include <osg/ref_ptr>
 
 #include <osg/Shader>
-
-#include <osgViewer/Viewer>
-
-#include <components/sceneutil/lightmanager.hpp>
-
-namespace Resource
-{
-    class SceneManager;
-}
-
-namespace SceneUtil
-{
-    enum class LightingMethod;
-}
+#include <osg/Program>
 
 namespace Shader
 {
-
-    enum class UBOBinding
-    {
-        LightBuffer
-    };
 
     /// @brief Reads shader template files and turns them into a concrete shader, based on a list of define's.
     /// @par Shader templates can get the value of a define with the syntax @define.
@@ -41,8 +23,6 @@ namespace Shader
 
         void setShaderPath(const std::string& path);
 
-        void setLightingMethod(SceneUtil::LightingMethod method);
-
         typedef std::map<std::string, std::string> DefineMap;
 
         /// Create or retrieve a shader instance.
@@ -53,7 +33,10 @@ namespace Shader
         /// @note Thread safe.
         osg::ref_ptr<osg::Shader> getShader(const std::string& templateName, const DefineMap& defines, osg::Shader::Type shaderType);
 
-        osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader);
+        osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader, const osg::Program* programTemplate=nullptr);
+
+        const osg::Program* getProgramTemplate() const { return mProgramTemplate; }
+        void setProgramTemplate(const osg::Program* program) { mProgramTemplate = program; }
 
         /// Get (a copy of) the DefineMap used to construct all shaders
         DefineMap getGlobalDefines();
@@ -81,9 +64,9 @@ namespace Shader
         typedef std::map<std::pair<osg::ref_ptr<osg::Shader>, osg::ref_ptr<osg::Shader> >, osg::ref_ptr<osg::Program> > ProgramMap;
         ProgramMap mPrograms;
 
-        SceneUtil::LightingMethod mLightingMethod;
-
         std::mutex mMutex;
+
+        osg::ref_ptr<const osg::Program> mProgramTemplate;
     };
 
     bool parseFors(std::string& source, const std::string& templateName);

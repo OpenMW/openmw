@@ -17,6 +17,7 @@
 #include <components/resource/keyframemanager.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
@@ -86,22 +87,22 @@ namespace
         std::vector<osg::ref_ptr<osg::Node> > mToRemove;
     };
 
-    class DayNightCallback : public osg::NodeCallback
+    class DayNightCallback : public SceneUtil::NodeCallback<DayNightCallback, osg::Switch*>
     {
     public:
         DayNightCallback() : mCurrentState(0)
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Switch* node, osg::NodeVisitor* nv)
         {
             unsigned int state = MWBase::Environment::get().getWorld()->getNightDayMode();
-            const unsigned int newState = node->asGroup()->getNumChildren() > state ? state : 0;
+            const unsigned int newState = node->getNumChildren() > state ? state : 0;
 
             if (newState != mCurrentState)
             {
                 mCurrentState = newState;
-                node->asSwitch()->setSingleChildOn(mCurrentState);
+                node->setSingleChildOn(mCurrentState);
             }
 
             traverse(node, nv);
@@ -471,20 +472,18 @@ namespace MWRender
         }
     }
 
-    class ResetAccumRootCallback : public osg::NodeCallback
+    class ResetAccumRootCallback : public SceneUtil::NodeCallback<ResetAccumRootCallback, osg::MatrixTransform*>
     {
     public:
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::MatrixTransform* transform, osg::NodeVisitor* nv)
         {
-            osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
-
             osg::Matrix mat = transform->getMatrix();
             osg::Vec3f position = mat.getTrans();
             position = osg::componentMultiply(mResetAxes, position);
             mat.setTrans(position);
             transform->setMatrix(mat);
 
-            traverse(node, nv);
+            traverse(transform, nv);
         }
 
         void setAccumulate(const osg::Vec3f& accumulate)
@@ -591,8 +590,6 @@ namespace MWRender
 
     void Animation::loadAllAnimationsInFolder(const std::string &model, const std::string &baseModel)
     {
-        const std::map<std::string, VFS::File*>& index = mResourceSystem->getVFS()->getIndex();
-
         std::string animationPath = model;
         if (animationPath.find("meshes") == 0)
         {
@@ -600,21 +597,10 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size()-3, 3, "/");
 
-        mResourceSystem->getVFS()->normalizeFilename(animationPath);
-
-        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(animationPath);
-        while (found != index.end())
+        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
-            const std::string& name = found->first;
-            if (name.size() >= animationPath.size() && name.substr(0, animationPath.size()) == animationPath)
-            {
-                size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".kf") == 0)
-                    addSingleAnimSource(name, baseModel);
-            }
-            else
-                break;
-            ++found;
+            if (Misc::getFileExtension(name) == "kf")
+                addSingleAnimSource(name, baseModel);
         }
     }
 
@@ -1295,8 +1281,6 @@ namespace MWRender
         if (model.empty())
             return;
 
-        const std::map<std::string, VFS::File*>& index = resourceSystem->getVFS()->getIndex();
-
         std::string animationPath = model;
         if (animationPath.find("meshes") == 0)
         {
@@ -1304,21 +1288,10 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size()-4, 4, "/");
 
-        resourceSystem->getVFS()->normalizeFilename(animationPath);
-
-        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(animationPath);
-        while (found != index.end())
+        for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
-            const std::string& name = found->first;
-            if (name.size() >= animationPath.size() && name.substr(0, animationPath.size()) == animationPath)
-            {
-                size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".nif") == 0)
-                    loadBonesFromFile(node, name, resourceSystem);
-            }
-            else
-                break;
-            ++found;
+            if (Misc::getFileExtension(name) == "nif")
+                loadBonesFromFile(node, name, resourceSystem);
         }
     }
 

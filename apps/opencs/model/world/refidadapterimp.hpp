@@ -25,6 +25,9 @@ namespace CSMWorld
         const RefIdColumn *mId;
         const RefIdColumn *mModified;
         const RefIdColumn *mType;
+        const RefIdColumn *mBlocked;
+
+        BaseColumns () : mBlocked(nullptr) {}
     };
 
     /// \brief Base adapter for all refereceable record types
@@ -90,6 +93,9 @@ namespace CSMWorld
         if (column==mBase.mType)
             return static_cast<int> (mType);
 
+        if (column==mBase.mBlocked)
+            return (record.get().mRecordFlags & ESM::FLAG_Blocked) != 0;
+
         return QVariant();
     }
 
@@ -102,6 +108,17 @@ namespace CSMWorld
 
         if (column==mBase.mModified)
             record.mState = static_cast<RecordBase::State> (value.toInt());
+        else if (column==mBase.mBlocked)
+        {
+            RecordT record2 = record.get();
+
+            if (value.toInt() != 0)
+                record2.mRecordFlags |= ESM::FLAG_Blocked;
+            else
+                record2.mRecordFlags &= ~ESM::FLAG_Blocked;
+
+            record.setModified(record2);
+        }
     }
 
     template<typename RecordT>
@@ -110,6 +127,14 @@ namespace CSMWorld
         return mType;
     }
 
+    // NOTE: Body Part should not have persistence (but BodyPart is not listed in the Objects
+    //       table at the moment).
+    //
+    //       Spellmaking - not persistent - currently not part of objects table
+    //       Enchanting  - not persistent - currently not part of objects table
+    //
+    //       Leveled Creature - no model, so not persistent
+    //       Leveled Item     - no model, so not persistent
 
     struct ModelColumns : public BaseColumns
     {
@@ -1845,6 +1870,7 @@ namespace CSMWorld
                         content.mWander.mDuration = static_cast<short>(value.toInt());
                     else
                         return; // return without saving
+                    break;
                 case 3:
                     if (content.mType == ESM::AI_Wander)
                         content.mWander.mTimeOfDay = static_cast<unsigned char>(value.toInt());

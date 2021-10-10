@@ -1,8 +1,8 @@
 #ifndef GAME_MWDIALOGUE_KEYWORDSEARCH_H
 #define GAME_MWDIALOGUE_KEYWORDSEARCH_H
 
-#include <map>
 #include <cctype>
+#include <map>
 #include <stdexcept>
 #include <vector>
 #include <algorithm>    // std::reverse
@@ -68,6 +68,7 @@ public:
         return false;
     }
 
+
     static bool sortMatches(const Match& left, const Match& right)
     {
         return left.mBeg < right.mBeg;
@@ -78,16 +79,6 @@ public:
         std::vector<Match> matches;
         for (Point i = beg; i != end; ++i)
         {
-            // check if previous character marked start of new word
-            if (i != beg)
-            {
-                Point prev = i;
-                --prev;
-                if(isalpha(*prev))
-                    continue;
-            }
-
-
             // check first character
             typename Entry::childen_t::iterator candidate = mRoot.mChildren.find (Misc::StringUtils::toLower (*i));
 

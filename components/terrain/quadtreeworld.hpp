@@ -5,6 +5,7 @@
 #include "terraingrid.hpp"
 
 #include <mutex>
+#include <memory>
 
 namespace osg
 {
@@ -15,12 +16,13 @@ namespace Terrain
 {
     class RootNode;
     class ViewDataMap;
+    class DebugChunkManager;
 
     /// @brief Terrain implementation that loads cells into a Quad Tree, with geometry LOD and texture LOD.
     class QuadTreeWorld : public TerrainGrid // note: derived from TerrainGrid is only to render default cells (see loadCell)
     {
     public:
-        QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask, int compMapResolution, float comMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize);
+        QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask, int compMapResolution, float comMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize, bool debugChunks);
 
         ~QuadTreeWorld();
 
@@ -38,7 +40,6 @@ namespace Terrain
 
         View* createView() override;
         void preload(View* view, const osg::Vec3f& eyePoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, Loading::Reporter& reporter) override;
-        bool storeView(const View* view, double referenceTime) override;
         void rebuildViews() override;
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) override;
@@ -72,6 +73,8 @@ namespace Terrain
         int mVertexLodMod;
         float mViewDistance;
         float mMinSize;
+        bool mDebugTerrainChunks;
+        std::unique_ptr<DebugChunkManager> mDebugChunkManager;
     };
 
 }

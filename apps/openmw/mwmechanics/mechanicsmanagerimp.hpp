@@ -45,7 +45,7 @@ namespace MWMechanics
             void add (const MWWorld::Ptr& ptr) override;
             ///< Register an object for management
 
-            void remove (const MWWorld::Ptr& ptr) override;
+            void remove (const MWWorld::Ptr& ptr, bool keepActive) override;
             ///< Deregister an object for management
 
             void updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr) override;
@@ -229,8 +229,6 @@ namespace MWMechanics
             float getAngleToPlayer(const MWWorld::Ptr& ptr) const override;
             GreetingState getGreetingState(const MWWorld::Ptr& ptr) const override;
             bool isTurningToPlayer(const MWWorld::Ptr& ptr) const override;
-
-            void restoreStatsAfterCorprus(const MWWorld::Ptr& actor, const std::string& sourceId) override;
 
         private:
             bool canCommitCrimeAgainst(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);

@@ -26,6 +26,7 @@
 #include "../mwmechanics/recharge.hpp"
 
 #include "ptr.hpp"
+#include "esmloader.hpp"
 #include "esmstore.hpp"
 #include "class.hpp"
 #include "containerstore.hpp"
@@ -176,6 +177,13 @@ namespace
 
         if (state.mVersion < 15)
             fixRestocking(record, state);
+        if (state.mVersion < 17)
+        {
+            if constexpr (std::is_same_v<T, ESM::Creature>)
+                MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory);
+            else if constexpr (std::is_same_v<T, ESM::NPC>)
+                MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory, &state.mNpcStats);
+        }
 
         if (state.mRef.mRefNum.hasContentFile())
         {

@@ -15,6 +15,7 @@
 
 #include <components/resource/imagemanager.hpp>
 #include <components/shader/shadermanager.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include <components/debug/debuglog.hpp>
 
@@ -51,7 +52,7 @@ class Drawable : public osg::Drawable {
 public:
 
     // Stage 0: update widget animations and controllers. Run during the Update traversal.
-    class FrameUpdate : public osg::Drawable::UpdateCallback
+    class FrameUpdate : public SceneUtil::NodeCallback<FrameUpdate>
     {
     public:
         FrameUpdate()
@@ -64,10 +65,9 @@ public:
             mRenderManager = renderManager;
         }
 
-        void update(osg::NodeVisitor*, osg::Drawable*) override
+        void operator()(osg::Node*, osg::NodeVisitor*)
         {
-            if (mRenderManager)
-                mRenderManager->update();
+            mRenderManager->update();
         }
 
     private:
@@ -75,7 +75,7 @@ public:
     };
 
     // Stage 1: collect draw calls. Run during the Cull traversal.
-    class CollectDrawCalls : public osg::Drawable::CullCallback
+    class CollectDrawCalls : public SceneUtil::NodeCallback<CollectDrawCalls>
     {
     public:
         CollectDrawCalls()
@@ -88,13 +88,9 @@ public:
             mRenderManager = renderManager;
         }
 
-        bool cull(osg::NodeVisitor*, osg::Drawable*, osg::State*) const override
+        void operator()(osg::Node*, osg::NodeVisitor*)
         {
-            if (!mRenderManager)
-                return false;
-
             mRenderManager->collectDrawCalls();
-            return false;
         }
 
     private:

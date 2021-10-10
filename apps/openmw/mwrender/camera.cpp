@@ -5,6 +5,7 @@
 #include <components/misc/mathutil.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/settings/settings.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -25,7 +26,7 @@
 namespace
 {
 
-class UpdateRenderCameraCallback : public osg::NodeCallback
+class UpdateRenderCameraCallback : public SceneUtil::NodeCallback<UpdateRenderCameraCallback, osg::Camera*>
 {
 public:
     UpdateRenderCameraCallback(MWRender::Camera* cam)
@@ -33,12 +34,10 @@ public:
     {
     }
 
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+    void operator()(osg::Camera* cam, osg::NodeVisitor* nv)
     {
-        osg::Camera* cam = static_cast<osg::Camera*>(node);
-
         // traverse first to update animations, in case the camera is attached to an animated node
-        traverse(node, nv);
+        traverse(cam, nv);
 
         mCamera->updateCamera(cam);
     }
@@ -251,6 +250,7 @@ namespace MWRender
 
         const float cameraObstacleLimit = 5.0f;
         const float focalObstacleLimit = 10.f;
+        const int collisionType = (MWPhysics::CollisionType::CollisionType_Default & ~MWPhysics::CollisionType::CollisionType_Actor);
 
         const auto* rayCasting = MWBase::Environment::get().getWorld()->getRayCasting();
 
@@ -260,7 +260,7 @@ namespace MWRender
         float offsetLen = focalOffset.length();
         if (offsetLen > 0)
         {
-            MWPhysics::RayCastingResult result = rayCasting->castSphere(focal - focalOffset, focal, focalObstacleLimit);
+            MWPhysics::RayCastingResult result = rayCasting->castSphere(focal - focalOffset, focal, focalObstacleLimit, collisionType);
             if (result.mHit)
             {
                 double adjustmentCoef = -(result.mHitPos + result.mHitNormal * focalObstacleLimit - focal).length() / offsetLen;
@@ -274,7 +274,7 @@ namespace MWRender
             mCameraDistance = std::min(mCameraDistance, mMaxNextCameraDistance);
         osg::Vec3d cameraPos;
         getPosition(focal, cameraPos);
-        MWPhysics::RayCastingResult result = rayCasting->castSphere(focal, cameraPos, cameraObstacleLimit);
+        MWPhysics::RayCastingResult result = rayCasting->castSphere(focal, cameraPos, cameraObstacleLimit, collisionType);
         if (result.mHit)
             mCameraDistance = (result.mHitPos + result.mHitNormal * cameraObstacleLimit - focal).length();
     }

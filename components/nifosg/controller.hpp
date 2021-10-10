@@ -7,6 +7,7 @@
 #include <components/nif/data.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
 #include <set>
@@ -14,18 +15,26 @@
 
 #include <osg/Texture2D>
 
-#include <osg/StateSet>
-#include <osg/NodeCallback>
-#include <osg/Drawable>
-
-
 namespace osg
 {
     class Material;
+    class MatrixTransform;
+}
+
+namespace osgParticle
+{
+    class ParticleProcessor;
+}
+
+namespace SceneUtil
+{
+    class MorphGeometry;
 }
 
 namespace NifOsg
 {
+
+    class MatrixTransform;
 
     // interpolation of keyframes
     template <typename MapT>
@@ -207,8 +216,7 @@ namespace NifOsg
         float getMaximum() const override;
     };
 
-    /// Must be set on a SceneUtil::MorphGeometry.
-    class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller
+    class GeomMorpherController : public SceneUtil::Controller, public SceneUtil::NodeCallback<GeomMorpherController, SceneUtil::MorphGeometry*>
     {
     public:
         GeomMorpherController(const Nif::NiGeomMorpherController* ctrl);
@@ -217,13 +225,13 @@ namespace NifOsg
 
         META_Object(NifOsg, GeomMorpherController)
 
-        void update(osg::NodeVisitor* nv, osg::Drawable* drawable) override;
+        void operator()(SceneUtil::MorphGeometry*, osg::NodeVisitor*);
 
     private:
         std::vector<FloatInterpolator> mKeyFrames;
     };
 
-    class KeyframeController : public SceneUtil::KeyframeController
+    class KeyframeController : public SceneUtil::KeyframeController, public SceneUtil::NodeCallback<KeyframeController, NifOsg::MatrixTransform*>
     {
     public:
         // This is used if there's no interpolator but there is data (Morrowind meshes).
@@ -241,7 +249,7 @@ namespace NifOsg
 
         osg::Vec3f getTranslation(float time) const override;
 
-        void operator() (osg::Node*, osg::NodeVisitor*) override;
+        void operator() (NifOsg::MatrixTransform*, osg::NodeVisitor*);
 
     private:
         QuaternionInterpolator mRotations;
@@ -276,7 +284,7 @@ namespace NifOsg
         std::set<int> mTextureUnits;
     };
 
-    class VisController : public osg::NodeCallback, public SceneUtil::Controller
+    class VisController : public SceneUtil::NodeCallback<VisController>, public SceneUtil::Controller
     {
     private:
         std::vector<Nif::NiVisData::VisData> mData;
@@ -291,10 +299,10 @@ namespace NifOsg
 
         META_Object(NifOsg, VisController)
 
-        void operator() (osg::Node* node, osg::NodeVisitor* nv) override;
+        void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    class RollController : public osg::NodeCallback, public SceneUtil::Controller
+    class RollController : public SceneUtil::NodeCallback<RollController, osg::MatrixTransform*>, public SceneUtil::Controller
     {
     private:
         FloatInterpolator mData;
@@ -306,7 +314,7 @@ namespace NifOsg
         RollController() = default;
         RollController(const RollController& copy, const osg::CopyOp& copyop);
 
-        void operator() (osg::Node* node, osg::NodeVisitor* nv) override;
+        void operator() (osg::MatrixTransform* node, osg::NodeVisitor* nv);
 
         META_Object(NifOsg, RollController)
     };
@@ -377,7 +385,7 @@ namespace NifOsg
         void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override;
     };
 
-    class ParticleSystemController : public osg::NodeCallback, public SceneUtil::Controller
+    class ParticleSystemController : public SceneUtil::NodeCallback<ParticleSystemController, osgParticle::ParticleProcessor*>, public SceneUtil::Controller
     {
     public:
         ParticleSystemController(const Nif::NiParticleSystemController* ctrl);
@@ -386,14 +394,14 @@ namespace NifOsg
 
         META_Object(NifOsg, ParticleSystemController)
 
-        void operator() (osg::Node* node, osg::NodeVisitor* nv) override;
+        void operator() (osgParticle::ParticleProcessor* node, osg::NodeVisitor* nv);
 
     private:
         float mEmitStart;
         float mEmitStop;
     };
 
-    class PathController : public osg::NodeCallback, public SceneUtil::Controller
+    class PathController : public SceneUtil::NodeCallback<PathController, osg::MatrixTransform*>, public SceneUtil::Controller
     {
     public:
         PathController(const Nif::NiPathController* ctrl);
@@ -402,7 +410,7 @@ namespace NifOsg
 
         META_Object(NifOsg, PathController)
 
-        void operator() (osg::Node*, osg::NodeVisitor*) override;
+        void operator() (osg::MatrixTransform*, osg::NodeVisitor*);
 
     private:
         Vec3Interpolator mPath;

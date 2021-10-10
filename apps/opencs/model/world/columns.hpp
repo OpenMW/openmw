@@ -344,6 +344,7 @@ namespace CSMWorld
             ColumnId_FactionAttrib2 = 312,
 
             ColumnId_Persistent = 313,
+            ColumnId_Blocked = 314,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

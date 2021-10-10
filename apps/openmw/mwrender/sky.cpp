@@ -44,6 +44,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -80,15 +81,15 @@ namespace
         return mat;
     }
 
-    osg::ref_ptr<osg::Geometry> createTexturedQuad(int numUvSets=1)
+    osg::ref_ptr<osg::Geometry> createTexturedQuad(int numUvSets=1, float scale=1.f)
     {
         osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
 
         osg::ref_ptr<osg::Vec3Array> verts = new osg::Vec3Array;
-        verts->push_back(osg::Vec3f(-0.5, -0.5, 0));
-        verts->push_back(osg::Vec3f(-0.5, 0.5, 0));
-        verts->push_back(osg::Vec3f(0.5, 0.5, 0));
-        verts->push_back(osg::Vec3f(0.5, -0.5, 0));
+        verts->push_back(osg::Vec3f(-0.5*scale, -0.5*scale, 0));
+        verts->push_back(osg::Vec3f(-0.5*scale, 0.5*scale, 0));
+        verts->push_back(osg::Vec3f(0.5*scale, 0.5*scale, 0));
+        verts->push_back(osg::Vec3f(0.5*scale, -0.5*scale, 0));
 
         geom->setVertexArray(verts);
 
@@ -301,13 +302,11 @@ public:
         return osg::BoundingSphere(osg::Vec3f(0,0,0), 0);
     }
 
-    class CullCallback : public osg::NodeCallback
+    class CullCallback : public SceneUtil::NodeCallback<CullCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
-        void operator() (osg::Node* node, osg::NodeVisitor* nv) override
+        void operator() (osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
             // XXX have to remove unwanted culling plane of the water reflection camera
 
             // Remove all planes that aren't from the standard frustum
@@ -336,7 +335,7 @@ public:
             cv->getProjectionCullingStack().back().pushCurrentMask();
             cv->getCurrentCullingSet().pushCurrentMask();
 
-            traverse(node, nv);
+            traverse(node, cv);
 
             cv->getProjectionCullingStack().back().popCurrentMask();
             cv->getCurrentCullingSet().popCurrentMask();
@@ -398,7 +397,7 @@ private:
 /// @note Must be added as cull callback.
 /// @note Meant to be used on a node that is child of a CameraRelativeTransform.
 /// The current view point must be retrieved by the CameraRelativeTransform since we can't get it anymore once we are in camera-relative space.
-class UnderwaterSwitchCallback : public osg::NodeCallback
+class UnderwaterSwitchCallback : public SceneUtil::NodeCallback<UnderwaterSwitchCallback>
 {
 public:
     UnderwaterSwitchCallback(CameraRelativeTransform* cameraRelativeTransform)
@@ -414,7 +413,7 @@ public:
         return mEnabled && viewPoint.z() < mWaterLevel;
     }
 
-    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+    void operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
         if (isUnderwater())
             return;
@@ -622,14 +621,13 @@ private:
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-        osg::ref_ptr<osg::PositionAttitudeTransform> transform (new osg::PositionAttitudeTransform);
+        osg::ref_ptr<osg::Group> group (new osg::Group);
+
+        mTransform->addChild(group);
+
         const float scale = 2.6f;
-        transform->setScale(osg::Vec3f(scale,scale,scale));
-
-        mTransform->addChild(transform);
-
-        osg::ref_ptr<osg::Geometry> geom = createTexturedQuad();
-        transform->addChild(geom);
+        osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(1, scale);
+        group->addChild(geom);
 
         osg::StateSet* stateset = geom->getOrCreateStateSet();
 
@@ -638,7 +636,7 @@ private:
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
 
-        mSunFlashNode = transform;
+        mSunFlashNode = group;
 
         mSunFlashCallback = new SunFlashCallback(mOcclusionQueryVisiblePixels, mOcclusionQueryTotalPixels);
         mSunFlashNode->addCullCallback(mSunFlashCallback);
@@ -717,7 +715,7 @@ private:
         }
     };
 
-    class OcclusionCallback : public osg::NodeCallback
+    class OcclusionCallback
     {
     public:
         OcclusionCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
@@ -760,7 +758,7 @@ private:
     };
 
     /// SunFlashCallback handles fading/scaling of a node depending on occlusion query result. Must be attached as a cull callback.
-    class SunFlashCallback : public OcclusionCallback
+    class SunFlashCallback : public OcclusionCallback, public SceneUtil::NodeCallback<SunFlashCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         SunFlashCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
@@ -769,10 +767,8 @@ private:
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
             float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
 
             osg::ref_ptr<osg::StateSet> stateset;
@@ -788,9 +784,11 @@ private:
                     stateset = new osg::StateSet;
                     stateset->setAttributeAndModes(mat, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
                 }
-
-                const float threshold = 0.6;
-                visibleRatio = visibleRatio * (1.f - threshold) + threshold;
+                else if (visibleRatio < 1.f)
+                {
+                    const float threshold = 0.6;
+                    visibleRatio = visibleRatio * (1.f - threshold) + threshold;
+                }
             }
 
             float scale = visibleRatio;
@@ -800,18 +798,20 @@ private:
                 // no traverse
                 return;
             }
+            else if (scale == 1.f)
+                traverse(node, cv);
             else
             {
                 osg::Matrix modelView = *cv->getModelViewMatrix();
 
-                modelView.preMultScale(osg::Vec3f(visibleRatio, visibleRatio, visibleRatio));
+                modelView.preMultScale(osg::Vec3f(scale, scale, scale));
 
                 if (stateset)
                     cv->pushStateSet(stateset);
 
                 cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
 
-                traverse(node, nv);
+                traverse(node, cv);
 
                 cv->popModelViewMatrix();
 
@@ -832,7 +832,7 @@ private:
 
     /// SunGlareCallback controls a full-screen glare effect depending on occlusion query result and the angle between sun and camera.
     /// Must be attached as a cull callback to the node above the glare node.
-    class SunGlareCallback : public OcclusionCallback
+    class SunGlareCallback : public OcclusionCallback, public SceneUtil::NodeCallback<SunGlareCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         SunGlareCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal,
@@ -854,10 +854,8 @@ private:
                 mColor[i] = std::min(1.f, mColor[i]);
         }
 
-        void operator ()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator ()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
             float angleRadians = getAngleToSunInRadians(*cv->getCurrentRenderStage()->getInitialViewMatrix());
             float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
 
@@ -885,7 +883,7 @@ private:
                 stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
 
                 cv->pushStateSet(stateset);
-                traverse(node, nv);
+                traverse(node, cv);
                 cv->popStateSet();
             }
         }

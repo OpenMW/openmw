@@ -12,6 +12,7 @@ namespace ESM
     {
         static unsigned int sRecordId;
 
+        unsigned int mRecordFlags;
         std::string mId;
 
         std::string mDescription;

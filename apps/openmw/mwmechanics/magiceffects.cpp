@@ -193,22 +193,22 @@ namespace MWMechanics
 
     void MagicEffects::writeState(ESM::MagicEffects &state) const
     {
-        // Don't need to save Modifiers, they are recalculated every frame anyway.
-        for (Collection::const_iterator iter (begin()); iter!=end(); ++iter)
+        for (const auto& [key, params] : mCollection)
         {
-            if (iter->second.getBase() != 0)
+            if (params.getBase() != 0 || params.getModifier() != 0.f)
             {
                 // Don't worry about mArg, never used by magic effect script instructions
-                state.mEffects.insert(std::make_pair(iter->first.mId, iter->second.getBase()));
+                state.mEffects[key.mId] = {params.getBase(), params.getModifier()};
             }
         }
     }
 
     void MagicEffects::readState(const ESM::MagicEffects &state)
     {
-        for (std::map<int, int>::const_iterator it = state.mEffects.begin(); it != state.mEffects.end(); ++it)
+        for (const auto& [key, params] : state.mEffects)
         {
-            mCollection[EffectKey(it->first)].setBase(it->second);
+            mCollection[EffectKey(key)].setBase(params.first);
+            mCollection[EffectKey(key)].setModifier(params.second);
         }
     }
 }

@@ -563,13 +563,7 @@ namespace MWScript
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                    MWMechanics::MagicEffects effects = stats.getSpells().getMagicEffects();
-                    effects += stats.getActiveSpells().getMagicEffects();
-                    if (ptr.getClass().hasInventoryStore(ptr) && !stats.isDeathAnimationFinished())
-                    {
-                        MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                        effects += store.getMagicEffects();
-                    }
+                    const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
 
                     for (const auto& activeEffect : effects)
                     {
@@ -821,7 +815,7 @@ namespace MWScript
                     }
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                    runtime.push(stats.getActiveSpells().isSpellActive(id) || stats.getSpells().isSpellActive(id));
+                    runtime.push(stats.getActiveSpells().isSpellActive(id));
                 }
         };
 
@@ -863,6 +857,9 @@ namespace MWScript
                 {
                     float param = runtime[0].mFloat;
                     runtime.pop();
+
+                    if (param < 0)
+                        throw std::runtime_error("square root of negative number (we aren't that imaginary)");
 
                     runtime.push(std::sqrt (param));
                 }

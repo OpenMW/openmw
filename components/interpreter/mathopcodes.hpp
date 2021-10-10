@@ -74,24 +74,6 @@ namespace Interpreter
             }           
     };
     
-    class OpSquareRoot : public Opcode0
-    {
-        public:
-        
-            void execute (Runtime& runtime) override
-            {
-                Type_Float value = runtime[0].mFloat;
-                
-                if (value<0)
-                    throw std::runtime_error (
-                        "square root of negative number (we aren't that imaginary)");
-                
-                value = std::sqrt (value);
-                
-                runtime[0].mFloat = value;
-            }           
-    };    
-    
     template<typename T, typename C>
     class OpCompare : public Opcode0
     {
@@ -105,7 +87,7 @@ namespace Interpreter
                 
                 runtime[0].mInteger = result;
             }           
-    };    
+    };
 }
 
 #endif

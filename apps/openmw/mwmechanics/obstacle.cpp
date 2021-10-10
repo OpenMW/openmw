@@ -4,6 +4,8 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "movement.hpp"
 
@@ -70,6 +72,15 @@ namespace MWMechanics
         }
 
         return MWWorld::Ptr(); // none found
+    }
+
+    bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& destination,
+        std::vector<MWWorld::Ptr>* occupyingActors)
+    {
+        const auto world = MWBase::Environment::get().getWorld();
+        const osg::Vec3f halfExtents = world->getPathfindingHalfExtents(actor);
+        const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
+        return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, actor, occupyingActors);
     }
 
     ObstacleCheck::ObstacleCheck()

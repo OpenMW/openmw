@@ -16,6 +16,7 @@
 #include <components/shader/shadermanager.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 namespace osgUtil
 {
@@ -156,7 +157,7 @@ namespace SceneUtil
         /// Internal use only, called automatically by the LightSource's UpdateCallback
         void addLight(LightSource* lightSource, const osg::Matrixf& worldMat, size_t frameNum);
 
-        const std::vector<LightSourceViewBound>& getLightsInViewSpace(osg::Camera* camera, const osg::RefMatrix* viewMatrix, size_t frameNum);
+        const std::vector<LightSourceViewBound>& getLightsInViewSpace(osgUtil::CullVisitor* cv, const osg::RefMatrix* viewMatrix, size_t frameNum);
 
         osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList, size_t frameNum, const osg::RefMatrix* viewMatrix);
 
@@ -254,7 +255,7 @@ namespace SceneUtil
     /// starting point is to attach a LightListCallback to each game object's base node.
     /// @note Not thread safe for CullThreadPerCamera threading mode.
     /// @note Due to lack of OSG support, the callback does not work on Drawables.
-    class LightListCallback : public osg::NodeCallback
+    class LightListCallback : public SceneUtil::NodeCallback<LightListCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
         LightListCallback()
@@ -262,7 +263,7 @@ namespace SceneUtil
             , mLastFrameNumber(0)
         {}
         LightListCallback(const LightListCallback& copy, const osg::CopyOp& copyop)
-            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop)
+            : osg::Object(copy, copyop), SceneUtil::NodeCallback<LightListCallback, osg::Node*, osgUtil::CullVisitor*>(copy, copyop)
             , mLightManager(copy.mLightManager)
             , mLastFrameNumber(0)
             , mIgnoredLightSources(copy.mIgnoredLightSources)
@@ -270,7 +271,7 @@ namespace SceneUtil
 
         META_Object(SceneUtil, LightListCallback)
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
+        void operator()(osg::Node* node, osgUtil::CullVisitor* nv);
 
         bool pushLightState(osg::Node* node, osgUtil::CullVisitor* nv);
 

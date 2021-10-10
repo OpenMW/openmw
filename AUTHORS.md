@@ -80,6 +80,7 @@ Programmers
     Federico Guerra (FedeWar)
     Fil Krynicki (filkry)
     Finbar Crago (finbar-crago)
+    Florent Teppe (Tetramir)
     Florian Weber (Florianjw)
     Frédéric Chardon (fr3dz10)
     Gaëtan Dezeiraud (Brouilles)
@@ -228,6 +229,7 @@ Programmers
     Yuri Krupenin
     zelurker
     Noah Gooder
+    Andrew Appuhamy (andrew-app)
 
 Documentation
 -------------

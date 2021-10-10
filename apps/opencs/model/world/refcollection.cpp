@@ -91,12 +91,48 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         else
             ref.mCell = cell2.mId;
 
+        if (ref.mRefNum.mContentFile != -1 && !base)
+        {
+            ref.mRefNum.mContentFile = ref.mRefNum.mIndex >> 24;
+            ref.mRefNum.mIndex &= 0x00ffffff;
+        }
+
         unsigned int  refNum = (ref.mRefNum.mIndex & 0x00ffffff) |
             (ref.mRefNum.hasContentFile() ? ref.mRefNum.mContentFile : 0xff) << 24;
 
         std::map<unsigned int, unsigned int>::iterator iter = cache.find(refNum);
 
-        if (ref.mRefNum.mContentFile != -1 && !base) ref.mRefNum.mContentFile = ref.mRefNum.mIndex >> 24;
+        if (isMoved)
+        {
+            if (iter == cache.end())
+            {
+                CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Cell,
+                    mCells.getId(cellIndex));
+
+                messages.add(id, "Attempt to move a non-existent reference - RefNum index "
+                    + std::to_string(ref.mRefNum.mIndex) + ", refID " + ref.mRefID + ", content file index "
+                    + std::to_string(ref.mRefNum.mContentFile),
+                    /*hint*/"",
+                    CSMDoc::Message::Severity_Warning);
+                continue;
+            }
+
+            int index = getIntIndex(iter->second);
+
+            // ensure we have the same record id for setRecord()
+            ref.mId = getRecord(index).get().mId;
+            ref.mIdNum = extractIdNum(ref.mId);
+
+            std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
+            // TODO: check whether a base record be moved
+            record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+            (base ? record->mBase : record->mModified) = std::move(ref);
+
+            // overwrite original record
+            setRecord(index, std::move(record));
+
+            continue; // NOTE: assumed moved references are not deleted at the same time
+        }
 
         if (isDeleted)
         {

@@ -397,7 +397,7 @@ namespace MWMechanics
                 mPath.clear();
         }
 
-        if (status != DetourNavigator::Status::NavMeshNotFound && mPath.empty())
+        if (status != DetourNavigator::Status::NavMeshNotFound && mPath.empty() && (flags & DetourNavigator::Flag_usePathgrid) == 0)
         {
             status = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents,
                 flags | DetourNavigator::Flag_usePathgrid, areaCosts, endTolerance, pathType, std::back_inserter(mPath));

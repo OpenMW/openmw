@@ -58,7 +58,7 @@ namespace MWBase
             virtual void add (const MWWorld::Ptr& ptr) = 0;
             ///< Register an object for management
 
-            virtual void remove (const MWWorld::Ptr& ptr) = 0;
+            virtual void remove (const MWWorld::Ptr& ptr, bool keepActive) = 0;
             ///< Deregister an object for management
 
             virtual void updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr) = 0;
@@ -277,8 +277,6 @@ namespace MWBase
             virtual float getAngleToPlayer(const MWWorld::Ptr& ptr) const  = 0;
             virtual MWMechanics::GreetingState getGreetingState(const MWWorld::Ptr& ptr) const = 0;
             virtual bool isTurningToPlayer(const MWWorld::Ptr& ptr) const = 0;
-
-            virtual void restoreStatsAfterCorprus(const MWWorld::Ptr& actor, const std::string& sourceId) = 0;
     };
 }
 

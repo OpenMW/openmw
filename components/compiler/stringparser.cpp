@@ -63,7 +63,7 @@ namespace Compiler
             keyword==Scanner::K_elseif || keyword==Scanner::K_while ||
             keyword==Scanner::K_endwhile || keyword==Scanner::K_return ||
             keyword==Scanner::K_messagebox || keyword==Scanner::K_set ||
-            keyword==Scanner::K_to || keyword==Scanner::K_getsquareroot)
+            keyword==Scanner::K_to)
         {
             // pretend this is not a keyword
             std::string name = loc.mLiteral;

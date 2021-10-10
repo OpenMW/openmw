@@ -70,7 +70,6 @@ namespace DetourNavigator
 
 namespace MWRender
 {
-    class GroundcoverUpdater;
     class StateUpdater;
     class SharedUniformStateUpdater;
 
@@ -279,7 +278,6 @@ namespace MWRender
         std::unique_ptr<TerrainStorage> mTerrainStorage;
         std::unique_ptr<ObjectPaging> mObjectPaging;
         std::unique_ptr<Groundcover> mGroundcover;
-        osg::ref_ptr<GroundcoverUpdater> mGroundcoverUpdater;
         std::unique_ptr<SkyManager> mSky;
         std::unique_ptr<FogManager> mFog;
         std::unique_ptr<ScreenshotManager> mScreenshotManager;

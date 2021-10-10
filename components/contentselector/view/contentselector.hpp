@@ -40,7 +40,7 @@ namespace ContentSelectorView
         void setGameFile (const QString &filename = QString(""));
 
         bool isGamefileSelected() const
-            { return ui.gameFileView->currentIndex() != -1; }
+            { return ui.gameFileView->currentIndex() > 0; }
 
         QWidget *uiWidget() const
             { return ui.contentGroupBox; }

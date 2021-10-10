@@ -28,6 +28,7 @@
 #include "../../model/prefs/shortcut.hpp"
 
 #include "tableeditidaction.hpp"
+#include "tableheadermouseeventhandler.hpp"
 #include "util.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
@@ -422,6 +423,8 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
         this, SLOT (settingChanged (const CSMPrefs::Setting *)));
     CSMPrefs::get()["ID Tables"].update();
+
+    new TableHeaderMouseEventHandler(this);
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
