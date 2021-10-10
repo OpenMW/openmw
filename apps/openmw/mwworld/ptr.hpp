@@ -37,6 +37,11 @@ namespace MWWorld
 
             unsigned int getType() const;
 
+            std::string getTypeDescription() const
+            {
+                return mRef ? mRef->getTypeDescription() : "nullptr";
+            }
+
             const Class& getClass() const
             {
                 if(mRef != nullptr)
@@ -52,7 +57,7 @@ namespace MWWorld
 
                 std::stringstream str;
                 str<< "Bad LiveCellRef cast to "<<T::getRecordType()<<" from ";
-                if(mRef != nullptr) str<< getType();
+                if(mRef != nullptr) str<< getTypeDescription();
                 else str<< "an empty object";
 
                 throw std::runtime_error(str.str());
@@ -113,6 +118,11 @@ namespace MWWorld
 
         unsigned int getType() const;
 
+        std::string getTypeDescription() const
+        {
+            return mRef ? mRef->getTypeDescription() : "nullptr";
+        }
+
         const Class& getClass() const
         {
             if(mRef != nullptr)
@@ -128,7 +138,7 @@ namespace MWWorld
 
             std::stringstream str;
             str<< "Bad LiveCellRef cast to "<<T::getRecordType()<<" from ";
-            if(mRef != nullptr) str<< getType();
+            if(mRef != nullptr) str<< getTypeDescription();
             else str<< "an empty object";
 
             throw std::runtime_error(str.str());
