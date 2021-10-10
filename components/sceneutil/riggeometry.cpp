@@ -330,8 +330,7 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
                 if (matrixTrans && matrixTrans->getMatrix().isIdentity())
                     continue;
                 if (!geomToSkelMatrix) geomToSkelMatrix = mGeomToSkelMatrix = new osg::RefMatrix;
-                if (matrixTrans) geomToSkelMatrix->preMult(matrixTrans->getMatrix());
-                else trans->computeWorldToLocalMatrix(*geomToSkelMatrix, nullptr);
+                trans->computeWorldToLocalMatrix(*geomToSkelMatrix, nullptr);
             }
         }
     }
