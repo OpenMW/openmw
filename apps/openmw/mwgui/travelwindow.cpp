@@ -115,7 +115,7 @@ namespace MWGui
         std::vector<ESM::Transport::Dest> transport;
         if (mPtr.getClass().isNpc())
             transport = mPtr.get<ESM::NPC>()->mBase->getTransport();
-        else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
+        else if (mPtr.getType() == ESM::Creature::sRecordId)
             transport = mPtr.get<ESM::Creature>()->mBase->getTransport();
 
         for(unsigned int i = 0;i<transport.size();i++)
