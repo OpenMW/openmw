@@ -313,6 +313,7 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
 {
     bool foundSkel = false;
     osg::RefMatrix* geomToSkelMatrix = mGeomToSkelMatrix;
+    if (geomToSkelMatrix) geomToSkelMatrix->makeIdentity();
     for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end()-1; ++it)
     {
         osg::Node* node = *it;
