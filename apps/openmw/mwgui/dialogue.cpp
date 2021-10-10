@@ -508,13 +508,13 @@ namespace MWGui
 
         int services = mPtr.getClass().getServices(mPtr);
 
-        bool travel = (mPtr.getTypeName() == typeid(ESM::NPC).name() && !mPtr.get<ESM::NPC>()->mBase->getTransport().empty())
-                || (mPtr.getTypeName() == typeid(ESM::Creature).name() && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
+        bool travel = (mPtr.getType() == ESM::NPC::sRecordId && !mPtr.get<ESM::NPC>()->mBase->getTransport().empty())
+                || (mPtr.getType() == ESM::Creature::sRecordId && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+        if (mPtr.getType() == ESM::NPC::sRecordId)
             mTopicsList->addItem(gmst.find("sPersuasion")->mValue.getString());
 
         if (services & ESM::NPC::AllItems)
