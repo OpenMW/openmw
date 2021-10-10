@@ -272,6 +272,24 @@ namespace
         EXPECT_EQ(variables["load-savegame"].as<boost::filesystem::path>().string(), "");
     }
 
+    TEST(OpenMWOptionsFromConfig, should_ignore_whitespace_prefixed_commented_option)
+    {
+        bpo::options_description description = makeOptionsDescription();
+        std::istringstream stream(" \t#load-savegame=save.omwsave");
+        bpo::variables_map variables;
+        Files::parseConfig(stream, variables, description);
+        EXPECT_EQ(variables["load-savegame"].as<boost::filesystem::path>().string(), "");
+    }
+
+    TEST(OpenMWOptionsFromConfig, should_support_whitespace_around_option)
+    {
+        bpo::options_description description = makeOptionsDescription();
+        std::istringstream stream(" load-savegame = save.omwsave ");
+        bpo::variables_map variables;
+        Files::parseConfig(stream, variables, description);
+        EXPECT_EQ(variables["load-savegame"].as<boost::filesystem::path>().string(), "save.omwsave");
+    }
+
     TEST(OpenMWOptionsFromConfig, should_throw_on_multiple_load_savegame)
     {
         bpo::options_description description = makeOptionsDescription();
