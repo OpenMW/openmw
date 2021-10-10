@@ -3,6 +3,7 @@
 #include <osg/Version>
 
 #include <components/debug/debuglog.hpp>
+#include <osg/MatrixTransform>
 
 #include "skeleton.hpp"
 #include "util.hpp"
