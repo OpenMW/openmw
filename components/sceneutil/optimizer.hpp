@@ -414,7 +414,7 @@ class Optimizer
                     return _targetMaximumNumberOfVertices;
                 }
 
-                void pushStateSet(osg::StateSet* stateSet);
+                bool pushStateSet(osg::StateSet* stateSet);
                 void popStateSet();
                 void checkAlphaBlendingActive();
                 void apply(osg::Geometry&) override { }
