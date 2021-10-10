@@ -653,9 +653,9 @@ void Optimizer::FlattenStaticTransformsVisitor::apply(osg::Geometry& geometry)
     {
         osg::VertexBufferObject* vbo = nullptr;
         if(geometry.getVertexArray() && geometry.getVertexArray()->referenceCount() > 1)
-            geometry.getVertexArray(cloneArray(geometry.getVertexArray(), vbo, &geometry));
+            geometry.setVertexArray(cloneArray(geometry.getVertexArray(), vbo, &geometry));
         if(geometry.getNormalArray() && geometry.getNormalArray()->referenceCount() > 1)
-            geometry.getNormalArray(cloneArray(geometry.getNormalArray(), vbo, &geometry));
+            geometry.setNormalArray(cloneArray(geometry.getNormalArray(), vbo, &geometry));
         if(geometry.getTexCoordArray(7) && geometry.getTexCoordArray(7)->referenceCount() > 1) // tangents
             geometry.setTexCoordArray(7, cloneArray(geometry.getTexCoordArray(7), vbo, &geometry));
     }
