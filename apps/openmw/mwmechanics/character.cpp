@@ -383,7 +383,7 @@ void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, Ju
 
 bool CharacterController::onOpen()
 {
-    if (mPtr.getTypeName() == typeid(ESM::Container).name())
+    if (mPtr.getType() == ESM::Container::sRecordId)
     {
         if (!mAnimation->hasAnimation("containeropen"))
             return true;
@@ -404,7 +404,7 @@ bool CharacterController::onOpen()
 
 void CharacterController::onClose()
 {
-    if (mPtr.getTypeName() == typeid(ESM::Container).name())
+    if (mPtr.getType() == ESM::Container::sRecordId)
     {
         if (!mAnimation->hasAnimation("containerclose"))
             return;
@@ -591,7 +591,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
             std::string anim = mCurrentMovement;
             mAdjustMovementAnimSpeed = true;
-            if (mPtr.getClass().getTypeName() == typeid(ESM::Creature).name()
+            if (mPtr.getClass().getType() == ESM::Creature::sRecordId
                     && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
             {
                 CharacterState walkState = runStateToWalkState(mMovementState);
@@ -1432,7 +1432,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
         MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(mPtr, &weaptype);
-        isWeapon = (weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name());
+        isWeapon = (weapon != inv.end() && weapon->getType() == ESM::Weapon::sRecordId);
         if (isWeapon)
         {
             weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
@@ -1467,7 +1467,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             mAttackStrength = 0;
 
             // Randomize attacks for non-bipedal creatures with Weapon flag
-            if (mPtr.getClass().getTypeName() == typeid(ESM::Creature).name() &&
+            if (mPtr.getClass().getType() == ESM::Creature::sRecordId &&
                 !mPtr.getClass().isBipedal(mPtr) &&
                 (!mAnimation->hasAnimation(mCurrentWeapon) || isRandomAttackAnimation(mCurrentWeapon)))
             {
@@ -1590,9 +1590,9 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
 
                 if(!target.isEmpty())
                 {
-                    if(item.getTypeName() == typeid(ESM::Lockpick).name())
+                    if(item.getType() == ESM::Lockpick::sRecordId)
                         Security(mPtr).pickLock(target, item, resultMessage, resultSound);
-                    else if(item.getTypeName() == typeid(ESM::Probe).name())
+                    else if(item.getType() == ESM::Probe::sRecordId)
                         Security(mPtr).probeTrap(target, item, resultMessage, resultSound);
                 }
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
@@ -1867,7 +1867,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
     {
         const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
+        if(torch != inv.end() && torch->getType() == ESM::Light::sRecordId
                 && updateCarriedLeftVisible(mWeaponType))
         {
             if (mAnimation->isPlaying("shield"))
