@@ -285,9 +285,10 @@ class Optimizer
                     BaseOptimizerVisitor(optimizer, FLATTEN_STATIC_TRANSFORMS) {}
 
                 void apply(osg::Node& geode) override;
-                void apply(osg::Drawable& drawable) override;
+                void apply(osg::Geometry& drawable) override;
                 void apply(osg::Billboard& geode) override;
-                void apply(osg::Transform& transform) override;
+                void apply(osg::Transform& transform) override final;
+                void apply(osg::MatrixTransform& transform) override { apply(static_cast<osg::Transform&>(transform)); }
 
                 bool removeTransforms(osg::Node* nodeWeCannotRemove);
 
@@ -316,6 +317,7 @@ class Optimizer
                     BaseOptimizerVisitor(optimizer, FLATTEN_STATIC_TRANSFORMS) {}
 
                 void apply(osg::MatrixTransform& transform) override;
+                void apply(osg::Geometry&) override { }
 
                 bool removeTransforms(osg::Node* nodeWeCannotRemove);
 
@@ -338,6 +340,7 @@ class Optimizer
                     BaseOptimizerVisitor(optimizer, REMOVE_REDUNDANT_NODES) {}
 
                 void apply(osg::Group& group) override;
+                void apply(osg::Geometry&) override { }
 
                 void removeEmptyNodes();
 
@@ -358,6 +361,7 @@ class Optimizer
                 void apply(osg::Transform& transform) override;
                 void apply(osg::LOD& lod) override;
                 void apply(osg::Switch& switchNode) override;
+                void apply(osg::Geometry&) override { }
 
                 bool isOperationPermissible(osg::Node& node);
 
@@ -376,6 +380,7 @@ class Optimizer
 
             bool isOperationPermissible(osg::Group& node);
 
+            void apply(osg::Geometry&) override { }
             void apply(osg::Group& group) override;
             void apply(osg::LOD& lod) override;
             void apply(osg::Switch& switchNode) override;
@@ -412,7 +417,7 @@ class Optimizer
                 void pushStateSet(osg::StateSet* stateSet);
                 void popStateSet();
                 void checkAlphaBlendingActive();
-
+                void apply(osg::Geometry&) override { }
                 void apply(osg::Group& group) override;
                 void apply(osg::Billboard&) override { /* don't do anything*/ }
 
