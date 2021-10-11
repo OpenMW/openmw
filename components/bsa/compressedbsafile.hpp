@@ -29,6 +29,7 @@
 #include <map>
 
 #include <components/bsa/bsa_file.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace Bsa
 {
