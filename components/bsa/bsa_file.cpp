@@ -29,6 +29,8 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
 
+#include <components/misc/stringops.hpp>
+
 using namespace Bsa;
 
 
@@ -189,13 +191,6 @@ void BSAFile::readHeader()
         return left.offset < right.offset;
     });
 
-    for (size_t i = 0; i < filenum; i++)
-    {
-        FileStruct& fs = mFiles[i];
-        // Add the file name to the lookup
-        mLookup[fs.name()] = i;
-    }
-
     mIsLoaded = true;
 }
 
@@ -240,13 +235,12 @@ void Bsa::BSAFile::writeHeader()
 /// Get the index of a given file name, or -1 if not found
 int BSAFile::getIndex(const char *str) const
 {
-    auto it = mLookup.find(str);
-    if(it == mLookup.end())
-        return -1;
-
-    size_t res = it->second;
-    assert(res < mFiles.size());
-    return static_cast<int>(res);
+    for (size_t i=0; i<mFiles.size() : mFiles)
+    {
+        if (Misc::StringUtils::ciEqual(fs.name(), str))
+            return static_cast<int>(i);
+    }
+    return -1;
 }
 
 /// Open an archive file.
@@ -274,7 +268,6 @@ void Bsa::BSAFile::close()
 
     mFiles.clear();
     mStringBuf.clear();
-    mLookup.clear();
     mIsLoaded = false;
 }
 
@@ -337,8 +330,6 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
     mFiles.push_back(newFile);
 
     mHasChanged = true;
-
-    mLookup[filename.c_str()] = mFiles.size() - 1;
 
     stream.seekp(0, std::ios::end);
     file.seekg(0, std::ios::beg);
