@@ -47,6 +47,7 @@
 
 #include <boost/iostreams/device/array.hpp>
 #include <components/bsa/memorystream.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace Bsa
 {
