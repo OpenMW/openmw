@@ -1213,7 +1213,7 @@ namespace NifOsg
                 if (niGeometryData->recType != Nif::RC_NiLinesData)
                     return;
                 auto data = static_cast<Nif::NiLinesData*>(niGeometryData);
-                const auto& line = data->lines;
+                auto& line = data->lines;
                 if (line.empty())
                     return;
                 geometry->addPrimitiveSet(moveArray<osg::DrawElementsUShort>(line, osg::PrimitiveSet::LINES));
