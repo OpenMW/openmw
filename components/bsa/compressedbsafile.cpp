@@ -286,7 +286,6 @@ void CompressedBSAFile::readHeader()
 
         mFiles[fileIndex].setNameInfos(mStringBuffOffset, &mStringBuf);
 
-        mLookup[reinterpret_cast<char*>(mStringBuf.data() + mStringBuffOffset)] = fileIndex;
         mStringBuffOffset += stringLength + 1u;
     }
 
