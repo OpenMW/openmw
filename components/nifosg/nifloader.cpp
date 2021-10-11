@@ -1156,7 +1156,7 @@ namespace NifOsg
             auto& uvlist = data->uvlist;
             int textureStage = 0;
             std::vector<osg::ref_ptr<osg::Array>> movedUvList;
-            movedUvList.reserve(uvlist.size());
+            movedUvList.resize(uvlist.size());
             for (unsigned int uvSet : boundTextures)
             {
                 if (uvSet >= uvlist.size())
