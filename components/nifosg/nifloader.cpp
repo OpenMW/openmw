@@ -1133,10 +1133,10 @@ namespace NifOsg
             }
         }
 
-        template <typename ArrayType, typename InputType>
-        osg::ref_ptr<ArrayType> moveArray(InputType& input)
+        template <typename ArrayType, typename InputType, typename... Args>
+        osg::ref_ptr<ArrayType> moveArray(InputType& input, Args... args)
         {
-            osg::ref_ptr<ArrayType> array = new ArrayType;
+            osg::ref_ptr<ArrayType> array = new ArrayType(args...);
             array->swap(input);
             return array;
         }
@@ -1155,17 +1155,23 @@ namespace NifOsg
 
             auto& uvlist = data->uvlist;
             int textureStage = 0;
-            for (const unsigned int uvSet : boundTextures)
+            std::vector<osg::ref_ptr<osg::Array>> movedUvList;
+            movedUvList.reserve(uvlist.size());
+            for (unsigned int uvSet : boundTextures)
             {
                 if (uvSet >= uvlist.size())
                 {
                     Log(Debug::Verbose) << "Out of bounds UV set " << uvSet << " on shape \"" << name << "\" in " << mFilename;
                     if (!uvlist.empty())
-                        geometry->setTexCoordArray(textureStage, new osg::Vec2Array(uvlist[0].size(), uvlist[0].data()), osg::Array::BIND_PER_VERTEX);
-                    continue;
+                        uvSet = 0;
+                    else
+                        continue;
                 }
+                osg::ref_ptr<osg::Array>& movedArray = movedUvList[uvSet];
+                if (!movedArray)
+                    movedArray = moveArray<osg::Vec2Array>(uvlist[uvSet]);
 
-                geometry->setTexCoordArray(textureStage, new osg::Vec2Array(uvlist[uvSet].size(), uvlist[uvSet].data()), osg::Array::BIND_PER_VERTEX);
+                geometry->setTexCoordArray(textureStage, movedArray, osg::Array::BIND_PER_VERTEX);
                 textureStage++;
             }
         }
@@ -1184,8 +1190,7 @@ namespace NifOsg
                 auto triangles = static_cast<Nif::NiTriShapeData*>(niGeometryData)->triangles;
                 if (triangles.empty())
                     return;
-                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(),
-                                                                        (unsigned short*)triangles.data()));
+                geometry->addPrimitiveSet(moveArray<osg::DrawElementsUShort>(triangles, osg::PrimitiveSet::TRIANGLES));
             }
             else if (niGeometry->recType == Nif::RC_NiTriStrips)
             {
@@ -1197,8 +1202,7 @@ namespace NifOsg
                 {
                     if (strip.size() < 3)
                         continue;
-                    geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(),
-                                                                            (unsigned short*)strip.data()));
+                    geometry->addPrimitiveSet(moveArray<osg::DrawElementsUShort>(strip, osg::PrimitiveSet::TRIANGLE_STRIP));
                     hasGeometry = true;
                 }
                 if (!hasGeometry)
@@ -1212,8 +1216,7 @@ namespace NifOsg
                 const auto& line = data->lines;
                 if (line.empty())
                     return;
-                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, line.size(),
-                                                                        (unsigned short*)line.data()));
+                geometry->addPrimitiveSet(moveArray<osg::DrawElementsUShort>(line, osg::PrimitiveSet::LINES));
             }
             handleNiGeometryData(geometry, niGeometryData, boundTextures, nifNode->name);
 
