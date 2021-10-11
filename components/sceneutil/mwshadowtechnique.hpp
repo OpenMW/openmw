@@ -91,6 +91,7 @@ namespace SceneUtil {
         public:
             ComputeLightSpaceBounds();
 
+            void apply(osg::Node& node) override final;
             void apply(osg::Group& node) override;
 
             void apply(osg::Drawable& drawable) override final;
