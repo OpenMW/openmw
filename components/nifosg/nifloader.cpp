@@ -281,13 +281,13 @@ namespace NifOsg
         osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
         {
             const size_t numRoots = nif->numRoots();
-            std::vector<const Nif::Node*> roots;
+            std::vector<Nif::Node*> roots;
             for (size_t i = 0; i < numRoots; ++i)
             {
                 const Nif::Record* r = nif->getRoot(i);
                 if (!r)
                     continue;
-                const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
+                Nif::Node* nifNode = dynamic_cast<Nif::Node*>(r);
                 if (nifNode)
                     roots.emplace_back(nifNode);
             }
@@ -298,7 +298,7 @@ namespace NifOsg
 
             osg::ref_ptr<osg::Group> created(new osg::Group);
             created->setDataVariance(osg::Object::STATIC);
-            for (const Nif::Node* root : roots)
+            for (Nif::Node* root : roots)
             {
                 auto node = handleNode(root, nullptr, imageManager, std::vector<unsigned int>(), 0, false, false, false, &textkeys->mTextKeys);
                 created->addChild(node);
@@ -503,7 +503,7 @@ namespace NifOsg
             return node;
         }
 
-        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
+        osg::ref_ptr<osg::Node> handleNode(Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
                                 std::vector<unsigned int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool hasAnimatedParents, SceneUtil::TextKeyMap* textKeys, osg::Node* rootNode=nullptr)
         {
             if (rootNode != nullptr && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
@@ -668,7 +668,7 @@ namespace NifOsg
                 currentNode = lodNode;
             }
 
-            const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
+            Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if(ninode)
             {
                 const Nif::NodeList &effects = ninode->effects;
@@ -1143,14 +1143,17 @@ namespace NifOsg
 
         void handleNiGeometryData(osg::Geometry *geometry, Nif::NiGeometryData* data, const std::vector<unsigned int>& boundTextures, const std::string& name)
         {
+            auto& vertices = data->vertices;
+            auto& normals = data->normals;
+            auto& colors = data->colors;
             if (!vertices.empty())
-                geometry->setVertexArray(moveArray<osg::Vec3Array>(data->vertices));
+                geometry->setVertexArray(moveArray<osg::Vec3Array>(vertices));
             if (!normals.empty())
-                geometry->setNormalArray(moveArray<osg::Vec3Array>(data->normals), osg::Array::BIND_PER_VERTEX);
+                geometry->setNormalArray(moveArray<osg::Vec3Array>(normals), osg::Array::BIND_PER_VERTEX);
             if (!colors.empty())
-                geometry->setColorArray(moveArray<osg::Vec4Array>(data->colors), osg::Array::BIND_PER_VERTEX);
+                geometry->setColorArray(moveArray<osg::Vec4Array>(colors), osg::Array::BIND_PER_VERTEX);
 
-            const auto& uvlist = data->uvlist;
+            auto& uvlist = data->uvlist;
             int textureStage = 0;
             for (const unsigned int uvSet : boundTextures)
             {
@@ -1167,9 +1170,9 @@ namespace NifOsg
             }
         }
 
-        void handleNiGeometry(const Nif::Node *nifNode, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
+        void handleNiGeometry(Nif::Node *nifNode, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
-            const Nif::NiGeometry* niGeometry = static_cast<const Nif::NiGeometry*>(nifNode);
+            Nif::NiGeometry* niGeometry = static_cast<Nif::NiGeometry*>(nifNode);
             if (niGeometry->data.empty())
                 return;
             Nif::NiGeometryData* niGeometryData = niGeometry->data.getPtr();
@@ -1178,7 +1181,7 @@ namespace NifOsg
             {
                 if (niGeometryData->recType != Nif::RC_NiTriShapeData)
                     return;
-                auto triangles = static_cast<const Nif::NiTriShapeData*>(niGeometryData)->triangles;
+                auto triangles = static_cast<Nif::NiTriShapeData*>(niGeometryData)->triangles;
                 if (triangles.empty())
                     return;
                 geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(),
@@ -1188,9 +1191,9 @@ namespace NifOsg
             {
                 if (niGeometryData->recType != Nif::RC_NiTriStripsData)
                     return;
-                auto data = static_cast<const Nif::NiTriStripsData*>(niGeometryData);
+                auto data = static_cast<Nif::NiTriStripsData*>(niGeometryData);
                 bool hasGeometry = false;
-                for (const auto& strip : data->strips)
+                for (auto& strip : data->strips)
                 {
                     if (strip.size() < 3)
                         continue;
@@ -1205,7 +1208,7 @@ namespace NifOsg
             {
                 if (niGeometryData->recType != Nif::RC_NiLinesData)
                     return;
-                auto data = static_cast<const Nif::NiLinesData*>(niGeometryData);
+                auto data = static_cast<Nif::NiLinesData*>(niGeometryData);
                 const auto& line = data->lines;
                 if (line.empty())
                     return;
@@ -1223,7 +1226,7 @@ namespace NifOsg
             applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->colors.empty(), animflags);
         }
 
-        void handleGeometry(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
+        void handleGeometry(Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
             assert(isTypeGeometry(nifNode->recType));
             osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
@@ -1238,7 +1241,7 @@ namespace NifOsg
                     continue;
                 if(ctrl->recType == Nif::RC_NiGeomMorpherController)
                 {
-                    const Nif::NiGeomMorpherController* nimorphctrl = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
+                    Nif::NiGeomMorpherController* nimorphctrl = static_cast<Nif::NiGeomMorpherController*>(ctrl.getPtr());
                     if (nimorphctrl->data.empty())
                         continue;
                     drawable = handleMorphGeometry(nimorphctrl, geom, parentNode, composite, boundTextures, animflags);
@@ -1255,22 +1258,22 @@ namespace NifOsg
             parentNode->addChild(drawable);
         }
 
-        osg::ref_ptr<osg::Drawable> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, osg::ref_ptr<osg::Geometry> sourceGeometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
+        osg::ref_ptr<osg::Drawable> handleMorphGeometry(Nif::NiGeomMorpherController* morpher, osg::ref_ptr<osg::Geometry> sourceGeometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
             osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
             morphGeom->setSourceGeometry(sourceGeometry);
 
-            const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
+            std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
             if (morphs.empty())
                 return morphGeom;
             // Note we are not interested in morph 0, which just contains the original vertices
             for (unsigned int i = 1; i < morphs.size(); ++i)
-                morphGeom->addMorphTarget(new osg::Vec3Array(morphs[i].mVertices.size(), morphs[i].mVertices.data()), 0.f);
+                morphGeom->addMorphTarget(moveArray<osg::Vec3Array>(morphs[i].mVertices), 0.f);
 
             return morphGeom;
         }
 
-        void handleSkinnedGeometry(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
+        void handleSkinnedGeometry(Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
                                           const std::vector<unsigned int>& boundTextures, int animflags)
         {
             assert(isTypeGeometry(nifNode->recType));
@@ -1301,7 +1304,7 @@ namespace NifOsg
                 influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
                 influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
 
-                map->mData.emplace_back(boneName, influence);
+                map->mData.emplace_back(std::move(boneName), influence);
             }
             rig->setInfluenceMap(map);
 
