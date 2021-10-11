@@ -284,7 +284,7 @@ namespace NifOsg
             std::vector<Nif::Node*> roots;
             for (size_t i = 0; i < numRoots; ++i)
             {
-                const Nif::Record* r = nif->getRoot(i);
+                Nif::Record* r = nif->getRoot(i);
                 if (!r)
                     continue;
                 Nif::Node* nifNode = dynamic_cast<Nif::Node*>(r);
@@ -678,7 +678,7 @@ namespace NifOsg
                         handleEffect(effects[i].getPtr(), currentNode, imageManager);
                 }
 
-                const Nif::NodeList &children = ninode->children;
+                Nif::NodeList &children = ninode->children;
                 for(size_t i = 0;i < children.length();++i)
                 {
                     if(!children[i].empty())
