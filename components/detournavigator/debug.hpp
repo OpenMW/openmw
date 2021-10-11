@@ -48,8 +48,9 @@ namespace DetourNavigator
     }
 
     class RecastMesh;
+    struct Settings;
 
-    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision);
+    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision, const Settings& settings);
     void writeToFile(const dtNavMesh& navMesh, const std::string& pathPrefix, const std::string& revision);
 }
 

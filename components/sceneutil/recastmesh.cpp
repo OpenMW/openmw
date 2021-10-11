@@ -64,8 +64,8 @@ namespace SceneUtil
 
         const auto normals = calculateNormals(vertices, indices);
         const auto texScale = 1.0f / (settings.mCellSize * 10.0f);
-        duDebugDrawTriMesh(&debugDraw, vertices.data(), static_cast<int>(vertices.size() / 3),
-            indices.data(), normals.data(), static_cast<int>(indices.size() / 3), nullptr, texScale);
+        duDebugDrawTriMeshSlope(&debugDraw, vertices.data(), static_cast<int>(vertices.size() / 3),
+            indices.data(), normals.data(), static_cast<int>(indices.size() / 3), settings.mMaxSlope, texScale);
 
         osg::ref_ptr<osg::Material> material = new osg::Material;
         material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);

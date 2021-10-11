@@ -1,9 +1,12 @@
 #include "shadow.hpp"
 
 #include <osgShadow/ShadowedScene>
+#include <osgShadow/ShadowSettings>
 
 #include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>
+
+#include "mwshadowtechnique.hpp"
 
 namespace SceneUtil
 {
@@ -94,7 +97,7 @@ namespace SceneUtil
         }
     }
 
-    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
+    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, unsigned int worldMask, Shader::ShaderManager &shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
         mShadowTechnique(new MWShadowTechnique),
         mOutdoorShadowCastingMask(outdoorShadowCastingMask),
         mIndoorShadowCastingMask(indoorShadowCastingMask)
@@ -109,8 +112,13 @@ namespace SceneUtil
         setupShadowSettings();
 
         mShadowTechnique->setupCastingShader(shaderManager);
+        mShadowTechnique->setWorldMask(worldMask);
 
         enableOutdoorMode();
+    }
+
+    ShadowManager::~ShadowManager()
+    {
     }
 
     Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines()

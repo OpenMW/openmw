@@ -409,7 +409,7 @@ namespace DetourNavigator
         }
         if (recastMesh && mSettings.get().mEnableWriteRecastMeshToFile)
             writeToFile(*recastMesh, mSettings.get().mRecastMeshPathPrefix + std::to_string(job.mChangedTile.x())
-                        + "_" + std::to_string(job.mChangedTile.y()) + "_", recastMeshRevision);
+                        + "_" + std::to_string(job.mChangedTile.y()) + "_", recastMeshRevision, mSettings);
         if (mSettings.get().mEnableWriteNavMeshToFile)
             if (const auto shared = job.mNavMeshCacheItem.lock())
                 writeToFile(shared->lockConst()->getImpl(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
