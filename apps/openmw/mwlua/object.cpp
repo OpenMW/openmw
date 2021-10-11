@@ -61,7 +61,7 @@ namespace MWLua
             return "Player";
         if (isMarker(ptr))
             return "Marker";
-        return "Unknown";
+        return getMWClassName(typeid(ptr.getClass()));
     }
 
     std::string ptrToString(const MWWorld::Ptr& ptr)
