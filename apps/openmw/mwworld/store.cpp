@@ -64,8 +64,9 @@ namespace MWWorld
         const T *ptr = search(index);
         if (ptr == nullptr)
         {
-            const std::string msg = T::getRecordType() + " with index " + std::to_string(index) + " not found";
-            throw std::runtime_error(msg);
+            std::stringstream msg;
+            msg << T::getRecordType() << " with index " << index << " not found";
+            throw std::runtime_error(msg.str());
         }
         return ptr;
     }
@@ -145,8 +146,9 @@ namespace MWWorld
         const T *ptr = search(id);
         if (ptr == nullptr)
         {
-            const std::string msg = T::getRecordType() + " '" + id + "' not found";
-            throw std::runtime_error(msg);
+            std::stringstream msg;
+            msg << T::getRecordType() << " '" << id << "' not found";
+            throw std::runtime_error(msg.str());
         }
         return ptr;
     }

@@ -19,7 +19,7 @@ struct Race
 {
     static unsigned int sRecordId;
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "Race"; }
+    static std::string_view getRecordType() { return "Race"; }
 
     struct SkillBonus
     {

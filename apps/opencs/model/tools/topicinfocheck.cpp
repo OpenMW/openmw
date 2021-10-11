@@ -395,12 +395,12 @@ bool CSMTools::TopicInfoCheckStage::verifyId(const std::string& name, const CSMW
 
     if (index == -1)
     {
-        messages.add(id, T::getRecordType() + " '" + name + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, std::string(T::getRecordType()) + " '" + name + "' does not exist", "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (collection.getRecord(index).isDeleted())
     {
-        messages.add(id, "Deleted " + T::getRecordType() + " record '" + name + "' is being referenced", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Deleted " + std::string(T::getRecordType()) + " record '" + name + "' is being referenced", "", CSMDoc::Message::Severity_Error);
         return false;
     }
 

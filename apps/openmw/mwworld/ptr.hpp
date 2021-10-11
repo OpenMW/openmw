@@ -37,7 +37,7 @@ namespace MWWorld
 
             unsigned int getType() const;
 
-            std::string getTypeDescription() const
+            std::string_view getTypeDescription() const
             {
                 return mRef ? mRef->getTypeDescription() : "nullptr";
             }
@@ -118,7 +118,7 @@ namespace MWWorld
 
         unsigned int getType() const;
 
-        std::string getTypeDescription() const
+        std::string_view getTypeDescription() const
         {
             return mRef ? mRef->getTypeDescription() : "nullptr";
         }

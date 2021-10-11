@@ -23,7 +23,7 @@ struct Creature
 {
     static unsigned int sRecordId;
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "Creature"; }
+    static std::string_view getRecordType() { return "Creature"; }
 
     // Default is 0x48?
     enum Flags
