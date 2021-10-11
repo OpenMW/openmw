@@ -296,8 +296,7 @@ int extractAll(std::unique_ptr<Bsa::BSAFile>& bsa, Arguments& info)
         }
 
         // Get a stream for the file to extract
-        // (inefficient because getFile iter on the list again)
-        Files::IStreamPtr data = bsa->getFile(file.name());
+        Files::IStreamPtr data = bsa->getFile(&file);
         bfs::ofstream out(target, std::ios::binary);
 
         // Write the file to disk
