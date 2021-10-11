@@ -26,6 +26,8 @@
 #ifndef BSA_COMPRESSED_BSA_FILE_H
 #define BSA_COMPRESSED_BSA_FILE_H
 
+#include <map>
+
 #include <components/bsa/bsa_file.hpp>
 
 namespace Bsa
