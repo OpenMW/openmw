@@ -1761,17 +1761,6 @@ namespace MWMechanics
 
         MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
 
-        if (actor == player->getPlayer())
-        {
-            if (werewolf)
-            {
-                player->saveStats();
-                player->setWerewolfStats();
-            }
-            else
-                player->restoreStats();
-        }
-
         // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.
         if (npcStats.getDrawState() == MWMechanics::DrawState_Spell)
             npcStats.setDrawState(MWMechanics::DrawState_Nothing);
@@ -1798,13 +1787,23 @@ namespace MWMechanics
             // Update the GUI only when called on the player
             MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
+            // Transforming removes all temporary effects
+            actor.getClass().getCreatureStats(actor).getActiveSpells().purge([] (const auto& params)
+            {
+                return params.getType() == ESM::ActiveSpells::Type_Consumable || params.getType() == ESM::ActiveSpells::Type_Temporary;
+            }, actor);
+            mActors.updateActor(actor, 0.f);
+
             if (werewolf)
             {
+                player->saveStats();
+                player->setWerewolfStats();
                 windowManager->forceHide(MWGui::GW_Inventory);
                 windowManager->forceHide(MWGui::GW_Magic);
             }
             else
             {
+                player->restoreStats();
                 windowManager->unsetForceHide(MWGui::GW_Inventory);
                 windowManager->unsetForceHide(MWGui::GW_Magic);
             }
