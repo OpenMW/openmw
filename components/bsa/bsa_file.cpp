@@ -235,7 +235,7 @@ void Bsa::BSAFile::writeHeader()
 /// Get the index of a given file name, or -1 if not found
 int BSAFile::getIndex(const char *str) const
 {
-    for (size_t i=0; i<mFiles.size() : mFiles)
+    for (size_t i=0; i<mFiles.size(); ++i)
     {
         if (Misc::StringUtils::ciEqual(fs.name(), str))
             return static_cast<int>(i);
