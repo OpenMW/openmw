@@ -31,7 +31,6 @@
 #include <osgShadow/ShadowTechnique>
 
 #include <components/shader/shadermanager.hpp>
-#include <components/terrain/quadtreeworld.hpp>
 
 namespace SceneUtil {
 
@@ -95,8 +94,6 @@ namespace SceneUtil {
             void apply(osg::Node& node) override;
 
             void apply(osg::Drawable& drawable) override;
-
-            void apply(Terrain::QuadTreeWorld& quadTreeWorld);
 
             void apply(osg::Billboard&) override;
 
@@ -237,6 +234,8 @@ namespace SceneUtil {
 
         virtual osg::StateSet* prepareStateSetForRenderingShadow(ViewDependentData& vdd, unsigned int traversalNumber) const;
 
+        void setWorldMask(unsigned int worldMask) { _worldMask = worldMask; }
+
     protected:
         virtual ~MWShadowTechnique();
 
@@ -269,6 +268,8 @@ namespace SceneUtil {
         bool                                    _useFrontFaceCulling = true;
 
         float                                   _shadowFadeStart = 0.0;
+
+        unsigned int                            _worldMask = ~0u;
 
         class DebugHUD final : public osg::Referenced
         {
