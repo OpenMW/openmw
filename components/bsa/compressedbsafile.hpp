@@ -93,7 +93,7 @@ namespace Bsa
         void readHeader() override;
        
         Files::IStreamPtr getFile(const char* filePath) override;
-        Files::IStreamPtr getFile(const FileStruct* fileStruct) override;
+        Files::IStreamPtr getFile(const FileStruct* fileStruct);
         void addFile(const std::string& filename, std::istream& file) override;
     };
 }
