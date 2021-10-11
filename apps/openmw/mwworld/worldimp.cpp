@@ -3420,7 +3420,29 @@ namespace MWWorld
             {
                 // but ignore containers without resolved content
                 if (isContainer && ptr.getRefData().getCustomData() == nullptr)
+                {
+                    const auto& store = MWBase::Environment::get().getWorld()->getStore();
+                    for(const auto& containerItem :  ptr.get<ESM::Container>()->mBase->mInventory.mList)
+                    {
+                        if(containerItem.mCount)
+                        {
+                            try
+                            {
+                                ManualRef ref(store, containerItem.mItem, containerItem.mCount);
+                                if(needToAdd(ref.getPtr(), mDetector))
+                                {
+                                    mOut.push_back(ptr);
+                                    return true;
+                                }
+                            }
+                            catch (const std::exception&)
+                            {
+                                // Ignore invalid item id
+                            }
+                        }
+                    }
                     return true;
+                }
 
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 {
