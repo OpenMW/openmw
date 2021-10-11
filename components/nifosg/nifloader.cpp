@@ -1133,17 +1133,22 @@ namespace NifOsg
             }
         }
 
-        void handleNiGeometryData(osg::Geometry *geometry, const Nif::NiGeometryData* data, const std::vector<unsigned int>& boundTextures, const std::string& name)
+        template <typename ArrayType, typename InputType>
+        osg::ref_ptr<ArrayType> moveArray(InputType& input)
         {
-            const auto& vertices = data->vertices;
-            const auto& normals = data->normals;
-            const auto& colors = data->colors;
+            osg::ref_ptr<ArrayType> array = new ArrayType;
+            array->swap(input);
+            return array;
+        }
+
+        void handleNiGeometryData(osg::Geometry *geometry, Nif::NiGeometryData* data, const std::vector<unsigned int>& boundTextures, const std::string& name)
+        {
             if (!vertices.empty())
-                geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
+                geometry->setVertexArray(moveArray<osg::Vec3Array>(data->vertices));
             if (!normals.empty())
-                geometry->setNormalArray(new osg::Vec3Array(normals.size(), normals.data()), osg::Array::BIND_PER_VERTEX);
+                geometry->setNormalArray(moveArray<osg::Vec3Array>(data->normals), osg::Array::BIND_PER_VERTEX);
             if (!colors.empty())
-                geometry->setColorArray(new osg::Vec4Array(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
+                geometry->setColorArray(moveArray<osg::Vec4Array>(data->colors), osg::Array::BIND_PER_VERTEX);
 
             const auto& uvlist = data->uvlist;
             int textureStage = 0;
@@ -1167,7 +1172,7 @@ namespace NifOsg
             const Nif::NiGeometry* niGeometry = static_cast<const Nif::NiGeometry*>(nifNode);
             if (niGeometry->data.empty())
                 return;
-            const Nif::NiGeometryData* niGeometryData = niGeometry->data.getPtr();
+            Nif::NiGeometryData* niGeometryData = niGeometry->data.getPtr();
 
             if (niGeometry->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_BSLODTriShape)
             {
