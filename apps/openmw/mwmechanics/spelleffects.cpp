@@ -213,8 +213,8 @@ namespace
             if (!wasEquipped)
                 return;
 
-            std::string type = currentItem->getTypeName();
-            if (type != typeid(ESM::Weapon).name() && type != typeid(ESM::Armor).name() && type != typeid(ESM::Clothing).name())
+            auto type = currentItem->getType();
+            if (type != ESM::Weapon::sRecordId && type != ESM::Armor::sRecordId && type != ESM::Clothing::sRecordId)
                 return;
 
             if (actor.getClass().getCreatureStats(actor).isDead())

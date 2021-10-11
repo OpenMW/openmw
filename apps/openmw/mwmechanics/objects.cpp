@@ -84,7 +84,7 @@ void Objects::update(float duration, bool paused)
 
         for(auto& object : mObjects)
         {
-            if (object.first.getTypeName() != typeid(ESM::Container).name())
+            if (object.first.getType() != ESM::Container::sRecordId)
                 continue;
 
             if (object.second->isAnimPlaying("containeropen"))

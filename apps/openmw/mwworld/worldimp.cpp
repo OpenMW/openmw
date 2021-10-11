@@ -784,9 +784,9 @@ namespace MWWorld
 
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
-            reference.getTypeName()==typeid (ESM::NPC).name() ||
-            reference.getTypeName()==typeid (ESM::Creature).name())
+        if( reference.getType()==ESM::Container::sRecordId ||
+            reference.getType()==ESM::NPC::sRecordId ||
+            reference.getType()==ESM::Creature::sRecordId)
         {
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
@@ -827,9 +827,9 @@ namespace MWWorld
 
     void World::removeContainerScripts(const Ptr& reference)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
-            reference.getTypeName()==typeid (ESM::NPC).name() ||
-            reference.getTypeName()==typeid (ESM::Creature).name())
+        if( reference.getType()==ESM::Container::sRecordId ||
+            reference.getType()==ESM::NPC::sRecordId ||
+            reference.getType()==ESM::Creature::sRecordId)
         {
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
@@ -3415,7 +3415,7 @@ namespace MWWorld
                 return true;
 
             // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)
-            bool isContainer = ptr.getClass().getTypeName() == typeid(ESM::Container).name();
+            bool isContainer = ptr.getClass().getType() == ESM::Container::sRecordId;
             if (mType != World::Detect_Creature && (ptr.getClass().isActor() || isContainer))
             {
                 // but ignore containers without resolved content
@@ -3470,10 +3470,10 @@ namespace MWWorld
                 // If in werewolf form, this detects only NPCs, otherwise only creatures
                 if (detector.getClass().isNpc() && detector.getClass().getNpcStats(detector).isWerewolf())
                 {
-                    if (ptr.getClass().getTypeName() != typeid(ESM::NPC).name())
+                    if (ptr.getClass().getType() != ESM::NPC::sRecordId)
                         return false;
                 }
-                else if (ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
+                else if (ptr.getClass().getType() != ESM::Creature::sRecordId)
                     return false;
 
                 if (ptr.getClass().getCreatureStats(ptr).isDead())

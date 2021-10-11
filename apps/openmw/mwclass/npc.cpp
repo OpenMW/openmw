@@ -459,12 +459,12 @@ namespace MWClass
             if (equipped != invStore.end())
             {
                 std::vector<ESM::PartReference> parts;
-                if(equipped->getTypeName() == typeid(ESM::Clothing).name())
+                if(equipped->getType() == ESM::Clothing::sRecordId)
                 {
                     const ESM::Clothing *clothes = equipped->get<ESM::Clothing>()->mBase;
                     parts = clothes->mParts.mParts;
                 }
-                else if(equipped->getTypeName() == typeid(ESM::Armor).name())
+                else if(equipped->getType() == ESM::Armor::sRecordId)
                 {
                     const ESM::Armor *armor = equipped->get<ESM::Armor>()->mBase;
                     parts = armor->mParts.mParts;
@@ -543,7 +543,7 @@ namespace MWClass
         MWWorld::InventoryStore &inv = getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         MWWorld::Ptr weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
-        if(!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
+        if(!weapon.isEmpty() && weapon.getType() != ESM::Weapon::sRecordId)
             weapon = MWWorld::Ptr();
 
         MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
@@ -766,7 +766,7 @@ namespace MWClass
                 MWWorld::InventoryStore &inv = getInventoryStore(ptr);
                 MWWorld::ContainerStoreIterator armorslot = inv.getSlot(hitslot);
                 MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
-                bool hasArmor = !armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name();
+                bool hasArmor = !armor.isEmpty() && armor.getType() == ESM::Armor::sRecordId;
                 // If there's no item in the carried left slot or if it is not a shield redistribute the hit.
                 if (!hasArmor && hitslot == MWWorld::InventoryStore::Slot_CarriedLeft)
                 {
@@ -778,7 +778,7 @@ namespace MWClass
                     if (armorslot != inv.end())
                     {
                         armor = *armorslot;
-                        hasArmor = !armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name();
+                        hasArmor = !armor.isEmpty() && armor.getType() == ESM::Armor::sRecordId;
                     }
                 }
                 if (hasArmor)
@@ -1036,7 +1036,7 @@ namespace MWClass
     void Npc::registerSelf()
     {
         std::shared_ptr<Class> instance (new Npc);
-        registerClass (typeid (ESM::NPC).name(), instance);
+        registerClass (ESM::NPC::sRecordId, instance);
     }
 
     bool Npc::hasToolTip(const MWWorld::ConstPtr& ptr) const
@@ -1135,7 +1135,7 @@ namespace MWClass
         for(int i = 0;i < MWWorld::InventoryStore::Slots;i++)
         {
             MWWorld::ConstContainerStoreIterator it = invStore.getSlot(i);
-            if (it == invStore.end() || it->getTypeName() != typeid(ESM::Armor).name())
+            if (it == invStore.end() || it->getType() != ESM::Armor::sRecordId)
             {
                 // unarmored
                 ratings[i] = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
@@ -1232,7 +1232,7 @@ namespace MWClass
 
                 const MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
                 MWWorld::ConstContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
-                if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
+                if(boots == inv.end() || boots->getType() != ESM::Armor::sRecordId)
                     return (name == "left") ? "FootBareLeft" : "FootBareRight";
 
                 switch(boots->getClass().getEquipmentSkill(*boots))

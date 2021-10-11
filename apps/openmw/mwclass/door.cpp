@@ -264,7 +264,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Door);
 
-        registerClass (typeid (ESM::Door).name(), instance);
+        registerClass (ESM::Door::sRecordId, instance);
     }
 
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const

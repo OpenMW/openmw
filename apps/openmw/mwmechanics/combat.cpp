@@ -71,7 +71,7 @@ namespace MWMechanics
 
         MWWorld::InventoryStore& inv = blocker.getClass().getInventoryStore(blocker);
         MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if (shield == inv.end() || shield->getTypeName() != typeid(ESM::Armor).name())
+        if (shield == inv.end() || shield->getType() != ESM::Armor::sRecordId)
             return false;
 
         if (!blocker.getRefData().getBaseNode())

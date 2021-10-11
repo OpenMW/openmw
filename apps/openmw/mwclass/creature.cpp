@@ -238,7 +238,7 @@ namespace MWClass
         {
             MWWorld::InventoryStore &inv = getInventoryStore(ptr);
             MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            if (weaponslot != inv.end() && weaponslot->getTypeName() == typeid(ESM::Weapon).name())
+            if (weaponslot != inv.end() && weaponslot->getType() == ESM::Weapon::sRecordId)
                 weapon = *weaponslot;
         }
 
@@ -497,7 +497,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Creature);
 
-        registerClass (typeid (ESM::Creature).name(), instance);
+        registerClass (ESM::Creature::sRecordId, instance);
     }
 
     float Creature::getMaxSpeed(const MWWorld::Ptr &ptr) const

@@ -163,7 +163,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Armor);
 
-        registerClass (typeid (ESM::Armor).name(), instance);
+        registerClass (ESM::Armor::sRecordId, instance);
     }
 
     std::string Armor::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -322,7 +322,7 @@ namespace MWClass
             if(*slot == MWWorld::InventoryStore::Slot_CarriedLeft)
             {
                 MWWorld::ConstContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                if(weapon != invStore.end() && weapon->getTypeName() == typeid(ESM::Weapon).name())
+                if(weapon != invStore.end() && weapon->getType() == ESM::Weapon::sRecordId)
                 {
                     const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
                     if (MWMechanics::getWeaponType(ref->mBase->mData.mType)->mFlags & ESM::WeaponType::TwoHanded)

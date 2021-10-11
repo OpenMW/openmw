@@ -89,7 +89,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Activator);
 
-        registerClass (typeid (ESM::Activator).name(), instance);
+        registerClass (ESM::Activator::sRecordId, instance);
     }
 
     bool Activator::hasToolTip (const MWWorld::ConstPtr& ptr) const

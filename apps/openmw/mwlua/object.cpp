@@ -23,7 +23,7 @@ namespace MWLua
         return std::to_string(id.mIndex) + "_" + std::to_string(id.mContentFile);
     }
 
-    const static std::map<std::type_index, std::string_view> classNames = {
+    const static std::map<std::type_index, std::string> classNames = {
         {typeid(MWClass::Activator), "Activator"},
         {typeid(MWClass::Armor), "Armor"},
         {typeid(MWClass::Book), "Book"},
@@ -40,7 +40,7 @@ namespace MWLua
         {typeid(MWClass::Weapon), "Weapon"},
     };
 
-    std::string_view getMWClassName(const std::type_index& cls_type, std::string_view fallback)
+    std::string getMWClassName(const std::type_index& cls_type, std::string fallback)
     {
         auto it = classNames.find(cls_type);
         if (it != classNames.end())
@@ -55,13 +55,13 @@ namespace MWLua
         return id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker";
     }
 
-    std::string_view getMWClassName(const MWWorld::Ptr& ptr)
+    std::string getMWClassName(const MWWorld::Ptr& ptr)
     {
         if (ptr.getCellRef().getRefIdRef() == "player")
             return "Player";
         if (isMarker(ptr))
             return "Marker";
-        return getMWClassName(typeid(ptr.getClass()), ptr.getTypeName());
+        return ptr.getTypeDescription();
     }
 
     std::string ptrToString(const MWWorld::Ptr& ptr)

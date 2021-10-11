@@ -143,21 +143,21 @@ bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
                 const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
                 const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-                if (shield != inv.end() && shield->getTypeName() == typeid(ESM::Armor).name() && !getShieldMesh(*shield).empty())
+                if (shield != inv.end() && shield->getType() == ESM::Armor::sRecordId && !getShieldMesh(*shield).empty())
                 {
                     if(stats.getDrawState() != MWMechanics::DrawState_Weapon)
                         return false;
 
                     if (weapon != inv.end())
                     {
-                        const std::string &type = weapon->getTypeName();
-                        if(type == typeid(ESM::Weapon).name())
+                        auto type = weapon->getType();
+                        if(type == ESM::Weapon::sRecordId)
                         {
                             const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
                             ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
                             return !(MWMechanics::getWeaponType(weaponType)->mFlags & ESM::WeaponType::TwoHanded);
                         }
-                        else if (type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                        else if (type == ESM::Lockpick::sRecordId || type == ESM::Probe::sRecordId)
                             return true;
                     }
                 }
@@ -184,7 +184,7 @@ void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-    if (shield == inv.end() || shield->getTypeName() != typeid(ESM::Armor).name())
+    if (shield == inv.end() || shield->getType() != ESM::Armor::sRecordId)
         return;
 
     // Can not show holdstered shields with two-handed weapons at all
@@ -192,8 +192,8 @@ void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
     if(weapon == inv.end())
         return;
 
-    const std::string &type = weapon->getTypeName();
-    if(type == typeid(ESM::Weapon).name())
+    auto type = weapon->getType();
+    if(type == ESM::Weapon::sRecordId)
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
         ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
@@ -254,17 +254,17 @@ bool ActorAnimation::useShieldAnimations() const
     const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
     if (weapon != inv.end() && shield != inv.end() &&
-        shield->getTypeName() == typeid(ESM::Armor).name() &&
+        shield->getType() == ESM::Armor::sRecordId &&
         !getShieldMesh(*shield).empty())
     {
-        const std::string &type = weapon->getTypeName();
-        if(type == typeid(ESM::Weapon).name())
+        auto type = weapon->getType();
+        if(type == ESM::Weapon::sRecordId)
         {
             const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
             ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
             return !(MWMechanics::getWeaponType(weaponType)->mFlags & ESM::WeaponType::TwoHanded);
         }
-        else if (type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+        else if (type == ESM::Lockpick::sRecordId || type == ESM::Probe::sRecordId)
             return true;
     }
 
@@ -288,8 +288,8 @@ std::string ActorAnimation::getHolsteredWeaponBoneName(const MWWorld::ConstPtr& 
     if(weapon.isEmpty())
         return boneName;
 
-    const std::string &type = weapon.getClass().getTypeName();
-    if(type == typeid(ESM::Weapon).name())
+    auto type = weapon.getClass().getType();
+    if(type == ESM::Weapon::sRecordId)
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon.get<ESM::Weapon>();
         int weaponType = ref->mBase->mData.mType;
@@ -323,7 +323,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if (weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if (weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
         return;
 
     // Since throwing weapons stack themselves, do not show such weapon itself
@@ -399,7 +399,7 @@ void ActorAnimation::updateQuiver()
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if(weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
         return;
 
     std::string mesh = weapon->getClass().getModel(*weapon);
@@ -471,7 +471,7 @@ void ActorAnimation::updateQuiver()
 
 void ActorAnimation::itemAdded(const MWWorld::ConstPtr& item, int /*count*/)
 {
-    if (item.getTypeName() == typeid(ESM::Light).name())
+    if (item.getType() == ESM::Light::sRecordId)
     {
         const ESM::Light* light = item.get<ESM::Light>()->mBase;
         if (!(light->mData.mFlags & ESM::Light::Carry))
@@ -486,7 +486,7 @@ void ActorAnimation::itemAdded(const MWWorld::ConstPtr& item, int /*count*/)
     // If the count of equipped ammo or throwing weapon was changed, we should update quiver
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if(weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
         return;
 
     MWWorld::ConstContainerStoreIterator ammo = inv.end();
@@ -502,7 +502,7 @@ void ActorAnimation::itemAdded(const MWWorld::ConstPtr& item, int /*count*/)
 
 void ActorAnimation::itemRemoved(const MWWorld::ConstPtr& item, int /*count*/)
 {
-    if (item.getTypeName() == typeid(ESM::Light).name())
+    if (item.getType() == ESM::Light::sRecordId)
     {
         ItemLightMap::iterator iter = mItemLights.find(item);
         if (iter != mItemLights.end())
@@ -520,7 +520,7 @@ void ActorAnimation::itemRemoved(const MWWorld::ConstPtr& item, int /*count*/)
     // If the count of equipped ammo or throwing weapon was changed, we should update quiver
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if(weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
         return;
 
     MWWorld::ConstContainerStoreIterator ammo = inv.end();
