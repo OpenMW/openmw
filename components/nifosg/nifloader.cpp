@@ -668,7 +668,7 @@ namespace NifOsg
                 currentNode = lodNode;
             }
 
-            Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
+            Nif::NiNode *ninode = dynamic_cast<Nif::NiNode*>(nifNode);
             if(ninode)
             {
                 const Nif::NodeList &effects = ninode->effects;
