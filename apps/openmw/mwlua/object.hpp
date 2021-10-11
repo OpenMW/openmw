@@ -19,8 +19,8 @@ namespace MWLua
     std::string idToString(const ObjectId& id);
     std::string ptrToString(const MWWorld::Ptr& ptr);
     bool isMarker(const MWWorld::Ptr& ptr);
-    std::string getMWClassName(const std::type_index& cls_type, std::string fallback = "Unknown");
-    std::string getMWClassName(const MWWorld::Ptr& ptr);
+    std::string_view getMWClassName(const std::type_index& cls_type, std::string_view fallback = "Unknown");
+    std::string_view getMWClassName(const MWWorld::Ptr& ptr);
 
     // Holds a mapping ObjectId -> MWWord::Ptr.
     class ObjectRegistry
