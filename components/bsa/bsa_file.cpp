@@ -235,7 +235,7 @@ int BSAFile::getIndex(const char *str) const
 {
     for (size_t i=0; i<mFiles.size(); ++i)
     {
-        if (std::string(fs.name()) == str)
+        if (std::string(mFiles[i].name()) == str)
             return static_cast<int>(i);
     }
     return -1;
