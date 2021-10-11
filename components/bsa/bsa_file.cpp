@@ -29,8 +29,6 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include <components/misc/stringops.hpp>
-
 using namespace Bsa;
 
 
@@ -237,7 +235,7 @@ int BSAFile::getIndex(const char *str) const
 {
     for (size_t i=0; i<mFiles.size(); ++i)
     {
-        if (Misc::StringUtils::ciEqual(fs.name(), str))
+        if (std::string(fs.name()) == str)
             return static_cast<int>(i);
     }
     return -1;
