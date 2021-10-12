@@ -27,11 +27,11 @@ jobs:
         max-size: 1000M
 
     - name: Install gtest
-      run: sudo CI/build_googletest.sh
-      env:
-        CONFIGURATION: Release
-        GOOGLETEST_DIR: "."
-        GENERATOR: Unix Makefiles
+      run: |
+        export CONFIGURATION="Release"
+        export GOOGLETEST_DIR="."
+        export GENERATOR="Unix Makefiles"
+        sudo CI/build_googletest.sh
 
     - name: Configure
       run: cmake -S . -B . -DGTEST_ROOT="$(pwd)/googletest/build/install" -DGMOCK_ROOT="$(pwd)/googletest/build/install" -DBUILD_UNITTESTS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_FLAGS='-Werror' -DCMAKE_CXX_FLAGS="-Werror -Wno-error=deprecated-declarations -Wno-error=nonnull -Wno-error=deprecated-copy"
