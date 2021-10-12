@@ -31,6 +31,8 @@ jobs:
         export CONFIGURATION="Release"
         export GOOGLETEST_DIR="."
         export GENERATOR="Unix Makefiles"
+        export CC="gcc"
+        export CXX="g++"
         sudo -E CI/build_googletest.sh
 
     - name: Configure
