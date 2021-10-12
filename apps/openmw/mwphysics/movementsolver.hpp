@@ -3,7 +3,8 @@
 
 #include <osg/Vec3f>
 
-#include "constants.hpp"
+#include <components/misc/constants.hpp>
+
 #include "../mwworld/ptr.hpp"
 
 class btCollisionWorld;
@@ -30,7 +31,7 @@ namespace MWPhysics
     template <class Vec3>
     static bool isWalkableSlope(const Vec3 &normal)
     {
-        static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(sMaxSlope));
+        static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(Constants::sMaxSlope));
         return (normal.z() > sMaxSlopeCos);
     }
 

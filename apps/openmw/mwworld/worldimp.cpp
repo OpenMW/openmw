@@ -175,13 +175,12 @@ namespace MWWorld
 
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
 
-        if (auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager())
+        if (Settings::Manager::getBool("enable", "Navigator"))
         {
-            navigatorSettings->mMaxClimb = MWPhysics::sStepSizeUp;
-            navigatorSettings->mMaxSlope = MWPhysics::sMaxSlope;
-            navigatorSettings->mSwimHeightScale = mSwimHeightScale;
+            auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
+            navigatorSettings.mSwimHeightScale = mSwimHeightScale;
             DetourNavigator::RecastGlobalAllocator::init();
-            mNavigator.reset(new DetourNavigator::NavigatorImpl(*navigatorSettings));
+            mNavigator.reset(new DetourNavigator::NavigatorImpl(navigatorSettings));
         }
         else
         {

@@ -36,6 +36,9 @@ const std::string HerbalismLabel = "HerbalismSwitch";
 // Percentage height at which projectiles are spawned from an actor
 const float TorsoHeight = 0.75f;
 
+static constexpr float sStepSizeUp = 34.0f;
+static constexpr float sMaxSlope = 46.0f;
+
 }
 
 #endif
