@@ -27,7 +27,7 @@ declare -rA GROUPED_DEPS=(
   # TODO: add librecastnavigation-dev when debian is ready
 
   # These dependencies can alternatively be built and linked statically.
-  [openmw-deps-dynamic]="libmygui-dev libopenscenegraph-dev"
+  [openmw-deps-dynamic]="libmygui-dev libopenscenegraph-dev libsqlite3-dev"
   [coverity]="curl"
   [clang-tidy]="clang-tidy"
 

@@ -1018,6 +1018,7 @@ echo
 echo "Setting up OpenMW build..."
 add_cmake_opts -DOPENMW_MP_BUILD=on
 add_cmake_opts -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}"
+add_cmake_opts -DOPENMW_USE_SYSTEM_SQLITE3=OFF
 if [ ! -z $CI ]; then
 	case $STEP in
 		components )
