@@ -6,6 +6,7 @@
 #include <components/resource/bulletshape.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/misc/convert.hpp>
+#include <components/bullethelpers/collisionobject.hpp>
 
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
@@ -15,22 +16,18 @@
 namespace MWPhysics
 {
     Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, osg::Quat rotation, int collisionType, PhysicsTaskScheduler* scheduler)
-        : mShapeInstance(shapeInstance)
+        : mShapeInstance(std::move(shapeInstance))
         , mSolid(true)
+        , mScale(ptr.getCellRef().getScale(), ptr.getCellRef().getScale(), ptr.getCellRef().getScale())
+        , mPosition(ptr.getRefData().getPosition().asVec3())
+        , mRotation(rotation)
         , mTaskScheduler(scheduler)
     {
         mPtr = ptr;
-
-        mCollisionObject = std::make_unique<btCollisionObject>();
-        mCollisionObject->setCollisionShape(shapeInstance->getCollisionShape());
-
+        mCollisionObject = BulletHelpers::makeCollisionObject(mShapeInstance->getCollisionShape(),
+            Misc::Convert::toBullet(mPosition), Misc::Convert::toBullet(rotation));
         mCollisionObject->setUserPointer(this);
-
-        setScale(ptr.getCellRef().getScale());
-        setRotation(rotation);
-        updatePosition();
-        commitPositionChange();
-
+        mShapeInstance->setLocalScaling(mScale);
         mTaskScheduler->addCollisionObject(mCollisionObject.get(), collisionType, CollisionType_Actor|CollisionType_HeightMap|CollisionType_Projectile);
     }
 
