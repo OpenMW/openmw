@@ -455,3 +455,12 @@ If disabled actors without the ability to swim will not follow other actors to t
     Has effect only when Navigator is enabled.
 
 This setting can be controlled in Advanced tab of the launcher.
+
+default actor pathfind half extents
+-----------------------------------
+
+:Type:		3D vector floating point
+:Range:		All components > 0
+:Default:	29.27999496459961 28.479997634887695 66.5
+
+Actor half extents used for exterior cells to generate navmesh.
