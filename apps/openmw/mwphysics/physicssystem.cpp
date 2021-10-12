@@ -472,9 +472,9 @@ namespace MWPhysics
         return MovementSolver::traceDown(ptr, position, found->second.get(), mCollisionWorld.get(), maxHeight);
     }
 
-    void PhysicsSystem::addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject)
+    void PhysicsSystem::addHeightField(const float* heights, int x, int y, int size, int verts, float minH, float maxH, const osg::Object* holdObject)
     {
-        mHeightFields[std::make_pair(x,y)] = std::make_unique<HeightField>(heights, x, y, triSize, sqrtVerts, minH, maxH, holdObject, mTaskScheduler.get());
+        mHeightFields[std::make_pair(x,y)] = std::make_unique<HeightField>(heights, x, y, size, verts, minH, maxH, holdObject, mTaskScheduler.get());
     }
 
     void PhysicsSystem::removeHeightField (int x, int y)
