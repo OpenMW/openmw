@@ -95,10 +95,6 @@ protected:
     virtual void readHeader();
     virtual void writeHeader();
 
-    /// Get the index of a given file name, or -1 if not found
-    /// @note Thread safe.
-    int getIndex(const char *str) const;
-
 public:
     /* -----------------------------------
      * BSA management methods
@@ -123,16 +119,6 @@ public:
      * Archive file routines
      * -----------------------------------
      */
-
-    /// Check if a file exists
-    virtual bool exists(const char *file) const
-    { return getIndex(file) != -1; }
-
-    /** Open a file contained in the archive. Throws an exception if the
-        file doesn't exist.
-     * @note Thread safe.
-    */
-    virtual Files::IStreamPtr getFile(const char *file);
 
     /** Open a file contained in the archive.
      * @note Thread safe.
