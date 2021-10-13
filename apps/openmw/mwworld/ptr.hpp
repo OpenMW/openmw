@@ -131,36 +131,6 @@ namespace MWWorld
         ConstPtr() : PtrBase<std::add_const_t>() {}
     };
 
-    inline bool operator== (const ConstPtr& left, const ConstPtr& right)
-    {
-        return left.mRef==right.mRef;
-    }
-
-    inline bool operator!= (const ConstPtr& left, const ConstPtr& right)
-    {
-        return !(left==right);
-    }
-
-    inline bool operator< (const ConstPtr& left, const ConstPtr& right)
-    {
-        return left.mRef<right.mRef;
-    }
-
-    inline bool operator>= (const ConstPtr& left, const ConstPtr& right)
-    {
-        return !(left<right);
-    }
-
-    inline bool operator> (const ConstPtr& left, const ConstPtr& right)
-    {
-        return right<left;
-    }
-
-    inline bool operator<= (const ConstPtr& left, const ConstPtr& right)
-    {
-        return !(left>right);
-    }
-
 }
 
 #endif
