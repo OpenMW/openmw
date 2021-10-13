@@ -43,7 +43,12 @@ namespace MWWorld
                 return mRef == nullptr;
             }
 
-            unsigned int getType() const;
+            unsigned int getType() const
+            {
+                if(mRef != nullptr)
+                    return mRef->mClass->getType();
+                throw std::runtime_error("Can't get type name from an empty object.");
+            }
 
             std::string getTypeDescription() const
             {
@@ -71,11 +76,24 @@ namespace MWWorld
                 throw std::runtime_error(str.str());
             }
 
-            LiveCellRefBaseType *getBase() const;
+            LiveCellRefBaseType *getBase() const
+            {
+                if (!mRef)
+                    throw std::runtime_error ("Can't access cell ref pointed to by null Ptr");
+                return mRef;
+            }
 
-            TypeTransform<MWWorld::CellRef>& getCellRef() const;
+            TypeTransform<MWWorld::CellRef>& getCellRef() const
+            {
+                assert(mRef);
+                return mRef->mRef;
+            }
 
-            TypeTransform<RefData>& getRefData() const;
+            TypeTransform<RefData>& getRefData() const
+            {
+                assert(mRef);
+                return mRef->mData;
+            }
 
             CellStoreType *getCell() const
             {
@@ -88,14 +106,25 @@ namespace MWWorld
                 return (mContainerStore == nullptr) && (mCell != nullptr);
             }
 
-            void setContainerStore (ContainerStoreType *store);
+            void setContainerStore (ContainerStoreType *store)
             ///< Must not be called on references that are in a cell.
+            {
+                assert (store);
+                assert (!mCell);
+                mContainerStore = store;
+            }
 
-            ContainerStoreType *getContainerStore() const;
+            ContainerStoreType *getContainerStore() const
             ///< May return a 0-pointer, if reference is not in a container.
+            {
+                return mContainerStore;
+            }
 
-            operator const void *();
+            operator const void *()
             ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
+            {
+                return mRef;
+            }
 
             inline bool operator== (const PtrBase<std::add_const_t>& right)
             {
@@ -123,8 +152,8 @@ namespace MWWorld
             }
     };
 
-    typedef class PtrBase<std::remove_const_t> Ptr;
-    typedef class PtrBase<std::add_const_t> ConstPtr;
+    class Ptr : PtrBase<std::remove_const_t> {};
+    class ConstPtr : PtrBase<std::add_const_t> {};
 
 }
 
