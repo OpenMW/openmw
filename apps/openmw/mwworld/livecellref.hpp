@@ -43,6 +43,8 @@ namespace MWWorld
 
         virtual std::string getTypeDescription() const { return ""; }
 
+        unsigned int getType() const;
+
         protected:
 
             void loadImp (const ESM::ObjectState& state);
