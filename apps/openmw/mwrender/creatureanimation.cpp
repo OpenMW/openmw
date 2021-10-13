@@ -119,7 +119,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     std::string itemModel = item.getClass().getModel(item);
     if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
     {
-        if(item.getTypeName() == typeid(ESM::Weapon).name())
+        if(item.getType() == ESM::Weapon::sRecordId)
         {
             int type = item.get<ESM::Weapon>()->mBase->mData.mType;
             bonename = MWMechanics::getWeaponType(type)->mAttachBone;
@@ -137,7 +137,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     else
     {
         bonename = "Shield Bone";
-        if (item.getTypeName() == typeid(ESM::Armor).name())
+        if (item.getType() == ESM::Armor::sRecordId)
         {
             // Shield body part model should be used if possible.
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -174,7 +174,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         // Crossbows start out with a bolt attached
         // FIXME: code duplicated from NpcAnimation
         if (slot == MWWorld::InventoryStore::Slot_CarriedRight &&
-                item.getTypeName() == typeid(ESM::Weapon).name() &&
+                item.getType() == ESM::Weapon::sRecordId &&
                 item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
         {
             const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(ESM::Weapon::MarksmanCrossbow);
@@ -246,7 +246,7 @@ osg::Group *CreatureWeaponAnimation::getArrowBone()
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if(weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
         return nullptr;
 
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;

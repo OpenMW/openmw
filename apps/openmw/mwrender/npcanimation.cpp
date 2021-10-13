@@ -594,13 +594,13 @@ void NpcAnimation::updateParts()
         int prio = 1;
         bool enchantedGlow = !store->getClass().getEnchantment(*store).empty();
         osg::Vec4f glowColor = store->getClass().getEnchantmentColor(*store);
-        if(store->getTypeName() == typeid(ESM::Clothing).name())
+        if(store->getType() == ESM::Clothing::sRecordId)
         {
             prio = ((slotlist[i].mBasePriority+1)<<1) + 0;
             const ESM::Clothing *clothes = store->get<ESM::Clothing>()->mBase;
             addPartGroup(slotlist[i].mSlot, prio, clothes->mParts.mParts, enchantedGlow, &glowColor);
         }
-        else if(store->getTypeName() == typeid(ESM::Armor).name())
+        else if(store->getType() == ESM::Armor::sRecordId)
         {
             prio = ((slotlist[i].mBasePriority+1)<<1) + 1;
             const ESM::Armor *armor = store->get<ESM::Armor>()->mBase;
@@ -640,7 +640,7 @@ void NpcAnimation::updateParts()
     {
         MWWorld::ConstContainerStoreIterator store = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         MWWorld::ConstPtr part;
-        if(store != inv.end() && (part=*store).getTypeName() == typeid(ESM::Light).name())
+        if(store != inv.end() && (part=*store).getType() == ESM::Light::sRecordId)
         {
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
             addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
@@ -771,7 +771,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         {
             const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
             MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            if(weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name())
+            if(weapon != inv.end() && weapon->getType() == ESM::Weapon::sRecordId)
             {
                 int weaponType = weapon->get<ESM::Weapon>()->mBase->mData.mType;
                 const std::string weaponBonename = MWMechanics::getWeaponType(weaponType)->mAttachBone;
@@ -943,7 +943,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
 
             // Crossbows start out with a bolt attached
-            if (weapon->getTypeName() == typeid(ESM::Weapon).name() &&
+            if (weapon->getType() == ESM::Weapon::sRecordId &&
                     weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
             {
                 int ammotype = MWMechanics::getWeaponType(ESM::Weapon::MarksmanCrossbow)->mAmmoType;
@@ -975,7 +975,7 @@ void NpcAnimation::showCarriedLeft(bool show)
         osg::Vec4f glowColor = iter->getClass().getEnchantmentColor(*iter);
         std::string mesh = iter->getClass().getModel(*iter);
         // For shields we must try to use the body part model
-        if (iter->getTypeName() == typeid(ESM::Armor).name())
+        if (iter->getType() == ESM::Armor::sRecordId)
         {
             const ESM::Armor *armor = iter->get<ESM::Armor>()->mBase;
             const std::vector<ESM::PartReference>& bodyparts = armor->mParts.mParts;
@@ -987,7 +987,7 @@ void NpcAnimation::showCarriedLeft(bool show)
         {
             if (mesh.empty())
                 reserveIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1);
-            if (iter->getTypeName() == typeid(ESM::Light).name() && mObjectParts[ESM::PRT_Shield])
+            if (iter->getType() == ESM::Light::sRecordId && mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
         }
     }
@@ -1033,7 +1033,7 @@ osg::Group* NpcAnimation::getArrowBone()
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if(weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
         return nullptr;
 
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;

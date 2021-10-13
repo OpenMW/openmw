@@ -91,19 +91,20 @@ namespace SceneUtil {
         public:
             ComputeLightSpaceBounds();
 
-            void apply(osg::Node& node) override;
+            void apply(osg::Node& node) override final;
+            void apply(osg::Group& node) override;
 
-            void apply(osg::Drawable& drawable) override;
+            void apply(osg::Drawable& drawable) override final;
+            void apply(osg::Geometry& drawable) override;
 
             void apply(osg::Billboard&) override;
 
             void apply(osg::Projection&) override;
 
-            void apply(osg::Transform& transform) override;
+            void apply(osg::Transform& transform) override final;
+            void apply(osg::MatrixTransform& transform) override;
 
             void apply(osg::Camera&) override;
-
-            using osg::NodeVisitor::apply;
 
             void updateBound(const osg::BoundingBox& bb);
 

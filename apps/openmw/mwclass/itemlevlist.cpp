@@ -19,6 +19,6 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new ItemLevList);
 
-        registerClass (typeid (ESM::ItemLevList).name(), instance);
+        registerClass (ESM::ItemLevList::sRecordId, instance);
     }
 }

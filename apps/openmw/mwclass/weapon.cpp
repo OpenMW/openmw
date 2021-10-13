@@ -125,7 +125,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Weapon);
 
-        registerClass (typeid (ESM::Weapon).name(), instance);
+        registerClass (ESM::Weapon::sRecordId, instance);
     }
 
     std::string Weapon::getUpSoundId (const MWWorld::ConstPtr& ptr) const

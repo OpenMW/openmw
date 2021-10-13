@@ -70,7 +70,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new CreatureLevList);
 
-        registerClass (typeid (ESM::CreatureLevList).name(), instance);
+        registerClass (ESM::CreatureLevList::sRecordId, instance);
     }
 
     void CreatureLevList::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const

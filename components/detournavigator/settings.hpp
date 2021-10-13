@@ -41,7 +41,7 @@ namespace DetourNavigator
         std::chrono::milliseconds mMinUpdateInterval;
     };
 
-    std::optional<Settings> makeSettingsFromSettingsManager();
+    Settings makeSettingsFromSettingsManager();
 }
 
 #endif

@@ -555,7 +555,7 @@ namespace MWMechanics
     {
         // Make sure zero base price items/services can't be bought/sold for 1 gold
         // and return the intended base price for creature merchants
-        if (basePrice == 0 || ptr.getTypeName() == typeid(ESM::Creature).name())
+        if (basePrice == 0 || ptr.getType() == ESM::Creature::sRecordId)
             return basePrice;
 
         const MWMechanics::NpcStats &sellerStats = ptr.getClass().getNpcStats(ptr);

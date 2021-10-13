@@ -106,7 +106,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Miscellaneous);
 
-        registerClass (typeid (ESM::Miscellaneous).name(), instance);
+        registerClass (ESM::Miscellaneous::sRecordId, instance);
     }
 
     std::string Miscellaneous::getUpSoundId (const MWWorld::ConstPtr& ptr) const

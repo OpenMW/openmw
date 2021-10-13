@@ -214,7 +214,7 @@ namespace MWMechanics
             case ESM::MagicEffect::Soultrap:
             {
                 if (!target.getClass().isNpc() // no messagebox for NPCs
-                     && (target.getTypeName() == typeid(ESM::Creature).name() && target.get<ESM::Creature>()->mBase->mData.mSoul == 0))
+                     && (target.getType() == ESM::Creature::sRecordId && target.get<ESM::Creature>()->mBase->mData.mSoul == 0))
                 {
                     if (castByPlayer)
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");

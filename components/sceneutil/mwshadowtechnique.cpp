@@ -378,6 +378,11 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Node& node)
     popCurrentMask();
 }
 
+void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Group& node)
+{
+    apply(static_cast<osg::Node&>(node));
+}
+
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
 {
     if (isCulled(drawable)) return;
@@ -389,6 +394,11 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
 
     // pop the culling mode.
     popCurrentMask();
+}
+
+void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Geometry& drawable)
+{
+    apply(static_cast<osg::Drawable&>(drawable));
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Billboard&)
@@ -424,7 +434,11 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Transform& transform
 
     // pop the culling mode.
     popCurrentMask();
+}
 
+void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::MatrixTransform& transform)
+{
+    apply(static_cast<osg::Transform&>(transform));
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Camera&)

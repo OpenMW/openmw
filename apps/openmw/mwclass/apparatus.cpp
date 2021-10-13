@@ -69,7 +69,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Apparatus);
 
-        registerClass (typeid (ESM::Apparatus).name(), instance);
+        registerClass (ESM::Apparatus::sRecordId, instance);
     }
 
     std::string Apparatus::getUpSoundId (const MWWorld::ConstPtr& ptr) const

@@ -50,7 +50,7 @@ namespace
 
     void addRandomToStore(const MWWorld::Ptr& itemPtr, int count, MWWorld::Ptr& owner, MWWorld::ContainerStore& store, bool topLevel = true)
     {
-        if(itemPtr.getTypeName() == typeid(ESM::ItemLevList).name())
+        if(itemPtr.getType() == ESM::ItemLevList::sRecordId)
         {
             const ESM::ItemLevList* levItemList = itemPtr.get<ESM::ItemLevList>()->mBase;
 
@@ -108,7 +108,7 @@ namespace MWScript
                     // Check if "item" can be placed in a container
                     MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), item, 1);
                     MWWorld::Ptr itemPtr = manualRef.getPtr();
-                    bool isLevelledList = itemPtr.getClass().getTypeName() == typeid(ESM::ItemLevList).name();
+                    bool isLevelledList = itemPtr.getClass().getType() == ESM::ItemLevList::sRecordId;
                     if(!isLevelledList)
                         MWWorld::ContainerStore::getType(itemPtr);
 
@@ -120,7 +120,7 @@ namespace MWScript
                     }
 
                     // Calls to unresolved containers affect the base record
-                    if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() && (!ptr.getRefData().getCustomData() ||
+                    if(ptr.getClass().getType() == ESM::Container::sRecordId && (!ptr.getRefData().getCustomData() ||
                     !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
@@ -232,7 +232,7 @@ namespace MWScript
                         return;
                     }
                     // Calls to unresolved containers affect the base record instead
-                    else if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() &&
+                    else if(ptr.getClass().getType() == ESM::Container::sRecordId &&
                         (!ptr.getRefData().getCustomData() || !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
@@ -380,7 +380,7 @@ namespace MWScript
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ConstContainerStoreIterator it = invStore.getSlot (slot);
                     
-                    if (it == invStore.end() || it->getTypeName () != typeid(ESM::Armor).name())
+                    if (it == invStore.end() || it->getType () != ESM::Armor::sRecordId)
                     {
                         runtime.push(-1);
                         return;
@@ -464,13 +464,13 @@ namespace MWScript
                         runtime.push(-1);
                         return;
                     }
-                    else if (it->getTypeName() != typeid(ESM::Weapon).name())
+                    else if (it->getType() != ESM::Weapon::sRecordId)
                     {
-                        if (it->getTypeName() == typeid(ESM::Lockpick).name())
+                        if (it->getType() == ESM::Lockpick::sRecordId)
                         {
                             runtime.push(-2);
                         }
-                        else if (it->getTypeName() == typeid(ESM::Probe).name())
+                        else if (it->getType() == ESM::Probe::sRecordId)
                         {
                             runtime.push(-3);
                         }

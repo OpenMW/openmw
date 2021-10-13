@@ -36,7 +36,7 @@ namespace MWClass
     {
         std::shared_ptr<MWWorld::Class> instance (new BodyPart);
 
-        registerClass (typeid (ESM::BodyPart).name(), instance);
+        registerClass (ESM::BodyPart::sRecordId, instance);
     }
 
     std::string BodyPart::getModel(const MWWorld::ConstPtr &ptr) const

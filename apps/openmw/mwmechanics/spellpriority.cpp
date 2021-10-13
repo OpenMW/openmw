@@ -96,7 +96,7 @@ namespace MWMechanics
 
     float ratePotion (const MWWorld::Ptr &item, const MWWorld::Ptr& actor)
     {
-        if (item.getTypeName() != typeid(ESM::Potion).name())
+        if (item.getType() != ESM::Potion::sRecordId)
             return 0.f;
 
         const ESM::Potion* potion = item.get<ESM::Potion>()->mBase;
