@@ -7,7 +7,6 @@
 #include <sstream>
 
 #include "livecellref.hpp"
-#include "class.hpp"
 
 namespace MWWorld
 {
@@ -47,7 +46,7 @@ namespace MWWorld
             unsigned int getType() const
             {
                 if(mRef != nullptr)
-                    return mRef->mClass->getType();
+                    return mRef->getType();
                 throw std::runtime_error("Can't get type name from an empty object.");
             }
 
