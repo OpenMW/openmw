@@ -27,22 +27,22 @@
 
 namespace
 {
-    bool compareType(const std::string& type1, const std::string& type2)
+    bool compareType(unsigned int type1, unsigned int type2)
     {
         // this defines the sorting order of types. types that are first in the vector appear before other types.
-        std::vector<std::string> mapping;
-        mapping.emplace_back(typeid(ESM::Weapon).name() );
-        mapping.emplace_back(typeid(ESM::Armor).name() );
-        mapping.emplace_back(typeid(ESM::Clothing).name() );
-        mapping.emplace_back(typeid(ESM::Potion).name() );
-        mapping.emplace_back(typeid(ESM::Ingredient).name() );
-        mapping.emplace_back(typeid(ESM::Apparatus).name() );
-        mapping.emplace_back(typeid(ESM::Book).name() );
-        mapping.emplace_back(typeid(ESM::Light).name() );
-        mapping.emplace_back(typeid(ESM::Miscellaneous).name() );
-        mapping.emplace_back(typeid(ESM::Lockpick).name() );
-        mapping.emplace_back(typeid(ESM::Repair).name() );
-        mapping.emplace_back(typeid(ESM::Probe).name() );
+        std::vector<unsigned int> mapping;
+        mapping.emplace_back(ESM::Weapon::sRecordId );
+        mapping.emplace_back(ESM::Armor::sRecordId );
+        mapping.emplace_back(ESM::Clothing::sRecordId );
+        mapping.emplace_back(ESM::Potion::sRecordId );
+        mapping.emplace_back(ESM::Ingredient::sRecordId );
+        mapping.emplace_back(ESM::Apparatus::sRecordId );
+        mapping.emplace_back(ESM::Book::sRecordId );
+        mapping.emplace_back(ESM::Light::sRecordId );
+        mapping.emplace_back(ESM::Miscellaneous::sRecordId );
+        mapping.emplace_back(ESM::Lockpick::sRecordId );
+        mapping.emplace_back(ESM::Repair::sRecordId );
+        mapping.emplace_back(ESM::Probe::sRecordId );
 
         assert( std::find(mapping.begin(), mapping.end(), type1) != mapping.end() );
         assert( std::find(mapping.begin(), mapping.end(), type2) != mapping.end() );
@@ -62,15 +62,15 @@ namespace
             float result = 0;
 
             // compare items by type
-            std::string leftName = left.mBase.getTypeName();
-            std::string rightName = right.mBase.getTypeName();
+            auto leftType = left.mBase.getType();
+            auto rightType = right.mBase.getType();
 
-            if (leftName != rightName)
-                return compareType(leftName, rightName);
+            if (leftType != rightType)
+                return compareType(leftType, rightType);
 
             // compare items by name
-            leftName = Misc::StringUtils::lowerCaseUtf8(left.mBase.getClass().getName(left.mBase));
-            rightName = Misc::StringUtils::lowerCaseUtf8(right.mBase.getClass().getName(right.mBase));
+            std::string leftName = Misc::StringUtils::lowerCaseUtf8(left.mBase.getClass().getName(left.mBase));
+            std::string rightName = Misc::StringUtils::lowerCaseUtf8(right.mBase.getClass().getName(right.mBase));
 
             result = leftName.compare(rightName);
             if (result != 0)
@@ -179,22 +179,22 @@ namespace MWGui
         MWWorld::Ptr base = item.mBase;
 
         int category = 0;
-        if (base.getTypeName() == typeid(ESM::Armor).name()
-                || base.getTypeName() == typeid(ESM::Clothing).name())
+        if (base.getType() == ESM::Armor::sRecordId
+                || base.getType() == ESM::Clothing::sRecordId)
             category = Category_Apparel;
-        else if (base.getTypeName() == typeid(ESM::Weapon).name())
+        else if (base.getType() == ESM::Weapon::sRecordId)
             category = Category_Weapon;
-        else if (base.getTypeName() == typeid(ESM::Ingredient).name()
-                     || base.getTypeName() == typeid(ESM::Potion).name())
+        else if (base.getType() == ESM::Ingredient::sRecordId
+                     || base.getType() == ESM::Potion::sRecordId)
             category = Category_Magic;
-        else if (base.getTypeName() == typeid(ESM::Miscellaneous).name()
-                 || base.getTypeName() == typeid(ESM::Ingredient).name()
-                 || base.getTypeName() == typeid(ESM::Repair).name()
-                 || base.getTypeName() == typeid(ESM::Lockpick).name()
-                 || base.getTypeName() == typeid(ESM::Light).name()
-                 || base.getTypeName() == typeid(ESM::Apparatus).name()
-                 || base.getTypeName() == typeid(ESM::Book).name()
-                 || base.getTypeName() == typeid(ESM::Probe).name())
+        else if (base.getType() == ESM::Miscellaneous::sRecordId
+                 || base.getType() == ESM::Ingredient::sRecordId
+                 || base.getType() == ESM::Repair::sRecordId
+                 || base.getType() == ESM::Lockpick::sRecordId
+                 || base.getType() == ESM::Light::sRecordId
+                 || base.getType() == ESM::Apparatus::sRecordId
+                 || base.getType() == ESM::Book::sRecordId
+                 || base.getType() == ESM::Probe::sRecordId)
             category = Category_Misc;
 
         if (item.mFlags & ItemStack::Flag_Enchanted)
@@ -205,7 +205,7 @@ namespace MWGui
 
         if (mFilter & Filter_OnlyIngredients)
         {
-            if (base.getTypeName() != typeid(ESM::Ingredient).name())
+            if (base.getType() != ESM::Ingredient::sRecordId)
                 return false;
 
             if (!mNameFilter.empty() && !mEffectFilter.empty())
@@ -238,18 +238,18 @@ namespace MWGui
 
         if ((mFilter & Filter_OnlyEnchanted) && !(item.mFlags & ItemStack::Flag_Enchanted))
             return false;
-        if ((mFilter & Filter_OnlyChargedSoulstones) && (base.getTypeName() != typeid(ESM::Miscellaneous).name()
+        if ((mFilter & Filter_OnlyChargedSoulstones) && (base.getType() != ESM::Miscellaneous::sRecordId
                                                      || base.getCellRef().getSoul() == "" || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(base.getCellRef().getSoul())))
             return false;
-        if ((mFilter & Filter_OnlyRepairTools) && (base.getTypeName() != typeid(ESM::Repair).name()))
+        if ((mFilter & Filter_OnlyRepairTools) && (base.getType() != ESM::Repair::sRecordId))
             return false;
         if ((mFilter & Filter_OnlyEnchantable) && (item.mFlags & ItemStack::Flag_Enchanted
-                                               || (base.getTypeName() != typeid(ESM::Armor).name()
-                                                   && base.getTypeName() != typeid(ESM::Clothing).name()
-                                                   && base.getTypeName() != typeid(ESM::Weapon).name()
-                                                   && base.getTypeName() != typeid(ESM::Book).name())))
+                                               || (base.getType() != ESM::Armor::sRecordId
+                                                   && base.getType() != ESM::Clothing::sRecordId
+                                                   && base.getType() != ESM::Weapon::sRecordId
+                                                   && base.getType() != ESM::Book::sRecordId)))
             return false;
-        if ((mFilter & Filter_OnlyEnchantable) && base.getTypeName() == typeid(ESM::Book).name()
+        if ((mFilter & Filter_OnlyEnchantable) && base.getType() == ESM::Book::sRecordId
                 && !base.get<ESM::Book>()->mBase->mData.mIsScroll)
             return false;
 
@@ -263,8 +263,8 @@ namespace MWGui
         if ((mFilter & Filter_OnlyRepairable) && (
                     !base.getClass().hasItemHealth(base)
                     || (base.getClass().getItemHealth(base) == base.getClass().getItemMaxHealth(base))
-                    || (base.getTypeName() != typeid(ESM::Weapon).name()
-                        && base.getTypeName() != typeid(ESM::Armor).name())))
+                    || (base.getType() != ESM::Weapon::sRecordId
+                        && base.getType() != ESM::Armor::sRecordId)))
             return false;
 
         if (mFilter & Filter_OnlyRechargable)

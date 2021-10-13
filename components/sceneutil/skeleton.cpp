@@ -1,6 +1,5 @@
 #include "skeleton.hpp"
 
-#include <osg/Transform>
 #include <osg/MatrixTransform>
 
 #include <components/debug/debuglog.hpp>
@@ -12,24 +11,24 @@ namespace SceneUtil
 class InitBoneCacheVisitor : public osg::NodeVisitor
 {
 public:
-    InitBoneCacheVisitor(std::map<std::string, std::pair<osg::NodePath, osg::MatrixTransform*> >& cache)
+    typedef std::vector<osg::MatrixTransform*> TransformPath;
+    InitBoneCacheVisitor(std::unordered_map<std::string, TransformPath>& cache)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mCache(cache)
     {
     }
 
-    void apply(osg::Transform &node) override
+    void apply(osg::MatrixTransform &node) override
     {
-        osg::MatrixTransform* bone = node.asMatrixTransform();
-        if (!bone)
-            return;
-
-        mCache[Misc::StringUtils::lowerCase(bone->getName())] = std::make_pair(getNodePath(), bone);
-
+        mPath.push_back(&node);
+        mCache[Misc::StringUtils::lowerCase(node.getName())] = mPath;
         traverse(node);
+        mPath.pop_back();
     }
+
 private:
-    std::map<std::string, std::pair<osg::NodePath, osg::MatrixTransform*> >& mCache;
+    TransformPath mPath;
+    std::unordered_map<std::string, TransformPath>& mCache;
 };
 
 Skeleton::Skeleton()
@@ -73,18 +72,13 @@ Bone* Skeleton::getBone(const std::string &name)
         mRootBone.reset(new Bone);
     }
 
-    const osg::NodePath& path = found->second.first;
     Bone* bone = mRootBone.get();
-    for (osg::NodePath::const_iterator it = path.begin(); it != path.end(); ++it)
+    for (osg::MatrixTransform* matrixTransform : found->second)
     {
-        osg::MatrixTransform* matrixTransform = dynamic_cast<osg::MatrixTransform*>(*it);
-        if (!matrixTransform)
-            continue;
-
         Bone* child = nullptr;
         for (unsigned int i=0; i<bone->mChildren.size(); ++i)
         {
-            if (bone->mChildren[i]->mNode == *it)
+            if (bone->mChildren[i]->mNode == matrixTransform)
             {
                 child = bone->mChildren[i];
                 break;

@@ -7,6 +7,8 @@
 
 #include <components/misc/guarded.hpp>
 
+#include <atomic>
+
 namespace DetourNavigator
 {
     class CachedRecastMeshManager
@@ -32,6 +34,8 @@ namespace DetourNavigator
 
         std::shared_ptr<RecastMesh> getMesh();
 
+        std::shared_ptr<RecastMesh> getCachedMesh() const;
+
         bool isEmpty() const;
 
         void reportNavMeshChange(const Version& recastMeshVersion, const Version& navMeshVersion);
@@ -41,6 +45,7 @@ namespace DetourNavigator
     private:
         RecastMeshManager mImpl;
         Misc::ScopeGuarded<std::shared_ptr<RecastMesh>> mCached;
+        std::atomic_bool mOutdatedCache {true};
     };
 }
 

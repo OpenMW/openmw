@@ -80,7 +80,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Probe);
 
-        registerClass (typeid (ESM::Probe).name(), instance);
+        registerClass (ESM::Probe::sRecordId, instance);
     }
 
     std::string Probe::getUpSoundId (const MWWorld::ConstPtr& ptr) const

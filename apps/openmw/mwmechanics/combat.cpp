@@ -48,6 +48,8 @@ namespace MWMechanics
                 MWMechanics::CastSpell cast(attacker, victim, fromProjectile);
                 cast.mHitPosition = hitPosition;
                 cast.cast(object, false);
+                // Apply magic effects directly instead of waiting a frame to allow soul trap to work on one-hit kills
+                MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(victim);
                 return true;
             }
         }
@@ -71,7 +73,7 @@ namespace MWMechanics
 
         MWWorld::InventoryStore& inv = blocker.getClass().getInventoryStore(blocker);
         MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if (shield == inv.end() || shield->getTypeName() != typeid(ESM::Armor).name())
+        if (shield == inv.end() || shield->getType() != ESM::Armor::sRecordId)
             return false;
 
         if (!blocker.getRefData().getBaseNode())

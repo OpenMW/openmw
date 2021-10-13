@@ -274,7 +274,7 @@ namespace MWMechanics
 
         bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
         bool isProjectile = false;
-        if (item.getTypeName() == typeid(ESM::Weapon).name())
+        if (item.getType() == ESM::Weapon::sRecordId)
         {
             int type = item.get<ESM::Weapon>()->mBase->mData.mType;
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;

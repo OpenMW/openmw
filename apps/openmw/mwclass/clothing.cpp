@@ -121,7 +121,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Clothing);
 
-        registerClass (typeid (ESM::Clothing).name(), instance);
+        registerClass (ESM::Clothing::sRecordId, instance);
     }
 
     std::string Clothing::getUpSoundId (const MWWorld::ConstPtr& ptr) const

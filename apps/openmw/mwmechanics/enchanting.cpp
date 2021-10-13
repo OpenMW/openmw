@@ -29,11 +29,11 @@ namespace MWMechanics
     {
         mOldItemPtr=oldItem;
         mWeaponType = -1;
-        mObjectType.clear();
+        mObjectType = 0;
         if(!itemEmpty())
         {
-            mObjectType = mOldItemPtr.getTypeName();
-            if (mObjectType == typeid(ESM::Weapon).name())
+            mObjectType = mOldItemPtr.getType();
+            if (mObjectType == ESM::Weapon::sRecordId)
                 mWeaponType = mOldItemPtr.get<ESM::Weapon>()->mBase->mData.mType;
         }
     }
@@ -115,7 +115,7 @@ namespace MWMechanics
 
         const bool powerfulSoul = getGemCharge() >= \
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->mValue.getInteger();
-        if ((mObjectType == typeid(ESM::Armor).name()) || (mObjectType == typeid(ESM::Clothing).name()))
+        if ((mObjectType == ESM::Armor::sRecordId) || (mObjectType == ESM::Clothing::sRecordId))
         { // Armor or Clothing
             switch(mCastStyle)
             {
@@ -150,7 +150,7 @@ namespace MWMechanics
                     return;
             }
         }
-        else if(mObjectType == typeid(ESM::Book).name())
+        else if(mObjectType == ESM::Book::sRecordId)
         { // Scroll or Book
             mCastStyle = ESM::Enchantment::CastOnce;
             return;

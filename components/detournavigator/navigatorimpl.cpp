@@ -187,7 +187,7 @@ namespace DetourNavigator
         mNavMeshManager.reportStats(frameNumber, stats);
     }
 
-    RecastMeshTiles NavigatorImpl::getRecastMeshTiles()
+    RecastMeshTiles NavigatorImpl::getRecastMeshTiles() const
     {
         return mNavMeshManager.getRecastMeshTiles();
     }

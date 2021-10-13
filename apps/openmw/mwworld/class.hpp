@@ -54,9 +54,8 @@ namespace MWWorld
     /// \brief Base class for referenceable esm records
     class Class
     {
-            static std::map<std::string, std::shared_ptr<Class> > sClasses;
-
-            std::string mTypeName;
+            static std::map<unsigned int, std::shared_ptr<Class> > sClasses;
+            unsigned int mType;
 
         protected:
 
@@ -73,8 +72,8 @@ namespace MWWorld
             Class (const Class&) = delete;
             Class& operator= (const Class&) = delete;
 
-            const std::string& getTypeName() const {
-                return mTypeName;
+            unsigned int getType() const {
+                return mType;
             }
 
             virtual void insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const;
@@ -338,10 +337,10 @@ namespace MWWorld
                 const;
             ///< Write additional state from \a ptr into \a state.
 
-            static const Class& get (const std::string& key);
+            static const Class& get (unsigned int key);
             ///< If there is no class for this \a key, an exception is thrown.
 
-            static void registerClass (const std::string& key,  std::shared_ptr<Class> instance);
+            static void registerClass (unsigned int key,  std::shared_ptr<Class> instance);
 
             virtual int getBaseGold(const MWWorld::ConstPtr& ptr) const;
 

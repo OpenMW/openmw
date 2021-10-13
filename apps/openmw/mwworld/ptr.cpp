@@ -6,10 +6,10 @@
 #include "class.hpp"
 #include "livecellref.hpp"
 
-const std::string& MWWorld::Ptr::getTypeName() const
+unsigned int MWWorld::Ptr::getType() const
 {
     if(mRef != nullptr)
-        return mRef->mClass->getTypeName();
+        return mRef->mClass->getType();
     throw std::runtime_error("Can't get type name from an empty object.");
 }
 
@@ -55,10 +55,10 @@ MWWorld::Ptr::operator const void *()
 
 // -------------------------------------------------------------------------------
 
-const std::string &MWWorld::ConstPtr::getTypeName() const
+unsigned int MWWorld::ConstPtr::getType() const
 {
     if(mRef != nullptr)
-        return mRef->mClass->getTypeName();
+        return mRef->mClass->getType();
     throw std::runtime_error("Can't get type name from an empty object.");
 }
 

@@ -1794,7 +1794,7 @@ namespace MWRender
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 mGlowUpdater = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
         }
-        if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
+        if (ptr.getType() == ESM::Light::sRecordId && allowLight)
             addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
 
         if (!allowLight && mObjectRoot)
@@ -1823,7 +1823,7 @@ namespace MWRender
 
     bool ObjectAnimation::canBeHarvested() const
     {
-        if (mPtr.getTypeName() != typeid(ESM::Container).name())
+        if (mPtr.getType() != ESM::Container::sRecordId)
             return false;
 
         const MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();

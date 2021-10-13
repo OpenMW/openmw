@@ -3,7 +3,6 @@
 
 namespace MWPhysics
 {
-    static constexpr float sStepSizeUp = 34.0f;
     static constexpr float sStepSizeDown = 62.0f;
 
     static constexpr float sMinStep = 10.0f; // hack to skip over tiny unwalkable slopes
@@ -12,7 +11,6 @@ namespace MWPhysics
     static constexpr bool sDoExtraStairHacks = true;
 
     static constexpr float sGroundOffset = 1.0f;
-    static constexpr float sMaxSlope = 49.0f;
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static constexpr int sMaxIterations = 8;

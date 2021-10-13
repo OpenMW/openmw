@@ -20,7 +20,7 @@ namespace MWMechanics
     float rateWeapon (const MWWorld::Ptr &item, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, int type,
                       float arrowRating, float boltRating)
     {
-        if (enemy.isEmpty() || item.getTypeName() != typeid(ESM::Weapon).name())
+        if (enemy.isEmpty() || item.getType() != ESM::Weapon::sRecordId)
             return 0.f;
 
         if (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) == 0)

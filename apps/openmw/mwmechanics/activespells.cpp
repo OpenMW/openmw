@@ -1,5 +1,7 @@
 #include "activespells.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/misc/rng.hpp>
 #include <components/misc/stringops.hpp>
 
@@ -234,7 +236,17 @@ namespace MWMechanics
 
             bool remove = false;
             if(spellIt->mType == ESM::ActiveSpells::Type_Ability || spellIt->mType == ESM::ActiveSpells::Type_Permanent)
-                remove = !spells.hasSpell(spellIt->mId);
+            {
+                try
+                {
+                    remove = !spells.hasSpell(spellIt->mId);
+                }
+                catch(const std::runtime_error& e)
+                {
+                    remove = true;
+                    Log(Debug::Error) << "Removing active effect: " << e.what();
+                }
+            }
             else if(spellIt->mType == ESM::ActiveSpells::Type_Enchantment)
             {
                 const auto& store = ptr.getClass().getInventoryStore(ptr);

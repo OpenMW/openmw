@@ -60,7 +60,6 @@ namespace MWRender
                 it->second.mValue = group;
                 it->second.mGeneration = tile->second->getGeneration();
                 it->second.mRevision = tile->second->getRevision();
-                continue;
             }
 
             ++it;

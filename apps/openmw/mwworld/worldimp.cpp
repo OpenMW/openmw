@@ -135,7 +135,9 @@ namespace MWWorld
     : mResourceSystem(resourceSystem), mLocalScripts (mStore),
       mCells (mStore, mEsm), mSky (true),
       mGodMode(false), mScriptsEnabled(true), mDiscardMovements(true), mContentFiles (contentFiles),
-      mUserDataPath(userDataPath), mShouldUpdateNavigator(false),
+      mUserDataPath(userDataPath),
+      mDefaultHalfExtents(Settings::Manager::getVector3("default actor pathfind half extents", "Game")),
+      mShouldUpdateNavigator(false),
       mActivationDistanceOverride (activationDistanceOverride),
       mStartCell(startCell), mDistanceToFacedObject(-1.f), mTeleportEnabled(true),
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
@@ -173,13 +175,12 @@ namespace MWWorld
 
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
 
-        if (auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager())
+        if (Settings::Manager::getBool("enable", "Navigator"))
         {
-            navigatorSettings->mMaxClimb = MWPhysics::sStepSizeUp;
-            navigatorSettings->mMaxSlope = MWPhysics::sMaxSlope;
-            navigatorSettings->mSwimHeightScale = mSwimHeightScale;
+            auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
+            navigatorSettings.mSwimHeightScale = mSwimHeightScale;
             DetourNavigator::RecastGlobalAllocator::init();
-            mNavigator.reset(new DetourNavigator::NavigatorImpl(*navigatorSettings));
+            mNavigator.reset(new DetourNavigator::NavigatorImpl(navigatorSettings));
         }
         else
         {
@@ -784,9 +785,9 @@ namespace MWWorld
 
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
-            reference.getTypeName()==typeid (ESM::NPC).name() ||
-            reference.getTypeName()==typeid (ESM::Creature).name())
+        if( reference.getType()==ESM::Container::sRecordId ||
+            reference.getType()==ESM::NPC::sRecordId ||
+            reference.getType()==ESM::Creature::sRecordId)
         {
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
@@ -827,9 +828,9 @@ namespace MWWorld
 
     void World::removeContainerScripts(const Ptr& reference)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
-            reference.getTypeName()==typeid (ESM::NPC).name() ||
-            reference.getTypeName()==typeid (ESM::Creature).name())
+        if( reference.getType()==ESM::Container::sRecordId ||
+            reference.getType()==ESM::NPC::sRecordId ||
+            reference.getType()==ESM::Creature::sRecordId)
         {
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
@@ -2471,7 +2472,6 @@ namespace MWWorld
 
         applyLoopingParticles(player);
 
-        mDefaultHalfExtents = mPhysics->getOriginalHalfExtents(getPlayerPtr());
         mNavigator->addAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
     }
 
@@ -3415,12 +3415,34 @@ namespace MWWorld
                 return true;
 
             // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)
-            bool isContainer = ptr.getClass().getTypeName() == typeid(ESM::Container).name();
+            bool isContainer = ptr.getClass().getType() == ESM::Container::sRecordId;
             if (mType != World::Detect_Creature && (ptr.getClass().isActor() || isContainer))
             {
                 // but ignore containers without resolved content
                 if (isContainer && ptr.getRefData().getCustomData() == nullptr)
+                {
+                    const auto& store = MWBase::Environment::get().getWorld()->getStore();
+                    for(const auto& containerItem :  ptr.get<ESM::Container>()->mBase->mInventory.mList)
+                    {
+                        if(containerItem.mCount)
+                        {
+                            try
+                            {
+                                ManualRef ref(store, containerItem.mItem, containerItem.mCount);
+                                if(needToAdd(ref.getPtr(), mDetector))
+                                {
+                                    mOut.push_back(ptr);
+                                    return true;
+                                }
+                            }
+                            catch (const std::exception&)
+                            {
+                                // Ignore invalid item id
+                            }
+                        }
+                    }
                     return true;
+                }
 
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 {
@@ -3448,10 +3470,10 @@ namespace MWWorld
                 // If in werewolf form, this detects only NPCs, otherwise only creatures
                 if (detector.getClass().isNpc() && detector.getClass().getNpcStats(detector).isWerewolf())
                 {
-                    if (ptr.getClass().getTypeName() != typeid(ESM::NPC).name())
+                    if (ptr.getClass().getType() != ESM::NPC::sRecordId)
                         return false;
                 }
-                else if (ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
+                else if (ptr.getClass().getType() != ESM::Creature::sRecordId)
                     return false;
 
                 if (ptr.getClass().getCreatureStats(ptr).isDead())

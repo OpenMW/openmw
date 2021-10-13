@@ -23,7 +23,7 @@ namespace MWMechanics
             ESM::EffectList mEffectList;
 
             std::string mNewItemName;
-            std::string mObjectType;
+            unsigned int mObjectType;
             int mWeaponType;
 
             const ESM::Enchantment* getRecord(const ESM::Enchantment& newEnchantment) const;

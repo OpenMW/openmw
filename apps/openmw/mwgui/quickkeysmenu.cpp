@@ -387,9 +387,9 @@ namespace MWGui
 
             if (key->type == Type_Item)
             {
-                bool isWeapon = item.getTypeName() == typeid(ESM::Weapon).name();
-                bool isTool = item.getTypeName() == typeid(ESM::Probe).name() ||
-                    item.getTypeName() == typeid(ESM::Lockpick).name();
+                bool isWeapon = item.getType() == ESM::Weapon::sRecordId;
+                bool isTool = item.getType() == ESM::Probe::sRecordId ||
+                    item.getType() == ESM::Lockpick::sRecordId;
 
                 // delay weapon switching if player is busy
                 if (isDelayNeeded && (isWeapon || isTool))
