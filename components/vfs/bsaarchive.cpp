@@ -66,7 +66,7 @@ CompressedBsaArchive::CompressedBsaArchive(const std::string &filename)
     }
 }
 
-void CompressedBsaArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
+void CompressedBsaArchive::listResources(std::unordered_map<std::string, File *> &out, char (*normalize_function)(char))
 {
     for (std::vector<CompressedBsaArchiveFile>::iterator it = mCompressedResources.begin(); it != mCompressedResources.end(); ++it)
     {
