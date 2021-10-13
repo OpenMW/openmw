@@ -28,11 +28,6 @@ namespace MWWorld
             CellStoreType *mCell;
             ContainerStoreType *mContainerStore;
 
-            PtrBase(LiveCellRefBaseType *liveCellRef=nullptr, CellStoreType *cell=nullptr)
-              : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)
-            {
-            }
-
             bool isEmpty() const
             {
                 return mRef == nullptr;
@@ -123,12 +118,19 @@ namespace MWWorld
 
     };
 
-    class Ptr : public PtrBase<std::remove_const_t> {};
+    class Ptr : public PtrBase<std::remove_const_t>
+    {
+    public:
+        Ptr(LiveCellRefBase *liveCellRef=nullptr, CellStoreType *cell=nullptr)
+              : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)  {}
+    }
+
     class ConstPtr : public PtrBase<std::add_const_t>
     {
     public:
         ConstPtr(const Ptr& ptr)  : PtrBase<std::add_const_t>(ptr.mRef, ptr.mCell) {}
-        ConstPtr() : PtrBase<std::add_const_t>() {}
+        ConstPtr(const LiveCellRefBase *liveCellRef=nullptr, const CellStoreType *cell=nullptr)
+              : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)  {}
     };
 
 }
