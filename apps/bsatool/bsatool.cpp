@@ -233,7 +233,17 @@ int extract(std::unique_ptr<Bsa::BSAFile>& bsa, Arguments& info)
     std::string extractPath = info.extractfile;
     Misc::StringUtils::replaceAll(extractPath, "\\", "/");
 
-    if (!bsa->exists(archivePath.c_str()))
+    Files::IStreamPtr stream;
+    // Get a stream for the file to extract
+    for (auto it = bsa->getList().rbegin(); it != bsa->getList().rend(); ++it)
+    {
+        if (Misc::StringUtils::ciEqual(std::string(it->name()), archivePath))
+        {
+            stream = bsa->getFile(&*it);
+            break;
+        }
+    }
+    if (!stream)
     {
         std::cout << "ERROR: file '" << archivePath << "' not found\n";
         std::cout << "In archive: " << info.filename << std::endl;
@@ -259,9 +269,6 @@ int extract(std::unique_ptr<Bsa::BSAFile>& bsa, Arguments& info)
         std::cout << "ERROR: " << target.parent_path() << " is not a directory." << std::endl;
         return 3;
     }
-
-    // Get a stream for the file to extract
-    Files::IStreamPtr stream = bsa->getFile(archivePath.c_str());
 
     bfs::ofstream out(target, std::ios::binary);
 
