@@ -224,7 +224,16 @@ namespace MWSound
         stopMusic();
 
         DecoderPtr decoder = getDecoder();
-        decoder->open(filename);
+        try
+        {
+            decoder->open(filename);
+        }
+        catch(std::exception &e)
+        {
+            Log(Debug::Error) << "Failed to load audio from " << filename << ": " << e.what();
+            return;
+        }
+
 
         mMusic = getStreamRef();
         mMusic->init([&] {
