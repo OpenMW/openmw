@@ -119,12 +119,12 @@ namespace MWWorld
             }
             inline bool operator<= (const PtrBase<std::add_const_t>& right)
             {
-                return !(*this<right);
+                return !(*this>right);
             }
     };
 
-    typedef PtrBase<std::remove_const_t> Ptr;
-    typedef PtrBase<std::add_const_t> ConstPtr;
+    typedef class PtrBase<std::remove_const_t> Ptr;
+    typedef class PtrBase<std::add_const_t> ConstPtr;
 
 }
 
