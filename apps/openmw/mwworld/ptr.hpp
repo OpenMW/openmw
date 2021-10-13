@@ -28,12 +28,12 @@ namespace MWWorld
             CellStoreType *mCell;
             ContainerStoreType *mContainerStore;
 
-            Ptr(LiveCellRefBaseType *liveCellRef=nullptr, CellStoreType *cell=nullptr)
+            PtrBase(LiveCellRefBaseType *liveCellRef=nullptr, CellStoreType *cell=nullptr)
               : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)
             {
             }
 
-            Ptr(const Ptr<std::remove_const>& ptr)
+            PtrBase(const PtrBase<std::remove_const>& ptr)
               : mRef(ptr.mRef), mCell(ptr.mCell), mContainerStore(ptr.mContainerStore)
             {
             }
@@ -98,32 +98,32 @@ namespace MWWorld
             ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
 
             template <typename T>
-            inline bool operator== (const Ptr<T>& right)
+            inline bool operator== (const PtrBase<T>& right)
             {
                 return *this.mRef==right.mRef;
             }
             template <typename T>
-            inline bool operator!= (const Ptr<T>& right)
+            inline bool operator!= (const PtrBase<T>& right)
             {
                 return !(*this==right);
             }
             template <typename T>
-            inline bool operator< (const Ptr<T>& right)
+            inline bool operator< (const PtrBase<T>& right)
             {
                 return this->mRef<right.mRef;
             }
             template <typename T>
-            inline bool operator>= (const Ptr<T>& right)
+            inline bool operator>= (const PtrBase<T>& right)
             {
                 return !(*this<right);
             }
             template <typename T>
-            inline bool operator> (const Ptr<T>& right)
+            inline bool operator> (const PtrBase<T>& right)
             {
                 return right<*this;
             }
             template <typename T>
-            inline bool operator<= (const Ptr<T>& right)
+            inline bool operator<= (const PtrBase<T>& right)
             {
                 return !(*this<right);
             }
