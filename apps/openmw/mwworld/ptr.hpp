@@ -123,7 +123,7 @@ namespace MWWorld
     public:
         Ptr(LiveCellRefBase *liveCellRef=nullptr, CellStoreType *cell=nullptr)
               : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)  {}
-    }
+    };
 
     class ConstPtr : public PtrBase<std::add_const_t>
     {
