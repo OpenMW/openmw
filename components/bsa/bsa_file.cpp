@@ -230,17 +230,6 @@ void Bsa::BSAFile::writeHeader()
     output.write(reinterpret_cast<char*>(hashes.data()), sizeof(Hash)*hashes.size());
 }
 
-/// Get the index of a given file name, or -1 if not found
-int BSAFile::getIndex(const char *str) const
-{
-    for (size_t i=0; i<mFiles.size(); ++i)
-    {
-        if (std::string(mFiles[i].name()) == str)
-            return static_cast<int>(i);
-    }
-    return -1;
-}
-
 /// Open an archive file.
 void BSAFile::open(const std::string &file)
 {
@@ -267,18 +256,6 @@ void Bsa::BSAFile::close()
     mFiles.clear();
     mStringBuf.clear();
     mIsLoaded = false;
-}
-
-Files::IStreamPtr BSAFile::getFile(const char *file)
-{
-    assert(file);
-    int i = getIndex(file);
-    if(i == -1)
-        fail("File not found: " + std::string(file));
-
-    const FileStruct &fs = mFiles[i];
-
-    return Files::openConstrainedFileStream (mFilename.c_str (), fs.offset, fs.fileSize);
 }
 
 void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
