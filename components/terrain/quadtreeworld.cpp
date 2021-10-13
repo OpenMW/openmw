@@ -498,9 +498,8 @@ void QuadTreeWorld::enable(bool enabled)
         if (!mRootNode->getNumParents())
             mTerrainRoot->addChild(mRootNode);
     }
-
-    if (mRootNode)
-        mRootNode->setNodeMask(enabled ? ~0 : 0);
+    else if (mRootNode)
+        mTerrainRoot->removeChild(mRootNode);
 }
 
 View* QuadTreeWorld::createView()
