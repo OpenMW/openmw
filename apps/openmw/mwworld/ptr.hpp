@@ -33,7 +33,7 @@ namespace MWWorld
             {
             }
 
-            PtrBase(const PtrBase<std::remove_const>& ptr)
+            PtrBase(const PtrBase<std::remove_const_t>& ptr)
               : mRef(ptr.mRef), mCell(ptr.mCell), mContainerStore(ptr.mContainerStore)
             {
             }
