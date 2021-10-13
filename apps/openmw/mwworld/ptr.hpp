@@ -33,11 +33,6 @@ namespace MWWorld
             {
             }
 
-            PtrBase(const PtrBase<std::remove_const_t>& ptr)
-              : mRef(ptr.mRef), mCell(ptr.mCell), mContainerStore(ptr.mContainerStore)
-            {
-            }
-
             bool isEmpty() const
             {
                 return mRef == nullptr;
@@ -153,7 +148,13 @@ namespace MWWorld
     };
 
     class Ptr : public PtrBase<std::remove_const_t> {};
-    class ConstPtr : public PtrBase<std::add_const_t> {};
+    class ConstPtr : public PtrBase<std::add_const_t>
+    {
+    public:
+        ConstPtr(const Ptr& ptr)
+              : mRef(ptr.mRef), mCell(ptr.mCell), mContainerStore(ptr.mContainerStore)
+            {}
+    };
 
 }
 
