@@ -121,7 +121,7 @@ namespace MWWorld
             {
                 return !(*this<right);
             }
-    }
+    };
 
     typedef PtrBase<std::remove_const_t> Ptr;
     typedef PtrBase<std::add_const_t> ConstPtr;
