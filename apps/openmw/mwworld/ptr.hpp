@@ -97,34 +97,34 @@ namespace MWWorld
             operator const void *();
             ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
 
-            inline bool operator== (const PtrBase<std::add_const>& right)
+            inline bool operator== (const PtrBase<std::add_const_t>& right)
             {
                 return *this.mRef==right.mRef;
             }
-            inline bool operator!= (const PtrBase<std::add_const>& right)
+            inline bool operator!= (const PtrBase<std::add_const_t>& right)
             {
                 return !(*this==right);
             }
-            inline bool operator< (const PtrBase<std::add_const>& right)
+            inline bool operator< (const PtrBase<std::add_const_t>& right)
             {
                 return this->mRef<right.mRef;
             }
-            inline bool operator>= (const PtrBase<std::add_const>& right)
+            inline bool operator>= (const PtrBase<std::add_const_t>& right)
             {
                 return !(*this<right);
             }
-            inline bool operator> (const PtrBase<std::add_const>& right)
+            inline bool operator> (const PtrBase<std::add_const_t>& right)
             {
                 return right<*this;
             }
-            inline bool operator<= (const PtrBase<std::add_const>& right)
+            inline bool operator<= (const PtrBase<std::add_const_t>& right)
             {
                 return !(*this<right);
             }
     }
 
-    typedef PtrBase<std::remove_const> Ptr;
-    typedef PtrBase<std::add_const> ConstPtr;
+    typedef PtrBase<std::remove_const_t> Ptr;
+    typedef PtrBase<std::add_const_t> ConstPtr;
 
 }
 
