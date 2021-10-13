@@ -121,30 +121,6 @@ namespace MWWorld
                 return mRef;
             }
 
-            inline bool operator== (const PtrBase<std::add_const_t>& right)
-            {
-                return *this.mRef==right.mRef;
-            }
-            inline bool operator!= (const PtrBase<std::add_const_t>& right)
-            {
-                return !(*this==right);
-            }
-            inline bool operator< (const PtrBase<std::add_const_t>& right)
-            {
-                return this->mRef<right.mRef;
-            }
-            inline bool operator>= (const PtrBase<std::add_const_t>& right)
-            {
-                return !(*this<right);
-            }
-            inline bool operator> (const PtrBase<std::add_const_t>& right)
-            {
-                return right<*this;
-            }
-            inline bool operator<= (const PtrBase<std::add_const_t>& right)
-            {
-                return !(*this>right);
-            }
     };
 
     class Ptr : public PtrBase<std::remove_const_t> {};
@@ -155,6 +131,36 @@ namespace MWWorld
               : PtrBase<std::add_const_t>(ptr.mRef, ptr.mCell)
         {}
     };
+
+    inline bool operator== (const ConstPtr& left, const ConstPtr& right)
+    {
+        return left.mRef==right.mRef;
+    }
+
+    inline bool operator!= (const ConstPtr& left, const ConstPtr& right)
+    {
+        return !(left==right);
+    }
+
+    inline bool operator< (const ConstPtr& left, const ConstPtr& right)
+    {
+        return left.mRef<right.mRef;
+    }
+
+    inline bool operator>= (const ConstPtr& left, const ConstPtr& right)
+    {
+        return !(left<right);
+    }
+
+    inline bool operator> (const ConstPtr& left, const ConstPtr& right)
+    {
+        return right<left;
+    }
+
+    inline bool operator<= (const ConstPtr& left, const ConstPtr& right)
+    {
+        return !(left>right);
+    }
 
 }
 
