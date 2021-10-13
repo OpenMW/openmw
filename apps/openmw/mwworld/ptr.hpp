@@ -15,7 +15,7 @@ namespace MWWorld
     struct LiveCellRefBase;
 
     /// \brief Pointer to a LiveCellRef
-    template <template<class> TypeTransform>
+    template <template<class> class TypeTransform>
     class PtrBase
     {
         public:
