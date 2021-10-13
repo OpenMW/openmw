@@ -122,14 +122,28 @@ namespace MWWorld
     {
     public:
         Ptr(LiveCellRefBase *liveCellRef=nullptr, CellStoreType *cell=nullptr)
-              : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)  {}
+        {
+            mRef = liveCellRef;
+            mCell = cell;
+            mContainerStore = nullptr;
+        }
     };
 
     class ConstPtr : public PtrBase<std::add_const_t>
     {
     public:
-        ConstPtr(const Ptr& ptr)  : mRef(ptr.mRef), mCell(ptr.mCell), mContainerStore(ptr.mContainerStore) {}
-        ConstPtr(const LiveCellRefBase *liveCellRef=nullptr, const CellStoreType *cell=nullptr) : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)  {}
+        ConstPtr(const Ptr& ptr)
+        {
+            mRef = ptr.mRef;
+            mCell = ptr.mCell;
+            mContainerStore = ptr.mContainerStore;
+        }
+        ConstPtr(const LiveCellRefBase *liveCellRef=nullptr, const CellStoreType *cell=nullptr)
+        {
+            mRef = liveCellRef;
+            mCell = cell;
+            mContainerStore = nullptr;
+        }
     };
 
 }
