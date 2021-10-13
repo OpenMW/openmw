@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "livecellref.hpp"
+#include "class.hpp"
 
 namespace MWWorld
 {
