@@ -299,7 +299,7 @@ public:
 
     osg::BoundingSphere computeBound() const override
     {
-        return osg::BoundingSphere(osg::Vec3f(0,0,0), 0);
+        return osg::BoundingSphere();
     }
 
     class CullCallback : public SceneUtil::NodeCallback<CullCallback, osg::Node*, osgUtil::CullVisitor*>
