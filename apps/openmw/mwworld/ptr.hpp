@@ -152,8 +152,8 @@ namespace MWWorld
             }
     };
 
-    class Ptr : PtrBase<std::remove_const_t> {};
-    class ConstPtr : PtrBase<std::add_const_t> {};
+    class Ptr : public PtrBase<std::remove_const_t> {};
+    class ConstPtr : public PtrBase<std::add_const_t> {};
 
 }
 
