@@ -97,33 +97,27 @@ namespace MWWorld
             operator const void *();
             ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
 
-            template <typename T>
-            inline bool operator== (const PtrBase<T>& right)
+            inline bool operator== (const PtrBase<std::add_const>& right)
             {
                 return *this.mRef==right.mRef;
             }
-            template <typename T>
-            inline bool operator!= (const PtrBase<T>& right)
+            inline bool operator!= (const PtrBase<std::add_const>& right)
             {
                 return !(*this==right);
             }
-            template <typename T>
-            inline bool operator< (const PtrBase<T>& right)
+            inline bool operator< (const PtrBase<std::add_const>& right)
             {
                 return this->mRef<right.mRef;
             }
-            template <typename T>
-            inline bool operator>= (const PtrBase<T>& right)
+            inline bool operator>= (const PtrBase<std::add_const>& right)
             {
                 return !(*this<right);
             }
-            template <typename T>
-            inline bool operator> (const PtrBase<T>& right)
+            inline bool operator> (const PtrBase<std::add_const>& right)
             {
                 return right<*this;
             }
-            template <typename T>
-            inline bool operator<= (const PtrBase<T>& right)
+            inline bool operator<= (const PtrBase<std::add_const>& right)
             {
                 return !(*this<right);
             }
