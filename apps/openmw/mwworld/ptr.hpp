@@ -115,7 +115,7 @@ namespace MWWorld
                 return mContainerStore;
             }
 
-            operator const void *()
+            operator const void *() const
             ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
             {
                 return mRef;
