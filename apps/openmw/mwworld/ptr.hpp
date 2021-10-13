@@ -127,9 +127,8 @@ namespace MWWorld
     class ConstPtr : public PtrBase<std::add_const_t>
     {
     public:
-        ConstPtr(const Ptr& ptr)
-              : PtrBase<std::add_const_t>(ptr.mRef, ptr.mCell)
-        {}
+        ConstPtr(const Ptr& ptr)  : PtrBase<std::add_const_t>(ptr.mRef, ptr.mCell) {}
+        ConstPtr() : PtrBase<std::add_const_t>() {}
     };
 
     inline bool operator== (const ConstPtr& left, const ConstPtr& right)
