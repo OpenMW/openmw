@@ -233,7 +233,7 @@ namespace MWWorld
         if (key.empty())
             throw std::logic_error ("Class::get(): attempting to get an empty key");
 
-        auto iter = sClasses.find (key);
+        std::map<std::string, std::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
 
         if (iter==sClasses.end())
             throw std::logic_error ("Class::get(): unknown class key: " + key);
