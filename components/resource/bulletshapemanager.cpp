@@ -4,7 +4,6 @@
 #include <osg/TriangleFunctor>
 #include <osg/Transform>
 #include <osg/Drawable>
-#include <osg/Version>
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
