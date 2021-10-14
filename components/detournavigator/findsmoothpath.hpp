@@ -199,11 +199,14 @@ namespace DetourNavigator
                 ++smoothPathSize;
                 break;
             }
-            else if (offMeshConnection && inRange(result->mResultPos, steerTarget->steerPos, slop))
+
+            dtPolyRef polyRef = polygonPath.front();
+            osg::Vec3f polyPos = result->mResultPos;
+
+            if (offMeshConnection && inRange(polyPos, steerTarget->steerPos, slop))
             {
                 // Advance the path up to and over the off-mesh connection.
                 dtPolyRef prevRef = 0;
-                dtPolyRef polyRef = polygonPath.front();
                 std::size_t npos = 0;
                 while (npos < polygonPath.size() && polyRef != steerTarget->steerPosRef)
                 {
@@ -233,14 +236,11 @@ namespace DetourNavigator
                     }
 
                     // Move position at the other side of the off-mesh link.
-                    if (dtStatusFailed(navMeshQuery.getPolyHeight(polygonPath.front(), endPos.ptr(), &iterPos.y())))
-                        return Status::GetPolyHeightFailed;
-                    iterPos.x() = endPos.x();
-                    iterPos.z() = endPos.z();
+                    polyPos = endPos;
                 }
             }
 
-            if (dtStatusFailed(navMeshQuery.getPolyHeight(polygonPath.front(), result->mResultPos.ptr(), &iterPos.y())))
+            if (dtStatusFailed(navMeshQuery.getPolyHeight(polyRef, polyPos.ptr(), &iterPos.y())))
                 return Status::GetPolyHeightFailed;
             iterPos.x() = result->mResultPos.x();
             iterPos.z() = result->mResultPos.z();
