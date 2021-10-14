@@ -30,7 +30,7 @@ namespace DetourNavigator
         return (osg::Vec2f(v1.x(), v1.z()) - osg::Vec2f(v2.x(), v2.z())).length() < r;
     }
 
-    std::vector<dtPolyRef> fixupCorridor(const std::vector<dtPolyRef>& path, const std::vector<dtPolyRef>& visited);
+    std::size_t fixupCorridor(dtPolyRef* path, std::size_t pathSize, const std::vector<dtPolyRef>& visited);
 
     // This function checks if the path has a small U-turn, that is,
     // a polygon further in the path is adjacent to the first polygon
@@ -43,17 +43,17 @@ namespace DetourNavigator
     //  +-S-+-T-+
     //  |:::|   | <-- the step can end up in here, resulting U-turn path.
     //  +---+---+
-    std::vector<dtPolyRef> fixupShortcuts(const std::vector<dtPolyRef>& path, const dtNavMeshQuery& navQuery);
+    std::size_t fixupShortcuts(dtPolyRef* path, std::size_t pathSize, const dtNavMeshQuery& navQuery);
 
     struct SteerTarget
     {
-        osg::Vec3f steerPos;
-        unsigned char steerPosFlag;
-        dtPolyRef steerPosRef;
+        osg::Vec3f mSteerPos;
+        unsigned char mSteerPosFlag;
+        dtPolyRef mSteerPosRef;
     };
 
     std::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navQuery, const osg::Vec3f& startPos,
-            const osg::Vec3f& endPos, const float minTargetDist, const std::vector<dtPolyRef>& path);
+            const osg::Vec3f& endPos, const float minTargetDist, const dtPolyRef* path, const std::size_t pathSize);
 
     template <class OutputIterator>
     class OutputTransformIterator
@@ -158,22 +158,23 @@ namespace DetourNavigator
         *out++ = iterPos;
 
         std::size_t smoothPathSize = 1;
+        std::size_t polygonPathSize = polygonPath.size();
 
         // Move towards target a small advancement at a time until target reached or
         // when ran out of memory to store the path.
-        while (!polygonPath.empty() && smoothPathSize < maxSmoothPathSize)
+        while (polygonPathSize > 0 && smoothPathSize < maxSmoothPathSize)
         {
             // Find location to steer towards.
-            const auto steerTarget = getSteerTarget(navMeshQuery, iterPos, targetPos, slop, polygonPath);
+            const auto steerTarget = getSteerTarget(navMeshQuery, iterPos, targetPos, slop, polygonPath.data(), polygonPathSize);
 
             if (!steerTarget)
                 break;
 
-            const bool endOfPath = bool(steerTarget->steerPosFlag & DT_STRAIGHTPATH_END);
-            const bool offMeshConnection = bool(steerTarget->steerPosFlag & DT_STRAIGHTPATH_OFFMESH_CONNECTION);
+            const bool endOfPath = bool(steerTarget->mSteerPosFlag & DT_STRAIGHTPATH_END);
+            const bool offMeshConnection = bool(steerTarget->mSteerPosFlag & DT_STRAIGHTPATH_OFFMESH_CONNECTION);
 
             // Find movement delta.
-            const osg::Vec3f delta = steerTarget->steerPos - iterPos;
+            const osg::Vec3f delta = steerTarget->mSteerPos - iterPos;
             float len = delta.length();
             // If the steer target is end of path or off-mesh link, do not move past the location.
             if ((endOfPath || offMeshConnection) && len < stepSize)
@@ -187,11 +188,11 @@ namespace DetourNavigator
             if (!result)
                 return Status::MoveAlongSurfaceFailed;
 
-            polygonPath = fixupCorridor(polygonPath, result->mVisited);
-            polygonPath = fixupShortcuts(polygonPath, navMeshQuery);
+            polygonPathSize = fixupCorridor(polygonPath.data(), polygonPathSize, result->mVisited);
+            polygonPathSize = fixupShortcuts(polygonPath.data(), polygonPathSize, navMeshQuery);
 
             // Handle end of path and off-mesh links when close enough.
-            if (endOfPath && inRange(result->mResultPos, steerTarget->steerPos, slop))
+            if (endOfPath && inRange(result->mResultPos, steerTarget->mSteerPos, slop))
             {
                 // Reached end of path.
                 iterPos = targetPos;
@@ -203,19 +204,22 @@ namespace DetourNavigator
             dtPolyRef polyRef = polygonPath.front();
             osg::Vec3f polyPos = result->mResultPos;
 
-            if (offMeshConnection && inRange(polyPos, steerTarget->steerPos, slop))
+            if (offMeshConnection && inRange(polyPos, steerTarget->mSteerPos, slop))
             {
                 // Advance the path up to and over the off-mesh connection.
                 dtPolyRef prevRef = 0;
                 std::size_t npos = 0;
-                while (npos < polygonPath.size() && polyRef != steerTarget->steerPosRef)
+                while (npos < polygonPathSize && polyRef != steerTarget->mSteerPosRef)
                 {
                     prevRef = polyRef;
                     polyRef = polygonPath[npos];
                     ++npos;
                 }
-                std::copy(polygonPath.begin() + std::ptrdiff_t(npos), polygonPath.end(), polygonPath.begin());
-                polygonPath.resize(polygonPath.size() - npos);
+                if (npos > 0)
+                {
+                    std::copy(polygonPath.begin() + npos, polygonPath.begin() + polygonPathSize, polygonPath.begin());
+                    polygonPathSize -= npos;
+                }
 
                 // Reached off-mesh connection.
                 osg::Vec3f startPos;
