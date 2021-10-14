@@ -35,6 +35,11 @@ namespace MWWorld
                 return mRef == nullptr;
             }
 
+            // Returns a 32-bit id of the ESM record this object is based on.
+            // Specific values of ids are defined in ESM::RecNameInts.
+            // Note 1: ids are not sequential. E.g. for a creature `getType` returns 0x41455243.
+            // Note 2: Life is not easy and full of surprises. For example
+            //         prison marker reuses ESM::Door record. Player is ESM::NPC.
             unsigned int getType() const;
 
             std::string_view getTypeDescription() const
