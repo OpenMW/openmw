@@ -68,7 +68,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install Building Dependancies
-      run: sudo CI/before_install.osx.sh
+      run: CI/before_install.osx.sh
 
     - name: Prime ccache
       uses: hendrikmuhs/ccache-action@v1
