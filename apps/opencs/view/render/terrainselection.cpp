@@ -1,7 +1,6 @@
 #include "terrainselection.hpp"
 
 #include <algorithm>
-#include <chrono>
 
 #include <osg/Group>
 #include <osg/Geometry>
