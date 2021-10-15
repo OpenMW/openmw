@@ -464,7 +464,6 @@ void CSVRender::WorldspaceWidget::abortDrag()
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
 
         editMode.dragAborted();
-        mDragging = false;
         mDragMode = InteractionType_None;
     }
 }
