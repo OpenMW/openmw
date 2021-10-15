@@ -49,8 +49,8 @@ namespace MWPhysics
         btVector3 mScale;
         osg::Vec3f mPosition;
         osg::Quat mRotation;
-        bool mScaleUpdatePending;
-        bool mTransformUpdatePending;
+        bool mScaleUpdatePending = false;
+        bool mTransformUpdatePending = false;
         mutable std::mutex mPositionMutex;
         PhysicsTaskScheduler* mTaskScheduler;
     };
