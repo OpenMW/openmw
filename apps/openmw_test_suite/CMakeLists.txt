@@ -43,6 +43,11 @@ if (GTEST_FOUND AND GMOCK_FOUND)
 
         ../openmw/options.cpp
         openmw/options.cpp
+
+        sqlite3/db.cpp
+        sqlite3/request.cpp
+        sqlite3/statement.cpp
+        sqlite3/transaction.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
