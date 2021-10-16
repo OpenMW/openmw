@@ -207,6 +207,11 @@ add_component_dir(sqlite3
     transaction
 )
 
+add_component_dir(esmloader
+    load
+    esmdata
+)
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 

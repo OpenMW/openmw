@@ -48,6 +48,8 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         sqlite3/request.cpp
         sqlite3/statement.cpp
         sqlite3/transaction.cpp
+
+        esmloader/load.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
@@ -72,5 +74,18 @@ if (GTEST_FOUND AND GMOCK_FOUND)
             set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
         endif (CMAKE_CL_64)
     endif (MSVC)
+
+    include(FetchContent)
+    FetchContent_Declare(example_suite_template_game
+        URL https://gitlab.com/OpenMW/example-suite/-/raw/8966dab24692555eec720c854fb0f73d108070cd/data/template.omwgame
+        URL_HASH MD5=bf3691034a38611534c74c3b89a7d2c3
+        SOURCE_DIR fetched/example_suite_template_game
+        DOWNLOAD_NO_EXTRACT ON
+    )
+    FetchContent_MakeAvailableExcludeFromAll(example_suite_template_game)
+
+    add_custom_target(example_suite_template_game SOURCES fetched/example_suite_template_game/template.omwgame)
+
+    add_dependencies(openmw_test_suite example_suite_template_game)
 
 endif()
