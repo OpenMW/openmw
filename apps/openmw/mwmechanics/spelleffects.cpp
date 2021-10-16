@@ -806,6 +806,7 @@ bool applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, Ac
             }
             if(effect.mMagnitude == 0)
             {
+                effect.mMagnitude = oldMagnitude;
                 effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
                 effect.mTimeLeft -= dt;
                 return false;
@@ -1027,15 +1028,15 @@ void onMagicEffectRemoved(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellP
 {
     if(!(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
         return;
-    const auto world = MWBase::Environment::get().getWorld();
     auto& magnitudes = target.getClass().getCreatureStats(target).getMagicEffects();
-    const auto* magicEffect = world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
-    if(magicEffect->mData.mFlags & ESM::MagicEffect::Flags::AppliedOnce)
-        magnitudes.add(EffectKey(effect.mEffectId, effect.mArg), EffectParam(-effect.mMagnitude));
+    magnitudes.add(EffectKey(effect.mEffectId, effect.mArg), EffectParam(-effect.mMagnitude));
     removeMagicEffect(target, spellParams, effect);
-    auto anim = world->getAnimation(target);
-    if(anim)
-        anim->removeEffect(effect.mEffectId);
+    if(magnitudes.get(effect.mEffectId).getMagnitude() <= 0.f)
+    {
+        auto anim = MWBase::Environment::get().getWorld()->getAnimation(target);
+        if(anim)
+            anim->removeEffect(effect.mEffectId);
+    }
 }
 
 }
