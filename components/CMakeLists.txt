@@ -201,6 +201,12 @@ add_component_dir(loadinglistener
     reporter
     )
 
+add_component_dir(sqlite3
+    db
+    statement
+    transaction
+)
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
@@ -236,6 +242,8 @@ endif ()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
+find_package(SQLite3 REQUIRED)
+
 add_library(components STATIC ${COMPONENT_FILES})
 
 target_link_libraries(components
@@ -268,6 +276,7 @@ target_link_libraries(components
     RecastNavigation::Recast
 
     Base64
+    SQLite::SQLite3
     )
 
 target_link_libraries(components ${BULLET_LIBRARIES})
