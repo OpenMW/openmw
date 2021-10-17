@@ -367,10 +367,10 @@ int load(Arguments& info)
             EsmTool::RecordBase *record = EsmTool::RecordBase::create(n);
             if (record == nullptr)
             {
-                if (skipped.count(n.intval) == 0)
+                if (skipped.count(n.toInt()) == 0)
                 {
                     std::cout << "Skipping " << n.toString() << " records.\n";
-                    skipped.emplace(n.intval);
+                    skipped.emplace(n.toInt());
                 }
 
                 esm.skipRecord();
@@ -402,7 +402,7 @@ int load(Arguments& info)
                 record->print();
             }
 
-            if (record->getType().intval == ESM::REC_CELL && loadCells && interested)
+            if (record->getType().toInt() == ESM::REC_CELL && loadCells && interested)
             {
                 loadCell(record->cast<ESM::Cell>()->get(), esm, info);
             }
@@ -415,7 +415,7 @@ int load(Arguments& info)
             {
                 delete record;
             }
-            ++info.data.mRecordStats[n.intval];
+            ++info.data.mRecordStats[n.toInt()];
         }
 
     } catch(std::exception &e) {
@@ -459,7 +459,7 @@ int clone(Arguments& info)
     for (std::pair<int, int> stat : info.data.mRecordStats)
     {
         ESM::NAME name;
-        name.intval = stat.first;
+        name = stat.first;
         int amount = stat.second;
         std::cout << std::setw(digitCount) << amount << " " << name.toString() << "  ";
         if (++i % 3 == 0)
@@ -496,7 +496,7 @@ int clone(Arguments& info)
         esm.startRecord(typeName.toString(), record->getFlags());
 
         record->save(esm);
-        if (typeName.intval == ESM::REC_CELL) {
+        if (typeName.toInt() == ESM::REC_CELL) {
             ESM::Cell *ptr = &record->cast<ESM::Cell>()->get();
             if (!info.data.mCellRefs[ptr].empty()) 
             {
