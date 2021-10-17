@@ -16,6 +16,8 @@ namespace MWState
 
     bool operator< (const Slot& left, const Slot& right);
 
+    std::string getFirstGameFile(const std::vector<std::string>& contentFiles);
+
     class Character
     {
         public:

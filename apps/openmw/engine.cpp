@@ -669,7 +669,7 @@ void OMW::Engine::setWindowIcon()
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
     mEnvironment.setStateManager (
-        new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles.at (0)));
+        new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles));
 
     createWindow(settings);
 

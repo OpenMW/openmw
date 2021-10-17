@@ -88,8 +88,8 @@ std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM::E
     return map;
 }
 
-MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::string& game)
-: mQuitRequest (false), mAskLoadRecent(false), mState (State_NoGame), mCharacterManager (saves, game), mTimePlayed (0)
+MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::vector<std::string>& contentFiles)
+: mQuitRequest (false), mAskLoadRecent(false), mState (State_NoGame), mCharacterManager (saves, contentFiles), mTimePlayed (0)
 {
 
 }
