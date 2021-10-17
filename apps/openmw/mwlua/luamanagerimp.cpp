@@ -432,6 +432,8 @@ namespace MWLua
             scripts->save(data);
             scripts->load(data);
         }
+        for (LocalScripts* scripts : mActiveLocalScripts)
+            scripts->receiveEngineEvent(LocalScripts::OnActive());
     }
 
 }
