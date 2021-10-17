@@ -176,7 +176,7 @@ RecordBase::create(const ESM::NAME type)
 {
     RecordBase *record = nullptr;
 
-    switch (type.intval) {
+    switch (type.toInt()) {
     case ESM::REC_ACTI:
     {
         record = new EsmTool::Record<ESM::Activator>;
