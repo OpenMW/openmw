@@ -1598,6 +1598,7 @@ namespace MWMechanics
 
             if (playerCharacter)
             {
+                MWBase::Environment::get().getWorld()->applyDeferredPreviewRotationToPlayer(duration);
                 playerCharacter->update(duration);
                 playerCharacter->setVisibility(1.f);
             }

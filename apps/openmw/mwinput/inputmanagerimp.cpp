@@ -101,8 +101,6 @@ namespace MWInput
         mMouseManager->update(dt);
         mSensorManager->update(dt);
         mActionManager->update(dt, controllerMove);
-
-        MWBase::Environment::get().getWorld()->applyDeferredPreviewRotationToPlayer(dt);
     }
 
     void InputManager::setDragDrop(bool dragDrop)
