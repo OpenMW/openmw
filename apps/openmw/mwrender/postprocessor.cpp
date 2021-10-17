@@ -183,6 +183,9 @@ namespace MWRender
             mMsaaFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(depthRB));
         }
 
+        if (const auto depthProxy = std::getenv("OPENMW_ENABLE_DEPTH_CLEAR_PROXY"))
+            mFirstPersonDepthRBProxy = new osg::RenderBuffer(width, height, mDepthTex->getInternalFormat(), samples);
+
         mViewer->getCamera()->resize(width, height);
         mHUDCamera->resize(width, height);
         mRendering.updateProjectionMatrix();

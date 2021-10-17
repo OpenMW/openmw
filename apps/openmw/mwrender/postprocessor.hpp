@@ -23,6 +23,7 @@ namespace MWRender
 
         auto getMsaaFbo() { return mMsaaFbo; }
         auto getFbo() { return mFbo; }
+        auto getFirstPersonRBProxy() { return mFirstPersonDepthRBProxy; }
 
         int getDepthFormat() { return mDepthFormat; }
 
@@ -37,6 +38,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::FrameBufferObject> mMsaaFbo;
         osg::ref_ptr<osg::FrameBufferObject> mFbo;
+        osg::ref_ptr<osg::RenderBuffer> mFirstPersonDepthRBProxy;
 
         osg::ref_ptr<osg::Texture2D> mSceneTex;
         osg::ref_ptr<osg::Texture2D> mDepthTex;
