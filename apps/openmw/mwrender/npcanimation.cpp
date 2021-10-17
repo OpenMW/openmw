@@ -44,6 +44,7 @@
 #include "renderbin.hpp"
 #include "vismask.hpp"
 #include "util.hpp"
+#include "postprocessor.hpp"
 
 namespace
 {
@@ -330,6 +331,8 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 }
 
 /// @brief A RenderBin callback to clear the depth buffer before rendering.
+/// Switches depth attachments to a proxy renderbuffer, reattaches original depth then redraws first person root.
+/// This gives a complete depth buffer which can be used for postprocessing, buffer resolves as if depth was never cleared.
 class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
 {
 public:
@@ -337,18 +340,49 @@ public:
     {
         mDepth = SceneUtil::createDepth();
         mDepth->setWriteMask(true);
+
+        mStateSet = new osg::StateSet;
+        mStateSet->setAttributeAndModes(new osg::ColorMask(false, false, false, false), osg::StateAttribute::ON);
+        mStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
     }
 
     void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override
     {
-        renderInfo.getState()->applyAttribute(mDepth);
+        osg::State* state = renderInfo.getState();
 
-        glClear(GL_DEPTH_BUFFER_BIT);
+        PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
 
-        bin->drawImplementation(renderInfo, previous);
+        state->applyAttribute(mDepth);
+
+        if (postProcessor && postProcessor->getFirstPersonRBProxy())
+        {
+            osg::GLExtensions* ext = state->get<osg::GLExtensions>();
+
+            osg::FrameBufferAttachment(postProcessor->getFirstPersonRBProxy()).attach(*state, GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, ext);
+
+            glClear(GL_DEPTH_BUFFER_BIT);
+            // color accumulation pass
+            bin->drawImplementation(renderInfo, previous);
+
+            auto primaryFBO = postProcessor->getMsaaFbo() ? postProcessor->getMsaaFbo() : postProcessor->getFbo();
+            primaryFBO->getAttachment(osg::FrameBufferObject::BufferComponent::DEPTH_BUFFER).attach(*state, GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, ext);
+
+            state->pushStateSet(mStateSet);
+            state->apply();
+            // depth accumulation pass
+            bin->drawImplementation(renderInfo, previous);
+            state->popStateSet();
+        }
+        else
+        {
+            // fallback to standard depth clear when we are not rendering our main scene via an intermediate FBO
+            glClear(GL_DEPTH_BUFFER_BIT);
+            bin->drawImplementation(renderInfo, previous);
+        }
     }
 
     osg::ref_ptr<osg::Depth> mDepth;
+    osg::ref_ptr<osg::StateSet> mStateSet;
 };
 
 /// Overrides Field of View to given value for rendering the subgraph.
