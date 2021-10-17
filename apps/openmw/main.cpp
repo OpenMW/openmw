@@ -1,6 +1,5 @@
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
-#include <components/files/escape.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/debug/debugging.hpp>

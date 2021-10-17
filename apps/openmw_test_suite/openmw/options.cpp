@@ -1,6 +1,5 @@
 #include <apps/openmw/options.hpp>
 #include <components/files/configurationmanager.hpp>
-#include <components/files/escape.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>

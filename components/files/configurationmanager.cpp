@@ -2,7 +2,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/configfileparser.hpp>
-#include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>
 
 #include <boost/filesystem/fstream.hpp>

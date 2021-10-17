@@ -1,7 +1,7 @@
 #include "options.hpp"
 
 #include <components/fallback/validate.hpp>
-#include <components/files/escape.hpp>
+#include <components/files/configurationmanager.hpp>
 #include <components/misc/rng.hpp>
 
 #include <boost/program_options.hpp>
