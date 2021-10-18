@@ -701,8 +701,8 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::cloneNode(const osg::Node* base)
     {
-        SceneUtil::CopyOp copyp;
-        if (osg::Drawable* drawable = base->asDrawable())
+        SceneUtil::CopyOp copyop;
+        if (const osg::Drawable* drawable = base->asDrawable())
         {
             if (drawable->asGeometry())
             {
@@ -727,11 +727,6 @@ namespace Resource
         }
 
         return cloned;
-    }
-
-    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name)
-    {
-        return createInstance(name);
     }
 
     osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name, osg::Group* parentNode)
