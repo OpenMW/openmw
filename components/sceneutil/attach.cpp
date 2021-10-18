@@ -13,9 +13,9 @@
 #include <components/misc/stringops.hpp>
 
 #include <components/sceneutil/skeleton.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include "visitor.hpp"
-#include "clone.hpp"
 
 namespace SceneUtil
 {
@@ -60,11 +60,11 @@ namespace SceneUtil
             mToCopy.emplace(node);
         }
 
-        void doCopy()
+        void doCopy(Resource::SceneManager* sceneManager)
         {
             for (const osg::ref_ptr<const osg::Node>& node : mToCopy)
             {
-                mParent->addChild(node->clone(SceneUtil::CopyOp())));
+                mParent->addChild(sceneManager->getInstance(node));
             }
             mToCopy.clear();
         }
@@ -100,7 +100,7 @@ namespace SceneUtil
         }
     }
 
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode, Resource::SceneManager* sceneManager)
     {
         if (dynamic_cast<const SceneUtil::Skeleton*>(toAttach.get()))
         {
@@ -108,7 +108,7 @@ namespace SceneUtil
 
             CopyRigVisitor copyVisitor(handle, filter);
             const_cast<osg::Node*>(toAttach.get())->accept(copyVisitor);
-            copyVisitor.doCopy();
+            copyVisitor.doCopy(sceneManager);
 
             if (handle->getNumChildren() == 1)
             {
@@ -127,7 +127,7 @@ namespace SceneUtil
         }
         else
         {
-            osg::ref_ptr<osg::Node> clonedToAttach = static_cast<osg::Node*>(toAttach->clone(SceneUtil::CopyOp()));
+            osg::ref_ptr<osg::Node> clonedToAttach = sceneManager->getInstance(toAttach);
 
             FindByNameVisitor findBoneOffset("BoneOffset");
             clonedToAttach->accept(findBoneOffset);
