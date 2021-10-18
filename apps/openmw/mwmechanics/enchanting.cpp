@@ -22,6 +22,7 @@ namespace MWMechanics
     Enchanting::Enchanting()
         : mCastStyle(ESM::Enchantment::CastOnce)
         , mSelfEnchanting(false)
+        , mObjectType(0)
         , mWeaponType(-1)
     {}
 
