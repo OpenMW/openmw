@@ -138,12 +138,16 @@ namespace Resource
 
         void shareState(osg::ref_ptr<osg::Node> node);
 
-        /// Get an instance of the given scene template. Clones the template node and adjusts it according to SceneManager's settings.
+        /// Clone osg::Node and adjust it according to SceneManager's settings.
+        /// @note Thread safe.
+        osg::ref_ptr<osg::Node> getInstance(const osg::Node* base);
+
+        /// Instance the given scene template.
         /// @see getTemplate
         /// @note Thread safe.
         osg::ref_ptr<osg::Node> getInstance(const std::string& name);
 
-        /// Get an instance of the given scene template and immediately attach it to a parent node
+        /// Instance the given scene template and immediately attach it to a parent node
         /// @see getTemplate
         /// @note Not thread safe, unless parentNode is not part of the main scene graph yet.
         osg::ref_ptr<osg::Node> getInstance(const std::string& name, osg::Group* parentNode);
