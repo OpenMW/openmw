@@ -693,21 +693,21 @@ namespace Resource
         }
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string& name)
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
-        return createInstance(scene);
+        return getInstance(scene);
     }
 
-    static osg::ref_ptr<osg::Node> SceneManager::cloneNode(const osg::Node* base)
+    osg::ref_ptr<osg::Node> SceneManager::cloneNode(const osg::Node* base)
     {
         SceneUtil::CopyOp copyp;
-        if (osg::Drawable* drawable = node->asDrawable())
+        if (osg::Drawable* drawable = base->asDrawable())
         {
-            if (osg::Geometry* geometry = drawable->asGeometry())
+            if (drawable->asGeometry())
             {
                 OSG_WARN << "SceneManager::cloneNode: attempting to clone osg::Geometry. For safety reasons this will be expensive. Consider avoiding this call." << std::endl;
-                op.setCopyFlags(op.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS|osg::CopyOp::DEEP_COPY_PRIMITIVES);
+                copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS|osg::CopyOp::DEEP_COPY_PRIMITIVES);
             }
         }
         osg::ref_ptr<osg::Node> cloned = static_cast<osg::Node*>(base->clone(copyop));
