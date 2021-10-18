@@ -27,10 +27,17 @@ MorphGeometry::MorphGeometry(const MorphGeometry &copy, const osg::CopyOp &copyo
 
 void MorphGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom)
 {
+    for (unsigned int i=0; i<2; ++i)
+        mGeometry[i] = nullptr;
+
     mSourceGeometry = sourceGeom;
 
     for (unsigned int i=0; i<2; ++i)
     {
+        // DO NOT COPY AND PASTE THIS CODE. Cloning osg::Geometry without also cloning its contained Arrays is generally unsafe.
+        // In this specific case the operation is safe under the following two assumptions:
+        // - All Arrays contained in the original geometry outlive the cloned geometry (ensured by mSourceGeometry)
+        // - Arrays that we add or replace in the cloned geometry must be explicitely forbidden from reusing BufferObjects of the original geometry. (ensured by vbo below)
         mGeometry[i] = new osg::Geometry(*mSourceGeometry, osg::CopyOp::SHALLOW_COPY);
 
         const osg::Geometry& from = *mSourceGeometry;
