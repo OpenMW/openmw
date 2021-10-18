@@ -44,9 +44,10 @@ namespace CSVRender
             ~TerrainSelection();
 
             void onlySelect(const std::vector<std::pair<int, int>> &localPositions);
-            void addSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress);
-            void removeSelect(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress);
-            void toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool toggleInProgress);
+            void addSelect(const std::vector<std::pair<int, int>>& localPositions);
+            void removeSelect(const std::vector<std::pair<int, int>>& localPositions);
+            void toggleSelect(const std::vector<std::pair<int, int>> &localPositions);
+            void clearTemporarySelection();
 
             void activate();
             void deactivate();
@@ -64,7 +65,7 @@ namespace CSVRender
 
         private:
 
-            void handleSelection(const std::vector<std::pair<int, int>>& localPositions, bool toggleInProgress, SelectionMethod selectionMethod);
+            void handleSelection(const std::vector<std::pair<int, int>>& localPositions, SelectionMethod selectionMethod);
 
             bool noCell(const std::string& cellId);
 
@@ -73,7 +74,7 @@ namespace CSVRender
             bool noLandLoaded(const std::string& cellId);
 
             bool isLandLoaded(const std::string& cellId);
-            
+
             osg::Group* mParentNode;
             WorldspaceWidget *mWorldspaceWidget;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
@@ -81,7 +82,6 @@ namespace CSVRender
             osg::ref_ptr<osg::Group> mSelectionNode;
             std::vector<std::pair<int, int>> mSelection; // Global terrain selection coordinate in either vertex or texture units
             std::vector<std::pair<int, int>> mTemporarySelection; // Used during toggle to compare the most recent drag operation
-            bool mDraggedOperationFlag; //true during drag operation, false when click-operation
             TerrainSelectionType mSelectionType;
     };
 }

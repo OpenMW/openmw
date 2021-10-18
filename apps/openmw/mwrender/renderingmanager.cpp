@@ -293,8 +293,13 @@ namespace MWRender
         , mNavigator(navigator)
         , mMinimumAmbientLuminance(0.f)
         , mNightEyeFactor(0.f)
+        // TODO: Near clip should not need to be bounded like this, but too small values break OSG shadow calculations CPU-side.
+        // See issue: #6072
+        , mNearClip(std::max(0.005f, Settings::Manager::getFloat("near clip", "Camera")))
+        , mViewDistance(Settings::Manager::getFloat("viewing distance", "Camera"))
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
+        , mFieldOfView(std::min(std::max(1.f, Settings::Manager::getFloat("field of view", "Camera")), 179.f))
     {
         bool reverseZ = SceneUtil::getReverseZ();
 
@@ -515,12 +520,6 @@ namespace MWRender
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
         Nif::NIFFile::setLoadUnsupportedFiles(Settings::Manager::getBool("load unsupported nif files", "Models"));
 
-        // TODO: Near clip should not need to be bounded like this, but too small values break OSG shadow calculations CPU-side.
-        // See issue: #6072
-        mNearClip = std::max(0.005f, Settings::Manager::getFloat("near clip", "Camera"));
-        mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-        float fov = Settings::Manager::getFloat("field of view", "Camera");
-        mFieldOfView = std::min(std::max(1.f, fov), 179.f);
         float firstPersonFov = Settings::Manager::getFloat("first person field of view", "Camera");
         mFirstPersonFieldOfView = std::min(std::max(1.f, firstPersonFov), 179.f);
         mStateUpdater->setFogEnd(mViewDistance);

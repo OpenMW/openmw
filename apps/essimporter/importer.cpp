@@ -324,14 +324,14 @@ namespace ESSImport
             ESM::NAME n = esm.getRecName();
             esm.getRecHeader();
 
-            auto it = converters.find(n.intval);
+            auto it = converters.find(n.toInt());
             if (it != converters.end())
             {
                 it->second->read(esm);
             }
             else
             {
-                if (unknownRecords.insert(n.intval).second)
+                if (unknownRecords.insert(n.toInt()).second)
                 {
                     std::ios::fmtflags f(std::cerr.flags());
                     std::cerr << "Error: unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;

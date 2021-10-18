@@ -20,7 +20,7 @@ struct Potion
     static unsigned int sRecordId;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "Potion"; }
+    static std::string_view getRecordType() { return "Potion"; }
 
     struct ALDTstruct
     {

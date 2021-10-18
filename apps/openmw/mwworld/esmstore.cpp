@@ -190,10 +190,10 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         esm.getRecHeader();
 
         // Look up the record type.
-        std::map<int, StoreBase *>::iterator it = mStores.find(n.intval);
+        std::map<int, StoreBase *>::iterator it = mStores.find(n.toInt());
 
         if (it == mStores.end()) {
-            if (n.intval == ESM::REC_INFO) {
+            if (n.toInt() == ESM::REC_INFO) {
                 if (dialogue)
                 {
                     dialogue->readInfo(esm, esm.getIndex() != 0);
@@ -203,12 +203,12 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                     Log(Debug::Error) << "Error: info record without dialog";
                     esm.skipRecord();
                 }
-            } else if (n.intval == ESM::REC_MGEF) {
+            } else if (n.toInt() == ESM::REC_MGEF) {
                 mMagicEffects.load (esm);
-            } else if (n.intval == ESM::REC_SKIL) {
+            } else if (n.toInt() == ESM::REC_SKIL) {
                 mSkills.load (esm);
             }
-            else if (n.intval==ESM::REC_FILT || n.intval == ESM::REC_DBGP)
+            else if (n.toInt() == ESM::REC_FILT || n.toInt() == ESM::REC_DBGP)
             {
                 // ignore project file only records
                 esm.skipRecord();
@@ -224,7 +224,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 continue;
             }
 
-            if (n.intval==ESM::REC_DIAL) {
+            if (n.toInt() == ESM::REC_DIAL) {
                 dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id.mId));
             } else {
                 dialogue = nullptr;

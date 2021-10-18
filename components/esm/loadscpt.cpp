@@ -91,7 +91,7 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().intval)
+            switch (esm.retSubName().toInt())
             {
                 case ESM::FourCC<'S','C','H','D'>::value:
                 {

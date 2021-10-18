@@ -35,7 +35,7 @@ QSet<QString> CellNameLoader::getCellNames(QStringList &contentPaths)
 
 bool CellNameLoader::isCellRecord(ESM::NAME &recordName)
 {
-    return recordName.intval == ESM::REC_CELL;
+    return recordName.toInt() == ESM::REC_CELL;
 }
 
 QString CellNameLoader::getCellName(ESM::ESMReader &esmReader)

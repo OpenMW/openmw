@@ -48,6 +48,7 @@
     Bug #6273: Respawning NPCs rotation is inconsistent
     Bug #6282: Laura craft doesn't follow the player character
     Bug #6283: Avis Dorsey follows you after her death
+    Bug #6285: Brush template drawing and terrain selection drawing performance is very bad
     Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
     Bug #6291: Can't pickup the dead mage's journal from the mysterious hunter mod
     Bug #6302: Teleporting disabled actor breaks its disabled state
@@ -69,6 +70,7 @@
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
     Feature #6032: Reverse-z depth buffer
+    Feature #6078: First person should not clear depth buffer
     Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Feature #6199: Support FBO Rendering
     Feature #6249: Alpha testing support for Collada

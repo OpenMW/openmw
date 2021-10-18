@@ -41,7 +41,7 @@ namespace MWWorld
         virtual void save (ESM::ObjectState& state) const = 0;
         ///< Save LiveCellRef state into \a state.
 
-        virtual std::string getTypeDescription() const { return ""; }
+        virtual std::string_view getTypeDescription() const = 0;
 
         protected:
 
@@ -95,7 +95,7 @@ namespace MWWorld
         void save (ESM::ObjectState& state) const override;
         ///< Save LiveCellRef state into \a state.
 
-        std::string getTypeDescription() const override { return X::getRecordType(); }
+        std::string_view getTypeDescription() const override { return X::getRecordType(); }
 
         static bool checkState (const ESM::ObjectState& state);
         ///< Check if state is valid and report errors.
