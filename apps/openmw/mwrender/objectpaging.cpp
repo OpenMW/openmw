@@ -617,6 +617,10 @@ namespace MWRender
                     pat->setAttitude(nodeAttitude);
                 }
 
+                // DO NOT COPY AND PASTE THIS CODE. Cloning osg::Geometry without also cloning its contained Arrays is generally unsafe.
+                // In this specific case the operation is safe under the following two assumptions:
+                // - All Arrays contained in the original geometry outlive the cloned geometry (ensured by TemplateMultiRef)
+                // - Arrays that we add or replace in the cloned geometry must be explicitely forbidden from reusing BufferObjects of the original geometry. (ensured by needvbo() in optimizer.cpp)
                 copyop.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES : osg::CopyOp::DEEP_COPY_NODES);
                 copyop.mOptimizeBillboards = (size > 1/4.f);
                 copyop.mNodePath.push_back(trans);
@@ -645,7 +649,7 @@ namespace MWRender
             }
             if (numinstances > 0)
             {
-                // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
+                // add a ref to the original template to help verify the safety of shallow cloning operations
                 templateRefs->addRef(cnode);
 
                 if (pair.second.mNeedCompile)
