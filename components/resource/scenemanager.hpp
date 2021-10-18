@@ -132,11 +132,13 @@ namespace Resource
         /// @note Thread safe.
         osg::ref_ptr<const osg::Node> getTemplate(const std::string& name, bool compile=true);
 
-        osg::ref_ptr<osg::Node> createInstance(const std::string& name);
+        /// Clone osg::Node safely.
+        /// @note Thread safe.
+        static osg::ref_ptr<osg::Node> cloneNode(const osg::Node* base);
 
-        osg::ref_ptr<osg::Node> createInstance(const osg::Node* base);
         void shareState(osg::ref_ptr<osg::Node> node);
-        /// Get an instance of the given scene template
+
+        /// Get an instance of the given scene template. Clones the template node and adjusts it according to SceneManager's settings.
         /// @see getTemplate
         /// @note Thread safe.
         osg::ref_ptr<osg::Node> getInstance(const std::string& name);
