@@ -699,13 +699,26 @@ namespace Resource
         return createInstance(scene);
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const osg::Node *base)
+    static osg::ref_ptr<osg::Node> SceneManager::cloneNode(const osg::Node* base)
     {
-        osg::ref_ptr<osg::Node> cloned = static_cast<osg::Node*>(base->clone(SceneUtil::CopyOp()));
-
-        // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
+        SceneUtil::CopyOp copyp;
+        if (osg::Drawable* drawable = node->asDrawable())
+        {
+            if (osg::Geometry* geometry = drawable->asGeometry())
+            {
+                OSG_WARN << "SceneManager::cloneNode: attempting to clone osg::Geometry. For safety reasons this will be expensive. Consider avoiding this call." << std::endl;
+                op.setCopyFlags(op.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS|osg::CopyOp::DEEP_COPY_PRIMITIVES);
+            }
+        }
+        osg::ref_ptr<osg::Node> cloned = static_cast<osg::Node*>(base->clone(copyop));
+        // add a ref to the original template to help verify the safety of shallow cloning operations
         cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(base));
+        return cloned;
+    }
 
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const osg::Node *base)
+    {
+        osg::ref_ptr<osg::Node> cloned = cloneNode(base);
         // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
         if (cloned->getNumChildrenRequiringUpdateTraversal() > 0)
         {
