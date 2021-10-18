@@ -49,10 +49,10 @@ namespace SceneUtil
             if (!filterMatches(drawable.getName()))
                 return;
 
-            osg::Node* node = &drawable;
+            const osg::Node* node = &drawable;
             for (auto it = getNodePath().rbegin()+1; it != getNodePath().rend(); ++it)
             {
-                osg::Node* parent = *it;
+                const osg::Node* parent = *it;
                 if (!filterMatches(parent->getName()))
                     break;
                 node = parent;
@@ -62,9 +62,9 @@ namespace SceneUtil
 
         void doCopy()
         {
-            for (const osg::ref_ptr<osg::Node>& node : mToCopy)
+            for (const osg::ref_ptr<const osg::Node>& node : mToCopy)
             {
-                mParent->addChild(static_cast<osg::Node*>(node->clone(SceneUtil::CopyOp())));
+                mParent->addChild(node->clone(SceneUtil::CopyOp())));
             }
             mToCopy.clear();
         }
@@ -78,7 +78,7 @@ namespace SceneUtil
                 || (lowerName.size() >= mFilter2.size() && lowerName.compare(0, mFilter2.size(), mFilter2) == 0);
         }
 
-        using NodeSet = std::set<osg::ref_ptr<osg::Node>>;
+        using NodeSet = std::set<osg::ref_ptr<const osg::Node>>;
         NodeSet mToCopy;
 
         osg::ref_ptr<osg::Group> mParent;
