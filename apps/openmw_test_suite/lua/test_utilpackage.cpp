@@ -91,7 +91,7 @@ namespace
         lua.safe_script("moveAndScale = T.move(v(1, 2, 3)) * T.scale(0.5, 1, 0.5) * T.move(10, 20, 30)");
         EXPECT_EQ(getAsString(lua, "moveAndScale * v(0, 0, 0)"), "(6, 22, 18)");
         EXPECT_EQ(getAsString(lua, "moveAndScale * v(300, 200, 100)"), "(156, 222, 68)");
-        EXPECT_EQ(getAsString(lua, "moveAndScale"), "TransformM{ move(6, 22, 18) scale(0.5, 1, 0.5) }");
+        EXPECT_THAT(getAsString(lua, "moveAndScale"), AllOf(StartsWith("TransformM{ move(6, 22, 18) scale(0.5, 1, 0.5) "), EndsWith(" }")));
         EXPECT_EQ(getAsString(lua, "T.identity"), "TransformM{ }");
         lua.safe_script("rx = T.rotateX(math.pi / 2)");
         lua.safe_script("ry = T.rotateY(math.pi / 2)");
