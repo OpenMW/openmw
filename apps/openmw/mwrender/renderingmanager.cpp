@@ -432,7 +432,6 @@ namespace MWRender
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug));
 
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
-        mTerrain->setWorkQueue(mWorkQueue.get());
 
         if (groundcover)
         {
