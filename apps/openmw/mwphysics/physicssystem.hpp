@@ -36,11 +36,6 @@ namespace Resource
     class ResourceSystem;
 }
 
-namespace SceneUtil
-{
-    class UnrefQueue;
-}
-
 class btCollisionWorld;
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -117,8 +112,6 @@ namespace MWPhysics
         public:
             PhysicsSystem (Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode);
             virtual ~PhysicsSystem ();
-
-            void setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue);
 
             Resource::BulletShapeManager* getShapeManager();
 
@@ -261,8 +254,6 @@ namespace MWPhysics
             void updateWater();
 
             std::pair<std::vector<std::shared_ptr<Actor>>, std::vector<ActorFrameData>> prepareFrameData(bool willSimulate);
-
-            osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
             std::unique_ptr<btBroadphaseInterface> mBroadphase;
             std::unique_ptr<btDefaultCollisionConfiguration> mCollisionConfiguration;
