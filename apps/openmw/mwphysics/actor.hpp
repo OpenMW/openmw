@@ -89,7 +89,7 @@ namespace MWPhysics
         void updatePosition();
 
         // register a position offset that will be applied during simulation.
-        void adjustPosition(const osg::Vec3f& offset, bool ignoreCollisions);
+        void adjustPosition(const osg::Vec3f& offset);
 
         // apply position offset. Can't be called during simulation
         void applyOffsetChange();
@@ -156,8 +156,6 @@ namespace MWPhysics
             mLastStuckPosition = position;
         }
 
-        bool skipCollisions();
-
         bool canMoveToWaterSurface(float waterlevel, const btCollisionWorld* world) const;
 
     private:
@@ -187,7 +185,6 @@ namespace MWPhysics
         osg::Vec3f mScale;
         osg::Vec3f mPositionOffset;
         bool mWorldPositionChanged;
-        bool mSkipCollisions;
         bool mSkipSimulation;
         mutable std::mutex mPositionMutex;
 

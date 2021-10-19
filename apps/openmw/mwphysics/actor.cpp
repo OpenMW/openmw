@@ -124,7 +124,6 @@ void Actor::updatePosition()
     mSimulationPosition = worldPosition;
     mPositionOffset = osg::Vec3f();
     mStandingOnPtr = nullptr;
-    mSkipCollisions = true;
     mSkipSimulation = true;
 }
 
@@ -163,17 +162,19 @@ bool Actor::setPosition(const osg::Vec3f& position)
 {
     std::scoped_lock lock(mPositionMutex);
     applyOffsetChange();
-    bool hasChanged = mPosition != position || mWorldPositionChanged;
-    mPreviousPosition = mPosition;
-    mPosition = position;
+    bool hasChanged = (mPosition != position && !mSkipSimulation) || mWorldPositionChanged;
+    if (!mSkipSimulation)
+    {
+        mPreviousPosition = mPosition;
+        mPosition = position;
+    }
     return hasChanged;
 }
 
-void Actor::adjustPosition(const osg::Vec3f& offset, bool ignoreCollisions)
+void Actor::adjustPosition(const osg::Vec3f& offset)
 {
     std::scoped_lock lock(mPositionMutex);
     mPositionOffset += offset;
-    mSkipCollisions = mSkipCollisions || ignoreCollisions;
 }
 
 void Actor::applyOffsetChange()
@@ -272,11 +273,6 @@ void Actor::setStandingOnPtr(const MWWorld::Ptr& ptr)
 {
     std::scoped_lock lock(mPositionMutex);
     mStandingOnPtr = ptr;
-}
-
-bool Actor::skipCollisions()
-{
-    return std::exchange(mSkipCollisions, false);
 }
 
 bool Actor::canMoveToWaterSurface(float waterlevel, const btCollisionWorld* world) const
