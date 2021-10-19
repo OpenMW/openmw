@@ -1,9 +1,19 @@
 #include "magiceffects.hpp"
 
+#include <cmath>
 #include <stdexcept>
 
 #include <components/esm/effectlist.hpp>
 #include <components/esm/magiceffects.hpp>
+
+namespace
+{
+    // Round value to prevent precision issues
+    void truncate(float& value)
+    {
+        value = std::roundf(value * 1000.f) / 1000.f;
+    }
+}
 
 namespace MWMechanics
 {
@@ -74,6 +84,7 @@ namespace MWMechanics
     {
         mModifier += param.mModifier;
         mBase += param.mBase;
+        truncate(mModifier);
         return *this;
     }
 
@@ -81,6 +92,7 @@ namespace MWMechanics
     {
         mModifier -= param.mModifier;
         mBase -= param.mBase;
+        truncate(mModifier);
         return *this;
     }
 
