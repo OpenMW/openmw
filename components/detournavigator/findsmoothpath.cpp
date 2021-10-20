@@ -7,13 +7,13 @@
 
 namespace DetourNavigator
 {
-    std::size_t fixupCorridor(dtPolyRef* path, std::size_t pathSize, const std::vector<dtPolyRef>& visited)
+    std::size_t fixupCorridor(std::vector<dtPolyRef>& path, std::size_t pathSize, const std::vector<dtPolyRef>& visited)
     {
         std::vector<dtPolyRef>::const_reverse_iterator furthestVisited;
 
         // Find furthest common polygon.
-        const auto begin = path;
-        const auto end = path + pathSize;
+        const auto begin = path.begin();
+        const auto end = path.begin() + pathSize;
         const std::reverse_iterator rbegin(end);
         const std::reverse_iterator rend(begin);
         const auto it = std::find_if(rbegin, rend, [&] (dtPolyRef pathValue)
@@ -34,12 +34,13 @@ namespace DetourNavigator
 
         // visited: a_1 ... a_n x b_1 ... b_n
         //      furthestVisited ^
-        //    path: C x D
-        //            ^ furthestPath
+        //    path: C x D            E
+        //            ^ furthestPath ^ path.size() - (furthestVisited + 1 - visited.rbegin())
         //  result: x b_n ... b_1 D
 
-        auto newEnd = std::copy(visited.rbegin(), furthestVisited + 1, begin);
-        newEnd = std::copy(furthestPath + 1, end, newEnd);
+        const std::size_t required = static_cast<std::size_t>(furthestVisited + 1 - visited.rbegin());
+        const auto newEnd = std::copy(furthestPath + 1, std::min(begin + path.size(), end), begin + required);
+        std::copy(visited.rbegin(), furthestVisited + 1, begin);
 
         return static_cast<std::size_t>(newEnd - begin);
     }
