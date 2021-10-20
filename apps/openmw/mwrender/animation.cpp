@@ -1510,7 +1510,7 @@ namespace MWRender
             parentNode = mInsert;
         else
         {
-            NodeMap::const_iterator found = getNodeMap().find(Misc::StringUtils::lowerCase(bonename));
+            NodeMap::const_iterator found = getNodeMap().find(bonename);
             if (found == getNodeMap().end())
                 throw std::runtime_error("Can't find bone " + bonename);
 
@@ -1619,8 +1619,7 @@ namespace MWRender
 
     const osg::Node* Animation::getNode(const std::string &name) const
     {
-        std::string lowerName = Misc::StringUtils::lowerCase(name);
-        NodeMap::const_iterator found = getNodeMap().find(lowerName);
+        NodeMap::const_iterator found = getNodeMap().find(name);
         if (found == getNodeMap().end())
             return nullptr;
         else
