@@ -712,6 +712,7 @@ namespace Resource
         }
         osg::ref_ptr<osg::Node> cloned = static_cast<osg::Node*>(base->clone(copyop));
         // add a ref to the original template to help verify the safety of shallow cloning operations
+        // in addition, if this node is managed by a cache, we hint to the cache that it's still being used and should be kept in cache
         cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(base));
         return cloned;
     }
