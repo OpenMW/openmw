@@ -11,6 +11,8 @@
 #include <osg/Texture>
 #include <osg/ValueObject>
 
+#include <osgParticle/ParticleSystem>
+
 #include <osgUtil/TangentSpaceGenerator>
 
 #include <components/debug/debuglog.hpp>
@@ -19,6 +21,7 @@
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include "removedalphafunc.hpp"
 #include "shadermanager.hpp"
@@ -554,6 +557,18 @@ namespace Shader
             updateAddedState(*writableUserData, addedState);
         }
 
+        if (auto partsys = dynamic_cast<osgParticle::ParticleSystem*>(&node))
+        {
+            writableStateSet->setDefine("SOFT_PARTICLES", "1", osg::StateAttribute::ON);
+
+            auto depth = SceneUtil::createDepth();
+            depth->setWriteMask(false);
+            writableStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            writableStateSet->addUniform(new osg::Uniform("particleSize", partsys->getDefaultParticleTemplate().getSizeRange().maximum));
+            writableStateSet->addUniform(new osg::Uniform("opaqueDepthTex", 2));
+            writableStateSet->setTextureAttributeAndModes(2, mOpaqueDepthTex, osg::StateAttribute::ON);
+        }
+
         std::string shaderPrefix;
         if (!node.getUserValue("shaderPrefix", shaderPrefix))
             shaderPrefix = mDefaultShaderPrefix;
@@ -767,6 +782,11 @@ namespace Shader
     void ShaderVisitor::setConvertAlphaTestToAlphaToCoverage(bool convert)
     {
         mConvertAlphaTestToAlphaToCoverage = convert;
+    }
+
+    void ShaderVisitor::setOpaqueDepthTex(osg::ref_ptr<osg::Texture2D> texture)
+    {
+        mOpaqueDepthTex = texture;
     }
 
     ReinstateRemovedStateVisitor::ReinstateRemovedStateVisitor(bool allowedToModifyStateSets)

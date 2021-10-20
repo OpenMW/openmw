@@ -1,5 +1,6 @@
 #version 120
 #pragma import_defines(FORCE_OPAQUE)
+#pragma import_defines(SOFT_PARTICLES)
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -79,6 +80,10 @@ varying vec3 passNormal;
 #include "lighting.glsl"
 #include "parallax.glsl"
 #include "alpha.glsl"
+
+#if defined(SOFT_PARTICLES) && SOFT_PARTICLES
+#include "softparticles.glsl"
+#endif
 
 void main()
 {
@@ -219,6 +224,10 @@ void main()
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+
+#if defined(SOFT_PARTICLES) && SOFT_PARTICLES
+    gl_FragData[0].a *= calcSoftParticleFade();
+#endif
 
 #if defined(FORCE_OPAQUE) && FORCE_OPAQUE
     // having testing & blending isn't enough - we need to write an opaque pixel to be opaque
