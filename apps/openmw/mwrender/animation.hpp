@@ -9,6 +9,7 @@
 #include <components/sceneutil/nodecallback.hpp>
 
 #include <vector>
+#include <unordered_map>
 
 namespace ESM
 {
@@ -250,8 +251,7 @@ protected:
 
     std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
-    // Stored in all lowercase for a case-insensitive lookup
-    typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
+    typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> NodeMap;
     mutable NodeMap mNodeMap;
     mutable bool mNodeMapCreated;
 
