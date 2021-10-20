@@ -12,7 +12,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/terrain/world.hpp>
-#include <components/sceneutil/unrefqueue.hpp>
 #include <components/esm/loadcell.hpp>
 #include <components/loadinglistener/reporter.hpp>
 
@@ -322,11 +321,10 @@ namespace MWWorld
         PreloadMap::iterator found = mPreloadCells.find(cell);
         if (found != mPreloadCells.end())
         {
-            // do the deletion in the background thread
             if (found->second.mWorkItem)
             {
                 found->second.mWorkItem->abort();
-                mUnrefQueue->push(std::move(found->second.mWorkItem));
+                found->second.mWorkItem = nullptr;
             }
 
             mPreloadCells.erase(found);
@@ -340,7 +338,7 @@ namespace MWWorld
             if (it->second.mWorkItem)
             {
                 it->second.mWorkItem->abort();
-                mUnrefQueue->push(it->second.mWorkItem);
+                it->second.mWorkItem = nullptr;
             }
 
             mPreloadCells.erase(it++);
@@ -356,7 +354,7 @@ namespace MWWorld
                 if (it->second.mWorkItem)
                 {
                     it->second.mWorkItem->abort();
-                    mUnrefQueue->push(it->second.mWorkItem);
+                    it->second.mWorkItem = nullptr;
                 }
                 mPreloadCells.erase(it++);
             }
@@ -409,11 +407,6 @@ namespace MWWorld
         mWorkQueue = workQueue;
     }
 
-    void CellPreloader::setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue)
-    {
-        mUnrefQueue = unrefQueue;
-    }
-
     bool CellPreloader::syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, double timestamp, Loading::Listener& listener)
     {
         if (!mTerrainPreloadItem)
@@ -455,11 +448,7 @@ namespace MWWorld
         else
         {
             if (mTerrainViews.size() > positions.size())
-            {
-                for (unsigned int i=positions.size(); i<mTerrainViews.size(); ++i)
-                    mUnrefQueue->push(mTerrainViews[i]);
                 mTerrainViews.resize(positions.size());
-            }
             else if (mTerrainViews.size() < positions.size())
             {
                 for (unsigned int i=mTerrainViews.size(); i<positions.size(); ++i)

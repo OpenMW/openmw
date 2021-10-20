@@ -24,7 +24,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/sceneutil/unrefqueue.hpp>
 #include <components/misc/convert.hpp>
 
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
@@ -158,11 +157,6 @@ namespace MWPhysics
         mObjects.clear();
         mActors.clear();
         mProjectiles.clear();
-    }
-
-    void PhysicsSystem::setUnrefQueue(SceneUtil::UnrefQueue *unrefQueue)
-    {
-        mUnrefQueue = unrefQueue;
     }
 
     Resource::BulletShapeManager *PhysicsSystem::getShapeManager()
@@ -513,9 +507,6 @@ namespace MWPhysics
     {
         if (auto foundObject = mObjects.find(ptr.mRef); foundObject != mObjects.end())
         {
-            if (mUnrefQueue.get())
-                mUnrefQueue->push(foundObject->second->getShapeInstance());
-
             mAnimatedObjects.erase(foundObject->second.get());
 
             mObjects.erase(foundObject);
