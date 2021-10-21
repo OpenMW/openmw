@@ -7,6 +7,7 @@
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/misc/stringops.hpp>
 
 #include <vector>
 #include <unordered_map>
