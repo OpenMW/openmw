@@ -553,7 +553,7 @@ namespace Compiler
             extensions.registerFunction("getpos",'f',"c",opcodeGetPos,opcodeGetPosExplicit);
             extensions.registerFunction("getstartingpos",'f',"c",opcodeGetStartingPos,opcodeGetStartingPosExplicit);
             extensions.registerInstruction("position","ffffz",opcodePosition,opcodePositionExplicit);
-            extensions.registerInstruction("positioncell","ffffcX",opcodePositionCell,opcodePositionCellExplicit);
+            extensions.registerInstruction("positioncell","ffffczz",opcodePositionCell,opcodePositionCellExplicit);
             extensions.registerInstruction("placeitemcell","ccffffX",opcodePlaceItemCell);
             extensions.registerInstruction("placeitem","cffffX",opcodePlaceItem);
             extensions.registerInstruction("placeatpc","clflX",opcodePlaceAtPc);
