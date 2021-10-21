@@ -266,10 +266,10 @@ namespace MWClass
 
     const Npc::GMST& Npc::getGmst()
     {
-        static GMST gmst;
-        static bool inited = false;
-        if(!inited)
+        static const GMST gmst = []
         {
+            GMST gmst;
+
             const MWBase::World *world = MWBase::Environment::get().getWorld();
             const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
 
@@ -294,8 +294,8 @@ namespace MWClass
             gmst.iKnockDownOddsBase = store.find("iKnockDownOddsBase");
             gmst.fCombatArmorMinMult = store.find("fCombatArmorMinMult");
 
-            inited = true;
-        }
+            return gmst;
+        } ();
         return gmst;
     }
 
