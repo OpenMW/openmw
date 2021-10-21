@@ -159,6 +159,8 @@ public:
 
     virtual bool updateCarriedLeftVisible(const int weaptype) const { return false; };
 
+    typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> NodeMap;
+
 protected:
     class AnimationTime : public SceneUtil::ControllerSource
     {
@@ -252,7 +254,6 @@ protected:
 
     std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
-    typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> NodeMap;
     mutable NodeMap mNodeMap;
     mutable bool mNodeMapCreated;
 
