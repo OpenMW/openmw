@@ -15,7 +15,7 @@ namespace ESM
     struct GameSetting;
     struct Land;
     struct Static;
-    struct Variant;
+    class Variant;
 }
 
 namespace EsmLoader
