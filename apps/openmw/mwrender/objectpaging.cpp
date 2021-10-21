@@ -619,7 +619,7 @@ namespace MWRender
 
                 // DO NOT COPY AND PASTE THIS CODE. Cloning osg::Geometry without also cloning its contained Arrays is generally unsafe.
                 // In this specific case the operation is safe under the following two assumptions:
-                // - All Arrays contained in the original geometry outlive the cloned geometry (ensured by TemplateMultiRef)
+                // - When Arrays are removed or replaced in the cloned geometry, the original Arrays in their place must outlive the cloned geometry regardless. (ensured by TemplateMultiRef)
                 // - Arrays that we add or replace in the cloned geometry must be explicitely forbidden from reusing BufferObjects of the original geometry. (ensured by needvbo() in optimizer.cpp)
                 copyop.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES : osg::CopyOp::DEEP_COPY_NODES);
                 copyop.mOptimizeBillboards = (size > 1/4.f);
