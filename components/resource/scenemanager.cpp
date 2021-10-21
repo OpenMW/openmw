@@ -706,7 +706,7 @@ namespace Resource
         {
             if (drawable->asGeometry())
             {
-                Log(Debug::Warning) << "SceneManager::cloneNode: attempting to clone osg::Geometry. For safety reasons this will be expensive. Consider avoiding this call." << std::endl;
+                Log(Debug::Warning) << "SceneManager::cloneNode: attempting to clone osg::Geometry. For safety reasons this will be expensive. Consider avoiding this call.";
                 copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS|osg::CopyOp::DEEP_COPY_PRIMITIVES);
             }
         }
