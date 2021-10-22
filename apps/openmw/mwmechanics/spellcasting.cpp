@@ -333,7 +333,10 @@ namespace MWMechanics
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 3);
         }
 
-        inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);
+        if (isProjectile)
+            inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Self);
+        else
+            inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);
 
         if (isProjectile || !mTarget.isEmpty())
             inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);

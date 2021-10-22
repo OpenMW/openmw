@@ -15,7 +15,6 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/bulletshape.hpp>
-#include <components/sceneutil/unrefqueue.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/debug.hpp>
@@ -654,7 +653,6 @@ namespace MWWorld
             }
 
             mRendering.getResourceSystem()->updateCache(mRendering.getReferenceTime());
-            mRendering.getUnrefQueue()->flush(mRendering.getWorkQueue());
 
             loadingListener->increaseProgress (1);
             i++;
@@ -701,7 +699,6 @@ namespace MWWorld
             }
 
             mRendering.getResourceSystem()->updateCache(mRendering.getReferenceTime());
-            mRendering.getUnrefQueue()->flush(mRendering.getWorkQueue());
 
             loadingListener->increaseProgress (1);
             i++;
@@ -754,9 +751,6 @@ namespace MWWorld
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain(), rendering.getLandManager()));
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
-
-        mPreloader->setUnrefQueue(rendering.getUnrefQueue());
-        mPhysics->setUnrefQueue(rendering.getUnrefQueue());
 
         rendering.getResourceSystem()->setExpiryDelay(Settings::Manager::getFloat("cache expiry delay", "Cells"));
 

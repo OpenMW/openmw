@@ -37,7 +37,6 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/workqueue.hpp>
-#include <components/sceneutil/unrefqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
 #include <components/sceneutil/shadow.hpp>
 
@@ -289,7 +288,6 @@ namespace MWRender
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
         , mWorkQueue(workQueue)
-        , mUnrefQueue(new SceneUtil::UnrefQueue)
         , mNavigator(navigator)
         , mMinimumAmbientLuminance(0.f)
         , mNightEyeFactor(0.f)
@@ -387,7 +385,7 @@ namespace MWRender
         mRecastMesh.reset(new RecastMesh(mRootNode, Settings::Manager::getBool("enable recast mesh render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
 
-        mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
+        mObjects.reset(new Objects(mResourceSystem, sceneRoot));
 
         if (getenv("OPENMW_DONT_PRECOMPILE") == nullptr)
         {
@@ -434,7 +432,6 @@ namespace MWRender
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug));
 
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
-        mTerrain->setWorkQueue(mWorkQueue.get());
 
         if (groundcover)
         {
@@ -567,11 +564,6 @@ namespace MWRender
     SceneUtil::WorkQueue* RenderingManager::getWorkQueue()
     {
         return mWorkQueue.get();
-    }
-
-    SceneUtil::UnrefQueue* RenderingManager::getUnrefQueue()
-    {
-        return mUnrefQueue.get();
     }
 
     Terrain::World* RenderingManager::getTerrain()
@@ -803,8 +795,6 @@ namespace MWRender
     void RenderingManager::update(float dt, bool paused)
     {
         reportStats();
-
-        mUnrefQueue->flush(mWorkQueue.get());
 
         float rainIntensity = mSky->getPrecipitationAlpha();
         mWater->setRainIntensity(rainIntensity);
@@ -1223,8 +1213,6 @@ namespace MWRender
         unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
         if (stats->collectStats("resource"))
         {
-            stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getNumItems());
-
             mTerrain->reportStats(frameNumber, stats);
         }
     }

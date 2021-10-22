@@ -84,11 +84,6 @@ World::~World()
     }
 }
 
-void World::setWorkQueue(SceneUtil::WorkQueue* workQueue)
-{
-    mCompositeMapRenderer->setWorkQueue(workQueue);
-}
-
 void World::setBordersVisible(bool visible)
 {
     mBorderVisible = visible;

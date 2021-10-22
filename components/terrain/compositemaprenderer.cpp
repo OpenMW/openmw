@@ -4,9 +4,6 @@
 #include <osg/Texture2D>
 #include <osg/RenderInfo>
 
-#include <components/sceneutil/unrefqueue.hpp>
-#include <components/sceneutil/workqueue.hpp>
-
 #include <algorithm>
 
 namespace Terrain
@@ -21,18 +18,11 @@ CompositeMapRenderer::CompositeMapRenderer()
 
     mFBO = new osg::FrameBufferObject;
 
-    mUnrefQueue = new SceneUtil::UnrefQueue;
-
     getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 }
 
 CompositeMapRenderer::~CompositeMapRenderer()
 {
-}
-
-void CompositeMapRenderer::setWorkQueue(SceneUtil::WorkQueue* workQueue)
-{
-    mWorkQueue = workQueue;
 }
 
 void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
@@ -44,9 +34,6 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
     double conservativeTimeRatio(0.75);
     double availableTime = std::max((targetFrameTime - dt)*conservativeTimeRatio,
                                     mMinimumTimeAvailable);
-
-    if (mWorkQueue)
-        mUnrefQueue->flush(mWorkQueue.get());
 
     std::lock_guard<std::mutex> lock(mMutex);
 
@@ -139,10 +126,6 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
 
         ++compositeMap.mCompiled;
 
-        if (mWorkQueue)
-        {
-            mUnrefQueue->push(compositeMap.mDrawables[i]);
-        }
         compositeMap.mDrawables[i] = nullptr;
 
         if (timeLeft)
