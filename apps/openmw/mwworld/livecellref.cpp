@@ -73,3 +73,8 @@ bool MWWorld::LiveCellRefBase::checkStateImp (const ESM::ObjectState& state)
 {
     return true;
 }
+
+unsigned int MWWorld::LiveCellRefBase::getType() const
+{
+    return mClass->getType();
+}
