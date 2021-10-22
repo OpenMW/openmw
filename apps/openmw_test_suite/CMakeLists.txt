@@ -78,17 +78,12 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         endif (CMAKE_CL_64)
     endif (MSVC)
 
-    include(FetchContent)
-    FetchContent_Declare(example_suite_template_game
-        URL https://gitlab.com/OpenMW/example-suite/-/raw/8966dab24692555eec720c854fb0f73d108070cd/data/template.omwgame
-        URL_HASH MD5=bf3691034a38611534c74c3b89a7d2c3
-        SOURCE_DIR fetched/example_suite_template_game
-        DOWNLOAD_NO_EXTRACT ON
+    file(DOWNLOAD
+        https://gitlab.com/OpenMW/example-suite/-/raw/8966dab24692555eec720c854fb0f73d108070cd/data/template.omwgame
+        ${CMAKE_CURRENT_BINARY_DIR}/data/template.omwgame
+        EXPECTED_MD5 bf3691034a38611534c74c3b89a7d2c3
     )
-    FetchContent_MakeAvailableExcludeFromAll(example_suite_template_game)
 
-    add_custom_target(example_suite_template_game SOURCES fetched/example_suite_template_game/template.omwgame)
-
-    add_dependencies(openmw_test_suite example_suite_template_game)
+    target_compile_definitions(openmw_test_suite PRIVATE OPENMW_DATA_DIR="${CMAKE_CURRENT_BINARY_DIR}/data")
 
 endif()
