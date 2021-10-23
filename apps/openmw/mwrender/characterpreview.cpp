@@ -191,6 +191,9 @@ namespace MWRender
         mTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
 
+        mTextureStateSet = new osg::StateSet;
+        mTextureStateSet->setAttribute(new osg::BlendFunc(osg::BlendFunc::ONE, osg::BlendFunc::ONE_MINUS_SRC_ALPHA));
+
         mCamera = new osg::Camera;
         // hints that the camera is not relative to the master camera
         mCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
