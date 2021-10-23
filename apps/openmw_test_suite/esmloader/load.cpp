@@ -1,5 +1,3 @@
-#include "settings.hpp"
-
 #include <components/esmloader/load.cpp>
 #include <components/files/collections.hpp>
 #include <components/files/multidircollection.hpp>
@@ -7,16 +5,18 @@
 
 #include <gtest/gtest.h>
 
+#ifndef OPENMW_DATA_DIR
+#error "OPENMW_DATA_DIR is not defined"
+#endif
+
 namespace
 {
     using namespace testing;
     using namespace EsmLoader;
-    using EsmLoaderTests::Settings;
 
     struct EsmLoaderTest : Test
     {
-        const boost::filesystem::path mDataDir {Settings::impl().mBasePath / "apps/openmw_test_suite/fetched/example_suite_template_game"};
-        const Files::PathContainer mDataDirs {{mDataDir.string()}};
+        const Files::PathContainer mDataDirs {{std::string(OPENMW_DATA_DIR)}};
         const Files::Collections mFileCollections {mDataDirs, true};
         const std::vector<std::string> mContentFiles {{"template.omwgame"}};
     };

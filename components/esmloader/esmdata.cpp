@@ -37,7 +37,7 @@ namespace EsmLoader
         {
             const auto it = std::lower_bound(values.begin(), values.end(), refId, LessById {});
 
-            if (it == values.end() && it->mId != refId)
+            if (it == values.end() || it->mId != refId)
                 return returnAs(std::forward<F>(f));
 
             return std::forward<F>(f)(*it);

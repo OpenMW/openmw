@@ -893,12 +893,8 @@ namespace MWClass
     float Creature::getSwimSpeed(const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
-        const GMST& gmst = getGmst();
         const MWMechanics::MagicEffects& mageffects = stats.getMagicEffects();
 
-        return getWalkSpeed(ptr)
-            * (1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude())
-            * (gmst.fSwimRunBase->mValue.getFloat()
-               + 0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fSwimRunAthleticsMult->mValue.getFloat());
+        return getSwimSpeedImpl(ptr, getGmst(), mageffects, getWalkSpeed(ptr));
     }
 }
