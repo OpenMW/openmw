@@ -190,7 +190,6 @@ namespace MWRender
         mTexture->setInternalFormat(GL_RGBA);
         mTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        mTexture->setUserValue("premultiplied alpha", true);
 
         mCamera = new osg::Camera;
         // hints that the camera is not relative to the master camera
