@@ -72,7 +72,7 @@ GlowUpdater::GlowUpdater(int texUnit, const osg::Vec4f& color, float duration, R
 {
 }
 
-osg::StateSet* GlowUpdater::getStateSet(int index)
+osg::StateSet* GlowUpdater::getStateSet(float time)
 {
     CachedState& cs = getCachedState();
     if (cs.mTextures.empty())
@@ -118,6 +118,7 @@ osg::StateSet* GlowUpdater::getStateSet(int index)
             stateset->setDefine("GLOW");
         }
     }
+    int index = static_cast<int>(time*16) % sequence.size();
     return sequence[index];
 }
 
@@ -148,8 +149,7 @@ void GlowUpdater::operator()(osg::Node* node, osgUtil::CullVisitor *cv)
         return;
     }
 
-    int index = (int)(time*16) % mTextures.size();
-    cv->pushStateSet(getStateSet(index));
+    cv->pushStateSet(getStateSet(time))
     traverse(node, cv);
     cv->popStateSet();
 }
