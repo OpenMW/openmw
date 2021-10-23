@@ -121,7 +121,7 @@ osg::StateSet* GlowUpdater::getStateSet(int index)
     return sequence[index];
 }
 
-void GlowUpdater::operator(osg::Node* node, osgUtil::CullVisitor *cv)
+void GlowUpdater::operator()(osg::Node* node, osgUtil::CullVisitor *cv)
 {
     // Set the starting time to measure glow duration from if this is a temporary glow
     if ((mDuration >= 0) && mStartingTime == 0)
