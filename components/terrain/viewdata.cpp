@@ -74,6 +74,8 @@ const osg::Vec3f& ViewData::getViewPoint() const
     return mViewPoint;
 }
 
+// NOTE: As a performance optimisation, we cache mRenderingNodes from previous frames here.
+// If this cache becomes invalid (e.g. through mWorldUpdateRevision), we need to use clear() instead of reset().
 void ViewData::reset()
 {
     // clear any unused entries
@@ -164,9 +166,13 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
         }
         else if (!mostSuitableView)
         {
+            if (vd->getWorldUpdateRevision() != mWorldUpdateRevision)
+            {
+                vd->setWorldUpdateRevision(mWorldUpdateRevision);
+                vd->clear();
+            }
             vd->setViewPoint(viewPoint);
             vd->setActiveGrid(activeGrid);
-            vd->setWorldUpdateRevision(mWorldUpdateRevision);
             needsUpdate = true;
         }
     }
