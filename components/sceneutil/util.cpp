@@ -149,7 +149,7 @@ void GlowUpdater::operator()(osg::Node* node, osgUtil::CullVisitor *cv)
         return;
     }
 
-    cv->pushStateSet(getStateSet(time))
+    cv->pushStateSet(getStateSet(time));
     traverse(node, cv);
     cv->popStateSet();
 }
