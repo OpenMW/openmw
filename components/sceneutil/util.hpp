@@ -10,20 +10,32 @@
 
 #include <components/resource/resourcesystem.hpp>
 
-#include "statesetupdater.hpp"
+#include "nodecallback.hpp"
+
+namespace osgUtil
+{
+    class CullVisitor;
+}
 
 namespace SceneUtil
 {
-    class GlowUpdater : public SceneUtil::StateSetUpdater
+    class GlowUpdater : public SceneUtil::NodeCallback<GlowUpdater, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
-        GlowUpdater(int texUnit, const osg::Vec4f& color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
-            osg::Node* node, float duration, Resource::ResourceSystem* resourcesystem);
+        GlowUpdater(int texUnit, const osg::Vec4f& color, float duration, Resource::ResourceSystem* resourcesystem);
 
-        void setDefaults(osg::StateSet *stateset) override;
+        void operator()(osg::Node*, osgUtil::CullVisitor*);
 
-        void removeTexture(osg::StateSet* stateset);
-        void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override;
+        class CachedState
+        {
+            std::vector<osg::ref_ptr<osg::Texture2D>> mTextures;
+            std::map<std::pair<int, osg::Vec4f>, osg::ref_ptr<osg::StateSet>> mStateSets;
+        }
+        static CachedState& getCachedState()
+        {
+            static CachedState cs;
+            return cs;
+        }
 
         bool isPermanentGlowUpdater();
 
@@ -37,8 +49,6 @@ namespace SceneUtil
         int mTexUnit;
         osg::Vec4f mColor;
         osg::Vec4f mOriginalColor; // for restoring the color of a permanent glow after a temporary glow on the object finishes
-        std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
-        osg::Node* mNode;
         float mDuration;
         float mOriginalDuration; // for recording that this is originally a permanent glow if it is changed to a temporary one
         float mStartingTime;
