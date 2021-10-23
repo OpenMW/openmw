@@ -48,6 +48,7 @@ namespace SceneUtil
         virtual void setDefaults(osg::StateSet* stateset) {}
     
         /// Reset mStateSets, forcing a setDefaults() on the next frame. Can be used to change the defaults if needed.
+        /// @note It is not allowed to call reset() from apply() or setDefaults().
         void reset();
 
     private:
