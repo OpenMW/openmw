@@ -75,7 +75,7 @@ GlowUpdater::GlowUpdater(int texUnit, const osg::Vec4f& color, float duration, R
 osg::StateSet* GlowUpdater::getStateSet(int index)
 {
     CachedState& cs = getCachedState();
-    if (!cs.mTextures)
+    if (cs.mTextures.empty())
     {
         for (int i=0; i<32; ++i)
         {
@@ -86,7 +86,7 @@ osg::StateSet* GlowUpdater::getStateSet(int index)
             stream << i;
             stream << ".dds";
 
-            osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(stream.str());
+            osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(stream.str());
             osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(image));
             tex->setName("envMap");
             tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
@@ -99,7 +99,7 @@ osg::StateSet* GlowUpdater::getStateSet(int index)
     if (sequence.empty())
     {
         sequence.resize(cs.mTextures.size());
-        for (int i=0; i<cs.mTextures.size(); ++i)
+        for (size_t i=0; i<cs.mTextures.size(); ++i)
         {
             sequence[i] = new osg::StateSet;
             osg::StateSet* stateset = sequence[i];
@@ -126,6 +126,7 @@ void GlowUpdater::operator()(osg::Node* node, osgUtil::CullVisitor *cv)
     // Set the starting time to measure glow duration from if this is a temporary glow
     if ((mDuration >= 0) && mStartingTime == 0)
         mStartingTime = cv->getFrameStamp()->getSimulationTime();
+    float time = cv->getFrameStamp()->getSimulationTime();
 
     if ((mDuration >= 0) && (time - mStartingTime > mDuration)) // If this is a temporary glow and it has finished its duration
     {
@@ -147,7 +148,6 @@ void GlowUpdater::operator()(osg::Node* node, osgUtil::CullVisitor *cv)
         return;
     }
 
-    float time = cv->getFrameStamp()->getSimulationTime();
     int index = (int)(time*16) % mTextures.size();
     cv->pushStateSet(getStateSet(index));
     traverse(node, cv);
