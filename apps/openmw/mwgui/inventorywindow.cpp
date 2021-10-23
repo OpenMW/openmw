@@ -11,6 +11,8 @@
 #include <MyGUI_EditBox.h>
 
 #include <osg/Texture2D>
+#include <osg/StateSet>
+#include <osg/BlendFunc>
 
 #include <components/misc/stringops.hpp>
 
@@ -70,7 +72,10 @@ namespace MWGui
         , mTrading(false)
         , mUpdateTimer(0.f)
     {
-        mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture()));
+        osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
+        stateSet->setAttribute(new osg::BlendFunc(osg::BlendFunc::ONE, osg::BlendFunc::ONE_MINUS_SRC_ALPHA));
+        
+        mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture(), stateSet));
         mPreview->rebuild();
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
