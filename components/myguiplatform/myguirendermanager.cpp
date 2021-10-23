@@ -6,7 +6,6 @@
 #include <osg/Drawable>
 #include <osg/Texture2D>
 #include <osg/TexMat>
-#include <osg/ValueObject>
 
 #include <osgViewer/Viewer>
 
@@ -15,8 +14,6 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
-
-#include <components/debug/debuglog.hpp>
 
 #include "myguicompat.h"
 #include "myguitexture.hpp"
