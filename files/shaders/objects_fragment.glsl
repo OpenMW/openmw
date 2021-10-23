@@ -1,5 +1,7 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE)
+#pragma import_defines(FORCE_OPAQUE, GLOW)
+
+#define ENVMAP (@envMap || defined(GLOW))
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -40,7 +42,7 @@ varying vec2 normalMapUV;
 varying vec4 passTangent;
 #endif
 
-#if @envMap
+#if ENVMAP
 uniform sampler2D envMap;
 varying vec2 envMapUV;
 uniform vec4 envMapColor;
@@ -144,7 +146,7 @@ void main()
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a);
 #endif
 
-#if @envMap
+#if ENVMAP
 
     vec2 envTexCoordGen = envMapUV;
     float envLuma = 1.0;
@@ -183,7 +185,7 @@ void main()
 
     gl_FragData[0].xyz *= lighting;
 
-#if @envMap && !@preLightEnv
+#if ENVMAP && !@preLightEnv
     gl_FragData[0].xyz += texture2D(envMap, envTexCoordGen).xyz * envMapColor.xyz * envLuma;
 #endif
 
