@@ -166,7 +166,7 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
         }
         else if (!mostSuitableView)
         {
-            if (vd->getWorldUpdateRevision() != mWorldUpdateRevision))
+            if (vd->getWorldUpdateRevision() != mWorldUpdateRevision)
             {
                 vd->setWorldUpdateRevision(mWorldUpdateRevision);
                 vd->clear();
