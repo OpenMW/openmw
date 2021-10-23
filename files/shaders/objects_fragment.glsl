@@ -1,6 +1,5 @@
 #version 120
 #pragma import_defines(FORCE_OPAQUE)
-#pragma import_defines(SOFT_PARTICLES)
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -81,7 +80,7 @@ varying vec3 passNormal;
 #include "parallax.glsl"
 #include "alpha.glsl"
 
-#if defined(SOFT_PARTICLES) && SOFT_PARTICLES
+#if @softParticles
 #include "softparticles.glsl"
 #endif
 
@@ -225,7 +224,7 @@ void main()
 #endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 
-#if defined(SOFT_PARTICLES) && SOFT_PARTICLES
+#if @softParticles
     gl_FragData[0].a *= calcSoftParticleFade();
 #endif
 

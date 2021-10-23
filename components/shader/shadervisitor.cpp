@@ -559,7 +559,7 @@ namespace Shader
 
         if (auto partsys = dynamic_cast<osgParticle::ParticleSystem*>(&node))
         {
-            writableStateSet->setDefine("SOFT_PARTICLES", "1", osg::StateAttribute::ON);
+            defineMap["softParticles"] = "1";
 
             auto depth = SceneUtil::createDepth();
             depth->setWriteMask(false);
@@ -568,6 +568,8 @@ namespace Shader
             writableStateSet->addUniform(new osg::Uniform("opaqueDepthTex", 2));
             writableStateSet->setTextureAttributeAndModes(2, mOpaqueDepthTex, osg::StateAttribute::ON);
         }
+        else
+            defineMap["softParticles"] = "0";
 
         std::string shaderPrefix;
         if (!node.getUserValue("shaderPrefix", shaderPrefix))
