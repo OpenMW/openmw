@@ -1,5 +1,9 @@
 #version 120
 
+#pragma import_defines(GLOW)
+
+#define ENVMAP (@envMap || defined(GLOW))
+
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
 #endif
@@ -35,7 +39,7 @@ varying vec2 normalMapUV;
 varying vec4 passTangent;
 #endif
 
-#if @envMap
+#if ENVMAP
 varying vec2 envMapUV;
 #endif
 
@@ -76,11 +80,11 @@ void main(void)
     euclideanDepth = length(viewPos.xyz);
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
-#if (@envMap || !PER_PIXEL_LIGHTING || @shadows_enabled)
+#if (ENVMAP || !PER_PIXEL_LIGHTING || @shadows_enabled)
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 #endif
 
-#if @envMap
+#if ENVMAP
     vec3 viewVec = normalize(viewPos.xyz);
     vec3 r = reflect( viewVec, viewNormal );
     float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );
