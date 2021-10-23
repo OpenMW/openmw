@@ -125,7 +125,7 @@ void GlowUpdater::operator()(osg::Node* node, osgUtil::CullVisitor *cv)
 {
     // Set the starting time to measure glow duration from if this is a temporary glow
     if ((mDuration >= 0) && mStartingTime == 0)
-        mStartingTime = nv->getFrameStamp()->getSimulationTime();
+        mStartingTime = cv->getFrameStamp()->getSimulationTime();
 
     if ((mDuration >= 0) && (time - mStartingTime > mDuration)) // If this is a temporary glow and it has finished its duration
     {
@@ -147,7 +147,7 @@ void GlowUpdater::operator()(osg::Node* node, osgUtil::CullVisitor *cv)
         return;
     }
 
-    float time = nv->getFrameStamp()->getSimulationTime();
+    float time = cv->getFrameStamp()->getSimulationTime();
     int index = (int)(time*16) % mTextures.size();
     cv->pushStateSet(getStateSet(index));
     traverse(node, cv);
