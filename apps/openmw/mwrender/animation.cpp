@@ -1467,7 +1467,7 @@ namespace MWRender
         if (!mGlowUpdater || (mGlowUpdater->isDone() || (mGlowUpdater->isPermanentGlowUpdater() == true)))
         {
             if (mGlowUpdater && mGlowUpdater->isDone())
-                mObjectRoot->removeUpdateCallback(mGlowUpdater);
+                mObjectRoot->removeCullCallback(mGlowUpdater);
 
             if (mGlowUpdater && mGlowUpdater->isPermanentGlowUpdater())
             {
