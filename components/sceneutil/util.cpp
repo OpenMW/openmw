@@ -95,7 +95,7 @@ osg::StateSet* GlowUpdater::getStateSet(int index)
             cs.mTextures.push_back(tex);
         }
     }
-    std::vector<osg::ref_ptr<osg::StateSet>>& sequence = cs[std::make_pair(mTexUnit, mColor)];
+    std::vector<osg::ref_ptr<osg::StateSet>>& sequence = cs.mStateSets[std::make_pair(mTexUnit, mColor)];
     if (sequence.empty())
     {
         sequence.resize(cs.mTextures.size());
