@@ -28,7 +28,7 @@ namespace SceneUtil
             }
         }
 
-        osg::ref_ptr<osg::StateSet> stateset = mStateSetsUpdate[nv->getTraversalNumber() % 2];
+        osg::StateSet* stateset = mStateSetsUpdate[nv->getTraversalNumber() % 2];
         apply(stateset, nv);
         node->setStateSet(stateset);
         traverse(node, nv);
