@@ -5,6 +5,7 @@
 
 #include "../mwmechanics/levelledlist.hpp"
 
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -26,6 +27,24 @@ namespace MWClass
             return *this;
         }
     };
+
+    MWWorld::Ptr CreatureLevList::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
+    {
+        const MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = ptr.get<ESM::CreatureLevList>();
+
+        return MWWorld::Ptr(cell.insert(ref), &cell);
+    }
+
+    void CreatureLevList::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
+    {
+        if (ptr.getRefData().getCustomData() == nullptr)
+            return;
+
+        CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
+        MWWorld::Ptr creature = (customData.mSpawnActorId == -1) ? MWWorld::Ptr() : MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
+        if (!creature.isEmpty())
+            MWBase::Environment::get().getWorld()->adjustPosition(creature, force);
+    }
 
     std::string CreatureLevList::getName (const MWWorld::ConstPtr& ptr) const
     {
