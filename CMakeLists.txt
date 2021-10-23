@@ -708,6 +708,7 @@ if (BUILD_OPENMW AND APPLE)
     # Without these flags LuaJit crashes on startup on OSX
     set_target_properties(openmw PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
     set_target_properties(components PROPERTIES COMPILE_DEFINITIONS "GL_SILENCE_DEPRECATION=1")
+    set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS "GL_SILENCE_DEPRECATION=1")
 endif()
 
 # Apple bundling
