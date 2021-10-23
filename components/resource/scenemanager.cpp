@@ -693,19 +693,33 @@ namespace Resource
         }
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string& name)
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
-        return createInstance(scene);
+        return getInstance(scene);
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const osg::Node *base)
+    osg::ref_ptr<osg::Node> SceneManager::cloneNode(const osg::Node* base)
     {
-        osg::ref_ptr<osg::Node> cloned = static_cast<osg::Node*>(base->clone(SceneUtil::CopyOp()));
-
-        // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
+        SceneUtil::CopyOp copyop;
+        if (const osg::Drawable* drawable = base->asDrawable())
+        {
+            if (drawable->asGeometry())
+            {
+                Log(Debug::Warning) << "SceneManager::cloneNode: attempting to clone osg::Geometry. For safety reasons this will be expensive. Consider avoiding this call.";
+                copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS|osg::CopyOp::DEEP_COPY_PRIMITIVES);
+            }
+        }
+        osg::ref_ptr<osg::Node> cloned = static_cast<osg::Node*>(base->clone(copyop));
+        // add a ref to the original template to help verify the safety of shallow cloning operations
+        // in addition, if this node is managed by a cache, we hint to the cache that it's still being used and should be kept in cache
         cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(base));
+        return cloned;
+    }
 
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const osg::Node *base)
+    {
+        osg::ref_ptr<osg::Node> cloned = cloneNode(base);
         // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
         if (cloned->getNumChildrenRequiringUpdateTraversal() > 0)
         {
@@ -714,11 +728,6 @@ namespace Resource
         }
 
         return cloned;
-    }
-
-    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name)
-    {
-        return createInstance(name);
     }
 
     osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name, osg::Group* parentNode)

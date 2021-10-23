@@ -111,7 +111,7 @@ namespace CSVRender
         if (!mesh.empty() && node != mNodeMap.end())
         {
             auto instance = sceneMgr->getInstance(mesh);
-            SceneUtil::attach(instance, mSkeleton, boneName, node->second);
+            SceneUtil::attach(instance, mSkeleton, boneName, node->second, sceneMgr);
         }
     }
 

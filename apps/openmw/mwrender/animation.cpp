@@ -1319,10 +1319,10 @@ namespace MWRender
 
                 cache.insert(std::make_pair(model, created));
 
-                return sceneMgr->createInstance(created);
+                return sceneMgr->getInstance(created);
             }
             else
-                return sceneMgr->createInstance(found->second);
+                return sceneMgr->getInstance(found->second);
         }
         else
         {

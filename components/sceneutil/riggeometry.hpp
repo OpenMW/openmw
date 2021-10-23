@@ -9,6 +9,13 @@ namespace SceneUtil
     class Skeleton;
     class Bone;
 
+    // TODO: This class has a lot of issues.
+    // - We require too many workarounds to ensure safety.
+    // - mSourceGeometry should be const, but can not be const because of a use case in shadervisitor.cpp.
+    // - We create useless mGeometry clones in template RigGeometries.
+    // - We do not support compileGLObjects.
+    // - We duplicate some code in MorphGeometry. 
+
     /// @brief Mesh skinning implementation.
     /// @note A RigGeometry may be attached directly to a Skeleton, or somewhere below a Skeleton.
     /// Note though that the RigGeometry ignores any transforms below the Skeleton, so the attachment point is not that important.
