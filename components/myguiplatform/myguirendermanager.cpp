@@ -4,7 +4,6 @@
 #include <MyGUI_Timer.h>
 
 #include <osg/Drawable>
-#include <osg/BlendFunc>
 #include <osg/Texture2D>
 #include <osg/TexMat>
 #include <osg/ValueObject>
@@ -471,17 +470,11 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
         batch.mTexture = static_cast<OSGTexture*>(texture)->getTexture();
         if (batch.mTexture->getDataVariance() == osg::Object::DYNAMIC)
             mDrawable->setDataVariance(osg::Object::DYNAMIC); // only for this frame, reset in begin()
-        batch.mTexture->getUserValue("premultiplied alpha", premultipliedAlpha);
     }
     if (mInjectState)
         batch.mStateSet = mInjectState;
-    else if (premultipliedAlpha)
-    {
-        // This is hacky, but MyGUI made it impossible to use a custom layer for a nested node, so state couldn't be injected 'properly'
-        osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
-        stateSet->setAttribute(new osg::BlendFunc(osg::BlendFunc::ONE, osg::BlendFunc::ONE_MINUS_SRC_ALPHA));
-        batch.mStateSet = stateSet;
-    }
+    else if (batch.mTexture)
+        batch.mStateSet = batch.mTexture->getInjectState();
 
     mDrawable->addBatch(batch);
 }
