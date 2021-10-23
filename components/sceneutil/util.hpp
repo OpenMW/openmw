@@ -36,6 +36,7 @@ namespace SceneUtil
             static CachedState cs;
             return cs;
         }
+        osg::StateSet* getStateSet(int index);
 
         bool isPermanentGlowUpdater();
 
