@@ -30,7 +30,7 @@ namespace SceneUtil
         {
             std::vector<osg::ref_ptr<osg::Texture2D>> mTextures;
             std::map<std::pair<int, osg::Vec4f>, osg::ref_ptr<osg::StateSet>> mStateSets;
-        }
+        };
         static CachedState& getCachedState()
         {
             static CachedState cs;
