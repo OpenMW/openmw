@@ -26,10 +26,10 @@ namespace SceneUtil
 
         void operator()(osg::Node*, osgUtil::CullVisitor*);
 
-        class CachedState
+        struct CachedState
         {
             std::vector<osg::ref_ptr<osg::Texture2D>> mTextures;
-            std::map<std::pair<int, osg::Vec4f>, osg::ref_ptr<osg::StateSet>> mStateSets;
+            std::map<std::pair<int, osg::Vec4f>, std::vector<osg::ref_ptr<osg::StateSet>>> mStateSets;
         };
         static CachedState& getCachedState()
         {
