@@ -461,17 +461,17 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
     batch.mVertexBuffer = static_cast<OSGVertexBuffer*>(buffer)->getVertexBuffer();
     batch.mArray = static_cast<OSGVertexBuffer*>(buffer)->getVertexArray();
     static_cast<OSGVertexBuffer*>(buffer)->markUsed();
-    bool premultipliedAlpha = false;
-    if (texture)
+
+    if (OSGTexture* osgtexture = static_cast<OSGTexture*>(texture))
     {
-        batch.mTexture = static_cast<OSGTexture*>(texture)->getTexture();
+        batch.mTexture = osgtexture->getTexture();
         if (batch.mTexture->getDataVariance() == osg::Object::DYNAMIC)
             mDrawable->setDataVariance(osg::Object::DYNAMIC); // only for this frame, reset in begin()
+        if (!mInjectState && osgtexture->getInjectState())
+            batch.mStateSet = osgtexture->getInjectState();
     }
     if (mInjectState)
         batch.mStateSet = mInjectState;
-    else if (batch.mTexture)
-        batch.mStateSet = batch.mTexture->getInjectState();
 
     mDrawable->addBatch(batch);
 }
