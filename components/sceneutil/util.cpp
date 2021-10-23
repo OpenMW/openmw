@@ -304,20 +304,7 @@ osg::ref_ptr<GlowUpdater> addEnchantedGlow(osg::ref_ptr<osg::Node> node, Resourc
     int texUnit = findLowestUnusedTexUnitVisitor.mLowestUnusedTexUnit;
 
     osg::ref_ptr<GlowUpdater> glowUpdater = new GlowUpdater(texUnit, glowColor, textures, node, glowDuration, resourceSystem);
-    node->addUpdateCallback(glowUpdater);
-
-    // set a texture now so that the ShaderVisitor can find it
-    osg::ref_ptr<osg::StateSet> writableStateSet = nullptr;
-    if (!node->getStateSet())
-        writableStateSet = node->getOrCreateStateSet();
-    else
-    {
-        writableStateSet = new osg::StateSet(*node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
-        node->setStateSet(writableStateSet);
-    }
-    writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
-    writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
-    resourceSystem->getSceneManager()->recreateShaders(node);
+    node->addCullCallback(glowUpdater);
 
     return glowUpdater;
 }
