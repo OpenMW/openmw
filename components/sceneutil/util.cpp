@@ -60,97 +60,98 @@ public:
     int mLowestUnusedTexUnit;
 };
 
-GlowUpdater::GlowUpdater(int texUnit, const osg::Vec4f& color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
-    osg::Node* node, float duration, Resource::ResourceSystem* resourcesystem)
+GlowUpdater::GlowUpdater(int texUnit, const osg::Vec4f& color, float duration, Resource::ResourceSystem* resourcesystem)
     : mTexUnit(texUnit)
     , mColor(color)
     , mOriginalColor(color)
-    , mTextures(textures)
-    , mNode(node)
     , mDuration(duration)
     , mOriginalDuration(duration)
     , mStartingTime(0)
     , mResourceSystem(resourcesystem)
-    , mColorChanged(false)
     , mDone(false)
 {
 }
 
-void GlowUpdater::setDefaults(osg::StateSet *stateset)
+osg::StateSet* GlowUpdater::getStateSet(int index)
 {
-    if (mDone)
-        removeTexture(stateset);
-    else
+    CachedState& cs = getCachedState();
+    if (!cs.mTextures)
     {
-        stateset->setTextureMode(mTexUnit, GL_TEXTURE_2D, osg::StateAttribute::ON);
-        osg::TexGen* texGen = new osg::TexGen;
-        texGen->setMode(osg::TexGen::SPHERE_MAP);
+        for (int i=0; i<32; ++i)
+        {
+            std::stringstream stream;
+            stream << "textures/magicitem/caust";
+            stream << std::setw(2);
+            stream << std::setfill('0');
+            stream << i;
+            stream << ".dds";
 
-        stateset->setTextureAttributeAndModes(mTexUnit, texGen, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
-        osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-        texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
-        texEnv->setConstantColor(mColor);
-        texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
-        texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
-        texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_COLOR);
-
-        stateset->setTextureAttributeAndModes(mTexUnit, texEnv, osg::StateAttribute::ON);
-        stateset->addUniform(new osg::Uniform("envMapColor", mColor));
+            osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(stream.str());
+            osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(image));
+            tex->setName("envMap");
+            tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
+            tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);
+            mResourceSystem->getSceneManager()->applyFilterSettings(tex);
+            cs.mTextures.push_back(tex);
+        }
     }
+    std::vector<osg::ref_ptr<osg::StateSet>>& sequence = cs[std::make_pair(mTexUnit, mColor)];
+    if (sequence.empty())
+    {
+        sequence.resize(cs.mTextures.size());
+        for (int i=0; i<cs.mTextures.size(); ++i)
+        {
+            sequence[i] = new osg::StateSet;
+            osg::StateSet* stateset = sequence[i];
+            stateset->setTextureAttributeAndModes(mTexUnit, cs.mTextures[i], osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            osg::ref_ptr<osg::TexGen> texGen = new osg::TexGen;
+            texGen->setMode(osg::TexGen::SPHERE_MAP);
+            stateset->setTextureAttributeAndModes(mTexUnit, texGen, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
+            texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
+            texEnv->setConstantColor(mColor);
+            texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
+            texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
+            texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_COLOR);
+            stateset->setTextureAttributeAndModes(mTexUnit, texEnv, osg::StateAttribute::ON);
+            stateset->addUniform(new osg::Uniform("envMapColor", mColor));
+            stateset->setDefine("GLOW");
+        }
+    }
+    return sequence[index];
 }
 
-void GlowUpdater::removeTexture(osg::StateSet* stateset)
+void GlowUpdater::operator(osg::Node* node, osgUtil::CullVisitor *cv)
 {
-    stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
-    stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXGEN);
-    stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXENV);
-    stateset->removeTextureMode(mTexUnit, GL_TEXTURE_2D);
-    stateset->removeUniform("envMapColor");
-
-    osg::StateSet::TextureAttributeList& list = stateset->getTextureAttributeList();
-    while (list.size() && list.rbegin()->empty())
-        list.pop_back();
-}
-
-void GlowUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
-{
-    if (mColorChanged){
-        this->reset();
-        setDefaults(stateset);
-        mColorChanged = false;
-    }
-    if (mDone)
-        return;
-
     // Set the starting time to measure glow duration from if this is a temporary glow
     if ((mDuration >= 0) && mStartingTime == 0)
         mStartingTime = nv->getFrameStamp()->getSimulationTime();
-
-    float time = nv->getFrameStamp()->getSimulationTime();
-    int index = (int)(time*16) % mTextures.size();
-    stateset->setTextureAttribute(mTexUnit, mTextures[index], osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
     if ((mDuration >= 0) && (time - mStartingTime > mDuration)) // If this is a temporary glow and it has finished its duration
     {
         if (mOriginalDuration >= 0) // if this glowupdater was a temporary glow since its creation
         {
-            removeTexture(stateset);
-            this->reset();
             mDone = true;
-            // normally done in StateSetUpdater::operator(), but needs doing here so the shader visitor sees the right StateSet
-            mNode->setStateSet(stateset);
-            mResourceSystem->getSceneManager()->recreateShaders(mNode);
         }
         if (mOriginalDuration < 0) // if this glowupdater was originally a permanent glow
         {
             mDuration = mOriginalDuration;
             mStartingTime = 0;
             mColor = mOriginalColor;
-            this->reset();
-            setDefaults(stateset);
         }
     }
+
+    if (mDone)
+    {
+        traverse(node, cv);
+        return;
+    }
+
+    float time = nv->getFrameStamp()->getSimulationTime();
+    int index = (int)(time*16) % mTextures.size();
+    cv->pushStateSet(getStateSet(index));
+    traverse(node, cv);
+    cv->popStateSet();
 }
 
 bool GlowUpdater::isPermanentGlowUpdater()
@@ -166,7 +167,6 @@ bool GlowUpdater::isDone()
 void GlowUpdater::setColor(const osg::Vec4f& color)
 {
     mColor = color;
-    mColorChanged = true;
 }
 
 void GlowUpdater::setDuration(float duration)
@@ -280,30 +280,11 @@ bool hasUserDescription(const osg::Node* node, const std::string& pattern)
 
 osg::ref_ptr<GlowUpdater> addEnchantedGlow(osg::ref_ptr<osg::Node> node, Resource::ResourceSystem* resourceSystem, const osg::Vec4f& glowColor, float glowDuration)
 {
-    std::vector<osg::ref_ptr<osg::Texture2D> > textures;
-    for (int i=0; i<32; ++i)
-    {
-        std::stringstream stream;
-        stream << "textures/magicitem/caust";
-        stream << std::setw(2);
-        stream << std::setfill('0');
-        stream << i;
-        stream << ".dds";
-
-        osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(stream.str());
-        osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(image));
-        tex->setName("envMap");
-        tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
-        tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);
-        resourceSystem->getSceneManager()->applyFilterSettings(tex);
-        textures.push_back(tex);
-    }
-
     FindLowestUnusedTexUnitVisitor findLowestUnusedTexUnitVisitor;
     node->accept(findLowestUnusedTexUnitVisitor);
     int texUnit = findLowestUnusedTexUnitVisitor.mLowestUnusedTexUnit;
 
-    osg::ref_ptr<GlowUpdater> glowUpdater = new GlowUpdater(texUnit, glowColor, textures, node, glowDuration, resourceSystem);
+    osg::ref_ptr<GlowUpdater> glowUpdater = new GlowUpdater(texUnit, glowColor, glowDuration, resourceSystem);
     node->addCullCallback(glowUpdater);
 
     return glowUpdater;
