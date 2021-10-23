@@ -43,7 +43,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::Texture2D> getTexture();
         /// Get the osg::StateSet required to render the texture correctly, if any.
-        osg::StateSet* getTextureStateSet();
+        osg::StateSet* getTextureStateSet() { return mTextureStateSet; }
 
     private:
         CharacterPreview(const CharacterPreview&);
