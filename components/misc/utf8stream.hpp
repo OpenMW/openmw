@@ -2,6 +2,7 @@
 #define MISC_UTF8ITER_HPP
 
 #include <cstring>
+#include <string>
 #include <tuple>
 
 class Utf8Stream
