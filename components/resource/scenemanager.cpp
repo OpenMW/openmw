@@ -20,6 +20,7 @@
 
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/misc/algorithm.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -551,7 +552,7 @@ namespace Resource
                 std::sort(reservedNames.begin(), reservedNames.end(), Misc::StringUtils::ciLess);
             }
 
-            std::vector<std::string>::iterator it = Misc::StringUtils::partialBinarySearch(reservedNames.begin(), reservedNames.end(), name);
+            std::vector<std::string>::iterator it = Misc::partialBinarySearch(reservedNames.begin(), reservedNames.end(), name);
             return it != reservedNames.end();
         }
 
