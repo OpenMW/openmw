@@ -1,5 +1,7 @@
 #include "actions.hpp"
 
+#include <cstring>
+
 #include <components/debug/debuglog.hpp>
 
 #include "../mwworld/cellstore.hpp"
