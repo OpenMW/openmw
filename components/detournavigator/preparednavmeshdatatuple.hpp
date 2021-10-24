@@ -14,11 +14,11 @@ namespace DetourNavigator
     constexpr auto makeTuple(const rcPolyMesh& v) noexcept
     {
         return std::tuple(
-            Span(v.verts, getVertsLength(v)),
-            Span(v.polys, getPolysLength(v)),
-            Span(v.regs, getRegsLength(v)),
-            Span(v.flags, getFlagsLength(v)),
-            Span(v.areas, getAreasLength(v)),
+            Span(v.verts, static_cast<int>(getVertsLength(v))),
+            Span(v.polys, static_cast<int>(getPolysLength(v))),
+            Span(v.regs, static_cast<int>(getRegsLength(v))),
+            Span(v.flags, static_cast<int>(getFlagsLength(v))),
+            Span(v.areas, static_cast<int>(getAreasLength(v))),
             ArrayRef(v.bmin),
             ArrayRef(v.bmax),
             v.cs,
@@ -31,9 +31,9 @@ namespace DetourNavigator
     constexpr auto makeTuple(const rcPolyMeshDetail& v) noexcept
     {
         return std::tuple(
-            Span(v.meshes, getMeshesLength(v)),
-            Span(v.verts, getVertsLength(v)),
-            Span(v.tris, getTrisLength(v))
+            Span(v.meshes, static_cast<int>(getMeshesLength(v))),
+            Span(v.verts, static_cast<int>(getVertsLength(v))),
+            Span(v.tris, static_cast<int>(getTrisLength(v)))
         );
     }
 
