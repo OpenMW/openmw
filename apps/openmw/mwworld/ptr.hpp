@@ -122,17 +122,16 @@ namespace MWWorld
                 return mRef;
             }
 
-protected:
-            PtrBase(LiveCellRefBaseType *liveCellRef, CellStoreType *cell, ContainerStoreType* containerStore)
-            : mRef(liveCellRef), mCell(cell), mContainerStore(containerStore) {}
+        protected:
+            PtrBase(LiveCellRefBaseType *liveCellRef, CellStoreType *cell, ContainerStoreType* containerStore) : mRef(liveCellRef), mCell(cell), mContainerStore(containerStore) {}
     };
 
-    /// @note It is possible to get mutable values from const Ptr. So if a function accepts const Ptr&, the object is still mutable. To make it really const the argument should be const ConstPtr&.
+    /// @note It is possible to get mutable values from const Ptr. So if a function accepts const Ptr&, the object is still mutable.
+    /// To make it really const the argument should be const ConstPtr&.
     class Ptr : public PtrBase<std::remove_const_t>
     {
     public:
-        Ptr(LiveCellRefBase *liveCellRef=nullptr, CellStoreType *cell=nullptr) : PtrBase(liveCellRef, cell, nullptr)
-        {}
+        Ptr(LiveCellRefBase *liveCellRef=nullptr, CellStoreType *cell=nullptr) : PtrBase(liveCellRef, cell, nullptr) {}
     };
 
     /// @note The difference between Ptr and ConstPtr is that the second one adds const to the underlying pointers.
@@ -140,10 +139,8 @@ protected:
     class ConstPtr : public PtrBase<std::add_const_t>
     {
     public:
-        ConstPtr(const Ptr& ptr) : PtrBase(ptr.mRef, ptr.mCell, ptr.mContainerStore)
-        {}
-        ConstPtr(const LiveCellRefBase *liveCellRef=nullptr, const CellStoreType *cell=nullptr) : PtrBase(liveCellRef, cell, nullptr)
-        {}
+        ConstPtr(const Ptr& ptr) : PtrBase(ptr.mRef, ptr.mCell, ptr.mContainerStore) {}
+        ConstPtr(const LiveCellRefBase *liveCellRef=nullptr, const CellStoreType *cell=nullptr) : PtrBase(liveCellRef, cell, nullptr) {}
     };
 
 }
