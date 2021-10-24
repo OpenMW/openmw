@@ -183,13 +183,6 @@ public:
         return out;
     }
 
-    struct CiComp
-    {
-        bool operator()(const std::string& left, const std::string& right) const
-        {
-            return ciLess(left, right);
-        }
-    };
     struct CiEqual
     {
         bool operator()(const std::string& left, const std::string& right) const
@@ -205,6 +198,14 @@ public:
             return std::hash<std::string>{}(str);
         }
     };
+    struct CiComp
+    {
+        bool operator()(const std::string& left, const std::string& right) const
+        {
+            return ciLess(left, right);
+        }
+    };
+
 
     /// Performs a binary search on a sorted container for a string that 'key' starts with
     template<typename Iterator, typename T>
