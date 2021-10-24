@@ -87,6 +87,16 @@ void doLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 a
     }
 }
 
+// Simplest lighting which only takes into account sun and ambient. Currently used for our weather particle systems.
+void doSimpleLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 ambientLight)
+{
+    vec3 ambientOut, diffuseOut;
+
+    perLightSun(diffuseOut, viewPos, viewNormal);
+    ambientLight = gl_LightModel.ambient.xyz;
+    diffuseLight = diffuseOut;
+}
+
 vec3 getSpecular(vec3 viewNormal, vec3 viewDirection, float shininess, vec3 matSpec)
 {
     vec3 lightDir = normalize(lcalcPosition(0));

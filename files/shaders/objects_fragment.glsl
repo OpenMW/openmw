@@ -63,7 +63,7 @@ uniform bool simpleWater;
 varying float euclideanDepth;
 varying float linearDepth;
 
-#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
+#define PER_PIXEL_LIGHTING ((@normalMap || @forcePPL) && !@simpleLighting)
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
@@ -170,6 +170,9 @@ void main()
 #endif
 
     float shadowing = unshadowedLightRatio(linearDepth);
+#if @simpleLighting
+    gl_FragData[0].xyz *= passLighting;
+#else
     vec3 lighting;
 #if !PER_PIXEL_LIGHTING
     lighting = passLighting + shadowDiffuseLighting * shadowing;
@@ -180,8 +183,8 @@ void main()
     lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
     clampLightingResult(lighting);
 #endif
-
     gl_FragData[0].xyz *= lighting;
+#endif
 
 #if @envMap && !@preLightEnv
     gl_FragData[0].xyz += texture2D(envMap, envTexCoordGen).xyz * envMapColor.xyz * envLuma;
@@ -207,6 +210,7 @@ void main()
 #endif
         gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
     }
+
 #if @radialFog
     float depth;
     // For the less detailed mesh of simple water we need to recalculate depth on per-pixel basis
