@@ -158,14 +158,13 @@ public:
      *
      * @return A reference to the string passed in @p str.
      */
-    static std::string &replaceAll(std::string &str, const char *what, const char *with,
-                                   std::size_t whatLen=std::string::npos, std::size_t withLen=std::string::npos)
+    static std::string &replaceAll(std::string &str, std::string_view what, std::string_view with, std::size_t whatLen=std::string::npos, std::size_t withLen=std::string::npos)
     {
         if (whatLen == std::string::npos)
-            whatLen = strlen(what);
+            whatLen = what.size();
 
         if (withLen == std::string::npos)
-            withLen = strlen(with);
+            withLen = with.size();
 
         std::size_t found;
         std::size_t offset = 0;
@@ -226,20 +225,6 @@ public:
             current = str.find_first_of(delims, previous);
         }
         cont.push_back(str.substr(previous, current - previous));
-    }
-
-    // TODO: use the std::string_view once we will use the C++17.
-    // It should allow us to avoid data copying while we still will support both string and literal arguments.
-
-    static inline void replaceAll(std::string& data, const std::string& toSearch, const std::string& replaceStr)
-    {
-        size_t pos = data.find(toSearch);
-
-        while( pos != std::string::npos)
-        {
-            data.replace(pos, toSearch.size(), replaceStr);
-            pos = data.find(toSearch, pos + replaceStr.size());
-        }
     }
 
      static inline void replaceLast(std::string& str, const std::string& substr, const std::string& with)
