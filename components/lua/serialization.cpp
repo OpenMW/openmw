@@ -1,7 +1,5 @@
 #include "serialization.hpp"
 
-#include <cstring>
-
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
