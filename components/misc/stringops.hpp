@@ -138,7 +138,7 @@ public:
         while((found = str.find(what, offset)) != std::string::npos)
         {
               str.replace(found, what.size(), with);
-              offset = found + withLen;
+              offset = found + with.size();
         }
         return str;
     }
