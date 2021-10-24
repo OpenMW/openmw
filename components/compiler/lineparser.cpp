@@ -145,7 +145,7 @@ namespace Compiler
             if (!arguments.empty())
             {
                 mExprParser.reset();
-                mExprParser.parseArguments (arguments, scanner, mCode);
+                mExprParser.parseArguments (arguments, scanner, mCode, -1, true);
             }
 
             mName = name;
