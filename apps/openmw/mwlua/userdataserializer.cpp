@@ -1,7 +1,5 @@
 #include "userdataserializer.hpp"
 
-#include <cstring>
-
 #include <components/lua/serialization.hpp>
 #include <components/misc/endianness.hpp>
 
