@@ -659,7 +659,10 @@ namespace MWRender
                     mParticleNode->addChild(program);
 
                     for (int particleIndex = 0; particleIndex < ps->numParticles(); ++particleIndex)
+                    {
                         ps->getParticle(particleIndex)->setAlphaRange(osgParticle::rangef(mPrecipitationAlpha, mPrecipitationAlpha));
+                        ps->getParticle(particleIndex)->update(0, true);
+                    }
 
                     ps->getOrCreateStateSet();
                     ps->setUserValue("simpleLighting", true);
