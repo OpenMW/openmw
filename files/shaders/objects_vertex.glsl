@@ -50,7 +50,7 @@ varying vec2 specularMapUV;
 varying float euclideanDepth;
 varying float linearDepth;
 
-#define PER_PIXEL_LIGHTING ((@normalMap || @forcePPL) && !@simpleLighting)
+#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
@@ -126,11 +126,7 @@ void main(void)
 
 #if !PER_PIXEL_LIGHTING
     vec3 diffuseLight, ambientLight;
-#if @simpleLighting
-    doSimpleLighting(passViewPos, viewNormal, diffuseLight, ambientLight);
-#else
-    doLighting(passViewPos, viewNormal, diffuseLight, ambientLight, shadowDiffuseLighting);
-#endif
+    doLighting(viewPos.xyz, viewNormal, diffuseLight, ambientLight, shadowDiffuseLighting);
     vec3 emission = getEmissionColor().xyz * emissiveMult;
     passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
     clampLightingResult(passLighting);

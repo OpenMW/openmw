@@ -31,7 +31,7 @@ void paintClouds(inout vec4 color)
     color.xyz = clamp(color.xyz * gl_FrontMaterial.emission.xyz, 0.0, 1.0);
 
     // ease transition between clear color and atmosphere/clouds
-    color = mix(vec4(gl_Fog.color.xyz, color.a), color, passColor.a * passColor.a);
+    color = mix(vec4(gl_Fog.color.xyz, color.a), color, passColor.a);
 }
 
 void paintMoon(inout vec4 color)

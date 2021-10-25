@@ -518,7 +518,11 @@ namespace Shader
 
         bool simpleLighting = false;
         node.getUserValue("simpleLighting", simpleLighting);
-        defineMap["simpleLighting"] = simpleLighting ? "1" : "0";
+        if (simpleLighting)
+        {
+            defineMap["forcePPL"] = "1";
+            defineMap["endLight"] = "0";
+        }
 
         if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT && !previousAddedState->hasMode(GL_ALPHA_TEST))
             removedState->setMode(GL_ALPHA_TEST, writableStateSet->getMode(GL_ALPHA_TEST));
