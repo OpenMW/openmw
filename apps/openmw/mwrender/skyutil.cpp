@@ -126,7 +126,7 @@ namespace MWRender
 
         void setDefaults(osg::StateSet* stateset) override
         {
-            stateset->setAttributeAndModes(MWRender::createUnlitMaterial(), osg::StateAttribute::ON);
+            stateset->setAttributeAndModes(MWRender::createUnlitMaterial());
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
@@ -292,7 +292,7 @@ namespace MWRender
                 mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,fade));
                 mat->setEmission(osg::Material::FRONT_AND_BACK, mColor);
 
-                stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
+                stateset->setAttributeAndModes(mat);
 
                 cv->pushStateSet(stateset);
                 traverse(node, cv);
@@ -359,9 +359,9 @@ namespace MWRender
         {
             if (mForceShaders)
             {
-                stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Moon)), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-                stateset->setTextureAttributeAndModes(0, mPhaseTex, osg::StateAttribute::ON);
-                stateset->setTextureAttributeAndModes(1, mCircleTex, osg::StateAttribute::ON);
+                stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Moon)));
+                stateset->setTextureAttributeAndModes(0, mPhaseTex);
+                stateset->setTextureAttributeAndModes(1, mCircleTex);
                 stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
                 stateset->setTextureMode(1, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
                 stateset->addUniform(new osg::Uniform("moonBlend", osg::Vec4f{}));
@@ -372,15 +372,15 @@ namespace MWRender
             }
             else
             {
-                stateset->setTextureAttributeAndModes(0, mPhaseTex, osg::StateAttribute::ON);
+                stateset->setTextureAttributeAndModes(0, mPhaseTex);
                 osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
                 texEnv->setCombine_RGB(osg::TexEnvCombine::MODULATE);
                 texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
                 texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
                 texEnv->setConstantColor(osg::Vec4f(1.f, 0.f, 0.f, 1.f)); // mShadowBlend * mMoonColor
-                stateset->setTextureAttributeAndModes(0, texEnv, osg::StateAttribute::ON);
+                stateset->setTextureAttributeAndModes(0, texEnv);
 
-                stateset->setTextureAttributeAndModes(1, mCircleTex, osg::StateAttribute::ON);
+                stateset->setTextureAttributeAndModes(1, mCircleTex);
                 osg::ref_ptr<osg::TexEnvCombine> texEnv2 = new osg::TexEnvCombine;
                 texEnv2->setCombine_RGB(osg::TexEnvCombine::ADD);
                 texEnv2->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
@@ -389,7 +389,7 @@ namespace MWRender
                 texEnv2->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
                 texEnv2->setSource1_RGB(osg::TexEnvCombine::CONSTANT);
                 texEnv2->setConstantColor(osg::Vec4f(0.f, 0.f, 0.f, 1.f)); // mAtmosphereColor.rgb, mTransparency
-                stateset->setTextureAttributeAndModes(1, texEnv2, osg::StateAttribute::ON);
+                stateset->setTextureAttributeAndModes(1, texEnv2);
                 stateset->setAttributeAndModes(MWRender::createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
             }
         }
@@ -477,7 +477,7 @@ namespace MWRender
     void AtmosphereUpdater::setDefaults(osg::StateSet* stateset)
     {
         stateset->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-        stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Atmosphere)), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Atmosphere)));
     }
 
     void AtmosphereUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
@@ -501,8 +501,8 @@ namespace MWRender
     {
         if (mForceShaders)
         {
-            stateset->addUniform(new osg::Uniform("opacity", 0.f), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-            stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Atmosphere_Night)), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            stateset->addUniform(new osg::Uniform("opacity", 0.f));
+            stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Atmosphere_Night)));
         }
         else
         {
@@ -561,18 +561,18 @@ namespace MWRender
         stateset->setAttribute(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
         osg::ref_ptr<osg::TexMat> texmat = new osg::TexMat;
-        stateset->setTextureAttributeAndModes(0, texmat, osg::StateAttribute::ON);
+        stateset->setTextureAttributeAndModes(0, texmat);
 
         if (mForceShaders)
         {
             stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-            stateset->addUniform(new osg::Uniform("opacity", 1.f), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-            stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Clouds)), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            stateset->addUniform(new osg::Uniform("opacity", 1.f));
+            stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Clouds)));
         }
         else
         {
-            stateset->setTextureAttributeAndModes(1, texmat, osg::StateAttribute::ON);
+            stateset->setTextureAttributeAndModes(1, texmat);
             // need to set opacity on a separate texture unit, diffuse alpha is used by the vertex colors already
             osg::ref_ptr<osg::TexEnvCombine> texEnvCombine = new osg::TexEnvCombine;
             texEnvCombine->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
@@ -582,7 +582,7 @@ namespace MWRender
             texEnvCombine->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
             texEnvCombine->setCombine_RGB(osg::TexEnvCombine::REPLACE);
 
-            stateset->setTextureAttributeAndModes(1, texEnvCombine, osg::StateAttribute::ON);
+            stateset->setTextureAttributeAndModes(1, texEnvCombine);
 
             stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
             stateset->setTextureMode(1, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
@@ -715,8 +715,8 @@ namespace MWRender
         sunTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         sunTex->setName("diffuseMap");
 
-        mGeom->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
-        mGeom->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sun)), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        mGeom->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex);
+        mGeom->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sun)));
 
         osg::ref_ptr<osg::Group> queryNode = new osg::Group;
         // Need to render after the world geometry so we can correctly test for occlusions
@@ -726,14 +726,14 @@ namespace MWRender
         // Set up alpha testing on the occlusion testing subgraph, that way we can get the occlusion tested fragments to match the circular shape of the sun
         osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
         alphaFunc->setFunction(osg::AlphaFunc::GREATER, 0.8);
-        stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
-        stateset->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
-        stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON);
-        stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sunflash_Query)), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setAttributeAndModes(alphaFunc);
+        stateset->setTextureAttributeAndModes(0, sunTex);
+        stateset->setAttributeAndModes(createUnlitMaterial());
+        stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sunflash_Query)));
 
         // Disable writing to the color buffer. We are using this geometry for visibility tests only.
         osg::ref_ptr<osg::ColorMask> colormask = new osg::ColorMask(0, 0, 0, 0);
-        stateset->setAttributeAndModes(colormask, osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(colormask);
 
         mTransform->addChild(queryNode);
 
@@ -829,7 +829,7 @@ namespace MWRender
             depth->setZNear(far);
             depth->setZFar(far);
             depth->setWriteMask(false);
-            queryStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON);
+            queryStateSet->setAttributeAndModes(depth);
         }
         else
         {
@@ -859,11 +859,11 @@ namespace MWRender
 
         osg::StateSet* stateset = geom->getOrCreateStateSet();
 
-        stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
+        stateset->setTextureAttributeAndModes(0, tex);
         stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
-        stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sun)), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sun)));
 
         mSunFlashNode = group;
 
@@ -898,13 +898,13 @@ namespace MWRender
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
         stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-        stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sunglare)), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sunglare)));
 
         // set up additive blending
         osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
         blendFunc->setSource(osg::BlendFunc::SRC_ALPHA);
         blendFunc->setDestination(osg::BlendFunc::ONE);
-        stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(blendFunc);
 
         mSunGlareCallback = new SunGlareCallback(mOcclusionQueryVisiblePixels, mOcclusionQueryTotalPixels, mTransform);
         mSunGlareNode = camera;

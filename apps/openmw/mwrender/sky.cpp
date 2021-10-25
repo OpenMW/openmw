@@ -340,7 +340,7 @@ namespace MWRender
 
         auto depth = SceneUtil::createDepth();
         depth->setWriteMask(false);
-        mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+        mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(depth);
         mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
         mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
 
@@ -374,7 +374,7 @@ namespace MWRender
         raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-        stateset->setTextureAttributeAndModes(0, raindropTex, osg::StateAttribute::ON);
+        stateset->setTextureAttributeAndModes(0, raindropTex);
         stateset->setNestRenderBins(false);
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -384,7 +384,7 @@ namespace MWRender
         mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-        stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(mat);
 
         osgParticle::Particle& particleTemplate = mRainParticleSystem->getDefaultParticleTemplate();
         particleTemplate.setSizeRange(osgParticle::rangef(5.f, 15.f));
