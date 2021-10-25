@@ -102,7 +102,7 @@ public:
         if (ch >= 0x41 && ch < 0x60)
             return ch + 0x20;
 
-        // Deutch characters
+        // German characters
         if (ch == 0xc4 || ch == 0xd6 || ch == 0xdc)
             return ch + 0x20;
         if (ch == 0x1e9e)
