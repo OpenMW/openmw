@@ -4,6 +4,10 @@
 #include <osg/MatrixTransform>
 #include <osg/NodeVisitor>
 
+#include <unordered_map>
+
+#include <components/misc/stringops.hpp>
+
 // Commonly used scene graph visitors
 namespace SceneUtil
 {
@@ -49,7 +53,7 @@ namespace SceneUtil
     class NodeMapVisitor : public osg::NodeVisitor
     {
     public:
-        typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
+        typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> NodeMap;
 
         NodeMapVisitor(NodeMap& map)
             : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)

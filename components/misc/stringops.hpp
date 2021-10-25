@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <string_view>
 #include <iterator>
+#include <functional>
 
 #include "utf8stream.hpp"
 
@@ -182,6 +183,21 @@ public:
         return out;
     }
 
+    struct CiEqual
+    {
+        bool operator()(const std::string& left, const std::string& right) const
+        {
+            return ciEqual(left, right);
+        }
+    };
+    struct CiHash
+    {
+        std::size_t operator()(std::string str) const
+        {
+            lowerCaseInPlace(str);
+            return std::hash<std::string>{}(str);
+        }
+    };
     struct CiComp
     {
         bool operator()(const std::string& left, const std::string& right) const
