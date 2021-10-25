@@ -303,7 +303,11 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<NpcCustomData> data(new NpcCustomData);
+            bool recalculate = false;
+            auto tempData = std::make_unique<NpcCustomData>();
+            NpcCustomData* data = tempData.get();
+            MWMechanics::CreatureCustomDataResetter resetter(ptr);
+            ptr.getRefData().setCustomData(std::move(tempData));
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -334,8 +338,6 @@ namespace MWClass
                 data->mNpcStats.setLevel(ref->mBase->mNpdt.mLevel);
                 data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt.mDisposition);
                 data->mNpcStats.setReputation(ref->mBase->mNpdt.mReputation);
-
-                data->mNpcStats.setNeedRecalcDynamicStats(false);
             }
             else
             {
@@ -351,7 +353,7 @@ namespace MWClass
                 autoCalculateAttributes(ref->mBase, data->mNpcStats);
                 autoCalculateSkills(ref->mBase, data->mNpcStats, ptr, spellsInitialised);
 
-                data->mNpcStats.setNeedRecalcDynamicStats(true);
+                recalculate = true;
             }
 
             // Persistent actors with 0 health do not play death animation
@@ -387,7 +389,9 @@ namespace MWClass
             data->mNpcStats.setGoldPool(gold);
 
             // store
-            ptr.getRefData().setCustomData(std::move(data));
+            resetter.mPtr = {};
+            if(recalculate)
+                data->mNpcStats.recalculateMagicka();
 
             // inventory
             // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items

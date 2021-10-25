@@ -86,6 +86,14 @@ namespace MWMechanics
     template void modifyBaseInventory<ESM::Creature>(const std::string& actorId, const std::string& itemId, int amount);
     template void modifyBaseInventory<ESM::NPC>(const std::string& actorId, const std::string& itemId, int amount);
     template void modifyBaseInventory<ESM::Container>(const std::string& containerId, const std::string& itemId, int amount);
+
+    struct CreatureCustomDataResetter
+    {
+        MWWorld::Ptr mPtr;
+
+        CreatureCustomDataResetter(const MWWorld::Ptr& ptr);
+        ~CreatureCustomDataResetter();
+    };
 }
 
 #endif

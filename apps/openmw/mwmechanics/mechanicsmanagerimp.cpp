@@ -77,7 +77,7 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats (ptr);
 
-        npcStats.setNeedRecalcDynamicStats(true);
+        npcStats.recalculateMagicka();
 
         const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
@@ -221,7 +221,6 @@ namespace MWMechanics
             creatureStats.getSpells().add(spell);
 
         // forced update and current value adjustments
-        mActors.updateActor (ptr, 0);
         mActors.updateActor (ptr, 0);
 
         for (int i=0; i<3; ++i)

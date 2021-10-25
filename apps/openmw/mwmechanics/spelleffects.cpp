@@ -279,7 +279,7 @@ namespace
 namespace MWMechanics
 {
 
-void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, bool& invalid, bool& receivedMagicDamage)
+void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, bool& invalid, bool& receivedMagicDamage, bool& recalculateMagicka)
 {
     const auto world = MWBase::Environment::get().getWorld();
     bool godmode = target == getPlayer() && world->getGodModeState();
@@ -609,7 +609,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 fortifySkill(target, effect, effect.mMagnitude);
             break;
         case ESM::MagicEffect::FortifyMaximumMagicka:
-            target.getClass().getCreatureStats(target).setNeedRecalcDynamicStats(true);
+            recalculateMagicka = true;
             break;
         case ESM::MagicEffect::AbsorbHealth:
         case ESM::MagicEffect::AbsorbMagicka:
@@ -687,13 +687,14 @@ bool applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, Ac
     const auto world = MWBase::Environment::get().getWorld();
     bool invalid = false;
     bool receivedMagicDamage = false;
+    bool recalculateMagicka = false;
     if(effect.mEffectId == ESM::MagicEffect::Corprus && spellParams.shouldWorsen())
     {
         spellParams.worsen();
         for(auto& otherEffect : spellParams.getEffects())
         {
             if(isCorprusEffect(otherEffect))
-                applyMagicEffect(target, caster, spellParams, otherEffect, invalid, receivedMagicDamage);
+                applyMagicEffect(target, caster, spellParams, otherEffect, invalid, receivedMagicDamage, recalculateMagicka);
         }
         if(target == getPlayer())
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
@@ -815,7 +816,7 @@ bool applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, Ac
         if(effect.mEffectId == ESM::MagicEffect::Corprus)
             spellParams.worsen();
         else
-            applyMagicEffect(target, caster, spellParams, effect, invalid, receivedMagicDamage);
+            applyMagicEffect(target, caster, spellParams, effect, invalid, receivedMagicDamage, recalculateMagicka);
         effect.mMagnitude = magnitude;
         magnitudes.add(EffectKey(effect.mEffectId, effect.mArg), EffectParam(effect.mMagnitude - oldMagnitude));
     }
@@ -832,6 +833,8 @@ bool applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, Ac
         effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
     if (receivedMagicDamage && target == getPlayer())
         MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+    if(recalculateMagicka)
+        target.getClass().getCreatureStats(target).recalculateMagicka();
     return false;
 }
 
@@ -981,7 +984,7 @@ void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellPara
                 fortifySkill(target, effect, -effect.mMagnitude);
             break;
         case ESM::MagicEffect::FortifyMaximumMagicka:
-            target.getClass().getCreatureStats(target).setNeedRecalcDynamicStats(true);
+            target.getClass().getCreatureStats(target).recalculateMagicka();
             break;
         case ESM::MagicEffect::AbsorbAttribute:
             {

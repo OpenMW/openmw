@@ -112,7 +112,10 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
+            auto tempData = std::make_unique<CreatureCustomData>();
+            CreatureCustomData* data = tempData.get();
+            MWMechanics::CreatureCustomDataResetter resetter(ptr);
+            ptr.getRefData().setCustomData(std::move(tempData));
 
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
@@ -156,10 +159,7 @@ namespace MWClass
 
             data->mCreatureStats.setGoldPool(ref->mBase->mData.mGold);
 
-            data->mCreatureStats.setNeedRecalcDynamicStats(false);
-
-            // store
-            ptr.getRefData().setCustomData(std::move(data));
+            resetter.mPtr = {};
 
             getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
 
