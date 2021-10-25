@@ -341,12 +341,6 @@ namespace Resource
         node->accept(*shaderVisitor);
     }
 
-    void SceneManager::reinstateRemovedState(osg::ref_ptr<osg::Node> node)
-    {
-        osg::ref_ptr<Shader::ReinstateRemovedStateVisitor> reinstateRemovedStateVisitor = new Shader::ReinstateRemovedStateVisitor(false);
-        node->accept(*reinstateRemovedStateVisitor);
-    }
-
     void SceneManager::setClampLighting(bool clamp)
     {
         mClampLighting = clamp;
