@@ -32,7 +32,7 @@ std::string ESM::loadLuaBinaryData(ESMReader& esm)
     {
         esm.getSubHeader();
         data.resize(esm.getSubSize());
-        esm.getExact(data.data(), data.size());
+        esm.getExact(data.data(), static_cast<int>(data.size()));
     }
     return data;
 }

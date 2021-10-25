@@ -82,7 +82,7 @@ namespace MWClass
 
     const Creature::GMST& Creature::getGmst()
     {
-        static const GMST gmst = []
+        static const GMST staticGmst = []
         {
             GMST gmst;
 
@@ -105,7 +105,7 @@ namespace MWClass
 
             return gmst;
         } ();
-        return gmst;
+        return staticGmst;
     }
 
     void Creature::ensureCustomData (const MWWorld::Ptr& ptr) const

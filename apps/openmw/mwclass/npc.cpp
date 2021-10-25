@@ -266,7 +266,7 @@ namespace MWClass
 
     const Npc::GMST& Npc::getGmst()
     {
-        static const GMST gmst = []
+        static const GMST staticGmst = []
         {
             GMST gmst;
 
@@ -296,7 +296,7 @@ namespace MWClass
 
             return gmst;
         } ();
-        return gmst;
+        return staticGmst;
     }
 
     void Npc::ensureCustomData (const MWWorld::Ptr& ptr) const
