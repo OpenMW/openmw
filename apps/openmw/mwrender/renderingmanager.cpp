@@ -526,7 +526,7 @@ namespace MWRender
         if (forceShaders)
         {
             // We handle alpha testing in shaders, so this prevents redundant glAlphaFunc calls
-            mRootNode->getOrCreateStateSet()->setAttribute(new osg::AlphaFunc(osg::AlphaFunc::ALWAYS, 1.0f), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            mRootNode->getOrCreateStateSet()->setAttribute(new osg::AlphaFunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
             // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
             mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
         }
