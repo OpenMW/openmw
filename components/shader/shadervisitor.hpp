@@ -112,17 +112,6 @@ namespace Shader
         osg::ref_ptr<const osg::Program> mProgramTemplate;
     };
 
-    class ReinstateRemovedStateVisitor : public osg::NodeVisitor
-    {
-    public:
-        ReinstateRemovedStateVisitor(bool allowedToModifyStateSets);
-
-        void apply(osg::Node& node) override;
-
-    private:
-        bool mAllowedToModifyStateSets;
-    };
-
 }
 
 #endif
