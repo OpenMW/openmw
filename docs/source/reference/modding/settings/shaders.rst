@@ -135,7 +135,7 @@ apply lighting to environment maps
 
 Normally environment map reflections aren't affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
 Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
-Affected objects will use shaders.
+Bear in mind that this will force OpenMW to use shaders as if :ref:`force shaders` was enabled. A keen developer may be able to implement compatibility with fixed-function mode, but it may not look exactly the same.
 
 radial fog
 ----------
