@@ -3,6 +3,7 @@
 #include <limits>
 #include <cstdlib>
 
+#include <osg/AlphaFunc>
 #include <osg/Light>
 #include <osg/LightModel>
 #include <osg/Fog>
@@ -27,7 +28,6 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 
-#include <components/shader/removedalphafunc.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include <components/settings/settings.hpp>
@@ -523,10 +523,13 @@ namespace MWRender
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
 
-        // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
-        mRootNode->getOrCreateStateSet()->setAttribute(Shader::RemovedAlphaFunc::getInstance(GL_ALWAYS));
-        // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
-        mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF);
+        if (forceShaders)
+        {
+            // We handle alpha testing in shaders, so this prevents redundant glAlphaFunc calls
+            mRootNode->getOrCreateStateSet()->setAttribute(new osg::AlphaFunc(GL_ALWAYS), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
+            mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+        }
 
         if (reverseZ)
         {
