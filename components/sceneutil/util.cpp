@@ -113,8 +113,9 @@ osg::StateSet* GlowUpdater::getStateSet(float time)
             texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
             texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
             texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_COLOR);
-            stateset->setTextureAttributeAndModes(mTexUnit, texEnv, osg::StateAttribute::ON);
-            stateset->addUniform(new osg::Uniform("envMapColor", mColor));
+            stateset->setTextureAttributeAndModes(mTexUnit, texEnv, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            stateset->addUniform(new osg::Uniform("envMapColor", mColor), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            stateset->addUniform(new osg::Uniform("envMap", mTexUnit), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
             stateset->setDefine("GLOW");
         }
     }
