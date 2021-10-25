@@ -109,7 +109,6 @@ namespace Shader
         , mAllowedToModifyStateSets(true)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
-        , mApplyLightingToEnvMaps(false)
         , mConvertAlphaTestToAlphaToCoverage(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
@@ -259,10 +258,6 @@ namespace Shader
                                     writableStateSet = getWritableStateSet(node);
                                 // Bump maps are off by default as well
                                 writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
-                            }
-                            else if (texName == "envMap" && mApplyLightingToEnvMaps)
-                            {
-                                mRequirements.back().mShaderRequired = true;
                             }
                         }
                         else
@@ -749,11 +744,6 @@ namespace Shader
     void ShaderVisitor::setSpecularMapPattern(const std::string &pattern)
     {
         mSpecularMapPattern = pattern;
-    }
-
-    void ShaderVisitor::setApplyLightingToEnvMaps(bool apply)
-    {
-        mApplyLightingToEnvMaps = apply;
     }
 
     void ShaderVisitor::setConvertAlphaTestToAlphaToCoverage(bool convert)
