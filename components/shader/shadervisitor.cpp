@@ -233,8 +233,7 @@ namespace Shader
             }
         }
 
-        const osg::StateSet::AttributeList& attributes = stateset->getAttributeList();
-        for (osg::StateSet::AttributeList::const_iterator it = attributeMap->begin(); it != attributeMap->end(); ++it)
+        for (osg::StateSet::AttributeList::const_iterator it = stateset->getAttributeList().begin(); it != stateset->getAttributeList().end(); ++it)
         {
             if (it->first.first == osg::StateAttribute::MATERIAL)
             {
