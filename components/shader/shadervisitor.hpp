@@ -41,8 +41,6 @@ namespace Shader
 
         void setSpecularMapPattern(const std::string& pattern);
 
-        void setApplyLightingToEnvMaps(bool apply);
-
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
 
         void apply(osg::Node& node) override;
