@@ -313,10 +313,7 @@ namespace Shader
     void ShaderVisitor::createProgram(const ShaderRequirements &reqs)
     {
         if (!reqs.mShaderRequired && !mForceShaders)
-        {
-            ensureFFP(*reqs.mNode);
             return;
-        }
 
         osg::Node& node = *reqs.mNode;
         osg::StateSet* writableStateSet = nullptr;
@@ -440,8 +437,6 @@ namespace Shader
 
             createProgram(reqs);
         }
-        else
-            ensureFFP(geometry);
 
         if (needPop)
             popRequirements();
@@ -476,8 +471,6 @@ namespace Shader
                     morph->setSourceGeometry(sourceGeometry);
             }
         }
-        else
-            ensureFFP(drawable);
 
         if (needPop)
             popRequirements();
