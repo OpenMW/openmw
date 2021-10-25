@@ -64,8 +64,6 @@ namespace Shader
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
 
-        bool mApplyLightingToEnvMaps;
-
         bool mConvertAlphaTestToAlphaToCoverage;
 
         ShaderManager& mShaderManager;
