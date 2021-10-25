@@ -309,10 +309,11 @@ namespace MWRender
         auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(Settings::Manager::getString("lighting method", "Shaders"));
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
-        // Shadows and radial fog have problems with fixed-function mode
-        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders")
-                            || Settings::Manager::getBool("force shaders", "Shaders")
+        // Many features have problems with fixed-function mode
+        bool forceShaders = Settings::Manager::getBool("force shaders", "Shaders")
+                            || Settings::Manager::getBool("radial fog", "Shaders")
                             || Settings::Manager::getBool("enable shadows", "Shadows")
+                            || Settings::Manager::getBool("apply lighting to environment maps", "Shaders")
                             || lightingMethod != SceneUtil::LightingMethod::FFP
                             || reverseZ;
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
@@ -323,7 +324,6 @@ namespace MWRender
         resourceSystem->getSceneManager()->setNormalHeightMapPattern(Settings::Manager::getString("normal height map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::Manager::getBool("auto use object specular maps", "Shaders"));
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
-        resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
         resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1);
 
         // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this depends on support for various OpenGL extensions.
