@@ -306,7 +306,6 @@ namespace Resource
         , mClampLighting(true)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
-        , mApplyLightingToEnvMaps(false)
         , mLightingMethod(SceneUtil::LightingMethod::FFP)
         , mConvertAlphaTestToAlphaToCoverage(false)
         , mDepthFormat(0)
@@ -390,11 +389,6 @@ namespace Resource
     void SceneManager::setSpecularMapPattern(const std::string &pattern)
     {
         mSpecularMapPattern = pattern;
-    }
-
-    void SceneManager::setApplyLightingToEnvMaps(bool apply)
-    {
-        mApplyLightingToEnvMaps = apply;
     }
 
     void SceneManager::setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported)
@@ -880,7 +874,6 @@ namespace Resource
         shaderVisitor->setNormalHeightMapPattern(mNormalHeightMapPattern);
         shaderVisitor->setAutoUseSpecularMaps(mAutoUseSpecularMaps);
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
-        shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
         return shaderVisitor;
     }
