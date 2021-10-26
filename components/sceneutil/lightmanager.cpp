@@ -1158,7 +1158,7 @@ namespace SceneUtil
         return mSun;
     }
 
-    size_t LightManager::HashLightList::operator()(const LightList& lightList)
+    size_t LightManager::HashLightList::operator()(const LightList& lightList) const
     {
         size_t hash = 0;
         for (size_t i = 0; i < lightList.size(); ++i)
