@@ -76,6 +76,8 @@ namespace Resource
         Shader::ShaderManager& getShaderManager();
 
         /// Re-create shaders for this node, need to call this if alpha testing, texture stages or vertex color mode have changed.
+        /// @note We should avoid calling this method because it lacks a state sharing mechanism and produces inefficient scene graphs.
+        /// In addition, calling this method on subgraphs that already had shaders attached or on subgraphs that have changed substantially since the last recreateShaders() invocation may lead to undesired results.
         void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects", bool forceShadersForNode = false, const osg::Program* programTemplate = nullptr);
 
         /// @see ShaderVisitor::setForceShaders
