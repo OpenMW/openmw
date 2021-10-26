@@ -108,7 +108,7 @@ namespace MWWorld
         /// Look up the given ID in 'all'. Returns 0 if not found.
         int find(const std::string &id) const
         {
-            IDMap:const_iterator it = mIds.find(id);
+            IDMap::const_iterator it = mIds.find(id);
             if (it == mIds.end()) {
                 return 0;
             }
