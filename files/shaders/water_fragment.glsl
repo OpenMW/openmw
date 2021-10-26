@@ -105,11 +105,11 @@ vec4 circle(vec2 coords, vec2 uv, float adjusted_time)
   float height = blip(ringfollower);
   vec4 ret = vec4(normal.x, normal.y, height, height);
   ret.xyw *= energy;
-  ret.xyz = normalize(ret.xyz);
+  ret.xyz = normalize(ret.x, ret.y, ret.z+0.001);
   return ret;
 }
 
-const float RAIN_RING_TIME_OFFSET = 1/6.0;
+const float RAIN_RING_TIME_OFFSET = 1.0/6.0;
 vec4 rain(vec2 uv, float time)
 {
   vec2 i_part = floor(uv * RAIN_RIPPLE_GAPS);
