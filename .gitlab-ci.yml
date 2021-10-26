@@ -422,7 +422,7 @@ Daily_Windows_MSBuild_Engine_RelWithDebInfo:on-schedule:
     - .Windows_MSBuild_Base
   variables:
     <<: *engine-targets
-    config: "RelWithDebInfo"
+    config: "Release"
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
