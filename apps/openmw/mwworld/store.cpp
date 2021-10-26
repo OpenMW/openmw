@@ -353,9 +353,9 @@ namespace MWWorld
 
         // Store it
         auto idx = lt.mIndex;
-        auto it = ltexl.insert_or_assign(idx, std::move(lt)).first;
+        ltexl[idx] = std::move(lt);
 
-        return RecordId(it->second.mId, isDeleted);
+        return RecordId(ltexl[idx].mId, isDeleted);
     }
     RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm)
     {
