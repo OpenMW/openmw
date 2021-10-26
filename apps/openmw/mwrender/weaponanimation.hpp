@@ -42,8 +42,7 @@ namespace MWRender
         void releaseArrow(MWWorld::Ptr actor, float attackStrength);
 
         /// Add WeaponAnimation-related controllers to \a nodes and store the added controllers in \a map.
-        void addControllers(const std::map<std::string, osg::ref_ptr<osg::MatrixTransform> >& nodes,
-                std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>>& map, osg::Node* objectRoot);
+        void addControllers(const Animation::NodeMap& nodes, std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>>& map, osg::Node* objectRoot);
 
         void deleteControllers();
 

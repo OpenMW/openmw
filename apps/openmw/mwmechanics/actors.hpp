@@ -43,10 +43,6 @@ namespace MWMechanics
 
             void adjustMagicEffects (const MWWorld::Ptr& creature, float duration);
 
-            void calculateDynamicStats (const MWWorld::Ptr& ptr);
-
-            void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration);
-
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
             void updateDrowning (const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer);

@@ -65,8 +65,6 @@ namespace MWMechanics
         std::string mLastHitObject; // The last object to hit this actor
         std::string mLastHitAttemptObject; // The last object to attempt to hit this actor
 
-        bool mRecalcMagicka;
-
         // For merchants: the last time items were restocked and gold pool refilled.
         MWWorld::TimeStamp mLastRestock;
 
@@ -103,8 +101,7 @@ namespace MWMechanics
         DrawState_ getDrawState() const;
         void setDrawState(DrawState_ state);
 
-        bool needToRecalcDynamicStats();
-        void setNeedRecalcDynamicStats(bool val);
+        void recalculateMagicka();
 
         float getFallHeight() const;
         void addToFallHeight(float height);

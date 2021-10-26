@@ -7,8 +7,10 @@
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/misc/stringops.hpp>
 
 #include <vector>
+#include <unordered_map>
 
 namespace ESM
 {
@@ -157,6 +159,8 @@ public:
 
     virtual bool updateCarriedLeftVisible(const int weaptype) const { return false; };
 
+    typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> NodeMap;
+
 protected:
     class AnimationTime : public SceneUtil::ControllerSource
     {
@@ -250,8 +254,6 @@ protected:
 
     std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
-    // Stored in all lowercase for a case-insensitive lookup
-    typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
     mutable NodeMap mNodeMap;
     mutable bool mNodeMapCreated;
 

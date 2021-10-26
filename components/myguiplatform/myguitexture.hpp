@@ -15,6 +15,7 @@ namespace osg
 {
     class Image;
     class Texture2D;
+    class StateSet;
 }
 
 namespace Resource
@@ -31,6 +32,7 @@ namespace osgMyGUI
 
         osg::ref_ptr<osg::Image> mLockedImage;
         osg::ref_ptr<osg::Texture2D> mTexture;
+        osg::ref_ptr<osg::StateSet> mInjectState;
         MyGUI::PixelFormat mFormat;
         MyGUI::TextureUsage mUsage;
         size_t mNumElemBytes;
@@ -40,8 +42,10 @@ namespace osgMyGUI
 
     public:
         OSGTexture(const std::string &name, Resource::ImageManager* imageManager);
-        OSGTexture(osg::Texture2D* texture);
+        OSGTexture(osg::Texture2D* texture, osg::StateSet* injectState = nullptr);
         virtual ~OSGTexture();
+
+        osg::StateSet* getInjectState() { return mInjectState; }
 
         const std::string& getName() const override { return mName; }
 

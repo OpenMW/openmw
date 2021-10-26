@@ -526,10 +526,10 @@ namespace MWPhysics
 
     void PhysicsSystem::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
-        if (auto found = mObjects.find(old.mRef); found != mObjects.end())
-            found->second->updatePtr(updated);
-        else if (auto found = mActors.find(old.mRef); found != mActors.end())
-            found->second->updatePtr(updated);
+        if (auto foundObject = mObjects.find(old.mRef); foundObject != mObjects.end())
+            foundObject->second->updatePtr(updated);
+        else if (auto foundActor = mActors.find(old.mRef); foundActor != mActors.end())
+            foundActor->second->updatePtr(updated);
 
         for (auto& [_, actor] : mActors)
         {

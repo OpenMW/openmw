@@ -713,7 +713,7 @@ PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const st
     osg::ref_ptr<const osg::Node> templateNode = mResourceSystem->getSceneManager()->getTemplate(model);
 
     const NodeMap& nodeMap = getNodeMap();
-    NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
+    NodeMap::const_iterator found = nodeMap.find(bonename);
     if (found == nodeMap.end())
         throw std::runtime_error("Can't find attachment node " + bonename);
 
@@ -813,7 +813,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
                 if (weaponBonename != bonename)
                 {
                     const NodeMap& nodeMap = getNodeMap();
-                    NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(weaponBonename));
+                    NodeMap::const_iterator found = nodeMap.find(weaponBonename);
                     if (found != nodeMap.end())
                         bonename = weaponBonename;
                 }

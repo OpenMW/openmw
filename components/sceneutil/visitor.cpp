@@ -51,18 +51,17 @@ namespace SceneUtil
 
     void NodeMapVisitor::apply(osg::MatrixTransform& trans)
     {
-        // Take transformation for first found node in file
-        std::string originalNodeName = Misc::StringUtils::lowerCase(trans.getName());
+        // Choose first found node in file
 
         if (trans.libraryName() == std::string("osgAnimation"))
         {
+            std::string nodeName = trans.getName();
             // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses whitespace-separated names)
-            std::replace(originalNodeName.begin(), originalNodeName.end(), '_', ' ');
+            std::replace(nodeName.begin(), nodeName.end(), '_', ' ');
+            mMap.emplace(nodeName, &trans);
         }
-
-        const std::string nodeName = originalNodeName;
-
-        mMap.emplace(nodeName, &trans);
+        else
+            mMap.emplace(trans.getName(), &trans);
 
         traverse(trans);
     }

@@ -74,7 +74,7 @@ PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::st
     osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->getInstance(model, parent);
 
     const NodeMap& nodeMap = getNodeMap();
-    NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
+    NodeMap::const_iterator found = nodeMap.find(bonename);
     if (found == nodeMap.end())
         return PartHolderPtr();
 
