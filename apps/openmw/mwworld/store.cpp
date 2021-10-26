@@ -543,7 +543,7 @@ namespace MWWorld
         newCell.mAmbi.mSunlight = 0;
         newCell.mAmbi.mFog = 0;
         newCell.mAmbi.mFogDensity = 0;
-        return &mExt.emplace(key, std::move(newCell)).first->second;
+        return &mExt.insert(std::make_pair(key, newCell)).first->second;
     }
     const ESM::Cell *Store<ESM::Cell>::find(const std::string &id) const
     {
@@ -750,25 +750,19 @@ namespace MWWorld
             const std::string cellType = (cell.isExterior()) ? "exterior" : "interior";
             throw std::runtime_error("Failed to create " + cellType + " cell");
         }
-        ESM::Cell *ptr;
         if (cell.isExterior()) {
             std::pair<int, int> key(cell.getGridX(), cell.getGridY());
 
             // duplicate insertions are avoided by search(ESM::Cell &)
-            std::pair<DynamicExt::iterator, bool> result =
-                mDynamicExt.insert(std::make_pair(key, cell));
-
-            ptr = &result.first->second;
-            mSharedExt.push_back(ptr);
+            DynamicExt::iterator result = mDynamicExt.emplace(key, cell).first;
+            mSharedExt.push_back(&result->second);
+            return &result->second;
         } else {
             // duplicate insertions are avoided by search(ESM::Cell &)
-            std::pair<DynamicInt::iterator, bool> result =
-                mDynamicInt.insert(std::make_pair(cell.mName, cell));
-
-            ptr = &result.first->second;
-            mSharedInt.push_back(ptr);
+            DynamicInt::iterator result = mDynamicInt.emplace(cell.mName, cell).first;
+            mSharedInt.push_back(&result->second);
+            return &result->second;
         }
-        return ptr;
     }
     bool Store<ESM::Cell>::erase(const ESM::Cell &cell)
     {
@@ -1038,6 +1032,7 @@ namespace MWWorld
         else
         {
             found->second.loadData(esm, isDeleted);
+            dialogue.mId = found->second.mId;
         }
 
         return RecordId(dialogue.mId, isDeleted);
