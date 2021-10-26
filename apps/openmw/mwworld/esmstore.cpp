@@ -59,7 +59,7 @@ namespace
         }
     }
 
-    std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions, const MWWorld::Store<ESM::Class>& classes, const std::map<std::string, ESM::NPC>& npcs)
+    std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions, const MWWorld::Store<ESM::Class>& classes, const MWWorld::Store<ESM::NPC>::Dynamic& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
         std::string defaultCls;
@@ -112,8 +112,8 @@ namespace
 
     // Custom enchanted items can reference scripts that no longer exist, this doesn't necessarily mean the base item no longer exists however.
     // So instead of removing the item altogether, we're only removing the script.
-    template<class T>
-    void removeMissingScripts(const MWWorld::Store<ESM::Script>& scripts, std::map<std::string, T>& items)
+    template<class MapT>
+    void removeMissingScripts(const MWWorld::Store<ESM::Script>& scripts, MapT& items)
     {
         for(auto& [id, item] : items)
         {
