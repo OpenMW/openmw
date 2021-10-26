@@ -60,28 +60,3 @@ jobs:
 #      with:
 #        path: ./build_artifact.7z
 #        name: build_artifact.7z
-
-  MacOS:
-    runs-on: macos-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Install Building Dependancies
-      run: CI/before_install.osx.sh
-
-    - name: Prime ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
-        max-size: 1000M
-
-    - name: Configure
-      run: |
-        rm -fr build  # remove the build directory
-        CI/before_script.osx.sh
-
-    - name: Build
-      run: |
-        cd build 
-        make -j $(sysctl -n hw.logicalcpu) package
