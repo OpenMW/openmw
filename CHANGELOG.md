@@ -5,6 +5,7 @@
     Bug #3246: ESSImporter: Most NPCs are dead on save load
     Bug #3514: Editing a reference's position after loading an esp file makes the reference disappear
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
+    Bug #3792: 1 frame late magicka recalc breaks early scripted magicka reactions to Intelligence change
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
     Bug #3905: Great House Dagoth issues
     Bug #4203: Resurrecting an actor should close the loot GUI

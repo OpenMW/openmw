@@ -240,10 +240,7 @@ namespace MWMechanics
     {
         // magic effects
         adjustMagicEffects (ptr, duration);
-        if (ptr.getClass().getCreatureStats(ptr).needToRecalcDynamicStats())
-            calculateDynamicStats (ptr);
 
-        calculateCreatureStatModifiers (ptr, duration);
         // fatigue restoration
         calculateRestoration(ptr, duration);
     }
@@ -654,29 +651,6 @@ namespace MWMechanics
             updateSummons(creature, mTimerDisposeSummonsCorpses == 0.f);
     }
 
-    void Actors::calculateDynamicStats (const MWWorld::Ptr& ptr)
-    {
-        CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
-
-        float intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
-
-        float base = 1.f;
-        if (ptr == getPlayer())
-            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPCbaseMagickaMult")->mValue.getFloat();
-        else
-            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->mValue.getFloat();
-
-        double magickaFactor = base +
-            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
-
-        DynamicStat<float> magicka = creatureStats.getMagicka();
-        float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
-        float currentToBaseRatio = magicka.getBase() > 0 ? magicka.getCurrent() / magicka.getBase() : 0;
-        magicka.setModified(magicka.getModified() + diff, 0);
-        magicka.setCurrent(magicka.getBase() * currentToBaseRatio, false, true);
-        creatureStats.setMagicka(magicka);
-    }
-
     void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, double hours, bool sleep)
     {
         MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
@@ -769,14 +743,6 @@ namespace MWMechanics
 
         fatigue.setCurrent (fatigue.getCurrent() + duration * x);
         stats.setFatigue (fatigue);
-    }
-
-    void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration)
-    {
-        CreatureStats &creatureStats = ptr.getClass().getCreatureStats(ptr);
-
-        if (creatureStats.needToRecalcDynamicStats())
-            calculateDynamicStats(ptr);
     }
 
     bool Actors::isAttackPreparing(const MWWorld::Ptr& ptr)
@@ -1711,10 +1677,6 @@ namespace MWMechanics
                 if (iter->first.getType() == ESM::Creature::sRecordId)
                     soulTrap(iter->first);
 
-                // Magic effects will be reset later, and the magic effect that could kill the actor
-                // needs to be determined now
-                calculateCreatureStatModifiers(iter->first, 0);
-
                 if (cls.isEssential(iter->first))
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
             }
@@ -1730,8 +1692,6 @@ namespace MWMechanics
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
 
-                // Reset dynamic stats, attributes and skills
-                calculateCreatureStatModifiers(iter->first, 0);
                 stats.getMagicEffects().add(ESM::MagicEffect::Vampirism, vampirism);
 
                 if (isPlayer)
@@ -1816,10 +1776,6 @@ namespace MWMechanics
                 continue;
 
             adjustMagicEffects (iter->first, duration);
-            if (iter->first.getClass().getCreatureStats(iter->first).needToRecalcDynamicStats())
-                calculateDynamicStats (iter->first);
-
-            calculateCreatureStatModifiers (iter->first, duration);
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
             if (animation)
@@ -2209,7 +2165,6 @@ namespace MWMechanics
     void Actors::updateMagicEffects(const MWWorld::Ptr &ptr)
     {
         adjustMagicEffects(ptr, 0.f);
-        calculateCreatureStatModifiers(ptr, 0.f);
     }
 
     bool Actors::isReadyToBlock(const MWWorld::Ptr &ptr) const
