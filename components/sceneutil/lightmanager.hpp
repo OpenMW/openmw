@@ -209,7 +209,7 @@ namespace SceneUtil
 
         struct HashLightList
         {
-            std::size_t operator()(const LightList&);
+            std::size_t operator()(const LightList&) const;
         };
         using LightStateSetMap = std::unordered_map<LightList, osg::ref_ptr<osg::StateSet>, HashLightList>;
         LightStateSetMap mStateSetCache[2];
