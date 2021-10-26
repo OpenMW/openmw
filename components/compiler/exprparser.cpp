@@ -632,7 +632,7 @@ namespace Compiler
     }
 
     int ExprParser::parseArguments (const std::string& arguments, Scanner& scanner,
-        std::vector<Interpreter::Type_Code>& code, int ignoreKeyword)
+        std::vector<Interpreter::Type_Code>& code, int ignoreKeyword, bool expectNames)
     {
         bool optional = false;
         int optionalCount = 0;
@@ -717,6 +717,8 @@ namespace Compiler
 
                 if (optional)
                     parser.setOptional (true);
+                if(expectNames)
+                    scanner.enableExpectName();
 
                 scanner.scan (parser);
 

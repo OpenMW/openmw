@@ -59,6 +59,7 @@
     Bug #6323: Wyrmhaven: Alboin doesn't follower the player character out of his house
     Bug #6326: Detect Enchantment/Key should detect items in unresolved containers
     Bug #6347: PlaceItem/PlaceItemCell/PlaceAt should work with levelled creatures
+    Bug #6363: Some scripts in Morrowland fail to work
     Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
