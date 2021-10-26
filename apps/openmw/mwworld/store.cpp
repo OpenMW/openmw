@@ -342,7 +342,7 @@ namespace MWWorld
             ESM::LandTexture* tex = const_cast<ESM::LandTexture*>(search(lt.mIndex, i));
             if (tex)
             {
-                if (Misc::StringUtils::ciEqual(texId, ltId))
+                if (Misc::StringUtils::ciEqual(tex->mId, lt.mId))
                     tex->mTexture = lt.mTexture;
             }
         }
