@@ -250,16 +250,13 @@ namespace MWWorld
     template<typename T>
     bool Store<T>::erase(const std::string &id)
     {
-        typename Dynamic::iterator it = mDynamic.find(id);
-        if (it == mDynamic.end()) {
+        if (!mDynamic.erase(id))
             return false;
-        }
-        mDynamic.erase(it);
 
         // have to reinit the whole shared part
         assert(mShared.size() >= mStatic.size());
         mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
-        for (it = mDynamic.begin(); it != mDynamic.end(); ++it) {
+        for (auto it = mDynamic.begin(); it != mDynamic.end(); ++it) {
             mShared.push_back(&it->second);
         }
         return true;
