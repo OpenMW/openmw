@@ -396,6 +396,15 @@ Windows_Ninja_Tests_RelWithDebInfo:
     - MSVC2019_64/*/*/*/*/*/*/*.log
     - MSVC2019_64/*/*/*/*/*/*/*/*.log
 
+Daily_Windows_MSBuild_Engine_Release:on-schedule:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *engine-targets
+    config: "Release"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
 Windows_MSBuild_Engine_Release:
   extends:
     - .Windows_MSBuild_Base
@@ -416,15 +425,6 @@ Windows_MSBuild_Engine_RelWithDebInfo:
   variables:
     <<: *engine-targets
     config: "RelWithDebInfo"
-
-Daily_Windows_MSBuild_Engine_RelWithDebInfo:on-schedule:
-  extends:
-    - .Windows_MSBuild_Base
-  variables:
-    <<: *engine-targets
-    config: "Release"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
 
 Windows_MSBuild_CS_Release:
   extends:
