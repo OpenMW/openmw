@@ -1158,29 +1158,35 @@ namespace SceneUtil
         return mSun;
     }
 
+    size_t LightManager::HashLightList::operator()(const LightList& lightList)
+    {
+        size_t hash = 0;
+        for (size_t i = 0; i < lightList.size(); ++i)
+            Misc::hashCombine(hash, lightList[i]->mLightSource->getId());
+        return hash;
+    }
+
     osg::ref_ptr<osg::StateSet> LightManager::getLightListStateSet(const LightList& lightList, size_t frameNum, const osg::RefMatrix* viewMatrix)
     {
         // possible optimization: return a StateSet containing all requested lights plus some extra lights (if a suitable one exists)
-        size_t hash = 0;
-        for (size_t i = 0; i < lightList.size(); ++i)
+
+        if (getLightingMethod() == LightingMethod::SingleUBO)
         {
-            auto id = lightList[i]->mLightSource->getId();
-            Misc::hashCombine(hash, id);
+            for (size_t i = 0; i < lightList.size(); ++i)
+            {
+                auto id = lightList[i]->mLightSource->getId();
+                if (getLightIndexMap(frameNum).find(id) != getLightIndexMap(frameNum).end())
+                    continue;
 
-            if (getLightingMethod() != LightingMethod::SingleUBO)
-                continue;
-
-            if (getLightIndexMap(frameNum).find(id) != getLightIndexMap(frameNum).end())
-                continue;
-
-            int index = getLightIndexMap(frameNum).size() + 1;
-            updateGPUPointLight(index, lightList[i]->mLightSource, frameNum, viewMatrix);
-            getLightIndexMap(frameNum).emplace(lightList[i]->mLightSource->getId(), index);
+                int index = getLightIndexMap(frameNum).size() + 1;
+                updateGPUPointLight(index, lightList[i]->mLightSource, frameNum, viewMatrix);
+                getLightIndexMap(frameNum).emplace(id, index);
+            }
         }
 
         auto& stateSetCache = mStateSetCache[frameNum%2];
 
-        auto found = stateSetCache.find(hash);
+        auto found = stateSetCache.find(lightList);
         if (found != stateSetCache.end())
         {
             mStateSetGenerator->update(found->second, lightList, frameNum);
@@ -1188,7 +1194,7 @@ namespace SceneUtil
         }
 
         auto stateset = mStateSetGenerator->generate(lightList, frameNum);
-        stateSetCache.emplace(hash, stateset);
+        stateSetCache.emplace(lightList, stateset);
         return stateset;
     }
 
