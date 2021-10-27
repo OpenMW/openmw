@@ -13,7 +13,7 @@ namespace SceneUtil
 {
 
 template <class Derived, typename NodeType=osg::Node*, typename VisitorType=osg::NodeVisitor*>
-class NodeCallback : public virtual osg::Callback
+class NodeCallback : public osg::Callback
 {
 public:
     NodeCallback(){}
