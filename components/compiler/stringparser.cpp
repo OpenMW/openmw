@@ -86,6 +86,12 @@ namespace Compiler
         return Parser::parseSpecial (code, loc, scanner);
     }
 
+    bool StringParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
+    {
+        reportWarning("Treating integer argument as a string", loc);
+        return parseName(loc.mLiteral, loc, scanner);
+    }
+
     void StringParser::append (std::vector<Interpreter::Type_Code>& code)
     {
         std::copy (mCode.begin(), mCode.end(), std::back_inserter (code));

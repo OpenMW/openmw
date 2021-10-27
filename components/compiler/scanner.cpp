@@ -130,7 +130,8 @@ namespace Compiler
         {
             bool cont = false;
 
-            if (scanInt (c, parser, cont))
+            bool scanned = mExpectName ? scanName(c, parser, cont) : scanInt(c, parser, cont);
+            if (scanned)
             {
                 mLoc.mLiteral.clear();
                 return cont;
@@ -387,6 +388,8 @@ namespace Compiler
 
     bool Scanner::scanSpecial (MultiChar& c, Parser& parser, bool& cont)
     {
+        bool expectName = mExpectName;
+        mExpectName = false;
         int special = -1;
 
         if (c=='\n')
@@ -541,15 +544,16 @@ namespace Compiler
 
         if (special==S_newline)
             mLoc.mLiteral = "<newline>";
-        else if (mExpectName && (special == S_member || special == S_minus))
+        else if (expectName && (special == S_member || special == S_minus))
         {
-            mExpectName = false;
             bool tolerant = mTolerantNames;
             mTolerantNames = true;
             bool out = scanName(c, parser, cont);
             mTolerantNames = tolerant;
             return out;
         }
+        else if (expectName && special == S_comma)
+            mExpectName = true;
 
         TokenLoc loc (mLoc);
         mLoc.mLiteral.clear();
