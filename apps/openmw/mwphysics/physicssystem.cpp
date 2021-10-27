@@ -618,7 +618,7 @@ namespace MWPhysics
         osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(mesh);
 
         // Try to get shape from basic model as fallback for creatures
-        if (!ptr.getClass().isNpc() && shape && shape->mCollisionBox.extents.length2() == 0)
+        if (!ptr.getClass().isNpc() && shape && shape->mCollisionBox.mExtents.length2() == 0)
         {
             const std::string fallbackModel = ptr.getClass().getModel(ptr);
             if (fallbackModel != mesh)
@@ -643,7 +643,7 @@ namespace MWPhysics
     {
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
         assert(shapeInstance);
-        float radius = computeRadius ? shapeInstance->mCollisionBox.extents.length() / 2.f : 1.f;
+        float radius = computeRadius ? shapeInstance->mCollisionBox.mExtents.length() / 2.f : 1.f;
 
         mProjectileId++;
 
