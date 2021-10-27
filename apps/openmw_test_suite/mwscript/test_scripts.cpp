@@ -346,23 +346,28 @@ End)mwscript";
     TEST_F(MWScriptTest, mwscript_test_function)
     {
         registerExtensions();
+        bool failed = true;
         if(auto script = compile(sScript2))
         {
             class AddTopic : public Interpreter::Opcode0
             {
+                bool& mFailed;
             public:
+                AddTopic(bool& failed) : mFailed(failed) {}
+
                 void execute(Interpreter::Runtime& runtime)
                 {
                     const auto topic = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
+                    mFailed = false;
                     EXPECT_EQ(topic, "OpenMW Unit Test");
                 }
             };
-            installOpcode(Compiler::Dialogue::opcodeAddTopic, new AddTopic);
+            installOpcode(Compiler::Dialogue::opcodeAddTopic, new AddTopic(failed));
             TestInterpreterContext context;
             run(*script, context);
         }
-        else
+        if(failed)
         {
             FAIL();
         }
