@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include <osg/Callback>
+#include <osg/Object>
 
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/textkeymap.hpp>
@@ -23,8 +23,6 @@ namespace SceneUtil
         META_Object(SceneUtil, KeyframeController)
 
         virtual osg::Vec3f getTranslation(float time) const  { return osg::Vec3f(); }
-
-        virtual osg::Callback* asCallback() = 0;
     };
 
     /// Wrapper object containing an animation track as a ref-countable osg::Object.
