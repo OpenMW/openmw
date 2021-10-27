@@ -370,6 +370,8 @@ namespace MWPhysics
 
     bool PhysicsSystem::getLineOfSight(const MWWorld::ConstPtr &actor1, const MWWorld::ConstPtr &actor2) const
     {
+        if (actor1 == actor2) return true;
+
         const auto it1 = mActors.find(actor1.mRef);
         const auto it2 = mActors.find(actor2.mRef);
         if (it1 == mActors.end() || it2 == mActors.end())
