@@ -11,7 +11,7 @@
 
 namespace SceneUtil
 {
-    /// @note Derived classes are expected to derive from osg::Callback and implement asCallback().
+    /// @note Derived classes are expected to derive from osg::Callback and implement getAsCallback().
     class KeyframeController : public SceneUtil::Controller, public virtual osg::Object
     {
     public:
@@ -24,7 +24,9 @@ namespace SceneUtil
         META_Object(SceneUtil, KeyframeController)
 
         virtual osg::Vec3f getTranslation(float time) const  { return osg::Vec3f(); }
-        virtual osg::Callback* asCallback() = 0;
+
+        /// @note We could drop this function in favour of osg::Object::asCallback from OSG 3.6 on.
+        virtual osg::Callback* getAsCallback() = 0;
     };
 
     /// Wrapper object containing an animation track as a ref-countable osg::Object.
