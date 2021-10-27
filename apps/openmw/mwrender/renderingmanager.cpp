@@ -753,12 +753,12 @@ namespace MWRender
         else if (mode == Render_Scene)
         {
             unsigned int mask = mViewer->getCamera()->getCullMask();
-            bool enabled = mask&Mask_Scene;
-            enabled = !enabled;
+            bool enabled = !(mask&sToggleWorldMask);
             if (enabled)
-                mask |= Mask_Scene;
+                mask |= sToggleWorldMask;
             else
-                mask &= ~Mask_Scene;
+                mask &= ~sToggleWorldMask;
+            mWater->showWorld(enabled);
             mViewer->getCamera()->setCullMask(mask);
             return enabled;
         }
