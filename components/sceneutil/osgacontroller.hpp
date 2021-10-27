@@ -45,7 +45,7 @@ namespace SceneUtil
 
         META_Object(SceneUtil, OsgAnimationController)
 
-        osg::Callback* asCallback() override { return this; }
+        osg::Callback* getAsCallback() override { return this; }
 
         /// @brief Handles the location of the instance
         osg::Vec3f getTranslation(float time) const override;
