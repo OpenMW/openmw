@@ -1,6 +1,8 @@
 #include "lightmanager.hpp"
 
 #include <array>
+#include <algorithm>
+#include <iterator>
 
 #include <osg/BufferObject>
 #include <osg/BufferIndexBinding>
@@ -1158,11 +1160,11 @@ namespace SceneUtil
         return mSun;
     }
 
-    size_t LightManager::HashLightList::operator()(const LightList& lightList) const
+    size_t LightManager::HashLightIdList::operator()(const LightIdList& lightIdList) const
     {
         size_t hash = 0;
-        for (size_t i = 0; i < lightList.size(); ++i)
-            Misc::hashCombine(hash, lightList[i]->mLightSource->getId());
+        for (size_t i = 0; i < lightIdList.size(); ++i)
+            Misc::hashCombine(hash, lightIdList[i]);
         return hash;
     }
 
@@ -1186,7 +1188,11 @@ namespace SceneUtil
 
         auto& stateSetCache = mStateSetCache[frameNum%2];
 
-        auto found = stateSetCache.find(lightList);
+        LightIdList lightIdList;
+        lightIdList.reserve(lightList.size());
+        std::transform(lightList.begin(), lightList.end(), std::back_inserter(lightIdList), [] (const LightSourceViewBound* l) { return l->mLightSource->getId(); });
+
+        auto found = stateSetCache.find(lightIdList);
         if (found != stateSetCache.end())
         {
             mStateSetGenerator->update(found->second, lightList, frameNum);
@@ -1194,7 +1200,7 @@ namespace SceneUtil
         }
 
         auto stateset = mStateSetGenerator->generate(lightList, frameNum);
-        stateSetCache.emplace(lightList, stateset);
+        stateSetCache.emplace(lightIdList, stateset);
         return stateset;
     }
 
