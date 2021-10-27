@@ -85,7 +85,7 @@ float blipDerivative(float x)
 
 vec2 randomize_center(vec2 i_part, float time)
 {
-  time = 1.0 + mod(time, 10000.0); // so things don't get out of hand after long runtimes
+  time = 0.5 + mod(time/1000.0, 1.0)*0.5;
   vec2 center = vec2(0.5,0.5) + (0.5 - RAIN_RIPPLE_RADIUS) * (2.0 * randOffset(i_part*time) - 1.0);
   return center;
 }
@@ -99,13 +99,15 @@ vec4 circle(vec2 coords, vec2 uv, float adjusted_time)
   float d = length(toCenter);
   float ringfollower = (phase-d/r)*6.0-1.0;
   float energy = 1.0-phase;
-  energy = energy*energy;
+  float range = blip(min(0.0, ringfollower));
 
   vec2 normal = -toCenter*blipDerivative(ringfollower)*5.0;
+  // for fake specularity
   float height = blip(ringfollower);
-  vec4 ret = vec4(normal.x, normal.y, height, height);
-  ret.xyw *= energy;
-  ret.xyz = normalize(ret.x, ret.y, ret.z+0.001);
+  vec4 ret = vec4(normal.x, normal.y, 0.5, height);
+  ret.xyw *= energy*energy*range;
+  // do energy adjustment here rather than later, so that we can use the w component for fake specularity
+  ret.xyz = normalize(ret.xyz) * energy*range;
   return ret;
 }
 
@@ -115,12 +117,18 @@ vec4 rain(vec2 uv, float time)
   vec2 i_part = floor(uv * RAIN_RIPPLE_GAPS);
   float time_prog = time * 1.2 + randPhase(i_part);
   vec2 f_part = fract(uv * RAIN_RIPPLE_GAPS);
-  return circle(f_part, uv, time_prog)
-       - circle(f_part, uv, time_prog - RAIN_RING_TIME_OFFSET)     / 4.0
-       + circle(f_part, uv, time_prog - RAIN_RING_TIME_OFFSET*2.0) / 8.0
-       - circle(f_part, uv, time_prog - RAIN_RING_TIME_OFFSET*3.0) / 16.0;
+  vec4 a = circle(f_part, uv, time_prog);
+  vec4 b = circle(f_part, uv, time_prog - RAIN_RING_TIME_OFFSET);
+  vec4 c = circle(f_part, uv, time_prog - RAIN_RING_TIME_OFFSET*2.0);
+  vec4 d = circle(f_part, uv, time_prog - RAIN_RING_TIME_OFFSET*3.0);
+  vec4 ret = a   - b  /2.0 + c  /4.0 - d  /8.0;
+  // z should always point up
+  ret.z    = a.z + b.z/2.0 + c.z/4.0 + d.z/8.0;
+  // fake specularity looks weird if we use every single ring, also if the inner rings are too bright
+  ret.w    = a.w + c.w/8.0;
+  return ret;
 }
-vec4 rainCombined(vec2 uv, float time)     // returns ripple normal in xyz and ripple height in w
+vec4 rainCombined(vec2 uv, float time)     // returns ripple normal in xyz and ripple energy in w
 {
   return
     rain(uv,time) +
@@ -217,11 +225,13 @@ void main(void)
     vec4 rainRipple;
 
     if (rainIntensity > 0.01)
-      rainRipple = rainCombined(position.xy / 1000.0,waterTimer) * clamp(rainIntensity,0.0,1.0);
+      rainRipple = rainCombined(position.xy/1000.0, waterTimer) * clamp(rainIntensity, 0.0, 1.0);
     else
       rainRipple = vec4(0.0);
 
-    vec3 rippleAdd = rainRipple.xyz * abs(rainRipple.w) * 10.0;
+    vec3 rippleAdd = rainRipple.xyz * 10.0;
+    // artificial specularity to make rain ripples more noticeable
+    float rainSpecular = abs(rainRipple.w);
 
     vec2 bigWaves = vec2(BIG_WAVES_X,BIG_WAVES_Y);
     vec2 midWaves = mix(vec2(MID_WAVES_X,MID_WAVES_Y),vec2(MID_WAVES_RAIN_X,MID_WAVES_RAIN_Y),rainIntensity);
@@ -289,7 +299,7 @@ void main(void)
     vec3 scatterColour = mix(SCATTER_COLOUR*vec3(1.0,0.4,0.0), SCATTER_COLOUR, clamp(1.0-exp(-sunHeight*SUN_EXT), 0.0, 1.0));
     vec3 lR = reflect(lVec, lNormal);
     float lightScatter = clamp(dot(lVec,lNormal)*0.7+0.3, 0.0, 1.0) * clamp(dot(lR, vVec)*2.0-1.2, 0.0, 1.0) * SCATTER_AMOUNT * sunFade * clamp(1.0-exp(-sunHeight), 0.0, 1.0);
-    gl_FragData[0].xyz = mix( mix(refraction,  scatterColour,  lightScatter),  reflection,  fresnel) + specular * sunSpec.xyz + vec3(abs(rainRipple.w)) * 0.2;
+    gl_FragData[0].xyz = mix( mix(refraction,  scatterColour,  lightScatter),  reflection,  fresnel) + specular * sunSpec.xyz + vec3(rainSpecular) * 0.3;
     gl_FragData[0].w = 1.0;
 
     // wobbly water: hard-fade into refraction texture at extremely low depth, with a wobble based on normal mapping
@@ -302,7 +312,7 @@ void main(void)
     shoreOffset = clamp(mix(shoreOffset, 1.0, clamp(linearDepth / WOBBLY_SHORE_FADE_DISTANCE, 0.0, 1.0)), 0.0, 1.0);
     gl_FragData[0].xyz = mix(rawRefraction, gl_FragData[0].xyz, shoreOffset);
 #else
-    gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * sunSpec.xyz + vec3(abs(rainRipple.w)) * 0.7;
+    gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * sunSpec.xyz + vec3(rainSpecular) * 0.7;
     gl_FragData[0].w = clamp(fresnel*6.0 + specular * sunSpec.w, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);
 #endif
 
@@ -312,7 +322,9 @@ void main(void)
 #else
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
-    gl_FragData[0].xyz = mix(gl_FragData[0].xyz,  gl_Fog.color.xyz,  fogValue);
+    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+    
+
 
     applyShadowDebugOverlay();
 }
