@@ -11,18 +11,20 @@
 
 namespace SceneUtil
 {
-    class KeyframeController : public SceneUtil::Controller, public virtual osg::Callback
+    class KeyframeController : public SceneUtil::Controller, public virtual osg::Object
     {
     public:
         KeyframeController() {}
 
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop)
-            : osg::Callback(copy, copyop)
+            : osg::Object(copy, copyop)
             , SceneUtil::Controller(copy)
         {}
         META_Object(SceneUtil, KeyframeController)
 
         virtual osg::Vec3f getTranslation(float time) const  { return osg::Vec3f(); }
+
+        virtual osg::Callback* asCallback() = 0;
     };
 
     /// Wrapper object containing an animation track as a ref-countable osg::Object.
