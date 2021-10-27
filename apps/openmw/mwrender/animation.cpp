@@ -968,7 +968,7 @@ namespace MWRender
                 {
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
-                    osg::Callback* callback = it->second->asCallback()
+                    osg::Callback* callback = it->second->getAsCallback();
                     node->addUpdateCallback(callback);
                     mActiveControllers.emplace_back(node, callback);
 
