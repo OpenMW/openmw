@@ -19,9 +19,7 @@ namespace SceneUtil
 
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop)
             : osg::Object(copy, copyop)
-            , SceneUtil::Controller(copy)
-        {}
-        META_Object(SceneUtil, KeyframeController)
+            , SceneUtil::Controller(copy) {}
 
         virtual osg::Vec3f getTranslation(float time) const  { return osg::Vec3f(); }
 
