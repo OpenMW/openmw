@@ -11,6 +11,7 @@
 
 namespace SceneUtil
 {
+    /// @note Derived classes are expected to derive from osg::Callback and implement asCallback().
     class KeyframeController : public SceneUtil::Controller, public virtual osg::Object
     {
     public:
@@ -23,6 +24,7 @@ namespace SceneUtil
         META_Object(SceneUtil, KeyframeController)
 
         virtual osg::Vec3f getTranslation(float time) const  { return osg::Vec3f(); }
+        virtual osg::Callback* asCallback() { return nullptr; }
     };
 
     /// Wrapper object containing an animation track as a ref-countable osg::Object.
