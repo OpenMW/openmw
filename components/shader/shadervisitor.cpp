@@ -516,6 +516,14 @@ namespace Shader
             // We could fall back to a texture size uniform if EXT_gpu_shader4 is missing
         }
 
+        bool simpleLighting = false;
+        node.getUserValue("simpleLighting", simpleLighting);
+        if (simpleLighting)
+        {
+            defineMap["forcePPL"] = "1";
+            defineMap["endLight"] = "0";
+        }
+
         if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT && !previousAddedState->hasMode(GL_ALPHA_TEST))
             removedState->setMode(GL_ALPHA_TEST, writableStateSet->getMode(GL_ALPHA_TEST));
         // This disables the deprecated fixed-function alpha test

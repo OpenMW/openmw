@@ -115,6 +115,8 @@ namespace MWWorld
     class Weather
     {
     public:
+        static osg::Vec3f defaultDirection();
+
         Weather(const std::string& name,
                 float stormWindSpeed,
                 float rainSpeed,
@@ -188,6 +190,8 @@ namespace MWWorld
         std::string mParticleEffect;
 
         std::string mRainEffect;
+
+        osg::Vec3f mStormDirection;
 
         // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
         // is broken in the vanilla game and was disabled.
