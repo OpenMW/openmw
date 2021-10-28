@@ -110,6 +110,33 @@ set e to ( d / a )
 
 End)mwscript";
 
+// https://forum.openmw.org/viewtopic.php?f=6&t=2262
+    const std::string sScript4 = R"mwscript(Begin scripting_once_again
+
+player -> addSpell "fire_bite", 645
+
+PositionCell "Rabenfels, Taverne" 4480.000 3968.000 15820.000 0
+
+End)mwscript";
+
+    const std::string sIssue1430 = R"mwscript(Begin issue1430
+
+short var
+If ( menumode == 1 )
+    Player->AddItem "fur_boots", 1
+    Player->Equip "iron battle axe", 1
+    player->addspell "fire bite", 645
+    player->additem "ring_keley", 1,
+endif
+
+End)mwscript";
+
+    const std::string sIssue1767 = R"mwscript(Begin issue1767
+
+player->GetPcRank "temple"
+
+End)mwscript";
+
     const std::string sIssue3006 = R"mwscript(Begin issue3006
 
 short a
@@ -227,6 +254,18 @@ End)mwscript";
 
 End)mwscript";
 
+    const std::string sIssue6363 = R"mwscript(Begin issue6363
+
+short 1
+
+if ( "1" == 1 )
+    PositionCell 0 1 2 3 4 5 "Morrowland"
+endif
+
+set 1 to 42
+
+End)mwscript";
+
     TEST_F(MWScriptTest, mwscript_test_invalid)
     {
         EXPECT_THROW(compile("this is not a valid script", true), Compiler::SourceException);
@@ -315,6 +354,24 @@ End)mwscript";
         {
             FAIL();
         }
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_forum_thread)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sScript4));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_1430)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue1430));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_1767)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue1767));
     }
 
     TEST_F(MWScriptTest, mwscript_test_3006)
@@ -429,5 +486,38 @@ End)mwscript";
     TEST_F(MWScriptTest, mwscript_test_6282)
     {
         EXPECT_FALSE(!compile(sIssue6282));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_6363)
+    {
+        registerExtensions();
+        if(const auto script = compile(sIssue6363))
+        {
+            class PositionCell : public Interpreter::Opcode0
+            {
+                bool& mRan;
+            public:
+                PositionCell(bool& ran) : mRan(ran) {}
+
+                void execute(Interpreter::Runtime& runtime)
+                {
+                    mRan = true;
+                }
+            };
+            bool ran = false;
+            installOpcode(Compiler::Transformation::opcodePositionCell, new PositionCell(ran));
+            TestInterpreterContext context;
+            context.setLocalShort(0, 0);
+            run(*script, context);
+            EXPECT_FALSE(ran);
+            ran = false;
+            context.setLocalShort(0, 1);
+            run(*script, context);
+            EXPECT_TRUE(ran);
+        }
+        else
+        {
+            FAIL();
+        }
     }
 }
