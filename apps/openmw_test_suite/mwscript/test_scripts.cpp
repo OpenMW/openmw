@@ -131,6 +131,10 @@ endif
 
 End)mwscript";
 
+    const std::string sIssue4061 = R"mwscript(Begin 01_Rz_neuvazhay-koryto2
+
+End)mwscript";
+
     const std::string sIssue4451 = R"mwscript(Begin, GlassDisplayScript
 
 ;[Script body]
@@ -175,6 +179,12 @@ StartScript kal_S_Pub_Jejubãr_Faraminos
 
 End)mwscript";
 
+    const std::string sIssue4803 = R"mwscript(
+--
++-Begin issue4803
+
+End)mwscript";
+
     const std::string sIssue4867 = R"mwscript(Begin issue4867
 
 float PcMagickaMult :  The gameplay setting fPcBaseMagickaMult - 1.0000
@@ -199,6 +209,21 @@ End Begin)mwscript";
     const std::string sIssue5097 = R"mwscript(Begin issue5097
 
 setscale "0.3"
+
+End)mwscript";
+
+    const std::string sIssue5345 = R"mwscript(Begin issue5345
+
+StartScript DN_MinionDrain_s"
+
+End)mwscript";
+
+    const std::string sIssue6066 = R"mwscript(Begin issue6066
+addtopic "return"
+
+End)mwscript";
+
+    const std::string sIssue6282 = R"mwscript(Begin 11AA_LauraScript7.5
 
 End)mwscript";
 
@@ -316,6 +341,11 @@ End)mwscript";
         EXPECT_FALSE(!compile(sIssue3725));
     }
 
+    TEST_F(MWScriptTest, mwscript_test_4061)
+    {
+        EXPECT_FALSE(!compile(sIssue4061));
+    }
+
     TEST_F(MWScriptTest, mwscript_test_4451)
     {
         EXPECT_FALSE(!compile(sIssue4451));
@@ -357,6 +387,11 @@ End)mwscript";
         EXPECT_FALSE(!compile(sIssue4598));
     }
 
+    TEST_F(MWScriptTest, mwscript_test_4803)
+    {
+        EXPECT_FALSE(!compile(sIssue4803));
+    }
+
     TEST_F(MWScriptTest, mwscript_test_4867)
     {
         EXPECT_FALSE(!compile(sIssue4867));
@@ -377,5 +412,22 @@ End)mwscript";
     {
         registerExtensions();
         EXPECT_FALSE(!compile(sIssue5097));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_5345)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue5345));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_6066)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue6066));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_6282)
+    {
+        EXPECT_FALSE(!compile(sIssue6282));
     }
 }
