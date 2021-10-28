@@ -93,7 +93,7 @@ namespace
 
 namespace MWRender
 {
-    osg::ref_ptr<osg::Material> createUnlitMaterial(osg::Material::ColorMode colorMode = osg::Material::OFF)
+    osg::ref_ptr<osg::Material> createUnlitMaterial(osg::Material::ColorMode colorMode)
     {
         osg::ref_ptr<osg::Material> mat = new osg::Material;
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
