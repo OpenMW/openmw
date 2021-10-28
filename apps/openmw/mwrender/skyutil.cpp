@@ -93,26 +93,20 @@ namespace
 
 namespace MWRender
 {
-    osg::ref_ptr<osg::Material> createAlphaTrackingUnlitMaterial()
+    osg::ref_ptr<osg::Material> createUnlitMaterial(osg::Material::ColorMode colorMode = osg::Material::OFF)
     {
         osg::ref_ptr<osg::Material> mat = new osg::Material;
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
         mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-        mat->setColorMode(osg::Material::DIFFUSE);
+        mat->setColorMode(colorMode);
         return mat;
     }
 
-    osg::ref_ptr<osg::Material> createUnlitMaterial()
+    osg::ref_ptr<osg::Material> createAlphaTrackingUnlitMaterial()
     {
-        osg::ref_ptr<osg::Material> mat = new osg::Material;
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-        mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-        mat->setColorMode(osg::Material::OFF);
-        return mat;
+        return createUnlitMaterial(osg::Material::DIFFUSE);
     }
 
     class SunUpdater : public SceneUtil::StateSetUpdater
@@ -126,7 +120,7 @@ namespace MWRender
 
         void setDefaults(osg::StateSet* stateset) override
         {
-            stateset->setAttributeAndModes(MWRender::createUnlitMaterial());
+            stateset->setAttributeAndModes(createUnlitMaterial());
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
@@ -188,7 +182,7 @@ namespace MWRender
                 if (visibleRatio < fadeThreshold)
                 {
                     float fade = 1.f - (fadeThreshold - visibleRatio) / fadeThreshold;
-                    osg::ref_ptr<osg::Material> mat (MWRender::createUnlitMaterial());
+                    osg::ref_ptr<osg::Material> mat (createUnlitMaterial());
                     mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,fade*mGlareView));
                     stateset = new osg::StateSet;
                     stateset->setAttributeAndModes(mat, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
@@ -287,7 +281,7 @@ namespace MWRender
             {
                 osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
 
-                osg::ref_ptr<osg::Material> mat = MWRender::createUnlitMaterial();
+                osg::ref_ptr<osg::Material> mat = createUnlitMaterial();
 
                 mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,fade));
                 mat->setEmission(osg::Material::FRONT_AND_BACK, mColor);
@@ -368,7 +362,7 @@ namespace MWRender
                 stateset->addUniform(new osg::Uniform("atmosphereFade", osg::Vec4f{}));
                 stateset->addUniform(new osg::Uniform("diffuseMap", 0));
                 stateset->addUniform(new osg::Uniform("maskMap", 1));
-                stateset->setAttributeAndModes(MWRender::createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
             }
             else
             {
@@ -390,7 +384,7 @@ namespace MWRender
                 texEnv2->setSource1_RGB(osg::TexEnvCombine::CONSTANT);
                 texEnv2->setConstantColor(osg::Vec4f(0.f, 0.f, 0.f, 1.f)); // mAtmosphereColor.rgb, mTransparency
                 stateset->setTextureAttributeAndModes(1, texEnv2);
-                stateset->setAttributeAndModes(MWRender::createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
             }
         }
 
