@@ -158,6 +158,13 @@ endif
 
 End)mwscript";
 
+    const std::string sIssue3846 = R"mwscript(Begin issue3846
+
+Addtopic -spells...
+Addtopic -magicka...
+
+End)mwscript";
+
     const std::string sIssue4061 = R"mwscript(Begin 01_Rz_neuvazhay-koryto2
 
 End)mwscript";
@@ -396,6 +403,12 @@ End)mwscript";
     {
         registerExtensions();
         EXPECT_FALSE(!compile(sIssue3725));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_3846)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue3846));
     }
 
     TEST_F(MWScriptTest, mwscript_test_4061)
