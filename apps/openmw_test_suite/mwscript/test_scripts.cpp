@@ -95,6 +95,21 @@ AddTopic "OpenMW Unit Test"
 
 End)mwscript";
 
+    const std::string sScript3 = R"mwscript(Begin math
+
+short a
+short b
+short c
+short d
+short e
+
+set b to ( a + 1 )
+set c to ( a - 1 )
+set d to ( b * c )
+set e to ( d / a )
+
+End)mwscript";
+
     TEST_F(MWScriptTest, mwscript_test_invalid)
     {
         EXPECT_THROW(compile("this is not a valid script", true), Compiler::SourceException);
@@ -135,6 +150,51 @@ End)mwscript";
             run(*script, context);
         }
         if(failed)
+        {
+            FAIL();
+        }
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_math)
+    {
+        if(auto script = compile(sScript3))
+        {
+            struct Algorithm
+            {
+                int a;
+                int b;
+                int c;
+                int d;
+                int e;
+
+                void run(int input)
+                {
+                    a = input;
+                    b = a + 1;
+                    c = a - 1;
+                    d = b * c;
+                    e = d / a;
+                }
+
+                void test(const TestInterpreterContext& context) const
+                {
+                    EXPECT_EQ(a, context.getLocalShort(0));
+                    EXPECT_EQ(b, context.getLocalShort(1));
+                    EXPECT_EQ(c, context.getLocalShort(2));
+                    EXPECT_EQ(d, context.getLocalShort(3));
+                    EXPECT_EQ(e, context.getLocalShort(4));
+                }
+            } algorithm;
+            TestInterpreterContext context;
+            for(int i = 1; i < 1000; ++i)
+            {
+                context.setLocalShort(0, i);
+                run(*script, context);
+                algorithm.run(i);
+                algorithm.test(context);
+            }
+        }
+        else
         {
             FAIL();
         }

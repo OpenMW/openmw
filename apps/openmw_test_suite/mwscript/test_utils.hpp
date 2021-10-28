@@ -64,7 +64,7 @@ namespace
         std::vector<float> mFloats;
 
         template<class T>
-        T getLocal(int index, const std::vector<T>& vector) const
+        T getLocal(std::size_t index, const std::vector<T>& vector) const
         {
             if(index < vector.size())
                 return vector[index];
@@ -72,7 +72,7 @@ namespace
         }
 
         template<class T>
-        void setLocal(T value, int index, std::vector<T>& vector)
+        void setLocal(T value, std::size_t index, std::vector<T>& vector)
         {
             if(index >= vector.size())
                 vector.resize(index + 1);
@@ -86,17 +86,17 @@ namespace
             mFloats.clear();
         }
 
-        int getShort(int index) const { return getLocal(index, mShorts); };
+        int getShort(std::size_t index) const { return getLocal(index, mShorts); };
 
-        int getLong(int index) const { return getLocal(index, mLongs); };
+        int getLong(std::size_t index) const { return getLocal(index, mLongs); };
 
-        float getFloat(int index) const { return getLocal(index, mFloats); };
+        float getFloat(std::size_t index) const { return getLocal(index, mFloats); };
 
-        void setShort(int index, int value) { setLocal(value, index, mShorts); };
+        void setShort(std::size_t index, int value) { setLocal(value, index, mShorts); };
 
-        void setLong(int index, int value) { setLocal(value, index, mLongs); };
+        void setLong(std::size_t index, int value) { setLocal(value, index, mLongs); };
 
-        void setFloat(int index, float value) { setLocal(value, index, mFloats); };
+        void setFloat(std::size_t index, float value) { setLocal(value, index, mFloats); };
     };
 
     class GlobalVariables
