@@ -104,7 +104,7 @@ namespace MWRender
     };
 
     osg::ref_ptr<osg::Material> createAlphaTrackingUnlitMaterial();
-    osg::ref_ptr<osg::Material> createUnlitMaterial();
+    osg::ref_ptr<osg::Material> createUnlitMaterial(osg::Material::ColorMode colorMode = osg::Material::OFF);
 
     class OcclusionCallback
     {
