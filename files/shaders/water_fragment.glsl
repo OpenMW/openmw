@@ -55,11 +55,19 @@ const float WOBBLY_SHORE_FADE_DISTANCE = 6200.0;   // fade out wobbly shores to 
 
 // ---------------- rain ripples related stuff ---------------------
 
-const float RAIN_RIPPLE_GAPS = 5.0;
-const float RAIN_RIPPLE_RADIUS = 0.1;
+const float RAIN_RIPPLE_GAPS = 10.0;
+const float RAIN_RIPPLE_RADIUS = 0.2;
 
-vec2 randOffset(vec2 c)
+float scramble(float x, float z)
 {
+    return mod(pow(x*3.0+1.0, z), 1.0);
+}
+
+vec2 randOffset(vec2 c, float time)
+{
+  time = mod(time/1000.0, 1.0);
+  c.x *= scramble(scramble(time + c.x/1000.0, 4.0), 3.0) + 1.0;
+  c.y *= scramble(scramble(time + c.y/1000.0, 3.5), 3.0) + 1.0;
   return fract(vec2(
           c.x * c.y / 8.0 + c.y * 0.3 + c.x * 0.2,
           c.x * c.y / 14.0 + c.y * 0.5 + c.x * 0.7));
@@ -85,8 +93,7 @@ float blipDerivative(float x)
 
 vec2 randomize_center(vec2 i_part, float time)
 {
-  time = 0.5 + mod(time/1000.0, 1.0)*0.5;
-  vec2 center = vec2(0.5,0.5) + (0.5 - RAIN_RIPPLE_RADIUS) * (2.0 * randOffset(i_part*time) - 1.0);
+  vec2 center = vec2(0.5,0.5) + (0.5 - RAIN_RIPPLE_RADIUS) * (2.0 * randOffset(i_part, time) - 1.0);
   return center;
 }
 
@@ -128,7 +135,7 @@ vec4 rain(vec2 uv, float time)
   ret.w    = a.w + c.w/8.0;
   return ret;
 }
-vec4 rainCombined(vec2 uv, float time)     // returns ripple normal in xyz and ripple energy in w
+vec4 rainCombined(vec2 uv, float time) // returns ripple normal in xyz and fake specularity in w
 {
   return
     rain(uv,time) +
