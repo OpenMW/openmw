@@ -28,7 +28,7 @@ namespace
         bool canDeclareLocals() const override { return true; }
         char getGlobalType(const std::string& name) const override { return ' '; }
         std::pair<char, bool> getMemberType(const std::string& name, const std::string& id) const override { return {' ', false}; }
-        bool isId(const std::string& name) const override { return false; }
+        bool isId(const std::string& name) const override { return name == "player"; }
         bool isJournalId(const std::string& name) const override { return false; }
     };
 

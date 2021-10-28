@@ -110,6 +110,98 @@ set e to ( d / a )
 
 End)mwscript";
 
+    const std::string sIssue3006 = R"mwscript(Begin issue3006
+
+short a
+
+if ( a == 1 )
+    set a to 2
+else set a to 3
+endif
+
+End)mwscript";
+
+    const std::string sIssue3725 = R"mwscript(Begin issue3725
+
+onactivate
+
+if onactivate
+    ; do something
+endif
+
+End)mwscript";
+
+    const std::string sIssue4451 = R"mwscript(Begin, GlassDisplayScript
+
+;[Script body]
+
+End, GlassDisplayScript)mwscript";
+
+    const std::string sIssue4597 = R"mwscript(Begin issue4597
+
+short a
+short b
+short c
+short d
+
+set c to 0
+set d to 0
+
+if ( a <> b )
+    set c to ( c + 1 )
+endif
+if ( a << b )
+    set c to ( c + 1 )
+endif
+if ( a < b )
+    set c to ( c + 1 )
+endif
+
+if ( a >< b )
+    set d to ( d + 1 )
+endif
+if ( a >> b )
+    set d to ( d + 1 )
+endif
+if ( a > b )
+    set d to ( d + 1 )
+endif
+
+End)mwscript";
+
+    const std::string sIssue4598 = R"mwscript(Begin issue4598
+
+StartScript kal_S_Pub_Jejubãr_Faraminos
+
+End)mwscript";
+
+    const std::string sIssue4867 = R"mwscript(Begin issue4867
+
+float PcMagickaMult :  The gameplay setting fPcBaseMagickaMult - 1.0000
+
+End)mwscript";
+
+    const std::string sIssue4888 = R"mwscript(Begin issue4888
+
+if (player->GameHour == 10)
+set player->GameHour to 20
+endif
+
+End)mwscript";
+
+    const std::string sIssue5087 = R"mwscript(Begin Begin
+
+player->sethealth 0
+stopscript Begin
+
+End Begin)mwscript";
+
+    const std::string sIssue5097 = R"mwscript(Begin issue5097
+
+setscale "0.3"
+
+End)mwscript";
+
     TEST_F(MWScriptTest, mwscript_test_invalid)
     {
         EXPECT_THROW(compile("this is not a valid script", true), Compiler::SourceException);
@@ -198,5 +290,92 @@ End)mwscript";
         {
             FAIL();
         }
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_3006)
+    {
+        if(auto script = compile(sIssue3006))
+        {
+            TestInterpreterContext context;
+            context.setLocalShort(0, 0);
+            run(*script, context);
+            EXPECT_EQ(context.getLocalShort(0), 0);
+            context.setLocalShort(0, 1);
+            run(*script, context);
+            EXPECT_EQ(context.getLocalShort(0), 2);
+        }
+        else
+        {
+            FAIL();
+        }
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_3725)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue3725));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_4451)
+    {
+        EXPECT_FALSE(!compile(sIssue4451));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_4597)
+    {
+        if(auto script = compile(sIssue4597))
+        {
+            TestInterpreterContext context;
+            for(int a = 0; a < 100; ++a)
+            {
+                for(int b = 0; b < 100; ++b)
+                {
+                    context.setLocalShort(0, a);
+                    context.setLocalShort(1, b);
+                    run(*script, context);
+                    if(a < b)
+                        EXPECT_EQ(context.getLocalShort(2), 3);
+                    else
+                        EXPECT_EQ(context.getLocalShort(2), 0);
+                    if(a > b)
+                        EXPECT_EQ(context.getLocalShort(3), 3);
+                    else
+                        EXPECT_EQ(context.getLocalShort(3), 0);
+
+                }
+            }
+        }
+        else
+        {
+            FAIL();
+        }
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_4598)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue4598));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_4867)
+    {
+        EXPECT_FALSE(!compile(sIssue4867));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_4888)
+    {
+        EXPECT_FALSE(!compile(sIssue4888));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_5087)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue5087));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_5097)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue5097));
     }
 }
