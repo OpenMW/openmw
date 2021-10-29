@@ -78,9 +78,9 @@ void DebugDrawer::createGeometry()
         mShapesRoot->setNodeMask(Mask_Debug);
         mParentNode->addChild(mShapesRoot);
 
-        MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(mLinesGeometry, "debug");
-        MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(mTrisGeometry, "debug");
-        MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(mShapesRoot, "debug");
+        MWBase::Environment::get().getResourceSystem()->getSceneManager()->setDebugShader(mLinesGeometry);
+        MWBase::Environment::get().getResourceSystem()->getSceneManager()->setDebugShader(mTrisGeometry);
+        MWBase::Environment::get().getResourceSystem()->getSceneManager()->setDebugShader(mShapesRoot);
     }
 }
 
