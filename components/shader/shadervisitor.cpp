@@ -106,7 +106,7 @@ namespace Shader
     ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string &defaultShaderPrefix)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(false)
-        , mAllowedToModifyStateSets(true)
+        , mAllowedToModifyStateSets(false)
         , mApplyLightingToEnvMaps(false)
         , mConvertAlphaTestToAlphaToCoverage(false)
         , mShaderManager(shaderManager)
