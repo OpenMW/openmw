@@ -115,7 +115,7 @@ void Pathgrid::enableCellPathgrid(const MWWorld::CellStore *store)
 
     osg::ref_ptr<osg::Geometry> geometry = SceneUtil::createPathgridGeometry(*pathgrid);
 
-    MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(geometry, "debug");
+    MWBase::Environment::get().getResourceSystem()->getSceneManager()->setDebugShader(geometry);
 
     cellPathGrid->addChild(geometry);
 
