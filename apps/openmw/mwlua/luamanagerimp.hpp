@@ -35,9 +35,9 @@ namespace MWLua
     class LuaManager : public MWBase::LuaManager
     {
     public:
-        LuaManager(const VFS::Manager* vfs, const std::vector<std::string>& globalScriptLists);
+        LuaManager(const VFS::Manager* vfs);
 
-        // Called by engine.cpp when environment is fully initialized.
+        // Called by engine.cpp when the environment is fully initialized.
         void init();
 
         // Called by engine.cpp every frame. For performance reasons it works in a separate
@@ -49,7 +49,8 @@ namespace MWLua
 
         // Available everywhere through the MWBase::LuaManager interface.
         // LuaManager queues these events and propagates to scripts on the next `update` call.
-        void newGameStarted() override { mGlobalScripts.newGameStarted(); }
+        void newGameStarted() override;
+        void gameLoaded() override;
         void objectAddedToScene(const MWWorld::Ptr& ptr) override;
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
         void registerObject(const MWWorld::Ptr& ptr) override;
@@ -62,8 +63,8 @@ namespace MWLua
         void clear() override;  // should be called before loading game or starting a new game to reset internal state.
         void setupPlayer(const MWWorld::Ptr& ptr) override;  // Should be called once after each "clear".
 
-        // Used only in luabindings
-        void addLocalScript(const MWWorld::Ptr&, const std::string& scriptPath);
+        // Used only in Lua bindings
+        void addCustomLocalScript(const MWWorld::Ptr&, int scriptId);
         void addAction(std::unique_ptr<Action>&& action) { mActionQueue.push_back(std::move(action)); }
         void addTeleportPlayerAction(std::unique_ptr<TeleportAction>&& action) { mTeleportPlayerAction = std::move(action); }
         void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
@@ -93,9 +94,12 @@ namespace MWLua
         }
 
     private:
-        LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr);
+        void initConfiguration();
+        LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScriptCfg::Flags);
 
         bool mInitialized = false;
+        bool mGlobalScriptsStarted = false;
+        LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;
@@ -104,12 +108,12 @@ namespace MWLua
         sol::table mLocalSettingsPackage;
         sol::table mPlayerSettingsPackage;
 
-        std::vector<std::string> mGlobalScriptList;
         GlobalScripts mGlobalScripts{&mLua};
         std::set<LocalScripts*> mActiveLocalScripts;
         WorldView mWorldView;
 
         bool mPlayerChanged = false;
+        bool mNewGameStarted = false;
         MWWorld::Ptr mPlayer;
 
         GlobalEventQueue mGlobalEvents;

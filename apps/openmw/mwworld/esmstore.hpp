@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#include <components/esm/luascripts.hpp>
 #include <components/esm/records.hpp>
 #include "store.hpp"
 
@@ -92,7 +93,16 @@ namespace MWWorld
 
         template<class T>
         void removeMissingObjects(Store<T>& store);
+
+        using LuaContent = std::variant<
+            ESM::LuaScriptsCfg,  // data from an omwaddon
+            std::string>;  // path to an omwscripts file
+        std::vector<LuaContent> mLuaContent;
+
     public:
+        void addOMWScripts(std::string filePath) { mLuaContent.push_back(std::move(filePath)); }
+        ESM::LuaScriptsCfg getLuaScriptsCfg() const;
+
         /// \todo replace with SharedIterator<StoreBase>
         typedef std::map<int, StoreBase *>::const_iterator iterator;
 

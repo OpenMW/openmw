@@ -495,11 +495,6 @@ void OMW::Engine::addGroundcoverFile(const std::string& file)
     mGroundcoverFiles.emplace_back(file);
 }
 
-void OMW::Engine::addLuaScriptListFile(const std::string& file)
-{
-    mLuaScriptListFiles.push_back(file);
-}
-
 void OMW::Engine::setSkipMenu (bool skipMenu, bool newGame)
 {
     mSkipMenu = skipMenu;
@@ -674,7 +669,7 @@ void OMW::Engine::setWindowIcon()
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
     mEnvironment.setStateManager (
-        new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles.at (0)));
+        new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles));
 
     createWindow(settings);
 
@@ -714,7 +709,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mViewer->addEventHandler(mScreenCaptureHandler);
 
-    mLuaManager = new MWLua::LuaManager(mVFS.get(), mLuaScriptListFiles);
+    mLuaManager = new MWLua::LuaManager(mVFS.get());
     mEnvironment.setLuaManager(mLuaManager);
 
     // Create input and UI first to set up a bootstrapping environment for

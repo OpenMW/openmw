@@ -40,13 +40,10 @@ namespace OpenMW
                 "set initial cell")
 
             ("content", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
-                ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
+                ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon/omwscripts")
 
             ("groundcover", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
                 ->multitoken()->composing(), "groundcover content file(s): esm/esp, or omwgame/omwaddon")
-
-            ("lua-scripts", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
-                ->multitoken()->composing(), "file(s) with a list of global Lua scripts: omwscripts")
 
             ("no-sound", bpo::value<bool>()->implicit_value(true)
                 ->default_value(false), "disable all sounds")

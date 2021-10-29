@@ -7,6 +7,8 @@
 
 #include <components/vfs/manager.hpp>
 
+#include "configuration.hpp"
+
 namespace LuaUtil
 {
 
@@ -22,12 +24,12 @@ namespace LuaUtil
     //   - Access to common read-only resources from different sandboxes;
     //   - Replace standard `require` with a safe version that allows to search
     //         Lua libraries (only source, no dll's) in the virtual filesystem;
-    //   - Make `print` to add the script name to the every message and
-    //         write to Log rather than directly to stdout;
+    //   - Make `print` to add the script name to every message and
+    //         write to the Log rather than directly to stdout;
     class LuaState
     {
     public:
-        explicit LuaState(const VFS::Manager* vfs);
+        explicit LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf);
         ~LuaState();
 
         // Returns underlying sol::state.
@@ -40,7 +42,7 @@ namespace LuaUtil
         // The package can be either a sol::table with an API or a sol::function. If it is a function,
         // it will be evaluated (once per sandbox) the first time when requested. If the package
         // is a table, then `makeReadOnly` is applied to it automatically (but not to other tables it contains).
-        void addCommonPackage(const std::string& packageName, const sol::object& package);
+        void addCommonPackage(std::string packageName, sol::object package);
 
         // Creates a new sandbox, runs a script, and returns the result
         // (the result is expected to be an interface of the script).
@@ -58,14 +60,17 @@ namespace LuaUtil
 
         void dropScriptCache() { mCompiledScripts.clear(); }
 
+        const ScriptsConfiguration& getConfiguration() const { return *mConf; }
+
     private:
         static sol::protected_function_result throwIfError(sol::protected_function_result&&);
         template <typename... Args>
-        friend sol::protected_function_result call(sol::protected_function fn, Args&&... args);
+        friend sol::protected_function_result call(const sol::protected_function& fn, Args&&... args);
 
-        sol::protected_function loadScript(const std::string& path);
+        sol::function loadScript(const std::string& path);
 
         sol::state mLua;
+        const ScriptsConfiguration* mConf;
         sol::table mSandboxEnv;
         std::map<std::string, sol::bytecode> mCompiledScripts;
         std::map<std::string, sol::object> mCommonPackages;
@@ -75,7 +80,7 @@ namespace LuaUtil
     // Should be used for every call of every Lua function.
     // It is a workaround for a bug in `sol`. See https://github.com/ThePhD/sol2/issues/1078
     template <typename... Args>
-    sol::protected_function_result call(sol::protected_function fn, Args&&... args)
+    sol::protected_function_result call(const sol::protected_function& fn, Args&&... args)
     {
         try
         {
@@ -101,7 +106,7 @@ namespace LuaUtil
     std::string toString(const sol::object&);
 
     // Makes a table read only (when accessed from Lua) by wrapping it with an empty userdata.
-    // Needed to forbid any changes in common resources that can accessed from different sandboxes.
+    // Needed to forbid any changes in common resources that can be accessed from different sandboxes.
     sol::table makeReadOnly(sol::table);
     sol::table getMutableFromReadOnly(const sol::userdata&);
 

@@ -5,13 +5,15 @@
 
 // List of all records, that are related to Lua.
 //
-// Record:
-// LUAM - MWLua::LuaManager
+// Records:
+// LUAL - LuaScriptsCfg - list of all scripts (in content files)
+// LUAM - MWLua::LuaManager (in saves)
 //
 // Subrecords:
+// LUAF - LuaScriptCfg::mFlags
 // LUAW - Start of MWLua::WorldView data
 // LUAE - Start of MWLua::LocalEvent or MWLua::GlobalEvent (eventName)
-// LUAS - Start LuaUtil::ScriptsContainer data (scriptName)
+// LUAS - VFS path to a Lua script
 // LUAD - Serialized Lua variable
 // LUAT - MWLua::ScriptsContainer::Timer
 // LUAC - Name of a timer callback (string)
@@ -35,6 +37,28 @@ std::string ESM::loadLuaBinaryData(ESMReader& esm)
         esm.getExact(data.data(), static_cast<int>(data.size()));
     }
     return data;
+}
+
+void ESM::LuaScriptsCfg::load(ESMReader& esm)
+{
+    while (esm.isNextSub("LUAS"))
+    {
+        std::string name = esm.getHString();
+        uint64_t flags;
+        esm.getHNT(flags, "LUAF");
+        std::string data = loadLuaBinaryData(esm);
+        mScripts.push_back({std::move(name), std::move(data), flags});
+    }
+}
+
+void ESM::LuaScriptsCfg::save(ESMWriter& esm) const
+{
+    for (const LuaScriptCfg& script : mScripts)
+    {
+        esm.writeHNString("LUAS", script.mScriptPath);
+        esm.writeHNT("LUAF", script.mFlags);
+        saveLuaBinaryData(esm, script.mInitializationData);
+    }
 }
 
 void ESM::LuaScripts::load(ESMReader& esm)
@@ -63,8 +87,7 @@ void ESM::LuaScripts::save(ESMWriter& esm) const
     for (const LuaScript& script : mScripts)
     {
         esm.writeHNString("LUAS", script.mScriptPath);
-        if (!script.mData.empty())
-            saveLuaBinaryData(esm, script.mData);
+        saveLuaBinaryData(esm, script.mData);
         for (const LuaTimer& timer : script.mTimers)
         {
             esm.startSubRecord("LUAT");

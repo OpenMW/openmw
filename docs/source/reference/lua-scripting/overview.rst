@@ -73,7 +73,7 @@ Let's write a simple example of a `Player script`:
 
 .. code-block:: Lua
 
-    -- Saved to my_lua_mod/example/player.lua
+    -- Save to my_lua_mod/example/player.lua
 
     local ui = require('openmw.ui')
 
@@ -87,42 +87,82 @@ Let's write a simple example of a `Player script`:
         }
     }
 
-In order to attach it to the player we also need a global script:
+The script will be used only if it is specified in one of content files.
+OpenMW Lua is an inclusive OpenMW feature, so it can not be controlled by ESP/ESM.
+The options are:
 
-.. code-block:: Lua
 
-    -- Saved to my_lua_mod/example/global.lua
-
-    return {
-        engineHandlers = {
-            onPlayerAdded = function(player) player:addScript('example/player.lua') end
-        }
-    }
-
-And one more file -- to start the global script:
-
+1. Create text file "my_lua_mod.omwscripts" with the following line:
 ::
 
-    # Saved to my_lua_mod/my_lua_mod.omwscripts
+    PLAYER: example/player.lua
 
-    # It is just a list of global scripts to run. Each file is on a separate line.
-    example/global.lua
+2. (not implemented yet) Add the script in OpenMW CS on "Lua scripts" view and save as "my_lua_mod.omwaddon".
 
-Finally :ref:`register <Lua scripting>` it in ``openmw.cfg``:
+
+Enable it in ``openmw.cfg`` the same way as any other mod:
 
 ::
 
     data=path/to/my_lua_mod
-    lua-scripts=my_lua_mod.omwscripts
+    content=my_lua_mod.omwscripts  # or content=my_lua_mod.omwaddon
 
 Now every time the player presses "X" on a keyboard, a message is shown.
+
+
+Format of ``.omwscripts``
+=========================
+
+::
+
+    # Lines starting with '#' are comments
+
+    GLOBAL: my_mod/some_global_script.lua
+
+    # Script that will be automatically attached to the player
+    PLAYER: my_mod/player.lua
+
+    # Local script that will be automatically attached to every NPC and every creature in the game
+    NPC, CREATURE: my_mod/some_other_script.lua
+
+    # Local script that can be attached to any object by a global script
+    CUSTOM: my_mod/something.lua
+
+    # Local script that will be automatically attached to any Container AND can be
+    # attached to any other object by a global script.
+    CONTAINER, CUSTOM: my_mod/container.lua
+
+Each script is described by one line:
+``<flags>: <path to .lua file in virtual file system>``.
+The order of lines determines the script load order (i.e. script priorities).
+
+Possible flags are:
+
+- ``GLOBAL`` - a global script; always active, can not by stopped;
+- ``CUSTOM`` - dynamic local script that can be started or stopped by a global script;
+- ``PLAYER`` - an auto started player script;
+- ``ACTIVATOR`` - a local script that will be automatically attached to any activator;
+- ``ARMOR`` - a local script that will be automatically attached to any armor;
+- ``BOOK`` - a local script that will be automatically attached to any book;
+- ``CLOTHING`` - a local script that will be automatically attached to any clothing;
+- ``CONTAINER`` - a local script that will be automatically attached to any container;
+- ``CREATURE`` - a local script that will be automatically attached to any creature;
+- ``DOOR`` - a local script that will be automatically attached to any door;
+- ``INGREDIENT`` - a local script that will be automatically attached to any ingredient;
+- ``LIGHT`` - a local script that will be automatically attached to any light;
+- ``MISC_ITEM`` - a local script that will be automatically attached to any miscellaneous item;
+- ``NPC`` - a local script that will be automatically attached to any NPC;
+- ``POTION`` - a local script that will be automatically attached to any potion;
+- ``WEAPON`` - a local script that will be automatically attached to any weapon.
+
+Several flags (except ``GLOBAL``) can be used with a single script. Use space or comma as a separator.
 
 Hot reloading
 =============
 
 It is possible to modify a script without restarting OpenMW. To apply changes, open the in-game console and run the command: ``reloadlua``.
 This will restart all Lua scripts using the `onSave and onLoad`_ handlers the same way as if the game was saved or loaded.
-It works only with existing ``*.lua`` files that are not packed to any archives. Adding new scripts or modifying ``*.omwscripts`` files always requires restarting the game.
+It reloads all ``.omwscripts`` files and ``.lua`` files that are not packed to any archives. ``.omwaddon`` files and scripts packed to BSA can not be changed without restarting the game.
 
 Script structure
 ================
@@ -196,7 +236,7 @@ Engine handlers
 
 An engine handler is a function defined by a script, that can be called by the engine. I.e. it is an engine-to-script interaction.
 Not visible to other scripts. If several scripts register an engine handler with the same name,
-the engine calls all of them in the same order as the scripts were started.
+the engine calls all of them according to the load order (i.e. the order of ``content=`` entries in ``openmw.cfg``) and the order of scripts in ``omwaddon/omwscripts``.
 
 Some engine handlers are allowed only for global, or only for local/player scripts. Some are universal.
 See :ref:`Engine handlers reference`.
@@ -209,12 +249,6 @@ When a game is saved or loaded, the engine calls the engine handlers `onSave` or
 The value that `onSave` returns will be passed to `onLoad` when the game is loaded.
 It is the only way to save the internal state of a script. All other script variables will be lost after closing the game.
 The saved state must be :ref:`serializable <Serializable data>`.
-
-The list of active global scripts is controlled by ``*.omwscripts`` files. Loading a save doesn't synchronize
-the list of global scripts with those that were active previously, it only calls `onLoad` for those currently active.
-
-For local scripts the situation is different. When a save is loading, it tries to run all local scripts that were saved.
-So if ``lua-scripts=`` entries of some mod are removed, but ``data=`` entries are still enabled, then local scripts from the mod may still run.
 
 `onSave` and `onLoad` can be called even for objects in inactive state, so it shouldn't use `openmw.nearby`.
 
@@ -366,26 +400,28 @@ Overriding the interface and adding a debug output:
 
 .. code-block:: Lua
 
-    local interfaces = require('openmw.interfaces')
+    local baseInterface = nil  -- will be assigned by `onInterfaceOverride`
+    interface = {
+        version = 1,
+        doSomething = function(x, y)
+            print(string.format('SomeUtils.doSomething(%d, %d)', x, y))
+            baseInterface.doSomething(x, y)  -- calls the original `doSomething`
 
-    -- it is important to save it before returning the new interface
-    local orig = interfaces.SomeUtils
-
-    return {
-        interfaceName = "SomeUtils"
-        interface = {
-            version = orig.version,
-            doSomething = function(x, y)
-                print(string.format('SomeUtils.doSomething(%d, %d)', x, y))
-                orig.doSomething(x, y)  -- calls the original `doSomething`
-
-                -- WRONG! Would lead to an infinite recursion.
-                -- interfaces.SomeUtils.doSomething(x, y)
-            end,
-        }
+            -- WRONG! Would lead to an infinite recursion.
+            -- local interfaces = require('openmw.interfaces')
+            -- interfaces.SomeUtils.doSomething(x, y)
+        end,
     }
 
-A general recomendation about overriding is that the new interface should be fully compatible with the old one.
+    return {
+        interfaceName = "SomeUtils",
+        interface = interface,
+        engineHandlers = {
+            onInterfaceOverride = function(base) baseInterface = base end,
+        },
+    }
+
+A general recommendation about overriding is that the new interface should be fully compatible with the old one.
 So it is fine to change the behaviour of `SomeUtils.doSomething`, but if you want to add a completely new function, it would be
 better to create a new interface for it. For example `SomeUtilsExtended` with an additional function `doSomethingElse`.
 
@@ -418,7 +454,7 @@ Events are the main way of interacting between local and global scripts.
 They are not recommended for interactions between two global scripts, because in this case interfaces are more convenient.
 
 If several scripts register handlers for the same event, the handlers will be called in reverse order (opposite to engine handlers).
-I.e. the handler from the last attached script will be called first.
+I.e. the handler from the last script in the load order will be called first.
 Return value 'false' means "skip all other handlers for this event".
 Any other return value (including nil) means nothing.
 
@@ -471,7 +507,7 @@ The protection mod attaches an additional local script to every actor. The scrip
         eventHandlers = { DamagedByDarkPower = reduceDarkDamage },
     }
 
-In order to be able to intercept the event, the protection script should be attached after the original script (i.e. below in the load order).
+In order to be able to intercept the event, the protection script should be placed in the load order below the original script.
 
 
 Timers

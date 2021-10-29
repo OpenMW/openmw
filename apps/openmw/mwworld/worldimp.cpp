@@ -111,6 +111,17 @@ namespace MWWorld
           LoadersContainer mLoaders;
     };
 
+    struct OMWScriptsLoader : public ContentLoader
+    {
+        ESMStore& mStore;
+        OMWScriptsLoader(Loading::Listener& listener, ESMStore& store) : ContentLoader(listener), mStore(store) {}
+        void load(const boost::filesystem::path& filepath, int& index) override
+        {
+            ContentLoader::load(filepath.filename(), index);
+            mStore.addOMWScripts(filepath.string());
+        }
+    };
+
     void World::adjustSky()
     {
         if (mSky && (isCellExterior() || isCellQuasiExterior()))
@@ -155,6 +166,9 @@ namespace MWWorld
         gameContentLoader.addLoader(".omwgame", &esmLoader);
         gameContentLoader.addLoader(".omwaddon", &esmLoader);
         gameContentLoader.addLoader(".project", &esmLoader);
+
+        OMWScriptsLoader omwScriptsLoader(*listener, mStore);
+        gameContentLoader.addLoader(".omwscripts", &omwScriptsLoader);
 
         loadContentFiles(fileCollections, contentFiles, groundcoverFiles, gameContentLoader);
 
