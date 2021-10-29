@@ -26,11 +26,6 @@ namespace osgUtil
     class IncrementalCompileOperation;
 }
 
-namespace osgDB
-{
-    class SharedStateManager;
-}
-
 namespace Shader
 {
     class ShaderManager;
@@ -166,6 +161,9 @@ namespace Resource
         const Shader::ShaderVisitor& getShaderVisitorTemplate() const;
 
         void setShaderVisitorTemplate(const Shader::ShaderVisitor&);
+
+        /// Convenience method that assigns "debug" shaders to a newly created node.
+        void setDebugShader(osg::Node* node);
 
     private:
 
