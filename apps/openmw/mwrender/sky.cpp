@@ -19,6 +19,8 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/imagemanager.hpp>
 
+#include <components/shader/shadervisitor.hpp>
+
 #include <components/vfs/manager.hpp>
 
 #include <components/misc/rng.hpp>
@@ -431,8 +433,9 @@ namespace MWRender
         mRainNode->setNodeMask(Mask_WeatherParticles);
 
         mRainParticleSystem->setUserValue("simpleLighting", true);
-        mSceneManager->recreateShaders(mRainNode);
-
+        Shader::ShaderVisitor shaderVisitor(mSceneManager->getShaderVisitorTemplate());
+        shaderVisitor.setAllowedToModifyStateSets(true);
+        mRainNode->accept(shaderVisitor);
         mRootNode->addChild(mRainNode);
     }
 
@@ -668,7 +671,9 @@ namespace MWRender
                     ps->setUserValue("simpleLighting", true);
                 }
 
-                mSceneManager->recreateShaders(mParticleNode);
+                Shader::ShaderVisitor shaderVisitor(mSceneManager->getShaderVisitorTemplate());
+                mParticleNode->accept(shaderVisitor);
+                // TODO: pass simpleLighting define to shaderVisitor directly
             }
         }
 
