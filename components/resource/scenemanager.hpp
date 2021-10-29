@@ -73,6 +73,9 @@ namespace Resource
         /// Convenience method that queries getForceShaders setting of the getShaderVisitorTemplate().
         bool getForceShaders() const;
 
+        void setClampLighting(bool clamp) { mClampLighting = clamp; }
+        bool getClampLighting() const { return mClampLighting; }
+
         void setDepthFormat(GLenum format);
         GLenum getDepthFormat() const;
 
@@ -168,6 +171,7 @@ namespace Resource
     private:
 
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
+        bool mClampLighting;
         osg::ref_ptr<Shader::ShaderVisitor> mShaderVisitorTemplate;
         
         SceneUtil::LightingMethod mLightingMethod;
