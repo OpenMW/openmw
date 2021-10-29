@@ -24,6 +24,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/shader/shadervisitor.hpp>
 
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
@@ -608,11 +609,10 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 
     // use a shader to render the simple water, ensuring that fog is applied per pixel as required.
     // this could be removed if a more detailed water mesh, using some sort of paging solution, is implemented.
-    Resource::SceneManager* sceneManager = mResourceSystem->getSceneManager();
-    bool oldValue = sceneManager->getForceShaders();
-    sceneManager->setForceShaders(true);
-    sceneManager->recreateShaders(node);
-    sceneManager->setForceShaders(oldValue);
+    Shader::ShaderVisitor shaderVisitor(sceneManager->getShaderVisitorTemplate());
+    shaderVisitor.setAllowedToModifyStateSets(true);
+    shaderVisitor.setForceShaders(true);
+    node->accept(shaderVisitor);
 }
 
 class ShaderWaterStateSetUpdater : public SceneUtil::StateSetUpdater
@@ -853,3 +853,4 @@ void Water::showWorld(bool show)
 }
 
 }
+
