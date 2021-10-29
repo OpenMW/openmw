@@ -8,6 +8,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/shader/shadermanager.hpp>
+#include <components/shader/shadervisitor.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwbase/environment.hpp"
@@ -224,7 +225,11 @@ namespace MWRender
         group->setNodeMask(Mask_Groundcover);
         if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
             group->setCullCallback(new SceneUtil::LightListCallback);
-        mSceneManager->recreateShaders(group, "groundcover", true, mProgramTemplate);
+        Shader::ShaderVisitor shaderVisitor(mSceneManager->getShaderVisitorTemplate());
+        shaderVisitor.setDefaultShaderPrefix("groundcover");
+        shaderVisitor.setProgramTemplate(mProgramTemplate);
+        shaderVisitor.setForceShaders(true);
+        group->accept(shaderVisitor);
         mSceneManager->shareState(group);
         group->getBound();
         return group;
