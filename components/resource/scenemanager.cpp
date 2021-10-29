@@ -302,13 +302,7 @@ namespace Resource
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
         , mShaderManager(new Shader::ShaderManager)
-        , mForceShaders(false)
-        , mClampLighting(true)
-        , mAutoUseNormalMaps(false)
-        , mAutoUseSpecularMaps(false)
-        , mApplyLightingToEnvMaps(false)
         , mLightingMethod(SceneUtil::LightingMethod::FFP)
-        , mConvertAlphaTestToAlphaToCoverage(false)
         , mDepthFormat(0)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
@@ -319,42 +313,29 @@ namespace Resource
         , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
     {
-    }
-
-    void SceneManager::setForceShaders(bool force)
-    {
-        mForceShaders = force;
+        mShaderVisitorTemplate = new Shader::ShaderVisitor(*mShaderManager, *mImageManager);
+        mShaderVisitorTemplate->setDefaultShaderPrefix("objects");
     }
 
     bool SceneManager::getForceShaders() const
     {
-        return mForceShaders;
+        return mShaderVisitorTemplate->getForceShaders();
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool forceShadersForNode, const osg::Program* programTemplate)
+    void SceneManager::setShaderVisitorTemplate(const Shader::ShaderVisitor& shaderVisitor)
     {
-        osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix));
-        shaderVisitor->setAllowedToModifyStateSets(false);
-        shaderVisitor->setProgramTemplate(programTemplate);
-        if (forceShadersForNode)
-            shaderVisitor->setForceShaders(true);
-        node->accept(*shaderVisitor);
+        mShaderVisitorTemplate = new Shader::ShaderVisitor(shaderVisitor);
+    }
+
+    const Shader::ShaderVisitor& SceneManager::getShaderVisitorTemplate() const
+    {
+        return *mShaderVisitorTemplate;
     }
 
     void SceneManager::reinstateRemovedState(osg::ref_ptr<osg::Node> node)
     {
         osg::ref_ptr<Shader::ReinstateRemovedStateVisitor> reinstateRemovedStateVisitor = new Shader::ReinstateRemovedStateVisitor(false);
         node->accept(*reinstateRemovedStateVisitor);
-    }
-
-    void SceneManager::setClampLighting(bool clamp)
-    {
-        mClampLighting = clamp;
-    }
-
-    bool SceneManager::getClampLighting() const
-    {
-        return mClampLighting;
     }
 
     void SceneManager::setDepthFormat(GLenum format)
@@ -365,36 +346,6 @@ namespace Resource
     GLenum SceneManager::getDepthFormat() const
     {
         return mDepthFormat;
-    }
-
-    void SceneManager::setAutoUseNormalMaps(bool use)
-    {
-        mAutoUseNormalMaps = use;
-    }
-
-    void SceneManager::setNormalMapPattern(const std::string &pattern)
-    {
-        mNormalMapPattern = pattern;
-    }
-
-    void SceneManager::setNormalHeightMapPattern(const std::string &pattern)
-    {
-        mNormalHeightMapPattern = pattern;
-    }
-
-    void SceneManager::setAutoUseSpecularMaps(bool use)
-    {
-        mAutoUseSpecularMaps = use;
-    }
-
-    void SceneManager::setSpecularMapPattern(const std::string &pattern)
-    {
-        mSpecularMapPattern = pattern;
-    }
-
-    void SceneManager::setApplyLightingToEnvMaps(bool apply)
-    {
-        mApplyLightingToEnvMaps = apply;
     }
 
     void SceneManager::setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported)
@@ -422,11 +373,6 @@ namespace Resource
     SceneUtil::LightingMethod SceneManager::getLightingMethod() const
     {
         return mLightingMethod;
-    }
-    
-    void SceneManager::setConvertAlphaTestToAlphaToCoverage(bool convert)
-    {
-        mConvertAlphaTestToAlphaToCoverage = convert;
     }
 
     SceneManager::~SceneManager()
@@ -667,8 +613,8 @@ namespace Resource
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
 
-            osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor());
-            loaded->accept(*shaderVisitor);
+            Shader::ShaderVisitor shaderVisitor (getShaderVisitorTemplate());
+            loaded->accept(shaderVisitor);
 
             if (canOptimize(normalized))
             {
@@ -880,17 +826,4 @@ namespace Resource
         stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
     }
 
-    Shader::ShaderVisitor *SceneManager::createShaderVisitor(const std::string& shaderPrefix)
-    {
-        Shader::ShaderVisitor* shaderVisitor = new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, shaderPrefix);
-        shaderVisitor->setForceShaders(mForceShaders);
-        shaderVisitor->setAutoUseNormalMaps(mAutoUseNormalMaps);
-        shaderVisitor->setNormalMapPattern(mNormalMapPattern);
-        shaderVisitor->setNormalHeightMapPattern(mNormalHeightMapPattern);
-        shaderVisitor->setAutoUseSpecularMaps(mAutoUseSpecularMaps);
-        shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
-        shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
-        shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
-        return shaderVisitor;
-    }
 }
