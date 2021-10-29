@@ -23,7 +23,7 @@ namespace ContentSelectorModel
     {
         Q_OBJECT
     public:
-        explicit ContentModel(QObject *parent, QIcon warningIcon);
+        explicit ContentModel(QObject *parent, QIcon warningIcon, bool showOMWScripts);
         ~ContentModel();
 
         void setEncoding(const QString &encoding);
@@ -84,6 +84,7 @@ namespace ContentSelectorModel
         QSet<QString> mPluginsWithLoadOrderError;
         QString mEncoding;
         QIcon mWarningIcon;
+        bool mShowOMWScripts;
 
     public:
 

@@ -32,7 +32,7 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
 {
     ui.setupUi (this);
     setObjectName ("DataFilesPage");
-    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget);
+    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget, /*showOMWScripts=*/true);
     const QString encoding = mGameSettings.value("encoding", "win1252");
     mSelector->setEncoding(encoding);
 
