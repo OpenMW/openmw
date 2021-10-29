@@ -614,6 +614,7 @@ namespace Resource
             loaded->accept(setFilterSettingsControllerVisitor);
 
             Shader::ShaderVisitor shaderVisitor (getShaderVisitorTemplate());
+            shaderVisitor.setAllowedToModifyStateSets(true);
             loaded->accept(shaderVisitor);
 
             if (canOptimize(normalized))
