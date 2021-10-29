@@ -107,19 +107,30 @@ namespace Shader
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(false)
         , mAllowedToModifyStateSets(true)
-        , mAutoUseNormalMaps(false)
-        , mAutoUseSpecularMaps(false)
         , mApplyLightingToEnvMaps(false)
         , mConvertAlphaTestToAlphaToCoverage(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
         , mDefaultShaderPrefix(defaultShaderPrefix)
     {
+        mAutoMapPatterns.resize(EnumSize);
     }
 
-    void ShaderVisitor::setForceShaders(bool force)
+    ShaderVisitor::ShaderVisitor(const ShaderVisitor& other)
+        : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        , mForceShaders(other.mForceShaders)
+        , mAllowedToModifyStateSets(other.mAllowedToModifyStateSets)
+        , mApplyLightingToEnvMaps(other.mApplyLightingToEnvMaps)
+        , mConvertAlphaTestToAlphaToCoverage(other.mConvertAlphaTestToAlphaToCoverage)
+        , mShaderManager(other.mShaderManager)
+        , mImageManager(other.mImageManager)
+        , mDefaultShaderPrefix(other.mDefaultShaderPrefix)
+        , mAutoMapPatterns(other.mAutoMapPatterns)
     {
-        mForceShaders = force;
+    }
+
+    ShaderVisitor::~ShaderVisitor()
+    {
     }
 
     void ShaderVisitor::apply(osg::Node& node)
@@ -271,22 +282,25 @@ namespace Shader
                 }
             }
 
-            if (mAutoUseNormalMaps && diffuseMap != nullptr && normalMap == nullptr && diffuseMap->getImage(0))
+            if ((!mAutoMapPatterns[NormalMap].empty() || !mAutoMapPatterns[NormalHeightMap].empty()) && diffuseMap != nullptr && normalMap == nullptr && diffuseMap->getImage(0))
             {
                 std::string normalMapFileName = diffuseMap->getImage(0)->getFileName();
 
                 osg::ref_ptr<osg::Image> image;
                 bool normalHeight = false;
-                std::string normalHeightMap = normalMapFileName;
-                Misc::StringUtils::replaceLast(normalHeightMap, ".", mNormalHeightMapPattern + ".");
-                if (mImageManager.getVFS()->exists(normalHeightMap))
+                if (!mAutoMapPatterns[NormalHeightMap].empty())
                 {
-                    image = mImageManager.getImage(normalHeightMap);
-                    normalHeight = true;
+                    std::string normalHeightMap = normalMapFileName;
+                    Misc::StringUtils::replaceLast(normalHeightMap, ".", mAutoMapPatterns[NormalHeightMap] + ".");
+                    if (mImageManager.getVFS()->exists(normalHeightMap))
+                    {
+                        image = mImageManager.getImage(normalHeightMap);
+                        normalHeight = true;
+                    }
                 }
-                else
+                if (!normalHeight && !mAutoMapPatterns[NormalMap].empty())
                 {
-                    Misc::StringUtils::replaceLast(normalMapFileName, ".", mNormalMapPattern + ".");
+                    Misc::StringUtils::replaceLast(normalMapFileName, ".", mAutoMapPatterns[NormalMap] + ".");
                     if (mImageManager.getVFS()->exists(normalMapFileName))
                     {
                         image = mImageManager.getImage(normalMapFileName);
@@ -317,10 +331,10 @@ namespace Shader
                     mRequirements.back().mNormalHeight = normalHeight;
                 }
             }
-            if (mAutoUseSpecularMaps && diffuseMap != nullptr && specularMap == nullptr && diffuseMap->getImage(0))
+            if (!mAutoMapPatterns[SpecularMap].empty() && diffuseMap != nullptr && specularMap == nullptr && diffuseMap->getImage(0))
             {
                 std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
-                Misc::StringUtils::replaceLast(specularMapFileName, ".", mSpecularMapPattern + ".");
+                Misc::StringUtils::replaceLast(specularMapFileName, ".", mAutoMapPatterns[SpecularMap] + ".");
                 if (mImageManager.getVFS()->exists(specularMapFileName))
                 {
                     osg::ref_ptr<osg::Image> image (mImageManager.getImage(specularMapFileName));
@@ -727,46 +741,6 @@ namespace Shader
 
         if (needPop)
             popRequirements();
-    }
-
-    void ShaderVisitor::setAllowedToModifyStateSets(bool allowed)
-    {
-        mAllowedToModifyStateSets = allowed;
-    }
-
-    void ShaderVisitor::setAutoUseNormalMaps(bool use)
-    {
-        mAutoUseNormalMaps = use;
-    }
-
-    void ShaderVisitor::setNormalMapPattern(const std::string &pattern)
-    {
-        mNormalMapPattern = pattern;
-    }
-
-    void ShaderVisitor::setNormalHeightMapPattern(const std::string &pattern)
-    {
-        mNormalHeightMapPattern = pattern;
-    }
-
-    void ShaderVisitor::setAutoUseSpecularMaps(bool use)
-    {
-        mAutoUseSpecularMaps = use;
-    }
-
-    void ShaderVisitor::setSpecularMapPattern(const std::string &pattern)
-    {
-        mSpecularMapPattern = pattern;
-    }
-
-    void ShaderVisitor::setApplyLightingToEnvMaps(bool apply)
-    {
-        mApplyLightingToEnvMaps = apply;
-    }
-
-    void ShaderVisitor::setConvertAlphaTestToAlphaToCoverage(bool convert)
-    {
-        mConvertAlphaTestToAlphaToCoverage = convert;
     }
 
     ReinstateRemovedStateVisitor::ReinstateRemovedStateVisitor(bool allowedToModifyStateSets)
