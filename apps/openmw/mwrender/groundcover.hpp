@@ -8,6 +8,7 @@
 namespace MWWorld
 {
     class ESMStore;
+    class GroundcoverStore;
 }
 namespace osg
 {
@@ -20,7 +21,7 @@ namespace MWRender
     class Groundcover : public Resource::GenericResourceManager<GroundcoverChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
     public:
-        Groundcover(Resource::SceneManager* sceneManager, float density, float viewDistance, const MWWorld::ESMStore& groundcoverStore);
+        Groundcover(Resource::SceneManager* sceneManager, float density, float viewDistance, const MWWorld::GroundcoverStore& store);
         ~Groundcover();
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;
@@ -43,8 +44,7 @@ namespace MWRender
         float mDensity;
         osg::ref_ptr<osg::StateSet> mStateset;
         osg::ref_ptr<osg::Program> mProgramTemplate;
-        /// @note mGroundcoverStore is separated from World's store because groundcover files must not be allowed to corrupt normal content files.
-        const MWWorld::ESMStore& mGroundcoverStore;
+        const MWWorld::GroundcoverStore& mGroundcoverStore;
 
         typedef std::map<std::string, std::vector<GroundcoverEntry>> InstanceMap;
         osg::ref_ptr<osg::Node> createChunk(InstanceMap& instances, const osg::Vec2f& center);
