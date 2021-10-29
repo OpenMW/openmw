@@ -103,7 +103,7 @@ namespace Shader
     {
     }
 
-    ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string &defaultShaderPrefix)
+    ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(false)
         , mAllowedToModifyStateSets(false)
@@ -111,7 +111,6 @@ namespace Shader
         , mConvertAlphaTestToAlphaToCoverage(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
-        , mDefaultShaderPrefix(defaultShaderPrefix)
     {
         mAutoMapPatterns.resize(EnumSize);
     }
