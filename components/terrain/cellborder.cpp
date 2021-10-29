@@ -77,7 +77,7 @@ osg::ref_ptr<osg::Group> CellBorder::createBorderGeometry(float x, float y, floa
     polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     stateSet->setAttributeAndModes(polygonmode,osg::StateAttribute::ON);
 
-    sceneManager->recreateShaders(borderGeode, "debug");
+    sceneManager->setDebugShader(borderGeode);
     borderGeode->setNodeMask(mask);
 
     return borderGeode;
