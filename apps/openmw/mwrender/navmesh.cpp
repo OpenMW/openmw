@@ -50,7 +50,7 @@ namespace MWRender
         mGroup = SceneUtil::createNavMeshGroup(navMesh, settings);
         if (mGroup)
         {
-            MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(mGroup, "debug");
+            MWBase::Environment::get().getResourceSystem()->getSceneManager()->setDebugShader(mGroup);
             mGroup->setNodeMask(Mask_Debug);
             mRootNode->addChild(mGroup);
         }
