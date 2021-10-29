@@ -143,7 +143,7 @@ void GlowUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
             mNode->setStateSet(stateset);
             // TODO: this visitor is unsafe here and needs to be avoided
             Shader::ShaderVisitor shaderVisitor(mResourceSystem->getSceneManager()->getShaderVisitorTemplate());
-            mNode->apply(shaderVisitor);
+            mNode->accept(shaderVisitor);
         }
         if (mOriginalDuration < 0) // if this glowupdater was originally a permanent glow
         {
@@ -321,8 +321,8 @@ osg::ref_ptr<GlowUpdater> addEnchantedGlow(osg::ref_ptr<osg::Node> node, Resourc
     writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
     writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
     // TODO: this visitor is unsafe here and needs to be avoided
-    Shader::ShaderVisitor shaderVisitor(mResourceSystem->getSceneManager()->getShaderVisitorTemplate());
-    node->apply(shaderVisitor);
+    Shader::ShaderVisitor shaderVisitor(resourceSystem->getSceneManager()->getShaderVisitorTemplate());
+    node->accept(shaderVisitor);
     return glowUpdater;
 }
 
