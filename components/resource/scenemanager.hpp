@@ -75,38 +75,11 @@ namespace Resource
 
         Shader::ShaderManager& getShaderManager();
 
-        /// Re-create shaders for this node, need to call this if alpha testing, texture stages or vertex color mode have changed.
-        void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects", bool forceShadersForNode = false, const osg::Program* programTemplate = nullptr);
-
-        /// Applying shaders to a node may replace some fixed-function state.
-        /// This restores it.
-        /// When editing such state, it should be reinstated before the edits, and shaders should be recreated afterwards.
-        void reinstateRemovedState(osg::ref_ptr<osg::Node> node);
-
-        /// @see ShaderVisitor::setForceShaders
-        void setForceShaders(bool force);
+        /// Convenience method that queries getForceShaders setting of the getShaderVisitorTemplate().
         bool getForceShaders() const;
-
-        void setClampLighting(bool clamp);
-        bool getClampLighting() const;
 
         void setDepthFormat(GLenum format);
         GLenum getDepthFormat() const;
-
-        /// @see ShaderVisitor::setAutoUseNormalMaps
-        void setAutoUseNormalMaps(bool use);
-
-        /// @see ShaderVisitor::setNormalMapPattern
-        void setNormalMapPattern(const std::string& pattern);
-
-        /// @see ShaderVisitor::setNormalHeightMapPattern
-        void setNormalHeightMapPattern(const std::string& pattern);
-
-        void setAutoUseSpecularMaps(bool use);
-
-        void setSpecularMapPattern(const std::string& pattern);
-
-        void setApplyLightingToEnvMaps(bool apply);
 
         void setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported);
         bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
@@ -118,8 +91,6 @@ namespace Resource
         };
         void setLightingMethod(SceneUtil::LightingMethod method);
         SceneUtil::LightingMethod getLightingMethod() const;
-        
-        void setConvertAlphaTestToAlphaToCoverage(bool convert);
 
         void setShaderPath(const std::string& path);
 
@@ -192,22 +163,18 @@ namespace Resource
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
+        const Shader::ShaderVisitor& getShaderVisitorTemplate() const;
+
+        void setShaderVisitorTemplate(const Shader::ShaderVisitor&);
+
     private:
 
-        Shader::ShaderVisitor* createShaderVisitor(const std::string& shaderPrefix = "objects");
-
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
-        bool mForceShaders;
-        bool mClampLighting;
-        bool mAutoUseNormalMaps;
-        std::string mNormalMapPattern;
-        std::string mNormalHeightMapPattern;
-        bool mAutoUseSpecularMaps;
-        std::string mSpecularMapPattern;
-        bool mApplyLightingToEnvMaps;
+        osg::ref_ptr<Shader::ShaderVisitor> mShaderVisitorTemplate;
+        
         SceneUtil::LightingMethod mLightingMethod;
         SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
-        bool mConvertAlphaTestToAlphaToCoverage;
+
         GLenum mDepthFormat;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
