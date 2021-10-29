@@ -11,7 +11,6 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/lightmanager.hpp>
-#include <components/shader/shadervisitor.hpp>
 
 #include "terraindrawable.hpp"
 #include "material.hpp"
