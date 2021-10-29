@@ -53,7 +53,7 @@ namespace MWRender
                 || it->second.mRevision != tile->second->getRevision())
             {
                 const auto group = SceneUtil::createRecastMeshGroup(*tile->second, settings);
-                MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
+                MWBase::Environment::get().getResourceSystem()->getSceneManager()->setDebugShader(group);
                 group->setNodeMask(Mask_Debug);
                 mRootNode->removeChild(it->second.mValue);
                 mRootNode->addChild(group);
