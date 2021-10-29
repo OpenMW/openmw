@@ -2,11 +2,14 @@
 #define OPENMW_COMPONENTS_SHADERVISITOR_H
 
 #include <osg/NodeVisitor>
-#include <osg/Program>
 
 namespace Resource
 {
     class ImageManager;
+}
+namespace osg
+{
+    class Program;
 }
 
 namespace Shader
@@ -18,28 +21,37 @@ namespace Shader
     class ShaderVisitor : public osg::NodeVisitor
     {
     public:
-        ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string& defaultShaderPrefix);
+        ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager);
+        ~ShaderVisitor();
+
+        void operator = (const ShaderVisitor&);
+
+        void setDefaultShaderPrefix(const std::string& defaultShaderPrefix) { mDefaultShaderPrefix = defaultShaderPrefix; }
 
         void setProgramTemplate(const osg::Program* programTemplate) { mProgramTemplate = programTemplate; }
+        const osg::Program* getProgramTemplate() const { return mProgramTemplate; }
 
         /// By default, only bump mapped objects will have a shader added to them.
         /// Setting force = true will cause all objects to render using shaders, regardless of having a bump map.
-        void setForceShaders(bool force);
+        void setForceShaders(bool force) { mForceShaders = force; }
+        bool getForceShaders() const { return mForceShaders; }
 
-        /// Set if we are allowed to modify StateSets encountered in the graph (default true).
+        /// Set if we are allowed to modify StateSets encountered in the graph (default false).
         /// @par If set to false, then instead of modifying, the StateSet will be cloned and this new StateSet will be assigned to the node.
-        /// @par This option is useful when the ShaderVisitor is run on a "live" subgraph that may have already been submitted for rendering.
+        /// @par Setting this option to true is useful when the ShaderVisitor is run on StateSets that have not been submitted for rendering yet.
         void setAllowedToModifyStateSets(bool allowed);
 
-        /// Automatically use normal maps if a file with suitable name exists (see normal map pattern).
-        void setAutoUseNormalMaps(bool use);
-
-        void setNormalMapPattern(const std::string& pattern);
-        void setNormalHeightMapPattern(const std::string& pattern);
-
-        void setAutoUseSpecularMaps(bool use);
-
-        void setSpecularMapPattern(const std::string& pattern);
+        /// Automatically use texture maps if a file with suitable name exists.
+        /// @note An empty pattern string indicates we will not use texture maps automatically.
+        enum AutoUsedMap
+        {
+            NormalMap,
+            NormalHeightMap,
+            SpecularMap,
+            EnumSize
+        };
+        void setAutoMapPattern(AutoUsedMap map, const std::string& pattern) { mAutoMapPatterns[map] = pattern; }
+        const std::string& getAutoMapPattern(AutoUsedMap map) const { return mAutoMapPatterns[map]; }
 
         void setApplyLightingToEnvMaps(bool apply);
 
@@ -52,19 +64,14 @@ namespace Shader
 
         void applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node);
 
+    private:
         void pushRequirements(osg::Node& node);
         void popRequirements();
 
-    private:
         bool mForceShaders;
         bool mAllowedToModifyStateSets;
 
-        bool mAutoUseNormalMaps;
-        std::string mNormalMapPattern;
-        std::string mNormalHeightMapPattern;
-
-        bool mAutoUseSpecularMaps;
-        std::string mSpecularMapPattern;
+        std::vector<std::string> mAutoMapPatterns;
 
         bool mApplyLightingToEnvMaps;
 
