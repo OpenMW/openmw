@@ -29,6 +29,7 @@
 
 #include <components/shader/removedalphafunc.hpp>
 #include <components/shader/shadermanager.hpp>
+#include <components/shader/shadervisitor.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -315,16 +316,19 @@ namespace MWRender
                             || Settings::Manager::getBool("enable shadows", "Shadows")
                             || lightingMethod != SceneUtil::LightingMethod::FFP
                             || reverseZ;
-        resourceSystem->getSceneManager()->setForceShaders(forceShaders);
-        // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
-        resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
-        resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
-        resourceSystem->getSceneManager()->setNormalMapPattern(Settings::Manager::getString("normal map pattern", "Shaders"));
-        resourceSystem->getSceneManager()->setNormalHeightMapPattern(Settings::Manager::getString("normal height map pattern", "Shaders"));
-        resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::Manager::getBool("auto use object specular maps", "Shaders"));
-        resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
-        resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
-        resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1);
+        Shader::ShaderVisitor shaderVisitor (resourceSystem->getSceneManager()->getShaderVisitorTemplate());
+        shaderVisitor.setForceShaders(forceShaders);
+        shaderVisitor.setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
+        if (Settings::Manager::getBool("auto use object normal maps", "Shaders"))
+        {
+            shaderVisitor.setAutoMapPattern(Shader::ShaderVisitor::NormalMap, Settings::Manager::getString("normal map pattern", "Shaders"));
+            shaderVisitor.setAutoMapPattern(Shader::ShaderVisitor::NormalHeightMap, Settings::Manager::getString("normal height map pattern", "Shaders"));
+        }
+        if (Settings::Manager::getBool("auto use object specular maps", "Shaders"))
+            shaderVisitor.setAutoMapPattern(Shader::ShaderVisitor::SpecularMap, Settings::Manager::getString("specular map pattern", "Shaders"));
+        shaderVisitor.setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
+        shaderVisitor.setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1);
+        resourceSystem->getSceneManager()->setShaderVisitorTemplate(shaderVisitor);
 
         // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this depends on support for various OpenGL extensions.
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(lightingMethod == SceneUtil::LightingMethod::FFP);
