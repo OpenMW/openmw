@@ -22,7 +22,7 @@ namespace Shader
     {
     public:
         ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager);
-        ShaderVisitor(const ShaderVisitor& copy, const osg::CopyOp& copyop=osg::CopyOp())
+        ShaderVisitor(const ShaderVisitor& copy, const osg::CopyOp& copyop=osg::CopyOp());
         ~ShaderVisitor();
 
         void setDefaultShaderPrefix(const std::string& defaultShaderPrefix) { mDefaultShaderPrefix = defaultShaderPrefix; }
@@ -38,7 +38,7 @@ namespace Shader
         /// Set if we are allowed to modify StateSets encountered in the graph (default false).
         /// @par If set to false, then instead of modifying, the StateSet will be cloned and this new StateSet will be assigned to the node.
         /// @par Setting this option to true is useful when the ShaderVisitor is run on StateSets that have not been submitted for rendering yet.
-        void setAllowedToModifyStateSets(bool allowed) { mAllowedToModifyStateSets = true; }
+        void setAllowedToModifyStateSets(bool allowed) { mAllowedToModifyStateSets = allowed; }
 
         /// Automatically use texture maps if a file with suitable name exists.
         /// @note An empty pattern string indicates we will not use texture maps automatically.
