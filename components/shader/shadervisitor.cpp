@@ -116,16 +116,17 @@ namespace Shader
         mAutoMapPatterns.resize(EnumSize);
     }
 
-    ShaderVisitor::ShaderVisitor(const ShaderVisitor& other)
+    ShaderVisitor::ShaderVisitor(const ShaderVisitor& other, const osg::CopyOp& copyop)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(other.mForceShaders)
         , mAllowedToModifyStateSets(other.mAllowedToModifyStateSets)
+        , mAutoMapPatterns(other.mAutoMapPatterns)
         , mApplyLightingToEnvMaps(other.mApplyLightingToEnvMaps)
         , mConvertAlphaTestToAlphaToCoverage(other.mConvertAlphaTestToAlphaToCoverage)
         , mShaderManager(other.mShaderManager)
         , mImageManager(other.mImageManager)
         , mDefaultShaderPrefix(other.mDefaultShaderPrefix)
-        , mAutoMapPatterns(other.mAutoMapPatterns)
+        , mProgramTemplate(other.mProgramTemplate)
     {
     }
 
