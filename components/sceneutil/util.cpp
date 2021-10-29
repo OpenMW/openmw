@@ -20,6 +20,7 @@
 #include <components/settings/settings.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/shader/shadervisitor.hpp>
 
 #ifndef GL_DEPTH32F_STENCIL8_NV
 #define GL_DEPTH32F_STENCIL8_NV 0x8DAC
@@ -140,7 +141,9 @@ void GlowUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
             mDone = true;
             // normally done in StateSetUpdater::operator(), but needs doing here so the shader visitor sees the right StateSet
             mNode->setStateSet(stateset);
-            mResourceSystem->getSceneManager()->recreateShaders(mNode);
+            // TODO: this visitor is unsafe here and needs to be avoided
+            Shader::ShaderVisitor shaderVisitor(mResourceSystem->getSceneManager()->getShaderVisitorTemplate());
+            mNode->apply(shaderVisitor);
         }
         if (mOriginalDuration < 0) // if this glowupdater was originally a permanent glow
         {
@@ -317,8 +320,9 @@ osg::ref_ptr<GlowUpdater> addEnchantedGlow(osg::ref_ptr<osg::Node> node, Resourc
     }
     writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
     writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
-    resourceSystem->getSceneManager()->recreateShaders(node);
-
+    // TODO: this visitor is unsafe here and needs to be avoided
+    Shader::ShaderVisitor shaderVisitor(mResourceSystem->getSceneManager()->getShaderVisitorTemplate());
+    node->apply(shaderVisitor);
     return glowUpdater;
 }
 
