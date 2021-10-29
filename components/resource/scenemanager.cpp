@@ -332,10 +332,12 @@ namespace Resource
         return *mShaderVisitorTemplate;
     }
 
-    void SceneManager::reinstateRemovedState(osg::ref_ptr<osg::Node> node)
+    void SceneManager::setDebugShader(osg::Node* node)
     {
-        osg::ref_ptr<Shader::ReinstateRemovedStateVisitor> reinstateRemovedStateVisitor = new Shader::ReinstateRemovedStateVisitor(false);
-        node->accept(*reinstateRemovedStateVisitor);
+        Shader::ShaderVisitor shaderVisitor(getShaderVisitorTemplate());
+        shaderVisitor.setAllowedToModifyStateSets(true);
+        shaderVisitor.setDefaultShaderPrefix("debug");
+        node->accept(shaderVisitor);
     }
 
     void SceneManager::setDepthFormat(GLenum format)
