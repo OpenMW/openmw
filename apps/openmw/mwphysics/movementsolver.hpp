@@ -37,13 +37,15 @@ namespace MWPhysics
 
     class Actor;
     struct ActorFrameData;
+    struct ProjectileFrameData;
     struct WorldFrameData;
 
     class MovementSolver
     {
     public:
         static osg::Vec3f traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight);
-        static void move(ActorFrameData& actor, float time, const btCollisionWorld* collisionWorld, WorldFrameData& worldData);
+        static void move(ActorFrameData& actor, float time, const btCollisionWorld* collisionWorld, const WorldFrameData& worldData);
+        static void move(ProjectileFrameData& projectile, float time, const btCollisionWorld* collisionWorld);
         static void unstuck(ActorFrameData& actor, const btCollisionWorld* collisionWorld);
     };
 }

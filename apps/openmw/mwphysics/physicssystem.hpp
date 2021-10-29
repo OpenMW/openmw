@@ -7,6 +7,7 @@
 #include <set>
 #include <unordered_map>
 #include <algorithm>
+#include <variant>
 
 #include <osg/Quat>
 #include <osg/BoundingBox>
@@ -100,12 +101,26 @@ namespace MWPhysics
         const bool mSkipCollisionDetection;
     };
 
+    struct ProjectileFrameData
+    {
+        explicit ProjectileFrameData(Projectile& projectile);
+        osg::Vec3f mPosition;
+        osg::Vec3f mMovement;
+        const btCollisionObject* mCaster;
+        const btCollisionObject* mCollisionObject;
+        Projectile* mProjectile;
+    };
+
     struct WorldFrameData
     {
         WorldFrameData();
         bool mIsInStorm;
         osg::Vec3f mStormDirection;
     };
+
+    using ActorSimulation = std::pair<std::shared_ptr<Actor>, ActorFrameData>;
+    using ProjectileSimulation = std::pair<std::shared_ptr<Projectile>, ProjectileFrameData>;
+    using Simulation = std::variant<ActorSimulation, ProjectileSimulation>;
 
     class PhysicsSystem : public RayCastingInterface
     {
@@ -124,7 +139,6 @@ namespace MWPhysics
 
             int addProjectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius);
             void setCaster(int projectileId, const MWWorld::Ptr& caster);
-            void updateProjectile(const int projectileId, const osg::Vec3f &position) const;
             void removeProjectile(const int projectileId);
 
             void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
@@ -253,7 +267,7 @@ namespace MWPhysics
 
             void updateWater();
 
-            std::pair<std::vector<std::shared_ptr<Actor>>, std::vector<ActorFrameData>> prepareFrameData(bool willSimulate);
+            std::vector<Simulation> prepareSimulation(bool willSimulate);
 
             std::unique_ptr<btBroadphaseInterface> mBroadphase;
             std::unique_ptr<btDefaultCollisionConfiguration> mCollisionConfiguration;

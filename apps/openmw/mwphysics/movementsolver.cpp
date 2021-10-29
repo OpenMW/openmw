@@ -3,6 +3,7 @@
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <BulletCollision/CollisionShapes/btConvexShape.h>
 
 #include <components/esm/loadgmst.hpp>
 #include <components/misc/convert.hpp>
@@ -19,6 +20,8 @@
 #include "constants.hpp"
 #include "contacttestwrapper.h"
 #include "physicssystem.hpp"
+#include "projectile.hpp"
+#include "projectileconvexcallback.hpp"
 #include "stepper.hpp"
 #include "trace.h"
 
@@ -116,7 +119,7 @@ namespace MWPhysics
     }
 
     void MovementSolver::move(ActorFrameData& actor, float time, const btCollisionWorld* collisionWorld,
-                                           WorldFrameData& worldData)
+                                           const WorldFrameData& worldData)
     {
         // Reset per-frame data
         actor.mWalkingOnWater = false;
@@ -396,6 +399,29 @@ namespace MWPhysics
         actor.mPosition = newPosition;
         // remove what was added earlier in compensating for doTrace not taking interior transformation into account
         actor.mPosition.z() -= actor.mHalfExtentsZ; // vanilla-accurate
+    }
+
+    void MovementSolver::move(ProjectileFrameData& projectile, float time, const btCollisionWorld* collisionWorld)
+    {
+        btVector3 btFrom = Misc::Convert::toBullet(projectile.mPosition);
+        btVector3 btTo = Misc::Convert::toBullet(projectile.mPosition + projectile.mMovement * time);
+
+        if (btFrom == btTo)
+            return;
+
+        ProjectileConvexCallback resultCallback(projectile.mCaster, projectile.mCollisionObject, btFrom, btTo, projectile.mProjectile);
+        resultCallback.m_collisionFilterMask = 0xff;
+        resultCallback.m_collisionFilterGroup = CollisionType_Projectile;
+
+        const btQuaternion btrot = btQuaternion::getIdentity();
+        btTransform from_ (btrot, btFrom);
+        btTransform to_ (btrot, btTo);
+
+        const btCollisionShape* shape = projectile.mCollisionObject->getCollisionShape();
+        assert(shape->isConvex());
+        collisionWorld->convexSweepTest(static_cast<const btConvexShape*>(shape), from_, to_, resultCallback);
+
+        projectile.mPosition = Misc::Convert::toOsg(projectile.mProjectile->isActive() ? btTo : resultCallback.m_hitPointWorld);
     }
 
     btVector3 addMarginToDelta(btVector3 delta)

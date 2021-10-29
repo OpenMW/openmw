@@ -31,14 +31,15 @@ Projectile::Projectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, f
     mCollisionObject->setCollisionShape(mShape.get());
     mCollisionObject->setUserPointer(this);
 
-    setPosition(position);
+    mPosition = position;
+    mPreviousPosition = position;
     setCaster(caster);
 
     const int collisionMask = CollisionType_World | CollisionType_HeightMap |
         CollisionType_Actor | CollisionType_Door | CollisionType_Water | CollisionType_Projectile;
     mTaskScheduler->addCollisionObject(mCollisionObject.get(), CollisionType_Projectile, collisionMask);
 
-    commitPositionChange();
+    updateCollisionObjectPosition();
 }
 
 Projectile::~Projectile()
@@ -48,29 +49,12 @@ Projectile::~Projectile()
     mTaskScheduler->removeCollisionObject(mCollisionObject.get());
 }
 
-void Projectile::commitPositionChange()
+void Projectile::updateCollisionObjectPosition()
 {
     std::scoped_lock lock(mMutex);
-    if (mTransformUpdatePending)
-    {
-        auto& trans = mCollisionObject->getWorldTransform();
-        trans.setOrigin(Misc::Convert::toBullet(mPosition));
-        mCollisionObject->setWorldTransform(trans);
-        mTransformUpdatePending = false;
-    }
-}
-
-void Projectile::setPosition(const osg::Vec3f &position)
-{
-    std::scoped_lock lock(mMutex);
-    mPosition = position;
-    mTransformUpdatePending = true;
-}
-
-osg::Vec3f Projectile::getPosition() const
-{
-    std::scoped_lock lock(mMutex);
-    return mPosition;
+    auto& trans = mCollisionObject->getWorldTransform();
+    trans.setOrigin(Misc::Convert::toBullet(mPosition));
+    mCollisionObject->setWorldTransform(trans);
 }
 
 void Projectile::hit(const btCollisionObject* target, btVector3 pos, btVector3 normal)

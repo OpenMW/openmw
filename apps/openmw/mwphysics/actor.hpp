@@ -12,6 +12,7 @@
 
 class btCollisionShape;
 class btCollisionObject;
+class btCollisionWorld;
 class btConvexShape;
 
 namespace Resource
@@ -59,7 +60,6 @@ namespace MWPhysics
         * to account for e.g. scripted movements
         */
         void setSimulationPosition(const osg::Vec3f& position);
-        osg::Vec3f getSimulationPosition() const;
 
         void updateCollisionObjectPosition();
 
@@ -93,10 +93,6 @@ namespace MWPhysics
 
         // apply position offset. Can't be called during simulation
         void applyOffsetChange();
-
-        osg::Vec3f getPosition() const;
-
-        osg::Vec3f getPreviousPosition() const;
 
         /**
          * Returns the half extents of the collision body (scaled according to rendering scale)
@@ -162,8 +158,7 @@ namespace MWPhysics
 
         bool skipCollisions();
 
-        void setVelocity(osg::Vec3f velocity);
-        osg::Vec3f velocity();
+        bool canMoveToWaterSurface(float waterlevel, const btCollisionWorld* world) const;
 
     private:
         MWWorld::Ptr mStandingOnPtr;
@@ -190,11 +185,7 @@ namespace MWPhysics
         osg::Quat mRotation;
 
         osg::Vec3f mScale;
-        osg::Vec3f mSimulationPosition;
-        osg::Vec3f mPosition;
-        osg::Vec3f mPreviousPosition;
         osg::Vec3f mPositionOffset;
-        osg::Vec3f mVelocity;
         bool mWorldPositionChanged;
         bool mSkipCollisions;
         bool mSkipSimulation;
