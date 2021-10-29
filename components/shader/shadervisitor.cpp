@@ -116,7 +116,8 @@ namespace Shader
     }
 
     ShaderVisitor::ShaderVisitor(const ShaderVisitor& other, const osg::CopyOp& copyop)
-        : osg::NodeVisitor(other, copyop)
+        : osg::Object(other, copyop)
+        , osg::NodeVisitor(other, copyop)
         , mForceShaders(other.mForceShaders)
         , mAllowedToModifyStateSets(other.mAllowedToModifyStateSets)
         , mAutoMapPatterns(other.mAutoMapPatterns)
