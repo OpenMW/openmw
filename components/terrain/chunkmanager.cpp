@@ -139,7 +139,7 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
     mStorage->getBlendmaps(chunkSize, chunkCenter, blendmaps, layerList);
 
     bool useShaders = mSceneManager->getForceShaders();
-    if (!mSceneManager->getShaderVisitorTemplate().getClampLighting())
+    if (!mSceneManager->getClampLighting())
         useShaders = true; // always use shaders when lighting is unclamped, this is to avoid lighting seams between a terrain chunk with normal maps and one without normal maps
 
     std::vector<TextureLayer> layers;
@@ -266,7 +266,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
             layer.mDiffuseMap = compositeMap->mTexture;
             layer.mParallax = false;
             layer.mSpecular = false;
-            geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getShaderVisitorTemplate().getClampLighting(), &mSceneManager->getShaderManager(), std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
+            geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
         }
         else
         {
