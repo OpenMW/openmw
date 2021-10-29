@@ -322,7 +322,6 @@ namespace MWRender
                             || reverseZ;
         Shader::ShaderVisitor shaderVisitor (resourceSystem->getSceneManager()->getShaderVisitorTemplate());
         shaderVisitor.setForceShaders(forceShaders);
-        shaderVisitor.setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
         if (Settings::Manager::getBool("auto use object normal maps", "Shaders"))
         {
             shaderVisitor.setAutoMapPattern(Shader::ShaderVisitor::NormalMap, Settings::Manager::getString("normal map pattern", "Shaders"));
