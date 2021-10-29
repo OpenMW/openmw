@@ -15,6 +15,7 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/shader/shadervisitor.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/sceneutil/util.hpp>
 
@@ -109,7 +110,9 @@ RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem*
 
     createWaterRippleStateSet(resourceSystem, mParticleNode);
 
-    resourceSystem->getSceneManager()->recreateShaders(mParticleNode);
+    Shader::ShaderVisitor shaderVisitor(resourceSystem->getSceneManager()->getShaderVisitorTemplate());
+    shaderVisitor.setAllowedToModifyStateSets(true);
+    mParticleNode->accept(shaderVisitor);
 
     mParent->addChild(mParticleNode);
 }
