@@ -902,14 +902,7 @@ namespace MWRender
             return false;
         }
 
-        unsigned int maskBackup = mPlayerAnimation->getObjectRoot()->getNodeMask();
-
-        if (mCamera->isFirstPerson())
-            mPlayerAnimation->getObjectRoot()->setNodeMask(0);
-
         mScreenshotManager->screenshot360(image);
-
-        mPlayerAnimation->getObjectRoot()->setNodeMask(maskBackup);
 
         return true;
     }
