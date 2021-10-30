@@ -941,7 +941,7 @@ namespace MWPhysics
         , mWasOnGround(actor.getOnGround())
         , mIsAquatic(actor.getPtr().getClass().isPureWaterCreature(actor.getPtr()))
         , mWaterCollision(waterCollision)
-        , mSkipCollisionDetection(actor.skipCollisions() || !actor.getCollisionMode())
+        , mSkipCollisionDetection(!actor.getCollisionMode())
     {
     }
 
@@ -951,8 +951,9 @@ namespace MWPhysics
         mPosition = actor.getPosition();
         if (mWaterCollision && mPosition.z() < mWaterlevel && actor.canMoveToWaterSurface(mWaterlevel, world))
         {
-            mPosition.z() = mWaterlevel;
-            MWBase::Environment::get().getWorld()->moveObject(actor.getPtr(), mPosition, false);
+            MWBase::Environment::get().getWorld()->moveObjectBy(actor.getPtr(), osg::Vec3f(0, 0, mWaterlevel - mPosition.z()));
+            actor.applyOffsetChange();
+            mPosition = actor.getPosition();
         }
         mOldHeight = mPosition.z();
         const auto rotation = actor.getPtr().getRefData().getPosition().asRotationVec3();
