@@ -193,9 +193,8 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
 {
     osg::ref_ptr<const BulletShape> shape = getShape(name);
     if (shape)
-        return shape->makeInstance();
-    else
-        return osg::ref_ptr<BulletShapeInstance>();
+        return makeInstance(std::move(shape));
+    return osg::ref_ptr<BulletShapeInstance>();
 }
 
 void BulletShapeManager::updateCache(double referenceTime)

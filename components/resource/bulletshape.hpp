@@ -21,7 +21,6 @@ namespace Resource
 
     using CollisionShapePtr = std::unique_ptr<btCollisionShape, DeleteCollisionShape>;
 
-    class BulletShapeInstance;
     class BulletShape : public osg::Object
     {
     public:
@@ -48,8 +47,6 @@ namespace Resource
         // we store the node's record index mapped to the child index of the shape in the btCompoundShape.
         std::map<int, int> mAnimatedShapes;
 
-        osg::ref_ptr<BulletShapeInstance> makeInstance() const;
-
         btCollisionShape* getCollisionShape() const;
 
         btCollisionShape* getAvoidCollisionShape() const;
@@ -70,6 +67,8 @@ namespace Resource
     private:
         osg::ref_ptr<const BulletShape> mSource;
     };
+
+    osg::ref_ptr<BulletShapeInstance> makeInstance(osg::ref_ptr<const BulletShape> source);
 
     // Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
     struct TriangleMeshShape : public btBvhTriangleMeshShape

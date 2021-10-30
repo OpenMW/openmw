@@ -99,10 +99,9 @@ bool BulletShape::isAnimated() const
     return !mAnimatedShapes.empty();
 }
 
-osg::ref_ptr<BulletShapeInstance> BulletShape::makeInstance() const
+osg::ref_ptr<BulletShapeInstance> makeInstance(osg::ref_ptr<const BulletShape> source)
 {
-    osg::ref_ptr<BulletShapeInstance> instance (new BulletShapeInstance(this));
-    return instance;
+    return {new BulletShapeInstance(std::move(source))};
 }
 
 BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
