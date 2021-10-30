@@ -77,16 +77,6 @@ BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
 {
 }
 
-btCollisionShape *BulletShape::getCollisionShape() const
-{
-    return mCollisionShape.get();
-}
-
-btCollisionShape *BulletShape::getAvoidCollisionShape() const
-{
-    return mAvoidCollisionShape.get();
-}
-
 void BulletShape::setLocalScaling(const btVector3& scale)
 {
     mCollisionShape->setLocalScaling(scale);

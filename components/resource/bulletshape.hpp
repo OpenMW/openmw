@@ -47,10 +47,6 @@ namespace Resource
         // we store the node's record index mapped to the child index of the shape in the btCompoundShape.
         std::map<int, int> mAnimatedShapes;
 
-        btCollisionShape* getCollisionShape() const;
-
-        btCollisionShape* getAvoidCollisionShape() const;
-
         void setLocalScaling(const btVector3& scale);
 
         bool isAnimated() const;

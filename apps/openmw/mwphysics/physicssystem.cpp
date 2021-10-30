@@ -481,7 +481,7 @@ namespace MWPhysics
         if (ptr.mRef->mData.mPhysicsPostponed)
             return;
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
-        if (!shapeInstance || !shapeInstance->getCollisionShape())
+        if (!shapeInstance || !shapeInstance->mCollisionShape)
             return;
 
         assert(!getObject(ptr));

@@ -482,7 +482,7 @@ namespace
         osg::ref_ptr<const Resource::BulletShapeInstance> instance(new Resource::BulletShapeInstance(bulletShape));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addObject(ObjectId(instance->getCollisionShape()), ObjectShapes(instance), btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(instance->mCollisionShape.get()), ObjectShapes(instance), btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 

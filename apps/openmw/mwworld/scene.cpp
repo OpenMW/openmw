@@ -132,7 +132,7 @@ namespace
             {
                 btVector3 aabbMin;
                 btVector3 aabbMax;
-                object->getShapeInstance()->getCollisionShape()->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+                object->getShapeInstance()->mCollisionShape->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
 
                 const auto center = (aabbMax + aabbMin) * 0.5f;
 
