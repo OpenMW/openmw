@@ -469,7 +469,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     if (mHeightCullCallback && isCullVisitor)
         updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty());
 
-    vd->markUnchanged();
+    vd->setChanged(false);
 
     double referenceTime = nv.getFrameStamp() ? nv.getFrameStamp()->getReferenceTime() : 0.0;
     if (referenceTime != 0.0)
