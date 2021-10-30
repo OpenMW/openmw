@@ -32,11 +32,17 @@ namespace
             return newShape;
         }
 
-        if (const btBvhTriangleMeshShape* trishape = dynamic_cast<const btBvhTriangleMeshShape*>(shape))
+        if (shape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)
+        {
+            const btBvhTriangleMeshShape* trishape = static_cast<const btBvhTriangleMeshShape*>(shape);
             return new btScaledBvhTriangleMeshShape(const_cast<btBvhTriangleMeshShape*>(trishape), btVector3(1.f, 1.f, 1.f));
+        }
 
-        if (const btBoxShape* boxshape = dynamic_cast<const btBoxShape*>(shape))
+        if (shape->getShapeType() == BOX_SHAPE_PROXYTYPE)
+        {
+            const btBoxShape* boxshape = static_cast<const btBoxShape*>(shape);
             return new btBoxShape(*boxshape);
+        }
 
         if (shape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE)
             return new btHeightfieldTerrainShape(static_cast<const btHeightfieldTerrainShape&>(*shape));
