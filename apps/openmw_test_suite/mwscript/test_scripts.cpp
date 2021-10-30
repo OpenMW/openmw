@@ -119,6 +119,36 @@ PositionCell "Rabenfels, Taverne" 4480.000 3968.000 15820.000 0
 
 End)mwscript";
 
+    const std::string sIssue587 = R"mwscript(Begin stalresetScript
+
+End stalreset Script)mwscript";
+
+    const std::string sIssue677 = R"mwscript(Begin _ase_dtree_dtree-owls
+
+End)mwscript";
+
+    const std::string sIssue685 = R"mwscript(Begin issue685
+
+Choice: "Sicher. Hier, nehmt." 1 "Nein, ich denke nicht. Tut mir Leid." 2
+StartScript GetPCGold
+
+End)mwscript";
+
+    const std::string sIssue694 = R"mwscript(Begin issue694
+
+float timer
+
+if ( timer < .1 )
+endif
+
+End)mwscript";
+
+    const std::string sIssue1062 = R"mwscript(Begin issue1026
+
+short end
+
+End)mwscript";
+
     const std::string sIssue1430 = R"mwscript(Begin issue1430
 
 short var
@@ -131,9 +161,55 @@ endif
 
 End)mwscript";
 
+    const std::string sIssue1593 = R"mwscript(Begin changeWater_-550_400
+
+End)mwscript";
+
+    const std::string sIssue1730 = R"mwscript(Begin 4LOM_Corprusarium_Guards
+
+End)mwscript";
+
     const std::string sIssue1767 = R"mwscript(Begin issue1767
 
 player->GetPcRank "temple"
+
+End)mwscript";
+
+    const std::string sIssue2206 = R"mwscript(Begin issue2206
+
+Choice ."Sklavin kaufen." 1 "Lebt wohl." 2
+Choice Choice "Insister pour qu’il vous réponde." 6 "Le prier de vous accorder un peu de son temps." 6 " Le menacer de révéler qu'il prélève sa part sur les bénéfices de la mine d’ébonite." 7
+
+End)mwscript";
+
+    const std::string sIssue2207 = R"mwscript(Begin issue2207
+
+PositionCell -35 –473 -248 0 "Skaal-Dorf, Die Große Halle"
+
+End)mwscript";
+
+    const std::string sIssue2794 = R"mwscript(Begin issue2794
+
+if ( player->"getlevel" == 1 )
+    ; do something
+endif
+
+End)mwscript";
+
+    const std::string sIssue2830 = R"mwscript(Begin issue2830
+
+AddItem "if" 1
+AddItem "endif" 1
+GetItemCount "begin"
+
+End)mwscript";
+
+    const std::string sIssue2991 = R"mwscript(Begin issue2991
+
+MessageBox "OnActivate"
+messagebox "messagebox"
+messagebox "if"
+messagebox "tcl"
 
 End)mwscript";
 
@@ -155,6 +231,18 @@ onactivate
 if onactivate
     ; do something
 endif
+
+End)mwscript";
+
+    const std::string sIssue3836 = R"mwscript(Begin issue3836
+
+MessageBox " Membership Level:         %.0f
+Account Balance:           %.0f
+Your Gold:                   %.0f
+Interest Rate:              %.3f
+Service Charge Rate:      %.3f
+Total Service Charges:    %.0f
+Total Interest Earned:     %.0f " Membership BankAccount YourGold InterestRate ServiceRate TotalServiceCharges TotalInterestEarned
 
 End)mwscript";
 
@@ -292,7 +380,7 @@ End)mwscript";
     {
         registerExtensions();
         bool failed = true;
-        if(auto script = compile(sScript2))
+        if(const auto script = compile(sScript2))
         {
             class AddTopic : public Interpreter::Opcode0
             {
@@ -320,7 +408,7 @@ End)mwscript";
 
     TEST_F(MWScriptTest, mwscript_test_math)
     {
-        if(auto script = compile(sScript3))
+        if(const auto script = compile(sScript3))
         {
             struct Algorithm
             {
@@ -369,10 +457,53 @@ End)mwscript";
         EXPECT_FALSE(!compile(sScript4));
     }
 
+    TEST_F(MWScriptTest, mwscript_test_587)
+    {
+        EXPECT_FALSE(!compile(sIssue587));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_677)
+    {
+        EXPECT_FALSE(!compile(sIssue677));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_685)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue685));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_694)
+    {
+        EXPECT_FALSE(!compile(sIssue694));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_1062)
+    {
+        if(const auto script = compile(sIssue1062))
+        {
+            EXPECT_EQ(script->mLocals.getIndex("end"), 0);
+        }
+        else
+        {
+            FAIL();
+        }
+    }
+
     TEST_F(MWScriptTest, mwscript_test_1430)
     {
         registerExtensions();
         EXPECT_FALSE(!compile(sIssue1430));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_1593)
+    {
+        EXPECT_FALSE(!compile(sIssue1593));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_1730)
+    {
+        EXPECT_FALSE(!compile(sIssue1730));
     }
 
     TEST_F(MWScriptTest, mwscript_test_1767)
@@ -381,9 +512,39 @@ End)mwscript";
         EXPECT_FALSE(!compile(sIssue1767));
     }
 
+    TEST_F(MWScriptTest, mwscript_test_2206)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue2206));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_2207)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue2207));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_2794)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue2794));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_2830)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue2830));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_2991)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue2991));
+    }
+
     TEST_F(MWScriptTest, mwscript_test_3006)
     {
-        if(auto script = compile(sIssue3006))
+        if(const auto script = compile(sIssue3006))
         {
             TestInterpreterContext context;
             context.setLocalShort(0, 0);
@@ -405,10 +566,41 @@ End)mwscript";
         EXPECT_FALSE(!compile(sIssue3725));
     }
 
+    TEST_F(MWScriptTest, mwscript_test_3836)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue3836));
+    }
+
     TEST_F(MWScriptTest, mwscript_test_3846)
     {
         registerExtensions();
-        EXPECT_FALSE(!compile(sIssue3846));
+        if(const auto script = compile(sIssue3846))
+        {
+            std::vector<std::string> topics = { "-spells...", "-magicka..." };
+            class AddTopic : public Interpreter::Opcode0
+            {
+                std::vector<std::string>& mTopics;
+            public:
+                AddTopic(std::vector<std::string>& topics) : mTopics(topics) {}
+
+                void execute(Interpreter::Runtime& runtime)
+                {
+                    const auto topic = runtime.getStringLiteral(runtime[0].mInteger);
+                    runtime.pop();
+                    EXPECT_EQ(topic, mTopics[0]);
+                    mTopics.erase(mTopics.begin());
+                }
+            };
+            installOpcode(Compiler::Dialogue::opcodeAddTopic, new AddTopic(topics));
+            TestInterpreterContext context;
+            run(*script, context);
+            EXPECT_TRUE(topics.empty());
+        }
+        else
+        {
+            FAIL();
+        }
     }
 
     TEST_F(MWScriptTest, mwscript_test_4061)
@@ -423,7 +615,7 @@ End)mwscript";
 
     TEST_F(MWScriptTest, mwscript_test_4597)
     {
-        if(auto script = compile(sIssue4597))
+        if(const auto script = compile(sIssue4597))
         {
             TestInterpreterContext context;
             for(int a = 0; a < 100; ++a)

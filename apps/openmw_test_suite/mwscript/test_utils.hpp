@@ -31,7 +31,6 @@ namespace
         char getGlobalType(const std::string& name) const override { return ' '; }
         std::pair<char, bool> getMemberType(const std::string& name, const std::string& id) const override { return {' ', false}; }
         bool isId(const std::string& name) const override { return Misc::StringUtils::ciEqual(name, "player"); }
-        bool isJournalId(const std::string& name) const override { return false; }
     };
 
     class TestErrorHandler : public Compiler::ErrorHandler
