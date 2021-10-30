@@ -352,7 +352,7 @@ void QuadTreeWorld::loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float 
     if (!vd->hasChanged() && entry.mRenderingNode)
         return;
 
-    int ourLod = getVertexLod(entry.mNode, vertexLodMod);
+    int ourLod = getVertexLod(entry.mNode, mVertexLodMod);
 
     if (vd->hasChanged())
     {
