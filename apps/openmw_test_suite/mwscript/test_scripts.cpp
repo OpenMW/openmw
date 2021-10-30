@@ -175,6 +175,49 @@ player->GetPcRank "temple"
 
 End)mwscript";
 
+    const std::string sIssue2185 = R"mwscript(Begin issue2185
+
+short a
+short b
+short eq
+short gte
+short lte
+short ne
+
+set eq to 0
+if ( a == b )
+    set eq to ( eq + 1 )
+endif
+if ( a = = b )
+    set eq to ( eq + 1 )
+endif
+
+set gte to 0
+if ( a >= b )
+    set gte to ( gte + 1 )
+endif
+if ( a > = b )
+    set gte to ( gte + 1 )
+endif
+
+set lte to 0
+if ( a <= b )
+    set lte to ( lte + 1 )
+endif
+if ( a < = b )
+    set lte to ( lte + 1 )
+endif
+
+set ne to 0
+if ( a != b )
+    set ne to ( ne + 1 )
+endif
+if ( a ! = b )
+    set ne to ( ne + 1 )
+endif
+
+End)mwscript";
+
     const std::string sIssue2206 = R"mwscript(Begin issue2206
 
 Choice ."Sklavin kaufen." 1 "Lebt wohl." 2
@@ -230,6 +273,29 @@ onactivate
 
 if onactivate
     ; do something
+endif
+
+End)mwscript";
+
+    const std::string sIssue3744 = R"mwscript(Begin issue3744
+
+short a
+short b
+short c
+
+set c to 0
+
+if ( a => b )
+    set c to ( c + 1 )
+endif
+if ( a =< b )
+    set c to ( c + 1 )
+endif
+if ( a = b )
+    set c to ( c + 1 )
+endif
+if ( a == b )
+    set c to ( c + 1 )
 endif
 
 End)mwscript";
@@ -512,6 +578,31 @@ End)mwscript";
         EXPECT_FALSE(!compile(sIssue1767));
     }
 
+    TEST_F(MWScriptTest, mwscript_test_2185)
+    {
+        if(const auto script = compile(sIssue2185))
+        {
+            TestInterpreterContext context;
+            for(int a = 0; a < 100; ++a)
+            {
+                for(int b = 0; b < 100; ++b)
+                {
+                    context.setLocalShort(0, a);
+                    context.setLocalShort(1, b);
+                    run(*script, context);
+                    EXPECT_EQ(context.getLocalShort(2), a == b ? 2 : 0);
+                    EXPECT_EQ(context.getLocalShort(3), a >= b ? 2 : 0);
+                    EXPECT_EQ(context.getLocalShort(4), a <= b ? 2 : 0);
+                    EXPECT_EQ(context.getLocalShort(5), a != b ? 2 : 0);
+                }
+            }
+        }
+        else
+        {
+            FAIL();
+        }
+    }
+
     TEST_F(MWScriptTest, mwscript_test_2206)
     {
         registerExtensions();
@@ -564,6 +655,28 @@ End)mwscript";
     {
         registerExtensions();
         EXPECT_FALSE(!compile(sIssue3725));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_3744)
+    {
+        if(const auto script = compile(sIssue3744))
+        {
+            TestInterpreterContext context;
+            for(int a = 0; a < 100; ++a)
+            {
+                for(int b = 0; b < 100; ++b)
+                {
+                    context.setLocalShort(0, a);
+                    context.setLocalShort(1, b);
+                    run(*script, context);
+                    EXPECT_EQ(context.getLocalShort(2), a == b ? 4 : 0);
+                }
+            }
+        }
+        else
+        {
+            FAIL();
+        }
     }
 
     TEST_F(MWScriptTest, mwscript_test_3836)
@@ -625,15 +738,8 @@ End)mwscript";
                     context.setLocalShort(0, a);
                     context.setLocalShort(1, b);
                     run(*script, context);
-                    if(a < b)
-                        EXPECT_EQ(context.getLocalShort(2), 3);
-                    else
-                        EXPECT_EQ(context.getLocalShort(2), 0);
-                    if(a > b)
-                        EXPECT_EQ(context.getLocalShort(3), 3);
-                    else
-                        EXPECT_EQ(context.getLocalShort(3), 0);
-
+                    EXPECT_EQ(context.getLocalShort(2), a < b ? 3 : 0);
+                    EXPECT_EQ(context.getLocalShort(3), a > b ? 3 : 0);
                 }
             }
         }
