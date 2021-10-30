@@ -10,6 +10,53 @@
 
 namespace Resource
 {
+namespace
+{
+    btCollisionShape* duplicateCollisionShape(const btCollisionShape *shape)
+    {
+        if (shape == nullptr)
+            return nullptr;
+
+        if (shape->isCompound())
+        {
+            const btCompoundShape *comp = static_cast<const btCompoundShape*>(shape);
+            btCompoundShape* newShape = new btCompoundShape;
+
+            for (int i = 0, n = comp->getNumChildShapes(); i < n; ++i)
+            {
+                btCollisionShape* child = duplicateCollisionShape(comp->getChildShape(i));
+                const btTransform& trans = comp->getChildTransform(i);
+                newShape->addChildShape(trans, child);
+            }
+
+            return newShape;
+        }
+
+        if (const btBvhTriangleMeshShape* trishape = dynamic_cast<const btBvhTriangleMeshShape*>(shape))
+            return new btScaledBvhTriangleMeshShape(const_cast<btBvhTriangleMeshShape*>(trishape), btVector3(1.f, 1.f, 1.f));
+
+        if (const btBoxShape* boxshape = dynamic_cast<const btBoxShape*>(shape))
+            return new btBoxShape(*boxshape);
+
+        if (shape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE)
+            return new btHeightfieldTerrainShape(static_cast<const btHeightfieldTerrainShape&>(*shape));
+
+        throw std::logic_error(std::string("Unhandled Bullet shape duplication: ") + shape->getName());
+    }
+
+    void deleteShape(btCollisionShape* shape)
+    {
+        if (shape->isCompound())
+        {
+            btCompoundShape* compound = static_cast<btCompoundShape*>(shape);
+            for (int i = 0, n = compound->getNumChildShapes(); i < n; i++)
+                if (btCollisionShape* child = compound->getChildShape(i))
+                    deleteShape(child);
+        }
+
+        delete shape;
+    }
+}
 
 BulletShape::BulletShape()
     : mCollisionShape(nullptr)
@@ -28,58 +75,10 @@ BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
 
 BulletShape::~BulletShape()
 {
-    deleteShape(mAvoidCollisionShape);
-    deleteShape(mCollisionShape);
-}
-
-void BulletShape::deleteShape(btCollisionShape* shape)
-{
-    if(shape!=nullptr)
-    {
-        if(shape->isCompound())
-        {
-            btCompoundShape* ms = static_cast<btCompoundShape*>(shape);
-            int a = ms->getNumChildShapes();
-            for(int i=0; i <a;i++)
-                deleteShape(ms->getChildShape(i));
-        }
-        delete shape;
-    }
-}
-
-btCollisionShape* BulletShape::duplicateCollisionShape(const btCollisionShape *shape) const
-{
-    if(shape->isCompound())
-    {
-        const btCompoundShape *comp = static_cast<const btCompoundShape*>(shape);
-        btCompoundShape *newShape = new btCompoundShape;
-
-        int numShapes = comp->getNumChildShapes();
-        for(int i = 0;i < numShapes;++i)
-        {
-            btCollisionShape *child = duplicateCollisionShape(comp->getChildShape(i));
-            const btTransform& trans = comp->getChildTransform(i);
-            newShape->addChildShape(trans, child);
-        }
-
-        return newShape;
-    }
-
-    if(const btBvhTriangleMeshShape* trishape = dynamic_cast<const btBvhTriangleMeshShape*>(shape))
-    {
-        btScaledBvhTriangleMeshShape* newShape = new btScaledBvhTriangleMeshShape(const_cast<btBvhTriangleMeshShape*>(trishape), btVector3(1.f, 1.f, 1.f));
-        return newShape;
-    }
-
-    if (const btBoxShape* boxshape = dynamic_cast<const btBoxShape*>(shape))
-    {
-        return new btBoxShape(*boxshape);
-    }
-
-    if (shape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE)
-        return new btHeightfieldTerrainShape(static_cast<const btHeightfieldTerrainShape&>(*shape));
-
-    throw std::logic_error(std::string("Unhandled Bullet shape duplication: ")+shape->getName());
+    if (mAvoidCollisionShape != nullptr)
+        deleteShape(mAvoidCollisionShape);
+    if (mCollisionShape != nullptr)
+        deleteShape(mCollisionShape);
 }
 
 btCollisionShape *BulletShape::getCollisionShape() const
@@ -115,14 +114,9 @@ BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
     , mSource(source)
 {
     mCollisionBox = source->mCollisionBox;
-
     mAnimatedShapes = source->mAnimatedShapes;
-
-    if (source->mCollisionShape)
-        mCollisionShape = duplicateCollisionShape(source->mCollisionShape);
-
-    if (source->mAvoidCollisionShape)
-        mAvoidCollisionShape = duplicateCollisionShape(source->mAvoidCollisionShape);
+    mCollisionShape = duplicateCollisionShape(source->mCollisionShape);
+    mAvoidCollisionShape = duplicateCollisionShape(source->mAvoidCollisionShape);
 }
 
 }

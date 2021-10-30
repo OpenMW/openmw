@@ -44,8 +44,6 @@ namespace Resource
 
         osg::ref_ptr<BulletShapeInstance> makeInstance() const;
 
-        btCollisionShape* duplicateCollisionShape(const btCollisionShape* shape) const;
-
         btCollisionShape* getCollisionShape() const;
 
         btCollisionShape* getAvoidCollisionShape() const;
@@ -53,10 +51,6 @@ namespace Resource
         void setLocalScaling(const btVector3& scale);
 
         bool isAnimated() const;
-
-    private:
-
-        void deleteShape(btCollisionShape* shape);
     };
 
 
