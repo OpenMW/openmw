@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_RESOURCE_BULLETSHAPE_H
 
 #include <map>
+#include <memory>
 
 #include <osg/Object>
 #include <osg/ref_ptr>
@@ -13,19 +14,24 @@ class btCollisionShape;
 
 namespace Resource
 {
+    struct DeleteCollisionShape
+    {
+        void operator()(btCollisionShape* shape) const;
+    };
+
+    using CollisionShapePtr = std::unique_ptr<btCollisionShape, DeleteCollisionShape>;
 
     class BulletShapeInstance;
     class BulletShape : public osg::Object
     {
     public:
-        BulletShape();
+        BulletShape() = default;
         BulletShape(const BulletShape& copy, const osg::CopyOp& copyop);
-        virtual ~BulletShape();
 
         META_Object(Resource, BulletShape)
 
-        btCollisionShape* mCollisionShape;
-        btCollisionShape* mAvoidCollisionShape;
+        CollisionShapePtr mCollisionShape;
+        CollisionShapePtr mAvoidCollisionShape;
 
         struct CollisionBox
         {

@@ -92,7 +92,7 @@ public:
         shape->mCollisionBox.mCenter = osg::Vec3f( (aabbMax[0] + aabbMin[0]) / 2.0f,
                                                   (aabbMax[1] + aabbMin[1]) / 2.0f,
                                                   (aabbMax[2] + aabbMin[2]) / 2.0f );
-        shape->mCollisionShape = triangleMeshShape;
+        shape->mCollisionShape.reset(triangleMeshShape);
 
         return shape;
     }

@@ -12,7 +12,7 @@ namespace Resource
 {
 namespace
 {
-    btCollisionShape* duplicateCollisionShape(const btCollisionShape *shape)
+    CollisionShapePtr duplicateCollisionShape(const btCollisionShape *shape)
     {
         if (shape == nullptr)
             return nullptr;
@@ -20,13 +20,13 @@ namespace
         if (shape->isCompound())
         {
             const btCompoundShape *comp = static_cast<const btCompoundShape*>(shape);
-            btCompoundShape* newShape = new btCompoundShape;
+            std::unique_ptr<btCompoundShape, DeleteCollisionShape> newShape(new btCompoundShape);
 
             for (int i = 0, n = comp->getNumChildShapes(); i < n; ++i)
             {
-                btCollisionShape* child = duplicateCollisionShape(comp->getChildShape(i));
+                auto child = duplicateCollisionShape(comp->getChildShape(i));
                 const btTransform& trans = comp->getChildTransform(i);
-                newShape->addChildShape(trans, child);
+                newShape->addChildShape(trans, child.release());
             }
 
             return newShape;
@@ -35,17 +35,17 @@ namespace
         if (shape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)
         {
             const btBvhTriangleMeshShape* trishape = static_cast<const btBvhTriangleMeshShape*>(shape);
-            return new btScaledBvhTriangleMeshShape(const_cast<btBvhTriangleMeshShape*>(trishape), btVector3(1.f, 1.f, 1.f));
+            return CollisionShapePtr(new btScaledBvhTriangleMeshShape(const_cast<btBvhTriangleMeshShape*>(trishape), btVector3(1.f, 1.f, 1.f)));
         }
 
         if (shape->getShapeType() == BOX_SHAPE_PROXYTYPE)
         {
             const btBoxShape* boxshape = static_cast<const btBoxShape*>(shape);
-            return new btBoxShape(*boxshape);
+            return CollisionShapePtr(new btBoxShape(*boxshape));
         }
 
         if (shape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE)
-            return new btHeightfieldTerrainShape(static_cast<const btHeightfieldTerrainShape&>(*shape));
+            return CollisionShapePtr(new btHeightfieldTerrainShape(static_cast<const btHeightfieldTerrainShape&>(*shape)));
 
         throw std::logic_error(std::string("Unhandled Bullet shape duplication: ") + shape->getName());
     }
@@ -64,37 +64,27 @@ namespace
     }
 }
 
-BulletShape::BulletShape()
-    : mCollisionShape(nullptr)
-    , mAvoidCollisionShape(nullptr)
+void DeleteCollisionShape::operator()(btCollisionShape* shape) const
 {
-
+    deleteShape(shape);
 }
 
 BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
-    : mCollisionShape(duplicateCollisionShape(copy.mCollisionShape))
-    , mAvoidCollisionShape(duplicateCollisionShape(copy.mAvoidCollisionShape))
+    : mCollisionShape(duplicateCollisionShape(copy.mCollisionShape.get()))
+    , mAvoidCollisionShape(duplicateCollisionShape(copy.mAvoidCollisionShape.get()))
     , mCollisionBox(copy.mCollisionBox)
     , mAnimatedShapes(copy.mAnimatedShapes)
 {
 }
 
-BulletShape::~BulletShape()
-{
-    if (mAvoidCollisionShape != nullptr)
-        deleteShape(mAvoidCollisionShape);
-    if (mCollisionShape != nullptr)
-        deleteShape(mCollisionShape);
-}
-
 btCollisionShape *BulletShape::getCollisionShape() const
 {
-    return mCollisionShape;
+    return mCollisionShape.get();
 }
 
 btCollisionShape *BulletShape::getAvoidCollisionShape() const
 {
-    return mAvoidCollisionShape;
+    return mAvoidCollisionShape.get();
 }
 
 void BulletShape::setLocalScaling(const btVector3& scale)
@@ -116,13 +106,12 @@ osg::ref_ptr<BulletShapeInstance> BulletShape::makeInstance() const
 }
 
 BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
-    : BulletShape()
-    , mSource(source)
+    : mSource(source)
 {
     mCollisionBox = source->mCollisionBox;
     mAnimatedShapes = source->mAnimatedShapes;
-    mCollisionShape = duplicateCollisionShape(source->mCollisionShape);
-    mAvoidCollisionShape = duplicateCollisionShape(source->mAvoidCollisionShape);
+    mCollisionShape = duplicateCollisionShape(source->mCollisionShape.get());
+    mAvoidCollisionShape = duplicateCollisionShape(source->mAvoidCollisionShape.get());
 }
 
 }

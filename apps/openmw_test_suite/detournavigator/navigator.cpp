@@ -117,7 +117,7 @@ namespace
     osg::ref_ptr<const Resource::BulletShapeInstance> makeBulletShapeInstance(std::unique_ptr<T>&& shape)
     {
         osg::ref_ptr<Resource::BulletShape> bulletShape(new Resource::BulletShape);
-        bulletShape->mCollisionShape = std::move(shape).release();
+        bulletShape->mCollisionShape.reset(std::move(shape).release());
         return new Resource::BulletShapeInstance(bulletShape);
     }
 
@@ -466,7 +466,7 @@ namespace
         }};
         std::unique_ptr<btHeightfieldTerrainShape> shapePtr = makeSquareHeightfieldTerrainShape(heightfieldData);
         shapePtr->setLocalScaling(btVector3(128, 128, 1));
-        bulletShape->mCollisionShape = shapePtr.release();
+        bulletShape->mCollisionShape.reset(shapePtr.release());
 
         std::array<btScalar, 5 * 5> heightfieldDataAvoid {{
             -25, -25, -25, -25, -25,
@@ -477,7 +477,7 @@ namespace
         }};
         std::unique_ptr<btHeightfieldTerrainShape> shapeAvoidPtr = makeSquareHeightfieldTerrainShape(heightfieldDataAvoid);
         shapeAvoidPtr->setLocalScaling(btVector3(128, 128, 1));
-        bulletShape->mAvoidCollisionShape = shapeAvoidPtr.release();
+        bulletShape->mAvoidCollisionShape.reset(shapeAvoidPtr.release());
 
         osg::ref_ptr<const Resource::BulletShapeInstance> instance(new Resource::BulletShapeInstance(bulletShape));
 
