@@ -12,12 +12,10 @@ ViewData::ViewData()
     , mHasViewPoint(false)
     , mWorldUpdateRevision(0)
 {
-
 }
 
 ViewData::~ViewData()
 {
-
 }
 
 void ViewData::copyFrom(const ViewData& other)
@@ -43,35 +41,10 @@ void ViewData::add(QuadTreeNode *node)
         mChanged = true;
 }
 
-unsigned int ViewData::getNumEntries() const
-{
-    return mNumEntries;
-}
-
-ViewData::Entry &ViewData::getEntry(unsigned int i)
-{
-    return mEntries[i];
-}
-
-bool ViewData::hasChanged() const
-{
-    return mChanged;
-}
-
-bool ViewData::hasViewPoint() const
-{
-    return mHasViewPoint;
-}
-
 void ViewData::setViewPoint(const osg::Vec3f &viewPoint)
 {
     mViewPoint = viewPoint;
     mHasViewPoint = true;
-}
-
-const osg::Vec3f& ViewData::getViewPoint() const
-{
-    return mViewPoint;
 }
 
 // NOTE: As a performance optimisation, we cache mRenderingNodes from previous frames here.
@@ -114,7 +87,6 @@ ViewData::Entry::Entry()
     : mNode(nullptr)
     , mLodFlags(0)
 {
-
 }
 
 bool ViewData::Entry::set(QuadTreeNode *node)
