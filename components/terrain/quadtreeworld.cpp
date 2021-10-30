@@ -347,7 +347,7 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, const
     return lodFlags;
 }
 
-void QuadTreeWorld::loadRenderingNode(ViewData::Entry& entry, ViewData* vd, float cellWorldSize, const osg::Vec4i &gridbounds, bool compile, float reuseDistance)
+void QuadTreeWorld::loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float cellWorldSize, const osg::Vec4i &gridbounds, bool compile, float reuseDistance)
 {
     if (!vd->hasChanged() && entry.mRenderingNode)
         return;
@@ -402,7 +402,7 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
     static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
-        ViewData::Entry& entry = vd->getEntry(i);
+        ViewDataEntry& entry = vd->getEntry(i);
         osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
         if (!bb.valid())
             continue;
@@ -461,7 +461,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
-        ViewData::Entry& entry = vd->getEntry(i);
+        ViewDataEntry& entry = vd->getEntry(i);
         loadRenderingNode(entry, vd, cellWorldSize, mActiveGrid, false, mViewDataMap->getReuseDistance());
         entry.mRenderingNode->accept(nv);
     }
@@ -544,7 +544,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
         const float reuseDistance = std::max(mViewDataMap->getReuseDistance(), std::abs(distanceModifier));
         for (unsigned int i=startEntry; i<vd->getNumEntries() && !abort; ++i)
         {
-            ViewData::Entry& entry = vd->getEntry(i);
+            ViewDataEntry& entry = vd->getEntry(i);
 
             loadRenderingNode(entry, vd, cellWorldSize, grid, true, reuseDistance);
             if (pass==0) reporter.addProgress(entry.mNode->getSize());
@@ -589,6 +589,14 @@ void QuadTreeWorld::addChunkManager(QuadTreeWorld::ChunkManager* m)
 
 void QuadTreeWorld::rebuildViews()
 {
+    mViewDataMap->rebuildViews();
+}
+
+void QuadTreeWorld::setViewDistance(float viewDistance)
+{
+    if (mViewDistance == viewDistance)
+        return;
+    mViewDistance = viewDistance;
     mViewDataMap->rebuildViews();
 }
 
