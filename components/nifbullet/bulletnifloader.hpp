@@ -61,7 +61,7 @@ private:
 
     void handleNiTriShape(const Nif::Node *nifNode, int flags, const osg::Matrixf& transform, bool isAnimated, bool avoid);
 
-    std::unique_ptr<btCompoundShape> mCompoundShape;
+    std::unique_ptr<btCompoundShape, Resource::DeleteCollisionShape> mCompoundShape;
 
     std::unique_ptr<btTriangleMesh> mStaticMesh;
 

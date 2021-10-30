@@ -179,7 +179,7 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
             child.release();
             mStaticMesh.release();
         }
-        mShape->mCollisionShape.reset(mCompoundShape.release());
+        mShape->mCollisionShape = std::move(mCompoundShape);
     }
     else if (mStaticMesh)
     {
