@@ -542,7 +542,7 @@ namespace MWWorld
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
             cast.mSlot = magicBoltState.mSlot;
-            cast.inflict(target, caster, magicBoltState.mEffects, ESM::RT_Target, false, true);
+            cast.inflict(target, caster, magicBoltState.mEffects, ESM::RT_Target, true);
 
             MWBase::Environment::get().getWorld()->explodeSpell(pos, magicBoltState.mEffects, caster, target, ESM::RT_Target, magicBoltState.mSpellId, magicBoltState.mSourceName, false, magicBoltState.mSlot);
             magicBoltState.mToDelete = true;

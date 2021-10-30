@@ -50,6 +50,8 @@ namespace MWMechanics
 
                     ActiveSpellParams(const MWWorld::ConstPtr& item, const ESM::Enchantment* enchantment, int slotIndex, const MWWorld::Ptr& actor);
 
+                    ActiveSpellParams(const ActiveSpellParams& params, const MWWorld::Ptr& actor);
+
                     ESM::ActiveSpells::ActiveSpellParams toEsm() const;
 
                     friend class ActiveSpells;

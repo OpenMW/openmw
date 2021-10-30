@@ -48,6 +48,8 @@
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
+    Bug #6253: Multiple instances of Reflect stack additively
+    Bug #6255: Reflect is different from vanilla
     Bug #6258: Barter menu glitches out when modifying prices
     Bug #6273: Respawning NPCs rotation is inconsistent
     Bug #6282: Laura craft doesn't follow the player character
