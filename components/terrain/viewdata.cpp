@@ -36,7 +36,7 @@ void ViewData::add(QuadTreeNode *node)
     if (index+1 > mEntries.size())
         mEntries.resize(index+1);
 
-    Entry& entry = mEntries[index];
+    ViewDataEntry& entry = mEntries[index];
     if (entry.set(node))
         mChanged = true;
 }
@@ -83,13 +83,13 @@ bool ViewData::contains(QuadTreeNode *node) const
     return false;
 }
 
-ViewData::Entry::Entry()
+ViewDataEntry::ViewDataEntry()
     : mNode(nullptr)
     , mLodFlags(0)
 {
 }
 
-bool ViewData::Entry::set(QuadTreeNode *node)
+bool ViewDataEntry::set(QuadTreeNode *node)
 {
     if (node == mNode)
         return false;
