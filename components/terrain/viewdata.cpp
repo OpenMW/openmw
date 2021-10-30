@@ -173,6 +173,7 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
             }
             vd->setViewPoint(viewPoint);
             vd->setActiveGrid(activeGrid);
+            vd->setChanged(true);
             needsUpdate = true;
         }
     }
