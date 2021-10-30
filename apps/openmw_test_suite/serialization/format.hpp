@@ -1,12 +1,12 @@
-#ifndef OPENMW_TEST_SUITE_DETOURNAVIGATOR_SERIALIZATION_FORMAT_H
-#define OPENMW_TEST_SUITE_DETOURNAVIGATOR_SERIALIZATION_FORMAT_H
+#ifndef OPENMW_TEST_SUITE_SERIALIZATION_FORMAT_H
+#define OPENMW_TEST_SUITE_SERIALIZATION_FORMAT_H
 
-#include <components/detournavigator/serialization/format.hpp>
+#include <components/serialization/format.hpp>
 
 #include <utility>
 #include <type_traits>
 
-namespace DetourNavigator::SerializationTesting
+namespace SerializationTesting
 {
     struct Pod
     {

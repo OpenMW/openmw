@@ -1,8 +1,8 @@
 #include "format.hpp"
 
-#include <components/detournavigator/serialization/sizeaccumulator.hpp>
-#include <components/detournavigator/serialization/binarywriter.hpp>
-#include <components/detournavigator/serialization/binaryreader.hpp>
+#include <components/serialization/sizeaccumulator.hpp>
+#include <components/serialization/binarywriter.hpp>
+#include <components/serialization/binaryreader.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -12,8 +12,8 @@
 namespace
 {
     using namespace testing;
-    using namespace DetourNavigator::Serialization;
-    using namespace DetourNavigator::SerializationTesting;
+    using namespace Serialization;
+    using namespace SerializationTesting;
 
     struct DetourNavigatorSerializationIntegrationTest : Test
     {

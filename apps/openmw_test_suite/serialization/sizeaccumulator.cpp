@@ -1,6 +1,6 @@
 #include "format.hpp"
 
-#include <components/detournavigator/serialization/sizeaccumulator.hpp>
+#include <components/serialization/sizeaccumulator.hpp>
 
 #include <gtest/gtest.h>
 
@@ -12,8 +12,8 @@
 namespace
 {
     using namespace testing;
-    using namespace DetourNavigator::Serialization;
-    using namespace DetourNavigator::SerializationTesting;
+    using namespace Serialization;
+    using namespace SerializationTesting;
 
     TEST(DetourNavigatorSerializationSizeAccumulatorTest, shouldProvideSizeForArithmeticType)
     {

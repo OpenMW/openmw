@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_SERIALIZATION_FORMAT_H
-#define OPENMW_COMPONENTS_DETOURNAVIGATOR_SERIALIZATION_FORMAT_H
+#ifndef OPENMW_COMPONENTS_SERIALIZATION_FORMAT_H
+#define OPENMW_COMPONENTS_SERIALIZATION_FORMAT_H
 
 #include <algorithm>
 #include <cstddef>
@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-namespace DetourNavigator::Serialization
+namespace Serialization
 {
     enum class Mode
     {
@@ -21,6 +21,9 @@ namespace DetourNavigator::Serialization
 
     template <class ... Args>
     struct IsContiguousContainer<std::vector<Args ...>> : std::true_type {};
+
+    template <class T, std::size_t n>
+    struct IsContiguousContainer<std::array<T, n>> : std::true_type {};
 
     template <class T>
     constexpr bool isContiguousContainer = IsContiguousContainer<std::decay_t<T>>::value;

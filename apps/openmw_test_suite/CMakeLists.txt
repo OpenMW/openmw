@@ -41,10 +41,11 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         detournavigator/recastmeshobject.cpp
         detournavigator/navmeshtilescache.cpp
         detournavigator/tilecachedrecastmeshmanager.cpp
-        detournavigator/serialization/binaryreader.cpp
-        detournavigator/serialization/binarywriter.cpp
-        detournavigator/serialization/sizeaccumulator.cpp
-        detournavigator/serialization/integration.cpp
+
+        serialization/binaryreader.cpp
+        serialization/binarywriter.cpp
+        serialization/sizeaccumulator.cpp
+        serialization/integration.cpp
 
         settings/parser.cpp
 

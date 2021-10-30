@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_SERIALIZATION_BINARYREADER_H
-#define OPENMW_COMPONENTS_DETOURNAVIGATOR_SERIALIZATION_BINARYREADER_H
+#ifndef OPENMW_COMPONENTS_SERIALIZATION_BINARYREADER_H
+#define OPENMW_COMPONENTS_SERIALIZATION_BINARYREADER_H
 
 #include <cassert>
 #include <cstddef>
@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace DetourNavigator::Serialization
+namespace Serialization
 {
     class BinaryReader
     {
