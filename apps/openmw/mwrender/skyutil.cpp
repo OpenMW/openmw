@@ -278,10 +278,6 @@ namespace MWRender
             {
                 // no traverse
                 return;
-
-                osg::Vec4 v4;
-                osg::Vec4 v3;
-                v4 = v3;
             }
             else
             {
