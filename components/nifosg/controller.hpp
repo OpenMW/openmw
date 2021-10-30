@@ -248,6 +248,7 @@ namespace NifOsg
         META_Object(NifOsg, KeyframeController)
 
         osg::Vec3f getTranslation(float time) const override;
+        osg::Callback* getAsCallback() override { return this; }
 
         void operator() (NifOsg::MatrixTransform*, osg::NodeVisitor*);
 
