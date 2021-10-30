@@ -12,6 +12,8 @@ if (GTEST_FOUND AND GMOCK_FOUND)
 
         mwdialogue/test_keywordsearch.cpp
 
+        mwscript/test_scripts.cpp
+
         esm/test_fixed_string.cpp
         esm/variant.cpp
 
