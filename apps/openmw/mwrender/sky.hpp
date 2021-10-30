@@ -32,17 +32,6 @@ namespace Resource
 
 namespace MWRender
 {
-    class AtmosphereUpdater;
-    class AtmosphereNightUpdater;
-    class CloudUpdater;
-    class Sun;
-    class Moon;
-    class RainCounter;
-    class RainShooter;
-    class RainFader;
-    class AlphaFader;
-    class UnderwaterSwitchCallback;
-
     ///@brief The SkyManager handles rendering of the sky domes, celestial bodies as well as other objects that need to be rendered
     /// relative to the camera (e.g. weather particle effects)
     class SkyManager
