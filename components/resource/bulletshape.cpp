@@ -95,12 +95,12 @@ osg::ref_ptr<BulletShapeInstance> makeInstance(osg::ref_ptr<const BulletShape> s
 }
 
 BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
-    : mSource(source)
+    : mSource(std::move(source))
 {
-    mCollisionBox = source->mCollisionBox;
-    mAnimatedShapes = source->mAnimatedShapes;
-    mCollisionShape = duplicateCollisionShape(source->mCollisionShape.get());
-    mAvoidCollisionShape = duplicateCollisionShape(source->mAvoidCollisionShape.get());
+    mCollisionBox = mSource->mCollisionBox;
+    mAnimatedShapes = mSource->mAnimatedShapes;
+    mCollisionShape = duplicateCollisionShape(mSource->mCollisionShape.get());
+    mAvoidCollisionShape = duplicateCollisionShape(mSource->mAvoidCollisionShape.get());
 }
 
 }
