@@ -13,6 +13,18 @@ namespace Terrain
 
     class QuadTreeNode;
 
+    struct ViewDataEntry
+    {
+        ViewDataEntry();
+
+        bool set(QuadTreeNode* node);
+
+        QuadTreeNode* mNode;
+
+        unsigned int mLodFlags;
+        osg::ref_ptr<osg::Node> mRenderingNode;
+    };
+
     class ViewData : public View
     {
     public:
@@ -31,20 +43,8 @@ namespace Terrain
 
         void copyFrom(const ViewData& other);
 
-        struct Entry
-        {
-            Entry();
-
-            bool set(QuadTreeNode* node);
-
-            QuadTreeNode* mNode;
-
-            unsigned int mLodFlags;
-            osg::ref_ptr<osg::Node> mRenderingNode;
-        };
-
         unsigned int getNumEntries() const { return mNumEntries; }
-        Entry& getEntry(unsigned int i) { return mEntries[i]; }
+        ViewDataEntry& getEntry(unsigned int i) { return mEntries[i]; }
 
         double getLastUsageTimeStamp() const { return mLastUsageTimeStamp; }
         void setLastUsageTimeStamp(double timeStamp) { mLastUsageTimeStamp = timeStamp; }
@@ -67,7 +67,7 @@ namespace Terrain
         void setWorldUpdateRevision(int updateRevision) { mWorldUpdateRevision = updateRevision; }
 
     private:
-        std::vector<Entry> mEntries;
+        std::vector<ViewDataEntry> mEntries;
         unsigned int mNumEntries;
         double mLastUsageTimeStamp;
         bool mChanged;
