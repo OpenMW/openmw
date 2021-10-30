@@ -61,7 +61,7 @@ namespace
         }
     }
 
-    std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions, const MWWorld::Store<ESM::Class>& classes, const std::map<std::string, ESM::NPC>& npcs)
+    std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions, const MWWorld::Store<ESM::Class>& classes, const std::unordered_map<std::string, ESM::NPC, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
         std::string defaultCls;
@@ -114,8 +114,8 @@ namespace
 
     // Custom enchanted items can reference scripts that no longer exist, this doesn't necessarily mean the base item no longer exists however.
     // So instead of removing the item altogether, we're only removing the script.
-    template<class T>
-    void removeMissingScripts(const MWWorld::Store<ESM::Script>& scripts, std::map<std::string, T>& items)
+    template<class MapT>
+    void removeMissingScripts(const MWWorld::Store<ESM::Script>& scripts, MapT& items)
     {
         for(auto& [id, item] : items)
         {
@@ -324,7 +324,6 @@ void ESMStore::countRecords()
         if (value.mRefID != deletedRefID)
         {
             std::string& refId = refIDs[value.mRefID];
-            Misc::StringUtils::lowerCaseInPlace(refId);
             ++mRefCount[std::move(refId)];
         }
     };
@@ -333,8 +332,7 @@ void ESMStore::countRecords()
 
 int ESMStore::getRefCount(const std::string& id) const
 {
-    const std::string lowerId = Misc::StringUtils::lowerCase(id);
-    auto it = mRefCount.find(lowerId);
+    auto it = mRefCount.find(id);
     if(it == mRefCount.end())
         return 0;
     return it->second;
@@ -533,9 +531,8 @@ void ESMStore::removeMissingObjects(Store<T>& store)
             throw std::runtime_error ("Invalid player record (race or class unavailable");
     }
 
-    std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> ESMStore::getSpellList(const std::string& originalId) const
+    std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> ESMStore::getSpellList(const std::string& id) const
     {
-        const std::string id = Misc::StringUtils::lowerCase(originalId);
         auto result = mSpellListCache.find(id);
         std::shared_ptr<MWMechanics::SpellList> ptr;
         if (result != mSpellListCache.end())
