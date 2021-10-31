@@ -60,16 +60,18 @@ namespace LuaUtil
     class ScriptsContainer
     {
     public:
+        // ScriptId of each script is stored with this key in Script::mHiddenData.
+        // Removed from mHiddenData when the script if removed.
+        constexpr static std::string_view sScriptIdKey = "_id";
+
+        // Debug identifier of each script is stored with this key in Script::mHiddenData.
+        // Present in mHiddenData even after removal of the script from ScriptsContainer.
+        constexpr static std::string_view sScriptDebugNameKey = "_name";
+
         struct ScriptId
         {
-            // ScriptId is stored in hidden data (see getHiddenData) with this key.
-            constexpr static std::string_view KEY = "_id";
-
             ScriptsContainer* mContainer;
             int mIndex;  // index in LuaUtil::ScriptsConfiguration
-            std::string mPath;  // path to the script source in VFS
-
-            std::string toString() const;
         };
         using TimeUnit = ESM::LuaTimer::TimeUnit;
 
@@ -192,6 +194,7 @@ namespace LuaUtil
             sol::table mHiddenData;
             std::map<std::string, sol::function> mRegisteredCallbacks;
             std::map<int64_t, sol::function> mTemporaryCallbacks;
+            std::string mPath;
         };
         struct Timer
         {
@@ -237,6 +240,17 @@ namespace LuaUtil
         std::vector<Timer> mSecondsTimersQueue;
         std::vector<Timer> mHoursTimersQueue;
         int64_t mTemporaryCallbackCounter = 0;
+    };
+
+    // Wrapper for a single-argument Lua function.
+    // Holds information about the script the function belongs to.
+    // Needed to prevent callback calls if the script was removed.
+    struct Callback
+    {
+        sol::function mFunc;
+        sol::table mHiddenData;  // same object as Script::mHiddenData in ScriptsContainer
+
+        void operator()(sol::object arg) const;
     };
 
 }

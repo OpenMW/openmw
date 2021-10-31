@@ -52,13 +52,12 @@ namespace MWLua
         };
         api["callback"] = [](const AsyncPackageId& asyncId, sol::function fn)
         {
-            return Callback{std::move(fn), asyncId.mHiddenData};
+            return LuaUtil::Callback{std::move(fn), asyncId.mHiddenData};
         };
 
         auto initializer = [](sol::table hiddenData)
         {
-            LuaUtil::ScriptsContainer::ScriptId id = hiddenData[LuaUtil::ScriptsContainer::ScriptId::KEY];
-            hiddenData[Callback::SCRIPT_NAME_KEY] = id.toString();
+            LuaUtil::ScriptsContainer::ScriptId id = hiddenData[LuaUtil::ScriptsContainer::sScriptIdKey];
             return AsyncPackageId{id.mContainer, id.mIndex, hiddenData};
         };
         return sol::make_object(context.mLua->sol(), initializer);

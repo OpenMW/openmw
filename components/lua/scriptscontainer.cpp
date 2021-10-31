@@ -15,15 +15,6 @@ namespace LuaUtil
     static constexpr std::string_view HANDLER_LOAD = "onLoad";
     static constexpr std::string_view HANDLER_INTERFACE_OVERRIDE = "onInterfaceOverride";
 
-    std::string ScriptsContainer::ScriptId::toString() const
-    {
-        std::string res = mContainer->mNamePrefix;
-        res.push_back('[');
-        res.append(mPath);
-        res.push_back(']');
-        return res;
-    }
-
     ScriptsContainer::ScriptsContainer(LuaUtil::LuaState* lua, std::string_view namePrefix, ESM::LuaScriptCfg::Flags autoStartMode)
         : mNamePrefix(namePrefix), mLua(*lua), mAutoStartMode(autoStartMode)
     {
@@ -70,11 +61,19 @@ namespace LuaUtil
             return false;  // already present
 
         const std::string& path = scriptPath(scriptId);
+        std::string debugName = mNamePrefix;
+        debugName.push_back('[');
+        debugName.append(path);
+        debugName.push_back(']');
+
+        Script& script = mScripts[scriptId];
+        script.mHiddenData = mLua.newTable();
+        script.mHiddenData[sScriptIdKey] = ScriptId{this, scriptId};
+        script.mHiddenData[sScriptDebugNameKey] = debugName;
+        script.mPath = path;
+
         try
         {
-            Script& script = mScripts[scriptId];
-            script.mHiddenData = mLua.newTable();
-            script.mHiddenData[ScriptId::KEY] = ScriptId{this, scriptId, path};
             sol::object scriptOutput = mLua.runInNewSandbox(path, mNamePrefix, mAPI, script.mHiddenData);
             if (scriptOutput == sol::nil)
                 return true;
@@ -91,7 +90,7 @@ namespace LuaUtil
                 else if (sectionName == INTERFACE)
                     script.mInterface = value.as<sol::table>();
                 else
-                    Log(Debug::Error) << "Not supported section '" << sectionName << "' in " << mNamePrefix << "[" << path << "]";
+                    Log(Debug::Error) << "Not supported section '" << sectionName << "' in " << debugName;
             }
             if (engineHandlers != sol::nil)
             {
@@ -110,8 +109,7 @@ namespace LuaUtil
                     {
                         auto it = mEngineHandlers.find(handlerName);
                         if (it == mEngineHandlers.end())
-                            Log(Debug::Error) << "Not supported handler '" << handlerName
-                                              << "' in " << mNamePrefix << "[" << path << "]";
+                            Log(Debug::Error) << "Not supported handler '" << handlerName << "' in " << debugName;
                         else
                             insertHandler(it->second->mList, scriptId, fn);
                     }
@@ -131,7 +129,7 @@ namespace LuaUtil
 
             if (script.mInterfaceName.empty() == script.mInterface.has_value())
             {
-                Log(Debug::Error) << mNamePrefix << "[" << path << "]: 'interfaceName' should always be used together with 'interface'";
+                Log(Debug::Error) << debugName << ": 'interfaceName' should always be used together with 'interface'";
                 script.mInterfaceName.clear();
                 script.mInterface = sol::nil;
             }
@@ -145,8 +143,9 @@ namespace LuaUtil
         }
         catch (std::exception& e)
         {
+            mScripts[scriptId].mHiddenData[sScriptIdKey] = sol::nil;
             mScripts.erase(scriptId);
-            Log(Debug::Error) << "Can't start " << mNamePrefix << "[" << path << "]; " << e.what();
+            Log(Debug::Error) << "Can't start " << debugName << "; " << e.what();
             return false;
         }
     }
@@ -159,7 +158,7 @@ namespace LuaUtil
         Script& script = scriptIter->second;
         if (script.mInterface)
             removeInterface(scriptId, script);
-        script.mHiddenData[ScriptId::KEY] = sol::nil;
+        script.mHiddenData[sScriptIdKey] = sol::nil;
         mScripts.erase(scriptIter);
         for (auto& [_, handlers] : mEngineHandlers)
             removeHandler(handlers->mList, scriptId);
@@ -329,7 +328,9 @@ namespace LuaUtil
         for (auto& [scriptId, script] : mScripts)
         {
             ESM::LuaScript savedScript;
-            savedScript.mScriptPath = script.mHiddenData.get<ScriptId>(ScriptId::KEY).mPath;
+            // Note: We can not use `scriptPath(scriptId)` here because `save` can be called during
+            // evaluating "reloadlua" command when ScriptsConfiguration is already changed.
+            savedScript.mScriptPath = script.mPath;
             if (script.mOnSave)
             {
                 try
@@ -423,7 +424,7 @@ namespace LuaUtil
     ScriptsContainer::~ScriptsContainer()
     {
         for (auto& [_, script] : mScripts)
-            script.mHiddenData[ScriptId::KEY] = sol::nil;
+            script.mHiddenData[sScriptIdKey] = sol::nil;
     }
 
     // Note: shouldn't be called from destructor because mEngineHandlers has pointers on
@@ -431,7 +432,7 @@ namespace LuaUtil
     void ScriptsContainer::removeAllScripts()
     {
         for (auto& [_, script] : mScripts)
-            script.mHiddenData[ScriptId::KEY] = sol::nil;
+            script.mHiddenData[sScriptIdKey] = sol::nil;
         mScripts.clear();
         for (auto& [_, handlers] : mEngineHandlers)
             handlers->mList.clear();
@@ -527,6 +528,15 @@ namespace LuaUtil
     {
         updateTimerQueue(mSecondsTimersQueue, gameSeconds);
         updateTimerQueue(mHoursTimersQueue, gameHours);
+    }
+
+    void Callback::operator()(sol::object arg) const
+    {
+        if (mHiddenData[ScriptsContainer::sScriptIdKey] != sol::nil)
+            LuaUtil::call(mFunc, std::move(arg));
+        else
+            Log(Debug::Debug) << "Ignored callback to the removed script "
+                              << mHiddenData.get<std::string>(ScriptsContainer::sScriptDebugNameKey);
     }
 
 }
