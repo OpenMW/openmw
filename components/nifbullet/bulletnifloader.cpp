@@ -105,10 +105,28 @@ auto handleNiGeometry(const Nif::NiGeometry& geometry, Function&& function)
     -> decltype(function(static_cast<const Nif::NiTriShapeData&>(geometry.data.get())))
 {
     if (geometry.recType == Nif::RC_NiTriShape || geometry.recType == Nif::RC_BSLODTriShape)
-        return function(static_cast<const Nif::NiTriShapeData&>(geometry.data.get()));
+    {
+        if (geometry.data->recType != Nif::RC_NiTriShapeData)
+            return {};
+
+        auto data = static_cast<const Nif::NiTriShapeData*>(geometry.data.getPtr());
+        if (data->triangles.empty())
+            return {};
+
+        return function(static_cast<const Nif::NiTriShapeData&>(*data));
+    }
 
     if (geometry.recType == Nif::RC_NiTriStrips)
-        return function(static_cast<const Nif::NiTriStripsData&>(geometry.data.get()));
+    {
+        if (geometry.data->recType != Nif::RC_NiTriStripsData)
+            return {};
+
+        auto data = static_cast<const Nif::NiTriStripsData*>(geometry.data.getPtr());
+        if (data->strips.empty())
+            return {};
+
+        return function(static_cast<const Nif::NiTriStripsData&>(*data));
+    }
 
     return {};
 }
@@ -371,25 +389,6 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiGeometry& niGeometry, const 
 {
     if (niGeometry.data.empty() || niGeometry.data->vertices.empty())
         return;
-
-    if (niGeometry.recType == Nif::RC_NiTriShape || niGeometry.recType == Nif::RC_BSLODTriShape)
-    {
-        if (niGeometry.data->recType != Nif::RC_NiTriShapeData)
-            return;
-
-        auto data = static_cast<const Nif::NiTriShapeData*>(niGeometry.data.getPtr());
-        if (data->triangles.empty())
-            return;
-    }
-    else if (niGeometry.recType == Nif::RC_NiTriStrips)
-    {
-        if (niGeometry.data->recType != Nif::RC_NiTriStripsData)
-            return;
-
-        auto data = static_cast<const Nif::NiTriStripsData*>(niGeometry.data.getPtr());
-        if (data->strips.empty())
-            return;
-    }
 
     if (!niGeometry.skin.empty())
         isAnimated = false;
