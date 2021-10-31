@@ -2955,7 +2955,7 @@ namespace MWWorld
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(file))
             {
-                contentLoader.load(col.getPath(file), idx);
+                gameContentLoader.load(col.getPath(file), idx);
             }
             else
             {
