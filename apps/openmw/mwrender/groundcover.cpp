@@ -156,6 +156,10 @@ namespace MWRender
          mProgramTemplate->addBindAttribLocation("aRotation", 7);
     }
 
+    Groundcover::~Groundcover()
+    {
+    }
+
     void Groundcover::collectInstances(InstanceMap& instances, float size, const osg::Vec2f& center)
     {
         const MWWorld::ESMStore& worldStore = MWBase::Environment::get().getWorld()->getStore();
