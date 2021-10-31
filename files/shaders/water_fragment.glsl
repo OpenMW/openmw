@@ -67,6 +67,8 @@ float scramble(float x, float z)
 vec2 randOffset(vec2 c, float time)
 {
   time = fract(time/1000.0);
+  c = vec2(c.x * c.y /  8.0 + c.y * 0.3 + c.x * 0.2,
+           c.x * c.y / 14.0 + c.y * 0.5 + c.x * 0.7);
   c.x *= scramble(scramble(time + c.x/1000.0, 4.0), 3.0) + 1.0;
   c.y *= scramble(scramble(time + c.y/1000.0, 3.5), 3.0) + 1.0;
   return fract(c);
