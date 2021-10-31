@@ -77,6 +77,21 @@ Controls what kinds of things are rendered in water reflections.
 In interiors the lowest level is 2.
 This setting can be changed ingame with the "Reflection shader detail" dropdown under the Water tab of the Video panel in the Options menu.
 
+rain ripple detail
+-----------------
+
+:Type:		integer
+:Range:		0, 1, 2
+:Default:	2
+
+Controls how detailed the raindrop ripples on water are.
+
+0: single, non-normal-mapped ring per raindrop
+1: normal-mapped raindrops, with multiple rings
+2: same as 1, but with a greater number of raindrops
+
+This setting can be changed ingame with the "Rain ripple detail/density" dropdown under the Water tab of the Video panel in the Options menu.
+
 small feature culling pixel size
 --------------------------------
 
