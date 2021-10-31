@@ -396,14 +396,14 @@ namespace MWGui
 
     void SettingsWindow::onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        unsigned int level = std::min(unsigned int(pos), unsigned int(5));
+        unsigned int level = unsigned int(std::min<size_t>(pos, 5));
         Settings::Manager::setInt("reflection detail", "Water", level);
         apply();
     }
 
     void SettingsWindow::onWaterRainRippleDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        unsigned int level = std::min(unsigned int(pos), unsigned int(2));
+        unsigned int level = unsigned int(std::min<size_t>(pos, 2));
         Settings::Manager::setInt("rain ripple detail", "Water", level);
         apply();
     }

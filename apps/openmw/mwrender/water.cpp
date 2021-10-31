@@ -647,9 +647,10 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
 {
     // use a define map to conditionally compile the shader
     std::map<std::string, std::string> defineMap;
-    defineMap.insert(std::make_pair(std::string("refraction_enabled"), std::string(mRefraction ? "1" : "0")));
-    unsigned int rippleDetail = std::clamp(Settings::Manager::getInt("rain ripple detail", "Water"), 0, 2);
-    defineMap.insert(std::make_pair(std::string("rain_ripple_detail"), Misc::StringUtils::format("%u", rippleDetail)));
+    defineMap["refraction_enabled"] = std::string(mRefraction ? "1" : "0");
+    const auto rippleDetail = std::clamp(Settings::Manager::getInt("rain ripple detail", "Water"), 0, 2);
+    defineMap["rain_ripple_detail"] = std::to_string(rippleDetail);
+
 
     Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
     osg::ref_ptr<osg::Shader> vertexShader(shaderMgr.getShader("water_vertex.glsl", defineMap, osg::Shader::VERTEX));
