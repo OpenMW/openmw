@@ -157,20 +157,13 @@ namespace MWWorld
         mEsm.resize(contentFiles.size() + groundcoverFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
-
-        GameContentLoader gameContentLoader(*listener);
-        EsmLoader esmLoader(mStore, mEsm, encoder, *listener);
-
-        gameContentLoader.addLoader(".esm", &esmLoader);
-        gameContentLoader.addLoader(".esp", &esmLoader);
-        gameContentLoader.addLoader(".omwgame", &esmLoader);
-        gameContentLoader.addLoader(".omwaddon", &esmLoader);
-        gameContentLoader.addLoader(".project", &esmLoader);
-
-        OMWScriptsLoader omwScriptsLoader(*listener, mStore);
-        gameContentLoader.addLoader(".omwscripts", &omwScriptsLoader);
-
-        loadContentFiles(fileCollections, contentFiles, groundcoverFiles, gameContentLoader);
+        
+        loadContentFiles(fileCollections, contentFiles, mStore, mEsm, encoder, listener);
+        if (!groundcoverFiles.empty())
+        {
+            std::vector<ESM::ESMReader> tempReaders (groundcoverFiles.size());
+            loadContentFiles(fileCollections, groundcoverFiles, mGroundcoverStore, tempReaders, encoder, listener);
+        }
 
         listener->loadingOff();
 
@@ -201,7 +194,7 @@ namespace MWWorld
             mNavigator.reset(new DetourNavigator::NavigatorStub());
         }
 
-        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator));
+        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator, mGroundcoverStore));
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
         mRendering->preloadCommonAssets();
 
@@ -2941,9 +2934,19 @@ namespace MWWorld
         return mScriptsEnabled;
     }
 
-    void World::loadContentFiles(const Files::Collections& fileCollections,
-        const std::vector<std::string>& content, const std::vector<std::string>& groundcover, ContentLoader& contentLoader)
-    {
+    void World::loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Encoder* encoder, Loading::Listener* listener)
+        GameContentLoader gameContentLoader(*listener);
+        EsmLoader esmLoader(store, readers, encoder, *listener);
+
+        gameContentLoader.addLoader(".esm", &esmLoader);
+        gameContentLoader.addLoader(".esp", &esmLoader);
+        gameContentLoader.addLoader(".omwgame", &esmLoader);
+        gameContentLoader.addLoader(".omwaddon", &esmLoader);
+        gameContentLoader.addLoader(".project", &esmLoader);
+
+        OMWScriptsLoader omwScriptsLoader(*listener, store);
+        gameContentLoader.addLoader(".omwscripts", &omwScriptsLoader);
+
         int idx = 0;
         for (const std::string &file : content)
         {
@@ -2956,24 +2959,6 @@ namespace MWWorld
             else
             {
                 std::string message = "Failed loading " + file + ": the content file does not exist";
-                throw std::runtime_error(message);
-            }
-            idx++;
-        }
-
-        ESM::GroundcoverIndex = idx;
-
-        for (const std::string &file : groundcover)
-        {
-            boost::filesystem::path filename(file);
-            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
-            if (col.doesExist(file))
-            {
-                contentLoader.load(col.getPath(file), idx);
-            }
-            else
-            {
-                std::string message = "Failed loading " + file + ": the groundcover file does not exist";
                 throw std::runtime_error(message);
             }
             idx++;
