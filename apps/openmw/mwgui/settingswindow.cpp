@@ -232,6 +232,7 @@ namespace MWGui
         getWidget(mControllerSwitch, "ControllerButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
         getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
+        getWidget(mWaterRainRippleDetail, "WaterRainRippleDetail");
         getWidget(mLightingMethodButton, "LightingMethodButton");
         getWidget(mLightsResetButton, "LightsResetButton");
         getWidget(mMaxLights, "MaxLights");
@@ -259,6 +260,7 @@ namespace MWGui
 
         mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
         mWaterReflectionDetail->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterReflectionDetailChanged);
+        mWaterRainRippleDetail->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterRainRippleDetailChanged);
 
         mLightingMethodButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onLightingMethodButtonChanged);
         mLightsResetButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onLightsResetButtonClicked);
@@ -308,6 +310,10 @@ namespace MWGui
         int waterReflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
         waterReflectionDetail = std::min(5, std::max(0, waterReflectionDetail));
         mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
+
+        int waterRainRippleDetail = Settings::Manager::getInt("rain ripple density", "Water");
+        waterRainRippleDetail = std::min(2, std::max(0, waterRainRippleDetail));
+        mWaterRainRippleDetail->setIndexSelected(waterRainRippleDetail);
 
         updateMaxLightsComboBox(mMaxLights);
 
@@ -394,6 +400,13 @@ namespace MWGui
     {
         unsigned int level = std::min((unsigned int)5, (unsigned int)pos);
         Settings::Manager::setInt("reflection detail", "Water", level);
+        apply();
+    }
+
+    void SettingsWindow::onWaterRainRippleDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        unsigned int level = std::min((unsigned int)2, (unsigned int)(pos));
+        Settings::Manager::setInt("rain ripple density", "Water", level);
         apply();
     }
 

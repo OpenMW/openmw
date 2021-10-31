@@ -619,6 +619,8 @@ public:
             stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
         stateset->addUniform(new osg::Uniform("nodePosition", osg::Vec3f(mWater->getPosition())));
+
+        stateset->addUniform(new osg::Uniform("rainRippleDensity", Settings::Manager::getInt("rain ripple density", "Water")));
     }
 
     void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
