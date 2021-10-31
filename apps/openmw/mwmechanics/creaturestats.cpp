@@ -539,6 +539,7 @@ namespace MWMechanics
         state.mFallHeight = mFallHeight; // TODO: vertical velocity (move from PhysicActor to CreatureStats?)
         state.mLastHitObject = mLastHitObject;
         state.mLastHitAttemptObject = mLastHitAttemptObject;
+        state.mRecalcDynamicStats = false;
         state.mDrawState = mDrawState;
         state.mLevel = mLevel;
         state.mActorId = mActorId;
