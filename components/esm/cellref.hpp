@@ -12,7 +12,6 @@ namespace ESM
     class ESMReader;
 
     const int UnbreakableLock = std::numeric_limits<int>::max();
-    extern int GroundcoverIndex;
 
     struct RefNum
     {
@@ -27,10 +26,6 @@ namespace ESM
 
         inline bool isSet() const { return mIndex != 0 || mContentFile != -1; }
         inline void unset() { *this = {0, -1}; }
-
-        // Note: this method should not be used for objects with invalid RefNum
-        // (for example, for objects from disabled plugins in savegames).
-        inline bool fromGroundcoverFile() const { return mContentFile >= GroundcoverIndex; }
     };
 
     /* Cell reference. This represents ONE object (of many) inside the
