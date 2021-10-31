@@ -4,6 +4,7 @@
 #include <osg/BlendFunc>
 #include <osg/Geometry>
 #include <osg/VertexAttribDivisor>
+#include <osg/Program>
 
 #include <components/esm/esmreader.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -17,15 +18,12 @@
 
 namespace MWRender
 {
-    std::string getGroundcoverModel(int type, const std::string& id, const MWWorld::ESMStore& store)
+    std::string getGroundcoverModel(const std::string& id, const MWWorld::ESMStore& groundcoverStore, const MWWorld::ESMStore& store)
     {
-        switch (type)
-        {
-          case ESM::REC_STAT:
-            return store.get<ESM::Static>().searchStatic(id)->mModel;
-          default:
-            return std::string();
-        }
+        const ESM::Static* stat = groundcoverStore.get<ESM::Static>().searchStatic(id);
+        if (!stat)
+            stat = store.get<ESM::Static>().searchStatic(id);
+        return stat ? stat->mModel : std::string();
     }
 
     class InstancingVisitor : public osg::NodeVisitor
@@ -137,11 +135,12 @@ namespace MWRender
         }
     }
 
-    Groundcover::Groundcover(Resource::SceneManager* sceneManager, float density)
+    Groundcover::Groundcover(Resource::SceneManager* sceneManager, float density, const MWWorld::ESMStore& store)
          : GenericResourceManager<GroundcoverChunkId>(nullptr)
          , mSceneManager(sceneManager)
          , mDensity(density)
          , mStateset(new osg::StateSet)
+         , mGroundcoverStore(store)
     {
          // MGE uses default alpha settings for groundcover, so we can not rely on alpha properties
          // Force a unified alpha handling instead of data from meshes
@@ -159,7 +158,7 @@ namespace MWRender
 
     void Groundcover::collectInstances(InstanceMap& instances, float size, const osg::Vec2f& center)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& worldStore = MWBase::Environment::get().getWorld()->getStore();
         osg::Vec2f minBound = (center - osg::Vec2f(size/2.f, size/2.f));
         osg::Vec2f maxBound = (center + osg::Vec2f(size/2.f, size/2.f));
         DensityCalculator calculator(mDensity);
@@ -169,7 +168,7 @@ namespace MWRender
         {
             for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
             {
-                const ESM::Cell* cell = store.get<ESM::Cell>().searchStatic(cellX, cellY);
+                const ESM::Cell* cell = mGroundcoverStore.get<ESM::Cell>().searchStatic(cellX, cellY);
                 if (!cell) continue;
 
                 calculator.reset();
@@ -185,14 +184,11 @@ namespace MWRender
                     while(cell->getNextRef(esm[index], ref, deleted))
                     {
                         if (deleted) continue;
-                        if (!ref.mRefNum.fromGroundcoverFile()) continue;
 
                         if (!calculator.isInstanceEnabled()) continue;
                         if (!isInChunkBorders(ref, minBound, maxBound)) continue;
 
-                        Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-                        int type = store.findStatic(ref.mRefID);
-                        std::string model = getGroundcoverModel(type, ref.mRefID, store);
+                        std::string model = getGroundcoverModel(ref.mRefID, mGroundcoverStore, worldStore);
                         if (model.empty()) continue;
                         model = "meshes/" + model;
 
