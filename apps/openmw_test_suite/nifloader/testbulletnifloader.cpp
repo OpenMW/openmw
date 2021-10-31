@@ -1159,8 +1159,7 @@ namespace
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("xtest.nif"));
         const auto result = mLoader.load(mNifFile);
 
-        Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new btCompoundShape);
+        const Resource::BulletShape expected;
 
         EXPECT_EQ(*result, expected);
     }

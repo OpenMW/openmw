@@ -1,6 +1,7 @@
 #include "bulletnifloader.hpp"
 
 #include <vector>
+#include <variant>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
@@ -99,12 +100,38 @@ void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data, co
     }
 }
 
-void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiGeometry& geometry, const osg::Matrixf &transform = osg::Matrixf())
+template <class Function>
+auto handleNiGeometry(const Nif::NiGeometry& geometry, Function&& function)
+    -> decltype(function(static_cast<const Nif::NiTriShapeData&>(geometry.data.get())))
 {
     if (geometry.recType == Nif::RC_NiTriShape || geometry.recType == Nif::RC_BSLODTriShape)
-        fillTriangleMesh(mesh, static_cast<const Nif::NiTriShapeData&>(geometry.data.get()), transform);
-    else if (geometry.recType == Nif::RC_NiTriStrips)
-        fillTriangleMesh(mesh, static_cast<const Nif::NiTriStripsData&>(geometry.data.get()), transform);
+        return function(static_cast<const Nif::NiTriShapeData&>(geometry.data.get()));
+
+    if (geometry.recType == Nif::RC_NiTriStrips)
+        return function(static_cast<const Nif::NiTriStripsData&>(geometry.data.get()));
+
+    return {};
+}
+
+std::monostate fillTriangleMesh(std::unique_ptr<btTriangleMesh>& mesh, const Nif::NiGeometry& geometry, const osg::Matrixf &transform)
+{
+    return handleNiGeometry(geometry, [&] (const auto& data)
+    {
+        if (mesh == nullptr)
+            mesh.reset(new btTriangleMesh(false));
+        fillTriangleMesh(*mesh, data, transform);
+        return std::monostate {};
+    });
+}
+
+std::unique_ptr<btTriangleMesh> makeChildMesh(const Nif::NiGeometry& geometry)
+{
+    return handleNiGeometry(geometry, [&] (const auto& data)
+    {
+        std::unique_ptr<btTriangleMesh> mesh(new btTriangleMesh);
+        fillTriangleMesh(*mesh, data, osg::Matrixf());
+        return mesh;
+    });
 }
 
 }
@@ -369,15 +396,12 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiGeometry& niGeometry, const 
 
     if (isAnimated)
     {
+        std::unique_ptr<btTriangleMesh> childMesh = makeChildMesh(niGeometry);
+        if (childMesh == nullptr || childMesh->getNumTriangles() == 0)
+            return;
+
         if (!mCompoundShape)
             mCompoundShape.reset(new btCompoundShape);
-
-        std::unique_ptr<btTriangleMesh> childMesh(new btTriangleMesh);
-
-        fillTriangleMesh(*childMesh, niGeometry);
-
-        if (childMesh->getNumTriangles() == 0)
-            return;
 
         std::unique_ptr<Resource::TriangleMeshShape> childShape(new Resource::TriangleMeshShape(childMesh.get(), true));
         childMesh.release();
@@ -397,20 +421,9 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiGeometry& niGeometry, const 
         childShape.release();
     }
     else if (avoid)
-    {
-        if (!mAvoidStaticMesh)
-            mAvoidStaticMesh.reset(new btTriangleMesh(false));
-
-        fillTriangleMesh(*mAvoidStaticMesh, niGeometry, transform);
-    }
+        fillTriangleMesh(mAvoidStaticMesh, niGeometry, transform);
     else
-    {
-        if (!mStaticMesh)
-            mStaticMesh.reset(new btTriangleMesh(false));
-
-        // Static shape, just transform all vertices into position
-        fillTriangleMesh(*mStaticMesh, niGeometry, transform);
-    }
+        fillTriangleMesh(mStaticMesh, niGeometry, transform);
 }
 
 } // namespace NifBullet
