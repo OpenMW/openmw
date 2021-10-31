@@ -336,7 +336,12 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node& nifNode, int flags, cons
     if ((flags & 0x800))
         return;
 
-    const Nif::NiGeometry& niGeometry = static_cast<const Nif::NiGeometry&>(nifNode);
+    handleNiTriShape(static_cast<const Nif::NiGeometry&>(nifNode), transform, isAnimated, avoid);
+}
+
+void BulletNifLoader::handleNiTriShape(const Nif::NiGeometry& niGeometry, const osg::Matrixf &transform,
+    bool isAnimated, bool avoid)
+{
     if (niGeometry.data.empty() || niGeometry.data->vertices.empty())
         return;
 
@@ -377,8 +382,8 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node& nifNode, int flags, cons
         std::unique_ptr<Resource::TriangleMeshShape> childShape(new Resource::TriangleMeshShape(childMesh.get(), true));
         childMesh.release();
 
-        float scale = nifNode.trafo.scale;
-        for (const Nif::Node* parent = nifNode.parent; parent != nullptr; parent = parent->parent)
+        float scale = niGeometry.trafo.scale;
+        for (const Nif::Node* parent = niGeometry.parent; parent != nullptr; parent = parent->parent)
             scale *= parent->trafo.scale;
         osg::Quat q = transform.getRotate();
         osg::Vec3f v = transform.getTrans();
@@ -386,7 +391,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node& nifNode, int flags, cons
 
         btTransform trans(btQuaternion(q.x(), q.y(), q.z(), q.w()), btVector3(v.x(), v.y(), v.z()));
 
-        mShape->mAnimatedShapes.emplace(nifNode.recIndex, mCompoundShape->getNumChildShapes());
+        mShape->mAnimatedShapes.emplace(niGeometry.recIndex, mCompoundShape->getNumChildShapes());
 
         mCompoundShape->addChildShape(trans, childShape.get());
         childShape.release();
