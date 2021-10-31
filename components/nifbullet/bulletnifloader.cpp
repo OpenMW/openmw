@@ -170,7 +170,7 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
 
     if (mCompoundShape)
     {
-        if (mStaticMesh)
+        if (mStaticMesh != nullptr && mStaticMesh->getNumTriangles() > 0)
         {
             btTransform trans;
             trans.setIdentity();
@@ -181,13 +181,13 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
         }
         mShape->mCollisionShape = std::move(mCompoundShape);
     }
-    else if (mStaticMesh)
+    else if (mStaticMesh != nullptr && mStaticMesh->getNumTriangles() > 0)
     {
         mShape->mCollisionShape.reset(new Resource::TriangleMeshShape(mStaticMesh.get(), true));
         mStaticMesh.release();
     }
 
-    if (mAvoidStaticMesh)
+    if (mAvoidStaticMesh != nullptr && mAvoidStaticMesh->getNumTriangles() > 0)
     {
         mShape->mAvoidCollisionShape.reset(new Resource::TriangleMeshShape(mAvoidStaticMesh.get(), false));
         mAvoidStaticMesh.release();
@@ -375,6 +375,9 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node *nifNode, int flags, cons
         std::unique_ptr<btTriangleMesh> childMesh(new btTriangleMesh);
 
         fillTriangleMesh(*childMesh, niGeometry);
+
+        if (childMesh->getNumTriangles() == 0)
+            return;
 
         std::unique_ptr<Resource::TriangleMeshShape> childShape(new Resource::TriangleMeshShape(childMesh.get(), true));
         childMesh.release();
