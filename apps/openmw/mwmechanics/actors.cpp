@@ -1496,15 +1496,13 @@ namespace MWMechanics
                         stats.getAiSequence().execute(iter->first, *ctrl, duration, /*outOfRange*/true);
                     }
 
-                    if(iter->first.getClass().isNpc())
+                    if(inProcessingRange && iter->first.getClass().isNpc())
                     {
                         // We can not update drowning state for actors outside of AI distance - they can not resurface to breathe
-                        if (inProcessingRange)
-                            updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
-
-                        if (timerUpdateEquippedLight == 0)
-                            updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
+                        updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
                     }
+                    if(timerUpdateEquippedLight == 0 && iter->first.getClass().hasInventoryStore(iter->first))
+                        updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
 
                     if (luaControls && isConscious(iter->first))
                     {
