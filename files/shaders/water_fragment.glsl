@@ -9,6 +9,7 @@
 #endif
 
 #define REFRACTION @refraction_enabled
+#define RAIN_RIPPLE_DETAIL @rain_ripple_detail
 
 // Inspired by Blender GLSL Water by martinsh ( https://devlog-martinsh.blogspot.de/2012/07/waterundewater-shader-wip.html )
 
@@ -55,8 +56,6 @@ const float WOBBLY_SHORE_FADE_DISTANCE = 6200.0;   // fade out wobbly shores to 
 
 // ---------------- rain ripples related stuff ---------------------
 
-uniform int rainRippleDensity;
-
 const float RAIN_RIPPLE_GAPS = 10.0;
 const float RAIN_RIPPLE_RADIUS = 0.2;
 
@@ -92,6 +91,7 @@ float blipDerivative(float x)
 }
 
 const float RAIN_RING_TIME_OFFSET = 1.0/6.0;
+
 vec4 circle(vec2 coords, vec2 corner, float adjusted_time)
 {
   vec2 center = vec2(0.5,0.5) + (0.5 - RAIN_RIPPLE_RADIUS) * (2.0 * randOffset(corner, floor(adjusted_time)) - 1.0);
@@ -101,6 +101,9 @@ vec4 circle(vec2 coords, vec2 corner, float adjusted_time)
   float r = RAIN_RIPPLE_RADIUS;
   float d = length(toCenter);
   float ringfollower = (phase-d/r)/RAIN_RING_TIME_OFFSET-1.0; // -1.0 ~ +1.0 cover the breadth of the ripple's ring
+
+#if RAIN_RIPPLE_DETAIL > 0
+// normal mapped ripples
   if(ringfollower < -1.0 || ringfollower > 1.0)
     return vec4(0.0);
 
@@ -119,6 +122,16 @@ vec4 circle(vec2 coords, vec2 corner, float adjusted_time)
   ret.xyz = normalize(ret.xyz) * energy*range_limit;
   ret.z *= range_limit;
   return ret;
+#else
+// ring-only ripples
+  if(ringfollower < -1.0 || ringfollower > 0.5)
+    return vec4(0.0);
+
+  float energy = 1.0-phase;
+  float height = blip(ringfollower*2.0+0.5)*energy*energy; // fake specularity
+
+  return vec4(0.0, 0.0, 0.0, height);
+#endif
 }
 vec4 rain(vec2 uv, float time)
 {
@@ -126,6 +139,7 @@ vec4 rain(vec2 uv, float time)
   vec2 f_part = fract(uv);
   vec2 i_part = floor(uv);
   float adjusted_time = time * 1.2 + randPhase(i_part);
+#if RAIN_RIPPLE_DETAIL > 0
   vec4 a = circle(f_part, i_part, adjusted_time);
   vec4 b = circle(f_part, i_part, adjusted_time - RAIN_RING_TIME_OFFSET);
   vec4 c = circle(f_part, i_part, adjusted_time - RAIN_RING_TIME_OFFSET*2.0);
@@ -138,50 +152,26 @@ vec4 rain(vec2 uv, float time)
   // fake specularity looks weird if we use every single ring, also if the inner rings are too bright 
   ret.w  = (a.w + c.w /8.0)*1.5;
   return ret;
+#else
+  return circle(f_part, i_part, adjusted_time) * 1.5;
+#endif
 }
-vec4 circleSimple(vec2 coords, vec2 corner, float adjusted_time) // only returns fake specularity
-{
-  vec2 center = vec2(0.5,0.5) + (0.5 - RAIN_RIPPLE_RADIUS) * (2.0 * randOffset(corner, floor(adjusted_time)) - 1.0);
-  float phase = fract(adjusted_time);
-  vec2 toCenter = coords - center;
 
-  float r = RAIN_RIPPLE_RADIUS;
-  float d = length(toCenter);
-  float ringfollower = (phase-d/r)/RAIN_RING_TIME_OFFSET-1.0; // -1.0 ~ +1.0 cover the breadth of the ripple's ring
-
-  if(ringfollower < -1.0 || ringfollower > 0.5)
-    return vec4(0.0);
-
-  float energy = 1.0-phase;
-  float height = blip(ringfollower*2.0+0.5)*energy*energy; // fake specularity
-
-  return vec4(0.0, 0.0, 0.0, height);
-}
-vec4 rainSimple(vec2 uv, float time)
-{
-  uv *= RAIN_RIPPLE_GAPS;
-  vec2 f_part = fract(uv);
-  vec2 i_part = floor(uv);
-  float adjusted_time = time * 1.2 + randPhase(i_part);
-  return circleSimple(f_part, i_part, adjusted_time) * 1.5;
-}
 vec2 complex_mult(vec2 a, vec2 b)
 {
     return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
 }
 vec4 rainCombined(vec2 uv, float time) // returns ripple normal in xyz and fake specularity in w
 {
-  if(rainRippleDensity == 0)
-    return rainSimple(uv, time) + rainSimple(complex_mult(uv, vec2(0.4, 0.7)) + vec2( 1.2, 3.0), time);
-  vec4 ret =
+  return
     rain(uv, time)
-  + rain(complex_mult(uv, vec2(0.4, 0.7)) + vec2(1.2, 3.0),time);
-  if(rainRippleDensity == 2)
-    ret +=
-      rain(uv * 0.75 + vec2( 3.7,18.9),time)
-    + rain(uv * 0.9  + vec2( 5.7,30.1),time)
-    + rain(uv * 1.0  + vec2(10.5 ,5.7),time);
-  return ret;
+  + rain(complex_mult(uv, vec2(0.4, 0.7)) + vec2(1.2, 3.0),time)
+    #if RAIN_RIPPLE_DETAIL == 2
+      + rain(uv * 0.75 + vec2( 3.7,18.9),time)
+      + rain(uv * 0.9  + vec2( 5.7,30.1),time)
+      + rain(uv * 1.0  + vec2(10.5 ,5.7),time)
+    #endif
+  ;
 }
 
 

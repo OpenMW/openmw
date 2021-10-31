@@ -32,6 +32,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/stringops.hpp>
 
 #include <components/nifosg/controller.hpp>
 
@@ -619,8 +620,6 @@ public:
             stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
         stateset->addUniform(new osg::Uniform("nodePosition", osg::Vec3f(mWater->getPosition())));
-
-        stateset->addUniform(new osg::Uniform("rainRippleDensity", Settings::Manager::getInt("rain ripple density", "Water")));
     }
 
     void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
@@ -649,6 +648,8 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     // use a define map to conditionally compile the shader
     std::map<std::string, std::string> defineMap;
     defineMap.insert(std::make_pair(std::string("refraction_enabled"), std::string(mRefraction ? "1" : "0")));
+    unsigned int rippleDetail = std::clamp(Settings::Manager::getInt("rain ripple detail", "Water"), 0, 2);
+    defineMap.insert(std::make_pair(std::string("rain_ripple_detail"), Misc::StringUtils::format("%u", rippleDetail)));
 
     Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
     osg::ref_ptr<osg::Shader> vertexShader(shaderMgr.getShader("water_vertex.glsl", defineMap, osg::Shader::VERTEX));

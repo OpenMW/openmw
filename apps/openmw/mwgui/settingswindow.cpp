@@ -307,12 +307,10 @@ namespace MWGui
         if (waterTextureSize >= 2048)
             mWaterTextureSize->setIndexSelected(2);
 
-        int waterReflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        waterReflectionDetail = std::min(5, std::max(0, waterReflectionDetail));
+        int waterReflectionDetail = std::clamp(Settings::Manager::getInt("reflection detail", "Water"), 0, 5);
         mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
 
-        int waterRainRippleDetail = Settings::Manager::getInt("rain ripple density", "Water");
-        waterRainRippleDetail = std::min(2, std::max(0, waterRainRippleDetail));
+        int waterRainRippleDetail = std::clamp(Settings::Manager::getInt("rain ripple detail", "Water"), 0, 2);
         mWaterRainRippleDetail->setIndexSelected(waterRainRippleDetail);
 
         updateMaxLightsComboBox(mMaxLights);
@@ -398,15 +396,15 @@ namespace MWGui
 
     void SettingsWindow::onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        unsigned int level = std::min((unsigned int)5, (unsigned int)pos);
+        unsigned int level = std::min(unsigned int(pos), unsigned int(5));
         Settings::Manager::setInt("reflection detail", "Water", level);
         apply();
     }
 
     void SettingsWindow::onWaterRainRippleDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        unsigned int level = std::min((unsigned int)2, (unsigned int)(pos));
-        Settings::Manager::setInt("rain ripple density", "Water", level);
+        unsigned int level = std::min(unsigned int(pos), unsigned int(2));
+        Settings::Manager::setInt("rain ripple detail", "Water", level);
         apply();
     }
 
