@@ -302,11 +302,11 @@ void ESMStore::setUp(bool validateRecords)
     if (validateRecords)
     {
         validate();
-        countAllCellrefs();
+        countAllCellRefs();
     }
 }
 
-void ESMStore::countAllCellrefs()
+void ESMStore::countAllCellRefs()
 {
     // TODO: We currently need to read entire files here again.
     // We should consider consolidating or deferring this reading.
