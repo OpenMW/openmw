@@ -1013,7 +1013,7 @@ namespace MWWorld
         mShared.reserve(mStatic.size());
         for (auto & [_, dial] : mStatic)
             mShared.push_back(&dial);
-        std::sort(mShared.begin(), mShared.end(), RecordCmp);
+        std::sort(mShared.begin(), mShared.end(), RecordCmp());
     }
 
     template <>
