@@ -84,30 +84,42 @@ PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::st
     return PartHolderPtr(new PartHolder(instance));
 }
 
-std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield) const
+std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield, bool female) const
 {
-    std::string mesh = shield.getClass().getModel(shield);
     const ESM::Armor *armor = shield.get<ESM::Armor>()->mBase;
     const std::vector<ESM::PartReference>& bodyparts = armor->mParts.mParts;
+    // Try to recover the body part model, use ground model as a fallback otherwise.
     if (!bodyparts.empty())
     {
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
-
-        // Try to get shield model from bodyparts first, with ground model as fallback
         for (const auto& part : bodyparts)
         {
-            // Assume all creatures use the male mesh.
-            if (part.mPart != ESM::PRT_Shield || part.mMale.empty())
+            if (part.mPart != ESM::PRT_Shield)
                 continue;
-            const ESM::BodyPart *bodypart = partStore.search(part.mMale);
-            if (bodypart && bodypart->mData.mType == ESM::BodyPart::MT_Armor && !bodypart->mModel.empty())
+
+            std::string bodypartName;
+            if (female && !part.mFemale.empty())
+                bodypartName = part.mFemale;
+            else if (!part.mMale.empty())
+                bodypartName = part.mMale;
+
+            if (!bodypartName.empty())
             {
-                mesh = "meshes\\" + bodypart->mModel;
-                break;
+                const ESM::BodyPart *bodypart = partStore.search(bodypartName);
+                if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
+                    return std::string();
+                if (!bodypart->mModel.empty())
+                    return "meshes\\" + bodypart->mModel;
             }
         }
     }
+    return shield.getClass().getModel(shield);
+}
+
+std::string ActorAnimation::getSheathedShieldMesh(const MWWorld::ConstPtr& shield) const
+{
+    std::string mesh = getShieldMesh(shield, false);
 
     if (mesh.empty())
         return mesh;
@@ -143,7 +155,7 @@ bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
                 const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
                 const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-                if (shield != inv.end() && shield->getType() == ESM::Armor::sRecordId && !getShieldMesh(*shield).empty())
+                if (shield != inv.end() && shield->getType() == ESM::Armor::sRecordId && !getSheathedShieldMesh(*shield).empty())
                 {
                     if(stats.getDrawState() != MWMechanics::DrawState_Weapon)
                         return false;
@@ -201,7 +213,7 @@ void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
             return;
     }
 
-    std::string mesh = getShieldMesh(*shield);
+    std::string mesh = getSheathedShieldMesh(*shield);
     if (mesh.empty())
         return;
 
@@ -255,7 +267,7 @@ bool ActorAnimation::useShieldAnimations() const
     const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
     if (weapon != inv.end() && shield != inv.end() &&
         shield->getType() == ESM::Armor::sRecordId &&
-        !getShieldMesh(*shield).empty())
+        !getSheathedShieldMesh(*shield).empty())
     {
         auto type = weapon->getType();
         if(type == ESM::Weapon::sRecordId)
