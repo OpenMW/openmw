@@ -149,7 +149,7 @@ namespace MWWorld
     class Store : public StoreBase
     {
         typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Static;
-        Static mStatic
+        Static mStatic;
         /// @par mShared usually preserves the record order as it came from the content files (this
         /// is relevant for the spell autocalc code and selection order
         /// for heads/hairs in the character creation)
