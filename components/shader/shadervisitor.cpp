@@ -557,19 +557,26 @@ namespace Shader
             updateAddedState(*writableUserData, addedState);
         }
 
-        if (auto partsys = dynamic_cast<osgParticle::ParticleSystem*>(&node))
-        {
-            defineMap["softParticles"] = "1";
+        bool softParticles = false;
 
-            auto depth = SceneUtil::createDepth();
-            depth->setWriteMask(false);
-            writableStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-            writableStateSet->addUniform(new osg::Uniform("particleSize", partsys->getDefaultParticleTemplate().getSizeRange().maximum));
-            writableStateSet->addUniform(new osg::Uniform("opaqueDepthTex", 2));
-            writableStateSet->setTextureAttributeAndModes(2, mOpaqueDepthTex, osg::StateAttribute::ON);
+        if (mOpaqueDepthTex)
+        {
+            auto partsys = dynamic_cast<osgParticle::ParticleSystem*>(&node);
+
+            if (partsys)
+            {
+                softParticles = true;
+
+                auto depth = SceneUtil::createDepth();
+                depth->setWriteMask(false);
+                writableStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                writableStateSet->addUniform(new osg::Uniform("particleSize", partsys->getDefaultParticleTemplate().getSizeRange().maximum));
+                writableStateSet->addUniform(new osg::Uniform("opaqueDepthTex", 2));
+                writableStateSet->setTextureAttributeAndModes(2, mOpaqueDepthTex, osg::StateAttribute::ON);
+            }
         }
-        else
-            defineMap["softParticles"] = "0";
+
+        defineMap["softParticles"] = softParticles ? "1" : "0";
 
         std::string shaderPrefix;
         if (!node.getUserValue("shaderPrefix", shaderPrefix))

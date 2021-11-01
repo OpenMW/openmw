@@ -78,6 +78,7 @@
     Feature #6017: Separate persistent and temporary cell references when saving
     Feature #6032: Reverse-z depth buffer
     Feature #6078: First person should not clear depth buffer
+    Feature #6128: Soft Particles
     Feature #6161: Refactor Sky to use shaders and GLES/GL3 friendly
     Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Feature #6199: Support FBO Rendering
