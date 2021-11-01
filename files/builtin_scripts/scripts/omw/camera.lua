@@ -19,7 +19,7 @@ local noStandingPreview = 0
 local noHeadBobbing = 0
 local noZoom = 0
 
-function init()
+local function init()
     camera.allowCharacterDeferredRotation(settings._getBoolFromSettingsCfg('Camera', 'deferred preview rotation'))
     if camera.getMode() == MODE.FirstPerson then
         primaryMode = MODE.FirstPerson
@@ -171,32 +171,54 @@ end
 
 return {
     interfaceName = 'Camera',
+    --- @module Camera
+    -- @usage require('openmw.interfaces').Camera
     interface = {
+        --- @field [parent=#Camera] #number version Interface version
         version = 0,
 
+        --- @function [parent=#Camera] getPrimaryMode Returns primary mode (MODE.FirstPerson or MODE.ThirdPerson).
         getPrimaryMode = function() return primaryMode end,
+        --- @function [parent=#Camera] getBaseThirdPersonDistance
         getBaseThirdPersonDistance = function() return third_person.baseDistance end,
+        --- @function [parent=#Camera] setBaseThirdPersonDistance
         setBaseThirdPersonDistance = function(v) third_person.baseDistance = v end,
+        --- @function [parent=#Camera] getTargetThirdPersonDistance
         getTargetThirdPersonDistance = function() return third_person.preferredDistance end,
 
+        --- @function [parent=#Camera] isModeControlEnabled
         isModeControlEnabled = function() return noModeControl == 0 end,
+        --- @function [parent=#Camera] disableModeControl
         disableModeControl = function() noModeControl = noModeControl + 1 end,
+        --- @function [parent=#Camera] enableModeControl
         enableModeControl = function() noModeControl = math.max(0, noModeControl - 1) end,
 
+        --- @function [parent=#Camera] isStandingPreviewEnabled
         isStandingPreviewEnabled = function() return previewIfStandSill and noStandingPreview == 0 end,
+        --- @function [parent=#Camera] disableStandingPreview
         disableStandingPreview = function() noStandingPreview = noStandingPreview + 1 end,
+        --- @function [parent=#Camera] enableStandingPreview
         enableStandingPreview = function() noStandingPreview = math.max(0, noStandingPreview - 1) end,
 
+        --- @function [parent=#Camera] isHeadBobbingEnabled
         isHeadBobbingEnabled = function() return head_bobbing.enabled and noHeadBobbing == 0 end,
+        --- @function [parent=#Camera] disableHeadBobbing
         disableHeadBobbing = function() noHeadBobbing = noHeadBobbing + 1 end,
+        --- @function [parent=#Camera] enableHeadBobbing
         enableHeadBobbing = function() noHeadBobbing = math.max(0, noHeadBobbing - 1) end,
 
+        --- @function [parent=#Camera] isZoomEnabled
         isZoomEnabled = function() return noZoom == 0 end,
+        --- @function [parent=#Camera] disableZoom
         disableZoom = function() noZoom = noZoom + 1 end,
+        --- @function [parent=#Camera] enableZoom
         enableZoom = function() noZoom = math.max(0, noZoom - 1) end,
 
+        --- @function [parent=#Camera] isThirdPersonOffsetControlEnabled
         isThirdPersonOffsetControlEnabled = function() return third_person.noOffsetControl == 0 end,
+        --- @function [parent=#Camera] disableThirdPersonOffsetControl
         disableThirdPersonOffsetControl = function() third_person.noOffsetControl = third_person.noOffsetControl + 1 end,
+        --- @function [parent=#Camera] enableThirdPersonOffsetControl
         enableThirdPersonOffsetControl = function() third_person.noOffsetControl = math.max(0, third_person.noOffsetControl - 1) end,
     },
     engineHandlers = {
