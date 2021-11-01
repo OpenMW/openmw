@@ -18,8 +18,6 @@ namespace MWRender
         : mRootNode(root)
         , mEnabled(enabled)
         , mId(std::numeric_limits<std::size_t>::max())
-        , mGeneration(0)
-        , mRevision(0)
     {
     }
 
@@ -39,15 +37,14 @@ namespace MWRender
         return mEnabled;
     }
 
-    void NavMesh::update(const dtNavMesh& navMesh, const std::size_t id,
-        const std::size_t generation, const std::size_t revision, const DetourNavigator::Settings& settings)
+    void NavMesh::update(const dtNavMesh& navMesh, std::size_t id, const DetourNavigator::Version& version,
+        const DetourNavigator::Settings& settings)
     {
-        if (!mEnabled || (mGroup && mId == id && mGeneration == generation && mRevision == revision))
+        if (!mEnabled || (mGroup && mId == id && mVersion == version))
             return;
 
         mId = id;
-        mGeneration = generation;
-        mRevision = revision;
+        mVersion = version;
         if (mGroup)
             mRootNode->removeChild(mGroup);
         mGroup = SceneUtil::createNavMeshGroup(navMesh, settings);

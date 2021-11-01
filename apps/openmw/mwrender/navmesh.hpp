@@ -1,6 +1,8 @@
 #ifndef OPENMW_MWRENDER_NAVMESH_H
 #define OPENMW_MWRENDER_NAVMESH_H
 
+#include <components/detournavigator/version.hpp>
+
 #include <osg/ref_ptr>
 
 #include <cstddef>
@@ -28,8 +30,8 @@ namespace MWRender
 
         bool toggle();
 
-        void update(const dtNavMesh& navMesh, const std::size_t number, const std::size_t generation,
-                    const std::size_t revision, const DetourNavigator::Settings& settings);
+        void update(const dtNavMesh& navMesh, std::size_t id, const DetourNavigator::Version& version,
+            const DetourNavigator::Settings& settings);
 
         void reset();
 
@@ -46,8 +48,7 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mRootNode;
         bool mEnabled;
         std::size_t mId;
-        std::size_t mGeneration;
-        std::size_t mRevision;
+        DetourNavigator::Version mVersion;
         osg::ref_ptr<osg::Group> mGroup;
     };
 }
