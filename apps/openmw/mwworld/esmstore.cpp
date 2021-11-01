@@ -338,7 +338,7 @@ void ESMStore::countAllCellrefs()
 int ESMStore::getRefCount(const std::string& id) const
 {
     const std::string lowerId = Misc::StringUtils::lowerCase(id);
-    auto it = mRefCount.find(id);
+    auto it = mRefCount.find(lowerId);
     if(it == mRefCount.end())
         return 0;
     return it->second;
