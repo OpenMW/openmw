@@ -4,6 +4,7 @@
 #include <osg/ref_ptr>
 
 class dtNavMesh;
+struct dtMeshTile;
 
 namespace osg
 {
@@ -17,7 +18,8 @@ namespace DetourNavigator
 
 namespace SceneUtil
 {
-    osg::ref_ptr<osg::Group> createNavMeshGroup(const dtNavMesh& navMesh, const DetourNavigator::Settings& settings);
+    osg::ref_ptr<osg::Group> createNavMeshTileGroup(const dtNavMesh& navMesh, const dtMeshTile& meshTile,
+        const DetourNavigator::Settings& settings);
 }
 
 #endif

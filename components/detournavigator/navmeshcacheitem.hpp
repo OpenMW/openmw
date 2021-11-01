@@ -124,6 +124,8 @@ namespace DetourNavigator
         }
     };
 
+    const dtMeshTile* getTile(const dtNavMesh& navMesh, const TilePosition& position);
+
     class NavMeshCacheItem
     {
     public:
@@ -145,10 +147,25 @@ namespace DetourNavigator
 
         UpdateNavMeshStatus removeTile(const TilePosition& position);
 
+        template <class Function>
+        void forEachUsedTile(Function&& function) const
+        {
+            for (const auto& [position, tile] : mUsedTiles)
+                if (const dtMeshTile* meshTile = getTile(*mImpl, position))
+                    function(position, tile.mVersion, *meshTile);
+        }
+
     private:
+        struct Tile
+        {
+            Version mVersion;
+            NavMeshTilesCache::Value mCached;
+            NavMeshData mData;
+        };
+
         NavMeshPtr mImpl;
         Version mVersion;
-        std::map<TilePosition, std::pair<NavMeshTilesCache::Value, NavMeshData>> mUsedTiles;
+        std::map<TilePosition, Tile> mUsedTiles;
     };
 
     using GuardedNavMeshCacheItem = Misc::ScopeGuarded<NavMeshCacheItem>;

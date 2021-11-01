@@ -2,10 +2,12 @@
 #define OPENMW_MWRENDER_NAVMESH_H
 
 #include <components/detournavigator/version.hpp>
+#include <components/detournavigator/tileposition.hpp>
 
 #include <osg/ref_ptr>
 
 #include <cstddef>
+#include <map>
 
 class dtNavMesh;
 
@@ -17,6 +19,7 @@ namespace osg
 
 namespace DetourNavigator
 {
+    class NavMeshCacheItem;
     struct Settings;
 }
 
@@ -30,7 +33,7 @@ namespace MWRender
 
         bool toggle();
 
-        void update(const dtNavMesh& navMesh, std::size_t id, const DetourNavigator::Version& version,
+        void update(const DetourNavigator::NavMeshCacheItem& navMesh, std::size_t id,
             const DetourNavigator::Settings& settings);
 
         void reset();
@@ -45,11 +48,17 @@ namespace MWRender
         }
 
     private:
+        struct Tile
+        {
+            DetourNavigator::Version mVersion;
+            osg::ref_ptr<osg::Group> mGroup;
+        };
+
         osg::ref_ptr<osg::Group> mRootNode;
         bool mEnabled;
         std::size_t mId;
         DetourNavigator::Version mVersion;
-        osg::ref_ptr<osg::Group> mGroup;
+        std::map<DetourNavigator::TilePosition, Tile> mTiles;
     };
 }
 
