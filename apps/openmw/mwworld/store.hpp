@@ -8,6 +8,9 @@
 #include <unordered_map>
 #include <set>
 
+#include <components/esm/records.hpp>
+#include <components/misc/stringops.hpp>
+
 namespace ESM
 {
     struct Land;
