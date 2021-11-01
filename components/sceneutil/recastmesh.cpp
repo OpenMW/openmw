@@ -1,5 +1,6 @@
 #include "recastmesh.hpp"
 #include "detourdebugdraw.hpp"
+#include "depth.hpp"
 
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/recastmesh.hpp>
@@ -9,6 +10,7 @@
 
 #include <osg/Group>
 #include <osg/Material>
+#include <osg/PolygonOffset>
 
 #include <algorithm>
 #include <vector>
@@ -69,7 +71,14 @@ namespace SceneUtil
 
         osg::ref_ptr<osg::Material> material = new osg::Material;
         material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-        group->getOrCreateStateSet()->setAttribute(material);
+
+        const float polygonOffsetFactor = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
+        const float polygonOffsetUnits = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
+        osg::ref_ptr<osg::PolygonOffset> polygonOffset = new osg::PolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
+
+        osg::ref_ptr<osg::StateSet> stateSet = group->getOrCreateStateSet();
+        stateSet->setAttribute(material);
+        stateSet->setAttributeAndModes(polygonOffset);
 
         return group;
     }
