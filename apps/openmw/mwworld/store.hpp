@@ -8,8 +8,6 @@
 #include <unordered_map>
 #include <set>
 
-#include "recordcmp.hpp"
-
 namespace ESM
 {
     struct Land;
