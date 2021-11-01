@@ -105,14 +105,15 @@ namespace
         dd->end();
     }
 
-    // Copied from https://github.com/recastnavigation/recastnavigation/blob/c5cbd53024c8a9d8d097a4371215e3342d2fdc87/DebugUtils/Source/DetourDebugDraw.cpp#L120-L235
+    // Based on https://github.com/recastnavigation/recastnavigation/blob/c5cbd53024c8a9d8d097a4371215e3342d2fdc87/DebugUtils/Source/DetourDebugDraw.cpp#L120-L235
     void drawMeshTile(duDebugDraw* dd, const dtNavMesh& mesh, const dtNavMeshQuery* query,
         const dtMeshTile* tile, unsigned char flags)
     {
         dtPolyRef base = mesh.getPolyRefBase(tile);
 
         int tileNum = mesh.decodePolyIdTile(base);
-        const unsigned int tileColor = duIntToCol(tileNum, 128);
+        const unsigned int tileNumColor = duIntToCol(tileNum, 128);
+        const unsigned alpha = tile->header->userId == 0 ? 64 : 128;
 
         dd->depthMask(false);
 
@@ -127,13 +128,13 @@ namespace
 
             unsigned int col;
             if (query && query->isInClosedList(base | (dtPolyRef)i))
-                col = duRGBA(255,196,0,64);
+                col = duRGBA(255, 196, 0, alpha);
             else
             {
                 if (flags & DU_DRAWNAVMESH_COLOR_TILES)
-                    col = tileColor;
+                    col = duTransCol(tileNumColor, alpha);
                 else
-                    col = duTransCol(dd->areaToCol(p->getArea()), 64);
+                    col = duTransCol(dd->areaToCol(p->getArea()), alpha);
             }
 
             for (int j = 0; j < pd->triCount; ++j)
