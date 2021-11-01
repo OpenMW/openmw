@@ -945,24 +945,6 @@ namespace MWPhysics
     {
     }
 
-    void ActorFrameData::updatePosition(Actor& actor, btCollisionWorld* world)
-    {
-        actor.applyOffsetChange();
-        mPosition = actor.getPosition();
-        if (mWaterCollision && mPosition.z() < mWaterlevel && actor.canMoveToWaterSurface(mWaterlevel, world))
-        {
-            MWBase::Environment::get().getWorld()->moveObjectBy(actor.getPtr(), osg::Vec3f(0, 0, mWaterlevel - mPosition.z()));
-            actor.applyOffsetChange();
-            mPosition = actor.getPosition();
-        }
-        mOldHeight = mPosition.z();
-        const auto rotation = actor.getPtr().getRefData().getPosition().asRotationVec3();
-        mRotation = osg::Vec2f(rotation.x(), rotation.z());
-        mInertia = actor.getInertialForce();
-        mStuckFrames = actor.getStuckFrames();
-        mLastStuckPosition = actor.getLastStuckPosition();
-    }
-
     ProjectileFrameData::ProjectileFrameData(Projectile& projectile)
         : mPosition(projectile.getPosition())
         , mMovement(projectile.velocity())
