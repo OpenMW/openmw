@@ -1006,10 +1006,12 @@ namespace MWWorld
         for (auto & [_, dial] : mStatic)
             dial.clearDeletedInfos();
 
+        // TODO: verify and document this inconsistent behaviour 
         mShared.clear();
         mShared.reserve(mStatic.size());
         for (auto & [_, dial] : mStatic)
             mShared.push_back(&dial);
+        std::sort(mShared.begin(), mShared.end(), RecordCmp<ESM::Dialogue>);
     }
 
     template <>
