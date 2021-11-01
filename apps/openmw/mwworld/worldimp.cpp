@@ -1313,7 +1313,7 @@ namespace MWWorld
              * currently it's done so for rotating the camera, which needs
              * clamping.
              */
-            objRot[0] = osg::clampBetween(objRot[0], -osg::PIf / 2, osg::PIf / 2);
+            objRot[0] = osg::clampBetween<float>(objRot[0], -osg::PI_2, osg::PI_2);
             objRot[1] = Misc::normalizeAngle(objRot[1]);
             objRot[2] = Misc::normalizeAngle(objRot[2]);
         }
