@@ -56,7 +56,7 @@ namespace SceneUtil
         mMode = mode;
         mVertices = new osg::Vec3Array;
         mColors = new osg::Vec4Array;
-        mSize = size * mRecastInvertedScaleFactor;
+        mSize = size;
     }
 
     void DebugDraw::begin(duDebugDrawPrimitives prim, float size)
@@ -93,7 +93,8 @@ namespace SceneUtil
         stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         stateSet->setMode(GL_DEPTH, (mDepthMask ? osg::StateAttribute::ON : osg::StateAttribute::OFF));
         stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        stateSet->setAttributeAndModes(new osg::LineWidth(mSize));
+        // TODO: mSize has to be used for the line width, but not for glLineWidth because of the spec limitations
+        stateSet->setAttributeAndModes(new osg::LineWidth());
         stateSet->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);

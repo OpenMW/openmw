@@ -15,7 +15,7 @@ namespace SceneUtil
     class DebugDraw : public duDebugDraw
     {
     public:
-        DebugDraw(osg::Group& group, const osg::Vec3f& shift, float recastInvertedScaleFactor);
+        explicit DebugDraw(osg::Group& group, const osg::Vec3f& shift, float recastInvertedScaleFactor);
 
         void depthMask(bool state) override;
 

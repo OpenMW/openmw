@@ -12,7 +12,7 @@ namespace SceneUtil
 {
     osg::ref_ptr<osg::Group> createNavMeshGroup(const dtNavMesh& navMesh, const DetourNavigator::Settings& settings)
     {
-        const osg::ref_ptr<osg::Group> group(new osg::Group);
+        osg::ref_ptr<osg::Group> group(new osg::Group);
         DebugDraw debugDraw(*group, osg::Vec3f(0, 0, 10), 1.0f / settings.mRecastScaleFactor);
         dtNavMeshQuery navMeshQuery;
         navMeshQuery.init(&navMesh, settings.mMaxNavMeshQueryNodes);
