@@ -90,7 +90,7 @@ namespace MWWorld
         /// Validate entries in store after setup
         void validate();
 
-        void countAllCellrefs();
+        void countAllCellRefs();
 
         template<class T>
         void removeMissingObjects(Store<T>& store);
