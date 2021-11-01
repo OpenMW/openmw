@@ -29,6 +29,7 @@ namespace
 
     void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, std::vector<ESM::ESMReader>& readers)
     {
+        // TODO: we have many near identical copies of this code.
         for (size_t i = 0; i < cell.mContextList.size(); i++)
         {
             size_t index = cell.mContextList[i].index;
@@ -301,12 +302,14 @@ void ESMStore::setUp(bool validateRecords)
     if (validateRecords)
     {
         validate();
-        countRecords();
+        countAllCellrefs();
     }
 }
 
-void ESMStore::countRecords()
+void ESMStore::countAllCellrefs()
 {
+    // TODO: We currently need to read entire files here again.
+    // We should consider consolidating or deferring this reading.
     if(!mRefCount.empty())
         return;
     std::vector<Ref> refs;
@@ -324,6 +327,8 @@ void ESMStore::countRecords()
         if (value.mRefID != deletedRefID)
         {
             std::string& refId = refIDs[value.mRefID];
+            // We manually lower case IDs here for the time being to improve performance.
+            Misc::StringUtils::lowerCaseInPlace(refId);
             ++mRefCount[std::move(refId)];
         }
     };
@@ -332,6 +337,7 @@ void ESMStore::countRecords()
 
 int ESMStore::getRefCount(const std::string& id) const
 {
+    const std::string lowerId = Misc::StringUtils::lowerCase(id);
     auto it = mRefCount.find(id);
     if(it == mRefCount.end())
         return 0;
