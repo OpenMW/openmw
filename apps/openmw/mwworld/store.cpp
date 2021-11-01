@@ -1011,7 +1011,7 @@ namespace MWWorld
         mShared.reserve(mStatic.size());
         for (auto & [_, dial] : mStatic)
             mShared.push_back(&dial);
-        std::sort(mShared.begin(), mShared.end(), [](const ESM::Dialogue& l, const ESM::Dialogue& r) -> bool { return l->mId < r->mId; });
+        std::sort(mShared.begin(), mShared.end(), [](const ESM::Dialogue* l, const ESM::Dialogue* r) -> bool { return l->mId < r->mId; });
     }
 
     template <>
