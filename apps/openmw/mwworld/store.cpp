@@ -11,6 +11,8 @@
 #include <iterator>
 #include <stdexcept>
 
+#include "recordcmp.hpp"
+
 namespace MWWorld
 {
     RecordId::RecordId(const std::string &id, bool isDeleted)
