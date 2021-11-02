@@ -281,7 +281,6 @@ private:
 
   Header mHeader;
 
-  std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
 
   size_t mFileSize;
