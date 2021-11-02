@@ -82,10 +82,7 @@ public:
   void setIndex(const int index) { mCtx.index = index;}
   int getIndex() {return mCtx.index;}
 
-  void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
-  std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
-
-  void addParentFileIndex(int index) { mCtx.parentFileIndices.push_back(index); }
+  void resolveParentFileIndices(const std::vector<ESMReader>& files);
   const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
 
   /*************************************************************************
