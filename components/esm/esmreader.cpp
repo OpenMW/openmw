@@ -20,7 +20,6 @@ ESM_Context ESMReader::getContext()
 ESMReader::ESMReader()
     : mRecordFlags(0)
     , mBuffer(50*1024)
-    , mGlobalReaderList(nullptr)
     , mEncoder(nullptr)
     , mFileSize(0)
 {
