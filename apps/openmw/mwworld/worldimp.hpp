@@ -157,6 +157,7 @@ namespace MWWorld
             void updateNavigatorObject(const MWPhysics::Object& object);
 
             void ensureNeededRecords();
+            void validateMasterFiles(const std::vector<ESM::ESMReader>& readers);
 
             void fillGlobalVariables();
 
