@@ -1,2 +1,2 @@
 parse_cmake
-sphinx>=1.7.0
+sphinx==1.8.5
