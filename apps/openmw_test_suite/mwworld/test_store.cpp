@@ -38,7 +38,6 @@ struct ContentFileTest : public ::testing::Test
             ESM::ESMReader lEsm;
             lEsm.setEncoder(nullptr);
             lEsm.setIndex(index);
-            lEsm.setGlobalReaderList(&readerList);
             lEsm.open(mContentFile.string());
             readerList[index] = lEsm;
             mEsmStore.load(readerList[index], &dummyListener);
