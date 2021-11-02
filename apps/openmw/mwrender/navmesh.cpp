@@ -5,8 +5,10 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/detournavigator/navmeshcacheitem.hpp>
+#include <components/sceneutil/detourdebugdraw.hpp>
 
 #include <osg/PositionAttitudeTransform>
+#include <osg/StateSet>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -17,6 +19,8 @@ namespace MWRender
 {
     NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, bool enabled)
         : mRootNode(root)
+        , mGroupStateSet(SceneUtil::makeNavMeshTileStateSet())
+        , mDebugDrawStateSet(SceneUtil::DebugDraw::makeStateSet())
         , mEnabled(enabled)
         , mId(std::numeric_limits<std::size_t>::max())
     {
@@ -64,7 +68,8 @@ namespace MWRender
                 return;
             if (tile.mGroup != nullptr)
                 mRootNode->removeChild(tile.mGroup);
-            tile.mGroup = SceneUtil::createNavMeshTileGroup(navMesh.getImpl(), meshTile, settings);
+            tile.mGroup = SceneUtil::createNavMeshTileGroup(navMesh.getImpl(), meshTile, settings,
+                                                            mGroupStateSet, mDebugDrawStateSet);
             if (tile.mGroup == nullptr)
                 return;
             MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(tile.mGroup, "debug");

@@ -47,7 +47,7 @@ namespace SceneUtil
         using namespace DetourNavigator;
 
         const osg::ref_ptr<osg::Group> group(new osg::Group);
-        DebugDraw debugDraw(*group, osg::Vec3f(0, 0, 0), 1.0f);
+        DebugDraw debugDraw(*group, DebugDraw::makeStateSet(), osg::Vec3f(0, 0, 0), 1.0f);
         const DetourNavigator::Mesh& mesh = recastMesh.getMesh();
         std::vector<int> indices = mesh.getIndices();
         std::vector<float> vertices = mesh.getVertices();

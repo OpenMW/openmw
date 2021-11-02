@@ -43,7 +43,7 @@ namespace SceneUtil
 
         const osg::ref_ptr<osg::Group> group(new osg::Group);
 
-        DebugDraw debugDraw(*group, osg::Vec3f(0, 0, 0), 1);
+        DebugDraw debugDraw(*group, DebugDraw::makeStateSet(), osg::Vec3f(0, 0, 0), 1);
 
         const auto agentRadius = halfExtents.x();
         const auto agentHeight = 2.0f * halfExtents.z();

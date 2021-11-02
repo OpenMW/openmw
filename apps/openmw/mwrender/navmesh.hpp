@@ -15,6 +15,7 @@ namespace osg
 {
     class Group;
     class Geometry;
+    class StateSet;
 }
 
 namespace DetourNavigator
@@ -55,6 +56,8 @@ namespace MWRender
         };
 
         osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<osg::StateSet> mGroupStateSet;
+        osg::ref_ptr<osg::StateSet> mDebugDrawStateSet;
         bool mEnabled;
         std::size_t mId;
         DetourNavigator::Version mVersion;

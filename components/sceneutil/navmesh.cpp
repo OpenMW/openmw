@@ -229,18 +229,8 @@ namespace
 
 namespace SceneUtil
 {
-    osg::ref_ptr<osg::Group> createNavMeshTileGroup(const dtNavMesh& navMesh, const dtMeshTile& meshTile,
-        const DetourNavigator::Settings& settings)
+    osg::ref_ptr<osg::StateSet> makeNavMeshTileStateSet()
     {
-        if (meshTile.header == nullptr)
-            return nullptr;
-
-        osg::ref_ptr<osg::Group> group(new osg::Group);
-        DebugDraw debugDraw(*group, osg::Vec3f(0, 0, 10), 1.0f / settings.mRecastScaleFactor);
-        dtNavMeshQuery navMeshQuery;
-        navMeshQuery.init(&navMesh, settings.mMaxNavMeshQueryNodes);
-        drawMeshTile(&debugDraw, navMesh, &navMeshQuery, &meshTile, DU_DRAWNAVMESH_OFFMESHCONS | DU_DRAWNAVMESH_CLOSEDLIST);
-
         osg::ref_ptr<osg::Material> material = new osg::Material;
         material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
 
@@ -248,9 +238,26 @@ namespace SceneUtil
         const float polygonOffsetUnits = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
         osg::ref_ptr<osg::PolygonOffset> polygonOffset = new osg::PolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
 
-        osg::ref_ptr<osg::StateSet> stateSet = group->getOrCreateStateSet();
+        osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
         stateSet->setAttribute(material);
         stateSet->setAttributeAndModes(polygonOffset);
+        return stateSet;
+    }
+
+    osg::ref_ptr<osg::Group> createNavMeshTileGroup(const dtNavMesh& navMesh, const dtMeshTile& meshTile,
+        const DetourNavigator::Settings& settings, const osg::ref_ptr<osg::StateSet>& groupStateSet,
+        const osg::ref_ptr<osg::StateSet>& debugDrawStateSet)
+    {
+        if (meshTile.header == nullptr)
+            return nullptr;
+
+        osg::ref_ptr<osg::Group> group(new osg::Group);
+        group->setStateSet(groupStateSet);
+        constexpr float shift = 10.0f;
+        DebugDraw debugDraw(*group, debugDrawStateSet, osg::Vec3f(0, 0, shift), 1.0f / settings.mRecastScaleFactor);
+        dtNavMeshQuery navMeshQuery;
+        navMeshQuery.init(&navMesh, settings.mMaxNavMeshQueryNodes);
+        drawMeshTile(&debugDraw, navMesh, &navMeshQuery, &meshTile, DU_DRAWNAVMESH_OFFMESHCONS | DU_DRAWNAVMESH_CLOSEDLIST);
 
         return group;
     }
