@@ -58,7 +58,7 @@ void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& star
         doing_short_trace = true;
     }
 
-    auto traceCallback = sweepHelper(actor, btstart, btend, world, false);
+    const auto traceCallback = sweepHelper(actor, btstart, btend, world, false);
 
     // Copy the hit data over to our trace results struct:
     if(traceCallback.hasHit())
@@ -77,7 +77,7 @@ void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& star
         if(doing_short_trace)
         {
             btend = Misc::Convert::toBullet(end);
-            auto newTraceCallback = sweepHelper(actor, btstart, btend, world, false);
+            const auto newTraceCallback = sweepHelper(actor, btstart, btend, world, false);
 
             if(newTraceCallback.hasHit())
             {
@@ -100,11 +100,11 @@ void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& star
 
 void ActorTracer::findGround(const Actor* actor, const osg::Vec3f& start, const osg::Vec3f& end, const btCollisionWorld* world)
 {
-    auto newTraceCallback = sweepHelper(actor->getCollisionObject(), Misc::Convert::toBullet(start), Misc::Convert::toBullet(end), world, true);
-    if(newTraceCallback.hasHit())
+    const auto traceCallback = sweepHelper(actor->getCollisionObject(), Misc::Convert::toBullet(start), Misc::Convert::toBullet(end), world, true);
+    if(traceCallback.hasHit())
     {
-        mFraction = newTraceCallback.m_closestHitFraction;
-        mPlaneNormal = Misc::Convert::toOsg(newTraceCallback.m_hitNormalWorld);
+        mFraction = traceCallback.m_closestHitFraction;
+        mPlaneNormal = Misc::Convert::toOsg(traceCallback.m_hitNormalWorld);
         mEndPos = (end-start)*mFraction + start;
     }
     else
