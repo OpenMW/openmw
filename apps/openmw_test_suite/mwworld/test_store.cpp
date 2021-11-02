@@ -29,9 +29,6 @@ struct ContentFileTest : public ::testing::Test
         readContentFiles();
 
         // load the content files
-        std::vector<ESM::ESMReader> readerList;
-        readerList.resize(mContentFiles.size());
-
         int index=0;
         for (const auto & mContentFile : mContentFiles)
         {
@@ -39,8 +36,7 @@ struct ContentFileTest : public ::testing::Test
             lEsm.setEncoder(nullptr);
             lEsm.setIndex(index);
             lEsm.open(mContentFile.string());
-            readerList[index] = lEsm;
-            mEsmStore.load(readerList[index], &dummyListener);
+            mEsmStore.load(lEsm, &dummyListener);
 
             ++index;
         }
@@ -253,9 +249,6 @@ TEST_F(StoreTest, delete_test)
     record.mId = recordId;
 
     ESM::ESMReader reader;
-    std::vector<ESM::ESMReader> readerList;
-    readerList.push_back(reader);
-    reader.setGlobalReaderList(&readerList);
 
     // master file inserts a record
     Files::IStreamPtr file = getEsmFile(record, false);
@@ -296,9 +289,6 @@ TEST_F(StoreTest, overwrite_test)
     record.mId = recordId;
 
     ESM::ESMReader reader;
-    std::vector<ESM::ESMReader> readerList;
-    readerList.push_back(reader);
-    reader.setGlobalReaderList(&readerList);
 
     // master file inserts a record
     Files::IStreamPtr file = getEsmFile(record, false);
