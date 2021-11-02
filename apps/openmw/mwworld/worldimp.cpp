@@ -415,7 +415,7 @@ namespace MWWorld
     {
         for (const auto& esm : readers)
         {
-            assert(esm.getGameFiles().size() == esm.getParentFileIndices.size());
+            assert(esm.getGameFiles().size() == esm.getParentFileIndices().size());
             for (unsigned int i=0; i<esm.getParentFileIndices().size(); ++i)
             {
                 if (!esm.isValidParentFileIndex(i))
