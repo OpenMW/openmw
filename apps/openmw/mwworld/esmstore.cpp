@@ -29,7 +29,7 @@ namespace
 
     void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, std::vector<ESM::ESMReader>& readers)
     {
-        // TODO: we have many near identical copies of this code.
+        // TODO: we have many similar copies of this code.
         for (size_t i = 0; i < cell.mContextList.size(); i++)
         {
             size_t index = cell.mContextList[i].index;
