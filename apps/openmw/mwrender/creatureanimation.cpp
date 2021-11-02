@@ -139,20 +139,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         bonename = "Shield Bone";
         if (item.getType() == ESM::Armor::sRecordId)
         {
-            // Shield body part model should be used if possible.
-            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            for (const auto& part : item.get<ESM::Armor>()->mBase->mParts.mParts)
-            {
-                // Assume all creatures use the male mesh.
-                if (part.mPart != ESM::PRT_Shield || part.mMale.empty())
-                    continue;
-                const ESM::BodyPart *bodypart = store.get<ESM::BodyPart>().search(part.mMale);
-                if (bodypart && bodypart->mData.mType == ESM::BodyPart::MT_Armor && !bodypart->mModel.empty())
-                {
-                    itemModel = "meshes\\" + bodypart->mModel;
-                    break;
-                }
-            }
+            itemModel = getShieldMesh(item, false);
         }
     }
 
