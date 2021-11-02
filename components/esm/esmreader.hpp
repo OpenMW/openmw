@@ -83,10 +83,12 @@ public:
   int getIndex() {return mCtx.index;}
 
   // Assign parent esX files by tracking their indices in the global list of
-  // all files/readers used by the engine. This is required for correct RefNums
+  // all files/readers used by the engine. This is required for correct adjustRefNum() results
   // as required for handling moved, deleted and edited CellRefs.
+  /// @note Does not validate.
   void resolveParentFileIndices(const std::vector<ESMReader>& files);
   const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
+  bool isValidParentFileIndex(unsigned int i) const { return i != getIndex(); }
 
   /*************************************************************************
    *
