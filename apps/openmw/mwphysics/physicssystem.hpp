@@ -76,7 +76,6 @@ namespace MWPhysics
     struct ActorFrameData
     {
         ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel);
-        void  updatePosition(Actor& actor, btCollisionWorld* world);
         osg::Vec3f mPosition;
         osg::Vec3f mInertia;
         const btCollisionObject* mStandingOn;
