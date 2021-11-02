@@ -1,5 +1,8 @@
 #include "esmreader.hpp"
 
+#include <boost/filesystem/path.hpp>
+#include <components/misc/stringops.hpp>
+
 #include <stdexcept>
 
 namespace ESM
@@ -53,6 +56,31 @@ void ESMReader::clearCtx()
    mCtx.subCached = false;
    mCtx.recName.clear();
    mCtx.subName.clear();
+}
+
+void ESMReader::resolveParentFileIndices(const std::vector<ESMReader>& allPlugins)
+{
+    // Assign parent esX files by tracking their indices in the global list of
+    // all files/readers used by the engine. This is required for correct RefNums
+    // as required for handling moved, deleted and edited CellRefs.
+    const std::vector<ESM::Header::MasterData> &masters = getGameFiles();
+    for (size_t j = 0; j < masters.size(); j++) {
+        const ESM::Header::MasterData &mast = masters[j];
+        std::string fname = mast.name;
+        int index = getIndex(); 
+        for (int i = 0; i < getIndex(); i++) {
+            ESM::ESMReader& reader = allPlugins.at(i);
+            if (reader.getFileSize() == 0)
+                continue;  // Content file in non-ESM format
+            const std::string candidate = reader.getContext().filename;
+            std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
+            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
+                index = i;
+                break;
+            }
+        }
+        addParentFileIndex(index);
+    }
 }
 
 void ESMReader::openRaw(Files::IStreamPtr _esm, const std::string& name)
