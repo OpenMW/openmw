@@ -143,8 +143,8 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     {
         if (findBoundingBox(node, filename))
         {
-            const btVector3 extents = Misc::Convert::toBullet(mShape->mCollisionBox.extents);
-            const btVector3 center = Misc::Convert::toBullet(mShape->mCollisionBox.center);
+            const btVector3 extents = Misc::Convert::toBullet(mShape->mCollisionBox.mExtents);
+            const btVector3 center = Misc::Convert::toBullet(mShape->mCollisionBox.mCenter);
             std::unique_ptr<btCompoundShape> compound (new btCompoundShape);
             std::unique_ptr<btBoxShape> boxShape(new btBoxShape(extents));
             btTransform transform = btTransform::getIdentity();
@@ -152,7 +152,7 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
             compound->addChildShape(transform, boxShape.get());
             boxShape.release();
 
-            mShape->mCollisionShape = compound.release();
+            mShape->mCollisionShape.reset(compound.release());
             return mShape;
         }
     }
@@ -179,17 +179,17 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
             child.release();
             mStaticMesh.release();
         }
-        mShape->mCollisionShape = mCompoundShape.release();
+        mShape->mCollisionShape = std::move(mCompoundShape);
     }
     else if (mStaticMesh)
     {
-        mShape->mCollisionShape = new Resource::TriangleMeshShape(mStaticMesh.get(), true);
+        mShape->mCollisionShape.reset(new Resource::TriangleMeshShape(mStaticMesh.get(), true));
         mStaticMesh.release();
     }
 
     if (mAvoidStaticMesh)
     {
-        mShape->mAvoidCollisionShape = new Resource::TriangleMeshShape(mAvoidStaticMesh.get(), false);
+        mShape->mAvoidCollisionShape.reset(new Resource::TriangleMeshShape(mAvoidStaticMesh.get(), false));
         mAvoidStaticMesh.release();
     }
 
@@ -206,8 +206,8 @@ bool BulletNifLoader::findBoundingBox(const Nif::Node* node, const std::string& 
         switch (type)
         {
             case Nif::NiBoundingVolume::Type::BOX_BV:
-                mShape->mCollisionBox.extents = node->bounds.box.extents;
-                mShape->mCollisionBox.center = node->bounds.box.center;
+                mShape->mCollisionBox.mExtents = node->bounds.box.extents;
+                mShape->mCollisionBox.mCenter = node->bounds.box.center;
                 break;
             default:
             {

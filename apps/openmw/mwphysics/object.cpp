@@ -24,7 +24,7 @@ namespace MWPhysics
         , mTaskScheduler(scheduler)
     {
         mPtr = ptr;
-        mCollisionObject = BulletHelpers::makeCollisionObject(mShapeInstance->getCollisionShape(),
+        mCollisionObject = BulletHelpers::makeCollisionObject(mShapeInstance->mCollisionShape.get(),
             Misc::Convert::toBullet(mPosition), Misc::Convert::toBullet(rotation));
         mCollisionObject->setUserPointer(this);
         mShapeInstance->setLocalScaling(mScale);
@@ -109,9 +109,9 @@ namespace MWPhysics
         if (mShapeInstance->mAnimatedShapes.empty())
             return false;
 
-        assert (mShapeInstance->getCollisionShape()->isCompound());
+        assert (mShapeInstance->mCollisionShape->isCompound());
 
-        btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
+        btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->mCollisionShape.get());
         for (const auto& [recIndex, shapeIndex] : mShapeInstance->mAnimatedShapes)
         {
             auto nodePathFound = mRecIndexToNodePath.find(recIndex);
