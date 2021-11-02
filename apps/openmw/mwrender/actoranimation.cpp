@@ -11,6 +11,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 
+#include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/visitor.hpp>
@@ -82,6 +83,22 @@ PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::st
         mGlowUpdater = SceneUtil::addEnchantedGlow(instance, mResourceSystem, *glowColor);
 
     return PartHolderPtr(new PartHolder(instance));
+}
+
+osg::ref_ptr<osg::Node> ActorAnimation::attach(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool isLight)
+{
+    osg::ref_ptr<const osg::Node> templateNode = mResourceSystem->getSceneManager()->getTemplate(model);
+
+    const NodeMap& nodeMap = getNodeMap();
+    auto found = nodeMap.find(bonename);
+    if (found == nodeMap.end())
+        throw std::runtime_error("Can't find attachment node " + bonename);
+    if(isLight)
+    {
+        osg::Quat rotation(osg::DegreesToRadians(-90.f), osg::Vec3f(1,0,0));
+        return SceneUtil::attach(templateNode, mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager(), &rotation);
+    }
+    return SceneUtil::attach(templateNode, mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager());
 }
 
 std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield, bool female) const

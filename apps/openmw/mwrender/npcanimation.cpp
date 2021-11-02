@@ -645,7 +645,7 @@ void NpcAnimation::updateParts()
         {
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
             addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
-                                       1, "meshes\\"+light->mModel);
+                                       1, "meshes\\"+light->mModel, false, nullptr, true);
             if (mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), light);
         }
@@ -675,16 +675,9 @@ void NpcAnimation::updateParts()
 
 
 
-PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
+PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
 {
-    osg::ref_ptr<const osg::Node> templateNode = mResourceSystem->getSceneManager()->getTemplate(model);
-
-    const NodeMap& nodeMap = getNodeMap();
-    NodeMap::const_iterator found = nodeMap.find(bonename);
-    if (found == nodeMap.end())
-        throw std::runtime_error("Can't find attachment node " + bonename);
-
-    osg::ref_ptr<osg::Node> attached = SceneUtil::attach(templateNode, mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager());
+    osg::ref_ptr<osg::Node> attached = attach(model, bonename, bonefilter, isLight);
     if (enchantedGlow)
         mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, *glowColor);
 
@@ -757,7 +750,7 @@ bool NpcAnimation::isFemalePart(const ESM::BodyPart* bodypart)
     return bodypart->mData.mFlags & ESM::BodyPart::BPF_Female;
 }
 
-bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, osg::Vec4f* glowColor)
+bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
 {
     if(priority <= mPartPriorities[type])
         return false;
@@ -789,7 +782,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
 
         // PRT_Hair seems to be the only type that breaks consistency and uses a filter that's different from the attachment bone
         const std::string bonefilter = (type == ESM::PRT_Hair) ? "hair" : bonename;
-        mObjectParts[type] = insertBoundedPart(mesh, bonename, bonefilter, enchantedGlow, glowColor);
+        mObjectParts[type] = insertBoundedPart(mesh, bonename, bonefilter, enchantedGlow, glowColor, isLight);
     }
     catch (std::exception& e)
     {
@@ -981,7 +974,7 @@ void NpcAnimation::showCarriedLeft(bool show)
             mesh = getShieldMesh(*iter, !mNpc->isMale());
         }
         if (mesh.empty() || addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                                        mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
+                                        mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor, iter->getType() == ESM::Light::sRecordId))
         {
             if (mesh.empty())
                 reserveIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1);
