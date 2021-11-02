@@ -60,6 +60,7 @@ void ESMReader::clearCtx()
 
 void ESMReader::resolveParentFileIndices(const std::vector<ESMReader>& allPlugins)
 {
+    mCtx.parentFileIndices.clear();
     const std::vector<Header::MasterData> &masters = getGameFiles();
     for (size_t j = 0; j < masters.size(); j++) {
         const Header::MasterData &mast = masters[j];
@@ -76,7 +77,7 @@ void ESMReader::resolveParentFileIndices(const std::vector<ESMReader>& allPlugin
                 break;
             }
         }
-        addParentFileIndex(index);
+        mCtx.parentFileIndices.push_back(index);
     }
 }
 
