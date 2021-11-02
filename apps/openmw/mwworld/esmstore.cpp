@@ -4,8 +4,6 @@
 #include <fstream>
 #include <set>
 
-#include <boost/filesystem/operations.hpp>
-
 #include <components/debug/debuglog.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
