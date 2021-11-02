@@ -88,7 +88,7 @@ public:
   /// @note Does not validate.
   void resolveParentFileIndices(const std::vector<ESMReader>& files);
   const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
-  bool isValidParentFileIndex(unsigned int i) const { return i != getIndex(); }
+  bool isValidParentFileIndex(int i) const { return i != getIndex(); }
 
   /*************************************************************************
    *
