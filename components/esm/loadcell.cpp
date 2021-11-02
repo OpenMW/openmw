@@ -21,10 +21,6 @@ namespace
     {
         unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
 
-        // TODO: enable this assertion when groundcover reading has been fixed.
-        // We need to ensure getParentFileIndices() has been initialised prior to adjusting RefNums.
-        // assert(reader.getParentFileIndices().size() == reader.getGameFiles.size());
-
         // If we have an index value that does not make sense, assume that it was an addition
         // by the present plugin (but a faulty one)
         if (local && local <= reader.getParentFileIndices().size())
