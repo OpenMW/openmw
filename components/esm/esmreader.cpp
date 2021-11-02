@@ -60,9 +60,6 @@ void ESMReader::clearCtx()
 
 void ESMReader::resolveParentFileIndices(const std::vector<ESMReader>& allPlugins)
 {
-    // Assign parent esX files by tracking their indices in the global list of
-    // all files/readers used by the engine. This is required for correct RefNums
-    // as required for handling moved, deleted and edited CellRefs.
     const std::vector<ESM::Header::MasterData> &masters = getGameFiles();
     for (size_t j = 0; j < masters.size(); j++) {
         const ESM::Header::MasterData &mast = masters[j];
