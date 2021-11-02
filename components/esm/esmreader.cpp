@@ -60,16 +60,16 @@ void ESMReader::clearCtx()
 
 void ESMReader::resolveParentFileIndices(const std::vector<ESMReader>& allPlugins)
 {
-    const std::vector<ESM::Header::MasterData> &masters = getGameFiles();
+    const std::vector<Header::MasterData> &masters = getGameFiles();
     for (size_t j = 0; j < masters.size(); j++) {
-        const ESM::Header::MasterData &mast = masters[j];
+        const Header::MasterData &mast = masters[j];
         std::string fname = mast.name;
         int index = getIndex(); 
         for (int i = 0; i < getIndex(); i++) {
-            ESM::ESMReader& reader = allPlugins.at(i);
+            const ESMReader& reader = allPlugins.at(i);
             if (reader.getFileSize() == 0)
                 continue;  // Content file in non-ESM format
-            const std::string candidate = reader.getContext().filename;
+            const std::string candidate = reader.getName();
             std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
             if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
                 index = i;
