@@ -9,6 +9,7 @@ namespace osg
 {
     class Node;
     class Group;
+    class Quat;
 }
 namespace Resource
 {
@@ -23,7 +24,7 @@ namespace SceneUtil
     /// Otherwise, just attach all of the toAttach scenegraph to the attachment node on the master scenegraph, with no filtering.
     /// @note The master scene graph is expected to include a skeleton.
     /// @return A newly created node that is directly attached to the master scene graph
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node* master, const std::string& filter, osg::Group* attachNode, Resource::SceneManager *sceneManager);
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node* master, const std::string& filter, osg::Group* attachNode, Resource::SceneManager *sceneManager, const osg::Quat* attitude = nullptr);
 
 }
 

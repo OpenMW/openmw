@@ -54,6 +54,7 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
             osg::Vec4f stubColor = osg::Vec4f(0,0,0,0);
             return attachMesh(model, bonename, false, &stubColor);
         };
+        osg::ref_ptr<osg::Node> attach(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool isLight);
 
         PartHolderPtr mScabbard;
         PartHolderPtr mHolsteredShield;
