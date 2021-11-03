@@ -162,7 +162,7 @@ namespace MWWorld
         if (!groundcoverFiles.empty())
         {
             std::vector<ESM::ESMReader> tempReaders (groundcoverFiles.size());
-            loadContentFiles(fileCollections, groundcoverFiles, mGroundcoverStore, tempReaders, encoder, listener);
+            loadContentFiles(fileCollections, groundcoverFiles, mGroundcoverStore, tempReaders, encoder, listener, false);
         }
 
         listener->loadingOff();
@@ -170,10 +170,6 @@ namespace MWWorld
         // insert records that may not be present in all versions of MW
         if (mEsm[0].getFormat() == 0)
             ensureNeededRecords();
-
-        // TODO: We can and should validate before we call loadContentFiles().
-        // Currently we validate here to prevent merge conflicts with groundcover ESMStore fixes.
-        validateMasterFiles(mEsm);
 
         mCurrentDate.reset(new DateTimeManager());
 
@@ -2955,10 +2951,12 @@ namespace MWWorld
         return mScriptsEnabled;
     }
 
-    void World::loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
+    void World::loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener, bool validate)
     {
         GameContentLoader gameContentLoader(*listener);
         EsmLoader esmLoader(store, readers, encoder, *listener);
+        if (validate)
+            validateMasterFiles();
 
         gameContentLoader.addLoader(".esm", &esmLoader);
         gameContentLoader.addLoader(".esp", &esmLoader);
