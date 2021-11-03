@@ -100,7 +100,7 @@ namespace SceneUtil
         }
     }
 
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode, Resource::SceneManager* sceneManager)
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode, Resource::SceneManager* sceneManager, const osg::Quat* attitude)
     {
         if (dynamic_cast<const SceneUtil::Skeleton*>(toAttach.get()))
         {
@@ -144,8 +144,6 @@ namespace SceneUtil
 
                 trans = new osg::PositionAttitudeTransform;
                 trans->setPosition(boneOffset->getMatrix().getTrans());
-                // The BoneOffset rotation seems to be incorrect
-                trans->setAttitude(osg::Quat(osg::DegreesToRadians(-90.f), osg::Vec3f(1,0,0)));
 
                 // Now that we used it, get rid of the redundant node.
                 if (boneOffset->getNumChildren() == 0 && boneOffset->getNumParents() == 1)
@@ -170,6 +168,13 @@ namespace SceneUtil
                     frontFaceStateSet->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
                 }
                 trans->setStateSet(frontFaceStateSet);
+            }
+
+            if(attitude)
+            {
+                if (!trans)
+                    trans = new osg::PositionAttitudeTransform;
+                trans->setAttitude(*attitude);
             }
 
             if (trans)

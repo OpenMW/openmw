@@ -79,7 +79,7 @@ namespace MWWorld
         IDMap mIds;
         IDMap mStaticIds;
 
-        IDMap mRefCount;
+        std::unordered_map<std::string, int> mRefCount;
 
         std::map<int, StoreBase *> mStores;
 
@@ -90,7 +90,7 @@ namespace MWWorld
         /// Validate entries in store after setup
         void validate();
 
-        void countRecords();
+        void countAllCellRefs();
 
         template<class T>
         void removeMissingObjects(Store<T>& store);

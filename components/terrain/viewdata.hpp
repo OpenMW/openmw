@@ -13,6 +13,18 @@ namespace Terrain
 
     class QuadTreeNode;
 
+    struct ViewDataEntry
+    {
+        ViewDataEntry();
+
+        bool set(QuadTreeNode* node);
+
+        QuadTreeNode* mNode;
+
+        unsigned int mLodFlags;
+        osg::ref_ptr<osg::Node> mRenderingNode;
+    };
+
     class ViewData : public View
     {
     public:
@@ -31,33 +43,22 @@ namespace Terrain
 
         void copyFrom(const ViewData& other);
 
-        struct Entry
-        {
-            Entry();
-
-            bool set(QuadTreeNode* node);
-
-            QuadTreeNode* mNode;
-
-            unsigned int mLodFlags;
-            osg::ref_ptr<osg::Node> mRenderingNode;
-        };
-
-        unsigned int getNumEntries() const;
-
-        Entry& getEntry(unsigned int i);
+        unsigned int getNumEntries() const { return mNumEntries; }
+        ViewDataEntry& getEntry(unsigned int i) { return mEntries[i]; }
 
         double getLastUsageTimeStamp() const { return mLastUsageTimeStamp; }
         void setLastUsageTimeStamp(double timeStamp) { mLastUsageTimeStamp = timeStamp; }
 
-        /// @return Have any nodes changed since the last frame
-        bool hasChanged() const;
-        void markUnchanged() { mChanged = false; }
+        /// Indicates at least one mNode of mEntries has changed or the view point has moved beyond mReuseDistance.
+        /// @note Such changes may necessitate a revalidation of cached mRenderingNodes elsewhere depending
+        /// on the parameters that affect the creation of mRenderingNode.
+        bool hasChanged() const { return mChanged; }
+        void setChanged(bool changed) { mChanged = changed; }
 
-        bool hasViewPoint() const;
+        bool hasViewPoint() const { return mHasViewPoint; }
 
         void setViewPoint(const osg::Vec3f& viewPoint);
-        const osg::Vec3f& getViewPoint() const;
+        const osg::Vec3f& getViewPoint() const { return mViewPoint; }
 
         void setActiveGrid(const osg::Vec4i &grid) { if (grid != mActiveGrid) {mActiveGrid = grid;mEntries.clear();mNumEntries=0;} }
         const osg::Vec4i &getActiveGrid() const { return mActiveGrid;}
@@ -66,7 +67,7 @@ namespace Terrain
         void setWorldUpdateRevision(int updateRevision) { mWorldUpdateRevision = updateRevision; }
 
     private:
-        std::vector<Entry> mEntries;
+        std::vector<ViewDataEntry> mEntries;
         unsigned int mNumEntries;
         double mLastUsageTimeStamp;
         bool mChanged;

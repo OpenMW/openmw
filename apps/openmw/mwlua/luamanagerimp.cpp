@@ -78,16 +78,6 @@ namespace MWLua
         mInitialized = true;
     }
 
-    void Callback::operator()(sol::object arg) const
-    {
-        if (mHiddenData[LuaUtil::ScriptsContainer::ScriptId::KEY] != sol::nil)
-            LuaUtil::call(mFunc, std::move(arg));
-        else
-        {
-            Log(Debug::Debug) << "Ignored callback to removed script " << mHiddenData.get<std::string>(SCRIPT_NAME_KEY);
-        }
-    }
-
     void LuaManager::update(bool paused, float dt)
     {
         ObjectRegistry* objectRegistry = mWorldView.getObjectRegistry();

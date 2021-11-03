@@ -139,32 +139,13 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         bonename = "Shield Bone";
         if (item.getType() == ESM::Armor::sRecordId)
         {
-            // Shield body part model should be used if possible.
-            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            for (const auto& part : item.get<ESM::Armor>()->mBase->mParts.mParts)
-            {
-                // Assume all creatures use the male mesh.
-                if (part.mPart != ESM::PRT_Shield || part.mMale.empty())
-                    continue;
-                const ESM::BodyPart *bodypart = store.get<ESM::BodyPart>().search(part.mMale);
-                if (bodypart && bodypart->mData.mType == ESM::BodyPart::MT_Armor && !bodypart->mModel.empty())
-                {
-                    itemModel = "meshes\\" + bodypart->mModel;
-                    break;
-                }
-            }
+            itemModel = getShieldMesh(item, false);
         }
     }
 
     try
     {
-        osg::ref_ptr<const osg::Node> node = mResourceSystem->getSceneManager()->getTemplate(itemModel);
-
-        const NodeMap& nodeMap = getNodeMap();
-        NodeMap::const_iterator found = nodeMap.find(bonename);
-        if (found == nodeMap.end())
-            throw std::runtime_error("Can't find attachment node " + bonename);
-        osg::ref_ptr<osg::Node> attached = SceneUtil::attach(node, mObjectRoot, bonename, found->second.get(), mResourceSystem->getSceneManager());
+        osg::ref_ptr<osg::Node> attached = attach(itemModel, bonename, bonename, item.getType() == ESM::Light::sRecordId);
 
         scene.reset(new PartHolder(attached));
 

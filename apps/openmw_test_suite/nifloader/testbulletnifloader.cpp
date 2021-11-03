@@ -60,6 +60,19 @@ namespace
     {
         return isNear(lhs.getOrigin(), rhs.getOrigin()) && isNear(lhs.getBasis(), rhs.getBasis());
     }
+
+    struct WriteVec3f
+    {
+        osg::Vec3f mValue;
+
+        friend std::ostream& operator <<(std::ostream& stream, const WriteVec3f& value)
+        {
+            return stream << "osg::Vec3f {"
+                << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.mValue.x() << ", "
+                << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.mValue.y() << ", "
+                << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.mValue.z() << "}";
+        }
+    };
 }
 
 static std::ostream& operator <<(std::ostream& stream, const btVector3& value)
@@ -122,6 +135,17 @@ static std::ostream& operator <<(std::ostream& stream, const TriangleMeshShape& 
     return stream << "}}";
 }
 
+static bool operator ==(const BulletShape::CollisionBox& l, const BulletShape::CollisionBox& r)
+{
+    const auto tie = [] (const BulletShape::CollisionBox& v) { return std::tie(v.mExtents, v.mCenter); };
+    return tie(l) == tie(r);
+}
+
+static std::ostream& operator <<(std::ostream& stream, const BulletShape::CollisionBox& value)
+{
+    return stream << "CollisionBox {" << WriteVec3f {value.mExtents} << ", " << WriteVec3f {value.mCenter} << "}";
+}
+
 }
 
 static std::ostream& operator <<(std::ostream& stream, const btCollisionShape& value)
@@ -160,20 +184,18 @@ namespace Resource
 {
     static bool operator ==(const Resource::BulletShape& lhs, const Resource::BulletShape& rhs)
     {
-        return compareObjects(lhs.mCollisionShape, rhs.mCollisionShape)
-            && compareObjects(lhs.mAvoidCollisionShape, rhs.mAvoidCollisionShape)
-            && lhs.mCollisionBox.extents == rhs.mCollisionBox.extents
-            && lhs.mCollisionBox.center == rhs.mCollisionBox.center
+        return compareObjects(lhs.mCollisionShape.get(), rhs.mCollisionShape.get())
+            && compareObjects(lhs.mAvoidCollisionShape.get(), rhs.mAvoidCollisionShape.get())
+            && lhs.mCollisionBox == rhs.mCollisionBox
             && lhs.mAnimatedShapes == rhs.mAnimatedShapes;
     }
 
     static std::ostream& operator <<(std::ostream& stream, const Resource::BulletShape& value)
     {
         return stream << "Resource::BulletShape {"
-            << value.mCollisionShape << ", "
-            << value.mAvoidCollisionShape << ", "
-            << "osg::Vec3f {" << value.mCollisionBox.extents << "}" << ", "
-            << "osg::Vec3f {" << value.mCollisionBox.center << "}" << ", "
+            << value.mCollisionShape.get() << ", "
+            << value.mAvoidCollisionShape.get() << ", "
+            << value.mCollisionBox << ", "
             << value.mAnimatedShapes
             << "}";
     }
@@ -272,6 +294,12 @@ namespace
         value.recType = Nif::RC_NiTriShape;
     }
 
+    void init(Nif::NiTriStrips& value)
+    {
+        init(static_cast<Nif::NiGeometry&>(value));
+        value.recType = Nif::RC_NiTriStrips;
+    }
+
     void init(Nif::NiSkinInstance& value)
     {
         value.data = Nif::NiSkinDataPtr(nullptr);
@@ -330,6 +358,8 @@ namespace
         Nif::NiTriShape mNiTriShape;
         Nif::NiTriShapeData mNiTriShapeData2;
         Nif::NiTriShape mNiTriShape2;
+        Nif::NiTriStripsData mNiTriStripsData;
+        Nif::NiTriStrips mNiTriStrips;
         Nif::NiSkinInstance mNiSkinInstance;
         Nif::NiStringExtraData mNiStringExtraData;
         Nif::NiStringExtraData mNiStringExtraData2;
@@ -361,6 +391,7 @@ namespace
             init(mNiNode3);
             init(mNiTriShape);
             init(mNiTriShape2);
+            init(mNiTriStrips);
             init(mNiSkinInstance);
             init(mNiStringExtraData);
             init(mNiStringExtraData2);
@@ -375,12 +406,29 @@ namespace
             mNiTriShapeData2.vertices = {osg::Vec3f(0, 0, 1), osg::Vec3f(1, 0, 1), osg::Vec3f(1, 1, 1)};
             mNiTriShapeData2.triangles = {0, 1, 2};
             mNiTriShape2.data = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
+
+            mNiTriStripsData.recType = Nif::RC_NiTriStripsData;
+            mNiTriStripsData.vertices = {osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0), osg::Vec3f(0, 1, 0)};
+            mNiTriStripsData.strips = {{0, 1, 2, 3}};
+            mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
         }
     };
 
     TEST_F(TestBulletNifLoader, for_zero_num_roots_should_return_default)
     {
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(0));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        Resource::BulletShape expected;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, should_ignore_nullptr_root)
+    {
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(nullptr));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
         const auto result = mLoader.load(mNifFile);
 
@@ -441,12 +489,12 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -458,6 +506,7 @@ namespace
         mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
         mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNode)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
@@ -466,12 +515,12 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -483,6 +532,7 @@ namespace
         mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
         mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.parent = &mNiNode;
 
         mNiNode.hasBounds = true;
         mNiNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
@@ -496,12 +546,12 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -513,11 +563,13 @@ namespace
         mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
         mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.parent = &mNiNode;
 
         mNode2.hasBounds = true;
         mNode2.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode2.bounds.box.extents = osg::Vec3f(4, 5, 6);
         mNode2.bounds.box.center = osg::Vec3f(-4, -5, -6);
+        mNode2.parent = &mNiNode;
 
         mNiNode.hasBounds = true;
         mNiNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
@@ -531,12 +583,12 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -547,12 +599,14 @@ namespace
         mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
         mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.parent = &mNiNode;
 
         mNode2.hasBounds = true;
         mNode2.flags |= Nif::NiNode::Flag_BBoxCollision;
         mNode2.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode2.bounds.box.extents = osg::Vec3f(4, 5, 6);
         mNode2.bounds.box.center = osg::Vec3f(-4, -5, -6);
+        mNode2.parent = &mNiNode;
 
         mNiNode.hasBounds = true;
         mNiNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
@@ -566,12 +620,12 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBox.extents = osg::Vec3f(4, 5, 6);
-        expected.mCollisionBox.center = osg::Vec3f(-4, -5, -6);
+        expected.mCollisionBox.mExtents = osg::Vec3f(4, 5, 6);
+        expected.mCollisionBox.mCenter = osg::Vec3f(-4, -5, -6);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(4, 5, 6)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-4, -5, -6)), box.release());
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -589,8 +643,8 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
 
         EXPECT_EQ(*result, expected);
     }
@@ -605,7 +659,7 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
-        expected.mCollisionShape = new Resource::TriangleMeshShape(triangles.release(), true);
+        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
 
         EXPECT_EQ(*result, expected);
     }
@@ -623,14 +677,15 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
 
         EXPECT_EQ(*result, expected);
     }
 
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_should_return_shape_with_triangle_mesh_shape)
     {
+        mNiTriShape.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
@@ -641,7 +696,7 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
-        expected.mCollisionShape = new Resource::TriangleMeshShape(triangles.release(), true);
+        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
 
         EXPECT_EQ(*result, expected);
     }
@@ -649,7 +704,9 @@ namespace
     TEST_F(TestBulletNifLoader, for_nested_tri_shape_child_should_return_shape_with_triangle_mesh_shape)
     {
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiNode2)}));
+        mNiNode2.parent = &mNiNode;
         mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
+        mNiTriShape.parent = &mNiNode2;
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
@@ -659,13 +716,15 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
-        expected.mCollisionShape = new Resource::TriangleMeshShape(triangles.release(), true);
+        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
 
         EXPECT_EQ(*result, expected);
     }
 
     TEST_F(TestBulletNifLoader, for_two_tri_shape_children_should_return_shape_with_triangle_mesh_shape_with_all_meshes)
     {
+        mNiTriShape.parent = &mNiNode;
+        mNiTriShape2.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({
             Nif::NodePtr(&mNiTriShape),
             Nif::NodePtr(&mNiTriShape2)
@@ -680,7 +739,7 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
-        expected.mCollisionShape = new Resource::TriangleMeshShape(triangles.release(), true);
+        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
 
         EXPECT_EQ(*result, expected);
     }
@@ -688,6 +747,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_and_filename_starting_with_x_and_not_empty_skin_should_return_shape_with_triangle_mesh_shape)
     {
         mNiTriShape.skin = Nif::NiSkinInstancePtr(&mNiSkinInstance);
+        mNiTriShape.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
@@ -698,7 +758,7 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
-        expected.mCollisionShape = new Resource::TriangleMeshShape(triangles.release(), true);
+        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
 
         EXPECT_EQ(*result, expected);
     }
@@ -720,7 +780,7 @@ namespace
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(mResultTransform, mesh.release());
         Resource::BulletShape expected;
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = {{-1, 0}};
 
         EXPECT_EQ(*result, expected);
@@ -746,7 +806,7 @@ namespace
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(mResultTransform2, mesh.release());
         Resource::BulletShape expected;
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = {{-1, 0}};
 
         EXPECT_EQ(*result, expected);
@@ -756,9 +816,11 @@ namespace
     {
         copy(mTransform, mNiTriShape.trafo);
         mNiTriShape.trafo.scale = 3;
+        mNiTriShape.parent = &mNiNode;
 
         copy(mTransform, mNiTriShape2.trafo);
         mNiTriShape2.trafo.scale = 3;
+        mNiTriShape2.parent = &mNiNode;
 
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({
             Nif::NodePtr(&mNiTriShape),
@@ -784,7 +846,7 @@ namespace
         shape->addChildShape(mResultTransform, mesh.release());
         shape->addChildShape(mResultTransform, mesh2.release());
         Resource::BulletShape expected;
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = {{-1, 0}};
 
         EXPECT_EQ(*result, expected);
@@ -813,7 +875,7 @@ namespace
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(mResultTransform2, mesh.release());
         Resource::BulletShape expected;
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = {{-1, 0}};
 
         EXPECT_EQ(*result, expected);
@@ -825,6 +887,7 @@ namespace
         mController.flags |= Nif::NiNode::ControllerFlag_Active;
         copy(mTransform, mNiTriShape.trafo);
         mNiTriShape.trafo.scale = 3;
+        mNiTriShape.parent = &mNiNode;
         copy(mTransform, mNiTriShape2.trafo);
         mNiTriShape2.trafo.scale = 3;
         mNiTriShape2.parent = &mNiNode;
@@ -841,7 +904,7 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
-        triangles->addTriangle(btVector3(1, 2, 3), btVector3(4, 2, 3), btVector3(4, 4.632747650146484375, 1.56172335147857666015625));
+        triangles->addTriangle(btVector3(4, 8, 12), btVector3(16, 8, 12), btVector3(16, 18.5309906005859375, 6.246893405914306640625));
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         mesh->setLocalScaling(btVector3(1, 1, 1));
 
@@ -854,7 +917,35 @@ namespace
         shape->addChildShape(mResultTransform2, mesh2.release());
         shape->addChildShape(btTransform::getIdentity(), mesh.release());
         Resource::BulletShape expected;
-        expected.mCollisionShape = shape.release();
+        expected.mCollisionShape.reset(shape.release());
+        expected.mAnimatedShapes = {{-1, 0}};
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, should_add_static_mesh_to_existing_compound_mesh)
+    {
+        mNiTriShape.parent = &mNiNode;
+        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
+
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(2));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
+        EXPECT_CALL(mNifFile, getRoot(1)).WillOnce(Return(&mNiTriShape2));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("xtest.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+
+        std::unique_ptr<btTriangleMesh> triangles2(new btTriangleMesh(false));
+        triangles2->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
+
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles2.release(), true));
+
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(compound.release());
         expected.mAnimatedShapes = {{-1, 0}};
 
         EXPECT_EQ(*result, expected);
@@ -862,6 +953,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_root_avoid_node_and_tri_shape_child_node_should_return_shape_with_null_collision_shape)
     {
+        mNiTriShape.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
         mNiNode.recType = Nif::RC_AvoidNode;
 
@@ -873,7 +965,7 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
-        expected.mAvoidCollisionShape = new Resource::TriangleMeshShape(triangles.release(), false);
+        expected.mAvoidCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), false));
 
         EXPECT_EQ(*result, expected);
     }
@@ -881,6 +973,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_empty_data_should_return_shape_with_null_collision_shape)
     {
         mNiTriShape.data = Nif::NiGeometryDataPtr(nullptr);
+        mNiTriShape.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
@@ -897,6 +990,7 @@ namespace
     {
         auto data = static_cast<Nif::NiTriShapeData*>(mNiTriShape.data.getPtr());
         data->triangles.clear();
+        mNiTriShape.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
@@ -914,6 +1008,7 @@ namespace
         mNiStringExtraData.string = "NC___";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
@@ -932,6 +1027,7 @@ namespace
         mNiStringExtraData2.string = "NC___";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
@@ -949,6 +1045,7 @@ namespace
         mNiStringExtraData.string = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
@@ -966,8 +1063,10 @@ namespace
         mNiStringExtraData.string = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.parent = &mNiNode2;
         mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
         mNiNode2.recType = Nif::RC_RootCollisionNode;
+        mNiNode2.parent = &mNiNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiNode2)}));
         mNiNode.recType = Nif::RC_NiNode;
 
@@ -979,7 +1078,137 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
-        expected.mCollisionShape = new Resource::TriangleMeshShape(triangles.release(), true);
+        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, should_ignore_tri_shape_data_with_mismatching_data_rec_type)
+    {
+        mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
+
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriShape));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        const Resource::BulletShape expected;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, for_tri_strips_root_node_should_return_shape_with_triangle_mesh_shape)
+    {
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriStrips));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        triangles->addTriangle(btVector3(1, 0, 0), btVector3(0, 1, 0), btVector3(1, 1, 0));
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, should_ignore_tri_strips_data_with_mismatching_data_rec_type)
+    {
+        mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
+
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriStrips));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        const Resource::BulletShape expected;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, should_ignore_tri_strips_data_with_empty_strips)
+    {
+        mNiTriStripsData.strips.clear();
+
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriStrips));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        const Resource::BulletShape expected;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, for_static_mesh_should_ignore_tri_strips_data_with_less_than_3_strips)
+    {
+        mNiTriStripsData.strips.front() = {0, 1};
+
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriStrips));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        const Resource::BulletShape expected;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, for_avoid_collision_mesh_should_ignore_tri_strips_data_with_less_than_3_strips)
+    {
+        mNiTriShape.parent = &mNiNode;
+        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
+        mNiNode.recType = Nif::RC_AvoidNode;
+        mNiTriStripsData.strips.front() = {0, 1};
+
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriStrips));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        const Resource::BulletShape expected;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, for_animated_mesh_should_ignore_tri_strips_data_with_less_than_3_strips)
+    {
+        mNiTriStripsData.strips.front() = {0, 1};
+        mNiTriStrips.parent = &mNiNode;
+        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriStrips)}));
+
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("xtest.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        const Resource::BulletShape expected;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, should_not_add_static_mesh_with_no_triangles_to_compound_shape)
+    {
+        mNiTriStripsData.strips.front() = {0, 1};
+        mNiTriShape.parent = &mNiNode;
+        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
+
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(2));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
+        EXPECT_CALL(mNifFile, getRoot(1)).WillOnce(Return(&mNiTriStrips));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("xtest.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(compound.release());
+        expected.mAnimatedShapes = {{-1, 0}};
 
         EXPECT_EQ(*result, expected);
     }

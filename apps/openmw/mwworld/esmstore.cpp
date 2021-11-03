@@ -4,8 +4,6 @@
 #include <fstream>
 #include <set>
 
-#include <boost/filesystem/operations.hpp>
-
 #include <components/debug/debuglog.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -29,6 +27,7 @@ namespace
 
     void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, std::vector<ESM::ESMReader>& readers)
     {
+        // TODO: we have many similar copies of this code.
         for (size_t i = 0; i < cell.mContextList.size(); i++)
         {
             size_t index = cell.mContextList[i].index;
@@ -152,41 +151,9 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     ESM::Dialogue *dialogue = nullptr;
 
     // Land texture loading needs to use a separate internal store for each plugin.
-    // We set the number of plugins here to avoid continual resizes during loading,
-    // and so we can properly verify if valid plugin indices are being passed to the
-    // LandTexture Store retrieval methods.
-    mLandTextures.resize(esm.getGlobalReaderList()->size());
-
-    /// \todo Move this to somewhere else. ESMReader?
-    // Cache parent esX files by tracking their indices in the global list of
-    //  all files/readers used by the engine. This will greaty accelerate
-    //  refnumber mangling, as required for handling moved references.
-    const std::vector<ESM::Header::MasterData> &masters = esm.getGameFiles();
-    std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
-    for (size_t j = 0; j < masters.size(); j++) {
-        const ESM::Header::MasterData &mast = masters[j];
-        std::string fname = mast.name;
-        int index = ~0;
-        for (int i = 0; i < esm.getIndex(); i++) {
-            ESM::ESMReader& reader = allPlugins->at(i);
-            if (reader.getFileSize() == 0)
-                continue;  // Content file in non-ESM format
-            const std::string candidate = reader.getContext().filename;
-            std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
-            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
-                index = i;
-                break;
-            }
-        }
-        if (index == (int)~0) {
-            // Tried to load a parent file that has not been loaded yet. This is bad,
-            //  the launcher should have taken care of this.
-            std::string fstring = "File " + esm.getName() + " asks for parent file " + masters[j].name
-                + ", but it has not been loaded yet. Please check your load order.";
-            esm.fail(fstring);
-        }
-        esm.addParentFileIndex(index);
-    }
+    // We set the number of plugins here so we can properly verify if valid plugin
+    // indices are being passed to the LandTexture Store retrieval methods.
+    mLandTextures.resize(mLandTextures.getSize()+1);
 
     // Loop through all records
     while(esm.hasMoreRecs())
@@ -301,12 +268,14 @@ void ESMStore::setUp(bool validateRecords)
     if (validateRecords)
     {
         validate();
-        countRecords();
+        countAllCellRefs();
     }
 }
 
-void ESMStore::countRecords()
+void ESMStore::countAllCellRefs()
 {
+    // TODO: We currently need to read entire files here again.
+    // We should consider consolidating or deferring this reading.
     if(!mRefCount.empty())
         return;
     std::vector<Ref> refs;
@@ -324,6 +293,8 @@ void ESMStore::countRecords()
         if (value.mRefID != deletedRefID)
         {
             std::string& refId = refIDs[value.mRefID];
+            // We manually lower case IDs here for the time being to improve performance.
+            Misc::StringUtils::lowerCaseInPlace(refId);
             ++mRefCount[std::move(refId)];
         }
     };
@@ -332,7 +303,8 @@ void ESMStore::countRecords()
 
 int ESMStore::getRefCount(const std::string& id) const
 {
-    auto it = mRefCount.find(id);
+    const std::string lowerId = Misc::StringUtils::lowerCase(id);
+    auto it = mRefCount.find(lowerId);
     if(it == mRefCount.end())
         return 0;
     return it->second;
