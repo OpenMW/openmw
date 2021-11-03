@@ -9,6 +9,10 @@ namespace MWWorld
 {
     class ESMStore;
 }
+namespace osg
+{
+    class Program;
+}
 
 namespace MWRender
 {
