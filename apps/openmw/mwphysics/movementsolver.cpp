@@ -206,7 +206,7 @@ namespace MWPhysics
             if((newPosition - nextpos).length2() > 0.0001)
             {
                 // trace to where character would go if there were no obstructions
-                tracer.doTrace(actor.mCollisionObject, newPosition, nextpos, collisionWorld);
+                tracer.doTrace(actor.mCollisionObject, newPosition, nextpos, collisionWorld, actor.mIsOnGround);
 
                 // check for obstructions
                 if(tracer.mFraction >= 1.0f)
@@ -341,7 +341,7 @@ namespace MWPhysics
             osg::Vec3f from = newPosition;
             auto dropDistance = 2*sGroundOffset + (actor.mIsOnGround ? sStepSizeDown : 0);
             osg::Vec3f to = newPosition - osg::Vec3f(0,0,dropDistance);
-            tracer.doTrace(actor.mCollisionObject, from, to, collisionWorld);
+            tracer.doTrace(actor.mCollisionObject, from, to, collisionWorld, actor.mIsOnGround);
             if(tracer.mFraction < 1.0f)
             {
                 if (!isActor(tracer.mHitObject))
