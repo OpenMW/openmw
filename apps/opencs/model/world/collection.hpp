@@ -311,7 +311,7 @@ namespace CSMWorld
         int index = touchRecordImp(id);
         if (index >= 0)
         {
-            mRecords.at(index)->get().setPlugin();
+            mRecords.at(index)->get().setPlugin(0);
             return true;
         }
 
