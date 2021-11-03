@@ -220,7 +220,7 @@ namespace MWWorld
         const ESM::LandTexture *find(size_t index, size_t plugin) const;
 
         /// Resize the internal store to hold another plugin.
-        void addPlugin() { mStatic.emplace(); }
+        void addPlugin() { mStatic.emplace_back(); }
 
         size_t getSize() const override;
         size_t getSize(size_t plugin) const;
