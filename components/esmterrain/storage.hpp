@@ -37,11 +37,6 @@ namespace ESMTerrain
             return &mData;
         }
 
-        inline int getPlugin() const
-        {
-            return mLand->mPlugin;
-        }
-
     private:
         const ESM::Land* mLand;
         int mLoadFlags;
