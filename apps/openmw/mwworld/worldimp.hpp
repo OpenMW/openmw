@@ -166,7 +166,7 @@ namespace MWWorld
 
             // A helper method called automatically during World construction.
             void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content,
-                 ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener);
+                 ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener, bool validateMasterFiles = true);
 
 
             float feetToGameUnits(float feet);
