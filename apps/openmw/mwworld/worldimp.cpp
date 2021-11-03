@@ -2956,7 +2956,7 @@ namespace MWWorld
         GameContentLoader gameContentLoader(*listener);
         EsmLoader esmLoader(store, readers, encoder, *listener);
         if (validate)
-            validateMasterFiles();
+            validateMasterFiles(readers);
 
         gameContentLoader.addLoader(".esm", &esmLoader);
         gameContentLoader.addLoader(".esp", &esmLoader);
