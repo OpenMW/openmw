@@ -178,6 +178,10 @@ namespace MWWorld
         if (mEsm[0].getFormat() == 0)
             ensureNeededRecords();
 
+        // TODO: We can and should validate before we call loadContentFiles().
+        // Currently we validate here to prevent merge conflicts with groundcover ESMStore fixes.
+        validateMasterFiles(mEsm);
+
         mCurrentDate.reset(new DateTimeManager());
 
         fillGlobalVariables();
@@ -404,6 +408,23 @@ namespace MWWorld
                     throw std::runtime_error ("unknown record in saved game");
                 }
                 break;
+        }
+    }
+
+    void World::validateMasterFiles(const std::vector<ESM::ESMReader>& readers)
+    {
+        for (const auto& esm : readers)
+        {
+            assert(esm.getGameFiles().size() == esm.getParentFileIndices().size());
+            for (unsigned int i=0; i<esm.getParentFileIndices().size(); ++i)
+            {
+                if (!esm.isValidParentFileIndex(i))
+                {
+                    std::string fstring = "File " + esm.getName() + " asks for parent file " + esm.getGameFiles()[i].name
+                        + ", but it is not available or has been loaded in the wrong order. Please run the launcher to fix this issue.";
+                    throw std::runtime_error(fstring);
+                }
+            }
         }
     }
 

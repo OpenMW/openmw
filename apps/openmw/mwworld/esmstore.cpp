@@ -4,8 +4,6 @@
 #include <fstream>
 #include <set>
 
-#include <boost/filesystem/operations.hpp>
-
 #include <components/debug/debuglog.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -153,41 +151,9 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     ESM::Dialogue *dialogue = nullptr;
 
     // Land texture loading needs to use a separate internal store for each plugin.
-    // We set the number of plugins here to avoid continual resizes during loading,
-    // and so we can properly verify if valid plugin indices are being passed to the
-    // LandTexture Store retrieval methods.
-    mLandTextures.resize(esm.getGlobalReaderList()->size());
-
-    /// \todo Move this to somewhere else. ESMReader?
-    // Cache parent esX files by tracking their indices in the global list of
-    //  all files/readers used by the engine. This will greaty accelerate
-    //  refnumber mangling, as required for handling moved references.
-    const std::vector<ESM::Header::MasterData> &masters = esm.getGameFiles();
-    std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
-    for (size_t j = 0; j < masters.size(); j++) {
-        const ESM::Header::MasterData &mast = masters[j];
-        std::string fname = mast.name;
-        int index = ~0;
-        for (int i = 0; i < esm.getIndex(); i++) {
-            ESM::ESMReader& reader = allPlugins->at(i);
-            if (reader.getFileSize() == 0)
-                continue;  // Content file in non-ESM format
-            const std::string candidate = reader.getContext().filename;
-            std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
-            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
-                index = i;
-                break;
-            }
-        }
-        if (index == (int)~0) {
-            // Tried to load a parent file that has not been loaded yet. This is bad,
-            //  the launcher should have taken care of this.
-            std::string fstring = "File " + esm.getName() + " asks for parent file " + masters[j].name
-                + ", but it has not been loaded yet. Please check your load order.";
-            esm.fail(fstring);
-        }
-        esm.addParentFileIndex(index);
-    }
+    // We set the number of plugins here so we can properly verify if valid plugin
+    // indices are being passed to the LandTexture Store retrieval methods.
+    mLandTextures.resize(mLandTextures.getSize()+1);
 
     // Loop through all records
     while(esm.hasMoreRecs())
