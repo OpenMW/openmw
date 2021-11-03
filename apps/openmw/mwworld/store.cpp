@@ -322,14 +322,12 @@ namespace MWWorld
         assert(plugin < mStatic.size());
         return mStatic[plugin].size();
     }
-    RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm, size_t plugin)
+    RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm)
     {
         ESM::LandTexture lt;
         bool isDeleted = false;
 
         lt.load(esm, isDeleted);
-
-        assert(plugin < mStatic.size());
 
         // Replace texture for records with given ID and index from all plugins.
         for (unsigned int i=0; i<mStatic.size(); i++)
@@ -342,7 +340,7 @@ namespace MWWorld
             }
         }
 
-        LandTextureList &ltexl = mStatic[plugin];
+        LandTextureList &ltexl = mStatic.back();
         if(lt.mIndex + 1 > (int)ltexl.size())
             ltexl.resize(lt.mIndex+1);
 
@@ -351,10 +349,6 @@ namespace MWWorld
         ltexl[idx] = std::move(lt);
 
         return RecordId(ltexl[idx].mId, isDeleted);
-    }
-    RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm)
-    {
-        return load(esm, esm.getIndex());
     }
     Store<ESM::LandTexture>::iterator Store<ESM::LandTexture>::begin(size_t plugin) const
     {
@@ -365,11 +359,6 @@ namespace MWWorld
     {
         assert(plugin < mStatic.size());
         return mStatic[plugin].end();
-    }
-    void Store<ESM::LandTexture>::resize(size_t num)
-    {
-        if (mStatic.size() < num)
-            mStatic.resize(num);
     }
 
     // Land
