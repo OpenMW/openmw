@@ -795,10 +795,10 @@ namespace MWSound
                 break;
             case WaterSoundAction::SetVolume:
                 mNearWaterSound->setVolume(update.mVolume * sfx->getVolume());
+                mNearWaterSound->setFade(sSfxFadeInDuration, 1.0f, Play_FadeExponential);
                 break;
             case WaterSoundAction::FinishSound:
-                mOutput->finishSound(mNearWaterSound);
-                mNearWaterSound = nullptr;
+                mNearWaterSound->setFade(sSfxFadeOutDuration, 0.0f, Play_FadeExponential | Play_StopAtFadeEnd);
                 break;
             case WaterSoundAction::PlaySound:
                 if (mNearWaterSound)
