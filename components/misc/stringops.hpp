@@ -148,7 +148,7 @@ public:
      * @param with The replacement string.
      * @return A reference to the string passed in @p str.
      */
-    static void &replaceAll(std::string &str, std::string_view what, std::string_view with)
+    static std::string &replaceAll(std::string &str, std::string_view what, std::string_view with)
     {
         std::size_t found;
         std::size_t offset = 0;
