@@ -34,12 +34,12 @@ namespace DetourNavigator
 
     bool NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape};
+        const CollisionShape collisionShape(shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape, shapes.mTransform);
         bool result = mNavMeshManager.addObject(id, collisionShape, transform, AreaType_ground);
         if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
             const ObjectId avoidId(avoidShape);
-            CollisionShape avoidCollisionShape {shapes.mShapeInstance, *avoidShape};
+            const CollisionShape avoidCollisionShape(shapes.mShapeInstance, *avoidShape, shapes.mTransform);
             if (mNavMeshManager.addObject(avoidId, avoidCollisionShape, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
@@ -64,12 +64,12 @@ namespace DetourNavigator
 
     bool NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        const CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape};
+        const CollisionShape collisionShape(shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape, shapes.mTransform);
         bool result = mNavMeshManager.updateObject(id, collisionShape, transform, AreaType_ground);
         if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
             const ObjectId avoidId(avoidShape);
-            const CollisionShape avoidCollisionShape {shapes.mShapeInstance, *avoidShape};
+            const CollisionShape avoidCollisionShape(shapes.mShapeInstance, *avoidShape, shapes.mTransform);
             if (mNavMeshManager.updateObject(avoidId, avoidCollisionShape, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);

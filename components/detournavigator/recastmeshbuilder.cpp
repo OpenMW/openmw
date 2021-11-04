@@ -134,6 +134,13 @@ namespace DetourNavigator
     }
 
     void RecastMeshBuilder::addObject(const btCollisionShape& shape, const btTransform& transform,
+        const AreaType areaType, osg::ref_ptr<const Resource::BulletShape> source, const ObjectTransform& objectTransform)
+    {
+        addObject(shape, transform, areaType);
+        mSources.push_back(MeshSource {std::move(source), objectTransform, areaType});
+    }
+
+    void RecastMeshBuilder::addObject(const btCollisionShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
         if (shape.isCompound())
@@ -261,7 +268,8 @@ namespace DetourNavigator
         std::sort(mWater.begin(), mWater.end());
         Mesh mesh = makeMesh(std::move(mTriangles));
         return std::make_shared<RecastMesh>(generation, revision, std::move(mesh), std::move(mWater),
-                                            std::move(mHeightfields), std::move(mFlatHeightfields));
+                                            std::move(mHeightfields), std::move(mFlatHeightfields),
+                                            std::move(mSources));
     }
 
     void RecastMeshBuilder::addObject(const btConcaveShape& shape, const btTransform& transform,

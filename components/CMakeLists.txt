@@ -203,6 +203,7 @@ add_component_dir(detournavigator
     preparednavmeshdata
     navmeshcacheitem
     navigatorutils
+    generatenavmeshtile
     )
 
 add_component_dir(loadinglistener

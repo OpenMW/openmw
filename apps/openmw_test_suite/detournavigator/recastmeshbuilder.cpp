@@ -89,6 +89,8 @@ namespace
         TileBounds mBounds;
         const std::size_t mGeneration = 0;
         const std::size_t mRevision = 0;
+        const osg::ref_ptr<const Resource::BulletShape> mSource {nullptr};
+        const ObjectTransform mObjectTransform {ESM::Position {{0, 0, 0}, {0, 0, 0}}, 0.0f};
 
         DetourNavigatorRecastMeshBuilderTest()
         {
@@ -115,7 +117,8 @@ namespace
         btBvhTriangleMeshShape shape(&mesh, true);
 
         RecastMeshBuilder builder(mBounds);
-        builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(), AreaType_ground);
+        builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(),
+                          AreaType_ground, mSource, mObjectTransform);
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -1, -1, 0,
@@ -135,7 +138,7 @@ namespace
         builder.addObject(
             static_cast<const btCollisionShape&>(shape),
             btTransform(btMatrix3x3::getIdentity().scaled(btVector3(1, 2, 3)), btVector3(1, 2, 3)),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
@@ -152,7 +155,8 @@ namespace
         const std::array<btScalar, 4> heightfieldData {{0, 0, 0, 0}};
         btHeightfieldTerrainShape shape(2, 2, heightfieldData.data(), 1, 0, 0, 2, PHY_FLOAT, false);
         RecastMeshBuilder builder(mBounds);
-        builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(), AreaType_ground);
+        builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(),
+                          AreaType_ground, mSource, mObjectTransform);
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -0.5, -0.5, 0,
@@ -168,7 +172,8 @@ namespace
     {
         btBoxShape shape(btVector3(1, 1, 2));
         RecastMeshBuilder builder(mBounds);
-        builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(), AreaType_ground);
+        builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(),
+                          AreaType_ground, mSource, mObjectTransform);
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -1, -1, -2,
@@ -214,7 +219,7 @@ namespace
         builder.addObject(
             static_cast<const btCollisionShape&>(shape),
             btTransform::getIdentity(),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
@@ -261,7 +266,7 @@ namespace
         builder.addObject(
             static_cast<const btCollisionShape&>(shape),
             btTransform(btMatrix3x3::getIdentity().scaled(btVector3(1, 2, 3)), btVector3(1, 2, 3)),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
@@ -285,7 +290,7 @@ namespace
         builder.addObject(
             static_cast<const btCollisionShape&>(shape),
             btTransform(btMatrix3x3::getIdentity().scaled(btVector3(1, 2, 3)), btVector3(1, 2, 3)),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
@@ -307,7 +312,7 @@ namespace
         builder.addObject(
             static_cast<const btCollisionShape&>(shape),
             btTransform::getIdentity(),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
@@ -334,7 +339,7 @@ namespace
         builder.addObject(
             static_cast<const btCollisionShape&>(shape),
             btTransform::getIdentity(),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
@@ -359,7 +364,7 @@ namespace
             static_cast<const btCollisionShape&>(shape),
             btTransform(btQuaternion(btVector3(1, 0, 0),
             static_cast<btScalar>(-osg::PI_4))),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_THAT(recastMesh->getMesh().getVertices(), Pointwise(FloatNear(1e-5), std::vector<float>({
@@ -384,7 +389,7 @@ namespace
             static_cast<const btCollisionShape&>(shape),
             btTransform(btQuaternion(btVector3(0, 1, 0),
             static_cast<btScalar>(osg::PI_4))),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_THAT(recastMesh->getMesh().getVertices(), Pointwise(FloatNear(1e-5), std::vector<float>({
@@ -409,7 +414,7 @@ namespace
             static_cast<const btCollisionShape&>(shape),
             btTransform(btQuaternion(btVector3(0, 0, 1),
             static_cast<btScalar>(osg::PI_4))),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_THAT(recastMesh->getMesh().getVertices(), Pointwise(FloatNear(1e-5), std::vector<float>({
@@ -433,12 +438,12 @@ namespace
         builder.addObject(
             static_cast<const btCollisionShape&>(shape1),
             btTransform::getIdentity(),
-            AreaType_ground
+            AreaType_ground, mSource, mObjectTransform
         );
         builder.addObject(
             static_cast<const btCollisionShape&>(shape2),
             btTransform::getIdentity(),
-            AreaType_null
+            AreaType_null, mSource, mObjectTransform
         );
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
@@ -471,7 +476,7 @@ namespace
         btBvhTriangleMeshShape shape(&mesh, true);
 
         RecastMeshBuilder builder(mBounds);
-        builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(), AreaType_ground);
+        builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(), AreaType_ground, mSource, mObjectTransform);
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -1, -1, 0,

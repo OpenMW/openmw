@@ -6,6 +6,7 @@
 #include "recastmeshtiles.hpp"
 #include "waitconditiontype.hpp"
 #include "heightfieldshape.hpp"
+#include "objecttransform.hpp"
 
 #include <components/resource/bulletshape.hpp>
 
@@ -27,10 +28,14 @@ namespace DetourNavigator
     struct ObjectShapes
     {
         osg::ref_ptr<const Resource::BulletShapeInstance> mShapeInstance;
+        ObjectTransform mTransform;
 
-        ObjectShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance)
+        ObjectShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance, const ObjectTransform& transform)
             : mShapeInstance(shapeInstance)
-        {}
+            , mTransform(transform)
+        {
+            assert(mShapeInstance != nullptr);
+        }
     };
 
     struct DoorShapes : ObjectShapes
@@ -39,8 +44,8 @@ namespace DetourNavigator
         osg::Vec3f mConnectionEnd;
 
         DoorShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance,
-                   const osg::Vec3f& connectionStart,const osg::Vec3f& connectionEnd)
-            : ObjectShapes(shapeInstance)
+                   const ObjectTransform& transform, const osg::Vec3f& connectionStart, const osg::Vec3f& connectionEnd)
+            : ObjectShapes(shapeInstance, transform)
             , mConnectionStart(connectionStart)
             , mConnectionEnd(connectionEnd)
         {}

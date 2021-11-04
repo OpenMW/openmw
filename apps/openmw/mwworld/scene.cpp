@@ -64,14 +64,23 @@ namespace
                 * osg::Quat(zr, osg::Vec3(0, 0, -1));
     }
 
-    osg::Quat makeNodeRotation(const MWWorld::Ptr& ptr, RotationOrder order)
+    osg::Quat makeInverseNodeRotation(const MWWorld::Ptr& ptr)
     {
         const auto pos = ptr.getRefData().getPosition();
+        return ptr.getClass().isActor() ? makeActorOsgQuat(pos) : makeInversedOrderObjectOsgQuat(pos);
+    }
 
-        const auto rot = ptr.getClass().isActor() ? makeActorOsgQuat(pos)
-            : (order == RotationOrder::inverse ? makeInversedOrderObjectOsgQuat(pos) : Misc::Convert::makeOsgQuat(pos));
+    osg::Quat makeDirectNodeRotation(const MWWorld::Ptr& ptr)
+    {
+        const auto pos = ptr.getRefData().getPosition();
+        return ptr.getClass().isActor() ? makeActorOsgQuat(pos) : Misc::Convert::makeOsgQuat(pos);
+    }
 
-        return rot;
+    osg::Quat makeNodeRotation(const MWWorld::Ptr& ptr, RotationOrder order)
+    {
+        if (order == RotationOrder::inverse)
+            return makeInverseNodeRotation(ptr);
+        return makeDirectNodeRotation(ptr);
     }
 
     void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, const osg::Quat &rotation)
@@ -101,7 +110,7 @@ namespace
         }
 
         std::string model = getModel(ptr, rendering.getResourceSystem()->getVFS());
-        const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
+        const auto rotation = makeDirectNodeRotation(ptr);
 
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
@@ -128,6 +137,8 @@ namespace
     {
         if (const auto object = physics.getObject(ptr))
         {
+            const DetourNavigator::ObjectTransform objectTransform {ptr.getRefData().getPosition(), ptr.getCellRef().getScale()};
+
             if (ptr.getClass().isDoor() && !ptr.getCellRef().getTeleport())
             {
                 btVector3 aabbMin;
@@ -159,7 +170,7 @@ namespace
 
                 navigator.addObject(
                     DetourNavigator::ObjectId(object),
-                    DetourNavigator::DoorShapes(object->getShapeInstance(), connectionStart, connectionEnd),
+                    DetourNavigator::DoorShapes(object->getShapeInstance(), objectTransform, connectionStart, connectionEnd),
                     transform
                 );
             }
@@ -167,7 +178,7 @@ namespace
             {
                 navigator.addObject(
                     DetourNavigator::ObjectId(object),
-                    DetourNavigator::ObjectShapes(object->getShapeInstance()),
+                    DetourNavigator::ObjectShapes(object->getShapeInstance(), objectTransform),
                     object->getTransform()
                 );
             }

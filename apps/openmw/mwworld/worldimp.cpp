@@ -1533,7 +1533,9 @@ namespace MWWorld
 
     void World::updateNavigatorObject(const MWPhysics::Object& object)
     {
-        const DetourNavigator::ObjectShapes shapes(object.getShapeInstance());
+        const MWWorld::Ptr ptr = object.getPtr();
+        const DetourNavigator::ObjectShapes shapes(object.getShapeInstance(),
+            DetourNavigator::ObjectTransform {ptr.getRefData().getPosition(), ptr.getCellRef().getScale()});
         mShouldUpdateNavigator = mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform())
             || mShouldUpdateNavigator;
     }

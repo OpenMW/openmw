@@ -4,8 +4,10 @@
 #include "areatype.hpp"
 #include "bounds.hpp"
 #include "tilebounds.hpp"
+#include "objecttransform.hpp"
 
 #include <components/bullethelpers/operators.hpp>
+#include <components/resource/bulletshape.hpp>
 
 #include <osg/Vec3f>
 #include <osg/Vec2i>
@@ -119,11 +121,19 @@ namespace DetourNavigator
         return tie(lhs) < tie(rhs);
     }
 
+    struct MeshSource
+    {
+        osg::ref_ptr<const Resource::BulletShape> mShape;
+        ObjectTransform mObjectTransform;
+        AreaType mAreaType;
+    };
+
     class RecastMesh
     {
     public:
         RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<CellWater> water,
-            std::vector<Heightfield> heightfields, std::vector<FlatHeightfield> flatHeightfields);
+            std::vector<Heightfield> heightfields, std::vector<FlatHeightfield> flatHeightfields,
+            std::vector<MeshSource> sources);
 
         std::size_t getGeneration() const
         {
@@ -152,6 +162,8 @@ namespace DetourNavigator
             return mFlatHeightfields;
         }
 
+        const std::vector<MeshSource>& getMeshSources() const noexcept { return mMeshSources; }
+
     private:
         std::size_t mGeneration;
         std::size_t mRevision;
@@ -159,6 +171,7 @@ namespace DetourNavigator
         std::vector<CellWater> mWater;
         std::vector<Heightfield> mHeightfields;
         std::vector<FlatHeightfield> mFlatHeightfields;
+        std::vector<MeshSource> mMeshSources;
 
         friend inline std::size_t getSize(const RecastMesh& value) noexcept
         {

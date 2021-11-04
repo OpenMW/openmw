@@ -1,6 +1,7 @@
 #include "operators.hpp"
 
 #include <components/detournavigator/recastmeshobject.hpp>
+#include <components/misc/convert.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
@@ -15,10 +16,11 @@ namespace
     struct DetourNavigatorRecastMeshObjectTest : Test
     {
         btBoxShape mBoxShapeImpl {btVector3(1, 2, 3)};
-        CollisionShape mBoxShape {nullptr, mBoxShapeImpl};
+        const ObjectTransform mObjectTransform {ESM::Position {{1, 2, 3}, {1, 2, 3}}, 0.5f};
+        CollisionShape mBoxShape {nullptr, mBoxShapeImpl, mObjectTransform};
         btCompoundShape mCompoundShapeImpl {true};
-        CollisionShape mCompoundShape {nullptr, mCompoundShapeImpl};
-        btTransform mTransform {btQuaternion(btVector3(1, 2, 3), 1), btVector3(1, 2, 3)};
+        CollisionShape mCompoundShape {nullptr, mCompoundShapeImpl, mObjectTransform};
+        btTransform mTransform {Misc::Convert::makeBulletTransform(mObjectTransform.mPosition)};
 
         DetourNavigatorRecastMeshObjectTest()
         {

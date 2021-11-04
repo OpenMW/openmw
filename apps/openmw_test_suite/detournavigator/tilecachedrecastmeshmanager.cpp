@@ -17,6 +17,9 @@ namespace
     {
         Settings mSettings;
         std::vector<TilePosition> mChangedTiles;
+        const ObjectTransform mObjectTransform {ESM::Position {{0, 0, 0}, {0, 0, 0}}, 0.0f};
+        const osg::ref_ptr<const Resource::BulletShape> mShape = new Resource::BulletShape;
+        const osg::ref_ptr<const Resource::BulletShapeInstance> mInstance = new Resource::BulletShapeInstance(mShape);
 
         DetourNavigatorTileCachedRecastMeshManagerTest()
         {
@@ -56,7 +59,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         EXPECT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
     }
 
@@ -64,7 +67,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_FALSE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
     }
@@ -73,7 +76,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
         for (int x = -1; x < 1; ++x)
             for (int y = -1; y < 1; ++y)
@@ -85,7 +88,7 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
         EXPECT_TRUE(manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground,
                                          [&] (const auto& v) { onChangedTile(v); }));
@@ -100,7 +103,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_FALSE(manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground,
                                           [&] (const auto& v) { onChangedTile(v); }));
@@ -111,7 +114,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_NE(manager.getMesh(TilePosition(-1, -1)), nullptr);
         EXPECT_NE(manager.getMesh(TilePosition(-1, 0)), nullptr);
@@ -123,7 +126,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_EQ(manager.getMesh(TilePosition(1, 0)), nullptr);
     }
@@ -133,7 +136,7 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
 
         manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
         EXPECT_NE(manager.getMesh(TilePosition(0, -1)), nullptr);
@@ -153,7 +156,7 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
 
         manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
         EXPECT_EQ(manager.getMesh(TilePosition(-1, -1)), nullptr);
@@ -168,7 +171,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         manager.removeObject(ObjectId(&boxShape));
         EXPECT_EQ(manager.getMesh(TilePosition(-1, -1)), nullptr);
@@ -181,7 +184,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
 
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_NE(manager.getMesh(TilePosition(-1, -1)), nullptr);
@@ -201,7 +204,7 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const auto initialRevision = manager.getRevision();
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_EQ(manager.getRevision(), initialRevision + 1);
     }
@@ -210,7 +213,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         const auto beforeAddRevision = manager.getRevision();
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
@@ -222,7 +225,7 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
         const auto beforeUpdateRevision = manager.getRevision();
         manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, [] (auto) {});
@@ -233,7 +236,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         const auto beforeUpdateRevision = manager.getRevision();
         manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, [] (auto) {});
@@ -244,7 +247,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         const auto beforeRemoveRevision = manager.getRevision();
         manager.removeObject(ObjectId(&boxShape));
@@ -282,7 +285,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = std::numeric_limits<int>::max();
@@ -325,7 +328,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
@@ -342,7 +345,7 @@ namespace
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
         const btBoxShape boxShape(btVector3(20, 20, 100));
-        const CollisionShape shape(nullptr, boxShape);
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
         ASSERT_TRUE(manager.addWater(cellPosition, cellSize, 0.0f));
         ASSERT_TRUE(manager.removeObject(ObjectId(&boxShape)));

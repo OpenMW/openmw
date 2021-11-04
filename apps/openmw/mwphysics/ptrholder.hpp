@@ -20,7 +20,7 @@ namespace MWPhysics
             mPtr = updated;
         }
 
-        MWWorld::Ptr getPtr()
+        MWWorld::Ptr getPtr() const
         {
             return mPtr;
         }

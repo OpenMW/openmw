@@ -67,6 +67,11 @@ namespace Convert
     {
         return makeBulletQuaternion(position.rot);
     }
+
+    inline btTransform makeBulletTransform(const ESM::Position& position)
+    {
+        return btTransform(makeBulletQuaternion(position), toBullet(position.asVec3()));
+    }
 }
 }
 

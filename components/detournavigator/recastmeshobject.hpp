@@ -2,6 +2,9 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESHOBJECT_H
 
 #include "areatype.hpp"
+#include "objecttransform.hpp"
+
+#include <components/resource/bulletshape.hpp>
 
 #include <LinearMath/btTransform.h>
 
@@ -19,17 +22,21 @@ namespace DetourNavigator
     class CollisionShape
     {
     public:
-        CollisionShape(osg::ref_ptr<const osg::Referenced> holder, const btCollisionShape& shape)
-            : mHolder(std::move(holder))
+        CollisionShape(osg::ref_ptr<const Resource::BulletShapeInstance> instance, const btCollisionShape& shape,
+                       const ObjectTransform& transform)
+            : mInstance(std::move(instance))
             , mShape(shape)
+            , mObjectTransform(transform)
         {}
 
-        const osg::ref_ptr<const osg::Referenced>& getHolder() const { return mHolder; }
+        const osg::ref_ptr<const Resource::BulletShapeInstance>& getInstance() const { return mInstance; }
         const btCollisionShape& getShape() const { return mShape; }
+        const ObjectTransform& getObjectTransform() const { return mObjectTransform; }
 
     private:
-        osg::ref_ptr<const osg::Referenced> mHolder;
+        osg::ref_ptr<const Resource::BulletShapeInstance> mInstance;
         std::reference_wrapper<const btCollisionShape> mShape;
+        ObjectTransform mObjectTransform;
     };
 
     class ChildRecastMeshObject
@@ -60,7 +67,7 @@ namespace DetourNavigator
 
             bool update(const btTransform& transform, const AreaType areaType) { return mImpl.update(transform, areaType); }
 
-            const osg::ref_ptr<const osg::Referenced>& getHolder() const { return mHolder; }
+            const osg::ref_ptr<const Resource::BulletShapeInstance>& getInstance() const { return mInstance; }
 
             const btCollisionShape& getShape() const { return mImpl.getShape(); }
 
@@ -68,8 +75,11 @@ namespace DetourNavigator
 
             AreaType getAreaType() const { return mImpl.getAreaType(); }
 
+            const ObjectTransform& getObjectTransform() const { return mObjectTransform; }
+
         private:
-            osg::ref_ptr<const osg::Referenced> mHolder;
+            osg::ref_ptr<const Resource::BulletShapeInstance> mInstance;
+            ObjectTransform mObjectTransform;
             ChildRecastMeshObject mImpl;
     };
 }
