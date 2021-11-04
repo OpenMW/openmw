@@ -199,6 +199,10 @@ if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
 endif()
 
+if(MSVC)
+  add_compile_options("/utf-8")
+endif()
+
 # Dependencies
 find_package(OpenGL REQUIRED)
 
