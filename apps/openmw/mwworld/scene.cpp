@@ -404,7 +404,7 @@ namespace MWWorld
                         return heights;
                     }
                 } ();
-                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shift, shape);
+                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shape);
             }
         }
 

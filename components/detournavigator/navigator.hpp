@@ -131,8 +131,7 @@ namespace DetourNavigator
          */
         virtual bool removeWater(const osg::Vec2i& cellPosition) = 0;
 
-        virtual bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-            const HeightfieldShape& shape) = 0;
+        virtual bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape) = 0;
 
         virtual bool removeHeightfield(const osg::Vec2i& cellPosition) = 0;
 

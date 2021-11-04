@@ -4,6 +4,7 @@
 #include "heightfieldshape.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/convert.hpp>
 
 #include <utility>
 
@@ -11,17 +12,18 @@ namespace
 {
     struct AddHeightfield
     {
-        const DetourNavigator::Cell& mCell;
+        osg::Vec2i mCellPosition;
+        int mCellSize;
         DetourNavigator::RecastMeshBuilder& mBuilder;
 
         void operator()(const DetourNavigator::HeightfieldSurface& v)
         {
-            mBuilder.addHeightfield(mCell.mSize, mCell.mShift, v.mHeights, v.mSize, v.mMinHeight, v.mMaxHeight);
+            mBuilder.addHeightfield(mCellPosition, mCellSize, v.mHeights, v.mSize, v.mMinHeight, v.mMaxHeight);
         }
 
         void operator()(DetourNavigator::HeightfieldPlane v)
         {
-            mBuilder.addHeightfield(mCell.mSize, mCell.mShift, v.mHeight);
+            mBuilder.addHeightfield(mCellPosition, mCellSize, v.mHeight);
         }
     };
 }
@@ -94,24 +96,24 @@ namespace DetourNavigator
         return result;
     }
 
-    bool RecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+    bool RecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
         const HeightfieldShape& shape)
     {
         const std::lock_guard lock(mMutex);
-        if (!mHeightfields.emplace(cellPosition, Heightfield {Cell {cellSize, shift}, shape}).second)
+        if (!mHeightfields.emplace(cellPosition, SizedHeightfieldShape {cellSize, shape}).second)
             return false;
         ++mRevision;
         return true;
     }
 
-    std::optional<Cell> RecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    std::optional<SizedHeightfieldShape> RecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
     {
         const std::lock_guard lock(mMutex);
         const auto it = mHeightfields.find(cellPosition);
         if (it == mHeightfields.end())
             return std::nullopt;
         ++mRevision;
-        const auto result = std::make_optional(it->second.mCell);
+        auto result = std::make_optional(it->second);
         mHeightfields.erase(it);
         return result;
     }
@@ -132,7 +134,7 @@ namespace DetourNavigator
             for (const auto& [k, v] : mWater)
                 builder.addWater(k, v);
             for (const auto& [cellPosition, v] : mHeightfields)
-                std::visit(AddHeightfield {v.mCell, builder}, v.mShape);
+                std::visit(AddHeightfield {cellPosition, v.mCellSize, builder}, v.mShape);
             objects.reserve(mObjects.size());
             for (const auto& [k, object] : mObjects)
             {

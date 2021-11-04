@@ -252,14 +252,17 @@ namespace
         return true;
     }
 
-    bool rasterizeTriangles(rcContext& context, const std::vector<FlatHeightfield>& heightfields,
+    bool rasterizeTriangles(rcContext& context, const TileBounds& tileBounds, const std::vector<FlatHeightfield>& heightfields,
         const Settings& settings, const rcConfig& config, rcHeightfield& solid)
     {
         for (const FlatHeightfield& heightfield : heightfields)
         {
-            const Rectangle rectangle {heightfield.mBounds, toNavMeshCoordinates(settings, heightfield.mHeight)};
-            if (!rasterizeTriangles(context, rectangle, config, AreaType_ground, solid))
-                return false;
+            if (auto intersection = getIntersection(tileBounds, maxCellTileBounds(heightfield.mCellPosition, heightfield.mCellSize)))
+            {
+                const Rectangle rectangle {*intersection, toNavMeshCoordinates(settings, heightfield.mHeight)};
+                if (!rasterizeTriangles(context, rectangle, config, AreaType_ground, solid))
+                    return false;
+            }
         }
         return true;
     }
@@ -278,13 +281,14 @@ namespace
         return true;
     }
 
-    bool rasterizeTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-        const rcConfig& config, const Settings& settings, rcHeightfield& solid)
+    bool rasterizeTriangles(rcContext& context, const TilePosition& tilePosition, const osg::Vec3f& agentHalfExtents,
+        const RecastMesh& recastMesh, const rcConfig& config, const Settings& settings, rcHeightfield& solid)
     {
         return rasterizeTriangles(context, recastMesh.getMesh(), settings, config, solid)
             && rasterizeTriangles(context, agentHalfExtents, recastMesh.getWater(), settings, config, solid)
             && rasterizeTriangles(context, recastMesh.getHeightfields(), settings, config, solid)
-            && rasterizeTriangles(context, recastMesh.getFlatHeightfields(), settings, config, solid);
+            && rasterizeTriangles(context, makeRealTileBoundsWithBorder(settings, tilePosition),
+                                  recastMesh.getFlatHeightfields(), settings, config, solid);
     }
 
     void buildCompactHeightfield(rcContext& context, const int walkableHeight, const int walkableClimb,
@@ -444,7 +448,7 @@ namespace DetourNavigator
         rcHeightfield solid;
         createHeightfield(context, solid, config.width, config.height, config.bmin, config.bmax, config.cs, config.ch);
 
-        if (!rasterizeTriangles(context, agentHalfExtents, recastMesh, config, settings, solid))
+        if (!rasterizeTriangles(context, tilePosition, agentHalfExtents, recastMesh, config, settings, solid))
             return nullptr;
 
         rcFilterLowHangingWalkableObstacles(&context, config.walkableClimb, solid);

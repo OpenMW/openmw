@@ -47,7 +47,6 @@ namespace
         Loading::Listener mListener;
         const osg::Vec2i mCellPosition {0, 0};
         const int mHeightfieldTileSize = ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1);
-        const osg::Vec3f mShift {0, 0, 0};
         const float mEndTolerance = 0;
         const btTransform mTransform {btMatrix3x3::getIdentity(), btVector3(256, 256, 0)};
 
@@ -137,9 +136,9 @@ namespace
         osg::ref_ptr<const Resource::BulletShapeInstance> mInstance;
     };
 
-    osg::Vec3f getHeightfieldShift(const osg::Vec2i& cellPosition, int cellSize, float minHeight, float maxHeight)
+    btVector3 getHeightfieldShift(const osg::Vec2i& cellPosition, int cellSize, float minHeight, float maxHeight)
     {
-        return Misc::Convert::toOsg(BulletHelpers::getHeightfieldShift(cellPosition.x(), cellPosition.x(), cellSize, minHeight, maxHeight));
+        return BulletHelpers::getHeightfieldShift(cellPosition.x(), cellPosition.x(), cellSize, minHeight, maxHeight);
     }
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_empty_should_return_empty)
@@ -176,10 +175,9 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
 
@@ -223,13 +221,12 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -308,13 +305,12 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance()), mTransform);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -453,7 +449,6 @@ namespace
         }};
         const HeightfieldSurface surface1 = makeSquareHeightfieldSurface(heightfieldData1);
         const int cellSize1 = mHeightfieldTileSize * (surface1.mSize - 1);
-        const osg::Vec3f shift1 = getHeightfieldShift(mCellPosition, cellSize1, surface1.mMinHeight, surface1.mMaxHeight);
 
         const std::array<float, 5 * 5> heightfieldData2 {{
             -25, -25, -25, -25, -25,
@@ -464,11 +459,10 @@ namespace
         }};
         const HeightfieldSurface surface2 = makeSquareHeightfieldSurface(heightfieldData2);
         const int cellSize2 = mHeightfieldTileSize * (surface2.mSize - 1);
-        const osg::Vec3f shift2 = getHeightfieldShift(mCellPosition, cellSize2, surface2.mMinHeight, surface2.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        EXPECT_TRUE(mNavigator->addHeightfield(mCellPosition, cellSize1, shift1, surface1));
-        EXPECT_FALSE(mNavigator->addHeightfield(mCellPosition, cellSize2, shift2, surface2));
+        EXPECT_TRUE(mNavigator->addHeightfield(mCellPosition, cellSize1, surface1));
+        EXPECT_FALSE(mNavigator->addHeightfield(mCellPosition, cellSize2, surface2));
     }
 
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_around_avoid_shape)
@@ -545,11 +539,10 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addWater(mCellPosition, cellSize, 300);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -594,11 +587,10 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addWater(mCellPosition, cellSize, -25);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -641,10 +633,9 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addWater(mCellPosition, std::numeric_limits<int>::max(), -25);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -688,11 +679,10 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addWater(mCellPosition, cellSize, -25);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -787,10 +777,9 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -798,7 +787,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -843,10 +832,9 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -876,14 +864,14 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
+        const btVector3 shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         std::vector<CollisionShapeInstance<btBoxShape>> boxes;
         std::generate_n(std::back_inserter(boxes), 100, [] { return std::make_unique<btBoxShape>(btVector3(20, 20, 100)); });
 
         mNavigator->addAgent(mAgentHalfExtents);
 
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
 
         for (std::size_t i = 0; i < boxes.size(); ++i)
         {
@@ -981,10 +969,9 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -1007,14 +994,13 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         CollisionShapeInstance oscillatingBox(std::make_unique<btBoxShape>(btVector3(20, 20, 20)));
         const btVector3 oscillatingBoxShapePosition(288, 288, 400);
         CollisionShapeInstance borderBox(std::make_unique<btBoxShape>(btVector3(50, 50, 50)));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addObject(ObjectId(&oscillatingBox.shape()), ObjectShapes(oscillatingBox.instance()),
                               btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition));
         // add this box to make navmesh bound box independent from oscillatingBoxShape rotations
@@ -1046,10 +1032,9 @@ namespace
     {
         const HeightfieldPlane plane {100};
         const int cellSize = mHeightfieldTileSize * 4;
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, plane.mHeight, plane.mHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, plane);
+        mNavigator->addHeightfield(mCellPosition, cellSize, plane);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
 
@@ -1057,28 +1042,28 @@ namespace
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
-            Vec3fEq(56.66666412353515625, 460, 203.9999847412109375),
-            Vec3fEq(76.70135498046875, 439.965301513671875, 203.9999847412109375),
-            Vec3fEq(96.73604583740234375, 419.93060302734375, 203.9999847412109375),
-            Vec3fEq(116.770751953125, 399.89593505859375, 203.9999847412109375),
-            Vec3fEq(136.8054351806640625, 379.861236572265625, 203.9999847412109375),
-            Vec3fEq(156.840118408203125, 359.826568603515625, 203.9999847412109375),
-            Vec3fEq(176.8748016357421875, 339.7918701171875, 203.9999847412109375),
-            Vec3fEq(196.90948486328125, 319.757171630859375, 203.9999847412109375),
-            Vec3fEq(216.944183349609375, 299.722503662109375, 203.9999847412109375),
-            Vec3fEq(236.9788665771484375, 279.68780517578125, 203.9999847412109375),
-            Vec3fEq(257.0135498046875, 259.65313720703125, 203.9999847412109375),
-            Vec3fEq(277.048248291015625, 239.618438720703125, 203.9999847412109375),
-            Vec3fEq(297.082916259765625, 219.583740234375, 203.9999847412109375),
-            Vec3fEq(317.11761474609375, 199.549041748046875, 203.9999847412109375),
-            Vec3fEq(337.15228271484375, 179.5143585205078125, 203.9999847412109375),
-            Vec3fEq(357.186981201171875, 159.47967529296875, 203.9999847412109375),
-            Vec3fEq(377.221649169921875, 139.4449920654296875, 203.9999847412109375),
-            Vec3fEq(397.25634765625, 119.41030120849609375, 203.9999847412109375),
-            Vec3fEq(417.291046142578125, 99.3756103515625, 203.9999847412109375),
-            Vec3fEq(437.325714111328125, 79.340911865234375, 203.9999847412109375),
-            Vec3fEq(457.360443115234375, 59.3062286376953125, 203.9999847412109375),
-            Vec3fEq(460, 56.66666412353515625, 203.9999847412109375)
+            Vec3fEq(56.66666412353515625, 460, 101.99999237060546875),
+            Vec3fEq(76.70135498046875, 439.965301513671875, 101.99999237060546875),
+            Vec3fEq(96.73604583740234375, 419.93060302734375, 101.99999237060546875),
+            Vec3fEq(116.770751953125, 399.89593505859375, 101.99999237060546875),
+            Vec3fEq(136.8054351806640625, 379.861236572265625, 101.99999237060546875),
+            Vec3fEq(156.840118408203125, 359.826568603515625, 101.99999237060546875),
+            Vec3fEq(176.8748016357421875, 339.7918701171875, 101.99999237060546875),
+            Vec3fEq(196.90948486328125, 319.757171630859375, 101.99999237060546875),
+            Vec3fEq(216.944183349609375, 299.722503662109375, 101.99999237060546875),
+            Vec3fEq(236.9788665771484375, 279.68780517578125, 101.99999237060546875),
+            Vec3fEq(257.0135498046875, 259.65313720703125, 101.99999237060546875),
+            Vec3fEq(277.048248291015625, 239.618438720703125, 101.99999237060546875),
+            Vec3fEq(297.082916259765625, 219.583740234375, 101.99999237060546875),
+            Vec3fEq(317.11761474609375, 199.549041748046875, 101.99999237060546875),
+            Vec3fEq(337.15228271484375, 179.5143585205078125, 101.99999237060546875),
+            Vec3fEq(357.186981201171875, 159.47967529296875, 101.99999237060546875),
+            Vec3fEq(377.221649169921875, 139.4449920654296875, 101.99999237060546875),
+            Vec3fEq(397.25634765625, 119.41030120849609375, 101.99999237060546875),
+            Vec3fEq(417.291046142578125, 99.3756103515625, 101.99999237060546875),
+            Vec3fEq(437.325714111328125, 79.340911865234375, 101.99999237060546875),
+            Vec3fEq(457.360443115234375, 59.3062286376953125, 101.99999237060546875),
+            Vec3fEq(460, 56.66666412353515625, 101.99999237060546875)
         )) << mPath;
     }
 
@@ -1093,14 +1078,13 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(204, -204, 0)),
                                        new btBoxShape(btVector3(200, 200, 1000)));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance()), mTransform);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -1133,14 +1117,13 @@ namespace
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
-        const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(204, -204, 0)),
                                        new btBoxShape(btVector3(100, 100, 1000)));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance()), mTransform);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);

@@ -48,12 +48,6 @@ namespace DetourNavigator
         }
     };
 
-    struct Cell
-    {
-        int mSize;
-        osg::Vec3f mShift;
-    };
-
     struct Water
     {
         int mCellSize;
@@ -90,18 +84,21 @@ namespace DetourNavigator
 
     struct Heightfield
     {
-        TileBounds mBounds;
+        osg::Vec2i mCellPosition;
+        int mCellSize;
         std::uint8_t mLength;
         float mMinHeight;
         float mMaxHeight;
-        osg::Vec3f mShift;
-        float mScale;
         std::vector<float> mHeights;
+        std::size_t mOriginalSize;
+        std::uint8_t mMinX;
+        std::uint8_t mMinY;
     };
 
     inline auto makeTuple(const Heightfield& v) noexcept
     {
-        return std::tie(v.mBounds, v.mLength, v.mMinHeight, v.mMaxHeight, v.mShift, v.mScale, v.mHeights);
+        return std::tie(v.mCellPosition, v.mCellSize, v.mLength, v.mMinHeight, v.mMaxHeight,
+                        v.mHeights, v.mOriginalSize, v.mMinX, v.mMinY);
     }
 
     inline bool operator<(const Heightfield& lhs, const Heightfield& rhs) noexcept
@@ -111,13 +108,15 @@ namespace DetourNavigator
 
     struct FlatHeightfield
     {
-        TileBounds mBounds;
+        osg::Vec2i mCellPosition;
+        int mCellSize;
         float mHeight;
     };
 
     inline bool operator<(const FlatHeightfield& lhs, const FlatHeightfield& rhs) noexcept
     {
-        return std::tie(lhs.mBounds, lhs.mHeight) < std::tie(rhs.mBounds, rhs.mHeight);
+        const auto tie = [] (const FlatHeightfield& v) { return std::tie(v.mCellPosition, v.mCellSize, v.mHeight); };
+        return tie(lhs) < tie(rhs);
     }
 
     class RecastMesh
@@ -170,11 +169,6 @@ namespace DetourNavigator
                 + value.mFlatHeightfields.size() * sizeof(FlatHeightfield);
         }
     };
-
-    inline bool operator<(const Cell& lhs, const Cell& rhs) noexcept
-    {
-        return std::tie(lhs.mSize, lhs.mShift) < std::tie(rhs.mSize, rhs.mShift);
-    }
 }
 
 #endif

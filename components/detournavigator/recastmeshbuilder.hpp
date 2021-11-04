@@ -50,9 +50,9 @@ namespace DetourNavigator
 
         void addWater(const osg::Vec2i& cellPosition, const Water& water);
 
-        void addHeightfield(int cellSize, const osg::Vec3f& shift, float height);
+        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, float height);
 
-        void addHeightfield(int cellSize, const osg::Vec3f& shift, const float* heights, std::size_t size,
+        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const float* heights, std::size_t size,
             float minHeight, float maxHeight);
 
         std::shared_ptr<RecastMesh> create(std::size_t generation, std::size_t revision) &&;
