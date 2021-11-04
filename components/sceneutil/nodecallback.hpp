@@ -19,7 +19,6 @@ public:
     NodeCallback(){}
     NodeCallback(const NodeCallback& nc,const osg::CopyOp& copyop):
             osg::Callback(nc, copyop) {}
-    META_Object(SceneUtil, NodeCallback)
 
     bool run(osg::Object* object, osg::Object* data) override
     {
