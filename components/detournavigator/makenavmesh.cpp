@@ -357,6 +357,7 @@ namespace
         rcPolyMeshDetail& polyMeshDetail)
     {
         rcCompactHeightfield compact;
+        compact.dist = nullptr;
         buildCompactHeightfield(context, config.walkableHeight, config.walkableClimb, solid, compact);
 
         erodeWalkableArea(context, config.walkableRadius, compact);
