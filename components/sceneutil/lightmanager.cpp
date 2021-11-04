@@ -1,12 +1,9 @@
 #include "lightmanager.hpp"
 
 #include <array>
-
 #include <cstring>
-
 #include <algorithm>
 #include <iterator>
-
 
 #include <osg/BufferObject>
 #include <osg/BufferIndexBinding>
