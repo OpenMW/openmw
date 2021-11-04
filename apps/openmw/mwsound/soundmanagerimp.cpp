@@ -897,7 +897,7 @@ namespace MWSound
                     }
                 }
 
-                if(!mOutput->isSoundPlaying(sound))
+                if(!sound->updateFade(duration) || !mOutput->isSoundPlaying(sound))
                 {
                     mOutput->finishSound(sound);
                     if (sound == mUnderwaterSound)
@@ -909,8 +909,6 @@ namespace MWSound
                 }
                 else
                 {
-                    sound->updateFade(duration);
-
                     mOutput->updateSound(sound);
                     ++sndidx;
                 }
@@ -939,15 +937,13 @@ namespace MWSound
                 }
             }
 
-            if(!mOutput->isStreamPlaying(sound))
+            if(!sound->updateFade(duration) || !mOutput->isStreamPlaying(sound))
             {
                 mOutput->finishStream(sound);
-                mActiveSaySounds.erase(sayiter++);
+                sayiter = mActiveSaySounds.erase(sayiter);
             }
             else
             {
-                sound->updateFade(duration);
-
                 mOutput->updateStream(sound);
                 ++sayiter;
             }
