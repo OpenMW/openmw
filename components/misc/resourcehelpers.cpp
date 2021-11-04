@@ -142,5 +142,5 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resP
 
 bool Misc::ResourceHelpers::isHiddenMarker(std::string_view id)
 {
-    return id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker";
+    return Misc::StringUtils::ciEqual(id, "prisonmarker") || Misc::StringUtils::ciEqual(id, "divinemarker") || Misc::StringUtils::ciEqual(id, "templemarker") || Misc::StringUtils::ciEqual(id, "northmarker");
 }
