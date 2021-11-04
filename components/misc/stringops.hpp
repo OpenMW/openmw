@@ -211,14 +211,11 @@ public:
         cont.push_back(str.substr(previous, current - previous));
     }
 
-
-     static inline void replaceLast(std::string& str, const std::string& substr, const std::string& with)
-     {
-         size_t pos = str.rfind(substr);
-         if (pos == std::string::npos)
-             return;
-
-
+    static inline void replaceLast(std::string& str, const std::string& substr, const std::string& with)
+    {
+        size_t pos = str.rfind(substr);
+        if (pos == std::string::npos)
+            return;
         str.replace(pos, substr.size(), with);
     }
 
