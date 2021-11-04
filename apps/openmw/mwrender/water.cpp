@@ -260,6 +260,7 @@ class Refraction : public SceneUtil::RTTNode
 public:
     Refraction(uint32_t rttSize)
         : RTTNode(rttSize, rttSize, 1, false)
+        , mNodeMask(Refraction::sDefaultCullMask)
     {
         mClipCullNode = new ClipCullNode;
     }
@@ -272,8 +273,6 @@ public:
         camera->setName("RefractionCamera");
         camera->addCullCallback(new InheritViewPointCallback);
         camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
-
-        camera->setCullMask(Mask_Effect | Mask_Scene | Mask_Object | Mask_Static | Mask_Terrain | Mask_Actor | Mask_ParticleSystem | Mask_Sky | Mask_Sun | Mask_Player | Mask_Lighting | Mask_Groundcover);
 
         // No need for fog here, we are already applying fog on the water surface itself as well as underwater fog
         // assign large value to effectively turn off fog
@@ -293,6 +292,7 @@ public:
     void apply(osg::Camera* camera) override
     {
         camera->setViewMatrix(mViewMatrix);
+        camera->setCullMask(mNodeMask);
     }
 
     void setScene(osg::Node* scene)
@@ -314,10 +314,22 @@ public:
         mClipCullNode->setPlane(osg::Plane(osg::Vec3d(0, 0, -1), osg::Vec3d(0, 0, waterLevel)));
     }
 
+    void showWorld(bool show)
+    {
+        if (show)
+            mNodeMask = Refraction::sDefaultCullMask;
+        else
+            mNodeMask = Refraction::sDefaultCullMask & ~sToggleWorldMask;
+    }
+
 private:
     osg::ref_ptr<ClipCullNode> mClipCullNode;
     osg::ref_ptr<osg::Node> mScene;
     osg::Matrix mViewMatrix{ osg::Matrix::identity() };
+
+    unsigned int mNodeMask;
+
+    static constexpr unsigned int sDefaultCullMask = Mask_Effect | Mask_Scene | Mask_Object | Mask_Static | Mask_Terrain | Mask_Actor | Mask_ParticleSystem | Mask_Sky | Mask_Sun | Mask_Player | Mask_Lighting | Mask_Groundcover;
 };
 
 class Reflection : public SceneUtil::RTTNode
@@ -357,15 +369,8 @@ public:
 
     void setInterior(bool isInterior)
     {
-        int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        reflectionDetail = std::min(5, std::max(isInterior ? 2 : 0, reflectionDetail));
-        unsigned int extraMask = 0;
-        if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
-        if(reflectionDetail >= 2) extraMask |= Mask_Static;
-        if(reflectionDetail >= 3) extraMask |= Mask_Effect | Mask_ParticleSystem | Mask_Object;
-        if(reflectionDetail >= 4) extraMask |= Mask_Player | Mask_Actor;
-        if(reflectionDetail >= 5) extraMask |= Mask_Groundcover;
-        mNodeMask = Mask_Scene | Mask_Sky | Mask_Lighting | extraMask;
+        mInterior = isInterior;
+        mNodeMask = calcNodeMask();
     }
 
     void setWaterLevel(float waterLevel)
@@ -382,11 +387,34 @@ public:
         mClipCullNode->addChild(scene);
     }
 
+    void showWorld(bool show)
+    {
+        if (show)
+            mNodeMask = calcNodeMask();
+        else
+            mNodeMask = calcNodeMask() & ~sToggleWorldMask;
+    }
+
 private:
+
+    unsigned int calcNodeMask()
+    {
+        int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
+        reflectionDetail = std::min(5, std::max(mInterior ? 2 : 0, reflectionDetail));
+        unsigned int extraMask = 0;
+        if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
+        if(reflectionDetail >= 2) extraMask |= Mask_Static;
+        if(reflectionDetail >= 3) extraMask |= Mask_Effect | Mask_ParticleSystem | Mask_Object;
+        if(reflectionDetail >= 4) extraMask |= Mask_Player | Mask_Actor;
+        if(reflectionDetail >= 5) extraMask |= Mask_Groundcover;
+        return Mask_Scene | Mask_Sky | Mask_Lighting | extraMask;
+    }
+
     osg::ref_ptr<ClipCullNode> mClipCullNode;
     osg::ref_ptr<osg::Node> mScene;
     osg::Node::NodeMask mNodeMask;
     osg::Matrix mViewMatrix{ osg::Matrix::identity() };
+    bool mInterior;
 };
 
 /// DepthClampCallback enables GL_DEPTH_CLAMP for the current draw, if supported.
@@ -422,6 +450,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     , mToggled(true)
     , mTop(0)
     , mInterior(false)
+    , mShowWorld(true)
     , mCullCallback(nullptr)
     , mShaderWaterStateSetUpdater(nullptr)
 {
@@ -518,6 +547,8 @@ void Water::updateWaterMaterial()
                 mRefraction->addCullCallback(mCullCallback);
             mParent->addChild(mRefraction);
         }
+
+        showWorld(mShowWorld);
 
         createShaderWaterStateSet(mWaterNode, mReflection, mRefraction);
     }
@@ -810,6 +841,15 @@ void Water::removeCell(const MWWorld::CellStore *store)
 void Water::clearRipples()
 {
     mSimulation->clear();
+}
+
+void Water::showWorld(bool show)
+{
+    if (mReflection)
+        mReflection->showWorld(show);
+    if (mRefraction)
+        mRefraction->showWorld(show);
+    mShowWorld = show;
 }
 
 }

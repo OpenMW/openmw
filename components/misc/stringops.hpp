@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <string_view>
 #include <iterator>
+#include <functional>
 
 namespace Misc
 {
@@ -22,6 +23,7 @@ class StringUtils
     template <typename T>
     static T argument(T value) noexcept
     {
+        static_assert(!std::is_same_v<T, std::string_view>, "std::string_view is not supported");
         return value;
     }
 
@@ -116,6 +118,21 @@ public:
         return out;
     }
 
+    struct CiEqual
+    {
+        bool operator()(const std::string& left, const std::string& right) const
+        {
+            return ciEqual(left, right);
+        }
+    };
+    struct CiHash
+    {
+        std::size_t operator()(std::string str) const
+        {
+            lowerCaseInPlace(str);
+            return std::hash<std::string>{}(str);
+        }
+    };
     struct CiComp
     {
         bool operator()(const std::string& left, const std::string& right) const
@@ -131,7 +148,7 @@ public:
      * @param with The replacement string.
      * @return A reference to the string passed in @p str.
      */
-    static std::string &replaceAll(std::string &str, std::string_view what, std::string_view with)
+    static void &replaceAll(std::string &str, std::string_view what, std::string_view with)
     {
         std::size_t found;
         std::size_t offset = 0;
@@ -194,14 +211,22 @@ public:
         cont.push_back(str.substr(previous, current - previous));
     }
 
+
      static inline void replaceLast(std::string& str, const std::string& substr, const std::string& with)
      {
          size_t pos = str.rfind(substr);
          if (pos == std::string::npos)
              return;
 
-         str.replace(pos, substr.size(), with);
-     }
+
+        str.replace(pos, substr.size(), with);
+    }
+
+    static inline bool ciEndsWith(std::string_view s, std::string_view suffix)
+    {
+        return s.size() >= suffix.size() && std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(),
+                                                       [](char l, char r) { return toLower(l) == toLower(r); });
+    };
 };
 
 }

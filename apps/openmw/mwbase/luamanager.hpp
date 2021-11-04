@@ -30,6 +30,7 @@ namespace MWBase
         virtual ~LuaManager() = default;
 
         virtual void newGameStarted() = 0;
+        virtual void gameLoaded() = 0;
         virtual void registerObject(const MWWorld::Ptr& ptr) = 0;
         virtual void deregisterObject(const MWWorld::Ptr& ptr) = 0;
         virtual void objectAddedToScene(const MWWorld::Ptr& ptr) = 0;

@@ -13,6 +13,15 @@ bool MWState::operator< (const Slot& left, const Slot& right)
     return left.mTimeStamp<right.mTimeStamp;
 }
 
+std::string MWState::getFirstGameFile(const std::vector<std::string>& contentFiles)
+{
+    for (const std::string& c : contentFiles)
+    {
+        if (Misc::StringUtils::ciEndsWith(c, ".esm") || Misc::StringUtils::ciEndsWith(c, ".omwgame"))
+            return c;
+    }
+    return "";
+}
 
 void MWState::Character::addSlot (const boost::filesystem::path& path, const std::string& game)
 {
@@ -30,8 +39,7 @@ void MWState::Character::addSlot (const boost::filesystem::path& path, const std
 
     slot.mProfile.load (reader);
 
-    if (Misc::StringUtils::lowerCase (slot.mProfile.mContentFiles.at (0))!=
-        Misc::StringUtils::lowerCase (game))
+    if (!Misc::StringUtils::ciEqual(getFirstGameFile(slot.mProfile.mContentFiles), game))
         return; // this file is for a different game -> ignore
 
     mSlots.push_back (slot);

@@ -34,9 +34,9 @@ namespace DetourNavigator
 
     bool NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->getCollisionShape()};
+        CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape};
         bool result = mNavMeshManager.addObject(id, collisionShape, transform, AreaType_ground);
-        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->getAvoidCollisionShape())
+        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
             const ObjectId avoidId(avoidShape);
             CollisionShape avoidCollisionShape {shapes.mShapeInstance, *avoidShape};
@@ -64,13 +64,13 @@ namespace DetourNavigator
 
     bool NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        const CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->getCollisionShape()};
+        const CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape};
         bool result = mNavMeshManager.updateObject(id, collisionShape, transform, AreaType_ground);
-        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->getAvoidCollisionShape())
+        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
             const ObjectId avoidId(avoidShape);
-            const CollisionShape collisionShape {shapes.mShapeInstance, *avoidShape};
-            if (mNavMeshManager.updateObject(avoidId, collisionShape, transform, AreaType_null))
+            const CollisionShape avoidCollisionShape {shapes.mShapeInstance, *avoidShape};
+            if (mNavMeshManager.updateObject(avoidId, avoidCollisionShape, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
                 result = true;

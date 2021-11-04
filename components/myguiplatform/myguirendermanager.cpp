@@ -4,10 +4,8 @@
 #include <MyGUI_Timer.h>
 
 #include <osg/Drawable>
-#include <osg/BlendFunc>
 #include <osg/Texture2D>
 #include <osg/TexMat>
-#include <osg/ValueObject>
 
 #include <osgViewer/Viewer>
 
@@ -16,8 +14,6 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
-
-#include <components/debug/debuglog.hpp>
 
 #include "myguicompat.h"
 #include "myguitexture.hpp"
@@ -465,23 +461,17 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
     batch.mVertexBuffer = static_cast<OSGVertexBuffer*>(buffer)->getVertexBuffer();
     batch.mArray = static_cast<OSGVertexBuffer*>(buffer)->getVertexArray();
     static_cast<OSGVertexBuffer*>(buffer)->markUsed();
-    bool premultipliedAlpha = false;
-    if (texture)
+
+    if (OSGTexture* osgtexture = static_cast<OSGTexture*>(texture))
     {
-        batch.mTexture = static_cast<OSGTexture*>(texture)->getTexture();
+        batch.mTexture = osgtexture->getTexture();
         if (batch.mTexture->getDataVariance() == osg::Object::DYNAMIC)
             mDrawable->setDataVariance(osg::Object::DYNAMIC); // only for this frame, reset in begin()
-        batch.mTexture->getUserValue("premultiplied alpha", premultipliedAlpha);
+        if (!mInjectState && osgtexture->getInjectState())
+            batch.mStateSet = osgtexture->getInjectState();
     }
     if (mInjectState)
         batch.mStateSet = mInjectState;
-    else if (premultipliedAlpha)
-    {
-        // This is hacky, but MyGUI made it impossible to use a custom layer for a nested node, so state couldn't be injected 'properly'
-        osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
-        stateSet->setAttribute(new osg::BlendFunc(osg::BlendFunc::ONE, osg::BlendFunc::ONE_MINUS_SRC_ALPHA));
-        batch.mStateSet = stateSet;
-    }
 
     mDrawable->addBatch(batch);
 }

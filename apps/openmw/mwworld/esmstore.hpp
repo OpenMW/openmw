@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#include <components/esm/luascripts.hpp>
 #include <components/esm/records.hpp>
 #include "store.hpp"
 
@@ -74,8 +75,9 @@ namespace MWWorld
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
-        std::map<std::string, int> mIds;
-        std::map<std::string, int> mStaticIds;
+        using IDMap = std::unordered_map<std::string, int, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>;
+        IDMap mIds;
+        IDMap mStaticIds;
 
         std::unordered_map<std::string, int> mRefCount;
 
@@ -83,16 +85,25 @@ namespace MWWorld
 
         unsigned int mDynamicCount;
 
-        mutable std::map<std::string, std::weak_ptr<MWMechanics::SpellList> > mSpellListCache;
+        mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> mSpellListCache;
 
         /// Validate entries in store after setup
         void validate();
 
-        void countRecords();
+        void countAllCellRefs();
 
         template<class T>
         void removeMissingObjects(Store<T>& store);
+
+        using LuaContent = std::variant<
+            ESM::LuaScriptsCfg,  // data from an omwaddon
+            std::string>;  // path to an omwscripts file
+        std::vector<LuaContent> mLuaContent;
+
     public:
+        void addOMWScripts(std::string filePath) { mLuaContent.push_back(std::move(filePath)); }
+        ESM::LuaScriptsCfg getLuaScriptsCfg() const;
+
         /// \todo replace with SharedIterator<StoreBase>
         typedef std::map<int, StoreBase *>::const_iterator iterator;
 
@@ -105,10 +116,9 @@ namespace MWWorld
         }
 
         /// Look up the given ID in 'all'. Returns 0 if not found.
-        /// \note id must be in lower case.
         int find(const std::string &id) const
         {
-            std::map<std::string, int>::const_iterator it = mIds.find(id);
+            IDMap::const_iterator it = mIds.find(id);
             if (it == mIds.end()) {
                 return 0;
             }
@@ -116,7 +126,7 @@ namespace MWWorld
         }
         int findStatic(const std::string &id) const
         {
-            std::map<std::string, int>::const_iterator it = mStaticIds.find(id);
+            IDMap::const_iterator it = mStaticIds.find(id);
             if (it == mStaticIds.end()) {
                 return 0;
             }

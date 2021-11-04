@@ -83,13 +83,13 @@ private:
     NpcType getNpcType() const;
 
     PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
-                                        const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor=nullptr);
+                                        const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight);
 
     void removeIndividualPart(ESM::PartReferenceType type);
     void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
 
     bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh,
-                                    bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
+                                    bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr, bool isLight = false);
     void removePartGroup(int group);
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
                                     bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
@@ -105,7 +105,7 @@ private:
 protected:
     void addControllers() override;
     bool isArrowAttached() const override;
-    std::string getShieldMesh(const MWWorld::ConstPtr& shield) const override;
+    std::string getSheathedShieldMesh(const MWWorld::ConstPtr& shield) const override;
 
 public:
     /**

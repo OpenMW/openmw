@@ -251,14 +251,13 @@ namespace MWRender
 
         osg::ref_ptr<osg::Camera> screenshotCamera(new osg::Camera);
         osg::ref_ptr<osg::ShapeDrawable> quad(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0,0,0), 2.0)));
-        quad->getOrCreateStateSet()->setRenderBinDetails(100, "RenderBin", osg::StateSet::USE_RENDERBIN_DETAILS);
 
         std::map<std::string, std::string> defineMap;
 
         Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
         osg::ref_ptr<osg::Shader> fragmentShader(shaderMgr.getShader("s360_fragment.glsl", defineMap,osg::Shader::FRAGMENT));
         osg::ref_ptr<osg::Shader> vertexShader(shaderMgr.getShader("s360_vertex.glsl", defineMap, osg::Shader::VERTEX));
-        osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+        osg::ref_ptr<osg::StateSet> stateset = quad->getOrCreateStateSet();
 
         osg::ref_ptr<osg::Program> program(new osg::Program);
         program->addShader(fragmentShader);
@@ -268,9 +267,6 @@ namespace MWRender
         stateset->addUniform(new osg::Uniform("cubeMap", 0));
         stateset->addUniform(new osg::Uniform("mapping", screenshotMapping));
         stateset->setTextureAttributeAndModes(0, cubeTexture, osg::StateAttribute::ON);
-
-        quad->setStateSet(stateset);
-        quad->setUpdateCallback(nullptr);
 
         screenshotCamera->addChild(quad);
 
@@ -347,7 +343,7 @@ namespace MWRender
         rttCamera->addChild(mWater->getReflectionNode());
         rttCamera->addChild(mWater->getRefractionNode());
 
-        rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
+        rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & ~(Mask_GUI|Mask_FirstPerson));
 
         rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

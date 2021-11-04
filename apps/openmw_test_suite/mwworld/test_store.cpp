@@ -7,6 +7,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwmechanics/spelllist.hpp"
@@ -28,19 +29,14 @@ struct ContentFileTest : public ::testing::Test
         readContentFiles();
 
         // load the content files
-        std::vector<ESM::ESMReader> readerList;
-        readerList.resize(mContentFiles.size());
-
         int index=0;
         for (const auto & mContentFile : mContentFiles)
         {
             ESM::ESMReader lEsm;
             lEsm.setEncoder(nullptr);
             lEsm.setIndex(index);
-            lEsm.setGlobalReaderList(&readerList);
             lEsm.open(mContentFile.string());
-            readerList[index] = lEsm;
-            mEsmStore.load(readerList[index], &dummyListener);
+            mEsmStore.load(lEsm, &dummyListener);
 
             ++index;
         }
@@ -88,7 +84,10 @@ struct ContentFileTest : public ::testing::Test
 
         std::vector<std::string> contentFiles = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
         for (auto & contentFile : contentFiles)
-            mContentFiles.push_back(collections.getPath(contentFile));
+        {
+            if (!Misc::StringUtils::ciEndsWith(contentFile, ".omwscripts"))
+                mContentFiles.push_back(collections.getPath(contentFile));
+        }
     }
 
 protected:
@@ -250,9 +249,6 @@ TEST_F(StoreTest, delete_test)
     record.mId = recordId;
 
     ESM::ESMReader reader;
-    std::vector<ESM::ESMReader> readerList;
-    readerList.push_back(reader);
-    reader.setGlobalReaderList(&readerList);
 
     // master file inserts a record
     Files::IStreamPtr file = getEsmFile(record, false);
@@ -293,9 +289,6 @@ TEST_F(StoreTest, overwrite_test)
     record.mId = recordId;
 
     ESM::ESMReader reader;
-    std::vector<ESM::ESMReader> readerList;
-    readerList.push_back(reader);
-    reader.setGlobalReaderList(&readerList);
 
     // master file inserts a record
     Files::IStreamPtr file = getEsmFile(record, false);

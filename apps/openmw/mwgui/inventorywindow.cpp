@@ -70,7 +70,7 @@ namespace MWGui
         , mTrading(false)
         , mUpdateTimer(0.f)
     {
-        mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture()));
+        mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture(), mPreview->getTextureStateSet()));
         mPreview->rebuild();
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);

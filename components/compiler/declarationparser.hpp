@@ -35,6 +35,10 @@ namespace Compiler
             ///< Handle a special character token.
             /// \return fetch another token?
 
+            bool parseInt (int value, const TokenLoc& loc, Scanner& scanner) override;
+            ///< Handle an int token.
+            /// \return fetch another token?
+
             void reset() override;
 
     };

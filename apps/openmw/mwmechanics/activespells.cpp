@@ -1,5 +1,7 @@
 #include "activespells.hpp"
 
+#include <optional>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/misc/rng.hpp>
@@ -13,6 +15,8 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwrender/animation.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -94,6 +98,11 @@ namespace MWMechanics
     : mId(params.mId), mEffects(params.mEffects), mDisplayName(params.mDisplayName), mCasterActorId(params.mCasterActorId)
     , mSlot(params.mItem.isSet() ? params.mItem.mIndex : 0)
     , mType(params.mType), mWorsenings(params.mWorsenings), mNextWorsening({params.mNextWorsening})
+    {}
+
+    ActiveSpells::ActiveSpellParams::ActiveSpellParams(const ActiveSpellParams& params, const MWWorld::Ptr& actor)
+    : mId(params.mId), mDisplayName(params.mDisplayName), mCasterActorId(actor.getClass().getCreatureStats(actor).getActorId())
+    , mSlot(params.mSlot), mType(params.mType), mWorsenings(-1)
     {}
 
     ESM::ActiveSpells::ActiveSpellParams ActiveSpells::ActiveSpellParams::toEsm() const
@@ -220,16 +229,33 @@ namespace MWMechanics
         {
             const auto caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spellIt->mCasterActorId); //Maybe make this search outside active grid?
             bool removedSpell = false;
+            std::optional<ActiveSpellParams> reflected;
             for(auto it = spellIt->mEffects.begin(); it != spellIt->mEffects.end();)
             {
-                bool remove = applyMagicEffect(ptr, caster, *spellIt, *it, duration);
-                if(remove)
+                auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration);
+                if(result == MagicApplicationResult::REFLECTED)
+                {
+                    if(!reflected)
+                        reflected = {*spellIt, ptr};
+                    auto& reflectedEffect = reflected->mEffects.emplace_back(*it);
+                    reflectedEffect.mFlags = ESM::ActiveEffect::Flag_Ignore_Reflect | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
+                    it = spellIt->mEffects.erase(it);
+                }
+                else if(result == MagicApplicationResult::REMOVED)
                     it = spellIt->mEffects.erase(it);
                 else
                     ++it;
                 removedSpell = applyPurges(ptr, &spellIt, &it);
                 if(removedSpell)
                     break;
+            }
+            if(reflected)
+            {
+                const ESM::Static* reflectStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find("VFX_Reflect");
+                MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+                if(animation && !reflectStatic->mModel.empty())
+                    animation->addEffect("meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, std::string());
+                caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
             }
             if(removedSpell)
                 continue;

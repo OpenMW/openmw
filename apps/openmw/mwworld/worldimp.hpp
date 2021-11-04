@@ -157,6 +157,7 @@ namespace MWWorld
             void updateNavigatorObject(const MWPhysics::Object& object);
 
             void ensureNeededRecords();
+            void validateMasterFiles(const std::vector<ESM::ESMReader>& readers);
 
             void fillGlobalVariables();
 
@@ -376,7 +377,7 @@ namespace MWWorld
             MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, const osg::Vec3f& position, bool movePhysics=true, bool keepActive=false) override;
             ///< @return an updated Ptr
 
-            MWWorld::Ptr moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec, bool moveToActive, bool ignoreCollisions) override;
+            MWWorld::Ptr moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec) override;
             ///< @return an updated Ptr
 
             void scaleObject (const Ptr& ptr, float scale) override;

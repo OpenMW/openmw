@@ -968,8 +968,9 @@ namespace MWRender
                 {
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
-                    node->addUpdateCallback(it->second);
-                    mActiveControllers.emplace_back(node, it->second);
+                    osg::Callback* callback = it->second->getAsCallback();
+                    node->addUpdateCallback(callback);
+                    mActiveControllers.emplace_back(node, callback);
 
                     if (blendMask == 0 && node == mAccumRoot)
                     {
@@ -1510,7 +1511,7 @@ namespace MWRender
             parentNode = mInsert;
         else
         {
-            NodeMap::const_iterator found = getNodeMap().find(Misc::StringUtils::lowerCase(bonename));
+            NodeMap::const_iterator found = getNodeMap().find(bonename);
             if (found == getNodeMap().end())
                 throw std::runtime_error("Can't find bone " + bonename);
 
@@ -1619,8 +1620,7 @@ namespace MWRender
 
     const osg::Node* Animation::getNode(const std::string &name) const
     {
-        std::string lowerName = Misc::StringUtils::lowerCase(name);
-        NodeMap::const_iterator found = getNodeMap().find(lowerName);
+        NodeMap::const_iterator found = getNodeMap().find(name);
         if (found == getNodeMap().end())
             return nullptr;
         else
