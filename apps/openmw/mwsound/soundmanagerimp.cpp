@@ -58,6 +58,13 @@ namespace MWSound
             if (squaredDist > (maxDist * maxDist))
                 return 0.0f;
 
+            // This is a *heuristic* that causes environment sounds to fade in. The idea is the following:
+            // - Only looped sounds playing through the effects channel are environment sounds
+            // - Do not fade in sounds if the player is already so close that the sound plays at maximum volume
+            const float minDist = sfx->getMinDist();
+            if ((squaredDist > (minDist * minDist)) && (type == Type::Sfx) && (mode & PlayMode::Loop))
+                return 0.0f;
+
             return 1.0;
         }
     }
