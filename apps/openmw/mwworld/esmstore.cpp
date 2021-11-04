@@ -153,7 +153,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     // Land texture loading needs to use a separate internal store for each plugin.
     // We set the number of plugins here so we can properly verify if valid plugin
     // indices are being passed to the LandTexture Store retrieval methods.
-    mLandTextures.resize(mLandTextures.getSize()+1);
+    mLandTextures.addPlugin();
 
     // Loop through all records
     while(esm.hasMoreRecs())
