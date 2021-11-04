@@ -241,7 +241,7 @@ lighting` is on.
 This setting has no effect if :ref:`lighting method` is 'legacy'.
 
 minimum interior brightness
-------------------------
+---------------------------
 
 :Type:		float
 :Range:		0.0-1.0

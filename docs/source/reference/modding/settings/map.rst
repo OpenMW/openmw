@@ -125,6 +125,7 @@ max local viewing distance
 This setting controls the viewing distance on local map when 'distant terrain' is enabled.
 If this setting is greater than the viewing distance then only up to the viewing distance is used for local map, otherwise the viewing distance is used.
 If view distance is changed in settings menu during the game, then viewable distance on the local map is not updated.
+
 .. warning::
 	Increasing this setting can increase cell load times,
 	because the localmap take a snapshot of each cell contained in a square of 2 x (max local viewing distance) + 1 square.

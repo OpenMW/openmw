@@ -51,6 +51,7 @@ Determines whether grass should respond to the player treading on it.
 
 .. list-table:: Modes
 	:header-rows: 1
+
 	* - Mode number
 	  - Meaning
 	* - 0
@@ -77,6 +78,7 @@ How far away from the player grass can be before it's unaffected by being trod o
 
 .. list-table:: Presets
 	:header-rows: 1
+
 	* - Preset number
 	  - Range (Units)
 	  - Distance (Units)
