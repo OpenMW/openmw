@@ -36,29 +36,28 @@ namespace
         float mHeight;
     };
 
-    Rectangle getSwimRectangle(const Cell& water, const Settings& settings,
-        const osg::Vec3f& agentHalfExtents)
+    Rectangle getSwimRectangle(const CellWater& water, const Settings& settings, const osg::Vec3f& agentHalfExtents)
     {
-        if (water.mSize == std::numeric_limits<int>::max())
+        if (water.mWater.mCellSize == std::numeric_limits<int>::max())
         {
             return Rectangle {
                 TileBounds {
                     osg::Vec2f(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()),
                     osg::Vec2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
                 },
-                toNavMeshCoordinates(settings, getSwimLevel(settings, water.mShift.z(), agentHalfExtents.z()))
+                toNavMeshCoordinates(settings, getSwimLevel(settings, water.mWater.mLevel, agentHalfExtents.z()))
             };
         }
         else
         {
-            const osg::Vec2f shift(water.mShift.x(), water.mShift.y());
-            const float halfCellSize = water.mSize / 2.0f;
+            const osg::Vec2f shift = getWaterShift2d(water.mCellPosition, water.mWater.mCellSize);
+            const float halfCellSize = water.mWater.mCellSize / 2.0f;
             return Rectangle {
                 TileBounds{
                     toNavMeshCoordinates(settings, shift + osg::Vec2f(-halfCellSize, -halfCellSize)),
                     toNavMeshCoordinates(settings, shift + osg::Vec2f(halfCellSize, halfCellSize))
                 },
-                toNavMeshCoordinates(settings, getSwimLevel(settings, water.mShift.z(), agentHalfExtents.z()))
+                toNavMeshCoordinates(settings, getSwimLevel(settings, water.mWater.mLevel, agentHalfExtents.z()))
             };
         }
     }
@@ -241,12 +240,12 @@ namespace
         );
     }
 
-    bool rasterizeTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const std::vector<Cell>& cells,
+    bool rasterizeTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const std::vector<CellWater>& water,
         const Settings& settings, const rcConfig& config, rcHeightfield& solid)
     {
-        for (const Cell& cell : cells)
+        for (const CellWater& cellWater : water)
         {
-            const Rectangle rectangle = getSwimRectangle(cell, settings, agentHalfExtents);
+            const Rectangle rectangle = getSwimRectangle(cellWater, settings, agentHalfExtents);
             if (!rasterizeTriangles(context, rectangle, config, AreaType_water, solid))
                 return false;
         }
@@ -404,9 +403,9 @@ namespace
             maxZ = std::max(maxZ, vertices[i + 2]);
         }
 
-        for (const Cell& water : recastMesh.getWater())
+        for (const CellWater& water : recastMesh.getWater())
         {
-            const float swimLevel = getSwimLevel(settings, water.mShift.z(), agentHalfExtents.z());
+            const float swimLevel = getSwimLevel(settings, water.mWater.mLevel, agentHalfExtents.z());
             minZ = std::min(minZ, swimLevel);
             maxZ = std::max(maxZ, swimLevel);
         }

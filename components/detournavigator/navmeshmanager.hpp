@@ -34,7 +34,7 @@ namespace DetourNavigator
 
         void addAgent(const osg::Vec3f& agentHalfExtents);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
 
         bool removeWater(const osg::Vec2i& cellPosition);
 

@@ -48,7 +48,7 @@ namespace DetourNavigator
 
         void addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType);
 
-        void addWater(const int mCellSize, const osg::Vec3f& shift);
+        void addWater(const osg::Vec2i& cellPosition, const Water& water);
 
         void addHeightfield(int cellSize, const osg::Vec3f& shift, float height);
 
@@ -60,7 +60,7 @@ namespace DetourNavigator
     private:
         const TileBounds mBounds;
         std::vector<RecastMeshTriangle> mTriangles;
-        std::vector<Cell> mWater;
+        std::vector<CellWater> mWater;
         std::vector<Heightfield> mHeightfields;
         std::vector<FlatHeightfield> mFlatHeightfields;
 

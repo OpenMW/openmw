@@ -8,6 +8,7 @@
 #include <components/bullethelpers/operators.hpp>
 
 #include <osg/Vec3f>
+#include <osg/Vec2i>
 
 #include <memory>
 #include <string>
@@ -53,6 +54,40 @@ namespace DetourNavigator
         osg::Vec3f mShift;
     };
 
+    struct Water
+    {
+        int mCellSize;
+        float mLevel;
+    };
+
+    inline bool operator<(const Water& lhs, const Water& rhs) noexcept
+    {
+        const auto tie = [] (const Water& v) { return std::tie(v.mCellSize, v.mLevel); };
+        return tie(lhs) < tie(rhs);
+    }
+
+    struct CellWater
+    {
+        osg::Vec2i mCellPosition;
+        Water mWater;
+    };
+
+    inline bool operator<(const CellWater& lhs, const CellWater& rhs) noexcept
+    {
+        const auto tie = [] (const CellWater& v) { return std::tie(v.mCellPosition, v.mWater); };
+        return tie(lhs) < tie(rhs);
+    }
+
+    inline osg::Vec2f getWaterShift2d(const osg::Vec2i& cellPosition, int cellSize)
+    {
+        return osg::Vec2f((cellPosition.x() + 0.5f) * cellSize, (cellPosition.y() + 0.5f) * cellSize);
+    }
+
+    inline osg::Vec3f getWaterShift3d(const osg::Vec2i& cellPosition, int cellSize, float level)
+    {
+        return osg::Vec3f(getWaterShift2d(cellPosition, cellSize), level);
+    }
+
     struct Heightfield
     {
         TileBounds mBounds;
@@ -88,7 +123,7 @@ namespace DetourNavigator
     class RecastMesh
     {
     public:
-        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Cell> water,
+        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<CellWater> water,
             std::vector<Heightfield> heightfields, std::vector<FlatHeightfield> flatHeightfields);
 
         std::size_t getGeneration() const
@@ -103,7 +138,7 @@ namespace DetourNavigator
 
         const Mesh& getMesh() const noexcept { return mMesh; }
 
-        const std::vector<Cell>& getWater() const
+        const std::vector<CellWater>& getWater() const
         {
             return mWater;
         }
@@ -122,13 +157,13 @@ namespace DetourNavigator
         std::size_t mGeneration;
         std::size_t mRevision;
         Mesh mMesh;
-        std::vector<Cell> mWater;
+        std::vector<CellWater> mWater;
         std::vector<Heightfield> mHeightfields;
         std::vector<FlatHeightfield> mFlatHeightfields;
 
         friend inline std::size_t getSize(const RecastMesh& value) noexcept
         {
-            return getSize(value.mMesh) + value.mWater.size() * sizeof(Cell)
+            return getSize(value.mMesh) + value.mWater.size() * sizeof(CellWater)
                 + value.mHeightfields.size() * sizeof(Heightfield)
                 + std::accumulate(value.mHeightfields.begin(), value.mHeightfields.end(), std::size_t {0},
                                   [] (std::size_t r, const Heightfield& v) { return r + v.mHeights.size() * sizeof(float); })

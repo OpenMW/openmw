@@ -41,9 +41,9 @@ namespace DetourNavigator
 
         std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
 
-        std::optional<Cell> removeWater(const osg::Vec2i& cellPosition);
+        std::optional<Water> removeWater(const osg::Vec2i& cellPosition);
 
         bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
             const HeightfieldShape& shape);
@@ -76,7 +76,7 @@ namespace DetourNavigator
         mutable std::mutex mMutex;
         std::size_t mRevision = 0;
         std::map<ObjectId, OscillatingRecastMeshObject> mObjects;
-        std::map<osg::Vec2i, Cell> mWater;
+        std::map<osg::Vec2i, Water> mWater;
         std::map<osg::Vec2i, Heightfield> mHeightfields;
         std::optional<Report> mLastNavMeshReportedChange;
         std::optional<Report> mLastNavMeshReport;

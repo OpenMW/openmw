@@ -54,8 +54,7 @@ namespace DetourNavigator
         return result;
     }
 
-    bool TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
-        const osg::Vec3f& shift)
+    bool TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
         auto& tilesPositions = mWaterTilesPositions[cellPosition];
 
@@ -66,7 +65,7 @@ namespace DetourNavigator
             const auto tiles = mTiles.lock();
             for (auto& tile : *tiles)
             {
-                if (tile.second->addWater(cellPosition, cellSize, shift))
+                if (tile.second->addWater(cellPosition, cellSize, level))
                 {
                     tilesPositions.push_back(tile.first);
                     result = true;
@@ -75,6 +74,7 @@ namespace DetourNavigator
         }
         else
         {
+            const osg::Vec3f shift = getWaterShift3d(cellPosition, cellSize, level);
             getTilesPositions(cellSize, shift, mSettings, [&] (const TilePosition& tilePosition)
                 {
                     const auto tiles = mTiles.lock();
@@ -85,7 +85,7 @@ namespace DetourNavigator
                         tile = tiles->emplace(tilePosition,
                                 std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration)).first;
                     }
-                    if (tile->second->addWater(cellPosition, cellSize, shift))
+                    if (tile->second->addWater(cellPosition, cellSize, level))
                     {
                         tilesPositions.push_back(tilePosition);
                         result = true;
@@ -99,12 +99,12 @@ namespace DetourNavigator
         return result;
     }
 
-    std::optional<Cell> TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<Water> TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto object = mWaterTilesPositions.find(cellPosition);
         if (object == mWaterTilesPositions.end())
             return std::nullopt;
-        std::optional<Cell> result;
+        std::optional<Water> result;
         for (const auto& tilePosition : object->second)
         {
             const auto tiles = mTiles.lock();

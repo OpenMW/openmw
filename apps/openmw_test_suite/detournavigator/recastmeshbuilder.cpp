@@ -28,6 +28,18 @@ namespace DetourNavigator
         return lhs.mSize == rhs.mSize && lhs.mShift == rhs.mShift;
     }
 
+    static inline bool operator ==(const Water& lhs, const Water& rhs)
+    {
+        const auto tie = [] (const Water& v) { return std::tie(v.mCellSize, v.mLevel); };
+        return tie(lhs) == tie(rhs);
+    }
+
+    static inline bool operator ==(const CellWater& lhs, const CellWater& rhs)
+    {
+        const auto tie = [] (const CellWater& v) { return std::tie(v.mCellPosition, v.mWater); };
+        return tie(lhs) == tie(rhs);
+    }
+
     static inline bool operator==(const Heightfield& lhs, const Heightfield& rhs)
     {
         return makeTuple(lhs) == makeTuple(rhs);
@@ -36,6 +48,16 @@ namespace DetourNavigator
     static inline bool operator==(const FlatHeightfield& lhs, const FlatHeightfield& rhs)
     {
         return std::tie(lhs.mBounds, lhs.mHeight) == std::tie(rhs.mBounds, rhs.mHeight);
+    }
+
+    static inline std::ostream& operator<<(std::ostream& s, const Water& v)
+    {
+        return s << "Water {" << v.mCellSize << ", " << v.mLevel << "}";
+    }
+
+    static inline std::ostream& operator<<(std::ostream& s, const CellWater& v)
+    {
+        return s << "CellWater {" << v.mCellPosition << ", " << v.mWater << "}";
     }
 
     static inline std::ostream& operator<<(std::ostream& s, const FlatHeightfield& v)
@@ -435,10 +457,10 @@ namespace
     TEST_F(DetourNavigatorRecastMeshBuilderTest, add_water_then_get_water_should_return_it)
     {
         RecastMeshBuilder builder(mBounds);
-        builder.addWater(1000, osg::Vec3f(100, 200, 300));
+        builder.addWater(osg::Vec2i(1, 2), Water {1000, 300.0f});
         const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
-        EXPECT_EQ(recastMesh->getWater(), std::vector<Cell>({
-            Cell {1000, osg::Vec3f(100, 200, 300)}
+        EXPECT_EQ(recastMesh->getWater(), std::vector<CellWater>({
+            CellWater {osg::Vec2i(1, 2), Water {1000, 300.0f}}
         }));
     }
 

@@ -548,7 +548,7 @@ namespace
         const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addWater(mCellPosition, cellSize, osg::Vec3f(shift.x(), shift.y(), 300));
+        mNavigator->addWater(mCellPosition, cellSize, 300);
         mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -597,7 +597,7 @@ namespace
         const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addWater(mCellPosition, cellSize, osg::Vec3f(shift.x(), shift.y(), -25));
+        mNavigator->addWater(mCellPosition, cellSize, -25);
         mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -645,7 +645,7 @@ namespace
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
-        mNavigator->addWater(mCellPosition, std::numeric_limits<int>::max(), osg::Vec3f(shift.x(), shift.y(), -25));
+        mNavigator->addWater(mCellPosition, std::numeric_limits<int>::max(), -25);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
@@ -691,7 +691,7 @@ namespace
         const osg::Vec3f shift = getHeightfieldShift(mCellPosition, cellSize, surface.mMinHeight, surface.mMaxHeight);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addWater(mCellPosition, cellSize, osg::Vec3f(shift.x(), shift.y(), -25));
+        mNavigator->addWater(mCellPosition, cellSize, -25);
         mNavigator->addHeightfield(mCellPosition, cellSize, shift, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);

@@ -200,9 +200,9 @@ namespace DetourNavigator
         }
     }
 
-    void RecastMeshBuilder::addWater(const int cellSize, const osg::Vec3f& shift)
+    void RecastMeshBuilder::addWater(const osg::Vec2i& cellPosition, const Water& water)
     {
-        mWater.push_back(Cell {cellSize, shift});
+        mWater.push_back(CellWater {cellPosition, water});
     }
 
     void RecastMeshBuilder::addHeightfield(int cellSize, const osg::Vec3f& shift, float height)

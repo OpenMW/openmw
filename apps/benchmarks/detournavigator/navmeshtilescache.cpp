@@ -89,10 +89,11 @@ namespace
     template <typename OutputIterator, typename Random>
     void generateWater(OutputIterator out, std::size_t count, Random& random)
     {
-        std::uniform_real_distribution<float> distribution(0.0, 1.0);
+        std::uniform_real_distribution<float> floatDistribution(0.0, 1.0);
+        std::uniform_int_distribution<int> intDistribution(-10, 10);
         std::generate_n(out, count, [&] {
-            const osg::Vec3f shift(distribution(random), distribution(random), distribution(random));
-            return Cell {1, shift};
+            const osg::Vec2i cellPosition(intDistribution(random), intDistribution(random));
+            return CellWater {cellPosition, Water {8196, floatDistribution(random)}};
         });
     }
 
@@ -148,7 +149,7 @@ namespace
         const std::size_t generation = std::uniform_int_distribution<std::size_t>(0, 100)(random);
         const std::size_t revision = std::uniform_int_distribution<std::size_t>(0, 10000)(random);
         Mesh mesh = generateMesh(triangles, random);
-        std::vector<Cell> water;
+        std::vector<CellWater> water;
         generateWater(std::back_inserter(water), 1, random);
         RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water),
                               {generateHeightfield(random)}, {generateFlatHeightfield(random)});

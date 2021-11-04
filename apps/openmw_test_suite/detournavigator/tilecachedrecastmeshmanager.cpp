@@ -264,7 +264,7 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        EXPECT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
+        EXPECT_TRUE(manager.addWater(cellPosition, cellSize, 0.0f));
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_water_for_not_max_int_should_add_new_tiles)
@@ -272,9 +272,9 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
-        for (int x = -6; x < 6; ++x)
-            for (int y = -6; y < 6; ++y)
+        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, 0.0f));
+        for (int x = -1; x < 12; ++x)
+            for (int y = -1; y < 12; ++y)
                 ASSERT_NE(manager.getMesh(TilePosition(x, y)), nullptr);
     }
 
@@ -286,7 +286,7 @@ namespace
         ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = std::numeric_limits<int>::max();
-        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
+        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, 0.0f));
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
                 ASSERT_EQ(manager.getMesh(TilePosition(x, y)) != nullptr, -1 <= x && x <= 0 && -1 <= y && y <= 0);
@@ -303,10 +303,10 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
+        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, 0.0f));
         const auto result = manager.removeWater(cellPosition);
         ASSERT_TRUE(result.has_value());
-        EXPECT_EQ(result->mSize, cellSize);
+        EXPECT_EQ(result->mCellSize, cellSize);
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_water_for_existing_cell_should_remove_empty_tiles)
@@ -314,7 +314,7 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
+        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, 0.0f));
         ASSERT_TRUE(manager.removeWater(cellPosition));
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
@@ -329,7 +329,7 @@ namespace
         ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
+        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, 0.0f));
         ASSERT_TRUE(manager.removeWater(cellPosition));
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
@@ -344,10 +344,10 @@ namespace
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(nullptr, boxShape);
         ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
-        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, osg::Vec3f()));
+        ASSERT_TRUE(manager.addWater(cellPosition, cellSize, 0.0f));
         ASSERT_TRUE(manager.removeObject(ObjectId(&boxShape)));
-        for (int x = -6; x < 6; ++x)
-            for (int y = -6; y < 6; ++y)
+        for (int x = -1; x < 12; ++x)
+            for (int y = -1; y < 12; ++y)
                 ASSERT_NE(manager.getMesh(TilePosition(x, y)), nullptr);
     }
 }

@@ -73,10 +73,11 @@ namespace DetourNavigator
         return true;
     }
 
-    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift)
+    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
-        if (!mRecastMeshManager.addWater(cellPosition, cellSize, shift))
+        if (!mRecastMeshManager.addWater(cellPosition, cellSize, level))
             return false;
+        const osg::Vec3f shift = getWaterShift3d(cellPosition, cellSize, level);
         addChangedTiles(cellSize, shift, ChangeType::add);
         return true;
     }
@@ -86,7 +87,8 @@ namespace DetourNavigator
         const auto water = mRecastMeshManager.removeWater(cellPosition);
         if (!water)
             return false;
-        addChangedTiles(water->mSize, water->mShift, ChangeType::remove);
+        const osg::Vec3f shift = getWaterShift3d(cellPosition, water->mCellSize, water->mLevel);
+        addChangedTiles(water->mCellSize, shift, ChangeType::remove);
         return true;
     }
 

@@ -97,9 +97,9 @@ namespace DetourNavigator
         return result;
     }
 
-    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift)
+    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
-        return mNavMeshManager.addWater(cellPosition, cellSize, shift);
+        return mNavMeshManager.addWater(cellPosition, cellSize, level);
     }
 
     bool NavigatorImpl::removeWater(const osg::Vec2i& cellPosition)

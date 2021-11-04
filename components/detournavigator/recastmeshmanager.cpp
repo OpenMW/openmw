@@ -73,23 +73,23 @@ namespace DetourNavigator
         return result;
     }
 
-    bool RecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift)
+    bool RecastMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
         const std::lock_guard lock(mMutex);
-        if (!mWater.emplace(cellPosition, Cell {cellSize, shift}).second)
+        if (!mWater.emplace(cellPosition, Water {cellSize, level}).second)
             return false;
         ++mRevision;
         return true;
     }
 
-    std::optional<Cell> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<Water> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const std::lock_guard lock(mMutex);
         const auto water = mWater.find(cellPosition);
         if (water == mWater.end())
             return std::nullopt;
         ++mRevision;
-        const Cell result = water->second;
+        Water result = water->second;
         mWater.erase(water);
         return result;
     }
@@ -130,7 +130,7 @@ namespace DetourNavigator
         {
             const std::lock_guard lock(mMutex);
             for (const auto& [k, v] : mWater)
-                builder.addWater(v.mSize, v.mShift);
+                builder.addWater(k, v);
             for (const auto& [cellPosition, v] : mHeightfields)
                 std::visit(AddHeightfield {v.mCell, builder}, v.mShape);
             objects.reserve(mObjects.size());
