@@ -8,7 +8,8 @@
 #include <unordered_map>
 #include <set>
 
-#include "recordcmp.hpp"
+#include <components/esm/records.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace ESM
 {
@@ -150,9 +151,11 @@ namespace MWWorld
     {
         typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Static;
         Static mStatic;
-        std::vector<T*> mShared; // Preserves the record order as it came from the content files (this
-                                     // is relevant for the spell autocalc code and selection order
-                                     // for heads/hairs in the character creation)
+        /// @par mShared usually preserves the record order as it came from the content files (this
+        /// is relevant for the spell autocalc code and selection order
+        /// for heads/hairs in the character creation)
+        /// @warning ESM::Dialogue Store currently implements a sorted order for unknown reasons.
+        std::vector<T*> mShared;
         typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Dynamic;
         Dynamic mDynamic;
 
