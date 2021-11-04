@@ -504,40 +504,27 @@ QStringList ContentSelectorModel::ContentModel::gameFiles() const
 
 void ContentSelectorModel::ContentModel::sortFiles()
 {
-    //first, sort the model such that all dependencies are ordered upstream (gamefile) first.
-    bool movedFiles = true;
-    int fileCount = mFiles.size();
-
     //Dependency sort
-    //iterate until no sorting of files occurs
-    while (movedFiles)
+    int sorted = 0;
+    //iterate each file, obtaining a reference to its gamefiles list
+    for(int i = sorted; i < mFiles.size(); ++i)
     {
-        movedFiles = false;
-        //iterate each file, obtaining a reference to it's gamefiles list
-        for (int i = 0; i < fileCount; i++)
+        const QStringList& gameFiles = mFiles.at(i)->gameFiles();
+        int j = sorted;
+        for(;j > 0; --j)
         {
-            QModelIndex idx1 = index (i, 0, QModelIndex());
-            const QStringList &gamefiles = mFiles.at(i)->gameFiles();
-            //iterate each file after the current file, verifying that none of it's
-            //dependencies appear.
-            for (int j = i + 1; j < fileCount; j++)
-            {
-                if (gamefiles.contains(mFiles.at(j)->fileName(), Qt::CaseInsensitive)
-                 || (!mFiles.at(i)->isGameFile() && gamefiles.isEmpty()
-                 && mFiles.at(j)->fileName().compare("Morrowind.esm", Qt::CaseInsensitive) == 0)) // Hack: implicit dependency on Morrowind.esm for dependency-less files
-                {
-                        mFiles.move(j, i);
-
-                        QModelIndex idx2 = index (j, 0, QModelIndex());
-
-                        emit dataChanged (idx1, idx2);
-
-                        movedFiles = true;
-                }
-            }
-            if (movedFiles)
+            const auto file = mFiles.at(j - 1);
+            if(gameFiles.contains(file->fileName(), Qt::CaseInsensitive)
+                 || (!mFiles.at(i)->isGameFile() && gameFiles.isEmpty()
+                 && file->fileName().compare("Morrowind.esm", Qt::CaseInsensitive) == 0)) // Hack: implicit dependency on Morrowind.esm for dependency-less files
                 break;
         }
+        if(i != j)
+        {
+            mFiles.move(i, j);
+            emit dataChanged(index(i, 0, QModelIndex()), index(j, 0, QModelIndex()));
+        }
+        ++sorted;
     }
 }
 
