@@ -14,6 +14,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/shader/shadervisitor.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -232,6 +233,14 @@ void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
         if (isEnchanted)
             SceneUtil::addEnchantedGlow(shieldNode, mResourceSystem, glowColor);
     }
+
+    if (mAlpha != 1.f)
+    {
+        // TODO: Remove when we have figured out why this was ever necessary.
+        Shader::ShaderVisitor shaderVisitor(mResourceSystem->getSceneManager()->getShaderVisitorTemplate());
+        mHolsteredShield->getNode()->accept(shaderVisitor);
+    }
+}
 }
 
 bool ActorAnimation::useShieldAnimations() const
