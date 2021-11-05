@@ -152,7 +152,8 @@ namespace MWRender
     osg::ref_ptr<osg::Node> Groundcover::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
         GroundcoverChunkId id = std::make_tuple(center, size);
-
+        if (lod > getMaxLodLevel())
+            return nullptr;
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
         if (obj)
             return static_cast<osg::Node*>(obj.get());
