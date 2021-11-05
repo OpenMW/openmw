@@ -122,7 +122,7 @@ namespace MWRender
             }
             
             float minDist = std::numeric_limits<float>::max();
-            for (unsigned int i = 0; i < 8; ++i)
+            for (unsigned int i=0; i<8; ++i)
             {
                 osg::Vec3f corner = mBb.corner(i);
                 minDist = std::min(minDist, nv->getDistanceToEyePoint(corner));
