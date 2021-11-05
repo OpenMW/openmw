@@ -167,12 +167,13 @@ namespace MWRender
         }
     }
 
-    Groundcover::Groundcover(Resource::SceneManager* sceneManager, float density)
+    Groundcover::Groundcover(Resource::SceneManager* sceneManager, float density, float viewDistance)
          : GenericResourceManager<GroundcoverChunkId>(nullptr)
          , mSceneManager(sceneManager)
          , mDensity(density)
          , mStateset(new osg::StateSet)
     {
+         setViewDistance(viewDistance);
          // MGE uses default alpha settings for groundcover, so we can not rely on alpha properties
          // Force a unified alpha handling instead of data from meshes
          osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f / 255.f);
