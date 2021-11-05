@@ -132,11 +132,6 @@ namespace DetourNavigator
         std::vector<FlatHeightfield> mFlatHeightfields;
         Bounds mBounds;
 
-        friend inline bool operator <(const RecastMesh& lhs, const RecastMesh& rhs) noexcept
-        {
-            return std::tie(lhs.mMesh, lhs.mWater) < std::tie(rhs.mMesh, rhs.mWater);
-        }
-
         friend inline std::size_t getSize(const RecastMesh& value) noexcept
         {
             return getSize(value.mMesh) + value.mWater.size() * sizeof(Cell)
