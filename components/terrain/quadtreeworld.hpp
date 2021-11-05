@@ -57,7 +57,7 @@ namespace Terrain
             void setViewDistance(float viewDistance) { mViewDistance = viewDistance; }
             float getViewDistance() const { return mViewDistance; }
 
-            // Automatically set based on getViewDistance()
+            // Automatically set by addChunkManager based on getViewDistance()
             unsigned int getMaxLodLevel() const { return mMaxLodLevel; }
             void setMaxLodLevel(unsigned int level) { mMaxLodLevel = level; }
         private:
