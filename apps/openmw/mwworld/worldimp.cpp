@@ -28,6 +28,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"

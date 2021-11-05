@@ -5,7 +5,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/esm/aisequence.hpp>
-#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navigatorutils.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
 #include "../mwbase/world.hpp"
@@ -337,7 +337,8 @@ namespace MWMechanics
             if (!isWaterCreature && !isFlyingCreature)
             {
                 // findRandomPointAroundCircle uses wanderDistance as limit for random and not as exact distance
-                if (const auto destination = navigator->findRandomPointAroundCircle(halfExtents, mInitialActorPosition, wanderDistance, navigatorFlags))
+                if (const auto destination = DetourNavigator::findRandomPointAroundCircle(*navigator, halfExtents,
+                        mInitialActorPosition, wanderDistance, navigatorFlags))
                     mDestination = *destination;
                 else
                     mDestination = getRandomPointAround(mInitialActorPosition, wanderRadius);
