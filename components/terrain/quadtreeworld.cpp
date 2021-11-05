@@ -55,9 +55,8 @@ namespace Terrain
 class DefaultLodCallback : public LodCallback
 {
 public:
-    DefaultLodCallback(float factor, float minSize, float viewDistance, const osg::Vec4i& grid, float distanceModifier=0.f)
+    DefaultLodCallback(float factor, float viewDistance, const osg::Vec4i& grid, float distanceModifier=0.f)
         : mFactor(factor)
-        , mMinSize(minSize)
         , mViewDistance(viewDistance)
         , mActiveGrid(grid)
         , mDistanceModifier(distanceModifier)
@@ -94,7 +93,6 @@ public:
 
 private:
     float mFactor;
-    float mMinSize;
     float mViewDistance;
     osg::Vec4i mActiveGrid;
     float mDistanceModifier;
