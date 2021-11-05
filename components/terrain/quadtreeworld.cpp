@@ -451,7 +451,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     if (needsUpdate)
     {
         vd->reset();
-        DefaultLodCallback lodCallback(mLodFactor, mViewDistance, mActiveGrid);
+        DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, mActiveGrid);
         mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
     }
 
@@ -527,7 +527,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
             distanceModifier = 1024;
         else if (pass == 2)
             distanceModifier = -1024;
-        DefaultLodCallback lodCallback(mLodFactor, mViewDistance, grid, distanceModifier);
+        DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid, distanceModifier);
         mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
 
         if (pass==0)
