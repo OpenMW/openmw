@@ -118,11 +118,6 @@ namespace DetourNavigator
             return mFlatHeightfields;
         }
 
-        const Bounds& getBounds() const
-        {
-            return mBounds;
-        }
-
     private:
         std::size_t mGeneration;
         std::size_t mRevision;
@@ -130,7 +125,6 @@ namespace DetourNavigator
         std::vector<Cell> mWater;
         std::vector<Heightfield> mHeightfields;
         std::vector<FlatHeightfield> mFlatHeightfields;
-        Bounds mBounds;
 
         friend inline std::size_t getSize(const RecastMesh& value) noexcept
         {
