@@ -48,35 +48,6 @@ namespace DetourNavigator
         };
         return tie(lhs) == tie(rhs);
     }
-
-    static inline std::ostream& operator<<(std::ostream& s, const Water& v)
-    {
-        return s << "Water {" << v.mCellSize << ", " << v.mLevel << "}";
-    }
-
-    static inline std::ostream& operator<<(std::ostream& s, const CellWater& v)
-    {
-        return s << "CellWater {" << v.mCellPosition << ", " << v.mWater << "}";
-    }
-
-    static inline std::ostream& operator<<(std::ostream& s, const FlatHeightfield& v)
-    {
-        return s << "FlatHeightfield {" << v.mCellPosition << ", " << v.mCellSize << ", " << v.mHeight << "}";
-    }
-
-    static inline std::ostream& operator<<(std::ostream& s, const Heightfield& v)
-    {
-        s << "Heightfield {.mCellPosition=" << v.mCellPosition
-          << ", .mCellSize=" << v.mCellSize
-          << ", .mLength=" << static_cast<int>(v.mLength)
-          << ", .mMinHeight=" << v.mMinHeight
-          << ", .mMaxHeight=" << v.mMaxHeight
-          << ", .mHeights={";
-        for (float h : v.mHeights)
-            s << h << ", ";
-        s << "}";
-        return s << ", .mOriginalSize=" << v.mOriginalSize << "}";
-    }
 }
 
 namespace

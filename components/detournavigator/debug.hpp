@@ -3,6 +3,7 @@
 
 #include "tilebounds.hpp"
 #include "status.hpp"
+#include "recastmesh.hpp"
 
 #include <osg/io_utils>
 
@@ -37,6 +38,35 @@ namespace DetourNavigator
         }
 #undef OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE
         return stream << "DetourNavigator::Error::" << static_cast<int>(value);
+    }
+
+    inline std::ostream& operator<<(std::ostream& s, const Water& v)
+    {
+        return s << "Water {" << v.mCellSize << ", " << v.mLevel << "}";
+    }
+
+    inline std::ostream& operator<<(std::ostream& s, const CellWater& v)
+    {
+        return s << "CellWater {" << v.mCellPosition << ", " << v.mWater << "}";
+    }
+
+    inline std::ostream& operator<<(std::ostream& s, const FlatHeightfield& v)
+    {
+        return s << "FlatHeightfield {" << v.mCellPosition << ", " << v.mCellSize << ", " << v.mHeight << "}";
+    }
+
+    inline std::ostream& operator<<(std::ostream& s, const Heightfield& v)
+    {
+        s << "Heightfield {.mCellPosition=" << v.mCellPosition
+          << ", .mCellSize=" << v.mCellSize
+          << ", .mLength=" << static_cast<int>(v.mLength)
+          << ", .mMinHeight=" << v.mMinHeight
+          << ", .mMaxHeight=" << v.mMaxHeight
+          << ", .mHeights={";
+        for (float h : v.mHeights)
+            s << h << ", ";
+        s << "}";
+        return s << ", .mOriginalSize=" << v.mOriginalSize << "}";
     }
 
     class RecastMesh;
