@@ -56,8 +56,13 @@ namespace Terrain
 
             void setViewDistance(float viewDistance) { mViewDistance = viewDistance; }
             float getViewDistance() const { return mViewDistance; }
+
+            // Automatically set based on getViewDistance().
+            unsigned int getMaxLodLevel() const { return mMaxLodLevel; }
+            void setMaxLodLevel(unsigned int level) { mMaxLodLevel = level; }
         private:
             float mViewDistance = 0.f;
+            unsigned int mMaxLodLevel = ~0u;
         };
         void addChunkManager(ChunkManager*);
 
@@ -79,7 +84,6 @@ namespace Terrain
         float mMinSize;
         bool mDebugTerrainChunks;
         std::unique_ptr<DebugChunkManager> mDebugChunkManager;
-        float mRevalidateDistance;
     };
 
 }
