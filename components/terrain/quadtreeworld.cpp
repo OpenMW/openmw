@@ -320,7 +320,7 @@ unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
 }
 
 /// get the flags to use for stitching in the index buffer so that chunks of different LOD connect seamlessly
-unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, const ViewData* vd)
+unsigned int getLodFlags(QuadTreeNode* node, int ourVertexLod, int vertexLodMod, const ViewData* vd)
 {
     unsigned int lodFlags = 0;
     for (unsigned int i=0; i<4; ++i)
@@ -337,14 +337,16 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, const
         if (neighbour)
             lod = getVertexLod(neighbour, vertexLodMod);
 
-        if (lod <= ourLod) // We only need to worry about neighbours less detailed than we are -
+        if (lod <= ourVertexLod) // We only need to worry about neighbours less detailed than we are -
             lod = 0;         // neighbours with more detail will do the stitching themselves
         // Use 4 bits for each LOD delta
         if (lod > 0)
         {
-            lodFlags |= static_cast<unsigned int>(lod - ourLod) << (4*i);
+            lodFlags |= static_cast<unsigned int>(lod - ourVertexLod) << (4*i);
         }
     }
+    // Use the remaining bits for our vertex LOD
+    lodFlags |= (ourVertexLod << (4*4);
     return lodFlags;
 }
 
@@ -353,12 +355,11 @@ void QuadTreeWorld::loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float 
     if (!vd->hasChanged() && entry.mRenderingNode)
         return;
 
-    int ourLod = getVertexLod(entry.mNode, mVertexLodMod);
-
     if (vd->hasChanged())
     {
+        int ourVertexLod = getVertexLod(entry.mNode, mVertexLodMod);
         // have to recompute the lodFlags in case a neighbour has changed LOD.
-        unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, mVertexLodMod, vd);
+        unsigned int lodFlags = getLodFlags(entry.mNode, ourVertexLod, mVertexLodMod, vd);
         if (lodFlags != entry.mLodFlags)
         {
             entry.mRenderingNode = nullptr;
@@ -376,7 +377,7 @@ void QuadTreeWorld::loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float 
 
         for (QuadTreeWorld::ChunkManager* m : mChunkManagers)
         {
-            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
+            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), DefaultLodCallback::getNativeLodLevel(entry.mNode), entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
             if (n) pat->addChild(n);
         }
         entry.mRenderingNode = pat;
