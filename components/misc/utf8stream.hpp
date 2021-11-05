@@ -2,6 +2,7 @@
 #define MISC_UTF8ITER_HPP
 
 #include <cstring>
+#include <string>
 #include <tuple>
 
 class Utf8Stream
@@ -85,6 +86,70 @@ public:
         }
 
         return std::make_pair (chr, cur);
+    }
+
+    static UnicodeChar toLowerUtf8(UnicodeChar ch)
+    {
+        // Russian alphabet
+        if (ch >= 0x0410 && ch < 0x0430)
+            return ch + 0x20;
+
+        // Cyrillic IO character
+        if (ch == 0x0401)
+            return ch + 0x50;
+
+        // Latin alphabet
+        if (ch >= 0x41 && ch < 0x60)
+            return ch + 0x20;
+
+        // German characters
+        if (ch == 0xc4 || ch == 0xd6 || ch == 0xdc)
+            return ch + 0x20;
+        if (ch == 0x1e9e)
+            return 0xdf;
+
+        // TODO: probably we will need to support characters from other languages
+
+        return ch;
+    }
+
+    static std::string lowerCaseUtf8(const std::string& str)
+    {
+        if (str.empty())
+            return str;
+
+        // Decode string as utf8 characters, convert to lower case and pack them to string
+        std::string out;
+        Utf8Stream stream (str.c_str());
+        while (!stream.eof ())
+        {
+            UnicodeChar character = toLowerUtf8(stream.peek());
+
+            if (character <= 0x7f)
+                out.append(1, static_cast<char>(character));
+            else if (character <= 0x7ff)
+            {
+                out.append(1, static_cast<char>(0xc0 | ((character >> 6) & 0x1f)));
+                out.append(1, static_cast<char>(0x80 | (character & 0x3f)));
+            }
+            else if (character <= 0xffff)
+            {
+                out.append(1, static_cast<char>(0xe0 | ((character >> 12) & 0x0f)));
+                out.append(1, static_cast<char>(0x80 | ((character >> 6) & 0x3f)));
+                out.append(1, static_cast<char>(0x80 | (character & 0x3f)));
+            }
+            else
+            {
+                out.append(1, static_cast<char>(0xf0 | ((character >> 18) & 0x07)));
+                out.append(1, static_cast<char>(0x80 | ((character >> 12) & 0x3f)));
+                out.append(1, static_cast<char>(0x80 | ((character >> 6) & 0x3f)));
+                out.append(1, static_cast<char>(0x80 | (character & 0x3f)));
+            }
+
+            stream.consume();
+        }
+
+        return out;
     }
 
 private:
