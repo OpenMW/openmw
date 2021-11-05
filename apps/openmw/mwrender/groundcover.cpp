@@ -1,5 +1,6 @@
 #include "groundcover.hpp"
 
+#include <osg/ComputeBoundsVisitor>
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
 #include <osg/Geometry>
@@ -7,6 +8,7 @@
 
 #include <components/esm/esmreader.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
@@ -104,6 +106,33 @@ namespace MWRender
     private:
         float mCurrentGroundcover = 0.f;
         float mDensity = 0.f;
+    };
+
+    class ViewDistanceCallback : public SceneUtil::NodeCallback<ViewDistanceCallback>
+    {
+    public:
+        ViewDistanceCallback(float dist) : mViewDistance(dist) {}
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osg::ComputeBoundsVisitor cbv;
+            if (!mBb.valid())
+            {
+                node->accept(cbv);
+                mBb = cbv.getBoundingBox();
+            }
+            
+            float minDist = std::numeric_limits<float>::max();
+            for (unsigned int i = 0; i < 8; ++i)
+            {
+                osg::Vec3f corner = mBb.corner(i);
+                minDist = std::min(minDist, nv.getDistanceToEyePoint(corner));
+            }
+            if (minDist <= mViewDistance)
+                traverse(node, nv);
+        }
+    private:
+        float mViewDistance;
+        osg::BoundingBox mBb;
     };
 
     inline bool isInChunkBorders(ESM::CellRef& ref, osg::Vec2f& minBound, osg::Vec2f& maxBound)
@@ -222,8 +251,9 @@ namespace MWRender
 
         group->setStateSet(mStateset);
         group->setNodeMask(Mask_Groundcover);
+        group->addCullCallback(new ViewDistanceCallback(getViewDistance()));
         if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
-            group->setCullCallback(new SceneUtil::LightListCallback);
+            group->addCullCallback(new SceneUtil::LightListCallback);
         mSceneManager->recreateShaders(group, "groundcover", true, mProgramTemplate);
         mSceneManager->shareState(group);
         group->getBound();
