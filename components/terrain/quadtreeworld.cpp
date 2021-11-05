@@ -78,19 +78,18 @@ public:
             if (intersects)
                 return Deeper;
         }
-
         dist = std::max(0.f, dist + mDistanceModifier);
-
         if (dist > mViewDistance && !activeGrid) // for Scene<->ObjectPaging sync the activegrid must remain loaded
             return StopTraversal;
-
-        int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
-        int lodLevel = convertDistanceToLodLevel(dist);
-        return nativeLodLevel <= lodLevel ? StopTraversalAndUse : Deeper;
+        return getNativeLodLevel(node) <= convertDistanceToLodLevel(distance) ? StopTraversalAndUse : Deeper;
     }
-    int convertDistanceToLodLevel(float distance) const
+    static int getNativeLodLevel(QuadTreeNode* node)
     {
-        return Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize*mFactor)));
+        return Log2(static_cast<unsigned int>(node->getSize()));
+    }
+    int convertDistanceToLodLevel(float dist) const
+    {
+        return Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mFactor)));
     }
 
 private:
@@ -281,7 +280,6 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     , mViewDistance(std::numeric_limits<float>::max())
     , mMinSize(1/8.f)
     , mDebugTerrainChunks(debugChunks)
-    , mRevalidateDistance(0.f)
 {
     mChunkManager->setCompositeMapSize(compMapResolution);
     mChunkManager->setCompositeMapLevel(compMapLevel);
@@ -302,7 +300,7 @@ QuadTreeWorld::~QuadTreeWorld()
 /// get the level of vertex detail to render this node at, expressed relative to the native resolution of the data set.
 unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
 {
-    int lod = Log2(int(node->getSize()));
+    int lod = DefaultLodCallback::getNativeLodLevel(node);
     if (vertexLodMod > 0)
     {
         lod = std::max(0, lod-vertexLodMod);
@@ -451,7 +449,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     if (needsUpdate)
     {
         vd->reset();
-        DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, mActiveGrid);
+        DefaultLodCallback lodCallback(mLodFactor, mViewDistance, mActiveGrid);
         mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
     }
 
@@ -527,7 +525,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
             distanceModifier = 1024;
         else if (pass == 2)
             distanceModifier = -1024;
-        DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid, distanceModifier);
+        DefaultLodCallback lodCallback(mLodFactor, mViewDistance, grid, distanceModifier);
         mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
 
         if (pass==0)
@@ -582,8 +580,8 @@ void QuadTreeWorld::addChunkManager(QuadTreeWorld::ChunkManager* m)
     mTerrainRoot->setNodeMask(mTerrainRoot->getNodeMask()|m->getNodeMask());
     if (m->getViewDistance())
     {
-        DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, mActiveGrid);
-        m->setMaxLodLevel(mLodCallback->convertDistanceToLodLevel(m->getViewDistance() + mViewDataMap->getReuseDistance()));
+        DefaultLodCallback lodCallback(mLodFactor, mViewDistance, mActiveGrid);
+        m->setMaxLodLevel(lodCallback.convertDistanceToLodLevel(m->getViewDistance() + mViewDataMap->getReuseDistance()));
     }
 }
 
