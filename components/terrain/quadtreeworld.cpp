@@ -378,7 +378,7 @@ void QuadTreeWorld::loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float 
 
         for (QuadTreeWorld::ChunkManager* m : mChunkManagers)
         {
-            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags, activeGrid, vd->getViewPoint(, compile);
+            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
             if (n) pat->addChild(n);
         }
         entry.mRenderingNode = pat;
