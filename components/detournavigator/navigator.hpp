@@ -240,6 +240,10 @@ namespace DetourNavigator
 
         virtual float getMaxNavmeshAreaRealRadius() const = 0;
     };
+
+    std::unique_ptr<Navigator> makeNavigator(const Settings& settings);
+
+    std::unique_ptr<Navigator> makeNavigatorStub();
 }
 
 #endif

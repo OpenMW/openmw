@@ -27,10 +27,7 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include <components/detournavigator/debug.hpp>
-#include <components/detournavigator/navigatorimpl.hpp>
-#include <components/detournavigator/navigatorstub.hpp>
-#include <components/detournavigator/recastglobalallocator.hpp>
+#include <components/detournavigator/navigator.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -197,12 +194,11 @@ namespace MWWorld
         {
             auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
             navigatorSettings.mSwimHeightScale = mSwimHeightScale;
-            DetourNavigator::RecastGlobalAllocator::init();
-            mNavigator.reset(new DetourNavigator::NavigatorImpl(navigatorSettings));
+            mNavigator = DetourNavigator::makeNavigator(navigatorSettings);
         }
         else
         {
-            mNavigator.reset(new DetourNavigator::NavigatorStub());
+            mNavigator = DetourNavigator::makeNavigatorStub();
         }
 
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator));
