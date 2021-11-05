@@ -241,7 +241,6 @@ void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
         mHolsteredShield->getNode()->accept(shaderVisitor);
     }
 }
-}
 
 bool ActorAnimation::useShieldAnimations() const
 {
