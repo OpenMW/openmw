@@ -30,7 +30,7 @@ namespace DetourNavigator
             RecastMeshTriangle result;
             result.mAreaType = areaType;
             for (std::size_t i = 0; i < 3; ++i)
-                result.mVertices[i] = Misc::Convert::makeOsgVec3f(vertices[i]);
+                result.mVertices[i] = Misc::Convert::toOsg(vertices[i]);
             return result;
         }
 
