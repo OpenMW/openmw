@@ -55,8 +55,9 @@ namespace Terrain
 class DefaultLodCallback : public LodCallback
 {
 public:
-    DefaultLodCallback(float factor, float viewDistance, const osg::Vec4i& grid, float distanceModifier=0.f)
+    DefaultLodCallback(float factor, float minSize, float viewDistance, const osg::Vec4i& grid, float distanceModifier=0.f)
         : mFactor(factor)
+        , mMinSize(minSize)
         , mViewDistance(viewDistance)
         , mActiveGrid(grid)
         , mDistanceModifier(distanceModifier)
@@ -80,19 +81,20 @@ public:
         dist = std::max(0.f, dist + mDistanceModifier);
         if (dist > mViewDistance && !activeGrid) // for Scene<->ObjectPaging sync the activegrid must remain loaded
             return StopTraversal;
-        return getNativeLodLevel(node) <= convertDistanceToLodLevel(dist) ? StopTraversalAndUse : Deeper;
+        return getNativeLodLevel(node, mMinSize) <= convertDistanceToLodLevel(dist, mMinSize, mFactor) ? StopTraversalAndUse : Deeper;
     }
-    static int getNativeLodLevel(QuadTreeNode* node)
+    static int getNativeLodLevel(const QuadTreeNode* node, float minSize)
     {
-        return Log2(static_cast<unsigned int>(node->getSize()));
+        return Log2(static_cast<unsigned int>(node->getSize()/minSize));
     }
-    int convertDistanceToLodLevel(float dist) const
+    static int convertDistanceToLodLevel(float dist, float minSize, float factor) const
     {
-        return Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mFactor)));
+        return Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*minSize*factor)));
     }
 
 private:
     float mFactor;
+    float mMinSize;
     float mViewDistance;
     osg::Vec4i mActiveGrid;
     float mDistanceModifier;
@@ -295,13 +297,14 @@ QuadTreeWorld::~QuadTreeWorld()
 {
 }
 
-/// get the level of vertex detail to render this node at, expressed relative to the native resolution of the data set.
+/// get the level of vertex detail to render this node at, expressed relative to the native resolution of the vertex data set,
+/// NOT relative to mMinSize as is the case with node LODs.
 unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
 {
-    int lod = DefaultLodCallback::getNativeLodLevel(node);
+    int vertexLod = DefaultLodCallback::getNativeLodLevel(node, 1);
     if (vertexLodMod > 0)
     {
-        lod = std::max(0, lod-vertexLodMod);
+        vertexLod = std::max(0, vertexLod-vertexLodMod);
     }
     else if (vertexLodMod < 0)
     {
@@ -312,9 +315,9 @@ unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
             size *= 2;
             vertexLodMod = std::min(0, vertexLodMod+1);
         }
-        lod += std::abs(vertexLodMod);
+        vertexLod += std::abs(vertexLodMod);
     }
-    return lod;
+    return vertexLod;
 }
 
 /// get the flags to use for stitching in the index buffer so that chunks of different LOD connect seamlessly
@@ -375,7 +378,7 @@ void QuadTreeWorld::loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float 
 
         for (QuadTreeWorld::ChunkManager* m : mChunkManagers)
         {
-            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), DefaultLodCallback::getNativeLodLevel(entry.mNode), entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
+            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), DefaultLodCallback::getNativeLodLevel(entry.mNode, mMinSize), entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
             if (n) pat->addChild(n);
         }
         entry.mRenderingNode = pat;
@@ -578,10 +581,7 @@ void QuadTreeWorld::addChunkManager(QuadTreeWorld::ChunkManager* m)
     mChunkManagers.push_back(m);
     mTerrainRoot->setNodeMask(mTerrainRoot->getNodeMask()|m->getNodeMask());
     if (m->getViewDistance())
-    {
-        DefaultLodCallback lodCallback(mLodFactor, mViewDistance, mActiveGrid);
-        m->setMaxLodLevel(lodCallback.convertDistanceToLodLevel(m->getViewDistance() + mViewDataMap->getReuseDistance()));
-    }
+        m->setMaxLodLevel(DefaultLodCallback::convertDistanceToLodLevel(m->getViewDistance() + mViewDataMap->getReuseDistance(), mMinSize, mLodFactor));
 }
 
 void QuadTreeWorld::rebuildViews()
