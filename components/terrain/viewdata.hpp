@@ -49,7 +49,7 @@ namespace Terrain
         double getLastUsageTimeStamp() const { return mLastUsageTimeStamp; }
         void setLastUsageTimeStamp(double timeStamp) { mLastUsageTimeStamp = timeStamp; }
 
-        /// Indicates at least one mNode of mEntries has changed or the view point has moved beyond mReuseDistance.
+        /// Indicates at least one mNode of mEntries has changed.
         /// @note Such changes may necessitate a revalidation of cached mRenderingNodes elsewhere depending
         /// on the parameters that affect the creation of mRenderingNode.
         bool hasChanged() const { return mChanged; }
