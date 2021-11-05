@@ -10,11 +10,14 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
+#include <limits>
+
 namespace MWRender
 {
     NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, bool enabled)
         : mRootNode(root)
         , mEnabled(enabled)
+        , mId(std::numeric_limits<std::size_t>::max())
         , mGeneration(0)
         , mRevision(0)
     {

@@ -37,8 +37,6 @@
 
 #include <components/version/version.hpp>
 
-#include <components/detournavigator/navigator.hpp>
-
 #include <components/misc/frameratelimiter.hpp>
 
 #include <components/sceneutil/screencapture.hpp>
