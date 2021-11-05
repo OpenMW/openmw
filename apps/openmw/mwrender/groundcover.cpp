@@ -114,9 +114,9 @@ namespace MWRender
         ViewDistanceCallback(float dist) : mViewDistance(dist) {}
         void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
-            osg::ComputeBoundsVisitor cbv;
             if (!mBb.valid())
             {
+                osg::ComputeBoundsVisitor cbv;
                 node->accept(cbv);
                 mBb = cbv.getBoundingBox();
             }
