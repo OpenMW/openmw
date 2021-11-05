@@ -80,7 +80,7 @@ public:
         dist = std::max(0.f, dist + mDistanceModifier);
         if (dist > mViewDistance && !activeGrid) // for Scene<->ObjectPaging sync the activegrid must remain loaded
             return StopTraversal;
-        return getNativeLodLevel(node) <= convertDistanceToLodLevel(distance) ? StopTraversalAndUse : Deeper;
+        return getNativeLodLevel(node) <= convertDistanceToLodLevel(dist) ? StopTraversalAndUse : Deeper;
     }
     static int getNativeLodLevel(QuadTreeNode* node)
     {
@@ -344,7 +344,7 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourVertexLod, int vertexLodMod,
         }
     }
     // Use the remaining bits for our vertex LOD
-    lodFlags |= (ourVertexLod << (4*4);
+    lodFlags |= (ourVertexLod << (4*4));
     return lodFlags;
 }
 
