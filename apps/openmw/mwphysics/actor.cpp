@@ -59,6 +59,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     mRotationallyInvariant = (mMeshTranslation.x() == 0.0 && mMeshTranslation.y() == 0.0) && std::fabs(mOriginalHalfExtents.x() - mOriginalHalfExtents.y()) < 2.2;
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
+    mConvexShape->setMargin(0.001); // make sure bullet isn't using the huge default convex shape margin of 0.04
 
     mCollisionObject = std::make_unique<btCollisionObject>();
     mCollisionObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
