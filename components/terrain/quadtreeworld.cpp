@@ -87,7 +87,7 @@ public:
     {
         return Log2(static_cast<unsigned int>(node->getSize()/minSize));
     }
-    static int convertDistanceToLodLevel(float dist, float minSize, float factor) const
+    static int convertDistanceToLodLevel(float dist, float minSize, float factor)
     {
         return Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*minSize*factor)));
     }
