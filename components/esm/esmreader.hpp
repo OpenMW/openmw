@@ -75,18 +75,18 @@ public:
   /// Get the current position in the file. Make sure that the file has been opened!
   size_t getFileOffset() const { return mEsm->tellg(); };
 
-  // This is a quick hack for multiple esm/esp files. Each plugin introduces its own
-  //  terrain palette, but ESMReader does not pass a reference to the correct plugin
-  //  to the individual load() methods. This hack allows to pass this reference
-  //  indirectly to the load() method.
+  /// Sets the position of this ESMReader in allPlugins as required for handling moved,
+  /// deleted and edited CellRefs as well as terrain palettes.
+  /// @note Automatically set by resolveParentFileIndices.
   void setIndex(const int index) { mCtx.index = index;}
   int getIndex() const {return mCtx.index;}
 
-  // Assign parent esX files by tracking their indices in the global list of
+  // Assign parent esX files by tracking their indices in the list of
   // all files/readers used by the engine. This is required for correct adjustRefNum() results
   // as required for handling moved, deleted and edited CellRefs.
   /// @note Does not validate.
-  void resolveParentFileIndices(const std::vector<ESMReader>& files);
+  /// @note open() must be called first. 
+  void resolveParentFileIndices(const std::vector<ESMReader>& allPlugins);
   const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
   bool isValidParentFileIndex(int i) const { return i != getIndex(); }
 
