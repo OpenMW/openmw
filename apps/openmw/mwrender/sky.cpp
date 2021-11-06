@@ -535,7 +535,11 @@ namespace MWRender
         mRootNode->setNodeMask(enabled ? Mask_Sky : 0u);
 
         if (!enabled && mParticleNode && mParticleEffect)
-            mCurrentParticleEffect = {};
+        {
+            mCurrentParticleEffect.clear();
+            mParticleNode->removeChild(mParticleEffect);
+            mParticleEffect = nullptr;
+        }
 
         mEnabled = enabled;
     }
