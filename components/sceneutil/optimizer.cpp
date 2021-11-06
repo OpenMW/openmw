@@ -1137,7 +1137,7 @@ bool isAbleToMerge(const osg::Geometry& g1, const osg::Geometry& g2)
 
 bool Optimizer::MergeGeometryVisitor::pushStateSet(osg::StateSet *stateSet)
 {
-    if (_mergeAlphaBlending || !stateSet || stateSet->getRenderBinMode() & osg::StateSet::INHERIT_RENDERBIN_DETAILS)
+    if (!stateSet || stateSet->getRenderBinMode() & osg::StateSet::INHERIT_RENDERBIN_DETAILS)
         return false;
     _stateSetStack.push_back(stateSet);
     checkAlphaBlendingActive();
