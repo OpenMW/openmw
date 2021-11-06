@@ -41,10 +41,9 @@ void EsmLoader::load(const boost::filesystem::path& filepath)
 
   ESM::ESMReader lEsm;
   lEsm.setEncoder(mEncoder);
-  lEsm.setIndex(mEsm.size());
   lEsm.open(filepath.string());
-  lEsm.resolveParentFileIndices(mEsm);
   mEsm.push_back(lEsm);
+  mEsm.back().resolveParentFileIndices(mEsm);
   mStore.load(mEsm.back(), &mListener);
 }
 
