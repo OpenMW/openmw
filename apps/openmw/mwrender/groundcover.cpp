@@ -1,6 +1,5 @@
 #include "groundcover.hpp"
 
-#include <osgUtil/CullVisitor>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
