@@ -40,9 +40,9 @@ namespace
         return 1 << depth;
     }
 
-    int Log2( unsigned int n )
+    unsigned int Log2( unsigned int n )
     {
-        int targetlevel = 0;
+        unsigned int targetlevel = 0;
         while (n >>= 1) ++targetlevel;
         return targetlevel;
     }
@@ -83,11 +83,11 @@ public:
             return StopTraversal;
         return getNativeLodLevel(node, mMinSize) <= convertDistanceToLodLevel(dist, mMinSize, mFactor) ? StopTraversalAndUse : Deeper;
     }
-    static int getNativeLodLevel(const QuadTreeNode* node, float minSize)
+    static unsigned int getNativeLodLevel(const QuadTreeNode* node, float minSize)
     {
         return Log2(static_cast<unsigned int>(node->getSize()/minSize));
     }
-    static int convertDistanceToLodLevel(float dist, float minSize, float factor)
+    static unsigned int convertDistanceToLodLevel(float dist, float minSize, float factor)
     {
         return Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*minSize*factor)));
     }
@@ -301,10 +301,10 @@ QuadTreeWorld::~QuadTreeWorld()
 /// NOT relative to mMinSize as is the case with node LODs.
 unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
 {
-    int vertexLod = DefaultLodCallback::getNativeLodLevel(node, 1);
+    unsigned int vertexLod = DefaultLodCallback::getNativeLodLevel(node, 1);
     if (vertexLodMod > 0)
     {
-        vertexLod = std::max(0, vertexLod-vertexLodMod);
+        vertexLod = static_cast<unsigned int>(std::max(0, static_cast<int>(vertexLod)-vertexLodMod));
     }
     else if (vertexLodMod < 0)
     {
@@ -321,7 +321,7 @@ unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
 }
 
 /// get the flags to use for stitching in the index buffer so that chunks of different LOD connect seamlessly
-unsigned int getLodFlags(QuadTreeNode* node, int ourVertexLod, int vertexLodMod, const ViewData* vd)
+unsigned int getLodFlags(QuadTreeNode* node, unsigned int ourVertexLod, int vertexLodMod, const ViewData* vd)
 {
     unsigned int lodFlags = 0;
     for (unsigned int i=0; i<4; ++i)
@@ -334,7 +334,7 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourVertexLod, int vertexLodMod,
         // our detail and the neighbour would handle stitching by itself.
         while (neighbour && !vd->contains(neighbour))
             neighbour = neighbour->getParent();
-        int lod = 0;
+        unsigned int lod = 0;
         if (neighbour)
             lod = getVertexLod(neighbour, vertexLodMod);
 
@@ -343,7 +343,7 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourVertexLod, int vertexLodMod,
         // Use 4 bits for each LOD delta
         if (lod > 0)
         {
-            lodFlags |= static_cast<unsigned int>(lod - ourVertexLod) << (4*i);
+            lodFlags |= (lod - ourVertexLod) << (4*i);
         }
     }
     // Use the remaining bits for our vertex LOD
@@ -358,7 +358,7 @@ void QuadTreeWorld::loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float 
 
     if (vd->hasChanged())
     {
-        int ourVertexLod = getVertexLod(entry.mNode, mVertexLodMod);
+        unsigned int ourVertexLod = getVertexLod(entry.mNode, mVertexLodMod);
         // have to recompute the lodFlags in case a neighbour has changed LOD.
         unsigned int lodFlags = getLodFlags(entry.mNode, ourVertexLod, mVertexLodMod, vd);
         if (lodFlags != entry.mLodFlags)
