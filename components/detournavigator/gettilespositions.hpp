@@ -46,13 +46,15 @@ namespace DetourNavigator
         btVector3 aabbMax;
         shape.getAabb(transform, aabbMin, aabbMax);
 
-        getTilesPositions(Misc::Convert::makeOsgVec3f(aabbMin), Misc::Convert::makeOsgVec3f(aabbMax), settings, std::forward<Callback>(callback));
+        getTilesPositions(Misc::Convert::toOsg(aabbMin), Misc::Convert::toOsg(aabbMax), settings, std::forward<Callback>(callback));
     }
 
     template <class Callback>
     void getTilesPositions(const int cellSize, const osg::Vec3f& shift,
         const Settings& settings, Callback&& callback)
     {
+        using Misc::Convert::toOsg;
+
         const auto halfCellSize = cellSize / 2;
         const btTransform transform(btMatrix3x3::getIdentity(), Misc::Convert::toBullet(shift));
         auto aabbMin = transform(btVector3(-halfCellSize, -halfCellSize, 0));
@@ -64,7 +66,7 @@ namespace DetourNavigator
         aabbMax.setX(std::max(aabbMin.x(), aabbMax.x()));
         aabbMax.setY(std::max(aabbMin.y(), aabbMax.y()));
 
-        getTilesPositions(Misc::Convert::makeOsgVec3f(aabbMin), Misc::Convert::makeOsgVec3f(aabbMax), settings, std::forward<Callback>(callback));
+        getTilesPositions(toOsg(aabbMin), toOsg(aabbMax), settings, std::forward<Callback>(callback));
     }
 }
 
