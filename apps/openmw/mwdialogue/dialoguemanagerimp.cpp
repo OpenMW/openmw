@@ -421,7 +421,7 @@ namespace MWDialogue
             // Clamp permanent disposition change so that final disposition doesn't go below 0 (could happen with intimidate)
             npcStats.setBaseDisposition(0);
             int zero = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false);
-            int disposition = std::min(100 - zero, std::max(mOriginalDisposition + mPermanentDispositionChange, -zero));
+            int disposition = std::clamp(mOriginalDisposition + mPermanentDispositionChange, -zero, 100 - zero);
 
             npcStats.setBaseDisposition(disposition);
         }

@@ -297,7 +297,8 @@ namespace MWRender
         , mViewDistance(Settings::Manager::getFloat("viewing distance", "Camera"))
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
-        , mFieldOfView(std::min(std::max(1.f, Settings::Manager::getFloat("field of view", "Camera")), 179.f))
+        , mFieldOfView(std::clamp(Settings::Manager::getFloat("field of view", "Camera"), 1.f, 179.f))
+        , mFirstPersonFieldOfView(std::clamp(Settings::Manager::getFloat("first person field of view", "Camera"), 1.f, 179.f))
     {
         bool reverseZ = SceneUtil::getReverseZ();
 
@@ -517,8 +518,6 @@ namespace MWRender
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
         Nif::NIFFile::setLoadUnsupportedFiles(Settings::Manager::getBool("load unsupported nif files", "Models"));
 
-        float firstPersonFov = Settings::Manager::getFloat("first person field of view", "Camera");
-        mFirstPersonFieldOfView = std::min(std::max(1.f, firstPersonFov), 179.f);
         mStateUpdater->setFogEnd(mViewDistance);
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
