@@ -79,6 +79,15 @@ int Manager::getInt (const std::string& setting, const std::string& category)
     return number;
 }
 
+std::int64_t Manager::getInt64 (const std::string& setting, const std::string& category)
+{
+    const std::string& value = getString(setting, category);
+    std::stringstream stream(value);
+    std::size_t number = 0;
+    stream >> number;
+    return number;
+}
+
 bool Manager::getBool (const std::string& setting, const std::string& category)
 {
     const std::string& string = getString(setting, category);

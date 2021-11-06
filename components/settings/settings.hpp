@@ -51,6 +51,7 @@ namespace Settings
         ///< returns the list of changed settings intersecting with the filter
 
         static int getInt (const std::string& setting, const std::string& category);
+        static std::int64_t getInt64 (const std::string& setting, const std::string& category);
         static float getFloat (const std::string& setting, const std::string& category);
         static double getDouble (const std::string& setting, const std::string& category);
         static std::string getString (const std::string& setting, const std::string& category);

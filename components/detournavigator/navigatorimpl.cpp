@@ -53,8 +53,8 @@ namespace DetourNavigator
     {
         if (addObject(id, static_cast<const ObjectShapes&>(shapes), transform))
         {
-            const osg::Vec3f start = toNavMeshCoordinates(mSettings, shapes.mConnectionStart);
-            const osg::Vec3f end = toNavMeshCoordinates(mSettings, shapes.mConnectionEnd);
+            const osg::Vec3f start = toNavMeshCoordinates(mSettings.mRecast, shapes.mConnectionStart);
+            const osg::Vec3f end = toNavMeshCoordinates(mSettings.mRecast, shapes.mConnectionEnd);
             mNavMeshManager.addOffMeshConnection(id, start, end, AreaType_door);
             mNavMeshManager.addOffMeshConnection(id, end, start, AreaType_door);
             return true;
@@ -126,8 +126,8 @@ namespace DetourNavigator
             const auto dst = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV1]));
             mNavMeshManager.addOffMeshConnection(
                 ObjectId(&pathgrid),
-                toNavMeshCoordinates(mSettings, src),
-                toNavMeshCoordinates(mSettings, dst),
+                toNavMeshCoordinates(mSettings.mRecast, src),
+                toNavMeshCoordinates(mSettings.mRecast, dst),
                 AreaType_pathgrid
             );
         }
@@ -149,7 +149,7 @@ namespace DetourNavigator
 
     void NavigatorImpl::updatePlayerPosition(const osg::Vec3f& playerPosition)
     {
-        const TilePosition tilePosition = getTilePosition(mSettings, toNavMeshCoordinates(mSettings, playerPosition));
+        const TilePosition tilePosition = getTilePosition(mSettings.mRecast, toNavMeshCoordinates(mSettings.mRecast, playerPosition));
         if (mLastPlayerPosition.has_value() && *mLastPlayerPosition == tilePosition)
             return;
         update(playerPosition);
@@ -225,6 +225,6 @@ namespace DetourNavigator
     float NavigatorImpl::getMaxNavmeshAreaRealRadius() const
     {
         const auto& settings = getSettings();
-        return getRealTileSize(settings) * getMaxNavmeshAreaRadius(settings);
+        return getRealTileSize(settings.mRecast) * getMaxNavmeshAreaRadius(settings);
     }
 }

@@ -10,7 +10,7 @@
 namespace DetourNavigator
 {
     std::optional<osg::Vec3f> findRandomPointAroundCircle(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents,
-        const osg::Vec3f& start, const float maxRadius, const Flags includeFlags, const Settings& settings)
+        const osg::Vec3f& start, const float maxRadius, const Flags includeFlags, const DetourSettings& settings)
     {
         dtNavMeshQuery navMeshQuery;
         if (!initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes))

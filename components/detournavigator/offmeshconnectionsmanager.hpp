@@ -18,7 +18,7 @@ namespace DetourNavigator
     class OffMeshConnectionsManager
     {
     public:
-        OffMeshConnectionsManager(const Settings& settings);
+        explicit OffMeshConnectionsManager(const RecastSettings& settings);
 
         void add(const ObjectId id, const OffMeshConnection& value);
 
@@ -33,7 +33,7 @@ namespace DetourNavigator
             std::map<TilePosition, std::unordered_set<ObjectId>> mByTilePosition;
         };
 
-        const Settings& mSettings;
+        const RecastSettings& mSettings;
         Misc::ScopeGuarded<Values> mValues;
     };
 }

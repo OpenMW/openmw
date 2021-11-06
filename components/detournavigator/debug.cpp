@@ -11,7 +11,8 @@
 
 namespace DetourNavigator
 {
-    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision, const Settings& settings)
+    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix,
+        const std::string& revision, const RecastSettings& settings)
     {
         const auto path = pathPrefix + "recastmesh" + revision + ".obj";
         boost::filesystem::ofstream file(boost::filesystem::path(path), std::ios::out);

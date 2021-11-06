@@ -365,20 +365,20 @@ max verts per poly
 
 The maximum number of vertices allowed for polygons generated during the contour to polygon conversion process.
 
-region merge size
+region merge area
 -----------------
 
 :Type:		integer
 :Range:		>= 0
-:Default:	20
+:Default:	400
 
 Any regions with a span count smaller than this value will, if possible, be merged with larger regions.
 
-region min size
+region min area
 ---------------
 
 :Type:		integer
 :Range:		>= 0
-:Default:	8
+:Default:	64
 
 The minimum number of cells allowed to form isolated island areas.

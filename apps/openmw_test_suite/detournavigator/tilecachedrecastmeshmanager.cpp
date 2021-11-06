@@ -15,7 +15,7 @@ namespace
 
     struct DetourNavigatorTileCachedRecastMeshManagerTest : Test
     {
-        Settings mSettings;
+        RecastSettings mSettings;
         std::vector<TilePosition> mChangedTiles;
         const ObjectTransform mObjectTransform {ESM::Position {{0, 0, 0}, {0, 0, 0}}, 0.0f};
         const osg::ref_ptr<const Resource::BulletShape> mShape = new Resource::BulletShape;

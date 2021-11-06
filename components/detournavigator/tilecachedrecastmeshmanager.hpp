@@ -20,7 +20,7 @@ namespace DetourNavigator
     class TileCachedRecastMeshManager
     {
     public:
-        TileCachedRecastMeshManager(const Settings& settings);
+        explicit TileCachedRecastMeshManager(const RecastSettings& settings);
 
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
@@ -102,7 +102,7 @@ namespace DetourNavigator
     private:
         using TilesMap = std::map<TilePosition, std::shared_ptr<CachedRecastMeshManager>>;
 
-        const Settings& mSettings;
+        const RecastSettings& mSettings;
         Misc::ScopeGuarded<TilesMap> mTiles;
         std::unordered_map<ObjectId, std::vector<TilePosition>> mObjectsTilesPositions;
         std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;

@@ -21,7 +21,7 @@ namespace
 
     struct DetourNavigatorGetTilesPositionsTest : Test
     {
-        Settings mSettings;
+        RecastSettings mSettings;
         std::vector<TilePosition> mTilesPositions;
         CollectTilesPositions mCollect {mTilesPositions};
 

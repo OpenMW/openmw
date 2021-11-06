@@ -11,7 +11,7 @@
 
 namespace DetourNavigator
 {
-    OffMeshConnectionsManager::OffMeshConnectionsManager(const Settings& settings)
+    OffMeshConnectionsManager::OffMeshConnectionsManager(const RecastSettings& settings)
         : mSettings(settings)
     {}
 

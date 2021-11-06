@@ -43,8 +43,8 @@ namespace DetourNavigator
 {
     NavMeshManager::NavMeshManager(const Settings& settings)
         : mSettings(settings)
-        , mRecastMeshManager(settings)
-        , mOffMeshConnectionsManager(settings)
+        , mRecastMeshManager(mSettings.mRecast)
+        , mOffMeshConnectionsManager(mSettings.mRecast)
         , mAsyncNavMeshUpdater(settings, mRecastMeshManager, mOffMeshConnectionsManager)
     {}
 
@@ -140,8 +140,8 @@ namespace DetourNavigator
     {
         mOffMeshConnectionsManager.add(id, OffMeshConnection {start, end, areaType});
 
-        const auto startTilePosition = getTilePosition(mSettings, start);
-        const auto endTilePosition = getTilePosition(mSettings, end);
+        const auto startTilePosition = getTilePosition(mSettings.mRecast, start);
+        const auto endTilePosition = getTilePosition(mSettings.mRecast, end);
 
         addChangedTile(startTilePosition, ChangeType::add);
 
@@ -158,7 +158,7 @@ namespace DetourNavigator
 
     void NavMeshManager::update(const osg::Vec3f& playerPosition, const osg::Vec3f& agentHalfExtents)
     {
-        const auto playerTile = getTilePosition(mSettings, toNavMeshCoordinates(mSettings, playerPosition));
+        const auto playerTile = getTilePosition(mSettings.mRecast, toNavMeshCoordinates(mSettings.mRecast, playerPosition));
         auto& lastRevision = mLastRecastMeshManagerRevision[agentHalfExtents];
         auto lastPlayerTile = mPlayerTile.find(agentHalfExtents);
         if (lastRevision == mRecastMeshManager.getRevision() && lastPlayerTile != mPlayerTile.end()
@@ -251,7 +251,7 @@ namespace DetourNavigator
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
             const ChangeType changeType)
     {
-        getTilesPositions(shape, transform, mSettings,
+        getTilesPositions(shape, transform, mSettings.mRecast,
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 
@@ -261,7 +261,7 @@ namespace DetourNavigator
         if (cellSize == std::numeric_limits<int>::max())
             return;
 
-        getTilesPositions(cellSize, shift, mSettings,
+        getTilesPositions(cellSize, shift, mSettings.mRecast,
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 

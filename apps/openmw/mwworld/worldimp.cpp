@@ -186,7 +186,7 @@ namespace MWWorld
         if (Settings::Manager::getBool("enable", "Navigator"))
         {
             auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
-            navigatorSettings.mSwimHeightScale = mSwimHeightScale;
+            navigatorSettings.mRecast.mSwimHeightScale = mSwimHeightScale;
             mNavigator = DetourNavigator::makeNavigator(navigatorSettings);
         }
         else

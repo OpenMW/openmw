@@ -10,7 +10,7 @@
 
 namespace DetourNavigator
 {
-    TileCachedRecastMeshManager::TileCachedRecastMeshManager(const Settings& settings)
+    TileCachedRecastMeshManager::TileCachedRecastMeshManager(const RecastSettings& settings)
         : mSettings(settings)
     {}
 
