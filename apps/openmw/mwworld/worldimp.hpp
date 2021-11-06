@@ -239,8 +239,6 @@ namespace MWWorld
 
             const MWWorld::ESMStore& getStore() const override;
 
-            std::vector<ESM::ESMReader>& getEsmReader() override;
-
             LocalScripts& getLocalScripts() override;
 
             bool hasCellChanged() const override;
