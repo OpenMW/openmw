@@ -2,7 +2,6 @@
 #define CONTENTLOADER_HPP
 
 #include <boost/filesystem/path.hpp>
-#include <MyGUI_TextIterator.h>
 
 #include <components/debug/debuglog.hpp>
 #include "components/loadinglistener/loadinglistener.hpp"
@@ -21,10 +20,10 @@ struct ContentLoader
     {
     }
 
-    virtual void load(const boost::filesystem::path& filepath, int& index)
+    virtual void load(const boost::filesystem::path& filepath)
     {
         Log(Debug::Info) << "Loading content file " << filepath.string();
-        mListener.setLabel(MyGUI::TextIterator::toTagsString(filepath.string()));
+        mListener.setLabel(filepath.string());
     }
 
     protected:
