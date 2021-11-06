@@ -2992,7 +2992,7 @@ namespace MWWorld
                 throw std::runtime_error(message);
             }
 
-            mEsm.back().setIndex(idx);
+            idx++;
         }
     }
 
