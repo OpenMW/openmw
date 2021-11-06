@@ -2991,6 +2991,7 @@ namespace MWWorld
                 std::string message = "Failed loading " + file + ": the groundcover file does not exist";
                 throw std::runtime_error(message);
             }
+
             mEsm.back().setIndex(idx);
         }
     }
