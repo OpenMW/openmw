@@ -91,12 +91,12 @@ namespace MWWorld
             return mLoaders.insert(std::make_pair(extension, loader)).second;
         }
 
-        void load(const boost::filesystem::path& filepath, int& index) override
+        void load(const boost::filesystem::path& filepath) override
         {
             LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
             if (it != mLoaders.end())
             {
-                it->second->load(filepath, index);
+                it->second->load(filepath);
             }
             else
             {
@@ -115,9 +115,9 @@ namespace MWWorld
     {
         ESMStore& mStore;
         OMWScriptsLoader(Loading::Listener& listener, ESMStore& store) : ContentLoader(listener), mStore(store) {}
-        void load(const boost::filesystem::path& filepath, int& index) override
+        void load(const boost::filesystem::path& filepath) override
         {
-            ContentLoader::load(filepath.filename(), index);
+            ContentLoader::load(filepath.filename());
             mStore.addOMWScripts(filepath.string());
         }
     };
@@ -154,7 +154,6 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
-        mEsm.resize(contentFiles.size() + groundcoverFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
 
@@ -626,11 +625,6 @@ namespace MWWorld
     const MWWorld::ESMStore& World::getStore() const
     {
         return mStore;
-    }
-
-    std::vector<ESM::ESMReader>& World::getEsmReader()
-    {
-        return mEsm;
     }
 
     LocalScripts& World::getLocalScripts()
@@ -2972,7 +2966,7 @@ namespace MWWorld
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(file))
             {
-                contentLoader.load(col.getPath(file), idx);
+                contentLoader.load(col.getPath(file));
             }
             else
             {
@@ -2990,7 +2984,7 @@ namespace MWWorld
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(file))
             {
-                contentLoader.load(col.getPath(file), idx);
+                contentLoader.load(col.getPath(file));
             }
             else
             {
