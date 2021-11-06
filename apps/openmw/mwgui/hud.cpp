@@ -610,7 +610,7 @@ namespace MWGui
 
         static const float fNPCHealthBarFade = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCHealthBarFade")->mValue.getFloat();
         if (fNPCHealthBarFade > 0.f)
-            mEnemyHealth->setAlpha(std::max(0.f, std::min(1.f, mEnemyHealthTimer/fNPCHealthBarFade)));
+            mEnemyHealth->setAlpha(std::clamp(mEnemyHealthTimer / fNPCHealthBarFade, 0.f, 1.f));
 
     }
 

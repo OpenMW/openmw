@@ -356,10 +356,10 @@ namespace MWMechanics
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
             if (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo)
             {
-                static const float multiplier = std::max(0.f, std::min(1.0f, Settings::Manager::getFloat("projectiles enchant multiplier", "Game")));
+                static const float multiplier = std::clamp(Settings::Manager::getFloat("projectiles enchant multiplier", "Game"), 0.f, 1.f);
                 MWWorld::Ptr player = getPlayer();
-                int itemsInInventoryCount = player.getClass().getContainerStore(player).count(mOldItemPtr.getCellRef().getRefId());
-                count = std::min(itemsInInventoryCount, std::max(1, int(getGemCharge() * multiplier / enchantPoints)));
+                count = player.getClass().getContainerStore(player).count(mOldItemPtr.getCellRef().getRefId());
+                count = std::clamp<int>(getGemCharge() * multiplier / enchantPoints, 1, count);
             }
         }
 

@@ -733,12 +733,8 @@ namespace MWRender
         }
         void clampToCell(osg::Vec3f& cellPos)
         {
-            osg::Vec2i min (mCell.x(), mCell.y());
-            osg::Vec2i max (mCell.x()+1, mCell.y()+1);
-            if (cellPos.x() < min.x()) cellPos.x() = min.x();
-            if (cellPos.x() > max.x()) cellPos.x() = max.x();
-            if (cellPos.y() < min.y()) cellPos.y() = min.y();
-            if (cellPos.y() > max.y()) cellPos.y() = max.y();
+            cellPos.x() = std::clamp<float>(cellPos.x(), mCell.x(), mCell.x() + 1);
+            cellPos.y() = std::clamp<float>(cellPos.y(), mCell.y(), mCell.y() + 1);
         }
         osg::Vec3f mPosition;
         osg::Vec2i mCell;

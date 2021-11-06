@@ -273,7 +273,7 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
     if (wrap)
         index = (index + keyFocusList.size())%keyFocusList.size();
     else
-        index = std::min(std::max(0, index), static_cast<int>(keyFocusList.size())-1);
+        index = std::clamp<int>(index, 0, keyFocusList.size() - 1);
 
     MyGUI::Widget* next = keyFocusList[index];
     int vertdiff = next->getTop() - focus->getTop();

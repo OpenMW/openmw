@@ -145,16 +145,13 @@ namespace Gui
     FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath, float scalingFactor)
         : mVFS(vfs)
         , mUserDataPath(userDataPath)
-        , mFontHeight(16)
+        , mFontHeight(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 20))
         , mScalingFactor(scalingFactor)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
             mEncoding = ToUTF8::CP437;
         else
             mEncoding = encoding;
-
-        int fontSize = Settings::Manager::getInt("font size", "GUI");
-        mFontHeight = std::min(std::max(12, fontSize), 20);
 
         MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
         MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = MyGUI::newDelegate(this, &FontLoader::loadFontFromXml);
@@ -549,7 +546,7 @@ namespace Gui
                 // to allow to configure font size via config file, without need to edit XML files.
                 // Also we should take UI scaling factor in account.
                 int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                resolution = std::min(960, std::max(48, resolution)) * mScalingFactor;
+                resolution = std::clamp(resolution, 48, 960) * mScalingFactor;
 
                 MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
                 resolutionNode->addAttribute("key", "Resolution");
@@ -591,7 +588,7 @@ namespace Gui
                     // setup separate fonts with different Resolution to fit these windows.
                     // These fonts have an internal prefix.
                     int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                    resolution = std::min(960, std::max(48, resolution));
+                    resolution = std::clamp(resolution, 48, 960);
 
                     float currentX = Settings::Manager::getInt("resolution x", "Video");
                     float currentY = Settings::Manager::getInt("resolution y", "Video");

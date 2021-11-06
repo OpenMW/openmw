@@ -57,7 +57,7 @@ float ControllerFunction::calculate(float value) const
     }
     case Constant:
     default:
-        return std::min(mStopTime, std::max(mStartTime, time));
+        return std::clamp(time, mStartTime, mStopTime);
     }
 }
 

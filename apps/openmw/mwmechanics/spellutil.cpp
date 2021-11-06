@@ -162,7 +162,10 @@ namespace MWMechanics
         float castChance = baseChance + castBonus;
         castChance *= stats.getFatigueTerm();
 
-        return std::max(0.f, cap ? std::min(100.f, castChance) : castChance);
+        if (cap)
+            return std::clamp(castChance, 0.f, 100.f);
+
+        return std::max(castChance, 0.f);
     }
 
     float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
