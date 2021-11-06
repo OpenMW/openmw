@@ -101,7 +101,7 @@ QuadTreeNode *QuadTreeNode::getNeighbour(Direction dir)
 float QuadTreeNode::distance(const osg::Vec3f& v) const
 {
     const osg::BoundingBox& box = getBoundingBox();
-    return distance(box, v);
+    return Terrain::distance(box, v);
 }
 
 void QuadTreeNode::initNeighbours()
