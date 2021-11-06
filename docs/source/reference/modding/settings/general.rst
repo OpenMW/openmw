@@ -61,7 +61,7 @@ Mipmapping is a way of reducing the processing power needed during minification
 by pregenerating a series of smaller textures.
 
 notify on saved screenshot
---------------
+--------------------------
 
 :Type:		boolean
 :Range:		True/False
