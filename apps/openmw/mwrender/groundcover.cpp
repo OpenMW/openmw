@@ -1,5 +1,6 @@
 #include "groundcover.hpp"
 
+#include <osgUtil/CullVisitor>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
@@ -9,6 +10,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/terrain/quadtreenode.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
@@ -111,28 +113,15 @@ namespace MWRender
     class ViewDistanceCallback : public SceneUtil::NodeCallback<ViewDistanceCallback>
     {
     public:
-        ViewDistanceCallback(float dist) : mViewDistance(dist) {}
+        ViewDistanceCallback(float dist, const osg::BoundingBox& box) : mViewDistance(dist), mBox(box) {}
         void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
-            if (!mBb.valid())
-            {
-                osg::ComputeBoundsVisitor cbv;
-                node->accept(cbv);
-                mBb = cbv.getBoundingBox();
-            }
-            
-            float minDist = std::numeric_limits<float>::max();
-            for (unsigned int i=0; i<8; ++i)
-            {
-                osg::Vec3f corner = mBb.corner(i);
-                minDist = std::min(minDist, nv->getDistanceToEyePoint(corner, false));
-            }
-            if (minDist <= mViewDistance)
+            if (Terrain::distance(mBox, nv->getEyePoint()) <= mViewDistance)
                 traverse(node, nv);
         }
     private:
         float mViewDistance;
-        osg::BoundingBox mBb;
+        osg::BoundingBox mBox;
     };
 
     inline bool isInChunkBorders(ESM::CellRef& ref, osg::Vec2f& minBound, osg::Vec2f& maxBound)
@@ -251,9 +240,14 @@ namespace MWRender
             group->addChild(node);
         }
 
+        osg::ComputeBoundsVisitor cbv;
+        group->accept(cbv);
+        osg::BoundingBox box = cbv.getBoundingBox();
+        box = osg::BoundingBox(box.getMin()+worldCenter, box.getMax()+worldCenter);
+        group->addCullCallback(new ViewDistanceCallback(getViewDistance(), box));
+
         group->setStateSet(mStateset);
         group->setNodeMask(Mask_Groundcover);
-        group->addCullCallback(new ViewDistanceCallback(getViewDistance()));
         if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
             group->addCullCallback(new SceneUtil::LightListCallback);
         mSceneManager->recreateShaders(group, "groundcover", true, mProgramTemplate);
