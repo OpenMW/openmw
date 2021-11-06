@@ -12,8 +12,8 @@ namespace
 template <typename IndexArrayType>
 osg::ref_ptr<IndexArrayType> createIndexBuffer(unsigned int flags, unsigned int verts)
 {
-    // LOD level n means every 2^n-th vertex is kept
-    size_t lodLevel = (flags >> (4*4));
+    // LOD level n means every 2^n-th vertex is kept, but we currently handle LOD elsewhere.
+    size_t lodLevel = 0;//(flags >> (4*4));
 
     size_t lodDeltas[4];
     for (int i=0; i<4; ++i)
