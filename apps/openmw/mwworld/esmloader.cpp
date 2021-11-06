@@ -35,19 +35,20 @@ EsmLoader::EsmLoader(MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& read
 {
 }
 
-void EsmLoader::load(const boost::filesystem::path& filepath, int& index)
+void EsmLoader::load(const boost::filesystem::path& filepath)
 {
-  ContentLoader::load(filepath.filename(), index);
+  ContentLoader::load(filepath.filename());
 
   ESM::ESMReader lEsm;
   lEsm.setEncoder(mEncoder);
-  lEsm.setIndex(index);
+  lEsm.setIndex(mEsm.size());
   lEsm.open(filepath.string());
   lEsm.resolveParentFileIndices(mEsm);
-  mEsm[index] = lEsm;
-  mStore.load(mEsm[index], &mListener);
+  mEsm.push_back(lEsm);
+  mStore.load(mEsm.back(), &mListener);
 }
 
+    // TODO: This code has no business here and should be moved.
     void convertMagicEffects(ESM::CreatureStats& creatureStats, ESM::InventoryState& inventory, ESM::NpcStats* npcStats)
     {
         const auto& store = MWBase::Environment::get().getWorld()->getStore();
