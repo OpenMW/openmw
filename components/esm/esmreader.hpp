@@ -85,7 +85,8 @@ public:
   // all files/readers used by the engine. This is required for correct adjustRefNum() results
   // as required for handling moved, deleted and edited CellRefs.
   /// @note Does not validate.
-  /// @note open() must be called first. 
+  /// @note open() must be called first.
+  /// @note this ESMReader must be contained in allPlugins.
   void resolveParentFileIndices(const std::vector<ESMReader>& allPlugins);
   const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
   bool isValidParentFileIndex(int i) const { return i != getIndex(); }
