@@ -242,7 +242,7 @@ namespace MWRender
         osg::ComputeBoundsVisitor cbv;
         group->accept(cbv);
         osg::BoundingBox box = cbv.getBoundingBox();
-        box = osg::BoundingBox(box.getMin()+worldCenter, box.getMax()+worldCenter);
+        box = osg::BoundingBox(box._min+worldCenter, box._max+worldCenter);
         group->addCullCallback(new ViewDistanceCallback(getViewDistance(), box));
 
         group->setStateSet(mStateset);
