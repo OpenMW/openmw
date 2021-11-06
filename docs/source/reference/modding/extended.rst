@@ -333,17 +333,9 @@ Lua scripting
 OpenMW supports Lua scripts. See :ref:`Lua scripting documentation <OpenMW Lua scripting>`.
 It is not compatible with MWSE. A mod with Lua scripts will work only if it was developed specifically for OpenMW.
 
-Mods can contain ``*.omwscripts`` files. They should be registered in the ``openmw.cfg`` via "lua-scripts" entries. The order of the "lua-scripts" entries can be important. If "some_lua_mod" uses API provided by "another_lua_mod", then omwscripts from "another_lua_mod" should be registered first. For example:
-
-::
-
-    data="path/to/another_lua_mod"
-    content=another_lua_mod.omwaddon
-    lua-scripts=another_lua_mod.omwscripts
-
-    data="path/to/some_lua_mod"
-    content=some_lua_mod.omwaddon
-    lua-scripts=some_lua_mod.omwscripts
+Installation of a Lua mod is the same as of any other mod: add ``data=`` and ``content=`` entries to ``openmw.cfg``.
+Files with suffix ``.omwscripts`` are special type of content files and should also be enabled using ``content=`` entries.
+Note that for some mods load order can be important.
 
 .. _`Graphic Herbalism`: https://www.nexusmods.com/morrowind/mods/46599
 .. _`OpenMW Containers Animated`: https://www.nexusmods.com/morrowind/mods/46232

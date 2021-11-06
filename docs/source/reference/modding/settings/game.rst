@@ -441,7 +441,7 @@ Some mods add harvestable container models. When this setting is enabled, activa
 When this setting is turned off or when activating a regular container, the menu will open as usual.
 
 allow actors to follow over water surface
----------------------
+-----------------------------------------
 
 :Type:		boolean
 :Range:		True/False

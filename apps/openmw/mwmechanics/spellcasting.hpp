@@ -62,7 +62,7 @@ namespace MWMechanics
         /// @note \a target can be any type of object, not just actors.
         /// @note \a caster can be any type of object, or even an empty object.
         void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
-                      const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
+                      const ESM::EffectList& effects, ESM::RangeType range, bool exploded=false);
     };
 
     void playEffects(const MWWorld::Ptr& target, const ESM::MagicEffect& magicEffect, bool playNonLooping = true);

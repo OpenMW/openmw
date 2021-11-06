@@ -16,6 +16,9 @@ namespace Terrain
 {
     class RootNode;
     class ViewDataMap;
+    class ViewData;
+    struct ViewDataEntry;
+    
     class DebugChunkManager;
 
     /// @brief Terrain implementation that loads cells into a Quad Tree, with geometry LOD and texture LOD.
@@ -30,7 +33,7 @@ namespace Terrain
 
         void enable(bool enabled) override;
 
-        void setViewDistance(float distance) override { mViewDistance = distance; }
+        void setViewDistance(float distance) override;
 
         void cacheCell(View *view, int x, int y) override {}
         /// @note Not thread safe.
@@ -60,6 +63,7 @@ namespace Terrain
 
     private:
         void ensureQuadTreeBuilt();
+        void loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float cellWorldSize, const osg::Vec4i &gridbounds, bool compile, float reuseDistance);
 
         osg::ref_ptr<RootNode> mRootNode;
 
@@ -75,6 +79,7 @@ namespace Terrain
         float mMinSize;
         bool mDebugTerrainChunks;
         std::unique_ptr<DebugChunkManager> mDebugChunkManager;
+        float mRevalidateDistance;
     };
 
 }

@@ -29,7 +29,7 @@ namespace MWState
 
         public:
 
-            CharacterManager (const boost::filesystem::path& saves, const std::string& game);
+            CharacterManager (const boost::filesystem::path& saves, const std::vector<std::string>& contentFiles);
 
             Character *getCurrentCharacter ();
             ///< @note May return null

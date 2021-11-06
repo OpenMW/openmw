@@ -5,12 +5,14 @@
     Bug #3246: ESSImporter: Most NPCs are dead on save load
     Bug #3514: Editing a reference's position after loading an esp file makes the reference disappear
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
+    Bug #3792: 1 frame late magicka recalc breaks early scripted magicka reactions to Intelligence change
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
     Bug #3905: Great House Dagoth issues
     Bug #4203: Resurrecting an actor should close the loot GUI
     Bug #4602: Robert's Bodies: crash inside createInstance()
     Bug #4700: Editor: Incorrect command implementation
     Bug #4744: Invisible particles must still be processed
+    Bug #5088: Sky abruptly changes direction during certain weather transitions
     Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
     Bug #5207: Loose summons can be present in scene
@@ -25,6 +27,8 @@
     Bug #5801: A multi-effect spell with the intervention effects and recall always favors Almsivi intervention
     Bug #5842: GetDisposition adds temporary disposition change from different actors
     Bug #5863: GetEffect should return true after the player has teleported
+    Bug #5913: Failed assertion during Ritual of Trees quest
+    Bug #5937: Lights always need to be rotated by 90 degrees
     Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
     Bug #6051: NaN water height in ESM file is not handled gracefully
     Bug #6066: addtopic "return" does not work from within script. No errors thrown
@@ -40,10 +44,13 @@
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
     Bug #6165: Paralyzed player character can pickup items when the inventory is open
+    Bug #6168: Weather particles flicker for a frame at start of storms
     Bug #6172: Some creatures can't open doors
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
+    Bug #6253: Multiple instances of Reflect stack additively
+    Bug #6255: Reflect is different from vanilla
     Bug #6258: Barter menu glitches out when modifying prices
     Bug #6273: Respawning NPCs rotation is inconsistent
     Bug #6282: Laura craft doesn't follow the player character
@@ -57,6 +64,9 @@
     Bug #6322: Total sold/cost should reset to 0 when there are no items offered
     Bug #6323: Wyrmhaven: Alboin doesn't follower the player character out of his house
     Bug #6326: Detect Enchantment/Key should detect items in unresolved containers
+    Bug #6347: PlaceItem/PlaceItemCell/PlaceAt should work with levelled creatures
+    Bug #6363: Some scripts in Morrowland fail to work
+    Bug #6376: Creatures should be able to use torches
     Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
@@ -72,6 +82,7 @@
     Feature #6017: Separate persistent and temporary cell references when saving
     Feature #6032: Reverse-z depth buffer
     Feature #6078: First person should not clear depth buffer
+    Feature #6161: Refactor Sky to use shaders and GLES/GL3 friendly
     Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Feature #6199: Support FBO Rendering
     Feature #6249: Alpha testing support for Collada
@@ -79,7 +90,6 @@
     Feature #6288: Preserve the "blocked" record flag for referenceable objects.
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
-
 
 0.47.0
 ------

@@ -2,8 +2,9 @@
 #define GAME_MWWORLD_PTR_H
 
 #include <cassert>
-
+#include <type_traits>
 #include <string>
+#include <string_view>
 #include <sstream>
 
 #include "livecellref.hpp"
@@ -15,20 +16,19 @@ namespace MWWorld
     struct LiveCellRefBase;
 
     /// \brief Pointer to a LiveCellRef
-
-    class Ptr
+    /// @note PtrBase is never used directly and needed only to define Ptr and ConstPtr
+    template <template<class> class TypeTransform>
+    class PtrBase
     {
         public:
 
-            MWWorld::LiveCellRefBase *mRef;
-            CellStore *mCell;
-            ContainerStore *mContainerStore;
+            typedef TypeTransform<MWWorld::LiveCellRefBase> LiveCellRefBaseType;
+            typedef TypeTransform<CellStore> CellStoreType;
+            typedef TypeTransform<ContainerStore> ContainerStoreType;
 
-        public:
-            Ptr(MWWorld::LiveCellRefBase *liveCellRef=nullptr, CellStore *cell=nullptr)
-              : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)
-            {
-            }
+            LiveCellRefBaseType *mRef;
+            CellStoreType *mCell;
+            ContainerStoreType *mContainerStore;
 
             bool isEmpty() const
             {
@@ -40,7 +40,12 @@ namespace MWWorld
             // Note 1: ids are not sequential. E.g. for a creature `getType` returns 0x41455243.
             // Note 2: Life is not easy and full of surprises. For example
             //         prison marker reuses ESM::Door record. Player is ESM::NPC.
-            unsigned int getType() const;
+            unsigned int getType() const
+            {
+                if(mRef != nullptr)
+                    return mRef->getType();
+                throw std::runtime_error("Can't get type name from an empty object.");
+            }
 
             std::string_view getTypeDescription() const
             {
@@ -55,9 +60,9 @@ namespace MWWorld
             }
 
             template<typename T>
-            MWWorld::LiveCellRef<T> *get() const
+            TypeTransform<MWWorld::LiveCellRef<T>> *get() const
             {
-                MWWorld::LiveCellRef<T> *ref = dynamic_cast<MWWorld::LiveCellRef<T>*>(mRef);
+                TypeTransform<MWWorld::LiveCellRef<T>> *ref = dynamic_cast<TypeTransform<MWWorld::LiveCellRef<T>>*>(mRef);
                 if(ref) return ref;
 
                 std::stringstream str;
@@ -68,13 +73,26 @@ namespace MWWorld
                 throw std::runtime_error(str.str());
             }
 
-            MWWorld::LiveCellRefBase *getBase() const;
+            LiveCellRefBaseType *getBase() const
+            {
+                if (!mRef)
+                    throw std::runtime_error ("Can't access cell ref pointed to by null Ptr");
+                return mRef;
+            }
 
-            MWWorld::CellRef& getCellRef() const;
+            TypeTransform<MWWorld::CellRef>& getCellRef() const
+            {
+                assert(mRef);
+                return mRef->mRef;
+            }
 
-            RefData& getRefData() const;
+            TypeTransform<RefData>& getRefData() const
+            {
+                assert(mRef);
+                return mRef->mData;
+            }
 
-            CellStore *getCell() const
+            CellStoreType *getCell() const
             {
                 assert(mCell);
                 return mCell;
@@ -85,164 +103,47 @@ namespace MWWorld
                 return (mContainerStore == nullptr) && (mCell != nullptr);
             }
 
-            void setContainerStore (ContainerStore *store);
+            void setContainerStore (ContainerStoreType *store)
             ///< Must not be called on references that are in a cell.
+            {
+                assert (store);
+                assert (!mCell);
+                mContainerStore = store;
+            }
 
-            ContainerStore *getContainerStore() const;
+            ContainerStoreType *getContainerStore() const
             ///< May return a 0-pointer, if reference is not in a container.
+            {
+                return mContainerStore;
+            }
 
-            operator const void *();
+            operator const void *() const
             ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
+            {
+                return mRef;
+            }
+
+        protected:
+            PtrBase(LiveCellRefBaseType *liveCellRef, CellStoreType *cell, ContainerStoreType* containerStore) : mRef(liveCellRef), mCell(cell), mContainerStore(containerStore) {}
     };
 
-    /// \brief Pointer to a const LiveCellRef
+    /// @note It is possible to get mutable values from const Ptr. So if a function accepts const Ptr&, the object is still mutable.
+    /// To make it really const the argument should be const ConstPtr&.
+    class Ptr : public PtrBase<std::remove_const_t>
+    {
+    public:
+        Ptr(LiveCellRefBase *liveCellRef=nullptr, CellStoreType *cell=nullptr) : PtrBase(liveCellRef, cell, nullptr) {}
+    };
+
+    /// @note The difference between Ptr and ConstPtr is that the second one adds const to the underlying pointers.
     /// @note a Ptr can be implicitely converted to a ConstPtr, but you can not convert a ConstPtr to a Ptr.
-    class ConstPtr
+    class ConstPtr : public PtrBase<std::add_const_t>
     {
     public:
-
-        const MWWorld::LiveCellRefBase *mRef;
-        const CellStore *mCell;
-        const ContainerStore *mContainerStore;
-
-    public:
-        ConstPtr(const MWWorld::LiveCellRefBase *liveCellRef=nullptr, const CellStore *cell=nullptr)
-          : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)
-        {
-        }
-
-        ConstPtr(const MWWorld::Ptr& ptr)
-            : mRef(ptr.mRef), mCell(ptr.mCell), mContainerStore(ptr.mContainerStore)
-        {
-        }
-
-        bool isEmpty() const
-        {
-            return mRef == nullptr;
-        }
-
-        unsigned int getType() const;
-
-        std::string_view getTypeDescription() const
-        {
-            return mRef ? mRef->getTypeDescription() : "nullptr";
-        }
-
-        const Class& getClass() const
-        {
-            if(mRef != nullptr)
-                return *(mRef->mClass);
-            throw std::runtime_error("Cannot get class of an empty object");
-        }
-
-        template<typename T>
-        const MWWorld::LiveCellRef<T> *get() const
-        {
-            const MWWorld::LiveCellRef<T> *ref = dynamic_cast<const MWWorld::LiveCellRef<T>*>(mRef);
-            if(ref) return ref;
-
-            std::stringstream str;
-            str<< "Bad LiveCellRef cast to "<<T::getRecordType()<<" from ";
-            if(mRef != nullptr) str<< getTypeDescription();
-            else str<< "an empty object";
-
-            throw std::runtime_error(str.str());
-        }
-
-        const MWWorld::LiveCellRefBase *getBase() const;
-
-        const MWWorld::CellRef& getCellRef() const
-        {
-            assert(mRef);
-            return mRef->mRef;
-        }
-
-        const RefData& getRefData() const
-        {
-            assert(mRef);
-            return mRef->mData;
-        }
-
-        const CellStore *getCell() const
-        {
-            assert(mCell);
-            return mCell;
-        }
-
-        bool isInCell() const
-        {
-            return (mContainerStore == nullptr) && (mCell != nullptr);
-        }
-        
-        void setContainerStore (const ContainerStore *store);
-        ///< Must not be called on references that are in a cell.
-        
-        const ContainerStore *getContainerStore() const;
-        ///< May return a 0-pointer, if reference is not in a container.
-
-        operator const void *();
-        ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
+        ConstPtr(const Ptr& ptr) : PtrBase(ptr.mRef, ptr.mCell, ptr.mContainerStore) {}
+        ConstPtr(const LiveCellRefBase *liveCellRef=nullptr, const CellStoreType *cell=nullptr) : PtrBase(liveCellRef, cell, nullptr) {}
     };
 
-    inline bool operator== (const Ptr& left, const Ptr& right)
-    {
-        return left.mRef==right.mRef;
-    }
-
-    inline bool operator!= (const Ptr& left, const Ptr& right)
-    {
-        return !(left==right);
-    }
-
-    inline bool operator< (const Ptr& left, const Ptr& right)
-    {
-        return left.mRef<right.mRef;
-    }
-
-    inline bool operator>= (const Ptr& left, const Ptr& right)
-    {
-        return !(left<right);
-    }
-
-    inline bool operator> (const Ptr& left, const Ptr& right)
-    {
-        return right<left;
-    }
-
-    inline bool operator<= (const Ptr& left, const Ptr& right)
-    {
-        return !(left>right);
-    }
-
-    inline bool operator== (const ConstPtr& left, const ConstPtr& right)
-    {
-        return left.mRef==right.mRef;
-    }
-
-    inline bool operator!= (const ConstPtr& left, const ConstPtr& right)
-    {
-        return !(left==right);
-    }
-
-    inline bool operator< (const ConstPtr& left, const ConstPtr& right)
-    {
-        return left.mRef<right.mRef;
-    }
-
-    inline bool operator>= (const ConstPtr& left, const ConstPtr& right)
-    {
-        return !(left<right);
-    }
-
-    inline bool operator> (const ConstPtr& left, const ConstPtr& right)
-    {
-        return right<left;
-    }
-
-    inline bool operator<= (const ConstPtr& left, const ConstPtr& right)
-    {
-        return !(left>right);
-    }
 }
 
 #endif

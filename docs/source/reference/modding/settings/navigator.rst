@@ -1,5 +1,5 @@
 Navigator Settings
-################
+##################
 
 Main settings
 *************
@@ -43,7 +43,7 @@ Increasing this value may decrease performance.
     It's a limitation of `Recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ library.
 
 wait until min distance to player
-------------------------------
+---------------------------------
 
 :Type:		integer
 :Range:		>= 0
@@ -87,7 +87,7 @@ Memory will be consumed in approximately linear dependency from number of nav me
 But only for new locations or already dropped from cache.
 
 min update interval ms
-----------------
+----------------------
 
 :Type:		integer
 :Range:		>= 0
@@ -181,7 +181,7 @@ Every nav mesh is visible and every update is noticable.
 Potentially decreases performance.
 
 enable agents paths render
--------------------
+--------------------------
 
 :Type:		boolean
 :Range:		True/False
@@ -193,7 +193,7 @@ Works even if Navigator is disabled.
 Potentially decreases performance.
 
 enable recast mesh render
-----------------------
+-------------------------
 
 :Type:		boolean
 :Range:		True/False

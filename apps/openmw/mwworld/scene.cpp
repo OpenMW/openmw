@@ -132,7 +132,7 @@ namespace
             {
                 btVector3 aabbMin;
                 btVector3 aabbMax;
-                object->getShapeInstance()->getCollisionShape()->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+                object->getShapeInstance()->mCollisionShape->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
 
                 const auto center = (aabbMax + aabbMin) * 0.5f;
 
@@ -147,12 +147,12 @@ namespace
                     transform.getOrigin()
                 );
 
-                const auto start = Misc::Convert::makeOsgVec3f(closedDoorTransform(center + toPoint));
+                const auto start = Misc::Convert::toOsg(closedDoorTransform(center + toPoint));
                 const auto startPoint = physics.castRay(start, start - osg::Vec3f(0, 0, 1000), ptr, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
                 const auto connectionStart = startPoint.mHit ? startPoint.mHitPos : start;
 
-                const auto end = Misc::Convert::makeOsgVec3f(closedDoorTransform(center - toPoint));
+                const auto end = Misc::Convert::toOsg(closedDoorTransform(center - toPoint));
                 const auto endPoint = physics.castRay(end, end - osg::Vec3f(0, 0, 1000), ptr, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
                 const auto connectionEnd = endPoint.mHit ? endPoint.mHitPos : end;

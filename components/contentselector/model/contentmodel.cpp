@@ -9,9 +9,10 @@
 
 #include <components/esm/esmreader.hpp>
 
-ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
+ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon, bool showOMWScripts) :
     QAbstractTableModel(parent),
     mWarningIcon(warningIcon),
+    mShowOMWScripts(showOMWScripts),
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
@@ -416,6 +417,8 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     QDir dir(path);
     QStringList filters;
     filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
+    if (mShowOMWScripts)
+        filters << "*.omwscripts";
     dir.setNameFilters(filters);
 
     for (const QString &path2 : dir.entryList())
@@ -424,6 +427,15 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
 
         if (item(info.fileName()))
             continue;
+
+        if (info.fileName().endsWith(".omwscripts", Qt::CaseInsensitive))
+        {
+            EsmFile *file = new EsmFile(path2);
+            file->setDate(info.lastModified());
+            file->setFilePath(info.absoluteFilePath());
+            addFile(file);
+            continue;
+        }
 
         try {
             ESM::ESMReader fileReader;

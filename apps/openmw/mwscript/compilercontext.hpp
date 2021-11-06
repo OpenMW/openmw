@@ -39,9 +39,6 @@ namespace MWScript
 
             bool isId (const std::string& name) const override;
             ///< Does \a name match an ID, that can be referenced?
-
-            bool isJournalId (const std::string& name) const override;
-            ///< Does \a name match a journal ID?
     };
 }
 

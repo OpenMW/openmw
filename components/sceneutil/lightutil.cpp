@@ -79,6 +79,7 @@ namespace SceneUtil
             // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
             osg::ref_ptr<SceneUtil::PositionAttitudeTransform> trans(new SceneUtil::PositionAttitudeTransform);
             trans->setPosition(computeBound.getBoundingBox().center());
+            trans->setNodeMask(lightMask);
 
             node->addChild(trans);
 

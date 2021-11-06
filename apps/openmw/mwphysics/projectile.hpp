@@ -36,10 +36,7 @@ namespace MWPhysics
 
         btConvexShape* getConvexShape() const { return mConvexShape; }
 
-        void commitPositionChange();
-
-        void setPosition(const osg::Vec3f& position);
-        osg::Vec3f getPosition() const;
+        void updateCollisionObjectPosition();
 
         bool isActive() const
         {
@@ -80,13 +77,11 @@ namespace MWPhysics
         std::unique_ptr<btCollisionShape> mShape;
         btConvexShape* mConvexShape;
 
-        bool mTransformUpdatePending;
         bool mHitWater;
         std::atomic<bool> mActive;
         MWWorld::Ptr mCaster;
         const btCollisionObject* mCasterColObj;
         const btCollisionObject* mHitTarget;
-        osg::Vec3f mPosition;
         btVector3 mHitPosition;
         btVector3 mHitNormal;
 

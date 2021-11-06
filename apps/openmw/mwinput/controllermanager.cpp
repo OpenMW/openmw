@@ -70,7 +70,7 @@ namespace MWInput
         }
 
         float deadZoneRadius = Settings::Manager::getFloat("joystick dead zone", "Input");
-        deadZoneRadius = std::min(std::max(deadZoneRadius, 0.0f), 0.5f);
+        deadZoneRadius = std::clamp(deadZoneRadius, 0.f, 0.5f);
         mBindingsManager->setJoystickDeadZone(deadZoneRadius);
     }
 

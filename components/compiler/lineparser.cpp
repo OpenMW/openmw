@@ -67,6 +67,11 @@ namespace Compiler
             parseExpression (scanner, loc);
             return true;
         }
+        else if (mState == SetState)
+        {
+            // Allow ints to be used as variable names
+            return parseName(loc.mLiteral, loc, scanner);
+        }
 
         return Parser::parseInt (value, loc, scanner);
     }
@@ -140,7 +145,7 @@ namespace Compiler
             if (!arguments.empty())
             {
                 mExprParser.reset();
-                mExprParser.parseArguments (arguments, scanner, mCode);
+                mExprParser.parseArguments (arguments, scanner, mCode, -1, true);
             }
 
             mName = name;

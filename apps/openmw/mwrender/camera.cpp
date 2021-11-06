@@ -236,7 +236,7 @@ namespace MWRender
         mTotalMovement += speed * duration;
         speed /= (1.f + speed / 500.f);
         float maxDelta = 300.f * duration;
-        mSmoothedSpeed += osg::clampBetween(speed - mSmoothedSpeed, -maxDelta, maxDelta);
+        mSmoothedSpeed += std::clamp(speed - mSmoothedSpeed, -maxDelta, maxDelta);
 
         mMaxNextCameraDistance = mCameraDistance + duration * (100.f + mBaseCameraDistance);
         updateStandingPreviewMode();
@@ -434,7 +434,7 @@ namespace MWRender
     {
         const float epsilon = 0.000001f;
         float limit = static_cast<float>(osg::PI_2) - epsilon;
-        mPitch = osg::clampBetween(angle, -limit, limit);
+        mPitch = std::clamp(angle, -limit, limit);
     }
 
     float Camera::getCameraDistance() const
@@ -460,7 +460,7 @@ namespace MWRender
         }
 
         mIsNearest = mBaseCameraDistance <= mNearest;
-        mBaseCameraDistance = osg::clampBetween(mBaseCameraDistance, mNearest, mFurthest);
+        mBaseCameraDistance = std::clamp(mBaseCameraDistance, mNearest, mFurthest);
         Settings::Manager::setFloat("third person camera distance", "Camera", mBaseCameraDistance);
     }
 

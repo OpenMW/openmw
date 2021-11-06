@@ -12,6 +12,8 @@ if (GTEST_FOUND AND GMOCK_FOUND)
 
         mwdialogue/test_keywordsearch.cpp
 
+        mwscript/test_scripts.cpp
+
         esm/test_fixed_string.cpp
         esm/variant.cpp
 
@@ -20,7 +22,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         lua/test_utilpackage.cpp
         lua/test_serialization.cpp
         lua/test_querypackage.cpp
-        lua/test_omwscriptsparser.cpp
+        lua/test_configuration.cpp
 
         misc/test_stringops.cpp
         misc/test_endianness.cpp
@@ -36,6 +38,10 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         detournavigator/recastmeshobject.cpp
         detournavigator/navmeshtilescache.cpp
         detournavigator/tilecachedrecastmeshmanager.cpp
+        detournavigator/serialization/binaryreader.cpp
+        detournavigator/serialization/binarywriter.cpp
+        detournavigator/serialization/sizeaccumulator.cpp
+        detournavigator/serialization/integration.cpp
 
         settings/parser.cpp
 

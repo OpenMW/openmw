@@ -4,6 +4,8 @@
 #include <typeindex>
 
 #include <components/esm/cellref.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm/luascripts.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -19,8 +21,12 @@ namespace MWLua
     std::string idToString(const ObjectId& id);
     std::string ptrToString(const MWWorld::Ptr& ptr);
     bool isMarker(const MWWorld::Ptr& ptr);
-    std::string_view getMWClassName(const std::type_index& cls_type, std::string_view fallback = "Unknown");
-    std::string_view getMWClassName(const MWWorld::Ptr& ptr);
+    std::string_view getLuaObjectTypeName(ESM::RecNameInts recordType, std::string_view fallback = "Unknown");
+    std::string_view getLuaObjectTypeName(const MWWorld::Ptr& ptr);
+
+    // Each script has a set of flags that controls to which objects the script should be
+    // automatically attached. This function maps each object types to one of the flags. 
+    ESM::LuaScriptCfg::Flags getLuaScriptFlag(const MWWorld::Ptr& ptr);
 
     // Holds a mapping ObjectId -> MWWord::Ptr.
     class ObjectRegistry
@@ -64,7 +70,7 @@ namespace MWLua
         ObjectId id() const { return mId; }
 
         std::string toString() const;
-        std::string_view type() const { return getMWClassName(ptr()); }
+        std::string_view type() const { return getLuaObjectTypeName(ptr()); }
 
         // Updates and returns the underlying Ptr. Throws an exception if object is not available.
         const MWWorld::Ptr& ptr() const;

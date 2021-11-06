@@ -245,8 +245,8 @@ namespace MWInput
         mMouseWheel += mouseWheelMove;
 
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width - 1)));
-        mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height - 1)));
+        mGuiCursorX = std::clamp<float>(mGuiCursorX, 0.f, viewSize.width - 1);
+        mGuiCursorY = std::clamp<float>(mGuiCursorY, 0.f, viewSize.height - 1);
 
         MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), static_cast<int>(mMouseWheel));
     }

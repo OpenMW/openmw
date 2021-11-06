@@ -5,9 +5,11 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <unordered_map>
 #include <set>
 
-#include "recordcmp.hpp"
+#include <components/esm/records.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace ESM
 {
@@ -147,14 +149,15 @@ namespace MWWorld
     template <class T>
     class Store : public StoreBase
     {
-        std::map<std::string, T>      mStatic;
-        std::vector<T *>    mShared; // Preserves the record order as it came from the content files (this
-                                     // is relevant for the spell autocalc code and selection order
-                                     // for heads/hairs in the character creation)
-        std::map<std::string, T> mDynamic;
-
-        typedef std::map<std::string, T> Dynamic;
-        typedef std::map<std::string, T> Static;
+        typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Static;
+        Static mStatic;
+        /// @par mShared usually preserves the record order as it came from the content files (this
+        /// is relevant for the spell autocalc code and selection order
+        /// for heads/hairs in the character creation)
+        /// @warning ESM::Dialogue Store currently implements a sorted order for unknown reasons.
+        std::vector<T*> mShared;
+        typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Dynamic;
+        Dynamic mDynamic;
 
         friend class ESMStore;
 
@@ -219,13 +222,12 @@ namespace MWWorld
         const ESM::LandTexture *search(size_t index, size_t plugin) const;
         const ESM::LandTexture *find(size_t index, size_t plugin) const;
 
-        /// Resize the internal store to hold at least \a num plugins.
-        void resize(size_t num);
+        /// Resize the internal store to hold another plugin.
+        void addPlugin() { mStatic.emplace_back(); }
 
         size_t getSize() const override;
         size_t getSize(size_t plugin) const;
 
-        RecordId load(ESM::ESMReader &esm, size_t plugin);
         RecordId load(ESM::ESMReader &esm) override;
 
         iterator begin(size_t plugin) const;
@@ -294,7 +296,7 @@ namespace MWWorld
             }
         };
 
-        typedef std::map<std::string, ESM::Cell>                           DynamicInt;
+        typedef std::unordered_map<std::string, ESM::Cell, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> DynamicInt;
         typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp>    DynamicExt;
 
         DynamicInt      mInt;
@@ -354,7 +356,7 @@ namespace MWWorld
     class Store<ESM::Pathgrid> : public StoreBase
     {
     private:
-        typedef std::map<std::string, ESM::Pathgrid> Interior;
+        typedef std::unordered_map<std::string, ESM::Pathgrid, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Interior;
         typedef std::map<std::pair<int, int>, ESM::Pathgrid> Exterior;
 
         Interior mInt;

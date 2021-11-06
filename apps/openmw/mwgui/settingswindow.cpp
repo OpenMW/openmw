@@ -171,7 +171,7 @@ namespace MWGui
                     else
                         valueStr = MyGUI::utility::toString(int(value));
 
-                    value = std::max(min, std::min(value, max));
+                    value = std::clamp(value, min, max);
                     value = (value-min)/(max-min);
 
                     scroll->setScrollPosition(static_cast<size_t>(value * (scroll->getScrollRange() - 1)));

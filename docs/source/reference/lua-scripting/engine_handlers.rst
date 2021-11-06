@@ -6,14 +6,22 @@ Engine handler is a function defined by a script, that can be called by the engi
 +---------------------------------------------------------------------------------------------------------+
 | **Can be defined by any script**                                                                        |
 +----------------------------------+----------------------------------------------------------------------+
+| onInit(initData)                 | | Called once when the script is created (not loaded). `InitData can`|
+|                                  | | `be assigned to a script in openmw-cs (not yet implemented)`.      |
+|                                  | | ``onInterfaceOverride`` can be called before ``onInit``.           |
++----------------------------------+----------------------------------------------------------------------+
 | onUpdate(dt)                     | | Called every frame if game not paused. `dt` is the time            |
 |                                  | | from the last update in seconds.                                   |
 +----------------------------------+----------------------------------------------------------------------+
-| onSave() -> data                 | | Called when the game is saving. May be called in inactive          |
+| onSave() -> savedData            | | Called when the game is saving. May be called in inactive          |
 |                                  | | state, so it shouldn't use `openmw.nearby`.                        |
 +----------------------------------+----------------------------------------------------------------------+
-| onLoad(data)                     | | Called on loading with the data previosly returned by              |
-|                                  | | onSave. During loading the object is always inactive.              |
+| onLoad(savedData, initData)      | | Called on loading with the data previosly returned by              |
+|                                  | | onSave. During loading the object is always inactive. initData is  |
+|                                  | | the same as in onInit.                                             |
++----------------------------------+----------------------------------------------------------------------+
+| onInterfaceOverride(base)        | | Called if the current script has an interface and overrides an     |
+|                                  | | interface (``base``) of another script.                            |
 +----------------------------------+----------------------------------------------------------------------+
 | **Only for global scripts**                                                                             |
 +----------------------------------+----------------------------------------------------------------------+

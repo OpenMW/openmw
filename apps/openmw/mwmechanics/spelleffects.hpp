@@ -10,8 +10,13 @@
 
 namespace MWMechanics
 {
+    enum class MagicApplicationResult
+    {
+        APPLIED, REMOVED, REFLECTED
+    };
+
     // Applies a tick of a single effect. Returns true if the effect should be removed immediately
-    bool applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, float dt);
+    MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, float dt);
 
     // Undoes permanent effects created by ESM::MagicEffect::AppliedOnce
     void onMagicEffectRemoved(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellParams& spell, const ESM::ActiveEffect& effect);

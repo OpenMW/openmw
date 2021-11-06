@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_RESOURCE_BULLETSHAPE_H
 
 #include <map>
+#include <memory>
 
 #include <osg/Object>
 #include <osg/ref_ptr>
@@ -13,24 +14,28 @@ class btCollisionShape;
 
 namespace Resource
 {
+    struct DeleteCollisionShape
+    {
+        void operator()(btCollisionShape* shape) const;
+    };
 
-    class BulletShapeInstance;
+    using CollisionShapePtr = std::unique_ptr<btCollisionShape, DeleteCollisionShape>;
+
     class BulletShape : public osg::Object
     {
     public:
-        BulletShape();
+        BulletShape() = default;
         BulletShape(const BulletShape& copy, const osg::CopyOp& copyop);
-        virtual ~BulletShape();
 
         META_Object(Resource, BulletShape)
 
-        btCollisionShape* mCollisionShape;
-        btCollisionShape* mAvoidCollisionShape;
+        CollisionShapePtr mCollisionShape;
+        CollisionShapePtr mAvoidCollisionShape;
 
         struct CollisionBox
         {
-            osg::Vec3f extents;
-            osg::Vec3f center;
+            osg::Vec3f mExtents;
+            osg::Vec3f mCenter;
         };
         // Used for actors and projectiles. mCollisionShape is used for actors only when we need to autogenerate collision box for creatures.
         // For now, use one file <-> one resource for simplicity.
@@ -42,21 +47,9 @@ namespace Resource
         // we store the node's record index mapped to the child index of the shape in the btCompoundShape.
         std::map<int, int> mAnimatedShapes;
 
-        osg::ref_ptr<BulletShapeInstance> makeInstance() const;
-
-        btCollisionShape* duplicateCollisionShape(const btCollisionShape* shape) const;
-
-        btCollisionShape* getCollisionShape() const;
-
-        btCollisionShape* getAvoidCollisionShape() const;
-
         void setLocalScaling(const btVector3& scale);
 
-        bool isAnimated() const;
-
-    private:
-
-        void deleteShape(btCollisionShape* shape);
+        bool isAnimated() const { return !mAnimatedShapes.empty(); }
     };
 
 
@@ -70,6 +63,8 @@ namespace Resource
     private:
         osg::ref_ptr<const BulletShape> mSource;
     };
+
+    osg::ref_ptr<BulletShapeInstance> makeInstance(osg::ref_ptr<const BulletShape> source);
 
     // Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
     struct TriangleMeshShape : public btBvhTriangleMeshShape

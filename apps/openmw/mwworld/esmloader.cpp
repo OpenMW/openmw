@@ -42,8 +42,8 @@ void EsmLoader::load(const boost::filesystem::path& filepath, int& index)
   ESM::ESMReader lEsm;
   lEsm.setEncoder(mEncoder);
   lEsm.setIndex(index);
-  lEsm.setGlobalReaderList(&mEsm);
   lEsm.open(filepath.string());
+  lEsm.resolveParentFileIndices(mEsm);
   mEsm[index] = lEsm;
   mStore.load(mEsm[index], &mListener);
 }
@@ -104,8 +104,8 @@ void EsmLoader::load(const boost::filesystem::path& filepath, int& index)
                         effect.mMagnitude = magnitude;
                         effect.mMinMagnitude = magnitude;
                         effect.mMaxMagnitude = magnitude;
-                        // Prevent recalculation of resistances
-                        effect.mFlags = ESM::ActiveEffect::Flag_Ignore_Resistances;
+                        // Prevent recalculation of resistances and don't reflect or absorb the effect
+                        effect.mFlags = ESM::ActiveEffect::Flag_Ignore_Resistances | ESM::ActiveEffect::Flag_Ignore_Reflect | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
                     }
                     else
                     {
@@ -172,8 +172,8 @@ void EsmLoader::load(const boost::filesystem::path& filepath, int& index)
                 effect.mDuration = -1;
                 effect.mTimeLeft = -1;
                 effect.mEffectIndex = static_cast<int>(effectIndex);
-                // Prevent recalculation of resistances
-                effect.mFlags = ESM::ActiveEffect::Flag_Ignore_Resistances;
+                // Prevent recalculation of resistances and don't reflect or absorb the effect
+                effect.mFlags = ESM::ActiveEffect::Flag_Ignore_Resistances | ESM::ActiveEffect::Flag_Ignore_Reflect | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
                 params.mEffects.emplace_back(effect);
             }
             auto [begin, end] = equippedItems.equal_range(id);

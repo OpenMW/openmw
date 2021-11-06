@@ -13,13 +13,12 @@ namespace SceneUtil
 {
 
 template <class Derived, typename NodeType=osg::Node*, typename VisitorType=osg::NodeVisitor*>
-class NodeCallback : public virtual osg::Callback
+class NodeCallback : public osg::Callback
 {
 public:
     NodeCallback(){}
     NodeCallback(const NodeCallback& nc,const osg::CopyOp& copyop):
             osg::Callback(nc, copyop) {}
-    META_Object(SceneUtil, NodeCallback)
 
     bool run(osg::Object* object, osg::Object* data) override
     {

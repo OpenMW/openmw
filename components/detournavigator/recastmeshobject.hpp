@@ -32,40 +32,45 @@ namespace DetourNavigator
         std::reference_wrapper<const btCollisionShape> mShape;
     };
 
+    class ChildRecastMeshObject
+    {
+        public:
+            ChildRecastMeshObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType);
+
+            bool update(const btTransform& transform, const AreaType areaType);
+
+            const btCollisionShape& getShape() const { return mShape; }
+
+            const btTransform& getTransform() const { return mTransform; }
+
+            AreaType getAreaType() const { return mAreaType; }
+
+        private:
+            std::reference_wrapper<const btCollisionShape> mShape;
+            btTransform mTransform;
+            AreaType mAreaType;
+            btVector3 mLocalScaling;
+            std::vector<ChildRecastMeshObject> mChildren;
+    };
+
     class RecastMeshObject
     {
         public:
             RecastMeshObject(const CollisionShape& shape, const btTransform& transform, const AreaType areaType);
 
-            bool update(const btTransform& transform, const AreaType areaType);
+            bool update(const btTransform& transform, const AreaType areaType) { return mImpl.update(transform, areaType); }
 
-            const osg::ref_ptr<const osg::Referenced>& getHolder() const
-            {
-                return mHolder;
-            }
+            const osg::ref_ptr<const osg::Referenced>& getHolder() const { return mHolder; }
 
-            const btCollisionShape& getShape() const
-            {
-                return mShape;
-            }
+            const btCollisionShape& getShape() const { return mImpl.getShape(); }
 
-            const btTransform& getTransform() const
-            {
-                return mTransform;
-            }
+            const btTransform& getTransform() const { return mImpl.getTransform(); }
 
-            AreaType getAreaType() const
-            {
-                return mAreaType;
-            }
+            AreaType getAreaType() const { return mImpl.getAreaType(); }
 
         private:
             osg::ref_ptr<const osg::Referenced> mHolder;
-            std::reference_wrapper<const btCollisionShape> mShape;
-            btTransform mTransform;
-            AreaType mAreaType;
-            btVector3 mLocalScaling;
-            std::vector<RecastMeshObject> mChildren;
+            ChildRecastMeshObject mImpl;
     };
 }
 

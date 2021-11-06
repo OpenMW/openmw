@@ -199,6 +199,10 @@ if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
 endif()
 
+if(MSVC)
+  add_compile_options("/utf-8")
+endif()
+
 # Dependencies
 find_package(OpenGL REQUIRED)
 
@@ -707,6 +711,8 @@ endif()
 if (BUILD_OPENMW AND APPLE)
     # Without these flags LuaJit crashes on startup on OSX
     set_target_properties(openmw PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+    target_compile_definitions(components PRIVATE GL_SILENCE_DEPRECATION=1)
+    target_compile_definitions(openmw PRIVATE GL_SILENCE_DEPRECATION=1)
 endif()
 
 # Apple bundling

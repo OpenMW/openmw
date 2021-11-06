@@ -10,6 +10,8 @@ QSet<QString> CellNameLoader::getCellNames(QStringList &contentPaths)
 
     // Loop through all content files
     for (auto &contentPath : contentPaths) {
+        if (contentPath.endsWith(".omwscripts", Qt::CaseInsensitive))
+            continue;
         esmReader.open(contentPath.toStdString());
 
         // Loop through all records

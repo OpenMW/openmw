@@ -108,7 +108,7 @@ namespace MWScript
                     chances.reserve(10);
                     while(arg0 > 0)
                     {
-                        chances.push_back(std::max(0, std::min(127, runtime[0].mInteger)));
+                        chances.push_back(std::clamp(runtime[0].mInteger, 0, 127));
                         runtime.pop();
                         arg0--;
                     }

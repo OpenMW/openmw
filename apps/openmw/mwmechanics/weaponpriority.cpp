@@ -128,8 +128,7 @@ namespace MWMechanics
         }
 
         // Take hit chance in account, but do not allow rating become negative.
-        float chance = getHitChance(actor, enemy, value) / 100.f;
-        rating *= std::min(1.f, std::max(0.01f, chance));
+        rating *= std::clamp(getHitChance(actor, enemy, value) / 100.f, 0.01f, 1.f);
 
         if (weapclass != ESM::WeaponType::Ammo)
             rating *= weapon->mData.mSpeed;

@@ -19,25 +19,12 @@
 namespace MWLua
 {
 
-    // Wrapper for a single-argument Lua function.
-    // Holds information about the script the function belongs to.
-    // Needed to prevent callback calls if the script was removed.
-    struct Callback
-    {
-        static constexpr std::string_view SCRIPT_NAME_KEY = "name";
-
-        sol::function mFunc;
-        sol::table mHiddenData;
-
-        void operator()(sol::object arg) const;
-    };
-
     class LuaManager : public MWBase::LuaManager
     {
     public:
-        LuaManager(const VFS::Manager* vfs, const std::vector<std::string>& globalScriptLists);
+        LuaManager(const VFS::Manager* vfs);
 
-        // Called by engine.cpp when environment is fully initialized.
+        // Called by engine.cpp when the environment is fully initialized.
         void init();
 
         // Called by engine.cpp every frame. For performance reasons it works in a separate
@@ -49,7 +36,8 @@ namespace MWLua
 
         // Available everywhere through the MWBase::LuaManager interface.
         // LuaManager queues these events and propagates to scripts on the next `update` call.
-        void newGameStarted() override { mGlobalScripts.newGameStarted(); }
+        void newGameStarted() override;
+        void gameLoaded() override;
         void objectAddedToScene(const MWWorld::Ptr& ptr) override;
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
         void registerObject(const MWWorld::Ptr& ptr) override;
@@ -62,8 +50,8 @@ namespace MWLua
         void clear() override;  // should be called before loading game or starting a new game to reset internal state.
         void setupPlayer(const MWWorld::Ptr& ptr) override;  // Should be called once after each "clear".
 
-        // Used only in luabindings
-        void addLocalScript(const MWWorld::Ptr&, const std::string& scriptPath);
+        // Used only in Lua bindings
+        void addCustomLocalScript(const MWWorld::Ptr&, int scriptId);
         void addAction(std::unique_ptr<Action>&& action) { mActionQueue.push_back(std::move(action)); }
         void addTeleportPlayerAction(std::unique_ptr<TeleportAction>&& action) { mTeleportPlayerAction = std::move(action); }
         void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
@@ -81,21 +69,27 @@ namespace MWLua
         void reloadAllScripts() override;
 
         // Used to call Lua callbacks from C++
-        void queueCallback(Callback callback, sol::object arg) { mQueuedCallbacks.push_back({std::move(callback), std::move(arg)}); }
+        void queueCallback(LuaUtil::Callback callback, sol::object arg)
+        {
+            mQueuedCallbacks.push_back({std::move(callback), std::move(arg)});
+        }
 
         // Wraps Lua callback into an std::function.
         // NOTE: Resulted function is not thread safe. Can not be used while LuaManager::update() or
         //       any other Lua-related function is running.
         template <class Arg>
-        std::function<void(Arg)> wrapLuaCallback(const Callback& c)
+        std::function<void(Arg)> wrapLuaCallback(const LuaUtil::Callback& c)
         {
             return [this, c](Arg arg) { this->queueCallback(c, sol::make_object(c.mFunc.lua_state(), arg)); };
         }
 
     private:
-        LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr);
+        void initConfiguration();
+        LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScriptCfg::Flags);
 
         bool mInitialized = false;
+        bool mGlobalScriptsStarted = false;
+        LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;
@@ -104,12 +98,12 @@ namespace MWLua
         sol::table mLocalSettingsPackage;
         sol::table mPlayerSettingsPackage;
 
-        std::vector<std::string> mGlobalScriptList;
         GlobalScripts mGlobalScripts{&mLua};
         std::set<LocalScripts*> mActiveLocalScripts;
         WorldView mWorldView;
 
         bool mPlayerChanged = false;
+        bool mNewGameStarted = false;
         MWWorld::Ptr mPlayer;
 
         GlobalEventQueue mGlobalEvents;
@@ -127,7 +121,7 @@ namespace MWLua
 
         struct CallbackWithData
         {
-            Callback mCallback;
+            LuaUtil::Callback mCallback;
             sol::object mArg;
         };
         std::vector<CallbackWithData> mQueuedCallbacks;

@@ -71,6 +71,7 @@ namespace MWRender
         bool mToggled;
         float mTop;
         bool mInterior;
+        bool mShowWorld;
 
         osg::Callback* mCullCallback;
         osg::ref_ptr<osg::Callback> mShaderWaterStateSetUpdater;
@@ -124,6 +125,8 @@ namespace MWRender
         osg::Vec3d getPosition() const;
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);
+
+        void showWorld(bool show);
     };
 
 }

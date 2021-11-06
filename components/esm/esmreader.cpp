@@ -1,5 +1,8 @@
 #include "esmreader.hpp"
 
+#include <boost/filesystem/path.hpp>
+#include <components/misc/stringops.hpp>
+
 #include <stdexcept>
 
 namespace ESM
@@ -17,7 +20,6 @@ ESM_Context ESMReader::getContext()
 ESMReader::ESMReader()
     : mRecordFlags(0)
     , mBuffer(50*1024)
-    , mGlobalReaderList(nullptr)
     , mEncoder(nullptr)
     , mFileSize(0)
 {
@@ -53,6 +55,29 @@ void ESMReader::clearCtx()
    mCtx.subCached = false;
    mCtx.recName.clear();
    mCtx.subName.clear();
+}
+
+void ESMReader::resolveParentFileIndices(const std::vector<ESMReader>& allPlugins)
+{
+    mCtx.parentFileIndices.clear();
+    const std::vector<Header::MasterData> &masters = getGameFiles();
+    for (size_t j = 0; j < masters.size(); j++) {
+        const Header::MasterData &mast = masters[j];
+        std::string fname = mast.name;
+        int index = getIndex(); 
+        for (int i = 0; i < getIndex(); i++) {
+            const ESMReader& reader = allPlugins.at(i);
+            if (reader.getFileSize() == 0)
+                continue;  // Content file in non-ESM format
+            const std::string candidate = reader.getName();
+            std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
+            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
+                index = i;
+                break;
+            }
+        }
+        mCtx.parentFileIndices.push_back(index);
+    }
 }
 
 void ESMReader::openRaw(Files::IStreamPtr _esm, const std::string& name)

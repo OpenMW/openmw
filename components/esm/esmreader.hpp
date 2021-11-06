@@ -80,13 +80,15 @@ public:
   //  to the individual load() methods. This hack allows to pass this reference
   //  indirectly to the load() method.
   void setIndex(const int index) { mCtx.index = index;}
-  int getIndex() {return mCtx.index;}
+  int getIndex() const {return mCtx.index;}
 
-  void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
-  std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
-
-  void addParentFileIndex(int index) { mCtx.parentFileIndices.push_back(index); }
+  // Assign parent esX files by tracking their indices in the global list of
+  // all files/readers used by the engine. This is required for correct adjustRefNum() results
+  // as required for handling moved, deleted and edited CellRefs.
+  /// @note Does not validate.
+  void resolveParentFileIndices(const std::vector<ESMReader>& files);
   const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
+  bool isValidParentFileIndex(int i) const { return i != getIndex(); }
 
   /*************************************************************************
    *
@@ -279,7 +281,6 @@ private:
 
   Header mHeader;
 
-  std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
 
   size_t mFileSize;

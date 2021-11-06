@@ -43,6 +43,9 @@ namespace MWWorld
 
         virtual std::string_view getTypeDescription() const = 0;
 
+        unsigned int getType() const;
+        ///< @see MWWorld::Class::getType
+
         protected:
 
             void loadImp (const ESM::ObjectState& state);

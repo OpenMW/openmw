@@ -22,37 +22,10 @@
 #include "actorutil.hpp"
 #include "aifollow.hpp"
 #include "creaturestats.hpp"
-#include "spellabsorption.hpp"
 #include "spelleffects.hpp"
 #include "spellutil.hpp"
 #include "summoning.hpp"
 #include "weapontype.hpp"
-
-namespace
-{
-    bool reflectEffect(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect,
-                       const MWWorld::Ptr& caster, const MWWorld::Ptr& target, ESM::EffectList& reflectedEffects)
-    {
-        if (caster.isEmpty() || caster == target || !target.getClass().isActor())
-            return false;
-
-        bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
-        bool isUnreflectable = magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable;
-        if (!isHarmful || isUnreflectable)
-            return false;
-
-        float reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).getMagnitude();
-        if (Misc::Rng::roll0to99() >= reflect)
-            return false;
-
-        const ESM::Static* reflectStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Reflect");
-        MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
-        if (animation && !reflectStatic->mModel.empty())
-            animation->addEffect("meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, std::string());
-        reflectedEffects.mList.emplace_back(effect);
-        return true;
-    }
-}
 
 namespace MWMechanics
 {
@@ -82,7 +55,7 @@ namespace MWMechanics
     }
 
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
-                            const ESM::EffectList &effects, ESM::RangeType range, bool reflected, bool exploded)
+                            const ESM::EffectList &effects, ESM::RangeType range, bool exploded)
     {
         const bool targetIsActor = !target.isEmpty() && target.getClass().isActor();
         if (targetIsActor)
@@ -123,7 +96,6 @@ namespace MWMechanics
             }
         }
 
-        ESM::EffectList reflectedEffects;
         ActiveSpells::ActiveSpellParams params(*this, caster);
 
         bool castByPlayer = (!caster.isEmpty() && caster == getPlayer());
@@ -135,9 +107,6 @@ namespace MWMechanics
         bool canCastAnEffect = false;    // For bound equipment.If this remains false
                                          // throughout the iteration of this spell's 
                                          // effects, we display a "can't re-cast" message
-
-        // Try absorbing the spell. Some handling must still happen for absorbed effects.
-        bool absorbed = absorbSpell(mId, caster, target);
 
         int currentEffectIndex = 0;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
@@ -167,19 +136,6 @@ namespace MWMechanics
                     && (caster.isEmpty() || !caster.getClass().isActor()))
                 continue;
 
-            // Notify the target actor they've been hit
-            bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
-            if (target.getClass().isActor() && target != caster && !caster.isEmpty() && isHarmful)
-                target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
-
-            // Avoid proceeding further for absorbed spells.
-            if (absorbed)
-                continue;
-
-            // Reflect harmful effects
-            if (!reflected && reflectEffect(*effectIt, magicEffect, caster, target, reflectedEffects))
-                continue;
-
             ActiveSpells::ActiveEffect effect;
             effect.mEffectId = effectIt->mEffectID;
             effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
@@ -189,13 +145,8 @@ namespace MWMechanics
             effect.mTimeLeft = 0.f;
             effect.mEffectIndex = currentEffectIndex;
             effect.mFlags = ESM::ActiveEffect::Flag_None;
-
-            // Avoid applying harmful effects to the player in god mode
-            if (target == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState() && isHarmful)
-            {
-                effect.mMinMagnitude = 0;
-                effect.mMaxMagnitude = 0;
-            }
+            if(mManualSpell)
+                effect.mFlags |= ESM::ActiveEffect::Flag_Ignore_Reflect;
 
             bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
             effect.mDuration = hasDuration ? static_cast<float>(effectIt->mDuration) : 1.f;
@@ -209,14 +160,14 @@ namespace MWMechanics
             // add to list of active effects, to apply in next frame
             params.getEffects().emplace_back(effect);
 
-            bool effectAffectsHealth = isHarmful || effectIt->mEffectID == ESM::MagicEffect::RestoreHealth;
+            bool effectAffectsHealth = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful || effectIt->mEffectID == ESM::MagicEffect::RestoreHealth;
             if (castByPlayer && target != caster && targetIsActor && effectAffectsHealth)
             {
                 // If player is attempting to cast a harmful spell on or is healing a living target, show the target's HP bar.
                 MWBase::Environment::get().getWindowManager()->setEnemy(target);
             }
 
-            if (targetIsActor || magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
+            if (!targetIsActor && magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
             {
                 playEffects(target, *magicEffect);
             }
@@ -227,9 +178,6 @@ namespace MWMechanics
 
         if (!target.isEmpty())
         {
-            if (!reflectedEffects.mList.empty())
-                inflict(caster, target, reflectedEffects, range, true, exploded);
-
             if (!params.getEffects().empty())
             {
                 if(targetIsActor)
@@ -237,6 +185,7 @@ namespace MWMechanics
                 else
                 {
                     // Apply effects instantly. We can ignore effect deletion since the entire params object gets deleted afterwards anyway
+                    // and we can ignore reflection since non-actors cannot reflect spells
                     for(auto& effect : params.getEffects())
                         applyMagicEffect(target, caster, params, effect, 0.f);
                 }

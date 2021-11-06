@@ -90,6 +90,16 @@ bool Compiler::DeclarationParser::parseSpecial (int code, const TokenLoc& loc, S
     return Parser::parseSpecial (code, loc, scanner);
 }
 
+bool Compiler::DeclarationParser::parseInt(int value, const TokenLoc& loc, Scanner& scanner)
+{
+    if(mState == State_Name)
+    {
+        // Allow integers to be used as variable names
+        return parseName(loc.mLiteral, loc, scanner);
+    }
+    return Parser::parseInt(value, loc, scanner);
+}
+
 void Compiler::DeclarationParser::reset()
 {
     mState = State_Begin;
