@@ -29,12 +29,15 @@ namespace MWInput
         mSwitches["vanitymode"]          = true;
     }
 
-    bool ControlSwitch::get(const std::string& key)
+    bool ControlSwitch::get(std::string_view key)
     {
-        return mSwitches[key];
+        auto it = mSwitches.find(key);
+        if (it == mSwitches.end())
+            throw std::runtime_error("Incorrect ControlSwitch: " + std::string(key));
+        return it->second;
     }
 
-    void ControlSwitch::set(const std::string& key, bool value)
+    void ControlSwitch::set(std::string_view key, bool value)
     {
         MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
 
@@ -59,7 +62,10 @@ namespace MWInput
         {
             MWBase::Environment::get().getWorld()->rotateObject(player.getPlayer(), osg::Vec3f());
         }
-        mSwitches[key] = value;
+        auto it = mSwitches.find(key);
+        if (it == mSwitches.end())
+            throw std::runtime_error("Incorrect ControlSwitch: " + std::string(key));
+        it->second = value;
     }
 
     void ControlSwitch::write(ESM::ESMWriter& writer, Loading::Listener& /*progress*/)

@@ -135,12 +135,12 @@ namespace MWInput
         mSensorManager->processChangedSettings(changed);
     }
 
-    bool InputManager::getControlSwitch(const std::string& sw)
+    bool InputManager::getControlSwitch(std::string_view sw)
     {
         return mControlSwitch->get(sw);
     }
 
-    void InputManager::toggleControlSwitch(const std::string& sw, bool value)
+    void InputManager::toggleControlSwitch(std::string_view sw, bool value)
     {
         mControlSwitch->set(sw, value);
     }
@@ -180,14 +180,14 @@ namespace MWInput
         return mBindingsManager->getActionValue(action);
     }
 
-    float InputManager::getControllerAxisValue(SDL_GameControllerAxis axis) const
+    bool InputManager::isControllerButtonPressed(SDL_GameControllerButton button) const
     {
-        return mBindingsManager->getControllerAxisValue(axis);
+        return mControllerManager->isButtonPressed(button);
     }
 
-    uint32_t InputManager::getMouseButtonsState() const
+    float InputManager::getControllerAxisValue(SDL_GameControllerAxis axis) const
     {
-        return mMouseManager->getButtonsState();
+        return mControllerManager->getAxisValue(axis);
     }
 
     int InputManager::getMouseMoveX() const

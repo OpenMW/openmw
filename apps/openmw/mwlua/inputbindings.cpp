@@ -2,6 +2,7 @@
 
 #include <SDL_events.h>
 #include <SDL_gamecontroller.h>
+#include <SDL_mouse.h>
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwinput/actions.hpp"
@@ -18,9 +19,14 @@ namespace MWLua
     sol::table initInputPackage(const Context& context)
     {
         sol::usertype<SDL_Keysym> keyEvent = context.mLua->sol().new_usertype<SDL_Keysym>("KeyEvent");
-        keyEvent["symbol"] = sol::readonly_property([](const SDL_Keysym& e) { return std::string(1, static_cast<char>(e.sym)); });
-        keyEvent["code"] = sol::readonly_property([](const SDL_Keysym& e) -> int { return e.sym; });
-        keyEvent["modifiers"] = sol::readonly_property([](const SDL_Keysym& e) -> int { return e.mod; });
+        keyEvent["symbol"] = sol::readonly_property([](const SDL_Keysym& e)
+        {
+            if (e.sym > 0 && e.sym <= 255)
+                return std::string(1, static_cast<char>(e.sym));
+            else
+                return std::string();
+        });
+        keyEvent["code"] = sol::readonly_property([](const SDL_Keysym& e) -> int { return e.scancode; });
         keyEvent["withShift"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_SHIFT; });
         keyEvent["withCtrl"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_CTRL; });
         keyEvent["withAlt"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_ALT; });
@@ -31,9 +37,26 @@ namespace MWLua
 
         api["isIdle"] = [input]() { return input->isIdle(); };
         api["isActionPressed"] = [input](int action) { return input->actionIsActive(action); };
+        api["isKeyPressed"] = [input](SDL_Scancode code) -> bool
+        {
+            int maxCode;
+            const auto* state = SDL_GetKeyboardState(&maxCode);
+            if (code >= 0 && code < maxCode)
+                return state[code] != 0;
+            else
+                return false;
+        };
+        api["isShiftPressed"] = [input]() -> bool { return SDL_GetModState() & KMOD_SHIFT; };
+        api["isCtrlPressed"] = [input]() -> bool { return SDL_GetModState() & KMOD_CTRL; };
+        api["isAltPressed"] = [input]() -> bool { return SDL_GetModState() & KMOD_ALT; };
+        api["isSuperPressed"] = [input]() -> bool { return SDL_GetModState() & KMOD_GUI; };
+        api["isControllerButtonPressed"] = [input](int button)
+        {
+            return input->isControllerButtonPressed(static_cast<SDL_GameControllerButton>(button));
+        };
         api["isMouseButtonPressed"] = [input](int button) -> bool
         {
-            return input->getMouseButtonsState() & (1 << (button - 1));
+            return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(button);
         };
         api["getMouseMoveX"] = [input]() { return input->getMouseMoveX(); };
         api["getMouseMoveY"] = [input]() { return input->getMouseMoveY(); };
@@ -45,8 +68,8 @@ namespace MWLua
                 return input->getActionValue(axis - SDL_CONTROLLER_AXIS_MAX) * 2 - 1;
         };
 
-        api["getControlSwitch"] = [input](const std::string& key) { return input->getControlSwitch(key); };
-        api["setControlSwitch"] = [input](const std::string& key, bool v) { input->toggleControlSwitch(key, v); };
+        api["getControlSwitch"] = [input](std::string_view key) { return input->getControlSwitch(key); };
+        api["setControlSwitch"] = [input](std::string_view key, bool v) { input->toggleControlSwitch(key, v); };
 
         api["ACTION"] = LuaUtil::makeReadOnly(context.mLua->sol().create_table_with(
             "GameMenu", MWInput::A_GameMenu,
@@ -142,6 +165,115 @@ namespace MWLua
             "LookLeftRight", SDL_CONTROLLER_AXIS_MAX + MWInput::A_LookLeftRight,
             "MoveForwardBackward", SDL_CONTROLLER_AXIS_MAX + MWInput::A_MoveForwardBackward,
             "MoveLeftRight", SDL_CONTROLLER_AXIS_MAX + MWInput::A_MoveLeftRight
+        ));
+
+        api["KEY"] = LuaUtil::makeReadOnly(context.mLua->sol().create_table_with(
+            "_0", SDL_SCANCODE_0,
+            "_1", SDL_SCANCODE_1,
+            "_2", SDL_SCANCODE_2,
+            "_3", SDL_SCANCODE_3,
+            "_4", SDL_SCANCODE_4,
+            "_5", SDL_SCANCODE_5,
+            "_6", SDL_SCANCODE_6,
+            "_7", SDL_SCANCODE_7,
+            "_8", SDL_SCANCODE_8,
+            "_9", SDL_SCANCODE_9,
+
+            "NP_0", SDL_SCANCODE_KP_0,
+            "NP_1", SDL_SCANCODE_KP_1,
+            "NP_2", SDL_SCANCODE_KP_2,
+            "NP_3", SDL_SCANCODE_KP_3,
+            "NP_4", SDL_SCANCODE_KP_4,
+            "NP_5", SDL_SCANCODE_KP_5,
+            "NP_6", SDL_SCANCODE_KP_6,
+            "NP_7", SDL_SCANCODE_KP_7,
+            "NP_8", SDL_SCANCODE_KP_8,
+            "NP_9", SDL_SCANCODE_KP_9,
+            "NP_Divide", SDL_SCANCODE_KP_DIVIDE,
+            "NP_Enter", SDL_SCANCODE_KP_ENTER,
+            "NP_Minus", SDL_SCANCODE_KP_MINUS,
+            "NP_Multiply", SDL_SCANCODE_KP_MULTIPLY,
+            "NP_Delete", SDL_SCANCODE_KP_PERIOD,
+            "NP_Plus", SDL_SCANCODE_KP_PLUS,
+
+            "F1", SDL_SCANCODE_F1,
+            "F2", SDL_SCANCODE_F2,
+            "F3", SDL_SCANCODE_F3,
+            "F4", SDL_SCANCODE_F4,
+            "F5", SDL_SCANCODE_F5,
+            "F6", SDL_SCANCODE_F6,
+            "F7", SDL_SCANCODE_F7,
+            "F8", SDL_SCANCODE_F8,
+            "F9", SDL_SCANCODE_F9,
+            "F10", SDL_SCANCODE_F10,
+            "F11", SDL_SCANCODE_F11,
+            "F12", SDL_SCANCODE_F12,
+
+            "A", SDL_SCANCODE_A,
+            "B", SDL_SCANCODE_B,
+            "C", SDL_SCANCODE_C,
+            "D", SDL_SCANCODE_D,
+            "E", SDL_SCANCODE_E,
+            "F", SDL_SCANCODE_F,
+            "G", SDL_SCANCODE_G,
+            "H", SDL_SCANCODE_H,
+            "I", SDL_SCANCODE_I,
+            "J", SDL_SCANCODE_J,
+            "K", SDL_SCANCODE_K,
+            "L", SDL_SCANCODE_L,
+            "M", SDL_SCANCODE_M,
+            "N", SDL_SCANCODE_N,
+            "O", SDL_SCANCODE_O,
+            "P", SDL_SCANCODE_P,
+            "Q", SDL_SCANCODE_Q,
+            "R", SDL_SCANCODE_R,
+            "S", SDL_SCANCODE_S,
+            "T", SDL_SCANCODE_T,
+            "U", SDL_SCANCODE_U,
+            "V", SDL_SCANCODE_V,
+            "W", SDL_SCANCODE_W,
+            "X", SDL_SCANCODE_X,
+            "Y", SDL_SCANCODE_Y,
+            "Z", SDL_SCANCODE_Z,
+
+            "LeftArrow", SDL_SCANCODE_LEFT,
+            "RightArrow", SDL_SCANCODE_RIGHT,
+            "UpArrow", SDL_SCANCODE_UP,
+            "DownArrow", SDL_SCANCODE_DOWN,
+
+            "LeftAlt", SDL_SCANCODE_LALT,
+            "LeftCtrl", SDL_SCANCODE_LCTRL,
+            "LeftBracket", SDL_SCANCODE_LEFTBRACKET,
+            "LeftSuper", SDL_SCANCODE_LGUI,
+            "LeftShift", SDL_SCANCODE_LSHIFT,
+            "RightAlt", SDL_SCANCODE_RALT,
+            "RightCtrl", SDL_SCANCODE_RCTRL,
+            "RightSuper", SDL_SCANCODE_RGUI,
+            "RightBracket", SDL_SCANCODE_RIGHTBRACKET,
+            "RightShift", SDL_SCANCODE_RSHIFT,
+
+            "BackSlash", SDL_SCANCODE_BACKSLASH,
+            "Backspace", SDL_SCANCODE_BACKSPACE,
+            "CapsLock", SDL_SCANCODE_CAPSLOCK,
+            "Comma", SDL_SCANCODE_COMMA,
+            "Delete", SDL_SCANCODE_DELETE,
+            "End", SDL_SCANCODE_END,
+            "Enter", SDL_SCANCODE_RETURN,
+            "Equals", SDL_SCANCODE_EQUALS,
+            "Escape", SDL_SCANCODE_ESCAPE,
+            "Home", SDL_SCANCODE_HOME,
+            "Insert", SDL_SCANCODE_INSERT,
+            "Minus", SDL_SCANCODE_MINUS,
+            "NumLock", SDL_SCANCODE_NUMLOCKCLEAR,
+            "PageDown", SDL_SCANCODE_PAGEDOWN,
+            "PageUp", SDL_SCANCODE_PAGEUP,
+            "Pause", SDL_SCANCODE_PAUSE,
+            "PrintScreen", SDL_SCANCODE_PRINTSCREEN,
+            "ScrollLock", SDL_SCANCODE_SCROLLLOCK,
+            "Semicolon", SDL_SCANCODE_SEMICOLON,
+            "Slash", SDL_SCANCODE_SLASH,
+            "Space", SDL_SCANCODE_SPACE,
+            "Tab", SDL_SCANCODE_TAB
         ));
 
         return LuaUtil::makeReadOnly(api);
