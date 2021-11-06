@@ -2959,7 +2959,6 @@ namespace MWWorld
     void World::loadContentFiles(const Files::Collections& fileCollections,
         const std::vector<std::string>& content, const std::vector<std::string>& groundcover, ContentLoader& contentLoader)
     {
-        int idx = 0;
         for (const std::string &file : content)
         {
             boost::filesystem::path filename(file);
@@ -2973,10 +2972,9 @@ namespace MWWorld
                 std::string message = "Failed loading " + file + ": the content file does not exist";
                 throw std::runtime_error(message);
             }
-            idx++;
         }
 
-        ESM::GroundcoverIndex = idx;
+        ESM::GroundcoverIndex = mEsm.size();
 
         for (const std::string &file : groundcover)
         {
@@ -2991,7 +2989,6 @@ namespace MWWorld
                 std::string message = "Failed loading " + file + ": the groundcover file does not exist";
                 throw std::runtime_error(message);
             }
-            idx++;
         }
     }
 
