@@ -79,7 +79,7 @@ void KeyboardNavigation::restoreFocus(int mode)
     if (found != mKeyFocus.end())
     {
         MyGUI::Widget* w = found->second;
-        if (w && w->getVisible() && w->getEnabled())
+        if (w && w->getVisible() && w->getEnabled() && w->getInheritedVisible() && w->getInheritedEnabled())
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(found->second);
     }
 }
