@@ -152,7 +152,7 @@ namespace MWRender
          mStateset->setAttribute(new osg::VertexAttribDivisor(6, 1));
          mStateset->setAttribute(new osg::VertexAttribDivisor(7, 1));
 
-         mProgramTemplate = mSceneManager->getShaderManager().getProgramTemplate() ? Shader::ShaderManager::cloneProgram(mSceneManager->getShaderManager().getProgramTemplate()) : new osg::Program;
+         mProgramTemplate = mSceneManager->getShaderManager().getProgramTemplate() ? Shader::ShaderManager::cloneProgram(mSceneManager->getShaderManager().getProgramTemplate()) : osg::ref_ptr<osg::Program>(new osg::Program);
          mProgramTemplate->addBindAttribLocation("aOffset", 6);
          mProgramTemplate->addBindAttribLocation("aRotation", 7);
     }
