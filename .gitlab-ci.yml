@@ -493,3 +493,18 @@ Debian_AndroidNDK_arm64-v8a:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 1h30m
 
+FindMissingMergeRequests:
+  image: python:latest
+  stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: FindMissingMergeRequests.v1
+    paths:
+      - .cache/pip
+  before_script:
+    - pip3 install --user requests click discord_webhook
+  script:
+    - scripts/find_missing_merge_requests.py --project_id=$CI_PROJECT_ID --ignored_mrs_path=$CI_PROJECT_DIR/.resubmitted_merge_requests.txt
