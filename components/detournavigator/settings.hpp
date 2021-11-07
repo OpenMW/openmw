@@ -2,7 +2,6 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGS_H
 
 #include <chrono>
-#include <optional>
 #include <string>
 
 namespace DetourNavigator

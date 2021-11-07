@@ -1,14 +1,21 @@
 #ifndef OPENMW_MWRENDER_NAVMESH_H
 #define OPENMW_MWRENDER_NAVMESH_H
 
-#include <components/detournavigator/navigator.hpp>
-
 #include <osg/ref_ptr>
+
+#include <cstddef>
+
+class dtNavMesh;
 
 namespace osg
 {
     class Group;
     class Geometry;
+}
+
+namespace DetourNavigator
+{
+    struct Settings;
 }
 
 namespace MWRender
@@ -38,7 +45,7 @@ namespace MWRender
     private:
         osg::ref_ptr<osg::Group> mRootNode;
         bool mEnabled;
-        std::size_t mId = std::numeric_limits<std::size_t>::max();
+        std::size_t mId;
         std::size_t mGeneration;
         std::size_t mRevision;
         osg::ref_ptr<osg::Group> mGroup;

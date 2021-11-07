@@ -3,8 +3,7 @@
 #include <iterator>
 #include <limits>
 
-#include <components/detournavigator/debug.hpp>
-#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navigatorutils.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
@@ -114,7 +113,7 @@ namespace
 
         bool operator()(const osg::Vec3f& start, const osg::Vec3f& end) const
         {
-            const auto position = mNavigator->raycast(mHalfExtents, start, end, mFlags);
+            const auto position = DetourNavigator::raycast(*mNavigator, mHalfExtents, start, end, mFlags);
             return position.has_value() && std::abs((position.value() - start).length2() - (end - start).length2()) <= 1;
         }
     };
@@ -422,8 +421,8 @@ namespace MWMechanics
         const auto world = MWBase::Environment::get().getWorld();
         const auto stepSize = getPathStepSize(actor);
         const auto navigator = world->getNavigator();
-        const auto status = navigator->findPath(halfExtents, stepSize, startPoint, endPoint, flags, areaCosts,
-                                                endTolerance, out);
+        const auto status = DetourNavigator::findPath(*navigator, halfExtents, stepSize,
+            startPoint, endPoint, flags, areaCosts, endTolerance, out);
 
         if (pathType == PathType::Partial && status == DetourNavigator::Status::PartialPath)
             return DetourNavigator::Status::Success;
@@ -455,8 +454,8 @@ namespace MWMechanics
         std::deque<osg::Vec3f> prePath;
         auto prePathInserter = std::back_inserter(prePath);
         const float endTolerance = 0;
-        const auto status = navigator->findPath(halfExtents, stepSize, startPoint, mPath.front(), flags, areaCosts,
-                                                endTolerance, prePathInserter);
+        const auto status = DetourNavigator::findPath(*navigator, halfExtents, stepSize,
+            startPoint, mPath.front(), flags, areaCosts, endTolerance, prePathInserter);
 
         if (status == DetourNavigator::Status::NavMeshNotFound)
             return;

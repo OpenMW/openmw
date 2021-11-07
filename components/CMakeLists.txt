@@ -196,6 +196,7 @@ add_component_dir(detournavigator
     offmeshconnectionsmanager
     preparednavmeshdata
     navmeshcacheitem
+    navigatorutils
     )
 
 add_component_dir(loadinglistener

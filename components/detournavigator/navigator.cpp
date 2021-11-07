@@ -1,36 +1,18 @@
-#include "findrandompointaroundcircle.hpp"
 #include "navigator.hpp"
-#include "raycast.hpp"
+#include "navigatorimpl.hpp"
+#include "navigatorstub.hpp"
+#include "recastglobalallocator.hpp"
 
 namespace DetourNavigator
 {
-    std::optional<osg::Vec3f> Navigator::findRandomPointAroundCircle(const osg::Vec3f& agentHalfExtents,
-        const osg::Vec3f& start, const float maxRadius, const Flags includeFlags) const
+    std::unique_ptr<Navigator> makeNavigator(const Settings& settings)
     {
-        const auto navMesh = getNavMesh(agentHalfExtents);
-        if (!navMesh)
-            return std::optional<osg::Vec3f>();
-        const auto settings = getSettings();
-        const auto result = DetourNavigator::findRandomPointAroundCircle(navMesh->lockConst()->getImpl(),
-            toNavMeshCoordinates(settings, agentHalfExtents), toNavMeshCoordinates(settings, start),
-            toNavMeshCoordinates(settings, maxRadius), includeFlags, settings);
-        if (!result)
-            return std::optional<osg::Vec3f>();
-        return std::optional<osg::Vec3f>(fromNavMeshCoordinates(settings, *result));
+        DetourNavigator::RecastGlobalAllocator::init();
+        return std::make_unique<NavigatorImpl>(settings);
     }
 
-    std::optional<osg::Vec3f> Navigator::raycast(const osg::Vec3f& agentHalfExtents, const osg::Vec3f& start,
-        const osg::Vec3f& end, const Flags includeFlags) const
+    std::unique_ptr<Navigator> makeNavigatorStub()
     {
-        const auto navMesh = getNavMesh(agentHalfExtents);
-        if (navMesh == nullptr)
-            return {};
-        const auto settings = getSettings();
-        const auto result = DetourNavigator::raycast(navMesh->lockConst()->getImpl(),
-            toNavMeshCoordinates(settings, agentHalfExtents), toNavMeshCoordinates(settings, start),
-            toNavMeshCoordinates(settings, end), includeFlags, settings);
-        if (!result)
-            return {};
-        return fromNavMeshCoordinates(settings, *result);
+        return std::make_unique<NavigatorStub>();
     }
 }
