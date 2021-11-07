@@ -345,7 +345,7 @@ namespace Shader
         if (found == mPrograms.end())
         {
             if (!programTemplate) programTemplate = mProgramTemplate;
-            osg::ref_ptr<osg::Program> program = programTemplate ? cloneProgram(programTemplate) : new osg::Program;
+            osg::ref_ptr<osg::Program> program = (programTemplate != nullptr) ? cloneProgram(programTemplate) : new osg::Program;
             program->addShader(vertexShader);
             program->addShader(fragmentShader);
             found = mPrograms.insert(std::make_pair(std::make_pair(vertexShader, fragmentShader), program)).first;
