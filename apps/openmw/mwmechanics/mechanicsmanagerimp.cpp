@@ -545,9 +545,9 @@ namespace MWMechanics
 
         x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).getMagnitude();
 
-        if(clamp)
-            return std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
-        return int(x);
+        if (clamp)
+            return std::clamp<int>(x, 0, 100);//, normally clamped to [0..100] when used
+        return static_cast<int>(x);
     }
 
     int MechanicsManager::getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying)
@@ -649,9 +649,9 @@ namespace MWMechanics
                 int flee = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Flee).getBase();
                 int fight = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Fight).getBase();
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee,
-                                       std::max(0, std::min(100, flee + int(std::max(iPerMinChange, s)))));
+                                       std::clamp(flee + int(std::max(iPerMinChange, s)), 0, 100));
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight,
-                                       std::max(0, std::min(100, fight + int(std::min(-iPerMinChange, -s)))));
+                                       std::clamp(fight + int(std::min(-iPerMinChange, -s)), 0, 100));
             }
 
             float c = -std::abs(floor(r * fPerDieRollMult));
@@ -689,10 +689,10 @@ namespace MWMechanics
                 float s = c * fPerDieRollMult * fPerTempMult;
                 int flee = npcStats.getAiSetting (CreatureStats::AI_Flee).getBase();
                 int fight = npcStats.getAiSetting (CreatureStats::AI_Fight).getBase();
-                npcStats.setAiSetting (CreatureStats::AI_Flee,
-                                       std::max(0, std::min(100, flee + std::min(-int(iPerMinChange), int(-s)))));
-                npcStats.setAiSetting (CreatureStats::AI_Fight,
-                                       std::max(0, std::min(100, fight + std::max(int(iPerMinChange), int(s)))));
+                npcStats.setAiSetting(CreatureStats::AI_Flee,
+                                       std::clamp(flee + std::min(-int(iPerMinChange), int(-s)), 0, 100));
+                npcStats.setAiSetting(CreatureStats::AI_Fight,
+                                       std::clamp(fight + std::max(int(iPerMinChange), int(s)), 0, 100));
             }
             x = floor(-c * fPerDieRollMult);
 

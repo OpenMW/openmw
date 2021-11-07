@@ -313,9 +313,9 @@ struct JournalViewModelImpl : JournalViewModel
         for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
             Utf8Stream stream (i->first.c_str());
-            Utf8Stream::UnicodeChar first = Misc::StringUtils::toLowerUtf8(stream.peek());
+            Utf8Stream::UnicodeChar first = Utf8Stream::toLowerUtf8(stream.peek());
 
-            if (first != Misc::StringUtils::toLowerUtf8(character))
+            if (first != Utf8Stream::toLowerUtf8(character))
                 continue;
 
             visitor (i->second.getName());

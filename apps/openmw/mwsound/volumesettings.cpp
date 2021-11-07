@@ -10,7 +10,7 @@ namespace MWSound
     {
         float clamp(float value)
         {
-            return std::max(0.0f, std::min(1.0f, value));
+            return std::clamp(value, 0.f, 1.f);
         }
     }
 

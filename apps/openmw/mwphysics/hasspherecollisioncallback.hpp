@@ -15,9 +15,9 @@ namespace MWPhysics
         const btVector3& position, const btScalar radius)
     {
         const btVector3 nearest(
-            std::max(aabbMin.x(), std::min(aabbMax.x(), position.x())),
-            std::max(aabbMin.y(), std::min(aabbMax.y(), position.y())),
-            std::max(aabbMin.z(), std::min(aabbMax.z(), position.z()))
+            std::clamp(position.x(), aabbMin.x(), aabbMax.x()),
+            std::clamp(position.y(), aabbMin.y(), aabbMax.y()),
+            std::clamp(position.z(), aabbMin.z(), aabbMax.z())
         );
         return nearest.distance(position) < radius;
     }

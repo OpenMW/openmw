@@ -2044,7 +2044,7 @@ void CharacterController::update(float duration)
                 mIsMovingBackward = vec.y() < 0;
 
             float maxDelta = osg::PI * duration * (2.5f - cosDelta);
-            delta = osg::clampBetween(delta, -maxDelta, maxDelta);
+            delta = std::clamp(delta, -maxDelta, maxDelta);
             stats.setSideMovementAngle(stats.getSideMovementAngle() + delta);
             effectiveRotation += delta;
         }
@@ -2286,7 +2286,7 @@ void CharacterController::update(float duration)
             float swimmingPitch = mAnimation->getBodyPitchRadians();
             float targetSwimmingPitch = -mPtr.getRefData().getPosition().rot[0];
             float maxSwimPitchDelta = 3.0f * duration;
-            swimmingPitch += osg::clampBetween(targetSwimmingPitch - swimmingPitch, -maxSwimPitchDelta, maxSwimPitchDelta);
+            swimmingPitch += std::clamp(targetSwimmingPitch - swimmingPitch, -maxSwimPitchDelta, maxSwimPitchDelta);
             mAnimation->setBodyPitchRadians(swimmingPitch);
         }
         else
@@ -2522,7 +2522,7 @@ void CharacterController::unpersistAnimationState()
         {
             float start = mAnimation->getTextKeyTime(anim.mGroup+": start");
             float stop = mAnimation->getTextKeyTime(anim.mGroup+": stop");
-            float time = std::max(start, std::min(stop, anim.mTime));
+            float time = std::clamp(anim.mTime, start, stop);
             complete = (time - start) / (stop - start);
         }
 
@@ -2746,7 +2746,7 @@ void CharacterController::setVisibility(float visibility)
         float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
         if (chameleon)
         {
-            alpha *= std::min(0.75f, std::max(0.25f, (100.f - chameleon)/100.f));
+            alpha *= std::clamp(1.f - chameleon / 100.f, 0.25f, 0.75f);
         }
 
         visibility = std::min(visibility, alpha);
@@ -2965,8 +2965,8 @@ void CharacterController::updateHeadTracking(float duration)
     const double xLimit = osg::DegreesToRadians(40.0);
     const double zLimit = osg::DegreesToRadians(30.0);
     double zLimitOffset = mAnimation->getUpperBodyYawRadians();
-    xAngleRadians = osg::clampBetween(xAngleRadians, -xLimit, xLimit);
-    zAngleRadians = osg::clampBetween(zAngleRadians, -zLimit + zLimitOffset, zLimit + zLimitOffset);
+    xAngleRadians = std::clamp(xAngleRadians, -xLimit, xLimit);
+    zAngleRadians = std::clamp(zAngleRadians, -zLimit + zLimitOffset, zLimit + zLimitOffset);
 
     float factor = duration*5;
     factor = std::min(factor, 1.f);

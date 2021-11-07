@@ -208,8 +208,7 @@ namespace MWScript
                     {
                         if(!repeat)
                             repeat = true;
-                        Interpreter::Type_Integer idleValue = runtime[0].mInteger;
-                        idleValue = std::min(255, std::max(0, idleValue));
+                        Interpreter::Type_Integer idleValue = std::clamp(runtime[0].mInteger, 0, 255);
                         idleList.push_back(idleValue);
                         runtime.pop();
                         --arg0;

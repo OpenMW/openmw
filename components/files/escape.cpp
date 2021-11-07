@@ -29,10 +29,10 @@ namespace Files
         std::string temp = str;
 
         static const char hash[] = { escape_hash_filter::sEscape,  escape_hash_filter::sHashIdentifier };
-        Misc::StringUtils::replaceAll(temp, hash, "#", 2, 1);
+        Misc::StringUtils::replaceAll(temp, std::string_view(hash, 2), "#");
 
         static const char escape[] = { escape_hash_filter::sEscape,  escape_hash_filter::sEscapeIdentifier };
-        Misc::StringUtils::replaceAll(temp, escape, "@", 2, 1);
+        Misc::StringUtils::replaceAll(temp, std::string_view(escape, 2), "@");
 
         return temp;
     }

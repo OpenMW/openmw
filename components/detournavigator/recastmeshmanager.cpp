@@ -28,9 +28,8 @@ namespace
 
 namespace DetourNavigator
 {
-    RecastMeshManager::RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation)
-        : mSettings(settings)
-        , mGeneration(generation)
+    RecastMeshManager::RecastMeshManager(const TileBounds& bounds, std::size_t generation)
+        : mGeneration(generation)
         , mTileBounds(bounds)
     {
     }
@@ -119,10 +118,7 @@ namespace DetourNavigator
 
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh() const
     {
-        TileBounds tileBounds = mTileBounds;
-        tileBounds.mMin /= mSettings.mRecastScaleFactor;
-        tileBounds.mMax /= mSettings.mRecastScaleFactor;
-        RecastMeshBuilder builder(tileBounds);
+        RecastMeshBuilder builder(mTileBounds);
         using Object = std::tuple<
             osg::ref_ptr<const osg::Referenced>,
             std::reference_wrapper<const btCollisionShape>,

@@ -29,7 +29,10 @@ struct Land
     int mFlags; // Only first four bits seem to be used, don't know what
     // they mean.
     int mX, mY; // Map coordinates.
-    int mPlugin; // Plugin index, used to reference the correct material palette.
+    
+    // Plugin index, used to reference the correct material palette.
+    int getPlugin() const { return mContext.index; }
+    void setPlugin(int index) { mContext.index = index; }
 
     // File context. This allows the ESM reader to be 'reset' to this
     // location later when we are ready to load the full data set.

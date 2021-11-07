@@ -34,8 +34,6 @@ namespace SceneUtil
         StateSetUpdater();
         StateSetUpdater(const StateSetUpdater& copy, const osg::CopyOp& copyop);
 
-        META_Object(SceneUtil, StateSetUpdater)
-
         void operator()(osg::Node* node, osg::NodeVisitor* nv);
 
         /// Apply state - to override in derived classes

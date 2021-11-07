@@ -171,7 +171,7 @@ namespace MWGui
                     else
                         valueStr = MyGUI::utility::toString(int(value));
 
-                    value = std::max(min, std::min(value, max));
+                    value = std::clamp(value, min, max);
                     value = (value-min)/(max-min);
 
                     scroll->setScrollPosition(static_cast<size_t>(value * (scroll->getScrollRange() - 1)));
@@ -306,7 +306,7 @@ namespace MWGui
             mWaterTextureSize->setIndexSelected(2);
 
         int waterReflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        waterReflectionDetail = std::min(5, std::max(0, waterReflectionDetail));
+        waterReflectionDetail = std::clamp(waterReflectionDetail, 0, 5);
         mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
 
         updateMaxLightsComboBox(mMaxLights);

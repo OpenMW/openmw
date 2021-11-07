@@ -33,7 +33,6 @@ namespace DetourNavigator
             if (object == mObjectsTilesPositions.end())
                 return false;
             auto& currentTiles = object->second;
-            const auto border = getBorderSize(mSettings);
             bool changed = false;
             std::vector<TilePosition> newTiles;
             {
@@ -49,7 +48,7 @@ namespace DetourNavigator
                             changed = true;
                         }
                     }
-                    else if (addTile(id, shape, transform, areaType, tilePosition, border, tiles.get()))
+                    else if (addTile(id, shape, transform, areaType, tilePosition, tiles.get()))
                     {
                         newTiles.push_back(tilePosition);
                         onChangedTile(tilePosition);
@@ -113,7 +112,7 @@ namespace DetourNavigator
         std::size_t mTilesGeneration = 0;
 
         bool addTile(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
-                const AreaType areaType, const TilePosition& tilePosition, float border, TilesMap& tiles);
+                const AreaType areaType, const TilePosition& tilePosition, TilesMap& tiles);
 
         bool updateTile(const ObjectId id, const btTransform& transform, const AreaType areaType,
                 const TilePosition& tilePosition, TilesMap& tiles);

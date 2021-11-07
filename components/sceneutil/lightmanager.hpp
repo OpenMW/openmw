@@ -207,8 +207,12 @@ namespace SceneUtil
         using LightSourceViewBoundCollection = std::vector<LightSourceViewBound>;
         std::map<osg::observer_ptr<osg::Camera>, LightSourceViewBoundCollection> mLightsInViewSpace;
 
-        // < Light list hash , StateSet >
-        using LightStateSetMap = std::map<size_t, osg::ref_ptr<osg::StateSet>>;
+        using LightIdList = std::vector<int>;
+        struct HashLightIdList
+        {
+            size_t operator()(const LightIdList&) const;
+        };
+        using LightStateSetMap = std::unordered_map<LightIdList, osg::ref_ptr<osg::StateSet>, HashLightIdList>;
         LightStateSetMap mStateSetCache[2];
 
         std::vector<osg::ref_ptr<osg::StateAttribute>> mDummies;

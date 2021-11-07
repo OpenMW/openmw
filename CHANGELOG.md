@@ -3,6 +3,7 @@
 
     Bug #1751: Birthsign abilities increase modified attribute values instead of base ones
     Bug #3246: ESSImporter: Most NPCs are dead on save load
+    Bug #3488: AI combat aiming is too slow
     Bug #3514: Editing a reference's position after loading an esp file makes the reference disappear
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
     Bug #3792: 1 frame late magicka recalc breaks early scripted magicka reactions to Intelligence change

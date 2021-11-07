@@ -27,10 +27,8 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include <components/detournavigator/debug.hpp>
-#include <components/detournavigator/navigatorimpl.hpp>
-#include <components/detournavigator/navigatorstub.hpp>
-#include <components/detournavigator/recastglobalallocator.hpp>
+#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -186,12 +184,11 @@ namespace MWWorld
         {
             auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
             navigatorSettings.mSwimHeightScale = mSwimHeightScale;
-            DetourNavigator::RecastGlobalAllocator::init();
-            mNavigator.reset(new DetourNavigator::NavigatorImpl(navigatorSettings));
+            mNavigator = DetourNavigator::makeNavigator(navigatorSettings);
         }
         else
         {
-            mNavigator.reset(new DetourNavigator::NavigatorStub());
+            mNavigator = DetourNavigator::makeNavigatorStub();
         }
 
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator, mGroundcoverStore));
@@ -1323,7 +1320,7 @@ namespace MWWorld
              * currently it's done so for rotating the camera, which needs
              * clamping.
              */
-            objRot[0] = osg::clampBetween<float>(objRot[0], -osg::PI_2, osg::PI_2);
+            objRot[0] = std::clamp<float>(objRot[0], -osg::PI_2, osg::PI_2);
             objRot[1] = Misc::normalizeAngle(objRot[1]);
             objRot[2] = Misc::normalizeAngle(objRot[2]);
         }
@@ -1890,7 +1887,7 @@ namespace MWWorld
         const auto& magicEffects = player.getClass().getCreatureStats(player).getMagicEffects();
         if (!mGodMode)
             blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getMagnitude());
-        MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
+        MWBase::Environment::get().getWindowManager()->setBlindness(std::clamp(blind, 0, 100));
 
         int nightEye = static_cast<int>(magicEffects.get(ESM::MagicEffect::NightEye).getMagnitude());
         mRendering->setNightEyeFactor(std::min(1.f, (nightEye/100.f)));

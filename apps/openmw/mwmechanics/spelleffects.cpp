@@ -631,7 +631,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 if (!target.isInCell() || !target.getCell()->isExterior() || godmode)
                     break;
                 float time = world->getTimeStamp().getHour();
-                float timeDiff = std::min(7.f, std::max(0.f, std::abs(time - 13)));
+                float timeDiff = std::clamp(std::abs(time - 13.f), 0.f, 7.f);
                 float damageScale = 1.f - timeDiff / 7.f;
                 // When cloudy, the sun damage effect is halved
                 static float fMagicSunBlockedMult = world->getStore().get<ESM::GameSetting>().find("fMagicSunBlockedMult")->mValue.getFloat();

@@ -296,7 +296,7 @@ namespace CSMWorld
         const std::string& destination, const UniversalId::Type type)
     {
         int index = cloneRecordImp(origin, destination, type);
-        mRecords.at(index)->get().mPlugin = 0;
+        mRecords.at(index)->get().setPlugin(0);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -311,7 +311,7 @@ namespace CSMWorld
         int index = touchRecordImp(id);
         if (index >= 0)
         {
-            mRecords.at(index)->get().mPlugin = 0;
+            mRecords.at(index)->get().setPlugin(0);
             return true;
         }
 

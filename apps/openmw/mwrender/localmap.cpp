@@ -562,8 +562,8 @@ bool LocalMap::isPositionExplored (float nX, float nY, int x, int y)
     if (!segment.mFogOfWarImage)
         return false;
 
-    nX = std::max(0.f, std::min(1.f, nX));
-    nY = std::max(0.f, std::min(1.f, nY));
+    nX = std::clamp(nX, 0.f, 1.f);
+    nY = std::clamp(nY, 0.f, 1.f);
 
     int texU = static_cast<int>((sFogOfWarResolution - 1) * nX);
     int texV = static_cast<int>((sFogOfWarResolution - 1) * nY);
@@ -648,7 +648,7 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
                     uint32_t clr = *(uint32_t*)data;
                     uint8_t alpha = (clr >> 24);
 
-                    alpha = std::min( alpha, (uint8_t) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
+                    alpha = std::min( alpha, (uint8_t) (std::clamp((sqrDist/sqrExploreRadius)*255, 0.f, 1.f)));
                     uint32_t val = (uint32_t) (alpha << 24);
                     if ( *data != val)
                     {
