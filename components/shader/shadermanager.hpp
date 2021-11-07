@@ -38,6 +38,9 @@ namespace Shader
         const osg::Program* getProgramTemplate() const { return mProgramTemplate; }
         void setProgramTemplate(const osg::Program* program) { mProgramTemplate = program; }
 
+        /// Clone an osg::Program including bindUniformBlocks that osg::Program::clone does not copy for some reason.
+        static osg::ref_ptr<osg::Program> cloneProgram(const osg::Program*);
+
         /// Get (a copy of) the DefineMap used to construct all shaders
         DefineMap getGlobalDefines();
 
