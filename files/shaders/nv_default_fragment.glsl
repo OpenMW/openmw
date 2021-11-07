@@ -44,7 +44,7 @@ void main()
 {
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
-    gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, adjustedDiffuseUV);
+    gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, diffuseMapUV);
 #else
     gl_FragData[0] = vec4(1.0);
 #endif
