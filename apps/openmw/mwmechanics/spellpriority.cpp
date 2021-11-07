@@ -368,6 +368,27 @@ namespace MWMechanics
                 return 0.f;
 
             break;
+        case ESM::MagicEffect::BoundShield:
+            if(actor.getClass().hasInventoryStore(actor))
+            {
+                // If the actor is an NPC they can benefit from the armor rating, otherwise check if we've got a one-handed weapon to use with the shield
+                if(!actor.getClass().isNpc())
+                {
+                    const auto& store = actor.getClass().getInventoryStore(actor);
+                    auto oneHanded = std::find_if(store.cbegin(MWWorld::ContainerStore::Type_Weapon), store.cend(), [](const MWWorld::ConstPtr& weapon)
+                    {
+                        if(weapon.getClass().getItemHealth(weapon) <= 0.f)
+                            return false;
+                        auto type = weapon.get<ESM::Weapon>()->mBase->mData.mType;
+                        return !(MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::TwoHanded);
+                    });
+                    if(oneHanded == store.cend())
+                        return 0.f;
+                }
+            }
+            else
+                return 0.f;
+            break;
         // Creatures can not wear armor
         case ESM::MagicEffect::BoundCuirass:
         case ESM::MagicEffect::BoundGloves:
@@ -550,6 +571,13 @@ namespace MWMechanics
             MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
 
             if (!creatureStats.getSummonedCreatureMap().empty())
+                return 0.f;
+        }
+        if(effect.mEffectID >= ESM::MagicEffect::BoundDagger && effect.mEffectID <= ESM::MagicEffect::BoundGloves)
+        {
+            // While rateSpell prevents actors from recasting the same spell, it doesn't prevent them from casting different spells with the same effect.
+            // Multiple instances of the same bound item don't stack so if the effect is already active, rate it as useless.
+            if(actor.getClass().getCreatureStats(actor).getMagicEffects().get(effect.mEffectID).getMagnitude() > 0.f)
                 return 0.f;
         }
 
