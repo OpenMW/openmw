@@ -3,9 +3,8 @@
 
 namespace DetourNavigator
 {
-    CachedRecastMeshManager::CachedRecastMeshManager(const Settings& settings, const TileBounds& bounds,
-            std::size_t generation)
-        : mImpl(settings, bounds, generation)
+    CachedRecastMeshManager::CachedRecastMeshManager(const TileBounds& bounds, std::size_t generation)
+        : mImpl(bounds, generation)
     {}
 
     bool CachedRecastMeshManager::addObject(const ObjectId id, const CollisionShape& shape,

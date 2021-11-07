@@ -18,12 +18,11 @@ namespace DetourNavigator
                                                 const btTransform& transform, const AreaType areaType)
     {
         std::vector<TilePosition> tilesPositions;
-        const auto border = getBorderSize(mSettings);
         {
             auto tiles = mTiles.lock();
             getTilesPositions(shape.getShape(), transform, mSettings, [&] (const TilePosition& tilePosition)
                 {
-                    if (addTile(id, shape, transform, areaType, tilePosition, border, tiles.get()))
+                    if (addTile(id, shape, transform, areaType, tilePosition, tiles.get()))
                         tilesPositions.push_back(tilePosition);
                 });
         }
@@ -58,8 +57,6 @@ namespace DetourNavigator
     bool TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
         const osg::Vec3f& shift)
     {
-        const auto border = getBorderSize(mSettings);
-
         auto& tilesPositions = mWaterTilesPositions[cellPosition];
 
         bool result = false;
@@ -84,11 +81,9 @@ namespace DetourNavigator
                     auto tile = tiles->find(tilePosition);
                     if (tile == tiles->end())
                     {
-                        auto tileBounds = makeTileBounds(mSettings, tilePosition);
-                        tileBounds.mMin -= osg::Vec2f(border, border);
-                        tileBounds.mMax += osg::Vec2f(border, border);
-                        tile = tiles->insert(std::make_pair(tilePosition,
-                                std::make_shared<CachedRecastMeshManager>(mSettings, tileBounds, mTilesGeneration))).first;
+                        const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
+                        tile = tiles->emplace(tilePosition,
+                                std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration)).first;
                     }
                     if (tile->second->addWater(cellPosition, cellSize, shift))
                     {
@@ -133,8 +128,6 @@ namespace DetourNavigator
     bool TileCachedRecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
         const osg::Vec3f& shift, const HeightfieldShape& shape)
     {
-        const auto border = getBorderSize(mSettings);
-
         auto& tilesPositions = mHeightfieldTilesPositions[cellPosition];
 
         bool result = false;
@@ -145,11 +138,9 @@ namespace DetourNavigator
                 auto tile = tiles->find(tilePosition);
                 if (tile == tiles->end())
                 {
-                    auto tileBounds = makeTileBounds(mSettings, tilePosition);
-                    tileBounds.mMin -= osg::Vec2f(border, border);
-                    tileBounds.mMax += osg::Vec2f(border, border);
-                    tile = tiles->insert(std::make_pair(tilePosition,
-                            std::make_shared<CachedRecastMeshManager>(mSettings, tileBounds, mTilesGeneration))).first;
+                    const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
+                    tile = tiles->emplace(tilePosition,
+                            std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration)).first;
                 }
                 if (tile->second->addHeightfield(cellPosition, cellSize, shift, shape))
                 {
@@ -219,17 +210,15 @@ namespace DetourNavigator
     }
 
     bool TileCachedRecastMeshManager::addTile(const ObjectId id, const CollisionShape& shape,
-        const btTransform& transform, const AreaType areaType, const TilePosition& tilePosition, float border,
+        const btTransform& transform, const AreaType areaType, const TilePosition& tilePosition,
         TilesMap& tiles)
     {
         auto tile = tiles.find(tilePosition);
         if (tile == tiles.end())
         {
-            auto tileBounds = makeTileBounds(mSettings, tilePosition);
-            tileBounds.mMin -= osg::Vec2f(border, border);
-            tileBounds.mMax += osg::Vec2f(border, border);
-            tile = tiles.insert(std::make_pair(
-                tilePosition, std::make_shared<CachedRecastMeshManager>(mSettings, tileBounds, mTilesGeneration))).first;
+            const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
+            tile = tiles.emplace(tilePosition,
+                    std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration)).first;
         }
         return tile->second->addObject(id, shape, transform, areaType);
     }

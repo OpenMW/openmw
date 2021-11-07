@@ -96,6 +96,17 @@ namespace DetourNavigator
     {
         return std::floor(std::sqrt(settings.mMaxTilesNumber / osg::PI)) - 1;
     }
+
+    inline TileBounds makeRealTileBoundsWithBorder(const Settings& settings, const TilePosition& tilePosition)
+    {
+        TileBounds result = makeTileBounds(settings, tilePosition);
+        const float border = getBorderSize(settings);
+        result.mMin -= osg::Vec2f(border, border);
+        result.mMax += osg::Vec2f(border, border);
+        result.mMin /= settings.mRecastScaleFactor;
+        result.mMax /= settings.mRecastScaleFactor;
+        return result;
+    }
 }
 
 #endif

@@ -34,7 +34,7 @@ namespace DetourNavigator
     class RecastMeshManager
     {
     public:
-        RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation);
+        explicit RecastMeshManager(const TileBounds& bounds, std::size_t generation);
 
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
@@ -73,7 +73,6 @@ namespace DetourNavigator
             HeightfieldShape mShape;
         };
 
-        const Settings& mSettings;
         const std::size_t mGeneration;
         const TileBounds mTileBounds;
         mutable std::mutex mMutex;
