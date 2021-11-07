@@ -1,6 +1,7 @@
 #include "contentmodel.hpp"
 #include "esmfile.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 
 #include <QDir>
@@ -474,8 +475,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
         }
 
     }
-
-    sortFiles();
 }
 
 void ContentSelectorModel::ContentModel::clearFiles()
@@ -504,8 +503,13 @@ QStringList ContentSelectorModel::ContentModel::gameFiles() const
 
 void ContentSelectorModel::ContentModel::sortFiles()
 {
+    emit layoutAboutToBeChanged();
+    std::sort(mFiles.begin(), mFiles.end(), [](const EsmFile* a, const EsmFile* b)
+    {
+        return a->fileName().compare(b->fileName(), Qt::CaseInsensitive) > 0;
+    });
     //Dependency sort
-    int sorted = 0;
+    int sorted = 1;
     //iterate each file, obtaining a reference to its gamefiles list
     for(int i = sorted; i < mFiles.size(); ++i)
     {
@@ -520,12 +524,10 @@ void ContentSelectorModel::ContentModel::sortFiles()
                 break;
         }
         if(i != j)
-        {
             mFiles.move(i, j);
-            emit dataChanged(index(i, 0, QModelIndex()), index(j, 0, QModelIndex()));
-        }
         ++sorted;
     }
+    emit layoutChanged();
 }
 
 bool ContentSelectorModel::ContentModel::isChecked(const QString& filepath) const

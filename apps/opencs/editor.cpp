@@ -149,11 +149,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
     //iterate the data directories and add them to the file dialog for loading
-    for (Files::PathContainer::const_reverse_iterator iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
-    {
-        QString path = QString::fromUtf8 (iter->string().c_str());
-        mFileDialog.addFiles(path);
-    }
+    mFileDialog.addFiles(dataDirs);
 
     return std::make_pair (dataDirs, variables["fallback-archive"].as<Files::EscapeStringVector>().toStdStringVector());
 }

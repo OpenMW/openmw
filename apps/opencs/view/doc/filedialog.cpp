@@ -28,9 +28,14 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     mAdjusterWidget = new AdjusterWidget (this);
 }
 
-void CSVDoc::FileDialog::addFiles(const QString &path)
+void CSVDoc::FileDialog::addFiles(const std::vector<boost::filesystem::path>& dataDirs)
 {
-    mSelector->addFiles(path);
+    for (auto iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
+    {
+        QString path = QString::fromUtf8(iter->string().c_str());
+        mSelector->addFiles(path);
+    }
+    mSelector->sortFiles();
 }
 
 void CSVDoc::FileDialog::setEncoding(const QString &encoding)

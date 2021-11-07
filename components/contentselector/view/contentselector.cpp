@@ -173,6 +173,11 @@ void ContentSelectorView::ContentSelector::addFiles(const QString &path)
     mContentModel->checkForLoadOrderErrors();
 }
 
+void ContentSelectorView::ContentSelector::sortFiles()
+{
+    mContentModel->sortFiles();
+}
+
 void ContentSelectorView::ContentSelector::clearFiles()
 {
     mContentModel->clearFiles();
