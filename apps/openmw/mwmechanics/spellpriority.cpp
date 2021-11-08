@@ -369,25 +369,22 @@ namespace MWMechanics
 
             break;
         case ESM::MagicEffect::BoundShield:
-            if(actor.getClass().hasInventoryStore(actor))
+            if(!actor.getClass().hasInventoryStore(actor))
+                return 0.f;
+            else if(!actor.getClass().isNpc())
             {
                 // If the actor is an NPC they can benefit from the armor rating, otherwise check if we've got a one-handed weapon to use with the shield
-                if(!actor.getClass().isNpc())
+                const auto& store = actor.getClass().getInventoryStore(actor);
+                auto oneHanded = std::find_if(store.cbegin(MWWorld::ContainerStore::Type_Weapon), store.cend(), [](const MWWorld::ConstPtr& weapon)
                 {
-                    const auto& store = actor.getClass().getInventoryStore(actor);
-                    auto oneHanded = std::find_if(store.cbegin(MWWorld::ContainerStore::Type_Weapon), store.cend(), [](const MWWorld::ConstPtr& weapon)
-                    {
-                        if(weapon.getClass().getItemHealth(weapon) <= 0.f)
-                            return false;
-                        auto type = weapon.get<ESM::Weapon>()->mBase->mData.mType;
-                        return !(MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::TwoHanded);
-                    });
-                    if(oneHanded == store.cend())
-                        return 0.f;
-                }
+                    if(weapon.getClass().getItemHealth(weapon) <= 0.f)
+                        return false;
+                    short type = weapon.get<ESM::Weapon>()->mBase->mData.mType;
+                    return !(MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::TwoHanded);
+                });
+                if(oneHanded == store.cend())
+                    return 0.f;
             }
-            else
-                return 0.f;
             break;
         // Creatures can not wear armor
         case ESM::MagicEffect::BoundCuirass:
