@@ -4,8 +4,6 @@
 #include <mutex>
 #include <iostream>
 
-#include <osg/io_utils>
-
 namespace Debug
 {
     enum Level
