@@ -261,9 +261,6 @@ void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
         if (isEnchanted)
             SceneUtil::addEnchantedGlow(shieldNode, mResourceSystem, glowColor);
     }
-
-    if (mAlpha != 1.f)
-        mResourceSystem->getSceneManager()->recreateShaders(mHolsteredShield->getNode());
 }
 
 bool ActorAnimation::useShieldAnimations() const
