@@ -439,11 +439,9 @@ namespace MWRender
             float density = Settings::Manager::getFloat("density", "Groundcover");
             density = std::clamp(density, 0.f, 1.f);
 
-            mGroundcover.reset(new Groundcover(mResourceSystem->getSceneManager(), density));
+            mGroundcover.reset(new Groundcover(mResourceSystem->getSceneManager(), density, groundcoverDistance));
             static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mGroundcover.get());
             mResourceSystem->addResourceManager(mGroundcover.get());
-
-            mGroundcover->setViewDistance(groundcoverDistance);
         }
 
         mStateUpdater = new StateUpdater;
