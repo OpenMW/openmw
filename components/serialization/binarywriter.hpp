@@ -1,6 +1,9 @@
 #ifndef OPENMW_COMPONENTS_SERIALIZATION_BINARYWRITER_H
 #define OPENMW_COMPONENTS_SERIALIZATION_BINARYWRITER_H
 
+#include <components/misc/endianness.hpp>
+
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstring>
@@ -29,8 +32,7 @@ namespace Serialization
             {
                 if (mEnd - mDest < static_cast<std::ptrdiff_t>(sizeof(T)))
                     throw std::runtime_error("Not enough space");
-                std::memcpy(mDest, &value, sizeof(T));
-                mDest += sizeof(T);
+                writeValue(value);
             }
             else
             {
@@ -48,8 +50,13 @@ namespace Serialization
                 const std::size_t size = sizeof(T) * count;
                 if (mEnd - mDest < static_cast<std::ptrdiff_t>(size))
                     throw std::runtime_error("Not enough space");
-                std::memcpy(mDest, data, size);
-                mDest += size;
+                if constexpr (Misc::IS_LITTLE_ENDIAN)
+                {
+                    std::memcpy(mDest, data, size);
+                    mDest += size;
+                }
+                else
+                    std::for_each(data, data + count, [&] (const T& v) { writeValue(v); });
             }
             else
             {
@@ -60,6 +67,14 @@ namespace Serialization
     private:
         std::byte* mDest;
         const std::byte* const mEnd;
+
+        template <class T>
+        void writeValue(const T& value) noexcept
+        {
+            T coverted = Misc::toLittleEndian(value);
+            std::memcpy(mDest, &coverted, sizeof(T));
+            mDest += sizeof(T);
+        }
     };
 }
 

@@ -1,6 +1,9 @@
 #ifndef OPENMW_COMPONENTS_SERIALIZATION_BINARYREADER_H
 #define OPENMW_COMPONENTS_SERIALIZATION_BINARYREADER_H
 
+#include <components/misc/endianness.hpp>
+
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstring>
@@ -31,6 +34,7 @@ namespace Serialization
                     throw std::runtime_error("Not enough data");
                 std::memcpy(&value, mPos, sizeof(T));
                 mPos += sizeof(T);
+                value = Misc::toLittleEndian(value);
             }
             else
             {
@@ -50,6 +54,8 @@ namespace Serialization
                     throw std::runtime_error("Not enough data");
                 std::memcpy(data, mPos, size);
                 mPos += size;
+                if constexpr (!Misc::IS_LITTLE_ENDIAN)
+                    std::for_each(data, data + count, [&] (T& v) { v = Misc::fromLittleEndian(v); });
             }
             else
             {
