@@ -23,12 +23,14 @@ namespace Serialization
         template <class Format, class T>
         void operator()(Format&& format, const T& value)
         {
-            if constexpr (std::is_arithmetic_v<T>)
+            if constexpr (std::is_enum_v<T>)
+                (*this)(std::forward<Format>(format), static_cast<std::underlying_type_t<T>>(value));
+            else if constexpr (std::is_arithmetic_v<T>)
             {
-                if (mEnd - mDest < static_cast<std::ptrdiff_t>(sizeof(value)))
+                if (mEnd - mDest < static_cast<std::ptrdiff_t>(sizeof(T)))
                     throw std::runtime_error("Not enough space");
-                std::memcpy(mDest, &value, sizeof(value));
-                mDest += sizeof(value);
+                std::memcpy(mDest, &value, sizeof(T));
+                mDest += sizeof(T);
             }
             else
             {
@@ -39,7 +41,9 @@ namespace Serialization
         template <class Format, class T>
         auto operator()(Format&& format, const T* data, std::size_t count)
         {
-            if constexpr (std::is_arithmetic_v<T>)
+            if constexpr (std::is_enum_v<T>)
+                (*this)(std::forward<Format>(format), reinterpret_cast<const std::underlying_type_t<T>*>(data), count);
+            else if constexpr (std::is_arithmetic_v<T>)
             {
                 const std::size_t size = sizeof(T) * count;
                 if (mEnd - mDest < static_cast<std::ptrdiff_t>(size))

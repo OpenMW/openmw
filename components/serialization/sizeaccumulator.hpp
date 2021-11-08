@@ -18,7 +18,7 @@ namespace Serialization
         template <class Format, class T>
         void operator()(Format&& format, const T& value)
         {
-            if constexpr (std::is_arithmetic_v<T>)
+            if constexpr (std::is_arithmetic_v<T> || std::is_enum_v<T>)
                 mValue += sizeof(T);
             else
                 format(*this, value);
@@ -27,7 +27,7 @@ namespace Serialization
         template <class Format, class T>
         auto operator()(Format&& format, const T* data, std::size_t count)
         {
-            if constexpr (std::is_arithmetic_v<T>)
+            if constexpr (std::is_arithmetic_v<T> || std::is_enum_v<T>)
                 mValue += count * sizeof(T);
             else
                 format(*this, data, count);

@@ -23,12 +23,14 @@ namespace Serialization
         template <class Format, class T>
         void operator()(Format&& format, T& value)
         {
-            if constexpr (std::is_arithmetic_v<T>)
+            if constexpr (std::is_enum_v<T>)
+                (*this)(std::forward<Format>(format), static_cast<std::underlying_type_t<T>&>(value));
+            else if constexpr (std::is_arithmetic_v<T>)
             {
-                if (mEnd - mPos < static_cast<std::ptrdiff_t>(sizeof(value)))
+                if (mEnd - mPos < static_cast<std::ptrdiff_t>(sizeof(T)))
                     throw std::runtime_error("Not enough data");
-                std::memcpy(&value, mPos, sizeof(value));
-                mPos += sizeof(value);
+                std::memcpy(&value, mPos, sizeof(T));
+                mPos += sizeof(T);
             }
             else
             {
@@ -39,11 +41,13 @@ namespace Serialization
         template <class Format, class T>
         auto operator()(Format&& format, T* data, std::size_t count)
         {
-            if constexpr (std::is_arithmetic_v<T>)
+            if constexpr (std::is_enum_v<T>)
+                (*this)(std::forward<Format>(format), reinterpret_cast<std::underlying_type_t<T>*>(data), count);
+            else if constexpr (std::is_arithmetic_v<T>)
             {
-                if (mEnd - mPos < static_cast<std::ptrdiff_t>(count * sizeof(T)))
-                    throw std::runtime_error("Not enough data");
                 const std::size_t size = sizeof(T) * count;
+                if (mEnd - mPos < static_cast<std::ptrdiff_t>(size))
+                    throw std::runtime_error("Not enough data");
                 std::memcpy(data, mPos, size);
                 mPos += size;
             }

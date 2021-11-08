@@ -34,24 +34,10 @@ namespace Serialization
         template <class Visitor, class T>
         void operator()(Visitor&& visitor, T* data, std::size_t size) const
         {
-            if constexpr (std::is_arithmetic_v<T>)
-            {
+            if constexpr (std::is_arithmetic_v<T> || std::is_enum_v<T>)
                 visitor(self(), data, size);
-            }
-            else if constexpr (std::is_enum_v<T>)
-            {
-                if constexpr (mode == Mode::Write)
-                    visitor(self(), reinterpret_cast<const std::underlying_type_t<T>*>(data), size);
-                else
-                {
-                    static_assert(mode == Mode::Read);
-                    visitor(self(), reinterpret_cast<std::underlying_type_t<T>*>(data), size);
-                }
-            }
             else
-            {
                 std::for_each(data, data + size, [&] (auto& v) { visitor(self(), v); });
-            }
         }
 
         template <class Visitor, class T, std::size_t size>
