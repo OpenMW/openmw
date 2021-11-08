@@ -14,8 +14,6 @@
 #include <map>
 #include <optional>
 #include <memory>
-#include <variant>
-#include <tuple>
 #include <mutex>
 
 class btCollisionShape;

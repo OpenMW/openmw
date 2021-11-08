@@ -1,4 +1,4 @@
-#include "navmesh.hpp"
+#include "recastmesh.hpp"
 #include "detourdebugdraw.hpp"
 
 #include <components/detournavigator/settings.hpp>

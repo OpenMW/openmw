@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <memory>
 
+#include <osg/Vec2f>
+
 #include "windowpinnablebase.hpp"
 
 #include <components/esm/cellid.hpp>

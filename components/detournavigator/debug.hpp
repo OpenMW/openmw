@@ -7,16 +7,8 @@
 #include <osg/io_utils>
 
 #include <components/bullethelpers/operators.hpp>
-#include <components/misc/guarded.hpp>
 
-#include <chrono>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <memory>
-#include <sstream>
 #include <string>
-#include <thread>
 
 class dtNavMesh;
 
