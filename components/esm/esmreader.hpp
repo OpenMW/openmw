@@ -77,7 +77,7 @@ public:
 
   /// Sets the position of this ESMReader in allPlugins as required for handling moved,
   /// deleted and edited CellRefs as well as terrain palettes.
-  /// @note Automatically set by resolveParentFileIndices.
+  /// @note Must be called before resolveParentFileIndices.
   void setIndex(const int index) { mCtx.index = index;}
   int getIndex() const {return mCtx.index;}
 
@@ -86,7 +86,6 @@ public:
   // as required for handling moved, deleted and edited CellRefs.
   /// @note Does not validate.
   /// @note open() must be called first.
-  /// @note this ESMReader must be contained in allPlugins.
   void resolveParentFileIndices(const std::vector<ESMReader>& allPlugins);
   const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
   bool isValidParentFileIndex(int i) const { return i != getIndex(); }
