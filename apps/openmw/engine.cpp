@@ -546,6 +546,10 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     if(fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
 
+    // Allows for Windows snapping features to properly work in borderless window
+    SDL_SetHint("SDL_BORDERLESS_WINDOWED_STYLE", "1");
+    SDL_SetHint("SDL_BORDERLESS_RESIZABLE_STYLE", "1");
+
     if (!windowBorder)
         flags |= SDL_WINDOW_BORDERLESS;
 
