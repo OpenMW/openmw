@@ -242,7 +242,7 @@ namespace DetourNavigator
         heightfield.mShift = shift + osg::Vec3f(minX, minY, 0) * stepSize - osg::Vec3f(halfCellSize, halfCellSize, 0);
         heightfield.mScale = stepSize;
         heightfield.mHeights = std::move(tileHeights);
-        mHeightfields.emplace_back(heightfield);
+        mHeightfields.push_back(std::move(heightfield));
     }
 
     std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision) &&
