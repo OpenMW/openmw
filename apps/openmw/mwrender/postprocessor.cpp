@@ -93,6 +93,41 @@ namespace
 
         MWRender::PostProcessor* mPostProcessor;
     };
+
+    // Copies the currently bound depth attachment to a new texture so drawables in transparent renderbin can safely sample from depth.
+    class OpaqueDepthCopyCallback : public osgUtil::RenderBin::DrawCallback
+    {
+    public:
+        OpaqueDepthCopyCallback(osg::ref_ptr<osg::Texture2D> opaqueDepthTex, osg::ref_ptr<osg::FrameBufferObject> sourceFbo)
+            : mOpaqueDepthFbo(new osg::FrameBufferObject)
+            , mSourceFbo(sourceFbo)
+            , mOpaqueDepthTex(opaqueDepthTex)
+        {
+            mOpaqueDepthFbo->setAttachment(osg::FrameBufferObject::BufferComponent::DEPTH_BUFFER, osg::FrameBufferAttachment(opaqueDepthTex));
+        }
+
+        void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override
+        {
+            if (bin->getStage()->getFrameBufferObject() == mSourceFbo)
+            {
+                osg::State& state = *renderInfo.getState();
+                osg::GLExtensions* ext = state.get<osg::GLExtensions>();
+
+                mSourceFbo->apply(state, osg::FrameBufferObject::READ_FRAMEBUFFER);
+                mOpaqueDepthFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+
+                ext->glBlitFramebuffer(0, 0, mOpaqueDepthTex->getTextureWidth(), mOpaqueDepthTex->getTextureHeight(), 0, 0, mOpaqueDepthTex->getTextureWidth(), mOpaqueDepthTex->getTextureHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+                mSourceFbo->apply(state);
+            }
+
+            bin->drawImplementation(renderInfo, previous);
+        }
+    private:
+        osg::ref_ptr<osg::FrameBufferObject> mOpaqueDepthFbo;
+        osg::ref_ptr<osg::FrameBufferObject> mSourceFbo;
+        osg::ref_ptr<osg::Texture2D> mOpaqueDepthTex;
+    };
 }
 
 namespace MWRender
@@ -103,7 +138,9 @@ namespace MWRender
         , mDepthFormat(GL_DEPTH_COMPONENT24)
         , mRendering(rendering)
     {
-        if (!SceneUtil::getReverseZ())
+        bool softParticles = Settings::Manager::getBool("soft particles", "Shaders");
+
+        if (!SceneUtil::getReverseZ() && !softParticles)
             return;
 
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
@@ -124,17 +161,22 @@ namespace MWRender
             return;
         }
 
-        if (osg::isGLExtensionSupported(contextID, "GL_ARB_depth_buffer_float"))
-            mDepthFormat = GL_DEPTH_COMPONENT32F;
-        else if (osg::isGLExtensionSupported(contextID, "GL_NV_depth_buffer_float"))
-            mDepthFormat = GL_DEPTH_COMPONENT32F_NV;
-        else
+        if (SceneUtil::getReverseZ())
         {
-            // TODO: Once we have post-processing implemented we want to skip this return and continue with setup.
-            // Rendering to a FBO to fullscreen geometry has overhead (especially when MSAA is enabled) and there are no
-            // benefits if no floating point depth formats are supported.
-            Log(Debug::Warning) << errPreamble << "'GL_ARB_depth_buffer_float' and 'GL_NV_depth_buffer_float' unsupported.";
-            return;
+            if (osg::isGLExtensionSupported(contextID, "GL_ARB_depth_buffer_float"))
+                mDepthFormat = GL_DEPTH_COMPONENT32F;
+            else if (osg::isGLExtensionSupported(contextID, "GL_NV_depth_buffer_float"))
+                mDepthFormat = GL_DEPTH_COMPONENT32F_NV;
+            else
+            {
+                // TODO: Once we have post-processing implemented we want to skip this return and continue with setup.
+                // Rendering to a FBO to fullscreen geometry has overhead (especially when MSAA is enabled) and there are no
+                // benefits if no floating point depth formats are supported.
+                Log(Debug::Warning) << errPreamble << "'GL_ARB_depth_buffer_float' and 'GL_NV_depth_buffer_float' unsupported.";
+
+                if (!softParticles)
+                    return;
+            }
         }
 
         int width = viewer->getCamera()->getViewport()->width();
@@ -165,6 +207,12 @@ namespace MWRender
         mDepthTex->dirtyTextureObject();
         mSceneTex->dirtyTextureObject();
 
+        if (mOpaqueDepthTex)
+        {
+            mOpaqueDepthTex->setTextureSize(width, height);
+            mOpaqueDepthTex->dirtyTextureObject();
+        }
+
         int samples = Settings::Manager::getInt("antialiasing", "Video");
 
         mFbo = new osg::FrameBufferObject;
@@ -186,6 +234,9 @@ namespace MWRender
         if (const auto depthProxy = std::getenv("OPENMW_ENABLE_DEPTH_CLEAR_PROXY"))
             mFirstPersonDepthRBProxy = new osg::RenderBuffer(width, height, mDepthTex->getInternalFormat(), samples);
 
+        if (Settings::Manager::getBool("soft particles", "Shaders"))
+            osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(new OpaqueDepthCopyCallback(mOpaqueDepthTex, mMsaaFbo ? mMsaaFbo : mFbo));
+
         mViewer->getCamera()->resize(width, height);
         mHUDCamera->resize(width, height);
         mRendering.updateProjectionMatrix();
@@ -203,6 +254,12 @@ namespace MWRender
         mDepthTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mDepthTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         mDepthTex->setResizeNonPowerOfTwoHint(false);
+
+        if (Settings::Manager::getBool("soft particles", "Shaders"))
+        {
+            mOpaqueDepthTex = new osg::Texture2D(*mDepthTex);
+            mOpaqueDepthTex->setName("opaqueTexMap");
+        }
 
         mSceneTex = new osg::Texture2D;
         mSceneTex->setTextureSize(width, height);

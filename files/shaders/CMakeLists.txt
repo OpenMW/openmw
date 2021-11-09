@@ -39,6 +39,7 @@ set(SHADER_FILES
     sky_vertex.glsl
     sky_fragment.glsl
     skypasses.glsl
+    softparticles.glsl
 )
 
 copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_SHADERS_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")

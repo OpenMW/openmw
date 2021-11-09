@@ -430,6 +430,11 @@ namespace Resource
         mConvertAlphaTestToAlphaToCoverage = convert;
     }
 
+    void SceneManager::setOpaqueDepthTex(osg::ref_ptr<osg::Texture2D> texture)
+    {
+        mOpaqueDepthTex = texture;
+    }
+
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
@@ -892,6 +897,7 @@ namespace Resource
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
+        shaderVisitor->setOpaqueDepthTex(mOpaqueDepthTex);
         return shaderVisitor;
     }
 }

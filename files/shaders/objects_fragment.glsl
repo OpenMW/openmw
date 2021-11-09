@@ -80,6 +80,10 @@ varying vec3 passNormal;
 #include "parallax.glsl"
 #include "alpha.glsl"
 
+#if @softParticles
+#include "softparticles.glsl"
+#endif
+
 void main()
 {
 #if @diffuseMap
@@ -219,6 +223,10 @@ void main()
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+
+#if @softParticles
+    gl_FragData[0].a *= calcSoftParticleFade();
+#endif
 
 #if defined(FORCE_OPAQUE) && FORCE_OPAQUE
     // having testing & blending isn't enough - we need to write an opaque pixel to be opaque
