@@ -18,6 +18,7 @@
 
 #include <cassert>
 #include <vector>
+#include <functional>
 
 class dtNavMesh;
 
