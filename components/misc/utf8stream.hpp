@@ -30,6 +30,11 @@ public:
     {
     }
 
+    Utf8Stream (const std::string& str) :
+        Utf8Stream (reinterpret_cast<Point>(str.c_str()), reinterpret_cast<Point>(str.c_str() + str.size()))
+    {
+    }
+
     bool eof () const
     {
         return cur == end;
