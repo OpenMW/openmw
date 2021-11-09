@@ -1109,13 +1109,8 @@ void OpenAL_Output::initCommon3D(ALuint source, const osg::Vec3f &pos, ALfloat m
     alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
 }
 
-void OpenAL_Output::updateCommon(ALuint source, const osg::Vec3f& pos, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv, bool is3d)
+void OpenAL_Output::updateCommon(ALuint source, const osg::Vec3f& pos, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv)
 {
-    if(is3d)
-    {
-        if((pos - mListenerPos).length2() > maxdist*maxdist)
-            gain = 0.0f;
-    }
     if(useenv && mListenerEnv == Env_Underwater && !mWaterFilter)
     {
         gain *= 0.9f;
@@ -1243,7 +1238,7 @@ void OpenAL_Output::updateSound(Sound *sound)
     ALuint source = GET_PTRID(sound->mHandle);
 
     updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
-                 sound->getPitch(), sound->getUseEnv(), sound->getIs3D());
+                 sound->getPitch(), sound->getUseEnv());
     getALError();
 }
 
@@ -1369,7 +1364,7 @@ void OpenAL_Output::updateStream(Stream *sound)
     ALuint source = stream->mSource;
 
     updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
-                 sound->getPitch(), sound->getUseEnv(), sound->getIs3D());
+                 sound->getPitch(), sound->getUseEnv());
     getALError();
 }
 

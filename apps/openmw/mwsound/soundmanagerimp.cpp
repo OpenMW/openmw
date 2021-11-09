@@ -33,6 +33,8 @@ namespace MWSound
     namespace
     {
         constexpr float sMinUpdateInterval = 1.0f / 30.0f;
+        constexpr float sSfxFadeInDuration = 1.0f;
+        constexpr float sSfxFadeOutDuration = 1.0f;
 
         WaterSoundUpdaterSettings makeWaterSoundUpdaterSettings()
         {
@@ -46,6 +48,24 @@ namespace MWSound
             settings.mNearWaterOutdoorID = Misc::StringUtils::lowerCase(Fallback::Map::getString("Water_NearWaterOutdoorID"));
 
             return settings;
+        }
+
+        float initialFadeVolume(float squaredDist, Sound_Buffer *sfx, Type type, PlayMode mode)
+        {
+            // If a sound is farther away than its maximum distance, start playing it with a zero fade volume.
+            // It can still become audible once the player moves closer.
+            const float maxDist = sfx->getMaxDist();
+            if (squaredDist > (maxDist * maxDist))
+                return 0.0f;
+
+            // This is a *heuristic* that causes environment sounds to fade in. The idea is the following:
+            // - Only looped sounds playing through the effects channel are environment sounds
+            // - Do not fade in sounds if the player is already so close that the sound plays at maximum volume
+            const float minDist = sfx->getMinDist();
+            if ((squaredDist > (minDist * minDist)) && (type == Type::Sfx) && (mode & PlayMode::Loop))
+                return 0.0f;
+
+            return 1.0;
         }
     }
 
@@ -517,7 +537,8 @@ namespace MWSound
             return nullptr;
 
         const osg::Vec3f objpos(ptr.getRefData().getPosition().asVec3());
-        if ((mode & PlayMode::RemoveAtDistance) && (mListenerPos - objpos).length2() > 2000 * 2000)
+        const float squaredDist = (mListenerPos - objpos).length2();
+        if ((mode & PlayMode::RemoveAtDistance) && squaredDist > 2000 * 2000)
             return nullptr;
 
         // Look up the sound in the ESM data
@@ -548,6 +569,7 @@ namespace MWSound
                 params.mPos = objpos;
                 params.mVolume = volume * sfx->getVolume();
                 params.mBaseVolume = volumeFromType(type);
+                params.mFadeVolume = initialFadeVolume(squaredDist, sfx, type, mode);
                 params.mPitch = pitch;
                 params.mMinDistance = sfx->getMinDist();
                 params.mMaxDistance = sfx->getMaxDist();
@@ -576,12 +598,15 @@ namespace MWSound
         Sound_Buffer *sfx = mSoundBuffers.load(Misc::StringUtils::lowerCase(soundId));
         if(!sfx) return nullptr;
 
+        const float squaredDist = (mListenerPos - initialPos).length2();
+
         SoundPtr sound = getSoundRef();
         sound->init([&] {
             SoundParams params;
             params.mPos = initialPos;
             params.mVolume = volume * sfx->getVolume();
             params.mBaseVolume = volumeFromType(type);
+            params.mFadeVolume = initialFadeVolume(squaredDist, sfx, type, mode);
             params.mPitch = pitch;
             params.mMinDistance = sfx->getMinDist();
             params.mMaxDistance = sfx->getMaxDist();
@@ -777,10 +802,10 @@ namespace MWSound
                 break;
             case WaterSoundAction::SetVolume:
                 mNearWaterSound->setVolume(update.mVolume * sfx->getVolume());
+                mNearWaterSound->setFade(sSfxFadeInDuration, 1.0f, Play_FadeExponential);
                 break;
             case WaterSoundAction::FinishSound:
-                mOutput->finishSound(mNearWaterSound);
-                mNearWaterSound = nullptr;
+                mNearWaterSound->setFade(sSfxFadeOutDuration, 0.0f, Play_FadeExponential | Play_StopAtFadeEnd);
                 break;
             case WaterSoundAction::PlaySound:
                 if (mNearWaterSound)
@@ -829,6 +854,28 @@ namespace MWSound
 
         return {WaterSoundAction::DoNothing, nullptr};
     }
+
+    void SoundManager::cull3DSound(SoundBase *sound)
+    {
+        // Hard-coded distance of 2000.0f is from vanilla Morrowind
+        const float maxDist = sound->getDistanceCull() ? 2000.0f : sound->getMaxDistance();
+        const float squaredMaxDist = maxDist * maxDist;
+
+        const osg::Vec3f pos = sound->getPosition();
+        const float squaredDist = (mListenerPos - pos).length2();
+
+        if (squaredDist > squaredMaxDist)
+        {
+            // If getDistanceCull() is set, delete the sound after it has faded out
+            sound->setFade(sSfxFadeOutDuration, 0.0f, Play_FadeExponential | (sound->getDistanceCull() ? Play_StopAtFadeEnd : 0));
+        }
+        else
+        {
+            // Fade sounds back in once they are in range
+            sound->setFade(sSfxFadeInDuration, 1.0f, Play_FadeExponential);
+        }
+    }
+
 
     void SoundManager::updateSounds(float duration)
     {
@@ -884,20 +931,15 @@ namespace MWSound
             {
                 Sound *sound = sndidx->first.get();
 
-                if(!ptr.isEmpty() && sound->getIs3D())
+                if (sound->getIs3D())
                 {
-                    const ESM::Position &pos = ptr.getRefData().getPosition();
-                    const osg::Vec3f objpos(pos.asVec3());
-                    sound->setPosition(objpos);
+                    if (!ptr.isEmpty())
+                        sound->setPosition(ptr.getRefData().getPosition().asVec3());
 
-                    if(sound->getDistanceCull())
-                    {
-                        if((mListenerPos - objpos).length2() > 2000*2000)
-                            mOutput->finishSound(sound);
-                    }
+                    cull3DSound(sound);
                 }
 
-                if(!mOutput->isSoundPlaying(sound))
+                if(!sound->updateFade(duration) || !mOutput->isSoundPlaying(sound))
                 {
                     mOutput->finishSound(sound);
                     if (sound == mUnderwaterSound)
@@ -909,8 +951,6 @@ namespace MWSound
                 }
                 else
                 {
-                    sound->updateFade(duration);
-
                     mOutput->updateSound(sound);
                     ++sndidx;
                 }
@@ -926,28 +966,24 @@ namespace MWSound
         {
             MWWorld::ConstPtr ptr = sayiter->first;
             Stream *sound = sayiter->second.get();
-            if(!ptr.isEmpty() && sound->getIs3D())
+            if (sound->getIs3D())
             {
-                MWBase::World *world = MWBase::Environment::get().getWorld();
-                const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
-                sound->setPosition(pos);
-
-                if(sound->getDistanceCull())
+                if (!ptr.isEmpty())
                 {
-                    if((mListenerPos - pos).length2() > 2000*2000)
-                        mOutput->finishStream(sound);
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    sound->setPosition(world->getActorHeadTransform(ptr).getTrans());
                 }
+
+                cull3DSound(sound);
             }
 
-            if(!mOutput->isStreamPlaying(sound))
+            if(!sound->updateFade(duration) || !mOutput->isStreamPlaying(sound))
             {
                 mOutput->finishStream(sound);
-                mActiveSaySounds.erase(sayiter++);
+                sayiter = mActiveSaySounds.erase(sayiter);
             }
             else
             {
-                sound->updateFade(duration);
-
                 mOutput->updateStream(sound);
                 ++sayiter;
             }
