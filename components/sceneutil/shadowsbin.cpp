@@ -42,11 +42,7 @@ namespace
 namespace SceneUtil
 {
 
-std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1> ShadowsBin::sCastingPrograms = {
-    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
-};
-
-ShadowsBin::ShadowsBin()
+ShadowsBin::ShadowsBin(const CastingPrograms& castingPrograms)
 {
     mNoTestStateSet = new osg::StateSet;
     mNoTestStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
@@ -57,10 +53,10 @@ ShadowsBin::ShadowsBin()
     mShaderAlphaTestStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
     mShaderAlphaTestStateSet->setMode(GL_BLEND, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
 
-    for (size_t i = 0; i < sCastingPrograms.size(); ++i)
+    for (size_t i = 0; i < castingPrograms.size(); ++i)
     {
         mAlphaFuncShaders[i] = new osg::StateSet;
-        mAlphaFuncShaders[i]->setAttribute(sCastingPrograms[i], osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
+        mAlphaFuncShaders[i]->setAttribute(castingPrograms[i], osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
     }
 }
 
@@ -148,13 +144,6 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
     }
 
     return sg;
-}
-
-void ShadowsBin::addPrototype(const std::string & name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1>& castingPrograms)
-{
-    sCastingPrograms = castingPrograms;
-    osg::ref_ptr<osgUtil::RenderBin> bin(new ShadowsBin);
-    osgUtil::RenderBin::addRenderBinPrototype(name, bin);
 }
 
 inline bool ShadowsBin::State::needTexture() const

@@ -279,14 +279,7 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
     }
 #endif
     // bin has to go inside camera cull or the rendertexture stage will override it
-    static osg::ref_ptr<osg::StateSet> ss;
-    if (!ss)
-    {
-        ShadowsBinAdder adder("ShadowsBin", _vdsm->getCastingPrograms());
-        ss = new osg::StateSet;
-        ss->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, "ShadowsBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
-    }
-    cv->pushStateSet(ss);
+    cv->pushStateSet(_vdsm->getOrCreateShadowsBinStateSet());
     if (_vdsm->getShadowedScene())
     {
         _vdsm->getShadowedScene()->osg::Group::traverse(*nv);
@@ -811,6 +804,8 @@ MWShadowTechnique::MWShadowTechnique(const MWShadowTechnique& vdsm, const osg::C
 
 MWShadowTechnique::~MWShadowTechnique()
 {
+    if (_shadowsBin != nullptr)
+        osgUtil::RenderBin::removeRenderBinPrototype(_shadowsBin);
 }
 
 
@@ -3281,4 +3276,19 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
 
     for(auto& uniformVector : mFrustumUniforms)
         uniformVector.push_back(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "transform"));
+}
+
+osg::ref_ptr<osg::StateSet> SceneUtil::MWShadowTechnique::getOrCreateShadowsBinStateSet()
+{
+    if (_shadowsBinStateSet == nullptr)
+    {
+        if (_shadowsBin == nullptr)
+        {
+            _shadowsBin = new ShadowsBin(_castingPrograms);
+            osgUtil::RenderBin::addRenderBinPrototype(_shadowsBinName, _shadowsBin);
+        }
+        _shadowsBinStateSet = new osg::StateSet;
+        _shadowsBinStateSet->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, _shadowsBinName, osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
+    }
+    return _shadowsBinStateSet;
 }
