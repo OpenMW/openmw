@@ -335,6 +335,7 @@ namespace
         MOCK_METHOD(void, setUseSkinning, (bool), (override));
         MOCK_METHOD(bool, getUseSkinning, (), (const, override));
         MOCK_METHOD(std::string, getFilename, (), (const, override));
+        MOCK_METHOD(std::uint64_t, getHash, (), (const, override));
         MOCK_METHOD(unsigned int, getVersion, (), (const, override));
         MOCK_METHOD(unsigned int, getUserVersion, (), (const, override));
         MOCK_METHOD(unsigned int, getBethVersion, (), (const, override));
@@ -381,6 +382,7 @@ namespace
             ),
             btVector3(4, 8, 12)
         };
+        const std::uint64_t mHash = 42;
 
         TestBulletNifLoader()
         {
@@ -411,6 +413,8 @@ namespace
             mNiTriStripsData.vertices = {osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0), osg::Vec3f(0, 1, 0)};
             mNiTriStripsData.strips = {{0, 1, 2, 3}};
             mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
+
+            EXPECT_CALL(mNifFile, getHash()).WillOnce(Return(mHash));
         }
     };
 
@@ -423,6 +427,8 @@ namespace
         Resource::BulletShape expected;
 
         EXPECT_EQ(*result, expected);
+        EXPECT_EQ(result->mFileName, "test.nif");
+        EXPECT_EQ(result->mFileHash, mHash);
     }
 
     TEST_F(TestBulletNifLoader, should_ignore_nullptr_root)

@@ -1,6 +1,8 @@
 #include "niffile.hpp"
 #include "effect.hpp"
 
+#include <components/files/hash.hpp>
+
 #include <array>
 #include <map>
 #include <sstream>
@@ -156,6 +158,8 @@ std::string NIFFile::printVersion(unsigned int version)
 
 void NIFFile::parse(Files::IStreamPtr stream)
 {
+    hash = Files::getHash(filename, *stream);
+
     NIFStream nif (this, stream);
 
     // Check the header string
