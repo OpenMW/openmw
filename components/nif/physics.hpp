@@ -57,5 +57,33 @@ struct bhkWorldObject : public Record
 
 struct bhkShape : public Record {};
 
+enum class hkResponseType : uint8_t
+{
+    Invalid = 0,
+    SimpleContact = 1,
+    Reporting = 2,
+    None = 3
+};
+
+struct bhkEntity : public bhkWorldObject
+{
+    hkResponseType responseType;
+    unsigned short processContactDelay;
+    void read(NIFStream *nif) override;
+};
+
+struct HavokMaterial
+{
+    unsigned int material;
+    void read(NIFStream *nif);
+};
+
+struct hkSubPartData
+{
+    HavokMaterial material;
+    unsigned int numVertices, havokFilter;
+    void read(NIFStream *nif);
+};
+
 } // Namespace
 #endif

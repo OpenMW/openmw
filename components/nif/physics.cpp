@@ -29,4 +29,26 @@ namespace Nif
         shape.post(nif);
     }
 
+    void bhkEntity::read(NIFStream *nif)
+    {
+        bhkWorldObject::read(nif);
+        responseType = static_cast<hkResponseType>(nif->getChar());
+        nif->skip(1); // Unused
+        processContactDelay = nif->getUShort();
+    }
+
+    void HavokMaterial::read(NIFStream *nif)
+    {
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
+            nif->skip(4); // Unknown
+        material = nif->getUInt();
+    }
+
+    void hkSubPartData::read(NIFStream *nif)
+    {
+        havokFilter = nif->getUInt();
+        numVertices = nif->getUInt();
+        material.read(nif);
+    }
+
 } // Namespace
