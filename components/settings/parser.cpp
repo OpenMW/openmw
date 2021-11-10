@@ -311,7 +311,7 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
 
 bool Settings::SettingsFileParser::skipWhiteSpace(size_t& i, std::string& str)
 {
-    while (i < str.size() && str[i] >= 0 && str[i] <= 255 && std::isspace(str[i], std::locale::classic()))
+    while (i < str.size() && std::isspace(str[i], std::locale::classic()))
     {
         ++i;
     }

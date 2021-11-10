@@ -184,10 +184,10 @@ public:
 
     static inline void trim(std::string &s)
     {
-        const auto notSpace = [](int ch)
+        const auto notSpace = [](char ch)
         {
             // TODO Do we care about multibyte whitespace?
-            return ch < 0 || ch > 255 || !std::isspace(ch);
+            return !std::isspace(ch);
         };
         // left trim
         s.erase(s.begin(), std::find_if(s.begin(), s.end(), notSpace));
