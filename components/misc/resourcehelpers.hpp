@@ -25,6 +25,8 @@ namespace Misc
         /// Use "xfoo.nif" instead of "foo.nif" if available
         std::string correctActorModelPath(const std::string &resPath, const VFS::Manager* vfs);
 
+        std::string correctSoundPath(const std::string& resPath, const VFS::Manager* vfs);
+
         /// marker objects that have a hardcoded function in the game logic, should be hidden from the player
         bool isHiddenMarker(std::string_view id);
     }
