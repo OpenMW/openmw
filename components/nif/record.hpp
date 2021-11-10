@@ -129,7 +129,8 @@ enum RecordType
   RC_BSFurnitureMarker,
   RC_NiCollisionObject,
   RC_bhkCollisionObject,
-  RC_BSDismemberSkinInstance
+  RC_BSDismemberSkinInstance,
+  RC_NiControllerManager
 };
 
 /// Base class for all records
