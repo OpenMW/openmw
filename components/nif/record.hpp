@@ -125,7 +125,8 @@ enum RecordType
   RC_BSLODTriShape,
   RC_BSShaderProperty,
   RC_BSShaderPPLightingProperty,
-  RC_BSShaderNoLightingProperty
+  RC_BSShaderNoLightingProperty,
+  RC_BSFurnitureMarker
 };
 
 /// Base class for all records
