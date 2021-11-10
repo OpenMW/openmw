@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <string>
+#include <string_view>
 #include <tuple>
 
 class Utf8Stream
@@ -30,8 +31,8 @@ public:
     {
     }
 
-    Utf8Stream (const std::string& str) :
-        Utf8Stream (reinterpret_cast<Point>(str.c_str()), reinterpret_cast<Point>(str.c_str() + str.size()))
+    Utf8Stream (std::string_view str) :
+        Utf8Stream (reinterpret_cast<Point>(str.data()), reinterpret_cast<Point>(str.data() + str.size()))
     {
     }
 
