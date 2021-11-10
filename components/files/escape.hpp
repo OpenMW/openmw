@@ -84,7 +84,7 @@ namespace Files
             {
                 mNext.push(character);
             }
-            if (!mSeenNonWhitespace && !isspace(character))
+            if (!mSeenNonWhitespace && !(character >= 0 && character <= 255 && isspace(character)))
                 mSeenNonWhitespace = true;
         }
         int retval = mNext.front();
