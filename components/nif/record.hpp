@@ -128,7 +128,8 @@ enum RecordType
   RC_BSShaderNoLightingProperty,
   RC_BSFurnitureMarker,
   RC_NiCollisionObject,
-  RC_bhkCollisionObject
+  RC_bhkCollisionObject,
+  RC_BSDismemberSkinInstance
 };
 
 /// Base class for all records
