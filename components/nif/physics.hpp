@@ -38,7 +38,6 @@ struct bhkCollisionObject : public NiCollisionObject
     }
 };
 
-
 // Abstract Havok shape info record
 struct bhkWorldObject : public Record
 {
