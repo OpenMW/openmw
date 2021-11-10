@@ -6,49 +6,49 @@ namespace Nif
     void bhkCollisionObject::read(NIFStream *nif)
     {
         NiCollisionObject::read(nif);
-        flags = nif->getUShort();
-        body.read(nif);
+        mFlags = nif->getUShort();
+        mBody.read(nif);
     }
 
     void bhkWorldObject::read(NIFStream *nif)
     {
-        shape.read(nif);
+        mShape.read(nif);
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
             nif->skip(4); // Unknown
-        flags = nif->getUInt();
+        mFlags = nif->getUInt();
         nif->skip(4); // Unused
-        worldObjectInfo.phaseType = nif->getChar();
+        mWorldObjectInfo.mPhaseType = nif->getChar();
         nif->skip(3); // Unused
-        worldObjectInfo.data = nif->getUInt();
-        worldObjectInfo.size = nif->getUInt();
-        worldObjectInfo.capacityAndFlags = nif->getUInt();
+        mWorldObjectInfo.mData = nif->getUInt();
+        mWorldObjectInfo.mSize = nif->getUInt();
+        mWorldObjectInfo.mCapacityAndFlags = nif->getUInt();
     }
 
     void bhkWorldObject::post(NIFFile *nif)
     {
-        shape.post(nif);
+        mShape.post(nif);
     }
 
     void bhkEntity::read(NIFStream *nif)
     {
         bhkWorldObject::read(nif);
-        responseType = static_cast<hkResponseType>(nif->getChar());
+        mResponseType = static_cast<hkResponseType>(nif->getChar());
         nif->skip(1); // Unused
-        processContactDelay = nif->getUShort();
+        mProcessContactDelay = nif->getUShort();
     }
 
     void HavokMaterial::read(NIFStream *nif)
     {
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
             nif->skip(4); // Unknown
-        material = nif->getUInt();
+        mMaterial = nif->getUInt();
     }
 
     void hkSubPartData::read(NIFStream *nif)
     {
-        havokFilter = nif->getUInt();
-        numVertices = nif->getUInt();
-        material.read(nif);
+        mHavokFilter = nif->getUInt();
+        mNumVertices = nif->getUInt();
+        mHavokMaterial.read(nif);
     }
 
 } // Namespace

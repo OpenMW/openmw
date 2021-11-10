@@ -124,22 +124,23 @@ struct BSFurnitureMarker : public Extra
 {
     struct LegacyFurniturePosition
     {
-        osg::Vec3f offset;
-        uint16_t orientation;
-        uint8_t positionRef;
+        osg::Vec3f mOffset;
+        uint16_t mOrientation;
+        uint8_t mPositionRef;
         void read(NIFStream *nif);
     };
 
     struct FurniturePosition
     {
-        osg::Vec3f offset;
-        float heading;
-        uint16_t type, entryPoint;
+        osg::Vec3f mOffset;
+        float mHeading;
+        uint16_t mType;
+        uint16_t mEntryPoint;
         void read(NIFStream *nif);
     };
 
-    std::vector<LegacyFurniturePosition> legacyMarkers;
-    std::vector<FurniturePosition> markers;
+    std::vector<LegacyFurniturePosition> mLegacyMarkers;
+    std::vector<FurniturePosition> mMarkers;
 
     void read(NIFStream *nif) override;
 };

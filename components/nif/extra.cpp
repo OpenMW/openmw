@@ -96,18 +96,18 @@ void BSBound::read(NIFStream *nif)
 
 void BSFurnitureMarker::LegacyFurniturePosition::read(NIFStream *nif)
 {
-    offset = nif->getVector3();
-    orientation = nif->getUShort();
-    positionRef = nif->getChar();
+    mOffset = nif->getVector3();
+    mOrientation = nif->getUShort();
+    mPositionRef = nif->getChar();
     nif->skip(1); // Position ref 2
 }
 
 void BSFurnitureMarker::FurniturePosition::read(NIFStream *nif)
 {
-    offset = nif->getVector3();
-    heading = nif->getFloat();
-    type = nif->getUShort();
-    entryPoint = nif->getUShort();
+    mOffset = nif->getVector3();
+    mHeading = nif->getFloat();
+    mType = nif->getUShort();
+    mEntryPoint = nif->getUShort();
 }
 
 void BSFurnitureMarker::read(NIFStream *nif)
@@ -116,14 +116,14 @@ void BSFurnitureMarker::read(NIFStream *nif)
     unsigned int num = nif->getUInt();
     if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
     {
-        legacyMarkers.resize(num);
-        for (auto& marker : legacyMarkers)
+        mLegacyMarkers.resize(num);
+        for (auto& marker : mLegacyMarkers)
             marker.read(nif);
     }
     else
     {
-        markers.resize(num);
-        for (auto& marker : markers)
+        mMarkers.resize(num);
+        for (auto& marker : mMarkers)
             marker.read(nif);
     }
 }

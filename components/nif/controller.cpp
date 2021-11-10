@@ -273,7 +273,7 @@ namespace Nif
     void NiControllerManager::read(NIFStream *nif)
     {
         Controller::read(nif);
-        cumulative = nif->getBoolean();
+        mCumulative = nif->getBoolean();
         unsigned int numSequences = nif->getUInt();
         nif->skip(4 * numSequences); // Controller sequences
         nif->skip(4); // Object palette

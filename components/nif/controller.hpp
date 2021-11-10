@@ -186,7 +186,7 @@ struct bhkBlendController : public Controller
 
 struct NiControllerManager : public Controller
 {
-    bool cumulative;
+    bool mCumulative;
     void read(NIFStream *nif) override;
 };
 
