@@ -137,6 +137,8 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["BSShaderPPLightingProperty"]   = {&construct <BSShaderPPLightingProperty>  , RC_BSShaderPPLightingProperty };
     factory["BSShaderNoLightingProperty"]   = {&construct <BSShaderNoLightingProperty>  , RC_BSShaderNoLightingProperty };
     factory["BSFurnitureMarker"]            = {&construct <BSFurnitureMarker>           , RC_BSFurnitureMarker          };
+    factory["NiCollisionObject"]            = {&construct <NiCollisionObject>           , RC_NiCollisionObject          };
+    factory["bhkCollisionObject"]           = {&construct <bhkCollisionObject>          , RC_bhkCollisionObject         };
     return factory;
 }
 

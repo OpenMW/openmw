@@ -8,6 +8,7 @@
 #include "niftypes.hpp"
 #include "controller.hpp"
 #include "base.hpp"
+#include "physics.hpp"
 
 #include <components/misc/stringops.hpp>
 
@@ -143,6 +144,9 @@ struct Node : public Named
     bool hasBounds{false};
     NiBoundingVolume bounds;
 
+    // Collision object info
+    NiCollisionObjectPtr collision;
+
     void read(NIFStream *nif) override
     {
         Named::read(nif);
@@ -160,7 +164,7 @@ struct Node : public Named
             bounds.read(nif);
         // Reference to the collision object in Gamebryo files.
         if (nif->getVersion() >= NIFStream::generateVersion(10,0,1,0))
-            nif->skip(4);
+            collision.read(nif);
 
         parent = nullptr;
 
@@ -171,6 +175,7 @@ struct Node : public Named
     {
         Named::post(nif);
         props.post(nif);
+        collision.post(nif);
     }
 
     // Parent node, or nullptr for the root node. As far as I'm aware, only

@@ -126,7 +126,9 @@ enum RecordType
   RC_BSShaderProperty,
   RC_BSShaderPPLightingProperty,
   RC_BSShaderNoLightingProperty,
-  RC_BSFurnitureMarker
+  RC_BSFurnitureMarker,
+  RC_NiCollisionObject,
+  RC_bhkCollisionObject
 };
 
 /// Base class for all records
