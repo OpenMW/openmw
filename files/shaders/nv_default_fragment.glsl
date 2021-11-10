@@ -39,6 +39,7 @@ varying vec3 passNormal;
 #include "alpha.glsl"
 
 uniform float emissiveMult;
+uniform float specStrength;
 
 void main()
 {
@@ -80,7 +81,7 @@ void main()
     gl_FragData[0].xyz *= lighting;
 
     float shininess = gl_FrontMaterial.shininess;
-    vec3 matSpec = getSpecularColor().xyz;
+    vec3 matSpec = getSpecularColor().xyz * specStrength;
 #if @normalMap
     matSpec *= normalTex.a;
 #endif

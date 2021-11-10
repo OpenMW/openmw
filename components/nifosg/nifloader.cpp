@@ -1932,6 +1932,7 @@ namespace NifOsg
 
             int lightmode = 1;
             float emissiveMult = 1.f;
+            float specStrength = 1.f;
 
             for (const Nif::Property* property : properties)
             {
@@ -2081,6 +2082,8 @@ namespace NifOsg
             stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
             if (emissiveMult != 1.f)
                 stateset->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
+            if (specStrength != 1.f)
+                stateset->addUniform(new osg::Uniform("specStrength", specStrength));
         }
 
     };

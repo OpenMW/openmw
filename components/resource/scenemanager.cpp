@@ -524,6 +524,7 @@ namespace Resource
                 result.getNode()->accept(colladaAlphaTrickVisitor);
 
                 result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
+                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
                 result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
                 result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
             }

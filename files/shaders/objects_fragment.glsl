@@ -71,6 +71,7 @@ centroid varying vec3 shadowDiffuseLighting;
 #else
 uniform float emissiveMult;
 #endif
+uniform float specStrength;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
@@ -204,6 +205,7 @@ void main()
     vec3 matSpec = getSpecularColor().xyz;
 #endif
 
+    matSpec *= specStrength;
     if (matSpec != vec3(0.0))
     {
 #if (!@normalMap && !@parallax && !@forcePPL)

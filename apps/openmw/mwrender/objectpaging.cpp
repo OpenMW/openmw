@@ -359,6 +359,7 @@ namespace MWRender
             stateset->setAttribute(m);
             stateset->addUniform(new osg::Uniform("colorMode", 0));
             stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
+            stateset->addUniform(new osg::Uniform("specStrength", 1.f));
             node.setStateSet(stateset);
         }
     };
