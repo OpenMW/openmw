@@ -2061,7 +2061,7 @@ void CharacterController::update(float duration)
         vec.x() *= speed;
         vec.y() *= speed;
 
-        if(mHitState != CharState_None && mJumpState == JumpState_None)
+        if(mHitState != CharState_None && mHitState != CharState_Block && mJumpState == JumpState_None)
             vec = osg::Vec3f();
 
         CharacterState movestate = CharState_None;
