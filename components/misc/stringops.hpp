@@ -187,7 +187,7 @@ public:
         const auto notSpace = [](char ch)
         {
             // TODO Do we care about multibyte whitespace?
-            return !std::isspace(ch);
+            return !std::isspace(static_cast<unsigned char>(ch));
         };
         // left trim
         s.erase(s.begin(), std::find_if(s.begin(), s.end(), notSpace));
