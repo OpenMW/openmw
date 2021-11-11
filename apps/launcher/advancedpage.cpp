@@ -208,7 +208,7 @@ bool Launcher::AdvancedPage::loadSettings()
     {
         // Saves
         loadSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-        maximumQuicksavesComboBox->setValue(Settings::Manager::getInt("max quicksaves", "Saves"));
+        loadSettingInt(maximumQuicksavesComboBox,"max quicksaves", "Saves");
 
         // Other Settings
         QString screenshotFormatString = QString::fromStdString(Settings::Manager::getString("screenshot format", "General")).toUpper();
@@ -253,14 +253,10 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
         saveSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
         saveSettingBool(avoidCollisionsCheckBox, "NPCs avoid collisions", "Game");
-        int unarmedFactorsStrengthIndex = unarmedFactorsStrengthComboBox->currentIndex();
-        if (unarmedFactorsStrengthIndex != Settings::Manager::getInt("strength influences hand to hand", "Game"))
-            Settings::Manager::setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
+        saveSettingInt(unarmedFactorsStrengthComboBox, "strength influences hand to hand", "Game");
         saveSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
         saveSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
-        int numPhysicsThreads = physicsThreadsSpinBox->value();
-        if (numPhysicsThreads != Settings::Manager::getInt("async num threads", "Physics"))
-            Settings::Manager::setInt("async num threads", "Physics", numPhysicsThreads);
+        saveSettingInt(physicsThreadsSpinBox, "async num threads", "Physics");
     }
 
     // Visuals
@@ -351,9 +347,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
         saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
         saveSettingBool(changeDialogTopicsCheckBox, "color topic enable", "GUI");
-        int showOwnedCurrentIndex = showOwnedComboBox->currentIndex();
-        if (showOwnedCurrentIndex != Settings::Manager::getInt("show owned", "Game"))
-            Settings::Manager::setInt("show owned", "Game", showOwnedCurrentIndex);
+        saveSettingInt(showOwnedComboBox,"show owned", "Game");
         saveSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
         saveSettingBool(useZoomOnMapCheckBox, "allow zooming", "Map");
         saveSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
@@ -372,11 +366,7 @@ void Launcher::AdvancedPage::saveSettings()
     {
         // Saves Settings
         saveSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-        int maximumQuicksaves = maximumQuicksavesComboBox->value();
-        if (maximumQuicksaves != Settings::Manager::getInt("max quicksaves", "Saves"))
-        {
-            Settings::Manager::setInt("max quicksaves", "Saves", maximumQuicksaves);
-        }
+        saveSettingInt(maximumQuicksavesComboBox, "max quicksaves", "Saves");
 
         // Other Settings
         std::string screenshotFormatString = screenshotFormatComboBox->currentText().toLower().toStdString();
@@ -416,6 +406,32 @@ void Launcher::AdvancedPage::saveSettingBool(QCheckBox *checkbox, const std::str
     bool cValue = checkbox->checkState();
     if (cValue != Settings::Manager::getBool(setting, group))
         Settings::Manager::setBool(setting, group, cValue);
+}
+
+void Launcher::AdvancedPage::loadSettingInt(QComboBox *comboBox, const std::string &setting, const std::string &group)
+{
+    int currentIndex = Settings::Manager::getInt(setting, group);
+    comboBox->setCurrentIndex(currentIndex);
+}
+
+void Launcher::AdvancedPage::saveSettingInt(QComboBox *comboBox, const std::string &setting, const std::string &group)
+{
+    int currentIndex = comboBox->currentIndex();
+    if (currentIndex != Settings::Manager::getInt(setting, group))
+        Settings::Manager::setInt(setting, group, currentIndex);
+}
+
+void Launcher::AdvancedPage::loadSettingInt(QSpinBox *spinBox, const std::string &setting, const std::string &group)
+{
+    int value = Settings::Manager::getInt(setting, group);
+    spinBox->setValue(value);
+}
+
+void Launcher::AdvancedPage::saveSettingInt(QSpinBox *spinBox, const std::string &setting, const std::string &group)
+{
+    int value = spinBox->value();
+    if (value != Settings::Manager::getInt(setting, group))
+        Settings::Manager::setInt(setting, group, value);
 }
 
 void Launcher::AdvancedPage::slotLoadedCellsChanged(QStringList cellNames)
