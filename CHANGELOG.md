@@ -8,6 +8,7 @@
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
     Bug #3792: 1 frame late magicka recalc breaks early scripted magicka reactions to Intelligence change
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
+    Bug #3855: AI sometimes spams defensive spells
     Bug #3905: Great House Dagoth issues
     Bug #4203: Resurrecting an actor should close the loot GUI
     Bug #4602: Robert's Bodies: crash inside createInstance()
