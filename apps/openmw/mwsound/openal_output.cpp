@@ -13,6 +13,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "openal_output.hpp"
@@ -954,17 +955,7 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
     try
     {
         DecoderPtr decoder = mManager.getDecoder();
-        // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-        if(decoder->mResourceMgr->exists(fname))
-            decoder->open(fname);
-        else
-        {
-            std::string file = fname;
-            std::string::size_type pos = file.rfind('.');
-            if(pos != std::string::npos)
-                file = file.substr(0, pos)+".mp3";
-            decoder->open(file);
-        }
+        decoder->open(Misc::ResourceHelpers::correctSoundPath(fname, decoder->mResourceMgr));
 
         ChannelConfig chans;
         SampleType type;
