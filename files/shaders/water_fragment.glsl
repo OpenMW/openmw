@@ -61,7 +61,7 @@ const float RAIN_RIPPLE_RADIUS = 0.2;
 
 float scramble(float x, float z)
 {
-    return fract(pow(x*3.0+1.0, z));
+    return fract(pow(fract(x)*3.0+1.0, z));
 }
 
 vec2 randOffset(vec2 c, float time)
