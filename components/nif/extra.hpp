@@ -120,5 +120,30 @@ struct BSBound : public Extra
     void read(NIFStream *nif) override;
 };
 
+struct BSFurnitureMarker : public Extra
+{
+    struct LegacyFurniturePosition
+    {
+        osg::Vec3f mOffset;
+        uint16_t mOrientation;
+        uint8_t mPositionRef;
+        void read(NIFStream *nif);
+    };
+
+    struct FurniturePosition
+    {
+        osg::Vec3f mOffset;
+        float mHeading;
+        uint16_t mType;
+        uint16_t mEntryPoint;
+        void read(NIFStream *nif);
+    };
+
+    std::vector<LegacyFurniturePosition> mLegacyMarkers;
+    std::vector<FurniturePosition> mMarkers;
+
+    void read(NIFStream *nif) override;
+};
+
 } // Namespace
 #endif

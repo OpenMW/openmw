@@ -184,6 +184,12 @@ struct bhkBlendController : public Controller
     void read(NIFStream *nif) override;
 };
 
+struct NiControllerManager : public Controller
+{
+    bool mCumulative;
+    void read(NIFStream *nif) override;
+};
+
 struct Interpolator : public Record { };
 
 struct NiPoint3Interpolator : public Interpolator

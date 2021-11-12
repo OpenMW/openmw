@@ -125,7 +125,12 @@ enum RecordType
   RC_BSLODTriShape,
   RC_BSShaderProperty,
   RC_BSShaderPPLightingProperty,
-  RC_BSShaderNoLightingProperty
+  RC_BSShaderNoLightingProperty,
+  RC_BSFurnitureMarker,
+  RC_NiCollisionObject,
+  RC_bhkCollisionObject,
+  RC_BSDismemberSkinInstance,
+  RC_NiControllerManager
 };
 
 /// Base class for all records

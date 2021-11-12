@@ -148,6 +148,9 @@ struct BSShaderTextureSet;
 struct NiGeometryData;
 struct BSShaderProperty;
 struct NiAlphaProperty;
+struct NiCollisionObject;
+struct bhkWorldObject;
+struct bhkShape;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -175,6 +178,9 @@ using BSShaderTextureSetPtr = RecordPtrT<BSShaderTextureSet>;
 using NiGeometryDataPtr = RecordPtrT<NiGeometryData>;
 using BSShaderPropertyPtr = RecordPtrT<BSShaderProperty>;
 using NiAlphaPropertyPtr = RecordPtrT<NiAlphaProperty>;
+using NiCollisionObjectPtr = RecordPtrT<NiCollisionObject>;
+using CollisionBodyPtr = RecordPtrT<bhkWorldObject>;
+using bhkShapePtr = RecordPtrT<bhkShape>;
 
 using NodeList = RecordListT<Node>;
 using PropertyList = RecordListT<Property>;
