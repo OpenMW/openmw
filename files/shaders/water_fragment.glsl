@@ -132,7 +132,6 @@ vec2 normalCoords(vec2 uv, float scale, float speed, float time, float timer1, f
     return uv * (WAVE_SCALE * scale) + WIND_DIR * time * (WIND_SPEED * speed) -(previousNormal.xy/previousNormal.zz) * WAVE_CHOPPYNESS + vec2(time * timer1,time * timer2);
   }
 
-varying vec3 screenCoordsPassthrough;
 varying vec4 position;
 varying float linearDepth;
 
@@ -151,6 +150,8 @@ uniform float far;
 uniform vec3 nodePosition;
 
 uniform float rainIntensity;
+
+uniform vec2 screenRes;
 
 #define PER_PIXEL_LIGHTING 0
 
@@ -178,8 +179,7 @@ void main(void)
 
     float shadow = unshadowedLightRatio(linearDepth);
 
-    vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
-    screenCoords.y = (1.0-screenCoords.y);
+    vec2 screenCoords = gl_FragCoord.xy / screenRes;
 
     #define waterTimer osg_SimulationTime
 
