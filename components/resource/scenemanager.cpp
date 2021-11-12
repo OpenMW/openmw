@@ -21,6 +21,7 @@
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/algorithm.hpp>
+#include <components/misc/errorMarker.hpp>
 #include <components/misc/osguservalues.hpp>
 
 #include <components/vfs/manager.hpp>
@@ -36,6 +37,7 @@
 #include <components/shader/shadermanager.hpp>
 
 #include <components/files/hash.hpp>
+#include <components/files/memorystream.hpp>
 
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
@@ -483,13 +485,11 @@ namespace Resource
         Resource::ImageManager* mImageManager;
     };
 
-    osg::ref_ptr<osg::Node> load (const std::string& normalizedFilename, const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
+    namespace
     {
-        auto ext = Misc::getFileExtension(normalizedFilename);
-        if (ext == "nif")
-            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), imageManager);
-        else
+        osg::ref_ptr<osg::Node> loadNonNif(const std::string& normalizedFilename, std::istream& model, Resource::ImageManager* imageManager)
         {
+            auto ext = Misc::getFileExtension(normalizedFilename);
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(std::string(ext));
             if (!reader)
             {
@@ -505,10 +505,9 @@ namespace Resource
             options->setReadFileCallback(new ImageReadCallback(imageManager));
             if (ext == "dae") options->setOptionString("daeUseSequencedTextureUnits");
 
-            Files::IStreamPtr stream = vfs->get(normalizedFilename);
-            const std::uint64_t fileHash = Files::getHash(normalizedFilename, *stream);
+            const std::uint64_t fileHash = Files::getHash(normalizedFilename, model);
 
-            osgDB::ReaderWriter::ReadResult result = reader->readNode(*stream, options);
+            osgDB::ReaderWriter::ReadResult result = reader->readNode(model, options);
             if (!result.success())
             {
                 std::stringstream errormsg;
@@ -519,7 +518,9 @@ namespace Resource
             // Recognize and hide collision node
             unsigned int hiddenNodeMask = 0;
             SceneUtil::FindByNameVisitor nameFinder("Collision");
-            result.getNode()->accept(nameFinder);
+
+            auto node = result.getNode();
+            node->accept(nameFinder);
             if (nameFinder.mFoundNode)
                 nameFinder.mFoundNode->setNodeMask(hiddenNodeMask);
 
@@ -527,21 +528,28 @@ namespace Resource
             {
                 // Collada alpha testing
                 Resource::ColladaAlphaTrickVisitor colladaAlphaTrickVisitor;
-                result.getNode()->accept(colladaAlphaTrickVisitor);
+                node->accept(colladaAlphaTrickVisitor);
 
-                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
-                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
-                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
-                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
             }
-
-            auto node = result.getNode();
 
             node->setUserValue(Misc::OsgUserValues::sFileHash,
                 std::string(reinterpret_cast<const char*>(&fileHash), sizeof(fileHash)));
 
             return node;
         }
+    }
+
+    osg::ref_ptr<osg::Node> load (const std::string& normalizedFilename, const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
+    {
+        auto ext = Misc::getFileExtension(normalizedFilename);
+        if (ext == "nif")
+            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), imageManager);
+        else
+            return loadNonNif(normalizedFilename, *vfs->get(normalizedFilename), imageManager);
     }
 
     class CanOptimizeCallback : public SceneUtil::Optimizer::IsOperationPermissibleForObjectCallback
@@ -659,23 +667,23 @@ namespace Resource
             {
                 loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
             }
-            catch (std::exception& e)
+            catch (const std::exception& e)
             {
-                static const char * const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae" };
+                static osg::ref_ptr<osg::Node> errorMarkerNode = [&] {
+                    static const char* const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae" };
 
-                for (unsigned int i=0; i<sizeof(sMeshTypes)/sizeof(sMeshTypes[0]); ++i)
-                {
-                    normalized = "meshes/marker_error." + std::string(sMeshTypes[i]);
-                    if (mVFS->exists(normalized))
+                    for (unsigned int i=0; i<sizeof(sMeshTypes)/sizeof(sMeshTypes[0]); ++i)
                     {
-                        Log(Debug::Error) << "Failed to load '" << name << "': " << e.what() << ", using marker_error." << sMeshTypes[i] << " instead";
-                        loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
-                        break;
+                        normalized = "meshes/marker_error." + std::string(sMeshTypes[i]);
+                        if (mVFS->exists(normalized))
+                            return load(normalized, mVFS, mImageManager, mNifFileManager);
                     }
-                }
+                    Files::IMemStream file(Misc::errorMarker.data(), Misc::errorMarker.size());
+                    return loadNonNif("error_marker.osgt", file, mImageManager);
+                }();
 
-                if (!loaded)
-                    throw;
+                Log(Debug::Error) << "Failed to load '" << name << "': " << e.what() << ", using marker_error instead";
+                loaded = static_cast<osg::Node*>(errorMarkerNode->clone(osg::CopyOp::DEEP_COPY_ALL));
             }
 
             // set filtering settings
