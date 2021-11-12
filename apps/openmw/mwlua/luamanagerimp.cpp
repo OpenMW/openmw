@@ -80,32 +80,28 @@ namespace MWLua
 
     void LuaManager::update(bool paused, float dt)
     {
+        if (mPlayer.isEmpty())
+            return;  // The game is not started yet.
+
         ObjectRegistry* objectRegistry = mWorldView.getObjectRegistry();
 
-        if (!mPlayer.isEmpty())
+        MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (!(getId(mPlayer) == getId(newPlayerPtr)))
+            throw std::logic_error("Player Refnum was changed unexpectedly");
+        if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
         {
-            MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            if (!(getId(mPlayer) == getId(newPlayerPtr)))
-                throw std::logic_error("Player Refnum was changed unexpectedly");
-            if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
-            {
-                mPlayer = newPlayerPtr;  // player was moved to another cell, update ptr in registry
-                objectRegistry->registerPtr(mPlayer);
-            }
+            mPlayer = newPlayerPtr;  // player was moved to another cell, update ptr in registry
+            objectRegistry->registerPtr(mPlayer);
         }
-        mWorldView.update();
 
-        if (paused)
-        {
-            mInputEvents.clear();
-            return;
-        }
+        mWorldView.update();
 
         std::vector<GlobalEvent> globalEvents = std::move(mGlobalEvents);
         std::vector<LocalEvent> localEvents = std::move(mLocalEvents);
         mGlobalEvents = std::vector<GlobalEvent>();
         mLocalEvents = std::vector<LocalEvent>();
 
+        if (!paused)
         {  // Update time and process timers
             double seconds = mWorldView.getGameTimeInSeconds() + dt;
             mWorldView.setGameTimeInSeconds(seconds);
@@ -137,7 +133,7 @@ namespace MWLua
 
         // Engine handlers in local scripts
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
-        if (playerScripts)
+        if (playerScripts && !paused)
         {
             for (const auto& event : mInputEvents)
                 playerScripts->processInputEvent(event);
@@ -158,8 +154,11 @@ namespace MWLua
         }
         mLocalEngineEvents.clear();
 
-        for (LocalScripts* scripts : mActiveLocalScripts)
-            scripts->update(dt);
+        if (!paused)
+        {
+            for (LocalScripts* scripts : mActiveLocalScripts)
+                scripts->update(dt);
+        }
 
         // Engine handlers in global scripts
         if (mPlayerChanged)
@@ -177,7 +176,8 @@ namespace MWLua
             mGlobalScripts.actorActive(GObject(id, objectRegistry));
         mActorAddedEvents.clear();
 
-        mGlobalScripts.update(dt);
+        if (!paused)
+            mGlobalScripts.update(dt);
     }
 
     void LuaManager::applyQueuedChanges()
