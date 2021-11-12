@@ -165,9 +165,15 @@ namespace MWWorld
 
         listener->loadingOff();
 
-        // insert records that may not be present in all versions of MW
-        if (mEsm[0].getFormat() == 0)
-            ensureNeededRecords();
+        // Find main game file
+        for (const ESM::ESMReader& reader : mEsm)
+        {
+            if (!Misc::StringUtils::ciEndsWith(reader.getName(), ".esm") && !Misc::StringUtils::ciEndsWith(reader.getName(), ".omwgame"))
+                continue;
+            if (reader.getFormat() == 0)
+                ensureNeededRecords();  // and insert records that may not be present in all versions of MW.
+            break;
+        }
 
         mCurrentDate.reset(new DateTimeManager());
 

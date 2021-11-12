@@ -430,6 +430,10 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
         if (item(info.fileName()))
             continue;
 
+        // Enabled by default in system openmw.cfg; shouldn't be shown in content list.
+        if (info.fileName().compare("builtin.omwscripts", Qt::CaseInsensitive) == 0)
+            continue;
+
         if (info.fileName().endsWith(".omwscripts", Qt::CaseInsensitive))
         {
             EsmFile *file = new EsmFile(path2);
