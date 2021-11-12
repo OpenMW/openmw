@@ -22,6 +22,8 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -407,6 +409,7 @@ namespace MWWorld
 
     void ProjectileManager::moveMagicBolts(float duration)
     {
+        static const bool normaliseRaceSpeed = Settings::Manager::getBool("normalise race speed", "Game");
         for (auto& magicBoltState : mMagicBolts)
         {
             if (magicBoltState.mToDelete)
@@ -426,10 +429,16 @@ namespace MWWorld
                 }
             }
 
+            const auto& store = MWBase::Environment::get().getWorld()->getStore();
             osg::Quat orient = magicBoltState.mNode->getAttitude();
-            static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fTargetSpellMaxSpeed")->mValue.getFloat();
+            static float fTargetSpellMaxSpeed = store.get<ESM::GameSetting>().find("fTargetSpellMaxSpeed")->mValue.getFloat();
             float speed = fTargetSpellMaxSpeed * magicBoltState.mSpeed;
+            if (!normaliseRaceSpeed && !caster.isEmpty() && caster.getClass().isNpc())
+            {
+                const auto npc = caster.get<ESM::NPC>()->mBase;
+                const auto race = store.get<ESM::Race>().find(npc->mRace);
+                speed *= npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
+            }
             osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
             direction.normalize();
             projectile->setVelocity(direction * speed);
