@@ -8,6 +8,8 @@
 
 #include <boost/filesystem/fstream.hpp>
 
+#include <osg/Version>
+
 #include <osgViewer/ViewerEventHandlers>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
@@ -544,6 +546,10 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     if(fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
 
+    // Allows for Windows snapping features to properly work in borderless window
+    SDL_SetHint("SDL_BORDERLESS_WINDOWED_STYLE", "1");
+    SDL_SetHint("SDL_BORDERLESS_RESIZABLE_STYLE", "1");
+
     if (!windowBorder)
         flags |= SDL_WINDOW_BORDERLESS;
 
@@ -751,6 +757,12 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
     bool shadersSupported = exts && (exts->glslLanguageVersion >= 1.2f);
+
+#if OSG_VERSION_LESS_THAN(3, 6, 6)
+    // hack fix for https://github.com/openscenegraph/OpenSceneGraph/issues/1028
+    if (exts)
+        exts->glRenderbufferStorageMultisampleCoverageNV = nullptr;
+#endif
 
     std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;

@@ -198,7 +198,7 @@ namespace
     }
 
     bool rasterizeTriangles(rcContext& context, const Rectangle& rectangle, const rcConfig& config,
-        const unsigned char* areas, std::size_t areasSize, rcHeightfield& solid)
+        AreaType areaType, rcHeightfield& solid)
     {
         const osg::Vec2f tileBoundsMin(
             std::clamp(rectangle.mBounds.mMin.x(), config.bmin[0], config.bmax[0]),
@@ -224,13 +224,15 @@ namespace
             0, 2, 3,
         };
 
+        const std::array<unsigned char, 2> areas {areaType, areaType};
+
         return rcRasterizeTriangles(
             &context,
             vertices.data(),
             static_cast<int>(vertices.size() / 3),
             indices.data(),
-            areas,
-            static_cast<int>(areasSize),
+            areas.data(),
+            static_cast<int>(areas.size()),
             solid,
             config.walkableClimb
         );
@@ -239,11 +241,10 @@ namespace
     bool rasterizeTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const std::vector<Cell>& cells,
         const Settings& settings, const rcConfig& config, rcHeightfield& solid)
     {
-        const std::array<unsigned char, 2> areas {{AreaType_water, AreaType_water}};
         for (const Cell& cell : cells)
         {
             const Rectangle rectangle = getSwimRectangle(cell, settings, agentHalfExtents);
-            if (!rasterizeTriangles(context, rectangle, config, areas.data(), areas.size(), solid))
+            if (!rasterizeTriangles(context, rectangle, config, AreaType_water, solid))
                 return false;
         }
         return true;
@@ -254,9 +255,8 @@ namespace
     {
         for (const FlatHeightfield& heightfield : heightfields)
         {
-            const std::array<unsigned char, 2> areas {{AreaType_ground, AreaType_ground}};
             const Rectangle rectangle {heightfield.mBounds, toNavMeshCoordinates(settings, heightfield.mHeight)};
-            if (!rasterizeTriangles(context, rectangle, config, areas.data(), areas.size(), solid))
+            if (!rasterizeTriangles(context, rectangle, config, AreaType_ground, solid))
                 return false;
         }
         return true;

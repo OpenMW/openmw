@@ -1,5 +1,7 @@
 #include "bulletshapemanager.hpp"
 
+#include <cstring>
+
 #include <osg/NodeVisitor>
 #include <osg/TriangleFunctor>
 #include <osg/Transform>
@@ -10,6 +12,7 @@
 #include <components/misc/pathhelpers.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/misc/osguservalues.hpp>
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
@@ -161,6 +164,15 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
                 shape = visitor.getShape();
                 if (!shape)
                     return osg::ref_ptr<BulletShape>();
+            }
+
+            if (shape != nullptr)
+            {
+                shape->mFileName = normalized;
+                std::string fileHash;
+                constNode->getUserValue(Misc::OsgUserValues::sFileHash, fileHash);
+                if (!fileHash.empty())
+                    std::memcpy(&shape->mFileHash, fileHash.data(), std::min(fileHash.size(), sizeof(shape->mFileHash)));
             }
         }
 

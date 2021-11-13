@@ -56,14 +56,19 @@ namespace Terrain
 
             void setViewDistance(float viewDistance) { mViewDistance = viewDistance; }
             float getViewDistance() const { return mViewDistance; }
+
+            // Automatically set by addChunkManager based on getViewDistance()
+            unsigned int getMaxLodLevel() const { return mMaxLodLevel; }
+            void setMaxLodLevel(unsigned int level) { mMaxLodLevel = level; }
         private:
             float mViewDistance = 0.f;
+            unsigned int mMaxLodLevel = ~0u;
         };
         void addChunkManager(ChunkManager*);
 
     private:
         void ensureQuadTreeBuilt();
-        void loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float cellWorldSize, const osg::Vec4i &gridbounds, bool compile, float reuseDistance);
+        void loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float cellWorldSize, const osg::Vec4i &gridbounds, bool compile);
 
         osg::ref_ptr<RootNode> mRootNode;
 
@@ -79,7 +84,6 @@ namespace Terrain
         float mMinSize;
         bool mDebugTerrainChunks;
         std::unique_ptr<DebugChunkManager> mDebugChunkManager;
-        float mRevalidateDistance;
     };
 
 }

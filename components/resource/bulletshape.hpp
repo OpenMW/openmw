@@ -12,6 +12,11 @@
 
 class btCollisionShape;
 
+namespace NifBullet
+{
+    class BulletNifLoader;
+}
+
 namespace Resource
 {
     struct DeleteCollisionShape
@@ -47,6 +52,9 @@ namespace Resource
         // we store the node's record index mapped to the child index of the shape in the btCompoundShape.
         std::map<int, int> mAnimatedShapes;
 
+        std::string mFileName;
+        std::uint64_t mFileHash = 0;
+
         void setLocalScaling(const btVector3& scale);
 
         bool isAnimated() const { return !mAnimatedShapes.empty(); }
@@ -59,6 +67,8 @@ namespace Resource
     {
     public:
         BulletShapeInstance(osg::ref_ptr<const BulletShape> source);
+
+        const osg::ref_ptr<const BulletShape>& getSource() const { return mSource; }
 
     private:
         osg::ref_ptr<const BulletShape> mSource;

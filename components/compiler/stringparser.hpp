@@ -14,13 +14,7 @@ namespace Compiler
 
     class StringParser : public Parser
     {
-            enum State
-            {
-                StartState, CommaState
-            };
-
             Literals& mLiterals;
-            State mState;
             std::vector<Interpreter::Type_Code> mCode;
             bool mSmashCase;
             TokenLoc mTokenLoc;
@@ -37,10 +31,6 @@ namespace Compiler
 
             bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a keyword token.
-            /// \return fetch another token?
-
-            bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner) override;
-            ///< Handle a special character token.
             /// \return fetch another token?
 
             bool parseInt (int value, const TokenLoc& loc, Scanner& scanner) override;

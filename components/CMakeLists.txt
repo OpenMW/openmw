@@ -61,7 +61,7 @@ add_component_dir (sceneutil
     )
 
 add_component_dir (nif
-    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey base nifstream
+    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey base nifstream physics
     )
 
 add_component_dir (nifosg
@@ -93,7 +93,7 @@ add_component_dir (esmterrain
 
 add_component_dir (misc
     constants utf8stream stringops resourcehelpers rng messageformatparser weakcache thread
-    compression
+    compression osguservalues
     )
 
 add_component_dir (debug
@@ -106,7 +106,7 @@ IF(NOT WIN32 AND NOT APPLE)
 ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager escape
-    lowlevelfile constrainedfilestream memorystream
+    lowlevelfile constrainedfilestream memorystream hash
     )
 
 add_component_dir (compiler

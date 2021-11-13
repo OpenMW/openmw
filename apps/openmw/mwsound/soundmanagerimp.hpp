@@ -34,6 +34,7 @@ namespace MWSound
 {
     class Sound_Output;
     struct Sound_Decoder;
+    class SoundBase;
     class Sound;
     class Stream;
 
@@ -110,6 +111,8 @@ namespace MWSound
         void streamMusicFull(const std::string& filename);
         void advanceMusic(const std::string& filename);
         void startRandomTitle();
+
+        void cull3DSound(SoundBase *sound);
 
         void updateSounds(float duration);
         void updateRegionSound(float duration);

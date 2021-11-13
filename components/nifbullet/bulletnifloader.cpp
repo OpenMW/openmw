@@ -166,6 +166,8 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     mStaticMesh.reset();
     mAvoidStaticMesh.reset();
 
+    mShape->mFileHash = nif.getHash();
+
     const size_t numRoots = nif.numRoots();
     std::vector<const Nif::Node*> roots;
     for (size_t i = 0; i < numRoots; ++i)
@@ -178,6 +180,7 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
             roots.emplace_back(node);
     }
     const std::string filename = nif.getFilename();
+    mShape->mFileName = filename;
     if (roots.empty())
     {
         warn("Found no root nodes in NIF file " + filename);

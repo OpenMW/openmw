@@ -1,5 +1,6 @@
 #include "groundcover.hpp"
 
+#include <osg/ComputeBoundsVisitor>
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
 #include <osg/Geometry>
@@ -8,6 +9,8 @@
 
 #include <components/esm/esmreader.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/nodecallback.hpp>
+#include <components/terrain/quadtreenode.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
@@ -104,6 +107,20 @@ namespace MWRender
         float mDensity = 0.f;
     };
 
+    class ViewDistanceCallback : public SceneUtil::NodeCallback<ViewDistanceCallback>
+    {
+    public:
+        ViewDistanceCallback(float dist, const osg::BoundingBox& box) : mViewDistance(dist), mBox(box) {}
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            if (Terrain::distance(mBox, nv->getEyePoint()) <= mViewDistance)
+                traverse(node, nv);
+        }
+    private:
+        float mViewDistance;
+        osg::BoundingBox mBox;
+    };
+
     inline bool isInChunkBorders(ESM::CellRef& ref, osg::Vec2f& minBound, osg::Vec2f& maxBound)
     {
         osg::Vec2f size = maxBound - minBound;
@@ -120,8 +137,9 @@ namespace MWRender
 
     osg::ref_ptr<osg::Node> Groundcover::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
+        if (lod > getMaxLodLevel())
+            return nullptr;
         GroundcoverChunkId id = std::make_tuple(center, size);
-
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
         if (obj)
             return static_cast<osg::Node*>(obj.get());
@@ -135,13 +153,14 @@ namespace MWRender
         }
     }
 
-    Groundcover::Groundcover(Resource::SceneManager* sceneManager, float density, const MWWorld::ESMStore& store)
+    Groundcover::Groundcover(Resource::SceneManager* sceneManager, float density, float viewDistance, const MWWorld::ESMStore& store)
          : GenericResourceManager<GroundcoverChunkId>(nullptr)
          , mSceneManager(sceneManager)
          , mDensity(density)
          , mStateset(new osg::StateSet)
          , mGroundcoverStore(store)
     {
+         setViewDistance(viewDistance);
          // MGE uses default alpha settings for groundcover, so we can not rely on alpha properties
          // Force a unified alpha handling instead of data from meshes
          osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f / 255.f);
@@ -151,7 +170,7 @@ namespace MWRender
          mStateset->setAttribute(new osg::VertexAttribDivisor(6, 1));
          mStateset->setAttribute(new osg::VertexAttribDivisor(7, 1));
 
-         mProgramTemplate = mSceneManager->getShaderManager().getProgramTemplate() ? static_cast<osg::Program*>(mSceneManager->getShaderManager().getProgramTemplate()->clone(osg::CopyOp::SHALLOW_COPY)) : new osg::Program;
+         mProgramTemplate = mSceneManager->getShaderManager().getProgramTemplate() ? Shader::ShaderManager::cloneProgram(mSceneManager->getShaderManager().getProgramTemplate()) : osg::ref_ptr<osg::Program>(new osg::Program);
          mProgramTemplate->addBindAttribLocation("aOffset", 6);
          mProgramTemplate->addBindAttribLocation("aRotation", 7);
     }
@@ -220,10 +239,15 @@ namespace MWRender
             group->addChild(node);
         }
 
+        osg::ComputeBoundsVisitor cbv;
+        group->accept(cbv);
+        osg::BoundingBox box = cbv.getBoundingBox();
+        group->addCullCallback(new ViewDistanceCallback(getViewDistance(), box));
+
         group->setStateSet(mStateset);
         group->setNodeMask(Mask_Groundcover);
         if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
-            group->setCullCallback(new SceneUtil::LightListCallback);
+            group->addCullCallback(new SceneUtil::LightListCallback);
         mSceneManager->recreateShaders(group, "groundcover", true, mProgramTemplate);
         mSceneManager->shareState(group);
         group->getBound();

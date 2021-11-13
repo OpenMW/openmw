@@ -20,7 +20,7 @@ namespace MWRender
     class Groundcover : public Resource::GenericResourceManager<GroundcoverChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
     public:
-        Groundcover(Resource::SceneManager* sceneManager, float density, const MWWorld::ESMStore& groundcoverStore);
+        Groundcover(Resource::SceneManager* sceneManager, float density, float viewDistance, const MWWorld::ESMStore& groundcoverStore);
         ~Groundcover();
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;

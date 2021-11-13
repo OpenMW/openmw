@@ -30,15 +30,20 @@ namespace
 
 }
 
-bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
+bool changeExtension(std::string &path, std::string_view ext)
 {
     std::string::size_type pos = path.rfind('.');
-    if(pos != std::string::npos && path.compare(pos, path.length() - pos, ".dds") != 0)
+    if(pos != std::string::npos && path.compare(pos, path.length() - pos, ext) != 0)
     {
-        path.replace(pos, path.length(), ".dds");
+        path.replace(pos, path.length(), ext);
         return true;
     }
     return false;
+}
+
+bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
+{
+    return changeExtension(path, ".dds");
 }
 
 std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLevelDirectory, const std::string &resPath, const VFS::Manager* vfs)
@@ -138,6 +143,17 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resP
         return resPath;
     }
     return mdlname;
+}
+
+std::string Misc::ResourceHelpers::correctSoundPath(const std::string& resPath, const VFS::Manager* vfs)
+{
+    std::string sound = resPath;
+    // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
+    if (!vfs->exists(sound))
+        changeExtension(sound, ".mp3");
+
+    return vfs->normalizeFilename(sound);
+
 }
 
 bool Misc::ResourceHelpers::isHiddenMarker(std::string_view id)

@@ -647,8 +647,7 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
 
                     uint32_t clr = *(uint32_t*)data;
                     uint8_t alpha = (clr >> 24);
-
-                    alpha = std::min( alpha, (uint8_t) (std::clamp((sqrDist/sqrExploreRadius)*255, 0.f, 1.f)));
+                    alpha = std::min(alpha, (uint8_t)(std::clamp(sqrDist/sqrExploreRadius, 0.f, 1.f) * 255));
                     uint32_t val = (uint32_t) (alpha << 24);
                     if ( *data != val)
                     {
