@@ -275,7 +275,7 @@ normalise race speed
 :Range:		True/False
 :Default:	False
 
-By default race weight is factored into horizontal movement speed like in Morrowind.
+By default race weight is factored into horizontal movement and magic projectile speed like in Morrowind.
 For example, an NPC which has 1.2 race weight is faster than an NPC with the exact same stats and weight 1.0 by a factor of 120%.
 If this setting is true, race weight is ignored in the calculations which allows for a movement behavior
 equivalent to the one introduced by the equivalent Morrowind Code Patch feature.
