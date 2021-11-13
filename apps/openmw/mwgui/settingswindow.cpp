@@ -267,6 +267,8 @@ namespace MWGui
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
 
+        computeMinimumWindowSize();
+
         center();
 
         mResetControlsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
@@ -737,6 +739,32 @@ namespace MWGui
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)
     {
         layoutControlsBox();
+    }
+
+    void SettingsWindow::computeMinimumWindowSize()
+    {
+        auto* window = mMainWidget->castType<MyGUI::Window>();
+        auto minSize = window->getMinSize();
+
+        // Window should be at minimum wide enough to show all tabs.
+        int tabBarWidth = 0;
+        for (uint32_t i = 0; i < mSettingsTab->getItemCount(); i++)
+        {
+            tabBarWidth += mSettingsTab->getButtonWidthAt(i);
+        }
+
+        // Need to include window margins
+        int margins = mMainWidget->getWidth() - mSettingsTab->getWidth();
+        int minimumWindowWidth = tabBarWidth + margins;
+
+        if (minimumWindowWidth > minSize.width)
+        {
+            minSize.width = minimumWindowWidth;
+            window->setMinSize(minSize);
+
+            // Make a dummy call to setSize so MyGUI can apply any resize resulting from the change in MinSize
+            mMainWidget->setSize(mMainWidget->getSize());
+        }
     }
 
     void SettingsWindow::resetScrollbars()
