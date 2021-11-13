@@ -95,7 +95,7 @@ namespace MWRender
     public:
         RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
                          Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                         const std::string& resourcePath, DetourNavigator::Navigator& navigator);
+                         const std::string& resourcePath, DetourNavigator::Navigator& navigator, const MWWorld::ESMStore& groundcoverStore);
         ~RenderingManager();
 
         osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();

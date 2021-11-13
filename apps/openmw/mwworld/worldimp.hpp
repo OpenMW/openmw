@@ -80,6 +80,7 @@ namespace MWWorld
 
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
+            MWWorld::ESMStore mGroundcoverStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
 
@@ -163,14 +164,10 @@ namespace MWWorld
 
             void updateSkyDate();
 
-            /**
-             * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
-             * @param fileCollections- Container which holds content file names and their paths
-             * @param content - Container which holds content file names
-             * @param contentLoader -
-             */
-            void loadContentFiles(const Files::Collections& fileCollections,
-                const std::vector<std::string>& content, const std::vector<std::string>& groundcover, ContentLoader& contentLoader);
+            // A helper method called automatically during World construction.
+            void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content,
+                 ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener, bool validateMasterFiles = true);
+
 
             float feetToGameUnits(float feet);
             float getActivationDistancePlusTelekinesis();
