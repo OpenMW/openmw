@@ -96,6 +96,7 @@
     Feature #6249: Alpha testing support for Collada
     Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
     Feature #6288: Preserve the "blocked" record flag for referenceable objects.
+    Feature #6380: Commas are treated as whitespace in vanilla
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
 

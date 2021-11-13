@@ -136,7 +136,7 @@ namespace Compiler
             return false;
         }
 
-        if (mState==MessageState || mState==MessageCommaState)
+        if (mState==MessageState)
         {
             GetArgumentsFromMessageFormat processor;
             processor.process(name);
@@ -155,7 +155,7 @@ namespace Compiler
             return true;
         }
 
-        if (mState==MessageButtonState || mState==MessageButtonCommaState)
+        if (mState==MessageButtonState)
         {
             Generator::pushString (mCode, mLiterals, name);
             mState = MessageButtonState;
@@ -198,7 +198,7 @@ namespace Compiler
 
     bool LineParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==MessageState || mState==MessageCommaState)
+        if (mState==MessageState)
         {
             if (const Extensions *extensions = getContext().getExtensions())
             {
@@ -446,12 +446,6 @@ namespace Compiler
         if (code==Scanner::S_newline && (mState==EndState || mState==BeginState))
             return false;
 
-        if (code==Scanner::S_comma && mState==MessageState)
-        {
-            mState = MessageCommaState;
-            return true;
-        }
-
         if (code==Scanner::S_ref && mState==SetPotentialMemberVarState)
         {
             getErrorHandler().warning ("Stray explicit reference", loc);
@@ -477,12 +471,6 @@ namespace Compiler
         {
             Generator::message (mCode, mLiterals, mName, mButtons);
             return false;
-        }
-
-        if (code==Scanner::S_comma && mState==MessageButtonState)
-        {
-            mState = MessageButtonCommaState;
-            return true;
         }
 
         if (code==Scanner::S_member && mState==SetPotentialMemberVarState)
