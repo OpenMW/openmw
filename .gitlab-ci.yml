@@ -163,8 +163,7 @@ Debian_Clang_tests_Debug:
   stage: build
   only:
     variables:
-      - $CI_PROJECT_ID == "7107382"
-      - $CI_PIPELINE_SOURCE == "push"    
+      - $CI_PROJECT_ID == "7107382" && $CI_PIPELINE_SOURCE == "push"
   cache:
     paths:
     - ccache/
