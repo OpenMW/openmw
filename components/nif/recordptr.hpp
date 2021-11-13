@@ -152,6 +152,7 @@ struct NiCollisionObject;
 struct bhkWorldObject;
 struct bhkShape;
 struct bhkSerializable;
+struct hkPackedNiTriStripsData;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -182,6 +183,7 @@ using NiAlphaPropertyPtr = RecordPtrT<NiAlphaProperty>;
 using NiCollisionObjectPtr = RecordPtrT<NiCollisionObject>;
 using bhkWorldObjectPtr = RecordPtrT<bhkWorldObject>;
 using bhkShapePtr = RecordPtrT<bhkShape>;
+using hkPackedNiTriStripsDataPtr = RecordPtrT<hkPackedNiTriStripsData>;
 
 using NodeList = RecordListT<Node>;
 using PropertyList = RecordListT<Property>;

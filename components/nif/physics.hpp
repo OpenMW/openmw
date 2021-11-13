@@ -77,6 +77,14 @@ struct hkpMoppCode
     void read(NIFStream *nif);
 };
 
+struct TriangleData
+{
+    unsigned short mTriangle[3];
+    unsigned short mWeldingInfo;
+    osg::Vec3f mNormal;
+    void read(NIFStream *nif);
+};
+
 /// Record types
 
 // Abstract Bethesda Havok object
@@ -152,6 +160,41 @@ struct bhkMoppBvTreeShape : public bhkBvTreeShape
 {
     float mScale;
     hkpMoppCode mMopp;
+    void read(NIFStream *nif) override;
+};
+
+// Bethesda triangle strip-based Havok shape collection
+struct bhkNiTriStripsShape : public bhkShape
+{
+    HavokMaterial mHavokMaterial;
+    float mRadius;
+    unsigned int mGrowBy;
+    osg::Vec4f mScale{1.f, 1.f, 1.f, 0.f};
+    NiTriStripsDataList mData;
+    std::vector<unsigned int> mFilters;
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+// Bethesda packed triangle strip-based Havok shape collection
+struct bhkPackedNiTriStripsShape : public bhkShapeCollection
+{
+    std::vector<hkSubPartData> mSubshapes;
+    unsigned int mUserData;
+    float mRadius;
+    osg::Vec4f mScale;
+    hkPackedNiTriStripsDataPtr mData;
+
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+// bhkPackedNiTriStripsShape data block
+struct hkPackedNiTriStripsData : public bhkShapeCollection
+{
+    std::vector<TriangleData> mTriangles;
+    std::vector<osg::Vec3f> mVertices;
+    std::vector<hkSubPartData> mSubshapes;
     void read(NIFStream *nif) override;
 };
 
