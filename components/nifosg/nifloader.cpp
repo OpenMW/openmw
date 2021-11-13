@@ -1721,28 +1721,64 @@ namespace NifOsg
             }
         }
 
-        const std::string& getNVShaderPrefix(unsigned int type) const
+        const std::string& getBSShaderPrefix(unsigned int type) const
         {
-            static const std::map<unsigned int, std::string> mapping =
+            static const std::unordered_map<Nif::BSShaderType, std::string> mapping =
             {
-                {Nif::BSShaderProperty::SHADER_TALL_GRASS, std::string()},
-                {Nif::BSShaderProperty::SHADER_DEFAULT,    "nv_default"},
-                {Nif::BSShaderProperty::SHADER_SKY,        std::string()},
-                {Nif::BSShaderProperty::SHADER_SKIN,       std::string()},
-                {Nif::BSShaderProperty::SHADER_WATER,      std::string()},
-                {Nif::BSShaderProperty::SHADER_LIGHTING30, std::string()},
-                {Nif::BSShaderProperty::SHADER_TILE,       std::string()},
-                {Nif::BSShaderProperty::SHADER_NOLIGHTING, "nv_nolighting"},
+                {Nif::BSShaderType::ShaderType_TallGrass,    std::string()},
+                {Nif::BSShaderType::ShaderType_Default,       "nv_default"},
+                {Nif::BSShaderType::ShaderType_Sky,          std::string()},
+                {Nif::BSShaderType::ShaderType_Skin,         std::string()},
+                {Nif::BSShaderType::ShaderType_Water,        std::string()},
+                {Nif::BSShaderType::ShaderType_Lighting30,   std::string()},
+                {Nif::BSShaderType::ShaderType_Tile,         std::string()},
+                {Nif::BSShaderType::ShaderType_NoLighting, "nv_nolighting"},
             };
-            auto prefix = mapping.find(type);
+            auto prefix = mapping.find(static_cast<Nif::BSShaderType>(type));
             if (prefix == mapping.end())
-                Log(Debug::Warning) << "Unknown shader type " << type << " in " << mFilename;
+                Log(Debug::Warning) << "Unknown BSShaderType " << type << " in " << mFilename;
             else if (prefix->second.empty())
-                Log(Debug::Warning) << "Unhandled shader type " << type << " in " << mFilename;
+                Log(Debug::Warning) << "Unhandled BSShaderType " << type << " in " << mFilename;
             else
                 return prefix->second;
 
-            return mapping.at(Nif::BSShaderProperty::SHADER_DEFAULT);
+            return mapping.at(Nif::BSShaderType::ShaderType_Default);
+        }
+
+        const std::string& getBSLightingShaderPrefix(unsigned int type) const
+        {
+            static const std::unordered_map<Nif::BSLightingShaderType, std::string> mapping =
+            {
+                {Nif::BSLightingShaderType::ShaderType_Default,                "nv_default"},
+                {Nif::BSLightingShaderType::ShaderType_EnvMap,                std::string()},
+                {Nif::BSLightingShaderType::ShaderType_Glow,                  std::string()},
+                {Nif::BSLightingShaderType::ShaderType_Parallax,              std::string()},
+                {Nif::BSLightingShaderType::ShaderType_FaceTint,              std::string()},
+                {Nif::BSLightingShaderType::ShaderType_HairTint,              std::string()},
+                {Nif::BSLightingShaderType::ShaderType_ParallaxOcc,           std::string()},
+                {Nif::BSLightingShaderType::ShaderType_MultitexLand,          std::string()},
+                {Nif::BSLightingShaderType::ShaderType_LODLand,               std::string()},
+                {Nif::BSLightingShaderType::ShaderType_Snow,                  std::string()},
+                {Nif::BSLightingShaderType::ShaderType_MultiLayerParallax,    std::string()},
+                {Nif::BSLightingShaderType::ShaderType_TreeAnim,              std::string()},
+                {Nif::BSLightingShaderType::ShaderType_LODObjects,            std::string()},
+                {Nif::BSLightingShaderType::ShaderType_SparkleSnow,           std::string()},
+                {Nif::BSLightingShaderType::ShaderType_LODObjectsHD,          std::string()},
+                {Nif::BSLightingShaderType::ShaderType_EyeEnvmap,             std::string()},
+                {Nif::BSLightingShaderType::ShaderType_Cloud,                 std::string()},
+                {Nif::BSLightingShaderType::ShaderType_LODNoise,              std::string()},
+                {Nif::BSLightingShaderType::ShaderType_MultitexLandLODBlend,  std::string()},
+                {Nif::BSLightingShaderType::ShaderType_Dismemberment,         std::string()}
+            };
+            auto prefix = mapping.find(static_cast<Nif::BSLightingShaderType>(type));
+            if (prefix == mapping.end())
+                Log(Debug::Warning) << "Unknown BSLightingShaderType " << type << " in " << mFilename;
+            else if (prefix->second.empty())
+                Log(Debug::Warning) << "Unhandled BSLightingShaderType " << type << " in " << mFilename;
+            else
+                return prefix->second;
+
+            return mapping.at(Nif::BSLightingShaderType::ShaderType_Default);
         }
 
         void handleProperty(const Nif::Property *property,
@@ -1834,7 +1870,7 @@ namespace NifOsg
             {
                 auto texprop = static_cast<const Nif::BSShaderPPLightingProperty*>(property);
                 bool shaderRequired = true;
-                node->setUserValue("shaderPrefix", getNVShaderPrefix(texprop->type));
+                node->setUserValue("shaderPrefix", getBSShaderPrefix(texprop->type));
                 node->setUserValue("shaderRequired", shaderRequired);
                 osg::StateSet* stateset = node->getOrCreateStateSet();
                 if (!texprop->textureSet.empty())
@@ -1849,7 +1885,7 @@ namespace NifOsg
             {
                 auto texprop = static_cast<const Nif::BSShaderNoLightingProperty*>(property);
                 bool shaderRequired = true;
-                node->setUserValue("shaderPrefix", getNVShaderPrefix(texprop->type));
+                node->setUserValue("shaderPrefix", getBSShaderPrefix(texprop->type));
                 node->setUserValue("shaderRequired", shaderRequired);
                 osg::StateSet* stateset = node->getOrCreateStateSet();
                 if (!texprop->filename.empty())
@@ -1884,6 +1920,18 @@ namespace NifOsg
                 {
                     stateset->addUniform(new osg::Uniform("useFalloff", false));
                 }
+                handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                break;
+            }
+            case Nif::RC_BSLightingShaderProperty:
+            {
+                auto texprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
+                bool shaderRequired = true;
+                node->setUserValue("shaderPrefix", getBSLightingShaderPrefix(texprop->type));
+                node->setUserValue("shaderRequired", shaderRequired);
+                osg::StateSet* stateset = node->getOrCreateStateSet();
+                if (!texprop->mTextureSet.empty())
+                    handleTextureSet(texprop->mTextureSet.getPtr(), texprop->mClamp, node->getName(), stateset, imageManager, boundTextures);
                 handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
                 break;
             }
@@ -2033,6 +2081,17 @@ namespace NifOsg
                         stateset->removeAttribute(osg::StateAttribute::ALPHAFUNC);
                         stateset->removeMode(GL_ALPHA_TEST);
                     }
+                    break;
+                }
+                case Nif::RC_BSLightingShaderProperty:
+                {
+                    auto shaderprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
+                    mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderprop->mAlpha);
+                    mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mEmissive, 1.f));
+                    mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mSpecular, 1.f));
+                    mat->setShininess(osg::Material::FRONT_AND_BACK, shaderprop->mGlossiness);
+                    emissiveMult = shaderprop->mEmissiveMult;
+                    specStrength = shaderprop->mSpecStrength;
                     break;
                 }
                 }
