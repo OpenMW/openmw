@@ -458,7 +458,7 @@ Windows_MSBuild_Tests_RelWithDebInfo:
 Debian_AndroidNDK_arm64-v8a:
   tags:
     - linux
-  image: psi29a:android-ndk
+  image: psi29a/android-ndk:focal-ndk22
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"  
   variables:
