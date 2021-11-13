@@ -7,7 +7,7 @@ mkdir -p build
 cd build
 
 cmake \
--DCMAKE_TOOLCHAIN_FILE=/usr/lib/android-sdk/ndk-bundle/build/cmake/android.toolchain.cmake \
+-DCMAKE_TOOLCHAIN_FILE=/android-ndk-r22/build/cmake/android.toolchain.cmake \
 -DANDROID_ABI=arm64-v8a \
 -DANDROID_PLATFORM=android-21 \
 -DCMAKE_C_COMPILER_LAUNCHER=ccache \
