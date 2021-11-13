@@ -143,6 +143,15 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["bhkCollisionObject"]           = {&construct <bhkCollisionObject>          , RC_bhkCollisionObject         };
     factory["BSDismemberSkinInstance"]      = {&construct <BSDismemberSkinInstance>     , RC_BSDismemberSkinInstance    };
     factory["NiControllerManager"]          = {&construct <NiControllerManager>         , RC_NiControllerManager        };
+    factory["bhkMoppBvTreeShape"]           = {&construct <bhkMoppBvTreeShape>          , RC_bhkMoppBvTreeShape         };
+    factory["bhkNiTriStripsShape"]          = {&construct <bhkNiTriStripsShape>         , RC_bhkNiTriStripsShape        };
+    factory["bhkPackedNiTriStripsShape"]    = {&construct <bhkPackedNiTriStripsShape>   , RC_bhkPackedNiTriStripsShape  };
+    factory["hkPackedNiTriStripsData"]      = {&construct <hkPackedNiTriStripsData>     , RC_hkPackedNiTriStripsData    };
+    factory["bhkConvexVerticesShape"]       = {&construct <bhkConvexVerticesShape>      , RC_bhkConvexVerticesShape     };
+    factory["bhkBoxShape"]                  = {&construct <bhkBoxShape>                 , RC_bhkBoxShape                };
+    factory["bhkListShape"]                 = {&construct <bhkListShape>                , RC_bhkListShape               };
+    factory["bhkRigidBody"]                 = {&construct <bhkRigidBody>                , RC_bhkRigidBody               };
+    factory["bhkRigidBodyT"]                = {&construct <bhkRigidBody>                , RC_bhkRigidBodyT              };
     return factory;
 }
 
