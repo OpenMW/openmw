@@ -224,7 +224,7 @@ void GeomMorpherController::operator()(SceneUtil::MorphGeometry* node, osg::Node
         if (mKeyFrames.size() <= 1)
             return;
         float input = getInputValue(nv);
-        int i = 0;
+        int i = 1;
         for (std::vector<FloatInterpolator>::iterator it = mKeyFrames.begin()+1; it != mKeyFrames.end(); ++it,++i)
         {
             float val = 0;
