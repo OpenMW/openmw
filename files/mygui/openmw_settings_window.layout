@@ -454,6 +454,16 @@
                                     <Property key="Caption" value="Reflection shader detail"/>
                                 </Widget>
                             </Widget>
+                            <Widget type="HBox" skin="" position="4 84 350 24">
+                                <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 115 24" align="Left Top" name="WaterRainRippleDetail">
+                                    <Property key="AddItem" value="Simple"/>
+                                    <Property key="AddItem" value="Sparse"/>
+                                    <Property key="AddItem" value="Dense"/>
+                                </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="64 4 90 16" align="Left Top">
+                                    <Property key="Caption" value="Rain ripple detail/density"/>
+                                </Widget>
+                            </Widget>
                         </Widget>
 
                     </Widget>
