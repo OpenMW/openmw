@@ -153,6 +153,7 @@ struct bhkWorldObject;
 struct bhkShape;
 struct bhkSerializable;
 struct hkPackedNiTriStripsData;
+struct NiAccumulator;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -184,6 +185,7 @@ using NiCollisionObjectPtr = RecordPtrT<NiCollisionObject>;
 using bhkWorldObjectPtr = RecordPtrT<bhkWorldObject>;
 using bhkShapePtr = RecordPtrT<bhkShape>;
 using hkPackedNiTriStripsDataPtr = RecordPtrT<hkPackedNiTriStripsData>;
+using NiAccumulatorPtr = RecordPtrT<NiAccumulator>;
 
 using NodeList = RecordListT<Node>;
 using PropertyList = RecordListT<Property>;
