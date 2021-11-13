@@ -531,8 +531,6 @@ namespace Compiler
             else
                 special = S_cmpGT;
         }
-        else if (c==',')
-            special = S_comma;
         else if (c=='+')
             special = S_plus;
         else if (c=='*')
@@ -552,8 +550,6 @@ namespace Compiler
             mTolerantNames = tolerant;
             return out;
         }
-        else if (expectName && special == S_comma)
-            mExpectName = true;
 
         TokenLoc loc (mLoc);
         mLoc.mLiteral.clear();

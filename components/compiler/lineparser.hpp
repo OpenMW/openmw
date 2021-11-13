@@ -24,7 +24,7 @@ namespace Compiler
                 BeginState,
                 SetState, SetLocalVarState, SetGlobalVarState, SetPotentialMemberVarState,
                 SetMemberVarState, SetMemberVarState2,
-                MessageState, MessageCommaState, MessageButtonState, MessageButtonCommaState,
+                MessageState, MessageButtonState,
                 EndState, PotentialExplicitState, ExplicitState, MemberState
             };
 
