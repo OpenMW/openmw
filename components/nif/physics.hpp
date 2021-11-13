@@ -68,7 +68,7 @@ struct bhkEntityCInfo
     hkResponseType mResponseType;
     unsigned short mProcessContactDelay;
     void read(NIFStream *nif);
-}
+};
 
 struct hkpMoppCode
 {
@@ -129,7 +129,6 @@ enum class hkQualityType : uint8_t
     Quality_Character = 8,
     Quality_KeyframedReport = 9
 };
-
 
 struct bhkRigidBodyCInfo
 {
@@ -289,7 +288,7 @@ struct bhkSphereRepShape : public bhkShape
 struct bhkConvexShape : public bhkSphereRepShape
 {
     float mRadius;
-    void read(NIFStream} *nif) override;
+    void read(NIFStream *nif) override;
 };
 
 // A convex shape built from vertices
