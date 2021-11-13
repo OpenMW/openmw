@@ -8,6 +8,82 @@
 namespace Nif
 {
 
+/// Non-record data types
+
+struct bhkWorldObjCInfoProperty
+{
+    unsigned int mData;
+    unsigned int mSize;
+    unsigned int mCapacityAndFlags;
+    void read(NIFStream *nif);
+};
+
+enum class BroadPhaseType : uint8_t
+{
+    BroadPhase_Invalid = 0,
+    BroadPhase_Entity = 1,
+    BroadPhase_Phantom = 2,
+    BroadPhase_Border = 3
+};
+
+struct bhkWorldObjectCInfo
+{
+    BroadPhaseType mPhaseType;
+    bhkWorldObjCInfoProperty mProperty;
+    void read(NIFStream *nif);
+};
+
+struct HavokMaterial
+{
+    unsigned int mMaterial;
+    void read(NIFStream *nif);
+};
+
+struct HavokFilter
+{
+    unsigned char mLayer;
+    unsigned char mFlags;
+    unsigned short mGroup;
+    void read(NIFStream *nif);
+};
+
+struct hkSubPartData
+{
+    HavokMaterial mHavokMaterial;
+    unsigned int mNumVertices;
+    HavokFilter mHavokFilter;
+    void read(NIFStream *nif);
+};
+
+enum class hkResponseType : uint8_t
+{
+    Response_Invalid = 0,
+    Response_SimpleContact = 1,
+    Response_Reporting = 2,
+    Response_None = 3
+};
+
+struct bhkEntityCInfo
+{
+    hkResponseType mResponseType;
+    unsigned short mProcessContactDelay;
+    void read(NIFStream *nif);
+}
+
+/// Record types
+
+// Abstract Bethesda Havok object
+struct bhkRefObject : public Record {};
+
+// Abstract serializable Bethesda Havok object
+struct bhkSerializable : public bhkRefObject {};
+
+// Abstract narrowphase collision detection object
+struct bhkShape : public bhkSerializable {};
+
+// Abstract bhkShape collection
+struct bhkShapeCollection : public bhkShape {};
+
 // Generic collision object
 struct NiCollisionObject : public Record
 {
@@ -28,7 +104,7 @@ struct NiCollisionObject : public Record
 struct bhkCollisionObject : public NiCollisionObject
 {
     unsigned short mFlags;
-    CollisionBodyPtr mBody;
+    bhkWorldObjectPtr mBody;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override
@@ -39,51 +115,20 @@ struct bhkCollisionObject : public NiCollisionObject
 };
 
 // Abstract Havok shape info record
-struct bhkWorldObject : public Record
+struct bhkWorldObject : public bhkSerializable
 {
     bhkShapePtr mShape;
-    unsigned int mFlags; // Havok layer type, collision filter flags and group
-    struct WorldObjectInfo
-    {
-        unsigned char mPhaseType;
-        unsigned int mData;
-        unsigned int mSize;
-        unsigned int mCapacityAndFlags;
-    };
-    WorldObjectInfo mWorldObjectInfo;
+    HavokFilter mHavokFilter;
+    bhkWorldObjectCInfo mWorldObjectInfo;
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
 };
 
-struct bhkShape : public Record {};
-
-enum class hkResponseType : uint8_t
-{
-    Response_Invalid = 0,
-    Response_SimpleContact = 1,
-    Response_Reporting = 2,
-    Response_None = 3
-};
-
+// Abstract
 struct bhkEntity : public bhkWorldObject
 {
-    hkResponseType mResponseType;
-    unsigned short mProcessContactDelay;
+    bhkEntityCInfo mInfo;
     void read(NIFStream *nif) override;
-};
-
-struct HavokMaterial
-{
-    unsigned int mMaterial;
-    void read(NIFStream *nif);
-};
-
-struct hkSubPartData
-{
-    HavokMaterial mHavokMaterial;
-    unsigned int mNumVertices;
-    unsigned int mHavokFilter;
-    void read(NIFStream *nif);
 };
 
 } // Namespace

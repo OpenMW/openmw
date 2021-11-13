@@ -151,6 +151,7 @@ struct NiAlphaProperty;
 struct NiCollisionObject;
 struct bhkWorldObject;
 struct bhkShape;
+struct bhkSerializable;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -179,7 +180,7 @@ using NiGeometryDataPtr = RecordPtrT<NiGeometryData>;
 using BSShaderPropertyPtr = RecordPtrT<BSShaderProperty>;
 using NiAlphaPropertyPtr = RecordPtrT<NiAlphaProperty>;
 using NiCollisionObjectPtr = RecordPtrT<NiCollisionObject>;
-using CollisionBodyPtr = RecordPtrT<bhkWorldObject>;
+using bhkWorldObjectPtr = RecordPtrT<bhkWorldObject>;
 using bhkShapePtr = RecordPtrT<bhkShape>;
 
 using NodeList = RecordListT<Node>;
@@ -188,6 +189,8 @@ using ExtraList = RecordListT<Extra>;
 using NiSourceTextureList = RecordListT<NiSourceTexture>;
 using NiFloatInterpolatorList = RecordListT<NiFloatInterpolator>;
 using NiTriStripsDataList = RecordListT<NiTriStripsData>;
+using bhkShapeList = RecordListT<bhkShape>;
+using bhkSerializableList = RecordListT<bhkSerializable>;
 
 } // Namespace
 #endif
