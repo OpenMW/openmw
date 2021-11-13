@@ -143,6 +143,7 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["bhkCollisionObject"]           = {&construct <bhkCollisionObject>          , RC_bhkCollisionObject         };
     factory["BSDismemberSkinInstance"]      = {&construct <BSDismemberSkinInstance>     , RC_BSDismemberSkinInstance    };
     factory["NiControllerManager"]          = {&construct <NiControllerManager>         , RC_NiControllerManager        };
+    factory["bhkMoppBvTreeShape"]           = {&construct <bhkMoppBvTreeShape>          , RC_bhkMoppBvTreeShape         };
     return factory;
 }
 

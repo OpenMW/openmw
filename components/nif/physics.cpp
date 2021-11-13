@@ -42,6 +42,17 @@ namespace Nif
         mHavokMaterial.read(nif);
     }
 
+    void hkpMoppCode::read(NIFStream *nif)
+    {
+        unsigned int size = nif->getUInt();
+        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+            mOffset = nif->getVector4();
+        if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
+            nif->getChar(); // MOPP data build type
+        if (size)
+            nif->getChars(mData, size);
+    }
+
     void bhkEntityCInfo::read(NIFStream *nif)
     {
         mResponseType = static_cast<hkResponseType>(nif->getChar());
@@ -76,6 +87,24 @@ namespace Nif
     {
         bhkWorldObject::read(nif);
         mInfo.read(nif);
+    }
+
+    void bhkBvTreeShape::read(NIFStream *nif)
+    {
+        mShape.read(nif);
+    }
+
+    void bhkBvTreeShape::post(NIFFile *nif)
+    {
+        mShape.post(nif);
+    }
+
+    void bhkMoppBvTreeShape::read(NIFStream *nif)
+    {
+        bhkBvTreeShape::read(nif);
+        nif->skip(12); // Unused
+        mScale = nif->getFloat();
+        mMopp.read(nif);
     }
 
 } // Namespace

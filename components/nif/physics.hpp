@@ -70,6 +70,13 @@ struct bhkEntityCInfo
     void read(NIFStream *nif);
 }
 
+struct hkpMoppCode
+{
+    osg::Vec4f mOffset;
+    std::vector<char> mData;
+    void read(NIFStream *nif);
+};
+
 /// Record types
 
 // Abstract Bethesda Havok object
@@ -128,6 +135,23 @@ struct bhkWorldObject : public bhkSerializable
 struct bhkEntity : public bhkWorldObject
 {
     bhkEntityCInfo mInfo;
+    void read(NIFStream *nif) override;
+};
+
+// Bethesda extension of hkpBvTreeShape
+// hkpBvTreeShape adds a bounding volume tree to an hkpShapeCollection
+struct bhkBvTreeShape : public bhkShape
+{
+    bhkShapePtr mShape;
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+// bhkBvTreeShape with Havok MOPP code
+struct bhkMoppBvTreeShape : public bhkBvTreeShape
+{
+    float mScale;
+    hkpMoppCode mMopp;
     void read(NIFStream *nif) override;
 };
 

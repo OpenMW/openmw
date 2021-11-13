@@ -130,7 +130,8 @@ enum RecordType
   RC_NiCollisionObject,
   RC_bhkCollisionObject,
   RC_BSDismemberSkinInstance,
-  RC_NiControllerManager
+  RC_NiControllerManager,
+  RC_bhkMoppBvTreeShape
 };
 
 /// Base class for all records
