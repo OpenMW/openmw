@@ -164,8 +164,16 @@ find_dependency(Threads)
 
 set_target_properties(GMock::GMock PROPERTIES
     INTERFACE_LINK_LIBRARIES "Threads::Threads"
-    IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-    IMPORTED_LOCATION "${GMOCK_LIBRARY}")
+    IMPORTED_LINK_INTERFACE_LANGUAGES "CXX")
+
+if(EXISTS "${GMOCK_LIBRARY}")
+    set_target_properties(GMock::GMock PROPERTIES
+        IMPORTED_LOCATION "${GMOCK_LIBRARY}")
+endif()
+if(EXISTS "${GMOCK_LIBRARY_DEBUG}")
+    set_target_properties(GMock::GMock PROPERTIES
+        IMPORTED_LOCATION_DEBUG "${GMOCK_LIBRARY_DEBUG}")
+endif()
 
 if(GMOCK_INCLUDE_DIR)
     set_target_properties(GMock::GMock PROPERTIES
