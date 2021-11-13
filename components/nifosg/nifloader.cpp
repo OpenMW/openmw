@@ -17,6 +17,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/misc/osguservalues.hpp>
 
 // particle
 #include <osgParticle/ParticleSystem>
@@ -324,6 +325,10 @@ namespace NifOsg
 
             if (!textkeys->mTextKeys.empty())
                 created->getOrCreateUserDataContainer()->addUserObject(textkeys);
+
+            const std::uint64_t nifHash = nif->getHash();
+            created->setUserValue(Misc::OsgUserValues::sFileHash,
+                std::string(reinterpret_cast<const char*>(&nifHash), sizeof(nifHash)));
 
             return created;
         }

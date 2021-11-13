@@ -74,6 +74,8 @@ BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
     , mAvoidCollisionShape(duplicateCollisionShape(copy.mAvoidCollisionShape.get()))
     , mCollisionBox(copy.mCollisionBox)
     , mAnimatedShapes(copy.mAnimatedShapes)
+    , mFileName(copy.mFileName)
+    , mFileHash(copy.mFileHash)
 {
 }
 

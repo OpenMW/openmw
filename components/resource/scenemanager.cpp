@@ -21,6 +21,7 @@
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/algorithm.hpp>
+#include <components/misc/osguservalues.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -33,6 +34,8 @@
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
+
+#include <components/files/hash.hpp>
 
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
@@ -502,7 +505,10 @@ namespace Resource
             options->setReadFileCallback(new ImageReadCallback(imageManager));
             if (ext == "dae") options->setOptionString("daeUseSequencedTextureUnits");
 
-            osgDB::ReaderWriter::ReadResult result = reader->readNode(*vfs->get(normalizedFilename), options);
+            Files::IStreamPtr stream = vfs->get(normalizedFilename);
+            const std::uint64_t fileHash = Files::getHash(normalizedFilename, *stream);
+
+            osgDB::ReaderWriter::ReadResult result = reader->readNode(*stream, options);
             if (!result.success())
             {
                 std::stringstream errormsg;
@@ -529,8 +535,12 @@ namespace Resource
                 result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
             }
 
+            auto node = result.getNode();
 
-            return result.getNode();
+            node->setUserValue(Misc::OsgUserValues::sFileHash,
+                std::string(reinterpret_cast<const char*>(&fileHash), sizeof(fileHash)));
+
+            return node;
         }
     }
 
