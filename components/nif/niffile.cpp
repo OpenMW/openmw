@@ -150,6 +150,8 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["bhkConvexVerticesShape"]       = {&construct <bhkConvexVerticesShape>      , RC_bhkConvexVerticesShape     };
     factory["bhkBoxShape"]                  = {&construct <bhkBoxShape>                 , RC_bhkBoxShape                };
     factory["bhkListShape"]                 = {&construct <bhkListShape>                , RC_bhkListShape               };
+    factory["bhkRigidBody"]                 = {&construct <bhkRigidBody>                , RC_bhkRigidBody               };
+    factory["bhkRigidBodyT"]                = {&construct <bhkRigidBody>                , RC_bhkRigidBodyT              };
     return factory;
 }
 

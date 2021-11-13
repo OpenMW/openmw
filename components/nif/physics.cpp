@@ -69,6 +69,82 @@ namespace Nif
             mNormal = nif->getVector3();
     }
 
+    void bhkRigidBodyCInfo::read(NIFStream *nif)
+    {
+        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        {
+            nif->skip(4); // Unused
+            mHavokFilter.read(nif);
+            nif->skip(4); // Unused
+            if (nif->getBethVersion() != NIFFile::BethVersion::BETHVER_FO4)
+            {
+                if (nif->getBethVersion() >= 83)
+                    nif->skip(4); // Unused
+                mResponseType = static_cast<hkResponseType>(nif->getChar());
+                nif->skip(1); // Unused
+                mProcessContactDelay = nif->getUShort();
+            }
+        }
+        if (nif->getBethVersion() < 83)
+            nif->skip(4); // Unused
+        mTranslation = nif->getVector4();
+        mRotation = nif->getQuaternion();
+        mLinearVelocity = nif->getVector4();
+        mAngularVelocity = nif->getVector4();
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 4; j++)
+                mInertiaTensor[i][j] = nif->getFloat();
+        mCenter = nif->getVector4();
+        mMass = nif->getFloat();
+        mLinearDamping = nif->getFloat();
+        mAngularDamping = nif->getFloat();
+        if (nif->getBethVersion() >= 83)
+        {
+            if (nif->getBethVersion() != NIFFile::BethVersion::BETHVER_FO4)
+                mTimeFactor = nif->getFloat();
+            mGravityFactor = nif->getFloat();
+        }
+        mFriction = nif->getFloat();
+        if (nif->getBethVersion() >= 83)
+            mRollingFrictionMult = nif->getFloat();
+        mRestitution = nif->getFloat();
+        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        {
+            mMaxLinearVelocity = nif->getFloat();
+            mMaxAngularVelocity = nif->getFloat();
+            if (nif->getBethVersion() != NIFFile::BethVersion::BETHVER_FO4)
+                mPenetrationDepth = nif->getFloat();
+        }
+        mMotionType = static_cast<hkMotionType>(nif->getChar());
+        if (nif->getBethVersion() < 83)
+            mDeactivatorType = static_cast<hkDeactivatorType>(nif->getChar());
+        else
+            mEnableDeactivation = nif->getBoolean();
+        mSolverDeactivation = static_cast<hkSolverDeactivation>(nif->getChar());
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_FO4)
+        {
+            nif->skip(1);
+            mPenetrationDepth = nif->getFloat();
+            mTimeFactor = nif->getFloat();
+            nif->skip(4);
+            mResponseType = static_cast<hkResponseType>(nif->getChar());
+            nif->skip(1); // Unused
+            mProcessContactDelay = nif->getUShort();
+        }
+        mQualityType = static_cast<hkQualityType>(nif->getChar());
+        if (nif->getBethVersion() >= 83)
+        {
+            mAutoRemoveLevel = nif->getChar();
+            mResponseModifierFlags = nif->getChar();
+            mNumContactPointShapeKeys = nif->getChar();
+            mForceCollidedOntoPPU = nif->getBoolean();
+        }
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_FO4)
+            nif->skip(3); // Unused
+        else
+            nif->skip(12); // Unused
+    }
+
     /// Record types
 
     void bhkCollisionObject::read(NIFStream *nif)
@@ -221,6 +297,17 @@ namespace Nif
         mHavokFilters.resize(numFilters);
         for (HavokFilter& filter : mHavokFilters)
             filter.read(nif);
+    }
+
+    void bhkRigidBody::read(NIFStream *nif)
+    {
+        bhkEntity::read(nif);
+        mInfo.read(nif);
+        mConstraints.read(nif);
+        if (nif->getBethVersion() < 76)
+            mBodyFlags = nif->getUInt();
+        else
+            mBodyFlags = nif->getUShort();
     }
 
 } // Namespace
