@@ -24,6 +24,7 @@ ESMReader::ESMReader()
     , mFileSize(0)
 {
     clearCtx();
+    mCtx.index = 0;
 }
 
 void ESMReader::restoreContext(const ESM_Context &rc)
