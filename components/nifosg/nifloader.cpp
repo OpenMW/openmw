@@ -1264,8 +1264,9 @@ namespace NifOsg
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
             if (morphs.empty())
                 return morphGeom;
-            // Note we are not interested in morph 0, which just contains the original vertices
-            for (unsigned int i = 1; i < morphs.size(); ++i)
+            if (morphs[0].mVertices.size() != static_cast<const osg::Vec3Array*>(sourceGeometry->getVertexArray())->size())
+                return morphGeom;
+            for (unsigned int i = 0; i < morphs.size(); ++i)
                 morphGeom->addMorphTarget(new osg::Vec3Array(morphs[i].mVertices.size(), morphs[i].mVertices.data()), 0.f);
 
             return morphGeom;

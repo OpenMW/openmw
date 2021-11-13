@@ -74,6 +74,7 @@
     Bug #6363: Some scripts in Morrowland fail to work
     Bug #6376: Creatures should be able to use torches
     Bug #6386: Artifacts in water reflection due to imprecise screen-space coordinate computation
+    Bug #6416: Morphs are applied to the wrong target
     Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
