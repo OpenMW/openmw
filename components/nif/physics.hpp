@@ -198,5 +198,47 @@ struct hkPackedNiTriStripsData : public bhkShapeCollection
     void read(NIFStream *nif) override;
 };
 
+// Abstract
+struct bhkSphereRepShape : public bhkShape
+{
+    HavokMaterial mHavokMaterial;
+    void read(NIFStream *nif) override;
+};
+
+// Abstract
+struct bhkConvexShape : public bhkSphereRepShape
+{
+    float mRadius;
+    void read(NIFStream} *nif) override;
+};
+
+// A convex shape built from vertices
+struct bhkConvexVerticesShape : public bhkConvexShape
+{
+    bhkWorldObjCInfoProperty mVerticesProperty;
+    bhkWorldObjCInfoProperty mNormalsProperty;
+    std::vector<osg::Vec4f> mVertices;
+    std::vector<osg::Vec4f> mNormals;
+    void read(NIFStream *nif) override;
+};
+
+// A box
+struct bhkBoxShape : public bhkConvexShape
+{
+    osg::Vec3f mExtents;
+    void read(NIFStream *nif) override;
+};
+
+// A list of shapes
+struct bhkListShape : public bhkShapeCollection
+{
+    bhkShapeList mSubshapes;
+    HavokMaterial mHavokMaterial;
+    bhkWorldObjCInfoProperty mChildShapeProperty;
+    bhkWorldObjCInfoProperty mChildFilterProperty;
+    std::vector<HavokFilter> mHavokFilters;
+    void read(NIFStream *nif) override;
+};
+
 } // Namespace
 #endif

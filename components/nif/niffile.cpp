@@ -147,6 +147,9 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["bhkNiTriStripsShape"]          = {&construct <bhkNiTriStripsShape>         , RC_bhkNiTriStripsShape        };
     factory["bhkPackedNiTriStripsShape"]    = {&construct <bhkPackedNiTriStripsShape>   , RC_bhkPackedNiTriStripsShape  };
     factory["hkPackedNiTriStripsData"]      = {&construct <hkPackedNiTriStripsData>     , RC_hkPackedNiTriStripsData    };
+    factory["bhkConvexVerticesShape"]       = {&construct <bhkConvexVerticesShape>      , RC_bhkConvexVerticesShape     };
+    factory["bhkBoxShape"]                  = {&construct <bhkBoxShape>                 , RC_bhkBoxShape                };
+    factory["bhkListShape"]                 = {&construct <bhkListShape>                , RC_bhkListShape               };
     return factory;
 }
 

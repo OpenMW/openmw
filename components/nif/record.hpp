@@ -134,7 +134,10 @@ enum RecordType
   RC_bhkMoppBvTreeShape,
   RC_bhkNiTriStripsShape,
   RC_bhkPackedNiTriStripsShape,
-  RC_hkPackedNiTriStripsData
+  RC_hkPackedNiTriStripsData,
+  RC_bhkConvexVerticesShape,
+  RC_bhkBoxShape,
+  RC_bhkListShape
 };
 
 /// Base class for all records

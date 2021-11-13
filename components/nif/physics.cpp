@@ -179,4 +179,48 @@ namespace Nif
         }
     }
 
+    void bhkSphereRepShape::read(NIFStream *nif)
+    {
+        mHavokMaterial.read(nif);
+    }
+
+    void bhkConvexShape::read(NIFStream *nif)
+    {
+        bhkSphereRepShape::read(nif);
+        mRadius = nif->getFloat();
+    }
+
+    void bhkConvexVerticesShape::read(NIFStream *nif)
+    {
+        bhkConvexShape::read(nif);
+        mVerticesProperty.read(nif);
+        mNormalsProperty.read(nif);
+        unsigned int numVertices = nif->getUInt();
+        if (numVertices)
+            nif->getVector4s(mVertices, numVertices);
+        unsigned int numNormals = nif->getUInt();
+        if (numNormals)
+            nif->getVector4s(mNormals, numNormals);
+    }
+
+    void bhkBoxShape::read(NIFStream *nif)
+    {
+        bhkConvexShape::read(nif);
+        nif->skip(8); // Unused
+        mExtents = nif->getVector3();
+        nif->skip(4); // Unused
+    }
+
+    void bhkListShape::read(NIFStream *nif)
+    {
+        mSubshapes.read(nif);
+        mHavokMaterial.read(nif);
+        mChildShapeProperty.read(nif);
+        mChildFilterProperty.read(nif);
+        unsigned int numFilters = nif->getUInt();
+        mHavokFilters.resize(numFilters);
+        for (HavokFilter& filter : mHavokFilters)
+            filter.read(nif);
+    }
+
 } // Namespace
