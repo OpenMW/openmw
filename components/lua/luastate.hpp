@@ -35,6 +35,11 @@ namespace LuaUtil
         // Returns underlying sol::state.
         sol::state& sol() { return mLua; }
 
+        // Can be used by a C++ function that is called from Lua to get the Lua traceback.
+        // Makes no sense if called not from Lua code.
+        // Note: It is a slow function, should be used for debug purposes only.
+        std::string debugTraceback() { return mLua["debug"]["traceback"]().get<std::string>(); }
+
         // A shortcut to create a new Lua table.
         sol::table newTable() { return sol::table(mLua, sol::create); }
 

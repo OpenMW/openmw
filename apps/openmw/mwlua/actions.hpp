@@ -6,6 +6,11 @@
 #include "object.hpp"
 #include "worldview.hpp"
 
+namespace LuaUtil
+{
+    class LuaState;
+}
+
 namespace MWLua
 {
 
@@ -16,17 +21,27 @@ namespace MWLua
     class Action
     {
     public:
+        Action(LuaUtil::LuaState* state);
         virtual ~Action() {}
+
+        void safeApply(WorldView&) const;
         virtual void apply(WorldView&) const = 0;
+        virtual std::string toString() const = 0;
+
+    private:
+#ifndef NDEBUG
+        std::string mCallerTraceback;
+#endif
     };
 
     class TeleportAction final : public Action
     {
     public:
-        TeleportAction(ObjectId object, std::string cell, const osg::Vec3f& pos, const osg::Vec3f& rot)
-            : mObject(object), mCell(std::move(cell)), mPos(pos), mRot(rot) {}
+        TeleportAction(LuaUtil::LuaState* state, ObjectId object, std::string cell, const osg::Vec3f& pos, const osg::Vec3f& rot)
+            : Action(state), mObject(object), mCell(std::move(cell)), mPos(pos), mRot(rot) {}
 
         void apply(WorldView&) const override;
+        std::string toString() const override { return "TeleportAction"; }
 
     private:
         ObjectId mObject;
@@ -41,9 +56,11 @@ namespace MWLua
         using Item = std::variant<std::string, ObjectId>;  // recordId or ObjectId
         using Equipment = std::map<int, Item>;  // slot to item
 
-        SetEquipmentAction(ObjectId actor, Equipment equipment) : mActor(actor), mEquipment(std::move(equipment)) {}
+        SetEquipmentAction(LuaUtil::LuaState* state, ObjectId actor, Equipment equipment)
+            : Action(state), mActor(actor), mEquipment(std::move(equipment)) {}
 
         void apply(WorldView&) const override;
+        std::string toString() const override { return "SetEquipmentAction"; }
 
     private:
         ObjectId mActor;

@@ -28,8 +28,7 @@ namespace MWLua
         api["API_REVISION"] = 9;
         api["quit"] = [lua]()
         {
-            std::string traceback = lua->sol()["debug"]["traceback"]().get<std::string>();
-            Log(Debug::Warning) << "Quit requested by a Lua script.\n" << traceback;
+            Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
         };
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData)

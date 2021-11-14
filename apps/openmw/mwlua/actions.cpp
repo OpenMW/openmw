@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include <components/debug/debuglog.hpp>
+#include <components/lua/luastate.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -12,14 +13,34 @@
 namespace MWLua
 {
 
+#ifdef NDEBUG
+    Action::Action(LuaUtil::LuaState* state) {}
+#else
+    Action::Action(LuaUtil::LuaState* state) : mCallerTraceback(state->debugTraceback()) {}
+#endif
+
+    void Action::safeApply(WorldView& w) const
+    {
+        try
+        {
+            apply(w);
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Error) << "Error in " << this->toString() << ": " << e.what();
+#ifdef NDEBUG
+            Log(Debug::Error) << "Traceback is available only in debug builds";
+#else
+            Log(Debug::Error) << "Caller " << mCallerTraceback;
+#endif
+        }
+    }
+
     void TeleportAction::apply(WorldView& worldView) const
     {
         MWWorld::CellStore* cell = worldView.findCell(mCell, mPos);
         if (!cell)
-        {
-            Log(Debug::Error) << "LuaManager::applyTeleport -> cell not found: '" << mCell << "'";
-            return;
-        }
+            throw std::runtime_error(std::string("cell not found: '") + mCell + "'");
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr obj = worldView.getObjectRegistry()->getPtr(mObject, false);
