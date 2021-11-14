@@ -464,7 +464,7 @@ Debian_AndroidNDK_arm64-v8a:
   variables:
     CCACHE_SIZE: 3G
   cache:
-    key: Ubuntu_AndroidNDK_arm64-v8a.v3
+    key: Ubuntu__Focal_AndroidNDK_r22b_arm64-v8a.v1
     paths:
       - apt-cache/
       - ccache/
