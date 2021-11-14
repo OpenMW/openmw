@@ -43,7 +43,8 @@ namespace MWInput
 
         bool actionIsActive(int id) const;
         float getActionValue(int id) const;  // returns value in range [0, 1]
-        float getControllerAxisValue(SDL_GameControllerAxis axis) const;  // returns value in range [-1, 1]
+
+        SDL_GameController* getControllerOrNull() const;
 
         void mousePressed(const SDL_MouseButtonEvent &evt, int deviceID);
         void mouseReleased(const SDL_MouseButtonEvent &arg, int deviceID);

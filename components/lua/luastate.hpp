@@ -38,6 +38,15 @@ namespace LuaUtil
         // A shortcut to create a new Lua table.
         sol::table newTable() { return sol::table(mLua, sol::create); }
 
+        template <typename Key, typename Value>
+        sol::table tableFromPairs(std::initializer_list<std::pair<Key, Value>> list)
+        {
+            sol::table res(mLua, sol::create);
+            for (const auto& [k, v] : list)
+                res[k] = v;
+            return res;
+        }
+
         // Registers a package that will be available from every sandbox via `require(name)`.
         // The package can be either a sol::table with an API or a sol::function. If it is a function,
         // it will be evaluated (once per sandbox) the first time when requested. If the package

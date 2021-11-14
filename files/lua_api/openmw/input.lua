@@ -18,6 +18,38 @@
 -- @return #boolean
 
 -------------------------------------------------------------------------------
+-- Is a keyboard button currently pressed.
+-- @function [parent=#input] isKeyPressed
+-- @param #number keyCode Key code (the same code that is used in @{openmw.input#KeyEvent})
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is a controller button currently pressed.
+-- @function [parent=#input] isControllerButtonPressed
+-- @param #number buttonId Button index (see @{openmw.input#CONTROLLER_BUTTON})
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is `Shift` key pressed.
+-- @function [parent=#input] isShiftPressed
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is `Ctrl` key pressed.
+-- @function [parent=#input] isCtrlPressed
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is `Alt` key pressed.
+-- @function [parent=#input] isAltPressed
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Is `Super`/`Win` key pressed.
+-- @function [parent=#input] isSuperPressed
+-- @return #boolean
+
+-------------------------------------------------------------------------------
 -- Is a mouse button currently pressed.
 -- @function [parent=#input] isMouseButtonPressed
 -- @param #number buttonId Button index (1 - left, 2 - middle, 3 - right, 4 - X1, 5 - X2)
@@ -157,9 +189,116 @@
 -- @field [parent=#input] #CONTROLLER_AXIS CONTROLLER_AXIS
 
 -------------------------------------------------------------------------------
+-- @type KEY
+-- @field #number _0
+-- @field #number _1
+-- @field #number _2
+-- @field #number _3
+-- @field #number _4
+-- @field #number _5
+-- @field #number _6
+-- @field #number _7
+-- @field #number _8
+-- @field #number _9
+-- @field #number NP_0
+-- @field #number NP_1
+-- @field #number NP_2
+-- @field #number NP_3
+-- @field #number NP_4
+-- @field #number NP_5
+-- @field #number NP_6
+-- @field #number NP_7
+-- @field #number NP_8
+-- @field #number NP_9
+-- @field #number NP_Divide
+-- @field #number NP_Enter
+-- @field #number NP_Minus
+-- @field #number NP_Multiply
+-- @field #number NP_Delete
+-- @field #number NP_Plus
+-- @field #number F1
+-- @field #number F2
+-- @field #number F3
+-- @field #number F4
+-- @field #number F5
+-- @field #number F6
+-- @field #number F7
+-- @field #number F8
+-- @field #number F9
+-- @field #number F10
+-- @field #number F11
+-- @field #number F12
+-- @field #number A
+-- @field #number B
+-- @field #number C
+-- @field #number D
+-- @field #number E
+-- @field #number F
+-- @field #number G
+-- @field #number H
+-- @field #number I
+-- @field #number J
+-- @field #number K
+-- @field #number L
+-- @field #number M
+-- @field #number N
+-- @field #number O
+-- @field #number P
+-- @field #number Q
+-- @field #number R
+-- @field #number S
+-- @field #number T
+-- @field #number U
+-- @field #number V
+-- @field #number W
+-- @field #number X
+-- @field #number Y
+-- @field #number Z
+-- @field #number LeftArrow
+-- @field #number RightArrow
+-- @field #number UpArrow
+-- @field #number DownArrow
+-- @field #number LeftAlt
+-- @field #number LeftCtrl
+-- @field #number LeftBracket
+-- @field #number LeftSuper
+-- @field #number LeftShift
+-- @field #number RightAlt
+-- @field #number RightCtrl
+-- @field #number RightBracket
+-- @field #number RightSuper
+-- @field #number RightShift
+-- @field #number BackSlash
+-- @field #number Backspace
+-- @field #number CapsLock
+-- @field #number Comma
+-- @field #number Delete
+-- @field #number End
+-- @field #number Enter
+-- @field #number Equals
+-- @field #number Escape
+-- @field #number Home
+-- @field #number Insert
+-- @field #number Minus
+-- @field #number NumLock
+-- @field #number PageDown
+-- @field #number PageUp
+-- @field #number Pause
+-- @field #number PrintScreen
+-- @field #number ScrollLock
+-- @field #number Semicolon
+-- @field #number Slash
+-- @field #number Space
+-- @field #number Tab
+
+-------------------------------------------------------------------------------
+-- Key codes.
+-- @field [parent=#input] #KEY KEY
+
+-------------------------------------------------------------------------------
 -- The argument of `onKeyPress`/`onKeyRelease` engine handlers.
 -- @type KeyboardEvent
--- @field [parent=#KeyboardEvent] #string symbol The pressed symbol (1-symbol string).
+-- @field [parent=#KeyboardEvent] #string symbol The pressed symbol (1-symbol string if can be represented or an empty string otherwise).
 -- @field [parent=#KeyboardEvent] #string code Key code.
 -- @field [parent=#KeyboardEvent] #boolean withShift Is `Shift` key pressed.
 -- @field [parent=#KeyboardEvent] #boolean withCtrl Is `Control` key pressed.

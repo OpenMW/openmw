@@ -49,8 +49,8 @@ namespace MWBase
             virtual void setGamepadGuiCursorEnabled(bool enabled) = 0;
             virtual void setAttemptJump(bool jumping) = 0;
 
-            virtual void toggleControlSwitch (const std::string& sw, bool value) = 0;
-            virtual bool getControlSwitch (const std::string& sw) = 0;
+            virtual void toggleControlSwitch(std::string_view sw, bool value) = 0;
+            virtual bool getControlSwitch(std::string_view sw) = 0;
 
             virtual std::string getActionDescription (int action) const = 0;
             virtual std::string getActionKeyBindingName (int action) const = 0;
@@ -58,8 +58,8 @@ namespace MWBase
             virtual bool actionIsActive(int action) const = 0;
 
             virtual float getActionValue(int action) const = 0;  // returns value in range [0, 1]
+            virtual bool isControllerButtonPressed(SDL_GameControllerButton button) const = 0;
             virtual float getControllerAxisValue(SDL_GameControllerAxis axis) const = 0;  // returns value in range [-1, 1]
-            virtual uint32_t getMouseButtonsState() const = 0;
             virtual int getMouseMoveX() const = 0;
             virtual int getMouseMoveY() const = 0;
 
