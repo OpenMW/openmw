@@ -332,7 +332,7 @@ void ActorAnimation::resetControllers(osg::Node* node)
 
     std::shared_ptr<SceneUtil::ControllerSource> src;
     src.reset(new NullAnimationTime);
-    SceneUtil::AssignControllerSourcesVisitor removeVisitor(src);
+    SceneUtil::ForceControllerSourcesVisitor removeVisitor(src);
     node->accept(removeVisitor);
 }
 
