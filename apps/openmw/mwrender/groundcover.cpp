@@ -181,6 +181,8 @@ namespace MWRender
 
     void Groundcover::collectInstances(InstanceMap& instances, float size, const osg::Vec2f& center)
     {
+        if (mDensity <=0.f) return;
+
         const MWWorld::ESMStore& worldStore = MWBase::Environment::get().getWorld()->getStore();
         osg::Vec2f minBound = (center - osg::Vec2f(size/2.f, size/2.f));
         osg::Vec2f maxBound = (center + osg::Vec2f(size/2.f, size/2.f));
@@ -195,6 +197,7 @@ namespace MWRender
                 if (!cell) continue;
 
                 calculator.reset();
+                std::map<ESM::RefNum, ESM::CellRef> refs;
                 for (size_t i=0; i<cell->mContextList.size(); ++i)
                 {
                     unsigned int index = cell->mContextList[i].index;
@@ -206,17 +209,20 @@ namespace MWRender
                     bool deleted = false;
                     while(cell->getNextRef(esm[index], ref, deleted))
                     {
-                        if (deleted) continue;
+                        if (!deleted && refs.find(ref.mRefNum) == refs.end() && !calculator.isInstanceEnabled()) deleted = true;
+                        if (!deleted && !isInChunkBorders(ref, minBound, maxBound)) deleted = true;
 
-                        if (!calculator.isInstanceEnabled()) continue;
-                        if (!isInChunkBorders(ref, minBound, maxBound)) continue;
-
-                        std::string model = getGroundcoverModel(ref.mRefID, mGroundcoverStore, worldStore);
-                        if (model.empty()) continue;
-                        model = "meshes/" + model;
-
-                        instances[model].emplace_back(std::move(ref));
+                        if (deleted) { refs.erase(ref.mRefNum); continue; }
+                        refs[ref.mRefNum] = std::move(ref);
                     }
+                }
+
+                for (auto& pair : refs)
+                {
+                    ESM::CellRef& ref = pair.second;
+                    const std::string& model = getGroundcoverModel(ref.mRefID, mGroundcoverStore, worldStore);
+                    if (!model.empty())
+                        instances["meshes\\" + model].emplace_back(std::move(ref));
                 }
             }
         }
