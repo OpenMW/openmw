@@ -121,6 +121,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
     for (const QString &path : paths)
         mSelector->addFiles(path);
+    mSelector->sortFiles();
 
     PathIterator pathIterator(paths);
 

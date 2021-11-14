@@ -2,6 +2,7 @@
 #include "esmfile.hpp"
 
 #include <stdexcept>
+#include <unordered_set>
 
 #include <QDir>
 #include <QTextCodec>
@@ -420,6 +421,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     if (mShowOMWScripts)
         filters << "*.omwscripts";
     dir.setNameFilters(filters);
+    dir.setSorting(QDir::Name);
 
     for (const QString &path2 : dir.entryList())
     {
@@ -474,8 +476,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
         }
 
     }
-
-    sortFiles();
 }
 
 void ContentSelectorModel::ContentModel::clearFiles()
@@ -504,41 +504,37 @@ QStringList ContentSelectorModel::ContentModel::gameFiles() const
 
 void ContentSelectorModel::ContentModel::sortFiles()
 {
-    //first, sort the model such that all dependencies are ordered upstream (gamefile) first.
-    bool movedFiles = true;
-    int fileCount = mFiles.size();
-
+    emit layoutAboutToBeChanged();
     //Dependency sort
-    //iterate until no sorting of files occurs
-    while (movedFiles)
+    std::unordered_set<const EsmFile*> moved;
+    for(int i = mFiles.size() - 1; i > 0;)
     {
-        movedFiles = false;
-        //iterate each file, obtaining a reference to it's gamefiles list
-        for (int i = 0; i < fileCount; i++)
+        const auto file = mFiles.at(i);
+        if(moved.find(file) == moved.end())
         {
-            QModelIndex idx1 = index (i, 0, QModelIndex());
-            const QStringList &gamefiles = mFiles.at(i)->gameFiles();
-            //iterate each file after the current file, verifying that none of it's
-            //dependencies appear.
-            for (int j = i + 1; j < fileCount; j++)
+            int index = -1;
+            for(int j = 0; j < i; ++j)
             {
-                if (gamefiles.contains(mFiles.at(j)->fileName(), Qt::CaseInsensitive)
-                 || (!mFiles.at(i)->isGameFile() && gamefiles.isEmpty()
-                 && mFiles.at(j)->fileName().compare("Morrowind.esm", Qt::CaseInsensitive) == 0)) // Hack: implicit dependency on Morrowind.esm for dependency-less files
+                const QStringList& gameFiles = mFiles.at(j)->gameFiles();
+                if(gameFiles.contains(file->fileName(), Qt::CaseInsensitive)
+                    || (!mFiles.at(j)->isGameFile() && gameFiles.isEmpty()
+                    && file->fileName().compare("Morrowind.esm", Qt::CaseInsensitive) == 0)) // Hack: implicit dependency on Morrowind.esm for dependency-less files
                 {
-                        mFiles.move(j, i);
-
-                        QModelIndex idx2 = index (j, 0, QModelIndex());
-
-                        emit dataChanged (idx1, idx2);
-
-                        movedFiles = true;
+                    index = j;
+                    break;
                 }
             }
-            if (movedFiles)
-                break;
+            if(index >= 0)
+            {
+                mFiles.move(i, index);
+                moved.insert(file);
+                continue;
+            }
         }
+        --i;
+        moved.clear();
     }
+    emit layoutChanged();
 }
 
 bool ContentSelectorModel::ContentModel::isChecked(const QString& filepath) const
