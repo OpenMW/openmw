@@ -56,7 +56,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         cfgMgr.readConfiguration(variables, desc, true);
 
-        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<boost::filesystem::path>().string());
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::ReluctantPath>().string());
         getRawStdout() << v.describe() << std::endl;
         return false;
     }
@@ -65,7 +65,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.readConfiguration(variables, desc);
     Files::mergeComposingVariables(variables, composingVariables, desc);
 
-    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<boost::filesystem::path>().string());
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::ReluctantPath>().string());
     Log(Debug::Info) << v.describe();
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
@@ -78,15 +78,15 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     // directory settings
     engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
-    Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
+    Files::PathContainer dataDirs(asPathContainer(variables["data"].as<Files::ReluctantPathContainer>()));
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::PathContainer::value_type>());
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::ReluctantPathContainer::value_type>());
     if (!local.empty())
         dataDirs.push_back(local);
 
     cfgMgr.processPaths(dataDirs);
 
-    engine.setResourceDir(variables["resources"].as<boost::filesystem::path>());
+    engine.setResourceDir(variables["resources"].as<Files::ReluctantPath>());
     engine.setDataDirs(dataDirs);
 
     // fallback archives
@@ -141,7 +141,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setWarningsMode (variables["script-warn"].as<int>());
     engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
-    engine.setSaveGameFile (variables["load-savegame"].as<boost::filesystem::path>().string());
+    engine.setSaveGameFile (variables["load-savegame"].as<Files::ReluctantPath>().string());
 
     // other settings
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);

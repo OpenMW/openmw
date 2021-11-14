@@ -25,16 +25,16 @@ namespace OpenMW
             ("replace", bpo::value<StringsVector>()->default_value(StringsVector(), "")
                 ->multitoken()->composing(), "settings where the values from the current source should replace those from lower-priority sources instead of being appended")
 
-            ("data", bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
+            ("data", bpo::value<Files::ReluctantPathContainer>()->default_value(Files::ReluctantPathContainer(), "data")
                 ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
-            ("data-local", bpo::value<Files::PathContainer::value_type>()->default_value(Files::PathContainer::value_type(), ""),
+            ("data-local", bpo::value<Files::ReluctantPathContainer::value_type>()->default_value(Files::ReluctantPathContainer::value_type(), ""),
                 "set local data directory (highest priority)")
 
             ("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
                 ->multitoken()->composing(), "set fallback BSA archives (later archives have higher priority)")
 
-            ("resources", bpo::value<boost::filesystem::path>()->default_value(boost::filesystem::path(), "resources"),
+            ("resources", bpo::value<Files::ReluctantPath>()->default_value(Files::ReluctantPath(), "resources"),
                 "set resources directory")
 
             ("start", bpo::value<std::string>()->default_value(""),
@@ -77,7 +77,7 @@ namespace OpenMW
             ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
                 ->default_value(true), "enable script blacklisting")
 
-            ("load-savegame", bpo::value<boost::filesystem::path>()->default_value(boost::filesystem::path(), ""),
+            ("load-savegame", bpo::value<Files::ReluctantPath>()->default_value(Files::ReluctantPath(), ""),
                 "load a save game file on game startup (specify an absolute filename or a filename relative to the current working directory)")
 
             ("skip-menu", bpo::value<bool>()->implicit_value(true)

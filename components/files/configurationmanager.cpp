@@ -138,10 +138,10 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
             boost::any& firstValue = firstPosition->second.value();
             const boost::any& secondValue = second[name].value();
             
-            if (firstValue.type() == typeid(Files::PathContainer))
+            if (firstValue.type() == typeid(Files::ReluctantPathContainer))
             {
-                auto& firstPathContainer = boost::any_cast<Files::PathContainer&>(firstValue);
-                const auto& secondPathContainer = boost::any_cast<const Files::PathContainer&>(secondValue);
+                auto& firstPathContainer = boost::any_cast<Files::ReluctantPathContainer&>(firstValue);
+                const auto& secondPathContainer = boost::any_cast<const Files::ReluctantPathContainer&>(secondValue);
 
                 firstPathContainer.insert(firstPathContainer.end(), secondPathContainer.begin(), secondPathContainer.end());
             }
@@ -315,6 +315,24 @@ void parseConfig(std::istream& stream, boost::program_options::variables_map& va
         Files::parse_config_file(stream, description, true),
         variables
     );
+}
+
+std::istream& operator>> (std::istream& istream, ReluctantPath& reluctantPath)
+{
+    // Read from stream using boost::filesystem::path rules, then discard anything remaining.
+    // This prevents boost::program_options getting upset that we've not consumed the whole stream.
+    istream >> static_cast<boost::filesystem::path&>(reluctantPath);
+    if (istream && !istream.eof() && istream.peek() != EOF)
+    {
+        std::string remainder(std::istreambuf_iterator(istream), {});
+        Log(Debug::Warning) << "Trailing data in path setting. Used '" << reluctantPath.string() << "' but '" << remainder << "' remained";
+    }
+    return istream;
+}
+
+PathContainer asPathContainer(const ReluctantPathContainer& reluctantPathContainer)
+{
+    return PathContainer(reluctantPathContainer.begin(), reluctantPathContainer.end());
 }
 
 } /* namespace Cfg */
