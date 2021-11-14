@@ -22,6 +22,6 @@ cmake \
 -DBUILD_ESSIMPORTER=0 \
 -DBUILD_OPENCS=0 \
 -DBUILD_WIZARD=0 \
--DMyGUI_LIBRARY=${prefix}/lib/libMyGUIEngineStatic.a \
+-DMyGUI_LIBRARY=/usr/lib/android-sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/libMyGUIEngineStatic.a \
 -DOPENMW_USE_SYSTEM_SQLITE3=OFF \
 ..
