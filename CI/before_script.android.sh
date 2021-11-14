@@ -7,9 +7,10 @@ mkdir -p build
 cd build
 
 cmake \
--DCMAKE_TOOLCHAIN_FILE=/usr/lib/android-sdk/ndk-bundle/build/cmake/android.toolchain.cmake \
+-DCMAKE_TOOLCHAIN_FILE=/android-ndk-r22/build/cmake/android.toolchain.cmake \
 -DANDROID_ABI=arm64-v8a \
 -DANDROID_PLATFORM=android-21 \
+-DANDROID_LD=deprecated \
 -DCMAKE_C_COMPILER_LAUNCHER=ccache \
 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
 -DCMAKE_INSTALL_PREFIX=install \
@@ -22,7 +23,5 @@ cmake \
 -DBUILD_OPENCS=0 \
 -DBUILD_WIZARD=0 \
 -DOPENMW_USE_SYSTEM_MYGUI=OFF \
--DOPENMW_USE_SYSTEM_OSG=OFF \
--DOPENMW_USE_SYSTEM_BULLET=OFF \
 -DOPENMW_USE_SYSTEM_SQLITE3=OFF \
 ..

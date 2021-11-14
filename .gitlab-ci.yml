@@ -458,23 +458,21 @@ Windows_MSBuild_Tests_RelWithDebInfo:
 Debian_AndroidNDK_arm64-v8a:
   tags:
     - linux
-  image: debian:bullseye
+  image: psi29a/android-ndk:focal-ndk22
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"  
   variables:
     CCACHE_SIZE: 3G
   cache:
-    key: Debian_AndroidNDK_arm64-v8a.v3
+    key: Ubuntu__Focal_AndroidNDK_r22b_arm64-v8a.v1
     paths:
       - apt-cache/
       - ccache/
       - build/extern/fetched/
   before_script:
     - export APT_CACHE_DIR=`pwd`/apt-cache && mkdir -pv $APT_CACHE_DIR
-    - echo "deb http://deb.debian.org/debian unstable main contrib" > /etc/apt/sources.list
-    - echo "google-android-ndk-installer google-android-installers/mirror select https://dl.google.com" | debconf-set-selections
     - apt-get update -yq
-    - apt-get -q -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake ccache curl unzip git build-essential google-android-ndk-installer
+    - apt-get -q -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake ccache curl unzip git build-essential
   stage: build
   script:
     - export CCACHE_BASEDIR="`pwd`"
