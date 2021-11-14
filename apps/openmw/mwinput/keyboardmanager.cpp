@@ -42,9 +42,9 @@ namespace MWInput
 
         bool consumed = SDL_IsTextInputActive() &&  // Little trick to check if key is printable
                         (!(SDLK_SCANCODE_MASK & arg.keysym.sym) &&
-                        (std::isprint(arg.keysym.sym) ||
                         // Don't trust isprint for symbols outside the extended ASCII range
-                        (kc == MyGUI::KeyCode::None && arg.keysym.sym > 0xff)));
+                        ((kc == MyGUI::KeyCode::None && arg.keysym.sym > 0xff) ||
+                        (arg.keysym.sym >= 0 && arg.keysym.sym <= 255 && std::isprint(arg.keysym.sym))));
         if (kc != MyGUI::KeyCode::None && !mBindingsManager->isDetectingBindingState())
         {
             if (MWBase::Environment::get().getWindowManager()->injectKeyPress(kc, 0, arg.repeat))

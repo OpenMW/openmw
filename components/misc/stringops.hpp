@@ -184,17 +184,16 @@ public:
 
     static inline void trim(std::string &s)
     {
-        // left trim
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch)
+        const auto notSpace = [](char ch)
         {
-            return !std::isspace(ch);
-        }));
+            // TODO Do we care about multibyte whitespace?
+            return !std::isspace(static_cast<unsigned char>(ch));
+        };
+        // left trim
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), notSpace));
 
         // right trim
-        s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch)
-        {
-            return !std::isspace(ch);
-        }).base(), s.end());
+        s.erase(std::find_if(s.rbegin(), s.rend(), notSpace).base(), s.end());
     }
 
     template <class Container>

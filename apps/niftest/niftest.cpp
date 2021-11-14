@@ -2,8 +2,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
 
+#include <components/misc/stringops.hpp>
 #include <components/nif/niffile.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/vfs/manager.hpp>
@@ -18,18 +18,10 @@ namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 
 ///See if the file has the named extension
-bool hasExtension(std::string filename, std::string  extensionToFind)
+bool hasExtension(std::string filename, std::string extensionToFind)
 {
     std::string extension = filename.substr(filename.find_last_of('.')+1);
-
-    //Convert strings to lower case for comparison
-    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-    std::transform(extensionToFind.begin(), extensionToFind.end(), extensionToFind.begin(), ::tolower);
-
-    if(extension == extensionToFind)
-        return true;
-    else
-        return false;
+    return Misc::StringUtils::ciEqual(extension, extensionToFind);
 }
 
 ///See if the file has the "nif" extension.

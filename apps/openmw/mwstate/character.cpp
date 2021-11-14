@@ -8,6 +8,8 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/defs.hpp>
 
+#include <components/misc/utf8stream.hpp>
+
 bool MWState::operator< (const Slot& left, const Slot& right)
 {
     return left.mTimeStamp<right.mTimeStamp;
@@ -52,12 +54,14 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
     std::ostringstream stream;
 
     // The profile description is user-supplied, so we need to escape the path
-    for (std::string::const_iterator it = profile.mDescription.begin(); it != profile.mDescription.end(); ++it)
+    Utf8Stream description(profile.mDescription);
+    while(!description.eof())
     {
-        if (std::isalnum(*it))  // Ignores multibyte characters and non alphanumeric characters
-            stream << *it;
+        auto c = description.consume();
+        if(c <= 0x7F && std::isalnum(c)) // Ignore multibyte characters and non alphanumeric characters
+            stream << static_cast<char>(c);
         else
-            stream << "_";
+            stream << '_';
     }
 
     const std::string ext = ".omwsave";
