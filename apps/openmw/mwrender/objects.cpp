@@ -141,11 +141,11 @@ void Objects::removeCell(const MWWorld::CellStore* store)
         MWWorld::Ptr ptr = iter->second->getPtr();
         if(ptr.getCell() == store)
         {
-            if (ptr.getClass().isNpc() && ptr.getRefData().getCustomData())
+            if (ptr.getClass().isActor() && ptr.getRefData().getCustomData())
             {
-                MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
-                invStore.setInvListener(nullptr, ptr);
-                invStore.setContListener(nullptr);
+                if (ptr.getClass().hasInventoryStore(ptr))
+                    ptr.getClass().getInventoryStore(ptr).setInvListener(nullptr, ptr);
+                ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
             }
 
             mObjects.erase(iter++);
