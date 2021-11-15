@@ -179,16 +179,16 @@ namespace MWLua
                 localScripts->removeScript(*scriptId);
             };
 
-            objectT["teleport"] = [luaManager=context.mLuaManager](const GObject& object, std::string_view cell,
-                                                                   const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& optRot)
+            objectT["teleport"] = [context](const GObject& object, std::string_view cell,
+                                            const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& optRot)
             {
                 MWWorld::Ptr ptr = object.ptr();
                 osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
-                auto action = std::make_unique<TeleportAction>(object.id(), std::string(cell), pos, rot);
+                auto action = std::make_unique<TeleportAction>(context.mLua, object.id(), std::string(cell), pos, rot);
                 if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                    luaManager->addTeleportPlayerAction(std::move(action));
+                    context.mLuaManager->addTeleportPlayerAction(std::move(action));
                 else
-                    luaManager->addAction(std::move(action));
+                    context.mLuaManager->addAction(std::move(action));
             };
         }
         else
@@ -352,7 +352,7 @@ namespace MWLua
 
         if constexpr (std::is_same_v<ObjectT, GObject>)
         {  // Only for global scripts
-            objectT["setEquipment"] = [manager=context.mLuaManager](const GObject& obj, sol::table equipment)
+            objectT["setEquipment"] = [context](const GObject& obj, sol::table equipment)
             {
                 if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
                 {
@@ -360,7 +360,8 @@ namespace MWLua
                         throw std::runtime_error(ptrToString(obj.ptr()) + " has no equipment slots");
                     return;
                 }
-                manager->addAction(std::make_unique<SetEquipmentAction>(obj.id(), parseEquipmentTable(equipment)));
+                context.mLuaManager->addAction(std::make_unique<SetEquipmentAction>(
+                    context.mLua, obj.id(), parseEquipmentTable(equipment)));
             };
 
             // TODO

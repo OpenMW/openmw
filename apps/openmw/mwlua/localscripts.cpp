@@ -39,7 +39,7 @@ namespace MWLua
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
         selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
-        selfAPI["setEquipment"] = [manager=context.mLuaManager](const SelfObject& obj, sol::table equipment)
+        selfAPI["setEquipment"] = [context](const SelfObject& obj, sol::table equipment)
         {
             if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
             {
@@ -56,7 +56,7 @@ namespace MWLua
                 else
                     eqp[slot] = value.as<std::string>();
             }
-            manager->addAction(std::make_unique<SetEquipmentAction>(obj.id(), std::move(eqp)));
+            context.mLuaManager->addAction(std::make_unique<SetEquipmentAction>(context.mLua, obj.id(), std::move(eqp)));
         };
         selfAPI["getCombatTarget"] = [worldView=context.mWorldView](SelfObject& self) -> sol::optional<LObject>
         {

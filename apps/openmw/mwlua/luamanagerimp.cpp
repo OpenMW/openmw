@@ -188,11 +188,11 @@ namespace MWLua
         mUIMessages.clear();
 
         for (std::unique_ptr<Action>& action : mActionQueue)
-            action->apply(mWorldView);
+            action->safeApply(mWorldView);
         mActionQueue.clear();
         
         if (mTeleportPlayerAction)
-            mTeleportPlayerAction->apply(mWorldView);
+            mTeleportPlayerAction->safeApply(mWorldView);
         mTeleportPlayerAction.reset();
     }
 
