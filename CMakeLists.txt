@@ -709,8 +709,10 @@ if (WIN32)
 endif()
 
 if (BUILD_OPENMW AND APPLE)
-    # Without these flags LuaJit crashes on startup on OSX
-    set_target_properties(openmw PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+    if (USE_LUAJIT)
+        # Without these flags LuaJit crashes on startup on OSX
+        set_target_properties(openmw PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+    endif(USE_LUAJIT)
     target_compile_definitions(components PRIVATE GL_SILENCE_DEPRECATION=1)
     target_compile_definitions(openmw PRIVATE GL_SILENCE_DEPRECATION=1)
 endif()

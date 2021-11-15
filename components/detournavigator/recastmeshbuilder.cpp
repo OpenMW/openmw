@@ -18,6 +18,7 @@
 #include <cassert>
 #include <array>
 #include <vector>
+#include <sstream>
 
 namespace DetourNavigator
 {
