@@ -506,7 +506,7 @@ namespace Resource
             options->setReadFileCallback(new ImageReadCallback(imageManager));
             if (ext == "dae") options->setOptionString("daeUseSequencedTextureUnits");
 
-            const std::uint64_t fileHash = Files::getHash(normalizedFilename, model);
+            const std::array<std::uint64_t, 2> fileHash = Files::getHash(normalizedFilename, model);
 
             osgDB::ReaderWriter::ReadResult result = reader->readNode(model, options);
             if (!result.success())
@@ -538,7 +538,7 @@ namespace Resource
             }
 
             node->setUserValue(Misc::OsgUserValues::sFileHash,
-                std::string(reinterpret_cast<const char*>(&fileHash), sizeof(fileHash)));
+                std::string(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t)));
 
             return node;
         }

@@ -325,9 +325,7 @@ namespace NifOsg
             if (!textkeys->mTextKeys.empty())
                 created->getOrCreateUserDataContainer()->addUserObject(textkeys);
 
-            const std::uint64_t nifHash = nif->getHash();
-            created->setUserValue(Misc::OsgUserValues::sFileHash,
-                std::string(reinterpret_cast<const char*>(&nifHash), sizeof(nifHash)));
+            created->setUserValue(Misc::OsgUserValues::sFileHash, nif->getHash());
 
             return created;
         }

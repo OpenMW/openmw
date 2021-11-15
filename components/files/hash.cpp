@@ -1,17 +1,17 @@
 #include "hash.hpp"
 
-#include <components/misc/hash.hpp>
+#include <extern/smhasher/MurmurHash3.h>
 
+#include <array>
 #include <cstdint>
-#include <functional>
 #include <istream>
 #include <string>
 
 namespace Files
 {
-    std::uint64_t getHash(const std::string& fileName, std::istream& stream)
+    std::array<std::uint64_t, 2> getHash(const std::string& fileName, std::istream& stream)
     {
-        std::uint64_t hash = std::hash<std::string> {}(fileName);
+        std::array<std::uint64_t, 2> hash {0, 0};
         try
         {
             const auto start = stream.tellg();
@@ -19,9 +19,14 @@ namespace Files
             stream.exceptions(std::ios_base::badbit);
             while (stream)
             {
-                std::uint64_t value = 0;
-                stream.read(reinterpret_cast<char*>(&value), sizeof(value));
-                Misc::hashCombine(hash, value);
+                std::array<char, 4096> value;
+                stream.read(value.data(), value.size());
+                const std::streamsize read = stream.gcount();
+                if (read == 0)
+                    break;
+                std::array<std::uint64_t, 2> blockHash {0, 0};
+                MurmurHash3_x64_128(value.data(), static_cast<int>(read), hash.data(), blockHash.data());
+                hash = blockHash;
             }
             stream.exceptions(exceptions);
             stream.clear();

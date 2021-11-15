@@ -335,7 +335,7 @@ namespace
         MOCK_METHOD(void, setUseSkinning, (bool), (override));
         MOCK_METHOD(bool, getUseSkinning, (), (const, override));
         MOCK_METHOD(std::string, getFilename, (), (const, override));
-        MOCK_METHOD(std::uint64_t, getHash, (), (const, override));
+        MOCK_METHOD(std::string, getHash, (), (const, override));
         MOCK_METHOD(unsigned int, getVersion, (), (const, override));
         MOCK_METHOD(unsigned int, getUserVersion, (), (const, override));
         MOCK_METHOD(unsigned int, getBethVersion, (), (const, override));
@@ -382,7 +382,7 @@ namespace
             ),
             btVector3(4, 8, 12)
         };
-        const std::uint64_t mHash = 42;
+        const std::string mHash = "hash";
 
         TestBulletNifLoader()
         {

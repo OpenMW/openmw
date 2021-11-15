@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_BULLETSHAPE_H
 #define OPENMW_COMPONENTS_RESOURCE_BULLETSHAPE_H
 
+#include <array>
 #include <map>
 #include <memory>
 
@@ -53,7 +54,7 @@ namespace Resource
         std::map<int, int> mAnimatedShapes;
 
         std::string mFileName;
-        std::uint64_t mFileHash = 0;
+        std::string mFileHash;
 
         void setLocalScaling(const btVector3& scale);
 

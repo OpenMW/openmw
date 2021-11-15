@@ -34,7 +34,7 @@ struct File
 
     virtual std::string getFilename() const = 0;
 
-    virtual std::uint64_t getHash() const = 0;
+    virtual std::string getHash() const = 0;
 
     virtual unsigned int getVersion() const = 0;
 
@@ -52,7 +52,7 @@ class NIFFile final : public File
 
     /// File name, used for error messages and opening the file
     std::string filename;
-    std::uint64_t hash = 0;
+    std::string hash;
 
     /// Record list
     std::vector<Record*> records;
@@ -144,7 +144,7 @@ public:
     /// Get the name of the file
     std::string getFilename() const override { return filename; }
 
-    std::uint64_t getHash() const override { return hash; }
+    std::string getHash() const override { return hash; }
 
     /// Get the version of the NIF format used
     unsigned int getVersion() const override { return ver; }
