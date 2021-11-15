@@ -9,6 +9,8 @@
 
 #include "MurmurHash3.h"
 
+#include <cstring>
+
 //-----------------------------------------------------------------------------
 // Platform-specific functions and macros
 
@@ -47,7 +49,9 @@ inline uint64_t rotl64 ( uint64_t x, int8_t r )
 
 FORCE_INLINE uint64_t getblock64 ( const uint64_t * p, int i )
 {
-  return p[i];
+  uint64_t result = 0;
+  std::memcpy(&result, p + i, sizeof(result));
+  return result;
 }
 
 //----------
