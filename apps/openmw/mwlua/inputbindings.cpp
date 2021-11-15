@@ -37,7 +37,7 @@ namespace MWLua
 
         api["isIdle"] = [input]() { return input->isIdle(); };
         api["isActionPressed"] = [input](int action) { return input->actionIsActive(action); };
-        api["isKeyPressed"] = [input](SDL_Scancode code) -> bool
+        api["isKeyPressed"] = [](SDL_Scancode code) -> bool
         {
             int maxCode;
             const auto* state = SDL_GetKeyboardState(&maxCode);
@@ -46,10 +46,10 @@ namespace MWLua
             else
                 return false;
         };
-        api["isShiftPressed"] = [input]() -> bool { return SDL_GetModState() & KMOD_SHIFT; };
-        api["isCtrlPressed"] = [input]() -> bool { return SDL_GetModState() & KMOD_CTRL; };
-        api["isAltPressed"] = [input]() -> bool { return SDL_GetModState() & KMOD_ALT; };
-        api["isSuperPressed"] = [input]() -> bool { return SDL_GetModState() & KMOD_GUI; };
+        api["isShiftPressed"] = []() -> bool { return SDL_GetModState() & KMOD_SHIFT; };
+        api["isCtrlPressed"] = []() -> bool { return SDL_GetModState() & KMOD_CTRL; };
+        api["isAltPressed"] = []() -> bool { return SDL_GetModState() & KMOD_ALT; };
+        api["isSuperPressed"] = []() -> bool { return SDL_GetModState() & KMOD_GUI; };
         api["isControllerButtonPressed"] = [input](int button)
         {
             return input->isControllerButtonPressed(static_cast<SDL_GameControllerButton>(button));
