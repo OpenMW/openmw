@@ -66,13 +66,13 @@ FORCE_INLINE uint64_t fmix64 ( uint64_t k )
 //-----------------------------------------------------------------------------
 
 void MurmurHash3_x64_128 ( const void * key, const int len,
-                           const uint32_t seed, void * out )
+                           const uint64_t * seed, void * out )
 {
   const uint8_t * data = (const uint8_t*)key;
   const int nblocks = len / 16;
 
-  uint64_t h1 = seed;
-  uint64_t h2 = seed;
+  uint64_t h1 = seed[0];
+  uint64_t h2 = seed[1];
 
   const uint64_t c1 = BIG_CONSTANT(0x87c37b91114253d5);
   const uint64_t c2 = BIG_CONSTANT(0x4cf5ad432745937f);
