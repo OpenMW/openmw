@@ -28,34 +28,18 @@ namespace MWMechanics
 {
 int AiFollow::mFollowIndexCounter = 0;
 
-AiFollow::AiFollow(const std::string &actorId, float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+AiFollow::AiFollow(const std::string &actorId, float duration, float x, float y, float z, bool repeat)
+: TypedAiPackage<AiFollow>(repeat), mAlwaysFollow(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
 , mCellId(""), mActive(false), mFollowIndex(mFollowIndexCounter++)
 {
     mTargetActorRefId = actorId;
 }
 
-AiFollow::AiFollow(const std::string &actorId, const std::string &cellId, float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+AiFollow::AiFollow(const std::string &actorId, const std::string &cellId, float duration, float x, float y, float z, bool repeat)
+: TypedAiPackage<AiFollow>(repeat), mAlwaysFollow(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
 , mCellId(cellId), mActive(false), mFollowIndex(mFollowIndexCounter++)
 {
     mTargetActorRefId = actorId;
-}
-
-AiFollow::AiFollow(const MWWorld::Ptr& actor, float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
-, mCellId(""), mActive(false), mFollowIndex(mFollowIndexCounter++)
-{
-    mTargetActorRefId = actor.getCellRef().getRefId();
-    mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
-}
-
-AiFollow::AiFollow(const MWWorld::Ptr& actor, const std::string &cellId, float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
-, mCellId(cellId), mActive(false), mFollowIndex(mFollowIndexCounter++)
-{
-    mTargetActorRefId = actor.getCellRef().getRefId();
-    mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
 }
 
 AiFollow::AiFollow(const MWWorld::Ptr& actor, bool commanded)

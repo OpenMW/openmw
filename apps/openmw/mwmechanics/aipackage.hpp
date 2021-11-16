@@ -108,7 +108,7 @@ namespace MWMechanics
             /// Upon adding this Ai package, should the Ai Sequence attempt to cancel previous Ai packages (default true)?
             bool shouldCancelPreviousAi() const { return mOptions.mShouldCancelPreviousAi; }
 
-            /// Return true if this package should repeat. Currently only used for Wander packages.
+            /// Return true if this package should repeat.
             bool getRepeat() const { return mOptions.mRepeat; }
 
             virtual osg::Vec3f getDestination() const { return osg::Vec3f(0, 0, 0); }

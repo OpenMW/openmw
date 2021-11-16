@@ -13,8 +13,8 @@
 
 namespace MWMechanics
 {
-    AiActivate::AiActivate(const std::string &objectId)
-        : mObjectId(objectId)
+    AiActivate::AiActivate(const std::string &objectId, bool repeat)
+        : TypedAiPackage<AiActivate>(repeat), mObjectId(objectId)
     {
     }
 

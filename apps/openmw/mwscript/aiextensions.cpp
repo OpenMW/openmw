@@ -48,13 +48,14 @@ namespace MWScript
                     std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
                     if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
                         return;
 
-                    MWMechanics::AiActivate activatePackage(objectID);
+                    MWMechanics::AiActivate activatePackage(objectID, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(activatePackage, ptr);
                     Log(Debug::Info) << "AiActivate";
                 }
@@ -78,13 +79,14 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
                     if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
                         return;
 
-                    MWMechanics::AiTravel travelPackage(x, y, z);
+                    MWMechanics::AiTravel travelPackage(x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(travelPackage, ptr);
 
                     Log(Debug::Info) << "AiTravel: " << x << ", " << y << ", " << z;
@@ -115,13 +117,14 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
                     if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
                         return;
 
-                    MWMechanics::AiEscort escortPackage(actorID, static_cast<int>(duration), x, y, z);
+                    MWMechanics::AiEscort escortPackage(actorID, static_cast<int>(duration), x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
                     Log(Debug::Info) << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration;
@@ -155,7 +158,8 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
                     if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
@@ -167,7 +171,7 @@ namespace MWScript
                     if (!MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(cellID))
                         return;
 
-                    MWMechanics::AiEscort escortPackage(actorID, cellID, static_cast<int>(duration), x, y, z);
+                    MWMechanics::AiEscort escortPackage(actorID, cellID, static_cast<int>(duration), x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
                     Log(Debug::Info) << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration;
@@ -237,7 +241,7 @@ namespace MWScript
                         --arg0;
                     }
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // discard additional arguments, because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
                     if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
@@ -331,13 +335,14 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
                     if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
                         return;
 
-                    MWMechanics::AiFollow followPackage(actorID, duration, x, y ,z);
+                    MWMechanics::AiFollow followPackage(actorID, duration, x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(followPackage, ptr);
 
                     Log(Debug::Info) << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration;
@@ -371,13 +376,14 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
                     if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
                         return;
 
-                    MWMechanics::AiFollow followPackage(actorID, cellID, duration, x, y ,z);
+                    MWMechanics::AiFollow followPackage(actorID, cellID, duration, x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(followPackage, ptr);
                     Log(Debug::Info) << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration;
                 }

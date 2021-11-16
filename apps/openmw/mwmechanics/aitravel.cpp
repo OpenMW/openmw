@@ -34,8 +34,8 @@ bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
 
 namespace MWMechanics
 {
-    AiTravel::AiTravel(float x, float y, float z, AiTravel*)
-        : mX(x), mY(y), mZ(z), mHidden(false)
+    AiTravel::AiTravel(float x, float y, float z, bool repeat, AiTravel*)
+        : TypedAiPackage<AiTravel>(repeat), mX(x), mY(y), mZ(z), mHidden(false)
     {
     }
 
@@ -44,8 +44,8 @@ namespace MWMechanics
     {
     }
 
-    AiTravel::AiTravel(float x, float y, float z)
-        : AiTravel(x, y, z, this)
+    AiTravel::AiTravel(float x, float y, float z, bool repeat)
+        : AiTravel(x, y, z, repeat, this)
     {
     }
 

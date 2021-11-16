@@ -22,11 +22,11 @@ namespace MWMechanics
             /// Implementation of AiEscort
             /** The Actor will escort the specified actor to the world position x, y, z until they reach their position, or they run out of time
                 \implement AiEscort **/
-            AiEscort(const std::string &actorId, int duration, float x, float y, float z);
+            AiEscort(const std::string &actorId, int duration, float x, float y, float z, bool repeat);
             /// Implementation of AiEscortCell
             /** The Actor will escort the specified actor to the cell position x, y, z until they reach their position, or they run out of time
                 \implement AiEscortCell **/
-            AiEscort(const std::string &actorId, const std::string &cellId, int duration, float x, float y, float z);
+            AiEscort(const std::string &actorId, const std::string &cellId, int duration, float x, float y, float z, bool repeat);
 
             AiEscort(const ESM::AiSequence::AiEscort* escort);
 
