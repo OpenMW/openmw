@@ -17,7 +17,7 @@ namespace MWLua
         {
             registerEngineHandlers({&mKeyPressHandlers, &mKeyReleaseHandlers,
                                     &mControllerButtonPressHandlers, &mControllerButtonReleaseHandlers,
-                                    &mActionHandlers});
+                                    &mActionHandlers, &mInputUpdateHandlers});
         }
 
         void processInputEvent(const MWBase::LuaManager::InputEvent& event)
@@ -43,12 +43,15 @@ namespace MWLua
             }
         }
 
+        void inputUpdate(float dt) { callEngineHandlers(mInputUpdateHandlers, dt); }
+
     private:
         EngineHandlerList mKeyPressHandlers{"onKeyPress"};
         EngineHandlerList mKeyReleaseHandlers{"onKeyRelease"};
         EngineHandlerList mControllerButtonPressHandlers{"onControllerButtonPress"};
         EngineHandlerList mControllerButtonReleaseHandlers{"onControllerButtonRelease"};
         EngineHandlerList mActionHandlers{"onInputAction"};
+        EngineHandlerList mInputUpdateHandlers{"onInputUpdate"};
     };
 
 }

@@ -293,6 +293,10 @@ bool OMW::Engine::frame(float frametime)
         // Main menu opened? Then scripts are also paused.
         bool paused = mEnvironment.getWindowManager()->containsMode(MWGui::GM_MainMenu);
 
+        // Should be called after input manager update and before any change to the game world.
+        // It applies to the game world queued changes from the previous frame.
+        mLuaManager->synchronizedUpdate(paused, frametime);
+
         // update game state
         {
             ScopedProfile<UserStatsType::State> profile(frameStart, frameNumber, *timer, *stats);
@@ -874,7 +878,6 @@ public:
         }
         else
             update();
-        mEngine->mLuaManager->applyQueuedChanges();
     };
 
     void join()

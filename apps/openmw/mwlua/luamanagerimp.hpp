@@ -32,7 +32,7 @@ namespace MWLua
         void update(bool paused, float dt);
 
         // Called by engine.cpp from the main thread. Can use scene graph.
-        void applyQueuedChanges();
+        void synchronizedUpdate(bool paused, float dt);
 
         // Available everywhere through the MWBase::LuaManager interface.
         // LuaManager queues these events and propagates to scripts on the next `update` call.
