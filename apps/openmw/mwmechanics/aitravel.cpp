@@ -50,7 +50,7 @@ namespace MWMechanics
     }
 
     AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
-        : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
+        : TypedAiPackage<AiTravel>(travel->mRepeat), mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
     {
         // Hidden ESM::AiSequence::AiTravel package should be converted into MWMechanics::AiInternalTravel type
         assert(!travel->mHidden);
@@ -125,6 +125,7 @@ namespace MWMechanics
         travel->mData.mY = mY;
         travel->mData.mZ = mZ;
         travel->mHidden = mHidden;
+        travel->mRepeat = getRepeat();
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Travel;

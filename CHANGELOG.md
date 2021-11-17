@@ -52,6 +52,7 @@
     Bug #6168: Weather particles flicker for a frame at start of storms
     Bug #6172: Some creatures can't open doors
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
+    Bug #6177: Followers of player follower stop following after waiting for a day
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
     Bug #6253: Multiple instances of Reflect stack additively
@@ -81,6 +82,7 @@
     Bug #6416: Morphs are applied to the wrong target
     Bug #6429: Wyrmhaven: Can't add AI packages to player
     Feature #890: OpenMW-CS: Column filtering
+    Feature #1465: "Reset" argument for AI functions
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map

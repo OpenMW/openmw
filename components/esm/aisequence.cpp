@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <algorithm>
 #include <memory>
 
 namespace ESM
@@ -34,12 +35,16 @@ namespace AiSequence
     {
         esm.getHNT (mData, "DATA");
         esm.getHNOT (mHidden, "HIDD");
+        mRepeat = false;
+        esm.getHNOT(mRepeat, "REPT");
     }
 
     void AiTravel::save(ESMWriter &esm) const
     {
         esm.writeHNT ("DATA", mData);
         esm.writeHNT ("HIDD", mHidden);
+        if(mRepeat)
+            esm.writeHNT("REPT", mRepeat);
     }
 
     void AiEscort::load(ESMReader &esm)
@@ -50,6 +55,15 @@ namespace AiSequence
         esm.getHNOT (mTargetActorId, "TAID");
         esm.getHNT (mRemainingDuration, "DURA");
         mCellId = esm.getHNOString ("CELL");
+        mRepeat = false;
+        esm.getHNOT(mRepeat, "REPT");
+        if(esm.getFormat() < 18)
+        {
+            // mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
+            // The exact value of mDuration only matters for repeating packages.
+            // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should fix old saves.
+            mData.mDuration = std::max<float>(mRemainingDuration > 0, mRemainingDuration);
+        }
     }
 
     void AiEscort::save(ESMWriter &esm) const
@@ -60,6 +74,8 @@ namespace AiSequence
         esm.writeHNT ("DURA", mRemainingDuration);
         if (!mCellId.empty())
             esm.writeHNString ("CELL", mCellId);
+        if(mRepeat)
+            esm.writeHNT("REPT", mRepeat);
     }
 
     void AiFollow::load(ESMReader &esm)
@@ -75,6 +91,15 @@ namespace AiSequence
         esm.getHNOT (mCommanded, "CMND");
         mActive = false;
         esm.getHNOT (mActive, "ACTV");
+        mRepeat = false;
+        esm.getHNOT(mRepeat, "REPT");
+        if(esm.getFormat() < 18)
+        {
+            // mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
+            // The exact value of mDuration only matters for repeating packages.
+            // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should fix old saves.
+            mData.mDuration = std::max<float>(mRemainingDuration > 0, mRemainingDuration);
+        }
     }
 
     void AiFollow::save(ESMWriter &esm) const
@@ -89,16 +114,22 @@ namespace AiSequence
         esm.writeHNT ("CMND", mCommanded);
         if (mActive)
             esm.writeHNT("ACTV", mActive);
+        if(mRepeat)
+            esm.writeHNT("REPT", mRepeat);
     }
 
     void AiActivate::load(ESMReader &esm)
     {
         mTargetId = esm.getHNString("TARG");
+        mRepeat = false;
+        esm.getHNOT(mRepeat, "REPT");
     }
 
     void AiActivate::save(ESMWriter &esm) const
     {
         esm.writeHNString("TARG", mTargetId);
+        if(mRepeat)
+            esm.writeHNT("REPT", mRepeat);
     }
 
     void AiCombat::load(ESMReader &esm)
@@ -166,6 +197,7 @@ namespace AiSequence
 
     void AiSequence::load(ESMReader &esm)
     {
+        int count = 0;
         while (esm.isNextSub("AIPK"))
         {
             int type;
@@ -181,6 +213,7 @@ namespace AiSequence
                 std::unique_ptr<AiWander> ptr = std::make_unique<AiWander>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
+                ++count;
                 break;
             }
             case Ai_Travel:
@@ -188,6 +221,7 @@ namespace AiSequence
                 std::unique_ptr<AiTravel> ptr = std::make_unique<AiTravel>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
+                ++count;
                 break;
             }
             case Ai_Escort:
@@ -195,6 +229,7 @@ namespace AiSequence
                 std::unique_ptr<AiEscort> ptr = std::make_unique<AiEscort>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
+                ++count;
                 break;
             }
             case Ai_Follow:
@@ -202,6 +237,7 @@ namespace AiSequence
                 std::unique_ptr<AiFollow> ptr = std::make_unique<AiFollow>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
+                ++count;
                 break;
             }
             case Ai_Activate:
@@ -209,6 +245,7 @@ namespace AiSequence
                 std::unique_ptr<AiActivate> ptr = std::make_unique<AiActivate>();
                 ptr->load(esm);
                 mPackages.back().mPackage = ptr.release();
+                ++count;
                 break;
             }
             case Ai_Combat:
@@ -231,6 +268,23 @@ namespace AiSequence
         }
 
         esm.getHNOT (mLastAiPackage, "LAST");
+
+        if(count > 1 && esm.getFormat() < 18)
+        {
+            for(auto& pkg : mPackages)
+            {
+                if(pkg.mType == Ai_Wander)
+                    static_cast<AiWander*>(pkg.mPackage)->mData.mShouldRepeat = true;
+                else if(pkg.mType == Ai_Travel)
+                    static_cast<AiTravel*>(pkg.mPackage)->mRepeat = true;
+                else if(pkg.mType == Ai_Escort)
+                    static_cast<AiEscort*>(pkg.mPackage)->mRepeat = true;
+                else if(pkg.mType == Ai_Follow)
+                    static_cast<AiFollow*>(pkg.mPackage)->mRepeat = true;
+                else if(pkg.mType == Ai_Activate)
+                    static_cast<AiActivate*>(pkg.mPackage)->mRepeat = true;
+            }
+        }
     }
 }
 }
