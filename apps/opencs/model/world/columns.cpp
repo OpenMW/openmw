@@ -255,7 +255,7 @@ namespace CSMWorld
             { ColumnId_AiWanderDist, "Wander Dist" },
             { ColumnId_AiDuration, "Ai Duration" },
             { ColumnId_AiWanderToD, "Wander ToD" },
-            { ColumnId_AiWanderRepeat, "Wander Repeat" },
+            { ColumnId_AiWanderRepeat, "Ai Repeat" },
             { ColumnId_AiActivateName, "Activate" },
             { ColumnId_AiTargetId, "Target ID" },
             { ColumnId_AiTargetCell, "Target Cell" },
