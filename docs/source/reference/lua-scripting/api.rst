@@ -6,6 +6,7 @@ Lua API reference
     :hidden:
 
     engine_handlers
+    user_interface
     openmw_util
     openmw_settings
     openmw_core
@@ -20,6 +21,7 @@ Lua API reference
 
 
 - :ref:`Engine handlers reference`
+- :ref:`User interface reference <User interface reference>`
 - `Game object reference <openmw_core.html##(GameObject)>`_
 - `Cell reference <openmw_core.html##(Cell)>`_
 
@@ -56,7 +58,7 @@ Player scripts are local scripts that are attached to a player.
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input                                                  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls user interface                                     |
+|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls :ref:`user interface <User interface reference>`   |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |openmw.camera                                            | by player scripts  | | Controls camera (not implemented)                           |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
@@ -71,4 +73,3 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
 +=========================================================+====================+===============================================================+
 |:ref:`openmw_aux.util <Package openmw_aux.util>`         | everywhere         | | Miscellaneous utils                                         |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-
