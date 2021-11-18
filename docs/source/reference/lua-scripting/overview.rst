@@ -350,7 +350,7 @@ Player scripts are local scripts that are attached to a player.
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input                                                  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls user interface                                     |
+|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls :ref:`user interface <User interface reference>`   |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |openmw.camera                                            | by player scripts  | | Controls camera (not implemented)                           |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
@@ -750,5 +750,3 @@ You can add special hints to give LDT more information:
 .. image:: https://gitlab.com/OpenMW/openmw-docs/raw/master/docs/source/reference/lua-scripting/_static/lua-ide-code-completion2.png
 
 See `LDT Documentation Language <https://wiki.eclipse.org/LDT/User_Area/Documentation_Language>`__ for more details.
-
-

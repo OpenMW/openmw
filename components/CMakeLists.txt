@@ -160,6 +160,11 @@ add_component_dir (fallback
 add_component_dir (queries
     query luabindings
     )
+    
+add_component_dir (lua_ui
+    widget widgetlist element content text textedit window
+    )
+
 
 if(WIN32)
     add_component_dir (crashcatcher
