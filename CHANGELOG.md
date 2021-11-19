@@ -78,6 +78,7 @@
     Bug #6386: Artifacts in water reflection due to imprecise screen-space coordinate computation
     Bug #6396: Inputting certain Unicode characters triggers an assertion
     Bug #6416: Morphs are applied to the wrong target
+    Bug #6429: Wyrmhaven: Can't add AI packages to player
     Feature #890: OpenMW-CS: Column filtering
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
