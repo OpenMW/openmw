@@ -19,6 +19,7 @@ namespace LuaUi
     class WidgetExtension
     {
     public:
+        WidgetExtension();
         // must be called after creating the underlying MyGUI::Widget
         void create(lua_State* lua, MyGUI::Widget* self);
         // must be called after before destroying the underlying MyGUI::Widget
@@ -42,7 +43,6 @@ namespace LuaUi
         void updateCoord();
 
     protected:
-        ~WidgetExtension() {}
         sol::table makeTable() const;
         sol::object keyEvent(MyGUI::KeyCode) const;
         sol::object mouseEvent(int left, int top, MyGUI::MouseButton button) const;

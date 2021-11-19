@@ -3,10 +3,13 @@
 
 namespace LuaUi
 {
+    LuaText::LuaText()
+        : mAutoSized(true)
+    {}
+
     void LuaText::initialize()
     {
         WidgetExtension::initialize();
-        mAutoSized = true;
     }
 
     bool LuaText::setPropertyRaw(std::string_view name, sol::object value)

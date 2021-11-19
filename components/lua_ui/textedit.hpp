@@ -11,8 +11,8 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaTextEdit)
 
-    protected:
-        bool setPropertyRaw(std::string_view name, sol::object value) override;
+        protected:
+            bool setPropertyRaw(std::string_view name, sol::object value) override;
     };
 }
 
