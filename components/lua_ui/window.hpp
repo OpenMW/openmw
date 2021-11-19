@@ -13,6 +13,9 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaWindow)
 
+        public:
+            LuaWindow();
+
         private:
             // \todo replace with LuaText when skins are properly implemented
             MyGUI::TextBox* mCaption;

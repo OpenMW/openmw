@@ -8,6 +8,13 @@
 
 namespace LuaUi
 {
+    WidgetExtension::WidgetExtension()
+        : mForcedCoord()
+        , mAbsoluteCoord()
+        , mRelativeCoord()
+        , mAnchor()
+    {}
+
     void WidgetExtension::triggerEvent(std::string_view name, const sol::object& argument = sol::nil) const
     {
         auto it = mCallbacks.find(name);
@@ -27,11 +34,6 @@ namespace LuaUi
 
     void WidgetExtension::initialize()
     {
-        mAbsoluteCoord = MyGUI::IntCoord();
-        mRelativeCoord = MyGUI::FloatCoord();
-        mAnchor = MyGUI::FloatSize();
-        mForcedCoord = MyGUI::IntCoord();
-
         // \todo might be more efficient to only register these if there are Lua callbacks
         mWidget->eventKeyButtonPressed += MyGUI::newDelegate(this, &WidgetExtension::keyPress);
         mWidget->eventKeyButtonReleased += MyGUI::newDelegate(this, &WidgetExtension::keyRelease);

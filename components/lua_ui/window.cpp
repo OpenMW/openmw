@@ -4,6 +4,12 @@
 
 namespace LuaUi
 {
+    LuaWindow::LuaWindow()
+        : mCaption()
+        , mPreviousMouse()
+        , mChangeScale()
+    {}
+
     void LuaWindow::initialize()
     {
         WidgetExtension::initialize();

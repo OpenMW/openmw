@@ -12,6 +12,7 @@ namespace LuaUi
         MYGUI_RTTI_DERIVED(LuaText)
 
         public:
+            LuaText();
             virtual void initialize() override;
 
         private:
