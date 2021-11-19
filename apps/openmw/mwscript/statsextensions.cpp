@@ -40,6 +40,22 @@ namespace
 
         return factionId;
     }
+
+    void modStat(MWMechanics::AttributeValue& stat, float amount)
+    {
+        float base = stat.getBase();
+        float modifier = stat.getModifier() - stat.getDamage();
+        float modified = base + modifier;
+        if(modified <= 0.f && amount < 0.f)
+            amount = 0.f;
+        else if(amount < 0.f && modified + amount < 0.f)
+            amount = -modified;
+        else if((modifier <= 0.f || base >= 100.f) && amount > 0.f)
+            amount = std::clamp(100.f - modified, 0.f, amount);
+        stat.setBase(std::min(base + amount, 100.f), true);
+        modifier += base - stat.getBase() + amount;
+        stat.setModifier(modifier);
+    }
 }
 
 namespace MWScript
@@ -122,7 +138,7 @@ namespace MWScript
                     runtime.pop();
 
                     MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
-                    attribute.setBase (value);
+                    attribute.setBase(value, true);
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
@@ -146,19 +162,7 @@ namespace MWScript
                     MWMechanics::AttributeValue attribute = ptr.getClass()
                         .getCreatureStats(ptr)
                         .getAttribute(mIndex);
-
-                    if (value == 0)
-                        return;
-
-                    if (((attribute.getBase() <= 0) && (value < 0))
-                        || ((attribute.getBase() >= 100) && (value > 0)))
-                        return;
-
-                    if (value < 0)
-                        attribute.setBase(std::max(0.f, attribute.getBase() + value));
-                    else
-                        attribute.setBase(std::min(100.f, attribute.getBase() + value));
-
+                    modStat(attribute, value);
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
@@ -372,7 +376,7 @@ namespace MWScript
 
                     MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats (ptr);
 
-                    stats.getSkill (mIndex).setBase (value);
+                    stats.getSkill(mIndex).setBase(value, true);
                 }
         };
 
@@ -395,18 +399,7 @@ namespace MWScript
                     MWMechanics::SkillValue &skill = ptr.getClass()
                         .getNpcStats(ptr)
                         .getSkill(mIndex);
-
-                    if (value == 0)
-                        return;
-
-                    if (((skill.getBase() <= 0.f) && (value < 0.f))
-                        || ((skill.getBase() >= 100.f) && (value > 0.f)))
-                        return;
-
-                    if (value < 0)
-                        skill.setBase(std::max(0.f, skill.getBase() + value));
-                    else
-                        skill.setBase(std::min(100.f, skill.getBase() + value));
+                    modStat(skill, value);
                 }
         };
 

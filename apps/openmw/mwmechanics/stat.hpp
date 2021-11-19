@@ -133,13 +133,14 @@ namespace MWMechanics
         float getBase() const;
         float getModifier() const;
 
-        void setBase(float base);
+        void setBase(float base, bool clearModifier = false);
 
         void setModifier(float mod);
 
         // Maximum attribute damage is limited to the modified value.
-        // Note: I think MW applies damage directly to mModified, since you can also
-        // "restore" drained attributes. We need to rewrite the magic effect system to support this.
+        // Note: MW applies damage directly to mModified, however it does track how much
+        // a damaged attribute that has been fortified beyond its base can be restored.
+        // Getting rid of mDamage would require calculating its value by ignoring active effects when restoring
         void damage(float damage);
         void restore(float amount);
 
