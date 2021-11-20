@@ -27,7 +27,6 @@
 
 namespace MWInput
 {
-    const float ZOOM_SCALE = 10.f; /// Used for scrolling camera in and out
 
     ActionManager::ActionManager(BindingsManager* bindingsManager,
             osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
@@ -41,7 +40,6 @@ namespace MWInput
         , mSneaking(false)
         , mAttemptJump(false)
         , mOverencumberedMessageDelay(0.f)
-        , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
     {
     }
@@ -109,27 +107,6 @@ namespace MWInput
                 }
             }
 
-            if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch"))
-            {
-                const float switchLimit = 0.25;
-                MWBase::World* world = MWBase::Environment::get().getWorld();
-                if (mBindingsManager->actionIsActive(A_TogglePOV))
-                {
-                    if (world->isFirstPerson() ? mPreviewPOVDelay > switchLimit : mPreviewPOVDelay == 0)
-                        world->togglePreviewMode(true);
-                    mPreviewPOVDelay += dt;
-                }
-                else
-                {
-                    //disable preview mode
-                    if (mPreviewPOVDelay > 0)
-                        world->togglePreviewMode(false);
-                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= switchLimit)
-                        world->togglePOV();
-                    mPreviewPOVDelay = 0.f;
-                }
-            }
-
             if (triedToMove)
                 MWBase::Environment::get().getInputManager()->resetIdleTime();
 
@@ -162,36 +139,14 @@ namespace MWInput
             resetIdleTime();
         }
         else
-        {
-            updateIdleTime(dt);
-        }
+            mTimeIdle += dt;
 
         mAttemptJump = false;
-    }
-    
-    bool ActionManager::isPreviewModeEnabled()
-    {
-        return MWBase::Environment::get().getWorld()->isPreviewModeEnabled();
     }
 
     void ActionManager::resetIdleTime()
     {
-        if (mTimeIdle < 0)
-            MWBase::Environment::get().getWorld()->toggleVanityMode(false);
         mTimeIdle = 0.f;
-    }
-
-    void ActionManager::updateIdleTime(float dt)
-    {
-        static const float vanityDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("fVanityDelay")->mValue.getFloat();
-        if (mTimeIdle >= 0.f)
-            mTimeIdle += dt;
-        if (mTimeIdle > vanityDelay)
-        {
-            MWBase::Environment::get().getWorld()->toggleVanityMode(true);
-            mTimeIdle = -1.f;
-        }
     }
 
     void ActionManager::executeAction(int action)
@@ -280,14 +235,6 @@ namespace MWInput
             break;
         case A_ToggleDebug:
             windowManager->toggleDebugWindow();
-            break;
-        case A_ZoomIn:
-            if (inputManager->getControlSwitch("playerviewswitch") && inputManager->getControlSwitch("playercontrols") && !windowManager->isGuiMode())
-                MWBase::Environment::get().getWorld()->adjustCameraDistance(-ZOOM_SCALE);
-            break;
-        case A_ZoomOut:
-            if (inputManager->getControlSwitch("playerviewswitch") && inputManager->getControlSwitch("playercontrols") && !windowManager->isGuiMode())
-                MWBase::Environment::get().getWorld()->adjustCameraDistance(ZOOM_SCALE);
             break;
         case A_QuickSave:
             quickSave();

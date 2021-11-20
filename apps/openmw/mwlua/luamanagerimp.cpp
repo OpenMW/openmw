@@ -132,14 +132,6 @@ namespace MWLua
         mQueuedCallbacks.clear();
 
         // Engine handlers in local scripts
-        PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
-        if (playerScripts && !paused)
-        {
-            for (const auto& event : mInputEvents)
-                playerScripts->processInputEvent(event);
-        }
-        mInputEvents.clear();
-
         for (const LocalEngineEvent& e : mLocalEngineEvents)
         {
             LObject obj(e.mDest, objectRegistry);
@@ -180,8 +172,21 @@ namespace MWLua
             mGlobalScripts.update(dt);
     }
 
-    void LuaManager::applyQueuedChanges()
+    void LuaManager::synchronizedUpdate(bool paused, float dt)
     {
+        if (mPlayer.isEmpty())
+            return;  // The game is not started yet.
+
+        // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
+        PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+        if (playerScripts && !paused)
+        {
+            for (const auto& event : mInputEvents)
+                playerScripts->processInputEvent(event);
+            playerScripts->inputUpdate(dt);
+        }
+        mInputEvents.clear();
+
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
         for (const std::string& message : mUIMessages)
             windowManager->messageBox(message);

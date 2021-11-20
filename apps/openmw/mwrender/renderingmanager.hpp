@@ -79,7 +79,6 @@ namespace MWRender
     class NpcAnimation;
     class Pathgrid;
     class Camera;
-    class ViewOverShoulderController;
     class Water;
     class TerrainStorage;
     class LandManager;
@@ -207,7 +206,6 @@ namespace MWRender
 
         // camera stuff
         Camera* getCamera() { return mCamera.get(); }
-        const osg::Vec3f& getCameraPosition() const { return mCurrentCameraPos; }
 
         /// temporarily override the field of view with given value.
         void overrideFieldOfView(float val);
@@ -284,8 +282,6 @@ namespace MWRender
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::unique_ptr<Camera> mCamera;
-        std::unique_ptr<ViewOverShoulderController> mViewOverShoulderController;
-        osg::Vec3f mCurrentCameraPos;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
         osg::ref_ptr<SharedUniformStateUpdater> mSharedUniformStateUpdater;

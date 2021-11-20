@@ -529,13 +529,10 @@ namespace MWWorld
             bool isFirstPerson() const override;
             bool isPreviewModeEnabled() const override;
 
-            void togglePreviewMode(bool enable) override;
-
             bool toggleVanityMode(bool enable) override;
 
-            void allowVanityMode(bool allow) override;
+            MWRender::Camera* getCamera() override;
             bool vanityRotateCamera(float * rot) override;
-            void adjustCameraDistance(float dist) override;
 
             void applyDeferredPreviewRotationToPlayer(float dt) override;
             void disableDeferredPreviewRotation() override;

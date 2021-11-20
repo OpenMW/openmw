@@ -62,6 +62,7 @@ namespace MWPhysics
 namespace MWRender
 {
     class Animation;
+    class Camera;
 }
 
 namespace MWMechanics
@@ -433,14 +434,12 @@ namespace MWBase
 
             virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const = 0;
 
+            virtual MWRender::Camera* getCamera() = 0;
             virtual void togglePOV(bool force = false) = 0;
             virtual bool isFirstPerson() const = 0;
             virtual bool isPreviewModeEnabled() const = 0;
-            virtual void togglePreviewMode(bool enable) = 0;
             virtual bool toggleVanityMode(bool enable) = 0;
-            virtual void allowVanityMode(bool allow) = 0;
             virtual bool vanityRotateCamera(float * rot) = 0;
-            virtual void adjustCameraDistance(float dist) = 0;
             virtual void applyDeferredPreviewRotationToPlayer(float dt) = 0;
             virtual void disableDeferredPreviewRotation() = 0;
 

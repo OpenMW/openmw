@@ -17,7 +17,9 @@ Lua API reference
     openmw_nearby
     openmw_input
     openmw_ui
+    openmw_camera
     openmw_aux_util
+    interface_camera
 
 
 - :ref:`Engine handlers reference`
@@ -56,11 +58,11 @@ Player scripts are local scripts that are attached to a player.
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.nearby <Package openmw.nearby>`             | by local scripts   | | Read-only access to the nearest area of the game world.     |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input                                                  |
+|:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input.                                                 |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls :ref:`user interface <User interface reference>`   |
+|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls :ref:`user interface <User interface reference>`.  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|openmw.camera                                            | by player scripts  | | Controls camera (not implemented)                           |
+|:ref:`openmw.camera <Package openmw.camera>`             | by player scripts  | | Controls camera.                                            |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
 **openmw_aux**
@@ -73,3 +75,13 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
 +=========================================================+====================+===============================================================+
 |:ref:`openmw_aux.util <Package openmw_aux.util>`         | everywhere         | | Miscellaneous utils                                         |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+
+**Interfaces of built-in scripts**
+
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+| Interface                                               | Can be used        | Description                                                   |
++=========================================================+====================+===============================================================+
+|:ref:`Camera <Interface Camera>`                         | by player scripts  | | Allows to alter behavior of the built-in camera script      |
+|                                                         |                    | | without overriding the script completely.                   |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+

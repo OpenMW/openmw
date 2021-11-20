@@ -1,6 +1,7 @@
 #ifndef GAME_MWRENDER_CAMERA_H
 #define GAME_MWRENDER_CAMERA_H
 
+#include <optional>
 #include <string>
 
 #include <osg/ref_ptr>
@@ -24,38 +25,107 @@ namespace MWRender
     class Camera
     {
     public:
-        enum class Mode { Normal, Vanity, Preview, StandingPreview };
+        enum class Mode : int {Static = 0, FirstPerson = 1, ThirdPerson = 2, Vanity = 3, Preview = 4};
+
+        Camera(osg::Camera* camera);
+        ~Camera();
+
+        /// Attach camera to object
+        void attachTo(const MWWorld::Ptr &ptr) { mTrackingPtr = ptr; }
+        MWWorld::Ptr getTrackingPtr() const { return mTrackingPtr; }
+
+        void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
+        float getFocalPointTransitionSpeed() const { return mFocalPointTransitionSpeedCoef; }
+        void setFocalPointTargetOffset(const osg::Vec2d& v);
+        osg::Vec2d getFocalPointTargetOffset() const { return mFocalPointTargetOffset; }
+        void instantTransition();
+        void showCrosshair(bool v) { mShowCrosshair = v; }
+
+        /// Update the view matrix of \a cam
+        void updateCamera(osg::Camera* cam);
+
+        /// Reset to defaults
+        void reset() { setMode(Mode::FirstPerson); }
+
+        void rotateCameraToTrackingPtr();
+
+        float getPitch() const { return mPitch; }
+        float getYaw() const { return mYaw; }
+        float getRoll() const { return mRoll; }
+
+        void setPitch(float angle, bool force = false);
+        void setYaw(float angle, bool force = false);
+        void setRoll(float angle) { mRoll = angle; }
+
+        float getExtraPitch() const { return mExtraPitch; }
+        float getExtraYaw() const { return mExtraYaw; }
+        void setExtraPitch(float angle) { mExtraPitch = angle; }
+        void setExtraYaw(float angle) { mExtraYaw = angle; }
+
+        /// @param Force view mode switch, even if currently not allowed by the animation.
+        void toggleViewMode(bool force=false);
+        bool toggleVanityMode(bool enable);
+
+        void applyDeferredPreviewRotationToPlayer(float dt);
+        void disableDeferredPreviewRotation() { mDeferredRotationDisabled = true; }
+
+        /// \brief Lowers the camera for sneak.
+        void setSneakOffset(float offset);
+
+        void processViewChange();
+
+        void update(float duration, bool paused=false);
+
+        float getCameraDistance() const { return mCameraDistance; }
+        void setPreferredCameraDistance(float v) { mPreferredCameraDistance = v; }
+
+        void setAnimation(NpcAnimation *anim);
+
+        osg::Vec3d getTrackedPosition() const { return mTrackedPosition; }
+        const osg::Vec3d& getPosition() const { return mPosition; }
+        void setStaticPosition(const osg::Vec3d& pos);
+
+        bool isVanityOrPreviewModeEnabled() const { return mMode == Mode::Vanity || mMode == Mode::Preview; }
+        Mode getMode() const { return mMode; }
+        std::optional<Mode> getQueuedMode() const { return mQueuedMode; }
+        void setMode(Mode mode, bool force = true);
+
+        void allowCharacterDeferredRotation(bool v) { mDeferredRotationAllowed = v; }
+        void calculateDeferredRotation();
+        void setFirstPersonOffset(const osg::Vec3f& v) { mFirstPersonOffset = v; }
+        osg::Vec3f getFirstPersonOffset() const { return mFirstPersonOffset; }
 
     private:
         MWWorld::Ptr mTrackingPtr;
         osg::ref_ptr<const osg::Node> mTrackingNode;
+        osg::Vec3d mTrackedPosition;
         float mHeightScale;
 
         osg::ref_ptr<osg::Camera> mCamera;
 
         NpcAnimation *mAnimation;
 
+        // Always 'true' if mMode == `FirstPerson`. Also it is 'true' in `Vanity` or `Preview` modes if
+        // the camera should return to `FirstPerson` view after it.
         bool mFirstPersonView;
+
         Mode mMode;
+        std::optional<Mode> mQueuedMode;
         bool mVanityAllowed;
-        bool mStandingPreviewAllowed;
         bool mDeferredRotationAllowed;
 
-        float mNearest;
-        float mFurthest;
-        bool mIsNearest;
+        bool mProcessViewChange;
 
-        float mHeight, mBaseCameraDistance;
+        float mHeight;
         float mPitch, mYaw, mRoll;
+        float mExtraPitch = 0, mExtraYaw = 0;
+        bool mLockPitch = false, mLockYaw = false;
+        osg::Vec3d mPosition;
 
-        bool mVanityToggleQueued;
-        bool mVanityToggleQueuedValue;
-        bool mViewModeToggleQueued;
+        float mCameraDistance, mPreferredCameraDistance;
 
-        float mCameraDistance;
-        float mMaxNextCameraDistance;
+        osg::Vec3f mFirstPersonOffset{0, 0, 0};
 
-        osg::Vec3d mFocalPointAdjustment;
         osg::Vec2d mFocalPointCurrentOffset;
         osg::Vec2d mFocalPointTargetOffset;
         float mFocalPointTransitionSpeedCoef;
@@ -67,98 +137,19 @@ namespace MWRender
         osg::Vec2d mPreviousTransitionSpeed;
         osg::Vec2d mPreviousExtraOffset;
 
-        float mSmoothedSpeed;
-        float mZoomOutWhenMoveCoef;
-        bool mDynamicCameraDistanceEnabled;
-        bool mShowCrosshairInThirdPersonMode;
+        bool mShowCrosshair;
 
-        bool mHeadBobbingEnabled;
-        float mHeadBobbingOffset;
-        float mHeadBobbingWeight; // Value from 0 to 1 for smooth enabling/disabling.
-        float mTotalMovement; // Needed for head bobbing.
-        void updateHeadBobbing(float duration);
-
+        osg::Vec3d calculateTrackedPosition() const;
+        osg::Vec3d calculateFirstPersonPosition(const osg::Vec3d& trackedPosition) const;
+        osg::Vec3d getFocalPointOffset() const;
         void updateFocalPointOffset(float duration);
         void updatePosition();
-        float getCameraDistanceCorrection() const;
 
         osg::ref_ptr<osg::Callback> mUpdateCallback;
 
         // Used to rotate player to the direction of view after exiting preview or vanity mode.
         osg::Vec3f mDeferredRotation;
         bool mDeferredRotationDisabled;
-        void calculateDeferredRotation();
-        void updateStandingPreviewMode();
-
-    public:
-        Camera(osg::Camera* camera);
-        ~Camera();
-
-        /// Attach camera to object
-        void attachTo(const MWWorld::Ptr &ptr) { mTrackingPtr = ptr; }
-        MWWorld::Ptr getTrackingPtr() const { return mTrackingPtr; }
-
-        void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
-        void setFocalPointTargetOffset(osg::Vec2d v);
-        void instantTransition();
-        void enableDynamicCameraDistance(bool v) { mDynamicCameraDistanceEnabled = v; }
-        void enableCrosshairInThirdPersonMode(bool v) { mShowCrosshairInThirdPersonMode = v; }
-
-        /// Update the view matrix of \a cam
-        void updateCamera(osg::Camera* cam);
-
-        /// Reset to defaults
-        void reset();
-
-        /// Set where the camera is looking at. Uses Morrowind (euler) angles
-        /// \param rot Rotation angles in radians
-        void rotateCamera(float pitch, float yaw, bool adjust);
-        void rotateCameraToTrackingPtr();
-
-        float getYaw() const { return mYaw; }
-        void setYaw(float angle);
-
-        float getPitch() const { return mPitch; }
-        void setPitch(float angle);
-
-        /// @param Force view mode switch, even if currently not allowed by the animation.
-        void toggleViewMode(bool force=false);
-
-        bool toggleVanityMode(bool enable);
-        void allowVanityMode(bool allow);
-
-        /// @note this may be ignored if an important animation is currently playing
-        void togglePreviewMode(bool enable);
-
-        void applyDeferredPreviewRotationToPlayer(float dt);
-        void disableDeferredPreviewRotation() { mDeferredRotationDisabled = true; }
-
-        /// \brief Lowers the camera for sneak.
-        void setSneakOffset(float offset);
-
-        bool isFirstPerson() const { return mFirstPersonView && mMode == Mode::Normal; }
-
-        void processViewChange();
-
-        void update(float duration, bool paused=false);
-
-        /// Adds distDelta to the camera distance. Switches 3rd/1st person view if distance is less than limit.
-        void adjustCameraDistance(float distDelta);
-
-        float getCameraDistance() const;
-
-        void setAnimation(NpcAnimation *anim);
-
-        osg::Vec3d getFocalPoint() const;
-        osg::Vec3d getFocalPointOffset() const;
-
-        /// Stores focal and camera world positions in passed arguments
-        void getPosition(osg::Vec3d &focal, osg::Vec3d &camera) const;
-
-        bool isVanityOrPreviewModeEnabled() const { return mMode != Mode::Normal; }
-        Mode getMode() const { return mMode; }
-
-        bool isNearest() const { return mIsNearest; }
     };
 }
 

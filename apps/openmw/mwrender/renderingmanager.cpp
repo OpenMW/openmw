@@ -59,7 +59,6 @@
 #include "vismask.hpp"
 #include "pathgrid.hpp"
 #include "camera.hpp"
-#include "viewovershoulder.hpp"
 #include "water.hpp"
 #include "terrainstorage.hpp"
 #include "navmesh.hpp"
@@ -472,8 +471,6 @@ namespace MWRender
         mWater.reset(new Water(sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
-        if (Settings::Manager::getBool("view over shoulder", "Camera"))
-            mViewOverShoulderController.reset(new ViewOverShoulderController(mCamera.get()));
 
         mScreenshotManager.reset(new ScreenshotManager(viewer, mRootNode, sceneRoot, mResourceSystem, mWater.get()));
 
@@ -826,15 +823,9 @@ namespace MWRender
         updateNavMesh();
         updateRecastMesh();
 
-        if (mViewOverShoulderController)
-            mViewOverShoulderController->update();
         mCamera->update(dt, paused);
 
-        osg::Vec3d focal, cameraPos;
-        mCamera->getPosition(focal, cameraPos);
-        mCurrentCameraPos = cameraPos;
-
-        bool isUnderwater = mWater->isUnderwater(cameraPos);
+        bool isUnderwater = mWater->isUnderwater(mCamera->getPosition());
         mStateUpdater->setFogStart(mFog->getFogStart(isUnderwater));
         mStateUpdater->setFogEnd(mFog->getFogEnd(isUnderwater));
         setFogColor(mFog->getFogColor(isUnderwater));

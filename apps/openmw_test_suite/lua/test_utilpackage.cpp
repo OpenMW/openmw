@@ -93,13 +93,13 @@ namespace
         EXPECT_EQ(getAsString(lua, "moveAndScale * v(300, 200, 100)"), "(156, 222, 68)");
         EXPECT_THAT(getAsString(lua, "moveAndScale"), AllOf(StartsWith("TransformM{ move(6, 22, 18) scale(0.5, 1, 0.5) "), EndsWith(" }")));
         EXPECT_EQ(getAsString(lua, "T.identity"), "TransformM{ }");
-        lua.safe_script("rx = T.rotateX(math.pi / 2)");
-        lua.safe_script("ry = T.rotateY(math.pi / 2)");
-        lua.safe_script("rz = T.rotateZ(math.pi / 2)");
+        lua.safe_script("rx = T.rotateX(-math.pi / 2)");
+        lua.safe_script("ry = T.rotateY(-math.pi / 2)");
+        lua.safe_script("rz = T.rotateZ(-math.pi / 2)");
         EXPECT_LT(get<float>(lua, "(rx * v(1, 2, 3) - v(1, -3, 2)):length()"), 1e-6);
         EXPECT_LT(get<float>(lua, "(ry * v(1, 2, 3) - v(3, 2, -1)):length()"), 1e-6);
         EXPECT_LT(get<float>(lua, "(rz * v(1, 2, 3) - v(-2, 1, 3)):length()"), 1e-6);
-        lua.safe_script("rot = T.rotate(math.pi / 2, v(-1, -1, 0)) * T.rotateZ(-math.pi / 4)");
+        lua.safe_script("rot = T.rotate(math.pi / 2, v(-1, -1, 0)) * T.rotateZ(math.pi / 4)");
         EXPECT_THAT(getAsString(lua, "rot"), HasSubstr("TransformQ"));
         EXPECT_LT(get<float>(lua, "(rot * v(1, 0, 0) - v(0, 0, 1)):length()"), 1e-6);
         EXPECT_LT(get<float>(lua, "(rot * rot:inverse() * v(1, 0, 0) - v(1, 0, 0)):length()"), 1e-6);
