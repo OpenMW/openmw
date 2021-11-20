@@ -37,7 +37,7 @@ add_component_dir (settings
     )
 
 add_component_dir (bsa
-    bsa_file compressedbsafile memorystream
+    bsa_file compressedbsafile
     )
 
 add_component_dir (vfs
@@ -93,7 +93,7 @@ add_component_dir (esmterrain
 
 add_component_dir (misc
     constants utf8stream stringops resourcehelpers rng messageformatparser weakcache thread
-    compression osguservalues
+    compression osguservalues errorMarker
     )
 
 add_component_dir (debug
