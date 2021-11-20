@@ -37,7 +37,7 @@ add_component_dir (settings
     )
 
 add_component_dir (bsa
-    bsa_file compressedbsafile memorystream
+    bsa_file compressedbsafile
     )
 
 add_component_dir (vfs
