@@ -101,4 +101,27 @@ namespace
         EXPECT_EQ(esmData.mLands.size(), 0);
         EXPECT_EQ(esmData.mStatics.size(), 0);
     }
+
+    TEST_F(EsmLoaderTest, loadEsmDataShouldSkipUnsupportedFormats)
+    {
+        Query query;
+        query.mLoadActivators = true;
+        query.mLoadCells = true;
+        query.mLoadContainers = true;
+        query.mLoadDoors = true;
+        query.mLoadGameSettings = true;
+        query.mLoadLands = true;
+        query.mLoadStatics = true;
+        const std::vector<std::string> contentFiles {{"script.omwscripts"}};
+        std::vector<ESM::ESMReader> readers(contentFiles.size());
+        ToUTF8::Utf8Encoder* const encoder = nullptr;
+        const EsmData esmData = loadEsmData(query, contentFiles, mFileCollections, readers, encoder);
+        EXPECT_EQ(esmData.mActivators.size(), 0);
+        EXPECT_EQ(esmData.mCells.size(), 0);
+        EXPECT_EQ(esmData.mContainers.size(), 0);
+        EXPECT_EQ(esmData.mDoors.size(), 0);
+        EXPECT_EQ(esmData.mGameSettings.size(), 0);
+        EXPECT_EQ(esmData.mLands.size(), 0);
+        EXPECT_EQ(esmData.mStatics.size(), 0);
+    }
 }

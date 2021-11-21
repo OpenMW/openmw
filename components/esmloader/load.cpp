@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <map>
+#include <set>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -206,10 +207,26 @@ namespace EsmLoader
         {
             ShallowContent result;
 
+            const std::set<std::string> supportedFormats {
+                ".esm",
+                ".esp",
+                ".omwgame",
+                ".omwaddon",
+                ".project",
+            };
+
             for (std::size_t i = 0; i < contentFiles.size(); ++i)
             {
                 const std::string &file = contentFiles[i];
-                const Files::MultiDirCollection& collection = fileCollections.getCollection(boost::filesystem::path(file).extension().string());
+                const std::string extension = boost::filesystem::path(file).extension().string();
+
+                if (supportedFormats.find(extension) == supportedFormats.end())
+                {
+                    Log(Debug::Warning) << "Skipping unsupported content file: " << file;
+                    continue;
+                }
+
+                const Files::MultiDirCollection& collection = fileCollections.getCollection(extension);
 
                 ESM::ESMReader& reader = readers[i];
                 reader.setEncoder(encoder);
