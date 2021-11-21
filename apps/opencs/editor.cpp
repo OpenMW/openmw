@@ -88,11 +88,11 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
 
     desc.add_options()
-    ("data", boost::program_options::value<Files::ReluctantPathContainer>()->default_value(Files::ReluctantPathContainer(), "data")->multitoken()->composing())
-    ("data-local", boost::program_options::value<Files::ReluctantPathContainer::value_type>()->default_value(Files::ReluctantPathContainer::value_type(), ""))
+    ("data", boost::program_options::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")->multitoken()->composing())
+    ("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
     ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
-    ("resources", boost::program_options::value<Files::ReluctantPath>()->default_value(Files::ReluctantPath(), "resources"))
+    ("resources", boost::program_options::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"))
     ("fallback-archive", boost::program_options::value<std::vector<std::string>>()->
         default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
     ("fallback", boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")
@@ -112,7 +112,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     mDocumentManager.setEncoding(ToUTF8::calculateEncoding(mEncodingName));
     mFileDialog.setEncoding (QString::fromUtf8(mEncodingName.c_str()));
 
-    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::ReluctantPath>());
+    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::MaybeQuotedPath>());
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
@@ -122,10 +122,10 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty()) {
-        dataDirs = asPathContainer(variables["data"].as<Files::ReluctantPathContainer>());
+        dataDirs = asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>());
     }
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::ReluctantPathContainer::value_type>());
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
     if (!local.empty())
         dataLocal.push_back(local);
 

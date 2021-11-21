@@ -77,17 +77,17 @@ void parseArgs(int argc, const char* const argv[], boost::program_options::varia
 void parseConfig(std::istream& stream, boost::program_options::variables_map& variables,
     boost::program_options::options_description& description);
 
-class ReluctantPath : public boost::filesystem::path
+class MaybeQuotedPath : public boost::filesystem::path
 {
 public:
     operator boost::filesystem::path() { return *this; }
 };
 
-std::istream& operator>> (std::istream& istream, ReluctantPath& reluctantPath);
+std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPath);
 
-typedef std::vector<ReluctantPath> ReluctantPathContainer;
+typedef std::vector<MaybeQuotedPath> MaybeQuotedPathContainer;
 
-PathContainer asPathContainer(const ReluctantPathContainer& reluctantPathContainer);
+PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathContainer);
 
 } /* namespace Cfg */
 

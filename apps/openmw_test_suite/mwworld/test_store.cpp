@@ -58,10 +58,10 @@ struct ContentFileTest : public ::testing::Test
 
         boost::program_options::options_description desc("Allowed options");
         desc.add_options()
-        ("data", boost::program_options::value<Files::ReluctantPathContainer>()->default_value(Files::ReluctantPathContainer(), "data")->multitoken()->composing())
+        ("data", boost::program_options::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")->multitoken()->composing())
         ("content", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
             ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
-        ("data-local", boost::program_options::value<Files::ReluctantPathContainer::value_type>()->default_value(Files::ReluctantPathContainer::value_type(), ""));
+        ("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""));
 
         boost::program_options::notify(variables);
 
@@ -69,10 +69,10 @@ struct ContentFileTest : public ::testing::Test
 
         Files::PathContainer dataDirs, dataLocal;
         if (!variables["data"].empty()) {
-            dataDirs = asPathContainer(variables["data"].as<Files::ReluctantPathContainer>());
+            dataDirs = asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>());
         }
 
-        Files::PathContainer::value_type local(variables["data-local"].as<Files::ReluctantPathContainer::value_type>());
+        Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
         if (!local.empty()) {
             dataLocal.push_back(local);
         }

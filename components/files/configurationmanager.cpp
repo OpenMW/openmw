@@ -138,10 +138,10 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
             boost::any& firstValue = firstPosition->second.value();
             const boost::any& secondValue = second[name].value();
             
-            if (firstValue.type() == typeid(Files::ReluctantPathContainer))
+            if (firstValue.type() == typeid(Files::MaybeQuotedPathContainer))
             {
-                auto& firstPathContainer = boost::any_cast<Files::ReluctantPathContainer&>(firstValue);
-                const auto& secondPathContainer = boost::any_cast<const Files::ReluctantPathContainer&>(secondValue);
+                auto& firstPathContainer = boost::any_cast<Files::MaybeQuotedPathContainer&>(firstValue);
+                const auto& secondPathContainer = boost::any_cast<const Files::MaybeQuotedPathContainer&>(secondValue);
 
                 firstPathContainer.insert(firstPathContainer.end(), secondPathContainer.begin(), secondPathContainer.end());
             }
@@ -317,22 +317,31 @@ void parseConfig(std::istream& stream, boost::program_options::variables_map& va
     );
 }
 
-std::istream& operator>> (std::istream& istream, ReluctantPath& reluctantPath)
+std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPath)
 {
-    // Read from stream using boost::filesystem::path rules, then discard anything remaining.
+    // If the stream starts with a double quote, read from stream using boost::filesystem::path rules, then discard anything remaining.
     // This prevents boost::program_options getting upset that we've not consumed the whole stream.
-    istream >> static_cast<boost::filesystem::path&>(reluctantPath);
-    if (istream && !istream.eof() && istream.peek() != EOF)
+    // If it doesn't start with a double quote, read the whole thing verbatim
+    if (istream.peek() == '"')
     {
-        std::string remainder(std::istreambuf_iterator(istream), {});
-        Log(Debug::Warning) << "Trailing data in path setting. Used '" << reluctantPath.string() << "' but '" << remainder << "' remained";
+        istream >> static_cast<boost::filesystem::path&>(MaybeQuotedPath);
+        if (istream && !istream.eof() && istream.peek() != EOF)
+        {
+            std::string remainder(std::istreambuf_iterator(istream), {});
+            Log(Debug::Warning) << "Trailing data in path setting. Used '" << MaybeQuotedPath.string() << "' but '" << remainder << "' remained";
+        }
+    }
+    else
+    {
+        std::string intermediate(std::istreambuf_iterator(istream), {});
+        static_cast<boost::filesystem::path&>(MaybeQuotedPath) = intermediate;
     }
     return istream;
 }
 
-PathContainer asPathContainer(const ReluctantPathContainer& reluctantPathContainer)
+PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathContainer)
 {
-    return PathContainer(reluctantPathContainer.begin(), reluctantPathContainer.end());
+    return PathContainer(MaybeQuotedPathContainer.begin(), MaybeQuotedPathContainer.end());
 }
 
 } /* namespace Cfg */
