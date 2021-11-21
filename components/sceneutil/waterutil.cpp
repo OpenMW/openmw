@@ -5,7 +5,7 @@
 #include <osg/Material>
 #include <osg/StateSet>
 
-#include "util.hpp"
+#include "depth.hpp"
 
 namespace SceneUtil
 {
@@ -78,7 +78,7 @@ namespace SceneUtil
         stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 
-        auto depth = createDepth();
+        osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 

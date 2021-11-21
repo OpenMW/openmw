@@ -9,7 +9,7 @@
 #include <osgViewer/Viewer>
 
 #include <components/settings/settings.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/debug/debuglog.hpp>
 
@@ -140,7 +140,7 @@ namespace MWRender
     {
         bool softParticles = Settings::Manager::getBool("soft particles", "Shaders");
 
-        if (!SceneUtil::getReverseZ() && !softParticles)
+        if (!SceneUtil::AutoDepth::isReversed() && !softParticles)
             return;
 
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
@@ -161,7 +161,7 @@ namespace MWRender
             return;
         }
 
-        if (SceneUtil::getReverseZ())
+        if (SceneUtil::AutoDepth::isReversed())
         {
             if (osg::isGLExtensionSupported(contextID, "GL_ARB_depth_buffer_float"))
                 mDepthFormat = GL_DEPTH_COMPONENT32F;

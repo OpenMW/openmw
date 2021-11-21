@@ -32,6 +32,7 @@
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
@@ -252,14 +253,14 @@ namespace Resource
             {
                 if (stateset->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
                 {
-                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    osg::ref_ptr<osg::Depth> depth = new osg::Depth;
                     depth->setWriteMask(false);
 
                     stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 }
                 else if (stateset->getRenderingHint() == osg::StateSet::OPAQUE_BIN)
                 {
-                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    osg::ref_ptr<osg::Depth> depth = new osg::Depth;
                     depth->setWriteMask(true);
 
                     stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
@@ -691,6 +692,9 @@ namespace Resource
             loaded->accept(setFilterSettingsVisitor);
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
+
+            SceneUtil::ReplaceDepthVisitor replaceDepthVisitor;
+            loaded->accept(replaceDepthVisitor);
 
             osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor());
             loaded->accept(*shaderVisitor);
