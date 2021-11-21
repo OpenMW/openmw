@@ -287,7 +287,7 @@ macOS12_Xcode13:
     CCACHE_SIZE: 3G
 
 variables: &engine-targets
-  targets: "openmw,openmw-iniimporter,openmw-launcher,openmw-wizard,openmw-navmeshtool"
+  targets: "openmw,openmw-iniimporter,openmw-launcher,openmw-wizard,openmw-navmeshtool,openmw-bulletobjecttool"
   package: "Engine"
 
 variables: &cs-targets
