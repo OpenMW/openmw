@@ -21,7 +21,7 @@
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include "removedalphafunc.hpp"
 #include "shadermanager.hpp"
@@ -567,7 +567,7 @@ namespace Shader
             {
                 softParticles = true;
 
-                auto depth = SceneUtil::createDepth();
+                auto depth = new SceneUtil::AutoDepth;
                 depth->setWriteMask(false);
                 writableStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
                 writableStateSet->addUniform(new osg::Uniform("particleSize", partsys->getDefaultParticleTemplate().getSizeRange().maximum));

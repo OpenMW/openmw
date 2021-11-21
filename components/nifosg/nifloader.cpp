@@ -16,7 +16,6 @@
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
-#include <components/sceneutil/util.hpp>
 #include <components/misc/osguservalues.hpp>
 
 // particle
@@ -1838,7 +1837,7 @@ namespace NifOsg
                 // Depth test flag
                 stateset->setMode(GL_DEPTH_TEST, zprop->flags&1 ? osg::StateAttribute::ON
                                                                 : osg::StateAttribute::OFF);
-                auto depth = SceneUtil::createDepth();
+                osg::ref_ptr<osg::Depth> depth = new osg::Depth;
                 // Depth write flag
                 depth->setWriteMask((zprop->flags>>1)&1);
                 // Morrowind ignores depth test function

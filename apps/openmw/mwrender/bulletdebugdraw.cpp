@@ -8,7 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <osg/PolygonMode>
 #include <osg/PolygonOffset>
 #include <osg/ShapeDrawable>
@@ -66,7 +66,7 @@ void DebugDrawer::createGeometry()
 
         auto* stateSet = new osg::StateSet;
         stateSet->setAttributeAndModes(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE), osg::StateAttribute::ON);
-        stateSet->setAttributeAndModes(new osg::PolygonOffset(SceneUtil::getReverseZ() ? 1.0 : -1.0, SceneUtil::getReverseZ() ? 1.0 : -1.0));
+        stateSet->setAttributeAndModes(new osg::PolygonOffset(SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0, SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0));
         osg::ref_ptr<osg::Material> material = new osg::Material;
         material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
         stateSet->setAttribute(material);

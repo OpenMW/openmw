@@ -14,7 +14,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -338,7 +338,7 @@ namespace MWRender
             mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
         }
 
-        auto depth = SceneUtil::createDepth();
+        osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
         depth->setWriteMask(false);
         mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(depth);
         mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);

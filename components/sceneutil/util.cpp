@@ -4,8 +4,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include <SDL_opengl_glext.h>
-
 #include <osg/Node>
 #include <osg/NodeVisitor>
 #include <osg/TexGen>
@@ -16,26 +14,7 @@
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/settings/settings.hpp>
-#include <components/debug/debuglog.hpp>
 #include <components/sceneutil/nodecallback.hpp>
-
-#ifndef GL_DEPTH32F_STENCIL8_NV
-#define GL_DEPTH32F_STENCIL8_NV 0x8DAC
-#endif
-
-namespace
-{
-
-bool isReverseZSupported()
-{
-    if (!Settings::Manager::mDefaultSettings.count({"Camera", "reverse z"}))
-        return false;
-    auto ext = osg::GLExtensions::Get(0, false);
-    return Settings::Manager::getBool("reverse z", "Camera") && ext && ext->isClipControlSupported;
-}
-
-}
 
 namespace SceneUtil
 {
@@ -336,83 +315,6 @@ bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::
     }
     camera->attach(buffer, texture, level, face, mipMapGeneration, samples, colourSamples);
     return addMSAAIntermediateTarget;
-}
-
-void attachAlphaToCoverageFriendlyDepthColor(osg::Camera* camera, osg::Texture2D* colorTex, osg::Texture2D* depthTex, GLenum depthFormat)
-{
-    bool addMSAAIntermediateTarget = Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1;
-
-    if (isFloatingPointDepthFormat(depthFormat) && addMSAAIntermediateTarget)
-    {
-        camera->attach(osg::Camera::COLOR_BUFFER0, colorTex);
-        camera->attach(osg::Camera::DEPTH_BUFFER, depthTex);
-        camera->addCullCallback(new AttachMultisampledDepthColorCallback(colorTex, depthTex, 2, 1));
-    }
-    else
-    {
-        attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER, colorTex);
-        camera->attach(osg::Camera::DEPTH_BUFFER, depthTex);
-    }
-}
-
-bool getReverseZ()
-{
-    static bool reverseZ = isReverseZSupported();
-    return reverseZ;
-}
-
-void setCameraClearDepth(osg::Camera* camera)
-{
-    camera->setClearDepth(getReverseZ() ? 0.0 : 1.0);
-}
-
-osg::ref_ptr<osg::Depth> createDepth()
-{
-    return new osg::Depth(getReverseZ() ? osg::Depth::GEQUAL : osg::Depth::LEQUAL);
-}
-
-osg::Matrix getReversedZProjectionMatrixAsPerspectiveInf(double fov, double aspect, double near)
-{
-    double A = 1.0/std::tan(osg::DegreesToRadians(fov)/2.0);
-    return osg::Matrix(
-        A/aspect,   0,      0,      0,
-        0,          A,      0,      0,
-        0,          0,      0,      -1,
-        0,          0,      near,   0
-    );
-}
-
-osg::Matrix getReversedZProjectionMatrixAsPerspective(double fov, double aspect, double near, double far)
-{
-    double A = 1.0/std::tan(osg::DegreesToRadians(fov)/2.0);
-    return osg::Matrix(
-        A/aspect,   0,      0,                          0,
-        0,          A,      0,                          0,
-        0,          0,      near/(far-near),            -1,
-        0,          0,      (far*near)/(far - near),    0
-    );
-}
-
-osg::Matrix getReversedZProjectionMatrixAsOrtho(double left, double right, double bottom, double top, double near, double far)
-{
-    return osg::Matrix(
-        2/(right-left),             0,                          0,                  0,
-        0,                          2/(top-bottom),             0,                  0,
-        0,                          0,                          1/(far-near),       0,
-        (right+left)/(left-right),  (top+bottom)/(bottom-top),  far/(far-near),     1
-    );
-}
-
-bool isFloatingPointDepthFormat(GLenum format)
-{
-    constexpr std::array<GLenum, 4> formats = {
-        GL_DEPTH_COMPONENT32F,
-        GL_DEPTH_COMPONENT32F_NV,
-        GL_DEPTH32F_STENCIL8,
-        GL_DEPTH32F_STENCIL8_NV,
-    };
-
-    return std::find(formats.cbegin(), formats.cend(), format) != formats.cend();
 }
 
 }

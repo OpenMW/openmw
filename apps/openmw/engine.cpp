@@ -42,6 +42,7 @@
 #include <components/misc/frameratelimiter.hpp>
 
 #include <components/sceneutil/screencapture.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -761,6 +762,22 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
     bool shadersSupported = exts && (exts->glslLanguageVersion >= 1.2f);
+    bool enableReverseZ = false;
+
+    if (Settings::Manager::getBool("reverse z", "Camera"))
+    {
+        if (exts && exts->isClipControlSupported)
+        {
+            enableReverseZ = true;
+            Log(Debug::Info) << "Using reverse-z depth buffer";
+        }
+        else
+            Log(Debug::Warning) << "GL_ARB_clip_control not supported: disabling reverse-z depth buffer";
+    }
+    else
+        Log(Debug::Info) << "Using standard depth buffer";
+
+    SceneUtil::AutoDepth::setReversed(enableReverseZ);
 
 #if OSG_VERSION_LESS_THAN(3, 6, 6)
     // hack fix for https://github.com/openscenegraph/OpenSceneGraph/issues/1028
