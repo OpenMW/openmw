@@ -295,7 +295,7 @@ bool OMW::Engine::frame(float frametime)
 
         // Should be called after input manager update and before any change to the game world.
         // It applies to the game world queued changes from the previous frame.
-        mLuaManager->synchronizedUpdate(paused, frametime);
+        mLuaManager->synchronizedUpdate(mEnvironment.getWindowManager()->isGuiMode(), frametime);
 
         // update game state
         {
