@@ -440,4 +440,24 @@ return {
         EXPECT_EQ(counter4, 25);
     }
 
+    TEST_F(LuaScriptsContainerTest, CallbackWrapper)
+    {
+        LuaUtil::Callback callback{mLua.sol()["print"], mLua.newTable()};
+        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptDebugNameKey] = "some_script.lua";
+        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptsContainer::ScriptId{nullptr, 0};
+
+        testing::internal::CaptureStdout();
+        callback(1.5);
+        EXPECT_EQ(internal::GetCapturedStdout(), "1.5\n");
+
+        testing::internal::CaptureStdout();
+        callback(1.5, 2.5);
+        EXPECT_EQ(internal::GetCapturedStdout(), "1.5\t2.5\n");
+
+        testing::internal::CaptureStdout();
+        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = sol::nil;
+        callback(1.5, 2.5);
+        EXPECT_EQ(internal::GetCapturedStdout(), "Ignored callback to the removed script some_script.lua\n");
+    }
+
 }

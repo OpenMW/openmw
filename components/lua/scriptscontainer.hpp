@@ -242,7 +242,7 @@ namespace LuaUtil
         int64_t mTemporaryCallbackCounter = 0;
     };
 
-    // Wrapper for a single-argument Lua function.
+    // Wrapper for a Lua function.
     // Holds information about the script the function belongs to.
     // Needed to prevent callback calls if the script was removed.
     struct Callback
@@ -250,7 +250,15 @@ namespace LuaUtil
         sol::function mFunc;
         sol::table mHiddenData;  // same object as Script::mHiddenData in ScriptsContainer
 
-        void operator()(sol::object arg) const;
+        template <typename... Args>
+        void operator()(Args&&... args) const
+        {
+            if (mHiddenData[ScriptsContainer::sScriptIdKey] != sol::nil)
+                LuaUtil::call(mFunc, std::forward<Args>(args)...);
+            else
+                Log(Debug::Debug) << "Ignored callback to the removed script "
+                                  << mHiddenData.get<std::string>(ScriptsContainer::sScriptDebugNameKey);
+        }
     };
 
 }
