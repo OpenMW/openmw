@@ -81,6 +81,7 @@ namespace ESM
     {
         AiTravelData mData;
         bool mHidden;
+        bool mRepeat;
 
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;
@@ -94,6 +95,7 @@ namespace ESM
         std::string mTargetId;
         std::string mCellId;
         float mRemainingDuration;
+        bool mRepeat;
 
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;
@@ -112,6 +114,7 @@ namespace ESM
         bool mCommanded;
 
         bool mActive;
+        bool mRepeat;
 
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;
@@ -120,6 +123,7 @@ namespace ESM
     struct AiActivate : AiPackage
     {
         std::string mTargetId;
+        bool mRepeat;
 
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;

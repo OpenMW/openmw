@@ -37,7 +37,8 @@ namespace ESM
     struct AITravel
     {
         float   mX, mY, mZ;
-        int     mUnk;
+        unsigned char mShouldRepeat;
+        unsigned char mPadding[3];
     };
 
     struct AITarget
@@ -45,13 +46,14 @@ namespace ESM
         float   mX, mY, mZ;
         short   mDuration;
         NAME32  mId;
-        short   mUnk;
+        unsigned char mShouldRepeat;
+        unsigned char mPadding;
     };
 
     struct AIActivate
     {
         NAME32 mName;
-        unsigned char mUnk;
+        unsigned char mShouldRepeat;
     };
 
     #pragma pack(pop)

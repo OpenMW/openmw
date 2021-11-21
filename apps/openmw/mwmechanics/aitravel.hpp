@@ -19,11 +19,11 @@ namespace MWMechanics
     class AiTravel : public TypedAiPackage<AiTravel>
     {
         public:
-            AiTravel(float x, float y, float z, AiTravel* derived);
+            AiTravel(float x, float y, float z, bool repeat, AiTravel* derived);
 
             AiTravel(float x, float y, float z, AiInternalTravel* derived);
 
-            AiTravel(float x, float y, float z);
+            AiTravel(float x, float y, float z, bool repeat);
 
             explicit AiTravel(const ESM::AiSequence::AiTravel* travel);
 
