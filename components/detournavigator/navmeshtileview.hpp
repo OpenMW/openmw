@@ -21,7 +21,7 @@ namespace DetourNavigator
         const dtBVNode* mBvTree;
         const dtOffMeshConnection* mOffMeshCons;
 
-        friend bool operator==(const NavMeshTileConstView& lhs, const NavMeshTileConstView& rhs);
+        friend bool operator==(const NavMeshTileConstView& lhs, const NavMeshTileConstView& rhs) noexcept;
     };
 
     NavMeshTileConstView asNavMeshTileConstView(const unsigned char* data);

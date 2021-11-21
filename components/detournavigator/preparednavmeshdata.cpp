@@ -6,8 +6,6 @@
 
 namespace
 {
-    using namespace DetourNavigator;
-
     void initPolyMeshDetail(rcPolyMeshDetail& value) noexcept
     {
         value.meshes = nullptr;
@@ -24,13 +22,6 @@ namespace
         rcFree(value.verts);
         rcFree(value.tris);
     }
-}
-
-template <class T>
-inline constexpr auto operator==(const T& lhs, const T& rhs) noexcept
-    -> std::enable_if_t<std::is_same_v<std::void_t<decltype(makeTuple(lhs))>, void>, bool>
-{
-    return makeTuple(lhs) == makeTuple(rhs);
 }
 
 namespace DetourNavigator
