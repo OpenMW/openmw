@@ -636,7 +636,6 @@ namespace MWRender
                     mParticleNode = new osg::PositionAttitudeTransform;
                     mParticleNode->addCullCallback(mUnderwaterSwitch);
                     mParticleNode->setNodeMask(Mask_WeatherParticles);
-                    mParticleNode->getOrCreateStateSet();
                     mRootNode->addChild(mParticleNode);
                 }
 
@@ -668,7 +667,6 @@ namespace MWRender
                         ps->getParticle(particleIndex)->update(0, true);
                     }
 
-                    ps->getOrCreateStateSet();
                     ps->setUserValue("simpleLighting", true);
                 }
 

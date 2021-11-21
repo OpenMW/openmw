@@ -1,6 +1,7 @@
 #include "shadervisitor.hpp"
 
 #include <unordered_set>
+#include <unordered_map>
 #include <set>
 
 #include <osg/AlphaFunc>
@@ -37,12 +38,14 @@ namespace Shader
             , mUniforms(rhs.mUniforms)
             , mModes(rhs.mModes)
             , mAttributes(rhs.mAttributes)
+            , mTextureModes(rhs.mTextureModes)
         {
         }
 
         void addUniform(const std::string& name) { mUniforms.emplace(name); }
         void setMode(osg::StateAttribute::GLMode mode) { mModes.emplace(mode); }
         void setAttribute(osg::StateAttribute::TypeMemberPair typeMemberPair) { mAttributes.emplace(typeMemberPair); }
+        void setTextureMode(int unit, osg::StateAttribute::GLMode mode) { mTextureModes[unit].emplace(mode); }
 
         void setAttribute(const osg::StateAttribute* attribute)
         {
@@ -64,12 +67,20 @@ namespace Shader
         bool hasMode(osg::StateAttribute::GLMode mode) { return mModes.count(mode); }
         bool hasAttribute(const osg::StateAttribute::TypeMemberPair &typeMemberPair) { return mAttributes.count(typeMemberPair); }
         bool hasAttribute(osg::StateAttribute::Type type, unsigned int member) { return hasAttribute(osg::StateAttribute::TypeMemberPair(type, member)); }
+        bool hasTextureMode(int unit, osg::StateAttribute::GLMode mode)
+        {
+            auto it = mTextureModes.find(unit);
+            if (it == mTextureModes.cend())
+                return false;
+
+            return it->second.count(mode);
+        }
 
         const std::set<osg::StateAttribute::TypeMemberPair>& getAttributes() { return mAttributes; }
 
         bool empty()
         {
-            return mUniforms.empty() && mModes.empty() && mAttributes.empty();
+            return mUniforms.empty() && mModes.empty() && mAttributes.empty() && mTextureModes.empty();
         }
 
         META_Object(Shader, AddedState)
@@ -86,9 +97,12 @@ namespace Shader
             AddedState* mTracker;
         };
 
+        using ModeSet = std::unordered_set<osg::StateAttribute::GLMode>;
+
         std::unordered_set<std::string> mUniforms;
-        std::unordered_set<osg::StateAttribute::GLMode> mModes;
+        ModeSet mModes;
         std::set<osg::StateAttribute::TypeMemberPair> mAttributes;
+        std::unordered_map<int, ModeSet> mTextureModes;
     };
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
@@ -102,6 +116,8 @@ namespace Shader
         , mAlphaBlend(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
+        , mSoftParticles(false)
+        , mSoftParticleSize(0.f)
         , mNode(nullptr)
     {
     }
@@ -213,6 +229,8 @@ namespace Shader
         if (node.getUserValue("shaderRequired", shaderRequired) && shaderRequired)
             mRequirements.back().mShaderRequired = true;
 
+        osg::ref_ptr<AddedState> addedState = getAddedState(*stateset);
+
         if (!texAttributes.empty())
         {
             const osg::Texture* diffuseMap = nullptr;
@@ -224,6 +242,9 @@ namespace Shader
                 const osg::StateAttribute *attr = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
                 if (attr)
                 {
+                    if (addedState && addedState->hasTextureMode(unit, GL_TEXTURE_2D))
+                        continue;
+
                     const osg::Texture* texture = attr->asTexture();
                     if (texture)
                     {
@@ -350,7 +371,6 @@ namespace Shader
         osg::StateSet::AttributeList removedAttributes;
         if (osg::ref_ptr<osg::StateSet> removedState = getRemovedState(*stateset))
             removedAttributes = removedState->getAttributeList();
-        osg::ref_ptr<AddedState> addedState = getAddedState(*stateset);
 
         for (const auto* attributeMap : std::initializer_list<const osg::StateSet::AttributeList*>{ &attributes, &removedAttributes })
         {
@@ -545,6 +565,25 @@ namespace Shader
             updateRemovedState(*writableUserData, removedState);
         }
 
+        if (reqs.mSoftParticles)
+        {
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
+            depth->setWriteMask(false);
+            writableStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            addedState->setAttribute(depth);
+
+            writableStateSet->addUniform(new osg::Uniform("particleSize", reqs.mSoftParticleSize));
+            addedState->addUniform("particleSize");
+
+            writableStateSet->addUniform(new osg::Uniform("opaqueDepthTex", 2));
+            addedState->addUniform("opaqueDepthTex");
+
+            writableStateSet->setTextureAttributeAndModes(2, mOpaqueDepthTex, osg::StateAttribute::ON);
+            addedState->setTextureMode(2, GL_TEXTURE_2D);
+        }
+
+        defineMap["softParticles"] = reqs.mSoftParticles ? "1" : "0";
+
         if (!addedState->empty())
         {
             // user data is normally shallow copied so shared with the original stateset
@@ -556,27 +595,6 @@ namespace Shader
 
             updateAddedState(*writableUserData, addedState);
         }
-
-        bool softParticles = false;
-
-        if (mOpaqueDepthTex)
-        {
-            auto partsys = dynamic_cast<osgParticle::ParticleSystem*>(&node);
-
-            if (partsys)
-            {
-                softParticles = true;
-
-                auto depth = new SceneUtil::AutoDepth;
-                depth->setWriteMask(false);
-                writableStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-                writableStateSet->addUniform(new osg::Uniform("particleSize", partsys->getDefaultParticleTemplate().getSizeRange().maximum));
-                writableStateSet->addUniform(new osg::Uniform("opaqueDepthTex", 2));
-                writableStateSet->setTextureAttributeAndModes(2, mOpaqueDepthTex, osg::StateAttribute::ON);
-            }
-        }
-
-        defineMap["softParticles"] = softParticles ? "1" : "0";
 
         std::string shaderPrefix;
         if (!node.getUserValue("shaderPrefix", shaderPrefix))
@@ -719,13 +737,22 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Drawable& drawable)
     {
-        // non-Geometry drawable (e.g. particle system)
-        bool needPop = (drawable.getStateSet() != nullptr);
+        auto partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drawable);
 
-        if (drawable.getStateSet())
+        bool needPop = drawable.getStateSet() || partsys;
+
+        if (needPop)
         {
             pushRequirements(drawable);
-            applyStateSet(drawable.getStateSet(), drawable);
+
+            if (partsys && mOpaqueDepthTex)
+            {
+                mRequirements.back().mSoftParticles = true;
+                mRequirements.back().mSoftParticleSize = partsys->getDefaultParticleTemplate().getSizeRange().maximum;
+            }
+
+            if (drawable.getStateSet())
+                applyStateSet(drawable.getStateSet(), drawable);
         }
 
         if (!mRequirements.empty())
@@ -831,6 +858,12 @@ namespace Shader
 
                 for (const auto& attribute : removedState->getAttributeList())
                     writableStateSet->setAttribute(attribute.second.first, attribute.second.second);
+
+                for (unsigned int unit = 0; unit < removedState->getTextureModeList().size(); ++unit)
+                {
+                    for (const auto&[mode, value] : removedState->getTextureModeList()[unit])
+                        writableStateSet->setTextureMode(unit, mode, value);
+                }
             }
         }
 
