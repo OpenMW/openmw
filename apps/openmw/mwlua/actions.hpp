@@ -29,9 +29,7 @@ namespace MWLua
         virtual std::string toString() const = 0;
 
     private:
-#ifndef NDEBUG
         std::string mCallerTraceback;
-#endif
     };
 
     class TeleportAction final : public Action

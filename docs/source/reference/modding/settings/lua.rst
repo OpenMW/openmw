@@ -1,6 +1,18 @@
 Lua Settings
 ############
 
+lua debug
+---------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enables debug tracebacks for Lua actions.
+It adds significant performance overhead, don't enable if you don't need it.
+
+This setting can only be configured by editing the settings configuration file.
+
 lua num threads
 ---------------
 
