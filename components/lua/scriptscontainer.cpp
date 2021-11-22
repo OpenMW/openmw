@@ -530,13 +530,4 @@ namespace LuaUtil
         updateTimerQueue(mHoursTimersQueue, gameHours);
     }
 
-    void Callback::operator()(sol::object arg) const
-    {
-        if (mHiddenData[ScriptsContainer::sScriptIdKey] != sol::nil)
-            LuaUtil::call(mFunc, std::move(arg));
-        else
-            Log(Debug::Debug) << "Ignored callback to the removed script "
-                              << mHiddenData.get<std::string>(ScriptsContainer::sScriptDebugNameKey);
-    }
-
 }
