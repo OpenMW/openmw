@@ -220,6 +220,7 @@ namespace MWLua
             mPlayer.getRefData().setLuaScripts(nullptr);
             mPlayer = MWWorld::Ptr();
         }
+        clearUserInterface();
     }
 
     void LuaManager::setupPlayer(const MWWorld::Ptr& ptr)
@@ -425,6 +426,7 @@ namespace MWLua
                 continue;
             ESM::LuaScripts data;
             scripts->save(data);
+            clearUserInterface();
             scripts->load(data);
         }
         for (LocalScripts* scripts : mActiveLocalScripts)
