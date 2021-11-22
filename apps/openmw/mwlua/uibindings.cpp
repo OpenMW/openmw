@@ -10,6 +10,7 @@ namespace MWLua
 {
     namespace
     {
+        std::set<LuaUi::Element*> allElements;
 
         class UiAction final : public Action
         {
@@ -152,6 +153,7 @@ namespace MWLua
         {
             if (element->mDestroy)
                 return;
+            allElements.erase(element.get());
             element->mDestroy = true;
             context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::DESTROY, element, context.mLua));
         };
@@ -168,6 +170,7 @@ namespace MWLua
         api["create"] = [context](const sol::table& layout)
         {
             auto element = std::make_shared<LuaUi::Element>(layout);
+            allElements.emplace(element.get());
             context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::CREATE, element, context.mLua));
             return element;
         };
@@ -180,4 +183,10 @@ namespace MWLua
         return LuaUtil::makeReadOnly(api);
     }
     
+    void clearUserInterface()
+    {
+        for (auto element : allElements)
+            element->destroy();
+        allElements.clear();
+    }
 }
