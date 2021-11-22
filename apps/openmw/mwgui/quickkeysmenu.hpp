@@ -32,6 +32,7 @@ namespace MWGui
         void onAssignMagicItem (MWWorld::Ptr item);
         void onAssignMagic (const std::string& spellId);
         void onAssignMagicCancel ();
+        void validate(MWWorld::Ptr player);
         void onOpen() override;
 
         void activateQuickKey(int index);
