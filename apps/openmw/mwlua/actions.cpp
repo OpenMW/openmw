@@ -4,6 +4,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -12,12 +13,12 @@
 
 namespace MWLua
 {
-
-#ifdef NDEBUG
-    Action::Action(LuaUtil::LuaState* state) {}
-#else
-    Action::Action(LuaUtil::LuaState* state) : mCallerTraceback(state->debugTraceback()) {}
-#endif
+    Action::Action(LuaUtil::LuaState* state)
+    {
+        static const bool luaDebug = Settings::Manager::getBool("lua debug", "Lua");
+        if (luaDebug)
+            mCallerTraceback = state->debugTraceback();
+    }
 
     void Action::safeApply(WorldView& w) const
     {
@@ -28,11 +29,11 @@ namespace MWLua
         catch (const std::exception& e)
         {
             Log(Debug::Error) << "Error in " << this->toString() << ": " << e.what();
-#ifdef NDEBUG
-            Log(Debug::Error) << "Traceback is available only in debug builds";
-#else
-            Log(Debug::Error) << "Caller " << mCallerTraceback;
-#endif
+
+            if (mCallerTraceback.empty())
+                Log(Debug::Error) << "Set 'lua_debug=true' in settings.cfg to enable action tracebacks";
+            else
+                Log(Debug::Error) << "Caller " << mCallerTraceback;
         }
     }
 
