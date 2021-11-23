@@ -501,6 +501,9 @@ namespace MWMechanics
         // If an ally of actor1 has been attacked by actor2 or has attacked actor2, start combat between actor1 and actor2
         for (const MWWorld::Ptr& ally : allies1)
         {
+            // Don't let allies that are already in combat choose additional sides
+            if (ally.getClass().getCreatureStats(ally).getAiSequence().isInCombat())
+                continue;
             if (creatureStats1.getAiSequence().isInCombat(ally))
                 continue;
 

@@ -11,6 +11,7 @@
     Bug #3792: 1 frame late magicka recalc breaks early scripted magicka reactions to Intelligence change
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
     Bug #3855: AI sometimes spams defensive spells
+    Bug #3867: All followers attack player when one follower enters combat with player
     Bug #3905: Great House Dagoth issues
     Bug #4203: Resurrecting an actor doesn't close the loot GUI
     Bug #4376: Moved actors don't respawn in their original cells
@@ -26,6 +27,7 @@
     Bug #5192: Actor turn rate is too slow
     Bug #5207: Loose summons can be present in scene
     Bug #5279: Ingame console stops auto-scrolling after clicking output
+    Bug #5318: Aiescort behaves differently from vanilla
     Bug #5371: 'Dead' slaughterfish added by mod are animated/alive
     Bug #5377: Console does not appear after using menutest in inventory
     Bug #5379: Wandering NPCs falling through cantons
