@@ -7,6 +7,8 @@
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmreader.hpp>
@@ -29,6 +31,8 @@
 
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/settings.hpp>
+
+#include <components/loadinglistener/loadinglistener.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -79,43 +83,40 @@ namespace MWWorld
 {
     struct GameContentLoader : public ContentLoader
     {
-        GameContentLoader(Loading::Listener& listener)
-          : ContentLoader(listener)
+        void addLoader(std::string&& extension, ContentLoader& loader)
         {
+            mLoaders.emplace(std::move(extension), &loader);
         }
 
-        bool addLoader(const std::string& extension, ContentLoader* loader)
+        void load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener) override
         {
-            return mLoaders.insert(std::make_pair(extension, loader)).second;
-        }
-
-        void load(const boost::filesystem::path& filepath, int& index) override
-        {
-            LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
+            const auto it = mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string()));
             if (it != mLoaders.end())
             {
-                it->second->load(filepath, index);
+                const std::string filename = filepath.filename().string();
+                Log(Debug::Info) << "Loading content file " << filename;
+                if (listener != nullptr)
+                    listener->setLabel(MyGUI::TextIterator::toTagsString(filename));
+                it->second->load(filepath, index, listener);
             }
             else
             {
-              std::string msg("Cannot load file: ");
-              msg += filepath.string();
-              throw std::runtime_error(msg.c_str());
+                std::string msg("Cannot load file: ");
+                msg += filepath.string();
+                throw std::runtime_error(msg.c_str());
             }
         }
 
         private:
-          typedef std::map<std::string, ContentLoader*> LoadersContainer;
-          LoadersContainer mLoaders;
+            std::map<std::string, ContentLoader*> mLoaders;
     };
 
     struct OMWScriptsLoader : public ContentLoader
     {
         ESMStore& mStore;
-        OMWScriptsLoader(Loading::Listener& listener, ESMStore& store) : ContentLoader(listener), mStore(store) {}
-        void load(const boost::filesystem::path& filepath, int& index) override
+        OMWScriptsLoader(ESMStore& store) : mStore(store) {}
+        void load(const boost::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
         {
-            ContentLoader::load(filepath.filename(), index);
             mStore.addOMWScripts(filepath.string());
         }
     };
@@ -2936,18 +2937,18 @@ namespace MWWorld
 
     void World::loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
-        GameContentLoader gameContentLoader(*listener);
-        EsmLoader esmLoader(store, readers, encoder, *listener);
+        GameContentLoader gameContentLoader;
+        EsmLoader esmLoader(store, readers, encoder);
         validateMasterFiles(readers);
 
-        gameContentLoader.addLoader(".esm", &esmLoader);
-        gameContentLoader.addLoader(".esp", &esmLoader);
-        gameContentLoader.addLoader(".omwgame", &esmLoader);
-        gameContentLoader.addLoader(".omwaddon", &esmLoader);
-        gameContentLoader.addLoader(".project", &esmLoader);
+        gameContentLoader.addLoader(".esm", esmLoader);
+        gameContentLoader.addLoader(".esp", esmLoader);
+        gameContentLoader.addLoader(".omwgame", esmLoader);
+        gameContentLoader.addLoader(".omwaddon", esmLoader);
+        gameContentLoader.addLoader(".project", esmLoader);
 
-        OMWScriptsLoader omwScriptsLoader(*listener, store);
-        gameContentLoader.addLoader(".omwscripts", &omwScriptsLoader);
+        OMWScriptsLoader omwScriptsLoader(store);
+        gameContentLoader.addLoader(".omwscripts", omwScriptsLoader);
 
         int idx = 0;
         for (const std::string &file : content)
@@ -2956,7 +2957,7 @@ namespace MWWorld
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(file))
             {
-                gameContentLoader.load(col.getPath(file), idx);
+                gameContentLoader.load(col.getPath(file), idx, listener);
             }
             else
             {

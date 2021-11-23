@@ -26,14 +26,14 @@ class ESMStore;
 struct EsmLoader : public ContentLoader
 {
     EsmLoader(MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& readers,
-      ToUTF8::Utf8Encoder* encoder, Loading::Listener& listener);
+        ToUTF8::Utf8Encoder* encoder);
 
-    void load(const boost::filesystem::path& filepath, int& index) override;
+    void load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener) override;
 
     private:
-      std::vector<ESM::ESMReader>& mEsm;
-      MWWorld::ESMStore& mStore;
-      ToUTF8::Utf8Encoder* mEncoder;
+        std::vector<ESM::ESMReader>& mEsm;
+        MWWorld::ESMStore& mStore;
+        ToUTF8::Utf8Encoder* mEncoder;
 };
 
 void convertMagicEffects(ESM::CreatureStats& creatureStats, ESM::InventoryState& inventory, ESM::NpcStats* npcStats = nullptr);
