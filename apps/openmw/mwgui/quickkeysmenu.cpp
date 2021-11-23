@@ -94,7 +94,6 @@ namespace MWGui
             {
                 MWWorld::Ptr item = *mKey[index].button->getUserData<MWWorld::Ptr>();
                 // Make sure the item is available and is not broken
-                std::cout << item << std::endl;
                 if (!item || item.getRefData().getCount() < 1 ||
                     (item.getClass().hasItemHealth(item) &&
                         item.getClass().getItemHealth(item) <= 0))
