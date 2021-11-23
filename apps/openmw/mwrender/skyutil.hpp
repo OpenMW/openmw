@@ -239,7 +239,7 @@ namespace MWRender
     class Sun : public CelestialBody
     {
     public:
-        Sun(osg::Group* parentNode, Resource::ImageManager& imageManager);
+        Sun(osg::Group* parentNode, Resource::SceneManager& sceneManager);
 
         ~Sun();
 

@@ -300,7 +300,7 @@ namespace MWRender
         mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getImageManager(), forceShaders);
         atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
-        mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getImageManager()));
+        mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager));
         mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager, Fallback::Map::getFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
         mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager, Fallback::Map::getFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 
