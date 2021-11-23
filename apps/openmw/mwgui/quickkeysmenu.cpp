@@ -83,8 +83,8 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
-            switch (mKey[index].type)
-            {
+        switch (mKey[index].type)
+        {
             case Type_Unassigned:
             case Type_HandToHand:
             case Type_Magic:
@@ -107,7 +107,7 @@ namespace MWGui
                     break;
                 }
             }
-            }
+        }
     }
 
     void QuickKeysMenu::onOpen()
