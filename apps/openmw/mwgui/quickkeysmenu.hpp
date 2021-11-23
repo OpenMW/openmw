@@ -32,7 +32,6 @@ namespace MWGui
         void onAssignMagicItem (MWWorld::Ptr item);
         void onAssignMagic (const std::string& spellId);
         void onAssignMagicCancel ();
-        void validate(MWWorld::Ptr player);
         void onOpen() override;
 
         void activateQuickKey(int index);
@@ -77,7 +76,8 @@ namespace MWGui
 
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
-
+        // Check if quick key is still valid
+        inline void validate(int index);
         void unassign(keyData* key);
     };
 
