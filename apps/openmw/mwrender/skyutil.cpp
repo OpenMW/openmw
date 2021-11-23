@@ -694,11 +694,13 @@ namespace MWRender
         mTransform->setNodeMask(visible ? mVisibleMask : 0);
     }
 
-    Sun::Sun(osg::Group* parentNode, Resource::ImageManager& imageManager)
+    Sun::Sun(osg::Group* parentNode, Resource::SceneManager& sceneManager)
         : CelestialBody(parentNode, 1.0f, 1, Mask_Sun)
         , mUpdater(new SunUpdater)
     {
         mTransform->addUpdateCallback(mUpdater);
+
+        Resource::ImageManager& imageManager = *sceneManager.getImageManager();
 
         osg::ref_ptr<osg::Texture2D> sunTex = new osg::Texture2D(imageManager.getImage("textures/tx_sun_05.dds"));
         sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -714,9 +716,12 @@ namespace MWRender
         stateset->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
         stateset->setNestRenderBins(false);
         // Set up alpha testing on the occlusion testing subgraph, that way we can get the occlusion tested fragments to match the circular shape of the sun
-        osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
-        alphaFunc->setFunction(osg::AlphaFunc::GREATER, 0.8);
-        stateset->setAttributeAndModes(alphaFunc);
+        if (!sceneManager.getForceShaders())
+        {
+            osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
+            alphaFunc->setFunction(osg::AlphaFunc::GREATER, 0.8);
+            stateset->setAttributeAndModes(alphaFunc);
+        }
         stateset->setTextureAttributeAndModes(0, sunTex);
         stateset->setAttributeAndModes(createUnlitMaterial());
         stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sunflash_Query)));
@@ -816,6 +821,7 @@ namespace MWRender
             // without having to retrieve the current far clipping distance.
             // We want the sun glare to be "infinitely" far away.
             double far = SceneUtil::AutoDepth::isReversed() ? 0.0 : 1.0;
+            depth->setFunction(osg::Depth::LEQUAL);
             depth->setZNear(far);
             depth->setZFar(far);
             depth->setWriteMask(false);
@@ -879,6 +885,8 @@ namespace MWRender
         camera->setClearMask(0);
         camera->setRenderOrder(osg::Camera::NESTED_RENDER);
         camera->setAllowEventFocus(false);
+        camera->getOrCreateStateSet()->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(camera->getProjectionMatrix())));
+        SceneUtil::setCameraClearDepth(camera);
 
         osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3f(-1,-1,0), osg::Vec3f(2,0,0), osg::Vec3f(0,2,0));
         camera->addChild(geom);
