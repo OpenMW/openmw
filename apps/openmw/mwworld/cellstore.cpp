@@ -1,4 +1,5 @@
 #include "cellstore.hpp"
+#include "magiceffects.hpp"
 
 #include <algorithm>
 
