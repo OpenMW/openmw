@@ -80,6 +80,7 @@
     Bug #6386: Artifacts in water reflection due to imprecise screen-space coordinate computation
     Bug #6396: Inputting certain Unicode characters triggers an assertion
     Bug #6416: Morphs are applied to the wrong target
+    Bug #6417: OpenMW doesn't always use the right node to accumulate movement
     Bug #6429: Wyrmhaven: Can't add AI packages to player
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
