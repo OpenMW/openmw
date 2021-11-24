@@ -67,7 +67,6 @@ namespace MWInput
         bool mSneaking;
         bool mAttemptJump;
 
-        float mOverencumberedMessageDelay;
         float mTimeIdle;
     };
 }

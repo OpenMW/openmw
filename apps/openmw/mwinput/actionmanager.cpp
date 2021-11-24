@@ -39,7 +39,6 @@ namespace MWInput
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mSneaking(false)
         , mAttemptJump(false)
-        , mOverencumberedMessageDelay(0.f)
         , mTimeIdle(0.f)
     {
     }
@@ -88,22 +87,16 @@ namespace MWInput
             {
                 player.setUpDown(1);
                 triedToMove = true;
-                mOverencumberedMessageDelay = 0.f;
             }
 
             // if player tried to start moving, but can't (due to being overencumbered), display a notification.
             if (triedToMove)
             {
                 MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-                mOverencumberedMessageDelay -= dt;
                 if (playerPtr.getClass().getEncumbrance(playerPtr) > playerPtr.getClass().getCapacity(playerPtr))
                 {
                     player.setAutoMove (false);
-                    if (mOverencumberedMessageDelay <= 0)
-                    {
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage59}");
-                        mOverencumberedMessageDelay = 1.0;
-                    }
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage59}");
                 }
             }
 
