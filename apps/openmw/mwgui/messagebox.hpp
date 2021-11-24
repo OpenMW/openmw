@@ -69,6 +69,7 @@ namespace MWGui
 
             float mCurrentTime;
             float mMaxTime;
+            bool mIsEncumberedMessage;
 
         protected:
             MessageBoxManager& mMessageBoxManager;

@@ -93,10 +93,19 @@ namespace MWGui
 
     void MessageBoxManager::createMessageBox (const std::string& message, bool stat)
     {
+        if (message == "#{sNotifyMessage59}")
+            for (MessageBox* messageBox : mMessageBoxes)
+                if (messageBox->mIsEncumberedMessage)
+                {
+                    messageBox->mCurrentTime = 0;
+                    return;
+                }
+
         MessageBox *box = new MessageBox(*this, message);
         box->mCurrentTime = 0;
         std::string realMessage = MyGUI::LanguageManager::getInstance().replaceTags(message);
         box->mMaxTime = realMessage.length()*mMessageBoxSpeed;
+        box->mIsEncumberedMessage = (message == "#{sNotifyMessage59}");
 
         if(stat)
             mStaticMessageBox = box;
