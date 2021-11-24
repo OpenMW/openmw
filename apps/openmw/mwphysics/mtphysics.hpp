@@ -69,6 +69,7 @@ namespace MWPhysics
             void afterPreStep();
             void afterPostStep();
             void afterPostSim();
+            void waitForWorkers();
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
             std::vector<ActorFrameData> mActorsFrameData;
@@ -91,13 +92,17 @@ namespace MWPhysics
             int mRemainingSteps;
             int mLOSCacheExpiry;
             bool mDeferAabbUpdate;
-            bool mNewFrame;
+            std::size_t mFrameCounter;
             bool mAdvanceSimulation;
             bool mThreadSafeBullet;
             bool mQuit;
             std::atomic<int> mNextJob;
             std::atomic<int> mNextLOS;
             std::vector<std::thread> mThreads;
+
+            std::size_t mWorkersFrameCounter = 0;
+            std::condition_variable mWorkersDone;
+            std::mutex mWorkersDoneMutex;
 
             mutable std::shared_mutex mSimulationMutex;
             mutable std::shared_mutex mCollisionWorldMutex;
