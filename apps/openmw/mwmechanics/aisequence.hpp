@@ -102,6 +102,9 @@ namespace MWMechanics
             /// Removes all combat packages until first non-combat or stack empty.
             void stopCombat();
 
+            /// Removes all combat packages with the given targets
+            void stopCombat(const std::vector<MWWorld::Ptr>& targets);
+
             /// Has a package been completed during the last update?
             bool isPackageDone() const;
 

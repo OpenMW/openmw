@@ -158,11 +158,25 @@ bool AiSequence::isInCombat(const MWWorld::Ptr &actor) const
     return false;
 }
 
+// TODO: use std::list::remove_if for all these methods when we switch to C++20
 void AiSequence::stopCombat()
 {
     for(auto it = mPackages.begin(); it != mPackages.end(); )
     {
         if ((*it)->getTypeId() == AiPackageTypeId::Combat)
+        {
+            it = mPackages.erase(it);
+        }
+        else
+            ++it;
+    }
+}
+
+void AiSequence::stopCombat(const std::vector<MWWorld::Ptr>& targets)
+{
+    for(auto it = mPackages.begin(); it != mPackages.end(); )
+    {
+        if ((*it)->getTypeId() == AiPackageTypeId::Combat && std::find(targets.begin(), targets.end(), (*it)->getTarget()) != targets.end())
         {
             it = mPackages.erase(it);
         }

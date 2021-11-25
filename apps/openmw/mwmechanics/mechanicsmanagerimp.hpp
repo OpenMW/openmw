@@ -102,6 +102,8 @@ namespace MWMechanics
             /// Makes \a ptr fight \a target. Also shouts a combat taunt.
             void startCombat (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) override;
 
+            void stopCombat(const MWWorld::Ptr& ptr) override;
+
             /**
              * @note victim may be empty
              * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.

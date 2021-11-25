@@ -112,6 +112,9 @@ namespace MWBase
             /// Makes \a ptr fight \a target. Also shouts a combat taunt.
             virtual void startCombat (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) = 0;
 
+            /// Removes an actor and its allies from combat with the actor's targets.
+            virtual void stopCombat(const MWWorld::Ptr& ptr) = 0;
+
             enum OffenseType
             {
                 OT_Theft, // Taking items owned by an NPC or a faction you are not a member of

@@ -443,6 +443,22 @@ namespace MWMechanics
         }
     }
 
+    void Actors::stopCombat(const MWWorld::Ptr& ptr)
+    {
+        auto& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+        std::vector<MWWorld::Ptr> targets;
+        if(ai.getCombatTargets(targets))
+        {
+            std::set<MWWorld::Ptr> allySet;
+            getActorsSidingWith(ptr, allySet);
+            std::vector<MWWorld::Ptr> allies(allySet.begin(), allySet.end());
+            for(const auto& ally : allies)
+                ally.getClass().getCreatureStats(ally).getAiSequence().stopCombat(targets);
+            for(const auto& target : targets)
+                target.getClass().getCreatureStats(target).getAiSequence().stopCombat(allies);
+        }
+    }
+
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer)
     {
         // No combat for totally static creatures
@@ -979,7 +995,7 @@ namespace MWMechanics
                     // Calm witness down
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stopPursuit();
-                    creatureStats.getAiSequence().stopCombat();
+                    stopCombat(ptr);
 
                     // Reset factors to attack
                     creatureStats.setAttacked(false);
@@ -1967,7 +1983,7 @@ namespace MWMechanics
             if (stats.isDead())
                 continue;
 
-            // An actor counts as siding with this actor if Follow or Escort is the current AI package, or there are only Combat and Wander packages before the Follow/Escort package
+            // An actor counts as siding with this actor if Follow or Escort is the current AI package, or there are only Wander packages before the Follow/Escort package
             // Actors that are targeted by this actor's Follow or Escort packages also side with them
             for (const auto& package : stats.getAiSequence())
             {
@@ -1983,7 +1999,7 @@ namespace MWMechanics
                     }
                     break;
                 }
-                else if (package->getTypeId() != AiPackageTypeId::Combat && package->getTypeId() != AiPackageTypeId::Wander)
+                else if (package->getTypeId() > AiPackageTypeId::Wander && package->getTypeId() <= AiPackageTypeId::Activate) // Don't count "fake" package types
                     break;
             }
         }
