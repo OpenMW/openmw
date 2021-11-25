@@ -771,6 +771,11 @@ namespace MWGui
         mMessageBoxManager->removeStaticMessageBox();
     }
 
+    std::vector<MWGui::MessageBox*> WindowManager::getActiveMessageBoxes()
+    {
+        return mMessageBoxManager->getActiveMessageBoxes();
+    }
+
     int WindowManager::readPressedButton ()
     {
         return mMessageBoxManager->readPressedButton();

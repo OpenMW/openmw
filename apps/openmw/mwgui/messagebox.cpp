@@ -161,6 +161,12 @@ namespace MWGui
         return false;
     }
 
+    std::vector<MessageBox*> MessageBoxManager::getActiveMessageBoxes()
+    {
+        return mMessageBoxes;
+    }
+
+
     int MessageBoxManager::readPressedButton (bool reset)
     {
         int pressed = mLastButtonPressed;
@@ -200,6 +206,11 @@ namespace MWGui
         pos.top = (gameWindowSize.height - mMainWidget->getHeight() - height - mBottomPadding);
 
         mMainWidget->setPosition(pos);
+    }
+
+    std::string MessageBox::getMessage()
+    { 
+        return mMessage;
     }
 
     int MessageBox::getHeight ()
