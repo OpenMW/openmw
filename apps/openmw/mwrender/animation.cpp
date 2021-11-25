@@ -624,9 +624,8 @@ namespace MWRender
             return;
 
         const NodeMap& nodeMap = getNodeMap();
-
-        for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = animsrc->mKeyframes->mKeyframeControllers.begin();
-             it != animsrc->mKeyframes->mKeyframeControllers.end(); ++it)
+        const auto& controllerMap = animsrc->mKeyframes->mKeyframeControllers;
+        for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = controllerMap.begin(); it != controllerMap.end(); ++it)
         {
             std::string bonename = Misc::StringUtils::lowerCase(it->first);
             NodeMap::const_iterator found = nodeMap.find(bonename);
@@ -652,14 +651,32 @@ namespace MWRender
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(mAnimationTimePtr[0]);
         mObjectRoot->accept(assignVisitor);
 
+        // Determine the movement accumulation bone if necessary
         if (!mAccumRoot)
         {
-            NodeMap::const_iterator found = nodeMap.find("bip01");
-            if (found == nodeMap.end())
-                found = nodeMap.find("root bone");
-
-            if (found != nodeMap.end())
-                mAccumRoot = found->second;
+            // Priority matters! bip01 is preferred.
+            static const std::array<std::string, 2> accumRootNames =
+            {
+                "bip01",
+                "root bone"
+            };
+            NodeMap::const_iterator found = nodeMap.end();
+            for (const std::string& name : accumRootNames)
+            {
+                found = nodeMap.find(name);
+                if (found == nodeMap.end())
+                    continue;
+                for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = controllerMap.begin(); it != controllerMap.end(); ++it)
+                {
+                    if (Misc::StringUtils::lowerCase(it->first) == name)
+                    {
+                        mAccumRoot = found->second;
+                        break;
+                    }
+                }
+                if (mAccumRoot)
+                    break;
+            }
         }
     }
 
