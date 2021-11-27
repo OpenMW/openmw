@@ -161,7 +161,7 @@ namespace MWGui
         return false;
     }
 
-    std::vector<MessageBox*> MessageBoxManager::getActiveMessageBoxes()
+    const std::vector<MessageBox*> MessageBoxManager::getActiveMessageBoxes()
     {
         return mMessageBoxes;
     }
@@ -208,7 +208,7 @@ namespace MWGui
         mMainWidget->setPosition(pos);
     }
 
-    std::string MessageBox::getMessage()
+    const std::string MessageBox::getMessage()
     { 
         return mMessage;
     }

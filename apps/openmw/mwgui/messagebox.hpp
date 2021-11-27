@@ -49,7 +49,7 @@ namespace MWGui
 
             void setVisible(bool value);
 
-            std::vector<MessageBox*> getActiveMessageBoxes();
+            const std::vector<MessageBox*> getActiveMessageBoxes();
 
         private:
             std::vector<MessageBox*> mMessageBoxes;
@@ -65,7 +65,7 @@ namespace MWGui
         public:
             MessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message);
             void setMessage (const std::string& message);
-            std::string getMessage();
+            const std::string getMessage();
             int getHeight ();
             void update (int height);
             void setVisible(bool value);

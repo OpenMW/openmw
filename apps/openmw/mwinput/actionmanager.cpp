@@ -42,6 +42,7 @@ namespace MWInput
         , mSneaking(false)
         , mAttemptJump(false)
         , mTimeIdle(0.f)
+        , mOverencumberedMessage("#{sNotifyMessage59}")
     {
     }
 
@@ -99,16 +100,16 @@ namespace MWInput
                 {
                     player.setAutoMove (false);
                     std::vector<MWGui::MessageBox*> msgboxs = MWBase::Environment::get().getWindowManager()->getActiveMessageBoxes();
-                    std::vector<MWGui::MessageBox*>::iterator it = std::find_if(msgboxs.begin(), msgboxs.end(), [](MWGui::MessageBox*& msg)
+                    const std::vector<MWGui::MessageBox*>::iterator it = std::find_if(msgboxs.begin(), msgboxs.end(), [=](MWGui::MessageBox*& msgbox)
                     {
-                        return (msg->getMessage() == "#{sNotifyMessage59}");
+                        return (msgbox->getMessage() == mOverencumberedMessage);
                     });
 
                     // if an overencumbered messagebox is already present, reset its expiry timer, otherwise create new one.
                     if (it != msgboxs.end())
                         (*it)->mCurrentTime = 0;
                     else
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage59}");
+                        MWBase::Environment::get().getWindowManager()->messageBox(mOverencumberedMessage);
                 }
             }
 
