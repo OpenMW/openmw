@@ -93,11 +93,6 @@ namespace MWMechanics
 
             /// Removes an actor from combat and makes all of their allies stop fighting the actor's targets
             void stopCombat(const MWWorld::Ptr& ptr);
-            /** Start combat between two actors
-                @Notes: If againstPlayer = true then actor2 should be the Player.
-                        If one of the combatants is creature it should be actor1.
-            */
-            void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer);
 
             void playIdleDialogue(const MWWorld::Ptr& actor);
             void updateMovementSpeed(const MWWorld::Ptr& actor);
@@ -144,15 +139,13 @@ namespace MWMechanics
 
             ///Returns the list of actors which are siding with the given actor in fights
             /**ie AiFollow or AiEscort is active and the target is the actor **/
-            std::vector<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
+            std::vector<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor, bool excludeInfighting = false);
             std::vector<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
             /// Recursive version of getActorsFollowing
             void getActorsFollowing(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out);
             /// Recursive version of getActorsSidingWith
-            void getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out);
-            /// Recursive version of getActorsSidingWith that takes, adds to and returns a cache of actors mapped to their allies
-            void getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies);
+            void getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, bool excludeInfighting = false);
 
             /// Get the list of AiFollow::mFollowIndex for all actors following this target
             std::vector<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);
@@ -218,6 +211,16 @@ namespace MWMechanics
             void purgeSpellEffects (int casterActorId);
 
             void predictAndAvoidCollisions(float duration);
+
+            /** Start combat between two actors
+                @Notes: If againstPlayer = true then actor2 should be the Player.
+                        If one of the combatants is creature it should be actor1.
+            */
+            void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer);
+
+            /// Recursive version of getActorsSidingWith that takes, adds to and returns a cache of actors mapped to their allies. Excludes infighting
+            void getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies);
+
     };
 }
 
