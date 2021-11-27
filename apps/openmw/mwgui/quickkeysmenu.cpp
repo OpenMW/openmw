@@ -79,41 +79,45 @@ namespace MWGui
         delete mMagicSelectionDialog;
     }
 
+    inline void QuickKeysMenu::validate(int index)
+    {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+        switch (mKey[index].type)
+        {
+            case Type_Unassigned:
+            case Type_HandToHand:
+            case Type_Magic:
+                break;
+            case Type_Item:
+            case Type_MagicItem:
+            {
+                MWWorld::Ptr item = *mKey[index].button->getUserData<MWWorld::Ptr>();
+                // Make sure the item is available and is not broken
+                if (!item || item.getRefData().getCount() < 1 ||
+                    (item.getClass().hasItemHealth(item) &&
+                        item.getClass().getItemHealth(item) <= 0))
+                {
+                    // Try searching for a compatible replacement
+                    item = store.findReplacement(mKey[index].id);
+
+                    if (item)
+                        mKey[index].button->setUserData(MWWorld::Ptr(item));
+
+                    break;
+                }
+            }
+        }
+    }
+
     void QuickKeysMenu::onOpen()
     {
         WindowBase::onOpen();
 
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
-
-        // Check if quick keys are still valid
-        for (int i=0; i<10; ++i)
+        // Quick key index
+        for (int index = 0; index < 10; ++index)
         {
-            switch (mKey[i].type)
-            {
-                case Type_Unassigned:
-                case Type_HandToHand:
-                case Type_Magic:
-                    break;
-                case Type_Item:
-                case Type_MagicItem:
-                {
-                    MWWorld::Ptr item = *mKey[i].button->getUserData<MWWorld::Ptr>();
-                    // Make sure the item is available and is not broken
-                    if (!item || item.getRefData().getCount() < 1 ||
-                        (item.getClass().hasItemHealth(item) &&
-                        item.getClass().getItemHealth(item) <= 0))
-                    {
-                        // Try searching for a compatible replacement
-                        item = store.findReplacement(mKey[i].id);
-
-                        if (item)
-                            mKey[i].button->setUserData(MWWorld::Ptr(item));
-
-                        break;
-                    }
-                }
-            }
+            validate(index);
         }
     }
 
@@ -329,10 +333,12 @@ namespace MWGui
         assert(index >= 1 && index <= 10);
 
         keyData *key = &mKey[index-1];
-
+        
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
         const MWMechanics::CreatureStats &playerStats = player.getClass().getCreatureStats(player);
+
+        validate(index-1);
 
         // Delay action executing,
         // if player is busy for now (casting a spell, attacking someone, etc.)

@@ -67,6 +67,8 @@ namespace MWInput
         bool mSneaking;
         bool mAttemptJump;
 
+        const std::string mOverencumberedMessage;
+
         float mTimeIdle;
     };
 }

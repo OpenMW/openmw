@@ -49,6 +49,8 @@ namespace MWGui
 
             void setVisible(bool value);
 
+            const std::vector<MessageBox*> getActiveMessageBoxes();
+
         private:
             std::vector<MessageBox*> mMessageBoxes;
             InteractiveMessageBox* mInterMessageBoxe;
@@ -63,6 +65,7 @@ namespace MWGui
         public:
             MessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message);
             void setMessage (const std::string& message);
+            const std::string getMessage();
             int getHeight ();
             void update (int height);
             void setVisible(bool value);
@@ -73,7 +76,7 @@ namespace MWGui
 
         protected:
             MessageBoxManager& mMessageBoxManager;
-            const std::string& mMessage;
+            const std::string mMessage;
             MyGUI::EditBox* mMessageWidget;
             int mBottomPadding;
             int mNextBoxPadding;
