@@ -403,8 +403,8 @@ Windows_MSBuild_Engine_Release:
     config: "Release"
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-    # there's no true literal so we have to use a tautology
-    - if: $CI_PIPELINE_SOURCE == $CI_PIPELINE_SOURCE
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule" 
 
 Windows_MSBuild_Engine_Debug:
   extends:
