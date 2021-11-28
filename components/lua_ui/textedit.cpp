@@ -2,18 +2,9 @@
 
 namespace LuaUi
 {
-    bool LuaTextEdit::setPropertyRaw(std::string_view name, sol::object value)
+    void LuaTextEdit::setProperties(sol::object props)
     {
-        if (name == "caption")
-        {
-            if (!value.is<std::string>())
-                return false;
-            setCaption(value.as<std::string>());
-        }
-        else
-        {
-            return WidgetExtension::setPropertyRaw(name, value);
-        }
-        return true;
+        setCaption(parseProperty(props, "caption", std::string()));
+        WidgetExtension::setProperties(props);
     }
 }

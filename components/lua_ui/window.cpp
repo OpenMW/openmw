@@ -8,6 +8,7 @@ namespace LuaUi
         : mCaption()
         , mPreviousMouse()
         , mChangeScale()
+        , mMoveResize()
     {}
 
     void LuaWindow::initialize()
@@ -43,20 +44,13 @@ namespace LuaUi
         }
     }
 
-    bool LuaWindow::setPropertyRaw(std::string_view name, sol::object value)
+    void LuaWindow::setProperties(sol::object props)
     {
-        if (name == "caption")
-        {
-            if (!value.is<std::string>())
-                return false;
-            if (mCaption)
-                mCaption->setCaption(value.as<std::string>());
-        }
-        else
-        {
-            return WidgetExtension::setPropertyRaw(name, value);
-        }
-        return true;
+        if (mCaption)
+            mCaption->setCaption(parseProperty(props, "caption", std::string()));
+        mMoveResize = MyGUI::IntCoord();
+        setForcedCoord(mMoveResize);
+        WidgetExtension::setProperties(props);
     }
 
     void LuaWindow::notifyMousePress(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
@@ -84,9 +78,11 @@ namespace LuaUi
         change.width *= (left - mPreviousMouse.left);
         change.height *= (top - mPreviousMouse.top);
 
-        setForcedOffset(forcedOffset() + change.size());
-        MyGUI::IntPoint positionOffset = change.point() + getPosition() - calculateCoord().point();
-        setForcedOffset(forcedOffset() + positionOffset);
+        mMoveResize = mMoveResize + change.size();
+        setForcedCoord(mMoveResize);
+        // position can change based on size changes
+        mMoveResize = mMoveResize + change.point() + getPosition() - calculateCoord().point();
+        setForcedCoord(mMoveResize);
         updateCoord();
 
         mPreviousMouse.left = left;

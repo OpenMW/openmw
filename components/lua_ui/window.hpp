@@ -15,6 +15,7 @@ namespace LuaUi
 
         public:
             LuaWindow();
+            virtual void setProperties(sol::object) override;
 
         private:
             // \todo replace with LuaText when skins are properly implemented
@@ -22,11 +23,11 @@ namespace LuaUi
             MyGUI::IntPoint mPreviousMouse;
             MyGUI::IntCoord mChangeScale;
 
+            MyGUI::IntCoord mMoveResize;
+
         protected:
             virtual void initialize() override;
             virtual void deinitialize() override;
-
-            bool setPropertyRaw(std::string_view name, sol::object value) override;
 
             void notifyMousePress(MyGUI::Widget*, int, int, MyGUI::MouseButton);
             void notifyMouseDrag(MyGUI::Widget*, int, int, MyGUI::MouseButton);

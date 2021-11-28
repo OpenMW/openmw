@@ -5,9 +5,10 @@
 
 #include <MyGUI_Widget.h>
 #include <sol/sol.hpp>
-#include <osg/Vec2>
 
 #include <components/lua/scriptscontainer.hpp>
+
+#include "properties.hpp"
 
 namespace LuaUi
 {
@@ -36,17 +37,16 @@ namespace LuaUi
         void setCallback(const std::string&, const LuaUtil::Callback&);
         void clearCallbacks();
 
-        void setProperty(std::string_view, sol::object value);
+        virtual void setProperties(sol::object);
 
-        MyGUI::IntCoord forcedOffset();
-        void setForcedOffset(const MyGUI::IntCoord& offset);
+        MyGUI::IntCoord forcedCoord();
+        void setForcedCoord(const MyGUI::IntCoord& offset);
         void updateCoord();
 
     protected:
         sol::table makeTable() const;
         sol::object keyEvent(MyGUI::KeyCode) const;
         sol::object mouseEvent(int left, int top, MyGUI::MouseButton button) const;
-        virtual bool setPropertyRaw(std::string_view name, sol::object value);
         virtual void initialize();
         virtual void deinitialize();
         virtual MyGUI::IntSize calculateSize();
@@ -55,9 +55,14 @@ namespace LuaUi
 
         void triggerEvent(std::string_view name, const sol::object& argument) const;
 
+        // offsets the position and size, used only in C++ widget code
         MyGUI::IntCoord mForcedCoord;
+        // position and size in pixels
         MyGUI::IntCoord mAbsoluteCoord;
+        // position and size as a ratio of parent size
         MyGUI::FloatCoord mRelativeCoord;
+        // negative position offset as a ratio of this widget's size
+        // used in combination with relative coord to align the widget, e. g. center it
         MyGUI::FloatSize mAnchor;
 
     private:
