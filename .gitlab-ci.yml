@@ -426,6 +426,10 @@ Windows_MSBuild_CS_Release:
   variables:
     <<: *cs-targets
     config: "Release"
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule" 
 
 Windows_MSBuild_CS_Debug:
   extends:
