@@ -395,21 +395,15 @@ Windows_Ninja_Tests_RelWithDebInfo:
     - MSVC2019_64/*/*/*/*/*/*/*.log
     - MSVC2019_64/*/*/*/*/*/*/*/*.log
 
-Daily_Windows_MSBuild_Engine_Release:on-schedule:
-  extends:
-    - .Windows_MSBuild_Base
-  variables:
-    <<: *engine-targets
-    config: "Release"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-
 Windows_MSBuild_Engine_Release:
   extends:
     - .Windows_MSBuild_Base
   variables:
     <<: *engine-targets
     config: "Release"
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: true
 
 Windows_MSBuild_Engine_Debug:
   extends:
