@@ -79,8 +79,6 @@ void parseConfig(std::istream& stream, boost::program_options::variables_map& va
 
 class MaybeQuotedPath : public boost::filesystem::path
 {
-public:
-    operator boost::filesystem::path() { return *this; }
 };
 
 std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPath);
