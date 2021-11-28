@@ -113,7 +113,6 @@ namespace
         bpo::variables_map variables;
         parseArgs(arguments, variables, description);
         EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"(save)");
-//        EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"("save".omwsave)");
     }
 
     TEST(OpenMWOptionsFromArguments, should_support_quoted_load_savegame_path_with_escaped_quote_by_ampersand)
@@ -222,7 +221,6 @@ namespace
         bpo::variables_map variables;
         Files::parseConfig(stream, variables, description);
         EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), "");
-//        EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"(""save".omwsave")");
     }
 
     TEST(OpenMWOptionsFromConfig, should_strip_quotes_from_load_savegame_path_with_space)
