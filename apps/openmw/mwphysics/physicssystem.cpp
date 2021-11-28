@@ -934,7 +934,8 @@ namespace MWPhysics
         , mRotation()
         , mMovement(actor.velocity())
         , mWaterlevel(waterlevel)
-        , mHalfExtentsZ(actor.getHalfExtents().z())
+        // for compatibility with vanilla assets, mesh offset is the actor halfextent for dead actors
+        , mHalfExtentsZ(actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead() ? actor.getHalfExtents().z() : actor.getScaledMeshTranslation().z())
         , mOldHeight(0)
         , mStuckFrames(0)
         , mFlying(MWBase::Environment::get().getWorld()->isFlying(actor.getPtr()))
