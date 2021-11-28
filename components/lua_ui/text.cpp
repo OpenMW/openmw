@@ -12,25 +12,11 @@ namespace LuaUi
         WidgetExtension::initialize();
     }
 
-    bool LuaText::setPropertyRaw(std::string_view name, sol::object value)
+    void LuaText::setProperties(sol::object props)
     {
-        if (name == "caption")
-        {
-            if (!value.is<std::string>())
-                return false;
-            setCaption(value.as<std::string>());
-        }
-        else if (name == "autoSize")
-        {
-            if (!value.is<bool>())
-                return false;
-            mAutoSized = value.as<bool>();
-        }
-        else
-        {
-            return WidgetExtension::setPropertyRaw(name, value);
-        }
-        return true;
+        setCaption(parseProperty(props, "caption", std::string()));
+        mAutoSized = parseProperty(props, "autoSize", true);
+        WidgetExtension::setProperties(props);
     }
 
     MyGUI::IntSize LuaText::calculateSize()

@@ -142,19 +142,12 @@ namespace LuaUi
         mCallbacks.clear();
     }
 
-    void WidgetExtension::setProperty(std::string_view name, sol::object value)
-    {
-        if (!setPropertyRaw(name, value))
-            Log(Debug::Error) << "Invalid value of property " << name
-                              << ": " << LuaUtil::toString(value);
-    }
-
-    MyGUI::IntCoord WidgetExtension::forcedOffset()
+    MyGUI::IntCoord WidgetExtension::forcedCoord()
     {
         return mForcedCoord;
     }
 
-    void WidgetExtension::setForcedOffset(const MyGUI::IntCoord& offset)
+    void WidgetExtension::setForcedCoord(const MyGUI::IntCoord& offset)
     {
         mForcedCoord = offset;
     }
@@ -164,55 +157,16 @@ namespace LuaUi
         mWidget->setCoord(calculateCoord());
     }
 
-    bool WidgetExtension::setPropertyRaw(std::string_view name, sol::object value)
+    void WidgetExtension::setProperties(sol::object props)
     {
-        if (name == "position")
-        {
-            if (!value.is<osg::Vec2f>())
-                return false;
-            auto v = value.as<osg::Vec2f>();
-            mAbsoluteCoord.left = v.x();
-            mAbsoluteCoord.top = v.y();
-        }
-        else if (name == "size")
-        {
-            if (!value.is<osg::Vec2f>())
-                return false;
-            auto v = value.as<osg::Vec2f>();
-            mAbsoluteCoord.width = v.x();
-            mAbsoluteCoord.height = v.y();
-        }
-        else if (name == "relativePosition")
-        {
-            if (!value.is<osg::Vec2f>())
-                return false;
-            auto v = value.as<osg::Vec2f>();
-            mRelativeCoord.left = v.x();
-            mRelativeCoord.top = v.y();
-        }
-        else if (name == "relativeSize")
-        {
-            if (!value.is<osg::Vec2f>())
-                return false;
-            auto v = value.as<osg::Vec2f>();
-            mRelativeCoord.width = v.x();
-            mRelativeCoord.height = v.y();
-        }
-        else if (name == "anchor")
-        {
-            if (!value.is<osg::Vec2f>())
-                return false;
-            auto v = value.as<osg::Vec2f>();
-            mAnchor.width = v.x();
-            mAnchor.height = v.y();
-        }
-        else if (name == "visible")
-        {
-            if (!value.is<bool>())
-                return false;
-            mWidget->setVisible(value.as<bool>());
-        }
-        return true;
+        mAbsoluteCoord = parseProperty(props, "position", MyGUI::IntPoint());
+        mAbsoluteCoord = parseProperty(props, "size", MyGUI::IntSize());
+        mRelativeCoord = parseProperty(props, "relativePosition", MyGUI::FloatPoint());
+        mRelativeCoord = parseProperty(props, "relativeSize", MyGUI::FloatSize());
+        mAnchor = parseProperty(props, "anchor", MyGUI::FloatSize());
+        mWidget->setVisible(parseProperty(props, "visible", true));
+
+        updateCoord();
     }
 
     void WidgetExtension::updateChildrenCoord(MyGUI::Widget* _widget)

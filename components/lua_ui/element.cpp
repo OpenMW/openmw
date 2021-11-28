@@ -24,18 +24,7 @@ namespace LuaUi
 
     void setProperties(LuaUi::WidgetExtension* ext, const sol::table& layout)
     {
-        auto props = layout.get<sol::optional<sol::table>>("props");
-        if (props.has_value())
-        {
-            props.value().for_each([ext](const sol::object& key, const sol::object& value)
-                {
-                    if (key.is<std::string_view>())
-                        ext->setProperty(key.as<std::string_view>(), value);
-                    else
-                        Log(Debug::Warning) << "UI property key must be a string";
-                });
-            ext->updateCoord();
-        }
+        ext->setProperties(layout.get<sol::object>("props"));
     }
 
     void setEventCallbacks(LuaUi::WidgetExtension* ext, const sol::table& layout)

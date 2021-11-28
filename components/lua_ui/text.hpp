@@ -14,13 +14,13 @@ namespace LuaUi
         public:
             LuaText();
             virtual void initialize() override;
+            virtual void setProperties(sol::object) override;
 
         private:
             bool mAutoSized;
 
         protected:
             virtual MyGUI::IntSize calculateSize() override;
-            bool setPropertyRaw(std::string_view name, sol::object value) override;
     };
 }
 
