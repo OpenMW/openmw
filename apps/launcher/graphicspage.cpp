@@ -47,7 +47,10 @@ Launcher::GraphicsPage::GraphicsPage(QWidget *parent)
     connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
     connect(framerateLimitCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotFramerateLimitToggled(bool)));
     connect(shadowDistanceCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotShadowDistLimitToggled(bool)));
+}
 
+void Launcher::GraphicsPage::connectAntiAliasingChanged(const QObject* receiver, const char* slot) {
+    connect(antiAliasingComboBox, SIGNAL(currentIndexChanged(int)), receiver, slot);
 }
 
 bool Launcher::GraphicsPage::setupSDL()

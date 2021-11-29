@@ -20,11 +20,15 @@ namespace Launcher
     public:
         explicit GraphicsPage(QWidget *parent = nullptr);
 
+        void connectAntiAliasingChanged(const QObject *receiver, const char *slot);
         void saveSettings();
         bool loadSettings();
 
     public slots:
         void screenChanged(int screen);
+
+    signals:
+        void signalAntiAliasingChanged(int aaValue);
 
     private slots:
         void slotFullScreenChanged(int state);
