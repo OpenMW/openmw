@@ -15,6 +15,7 @@
 #include "timestamp.hpp"
 #include "globals.hpp"
 #include "contentloader.hpp"
+#include "groundcoverstore.hpp"
 
 namespace osg
 {
@@ -80,7 +81,7 @@ namespace MWWorld
 
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
-            MWWorld::ESMStore mGroundcoverStore;
+            GroundcoverStore mGroundcoverStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
 
@@ -164,10 +165,9 @@ namespace MWWorld
 
             void updateSkyDate();
 
-            // A helper method called automatically during World construction.
-            void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content,
-                 ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener, bool validateMasterFiles = true);
+            void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener);
 
+            void loadGroundcoverFiles(const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder);
 
             float feetToGameUnits(float feet);
             float getActivationDistancePlusTelekinesis();

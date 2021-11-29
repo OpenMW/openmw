@@ -155,13 +155,9 @@ namespace MWWorld
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
-        
+
         loadContentFiles(fileCollections, contentFiles, mStore, mEsm, encoder, listener);
-        if (!groundcoverFiles.empty())
-        {
-            std::vector<ESM::ESMReader> tempReaders (groundcoverFiles.size());
-            loadContentFiles(fileCollections, groundcoverFiles, mGroundcoverStore, tempReaders, encoder, listener, false);
-        }
+        loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder);
 
         listener->loadingOff();
 
@@ -2938,12 +2934,11 @@ namespace MWWorld
         return mScriptsEnabled;
     }
 
-    void World::loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener, bool validate)
+    void World::loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         GameContentLoader gameContentLoader(*listener);
         EsmLoader esmLoader(store, readers, encoder, *listener);
-        if (validate)
-            validateMasterFiles(readers);
+        validateMasterFiles(readers);
 
         gameContentLoader.addLoader(".esm", &esmLoader);
         gameContentLoader.addLoader(".esp", &esmLoader);
@@ -2970,6 +2965,15 @@ namespace MWWorld
             }
             idx++;
         }
+    }
+
+    void World::loadGroundcoverFiles(const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder)
+    {
+        if (!Settings::Manager::getBool("enabled", "Groundcover")) return;
+
+        Log(Debug::Info) << "Loading groundcover:";
+
+        mGroundcoverStore.init(mStore.get<ESM::Static>(), fileCollections, groundcoverFiles, encoder);
     }
 
     bool World::startSpellCast(const Ptr &actor)

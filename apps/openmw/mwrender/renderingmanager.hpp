@@ -67,6 +67,11 @@ namespace DetourNavigator
     struct Settings;
 }
 
+namespace MWWorld
+{
+    class GroundcoverStore;
+}
+
 namespace MWRender
 {
     class StateUpdater;
@@ -94,7 +99,7 @@ namespace MWRender
     public:
         RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
                          Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                         const std::string& resourcePath, DetourNavigator::Navigator& navigator, const MWWorld::ESMStore& groundcoverStore);
+                         const std::string& resourcePath, DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore);
         ~RenderingManager();
 
         osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();

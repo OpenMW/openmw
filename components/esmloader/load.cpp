@@ -215,6 +215,8 @@ namespace EsmLoader
                 reader.setEncoder(encoder);
                 reader.setIndex(static_cast<int>(i));
                 reader.open(collection.getPath(file).string());
+                if (query.mLoadCells)
+                    reader.resolveParentFileIndices(readers);
 
                 loadEsm(query, readers[i], result);
             }
