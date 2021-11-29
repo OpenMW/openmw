@@ -82,7 +82,8 @@
     Bug #6416: Morphs are applied to the wrong target
     Bug #6417: OpenMW doesn't always use the right node to accumulate movement
     Bug #6429: Wyrmhaven: Can't add AI packages to player
-    Bug #6433: Items bound to Quick Keys sometimes do not appear until the Quick Key menu is opened.
+    Bug #6433: Items bound to Quick Keys sometimes do not appear until the Quick Key menu is opened
+    Bug #6451: Weapon summoned from Cast When Used item will have the name "None"
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
