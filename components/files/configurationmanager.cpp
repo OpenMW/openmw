@@ -327,13 +327,13 @@ std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPat
         istream >> static_cast<boost::filesystem::path&>(MaybeQuotedPath);
         if (istream && !istream.eof() && istream.peek() != EOF)
         {
-            std::string remainder(std::istreambuf_iterator(istream), {});
+            std::string remainder{std::istreambuf_iterator(istream), {}};
             Log(Debug::Warning) << "Trailing data in path setting. Used '" << MaybeQuotedPath.string() << "' but '" << remainder << "' remained";
         }
     }
     else
     {
-        std::string intermediate(std::istreambuf_iterator(istream), {});
+        std::string intermediate{std::istreambuf_iterator(istream), {}};
         static_cast<boost::filesystem::path&>(MaybeQuotedPath) = intermediate;
     }
     return istream;
