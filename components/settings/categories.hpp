@@ -9,7 +9,7 @@
 namespace Settings
 {
     using CategorySetting = std::pair<std::string, std::string>;
-    using CategorySettingVector = std::set<std::pair<std::string, std::string>>;
+    using CategorySettingVector = std::set<CategorySetting>;
     using CategorySettingValueMap = std::map<CategorySetting, std::string>;
 }
 

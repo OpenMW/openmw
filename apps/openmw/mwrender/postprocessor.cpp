@@ -14,7 +14,6 @@
 #include <components/debug/debuglog.hpp>
 
 #include "vismask.hpp"
-#include "renderingmanager.hpp"
 
 namespace
 {
@@ -132,11 +131,10 @@ namespace
 
 namespace MWRender
 {
-    PostProcessor::PostProcessor(RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode)
+    PostProcessor::PostProcessor(osgViewer::Viewer* viewer, osg::Group* rootNode)
         : mViewer(viewer)
         , mRootNode(new osg::Group)
         , mDepthFormat(GL_DEPTH_COMPONENT24)
-        , mRendering(rendering)
     {
         bool softParticles = Settings::Manager::getBool("soft particles", "Shaders");
 
@@ -239,7 +237,6 @@ namespace MWRender
 
         mViewer->getCamera()->resize(width, height);
         mHUDCamera->resize(width, height);
-        mRendering.updateProjectionMatrix();
     }
 
     void PostProcessor::createTexturesAndCamera(int width, int height)

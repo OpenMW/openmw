@@ -454,7 +454,7 @@ namespace MWRender
         mSharedUniformStateUpdater = new SharedUniformStateUpdater(groundcover);
         rootNode->addUpdateCallback(mSharedUniformStateUpdater);
 
-        mPostProcessor = new PostProcessor(*this, viewer, mRootNode);
+        mPostProcessor = new PostProcessor(viewer, mRootNode);
         resourceSystem->getSceneManager()->setDepthFormat(mPostProcessor->getDepthFormat());
         resourceSystem->getSceneManager()->setOpaqueDepthTex(mPostProcessor->getOpaqueDepthTex());
 
@@ -1208,19 +1208,26 @@ namespace MWRender
 
     void RenderingManager::processChangedSettings(const Settings::CategorySettingVector &changed)
     {
+        // Only perform a projection matrix update once if a relevant setting is changed.
+        bool updateProjection = false;
+
         for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
         {
             if (it->first == "Camera" && it->second == "field of view")
             {
                 mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
-                updateProjectionMatrix();
+                updateProjection = true;
+            }
+            else if (it->first == "Video" && (it->second == "resolution x" || it->second == "resolution y"))
+            {
+                updateProjection = true;
             }
             else if (it->first == "Camera" && it->second == "viewing distance")
             {
                 mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
                 if(!Settings::Manager::getBool("use distant fog", "Fog"))
                     mStateUpdater->setFogEnd(mViewDistance);
-                updateProjectionMatrix();
+                updateProjection = true;
             }
             else if (it->first == "General" && (it->second == "texture filter" ||
                                                 it->second == "texture mipmap" ||
@@ -1262,6 +1269,11 @@ namespace MWRender
                     mViewer->startThreading();
                 }
             }
+        }
+
+        if (updateProjection)
+        {
+            updateProjectionMatrix();
         }
     }
 
