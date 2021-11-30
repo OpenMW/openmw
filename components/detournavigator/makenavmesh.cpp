@@ -26,10 +26,10 @@
 #include <limits>
 #include <array>
 
+namespace DetourNavigator
+{
 namespace
 {
-    using namespace DetourNavigator;
-
     struct Rectangle
     {
         TileBounds mBounds;
@@ -388,6 +388,7 @@ namespace
         return power;
     }
 }
+} // namespace DetourNavigator
 
 namespace DetourNavigator
 {

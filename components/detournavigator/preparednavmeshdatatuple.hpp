@@ -9,10 +9,11 @@
 
 #include <tuple>
 
-namespace DetourNavigator
+inline bool operator==(const rcPolyMesh& lhs, const rcPolyMesh& rhs) noexcept
 {
-    constexpr auto makeTuple(const rcPolyMesh& v) noexcept
+    const auto makeTuple = [] (const rcPolyMesh& v)
     {
+        using namespace DetourNavigator;
         return std::tuple(
             Span(v.verts, static_cast<int>(getVertsLength(v))),
             Span(v.polys, static_cast<int>(getPolysLength(v))),
@@ -26,18 +27,27 @@ namespace DetourNavigator
             v.borderSize,
             v.maxEdgeError
         );
-    }
+    };
+    return makeTuple(lhs) == makeTuple(rhs);
+}
 
-    constexpr auto makeTuple(const rcPolyMeshDetail& v) noexcept
+inline bool operator==(const rcPolyMeshDetail& lhs, const rcPolyMeshDetail& rhs) noexcept
+{
+    const auto makeTuple = [] (const rcPolyMeshDetail& v)
     {
+        using namespace DetourNavigator;
         return std::tuple(
             Span(v.meshes, static_cast<int>(getMeshesLength(v))),
             Span(v.verts, static_cast<int>(getVertsLength(v))),
             Span(v.tris, static_cast<int>(getTrisLength(v)))
         );
-    }
+    };
+    return makeTuple(lhs) == makeTuple(rhs);
+}
 
-    constexpr auto makeTuple(const PreparedNavMeshData& v) noexcept
+namespace DetourNavigator
+{
+    inline auto makeTuple(const PreparedNavMeshData& v) noexcept
     {
         return std::tuple(
             v.mUserId,
