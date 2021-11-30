@@ -27,9 +27,6 @@ namespace Launcher
     public slots:
         void screenChanged(int screen);
 
-    signals:
-        void signalAntiAliasingChanged(int aaValue);
-
     private slots:
         void slotFullScreenChanged(int state);
         void slotStandardToggled(bool checked);
