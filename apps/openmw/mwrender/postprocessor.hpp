@@ -14,12 +14,10 @@ namespace osgViewer
 
 namespace MWRender
 {
-    class RenderingManager;
-
     class PostProcessor : public osg::Referenced
     {
     public:
-        PostProcessor(RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode);
+        PostProcessor(osgViewer::Viewer* viewer, osg::Group* rootNode);
 
         auto getMsaaFbo() { return mMsaaFbo; }
         auto getFbo() { return mFbo; }
@@ -46,8 +44,6 @@ namespace MWRender
         osg::ref_ptr<osg::Texture2D> mOpaqueDepthTex;
 
         int mDepthFormat;
-
-        RenderingManager& mRendering;
     };
 }
 
