@@ -12,6 +12,7 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/magiceffects.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
