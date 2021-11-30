@@ -515,8 +515,7 @@ namespace MWScript
                     MWWorld::Ptr actor = R()(runtime);
                     if (!actor.getClass().isActor())
                         return;
-                    MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
-                    creatureStats.getAiSequence().stopCombat();
+                    MWBase::Environment::get().getMechanicsManager()->stopCombat(actor);
                 }
         };
 

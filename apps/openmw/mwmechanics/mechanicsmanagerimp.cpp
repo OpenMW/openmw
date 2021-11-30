@@ -1608,6 +1608,11 @@ namespace MWMechanics
         MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 
+    void MechanicsManager::stopCombat(const MWWorld::Ptr& actor)
+    {
+        mActors.stopCombat(actor);
+    }
+
     void MechanicsManager::getObjectsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
         mActors.getObjectsInRange(position, radius, objects);

@@ -111,6 +111,8 @@ namespace MWMechanics
             ///< This function is normally called automatically during the update process, but it can
             /// also be called explicitly at any time to force an update.
 
+            /// Removes an actor from combat and makes all of their allies stop fighting the actor's targets
+            void stopCombat(const MWWorld::Ptr& ptr);
             /** Start combat between two actors
                 @Notes: If againstPlayer = true then actor2 should be the Player.
                         If one of the combatants is creature it should be actor1.

@@ -2,6 +2,7 @@
 ------
 
     Bug #1751: Birthsign abilities increase modified attribute values instead of base ones
+    Bug #1930: Followers are still fighting if a target stops combat with a leader
     Bug #3246: ESSImporter: Most NPCs are dead on save load
     Bug #3488: AI combat aiming is too slow
     Bug #3514: Editing a reference's position after loading an esp file makes the reference disappear
