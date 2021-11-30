@@ -11,7 +11,7 @@ namespace
     // Round value to prevent precision issues
     void truncate(float& value)
     {
-        value = std::roundf(value * 1024.f) / 1024.f;
+        value = static_cast<int>(value * 1024.f) / 1024.f;
     }
 }
 
