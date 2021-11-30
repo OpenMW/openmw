@@ -1089,8 +1089,6 @@ void OMW::Engine::go()
     // Save user settings
     settings.saveUser(settingspath);
 
-    mViewer->stopThreading();
-
     Log(Debug::Info) << "Quitting peacefully.";
 }
 
