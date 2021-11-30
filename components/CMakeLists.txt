@@ -290,6 +290,7 @@ target_link_libraries(components
 
     Base64
     SQLite::SQLite3
+    smhasher
     )
 
 target_link_libraries(components ${BULLET_LIBRARIES})

@@ -173,7 +173,8 @@ std::string NIFFile::printVersion(unsigned int version)
 
 void NIFFile::parse(Files::IStreamPtr stream)
 {
-    hash = Files::getHash(filename, *stream);
+    const std::array<std::uint64_t, 2> fileHash = Files::getHash(filename, *stream);
+    hash.append(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t));
 
     NIFStream nif (this, stream);
 

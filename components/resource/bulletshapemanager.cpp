@@ -169,10 +169,7 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
             if (shape != nullptr)
             {
                 shape->mFileName = normalized;
-                std::string fileHash;
-                constNode->getUserValue(Misc::OsgUserValues::sFileHash, fileHash);
-                if (!fileHash.empty())
-                    std::memcpy(&shape->mFileHash, fileHash.data(), std::min(fileHash.size(), sizeof(shape->mFileHash)));
+                constNode->getUserValue(Misc::OsgUserValues::sFileHash, shape->mFileHash);
             }
         }
 
