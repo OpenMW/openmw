@@ -49,10 +49,6 @@ Launcher::GraphicsPage::GraphicsPage(QWidget *parent)
     connect(shadowDistanceCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotShadowDistLimitToggled(bool)));
 }
 
-void Launcher::GraphicsPage::connectAntiAliasingChanged(const QObject* receiver, const char* slot) {
-    connect(antiAliasingComboBox, SIGNAL(currentIndexChanged(int)), receiver, slot);
-}
-
 bool Launcher::GraphicsPage::setupSDL()
 {
     bool sdlConnectSuccessful = initSDL();

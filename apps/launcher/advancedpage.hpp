@@ -24,7 +24,6 @@ namespace Launcher
 
     public slots:
         void slotLoadedCellsChanged(QStringList cellNames);
-        void slotAASettingChanged(int aaLevel);
 
     private slots:
         void on_skipMenuCheckBox_stateChanged(int state);

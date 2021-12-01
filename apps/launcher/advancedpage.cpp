@@ -121,7 +121,6 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
         if (Settings::Manager::getInt("antialiasing", "Video") == 0) {
             antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
-            antialiasAlphaTestCheckBox->setEnabled(false);
         }
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
@@ -443,12 +442,6 @@ void Launcher::AdvancedPage::saveSettingInt(QSpinBox *spinBox, const std::string
 void Launcher::AdvancedPage::slotLoadedCellsChanged(QStringList cellNames)
 {
     loadCellsForAutocomplete(cellNames);
-}
-
-void Launcher::AdvancedPage::slotAASettingChanged(int aaLevel) {
-    antialiasAlphaTestCheckBox->setEnabled(aaLevel > 0);
-    if (aaLevel == 0)
-        antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
 }
 
 void Launcher::AdvancedPage::slotAnimSourcesToggled(bool checked)
