@@ -355,6 +355,7 @@ namespace MWBase
             virtual const std::string& getVersionDescription() const = 0;
 
             virtual void onDeleteCustomData(const MWWorld::Ptr& ptr) = 0;
+            virtual void forceLootMode(const MWWorld::Ptr& ptr) = 0;
     };
 }
 
