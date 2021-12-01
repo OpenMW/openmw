@@ -113,13 +113,13 @@ namespace MWLua
 
         if (!mWorldView.isPaused())
         {  // Update time and process timers
-            double seconds = mWorldView.getGameTimeInSeconds() + frameDuration;
-            mWorldView.setGameTimeInSeconds(seconds);
-            double hours = mWorldView.getGameTimeInHours();
+            double simulationTime = mWorldView.getSimulationTime() + frameDuration;
+            mWorldView.setSimulationTime(simulationTime);
+            double gameTime = mWorldView.getGameTime();
 
-            mGlobalScripts.processTimers(seconds, hours);
+            mGlobalScripts.processTimers(simulationTime, gameTime);
             for (LocalScripts* scripts : mActiveLocalScripts)
-                scripts->processTimers(seconds, hours);
+                scripts->processTimers(simulationTime, gameTime);
         }
 
         // Receive events

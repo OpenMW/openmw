@@ -19,36 +19,36 @@ namespace MWLua
 
     sol::function getAsyncPackageInitializer(const Context& context)
     {
-        using TimeUnit = LuaUtil::ScriptsContainer::TimeUnit;
+        using TimerType = LuaUtil::ScriptsContainer::TimerType;
         sol::usertype<AsyncPackageId> api = context.mLua->sol().new_usertype<AsyncPackageId>("AsyncPackage");
         api["registerTimerCallback"] = [](const AsyncPackageId& asyncId, std::string_view name, sol::function callback)
         {
             asyncId.mContainer->registerTimerCallback(asyncId.mScriptId, name, std::move(callback));
             return TimerCallback{asyncId, std::string(name)};
         };
-        api["newTimerInSeconds"] = [world=context.mWorldView](const AsyncPackageId&, double delay,
-                                                              const TimerCallback& callback, sol::object callbackArg)
+        api["newSimulationTimer"] = [world=context.mWorldView](const AsyncPackageId&, double delay,
+                                                               const TimerCallback& callback, sol::object callbackArg)
         {
             callback.mAsyncId.mContainer->setupSerializableTimer(
-                TimeUnit::SECONDS, world->getGameTimeInSeconds() + delay,
+                TimerType::SIMULATION_TIME, world->getSimulationTime() + delay,
                 callback.mAsyncId.mScriptId, callback.mName, std::move(callbackArg));
         };
-        api["newTimerInHours"] = [world=context.mWorldView](const AsyncPackageId&, double delay,
-                                                            const TimerCallback& callback, sol::object callbackArg)
+        api["newGameTimer"] = [world=context.mWorldView](const AsyncPackageId&, double delay,
+                                                         const TimerCallback& callback, sol::object callbackArg)
         {
             callback.mAsyncId.mContainer->setupSerializableTimer(
-                TimeUnit::HOURS, world->getGameTimeInHours() + delay,
+                TimerType::GAME_TIME, world->getGameTime() + delay,
                 callback.mAsyncId.mScriptId, callback.mName, std::move(callbackArg));
         };
-        api["newUnsavableTimerInSeconds"] = [world=context.mWorldView](const AsyncPackageId& asyncId, double delay, sol::function callback)
+        api["newUnsavableSimulationTimer"] = [world=context.mWorldView](const AsyncPackageId& asyncId, double delay, sol::function callback)
         {
             asyncId.mContainer->setupUnsavableTimer(
-                TimeUnit::SECONDS, world->getGameTimeInSeconds() + delay, asyncId.mScriptId, std::move(callback));
+                TimerType::SIMULATION_TIME, world->getSimulationTime() + delay, asyncId.mScriptId, std::move(callback));
         };
-        api["newUnsavableTimerInHours"] = [world=context.mWorldView](const AsyncPackageId& asyncId, double delay, sol::function callback)
+        api["newUnsavableGameTimer"] = [world=context.mWorldView](const AsyncPackageId& asyncId, double delay, sol::function callback)
         {
             asyncId.mContainer->setupUnsavableTimer(
-                TimeUnit::HOURS, world->getGameTimeInHours() + delay, asyncId.mScriptId, std::move(callback));
+                TimerType::GAME_TIME, world->getGameTime() + delay, asyncId.mScriptId, std::move(callback));
         };
         api["callback"] = [](const AsyncPackageId& asyncId, sol::function fn)
         {

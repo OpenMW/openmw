@@ -52,7 +52,7 @@ namespace LuaUtil
     LuaState::LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf) : mConf(conf), mVFS(vfs)
     {
         mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math,
-                            sol::lib::string, sol::lib::table, sol::lib::debug);
+                            sol::lib::string, sol::lib::table, sol::lib::os, sol::lib::debug);
 
         mLua["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
         mLua["math"]["randomseed"] = []{};
@@ -85,6 +85,11 @@ namespace LuaUtil
             if (mLua[s] == sol::nil) throw std::logic_error("Lua package not found: " + s);
             mCommonPackages[s] = mSandboxEnv[s] = makeReadOnly(mLua[s]);
         }
+        mCommonPackages["os"] = mSandboxEnv["os"] = makeReadOnly(tableFromPairs<std::string_view, sol::function>({
+            {"date", mLua["os"]["date"]},
+            {"difftime", mLua["os"]["difftime"]},
+            {"time", mLua["os"]["time"]}
+        }));
     }
 
     LuaState::~LuaState()
