@@ -798,6 +798,11 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sLevitateDisabled}");
         return MagicApplicationResult::REMOVED;
     }
+    else if(effect.mEffectId == ESM::MagicEffect::AlmsiviIntervention || effect.mEffectId == ESM::MagicEffect::DivineIntervention || effect.mEffectId == ESM::MagicEffect::Recall)
+    {
+        if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
+            return MagicApplicationResult::REMOVED;
+    }
     const auto* magicEffect = world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
     if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
     {
