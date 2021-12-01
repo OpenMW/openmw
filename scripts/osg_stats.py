@@ -35,6 +35,8 @@ import termtables
                    'between Physics Actors and physics_time_taken. Format: --plot <x> <y> <function>.')
 @click.option('--stats', type=str, multiple=True,
               help='Print table with stats for a given metric containing min, max, mean, median etc.')
+@click.option('--precision', type=int,
+              help='Format floating point numbers with given precision')
 @click.option('--timeseries_sum', is_flag=True,
               help='Add a graph to timeseries for a sum per frame of all given timeseries metrics.')
 @click.option('--commulative_timeseries_sum', is_flag=True,
@@ -54,7 +56,7 @@ import termtables
 @click.option('--threshold_value', type=float, default=1.05/60,
               help='Threshold for hist_over.')
 @click.argument('path', type=click.Path(), nargs=-1)
-def main(print_keys, timeseries, hist, hist_ratio, stdev_hist, plot, stats,
+def main(print_keys, timeseries, hist, hist_ratio, stdev_hist, plot, stats, precision,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
          commulative_timeseries, commulative_timeseries_sum, frame_number_name,
          hist_threshold, threshold_name, threshold_value):
@@ -82,7 +84,7 @@ def main(print_keys, timeseries, hist, hist_ratio, stdev_hist, plot, stats,
     if plot:
         draw_plots(sources=frames, plots=plot)
     if stats:
-        print_stats(sources=frames, keys=stats, stats_sum=stats_sum)
+        print_stats(sources=frames, keys=stats, stats_sum=stats_sum, precision=precision)
     if hist_threshold:
         draw_hist_threshold(sources=frames, keys=hist_threshold, begin_frame=begin_frame,
                             threshold_name=threshold_name, threshold_value=threshold_value)
@@ -242,13 +244,13 @@ def draw_plots(sources, plots):
     fig.canvas.set_window_title('plots')
 
 
-def print_stats(sources, keys, stats_sum):
+def print_stats(sources, keys, stats_sum, precision):
     stats = list()
     for name, frames in sources.items():
         for key in keys:
-            stats.append(make_stats(source=name, key=key, values=filter_not_none(frames[key])))
+            stats.append(make_stats(source=name, key=key, values=filter_not_none(frames[key]), precision=precision))
         if stats_sum:
-            stats.append(make_stats(source=name, key='sum', values=sum_multiple(frames, keys)))
+            stats.append(make_stats(source=name, key='sum', values=sum_multiple(frames, keys), precision=precision))
     metrics = list(stats[0].keys())
     termtables.print(
         [list(v.values()) for v in stats],
@@ -282,6 +284,10 @@ def filter_not_none(values):
     return [v for v in values if v is not None]
 
 
+def fixed_float(value, precision):
+    return '{v:.{p}f}'.format(v=value, p=precision) if precision else value
+
+
 def sum_multiple(frames, keys):
     result = collections.Counter()
     for key in keys:
@@ -292,17 +298,17 @@ def sum_multiple(frames, keys):
     return numpy.array([result[k] for k in sorted(result.keys())])
 
 
-def make_stats(source, key, values):
+def make_stats(source, key, values, precision):
     return collections.OrderedDict(
         source=source,
         key=key,
         number=len(values),
-        min=min(values),
-        max=max(values),
-        mean=statistics.mean(values),
-        median=statistics.median(values),
-        stdev=statistics.stdev(values),
-        q95=numpy.quantile(values, 0.95),
+        min=fixed_float(min(values), precision),
+        max=fixed_float(max(values), precision),
+        mean=fixed_float(statistics.mean(values), precision),
+        median=fixed_float(statistics.median(values), precision),
+        stdev=fixed_float(statistics.stdev(values), precision),
+        q95=fixed_float(numpy.quantile(values, 0.95), precision),
     )
 
 
