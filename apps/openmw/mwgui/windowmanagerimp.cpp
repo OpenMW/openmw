@@ -638,6 +638,7 @@ namespace MWGui
             mMap->setVisible(false);
             mStatsWindow->setVisible(false);
             mSpellWindow->setVisible(false);
+            mHud->setDrowningBarVisible(false);
             mInventoryWindow->setVisible(getMode() == GM_Container || getMode() == GM_Barter || getMode() == GM_Companion);
         }
 

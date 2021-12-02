@@ -31,6 +31,7 @@ Programmers
     Allofich
     Andreas Stöckel
     Andrei Kortunov (akortunov)
+    Andrew Appuhamy (andrew-app)
     AnyOldName3
     Ardekantur
     Armin Preiml
@@ -231,7 +232,7 @@ Programmers
     Yuri Krupenin
     zelurker
     Noah Gooder
-    Andrew Appuhamy (andrew-app)
+    
 
 Documentation
 -------------
