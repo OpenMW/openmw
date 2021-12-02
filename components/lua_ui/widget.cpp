@@ -13,13 +13,16 @@ namespace LuaUi
         , mAbsoluteCoord()
         , mRelativeCoord()
         , mAnchor()
+        , mLua{ nullptr }
+        , mWidget{ nullptr }
+        , mLayout{ sol::nil }
     {}
 
     void WidgetExtension::triggerEvent(std::string_view name, const sol::object& argument = sol::nil) const
     {
         auto it = mCallbacks.find(name);
         if (it != mCallbacks.end())
-            it->second(argument);
+            it->second(argument, mLayout);
     }
 
     void WidgetExtension::create(lua_State* lua, MyGUI::Widget* self)

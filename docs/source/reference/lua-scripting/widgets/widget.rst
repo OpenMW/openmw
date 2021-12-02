@@ -41,7 +41,7 @@ Events
   :widths: 20 20 60
 
   * - name
-    - type
+    - first argument type
     - description
   * - keyPress
     - `KeyboardEvent <../openmw_input.html##(KeyboardEvent)>`_
