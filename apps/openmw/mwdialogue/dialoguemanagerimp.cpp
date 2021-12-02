@@ -76,9 +76,10 @@ namespace MWDialogue
         mKnownTopics.insert( Misc::StringUtils::lowerCase(topic) );
     }
 
-    void DialogueManager::parseText (const std::string& text)
+    std::vector<std::string> DialogueManager::parseTopicIdsFromText (const std::string& text)
     {
-        updateActorKnownTopics();
+        std::vector<std::string> topicIdList;
+
         std::vector<HyperTextParser::Token> hypertext = HyperTextParser::parseHyperText(text);
 
         for (std::vector<HyperTextParser::Token>::iterator tok = hypertext.begin(); tok != hypertext.end(); ++tok)
@@ -95,6 +96,18 @@ namespace MWDialogue
                 topicId = mTranslationDataStorage.topicStandardForm(topicId);
             }
 
+            topicIdList.push_back(topicId);
+        }
+
+        return topicIdList;
+    }
+
+    void DialogueManager::addTopicsFromText (const std::string& text)
+    {
+        updateActorKnownTopics();
+
+        for (const auto& topicId : parseTopicIdsFromText(text))
+        {
             if (mActorKnownTopics.count( topicId ))
                 mKnownTopics.insert( topicId );
         }
@@ -136,7 +149,6 @@ namespace MWDialogue
         mTalkedTo = creatureStats.hasTalkedToPlayer();
 
         mActorKnownTopics.clear();
-        mActorKnownTopicsFlag.clear();
 
         //greeting
         const MWWorld::Store<ESM::Dialogue> &dialogs =
@@ -163,7 +175,7 @@ namespace MWDialogue
                     executeScript (info->mResultScript, mActor);
                     mLastTopic = it->mId;
 
-                    parseText (info->mResponse);
+                    addTopicsFromText (info->mResponse);
 
                     return true;
                 }
@@ -277,7 +289,10 @@ namespace MWDialogue
 
         const ESM::Dialogue& dialogue = *dialogues.find (topic);
 
-        const ESM::DialInfo* info = filter.search(dialogue, true);
+        const ESM::DialInfo* info =
+            mChoice == -1 && mActorKnownTopics.count(topic) ?
+                mActorKnownTopics[topic].mInfo : filter.search(dialogue, true);
+        
         if (info)
         {
             std::string title;
@@ -320,7 +335,7 @@ namespace MWDialogue
 
             executeScript (info->mResultScript, mActor);
 
-            parseText (info->mResponse);
+            addTopicsFromText (info->mResponse);
         }
     }
 
@@ -339,7 +354,6 @@ namespace MWDialogue
         updateGlobals();
 
         mActorKnownTopics.clear();
-        mActorKnownTopicsFlag.clear();
 
         const auto& dialogs = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
@@ -354,19 +368,39 @@ namespace MWDialogue
 
                 if (answer != nullptr)
                 {
-                    int flag = 0;
+                    int topicFlags = 0;
                     if(!inJournal(topicId, answer->mId))
                     {
                         // Does this dialogue contains some actor-specific answer?
                         if (Misc::StringUtils::ciEqual(answer->mActor, mActor.getCellRef().getRefId()))
-                            flag |= MWBase::DialogueManager::TopicType::Specific;
+                            topicFlags |= MWBase::DialogueManager::TopicType::Specific;
                     }
                     else
-                        flag |= MWBase::DialogueManager::TopicType::Exhausted;
-                    mActorKnownTopics.insert (dialog.mId);
-                    mActorKnownTopicsFlag[dialog.mId] = flag;
+                        topicFlags |= MWBase::DialogueManager::TopicType::Exhausted;
+                    mActorKnownTopics.insert (std::make_pair(dialog.mId, ActorKnownTopicInfo {topicFlags, answer}));
                 }
 
+            }
+        }
+
+        // If response to a topic leads to a new topic, the original topic is not exhausted.
+
+        for (auto& [dialogId, topicInfo] : mActorKnownTopics)
+        {
+            // If the topic is not marked as exhausted, we don't need to do anything about it.
+            // If the topic will not be shown to the player, the flag actually does not matter.
+
+            if (!(topicInfo.mFlags & MWBase::DialogueManager::TopicType::Exhausted) ||
+                !mKnownTopics.count(dialogId))
+                continue;
+
+            for (const auto& topicId : parseTopicIdsFromText(topicInfo.mInfo->mResponse))
+            {
+                if (mActorKnownTopics.count( topicId ) && !mKnownTopics.count( topicId ))
+                {
+                    topicInfo.mFlags &= ~MWBase::DialogueManager::TopicType::Exhausted;
+                    break;
+                }
             }
         }
     }
@@ -377,7 +411,7 @@ namespace MWDialogue
 
         std::list<std::string> keywordList;
 
-        for (const std::string& topic : mActorKnownTopics)
+        for (const auto& [topic, topicInfo] : mActorKnownTopics)
         {
             //does the player know the topic?
             if (mKnownTopics.count(topic))
@@ -391,7 +425,7 @@ namespace MWDialogue
 
     int DialogueManager::getTopicFlag(const std::string& topicId)
     {
-        return mActorKnownTopicsFlag[topicId];
+        return mActorKnownTopics[topicId].mFlags;
     }
 
     void DialogueManager::keywordSelected (const std::string& keyword, ResponseCallback* callback)
@@ -444,7 +478,7 @@ namespace MWDialogue
                 if (const ESM::DialInfo *info = filter.search (*dialogue, true))
                 {
                     std::string text = info->mResponse;
-                    parseText (text);
+                    addTopicsFromText (text);
 
                     mChoice = -1;
                     mIsInChoice = false;
@@ -579,7 +613,7 @@ namespace MWDialogue
         {
             const ESM::DialInfo* info = infos[0];
 
-            parseText (info->mResponse);
+            addTopicsFromText (info->mResponse);
 
             const MWWorld::Store<ESM::GameSetting>& gmsts =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

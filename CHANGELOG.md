@@ -110,6 +110,7 @@
     Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
     Feature #6288: Preserve the "blocked" record flag for referenceable objects.
     Feature #6380: Commas are treated as whitespace in vanilla
+    Feature #6419: Topics shouldn't be greyed out if they can produce another topic reference
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
 
