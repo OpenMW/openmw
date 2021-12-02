@@ -15,6 +15,7 @@
     <Layer name="Popup" overlapped="true" pick="true"/>
     <Layer name="Notification" overlapped="false" pick="false"/>
     <Layer name="DragAndDrop" overlapped="false" pick="false"/>
+    <Layer name="DrowningBar" overlapped="false" pick="false"/>
     <Layer name="LoadingScreen" overlapped="false" pick="true"/>
     <Layer name="MessageBox" overlapped="false" pick="true"/>
     <Layer name="InputBlocker" overlapped="false" pick="true"/>

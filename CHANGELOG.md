@@ -23,6 +23,7 @@
     Bug #5377: console does not appear after using menutest in inventory
     Bug #5379: Wandering NPCs falling through cantons
     Bug #5394: Windows snapping no longer works
+    Bug #5434: Pinned windows shouldn't cover breath progress bar
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
     Bug #5508: Engine binary links to Qt without using it
