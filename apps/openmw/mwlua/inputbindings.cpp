@@ -71,6 +71,10 @@ namespace MWLua
         api["getControlSwitch"] = [input](std::string_view key) { return input->getControlSwitch(key); };
         api["setControlSwitch"] = [input](std::string_view key, bool v) { input->toggleControlSwitch(key, v); };
 
+        api["getKeyName"] = [](SDL_Scancode code) {
+            return SDL_GetKeyName(SDL_GetKeyFromScancode(code));
+        };
+
         api["ACTION"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, MWInput::Actions>({
             {"GameMenu", MWInput::A_GameMenu},
             {"Screenshot", MWInput::A_Screenshot},
@@ -252,6 +256,7 @@ namespace MWLua
             {"RightBracket", SDL_SCANCODE_RIGHTBRACKET},
             {"RightShift", SDL_SCANCODE_RSHIFT},
 
+            {"Apostrophe", SDL_SCANCODE_APOSTROPHE},
             {"BackSlash", SDL_SCANCODE_BACKSLASH},
             {"Backspace", SDL_SCANCODE_BACKSPACE},
             {"CapsLock", SDL_SCANCODE_CAPSLOCK},
@@ -267,6 +272,7 @@ namespace MWLua
             {"NumLock", SDL_SCANCODE_NUMLOCKCLEAR},
             {"PageDown", SDL_SCANCODE_PAGEDOWN},
             {"PageUp", SDL_SCANCODE_PAGEUP},
+            {"Period", SDL_SCANCODE_PERIOD},
             {"Pause", SDL_SCANCODE_PAUSE},
             {"PrintScreen", SDL_SCANCODE_PRINTSCREEN},
             {"ScrollLock", SDL_SCANCODE_SCROLLLOCK},

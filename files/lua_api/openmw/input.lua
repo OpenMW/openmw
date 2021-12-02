@@ -20,7 +20,7 @@
 -------------------------------------------------------------------------------
 -- Is a keyboard button currently pressed.
 -- @function [parent=#input] isKeyPressed
--- @param #number keyCode Key code (the same code that is used in @{openmw.input#KeyEvent})
+-- @param #number keyCode Key code (see @{openmw.input#KEY})
 -- @return #boolean
 
 -------------------------------------------------------------------------------
@@ -82,6 +82,12 @@
 -- @function [parent=#input] setControlSwitch
 -- @param #string key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @param #boolean value
+
+-------------------------------------------------------------------------------
+-- Returns a human readable name for the given key code
+-- @function [parent=#input] getKeyName
+-- @param #number code A key code (see @{openmw.input#KEY})
+-- @return #string
 
 -------------------------------------------------------------------------------
 -- @type CONTROL_SWITCH
@@ -268,6 +274,7 @@
 -- @field #number RightBracket
 -- @field #number RightSuper
 -- @field #number RightShift
+-- @field #number Apostrophe
 -- @field #number BackSlash
 -- @field #number Backspace
 -- @field #number CapsLock
@@ -284,6 +291,7 @@
 -- @field #number PageDown
 -- @field #number PageUp
 -- @field #number Pause
+-- @field #number Period
 -- @field #number PrintScreen
 -- @field #number ScrollLock
 -- @field #number Semicolon
