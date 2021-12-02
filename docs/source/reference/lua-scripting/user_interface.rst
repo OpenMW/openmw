@@ -46,6 +46,14 @@ A container holding all the widget's children. It has a few important difference
 
 .. TODO: Talk about skins/templates here when they are ready
 
+Events
+------
+
+| A table mapping event names to `openmw.async.callback` s.
+| When an event triggers, the callback is called with two arguments:
+   an event-specific value, and that widget's layout table.
+| See the Widget type pages for information on what events exist, and which first argument they pass. 
+
 Widget types
 ------------
 

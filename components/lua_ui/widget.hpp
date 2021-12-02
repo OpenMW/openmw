@@ -43,6 +43,8 @@ namespace LuaUi
         void setForcedCoord(const MyGUI::IntCoord& offset);
         void updateCoord();
 
+        void setLayout(const sol::table& layout) { mLayout = layout; }
+
     protected:
         sol::table makeTable() const;
         sol::object keyEvent(MyGUI::KeyCode) const;
@@ -67,11 +69,12 @@ namespace LuaUi
 
     private:
         // use lua_State* instead of sol::state_view because MyGUI requires a default constructor
-        lua_State* mLua; 
+        lua_State* mLua;
         MyGUI::Widget* mWidget;
 
         std::vector<WidgetExtension*> mContent;
         std::map<std::string, LuaUtil::Callback, std::less<>> mCallbacks;
+        sol::table mLayout;
 
         void updateChildrenCoord(MyGUI::Widget*);
 

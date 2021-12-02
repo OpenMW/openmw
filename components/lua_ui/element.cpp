@@ -46,6 +46,11 @@ namespace LuaUi
         }
     }
 
+    void setLayout(LuaUi::WidgetExtension* ext, const sol::table& layout)
+    {
+        ext->setLayout(layout);
+    }
+
     LuaUi::WidgetExtension* createWidget(const sol::table& layout, LuaUi::WidgetExtension* parent)
     {
         std::string type = widgetType(layout);
@@ -72,6 +77,7 @@ namespace LuaUi
 
         setEventCallbacks(ext, layout);
         setProperties(ext, layout);
+        setLayout(ext, layout);
 
         Content cont = content(layout);
         for (size_t i = 0; i < cont.size(); i++)
@@ -90,6 +96,7 @@ namespace LuaUi
     {
         setEventCallbacks(ext, layout);
         setProperties(ext, layout);
+        setLayout(ext, layout);
 
         Content newContent = content(layout);
 
