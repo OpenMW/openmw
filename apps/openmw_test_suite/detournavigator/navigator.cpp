@@ -990,8 +990,7 @@ namespace
         ASSERT_EQ(navMeshes.size(), 1);
         {
             const auto navMesh = navMeshes.begin()->second->lockConst();
-            ASSERT_EQ(navMesh->getGeneration(), 1);
-            ASSERT_EQ(navMesh->getNavMeshRevision(), 4);
+            ASSERT_EQ(navMesh->getVersion(), (Version {1, 4}));
         }
 
         for (int n = 0; n < 10; ++n)
@@ -1006,8 +1005,7 @@ namespace
         ASSERT_EQ(navMeshes.size(), 1);
         {
             const auto navMesh = navMeshes.begin()->second->lockConst();
-            ASSERT_EQ(navMesh->getGeneration(), 1);
-            ASSERT_EQ(navMesh->getNavMeshRevision(), 4);
+            ASSERT_EQ(navMesh->getVersion(), (Version {1, 4}));
         }
     }
 

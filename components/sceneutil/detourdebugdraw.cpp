@@ -32,19 +32,19 @@ namespace
 
 namespace SceneUtil
 {
-    DebugDraw::DebugDraw(osg::Group& group, const osg::Vec3f& shift, float recastInvertedScaleFactor)
+    DebugDraw::DebugDraw(osg::Group& group, const osg::ref_ptr<osg::StateSet>& stateSet,
+        const osg::Vec3f& shift, float recastInvertedScaleFactor)
         : mGroup(group)
+        , mStateSet(stateSet)
         , mShift(shift)
         , mRecastInvertedScaleFactor(recastInvertedScaleFactor)
-        , mDepthMask(false)
         , mMode(osg::PrimitiveSet::POINTS)
         , mSize(1.0f)
     {
     }
 
-    void DebugDraw::depthMask(bool state)
+    void DebugDraw::depthMask(bool)
     {
-        mDepthMask = state;
     }
 
     void DebugDraw::texture(bool)
@@ -56,7 +56,7 @@ namespace SceneUtil
         mMode = mode;
         mVertices = new osg::Vec3Array;
         mColors = new osg::Vec4Array;
-        mSize = size * mRecastInvertedScaleFactor;
+        mSize = size;
     }
 
     void DebugDraw::begin(duDebugDrawPrimitives prim, float size)
@@ -88,16 +88,8 @@ namespace SceneUtil
 
     void DebugDraw::end()
     {
-        osg::ref_ptr<osg::StateSet> stateSet(new osg::StateSet);
-        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-        stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-        stateSet->setMode(GL_DEPTH, (mDepthMask ? osg::StateAttribute::ON : osg::StateAttribute::OFF));
-        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        stateSet->setAttributeAndModes(new osg::LineWidth(mSize));
-        stateSet->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
         osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
-        geometry->setStateSet(stateSet);
+        geometry->setStateSet(mStateSet);
         geometry->setVertexArray(mVertices);
         geometry->setColorArray(mColors, osg::Array::BIND_PER_VERTEX);
         geometry->addPrimitiveSet(new osg::DrawArrays(mMode, 0, static_cast<int>(mVertices->size())));
@@ -116,5 +108,17 @@ namespace SceneUtil
     void DebugDraw::addColor(osg::Vec4f&& value)
     {
         mColors->push_back(value);
+    }
+
+    osg::ref_ptr<osg::StateSet> DebugDraw::makeStateSet()
+    {
+        osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+        stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+        stateSet->setMode(GL_DEPTH, osg::StateAttribute::OFF);
+        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+        stateSet->setAttributeAndModes(new osg::LineWidth());
+        stateSet->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        return stateSet;
     }
 }
