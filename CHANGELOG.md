@@ -77,6 +77,7 @@
     Bug #6343: Magic projectile speed doesn't take race weight into account
     Bug #6347: PlaceItem/PlaceItemCell/PlaceAt should work with levelled creatures
     Bug #6354: SFX abruptly cut off after crossing max distance; implement soft fading of sound effects
+    Bug #6358: Changeweather command does not report an error when entering non-existent region
     Bug #6363: Some scripts in Morrowland fail to work
     Bug #6376: Creatures should be able to use torches
     Bug #6386: Artifacts in water reflection due to imprecise screen-space coordinate computation
