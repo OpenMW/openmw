@@ -153,8 +153,11 @@ target_link_libraries(openmw
     "osg-ffmpeg-videoplayer"
     "oics"
     components
-    ${LUA_LIBRARIES}
 )
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+    target_precompile_headers(openmw PRIVATE ${SOL_INCLUDE_DIR}/sol/sol.hpp)
+endif ()
 
 if (ANDROID)
     target_link_libraries(openmw EGL android log z)
