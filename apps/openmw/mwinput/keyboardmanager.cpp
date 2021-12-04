@@ -4,6 +4,8 @@
 
 #include <MyGUI_InputManager.h>
 
+#include <components/sdlutil/sdlmappings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -13,7 +15,6 @@
 
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
-#include "sdlmappings.hpp"
 
 namespace MWInput
 {
@@ -35,7 +36,7 @@ namespace MWInput
         // HACK: to make default keybinding for the console work without printing an extra "^" upon closing
         // This assumes that SDL_TextInput events always come *after* the key event
         // (which is somewhat reasonable, and hopefully true for all SDL platforms)
-        auto kc = sdlKeyToMyGUI(arg.keysym.sym);
+        auto kc = SDLUtil::sdlKeyToMyGUI(arg.keysym.sym);
         if (mBindingsManager->getKeyBinding(A_Console) == arg.keysym.scancode
                 && MWBase::Environment::get().getWindowManager()->isConsoleMode())
             SDL_StopTextInput();
@@ -71,7 +72,7 @@ namespace MWInput
     void KeyboardManager::keyReleased(const SDL_KeyboardEvent &arg)
     {
         MWBase::Environment::get().getInputManager()->setJoystickLastUsed(false);
-        auto kc = sdlKeyToMyGUI(arg.keysym.sym);
+        auto kc = SDLUtil::sdlKeyToMyGUI(arg.keysym.sym);
 
         if (!mBindingsManager->isDetectingBindingState())
             mBindingsManager->setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(kc));

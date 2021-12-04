@@ -1,6 +1,7 @@
 #include "widget.hpp"
 
 #include <SDL_events.h>
+#include <components/sdlutil/sdlmappings.hpp>
 
 #include "text.hpp"
 #include "textedit.hpp"
@@ -87,9 +88,7 @@ namespace LuaUi
     sol::object WidgetExtension::keyEvent(MyGUI::KeyCode code) const
     {
         SDL_Keysym keySym;
-        // MyGUI key codes are not one to one with SDL key codes
-        // \todo refactor sdlmappings.cpp to map this back to SDL correctly
-        keySym.sym = static_cast<SDL_Keycode>(code.getValue());
+        keySym.sym = SDLUtil::myGuiKeyToSdl(code);
         keySym.scancode = SDL_GetScancodeFromKey(keySym.sym);
         keySym.mod = SDL_GetModState();
         return sol::make_object(mLua, keySym);
@@ -103,8 +102,7 @@ namespace LuaUi
         sol::table table = makeTable();
         table["position"] = position;
         table["offset"] = offset;
-        // \todo refactor sdlmappings.cpp to map this back to SDL properly
-        table["button"] = button.getValue() + 1;
+        table["button"] = SDLUtil::myGuiMouseButtonToSdl(button);
         return table;
     }
 

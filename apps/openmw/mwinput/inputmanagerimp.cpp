@@ -18,7 +18,6 @@
 #include "controlswitch.hpp"
 #include "keyboardmanager.hpp"
 #include "mousemanager.hpp"
-#include "sdlmappings.hpp"
 #include "sensormanager.hpp"
 
 namespace MWInput

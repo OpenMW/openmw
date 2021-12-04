@@ -5,6 +5,7 @@
 #include <MyGUI_Widget.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/sdlutil/sdlmappings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -19,7 +20,6 @@
 #include "actionmanager.hpp"
 #include "bindingsmanager.hpp"
 #include "mousemanager.hpp"
-#include "sdlmappings.hpp"
 
 namespace MWInput
 {
@@ -215,7 +215,7 @@ namespace MWInput
             mBindingsManager->setPlayerControlsEnabled(true);
 
         //esc, to leave initial movie screen
-        auto kc = sdlKeyToMyGUI(SDLK_ESCAPE);
+        auto kc = SDLUtil::sdlKeyToMyGUI(SDLK_ESCAPE);
         mBindingsManager->setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyPress(kc, 0));
 
         if (!MWBase::Environment::get().getInputManager()->controlsDisabled())
@@ -259,7 +259,7 @@ namespace MWInput
             mBindingsManager->setPlayerControlsEnabled(true);
 
         //esc, to leave initial movie screen
-        auto kc = sdlKeyToMyGUI(SDLK_ESCAPE);
+        auto kc = SDLUtil::sdlKeyToMyGUI(SDLK_ESCAPE);
         mBindingsManager->setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(kc));
 
         mBindingsManager->controllerButtonReleased(deviceID, arg);

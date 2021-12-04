@@ -1,5 +1,5 @@
-#ifndef MWINPUT_SDLMAPPINGS_H
-#define MWINPUT_SDLMAPPINGS_H
+#ifndef SDLUTIL_SDLMAPPINGS
+#define SDLUTIL_SDLMAPPINGS
 
 #include <string>
 
@@ -12,14 +12,16 @@ namespace MyGUI
     struct MouseButton;
 }
 
-namespace MWInput
+namespace SDLUtil
 {
     std::string sdlControllerButtonToString(int button);
 
     std::string sdlControllerAxisToString(int axis);
 
-    MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
+    MyGUI::MouseButton sdlMouseButtonToMyGui(Uint8 button);
+    Uint8 myGuiMouseButtonToSdl(MyGUI::MouseButton button);
 
     MyGUI::KeyCode sdlKeyToMyGUI(SDL_Keycode code);
+    SDL_Keycode myGuiKeyToSdl(MyGUI::KeyCode button);
 }
-#endif
+#endif // !SDLUTIL_SDLMAPPINGS
