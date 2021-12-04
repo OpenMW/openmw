@@ -7,6 +7,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
+#include <components/sdlutil/sdlmappings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -17,7 +18,6 @@
 
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
-#include "sdlmappings.hpp"
 
 namespace MWInput
 {
@@ -125,7 +125,11 @@ namespace MWInput
         else
         {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(
+                static_cast<int>(mGuiCursorX),
+                static_cast<int>(mGuiCursorY),
+                SDLUtil::sdlMouseButtonToMyGui(id)
+            ) && guiMode;
 
             if (mBindingsManager->isDetectingBindingState())
                 return; // don't allow same mouseup to bind as initiated bind
@@ -153,7 +157,11 @@ namespace MWInput
         if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
         {
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMousePress(
+                static_cast<int>(mGuiCursorX),
+                static_cast<int>(mGuiCursorY),
+                SDLUtil::sdlMouseButtonToMyGui(id)
+            ) && guiMode;
             if (MyGUI::InputManager::getInstance().getMouseFocusWidget () != nullptr)
             {
                 MyGUI::Button* b = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
@@ -229,12 +237,18 @@ namespace MWInput
 
     bool MouseManager::injectMouseButtonPress(Uint8 button)
     {
-        return MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(button));
+        return MyGUI::InputManager::getInstance().injectMousePress(
+            static_cast<int>(mGuiCursorX),
+            static_cast<int>(mGuiCursorY),
+            SDLUtil::sdlMouseButtonToMyGui(button));
     }
 
     bool MouseManager::injectMouseButtonRelease(Uint8 button)
     {
-        return MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(button));
+        return MyGUI::InputManager::getInstance().injectMouseRelease(
+            static_cast<int>(mGuiCursorX),
+            static_cast<int>(mGuiCursorY),
+            SDLUtil::sdlMouseButtonToMyGui(button));
     }
 
     void MouseManager::injectMouseMove(float xMove, float yMove, float mouseWheelMove)
