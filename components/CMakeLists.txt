@@ -283,6 +283,7 @@ target_link_libraries(components
     ${SDL2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
+    ${LUA_LIBRARIES}
     LZ4::LZ4
     RecastNavigation::DebugUtils
     RecastNavigation::Detour
@@ -371,3 +372,7 @@ endif(OSG_STATIC)
 if(USE_QT)
     set_property(TARGET components_qt PROPERTY AUTOMOC ON)
 endif(USE_QT)
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+    target_precompile_headers(components PRIVATE ${SOL_INCLUDE_DIR}/sol/sol.hpp)
+endif ()
