@@ -138,7 +138,7 @@ namespace MWPhysics
           , mRemainingSteps(0)
           , mLOSCacheExpiry(Settings::Manager::getInt("lineofsight keep inactive cache", "Physics"))
           , mDeferAabbUpdate(Settings::Manager::getBool("defer aabb update", "Physics"))
-          , mNewFrame(false)
+          , mFrameCounter(0)
           , mAdvanceSimulation(false)
           , mQuit(false)
           , mNextJob(0)
@@ -176,12 +176,13 @@ namespace MWPhysics
 
     PhysicsTaskScheduler::~PhysicsTaskScheduler()
     {
+        waitForWorkers();
         std::unique_lock lock(mSimulationMutex);
         mQuit = true;
         mNumJobs = 0;
         mRemainingSteps = 0;
-        lock.unlock();
         mHasJob.notify_all();
+        lock.unlock();
         for (auto& thread : mThreads)
             thread.join();
     }
@@ -234,9 +235,10 @@ namespace MWPhysics
 
     const std::vector<MWWorld::Ptr>& PhysicsTaskScheduler::moveActors(float & timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
+        waitForWorkers();
+
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
-
         std::unique_lock lock(mSimulationMutex);
 
         double timeStart = mTimer->tick();
@@ -282,7 +284,7 @@ namespace MWPhysics
         mPhysicsDt = newDelta;
         mActorsFrameData = std::move(actorsData);
         mAdvanceSimulation = (mRemainingSteps != 0);
-        mNewFrame = true;
+        ++mFrameCounter;
         mNumJobs = mActorsFrameData.size();
         mNextLOS.store(0, std::memory_order_relaxed);
         mNextJob.store(0, std::memory_order_release);
@@ -302,8 +304,8 @@ namespace MWPhysics
         }
 
         mAsyncStartTime = mTimer->tick();
-        lock.unlock();
         mHasJob.notify_all();
+        lock.unlock();
         if (mAdvanceSimulation)
             mBudget.update(mTimer->delta_s(timeStart, mTimer->tick()), 1, mBudgetCursor);
         return mMovedActors;
@@ -311,6 +313,7 @@ namespace MWPhysics
 
     const std::vector<MWWorld::Ptr>& PhysicsTaskScheduler::resetSimulation(const ActorMap& actors)
     {
+        waitForWorkers();
         std::unique_lock lock(mSimulationMutex);
         mBudget.reset(mDefaultPhysicsDt);
         mAsyncBudget.reset(0.0f);
@@ -477,11 +480,13 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::worker()
     {
+        std::size_t lastFrame = 0;
         std::shared_lock lock(mSimulationMutex);
         while (!mQuit)
         {
-            if (!mNewFrame)
-                mHasJob.wait(lock, [&]() { return mQuit || mNewFrame; });
+            if (mRemainingSteps == 0 && lastFrame == mFrameCounter)
+                mHasJob.wait(lock, [&] { return mQuit || lastFrame != mFrameCounter; });
+            lastFrame = mFrameCounter;
 
             mPreStepBarrier->wait([this] { afterPreStep(); });
 
@@ -618,7 +623,6 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::afterPostSim()
     {
-        mNewFrame = false;
         if (mLOSCacheExpiry >= 0)
         {
             std::unique_lock lock(mLOSCacheMutex);
@@ -628,5 +632,23 @@ namespace MWPhysics
                     mLOSCache.end());
         }
         mTimeEnd = mTimer->tick();
+        std::unique_lock lock(mWorkersDoneMutex);
+        ++mWorkersFrameCounter;
+        mWorkersDone.notify_all();
+    }
+
+    // Attempt to acquire unique lock on mSimulationMutex while not all worker
+    // threads are holding shared lock but will have to may lead to a deadlock because
+    // C++ standard does not guarantee priority for exclusive and shared locks
+    // for std::shared_mutex. For example microsoft STL implementation points out
+    // for the absence of such priority:
+    // https://docs.microsoft.com/en-us/windows/win32/sync/slim-reader-writer--srw--locks
+    void PhysicsTaskScheduler::waitForWorkers()
+    {
+        if (mNumThreads == 0)
+            return;
+        std::unique_lock lock(mWorkersDoneMutex);
+        if (mFrameCounter != mWorkersFrameCounter)
+            mWorkersDone.wait(lock);
     }
 }
