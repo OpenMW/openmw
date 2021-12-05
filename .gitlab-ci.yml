@@ -50,6 +50,9 @@ Clang_Tidy:
     CXX: clang++
     CI_CLANG_TIDY: 1
   timeout: 8h
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 Coverity:
   extends: .Debian_Image
@@ -73,6 +76,9 @@ Coverity:
   variables:
     CC: gcc
     CXX: g++
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 Debian_GCC:
   extends: .Debian
@@ -94,6 +100,9 @@ Debian_GCC_tests:
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 Debian_GCC_tests_Debug:
   extends: Debian_GCC
@@ -103,6 +112,9 @@ Debian_GCC_tests_Debug:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
     CMAKE_BUILD_TYPE: Debug
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 Debian_GCC_Static_Deps:
   extends: Debian_GCC
@@ -125,6 +137,9 @@ Debian_GCC_Static_Deps_tests:
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 Debian_Clang:
   extends: .Debian
@@ -146,6 +161,9 @@ Debian_Clang_tests:
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 Debian_Clang_tests_Debug:
   extends: Debian_Clang
@@ -155,6 +173,9 @@ Debian_Clang_tests_Debug:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
     CMAKE_BUILD_TYPE: Debug
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 .MacOS:
   image: macos-11-xcode-12
@@ -329,6 +350,9 @@ Windows_Ninja_Tests_RelWithDebInfo:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 .Windows_MSBuild_Base:
   tags:
@@ -453,6 +477,9 @@ Windows_MSBuild_Tests_RelWithDebInfo:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 Debian_AndroidNDK_arm64-v8a:
   tags:
