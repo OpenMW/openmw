@@ -153,6 +153,9 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["bhkRigidBody"]                 = {&construct <bhkRigidBody>                , RC_bhkRigidBody               };
     factory["bhkRigidBodyT"]                = {&construct <bhkRigidBody>                , RC_bhkRigidBodyT              };
     factory["BSLightingShaderProperty"]     = {&construct <BSLightingShaderProperty>    , RC_BSLightingShaderProperty   };
+    factory["NiSortAdjustNode"]             = {&construct <NiSortAdjustNode>            , RC_NiNode                     };
+    factory["NiClusterAccumulator"]         = {&construct <NiClusterAccumulator>        , RC_NiClusterAccumulator       };
+    factory["NiAlphaAccumulator"]           = {&construct <NiAlphaAccumulator>          , RC_NiAlphaAccumulator         };
     return factory;
 }
 

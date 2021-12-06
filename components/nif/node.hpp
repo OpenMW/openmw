@@ -427,5 +427,39 @@ struct NiLODNode : public NiSwitchNode
     }
 };
 
+// Abstract
+struct NiAccumulator : Record
+{
+    void read(NIFStream *nif) override {}
+};
+
+// Node children sorters
+struct NiClusterAccumulator : NiAccumulator {};
+struct NiAlphaAccumulator : NiClusterAccumulator {};
+
+struct NiSortAdjustNode : NiNode
+{
+    enum SortingMode
+    {
+        SortingMode_Inherit,
+        SortingMode_Off,
+        SortingMode_Subsort
+    };
+
+    int mMode;
+    NiAccumulatorPtr mSubSorter;
+    void read(NIFStream *nif) override
+    {
+        NiNode::read(nif);
+        mMode = nif->getInt();
+        if (nif->getVersion() <= NIFStream::generateVersion(20,0,0,3))
+            mSubSorter.read(nif);
+    }
+    void post(NIFFile *nif) override
+    {
+        mSubSorter.post(nif);
+    }
+};
+
 } // Namespace
 #endif
