@@ -718,7 +718,7 @@ namespace MWMechanics
         if (currentDisposition + tempChange < 0)
         {
             cappedDispositionChange = -currentDisposition;
-            tempChange = 0;
+            tempChange = cappedDispositionChange;
         }
 
         permChange = floor(cappedDispositionChange / fPerTempMult);
