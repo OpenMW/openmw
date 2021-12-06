@@ -397,6 +397,8 @@ namespace MWWorld
             void respawn ();
             ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
 
+            Ptr getMovedActor(int actorId) const;
+
         private:
 
             /// Run through references and store IDs
