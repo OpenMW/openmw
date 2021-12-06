@@ -73,6 +73,7 @@ Coverity:
       --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
       --form file=@cov-int.tar.gz --form version="`git describe --tags`"
       --form description="`git describe --tags` / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
+    - cat /builds/OpenMW/openmw/cov-int/build-log.txt
   variables:
     CC: gcc
     CXX: g++
