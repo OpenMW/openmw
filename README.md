@@ -1,8 +1,6 @@
 OpenMW
 ======
 
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740) [![pipeline status](https://gitlab.com/OpenMW/openmw/badges/master/pipeline.svg)](https://gitlab.com/OpenMW/openmw/commits/master)
-
 OpenMW is an open-source game engine that supports playing Morrowind by Bethesda Softworks. You need to own the game for OpenMW to play Morrowind.
 
 OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
