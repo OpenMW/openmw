@@ -38,6 +38,7 @@ namespace MWGui
         , mSortModel(nullptr)
         , mModel(nullptr)
         , mSelectedItem(-1)
+        , mTreatNextOpenAsLoot(false)
     {
         getWidget(mDisposeCorpseButton, "DisposeCorpseButton");
         getWidget(mTakeButton, "TakeButton");
@@ -121,13 +122,15 @@ namespace MWGui
 
     void ContainerWindow::setPtr(const MWWorld::Ptr& container)
     {
+        bool lootAnyway = mTreatNextOpenAsLoot;
+        mTreatNextOpenAsLoot = false;
         mPtr = container;
 
         bool loot = mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead();
 
         if (mPtr.getClass().hasInventoryStore(mPtr))
         {
-            if (mPtr.getClass().isNpc() && !loot)
+            if (mPtr.getClass().isNpc() && !loot && !lootAnyway)
             {
                 // we are stealing stuff
                 mModel = new PickpocketItemModel(mPtr, new InventoryItemModel(container),

@@ -1194,13 +1194,23 @@ namespace MWScript
                     {
                         bool wasEnabled = ptr.getRefData().isEnabled();
                         MWBase::Environment::get().getWorld()->undeleteObject(ptr);
-                        MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
-                        MWBase::Environment::get().getWindowManager()->onDeleteCustomData(ptr);
-
+                        auto windowManager = MWBase::Environment::get().getWindowManager();
+                        bool wasOpen = windowManager->containsMode(MWGui::GM_Container);
+                        windowManager->onDeleteCustomData(ptr);
                         // HACK: disable/enable object to re-add it to the scene properly (need a new Animation).
                         MWBase::Environment::get().getWorld()->disable(ptr);
-                        // resets runtime state such as inventory, stats and AI. does not reset position in the world
-                        ptr.getRefData().setCustomData(nullptr);
+                        if (wasOpen && !windowManager->containsMode(MWGui::GM_Container))
+                        {
+                            // Reopen the loot GUI if it was closed because we resurrected the actor we were looting
+                            MWBase::Environment::get().getMechanicsManager()->resurrect(ptr);
+                            windowManager->forceLootMode(ptr);
+                        }
+                        else
+                        {
+                            MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
+                            // resets runtime state such as inventory, stats and AI. does not reset position in the world
+                            ptr.getRefData().setCustomData(nullptr);
+                        }
                         if (wasEnabled)
                             MWBase::Environment::get().getWorld()->enable(ptr);
                     }

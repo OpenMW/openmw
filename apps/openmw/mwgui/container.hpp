@@ -37,6 +37,7 @@ namespace MWGui
 
         void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
 
+        void treatNextOpenAsLoot() { mTreatNextOpenAsLoot = true; };
     private:
         DragAndDrop* mDragAndDrop;
 
@@ -44,7 +45,7 @@ namespace MWGui
         SortFilterItemModel* mSortModel;
         ItemModel* mModel;
         int mSelectedItem;
-
+        bool mTreatNextOpenAsLoot;
         MyGUI::Button* mDisposeCorpseButton;
         MyGUI::Button* mTakeButton;
         MyGUI::Button* mCloseButton;
