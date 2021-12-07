@@ -129,7 +129,7 @@ Ubuntu_GCC_Static_Deps:
     - ccache/
     - build/extern/fetched/
   before_script:
-    - apt-get update; apt-get-y install software-properties-common; add-apt-repository -y ppa:openmw/openmw
+    - apt-get update; apt-get -y install software-properties-common; add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-static
   variables:
     CI_OPENMW_USE_STATIC_DEPS: 1
