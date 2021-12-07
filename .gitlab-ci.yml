@@ -40,7 +40,7 @@ Clang_Tidy:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   before_script:
-    - sudo add-apt-repository -y ppa:openmw/openmw
+    - add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic clang-tidy clang
   script:
     - CI/before_script.linux.sh
@@ -61,7 +61,7 @@ Coverity:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   before_script:
-    - sudo add-apt-repository -y ppa:openmw/openmw
+    - add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic coverity
     - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64 --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - tar xfz /tmp/cov-analysis-linux64.tgz
@@ -88,7 +88,7 @@ Ubuntu_GCC:
   cache:
     key: Ubuntu_GCC.v2
   before_script:
-    - sudo add-apt-repository -y ppa:openmw/openmw
+    - add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
     CC: gcc
@@ -129,7 +129,7 @@ Ubuntu_GCC_Static_Deps:
     - ccache/
     - build/extern/fetched/
   before_script:
-    - sudo add-apt-repository -y ppa:openmw/openmw
+    - add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-static
   variables:
     CI_OPENMW_USE_STATIC_DEPS: 1
@@ -149,7 +149,7 @@ Ubuntu_GCC_Static_Deps_tests:
 Ubuntu_Clang:
   extends: .Ubuntu
   before_script:
-    - sudo add-apt-repository -y ppa:openmw/openmw
+    - add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
   cache:
     key: Ubuntu_Clang.v2
