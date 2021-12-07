@@ -179,8 +179,7 @@ endif()
 if(APPLE)
     set(BUNDLE_RESOURCES_DIR "${APP_BUNDLE_DIR}/Contents/Resources")
 
-    set(OPENMW_MYGUI_FILES_ROOT ${BUNDLE_RESOURCES_DIR})
-    set(OPENMW_SHADERS_ROOT ${BUNDLE_RESOURCES_DIR})
+    set(OPENMW_BINARY_ROOT ${BUNDLE_RESOURCES_DIR})
 
     add_subdirectory(../../files/ ${CMAKE_CURRENT_BINARY_DIR}/files)
 

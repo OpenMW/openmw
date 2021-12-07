@@ -1,4 +1,4 @@
-if (NOT DEFINED OPENMW_SHADERS_ROOT)
+if (NOT DEFINED OPENMW_BINARY_ROOT)
     return()
 endif()
 
@@ -42,4 +42,4 @@ set(SHADER_FILES
     softparticles.glsl
 )
 
-copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_SHADERS_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_BINARY_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")
