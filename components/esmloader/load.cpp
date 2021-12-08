@@ -218,7 +218,7 @@ namespace EsmLoader
             for (std::size_t i = 0; i < contentFiles.size(); ++i)
             {
                 const std::string &file = contentFiles[i];
-                const std::string extension = boost::filesystem::path(file).extension().string();
+                const std::string extension = Misc::StringUtils::lowerCase(boost::filesystem::path(file).extension().string());
 
                 if (supportedFormats.find(extension) == supportedFormats.end())
                 {
