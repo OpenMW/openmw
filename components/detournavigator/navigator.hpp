@@ -122,7 +122,7 @@ namespace DetourNavigator
          * at least single object is added to the scene, false if there is already water for given cell or there is no
          * any other objects.
          */
-        virtual bool addWater(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift) = 0;
+        virtual bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level) = 0;
 
         /**
          * @brief removeWater to make it no more available at the scene.
@@ -131,8 +131,7 @@ namespace DetourNavigator
          */
         virtual bool removeWater(const osg::Vec2i& cellPosition) = 0;
 
-        virtual bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-            const HeightfieldShape& shape) = 0;
+        virtual bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape) = 0;
 
         virtual bool removeHeightfield(const osg::Vec2i& cellPosition) = 0;
 

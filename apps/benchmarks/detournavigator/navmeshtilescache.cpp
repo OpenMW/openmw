@@ -25,18 +25,10 @@ namespace
     };
 
     template <typename Random>
-    TilePosition generateTilePosition(int max, Random& random)
+    osg::Vec2i generateVec2i(int max, Random& random)
     {
         std::uniform_int_distribution<int> distribution(0, max);
-        return TilePosition(distribution(random), distribution(random));
-    }
-
-    template <typename Random>
-    TileBounds generateTileBounds(Random& random)
-    {
-        std::uniform_real_distribution<float> distribution(0.0, 1.0);
-        const osg::Vec2f min(distribution(random), distribution(random));
-        return TileBounds {min, min + osg::Vec2f(1.0, 1.0)};
+        return osg::Vec2i(distribution(random), distribution(random));
     }
 
     template <typename Random>
@@ -91,8 +83,7 @@ namespace
     {
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         std::generate_n(out, count, [&] {
-            const osg::Vec3f shift(distribution(random), distribution(random), distribution(random));
-            return Cell {1, shift};
+            return CellWater {generateVec2i(1000, random), Water {ESM::Land::REAL_SIZE, distribution(random)}};
         });
     }
 
@@ -117,16 +108,18 @@ namespace
     {
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         Heightfield result;
-        result.mBounds = generateTileBounds(random);
+        result.mCellPosition = generateVec2i(1000, random);
+        result.mCellSize = ESM::Land::REAL_SIZE;
         result.mMinHeight = distribution(random);
         result.mMaxHeight = result.mMinHeight + 1.0;
-        result.mShift = osg::Vec3f(distribution(random), distribution(random), distribution(random));
-        result.mScale = distribution(random);
         result.mLength = static_cast<std::uint8_t>(ESM::Land::LAND_SIZE);
         std::generate_n(std::back_inserter(result.mHeights), ESM::Land::LAND_NUM_VERTS, [&]
         {
             return distribution(random);
         });
+        result.mOriginalSize = ESM::Land::LAND_SIZE;
+        result.mMinX = 0;
+        result.mMinY = 0;
         return result;
     }
 
@@ -135,7 +128,8 @@ namespace
     {
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         FlatHeightfield result;
-        result.mBounds = generateTileBounds(random);
+        result.mCellPosition = generateVec2i(1000, random);
+        result.mCellSize = ESM::Land::REAL_SIZE;
         result.mHeight = distribution(random);
         return result;
     }
@@ -144,11 +138,11 @@ namespace
     Key generateKey(std::size_t triangles, Random& random)
     {
         const osg::Vec3f agentHalfExtents = generateAgentHalfExtents(0.5, 1.5, random);
-        const TilePosition tilePosition = generateTilePosition(10000, random);
+        const TilePosition tilePosition = generateVec2i(10000, random);
         const std::size_t generation = std::uniform_int_distribution<std::size_t>(0, 100)(random);
         const std::size_t revision = std::uniform_int_distribution<std::size_t>(0, 10000)(random);
         Mesh mesh = generateMesh(triangles, random);
-        std::vector<Cell> water;
+        std::vector<CellWater> water;
         generateWater(std::back_inserter(water), 1, random);
         RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water),
                               {generateHeightfield(random)}, {generateFlatHeightfield(random)});

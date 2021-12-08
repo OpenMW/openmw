@@ -29,6 +29,12 @@ namespace DetourNavigator
         btTransform mTransform;
     };
 
+    struct SizedHeightfieldShape
+    {
+        int mCellSize;
+        HeightfieldShape mShape;
+    };
+
     class RecastMeshManager
     {
     public:
@@ -41,14 +47,13 @@ namespace DetourNavigator
 
         std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
 
-        std::optional<Cell> removeWater(const osg::Vec2i& cellPosition);
+        std::optional<Water> removeWater(const osg::Vec2i& cellPosition);
 
-        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-            const HeightfieldShape& shape);
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape);
 
-        std::optional<Cell> removeHeightfield(const osg::Vec2i& cellPosition);
+        std::optional<SizedHeightfieldShape> removeHeightfield(const osg::Vec2i& cellPosition);
 
         std::shared_ptr<RecastMesh> getMesh() const;
 
@@ -65,19 +70,13 @@ namespace DetourNavigator
             Version mNavMeshVersion;
         };
 
-        struct Heightfield
-        {
-            Cell mCell;
-            HeightfieldShape mShape;
-        };
-
         const std::size_t mGeneration;
         const TileBounds mTileBounds;
         mutable std::mutex mMutex;
         std::size_t mRevision = 0;
         std::map<ObjectId, OscillatingRecastMeshObject> mObjects;
-        std::map<osg::Vec2i, Cell> mWater;
-        std::map<osg::Vec2i, Heightfield> mHeightfields;
+        std::map<osg::Vec2i, Water> mWater;
+        std::map<osg::Vec2i, SizedHeightfieldShape> mHeightfields;
         std::optional<Report> mLastNavMeshReportedChange;
         std::optional<Report> mLastNavMeshReport;
     };

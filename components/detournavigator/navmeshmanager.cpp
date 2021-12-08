@@ -8,6 +8,7 @@
 #include "waitconditiontype.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/bullethelpers/heightfield.hpp>
 
 #include <DetourNavMesh.h>
 
@@ -73,10 +74,11 @@ namespace DetourNavigator
         return true;
     }
 
-    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift)
+    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
-        if (!mRecastMeshManager.addWater(cellPosition, cellSize, shift))
+        if (!mRecastMeshManager.addWater(cellPosition, cellSize, level))
             return false;
+        const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
         addChangedTiles(cellSize, shift, ChangeType::add);
         return true;
     }
@@ -86,15 +88,16 @@ namespace DetourNavigator
         const auto water = mRecastMeshManager.removeWater(cellPosition);
         if (!water)
             return false;
-        addChangedTiles(water->mSize, water->mShift, ChangeType::remove);
+        const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, water->mCellSize, water->mLevel));
+        addChangedTiles(water->mCellSize, shift, ChangeType::remove);
         return true;
     }
 
-    bool NavMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-        const HeightfieldShape& shape)
+    bool NavMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape)
     {
-        if (!mRecastMeshManager.addHeightfield(cellPosition, cellSize, shift, shape))
+        if (!mRecastMeshManager.addHeightfield(cellPosition, cellSize, shape))
             return false;
+        const btVector3 shift = getHeightfieldShift(shape, cellPosition, cellSize);
         addChangedTiles(cellSize, shift, ChangeType::add);
         return true;
     }
@@ -104,7 +107,8 @@ namespace DetourNavigator
         const auto heightfield = mRecastMeshManager.removeHeightfield(cellPosition);
         if (!heightfield)
             return false;
-        addChangedTiles(heightfield->mSize, heightfield->mShift, ChangeType::remove);
+        const btVector3 shift = getHeightfieldShift(heightfield->mShape, cellPosition, heightfield->mCellSize);
+        addChangedTiles(heightfield->mCellSize, shift, ChangeType::remove);
         return true;
     }
 
@@ -251,7 +255,7 @@ namespace DetourNavigator
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 
-    void NavMeshManager::addChangedTiles(const int cellSize, const osg::Vec3f& shift,
+    void NavMeshManager::addChangedTiles(const int cellSize, const btVector3& shift,
             const ChangeType changeType)
     {
         if (cellSize == std::numeric_limits<int>::max())

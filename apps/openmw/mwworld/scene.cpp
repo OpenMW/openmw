@@ -404,7 +404,7 @@ namespace MWWorld
                         return heights;
                     }
                 } ();
-                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shift, shape);
+                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shape);
             }
         }
 
@@ -434,18 +434,11 @@ namespace MWWorld
             if (cell->getCell()->isExterior())
             {
                 if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                {
-                    const btTransform& transform =heightField->getCollisionObject()->getWorldTransform();
-                    mNavigator.addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE,
-                                        osg::Vec3f(static_cast<float>(transform.getOrigin().x()),
-                                                   static_cast<float>(transform.getOrigin().y()),
-                                                   waterLevel));
-                }
+                    mNavigator.addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE, waterLevel);
             }
             else
             {
-                mNavigator.addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(),
-                                    osg::Vec3f(0, 0, waterLevel));
+                mNavigator.addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(), waterLevel);
             }
         }
         else

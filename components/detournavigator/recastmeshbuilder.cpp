@@ -6,6 +6,7 @@
 #include <components/bullethelpers/processtrianglecallback.hpp>
 #include <components/misc/convert.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/bullethelpers/heightfield.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
@@ -35,13 +36,9 @@ namespace DetourNavigator
             return result;
         }
 
-        TileBounds maxCellTileBounds(int size, const osg::Vec3f& shift)
+        float getHeightfieldScale(int cellSize, std::size_t dataSize)
         {
-            const float halfCellSize = static_cast<float>(size) / 2;
-            return TileBounds {
-                osg::Vec2f(shift.x() - halfCellSize, shift.y() - halfCellSize),
-                osg::Vec2f(shift.x() + halfCellSize, shift.y() + halfCellSize)
-            };
+            return static_cast<float>(cellSize) / (dataSize - 1);
         }
     }
 
@@ -108,7 +105,8 @@ namespace DetourNavigator
             static_cast<int>(heightfield.mLength), heightfield.mHeights.data(),
             heightfield.mMinHeight, heightfield.mMaxHeight, upAxis, flipQuadEdges);
 #endif
-        shape.setLocalScaling(btVector3(heightfield.mScale, heightfield.mScale, 1));
+        const float scale = getHeightfieldScale(heightfield.mCellSize, heightfield.mOriginalSize);
+        shape.setLocalScaling(btVector3(scale, scale, 1));
         btVector3 aabbMin;
         btVector3 aabbMax;
         shape.getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
@@ -118,8 +116,16 @@ namespace DetourNavigator
             triangles.emplace_back(makeRecastMeshTriangle(vertices, AreaType_ground));
         });
         shape.processAllTriangles(&callback, aabbMin, aabbMax);
-        const osg::Vec2f shift = (osg::Vec2f(aabbMax.x(), aabbMax.y()) - osg::Vec2f(aabbMin.x(), aabbMin.y())) * 0.5;
-        return makeMesh(std::move(triangles), heightfield.mShift + osg::Vec3f(shift.x(), shift.y(), 0));
+        const osg::Vec2f aabbShift = (osg::Vec2f(aabbMax.x(), aabbMax.y()) - osg::Vec2f(aabbMin.x(), aabbMin.y())) * 0.5;
+        const osg::Vec2f tileShift = osg::Vec2f(heightfield.mMinX, heightfield.mMinY) * scale;
+        const osg::Vec2f localShift = aabbShift + tileShift;
+        const float cellSize = static_cast<float>(heightfield.mCellSize);
+        const osg::Vec3f cellShift(
+            heightfield.mCellPosition.x() * cellSize,
+            heightfield.mCellPosition.y() * cellSize,
+            (heightfield.mMinHeight + heightfield.mMaxHeight) * 0.5f
+        );
+        return makeMesh(std::move(triangles), cellShift + osg::Vec3f(localShift.x(), localShift.y(), 0));
     }
 
     RecastMeshBuilder::RecastMeshBuilder(const TileBounds& bounds) noexcept
@@ -200,24 +206,25 @@ namespace DetourNavigator
         }
     }
 
-    void RecastMeshBuilder::addWater(const int cellSize, const osg::Vec3f& shift)
+    void RecastMeshBuilder::addWater(const osg::Vec2i& cellPosition, const Water& water)
     {
-        mWater.push_back(Cell {cellSize, shift});
+        mWater.push_back(CellWater {cellPosition, water});
     }
 
-    void RecastMeshBuilder::addHeightfield(int cellSize, const osg::Vec3f& shift, float height)
+    void RecastMeshBuilder::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, float height)
     {
-        if (const auto intersection = getIntersection(mBounds, maxCellTileBounds(cellSize, shift)))
-            mFlatHeightfields.emplace_back(FlatHeightfield {*intersection, height + shift.z()});
+        if (const auto intersection = getIntersection(mBounds, maxCellTileBounds(cellPosition, cellSize)))
+            mFlatHeightfields.emplace_back(FlatHeightfield {cellPosition, cellSize, height});
     }
 
-    void RecastMeshBuilder::addHeightfield(int cellSize, const osg::Vec3f& shift, const float* heights,
+    void RecastMeshBuilder::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const float* heights,
         std::size_t size, float minHeight, float maxHeight)
     {
-        const auto intersection = getIntersection(mBounds, maxCellTileBounds(cellSize, shift));
+        const auto intersection = getIntersection(mBounds, maxCellTileBounds(cellPosition, cellSize));
         if (!intersection.has_value())
             return;
-        const float stepSize = static_cast<float>(cellSize) / (size - 1);
+        const osg::Vec3f shift = Misc::Convert::toOsg(BulletHelpers::getHeightfieldShift(cellPosition.x(), cellPosition.y(), cellSize, minHeight, maxHeight));
+        const float stepSize = getHeightfieldScale(cellSize, size);
         const int halfCellSize = cellSize / 2;
         const auto local = [&] (float v, float shift) { return (v - shift + halfCellSize) / stepSize; };
         const auto index = [&] (float v, int add) { return std::clamp<int>(static_cast<int>(v) + add, 0, size); };
@@ -236,13 +243,15 @@ namespace DetourNavigator
             for (std::size_t x = minX; x < endX; ++x)
                 tileHeights.push_back(heights[x + y * size]);
         Heightfield heightfield;
-        heightfield.mBounds = *intersection;
+        heightfield.mCellPosition = cellPosition;
+        heightfield.mCellSize = cellSize;
         heightfield.mLength = static_cast<std::uint8_t>(endY - minY);
         heightfield.mMinHeight = minHeight;
         heightfield.mMaxHeight = maxHeight;
-        heightfield.mShift = shift + osg::Vec3f(minX, minY, 0) * stepSize - osg::Vec3f(halfCellSize, halfCellSize, 0);
-        heightfield.mScale = stepSize;
         heightfield.mHeights = std::move(tileHeights);
+        heightfield.mOriginalSize = size;
+        heightfield.mMinX = static_cast<std::uint8_t>(minX);
+        heightfield.mMinY = static_cast<std::uint8_t>(minY);
         mHeightfields.push_back(std::move(heightfield));
     }
 

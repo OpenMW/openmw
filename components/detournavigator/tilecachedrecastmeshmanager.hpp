@@ -76,14 +76,13 @@ namespace DetourNavigator
 
         std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
 
-        std::optional<Cell> removeWater(const osg::Vec2i& cellPosition);
+        std::optional<Water> removeWater(const osg::Vec2i& cellPosition);
 
-        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-            const HeightfieldShape& shape);
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape);
 
-        std::optional<Cell> removeHeightfield(const osg::Vec2i& cellPosition);
+        std::optional<SizedHeightfieldShape> removeHeightfield(const osg::Vec2i& cellPosition);
 
         std::shared_ptr<RecastMesh> getMesh(const TilePosition& tilePosition) const;
 

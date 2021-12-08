@@ -32,16 +32,15 @@ namespace DetourNavigator
         return object;
     }
 
-    bool CachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
-        const osg::Vec3f& shift)
+    bool CachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
-        if (!mImpl.addWater(cellPosition, cellSize, shift))
+        if (!mImpl.addWater(cellPosition, cellSize, level))
             return false;
         mOutdatedCache = true;
         return true;
     }
 
-    std::optional<Cell> CachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<Water> CachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto water = mImpl.removeWater(cellPosition);
         if (water)
@@ -50,20 +49,20 @@ namespace DetourNavigator
     }
 
     bool CachedRecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
-        const osg::Vec3f& shift, const HeightfieldShape& shape)
+        const HeightfieldShape& shape)
     {
-        if (!mImpl.addHeightfield(cellPosition, cellSize, shift, shape))
+        if (!mImpl.addHeightfield(cellPosition, cellSize, shape))
             return false;
         mOutdatedCache = true;
         return true;
     }
 
-    std::optional<Cell> CachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    std::optional<SizedHeightfieldShape> CachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
     {
-        const auto cell = mImpl.removeHeightfield(cellPosition);
-        if (cell)
+        const auto heightfield = mImpl.removeHeightfield(cellPosition);
+        if (heightfield)
             mOutdatedCache = true;
-        return cell;
+        return heightfield;
     }
 
     std::shared_ptr<RecastMesh> CachedRecastMeshManager::getMesh()

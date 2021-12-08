@@ -23,7 +23,7 @@ namespace DetourNavigator
     struct RecastMeshData
     {
         Mesh mMesh;
-        std::vector<Cell> mWater;
+        std::vector<CellWater> mWater;
         std::vector<Heightfield> mHeightfields;
         std::vector<FlatHeightfield> mFlatHeightfields;
     };

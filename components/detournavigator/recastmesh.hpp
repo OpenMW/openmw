@@ -8,6 +8,7 @@
 #include <components/bullethelpers/operators.hpp>
 
 #include <osg/Vec3f>
+#include <osg/Vec2i>
 
 #include <memory>
 #include <string>
@@ -47,26 +48,57 @@ namespace DetourNavigator
         }
     };
 
-    struct Cell
+    struct Water
     {
-        int mSize;
-        osg::Vec3f mShift;
+        int mCellSize;
+        float mLevel;
     };
+
+    inline bool operator<(const Water& lhs, const Water& rhs) noexcept
+    {
+        const auto tie = [] (const Water& v) { return std::tie(v.mCellSize, v.mLevel); };
+        return tie(lhs) < tie(rhs);
+    }
+
+    struct CellWater
+    {
+        osg::Vec2i mCellPosition;
+        Water mWater;
+    };
+
+    inline bool operator<(const CellWater& lhs, const CellWater& rhs) noexcept
+    {
+        const auto tie = [] (const CellWater& v) { return std::tie(v.mCellPosition, v.mWater); };
+        return tie(lhs) < tie(rhs);
+    }
+
+    inline osg::Vec2f getWaterShift2d(const osg::Vec2i& cellPosition, int cellSize)
+    {
+        return osg::Vec2f((cellPosition.x() + 0.5f) * cellSize, (cellPosition.y() + 0.5f) * cellSize);
+    }
+
+    inline osg::Vec3f getWaterShift3d(const osg::Vec2i& cellPosition, int cellSize, float level)
+    {
+        return osg::Vec3f(getWaterShift2d(cellPosition, cellSize), level);
+    }
 
     struct Heightfield
     {
-        TileBounds mBounds;
+        osg::Vec2i mCellPosition;
+        int mCellSize;
         std::uint8_t mLength;
         float mMinHeight;
         float mMaxHeight;
-        osg::Vec3f mShift;
-        float mScale;
         std::vector<float> mHeights;
+        std::size_t mOriginalSize;
+        std::uint8_t mMinX;
+        std::uint8_t mMinY;
     };
 
     inline auto makeTuple(const Heightfield& v) noexcept
     {
-        return std::tie(v.mBounds, v.mLength, v.mMinHeight, v.mMaxHeight, v.mShift, v.mScale, v.mHeights);
+        return std::tie(v.mCellPosition, v.mCellSize, v.mLength, v.mMinHeight, v.mMaxHeight,
+                        v.mHeights, v.mOriginalSize, v.mMinX, v.mMinY);
     }
 
     inline bool operator<(const Heightfield& lhs, const Heightfield& rhs) noexcept
@@ -76,19 +108,21 @@ namespace DetourNavigator
 
     struct FlatHeightfield
     {
-        TileBounds mBounds;
+        osg::Vec2i mCellPosition;
+        int mCellSize;
         float mHeight;
     };
 
     inline bool operator<(const FlatHeightfield& lhs, const FlatHeightfield& rhs) noexcept
     {
-        return std::tie(lhs.mBounds, lhs.mHeight) < std::tie(rhs.mBounds, rhs.mHeight);
+        const auto tie = [] (const FlatHeightfield& v) { return std::tie(v.mCellPosition, v.mCellSize, v.mHeight); };
+        return tie(lhs) < tie(rhs);
     }
 
     class RecastMesh
     {
     public:
-        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<Cell> water,
+        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<CellWater> water,
             std::vector<Heightfield> heightfields, std::vector<FlatHeightfield> flatHeightfields);
 
         std::size_t getGeneration() const
@@ -103,7 +137,7 @@ namespace DetourNavigator
 
         const Mesh& getMesh() const noexcept { return mMesh; }
 
-        const std::vector<Cell>& getWater() const
+        const std::vector<CellWater>& getWater() const
         {
             return mWater;
         }
@@ -118,34 +152,23 @@ namespace DetourNavigator
             return mFlatHeightfields;
         }
 
-        const Bounds& getBounds() const
-        {
-            return mBounds;
-        }
-
     private:
         std::size_t mGeneration;
         std::size_t mRevision;
         Mesh mMesh;
-        std::vector<Cell> mWater;
+        std::vector<CellWater> mWater;
         std::vector<Heightfield> mHeightfields;
         std::vector<FlatHeightfield> mFlatHeightfields;
-        Bounds mBounds;
 
         friend inline std::size_t getSize(const RecastMesh& value) noexcept
         {
-            return getSize(value.mMesh) + value.mWater.size() * sizeof(Cell)
+            return getSize(value.mMesh) + value.mWater.size() * sizeof(CellWater)
                 + value.mHeightfields.size() * sizeof(Heightfield)
                 + std::accumulate(value.mHeightfields.begin(), value.mHeightfields.end(), std::size_t {0},
                                   [] (std::size_t r, const Heightfield& v) { return r + v.mHeights.size() * sizeof(float); })
                 + value.mFlatHeightfields.size() * sizeof(FlatHeightfield);
         }
     };
-
-    inline bool operator<(const Cell& lhs, const Cell& rhs) noexcept
-    {
-        return std::tie(lhs.mSize, lhs.mShift) < std::tie(rhs.mSize, rhs.mShift);
-    }
 }
 
 #endif

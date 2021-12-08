@@ -44,7 +44,7 @@ namespace DetourNavigator
             return false;
         }
 
-        bool addWater(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, const osg::Vec3f& /*shift*/) override
+        bool addWater(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, float /*level*/) override
         {
             return false;
         }
@@ -54,8 +54,7 @@ namespace DetourNavigator
             return false;
         }
 
-        bool addHeightfield(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, const osg::Vec3f& /*shift*/,
-            const HeightfieldShape& /*height*/) override
+        bool addHeightfield(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, const HeightfieldShape& /*height*/) override
         {
             return false;
         }
