@@ -3,17 +3,17 @@
 stages:
   - build
 
-.Debian_Image:
+.Ubuntu_Image:
   tags:
     - docker
     - linux
-  image: debian:bullseye
+  image: ubuntu:focal
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"  
   
 
-.Debian:
-  extends: .Debian_Image
+.Ubuntu:
+  extends: .Ubuntu_Image
   cache:
     paths:
     - apt-cache/
@@ -35,11 +35,12 @@ stages:
       - build/install/
 
 Clang_Tidy:
-  extends: .Debian_Image
+  extends: .Ubuntu_Image
   stage: build
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   before_script:
+    - apt-get update; apt-get -y install software-properties-common; add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic clang-tidy clang
   script:
     - CI/before_script.linux.sh
@@ -55,11 +56,12 @@ Clang_Tidy:
     expire_in: 1 minute
 
 Coverity:
-  extends: .Debian_Image
+  extends: .Ubuntu_Image
   stage: build
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   before_script:
+    - apt-get update; apt-get -y install software-properties-common; add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic coverity
     - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64 --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - tar xfz /tmp/cov-analysis-linux64.tgz
@@ -81,11 +83,12 @@ Coverity:
     paths: []
     expire_in: 1 minute
 
-Debian_GCC:
-  extends: .Debian
+Ubuntu_GCC:
+  extends: .Ubuntu
   cache:
-    key: Debian_GCC.v2
+    key: Ubuntu_GCC.v2
   before_script:
+    - apt-get update; apt-get -y install software-properties-common; add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
     CC: gcc
@@ -94,10 +97,10 @@ Debian_GCC:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-Debian_GCC_tests:
-  extends: Debian_GCC
+Ubuntu_GCC_tests:
+  extends: Ubuntu_GCC
   cache:
-    key: Debian_GCC_tests.v2
+    key: Ubuntu_GCC_tests.v2
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -105,10 +108,10 @@ Debian_GCC_tests:
     paths: []
     expire_in: 1 minute
 
-Debian_GCC_tests_Debug:
-  extends: Debian_GCC
+Ubuntu_GCC_tests_Debug:
+  extends: Ubuntu_GCC
   cache:
-    key: Debian_GCC_tests_Debug.v1
+    key: Ubuntu_GCC_tests_Debug.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -117,24 +120,25 @@ Debian_GCC_tests_Debug:
     paths: []
     expire_in: 1 minute
 
-Debian_GCC_Static_Deps:
-  extends: Debian_GCC
+Ubuntu_GCC_Static_Deps:
+  extends: Ubuntu_GCC
   cache:
-    key: Debian_GCC_Static_Deps
+    key: Ubuntu_GCC_Static_Deps
     paths:
     - apt-cache/
     - ccache/
     - build/extern/fetched/
   before_script:
+    - apt-get update; apt-get -y install software-properties-common; add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-static
   variables:
     CI_OPENMW_USE_STATIC_DEPS: 1
   timeout: 3h
 
-Debian_GCC_Static_Deps_tests:
-  extends: Debian_GCC_Static_Deps
+Ubuntu_GCC_Static_Deps_tests:
+  extends: Ubuntu_GCC_Static_Deps
   cache:
-    key: Debian_GCC_Static_Deps_tests
+    key: Ubuntu_GCC_Static_Deps_tests
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -142,12 +146,13 @@ Debian_GCC_Static_Deps_tests:
     paths: []
     expire_in: 1 minute
 
-Debian_Clang:
-  extends: .Debian
+Ubuntu_Clang:
+  extends: .Ubuntu
   before_script:
+    - apt-get update; apt-get -y install software-properties-common; add-apt-repository -y ppa:openmw/openmw
     - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
   cache:
-    key: Debian_Clang.v2
+    key: Ubuntu_Clang.v2
   variables:
     CC: clang
     CXX: clang++
@@ -155,10 +160,10 @@ Debian_Clang:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-Debian_Clang_tests:
-  extends: Debian_Clang
+Ubuntu_Clang_tests:
+  extends: Ubuntu_Clang
   cache:
-    key: Debian_Clang_tests.v2
+    key: Ubuntu_Clang_tests.v2
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -166,10 +171,10 @@ Debian_Clang_tests:
     paths: []
     expire_in: 1 minute
 
-Debian_Clang_tests_Debug:
-  extends: Debian_Clang
+Ubuntu_Clang_tests_Debug:
+  extends: Ubuntu_Clang
   cache:
-    key: Debian_Clang_tests_Debug.v1
+    key: Ubuntu_Clang_tests_Debug.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -473,7 +478,7 @@ Windows_MSBuild_Tests_RelWithDebInfo:
     paths: []
     expire_in: 1 minute
 
-Debian_AndroidNDK_arm64-v8a:
+Ubuntu_AndroidNDK_arm64-v8a:
   tags:
     - linux
   image: psi29a/android-ndk:focal-ndk22
