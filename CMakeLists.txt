@@ -446,7 +446,7 @@ if (APPLE)
 endif (APPLE)
 
 if (NOT APPLE)  # this is modified for macOS use later in "apps/open[mw|cs]/CMakeLists.txt"
-    set(OPENMW_BINARY_ROOT ${OpenMW_BINARY_DIR})
+    set(OPENMW_RESOURCES_ROOT ${OpenMW_BINARY_DIR})
 endif ()
 
 add_subdirectory(files/)
