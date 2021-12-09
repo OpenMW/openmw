@@ -14,7 +14,7 @@
    <item>
     <widget class="QTabWidget" name="AdvancedTabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="GameMechanics">
       <attribute name="title">
@@ -281,8 +281,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>645</width>
-            <height>413</height>
+            <width>665</width>
+            <height>525</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
@@ -451,6 +451,16 @@
                 </property>
                 <property name="text">
                  <string>Soft Particles</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QCheckBox" name="antialiasAlphaTestCheckBox">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows MSAA to work with alpha-tested meshes, producing better-looking edges without pixelation. Can negatively impact performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Use anti-alias alpha testing</string>
                 </property>
                </widget>
               </item>

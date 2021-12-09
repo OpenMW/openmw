@@ -217,6 +217,7 @@ Programmers
     tlmullis
     tri4ng1e
     Thoronador
+    Tom Lowe (Vulpen)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)
     unelsson

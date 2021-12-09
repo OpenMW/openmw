@@ -118,6 +118,10 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
         loadSettingBool(radialFogCheckBox, "radial fog", "Shaders");
         loadSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
+        loadSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
+        if (Settings::Manager::getInt("antialiasing", "Video") == 0) {
+            antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
+        }
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
         loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
@@ -268,6 +272,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
         saveSettingBool(radialFogCheckBox, "radial fog", "Shaders");
         saveSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
+        saveSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
         saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         saveSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
         saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
