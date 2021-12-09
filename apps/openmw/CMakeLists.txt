@@ -155,7 +155,7 @@ target_link_libraries(openmw
     components
 )
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+if (MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
     target_precompile_headers(openmw PRIVATE ${SOL_INCLUDE_DIR}/sol/sol.hpp)
 endif ()
 

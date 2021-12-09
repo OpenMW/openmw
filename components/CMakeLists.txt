@@ -373,6 +373,6 @@ if(USE_QT)
     set_property(TARGET components_qt PROPERTY AUTOMOC ON)
 endif(USE_QT)
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+if (MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
     target_precompile_headers(components PRIVATE ${SOL_INCLUDE_DIR}/sol/sol.hpp)
 endif ()
