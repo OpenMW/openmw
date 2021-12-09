@@ -88,8 +88,8 @@ std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM::E
     return map;
 }
 
-MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::string& game)
-: mQuitRequest (false), mAskLoadRecent(false), mState (State_NoGame), mCharacterManager (saves, game), mTimePlayed (0)
+MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::vector<std::string>& contentFiles)
+: mQuitRequest (false), mAskLoadRecent(false), mState (State_NoGame), mCharacterManager (saves, contentFiles), mTimePlayed (0)
 {
 
 }
@@ -406,7 +406,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
             ESM::NAME n = reader.getRecName();
             reader.getRecHeader();
 
-            switch (n.intval)
+            switch (n.toInt())
             {
                 case ESM::REC_SAVE:
                     {
@@ -427,12 +427,12 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_JOUR_LEGACY:
                 case ESM::REC_QUES:
 
-                    MWBase::Environment::get().getJournal()->readRecord (reader, n.intval);
+                    MWBase::Environment::get().getJournal()->readRecord (reader, n.toInt());
                     break;
 
                 case ESM::REC_DIAS:
 
-                    MWBase::Environment::get().getDialogueManager()->readRecord (reader, n.intval);
+                    MWBase::Environment::get().getDialogueManager()->readRecord (reader, n.toInt());
                     break;
 
                 case ESM::REC_ALCH:
@@ -457,7 +457,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_LEVI:
                 case ESM::REC_CREA:
                 case ESM::REC_CONT:
-                    MWBase::Environment::get().getWorld()->readRecord(reader, n.intval, contentFileMap);
+                    MWBase::Environment::get().getWorld()->readRecord(reader, n.toInt(), contentFileMap);
                     break;
 
                 case ESM::REC_CAM_:
@@ -466,7 +466,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
                 case ESM::REC_GSCR:
 
-                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord (reader, n.intval, contentFileMap);
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord (reader, n.toInt(), contentFileMap);
                     break;
 
                 case ESM::REC_GMAP:
@@ -474,21 +474,21 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_ASPL:
                 case ESM::REC_MARK:
 
-                    MWBase::Environment::get().getWindowManager()->readRecord(reader, n.intval);
+                    MWBase::Environment::get().getWindowManager()->readRecord(reader, n.toInt());
                     break;
 
                 case ESM::REC_DCOU:
                 case ESM::REC_STLN:
 
-                    MWBase::Environment::get().getMechanicsManager()->readRecord(reader, n.intval);
+                    MWBase::Environment::get().getMechanicsManager()->readRecord(reader, n.toInt());
                     break;
 
                 case ESM::REC_INPU:
-                    MWBase::Environment::get().getInputManager()->readRecord(reader, n.intval);
+                    MWBase::Environment::get().getInputManager()->readRecord(reader, n.toInt());
                     break;
 
                 case ESM::REC_LUAM:
-                    MWBase::Environment::get().getLuaManager()->readRecord(reader, n.intval);
+                    MWBase::Environment::get().getLuaManager()->readRecord(reader, n.toInt());
                     break;
 
                 default:
@@ -558,6 +558,8 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         // Since we passed "changeEvent=false" to changeCell, we shouldn't have triggered the cell change flag.
         // But make sure the flag is cleared anyway in case it was set from an earlier game.
         MWBase::Environment::get().getWorld()->markCellAsUnchanged();
+
+        MWBase::Environment::get().getLuaManager()->gameLoaded();
     }
     catch (const std::exception& e)
     {

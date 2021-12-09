@@ -9,6 +9,7 @@
 #include <osg/ref_ptr>
 #include <osg/Node>
 #include <osg/Texture>
+#include <osg/Texture2D>
 
 #include "resourcemanager.hpp"
 
@@ -111,6 +112,8 @@ namespace Resource
         void setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported);
         bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
 
+        void setOpaqueDepthTex(osg::ref_ptr<osg::Texture2D> texture);
+
         enum class UBOBinding
         {
             // If we add more UBO's, we should probably assign their bindings dynamically according to the current count of UBO's in the programTemplate
@@ -132,16 +135,22 @@ namespace Resource
         /// @note Thread safe.
         osg::ref_ptr<const osg::Node> getTemplate(const std::string& name, bool compile=true);
 
-        osg::ref_ptr<osg::Node> createInstance(const std::string& name);
+        /// Clone osg::Node safely.
+        /// @note Thread safe.
+        static osg::ref_ptr<osg::Node> cloneNode(const osg::Node* base);
 
-        osg::ref_ptr<osg::Node> createInstance(const osg::Node* base);
         void shareState(osg::ref_ptr<osg::Node> node);
-        /// Get an instance of the given scene template
+
+        /// Clone osg::Node and adjust it according to SceneManager's settings.
+        /// @note Thread safe.
+        osg::ref_ptr<osg::Node> getInstance(const osg::Node* base);
+
+        /// Instance the given scene template.
         /// @see getTemplate
         /// @note Thread safe.
         osg::ref_ptr<osg::Node> getInstance(const std::string& name);
 
-        /// Get an instance of the given scene template and immediately attach it to a parent node
+        /// Instance the given scene template and immediately attach it to a parent node
         /// @see getTemplate
         /// @note Not thread safe, unless parentNode is not part of the main scene graph yet.
         osg::ref_ptr<osg::Node> getInstance(const std::string& name, osg::Group* parentNode);
@@ -203,6 +212,7 @@ namespace Resource
         SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
         bool mConvertAlphaTestToAlphaToCoverage;
         GLenum mDepthFormat;
+        osg::ref_ptr<osg::Texture2D> mOpaqueDepthTex;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
         mutable std::mutex mSharedStateMutex;

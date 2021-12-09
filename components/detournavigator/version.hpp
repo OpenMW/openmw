@@ -8,12 +8,32 @@ namespace DetourNavigator
 {
     struct Version
     {
-        std::size_t mGeneration;
-        std::size_t mRevision;
+        std::size_t mGeneration = 0;
+        std::size_t mRevision = 0;
+
+        friend inline auto tie(const Version& value)
+        {
+            return std::tie(value.mGeneration, value.mRevision);
+        }
 
         friend inline bool operator<(const Version& lhs, const Version& rhs)
         {
-            return std::tie(lhs.mGeneration, lhs.mRevision) < std::tie(rhs.mGeneration, rhs.mRevision);
+            return tie(lhs) < tie(rhs);
+        }
+
+        friend inline bool operator<=(const Version& lhs, const Version& rhs)
+        {
+            return tie(lhs) <= tie(rhs);
+        }
+
+        friend inline bool operator==(const Version& lhs, const Version& rhs)
+        {
+            return tie(lhs) == tie(rhs);
+        }
+
+        friend inline bool operator!=(const Version& lhs, const Version& rhs)
+        {
+            return !(lhs == rhs);
         }
     };
 }

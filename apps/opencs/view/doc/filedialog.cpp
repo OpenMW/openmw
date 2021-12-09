@@ -24,13 +24,18 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     resize(400, 400);
 
     setObjectName ("FileDialog");
-    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget);
+    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget, /*showOMWScripts=*/false);
     mAdjusterWidget = new AdjusterWidget (this);
 }
 
-void CSVDoc::FileDialog::addFiles(const QString &path)
+void CSVDoc::FileDialog::addFiles(const std::vector<boost::filesystem::path>& dataDirs)
 {
-    mSelector->addFiles(path);
+    for (auto iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
+    {
+        QString path = QString::fromUtf8(iter->string().c_str());
+        mSelector->addFiles(path);
+    }
+    mSelector->sortFiles();
 }
 
 void CSVDoc::FileDialog::setEncoding(const QString &encoding)

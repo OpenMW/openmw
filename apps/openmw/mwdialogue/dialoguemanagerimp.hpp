@@ -10,6 +10,7 @@
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/translation/translation.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/esm/loadinfo.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -24,14 +25,19 @@ namespace MWDialogue
 {
     class DialogueManager : public MWBase::DialogueManager
     {
+            struct ActorKnownTopicInfo
+            {
+                int mFlags;
+                const ESM::DialInfo* mInfo;
+            };
+
             std::set<std::string, Misc::StringUtils::CiComp> mKnownTopics;// Those are the topics the player knows.
 
             // Modified faction reactions. <Faction1, <Faction2, Difference> >
             typedef std::map<std::string, std::map<std::string, int> > ModFactionReactionMap;
             ModFactionReactionMap mChangedFactionReaction;
 
-            std::set<std::string, Misc::StringUtils::CiComp> mActorKnownTopics;
-            std::unordered_map<std::string, int> mActorKnownTopicsFlag;
+            std::map<std::string, ActorKnownTopicInfo, Misc::StringUtils::CiComp> mActorKnownTopics;
 
             Translation::Storage& mTranslationDataStorage;
             MWScript::CompilerContext mCompilerContext;
@@ -51,7 +57,8 @@ namespace MWDialogue
             int mCurrentDisposition;
             int mPermanentDispositionChange;
 
-            void parseText (const std::string& text);
+            std::vector<std::string> parseTopicIdsFromText (const std::string& text);
+            void addTopicsFromText (const std::string& text);
 
             void updateActorKnownTopics();
             void updateGlobals();

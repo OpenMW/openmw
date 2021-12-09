@@ -13,12 +13,6 @@ namespace osg
     class Texture2D;
 }
 
-namespace SceneUtil
-{
-    class UnrefQueue;
-    class WorkQueue;
-}
-
 namespace Terrain
 {
 
@@ -45,9 +39,6 @@ namespace Terrain
 
         void compile(CompositeMap& compositeMap, osg::RenderInfo& renderInfo, double* timeLeft) const;
 
-        /// Set a WorkQueue to delete compiled composite map layers in the background thread
-        void setWorkQueue(SceneUtil::WorkQueue* workQueue);
-
         /// Set the available time in seconds for compiling (non-immediate) composite maps each frame
         void setMinimumTimeAvailableForCompile(double time);
 
@@ -66,9 +57,6 @@ namespace Terrain
         float mTargetFrameRate;
         double mMinimumTimeAvailable;
         mutable osg::Timer mTimer;
-
-        osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
-        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
         typedef std::set<osg::ref_ptr<CompositeMap> > CompileSet;
 

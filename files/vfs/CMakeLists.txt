@@ -1,4 +1,4 @@
-if (NOT DEFINED OPENMW_MYGUI_FILES_ROOT)
+if (NOT DEFINED OPENMW_RESOURCES_ROOT)
     return()
 endif()
 
@@ -15,4 +15,4 @@ set(TEXTURE_FILES
     textures/omw_menu_scroll_center_v.dds
 )
 
-copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_MYGUI_FILES_ROOT} ${DDIRRELATIVE} "${TEXTURE_FILES}")
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${TEXTURE_FILES}")

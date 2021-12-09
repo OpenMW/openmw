@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "components/misc/stringops.hpp"
+#include "components/misc/algorithm.hpp"
 
 #include <string>
 #include <string_view>
@@ -18,7 +19,7 @@ struct PartialBinarySearchTest : public ::testing::Test
 
     bool matches(const std::string& keyword)
     {
-        return Misc::StringUtils::partialBinarySearch(mDataVec.begin(), mDataVec.end(), keyword) != mDataVec.end();
+        return Misc::partialBinarySearch(mDataVec.begin(), mDataVec.end(), keyword) != mDataVec.end();
     }
 };
 

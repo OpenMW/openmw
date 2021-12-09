@@ -66,7 +66,7 @@ void WeaponAnimation::attachArrow(const MWWorld::Ptr& actor)
     MWWorld::ConstContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weaponSlot == inv.end())
         return;
-    if (weaponSlot->getTypeName() != typeid(ESM::Weapon).name())
+    if (weaponSlot->getType() != ESM::Weapon::sRecordId)
         return;
 
     int type = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
@@ -109,7 +109,7 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
     MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weapon == inv.end())
         return;
-    if (weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if (weapon->getType() != ESM::Weapon::sRecordId)
         return;
 
     // The orientation of the launched projectile. Always the same as the actor orientation, even if the ArrowBone's orientation dictates otherwise.
@@ -172,14 +172,13 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
     }
 }
 
-void WeaponAnimation::addControllers(const std::map<std::string, osg::ref_ptr<osg::MatrixTransform> >& nodes,
-    std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>> &map, osg::Node* objectRoot)
+void WeaponAnimation::addControllers(const Animation::NodeMap& nodes, std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>> &map, osg::Node* objectRoot)
 {
     for (int i=0; i<2; ++i)
     {
         mSpineControllers[i] = nullptr;
 
-        std::map<std::string, osg::ref_ptr<osg::MatrixTransform> >::const_iterator found = nodes.find(i == 0 ? "bip01 spine1" : "bip01 spine2");
+        Animation::NodeMap::const_iterator found = nodes.find(i == 0 ? "bip01 spine1" : "bip01 spine2");
         if (found != nodes.end())
         {
             osg::Node* node = found->second;

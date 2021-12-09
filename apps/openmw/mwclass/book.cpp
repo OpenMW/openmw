@@ -85,7 +85,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Book);
 
-        registerClass (typeid (ESM::Book).name(), instance);
+        registerClass (ESM::Book::sRecordId, instance);
     }
 
     std::string Book::getUpSoundId (const MWWorld::ConstPtr& ptr) const

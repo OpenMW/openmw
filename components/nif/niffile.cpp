@@ -1,6 +1,8 @@
 #include "niffile.hpp"
 #include "effect.hpp"
 
+#include <components/files/hash.hpp>
+
 #include <array>
 #include <map>
 #include <sstream>
@@ -136,6 +138,24 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["BSShaderProperty"]             = {&construct <BSShaderProperty>            , RC_BSShaderProperty           };
     factory["BSShaderPPLightingProperty"]   = {&construct <BSShaderPPLightingProperty>  , RC_BSShaderPPLightingProperty };
     factory["BSShaderNoLightingProperty"]   = {&construct <BSShaderNoLightingProperty>  , RC_BSShaderNoLightingProperty };
+    factory["BSFurnitureMarker"]            = {&construct <BSFurnitureMarker>           , RC_BSFurnitureMarker          };
+    factory["NiCollisionObject"]            = {&construct <NiCollisionObject>           , RC_NiCollisionObject          };
+    factory["bhkCollisionObject"]           = {&construct <bhkCollisionObject>          , RC_bhkCollisionObject         };
+    factory["BSDismemberSkinInstance"]      = {&construct <BSDismemberSkinInstance>     , RC_BSDismemberSkinInstance    };
+    factory["NiControllerManager"]          = {&construct <NiControllerManager>         , RC_NiControllerManager        };
+    factory["bhkMoppBvTreeShape"]           = {&construct <bhkMoppBvTreeShape>          , RC_bhkMoppBvTreeShape         };
+    factory["bhkNiTriStripsShape"]          = {&construct <bhkNiTriStripsShape>         , RC_bhkNiTriStripsShape        };
+    factory["bhkPackedNiTriStripsShape"]    = {&construct <bhkPackedNiTriStripsShape>   , RC_bhkPackedNiTriStripsShape  };
+    factory["hkPackedNiTriStripsData"]      = {&construct <hkPackedNiTriStripsData>     , RC_hkPackedNiTriStripsData    };
+    factory["bhkConvexVerticesShape"]       = {&construct <bhkConvexVerticesShape>      , RC_bhkConvexVerticesShape     };
+    factory["bhkBoxShape"]                  = {&construct <bhkBoxShape>                 , RC_bhkBoxShape                };
+    factory["bhkListShape"]                 = {&construct <bhkListShape>                , RC_bhkListShape               };
+    factory["bhkRigidBody"]                 = {&construct <bhkRigidBody>                , RC_bhkRigidBody               };
+    factory["bhkRigidBodyT"]                = {&construct <bhkRigidBody>                , RC_bhkRigidBodyT              };
+    factory["BSLightingShaderProperty"]     = {&construct <BSLightingShaderProperty>    , RC_BSLightingShaderProperty   };
+    factory["NiSortAdjustNode"]             = {&construct <NiSortAdjustNode>            , RC_NiNode                     };
+    factory["NiClusterAccumulator"]         = {&construct <NiClusterAccumulator>        , RC_NiClusterAccumulator       };
+    factory["NiAlphaAccumulator"]           = {&construct <NiAlphaAccumulator>          , RC_NiAlphaAccumulator         };
     return factory;
 }
 
@@ -156,6 +176,9 @@ std::string NIFFile::printVersion(unsigned int version)
 
 void NIFFile::parse(Files::IStreamPtr stream)
 {
+    const std::array<std::uint64_t, 2> fileHash = Files::getHash(filename, *stream);
+    hash.append(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t));
+
     NIFStream nif (this, stream);
 
     // Check the header string

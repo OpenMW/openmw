@@ -27,8 +27,6 @@
 
 #include <sstream>
 
-#include <components/sceneutil/util.hpp>
-
 #include "shadowsbin.hpp"
 
 namespace {
@@ -279,14 +277,7 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
     }
 #endif
     // bin has to go inside camera cull or the rendertexture stage will override it
-    static osg::ref_ptr<osg::StateSet> ss;
-    if (!ss)
-    {
-        ShadowsBinAdder adder("ShadowsBin", _vdsm->getCastingPrograms());
-        ss = new osg::StateSet;
-        ss->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, "ShadowsBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
-    }
-    cv->pushStateSet(ss);
+    cv->pushStateSet(_vdsm->getOrCreateShadowsBinStateSet());
     if (_vdsm->getShadowedScene())
     {
         _vdsm->getShadowedScene()->osg::Group::traverse(*nv);
@@ -357,8 +348,6 @@ MWShadowTechnique::ComputeLightSpaceBounds::ComputeLightSpaceBounds() :
     osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
 {
     setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
-
-    setName("SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds,AcceptedByComponentsTerrainQuadTreeWorld");
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::reset()
@@ -380,6 +369,11 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Node& node)
     popCurrentMask();
 }
 
+void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Group& node)
+{
+    apply(static_cast<osg::Node&>(node));
+}
+
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
 {
     if (isCulled(drawable)) return;
@@ -393,12 +387,9 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
     popCurrentMask();
 }
 
-void MWShadowTechnique::ComputeLightSpaceBounds::apply(Terrain::QuadTreeWorld & quadTreeWorld)
+void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Geometry& drawable)
 {
-    // For now, just expand the bounds fully as terrain will fill them up and possible ways to detect which terrain definitely won't cast shadows aren't implemented.
-
-    update(osg::Vec3(-1.0, -1.0, 0.0));
-    update(osg::Vec3(1.0, 1.0, 0.0));
+    apply(static_cast<osg::Drawable&>(drawable));
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Billboard&)
@@ -434,7 +425,11 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Transform& transform
 
     // pop the culling mode.
     popCurrentMask();
+}
 
+void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::MatrixTransform& transform)
+{
+    apply(static_cast<osg::Transform&>(transform));
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Camera&)
@@ -807,6 +802,8 @@ MWShadowTechnique::MWShadowTechnique(const MWShadowTechnique& vdsm, const osg::C
 
 MWShadowTechnique::~MWShadowTechnique()
 {
+    if (_shadowsBin != nullptr)
+        osgUtil::RenderBin::removeRenderBinPrototype(_shadowsBin);
 }
 
 
@@ -1122,7 +1119,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
         // if we are using multiple shadow maps and CastShadowTraversalMask is being used
         // traverse the scene to compute the extents of the objects
-        if (/*numShadowMapsPerLight>1 &&*/ _shadowedScene->getCastsShadowTraversalMask()!=0xffffffff)
+        if (/*numShadowMapsPerLight>1 &&*/ (_shadowedScene->getCastsShadowTraversalMask() & _worldMask) == 0)
         {
             // osg::ElapsedTime timer;
 
@@ -1653,11 +1650,8 @@ void MWShadowTechnique::createShaders()
     _shadowCastingStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(true);
-    if (SceneUtil::getReverseZ())
-    {
-        osg::ref_ptr<osg::ClipControl> clipcontrol = new osg::ClipControl(osg::ClipControl::LOWER_LEFT, osg::ClipControl::NEGATIVE_ONE_TO_ONE);
-        _shadowCastingStateSet->setAttribute(clipcontrol, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-    }
+    osg::ref_ptr<osg::ClipControl> clipcontrol = new osg::ClipControl(osg::ClipControl::LOWER_LEFT, osg::ClipControl::NEGATIVE_ONE_TO_ONE);
+    _shadowCastingStateSet->setAttribute(clipcontrol, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->setAttribute(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
 
@@ -3277,4 +3271,19 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
 
     for(auto& uniformVector : mFrustumUniforms)
         uniformVector.push_back(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "transform"));
+}
+
+osg::ref_ptr<osg::StateSet> SceneUtil::MWShadowTechnique::getOrCreateShadowsBinStateSet()
+{
+    if (_shadowsBinStateSet == nullptr)
+    {
+        if (_shadowsBin == nullptr)
+        {
+            _shadowsBin = new ShadowsBin(_castingPrograms);
+            osgUtil::RenderBin::addRenderBinPrototype(_shadowsBinName, _shadowsBin);
+        }
+        _shadowsBinStateSet = new osg::StateSet;
+        _shadowsBinStateSet->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, _shadowsBinName, osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
+    }
+    return _shadowsBinStateSet;
 }

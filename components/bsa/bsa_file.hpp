@@ -27,9 +27,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <map>
-
-#include <components/misc/stringops.hpp>
 
 #include <components/files/constrainedfilestream.hpp>
 
@@ -91,30 +88,12 @@ protected:
     /// Used for error messages
     std::string mFilename;
 
-    /// Case insensitive string comparison
-    struct iltstr
-    {
-        bool operator()(const std::string& s1, const std::string& s2) const
-        { return Misc::StringUtils::ciLess(s1, s2); }
-    };
-
-    /** A map used for fast file name lookup. The value is the index into
-        the files[] vector above. The iltstr ensures that file name
-        checks are case insensitive.
-    */
-    typedef std::map<std::string, size_t, iltstr> Lookup;
-    Lookup mLookup;
-
     /// Error handling
     [[noreturn]] void fail(const std::string &msg);
 
     /// Read header information from the input source
     virtual void readHeader();
     virtual void writeHeader();
-
-    /// Get the index of a given file name, or -1 if not found
-    /// @note Thread safe.
-    int getIndex(const char *str) const;
 
 public:
     /* -----------------------------------
@@ -141,20 +120,13 @@ public:
      * -----------------------------------
      */
 
-    /// Check if a file exists
-    virtual bool exists(const char *file) const
-    { return getIndex(file) != -1; }
-
-    /** Open a file contained in the archive. Throws an exception if the
-        file doesn't exist.
-     * @note Thread safe.
-    */
-    virtual Files::IStreamPtr getFile(const char *file);
-
     /** Open a file contained in the archive.
      * @note Thread safe.
     */
-    virtual Files::IStreamPtr getFile(const FileStruct* file);
+    Files::IStreamPtr getFile(const FileStruct *file)
+    {
+        return Files::openConstrainedFileStream (mFilename.c_str (), file->offset, file->fileSize);
+    }
 
     virtual void addFile(const std::string& filename, std::istream& file);
 

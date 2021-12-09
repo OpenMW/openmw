@@ -149,6 +149,8 @@ else()
 endif()
 option(RECASTNAVIGATION_STATIC "Build recastnavigation static libraries" ${_recastnavigation_static_default})
 
+option(OPENMW_USE_SYSTEM_SQLITE3 "Use system provided SQLite3 library" ON)
+
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
 
@@ -195,6 +197,10 @@ endif(APPLE)
 
 if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
+endif()
+
+if(MSVC)
+  add_compile_options("/utf-8")
 endif()
 
 # Dependencies
@@ -408,7 +414,8 @@ else(USE_LUAJIT)
 endif(USE_LUAJIT)
 
 # C++ library binding to Lua
-set(SOL_INCLUDE_DIRS ${OpenMW_SOURCE_DIR}/extern/sol3.2.2 ${OpenMW_SOURCE_DIR}/extern/sol_config)
+set(SOL_INCLUDE_DIR ${OpenMW_SOURCE_DIR}/extern/sol3.2.2)
+set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 
 include_directories(
     BEFORE SYSTEM
@@ -420,7 +427,8 @@ include_directories(
     ${OPENGL_INCLUDE_DIR}
     ${BULLET_INCLUDE_DIRS}
     ${LUA_INCLUDE_DIR}
-    ${SOL_INCLUDE_DIRS}
+    ${SOL_INCLUDE_DIR}
+    ${SOL_CONFIG_DIR}
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
@@ -437,9 +445,8 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 endif (APPLE)
 
-if (NOT APPLE)
-    set(OPENMW_MYGUI_FILES_ROOT ${OpenMW_BINARY_DIR})
-    set(OPENMW_SHADERS_ROOT ${OpenMW_BINARY_DIR})
+if (NOT APPLE)  # this is modified for macOS use later in "apps/open[mw|cs]/CMakeLists.txt"
+    set(OPENMW_RESOURCES_ROOT ${OpenMW_BINARY_DIR})
 endif ()
 
 add_subdirectory(files/)
@@ -703,8 +710,12 @@ if (WIN32)
 endif()
 
 if (BUILD_OPENMW AND APPLE)
-    # Without these flags LuaJit crashes on startup on OSX
-    set_target_properties(openmw PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+    if (USE_LUAJIT)
+        # Without these flags LuaJit crashes on startup on OSX
+        set_target_properties(openmw PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+    endif(USE_LUAJIT)
+    target_compile_definitions(components PRIVATE GL_SILENCE_DEPRECATION=1)
+    target_compile_definitions(openmw PRIVATE GL_SILENCE_DEPRECATION=1)
 endif()
 
 # Apple bundling

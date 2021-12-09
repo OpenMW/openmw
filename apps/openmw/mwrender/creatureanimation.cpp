@@ -119,14 +119,14 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     std::string itemModel = item.getClass().getModel(item);
     if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
     {
-        if(item.getTypeName() == typeid(ESM::Weapon).name())
+        if(item.getType() == ESM::Weapon::sRecordId)
         {
             int type = item.get<ESM::Weapon>()->mBase->mData.mType;
             bonename = MWMechanics::getWeaponType(type)->mAttachBone;
             if (bonename != "Weapon Bone")
             {
                 const NodeMap& nodeMap = getNodeMap();
-                NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
+                NodeMap::const_iterator found = nodeMap.find(bonename);
                 if (found == nodeMap.end())
                     bonename = "Weapon Bone";
             }
@@ -137,34 +137,15 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     else
     {
         bonename = "Shield Bone";
-        if (item.getTypeName() == typeid(ESM::Armor).name())
+        if (item.getType() == ESM::Armor::sRecordId)
         {
-            // Shield body part model should be used if possible.
-            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            for (const auto& part : item.get<ESM::Armor>()->mBase->mParts.mParts)
-            {
-                // Assume all creatures use the male mesh.
-                if (part.mPart != ESM::PRT_Shield || part.mMale.empty())
-                    continue;
-                const ESM::BodyPart *bodypart = store.get<ESM::BodyPart>().search(part.mMale);
-                if (bodypart && bodypart->mData.mType == ESM::BodyPart::MT_Armor && !bodypart->mModel.empty())
-                {
-                    itemModel = "meshes\\" + bodypart->mModel;
-                    break;
-                }
-            }
+            itemModel = getShieldMesh(item, false);
         }
     }
 
     try
     {
-        osg::ref_ptr<const osg::Node> node = mResourceSystem->getSceneManager()->getTemplate(itemModel);
-
-        const NodeMap& nodeMap = getNodeMap();
-        NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
-        if (found == nodeMap.end())
-            throw std::runtime_error("Can't find attachment node " + bonename);
-        osg::ref_ptr<osg::Node> attached = SceneUtil::attach(node, mObjectRoot, bonename, found->second.get());
+        osg::ref_ptr<osg::Node> attached = attach(itemModel, bonename, bonename, item.getType() == ESM::Light::sRecordId);
 
         scene.reset(new PartHolder(attached));
 
@@ -174,7 +155,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         // Crossbows start out with a bolt attached
         // FIXME: code duplicated from NpcAnimation
         if (slot == MWWorld::InventoryStore::Slot_CarriedRight &&
-                item.getTypeName() == typeid(ESM::Weapon).name() &&
+                item.getType() == ESM::Weapon::sRecordId &&
                 item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
         {
             const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(ESM::Weapon::MarksmanCrossbow);
@@ -246,7 +227,7 @@ osg::Group *CreatureWeaponAnimation::getArrowBone()
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if(weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
         return nullptr;
 
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;

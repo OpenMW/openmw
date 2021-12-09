@@ -52,7 +52,7 @@ namespace
     }
 
     #define EXPECT_ERROR(X, ERR_SUBSTR) try { X; FAIL() << "Expected error"; } \
-        catch (std::exception& e) { EXPECT_THAT(e.what(), HasSubstr(ERR_SUBSTR)); }
+        catch (std::exception& e) { EXPECT_THAT(e.what(), ::testing::HasSubstr(ERR_SUBSTR)); }
 
 }
 

@@ -3,6 +3,8 @@
 #include <osg/Version>
 
 #include <components/debug/debuglog.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <osg/MatrixTransform>
 
 #include "skeleton.hpp"
 #include "util.hpp"
@@ -59,12 +61,22 @@ RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
 
 void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
 {
+    for (unsigned int i=0; i<2; ++i)
+        mGeometry[i] = nullptr;
+
     mSourceGeometry = sourceGeometry;
 
     for (unsigned int i=0; i<2; ++i)
     {
         const osg::Geometry& from = *sourceGeometry;
+
+        // DO NOT COPY AND PASTE THIS CODE. Cloning osg::Geometry without also cloning its contained Arrays is generally unsafe.
+        // In this specific case the operation is safe under the following two assumptions:
+        // - When Arrays are removed or replaced in the cloned geometry, the original Arrays in their place must outlive the cloned geometry regardless. (ensured by mSourceGeometry)
+        // - Arrays that we add or replace in the cloned geometry must be explicitely forbidden from reusing BufferObjects of the original geometry. (ensured by vbo below)
         mGeometry[i] = new osg::Geometry(from, osg::CopyOp::SHALLOW_COPY);
+        mGeometry[i]->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(mSourceGeometry));
+
         osg::Geometry& to = *mGeometry[i];
         to.setSupportsDisplayList(false);
         to.setUseVertexBufferObjects(true);
@@ -114,9 +126,11 @@ osg::ref_ptr<osg::Geometry> RigGeometry::getSourceGeometry() const
 bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
 {
     const osg::NodePath& path = nv->getNodePath();
-    for (osg::NodePath::const_reverse_iterator it = path.rbegin(); it != path.rend(); ++it)
+    for (osg::NodePath::const_reverse_iterator it = path.rbegin()+1; it != path.rend(); ++it)
     {
         osg::Node* node = *it;
+        if (node->asTransform())
+            continue;
         if (Skeleton* skel = dynamic_cast<Skeleton*>(node))
         {
             mSkeleton = skel;
@@ -246,8 +260,8 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
     if (tangentDst)
         tangentDst->dirty();
 
-#if OSG_MIN_VERSION_REQUIRED(3, 5, 6)
-    geom.dirtyGLObjects();
+#if OSG_MIN_VERSION_REQUIRED(3, 5, 10)
+    geom.osg::Drawable::dirtyGLObjects();
 #endif
 
     nv->pushOntoNodePath(&geom);
@@ -310,8 +324,10 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
 void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
 {
     bool foundSkel = false;
-    osg::ref_ptr<osg::RefMatrix> geomToSkelMatrix;
-    for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end(); ++it)
+    osg::RefMatrix* geomToSkelMatrix = mGeomToSkelMatrix;
+    if (geomToSkelMatrix)
+        geomToSkelMatrix->makeIdentity();
+    for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end()-1; ++it)
     {
         osg::Node* node = *it;
         if (!foundSkel)
@@ -323,14 +339,15 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
         {
             if (osg::Transform* trans = node->asTransform())
             {
+                osg::MatrixTransform* matrixTrans = trans->asMatrixTransform();
+                if (matrixTrans && matrixTrans->getMatrix().isIdentity())
+                    continue;
                 if (!geomToSkelMatrix)
-                    geomToSkelMatrix = new osg::RefMatrix;
+                    geomToSkelMatrix = mGeomToSkelMatrix = new osg::RefMatrix;
                 trans->computeWorldToLocalMatrix(*geomToSkelMatrix, nullptr);
             }
         }
     }
-    if (geomToSkelMatrix && !geomToSkelMatrix->isIdentity())
-        mGeomToSkelMatrix = geomToSkelMatrix;
 }
 
 void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)

@@ -24,11 +24,6 @@ namespace MWWorld
     class CellStore;
 }
 
-namespace SceneUtil
-{
-    class UnrefQueue;
-}
-
 namespace MWRender{
 
 class Animation;
@@ -66,12 +61,10 @@ class Objects{
 
     Resource::ResourceSystem* mResourceSystem;
 
-    osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
-
     void insertBegin(const MWWorld::Ptr& ptr);
 
 public:
-    Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue);
+    Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode);
     ~Objects();
 
     /// @param animated Attempt to load separate keyframes from a .kf file matching the model file?

@@ -10,6 +10,8 @@ QSet<QString> CellNameLoader::getCellNames(QStringList &contentPaths)
 
     // Loop through all content files
     for (auto &contentPath : contentPaths) {
+        if (contentPath.endsWith(".omwscripts", Qt::CaseInsensitive))
+            continue;
         esmReader.open(contentPath.toStdString());
 
         // Loop through all records
@@ -35,7 +37,7 @@ QSet<QString> CellNameLoader::getCellNames(QStringList &contentPaths)
 
 bool CellNameLoader::isCellRecord(ESM::NAME &recordName)
 {
-    return recordName.intval == ESM::REC_CELL;
+    return recordName.toInt() == ESM::REC_CELL;
 }
 
 QString CellNameLoader::getCellName(ESM::ESMReader &esmReader)

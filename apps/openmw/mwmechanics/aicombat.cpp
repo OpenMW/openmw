@@ -8,7 +8,7 @@
 #include <components/misc/mathutil.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navigatorutils.hpp>
 
 #include "../mwphysics/collisiontype.hpp"
 
@@ -137,7 +137,10 @@ namespace MWMechanics
             }
 
             storage.updateCombatMove(duration);
+            storage.mRotateMove = false;
             if (storage.mReadyToAttack) updateActorsMovement(actor, duration, storage);
+            if (storage.mRotateMove)
+                return false;
             storage.updateAttack(characterController);
         }
         else
@@ -277,7 +280,7 @@ namespace MWMechanics
                 // If there is no path, try to find a point on a line from the actor position to target projected
                 // on navmesh to attack the target from there.
                 const auto navigator = world->getNavigator();
-                const auto hit = navigator->raycast(halfExtents, vActorPos, vTargetPos, navigatorFlags);
+                const auto hit = DetourNavigator::raycast(*navigator, halfExtents, vActorPos, vTargetPos, navigatorFlags);
 
                 if (hit.has_value() && (*hit - vTargetPos).length() <= rangeAttack)
                 {
@@ -442,7 +445,7 @@ namespace MWMechanics
         storage.mCurrentAction->getCombatRange(isRangedCombat);
         float eps = isRangedCombat ? osg::DegreesToRadians(0.5) : osg::DegreesToRadians(3.f);
         float targetAngleRadians = storage.mMovement.mRotation[axis];
-        smoothTurn(actor, targetAngleRadians, axis, eps);
+        storage.mRotateMove = !smoothTurn(actor, targetAngleRadians, axis, eps);
     }
 
     MWWorld::Ptr AiCombat::getTarget() const

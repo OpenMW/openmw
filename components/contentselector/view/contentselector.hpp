@@ -23,11 +23,12 @@ namespace ContentSelectorView
 
     public:
 
-        explicit ContentSelector(QWidget *parent = nullptr);
+        explicit ContentSelector(QWidget *parent = nullptr, bool showOMWScripts = false);
 
         QString currentFile() const;
 
         void addFiles(const QString &path);
+        void sortFiles();
         void clearFiles();
         void setProfileContent (const QStringList &fileList);
 
@@ -56,7 +57,7 @@ namespace ContentSelectorView
 
         Ui::ContentSelector ui;
 
-        void buildContentModel();
+        void buildContentModel(bool showOMWScripts);
         void buildGameFileView();
         void buildAddonView();
         void buildContextMenu();

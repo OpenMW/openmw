@@ -20,6 +20,7 @@
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -44,6 +45,7 @@
 #include "renderbin.hpp"
 #include "vismask.hpp"
 #include "util.hpp"
+#include "postprocessor.hpp"
 
 namespace
 {
@@ -79,34 +81,6 @@ std::string getVampireHead(const std::string& race, bool female)
     if (!bodyPart)
         return std::string();
     return "meshes\\" + bodyPart->mModel;
-}
-
-std::string getShieldBodypartMesh(const std::vector<ESM::PartReference>& bodyparts, bool female)
-{
-    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
-    for (const auto& part : bodyparts)
-    {
-        if (part.mPart != ESM::PRT_Shield)
-            continue;
-
-        std::string bodypartName;
-        if (female && !part.mFemale.empty())
-            bodypartName = part.mFemale;
-        else if (!part.mMale.empty())
-            bodypartName = part.mMale;
-
-        if (!bodypartName.empty())
-        {
-            const ESM::BodyPart *bodypart = partStore.search(bodypartName);
-            if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
-                return std::string();
-            if (!bodypart->mModel.empty())
-                return "meshes\\" + bodypart->mModel;
-        }
-    }
-
-    return std::string();
 }
 
 }
@@ -330,25 +304,58 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 }
 
 /// @brief A RenderBin callback to clear the depth buffer before rendering.
+/// Switches depth attachments to a proxy renderbuffer, reattaches original depth then redraws first person root.
+/// This gives a complete depth buffer which can be used for postprocessing, buffer resolves as if depth was never cleared.
 class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
 {
 public:
     DepthClearCallback()
     {
-        mDepth = SceneUtil::createDepth();
+        mDepth = new SceneUtil::AutoDepth;
         mDepth->setWriteMask(true);
+
+        mStateSet = new osg::StateSet;
+        mStateSet->setAttributeAndModes(new osg::ColorMask(false, false, false, false), osg::StateAttribute::ON);
+        mStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
     }
 
     void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override
     {
-        renderInfo.getState()->applyAttribute(mDepth);
+        osg::State* state = renderInfo.getState();
 
-        glClear(GL_DEPTH_BUFFER_BIT);
+        PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
 
-        bin->drawImplementation(renderInfo, previous);
+        state->applyAttribute(mDepth);
+
+        if (postProcessor && postProcessor->getFirstPersonRBProxy())
+        {
+            osg::GLExtensions* ext = state->get<osg::GLExtensions>();
+
+            osg::FrameBufferAttachment(postProcessor->getFirstPersonRBProxy()).attach(*state, GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, ext);
+
+            glClear(GL_DEPTH_BUFFER_BIT);
+            // color accumulation pass
+            bin->drawImplementation(renderInfo, previous);
+
+            auto primaryFBO = postProcessor->getMsaaFbo() ? postProcessor->getMsaaFbo() : postProcessor->getFbo();
+            primaryFBO->getAttachment(osg::FrameBufferObject::BufferComponent::DEPTH_BUFFER).attach(*state, GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, ext);
+
+            state->pushStateSet(mStateSet);
+            state->apply();
+            // depth accumulation pass
+            bin->drawImplementation(renderInfo, previous);
+            state->popStateSet();
+        }
+        else
+        {
+            // fallback to standard depth clear when we are not rendering our main scene via an intermediate FBO
+            glClear(GL_DEPTH_BUFFER_BIT);
+            bin->drawImplementation(renderInfo, previous);
+        }
     }
 
     osg::ref_ptr<osg::Depth> mDepth;
+    osg::ref_ptr<osg::StateSet> mStateSet;
 };
 
 /// Overrides Field of View to given value for rendering the subgraph.
@@ -513,14 +520,9 @@ void NpcAnimation::updateNpcBase()
     mWeaponAnimationTime->updateStartTime();
 }
 
-std::string NpcAnimation::getShieldMesh(const MWWorld::ConstPtr& shield) const
+std::string NpcAnimation::getSheathedShieldMesh(const MWWorld::ConstPtr& shield) const
 {
-    std::string mesh = shield.getClass().getModel(shield);
-    const ESM::Armor *armor = shield.get<ESM::Armor>()->mBase;
-    const std::vector<ESM::PartReference>& bodyparts = armor->mParts.mParts;
-    // Try to recover the body part model, use ground model as a fallback otherwise.
-    if (!bodyparts.empty())
-        mesh = getShieldBodypartMesh(bodyparts, !mNpc->isMale());
+    std::string mesh = getShieldMesh(shield, !mNpc->isMale());
 
     if (mesh.empty())
         return std::string();
@@ -594,13 +596,13 @@ void NpcAnimation::updateParts()
         int prio = 1;
         bool enchantedGlow = !store->getClass().getEnchantment(*store).empty();
         osg::Vec4f glowColor = store->getClass().getEnchantmentColor(*store);
-        if(store->getTypeName() == typeid(ESM::Clothing).name())
+        if(store->getType() == ESM::Clothing::sRecordId)
         {
             prio = ((slotlist[i].mBasePriority+1)<<1) + 0;
             const ESM::Clothing *clothes = store->get<ESM::Clothing>()->mBase;
             addPartGroup(slotlist[i].mSlot, prio, clothes->mParts.mParts, enchantedGlow, &glowColor);
         }
-        else if(store->getTypeName() == typeid(ESM::Armor).name())
+        else if(store->getType() == ESM::Armor::sRecordId)
         {
             prio = ((slotlist[i].mBasePriority+1)<<1) + 1;
             const ESM::Armor *armor = store->get<ESM::Armor>()->mBase;
@@ -640,11 +642,11 @@ void NpcAnimation::updateParts()
     {
         MWWorld::ConstContainerStoreIterator store = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         MWWorld::ConstPtr part;
-        if(store != inv.end() && (part=*store).getTypeName() == typeid(ESM::Light).name())
+        if(store != inv.end() && (part=*store).getType() == ESM::Light::sRecordId)
         {
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
             addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
-                                       1, "meshes\\"+light->mModel);
+                                       1, "meshes\\"+light->mModel, false, nullptr, true);
             if (mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), light);
         }
@@ -674,16 +676,9 @@ void NpcAnimation::updateParts()
 
 
 
-PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
+PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
 {
-    osg::ref_ptr<const osg::Node> templateNode = mResourceSystem->getSceneManager()->getTemplate(model);
-
-    const NodeMap& nodeMap = getNodeMap();
-    NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
-    if (found == nodeMap.end())
-        throw std::runtime_error("Can't find attachment node " + bonename);
-
-    osg::ref_ptr<osg::Node> attached = SceneUtil::attach(templateNode, mObjectRoot, bonefilter, found->second);
+    osg::ref_ptr<osg::Node> attached = attach(model, bonename, bonefilter, isLight);
     if (enchantedGlow)
         mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, *glowColor);
 
@@ -756,7 +751,7 @@ bool NpcAnimation::isFemalePart(const ESM::BodyPart* bodypart)
     return bodypart->mData.mFlags & ESM::BodyPart::BPF_Female;
 }
 
-bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, osg::Vec4f* glowColor)
+bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
 {
     if(priority <= mPartPriorities[type])
         return false;
@@ -771,7 +766,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         {
             const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
             MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            if(weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name())
+            if(weapon != inv.end() && weapon->getType() == ESM::Weapon::sRecordId)
             {
                 int weaponType = weapon->get<ESM::Weapon>()->mBase->mData.mType;
                 const std::string weaponBonename = MWMechanics::getWeaponType(weaponType)->mAttachBone;
@@ -779,7 +774,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
                 if (weaponBonename != bonename)
                 {
                     const NodeMap& nodeMap = getNodeMap();
-                    NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(weaponBonename));
+                    NodeMap::const_iterator found = nodeMap.find(weaponBonename);
                     if (found != nodeMap.end())
                         bonename = weaponBonename;
                 }
@@ -788,7 +783,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
 
         // PRT_Hair seems to be the only type that breaks consistency and uses a filter that's different from the attachment bone
         const std::string bonefilter = (type == ESM::PRT_Hair) ? "hair" : bonename;
-        mObjectParts[type] = insertBoundedPart(mesh, bonename, bonefilter, enchantedGlow, glowColor);
+        mObjectParts[type] = insertBoundedPart(mesh, bonename, bonefilter, enchantedGlow, glowColor, isLight);
     }
     catch (std::exception& e)
     {
@@ -843,14 +838,18 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
                     }
                 }
             }
+            SceneUtil::ForceControllerSourcesVisitor assignVisitor(src);
+            node->accept(assignVisitor);
         }
-        else if (type == ESM::PRT_Weapon)
-            src = mWeaponAnimationTime;
         else
-            src.reset(new NullAnimationTime);
-
-        SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
-        node->accept(assignVisitor);
+        {
+            if (type == ESM::PRT_Weapon)
+                src = mWeaponAnimationTime;
+            else
+                src.reset(new NullAnimationTime);
+            SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
+            node->accept(assignVisitor);
+        }
     }
 
     return true;
@@ -943,7 +942,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
 
             // Crossbows start out with a bolt attached
-            if (weapon->getTypeName() == typeid(ESM::Weapon).name() &&
+            if (weapon->getType() == ESM::Weapon::sRecordId &&
                     weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
             {
                 int ammotype = MWMechanics::getWeaponType(ESM::Weapon::MarksmanCrossbow)->mAmmoType;
@@ -975,19 +974,16 @@ void NpcAnimation::showCarriedLeft(bool show)
         osg::Vec4f glowColor = iter->getClass().getEnchantmentColor(*iter);
         std::string mesh = iter->getClass().getModel(*iter);
         // For shields we must try to use the body part model
-        if (iter->getTypeName() == typeid(ESM::Armor).name())
+        if (iter->getType() == ESM::Armor::sRecordId)
         {
-            const ESM::Armor *armor = iter->get<ESM::Armor>()->mBase;
-            const std::vector<ESM::PartReference>& bodyparts = armor->mParts.mParts;
-            if (!bodyparts.empty())
-                mesh = getShieldBodypartMesh(bodyparts, !mNpc->isMale());
+            mesh = getShieldMesh(*iter, !mNpc->isMale());
         }
         if (mesh.empty() || addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                                        mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
+                                        mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor, iter->getType() == ESM::Light::sRecordId))
         {
             if (mesh.empty())
                 reserveIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1);
-            if (iter->getTypeName() == typeid(ESM::Light).name() && mObjectParts[ESM::PRT_Shield])
+            if (iter->getType() == ESM::Light::sRecordId && mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
         }
     }
@@ -1033,7 +1029,7 @@ osg::Group* NpcAnimation::getArrowBone()
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if(weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
         return nullptr;
 
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;

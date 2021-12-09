@@ -23,8 +23,12 @@ namespace VFS
                 // Last BSA has the highest priority
                 const std::string archivePath = collections.getPath(*archive).string();
                 Log(Debug::Info) << "Adding BSA archive " << archivePath;
+                Bsa::BsaVersion bsaVersion = Bsa::CompressedBSAFile::detectVersion(archivePath);
 
-                vfs->addArchive(new BsaArchive(archivePath));
+                if (bsaVersion == Bsa::BSAVER_COMPRESSED)
+                    vfs->addArchive(new CompressedBsaArchive(archivePath));
+                else
+                    vfs->addArchive(new BsaArchive(archivePath));
             }
             else
             {

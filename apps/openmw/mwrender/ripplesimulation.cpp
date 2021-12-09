@@ -16,7 +16,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/fallback/fallback.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include "vismask.hpp"
 
@@ -56,13 +56,13 @@ namespace
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
         stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);
 
-        auto depth = SceneUtil::createDepth();
+        osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
         osg::ref_ptr<osg::PolygonOffset> polygonOffset (new osg::PolygonOffset);
-        polygonOffset->setUnits(SceneUtil::getReverseZ() ? 1 : -1);
-        polygonOffset->setFactor(SceneUtil::getReverseZ() ? 1 : -1);
+        polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1 : -1);
+        polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 1 : -1);
         stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
 
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);

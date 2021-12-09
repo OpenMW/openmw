@@ -1,8 +1,6 @@
 #ifndef GAME_MWWORLD_LIVECELLREF_H
 #define GAME_MWWORLD_LIVECELLREF_H
 
-#include <typeinfo>
-
 #include "cellref.hpp"
 
 #include "refdata.hpp"
@@ -31,7 +29,7 @@ namespace MWWorld
         /** runtime-data */
         RefData mData;
 
-        LiveCellRefBase(const std::string& type, const ESM::CellRef &cref=ESM::CellRef());
+        LiveCellRefBase(unsigned int type, const ESM::CellRef &cref=ESM::CellRef());
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase() { }
 
@@ -42,6 +40,11 @@ namespace MWWorld
 
         virtual void save (ESM::ObjectState& state) const = 0;
         ///< Save LiveCellRef state into \a state.
+
+        virtual std::string_view getTypeDescription() const = 0;
+
+        unsigned int getType() const;
+        ///< @see MWWorld::Class::getType
 
         protected:
 
@@ -77,11 +80,11 @@ namespace MWWorld
     struct LiveCellRef : public LiveCellRefBase
     {
         LiveCellRef(const ESM::CellRef& cref, const X* b = nullptr)
-            : LiveCellRefBase(typeid(X).name(), cref), mBase(b)
+            : LiveCellRefBase(X::sRecordId, cref), mBase(b)
         {}
 
         LiveCellRef(const X* b = nullptr)
-            : LiveCellRefBase(typeid(X).name()), mBase(b)
+            : LiveCellRefBase(X::sRecordId), mBase(b)
         {}
 
         // The object that this instance is based on.
@@ -94,6 +97,8 @@ namespace MWWorld
 
         void save (ESM::ObjectState& state) const override;
         ///< Save LiveCellRef state into \a state.
+
+        std::string_view getTypeDescription() const override { return X::getRecordType(); }
 
         static bool checkState (const ESM::ObjectState& state);
         ///< Check if state is valid and report errors.

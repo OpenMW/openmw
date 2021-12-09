@@ -5,11 +5,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-namespace ESM
-{
-    int GroundcoverIndex = std::numeric_limits<int>::max();
-}
-
 void ESM::RefNum::load (ESMReader& esm, bool wide, const std::string& tag)
 {
     if (wide)
@@ -66,7 +61,7 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
     while (!isLoaded && esm.hasMoreSubs())
     {
         esm.getSubName();
-        switch (esm.retSubName().intval)
+        switch (esm.retSubName().toInt())
         {
             case ESM::FourCC<'U','N','A','M'>::value:
                 esm.getHT(mReferenceBlocked);

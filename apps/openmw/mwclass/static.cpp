@@ -59,7 +59,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Static);
 
-        registerClass (typeid (ESM::Static).name(), instance);
+        registerClass (ESM::Static::sRecordId, instance);
     }
 
     MWWorld::Ptr Static::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

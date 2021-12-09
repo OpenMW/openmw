@@ -20,7 +20,7 @@ struct LandTexture
 {
     static unsigned int sRecordId;
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "LandTexture"; }
+    static std::string_view getRecordType() { return "LandTexture"; }
 
     // mId is merely a user friendly name for the texture in the editor.
     std::string mId, mTexture;

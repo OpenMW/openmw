@@ -146,7 +146,6 @@ void Launcher::MainDialog::createPages()
     connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
     // Using Qt::QueuedConnection because signal is emitted in a subthread and slot is in the main thread
     connect(mDataFilesPage, SIGNAL(signalLoadedCellsChanged(QStringList)), mAdvancedPage, SLOT(slotLoadedCellsChanged(QStringList)), Qt::QueuedConnection);
-
 }
 
 Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()

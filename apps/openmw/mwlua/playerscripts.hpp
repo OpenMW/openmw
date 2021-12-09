@@ -13,11 +13,11 @@ namespace MWLua
     class PlayerScripts : public LocalScripts
     {
     public:
-        PlayerScripts(LuaUtil::LuaState* lua, const LObject& obj) : LocalScripts(lua, obj)
+        PlayerScripts(LuaUtil::LuaState* lua, const LObject& obj) : LocalScripts(lua, obj, ESM::LuaScriptCfg::sPlayer)
         {
             registerEngineHandlers({&mKeyPressHandlers, &mKeyReleaseHandlers,
                                     &mControllerButtonPressHandlers, &mControllerButtonReleaseHandlers,
-                                    &mActionHandlers});
+                                    &mActionHandlers, &mInputUpdateHandlers});
         }
 
         void processInputEvent(const MWBase::LuaManager::InputEvent& event)
@@ -43,12 +43,15 @@ namespace MWLua
             }
         }
 
+        void inputUpdate(float dt) { callEngineHandlers(mInputUpdateHandlers, dt); }
+
     private:
         EngineHandlerList mKeyPressHandlers{"onKeyPress"};
         EngineHandlerList mKeyReleaseHandlers{"onKeyRelease"};
         EngineHandlerList mControllerButtonPressHandlers{"onControllerButtonPress"};
         EngineHandlerList mControllerButtonReleaseHandlers{"onControllerButtonRelease"};
         EngineHandlerList mActionHandlers{"onInputAction"};
+        EngineHandlerList mInputUpdateHandlers{"onInputUpdate"};
     };
 
 }

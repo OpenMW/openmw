@@ -389,11 +389,6 @@ namespace MWRender
             mAlpha = alpha;
         }
 
-        void setLightSource(const osg::ref_ptr<SceneUtil::LightSource>& lightSource)
-        {
-            mLightSource = lightSource;
-        }
-
     protected:
         void setDefaults(osg::StateSet* stateset) override
         {
@@ -416,13 +411,10 @@ namespace MWRender
         {
             osg::Material* material = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
             material->setAlpha(osg::Material::FRONT_AND_BACK, mAlpha);
-            if (mLightSource)
-                mLightSource->setActorFade(mAlpha);
         }
 
     private:
         float mAlpha;
-        osg::ref_ptr<SceneUtil::LightSource> mLightSource;
     };
 
     struct Animation::AnimSource
@@ -632,9 +624,8 @@ namespace MWRender
             return;
 
         const NodeMap& nodeMap = getNodeMap();
-
-        for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = animsrc->mKeyframes->mKeyframeControllers.begin();
-             it != animsrc->mKeyframes->mKeyframeControllers.end(); ++it)
+        const auto& controllerMap = animsrc->mKeyframes->mKeyframeControllers;
+        for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = controllerMap.begin(); it != controllerMap.end(); ++it)
         {
             std::string bonename = Misc::StringUtils::lowerCase(it->first);
             NodeMap::const_iterator found = nodeMap.find(bonename);
@@ -660,14 +651,32 @@ namespace MWRender
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(mAnimationTimePtr[0]);
         mObjectRoot->accept(assignVisitor);
 
+        // Determine the movement accumulation bone if necessary
         if (!mAccumRoot)
         {
-            NodeMap::const_iterator found = nodeMap.find("bip01");
-            if (found == nodeMap.end())
-                found = nodeMap.find("root bone");
-
-            if (found != nodeMap.end())
-                mAccumRoot = found->second;
+            // Priority matters! bip01 is preferred.
+            static const std::array<std::string, 2> accumRootNames =
+            {
+                "bip01",
+                "root bone"
+            };
+            NodeMap::const_iterator found = nodeMap.end();
+            for (const std::string& name : accumRootNames)
+            {
+                found = nodeMap.find(name);
+                if (found == nodeMap.end())
+                    continue;
+                for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = controllerMap.begin(); it != controllerMap.end(); ++it)
+                {
+                    if (Misc::StringUtils::lowerCase(it->first) == name)
+                    {
+                        mAccumRoot = found->second;
+                        break;
+                    }
+                }
+                if (mAccumRoot)
+                    break;
+            }
         }
     }
 
@@ -968,8 +977,9 @@ namespace MWRender
                 {
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
-                    node->addUpdateCallback(it->second);
-                    mActiveControllers.emplace_back(node, it->second);
+                    osg::Callback* callback = it->second->getAsCallback();
+                    node->addUpdateCallback(callback);
+                    mActiveControllers.emplace_back(node, callback);
 
                     if (blendMask == 0 && node == mAccumRoot)
                     {
@@ -1319,10 +1329,10 @@ namespace MWRender
 
                 cache.insert(std::make_pair(model, created));
 
-                return sceneMgr->createInstance(created);
+                return sceneMgr->getInstance(created);
             }
             else
-                return sceneMgr->createInstance(found->second);
+                return sceneMgr->getInstance(found->second);
         }
         else
         {
@@ -1484,6 +1494,7 @@ namespace MWRender
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
         mExtraLightSource = SceneUtil::addLight(parent, esmLight, Mask_ParticleSystem, Mask_Lighting, exterior);
+        mExtraLightSource->setActorFade(mAlpha);
     }
 
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
@@ -1510,7 +1521,7 @@ namespace MWRender
             parentNode = mInsert;
         else
         {
-            NodeMap::const_iterator found = getNodeMap().find(Misc::StringUtils::lowerCase(bonename));
+            NodeMap::const_iterator found = getNodeMap().find(bonename);
             if (found == getNodeMap().end())
                 throw std::runtime_error("Can't find bone " + bonename);
 
@@ -1619,8 +1630,7 @@ namespace MWRender
 
     const osg::Node* Animation::getNode(const std::string &name) const
     {
-        std::string lowerName = Misc::StringUtils::lowerCase(name);
-        NodeMap::const_iterator found = getNodeMap().find(lowerName);
+        NodeMap::const_iterator found = getNodeMap().find(name);
         if (found == getNodeMap().end())
             return nullptr;
         else
@@ -1639,7 +1649,6 @@ namespace MWRender
             if (mTransparencyUpdater == nullptr)
             {
                 mTransparencyUpdater = new TransparencyUpdater(alpha);
-                mTransparencyUpdater->setLightSource(mExtraLightSource);
                 mObjectRoot->addCullCallback(mTransparencyUpdater);
             }
             else
@@ -1650,6 +1659,8 @@ namespace MWRender
             mObjectRoot->removeCullCallback(mTransparencyUpdater);
             mTransparencyUpdater = nullptr;
         }
+        if (mExtraLightSource)
+            mExtraLightSource->setActorFade(alpha);
     }
 
     void Animation::setLightEffect(float effect)
@@ -1794,7 +1805,7 @@ namespace MWRender
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 mGlowUpdater = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
         }
-        if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
+        if (ptr.getType() == ESM::Light::sRecordId && allowLight)
             addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
 
         if (!allowLight && mObjectRoot)
@@ -1823,7 +1834,7 @@ namespace MWRender
 
     bool ObjectAnimation::canBeHarvested() const
     {
-        if (mPtr.getTypeName() != typeid(ESM::Container).name())
+        if (mPtr.getType() != ESM::Container::sRecordId)
             return false;
 
         const MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();

@@ -146,6 +146,62 @@ void BSShaderNoLightingProperty::read(NIFStream *nif)
         falloffParams = nif->getVector4();
 }
 
+void BSLightingShaderProperty::read(NIFStream *nif)
+{
+    type = nif->getUInt();
+    BSShaderProperty::read(nif);
+    flags1 = nif->getUInt();
+    flags2 = nif->getUInt();
+    nif->skip(8); // UV offset
+    nif->skip(8); // UV scale
+    mTextureSet.read(nif);
+    mEmissive = nif->getVector3();
+    mEmissiveMult = nif->getFloat();
+    mClamp = nif->getUInt();
+    mAlpha = nif->getFloat();
+    nif->getFloat(); // Refraction strength
+    mGlossiness = nif->getFloat();
+    mSpecular = nif->getVector3();
+    mSpecStrength = nif->getFloat();
+    nif->skip(8); // Lighting effects
+    switch (static_cast<BSLightingShaderType>(type))
+    {
+        case BSLightingShaderType::ShaderType_EnvMap:
+            nif->skip(4); // Environment map scale
+            break;
+        case BSLightingShaderType::ShaderType_SkinTint:
+        case BSLightingShaderType::ShaderType_HairTint:
+            nif->skip(12); // Tint color
+            break;
+        case BSLightingShaderType::ShaderType_ParallaxOcc:
+            nif->skip(4); // Max passes
+            nif->skip(4); // Scale
+            break;
+        case BSLightingShaderType::ShaderType_MultiLayerParallax:
+            nif->skip(4); // Inner layer thickness
+            nif->skip(4); // Refraction scale
+            nif->skip(4); // Inner layer texture scale
+            nif->skip(4); // Environment map strength
+            break;
+        case BSLightingShaderType::ShaderType_SparkleSnow:
+            nif->skip(16); // Sparkle parameters
+            break;
+        case BSLightingShaderType::ShaderType_EyeEnvmap:
+            nif->skip(4); // Cube map scale
+            nif->skip(12); // Left eye cube map offset
+            nif->skip(12); // Right eye cube map offset
+            break;
+        default:
+            break;
+    }
+}
+
+void BSLightingShaderProperty::post(NIFFile *nif)
+{
+    BSShaderProperty::post(nif);
+    mTextureSet.post(nif);
+}
+
 void NiFogProperty::read(NIFStream *nif)
 {
     Property::read(nif);

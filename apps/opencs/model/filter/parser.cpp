@@ -17,6 +17,19 @@
 #include "textnode.hpp"
 #include "valuenode.hpp"
 
+namespace
+{
+    bool isAlpha(char c)
+    {
+        return std::isalpha(static_cast<unsigned char>(c));
+    }
+
+    bool isDigit(char c)
+    {
+        return std::isdigit(static_cast<unsigned char>(c));
+    }
+}
+
 namespace CSMFilter
 {
     struct Token
@@ -103,7 +116,7 @@ CSMFilter::Token CSMFilter::Parser::getStringToken()
     {
         char c = mInput[mIndex];
 
-        if (std::isalpha (c) || c==':' || c=='_' || (!string.empty() && std::isdigit (c)) || c=='"' ||
+        if (isAlpha(c) || c==':' || c=='_' || (!string.empty() && isDigit(c)) || c=='"' ||
             (!string.empty() && string[0]=='"'))
             string += c;
         else
@@ -150,7 +163,7 @@ CSMFilter::Token CSMFilter::Parser::getNumberToken()
     {
         char c = mInput[mIndex];
 
-        if (std::isdigit (c))
+        if (isDigit(c))
         {
             string += c;
             hasDigit = true;
@@ -225,10 +238,10 @@ CSMFilter::Token CSMFilter::Parser::getNextToken()
         case '!': ++mIndex; return Token (Token::Type_OneShot);
     }
 
-    if (c=='"' || c=='_' || std::isalpha (c) || c==':')
+    if (c=='"' || c=='_' || isAlpha(c) || c==':')
         return getStringToken();
 
-    if (c=='-' || c=='.' || std::isdigit (c))
+    if (c=='-' || c=='.' || isDigit(c))
         return getNumberToken();
 
     error();

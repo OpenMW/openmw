@@ -9,6 +9,9 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
+#include <algorithm>
+
 namespace MWRender
 {
     ActorsPaths::ActorsPaths(const osg::ref_ptr<osg::Group>& root, bool enabled)

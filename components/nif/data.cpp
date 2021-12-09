@@ -34,6 +34,13 @@ void NiSkinInstance::post(NIFFile *nif)
     }
 }
 
+void BSDismemberSkinInstance::read(NIFStream *nif)
+{
+    NiSkinInstance::read(nif);
+    unsigned int numPartitions = nif->getUInt();
+    nif->skip(4 * numPartitions); // Body part information
+}
+
 void NiGeometryData::read(NIFStream *nif)
 {
     if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,114))

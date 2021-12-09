@@ -5,9 +5,11 @@
 
 #include <boost/filesystem.hpp>
 
+#include <components/misc/utf8stream.hpp>
+
 MWState::CharacterManager::CharacterManager (const boost::filesystem::path& saves,
-    const std::string& game)
-: mPath (saves), mCurrent (nullptr), mGame (game)
+    const std::vector<std::string>& contentFiles)
+: mPath (saves), mCurrent (nullptr), mGame (getFirstGameFile(contentFiles))
 {
     if (!boost::filesystem::is_directory (mPath))
     {
@@ -57,12 +59,14 @@ MWState::Character* MWState::CharacterManager::createCharacter(const std::string
     std::ostringstream stream;
 
     // The character name is user-supplied, so we need to escape the path
-    for (std::string::const_iterator it = name.begin(); it != name.end(); ++it)
+    Utf8Stream nameStream(name);
+    while(!nameStream.eof())
     {
-        if (std::isalnum(*it)) // Ignores multibyte characters and non alphanumeric characters
-            stream << *it;
+        auto c = nameStream.consume();
+        if(c <= 0x7F && std::isalnum(c)) // Ignore multibyte characters and non alphanumeric characters
+            stream << static_cast<char>(c);
         else
-            stream << "_";
+            stream << '_';
     }
 
     boost::filesystem::path path = mPath / stream.str();

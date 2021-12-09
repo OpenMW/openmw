@@ -23,6 +23,7 @@
 #include <components/sceneutil/shadow.hpp>
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwworld/class.hpp"
@@ -132,43 +133,6 @@ namespace MWRender
                     newStateSet->setTextureMode(7, GL_TEXTURE_2D, osg::StateAttribute::OFF);
                     newStateSet->setDefine("FORCE_OPAQUE", "0", osg::StateAttribute::ON);
                 }
-                if (SceneUtil::getReverseZ() && stateset->getAttribute(osg::StateAttribute::DEPTH))
-                {
-                    bool depthModified = false;
-                    osg::Depth* depth = static_cast<osg::Depth*>(stateset->getAttribute(osg::StateAttribute::DEPTH));
-                    depth->getUserValue("depthModified", depthModified);
-
-                    if (!depthModified)
-                    {
-                        if (!newStateSet)
-                        {
-                            newStateSet = new osg::StateSet(*stateset, osg::CopyOp::SHALLOW_COPY);
-                            node.setStateSet(newStateSet);
-                        }
-                        // Setup standard depth ranges
-                        osg::ref_ptr<osg::Depth> newDepth = new osg::Depth(*depth);
-
-                        switch (newDepth->getFunction())
-                        {
-                            case osg::Depth::LESS:
-                                newDepth->setFunction(osg::Depth::GREATER);
-                                break;
-                            case osg::Depth::LEQUAL:
-                                newDepth->setFunction(osg::Depth::GEQUAL);
-                                break;
-                            case osg::Depth::GREATER:
-                                newDepth->setFunction(osg::Depth::LESS);
-                                break;
-                            case osg::Depth::GEQUAL:
-                                newDepth->setFunction(osg::Depth::LEQUAL);
-                                break;
-                            default:
-                                break;
-                        }
-                        newStateSet->setAttribute(newDepth, osg::StateAttribute::ON);
-                        newDepth->setUserValue("depthModified", true);
-                    }
-                }
             }
             traverse(node);
         }
@@ -190,7 +154,9 @@ namespace MWRender
         mTexture->setInternalFormat(GL_RGBA);
         mTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        mTexture->setUserValue("premultiplied alpha", true);
+
+        mTextureStateSet = new osg::StateSet;
+        mTextureStateSet->setAttribute(new osg::BlendFunc(osg::BlendFunc::ONE, osg::BlendFunc::ONE_MINUS_SRC_ALPHA));
 
         mCamera = new osg::Camera;
         // hints that the camera is not relative to the master camera
@@ -198,8 +164,6 @@ namespace MWRender
         mCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         mCamera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 0.f));
         mCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        const float fovYDegrees = 12.3f;
-        mCamera->setProjectionMatrixAsPerspective(fovYDegrees, sizeX/static_cast<float>(sizeY), 0.1f, 10000.f); // zNear and zFar are autocomputed
         mCamera->setViewport(0, 0, sizeX, sizeY);
         mCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture, 0, 0, false, Settings::Manager::getInt("antialiasing", "Video"));
@@ -208,6 +172,8 @@ namespace MWRender
         mCamera->setCullMask(~(Mask_UpdateVisitor));
 
         mCamera->setNodeMask(Mask_RenderToTexture);
+
+        SceneUtil::setCameraClearDepth(mCamera);
 
         bool ffp = mResourceSystem->getSceneManager()->getLightingMethod() == SceneUtil::LightingMethod::FFP;
 
@@ -224,9 +190,14 @@ namespace MWRender
         defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
-        stateset->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(mCamera->getProjectionMatrix())));
 
-        stateset->setAttributeAndModes(new osg::Depth, osg::StateAttribute::ON);
+        const float fovYDegrees = 12.3f;
+        const float aspectRatio = static_cast<float>(sizeX) / static_cast<float>(sizeY);
+        const float znear = 0.1f;
+        const float zfar = 10000.f;
+        mCamera->setProjectionMatrixAsPerspective(fovYDegrees, aspectRatio, znear, zfar);
+        osg::Matrixf projectionMatrix = SceneUtil::AutoDepth::isReversed() ? static_cast<osg::Matrixf>(SceneUtil::getReversedZProjectionMatrixAsPerspective(fovYDegrees, aspectRatio, znear, zfar)) : static_cast<osg::Matrixf>(mCamera->getProjectionMatrix());
+        stateset->addUniform(new osg::Uniform("projectionMatrix", projectionMatrix));
 
         SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 
@@ -395,7 +366,7 @@ namespace MWRender
         if(iter != inv.end())
         {
             groupname = "inventoryweapononehand";
-            if(iter->getTypeName() == typeid(ESM::Weapon).name())
+            if(iter->getType() == ESM::Weapon::sRecordId)
             {
                 MWWorld::LiveCellRef<ESM::Weapon> *ref = iter->get<ESM::Weapon>();
                 int type = ref->mBase->mData.mType;
@@ -428,7 +399,7 @@ namespace MWRender
         mAnimation->play(mCurrentAnimGroup, 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name() && showCarriedLeft)
+        if(torch != inv.end() && torch->getType() == ESM::Light::sRecordId && showCarriedLeft)
         {
             if(!mAnimation->getInfo("torch"))
                 mAnimation->play("torch", 2, Animation::BlendMask_LeftArm, false,

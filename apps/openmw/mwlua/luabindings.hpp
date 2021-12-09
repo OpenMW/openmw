@@ -48,7 +48,7 @@ namespace MWLua
     struct AsyncPackageId
     {
         LuaUtil::ScriptsContainer* mContainer;
-        std::string mScript;
+        int mScriptId;
         sol::table mHiddenData;
     };
     sol::function getAsyncPackageInitializer(const Context&);
@@ -58,6 +58,7 @@ namespace MWLua
 
     // Implemented in uibindings.cpp
     sol::table initUserInterfacePackage(const Context&);
+    void clearUserInterface();
 
     // Implemented in inputbindings.cpp
     sol::table initInputPackage(const Context&);

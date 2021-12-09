@@ -3,6 +3,8 @@
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
+#include <components/misc/constants.hpp>
+
 #include "collisiontype.hpp"
 #include "constants.hpp"
 #include "movementsolver.hpp"
@@ -13,7 +15,7 @@ namespace MWPhysics
     {
         if (!stepper.mHitObject)
             return false;
-        static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(sMaxSlope));
+        static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(Constants::sMaxSlope));
         if (stepper.mPlaneNormal.z() <= sMaxSlopeCos)
             return false;
 
@@ -34,13 +36,13 @@ namespace MWPhysics
         // Stairstepping algorithms work by moving up to avoid the step, moving forwards, then moving back down onto the ground.
         // This algorithm has a couple of minor problems, but they don't cause problems for sane geometry, and just prevent stepping on insane geometry.
 
-        mUpStepper.doTrace(mColObj, position, position+osg::Vec3f(0.0f,0.0f,sStepSizeUp), mColWorld);
+        mUpStepper.doTrace(mColObj, position, position + osg::Vec3f(0.0f, 0.0f, Constants::sStepSizeUp), mColWorld, onGround);
 
         float upDistance = 0;
         if(!mUpStepper.mHitObject)
-            upDistance = sStepSizeUp;
-        else if(mUpStepper.mFraction*sStepSizeUp > sCollisionMargin)
-            upDistance = mUpStepper.mFraction*sStepSizeUp - sCollisionMargin;
+            upDistance = Constants::sStepSizeUp;
+        else if(mUpStepper.mFraction * Constants::sStepSizeUp > sCollisionMargin)
+            upDistance = mUpStepper.mFraction * Constants::sStepSizeUp - sCollisionMargin;
         else
         {
             return false;
@@ -76,9 +78,9 @@ namespace MWPhysics
             }
             else if(attempt == 3)
             {
-                if(upDistance > sStepSizeUp)
+                if(upDistance > Constants::sStepSizeUp)
                 {
-                    upDistance = sStepSizeUp;
+                    upDistance = Constants::sStepSizeUp;
                     tracerPos = position + osg::Vec3f(0.0f, 0.0f, upDistance);
                 }
                 moveDistance = sMinStep2;
@@ -115,7 +117,7 @@ namespace MWPhysics
                 downStepSize = upDistance;
             else
                 downStepSize = moveDistance + upDistance + sStepSizeDown;
-            mDownStepper.doTrace(mColObj, tracerDest, tracerDest + osg::Vec3f(0.0f, 0.0f, -downStepSize), mColWorld);
+            mDownStepper.doTrace(mColObj, tracerDest, tracerDest + osg::Vec3f(0.0f, 0.0f, -downStepSize), mColWorld, onGround);
 
             // can't step down onto air, non-walkable-slopes, or actors
             // NOTE: using a capsule causes isWalkableSlope (used in canStepDown) to fail on certain geometry that were intended to be valid at the bottoms of stairs

@@ -8,7 +8,7 @@
 #include "MyGUI_FactoryManager.h"
 
 #include <components/misc/utf8stream.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -1221,7 +1221,7 @@ public:
 
         RenderXform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
 
-        float z = SceneUtil::getReverseZ() ? 1.f : -1.f;
+        float z = SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f;
 
         GlyphStream glyphStream(textFormat.mFont, static_cast<float>(mCoord.left), static_cast<float>(mCoord.top - mViewTop),
                                   z /*mNode->getNodeDepth()*/, vertices, renderXform);

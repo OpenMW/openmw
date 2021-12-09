@@ -244,7 +244,6 @@ namespace Compiler
         }
         else
         {
-            // no comma was used between arguments
             scanner.putbackInt (value, loc);
             return false;
         }
@@ -267,7 +266,6 @@ namespace Compiler
         }
         else
         {
-            // no comma was used between arguments
             scanner.putbackFloat (value, loc);
             return false;
         }
@@ -343,7 +341,6 @@ namespace Compiler
         }
         else
         {
-            // no comma was used between arguments
             scanner.putbackName (name, loc);
             return false;
         }
@@ -452,7 +449,6 @@ namespace Compiler
         }
         else
         {
-            // no comma was used between arguments
             scanner.putbackKeyword (keyword, loc);
             return false;
         }
@@ -485,22 +481,6 @@ namespace Compiler
             }
 
             return Parser::parseSpecial (code, loc, scanner);
-        }
-
-        if (code==Scanner::S_comma)
-        {
-            mTokenLoc = loc;
-
-            if (mFirst)
-            {
-                // leading comma
-                mFirst = false;
-                return true;
-            }
-
-            // end marker
-            scanner.putbackSpecial (code, loc);
-            return false;
         }
 
         mFirst = false;
@@ -539,7 +519,6 @@ namespace Compiler
             }
             else
             {
-                // no comma was used between arguments
                 scanner.putbackSpecial (code, loc);
                 return false;
             }
@@ -632,7 +611,7 @@ namespace Compiler
     }
 
     int ExprParser::parseArguments (const std::string& arguments, Scanner& scanner,
-        std::vector<Interpreter::Type_Code>& code, int ignoreKeyword)
+        std::vector<Interpreter::Type_Code>& code, int ignoreKeyword, bool expectNames)
     {
         bool optional = false;
         int optionalCount = 0;
@@ -717,6 +696,8 @@ namespace Compiler
 
                 if (optional)
                     parser.setOptional (true);
+                if(expectNames)
+                    scanner.enableExpectName();
 
                 scanner.scan (parser);
 

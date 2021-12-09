@@ -2,7 +2,6 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGS_H
 
 #include <chrono>
-#include <optional>
 #include <string>
 
 namespace DetourNavigator
@@ -41,7 +40,7 @@ namespace DetourNavigator
         std::chrono::milliseconds mMinUpdateInterval;
     };
 
-    std::optional<Settings> makeSettingsFromSettingsManager();
+    Settings makeSettingsFromSettingsManager();
 }
 
 #endif

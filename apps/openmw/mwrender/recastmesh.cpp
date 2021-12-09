@@ -3,6 +3,8 @@
 #include <components/sceneutil/recastmesh.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/detournavigator/settings.hpp>
+#include <components/detournavigator/recastmesh.hpp>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -60,7 +62,6 @@ namespace MWRender
                 it->second.mValue = group;
                 it->second.mGeneration = tile->second->getGeneration();
                 it->second.mRevision = tile->second->getRevision();
-                continue;
             }
 
             ++it;

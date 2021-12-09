@@ -241,7 +241,7 @@ lighting` is on.
 This setting has no effect if :ref:`lighting method` is 'legacy'.
 
 minimum interior brightness
-------------------------
+---------------------------
 
 :Type:		float
 :Range:		0.0-1.0
@@ -260,7 +260,7 @@ aforementioned changes in visuals.
 This setting has no effect if :ref:`lighting method` is 'legacy'.
 
 antialias alpha test
----------------------------------------
+--------------------
 
 :Type:		boolean
 :Range:		True/False
@@ -269,3 +269,16 @@ antialias alpha test
 Convert the alpha test (cutout/punchthrough alpha) to alpha-to-coverage when :ref:`antialiasing` is on.
 This allows MSAA to work with alpha-tested meshes, producing better-looking edges without pixelation.
 When MSAA is off, this setting will have no visible effect, but might have a performance cost.
+
+soft particles
+--------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enables soft particles for particle effects. This technique softens the
+intersection between individual particles and other opaque geometry by blending
+between them. Note, this relies on overriding specific properties of particle
+systems that potentially differ from the source content, this setting may change
+the look of some particle systems.

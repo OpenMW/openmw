@@ -22,6 +22,8 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -407,6 +409,7 @@ namespace MWWorld
 
     void ProjectileManager::moveMagicBolts(float duration)
     {
+        static const bool normaliseRaceSpeed = Settings::Manager::getBool("normalise race speed", "Game");
         for (auto& magicBoltState : mMagicBolts)
         {
             if (magicBoltState.mToDelete)
@@ -426,13 +429,19 @@ namespace MWWorld
                 }
             }
 
+            const auto& store = MWBase::Environment::get().getWorld()->getStore();
             osg::Quat orient = magicBoltState.mNode->getAttitude();
-            static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fTargetSpellMaxSpeed")->mValue.getFloat();
+            static float fTargetSpellMaxSpeed = store.get<ESM::GameSetting>().find("fTargetSpellMaxSpeed")->mValue.getFloat();
             float speed = fTargetSpellMaxSpeed * magicBoltState.mSpeed;
+            if (!normaliseRaceSpeed && !caster.isEmpty() && caster.getClass().isNpc())
+            {
+                const auto npc = caster.get<ESM::NPC>()->mBase;
+                const auto race = store.get<ESM::Race>().find(npc->mRace);
+                speed *= npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
+            }
             osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
             direction.normalize();
-            osg::Vec3f newPos = projectile->getPosition() + direction * duration * speed;
+            projectile->setVelocity(direction * speed);
 
             update(magicBoltState, duration);
 
@@ -441,8 +450,6 @@ namespace MWWorld
             if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
                 caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
             projectile->setValidTargets(targetActors);
-
-            mPhysics->updateProjectile(magicBoltState.mProjectileId, newPos);
         }
     }
 
@@ -460,7 +467,7 @@ namespace MWWorld
             // simulating aerodynamics at all
             projectileState.mVelocity -= osg::Vec3f(0, 0, Constants::GravityConst * Constants::UnitsPerMeter * 0.1f) * duration;
 
-            osg::Vec3f newPos = projectile->getPosition() + projectileState.mVelocity * duration;
+            projectile->setVelocity(projectileState.mVelocity);
 
             // rotation does not work well for throwing projectiles - their roll angle will depend on shooting direction.
             if (!projectileState.mThrown)
@@ -479,8 +486,6 @@ namespace MWWorld
             if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
                 caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
             projectile->setValidTargets(targetActors);
-
-            mPhysics->updateProjectile(projectileState.mProjectileId, newPos);
         }
     }
 
@@ -493,7 +498,7 @@ namespace MWWorld
 
             auto* projectile = mPhysics->getProjectile(projectileState.mProjectileId);
 
-            const auto pos = projectile->getPosition();
+            const auto pos = projectile->getSimulationPosition();
             projectileState.mNode->setPosition(pos);
 
             if (projectile->isActive())
@@ -529,7 +534,7 @@ namespace MWWorld
 
             auto* projectile = mPhysics->getProjectile(magicBoltState.mProjectileId);
 
-            const auto pos = projectile->getPosition();
+            const auto pos = projectile->getSimulationPosition();
             magicBoltState.mNode->setPosition(pos);
             for (const auto& sound : magicBoltState.mSounds)
                 sound->setPosition(pos);
@@ -546,7 +551,7 @@ namespace MWWorld
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
             cast.mSlot = magicBoltState.mSlot;
-            cast.inflict(target, caster, magicBoltState.mEffects, ESM::RT_Target, false, true);
+            cast.inflict(target, caster, magicBoltState.mEffects, ESM::RT_Target, true);
 
             MWBase::Environment::get().getWorld()->explodeSpell(pos, magicBoltState.mEffects, caster, target, ESM::RT_Target, magicBoltState.mSpellId, magicBoltState.mSourceName, false, magicBoltState.mSlot);
             magicBoltState.mToDelete = true;

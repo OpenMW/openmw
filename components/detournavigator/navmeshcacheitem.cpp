@@ -13,12 +13,6 @@ namespace
 {
     using DetourNavigator::TilePosition;
 
-    const dtMeshTile* getTile(const dtNavMesh& navMesh, const TilePosition& position)
-    {
-        const int layer = 0;
-        return navMesh.getTileAt(position.x(), position.y(), layer);
-    }
-
     bool removeTile(dtNavMesh& navMesh, const TilePosition& position)
     {
         const int layer = 0;
@@ -41,10 +35,16 @@ namespace
 
 namespace DetourNavigator
 {
+    const dtMeshTile* getTile(const dtNavMesh& navMesh, const TilePosition& position)
+    {
+        const int layer = 0;
+        return navMesh.getTileAt(position.x(), position.y(), layer);
+    }
+
     UpdateNavMeshStatus NavMeshCacheItem::updateTile(const TilePosition& position, NavMeshTilesCache::Value&& cached,
         NavMeshData&& navMeshData)
     {
-        const dtMeshTile* currentTile = ::getTile(*mImpl, position);
+        const dtMeshTile* currentTile = getTile(*mImpl, position);
         if (currentTile != nullptr
             && asNavMeshTileConstView(*currentTile) == asNavMeshTileConstView(navMeshData.mValue.get()))
         {
@@ -54,8 +54,19 @@ namespace DetourNavigator
         const auto addStatus = addTile(*mImpl, navMeshData.mValue.get(), navMeshData.mSize);
         if (dtStatusSucceed(addStatus))
         {
-            mUsedTiles[position] = std::make_pair(std::move(cached), std::move(navMeshData));
-            ++mNavMeshRevision;
+            auto tile = mUsedTiles.find(position);
+            if (tile == mUsedTiles.end())
+            {
+                mUsedTiles.emplace_hint(tile, position,
+                    Tile {Version {mVersion.mRevision, 1}, std::move(cached), std::move(navMeshData)});
+            }
+            else
+            {
+                ++tile->second.mVersion.mRevision;
+                tile->second.mCached = std::move(cached);
+                tile->second.mData = std::move(navMeshData);
+            }
+            ++mVersion.mRevision;
             return UpdateNavMeshStatusBuilder().added(true).removed(removed).getResult();
         }
         else
@@ -63,7 +74,7 @@ namespace DetourNavigator
             if (removed)
             {
                 mUsedTiles.erase(position);
-                ++mNavMeshRevision;
+                ++mVersion.mRevision;
             }
             return UpdateNavMeshStatusBuilder().removed(removed).failed((addStatus & DT_OUT_OF_MEMORY) != 0).getResult();
         }
@@ -75,7 +86,7 @@ namespace DetourNavigator
         if (removed)
         {
             mUsedTiles.erase(position);
-            ++mNavMeshRevision;
+            ++mVersion.mRevision;
         }
         return UpdateNavMeshStatusBuilder().removed(removed).getResult();
     }

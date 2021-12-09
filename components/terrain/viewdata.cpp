@@ -12,12 +12,10 @@ ViewData::ViewData()
     , mHasViewPoint(false)
     , mWorldUpdateRevision(0)
 {
-
 }
 
 ViewData::~ViewData()
 {
-
 }
 
 void ViewData::copyFrom(const ViewData& other)
@@ -38,29 +36,9 @@ void ViewData::add(QuadTreeNode *node)
     if (index+1 > mEntries.size())
         mEntries.resize(index+1);
 
-    Entry& entry = mEntries[index];
+    ViewDataEntry& entry = mEntries[index];
     if (entry.set(node))
         mChanged = true;
-}
-
-unsigned int ViewData::getNumEntries() const
-{
-    return mNumEntries;
-}
-
-ViewData::Entry &ViewData::getEntry(unsigned int i)
-{
-    return mEntries[i];
-}
-
-bool ViewData::hasChanged() const
-{
-    return mChanged;
-}
-
-bool ViewData::hasViewPoint() const
-{
-    return mHasViewPoint;
 }
 
 void ViewData::setViewPoint(const osg::Vec3f &viewPoint)
@@ -69,11 +47,8 @@ void ViewData::setViewPoint(const osg::Vec3f &viewPoint)
     mHasViewPoint = true;
 }
 
-const osg::Vec3f& ViewData::getViewPoint() const
-{
-    return mViewPoint;
-}
-
+// NOTE: As a performance optimisation, we cache mRenderingNodes from previous frames here.
+// If this cache becomes invalid (e.g. through mWorldUpdateRevision), we need to use clear() instead of reset().
 void ViewData::reset()
 {
     // clear any unused entries
@@ -108,14 +83,13 @@ bool ViewData::contains(QuadTreeNode *node) const
     return false;
 }
 
-ViewData::Entry::Entry()
+ViewDataEntry::ViewDataEntry()
     : mNode(nullptr)
     , mLodFlags(0)
 {
-
 }
 
-bool ViewData::Entry::set(QuadTreeNode *node)
+bool ViewDataEntry::set(QuadTreeNode *node)
 {
     if (node == mNode)
         return false;
@@ -164,9 +138,13 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
         }
         else if (!mostSuitableView)
         {
+            if (vd->getWorldUpdateRevision() != mWorldUpdateRevision)
+            {
+                vd->setWorldUpdateRevision(mWorldUpdateRevision);
+                vd->clear();
+            }
             vd->setViewPoint(viewPoint);
             vd->setActiveGrid(activeGrid);
-            vd->setWorldUpdateRevision(mWorldUpdateRevision);
             needsUpdate = true;
         }
     }

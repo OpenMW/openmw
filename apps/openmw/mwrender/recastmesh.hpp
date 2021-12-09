@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWRENDER_RECASTMESH_H
 #define OPENMW_MWRENDER_RECASTMESH_H
 
-#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/recastmeshtiles.hpp>
 
 #include <osg/ref_ptr>
 
@@ -11,6 +11,11 @@ namespace osg
 {
     class Group;
     class Geometry;
+}
+
+namespace DetourNavigator
+{
+    struct Settings;
 }
 
 namespace MWRender

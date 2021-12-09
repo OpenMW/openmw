@@ -1,5 +1,6 @@
-#include "navmesh.hpp"
+#include "recastmesh.hpp"
 #include "detourdebugdraw.hpp"
+#include "depth.hpp"
 
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/recastmesh.hpp>
@@ -9,6 +10,7 @@
 
 #include <osg/Group>
 #include <osg/Material>
+#include <osg/PolygonOffset>
 
 #include <algorithm>
 #include <vector>
@@ -45,7 +47,7 @@ namespace SceneUtil
         using namespace DetourNavigator;
 
         const osg::ref_ptr<osg::Group> group(new osg::Group);
-        DebugDraw debugDraw(*group, osg::Vec3f(0, 0, 0), 1.0f);
+        DebugDraw debugDraw(*group, DebugDraw::makeStateSet(), osg::Vec3f(0, 0, 0), 1.0f);
         const DetourNavigator::Mesh& mesh = recastMesh.getMesh();
         std::vector<int> indices = mesh.getIndices();
         std::vector<float> vertices = mesh.getVertices();
@@ -64,12 +66,19 @@ namespace SceneUtil
 
         const auto normals = calculateNormals(vertices, indices);
         const auto texScale = 1.0f / (settings.mCellSize * 10.0f);
-        duDebugDrawTriMesh(&debugDraw, vertices.data(), static_cast<int>(vertices.size() / 3),
-            indices.data(), normals.data(), static_cast<int>(indices.size() / 3), nullptr, texScale);
+        duDebugDrawTriMeshSlope(&debugDraw, vertices.data(), static_cast<int>(vertices.size() / 3),
+            indices.data(), normals.data(), static_cast<int>(indices.size() / 3), settings.mMaxSlope, texScale);
 
         osg::ref_ptr<osg::Material> material = new osg::Material;
         material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-        group->getOrCreateStateSet()->setAttribute(material);
+
+        const float polygonOffsetFactor = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
+        const float polygonOffsetUnits = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
+        osg::ref_ptr<osg::PolygonOffset> polygonOffset = new osg::PolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
+
+        osg::ref_ptr<osg::StateSet> stateSet = group->getOrCreateStateSet();
+        stateSet->setAttribute(material);
+        stateSet->setAttributeAndModes(polygonOffset);
 
         return group;
     }

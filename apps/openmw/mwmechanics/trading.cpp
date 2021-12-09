@@ -23,7 +23,7 @@ namespace MWMechanics
         }
 
         // reject if npc is a creature
-        if ( merchant.getTypeName() != typeid(ESM::NPC).name() ) {
+        if ( merchant.getType() != ESM::NPC::sRecordId ) {
             return false;
         }
 

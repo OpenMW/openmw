@@ -63,7 +63,7 @@ namespace Compiler
 
         bool isWhitespace()
         {
-            return (mData[0]==' ' || mData[0]=='\t') && mData[1]==0 && mData[2]==0 && mData[3]==0;
+            return (mData[0]==' ' || mData[0]=='\t' || mData[0]==',') && mData[1]==0 && mData[2]==0 && mData[3]==0;
         }
 
         bool isDigit()
@@ -214,7 +214,6 @@ namespace Compiler
                 S_open, S_close,
                 S_cmpEQ, S_cmpNE, S_cmpLT, S_cmpLE, S_cmpGT, S_cmpGE,
                 S_plus, S_minus, S_mult, S_div,
-                S_comma,
                 S_ref,
                 S_member
             };

@@ -3,6 +3,8 @@
 
 #include "../mwworld/class.hpp"
 
+#include <components/esm/loadmgef.hpp>
+
 namespace ESM
 {
     struct GameSetting;
@@ -16,6 +18,15 @@ namespace MWClass
     protected:
 
         Actor() = default;
+
+        template <class GMST>
+        float getSwimSpeedImpl(const MWWorld::Ptr& ptr, const GMST& gmst, const MWMechanics::MagicEffects& mageffects, float baseSpeed) const
+        {
+            return baseSpeed
+                * (1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude())
+                * (gmst.fSwimRunBase->mValue.getFloat()
+                   + 0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fSwimRunAthleticsMult->mValue.getFloat());
+        }
 
     public:
          ~Actor() override = default;

@@ -383,7 +383,7 @@ void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, Ju
 
 bool CharacterController::onOpen()
 {
-    if (mPtr.getTypeName() == typeid(ESM::Container).name())
+    if (mPtr.getType() == ESM::Container::sRecordId)
     {
         if (!mAnimation->hasAnimation("containeropen"))
             return true;
@@ -404,7 +404,7 @@ bool CharacterController::onOpen()
 
 void CharacterController::onClose()
 {
-    if (mPtr.getTypeName() == typeid(ESM::Container).name())
+    if (mPtr.getType() == ESM::Container::sRecordId)
     {
         if (!mAnimation->hasAnimation("containerclose"))
             return;
@@ -591,7 +591,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
             std::string anim = mCurrentMovement;
             mAdjustMovementAnimSpeed = true;
-            if (mPtr.getClass().getTypeName() == typeid(ESM::Creature).name()
+            if (mPtr.getClass().getType() == ESM::Creature::sRecordId
                     && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
             {
                 CharacterState walkState = runStateToWalkState(mMovementState);
@@ -1432,7 +1432,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
         MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(mPtr, &weaptype);
-        isWeapon = (weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name());
+        isWeapon = (weapon != inv.end() && weapon->getType() == ESM::Weapon::sRecordId);
         if (isWeapon)
         {
             weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
@@ -1467,7 +1467,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             mAttackStrength = 0;
 
             // Randomize attacks for non-bipedal creatures with Weapon flag
-            if (mPtr.getClass().getTypeName() == typeid(ESM::Creature).name() &&
+            if (mPtr.getClass().getType() == ESM::Creature::sRecordId &&
                 !mPtr.getClass().isBipedal(mPtr) &&
                 (!mAnimation->hasAnimation(mCurrentWeapon) || isRandomAttackAnimation(mCurrentWeapon)))
             {
@@ -1590,9 +1590,9 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
 
                 if(!target.isEmpty())
                 {
-                    if(item.getTypeName() == typeid(ESM::Lockpick).name())
+                    if(item.getType() == ESM::Lockpick::sRecordId)
                         Security(mPtr).pickLock(target, item, resultMessage, resultSound);
-                    else if(item.getTypeName() == typeid(ESM::Probe).name())
+                    else if(item.getType() == ESM::Probe::sRecordId)
                         Security(mPtr).probeTrap(target, item, resultMessage, resultSound);
                 }
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
@@ -1867,7 +1867,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
     {
         const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
+        if(torch != inv.end() && torch->getType() == ESM::Light::sRecordId
                 && updateCarriedLeftVisible(mWeaponType))
         {
             if (mAnimation->isPlaying("shield"))
@@ -2044,7 +2044,7 @@ void CharacterController::update(float duration)
                 mIsMovingBackward = vec.y() < 0;
 
             float maxDelta = osg::PI * duration * (2.5f - cosDelta);
-            delta = osg::clampBetween(delta, -maxDelta, maxDelta);
+            delta = std::clamp(delta, -maxDelta, maxDelta);
             stats.setSideMovementAngle(stats.getSideMovementAngle() + delta);
             effectiveRotation += delta;
         }
@@ -2061,7 +2061,7 @@ void CharacterController::update(float duration)
         vec.x() *= speed;
         vec.y() *= speed;
 
-        if(mHitState != CharState_None && mJumpState == JumpState_None)
+        if(mHitState != CharState_None && mHitState != CharState_Block && mJumpState == JumpState_None)
             vec = osg::Vec3f();
 
         CharacterState movestate = CharState_None;
@@ -2286,7 +2286,7 @@ void CharacterController::update(float duration)
             float swimmingPitch = mAnimation->getBodyPitchRadians();
             float targetSwimmingPitch = -mPtr.getRefData().getPosition().rot[0];
             float maxSwimPitchDelta = 3.0f * duration;
-            swimmingPitch += osg::clampBetween(targetSwimmingPitch - swimmingPitch, -maxSwimPitchDelta, maxSwimPitchDelta);
+            swimmingPitch += std::clamp(targetSwimmingPitch - swimmingPitch, -maxSwimPitchDelta, maxSwimPitchDelta);
             mAnimation->setBodyPitchRadians(swimmingPitch);
         }
         else
@@ -2522,7 +2522,7 @@ void CharacterController::unpersistAnimationState()
         {
             float start = mAnimation->getTextKeyTime(anim.mGroup+": start");
             float stop = mAnimation->getTextKeyTime(anim.mGroup+": stop");
-            float time = std::max(start, std::min(stop, anim.mTime));
+            float time = std::clamp(anim.mTime, start, stop);
             complete = (time - start) / (stop - start);
         }
 
@@ -2746,7 +2746,7 @@ void CharacterController::setVisibility(float visibility)
         float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
         if (chameleon)
         {
-            alpha *= std::min(0.75f, std::max(0.25f, (100.f - chameleon)/100.f));
+            alpha *= std::clamp(1.f - chameleon / 100.f, 0.25f, 0.75f);
         }
 
         visibility = std::min(visibility, alpha);
@@ -2965,8 +2965,8 @@ void CharacterController::updateHeadTracking(float duration)
     const double xLimit = osg::DegreesToRadians(40.0);
     const double zLimit = osg::DegreesToRadians(30.0);
     double zLimitOffset = mAnimation->getUpperBodyYawRadians();
-    xAngleRadians = osg::clampBetween(xAngleRadians, -xLimit, xLimit);
-    zAngleRadians = osg::clampBetween(zAngleRadians, -zLimit + zLimitOffset, zLimit + zLimitOffset);
+    xAngleRadians = std::clamp(xAngleRadians, -xLimit, xLimit);
+    zAngleRadians = std::clamp(zAngleRadians, -zLimit + zLimitOffset, zLimit + zLimitOffset);
 
     float factor = duration*5;
     factor = std::min(factor, 1.f);

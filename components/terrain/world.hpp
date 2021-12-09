@@ -28,11 +28,6 @@ namespace Resource
     class ResourceSystem;
 }
 
-namespace SceneUtil
-{
-    class WorkQueue;
-}
-
 namespace Loading
 {
     class Reporter;
@@ -114,9 +109,6 @@ namespace Terrain
         World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask);
         World(osg::Group* parent, Storage* storage, unsigned int nodeMask);
         virtual ~World();
-
-        /// Set a WorkQueue to delete objects in the background thread.
-        void setWorkQueue(SceneUtil::WorkQueue* workQueue);
 
         /// See CompositeMapRenderer::setTargetFrameRate
         void setTargetFrameRate(float rate);

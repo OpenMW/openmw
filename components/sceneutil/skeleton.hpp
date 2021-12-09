@@ -4,6 +4,7 @@
 #include <osg/Group>
 
 #include <memory>
+#include <unordered_map>
 
 namespace SceneUtil
 {
@@ -72,7 +73,7 @@ namespace SceneUtil
         // As far as the scene graph goes we support multiple root bones.
         std::unique_ptr<Bone> mRootBone;
 
-        typedef std::map<std::string, std::pair<osg::NodePath, osg::MatrixTransform*> > BoneCache;
+        typedef std::unordered_map<std::string, std::vector<osg::MatrixTransform*> > BoneCache;
         BoneCache mBoneCache;
         bool mBoneCacheInit;
 

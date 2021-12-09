@@ -40,12 +40,10 @@ namespace MWMechanics
     class AiFollow final : public TypedAiPackage<AiFollow>
     {
         public:
-            AiFollow(const std::string &actorId, float duration, float x, float y, float z);
-            AiFollow(const std::string &actorId, const std::string &CellId, float duration, float x, float y, float z);
             /// Follow Actor for duration or until you arrive at a world position
-            AiFollow(const MWWorld::Ptr& actor, float duration, float X, float Y, float Z);
+            AiFollow(const std::string &actorId, float duration, float x, float y, float z, bool repeat);
             /// Follow Actor for duration or until you arrive at a position in a cell
-            AiFollow(const MWWorld::Ptr& actor, const std::string &CellId, float duration, float X, float Y, float Z);
+            AiFollow(const std::string &actorId, const std::string &CellId, float duration, float x, float y, float z, bool repeat);
             /// Follow Actor indefinitively
             AiFollow(const MWWorld::Ptr& actor, bool commanded=false);
 

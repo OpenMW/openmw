@@ -15,7 +15,6 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/bulletshape.hpp>
-#include <components/sceneutil/unrefqueue.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/debug.hpp>
@@ -65,23 +64,12 @@ namespace
                 * osg::Quat(zr, osg::Vec3(0, 0, -1));
     }
 
-    osg::Quat makeObjectOsgQuat(const ESM::Position& position)
-    {
-        const float xr = position.rot[0];
-        const float yr = position.rot[1];
-        const float zr = position.rot[2];
-
-        return osg::Quat(zr, osg::Vec3(0, 0, -1))
-            * osg::Quat(yr, osg::Vec3(0, -1, 0))
-            * osg::Quat(xr, osg::Vec3(-1, 0, 0));
-    }
-
     osg::Quat makeNodeRotation(const MWWorld::Ptr& ptr, RotationOrder order)
     {
         const auto pos = ptr.getRefData().getPosition();
 
         const auto rot = ptr.getClass().isActor() ? makeActorOsgQuat(pos)
-            : (order == RotationOrder::inverse ? makeInversedOrderObjectOsgQuat(pos) : makeObjectOsgQuat(pos));
+            : (order == RotationOrder::inverse ? makeInversedOrderObjectOsgQuat(pos) : Misc::Convert::makeOsgQuat(pos));
 
         return rot;
     }
@@ -144,7 +132,7 @@ namespace
             {
                 btVector3 aabbMin;
                 btVector3 aabbMax;
-                object->getShapeInstance()->getCollisionShape()->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+                object->getShapeInstance()->mCollisionShape->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
 
                 const auto center = (aabbMax + aabbMin) * 0.5f;
 
@@ -155,16 +143,16 @@ namespace
 
                 const auto transform = object->getTransform();
                 const btTransform closedDoorTransform(
-                    Misc::Convert::toBullet(makeObjectOsgQuat(ptr.getCellRef().getPosition())),
+                    Misc::Convert::makeBulletQuaternion(ptr.getCellRef().getPosition()),
                     transform.getOrigin()
                 );
 
-                const auto start = Misc::Convert::makeOsgVec3f(closedDoorTransform(center + toPoint));
+                const auto start = Misc::Convert::toOsg(closedDoorTransform(center + toPoint));
                 const auto startPoint = physics.castRay(start, start - osg::Vec3f(0, 0, 1000), ptr, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
                 const auto connectionStart = startPoint.mHit ? startPoint.mHitPos : start;
 
-                const auto end = Misc::Convert::makeOsgVec3f(closedDoorTransform(center - toPoint));
+                const auto end = Misc::Convert::toOsg(closedDoorTransform(center - toPoint));
                 const auto endPoint = physics.castRay(end, end - osg::Vec3f(0, 0, 1000), ptr, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
                 const auto connectionEnd = endPoint.mHit ? endPoint.mHitPos : end;
@@ -383,17 +371,17 @@ namespace MWWorld
         {
             osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
             const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
-            const float verts = ESM::Land::LAND_SIZE;
-            const float worldsize = ESM::Land::REAL_SIZE;
+            const int verts = ESM::Land::LAND_SIZE;
+            const int worldsize = ESM::Land::REAL_SIZE;
             if (data)
             {
-                mPhysics->addHeightField (data->mHeights, cellX, cellY, worldsize / (verts-1), verts, data->mMinHeight, data->mMaxHeight, land.get());
+                mPhysics->addHeightField(data->mHeights, cellX, cellY, worldsize, verts, data->mMinHeight, data->mMaxHeight, land.get());
             }
             else
             {
                 static std::vector<float> defaultHeight;
                 defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
-                mPhysics->addHeightField (&defaultHeight[0], cellX, cellY, worldsize / (verts-1), verts, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
+                mPhysics->addHeightField(defaultHeight.data(), cellX, cellY, worldsize, verts, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
             }
             if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
             {
@@ -416,7 +404,7 @@ namespace MWWorld
                         return heights;
                     }
                 } ();
-                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shift, shape);
+                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shape);
             }
         }
 
@@ -446,18 +434,11 @@ namespace MWWorld
             if (cell->getCell()->isExterior())
             {
                 if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                {
-                    const btTransform& transform =heightField->getCollisionObject()->getWorldTransform();
-                    mNavigator.addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE,
-                                        osg::Vec3f(static_cast<float>(transform.getOrigin().x()),
-                                                   static_cast<float>(transform.getOrigin().y()),
-                                                   waterLevel));
-                }
+                    mNavigator.addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE, waterLevel);
             }
             else
             {
-                mNavigator.addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(),
-                                    osg::Vec3f(0, 0, waterLevel));
+                mNavigator.addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(), waterLevel);
             }
         }
         else
@@ -665,7 +646,6 @@ namespace MWWorld
             }
 
             mRendering.getResourceSystem()->updateCache(mRendering.getReferenceTime());
-            mRendering.getUnrefQueue()->flush(mRendering.getWorkQueue());
 
             loadingListener->increaseProgress (1);
             i++;
@@ -712,7 +692,6 @@ namespace MWWorld
             }
 
             mRendering.getResourceSystem()->updateCache(mRendering.getReferenceTime());
-            mRendering.getUnrefQueue()->flush(mRendering.getWorkQueue());
 
             loadingListener->increaseProgress (1);
             i++;
@@ -765,9 +744,6 @@ namespace MWWorld
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain(), rendering.getLandManager()));
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
-
-        mPreloader->setUnrefQueue(rendering.getUnrefQueue());
-        mPhysics->setUnrefQueue(rendering.getUnrefQueue());
 
         rendering.getResourceSystem()->setExpiryDelay(Settings::Manager::getFloat("cache expiry delay", "Cells"));
 

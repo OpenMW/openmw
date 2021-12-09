@@ -18,6 +18,7 @@ namespace osg
     class Camera;
     class Group;
     class Viewport;
+    class StateSet;
 }
 
 namespace MWRender
@@ -41,6 +42,8 @@ namespace MWRender
         void rebuild();
 
         osg::ref_ptr<osg::Texture2D> getTexture();
+        /// Get the osg::StateSet required to render the texture correctly, if any.
+        osg::StateSet* getTextureStateSet() { return mTextureStateSet; }
 
     private:
         CharacterPreview(const CharacterPreview&);
@@ -54,6 +57,7 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mParent;
         Resource::ResourceSystem* mResourceSystem;
         osg::ref_ptr<osg::Texture2D> mTexture;
+        osg::ref_ptr<osg::StateSet> mTextureStateSet;
         osg::ref_ptr<osg::Camera> mCamera;
         osg::ref_ptr<DrawOnceCallback> mDrawOnceCallback;
 

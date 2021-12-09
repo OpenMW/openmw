@@ -13,9 +13,9 @@
 #include <components/misc/stringops.hpp>
 
 #include <components/sceneutil/skeleton.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include "visitor.hpp"
-#include "clone.hpp"
 
 namespace SceneUtil
 {
@@ -49,10 +49,10 @@ namespace SceneUtil
             if (!filterMatches(drawable.getName()))
                 return;
 
-            osg::Node* node = &drawable;
+            const osg::Node* node = &drawable;
             for (auto it = getNodePath().rbegin()+1; it != getNodePath().rend(); ++it)
             {
-                osg::Node* parent = *it;
+                const osg::Node* parent = *it;
                 if (!filterMatches(parent->getName()))
                     break;
                 node = parent;
@@ -60,11 +60,11 @@ namespace SceneUtil
             mToCopy.emplace(node);
         }
 
-        void doCopy()
+        void doCopy(Resource::SceneManager* sceneManager)
         {
-            for (const osg::ref_ptr<osg::Node>& node : mToCopy)
+            for (const osg::ref_ptr<const osg::Node>& node : mToCopy)
             {
-                mParent->addChild(static_cast<osg::Node*>(node->clone(SceneUtil::CopyOp())));
+                mParent->addChild(sceneManager->getInstance(node));
             }
             mToCopy.clear();
         }
@@ -78,7 +78,7 @@ namespace SceneUtil
                 || (lowerName.size() >= mFilter2.size() && lowerName.compare(0, mFilter2.size(), mFilter2) == 0);
         }
 
-        using NodeSet = std::set<osg::ref_ptr<osg::Node>>;
+        using NodeSet = std::set<osg::ref_ptr<const osg::Node>>;
         NodeSet mToCopy;
 
         osg::ref_ptr<osg::Group> mParent;
@@ -100,7 +100,7 @@ namespace SceneUtil
         }
     }
 
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode, Resource::SceneManager* sceneManager, const osg::Quat* attitude)
     {
         if (dynamic_cast<const SceneUtil::Skeleton*>(toAttach.get()))
         {
@@ -108,7 +108,9 @@ namespace SceneUtil
 
             CopyRigVisitor copyVisitor(handle, filter);
             const_cast<osg::Node*>(toAttach.get())->accept(copyVisitor);
-            copyVisitor.doCopy();
+            copyVisitor.doCopy(sceneManager);
+            // add a ref to the original template to hint to the cache that it is still being used and should be kept in cache.
+            handle->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(toAttach));
 
             if (handle->getNumChildren() == 1)
             {
@@ -127,7 +129,7 @@ namespace SceneUtil
         }
         else
         {
-            osg::ref_ptr<osg::Node> clonedToAttach = static_cast<osg::Node*>(toAttach->clone(SceneUtil::CopyOp()));
+            osg::ref_ptr<osg::Node> clonedToAttach = sceneManager->getInstance(toAttach);
 
             FindByNameVisitor findBoneOffset("BoneOffset");
             clonedToAttach->accept(findBoneOffset);
@@ -142,8 +144,6 @@ namespace SceneUtil
 
                 trans = new osg::PositionAttitudeTransform;
                 trans->setPosition(boneOffset->getMatrix().getTrans());
-                // The BoneOffset rotation seems to be incorrect
-                trans->setAttitude(osg::Quat(osg::DegreesToRadians(-90.f), osg::Vec3f(1,0,0)));
 
                 // Now that we used it, get rid of the redundant node.
                 if (boneOffset->getNumChildren() == 0 && boneOffset->getNumParents() == 1)
@@ -168,6 +168,13 @@ namespace SceneUtil
                     frontFaceStateSet->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
                 }
                 trans->setStateSet(frontFaceStateSet);
+            }
+
+            if(attitude)
+            {
+                if (!trans)
+                    trans = new osg::PositionAttitudeTransform;
+                trans->setAttitude(*attitude);
             }
 
             if (trans)

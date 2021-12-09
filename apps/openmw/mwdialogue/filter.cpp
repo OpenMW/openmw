@@ -23,7 +23,7 @@
 
 bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 {
-    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+    bool isCreature = (mActor.getType() != ESM::NPC::sRecordId);
 
     // actor id
     if (!info.mActor.empty())
@@ -160,7 +160,7 @@ bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
 
 bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert) const
 {
-    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+    bool isCreature = (mActor.getType() != ESM::NPC::sRecordId);
 
     if (isCreature)
         return true;
@@ -207,7 +207,7 @@ bool MWDialogue::Filter::testFunctionLocal(const MWDialogue::SelectWrapper& sele
 
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
-    if (select.isNpcOnly() && (mActor.getTypeName() != typeid (ESM::NPC).name()))
+    if (select.isNpcOnly() && (mActor.getType() != ESM::NPC::sRecordId))
         // If the actor is a creature, we pass all conditions only applicable to NPCs.
         return true;
 
@@ -452,7 +452,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
                 {
                     if (target.getClass().isNpc() && target.getClass().getNpcStats(target).isWerewolf())
                         return 2;
-                    if (target.getTypeName() == typeid(ESM::Creature).name())
+                    if (target.getType() == ESM::Creature::sRecordId)
                         return 1;
                 }
             }

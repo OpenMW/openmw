@@ -80,7 +80,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Lockpick);
 
-        registerClass (typeid (ESM::Lockpick).name(), instance);
+        registerClass (ESM::Lockpick::sRecordId, instance);
     }
 
     std::string Lockpick::getUpSoundId (const MWWorld::ConstPtr& ptr) const

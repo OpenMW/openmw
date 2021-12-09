@@ -15,6 +15,7 @@
 #include "timestamp.hpp"
 #include "globals.hpp"
 #include "contentloader.hpp"
+#include "groundcoverstore.hpp"
 
 namespace osg
 {
@@ -80,6 +81,7 @@ namespace MWWorld
 
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
+            GroundcoverStore mGroundcoverStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
 
@@ -157,19 +159,15 @@ namespace MWWorld
             void updateNavigatorObject(const MWPhysics::Object& object);
 
             void ensureNeededRecords();
+            void validateMasterFiles(const std::vector<ESM::ESMReader>& readers);
 
             void fillGlobalVariables();
 
             void updateSkyDate();
 
-            /**
-             * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
-             * @param fileCollections- Container which holds content file names and their paths
-             * @param content - Container which holds content file names
-             * @param contentLoader -
-             */
-            void loadContentFiles(const Files::Collections& fileCollections,
-                const std::vector<std::string>& content, const std::vector<std::string>& groundcover, ContentLoader& contentLoader);
+            void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener);
+
+            void loadGroundcoverFiles(const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder);
 
             float feetToGameUnits(float feet);
             float getActivationDistancePlusTelekinesis();
@@ -376,7 +374,7 @@ namespace MWWorld
             MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, const osg::Vec3f& position, bool movePhysics=true, bool keepActive=false) override;
             ///< @return an updated Ptr
 
-            MWWorld::Ptr moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec, bool moveToActive, bool ignoreCollisions) override;
+            MWWorld::Ptr moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec) override;
             ///< @return an updated Ptr
 
             void scaleObject (const Ptr& ptr, float scale) override;
@@ -531,13 +529,10 @@ namespace MWWorld
             bool isFirstPerson() const override;
             bool isPreviewModeEnabled() const override;
 
-            void togglePreviewMode(bool enable) override;
-
             bool toggleVanityMode(bool enable) override;
 
-            void allowVanityMode(bool allow) override;
+            MWRender::Camera* getCamera() override;
             bool vanityRotateCamera(float * rot) override;
-            void adjustCameraDistance(float dist) override;
 
             void applyDeferredPreviewRotationToPlayer(float dt) override;
             void disableDeferredPreviewRotation() override;

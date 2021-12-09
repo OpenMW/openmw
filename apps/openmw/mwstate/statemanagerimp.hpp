@@ -31,7 +31,7 @@ namespace MWState
 
         public:
 
-            StateManager (const boost::filesystem::path& saves, const std::string& game);
+            StateManager (const boost::filesystem::path& saves, const std::vector<std::string>& contentFiles);
 
             void requestQuit() override;
 

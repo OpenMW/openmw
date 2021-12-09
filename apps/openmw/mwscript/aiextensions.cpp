@@ -14,6 +14,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/aiactivate.hpp"
 #include "../mwmechanics/aiescort.hpp"
@@ -47,10 +48,14 @@ namespace MWScript
                     std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiActivate activatePackage(objectID);
+                    if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
+                        return;
+
+                    MWMechanics::AiActivate activatePackage(objectID, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(activatePackage, ptr);
                     Log(Debug::Info) << "AiActivate";
                 }
@@ -74,10 +79,14 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiTravel travelPackage(x, y, z);
+                    if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
+                        return;
+
+                    MWMechanics::AiTravel travelPackage(x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(travelPackage, ptr);
 
                     Log(Debug::Info) << "AiTravel: " << x << ", " << y << ", " << z;
@@ -108,10 +117,14 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiEscort escortPackage(actorID, static_cast<int>(duration), x, y, z);
+                    if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
+                        return;
+
+                    MWMechanics::AiEscort escortPackage(actorID, static_cast<int>(duration), x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
                     Log(Debug::Info) << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration;
@@ -145,15 +158,20 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
+                    if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
+                        return;
+
                     if (cellID.empty())
-                        throw std::runtime_error("AiEscortCell: no cell ID given");
+                        return;
 
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().find(cellID);
+                    if (!MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(cellID))
+                        return;
 
-                    MWMechanics::AiEscort escortPackage(actorID, cellID, static_cast<int>(duration), x, y, z);
+                    MWMechanics::AiEscort escortPackage(actorID, cellID, static_cast<int>(duration), x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
                     Log(Debug::Info) << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration;
@@ -169,9 +187,11 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = ptr.getClass().getCreatureStats (ptr).getAiSequence().isPackageDone();
+                    bool done = false;
+                    if (ptr.getClass().isActor())
+                        done = ptr.getClass().getCreatureStats(ptr).getAiSequence().isPackageDone();
 
-                    runtime.push (value);
+                    runtime.push(done);
                 }
         };
 
@@ -208,8 +228,7 @@ namespace MWScript
                     {
                         if(!repeat)
                             repeat = true;
-                        Interpreter::Type_Integer idleValue = runtime[0].mInteger;
-                        idleValue = std::min(255, std::max(0, idleValue));
+                        Interpreter::Type_Integer idleValue = std::clamp(runtime[0].mInteger, 0, 255);
                         idleList.push_back(idleValue);
                         runtime.pop();
                         --arg0;
@@ -222,8 +241,11 @@ namespace MWScript
                         --arg0;
                     }
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // discard additional arguments, because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
+
+                    if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
+                        return;
 
                     MWMechanics::AiWander wanderPackage(range, duration, time, idleList, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(wanderPackage, ptr);
@@ -241,7 +263,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push(ptr.getClass().getCreatureStats (ptr).getAiSetting (mIndex).getModified(false));
+                    Interpreter::Type_Integer value = 0;
+                    if (ptr.getClass().isActor())
+                        value = ptr.getClass().getCreatureStats (ptr).getAiSetting(mIndex).getModified(false);
+                    runtime.push(value);
                 }
         };
         template<class R>
@@ -256,6 +281,9 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
+
+                    if (!ptr.getClass().isActor())
+                        return;
 
                     int modified = ptr.getClass().getCreatureStats (ptr).getAiSetting (mIndex).getBase() + value;
 
@@ -307,10 +335,14 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiFollow followPackage(actorID, duration, x, y ,z);
+                    if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
+                        return;
+
+                    MWMechanics::AiFollow followPackage(actorID, duration, x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(followPackage, ptr);
 
                     Log(Debug::Info) << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration;
@@ -344,10 +376,14 @@ namespace MWScript
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional arguments (reset), because we have no idea what they mean.
+                    // The value of the reset argument doesn't actually matter
+                    bool repeat = arg0;
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiFollow followPackage(actorID, cellID, duration, x, y ,z);
+                    if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
+                        return;
+
+                    MWMechanics::AiFollow followPackage(actorID, cellID, duration, x, y, z, repeat);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(followPackage, ptr);
                     Log(Debug::Info) << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration;
                 }
@@ -432,23 +468,25 @@ namespace MWScript
                     std::string testedTargetId = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
-
                     bool targetsAreEqual = false;
-                    MWWorld::Ptr targetPtr;
-                    if (creatureStats.getAiSequence().getCombatTarget (targetPtr))
+                    if (actor.getClass().isActor())
                     {
-                        if (!targetPtr.isEmpty() && targetPtr.getCellRef().getRefId() == testedTargetId)
-                            targetsAreEqual = true;
+                        const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
+                        MWWorld::Ptr targetPtr;
+                        if (creatureStats.getAiSequence().getCombatTarget(targetPtr))
+                        {
+                            if (!targetPtr.isEmpty() && targetPtr.getCellRef().getRefId() == testedTargetId)
+                                targetsAreEqual = true;
+                        }
+                        else if (testedTargetId == "player") // Currently the player ID is hardcoded
+                        {
+                            MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
+                            bool greeting = mechMgr->getGreetingState(actor) == MWMechanics::Greet_InProgress;
+                            bool sayActive = MWBase::Environment::get().getSoundManager()->sayActive(actor);
+                            targetsAreEqual = (greeting && sayActive) || mechMgr->isTurningToPlayer(actor);
+                        }
                     }
-                    else if (testedTargetId == "player") // Currently the player ID is hardcoded
-                    {
-                        MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
-                        bool greeting = mechMgr->getGreetingState(actor) == MWMechanics::Greet_InProgress;
-                        bool sayActive = MWBase::Environment::get().getSoundManager()->sayActive(actor);
-                        targetsAreEqual = (greeting && sayActive) || mechMgr->isTurningToPlayer(actor);
-                    }
-                    runtime.push(int(targetsAreEqual));
+                    runtime.push(targetsAreEqual);
                 }
         };
 
@@ -475,8 +513,9 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr actor = R()(runtime);
-                    MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
-                    creatureStats.getAiSequence().stopCombat();
+                    if (!actor.getClass().isActor())
+                        return;
+                    MWBase::Environment::get().getMechanicsManager()->stopCombat(actor);
                 }
         };
 
@@ -505,6 +544,9 @@ namespace MWScript
 
                 Interpreter::Type_Float y = runtime[0].mFloat;
                 runtime.pop();
+
+                if (!actor.getClass().isActor() || actor == MWMechanics::getPlayer())
+                    return;
 
                 MWMechanics::AiFace facePackage(x, y);
                 actor.getClass().getCreatureStats(actor).getAiSequence().stack(facePackage, actor);

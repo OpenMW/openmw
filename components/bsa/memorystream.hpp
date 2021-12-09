@@ -28,22 +28,10 @@
 
 #include <vector>
 #include <iostream>
+#include <components/files/memorystream.hpp>
 
 namespace Bsa
 {
-/**
-Class used internally by MemoryInputStream.
-*/
-class MemoryInputStreamBuf : public std::streambuf {
-
-public:
-    explicit MemoryInputStreamBuf(size_t bufferSize);
-    virtual char* getRawData();
-private:
-    //correct call to delete [] on C++ 11
-    std::vector<char> mBufferPtr;
-};
-
 /**
     Class replaces Ogre memory streams without introducing any new external dependencies
     beyond standard library.
@@ -52,10 +40,18 @@ private:
 
     Memory buffer is freed once the class instance is destroyed.
  */
-class MemoryInputStream : virtual MemoryInputStreamBuf, std::istream {
+class MemoryInputStream : private std::vector<char>, public virtual Files::MemBuf, public std::istream {
 public:
-    explicit MemoryInputStream(size_t bufferSize);
-    char* getRawData() override;
+    explicit MemoryInputStream(size_t bufferSize)
+        : std::vector<char>(bufferSize)
+        , Files::MemBuf(this->data(), this->size())
+        , std::istream(static_cast<std::streambuf*>(this))
+    {}
+
+    char* getRawData()
+    {
+        return this->data();
+    }
 };
 
 }

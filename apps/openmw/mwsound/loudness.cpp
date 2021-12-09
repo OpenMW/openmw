@@ -40,7 +40,7 @@ void Sound_Loudness::analyzeLoudness(const std::vector< char >& data)
             else if (mSampleType == SampleType_Float32)
             {
                 value = *reinterpret_cast<const float*>(&mQueue[sample*advance]);
-                value = std::max(-1.f, std::min(1.f, value)); // Float samples *should* be scaled to [-1,1] already.
+                value = std::clamp(value, -1.f, 1.f); // Float samples *should* be scaled to [-1,1] already.
             }
 
             sum += value*value;
@@ -64,8 +64,7 @@ float Sound_Loudness::getLoudnessAtTime(float sec) const
     if(mSamplesPerSec <= 0.0f || mSamples.empty() || sec < 0.0f)
         return 0.0f;
 
-    size_t index = static_cast<size_t>(sec * mSamplesPerSec);
-    index = std::max<size_t>(0, std::min(index, mSamples.size()-1));
+    size_t index = std::clamp<size_t>(sec * mSamplesPerSec, 0, mSamples.size() - 1);
     return mSamples[index];
 }
 

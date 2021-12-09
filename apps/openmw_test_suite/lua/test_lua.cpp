@@ -58,7 +58,8 @@ return {
             {"invalid.lua", &invalidScriptFile}
         });
 
-        LuaUtil::LuaState mLua{mVFS.get()};
+        LuaUtil::ScriptsConfiguration mCfg;
+        LuaUtil::LuaState mLua{mVFS.get(), &mCfg};
     };
 
     TEST_F(LuaStateTest, Sandbox)
@@ -148,7 +149,7 @@ return {
 
     TEST_F(LuaStateTest, ProvideAPI)
     {
-        LuaUtil::LuaState lua(mVFS.get());
+        LuaUtil::LuaState lua(mVFS.get(), &mCfg);
 
         sol::table api1 = LuaUtil::makeReadOnly(lua.sol().create_table_with("name", "api1"));
         sol::table api2 = LuaUtil::makeReadOnly(lua.sol().create_table_with("name", "api2"));

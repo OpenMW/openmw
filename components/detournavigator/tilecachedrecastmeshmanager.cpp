@@ -18,12 +18,11 @@ namespace DetourNavigator
                                                 const btTransform& transform, const AreaType areaType)
     {
         std::vector<TilePosition> tilesPositions;
-        const auto border = getBorderSize(mSettings);
         {
             auto tiles = mTiles.lock();
             getTilesPositions(shape.getShape(), transform, mSettings, [&] (const TilePosition& tilePosition)
                 {
-                    if (addTile(id, shape, transform, areaType, tilePosition, border, tiles.get()))
+                    if (addTile(id, shape, transform, areaType, tilePosition, tiles.get()))
                         tilesPositions.push_back(tilePosition);
                 });
         }
@@ -55,11 +54,8 @@ namespace DetourNavigator
         return result;
     }
 
-    bool TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
-        const osg::Vec3f& shift)
+    bool TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
-        const auto border = getBorderSize(mSettings);
-
         auto& tilesPositions = mWaterTilesPositions[cellPosition];
 
         bool result = false;
@@ -69,7 +65,7 @@ namespace DetourNavigator
             const auto tiles = mTiles.lock();
             for (auto& tile : *tiles)
             {
-                if (tile.second->addWater(cellPosition, cellSize, shift))
+                if (tile.second->addWater(cellPosition, cellSize, level))
                 {
                     tilesPositions.push_back(tile.first);
                     result = true;
@@ -78,19 +74,18 @@ namespace DetourNavigator
         }
         else
         {
+            const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
             getTilesPositions(cellSize, shift, mSettings, [&] (const TilePosition& tilePosition)
                 {
                     const auto tiles = mTiles.lock();
                     auto tile = tiles->find(tilePosition);
                     if (tile == tiles->end())
                     {
-                        auto tileBounds = makeTileBounds(mSettings, tilePosition);
-                        tileBounds.mMin -= osg::Vec2f(border, border);
-                        tileBounds.mMax += osg::Vec2f(border, border);
-                        tile = tiles->insert(std::make_pair(tilePosition,
-                                std::make_shared<CachedRecastMeshManager>(mSettings, tileBounds, mTilesGeneration))).first;
+                        const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
+                        tile = tiles->emplace(tilePosition,
+                                std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration)).first;
                     }
-                    if (tile->second->addWater(cellPosition, cellSize, shift))
+                    if (tile->second->addWater(cellPosition, cellSize, level))
                     {
                         tilesPositions.push_back(tilePosition);
                         result = true;
@@ -104,12 +99,12 @@ namespace DetourNavigator
         return result;
     }
 
-    std::optional<Cell> TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<Water> TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto object = mWaterTilesPositions.find(cellPosition);
         if (object == mWaterTilesPositions.end())
             return std::nullopt;
-        std::optional<Cell> result;
+        std::optional<Water> result;
         for (const auto& tilePosition : object->second)
         {
             const auto tiles = mTiles.lock();
@@ -131,10 +126,9 @@ namespace DetourNavigator
     }
 
     bool TileCachedRecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
-        const osg::Vec3f& shift, const HeightfieldShape& shape)
+        const HeightfieldShape& shape)
     {
-        const auto border = getBorderSize(mSettings);
-
+        const btVector3 shift = getHeightfieldShift(shape, cellPosition, cellSize);
         auto& tilesPositions = mHeightfieldTilesPositions[cellPosition];
 
         bool result = false;
@@ -145,13 +139,11 @@ namespace DetourNavigator
                 auto tile = tiles->find(tilePosition);
                 if (tile == tiles->end())
                 {
-                    auto tileBounds = makeTileBounds(mSettings, tilePosition);
-                    tileBounds.mMin -= osg::Vec2f(border, border);
-                    tileBounds.mMax += osg::Vec2f(border, border);
-                    tile = tiles->insert(std::make_pair(tilePosition,
-                            std::make_shared<CachedRecastMeshManager>(mSettings, tileBounds, mTilesGeneration))).first;
+                    const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
+                    tile = tiles->emplace(tilePosition,
+                            std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration)).first;
                 }
-                if (tile->second->addHeightfield(cellPosition, cellSize, shift, shape))
+                if (tile->second->addHeightfield(cellPosition, cellSize, shape))
                 {
                     tilesPositions.push_back(tilePosition);
                     result = true;
@@ -164,12 +156,12 @@ namespace DetourNavigator
         return result;
     }
 
-    std::optional<Cell> TileCachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    std::optional<SizedHeightfieldShape> TileCachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
     {
         const auto object = mHeightfieldTilesPositions.find(cellPosition);
         if (object == mHeightfieldTilesPositions.end())
             return std::nullopt;
-        std::optional<Cell> result;
+        std::optional<SizedHeightfieldShape> result;
         for (const auto& tilePosition : object->second)
         {
             const auto tiles = mTiles.lock();
@@ -192,17 +184,16 @@ namespace DetourNavigator
 
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getMesh(const TilePosition& tilePosition) const
     {
-        const auto manager = [&] () -> std::shared_ptr<CachedRecastMeshManager>
-        {
-            const auto tiles = mTiles.lockConst();
-            const auto it = tiles->find(tilePosition);
-            if (it == tiles->end())
-                return nullptr;
-            return it->second;
-        } ();
-        if (manager == nullptr)
-            return nullptr;
-        return manager->getMesh();
+        if (const auto manager = getManager(tilePosition))
+            return manager->getMesh();
+        return nullptr;
+    }
+
+    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getCachedMesh(const TilePosition& tilePosition) const
+    {
+        if (const auto manager = getManager(tilePosition))
+            return manager->getCachedMesh();
+        return nullptr;
     }
 
     std::size_t TileCachedRecastMeshManager::getRevision() const
@@ -220,17 +211,15 @@ namespace DetourNavigator
     }
 
     bool TileCachedRecastMeshManager::addTile(const ObjectId id, const CollisionShape& shape,
-        const btTransform& transform, const AreaType areaType, const TilePosition& tilePosition, float border,
+        const btTransform& transform, const AreaType areaType, const TilePosition& tilePosition,
         TilesMap& tiles)
     {
         auto tile = tiles.find(tilePosition);
         if (tile == tiles.end())
         {
-            auto tileBounds = makeTileBounds(mSettings, tilePosition);
-            tileBounds.mMin -= osg::Vec2f(border, border);
-            tileBounds.mMax += osg::Vec2f(border, border);
-            tile = tiles.insert(std::make_pair(
-                tilePosition, std::make_shared<CachedRecastMeshManager>(mSettings, tileBounds, mTilesGeneration))).first;
+            const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
+            tile = tiles.emplace(tilePosition,
+                    std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration)).first;
         }
         return tile->second->addObject(id, shape, transform, areaType);
     }
@@ -255,5 +244,14 @@ namespace DetourNavigator
             ++mTilesGeneration;
         }
         return tileResult;
+    }
+
+    std::shared_ptr<CachedRecastMeshManager> TileCachedRecastMeshManager::getManager(const TilePosition& tilePosition) const
+    {
+        const auto tiles = mTiles.lockConst();
+        const auto it = tiles->find(tilePosition);
+        if (it == tiles->end())
+            return nullptr;
+        return it->second;
     }
 }

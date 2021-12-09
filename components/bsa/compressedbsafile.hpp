@@ -26,6 +26,8 @@
 #ifndef BSA_COMPRESSED_BSA_FILE_H
 #define BSA_COMPRESSED_BSA_FILE_H
 
+#include <map>
+
 #include <components/bsa/bsa_file.hpp>
 
 namespace Bsa
@@ -92,8 +94,8 @@ namespace Bsa
         /// Read header information from the input source
         void readHeader() override;
        
-        Files::IStreamPtr getFile(const char* filePath) override;
-        Files::IStreamPtr getFile(const FileStruct* fileStruct) override;
+        Files::IStreamPtr getFile(const char* filePath);
+        Files::IStreamPtr getFile(const FileStruct* fileStruct);
         void addFile(const std::string& filename, std::istream& file) override;
     };
 }

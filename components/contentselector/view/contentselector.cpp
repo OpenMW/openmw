@@ -10,21 +10,21 @@
 #include <QClipboard>
 #include <QModelIndex>
 
-ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
+ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent, bool showOMWScripts) :
     QObject(parent)
 {
     ui.setupUi(parent);
     ui.addonView->setDragDropMode(QAbstractItemView::InternalMove);
 
-    buildContentModel();
+    buildContentModel(showOMWScripts);
     buildGameFileView();
     buildAddonView();
 }
 
-void ContentSelectorView::ContentSelector::buildContentModel()
+void ContentSelectorView::ContentSelector::buildContentModel(bool showOMWScripts)
 {
     QIcon warningIcon(ui.addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(QSize(16, 15)));
-    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon);
+    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon, showOMWScripts);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()
@@ -171,6 +171,11 @@ void ContentSelectorView::ContentSelector::addFiles(const QString &path)
 
     mContentModel->uncheckAll();
     mContentModel->checkForLoadOrderErrors();
+}
+
+void ContentSelectorView::ContentSelector::sortFiles()
+{
+    mContentModel->sortFiles();
 }
 
 void ContentSelectorView::ContentSelector::clearFiles()

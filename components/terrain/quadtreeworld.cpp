@@ -3,12 +3,12 @@
 #include <osgUtil/CullVisitor>
 #include <osg/ShapeDrawable>
 #include <osg/PolygonMode>
+#include <osg/Material>
 
 #include <limits>
 #include <sstream>
 
 #include <components/misc/constants.hpp>
-#include <components/sceneutil/mwshadowtechnique.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/loadinglistener/reporter.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -40,9 +40,9 @@ namespace
         return 1 << depth;
     }
 
-    int Log2( unsigned int n )
+    unsigned int Log2( unsigned int n )
     {
-        int targetlevel = 0;
+        unsigned int targetlevel = 0;
         while (n >>= 1) ++targetlevel;
         return targetlevel;
     }
@@ -78,16 +78,18 @@ public:
             if (intersects)
                 return Deeper;
         }
-
         dist = std::max(0.f, dist + mDistanceModifier);
-
         if (dist > mViewDistance && !activeGrid) // for Scene<->ObjectPaging sync the activegrid must remain loaded
             return StopTraversal;
-
-        int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
-        int lodLevel = Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize*mFactor)));
-
-        return nativeLodLevel <= lodLevel ? StopTraversalAndUse : Deeper;
+        return getNativeLodLevel(node, mMinSize) <= convertDistanceToLodLevel(dist, mMinSize, mFactor) ? StopTraversalAndUse : Deeper;
+    }
+    static unsigned int getNativeLodLevel(const QuadTreeNode* node, float minSize)
+    {
+        return Log2(static_cast<unsigned int>(node->getSize()/minSize));
+    }
+    static unsigned int convertDistanceToLodLevel(float dist, float minSize, float factor)
+    {
+        return Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*minSize*factor)));
     }
 
 private:
@@ -257,10 +259,10 @@ public:
     {
         osg::Vec3f center = { chunkCenter.x(), chunkCenter.y(), 0 };
         auto chunkBorder = CellBorder::createBorderGeometry(center.x() - size / 2.f, center.y() - size / 2.f, size, mStorage, mSceneManager, mNodeMask, 5.f, { 1, 0, 0, 0 });
-        osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(osg::Matrixf::translate(-center*Constants::CellSizeInUnits));
-        trans->setDataVariance(osg::Object::STATIC);
-        trans->addChild(chunkBorder);
-        return trans;
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pat = new SceneUtil::PositionAttitudeTransform;
+        pat->setPosition(-center*Constants::CellSizeInUnits);
+        pat->addChild(chunkBorder);
+        return pat;
     }
     unsigned int getNodeMask() { return mNodeMask; }
 private:
@@ -295,13 +297,14 @@ QuadTreeWorld::~QuadTreeWorld()
 {
 }
 
-/// get the level of vertex detail to render this node at, expressed relative to the native resolution of the data set.
+/// get the level of vertex detail to render this node at, expressed relative to the native resolution of the vertex data set,
+/// NOT relative to mMinSize as is the case with node LODs.
 unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
 {
-    int lod = Log2(int(node->getSize()));
+    unsigned int vertexLod = DefaultLodCallback::getNativeLodLevel(node, 1);
     if (vertexLodMod > 0)
     {
-        lod = std::max(0, lod-vertexLodMod);
+        vertexLod = static_cast<unsigned int>(std::max(0, static_cast<int>(vertexLod)-vertexLodMod));
     }
     else if (vertexLodMod < 0)
     {
@@ -312,13 +315,13 @@ unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
             size *= 2;
             vertexLodMod = std::min(0, vertexLodMod+1);
         }
-        lod += std::abs(vertexLodMod);
+        vertexLod += std::abs(vertexLodMod);
     }
-    return lod;
+    return vertexLod;
 }
 
 /// get the flags to use for stitching in the index buffer so that chunks of different LOD connect seamlessly
-unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, const ViewData* vd)
+unsigned int getLodFlags(QuadTreeNode* node, unsigned int ourVertexLod, int vertexLodMod, const ViewData* vd)
 {
     unsigned int lodFlags = 0;
     for (unsigned int i=0; i<4; ++i)
@@ -331,32 +334,33 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, const
         // our detail and the neighbour would handle stitching by itself.
         while (neighbour && !vd->contains(neighbour))
             neighbour = neighbour->getParent();
-        int lod = 0;
+        unsigned int lod = 0;
         if (neighbour)
             lod = getVertexLod(neighbour, vertexLodMod);
 
-        if (lod <= ourLod) // We only need to worry about neighbours less detailed than we are -
+        if (lod <= ourVertexLod) // We only need to worry about neighbours less detailed than we are -
             lod = 0;         // neighbours with more detail will do the stitching themselves
         // Use 4 bits for each LOD delta
         if (lod > 0)
         {
-            lodFlags |= static_cast<unsigned int>(lod - ourLod) << (4*i);
+            lodFlags |= (lod - ourVertexLod) << (4*i);
         }
     }
+    // Use the remaining bits for our vertex LOD
+    lodFlags |= (ourVertexLod << (4*4));
     return lodFlags;
 }
 
-void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, float cellWorldSize, const osg::Vec4i &gridbounds, const std::vector<QuadTreeWorld::ChunkManager*>& chunkManagers, bool compile, float reuseDistance)
+void QuadTreeWorld::loadRenderingNode(ViewDataEntry& entry, ViewData* vd, float cellWorldSize, const osg::Vec4i &gridbounds, bool compile)
 {
     if (!vd->hasChanged() && entry.mRenderingNode)
         return;
 
-    int ourLod = getVertexLod(entry.mNode, vertexLodMod);
-
     if (vd->hasChanged())
     {
+        unsigned int ourVertexLod = getVertexLod(entry.mNode, mVertexLodMod);
         // have to recompute the lodFlags in case a neighbour has changed LOD.
-        unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vertexLodMod, vd);
+        unsigned int lodFlags = getLodFlags(entry.mNode, ourVertexLod, mVertexLodMod, vd);
         if (lodFlags != entry.mLodFlags)
         {
             entry.mRenderingNode = nullptr;
@@ -372,11 +376,9 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, f
         const osg::Vec2f& center = entry.mNode->getCenter();
         bool activeGrid = (center.x() > gridbounds.x() && center.y() > gridbounds.y() && center.x() < gridbounds.z() && center.y() < gridbounds.w());
 
-        for (QuadTreeWorld::ChunkManager* m : chunkManagers)
+        for (QuadTreeWorld::ChunkManager* m : mChunkManagers)
         {
-            if (m->getViewDistance() && entry.mNode->distance(vd->getViewPoint()) > m->getViewDistance() + reuseDistance)
-                continue;
-            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
+            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), DefaultLodCallback::getNativeLodLevel(entry.mNode, mMinSize), entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
             if (n) pat->addChild(n);
         }
         entry.mRenderingNode = pat;
@@ -398,7 +400,7 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
     static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
-        ViewData::Entry& entry = vd->getEntry(i);
+        ViewDataEntry& entry = vd->getEntry(i);
         osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
         if (!bb.valid())
             continue;
@@ -440,19 +442,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     bool isCullVisitor = nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR;
     if (!isCullVisitor && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
-    {
-        if (nv.getName().find("AcceptedByComponentsTerrainQuadTreeWorld") != std::string::npos)
-        {
-            if (nv.getName().find("SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds") != std::string::npos)
-            {
-                SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds* clsb = static_cast<SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds*>(&nv);
-                clsb->apply(*this);
-            }
-            else
-                nv.apply(*mRootNode);
-        }
         return;
-    }
 
     osg::Object * viewer = isCullVisitor ? static_cast<osgUtil::CullVisitor*>(&nv)->getCurrentCamera() : nullptr;
     bool needsUpdate = true;
@@ -469,15 +459,15 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
-        ViewData::Entry& entry = vd->getEntry(i);
-        loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, mActiveGrid, mChunkManagers, false, mViewDataMap->getReuseDistance());
+        ViewDataEntry& entry = vd->getEntry(i);
+        loadRenderingNode(entry, vd, cellWorldSize, mActiveGrid, false);
         entry.mRenderingNode->accept(nv);
     }
 
     if (mHeightCullCallback && isCullVisitor)
         updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty());
 
-    vd->markUnchanged();
+    vd->setChanged(false);
 
     double referenceTime = nv.getFrameStamp() ? nv.getFrameStamp()->getReferenceTime() : 0.0;
     if (referenceTime != 0.0)
@@ -510,9 +500,8 @@ void QuadTreeWorld::enable(bool enabled)
         if (!mRootNode->getNumParents())
             mTerrainRoot->addChild(mRootNode);
     }
-
-    if (mRootNode)
-        mRootNode->setNodeMask(enabled ? ~0 : 0);
+    else if (mRootNode)
+        mTerrainRoot->removeChild(mRootNode);
 }
 
 View* QuadTreeWorld::createView()
@@ -550,12 +539,11 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
             reporter.addTotal(progressTotal);
         }
 
-        const float reuseDistance = std::max(mViewDataMap->getReuseDistance(), std::abs(distanceModifier));
         for (unsigned int i=startEntry; i<vd->getNumEntries() && !abort; ++i)
         {
-            ViewData::Entry& entry = vd->getEntry(i);
+            ViewDataEntry& entry = vd->getEntry(i);
 
-            loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, grid, mChunkManagers, true, reuseDistance);
+            loadRenderingNode(entry, vd, cellWorldSize, grid, true);
             if (pass==0) reporter.addProgress(entry.mNode->getSize());
             entry.mNode = nullptr; // Clear node lest we break the neighbours search for the next pass
         }
@@ -592,10 +580,20 @@ void QuadTreeWorld::addChunkManager(QuadTreeWorld::ChunkManager* m)
 {
     mChunkManagers.push_back(m);
     mTerrainRoot->setNodeMask(mTerrainRoot->getNodeMask()|m->getNodeMask());
+    if (m->getViewDistance())
+        m->setMaxLodLevel(DefaultLodCallback::convertDistanceToLodLevel(m->getViewDistance() + mViewDataMap->getReuseDistance(), mMinSize, mLodFactor));
 }
 
 void QuadTreeWorld::rebuildViews()
 {
+    mViewDataMap->rebuildViews();
+}
+
+void QuadTreeWorld::setViewDistance(float viewDistance)
+{
+    if (mViewDistance == viewDistance)
+        return;
+    mViewDistance = viewDistance;
     mViewDataMap->rebuildViews();
 }
 

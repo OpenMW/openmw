@@ -30,7 +30,7 @@ void printAIPackage(const ESM::AIPackage& p)
     {
         std::cout << "    Travel Coordinates: (" << p.mTravel.mX << ","
                   << p.mTravel.mY << "," << p.mTravel.mZ << ")" << std::endl;
-        std::cout << "    Travel Unknown: " << p.mTravel.mUnk << std::endl;
+        std::cout << "    Should repeat: " << p.mTravel.mShouldRepeat << std::endl;
     }
     else if (p.mType == ESM::AI_Follow || p.mType == ESM::AI_Escort)
     {
@@ -38,12 +38,12 @@ void printAIPackage(const ESM::AIPackage& p)
                   << p.mTarget.mY << "," << p.mTarget.mZ << ")" << std::endl;
         std::cout << "    Duration: " << p.mTarget.mDuration << std::endl;
         std::cout << "    Target ID: " << p.mTarget.mId.toString() << std::endl;
-        std::cout << "    Unknown: " << p.mTarget.mUnk << std::endl;
+        std::cout << "    Should repeat: " << p.mTarget.mShouldRepeat << std::endl;
     }
     else if (p.mType == ESM::AI_Activate)
     {
         std::cout << "    Name: " << p.mActivate.mName.toString() << std::endl;
-        std::cout << "    Activate Unknown: " << p.mActivate.mUnk << std::endl;
+        std::cout << "    Should repeat: " << p.mActivate.mShouldRepeat << std::endl;
     }
     else {
         std::cout << "    BadPackage: " << Misc::StringUtils::format("0x%08X", p.mType) << std::endl;
@@ -176,7 +176,7 @@ RecordBase::create(const ESM::NAME type)
 {
     RecordBase *record = nullptr;
 
-    switch (type.intval) {
+    switch (type.toInt()) {
     case ESM::REC_ACTI:
     {
         record = new EsmTool::Record<ESM::Activator>;

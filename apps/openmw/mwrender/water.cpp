@@ -27,11 +27,12 @@
 
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/waterutil.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/stringops.hpp>
 
 #include <components/nifosg/controller.hpp>
 
@@ -260,20 +261,18 @@ class Refraction : public SceneUtil::RTTNode
 public:
     Refraction(uint32_t rttSize)
         : RTTNode(rttSize, rttSize, 1, false)
+        , mNodeMask(Refraction::sDefaultCullMask)
     {
         mClipCullNode = new ClipCullNode;
     }
 
     void setDefaults(osg::Camera* camera) override
     {
-        SceneUtil::setCameraClearDepth(camera);
         camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
         camera->setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         camera->setName("RefractionCamera");
         camera->addCullCallback(new InheritViewPointCallback);
         camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
-
-        camera->setCullMask(Mask_Effect | Mask_Scene | Mask_Object | Mask_Static | Mask_Terrain | Mask_Actor | Mask_ParticleSystem | Mask_Sky | Mask_Sun | Mask_Player | Mask_Lighting | Mask_Groundcover);
 
         // No need for fog here, we are already applying fog on the water surface itself as well as underwater fog
         // assign large value to effectively turn off fog
@@ -293,6 +292,7 @@ public:
     void apply(osg::Camera* camera) override
     {
         camera->setViewMatrix(mViewMatrix);
+        camera->setCullMask(mNodeMask);
     }
 
     void setScene(osg::Node* scene)
@@ -305,8 +305,7 @@ public:
 
     void setWaterLevel(float waterLevel)
     {
-        const float refractionScale = std::min(1.0f, std::max(0.0f,
-            Settings::Manager::getFloat("refraction scale", "Water")));
+        const float refractionScale = std::clamp(Settings::Manager::getFloat("refraction scale", "Water"), 0.f, 1.f);
 
         mViewMatrix = osg::Matrix::scale(1, 1, refractionScale) *
             osg::Matrix::translate(0, 0, (1.0 - refractionScale) * waterLevel);
@@ -314,10 +313,22 @@ public:
         mClipCullNode->setPlane(osg::Plane(osg::Vec3d(0, 0, -1), osg::Vec3d(0, 0, waterLevel)));
     }
 
+    void showWorld(bool show)
+    {
+        if (show)
+            mNodeMask = Refraction::sDefaultCullMask;
+        else
+            mNodeMask = Refraction::sDefaultCullMask & ~sToggleWorldMask;
+    }
+
 private:
     osg::ref_ptr<ClipCullNode> mClipCullNode;
     osg::ref_ptr<osg::Node> mScene;
     osg::Matrix mViewMatrix{ osg::Matrix::identity() };
+
+    unsigned int mNodeMask;
+
+    static constexpr unsigned int sDefaultCullMask = Mask_Effect | Mask_Scene | Mask_Object | Mask_Static | Mask_Terrain | Mask_Actor | Mask_ParticleSystem | Mask_Sky | Mask_Sun | Mask_Player | Mask_Lighting | Mask_Groundcover;
 };
 
 class Reflection : public SceneUtil::RTTNode
@@ -332,7 +343,6 @@ public:
 
     void setDefaults(osg::Camera* camera) override
     {
-        SceneUtil::setCameraClearDepth(camera);
         camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
         camera->setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         camera->setName("ReflectionCamera");
@@ -357,15 +367,8 @@ public:
 
     void setInterior(bool isInterior)
     {
-        int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        reflectionDetail = std::min(5, std::max(isInterior ? 2 : 0, reflectionDetail));
-        unsigned int extraMask = 0;
-        if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
-        if(reflectionDetail >= 2) extraMask |= Mask_Static;
-        if(reflectionDetail >= 3) extraMask |= Mask_Effect | Mask_ParticleSystem | Mask_Object;
-        if(reflectionDetail >= 4) extraMask |= Mask_Player | Mask_Actor;
-        if(reflectionDetail >= 5) extraMask |= Mask_Groundcover;
-        mNodeMask = Mask_Scene | Mask_Sky | Mask_Lighting | extraMask;
+        mInterior = isInterior;
+        mNodeMask = calcNodeMask();
     }
 
     void setWaterLevel(float waterLevel)
@@ -382,11 +385,34 @@ public:
         mClipCullNode->addChild(scene);
     }
 
+    void showWorld(bool show)
+    {
+        if (show)
+            mNodeMask = calcNodeMask();
+        else
+            mNodeMask = calcNodeMask() & ~sToggleWorldMask;
+    }
+
 private:
+
+    unsigned int calcNodeMask()
+    {
+        int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
+        reflectionDetail = std::clamp(reflectionDetail, mInterior ? 2 : 0, 5);
+        unsigned int extraMask = 0;
+        if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
+        if(reflectionDetail >= 2) extraMask |= Mask_Static;
+        if(reflectionDetail >= 3) extraMask |= Mask_Effect | Mask_ParticleSystem | Mask_Object;
+        if(reflectionDetail >= 4) extraMask |= Mask_Player | Mask_Actor;
+        if(reflectionDetail >= 5) extraMask |= Mask_Groundcover;
+        return Mask_Scene | Mask_Sky | Mask_Lighting | extraMask;
+    }
+
     osg::ref_ptr<ClipCullNode> mClipCullNode;
     osg::ref_ptr<osg::Node> mScene;
     osg::Node::NodeMask mNodeMask;
     osg::Matrix mViewMatrix{ osg::Matrix::identity() };
+    bool mInterior;
 };
 
 /// DepthClampCallback enables GL_DEPTH_CLAMP for the current draw, if supported.
@@ -422,6 +448,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     , mToggled(true)
     , mTop(0)
     , mInterior(false)
+    , mShowWorld(true)
     , mCullCallback(nullptr)
     , mShaderWaterStateSetUpdater(nullptr)
 {
@@ -519,6 +546,8 @@ void Water::updateWaterMaterial()
             mParent->addChild(mRefraction);
         }
 
+        showWorld(mShowWorld);
+
         createShaderWaterStateSet(mWaterNode, mReflection, mRefraction);
     }
     else
@@ -552,7 +581,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 
     // Add animated textures
     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
-    int frameCount = std::max(0, std::min(Fallback::Map::getInt("Water_SurfaceFrameCount"), 320));
+    const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
     const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {
@@ -614,7 +643,7 @@ public:
         {
             stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
             stateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
-            osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
             depth->setWriteMask(false);
             stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
@@ -646,7 +675,10 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
 {
     // use a define map to conditionally compile the shader
     std::map<std::string, std::string> defineMap;
-    defineMap.insert(std::make_pair(std::string("refraction_enabled"), std::string(mRefraction ? "1" : "0")));
+    defineMap["refraction_enabled"] = std::string(mRefraction ? "1" : "0");
+    const auto rippleDetail = std::clamp(Settings::Manager::getInt("rain ripple detail", "Water"), 0, 2);
+    defineMap["rain_ripple_detail"] = std::to_string(rippleDetail);
+
 
     Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
     osg::ref_ptr<osg::Shader> vertexShader(shaderMgr.getShader("water_vertex.glsl", defineMap, osg::Shader::VERTEX));
@@ -693,7 +725,7 @@ Water::~Water()
 
 void Water::listAssetsToPreload(std::vector<std::string> &textures)
 {
-    int frameCount = std::max(0, std::min(Fallback::Map::getInt("Water_SurfaceFrameCount"), 320));
+    const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
     const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {
@@ -810,6 +842,15 @@ void Water::removeCell(const MWWorld::CellStore *store)
 void Water::clearRipples()
 {
     mSimulation->clear();
+}
+
+void Water::showWorld(bool show)
+{
+    if (mReflection)
+        mReflection->showWorld(show);
+    if (mRefraction)
+        mRefraction->showWorld(show);
+    mShowWorld = show;
 }
 
 }

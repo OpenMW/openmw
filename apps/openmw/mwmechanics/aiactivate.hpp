@@ -24,7 +24,7 @@ namespace MWMechanics
         public:
             /// Constructor
             /** \param objectId Reference to object to activate **/
-            explicit AiActivate(const std::string &objectId);
+            explicit AiActivate(const std::string &objectId, bool repeat);
 
             explicit AiActivate(const ESM::AiSequence::AiActivate* activate);
 

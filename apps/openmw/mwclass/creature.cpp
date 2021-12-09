@@ -82,12 +82,13 @@ namespace MWClass
 
     const Creature::GMST& Creature::getGmst()
     {
-        static GMST gmst;
-        static bool inited = false;
-        if (!inited)
+        static const GMST staticGmst = []
         {
+            GMST gmst;
+
             const MWBase::World *world = MWBase::Environment::get().getWorld();
             const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+
             gmst.fMinWalkSpeedCreature = store.find("fMinWalkSpeedCreature");
             gmst.fMaxWalkSpeedCreature = store.find("fMaxWalkSpeedCreature");
             gmst.fEncumberedMoveEffect = store.find("fEncumberedMoveEffect");
@@ -101,16 +102,20 @@ namespace MWClass
             gmst.fKnockDownMult = store.find("fKnockDownMult");
             gmst.iKnockDownOddsMult = store.find("iKnockDownOddsMult");
             gmst.iKnockDownOddsBase = store.find("iKnockDownOddsBase");
-            inited = true;
-        }
-        return gmst;
+
+            return gmst;
+        } ();
+        return staticGmst;
     }
 
     void Creature::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
+            auto tempData = std::make_unique<CreatureCustomData>();
+            CreatureCustomData* data = tempData.get();
+            MWMechanics::CreatureCustomDataResetter resetter(ptr);
+            ptr.getRefData().setCustomData(std::move(tempData));
 
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
@@ -154,10 +159,7 @@ namespace MWClass
 
             data->mCreatureStats.setGoldPool(ref->mBase->mData.mGold);
 
-            data->mCreatureStats.setNeedRecalcDynamicStats(false);
-
-            // store
-            ptr.getRefData().setCustomData(std::move(data));
+            resetter.mPtr = {};
 
             getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
 
@@ -238,7 +240,7 @@ namespace MWClass
         {
             MWWorld::InventoryStore &inv = getInventoryStore(ptr);
             MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            if (weaponslot != inv.end() && weaponslot->getTypeName() == typeid(ESM::Weapon).name())
+            if (weaponslot != inv.end() && weaponslot->getType() == ESM::Weapon::sRecordId)
                 weapon = *weaponslot;
         }
 
@@ -497,7 +499,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Creature);
 
-        registerClass (typeid (ESM::Creature).name(), instance);
+        registerClass (ESM::Creature::sRecordId, instance);
     }
 
     float Creature::getMaxSpeed(const MWWorld::Ptr &ptr) const
@@ -891,12 +893,8 @@ namespace MWClass
     float Creature::getSwimSpeed(const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
-        const GMST& gmst = getGmst();
         const MWMechanics::MagicEffects& mageffects = stats.getMagicEffects();
 
-        return getWalkSpeed(ptr)
-            * (1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude())
-            * (gmst.fSwimRunBase->mValue.getFloat()
-               + 0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fSwimRunAthleticsMult->mValue.getFloat());
+        return getSwimSpeedImpl(ptr, getGmst(), mageffects, getWalkSpeed(ptr));
     }
 }

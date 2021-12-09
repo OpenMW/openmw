@@ -311,12 +311,7 @@ namespace DetourNavigator
 
         if (recastMesh != nullptr)
         {
-            Version navMeshVersion;
-            {
-                const auto locked = navMeshCacheItem->lockConst();
-                navMeshVersion.mGeneration = locked->getGeneration();
-                navMeshVersion.mRevision = locked->getNavMeshRevision();
-            }
+            const Version navMeshVersion = navMeshCacheItem->lockConst()->getVersion();
             mRecastMeshManager.get().reportNavMeshChange(job.mChangedTile,
                 Version {recastMesh->getGeneration(), recastMesh->getRevision()},
                 navMeshVersion);
@@ -339,13 +334,13 @@ namespace DetourNavigator
 
         using FloatMs = std::chrono::duration<float, std::milli>;
 
-        const auto locked = navMeshCacheItem->lockConst();
+        const Version version = navMeshCacheItem->lockConst()->getVersion();
         Log(Debug::Debug) << std::fixed << std::setprecision(2) <<
             "Cache updated for agent=(" << job.mAgentHalfExtents << ")" <<
             " tile=" << job.mChangedTile <<
             " status=" << status <<
-            " generation=" << locked->getGeneration() <<
-            " revision=" << locked->getNavMeshRevision() <<
+            " generation=" << version.mGeneration <<
+            " revision=" << version.mRevision <<
             " time=" << std::chrono::duration_cast<FloatMs>(finish - start).count() << "ms" <<
             " thread=" << std::this_thread::get_id();
 
@@ -409,7 +404,7 @@ namespace DetourNavigator
         }
         if (recastMesh && mSettings.get().mEnableWriteRecastMeshToFile)
             writeToFile(*recastMesh, mSettings.get().mRecastMeshPathPrefix + std::to_string(job.mChangedTile.x())
-                        + "_" + std::to_string(job.mChangedTile.y()) + "_", recastMeshRevision);
+                        + "_" + std::to_string(job.mChangedTile.y()) + "_", recastMeshRevision, mSettings);
         if (mSettings.get().mEnableWriteNavMeshToFile)
             if (const auto shared = job.mNavMeshCacheItem.lock())
                 writeToFile(shared->lockConst()->getImpl(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);

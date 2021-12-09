@@ -66,14 +66,14 @@ namespace MWMechanics
 
         // Is this another levelled item or a real item?
         MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item, 1);
-        if (ref.getPtr().getTypeName() != typeid(ESM::ItemLevList).name()
-                && ref.getPtr().getTypeName() != typeid(ESM::CreatureLevList).name())
+        if (ref.getPtr().getType() != ESM::ItemLevList::sRecordId
+                && ref.getPtr().getType() != ESM::CreatureLevList::sRecordId)
         {
             return item;
         }
         else
         {
-            if (ref.getPtr().getTypeName() == typeid(ESM::ItemLevList).name())
+            if (ref.getPtr().getType() == ESM::ItemLevList::sRecordId)
                 return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false, seed);
             else
                 return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true, seed);

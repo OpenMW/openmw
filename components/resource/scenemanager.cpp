@@ -20,6 +20,9 @@
 
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/misc/algorithm.hpp>
+#include <components/misc/errorMarker.hpp>
+#include <components/misc/osguservalues.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -29,9 +32,13 @@
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
+
+#include <components/files/hash.hpp>
+#include <components/files/memorystream.hpp>
 
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
@@ -246,14 +253,14 @@ namespace Resource
             {
                 if (stateset->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
                 {
-                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    osg::ref_ptr<osg::Depth> depth = new osg::Depth;
                     depth->setWriteMask(false);
 
                     stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 }
                 else if (stateset->getRenderingHint() == osg::StateSet::OPAQUE_BIN)
                 {
-                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    osg::ref_ptr<osg::Depth> depth = new osg::Depth;
                     depth->setWriteMask(true);
 
                     stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
@@ -429,6 +436,11 @@ namespace Resource
         mConvertAlphaTestToAlphaToCoverage = convert;
     }
 
+    void SceneManager::setOpaqueDepthTex(osg::ref_ptr<osg::Texture2D> texture)
+    {
+        mOpaqueDepthTex = texture;
+    }
+
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
@@ -474,13 +486,11 @@ namespace Resource
         Resource::ImageManager* mImageManager;
     };
 
-    osg::ref_ptr<osg::Node> load (const std::string& normalizedFilename, const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
+    namespace
     {
-        auto ext = Misc::getFileExtension(normalizedFilename);
-        if (ext == "nif")
-            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), imageManager);
-        else
+        osg::ref_ptr<osg::Node> loadNonNif(const std::string& normalizedFilename, std::istream& model, Resource::ImageManager* imageManager)
         {
+            auto ext = Misc::getFileExtension(normalizedFilename);
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(std::string(ext));
             if (!reader)
             {
@@ -496,7 +506,9 @@ namespace Resource
             options->setReadFileCallback(new ImageReadCallback(imageManager));
             if (ext == "dae") options->setOptionString("daeUseSequencedTextureUnits");
 
-            osgDB::ReaderWriter::ReadResult result = reader->readNode(*vfs->get(normalizedFilename), options);
+            const std::array<std::uint64_t, 2> fileHash = Files::getHash(normalizedFilename, model);
+
+            osgDB::ReaderWriter::ReadResult result = reader->readNode(model, options);
             if (!result.success())
             {
                 std::stringstream errormsg;
@@ -507,7 +519,9 @@ namespace Resource
             // Recognize and hide collision node
             unsigned int hiddenNodeMask = 0;
             SceneUtil::FindByNameVisitor nameFinder("Collision");
-            result.getNode()->accept(nameFinder);
+
+            auto node = result.getNode();
+            node->accept(nameFinder);
             if (nameFinder.mFoundNode)
                 nameFinder.mFoundNode->setNodeMask(hiddenNodeMask);
 
@@ -515,16 +529,28 @@ namespace Resource
             {
                 // Collada alpha testing
                 Resource::ColladaAlphaTrickVisitor colladaAlphaTrickVisitor;
-                result.getNode()->accept(colladaAlphaTrickVisitor);
+                node->accept(colladaAlphaTrickVisitor);
 
-                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
-                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
-                result.getNode()->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
             }
 
+            node->setUserValue(Misc::OsgUserValues::sFileHash,
+                std::string(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t)));
 
-            return result.getNode();
+            return node;
         }
+    }
+
+    osg::ref_ptr<osg::Node> load (const std::string& normalizedFilename, const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
+    {
+        auto ext = Misc::getFileExtension(normalizedFilename);
+        if (ext == "nif")
+            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), imageManager);
+        else
+            return loadNonNif(normalizedFilename, *vfs->get(normalizedFilename), imageManager);
     }
 
     class CanOptimizeCallback : public SceneUtil::Optimizer::IsOperationPermissibleForObjectCallback
@@ -551,7 +577,7 @@ namespace Resource
                 std::sort(reservedNames.begin(), reservedNames.end(), Misc::StringUtils::ciLess);
             }
 
-            std::vector<std::string>::iterator it = Misc::StringUtils::partialBinarySearch(reservedNames.begin(), reservedNames.end(), name);
+            std::vector<std::string>::iterator it = Misc::partialBinarySearch(reservedNames.begin(), reservedNames.end(), name);
             return it != reservedNames.end();
         }
 
@@ -642,23 +668,23 @@ namespace Resource
             {
                 loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
             }
-            catch (std::exception& e)
+            catch (const std::exception& e)
             {
-                static const char * const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae" };
+                static osg::ref_ptr<osg::Node> errorMarkerNode = [&] {
+                    static const char* const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae" };
 
-                for (unsigned int i=0; i<sizeof(sMeshTypes)/sizeof(sMeshTypes[0]); ++i)
-                {
-                    normalized = "meshes/marker_error." + std::string(sMeshTypes[i]);
-                    if (mVFS->exists(normalized))
+                    for (unsigned int i=0; i<sizeof(sMeshTypes)/sizeof(sMeshTypes[0]); ++i)
                     {
-                        Log(Debug::Error) << "Failed to load '" << name << "': " << e.what() << ", using marker_error." << sMeshTypes[i] << " instead";
-                        loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
-                        break;
+                        normalized = "meshes/marker_error." + std::string(sMeshTypes[i]);
+                        if (mVFS->exists(normalized))
+                            return load(normalized, mVFS, mImageManager, mNifFileManager);
                     }
-                }
+                    Files::IMemStream file(Misc::errorMarker.data(), Misc::errorMarker.size());
+                    return loadNonNif("error_marker.osgt", file, mImageManager);
+                }();
 
-                if (!loaded)
-                    throw;
+                Log(Debug::Error) << "Failed to load '" << name << "': " << e.what() << ", using marker_error instead";
+                loaded = static_cast<osg::Node*>(errorMarkerNode->clone(osg::CopyOp::DEEP_COPY_ALL));
             }
 
             // set filtering settings
@@ -666,6 +692,9 @@ namespace Resource
             loaded->accept(setFilterSettingsVisitor);
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
+
+            SceneUtil::ReplaceDepthVisitor replaceDepthVisitor;
+            loaded->accept(replaceDepthVisitor);
 
             osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor());
             loaded->accept(*shaderVisitor);
@@ -693,19 +722,33 @@ namespace Resource
         }
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string& name)
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
-        return createInstance(scene);
+        return getInstance(scene);
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const osg::Node *base)
+    osg::ref_ptr<osg::Node> SceneManager::cloneNode(const osg::Node* base)
     {
-        osg::ref_ptr<osg::Node> cloned = static_cast<osg::Node*>(base->clone(SceneUtil::CopyOp()));
-
-        // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
+        SceneUtil::CopyOp copyop;
+        if (const osg::Drawable* drawable = base->asDrawable())
+        {
+            if (drawable->asGeometry())
+            {
+                Log(Debug::Warning) << "SceneManager::cloneNode: attempting to clone osg::Geometry. For safety reasons this will be expensive. Consider avoiding this call.";
+                copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS|osg::CopyOp::DEEP_COPY_PRIMITIVES);
+            }
+        }
+        osg::ref_ptr<osg::Node> cloned = static_cast<osg::Node*>(base->clone(copyop));
+        // add a ref to the original template to help verify the safety of shallow cloning operations
+        // in addition, if this node is managed by a cache, we hint to the cache that it's still being used and should be kept in cache
         cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(base));
+        return cloned;
+    }
 
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const osg::Node *base)
+    {
+        osg::ref_ptr<osg::Node> cloned = cloneNode(base);
         // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
         if (cloned->getNumChildrenRequiringUpdateTraversal() > 0)
         {
@@ -714,11 +757,6 @@ namespace Resource
         }
 
         return cloned;
-    }
-
-    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name)
-    {
-        return createInstance(name);
     }
 
     osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name, osg::Group* parentNode)
@@ -882,6 +920,7 @@ namespace Resource
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
+        shaderVisitor->setOpaqueDepthTex(mOpaqueDepthTex);
         return shaderVisitor;
     }
 }

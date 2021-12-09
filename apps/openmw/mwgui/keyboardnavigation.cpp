@@ -79,7 +79,7 @@ void KeyboardNavigation::restoreFocus(int mode)
     if (found != mKeyFocus.end())
     {
         MyGUI::Widget* w = found->second;
-        if (w && w->getVisible() && w->getEnabled())
+        if (w && w->getVisible() && w->getEnabled() && w->getInheritedVisible() && w->getInheritedEnabled())
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(found->second);
     }
 }
@@ -273,7 +273,7 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
     if (wrap)
         index = (index + keyFocusList.size())%keyFocusList.size();
     else
-        index = std::min(std::max(0, index), static_cast<int>(keyFocusList.size())-1);
+        index = std::clamp<int>(index, 0, keyFocusList.size() - 1);
 
     MyGUI::Widget* next = keyFocusList[index];
     int vertdiff = next->getTop() - focus->getTop();

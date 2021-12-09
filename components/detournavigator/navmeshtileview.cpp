@@ -9,14 +9,11 @@
 #include <stdexcept>
 #include <tuple>
 
-namespace
+inline bool operator==(const dtMeshHeader& lhs, const dtMeshHeader& rhs) noexcept
 {
-    using DetourNavigator::ArrayRef;
-    using DetourNavigator::Ref;
-    using DetourNavigator::Span;
-
-    auto makeTuple(const dtMeshHeader& v)
+    const auto makeTuple = [] (const dtMeshHeader& v)
     {
+        using DetourNavigator::ArrayRef;
         return std::tuple(
             v.x,
             v.y,
@@ -39,47 +36,46 @@ namespace
             ArrayRef(v.bmax),
             v.bvQuantFactor
         );
-    }
-
-    auto makeTuple(const dtPoly& v)
-    {
-        return std::tuple(ArrayRef(v.verts), ArrayRef(v.neis), v.flags, v.vertCount, v.areaAndtype);
-    }
-
-    auto makeTuple(const dtPolyDetail& v)
-    {
-        return std::tuple(v.vertBase, v.triBase, v.vertCount, v.triCount);
-    }
-
-    auto makeTuple(const dtBVNode& v)
-    {
-        return std::tuple(ArrayRef(v.bmin), ArrayRef(v.bmax), v.i);
-    }
-
-    auto makeTuple(const dtOffMeshConnection& v)
-    {
-        return std::tuple(ArrayRef(v.pos), v.rad, v.poly, v.flags, v.side, v.userId);
-    }
-
-    auto makeTuple(const DetourNavigator::NavMeshTileConstView& v)
-    {
-        return std::tuple(
-            Ref(*v.mHeader),
-            Span(v.mPolys, v.mHeader->polyCount),
-            Span(v.mVerts, v.mHeader->vertCount),
-            Span(v.mDetailMeshes, v.mHeader->detailMeshCount),
-            Span(v.mDetailVerts, v.mHeader->detailVertCount),
-            Span(v.mDetailTris, v.mHeader->detailTriCount),
-            Span(v.mBvTree, v.mHeader->bvNodeCount),
-            Span(v.mOffMeshCons, v.mHeader->offMeshConCount)
-        );
-    }
+    };
+    return makeTuple(lhs) == makeTuple(rhs);
 }
 
-template <class T>
-inline auto operator==(const T& lhs, const T& rhs)
-    -> std::enable_if_t<std::is_same_v<std::void_t<decltype(makeTuple(lhs))>, void>, bool>
+inline bool operator==(const dtPoly& lhs, const dtPoly& rhs) noexcept
 {
+    const auto makeTuple = [] (const dtPoly& v)
+    {
+        using DetourNavigator::ArrayRef;
+        return std::tuple(ArrayRef(v.verts), ArrayRef(v.neis), v.flags, v.vertCount, v.areaAndtype);
+    };
+    return makeTuple(lhs) == makeTuple(rhs);
+}
+
+inline bool operator==(const dtPolyDetail& lhs, const dtPolyDetail& rhs) noexcept
+{
+    const auto makeTuple = [] (const dtPolyDetail& v)
+    {
+        return std::tuple(v.vertBase, v.triBase, v.vertCount, v.triCount);
+    };
+    return makeTuple(lhs) == makeTuple(rhs);
+}
+
+inline bool operator==(const dtBVNode& lhs, const dtBVNode& rhs) noexcept
+{
+    const auto makeTuple = [] (const dtBVNode& v)
+    {
+        using DetourNavigator::ArrayRef;
+        return std::tuple(ArrayRef(v.bmin), ArrayRef(v.bmax), v.i);
+    };
+    return makeTuple(lhs) == makeTuple(rhs);
+}
+
+inline bool operator==(const dtOffMeshConnection& lhs, const dtOffMeshConnection& rhs) noexcept
+{
+    const auto makeTuple = [] (const dtOffMeshConnection& v)
+    {
+        using DetourNavigator::ArrayRef;
+        return std::tuple(ArrayRef(v.pos), v.rad, v.poly, v.flags, v.side, v.userId);
+    };
     return makeTuple(lhs) == makeTuple(rhs);
 }
 
@@ -139,8 +135,23 @@ namespace DetourNavigator
         return view;
     }
 
-    bool operator==(const NavMeshTileConstView& lhs, const NavMeshTileConstView& rhs)
+    bool operator==(const NavMeshTileConstView& lhs, const NavMeshTileConstView& rhs) noexcept
     {
+        using DetourNavigator::Ref;
+        using DetourNavigator::Span;
+        const auto makeTuple = [] (const DetourNavigator::NavMeshTileConstView& v)
+        {
+            return std::tuple(
+                Ref(*v.mHeader),
+                Span(v.mPolys, v.mHeader->polyCount),
+                Span(v.mVerts, v.mHeader->vertCount),
+                Span(v.mDetailMeshes, v.mHeader->detailMeshCount),
+                Span(v.mDetailVerts, v.mHeader->detailVertCount),
+                Span(v.mDetailTris, v.mHeader->detailTriCount),
+                Span(v.mBvTree, v.mHeader->bvNodeCount),
+                Span(v.mOffMeshCons, v.mHeader->offMeshConCount)
+            );
+        };
         return makeTuple(lhs) == makeTuple(rhs);
     }
 }

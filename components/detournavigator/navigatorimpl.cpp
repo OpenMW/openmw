@@ -34,9 +34,9 @@ namespace DetourNavigator
 
     bool NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->getCollisionShape()};
+        CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape};
         bool result = mNavMeshManager.addObject(id, collisionShape, transform, AreaType_ground);
-        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->getAvoidCollisionShape())
+        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
             const ObjectId avoidId(avoidShape);
             CollisionShape avoidCollisionShape {shapes.mShapeInstance, *avoidShape};
@@ -64,13 +64,13 @@ namespace DetourNavigator
 
     bool NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        const CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->getCollisionShape()};
+        const CollisionShape collisionShape {shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape};
         bool result = mNavMeshManager.updateObject(id, collisionShape, transform, AreaType_ground);
-        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->getAvoidCollisionShape())
+        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
             const ObjectId avoidId(avoidShape);
-            const CollisionShape collisionShape {shapes.mShapeInstance, *avoidShape};
-            if (mNavMeshManager.updateObject(avoidId, collisionShape, transform, AreaType_null))
+            const CollisionShape avoidCollisionShape {shapes.mShapeInstance, *avoidShape};
+            if (mNavMeshManager.updateObject(avoidId, avoidCollisionShape, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
                 result = true;
@@ -97,9 +97,9 @@ namespace DetourNavigator
         return result;
     }
 
-    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift)
+    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
-        return mNavMeshManager.addWater(cellPosition, cellSize, shift);
+        return mNavMeshManager.addWater(cellPosition, cellSize, level);
     }
 
     bool NavigatorImpl::removeWater(const osg::Vec2i& cellPosition)
@@ -107,10 +107,9 @@ namespace DetourNavigator
         return mNavMeshManager.removeWater(cellPosition);
     }
 
-    bool NavigatorImpl::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-        const HeightfieldShape& shape)
+    bool NavigatorImpl::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape)
     {
-        return mNavMeshManager.addHeightfield(cellPosition, cellSize, shift, shape);
+        return mNavMeshManager.addHeightfield(cellPosition, cellSize, shape);
     }
 
     bool NavigatorImpl::removeHeightfield(const osg::Vec2i& cellPosition)
@@ -187,7 +186,7 @@ namespace DetourNavigator
         mNavMeshManager.reportStats(frameNumber, stats);
     }
 
-    RecastMeshTiles NavigatorImpl::getRecastMeshTiles()
+    RecastMeshTiles NavigatorImpl::getRecastMeshTiles() const
     {
         return mNavMeshManager.getRecastMeshTiles();
     }

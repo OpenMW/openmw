@@ -25,11 +25,10 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 7;
+        api["API_REVISION"] = 10;
         api["quit"] = [lua]()
         {
-            std::string traceback = lua->sol()["debug"]["traceback"]().get<std::string>();
-            Log(Debug::Warning) << "Quit requested by a Lua script.\n" << traceback;
+            Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
         };
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData)
@@ -43,27 +42,27 @@ namespace MWLua
             "Activator", "Armor", "Book", "Clothing", "Creature", "Door", "Ingredient",
             "Light", "Miscellaneous", "NPC", "Player", "Potion", "Static", "Weapon"
         });
-        api["EQUIPMENT_SLOT"] = LuaUtil::makeReadOnly(lua->sol().create_table_with(
-            "Helmet", MWWorld::InventoryStore::Slot_Helmet,
-            "Cuirass", MWWorld::InventoryStore::Slot_Cuirass,
-            "Greaves", MWWorld::InventoryStore::Slot_Greaves,
-            "LeftPauldron", MWWorld::InventoryStore::Slot_LeftPauldron,
-            "RightPauldron", MWWorld::InventoryStore::Slot_RightPauldron,
-            "LeftGauntlet", MWWorld::InventoryStore::Slot_LeftGauntlet,
-            "RightGauntlet", MWWorld::InventoryStore::Slot_RightGauntlet,
-            "Boots", MWWorld::InventoryStore::Slot_Boots,
-            "Shirt", MWWorld::InventoryStore::Slot_Shirt,
-            "Pants", MWWorld::InventoryStore::Slot_Pants,
-            "Skirt", MWWorld::InventoryStore::Slot_Skirt,
-            "Robe", MWWorld::InventoryStore::Slot_Robe,
-            "LeftRing", MWWorld::InventoryStore::Slot_LeftRing,
-            "RightRing", MWWorld::InventoryStore::Slot_RightRing,
-            "Amulet", MWWorld::InventoryStore::Slot_Amulet,
-            "Belt", MWWorld::InventoryStore::Slot_Belt,
-            "CarriedRight", MWWorld::InventoryStore::Slot_CarriedRight,
-            "CarriedLeft", MWWorld::InventoryStore::Slot_CarriedLeft,
-            "Ammunition", MWWorld::InventoryStore::Slot_Ammunition
-        ));
+        api["EQUIPMENT_SLOT"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
+            {"Helmet", MWWorld::InventoryStore::Slot_Helmet},
+            {"Cuirass", MWWorld::InventoryStore::Slot_Cuirass},
+            {"Greaves", MWWorld::InventoryStore::Slot_Greaves},
+            {"LeftPauldron", MWWorld::InventoryStore::Slot_LeftPauldron},
+            {"RightPauldron", MWWorld::InventoryStore::Slot_RightPauldron},
+            {"LeftGauntlet", MWWorld::InventoryStore::Slot_LeftGauntlet},
+            {"RightGauntlet", MWWorld::InventoryStore::Slot_RightGauntlet},
+            {"Boots", MWWorld::InventoryStore::Slot_Boots},
+            {"Shirt", MWWorld::InventoryStore::Slot_Shirt},
+            {"Pants", MWWorld::InventoryStore::Slot_Pants},
+            {"Skirt", MWWorld::InventoryStore::Slot_Skirt},
+            {"Robe", MWWorld::InventoryStore::Slot_Robe},
+            {"LeftRing", MWWorld::InventoryStore::Slot_LeftRing},
+            {"RightRing", MWWorld::InventoryStore::Slot_RightRing},
+            {"Amulet", MWWorld::InventoryStore::Slot_Amulet},
+            {"Belt", MWWorld::InventoryStore::Slot_Belt},
+            {"CarriedRight", MWWorld::InventoryStore::Slot_CarriedRight},
+            {"CarriedLeft", MWWorld::InventoryStore::Slot_CarriedLeft},
+            {"Ammunition", MWWorld::InventoryStore::Slot_Ammunition}
+        }));
         return LuaUtil::makeReadOnly(api);
     }
 

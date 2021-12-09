@@ -7,12 +7,14 @@
 
 #include <components/misc/guarded.hpp>
 
+#include <atomic>
+
 namespace DetourNavigator
 {
     class CachedRecastMeshManager
     {
     public:
-        CachedRecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation);
+        explicit CachedRecastMeshManager(const TileBounds& bounds, std::size_t generation);
 
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
@@ -21,16 +23,17 @@ namespace DetourNavigator
 
         std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
 
-        std::optional<Cell> removeWater(const osg::Vec2i& cellPosition);
+        std::optional<Water> removeWater(const osg::Vec2i& cellPosition);
 
-        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-            const HeightfieldShape& shape);
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape);
 
-        std::optional<Cell> removeHeightfield(const osg::Vec2i& cellPosition);
+        std::optional<SizedHeightfieldShape> removeHeightfield(const osg::Vec2i& cellPosition);
 
         std::shared_ptr<RecastMesh> getMesh();
+
+        std::shared_ptr<RecastMesh> getCachedMesh() const;
 
         bool isEmpty() const;
 
@@ -41,6 +44,7 @@ namespace DetourNavigator
     private:
         RecastMeshManager mImpl;
         Misc::ScopeGuarded<std::shared_ptr<RecastMesh>> mCached;
+        std::atomic_bool mOutdatedCache {true};
     };
 }
 

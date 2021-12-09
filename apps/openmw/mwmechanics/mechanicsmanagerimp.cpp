@@ -77,7 +77,7 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats (ptr);
 
-        npcStats.setNeedRecalcDynamicStats(true);
+        npcStats.recalculateMagicka();
 
         const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
@@ -222,7 +222,6 @@ namespace MWMechanics
 
         // forced update and current value adjustments
         mActors.updateActor (ptr, 0);
-        mActors.updateActor (ptr, 0);
 
         for (int i=0; i<3; ++i)
         {
@@ -290,13 +289,8 @@ namespace MWMechanics
         MWWorld::Ptr ptr = getPlayer();
         MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
 
-        // Update the equipped weapon icon
         MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if (weapon == inv.end())
-            winMgr->unsetSelectedWeapon();
-        else
-            winMgr->setSelectedWeapon(*weapon);
 
         // Update the selected spell icon
         MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
@@ -310,6 +304,12 @@ namespace MWMechanics
             else
                 winMgr->unsetSelectedSpell();
         }
+
+        // Update the equipped weapon icon
+        if (weapon == inv.end())
+            winMgr->unsetSelectedWeapon();
+        else
+            winMgr->setSelectedWeapon(*weapon);
 
         if (mUpdatePlayer)
         {
@@ -546,16 +546,16 @@ namespace MWMechanics
 
         x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).getMagnitude();
 
-        if(clamp)
-            return std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
-        return int(x);
+        if (clamp)
+            return std::clamp<int>(x, 0, 100);//, normally clamped to [0..100] when used
+        return static_cast<int>(x);
     }
 
     int MechanicsManager::getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying)
     {
         // Make sure zero base price items/services can't be bought/sold for 1 gold
         // and return the intended base price for creature merchants
-        if (basePrice == 0 || ptr.getTypeName() == typeid(ESM::Creature).name())
+        if (basePrice == 0 || ptr.getType() == ESM::Creature::sRecordId)
             return basePrice;
 
         const MWMechanics::NpcStats &sellerStats = ptr.getClass().getNpcStats(ptr);
@@ -650,9 +650,9 @@ namespace MWMechanics
                 int flee = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Flee).getBase();
                 int fight = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Fight).getBase();
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee,
-                                       std::max(0, std::min(100, flee + int(std::max(iPerMinChange, s)))));
+                                       std::clamp(flee + int(std::max(iPerMinChange, s)), 0, 100));
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight,
-                                       std::max(0, std::min(100, fight + int(std::min(-iPerMinChange, -s)))));
+                                       std::clamp(fight + int(std::min(-iPerMinChange, -s)), 0, 100));
             }
 
             float c = -std::abs(floor(r * fPerDieRollMult));
@@ -690,10 +690,10 @@ namespace MWMechanics
                 float s = c * fPerDieRollMult * fPerTempMult;
                 int flee = npcStats.getAiSetting (CreatureStats::AI_Flee).getBase();
                 int fight = npcStats.getAiSetting (CreatureStats::AI_Fight).getBase();
-                npcStats.setAiSetting (CreatureStats::AI_Flee,
-                                       std::max(0, std::min(100, flee + std::min(-int(iPerMinChange), int(-s)))));
-                npcStats.setAiSetting (CreatureStats::AI_Fight,
-                                       std::max(0, std::min(100, fight + std::max(int(iPerMinChange), int(s)))));
+                npcStats.setAiSetting(CreatureStats::AI_Flee,
+                                       std::clamp(flee + std::min(-int(iPerMinChange), int(-s)), 0, 100));
+                npcStats.setAiSetting(CreatureStats::AI_Fight,
+                                       std::clamp(fight + std::max(int(iPerMinChange), int(s)), 0, 100));
             }
             x = floor(-c * fPerDieRollMult);
 
@@ -718,7 +718,7 @@ namespace MWMechanics
         if (currentDisposition + tempChange < 0)
         {
             cappedDispositionChange = -currentDisposition;
-            tempChange = 0;
+            tempChange = cappedDispositionChange;
         }
 
         permChange = floor(cappedDispositionChange / fPerTempMult);
@@ -1608,6 +1608,11 @@ namespace MWMechanics
         MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 
+    void MechanicsManager::stopCombat(const MWWorld::Ptr& actor)
+    {
+        mActors.stopCombat(actor);
+    }
+
     void MechanicsManager::getObjectsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
         mActors.getObjectsInRange(position, radius, objects);
@@ -1761,17 +1766,6 @@ namespace MWMechanics
 
         MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
 
-        if (actor == player->getPlayer())
-        {
-            if (werewolf)
-            {
-                player->saveStats();
-                player->setWerewolfStats();
-            }
-            else
-                player->restoreStats();
-        }
-
         // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.
         if (npcStats.getDrawState() == MWMechanics::DrawState_Spell)
             npcStats.setDrawState(MWMechanics::DrawState_Nothing);
@@ -1798,13 +1792,23 @@ namespace MWMechanics
             // Update the GUI only when called on the player
             MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
+            // Transforming removes all temporary effects
+            actor.getClass().getCreatureStats(actor).getActiveSpells().purge([] (const auto& params)
+            {
+                return params.getType() == ESM::ActiveSpells::Type_Consumable || params.getType() == ESM::ActiveSpells::Type_Temporary;
+            }, actor);
+            mActors.updateActor(actor, 0.f);
+
             if (werewolf)
             {
+                player->saveStats();
+                player->setWerewolfStats();
                 windowManager->forceHide(MWGui::GW_Inventory);
                 windowManager->forceHide(MWGui::GW_Magic);
             }
             else
             {
+                player->restoreStats();
                 windowManager->unsetForceHide(MWGui::GW_Inventory);
                 windowManager->unsetForceHide(MWGui::GW_Magic);
             }

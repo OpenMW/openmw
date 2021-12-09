@@ -189,13 +189,6 @@ void BSAFile::readHeader()
         return left.offset < right.offset;
     });
 
-    for (size_t i = 0; i < filenum; i++)
-    {
-        FileStruct& fs = mFiles[i];
-        // Add the file name to the lookup
-        mLookup[fs.name()] = i;
-    }
-
     mIsLoaded = true;
 }
 
@@ -237,18 +230,6 @@ void Bsa::BSAFile::writeHeader()
     output.write(reinterpret_cast<char*>(hashes.data()), sizeof(Hash)*hashes.size());
 }
 
-/// Get the index of a given file name, or -1 if not found
-int BSAFile::getIndex(const char *str) const
-{
-    auto it = mLookup.find(str);
-    if(it == mLookup.end())
-        return -1;
-
-    size_t res = it->second;
-    assert(res < mFiles.size());
-    return static_cast<int>(res);
-}
-
 /// Open an archive file.
 void BSAFile::open(const std::string &file)
 {
@@ -274,25 +255,7 @@ void Bsa::BSAFile::close()
 
     mFiles.clear();
     mStringBuf.clear();
-    mLookup.clear();
     mIsLoaded = false;
-}
-
-Files::IStreamPtr BSAFile::getFile(const char *file)
-{
-    assert(file);
-    int i = getIndex(file);
-    if(i == -1)
-        fail("File not found: " + std::string(file));
-
-    const FileStruct &fs = mFiles[i];
-
-    return Files::openConstrainedFileStream (mFilename.c_str (), fs.offset, fs.fileSize);
-}
-
-Files::IStreamPtr BSAFile::getFile(const FileStruct *file)
-{
-    return Files::openConstrainedFileStream (mFilename.c_str (), file->offset, file->fileSize);
 }
 
 void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
@@ -342,8 +305,6 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
     mFiles.push_back(newFile);
 
     mHasChanged = true;
-
-    mLookup[filename.c_str()] = mFiles.size() - 1;
 
     stream.seekp(0, std::ios::end);
     file.seekg(0, std::ios::beg);

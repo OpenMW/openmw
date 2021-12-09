@@ -1,6 +1,10 @@
 #include "actions.hpp"
 
+#include <cstring>
+
 #include <components/debug/debuglog.hpp>
+#include <components/lua/luastate.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -9,15 +13,35 @@
 
 namespace MWLua
 {
+    Action::Action(LuaUtil::LuaState* state)
+    {
+        static const bool luaDebug = Settings::Manager::getBool("lua debug", "Lua");
+        if (luaDebug)
+            mCallerTraceback = state->debugTraceback();
+    }
+
+    void Action::safeApply(WorldView& w) const
+    {
+        try
+        {
+            apply(w);
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Error) << "Error in " << this->toString() << ": " << e.what();
+
+            if (mCallerTraceback.empty())
+                Log(Debug::Error) << "Set 'lua_debug=true' in settings.cfg to enable action tracebacks";
+            else
+                Log(Debug::Error) << "Caller " << mCallerTraceback;
+        }
+    }
 
     void TeleportAction::apply(WorldView& worldView) const
     {
         MWWorld::CellStore* cell = worldView.findCell(mCell, mPos);
         if (!cell)
-        {
-            Log(Debug::Error) << "LuaManager::applyTeleport -> cell not found: '" << mCell << "'";
-            return;
-        }
+            throw std::runtime_error(std::string("cell not found: '") + mCell + "'");
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr obj = worldView.getObjectRegistry()->getPtr(mObject, false);

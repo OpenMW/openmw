@@ -29,4 +29,12 @@ namespace MWMechanics
         const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
         return effects.get(ESM::MagicEffect::WaterWalking).getMagnitude() > 0;
     }
+
+    CreatureCustomDataResetter::CreatureCustomDataResetter(const MWWorld::Ptr& ptr) : mPtr(ptr) {}
+
+    CreatureCustomDataResetter::~CreatureCustomDataResetter()
+    {
+        if(!mPtr.isEmpty())
+            mPtr.getRefData().setCustomData({});
+    }
 }

@@ -11,7 +11,7 @@ namespace Compiler
     {
             enum State
             {
-                StartState, CommaState, MinusState
+                StartState, MinusState
             };
 
             State mState;

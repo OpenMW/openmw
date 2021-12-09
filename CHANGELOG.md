@@ -2,19 +2,29 @@
 ------
 
     Bug #1751: Birthsign abilities increase modified attribute values instead of base ones
+    Bug #1930: Followers are still fighting if a target stops combat with a leader
     Bug #3246: ESSImporter: Most NPCs are dead on save load
+    Bug #3488: AI combat aiming is too slow
     Bug #3514: Editing a reference's position after loading an esp file makes the reference disappear
     Bug #3737: Scripts from The Underground 2 .esp do not play (all patched versions)
+    Bug #3792: 1 frame late magicka recalc breaks early scripted magicka reactions to Intelligence change
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
+    Bug #3855: AI sometimes spams defensive spells
     Bug #3905: Great House Dagoth issues
     Bug #4203: Resurrecting an actor should close the loot GUI
+    Bug #4376: Moved actors don't respawn in their original cells
+    Bug #4389: NPC's lips do not move if his head model has the NiBSAnimationNode root node
     Bug #4602: Robert's Bodies: crash inside createInstance()
     Bug #4700: Editor: Incorrect command implementation
     Bug #4744: Invisible particles must still be processed
+    Bug #5088: Sky abruptly changes direction during certain weather transitions
     Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
     Bug #5207: Loose summons can be present in scene
+    Bug #5377: console does not appear after using menutest in inventory
     Bug #5379: Wandering NPCs falling through cantons
+    Bug #5394: Windows snapping no longer works
+    Bug #5434: Pinned windows shouldn't cover breath progress bar
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
     Bug #5508: Engine binary links to Qt without using it
@@ -25,6 +35,8 @@
     Bug #5801: A multi-effect spell with the intervention effects and recall always favors Almsivi intervention
     Bug #5842: GetDisposition adds temporary disposition change from different actors
     Bug #5863: GetEffect should return true after the player has teleported
+    Bug #5913: Failed assertion during Ritual of Trees quest
+    Bug #5937: Lights always need to be rotated by 90 degrees
     Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
     Bug #6051: NaN water height in ESM file is not handled gracefully
     Bug #6066: addtopic "return" does not work from within script. No errors thrown
@@ -40,19 +52,45 @@
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
     Bug #6165: Paralyzed player character can pickup items when the inventory is open
+    Bug #6168: Weather particles flicker for a frame at start of storms
     Bug #6172: Some creatures can't open doors
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
+    Bug #6177: Followers of player follower stop following after waiting for a day
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
     Bug #6197: Infinite Casting Loop
+    Bug #6253: Multiple instances of Reflect stack additively
+    Bug #6255: Reflect is different from vanilla
+    Bug #6258: Barter menu glitches out when modifying prices
     Bug #6273: Respawning NPCs rotation is inconsistent
     Bug #6282: Laura craft doesn't follow the player character
     Bug #6283: Avis Dorsey follows you after her death
+    Bug #6285: Brush template drawing and terrain selection drawing performance is very bad
     Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
     Bug #6291: Can't pickup the dead mage's journal from the mysterious hunter mod
     Bug #6302: Teleporting disabled actor breaks its disabled state
     Bug #6307: Pathfinding in Infidelities quest from Tribunal addon is broken
+    Bug #6321: Arrow enchantments should always be applied to the target
+    Bug #6322: Total sold/cost should reset to 0 when there are no items offered
     Bug #6323: Wyrmhaven: Alboin doesn't follower the player character out of his house
+    Bug #6324: Special Slave Companions: Can't buy the slave companions
+    Bug #6326: Detect Enchantment/Key should detect items in unresolved containers
+    Bug #6327: Blocking roots the character in place
+    Bug #6343: Magic projectile speed doesn't take race weight into account
+    Bug #6347: PlaceItem/PlaceItemCell/PlaceAt should work with levelled creatures
+    Bug #6354: SFX abruptly cut off after crossing max distance; implement soft fading of sound effects
+    Bug #6358: Changeweather command does not report an error when entering non-existent region
+    Bug #6363: Some scripts in Morrowland fail to work
+    Bug #6376: Creatures should be able to use torches
+    Bug #6386: Artifacts in water reflection due to imprecise screen-space coordinate computation
+    Bug #6396: Inputting certain Unicode characters triggers an assertion
+    Bug #6416: Morphs are applied to the wrong target
+    Bug #6417: OpenMW doesn't always use the right node to accumulate movement
+    Bug #6429: Wyrmhaven: Can't add AI packages to player
+    Bug #6433: Items bound to Quick Keys sometimes do not appear until the Quick Key menu is opened
+    Bug #6451: Weapon summoned from Cast When Used item will have the name "None"
+    Bug #6473: Strings from NIF should be parsed only to first null terminator
     Feature #890: OpenMW-CS: Column filtering
+    Feature #1465: "Reset" argument for AI functions
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
@@ -66,14 +104,19 @@
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
     Feature #6032: Reverse-z depth buffer
+    Feature #6078: First person should not clear depth buffer
+    Feature #6128: Soft Particles
+    Feature #6161: Refactor Sky to use shaders and GLES/GL3 friendly
     Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Feature #6199: Support FBO Rendering
+    Feature #6248: Embedded error marker mesh
     Feature #6249: Alpha testing support for Collada
     Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
     Feature #6288: Preserve the "blocked" record flag for referenceable objects.
+    Feature #6380: Commas are treated as whitespace in vanilla
+    Feature #6419: Topics shouldn't be greyed out if they can produce another topic reference
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
-
 
 0.47.0
 ------
@@ -208,6 +251,8 @@
     Bug #6043: Actor can have torch missing when torch animation is played
     Bug #6047: Mouse bindings can be triggered during save loading
     Bug #6136: Game freezes when NPCs try to open doors that are about to be closed
+    Bug #6142: Groundcover plugins change cells flags
+    Bug #6276: Deleted groundcover instances are not deleted in game
     Bug #6294: Game crashes with empty pathgrid
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references

@@ -1,16 +1,18 @@
 #include "bulletshapemanager.hpp"
 
+#include <cstring>
+
 #include <osg/NodeVisitor>
 #include <osg/TriangleFunctor>
 #include <osg/Transform>
 #include <osg/Drawable>
-#include <osg/Version>
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
 #include <components/misc/pathhelpers.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/misc/osguservalues.hpp>
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
@@ -45,11 +47,7 @@ struct GetTriangleFunctor
         return btVector3(vec.x(), vec.y(), vec.z());
     }
 
-#if OSG_MIN_VERSION_REQUIRED(3,5,6)
-    void inline operator()( const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3 )
-#else
-    void inline operator()( const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3, bool _temp )
-#endif
+    void inline operator()( const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3, bool _temp=false ) // Note: unused temp argument left here for OSG versions less than 3.5.6 
     {
         if (mTriMesh)
             mTriMesh->addTriangle( toBullet(mMatrix.preMult(v1)), toBullet(mMatrix.preMult(v2)), toBullet(mMatrix.preMult(v3)));
@@ -88,16 +86,17 @@ public:
             return osg::ref_ptr<BulletShape>();
 
         osg::ref_ptr<BulletShape> shape (new BulletShape);
-        btBvhTriangleMeshShape* triangleMeshShape = new TriangleMeshShape(mTriangleMesh.release(), true);
+
+        auto triangleMeshShape = std::make_unique<TriangleMeshShape>(mTriangleMesh.release(), true);
         btVector3 aabbMin = triangleMeshShape->getLocalAabbMin();
         btVector3 aabbMax = triangleMeshShape->getLocalAabbMax();
-        shape->mCollisionBox.extents[0] = (aabbMax[0] - aabbMin[0]) / 2.0f;
-        shape->mCollisionBox.extents[1] = (aabbMax[1] - aabbMin[1]) / 2.0f;
-        shape->mCollisionBox.extents[2] = (aabbMax[2] - aabbMin[2]) / 2.0f;
-        shape->mCollisionBox.center = osg::Vec3f( (aabbMax[0] + aabbMin[0]) / 2.0f,
+        shape->mCollisionBox.mExtents[0] = (aabbMax[0] - aabbMin[0]) / 2.0f;
+        shape->mCollisionBox.mExtents[1] = (aabbMax[1] - aabbMin[1]) / 2.0f;
+        shape->mCollisionBox.mExtents[2] = (aabbMax[2] - aabbMin[2]) / 2.0f;
+        shape->mCollisionBox.mCenter = osg::Vec3f( (aabbMax[0] + aabbMin[0]) / 2.0f,
                                                   (aabbMax[1] + aabbMin[1]) / 2.0f,
                                                   (aabbMax[2] + aabbMin[2]) / 2.0f );
-        shape->mCollisionShape = triangleMeshShape;
+        shape->mCollisionShape.reset(triangleMeshShape.release());
 
         return shape;
     }
@@ -166,6 +165,12 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
                 if (!shape)
                     return osg::ref_ptr<BulletShape>();
             }
+
+            if (shape != nullptr)
+            {
+                shape->mFileName = normalized;
+                constNode->getUserValue(Misc::OsgUserValues::sFileHash, shape->mFileHash);
+            }
         }
 
         mCache->addEntryToObjectCache(normalized, shape);
@@ -198,9 +203,8 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
 {
     osg::ref_ptr<const BulletShape> shape = getShape(name);
     if (shape)
-        return shape->makeInstance();
-    else
-        return osg::ref_ptr<BulletShapeInstance>();
+        return makeInstance(std::move(shape));
+    return osg::ref_ptr<BulletShapeInstance>();
 }
 
 void BulletShapeManager::updateCache(double referenceTime)

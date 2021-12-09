@@ -7,6 +7,7 @@
 #include <shared_mutex>
 #include <thread>
 #include <unordered_set>
+#include <variant>
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
@@ -39,7 +40,7 @@ namespace MWPhysics
             /// @param timeAccum accumulated time from previous run to interpolate movements
             /// @param actorsData per actor data needed to compute new positions
             /// @return new position of each actor
-            void applyQueuedMovements(float & timeAccum, std::vector<std::shared_ptr<Actor>>&& actors, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            void applyQueuedMovements(float & timeAccum, std::vector<Simulation>&& simulations, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             void resetSimulation(const ActorMap& actors);
 
@@ -57,14 +58,12 @@ namespace MWPhysics
             bool getLineOfSight(const std::shared_ptr<Actor>& actor1, const std::shared_ptr<Actor>& actor2);
             void debugDraw();
             void* getUserPointer(const btCollisionObject* object) const;
-
             void releaseSharedStates(); // destroy all objects whose destructor can't be safely called from ~PhysicsTaskScheduler()
 
         private:
             void doSimulation();
             void worker();
             void updateActorsPositions();
-            void updateActor(Actor& actor, ActorFrameData& actorData, bool simulationPerformed, float timeAccum, float dt) const;
             bool hasLineOfSight(const Actor* actor1, const Actor* actor2);
             void refreshLOSCache();
             void updateAabbs();
@@ -75,10 +74,10 @@ namespace MWPhysics
             void afterPostStep();
             void afterPostSim();
             void syncWithMainThread();
+            void waitForWorkers();
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
-            std::vector<std::shared_ptr<Actor>> mActors;
-            std::vector<ActorFrameData> mActorsFrameData;
+            std::vector<Simulation> mSimulations;
             std::unordered_set<const btCollisionObject*> mCollisionObjects;
             float mDefaultPhysicsDt;
             float mPhysicsDt;
@@ -97,12 +96,16 @@ namespace MWPhysics
             int mNumJobs;
             int mRemainingSteps;
             int mLOSCacheExpiry;
-            bool mNewFrame;
+            std::size_t mFrameCounter;
             bool mAdvanceSimulation;
             bool mQuit;
             std::atomic<int> mNextJob;
             std::atomic<int> mNextLOS;
             std::vector<std::thread> mThreads;
+
+            std::size_t mWorkersFrameCounter = 0;
+            std::condition_variable mWorkersDone;
+            std::mutex mWorkersDoneMutex;
 
             mutable std::shared_mutex mSimulationMutex;
             mutable std::shared_mutex mCollisionWorldMutex;

@@ -32,6 +32,10 @@ namespace MWClass
             ///< Write additional state from \a ptr into \a state.
 
             void respawn (const MWWorld::Ptr& ptr) const override;
+
+            MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
+
+            void adjustPosition(const MWWorld::Ptr& ptr, bool force) const override;
     };
 }
 

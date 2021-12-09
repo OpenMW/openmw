@@ -172,8 +172,7 @@ namespace Interpreter{
 
                         for(unsigned int j = 0; j < globals.size(); j++){
                             if(globals[j].length() > temp.length()){ // Just in case there's a global with a huuuge name
-                                temp = text.substr(i+1, globals[j].length());
-                                transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+                                temp = Misc::StringUtils::lowerCase(text.substr(i+1, globals[j].length()));
                             }
 
                             found = check(temp, globals[j], &i, &start);

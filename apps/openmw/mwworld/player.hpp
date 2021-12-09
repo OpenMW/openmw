@@ -11,10 +11,10 @@
 
 #include <components/esm/loadskil.hpp>
 #include <components/esm/attr.hpp>
+#include <components/esm/loadnpc.hpp>
 
 namespace ESM
 {
-    struct NPC;
     class ESMWriter;
     class ESMReader;
 }

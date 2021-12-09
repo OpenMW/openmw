@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include <osg/Callback>
+#include <osg/Object>
 
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/textkeymap.hpp>
@@ -11,18 +11,20 @@
 
 namespace SceneUtil
 {
-    class KeyframeController : public SceneUtil::Controller, public virtual osg::Callback
+    /// @note Derived classes are expected to derive from osg::Callback and implement getAsCallback().
+    class KeyframeController : public SceneUtil::Controller, public virtual osg::Object
     {
     public:
         KeyframeController() {}
 
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop)
-            : osg::Callback(copy, copyop)
-            , SceneUtil::Controller(copy)
-        {}
-        META_Object(SceneUtil, KeyframeController)
+            : osg::Object(copy, copyop)
+            , SceneUtil::Controller(copy) {}
 
         virtual osg::Vec3f getTranslation(float time) const  { return osg::Vec3f(); }
+
+        /// @note We could drop this function in favour of osg::Object::asCallback from OSG 3.6 on.
+        virtual osg::Callback* getAsCallback() = 0;
     };
 
     /// Wrapper object containing an animation track as a ref-countable osg::Object.

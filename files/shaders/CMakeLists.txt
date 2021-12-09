@@ -1,4 +1,4 @@
-if (NOT DEFINED OPENMW_SHADERS_ROOT)
+if (NOT DEFINED OPENMW_RESOURCES_ROOT)
     return()
 endif()
 
@@ -36,6 +36,10 @@ set(SHADER_FILES
     gui_fragment.glsl
     debug_vertex.glsl
     debug_fragment.glsl
+    sky_vertex.glsl
+    sky_fragment.glsl
+    skypasses.glsl
+    softparticles.glsl
 )
 
-copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_SHADERS_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")

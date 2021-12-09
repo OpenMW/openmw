@@ -19,11 +19,6 @@ namespace Terrain
     class View;
 }
 
-namespace SceneUtil
-{
-    class UnrefQueue;
-}
-
 namespace MWRender
 {
     class LandManager;
@@ -72,8 +67,6 @@ namespace MWWorld
 
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
-        void setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue);
-
         typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
         void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
 
@@ -87,7 +80,6 @@ namespace MWWorld
         Terrain::World* mTerrain;
         MWRender::LandManager* mLandManager;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
-        osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
         double mExpiryDelay;
         unsigned int mMinCacheSize;
         unsigned int mMaxCacheSize;

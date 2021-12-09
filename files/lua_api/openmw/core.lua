@@ -192,10 +192,26 @@
 
 -------------------------------------------------------------------------------
 -- Add new local script to the object.
--- Can be called only from a global script.
+-- Can be called only from a global script. Script should be specified in a content
+-- file (omwgame/omwaddon/omwscripts) with a CUSTOM flag.
 -- @function [parent=#GameObject] addScript
 -- @param self
--- @param #string scriptPath Path to the script in OpenMW virtual filesystem
+-- @param #string scriptPath Path to the script in OpenMW virtual filesystem.
+
+-------------------------------------------------------------------------------
+-- Whether a script with given path is attached to this object.
+-- Can be called only from a global script.
+-- @function [parent=#GameObject] hasScript
+-- @param self
+-- @param #string scriptPath Path to the script in OpenMW virtual filesystem.
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Removes script that was attached by `addScript`
+-- Can be called only from a global script.
+-- @function [parent=#GameObject] removeScript
+-- @param self
+-- @param #string scriptPath Path to the script in OpenMW virtual filesystem.
 
 -------------------------------------------------------------------------------
 -- Moves object to given cell and position.

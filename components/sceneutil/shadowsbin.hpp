@@ -12,20 +12,17 @@ namespace osg
 
 namespace SceneUtil
 {
-
     /// renderbin which culls redundant state for shadow map rendering
     class ShadowsBin : public osgUtil::RenderBin
     {
-    private:
-        static std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1> sCastingPrograms;
-
-        osg::ref_ptr<osg::StateSet> mNoTestStateSet;
-        osg::ref_ptr<osg::StateSet> mShaderAlphaTestStateSet;
-
-        std::array<osg::ref_ptr<osg::StateSet>, GL_ALWAYS - GL_NEVER + 1> mAlphaFuncShaders;
     public:
+        template <class T>
+        using Array = std::array<T, GL_ALWAYS - GL_NEVER + 1>;
+
+        using CastingPrograms = Array<osg::ref_ptr<osg::Program>>;
+
         META_Object(SceneUtil, ShadowsBin)
-        ShadowsBin();
+        ShadowsBin(const CastingPrograms& castingPrograms);
         ShadowsBin(const ShadowsBin& rhs, const osg::CopyOp& copyop)
             : osgUtil::RenderBin(rhs, copyop)
             , mNoTestStateSet(rhs.mNoTestStateSet)
@@ -65,15 +62,14 @@ namespace SceneUtil
 
         osgUtil::StateGraph* cullStateGraph(osgUtil::StateGraph* sg, osgUtil::StateGraph* root, std::unordered_set<osgUtil::StateGraph*>& uninteresting, bool cullFaceOverridden);
 
-        static void addPrototype(const std::string& name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1>& castingPrograms);
-    };
+    private:
+        ShadowsBin() {}
 
-    class ShadowsBinAdder
-    {
-        public:
-        ShadowsBinAdder(const std::string& name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1>& castingPrograms){ ShadowsBin::addPrototype(name, castingPrograms); }
-    };
+        osg::ref_ptr<osg::StateSet> mNoTestStateSet;
+        osg::ref_ptr<osg::StateSet> mShaderAlphaTestStateSet;
 
+        Array<osg::ref_ptr<osg::StateSet>> mAlphaFuncShaders;
+    };
 }
 
 #endif

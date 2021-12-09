@@ -6,6 +6,7 @@ Lua API reference
     :hidden:
 
     engine_handlers
+    user_interface
     openmw_util
     openmw_settings
     openmw_core
@@ -16,10 +17,13 @@ Lua API reference
     openmw_nearby
     openmw_input
     openmw_ui
+    openmw_camera
     openmw_aux_util
+    interface_camera
 
 
 - :ref:`Engine handlers reference`
+- :ref:`User interface reference <User interface reference>`
 - `Game object reference <openmw_core.html##(GameObject)>`_
 - `Cell reference <openmw_core.html##(Cell)>`_
 
@@ -54,11 +58,11 @@ Player scripts are local scripts that are attached to a player.
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.nearby <Package openmw.nearby>`             | by local scripts   | | Read-only access to the nearest area of the game world.     |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input                                                  |
+|:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input.                                                 |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls user interface                                     |
+|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls :ref:`user interface <User interface reference>`.  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|openmw.camera                                            | by player scripts  | | Controls camera (not implemented)                           |
+|:ref:`openmw.camera <Package openmw.camera>`             | by player scripts  | | Controls camera.                                            |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
 **openmw_aux**
@@ -70,5 +74,14 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
 | Built-in library                                        | Can be used        | Description                                                   |
 +=========================================================+====================+===============================================================+
 |:ref:`openmw_aux.util <Package openmw_aux.util>`         | everywhere         | | Miscellaneous utils                                         |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+
+**Interfaces of built-in scripts**
+
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+| Interface                                               | Can be used        | Description                                                   |
++=========================================================+====================+===============================================================+
+|:ref:`Camera <Interface Camera>`                         | by player scripts  | | Allows to alter behavior of the built-in camera script      |
+|                                                         |                    | | without overriding the script completely.                   |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
