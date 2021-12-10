@@ -64,5 +64,5 @@ done
 export APT_CACHE_DIR="${PWD}/apt-cache"
 set -x
 mkdir -pv "$APT_CACHE_DIR"
-apt-get update -yq
-apt-get -q -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}"
+apt-get update -yqq
+apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}"
