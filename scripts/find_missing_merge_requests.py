@@ -14,6 +14,8 @@ import urllib.parse
               help='Path to text file with Gitlab token.')
 @click.option('--project_id', type=int, default=7107382,
               help='Gitlab project id.')
+@click.option('--job_id', type=int, default=os.getenv('CI_JOB_ID'),
+              help='Gitlab job id.')
 @click.option('--host', type=str, default='gitlab.com',
               help='Gitlab host.')
 @click.option('--workers', type=int, default=10,
@@ -28,7 +30,7 @@ import urllib.parse
               help='Number of merge requests per page.')
 @click.option('--ignored_mrs_path', type=str,
               help='Path to a list of ignored MRs.')
-def main(token_path, project_id, host, workers, target_branch, begin_page, end_page, per_page, ignored_mrs_path):
+def main(token_path, project_id, job_id, host, workers, target_branch, begin_page, end_page, per_page, ignored_mrs_path):
     headers = make_headers(token_path)
     base_url = f'https://{host}/api/v4/projects/{project_id}/'
     discord_webhook_url = os.getenv('DISCORD_WEBHOOK_URL')
@@ -67,7 +69,8 @@ def main(token_path, project_id, host, workers, target_branch, begin_page, end_p
     if discord_webhook_url is not None and missing_mrs:
         project_web_url = parse_gitlab_response(requests.get(url=base_url, headers=headers))['web_url'] + '/'
         discord_message = format_discord_message(missing=missing, filtered=filtered, target_branch=target_branch,
-                                                 project_web_url=project_web_url, missing_mrs=missing_mrs)
+                                                 project_web_url=project_web_url, missing_mrs=missing_mrs,
+                                                 job_id=job_id)
         print('Sending Discord notification...')
         print(discord_message)
         discord_webhook.DiscordWebhook(url=discord_webhook_url, content=discord_message, rate_limit_retry=True).execute()
@@ -75,10 +78,11 @@ def main(token_path, project_id, host, workers, target_branch, begin_page, end_p
         exit(-1)
 
 
-def format_discord_message(missing, filtered, target_branch, project_web_url, missing_mrs):
+def format_discord_message(missing, filtered, target_branch, project_web_url, missing_mrs, job_id):
     target_branch = format_link(target_branch, urllib.parse.urljoin(project_web_url, f'-/tree/{target_branch}'))
+    job = f' by job ' + format_link(job_id, urllib.parse.urljoin(project_web_url, f'-/jobs/{job_id}')) if job_id else ''
     return (
-        f'Found {missing} missing MRs out of {filtered} from {target_branch} target branch:\n'
+        f'Found {missing} missing MRs out of {filtered} from {target_branch} target branch{job}:\n'
         + '\n'.join(format_missing_mr_message(v, project_web_url) for v in missing_mrs)
     )
 
