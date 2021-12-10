@@ -105,8 +105,8 @@ IF(NOT WIN32 AND NOT APPLE)
     add_definitions(-DGLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
 ENDIF()
 add_component_dir (files
-    linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager escape
-    lowlevelfile constrainedfilestream memorystream hash
+    linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
+    lowlevelfile constrainedfilestream memorystream hash configfileparser
     )
 
 add_component_dir (compiler

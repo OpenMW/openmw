@@ -1,6 +1,5 @@
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
-#include <components/files/escape.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/debug/debugging.hpp>
@@ -57,7 +56,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         cfgMgr.readConfiguration(variables, desc, true);
 
-        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapePath>().mPath.string());
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
         getRawStdout() << v.describe() << std::endl;
         return false;
     }
@@ -66,38 +65,38 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.readConfiguration(variables, desc);
     Files::mergeComposingVariables(variables, composingVariables, desc);
 
-    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapePath>().mPath.string());
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
     Log(Debug::Info) << v.describe();
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
 
     // Font encoding settings
-    std::string encoding(variables["encoding"].as<Files::EscapeHashString>().toStdString());
+    std::string encoding(variables["encoding"].as<std::string>());
     Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
     engine.setEncoding(ToUTF8::calculateEncoding(encoding));
 
     // directory settings
     engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
-    Files::PathContainer dataDirs(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
+    Files::PathContainer dataDirs(asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>()));
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::EscapePath>().mPath);
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
     if (!local.empty())
         dataDirs.push_back(local);
 
     cfgMgr.processPaths(dataDirs);
 
-    engine.setResourceDir(variables["resources"].as<Files::EscapePath>().mPath);
+    engine.setResourceDir(variables["resources"].as<Files::MaybeQuotedPath>());
     engine.setDataDirs(dataDirs);
 
     // fallback archives
-    StringsVector archives = variables["fallback-archive"].as<Files::EscapeStringVector>().toStdStringVector();
+    StringsVector archives = variables["fallback-archive"].as<StringsVector>();
     for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); ++it)
     {
         engine.addArchive(*it);
     }
 
-    StringsVector content = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
+    StringsVector content = variables["content"].as<StringsVector>();
     if (content.empty())
     {
         Log(Debug::Error) << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting...";
@@ -118,7 +117,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         engine.addContentFile(file);
     }
 
-    StringsVector groundcover = variables["groundcover"].as<Files::EscapeStringVector>().toStdStringVector();
+    StringsVector groundcover = variables["groundcover"].as<StringsVector>();
     for (auto& file : groundcover)
     {
         engine.addGroundcoverFile(file);
@@ -131,7 +130,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     }
 
     // startup-settings
-    engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());
+    engine.setCell(variables["start"].as<std::string>());
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
         Log(Debug::Warning) << "Warning: new-game used without skip-menu -> ignoring it";
@@ -140,11 +139,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setCompileAllDialogue(variables["script-all-dialogue"].as<bool>());
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
-    engine.setStartupScript (variables["script-run"].as<Files::EscapeHashString>().toStdString());
+    engine.setStartupScript (variables["script-run"].as<std::string>());
     engine.setWarningsMode (variables["script-warn"].as<int>());
-    engine.setScriptBlacklist (variables["script-blacklist"].as<Files::EscapeStringVector>().toStdStringVector());
+    engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
-    engine.setSaveGameFile (variables["load-savegame"].as<Files::EscapePath>().mPath.string());
+    engine.setSaveGameFile (variables["load-savegame"].as<Files::MaybeQuotedPath>().string());
 
     // other settings
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);

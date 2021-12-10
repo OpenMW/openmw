@@ -1,7 +1,7 @@
 #include "configurationmanager.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/files/escape.hpp>
+#include <components/files/configfileparser.hpp>
 #include <components/fallback/validate.hpp>
 
 #include <boost/filesystem/fstream.hpp>
@@ -109,7 +109,7 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
         auto replace = second["replace"];
         if (!replace.defaulted() && !replace.empty())
         {
-            std::vector<std::string> replaceVector = replace.as<Files::EscapeStringVector>().toStdStringVector();
+            std::vector<std::string> replaceVector = replace.as<std::vector<std::string>>();
             replacedVariables.insert(replaceVector.begin(), replaceVector.end());
         }
     }
@@ -138,19 +138,19 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
             boost::any& firstValue = firstPosition->second.value();
             const boost::any& secondValue = second[name].value();
             
-            if (firstValue.type() == typeid(Files::EscapePathContainer))
+            if (firstValue.type() == typeid(Files::MaybeQuotedPathContainer))
             {
-                auto& firstPathContainer = boost::any_cast<Files::EscapePathContainer&>(firstValue);
-                const auto& secondPathContainer = boost::any_cast<const Files::EscapePathContainer&>(secondValue);
+                auto& firstPathContainer = boost::any_cast<Files::MaybeQuotedPathContainer&>(firstValue);
+                const auto& secondPathContainer = boost::any_cast<const Files::MaybeQuotedPathContainer&>(secondValue);
 
                 firstPathContainer.insert(firstPathContainer.end(), secondPathContainer.begin(), secondPathContainer.end());
             }
-            else if (firstValue.type() == typeid(Files::EscapeStringVector))
+            else if (firstValue.type() == typeid(std::vector<std::string>))
             {
-                auto& firstVector = boost::any_cast<Files::EscapeStringVector&>(firstValue);
-                const auto& secondVector = boost::any_cast<const Files::EscapeStringVector&>(secondValue);
+                auto& firstVector = boost::any_cast<std::vector<std::string>&>(firstValue);
+                const auto& secondVector = boost::any_cast<const std::vector<std::string>&>(secondValue);
 
-                firstVector.mVector.insert(firstVector.mVector.end(), secondVector.mVector.begin(), secondVector.mVector.end());
+                firstVector.insert(firstVector.end(), secondVector.begin(), secondVector.end());
             }
             else if (firstValue.type() == typeid(Fallback::FallbackMap))
             {
@@ -235,11 +235,11 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
         if (!mSilent)
             Log(Debug::Info) << "Loading config file: " << cfgFile.string();
 
-        boost::filesystem::ifstream configFileStreamUnfiltered(cfgFile);
+        boost::filesystem::ifstream configFileStream(cfgFile);
 
-        if (configFileStreamUnfiltered.is_open())
+        if (configFileStream.is_open())
         {
-            parseConfig(configFileStreamUnfiltered, variables, description);
+            parseConfig(configFileStream, variables, description);
 
             return true;
         }
@@ -311,14 +311,37 @@ void parseArgs(int argc, const char* const argv[], boost::program_options::varia
 void parseConfig(std::istream& stream, boost::program_options::variables_map& variables,
     boost::program_options::options_description& description)
 {
-    boost::iostreams::filtering_istream configFileStream;
-    configFileStream.push(escape_hash_filter());
-    configFileStream.push(stream);
-
     boost::program_options::store(
-        boost::program_options::parse_config_file(configFileStream, description, true),
+        Files::parse_config_file(stream, description, true),
         variables
     );
+}
+
+std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPath)
+{
+    // If the stream starts with a double quote, read from stream using boost::filesystem::path rules, then discard anything remaining.
+    // This prevents boost::program_options getting upset that we've not consumed the whole stream.
+    // If it doesn't start with a double quote, read the whole thing verbatim
+    if (istream.peek() == '"')
+    {
+        istream >> static_cast<boost::filesystem::path&>(MaybeQuotedPath);
+        if (istream && !istream.eof() && istream.peek() != EOF)
+        {
+            std::string remainder{std::istreambuf_iterator(istream), {}};
+            Log(Debug::Warning) << "Trailing data in path setting. Used '" << MaybeQuotedPath.string() << "' but '" << remainder << "' remained";
+        }
+    }
+    else
+    {
+        std::string intermediate{std::istreambuf_iterator(istream), {}};
+        static_cast<boost::filesystem::path&>(MaybeQuotedPath) = intermediate;
+    }
+    return istream;
+}
+
+PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathContainer)
+{
+    return PathContainer(MaybeQuotedPathContainer.begin(), MaybeQuotedPathContainer.end());
 }
 
 } /* namespace Cfg */
