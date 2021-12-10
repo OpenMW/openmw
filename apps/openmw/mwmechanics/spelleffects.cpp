@@ -774,6 +774,45 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
     }
 }
 
+bool shouldRemoveEffect(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect)
+{
+    const auto world = MWBase::Environment::get().getWorld();
+    switch(effect.mEffectId)
+    {
+        case ESM::MagicEffect::Levitate:
+        {
+            if(!world->isLevitationEnabled())
+            {
+                if(target == getPlayer())
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sLevitateDisabled}");
+                return true;
+            }
+            break;
+        }
+        case ESM::MagicEffect::Recall:
+        case ESM::MagicEffect::DivineIntervention:
+        case ESM::MagicEffect::AlmsiviIntervention:
+        {
+            return effect.mFlags & ESM::ActiveEffect::Flag_Applied;
+        }
+        case ESM::MagicEffect::WaterWalking:
+        {
+            if (target.getClass().isPureWaterCreature(target) && world->isSwimming(target))
+                return true;
+            if (effect.mFlags & ESM::ActiveEffect::Flag_Applied)
+                break;
+            if (!world->isWaterWalkingCastableOnTarget(target))
+            {
+                if(target == getPlayer())
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidEffect}");
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
+}
+
 MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, float dt)
 {
     const auto world = MWBase::Environment::get().getWorld();
@@ -792,20 +831,10 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
         return MagicApplicationResult::APPLIED;
     }
-    else if(effect.mEffectId == ESM::MagicEffect::Levitate && !world->isLevitationEnabled())
+    else if(shouldRemoveEffect(target, effect))
     {
-        if(target == getPlayer())
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sLevitateDisabled}");
         onMagicEffectRemoved(target, spellParams, effect);
         return MagicApplicationResult::REMOVED;
-    }
-    else if(effect.mEffectId == ESM::MagicEffect::AlmsiviIntervention || effect.mEffectId == ESM::MagicEffect::DivineIntervention || effect.mEffectId == ESM::MagicEffect::Recall)
-    {
-        if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
-        {
-            onMagicEffectRemoved(target, spellParams, effect);
-            return MagicApplicationResult::REMOVED;
-        }
     }
     const auto* magicEffect = world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
     if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
@@ -883,8 +912,13 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
         float oldMagnitude = 0.f;
         if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
             oldMagnitude = effect.mMagnitude;
-        else if(spellParams.getType() == ESM::ActiveSpells::Type_Consumable || spellParams.getType() == ESM::ActiveSpells::Type_Temporary)
-            playEffects(target, *magicEffect);
+        else
+        {
+            if(spellParams.getType() == ESM::ActiveSpells::Type_Consumable || spellParams.getType() == ESM::ActiveSpells::Type_Temporary)
+                playEffects(target, *magicEffect);
+            if(effect.mEffectId == ESM::MagicEffect::Soultrap && !target.getClass().isNpc() && target.getType() == ESM::Creature::sRecordId && target.get<ESM::Creature>()->mBase->mData.mSoul == 0 && caster == getPlayer())
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
+        }
         float magnitude = roll(effect);
         //Note that there's an early out for Flag_Applied AppliedOnce effects so we don't have to exclude them here
         effect.mMagnitude = magnitude;
