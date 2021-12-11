@@ -234,16 +234,9 @@ namespace NifOsg
     class KeyframeController : public SceneUtil::KeyframeController, public SceneUtil::NodeCallback<KeyframeController, NifOsg::MatrixTransform*>
     {
     public:
-        // This is used if there's no interpolator but there is data (Morrowind meshes).
-        KeyframeController(const Nif::NiKeyframeData *data);
-        // This is used if the interpolator has data.
-        KeyframeController(const Nif::NiTransformInterpolator* interpolator);
-        // This is used if there are default values available (e.g. from a data-less interpolator).
-        // If there's neither keyframe data nor an interpolator a KeyframeController must not be created.
-        KeyframeController(const float scale, const osg::Vec3f& pos, const osg::Quat& rot);
-
         KeyframeController();
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
+        KeyframeController(const Nif::NiKeyframeController *keyctrl);
 
         META_Object(NifOsg, KeyframeController)
 
