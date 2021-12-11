@@ -270,8 +270,8 @@ namespace NifOsg
                 if (key->data.empty() && key->interpolator.empty())
                     continue;
 
-                osg::ref_ptr<SceneUtil::KeyframeController> callback(handleKeyframeController(key));
-                callback->setFunction(std::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
+                osg::ref_ptr<SceneUtil::KeyframeController> callback = new NifOsg::KeyframeController(key);
+                setupController(key, callback, /*animflags*/0);
 
                 if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
                     Log(Debug::Verbose) << "Controller " << strdata->string << " present more than once in " << nif->getFilename() << ", ignoring later version";
@@ -359,7 +359,7 @@ namespace NifOsg
                 handleProperty(geometry->shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
         }
 
-        void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
+        static void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             if (autoPlay)
@@ -368,7 +368,7 @@ namespace NifOsg
             toSetup->setFunction(std::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
         }
 
-        osg::ref_ptr<osg::LOD> handleLodNode(const Nif::NiLODNode* niLodNode)
+        static osg::ref_ptr<osg::LOD> handleLodNode(const Nif::NiLODNode* niLodNode)
         {
             osg::ref_ptr<osg::LOD> lod (new osg::LOD);
             lod->setName(niLodNode->name);
@@ -383,7 +383,7 @@ namespace NifOsg
             return lod;
         }
 
-        osg::ref_ptr<osg::Switch> handleSwitchNode(const Nif::NiSwitchNode* niSwitchNode)
+        static osg::ref_ptr<osg::Switch> handleSwitchNode(const Nif::NiSwitchNode* niSwitchNode)
         {
             osg::ref_ptr<osg::Switch> switchNode (new osg::Switch);
             switchNode->setName(niSwitchNode->name);
@@ -718,24 +718,6 @@ namespace NifOsg
             }
         }
 
-        static osg::ref_ptr<KeyframeController> handleKeyframeController(const Nif::NiKeyframeController* keyctrl)
-        {
-            osg::ref_ptr<NifOsg::KeyframeController> ctrl;
-            if (!keyctrl->interpolator.empty())
-            {
-                const Nif::NiTransformInterpolator* interp = keyctrl->interpolator.getPtr();
-                if (!interp->data.empty())
-                    ctrl = new NifOsg::KeyframeController(interp);
-                else
-                    ctrl = new NifOsg::KeyframeController(interp->defaultScale, interp->defaultPos, interp->defaultRot);
-            }
-            else if (!keyctrl->data.empty())
-            {
-                ctrl = new NifOsg::KeyframeController(keyctrl->data.getPtr());
-            }
-            return ctrl;
-        }
-
         void handleNodeControllers(const Nif::Node* nifNode, osg::Node* node, int animflags, bool& isAnimated)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
@@ -747,7 +729,7 @@ namespace NifOsg
                     const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
                     if (key->data.empty() && key->interpolator.empty())
                         continue;
-                    osg::ref_ptr<KeyframeController> callback(handleKeyframeController(key));
+                    osg::ref_ptr<KeyframeController> callback = new KeyframeController(key);
                     setupController(key, callback, animflags);
                     node->addUpdateCallback(callback);
                     isAnimated = true;
@@ -1615,6 +1597,9 @@ namespace NifOsg
                     }
                     else if (i == Nif::NiTexturingProperty::DecalTexture)
                     {
+                        // This is only an inaccurate imitation of the original implementation,
+                        // see https://github.com/niftools/nifskope/issues/184
+
                         osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
                         // Interpolate to the decal texture's colour...
                         texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
