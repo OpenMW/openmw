@@ -1,8 +1,10 @@
 #include "preparednavmeshdata.hpp"
 #include "preparednavmeshdatatuple.hpp"
+#include "recast.hpp"
 
 #include <Recast.h>
-#include <RecastAlloc.h>
+
+#include <cstring>
 
 namespace
 {
@@ -15,13 +17,6 @@ namespace
         value.nverts = 0;
         value.ntris = 0;
     }
-
-    void freePolyMeshDetail(rcPolyMeshDetail& value) noexcept
-    {
-        rcFree(value.meshes);
-        rcFree(value.verts);
-        rcFree(value.tris);
-    }
 }
 
 namespace DetourNavigator
@@ -29,6 +24,15 @@ namespace DetourNavigator
     PreparedNavMeshData::PreparedNavMeshData() noexcept
     {
         initPolyMeshDetail(mPolyMeshDetail);
+    }
+
+    PreparedNavMeshData::PreparedNavMeshData(const PreparedNavMeshData& other)
+        : mUserId(other.mUserId)
+        , mCellSize(other.mCellSize)
+        , mCellHeight(other.mCellHeight)
+    {
+        copyPolyMesh(other.mPolyMesh, mPolyMesh);
+        copyPolyMeshDetail(other.mPolyMeshDetail, mPolyMeshDetail);
     }
 
     PreparedNavMeshData::~PreparedNavMeshData() noexcept

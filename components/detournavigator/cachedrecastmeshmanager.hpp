@@ -35,6 +35,8 @@ namespace DetourNavigator
 
         std::shared_ptr<RecastMesh> getCachedMesh() const;
 
+        std::shared_ptr<RecastMesh> getNewMesh() const;
+
         bool isEmpty() const;
 
         void reportNavMeshChange(const Version& recastMeshVersion, const Version& navMeshVersion);

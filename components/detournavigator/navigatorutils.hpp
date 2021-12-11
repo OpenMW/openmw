@@ -37,9 +37,9 @@ namespace DetourNavigator
         if (navMesh == nullptr)
             return Status::NavMeshNotFound;
         const auto settings = navigator.getSettings();
-        return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings, agentHalfExtents),
-            toNavMeshCoordinates(settings, stepSize), toNavMeshCoordinates(settings, start),
-            toNavMeshCoordinates(settings, end), includeFlags, areaCosts, settings, endTolerance, out);
+        return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings.mRecast, agentHalfExtents),
+            toNavMeshCoordinates(settings.mRecast, stepSize), toNavMeshCoordinates(settings.mRecast, start),
+            toNavMeshCoordinates(settings.mRecast, end), includeFlags, areaCosts, settings, endTolerance, out);
     }
 
     /**

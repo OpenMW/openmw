@@ -7,7 +7,8 @@
 #include <QDebug>
 #include <QCoreApplication>
 
-Process::ProcessInvoker::ProcessInvoker()
+Process::ProcessInvoker::ProcessInvoker(QObject* parent)
+    : QObject(parent)
 {
     mProcess = new QProcess(this);
 
@@ -56,6 +57,7 @@ bool Process::ProcessInvoker::startProcess(const QString &name, const QStringLis
 //    mProcess = new QProcess(this);
     mName = name;
     mArguments = arguments;
+    mIgnoreErrors = false;
 
     QString path(name);
 #ifdef Q_OS_WIN
@@ -151,6 +153,8 @@ bool Process::ProcessInvoker::startProcess(const QString &name, const QStringLis
 
 void Process::ProcessInvoker::processError(QProcess::ProcessError error)
 {
+    if (mIgnoreErrors)
+        return;
     QMessageBox msgBox;
     msgBox.setWindowTitle(tr("Error running executable"));
     msgBox.setIcon(QMessageBox::Critical);
@@ -166,6 +170,8 @@ void Process::ProcessInvoker::processError(QProcess::ProcessError error)
 void Process::ProcessInvoker::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if (exitCode != 0 || exitStatus == QProcess::CrashExit) {
+        if (mIgnoreErrors)
+            return;
         QString error(mProcess->readAllStandardError());
         error.append(tr("\nArguments:\n"));
         error.append(mArguments.join(" "));
@@ -180,4 +186,10 @@ void Process::ProcessInvoker::processFinished(int exitCode, QProcess::ExitStatus
         msgBox.setDetailedText(error);
         msgBox.exec();
     }
+}
+
+void Process::ProcessInvoker::killProcess()
+{
+    mIgnoreErrors = true;
+    mProcess->kill();
 }

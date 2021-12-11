@@ -6,12 +6,8 @@
 
 namespace DetourNavigator
 {
-    struct Settings
+    struct RecastSettings
     {
-        bool mEnableWriteRecastMeshToFile = false;
-        bool mEnableWriteNavMeshToFile = false;
-        bool mEnableRecastMeshFileNameRevision = false;
-        bool mEnableNavMeshFileNameRevision = false;
         float mCellHeight = 0;
         float mCellSize = 0;
         float mDetailSampleDist = 0;
@@ -23,22 +19,43 @@ namespace DetourNavigator
         float mSwimHeightScale = 0;
         int mBorderSize = 0;
         int mMaxEdgeLen = 0;
-        int mMaxNavMeshQueryNodes = 0;
-        int mMaxPolys = 0;
-        int mMaxTilesNumber = 0;
         int mMaxVertsPerPoly = 0;
-        int mRegionMergeSize = 0;
-        int mRegionMinSize = 0;
+        int mRegionMergeArea = 0;
+        int mRegionMinArea = 0;
         int mTileSize = 0;
-        int mWaitUntilMinDistanceToPlayer = 0;
-        std::size_t mAsyncNavMeshUpdaterThreads = 0;
-        std::size_t mMaxNavMeshTilesCacheSize = 0;
+    };
+
+    struct DetourSettings
+    {
+        int mMaxPolys = 0;
+        int mMaxNavMeshQueryNodes = 0;
         std::size_t mMaxPolygonPathSize = 0;
         std::size_t mMaxSmoothPathSize = 0;
+    };
+
+    struct Settings
+    {
+        bool mEnableWriteRecastMeshToFile = false;
+        bool mEnableWriteNavMeshToFile = false;
+        bool mEnableRecastMeshFileNameRevision = false;
+        bool mEnableNavMeshFileNameRevision = false;
+        bool mEnableNavMeshDiskCache = false;
+        bool mWriteToNavMeshDb = false;
+        RecastSettings mRecast;
+        DetourSettings mDetour;
+        int mWaitUntilMinDistanceToPlayer = 0;
+        int mMaxTilesNumber = 0;
+        std::size_t mAsyncNavMeshUpdaterThreads = 0;
+        std::size_t mMaxNavMeshTilesCacheSize = 0;
         std::string mRecastMeshPathPrefix;
         std::string mNavMeshPathPrefix;
         std::chrono::milliseconds mMinUpdateInterval;
+        std::int64_t mNavMeshVersion = 0;
     };
+
+    RecastSettings makeRecastSettingsFromSettingsManager();
+
+    DetourSettings makeDetourSettingsFromSettingsManager();
 
     Settings makeSettingsFromSettingsManager();
 }

@@ -1,10 +1,10 @@
-#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_SERIALIZATION_SIZEACCUMULATOR_H
-#define OPENMW_COMPONENTS_DETOURNAVIGATOR_SERIALIZATION_SIZEACCUMULATOR_H
+#ifndef OPENMW_COMPONENTS_SERIALIZATION_SIZEACCUMULATOR_H
+#define OPENMW_COMPONENTS_SERIALIZATION_SIZEACCUMULATOR_H
 
 #include <cstddef>
 #include <type_traits>
 
-namespace DetourNavigator::Serialization
+namespace Serialization
 {
     class SizeAccumulator
     {
@@ -18,7 +18,7 @@ namespace DetourNavigator::Serialization
         template <class Format, class T>
         void operator()(Format&& format, const T& value)
         {
-            if constexpr (std::is_arithmetic_v<T>)
+            if constexpr (std::is_arithmetic_v<T> || std::is_enum_v<T>)
                 mValue += sizeof(T);
             else
                 format(*this, value);
@@ -27,7 +27,7 @@ namespace DetourNavigator::Serialization
         template <class Format, class T>
         auto operator()(Format&& format, const T* data, std::size_t count)
         {
-            if constexpr (std::is_arithmetic_v<T>)
+            if constexpr (std::is_arithmetic_v<T> || std::is_enum_v<T>)
                 mValue += count * sizeof(T);
             else
                 format(*this, data, count);

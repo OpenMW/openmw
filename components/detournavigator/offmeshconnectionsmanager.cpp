@@ -11,7 +11,7 @@
 
 namespace DetourNavigator
 {
-    OffMeshConnectionsManager::OffMeshConnectionsManager(const Settings& settings)
+    OffMeshConnectionsManager::OffMeshConnectionsManager(const RecastSettings& settings)
         : mSettings(settings)
     {}
 
@@ -65,11 +65,11 @@ namespace DetourNavigator
         return removed;
     }
 
-    std::vector<OffMeshConnection> OffMeshConnectionsManager::get(const TilePosition& tilePosition)
+    std::vector<OffMeshConnection> OffMeshConnectionsManager::get(const TilePosition& tilePosition) const
     {
         std::vector<OffMeshConnection> result;
 
-        const auto values = mValues.lock();
+        const auto values = mValues.lockConst();
 
         const auto itByTilePosition = values->mByTilePosition.find(tilePosition);
 

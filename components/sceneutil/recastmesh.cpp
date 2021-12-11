@@ -42,7 +42,7 @@ namespace
 namespace SceneUtil
 {
     osg::ref_ptr<osg::Group> createRecastMeshGroup(const DetourNavigator::RecastMesh& recastMesh,
-        const DetourNavigator::Settings& settings)
+        const DetourNavigator::RecastSettings& settings)
     {
         using namespace DetourNavigator;
 

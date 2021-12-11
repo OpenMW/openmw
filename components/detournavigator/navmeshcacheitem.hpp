@@ -12,6 +12,7 @@
 
 #include <map>
 #include <ostream>
+#include <set>
 
 struct dtMeshTile;
 
@@ -147,6 +148,10 @@ namespace DetourNavigator
 
         UpdateNavMeshStatus removeTile(const TilePosition& position);
 
+        UpdateNavMeshStatus markAsEmpty(const TilePosition& position);
+
+        bool isEmptyTile(const TilePosition& position) const;
+
         template <class Function>
         void forEachUsedTile(Function&& function) const
         {
@@ -166,6 +171,7 @@ namespace DetourNavigator
         NavMeshPtr mImpl;
         Version mVersion;
         std::map<TilePosition, Tile> mUsedTiles;
+        std::set<TilePosition> mEmptyTiles;
     };
 
     using GuardedNavMeshCacheItem = Misc::ScopeGuarded<NavMeshCacheItem>;

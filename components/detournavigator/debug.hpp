@@ -3,6 +3,7 @@
 
 #include "tilebounds.hpp"
 #include "status.hpp"
+#include "recastmesh.hpp"
 
 #include <osg/io_utils>
 
@@ -39,10 +40,40 @@ namespace DetourNavigator
         return stream << "DetourNavigator::Error::" << static_cast<int>(value);
     }
 
-    class RecastMesh;
-    struct Settings;
+    inline std::ostream& operator<<(std::ostream& s, const Water& v)
+    {
+        return s << "Water {" << v.mCellSize << ", " << v.mLevel << "}";
+    }
 
-    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision, const Settings& settings);
+    inline std::ostream& operator<<(std::ostream& s, const CellWater& v)
+    {
+        return s << "CellWater {" << v.mCellPosition << ", " << v.mWater << "}";
+    }
+
+    inline std::ostream& operator<<(std::ostream& s, const FlatHeightfield& v)
+    {
+        return s << "FlatHeightfield {" << v.mCellPosition << ", " << v.mCellSize << ", " << v.mHeight << "}";
+    }
+
+    inline std::ostream& operator<<(std::ostream& s, const Heightfield& v)
+    {
+        s << "Heightfield {.mCellPosition=" << v.mCellPosition
+          << ", .mCellSize=" << v.mCellSize
+          << ", .mLength=" << static_cast<int>(v.mLength)
+          << ", .mMinHeight=" << v.mMinHeight
+          << ", .mMaxHeight=" << v.mMaxHeight
+          << ", .mHeights={";
+        for (float h : v.mHeights)
+            s << h << ", ";
+        s << "}";
+        return s << ", .mOriginalSize=" << v.mOriginalSize << "}";
+    }
+
+    class RecastMesh;
+    struct RecastSettings;
+
+    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix,
+        const std::string& revision, const RecastSettings& settings);
     void writeToFile(const dtNavMesh& navMesh, const std::string& pathPrefix, const std::string& revision);
 }
 

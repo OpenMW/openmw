@@ -15,6 +15,11 @@ namespace DetourNavigator
         {
         }
 
+        explicit ObjectId(std::size_t value) noexcept
+            : mValue(value)
+        {
+        }
+
         std::size_t value() const noexcept
         {
             return mValue;

@@ -145,7 +145,7 @@ namespace
         std::vector<CellWater> water;
         generateWater(std::back_inserter(water), 1, random);
         RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water),
-                              {generateHeightfield(random)}, {generateFlatHeightfield(random)});
+                              {generateHeightfield(random)}, {generateFlatHeightfield(random)}, {});
         return Key {agentHalfExtents, tilePosition, std::move(recastMesh)};
     }
 

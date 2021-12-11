@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_SERIALIZATION_FORMAT_H
-#define OPENMW_COMPONENTS_DETOURNAVIGATOR_SERIALIZATION_FORMAT_H
+#ifndef OPENMW_COMPONENTS_SERIALIZATION_FORMAT_H
+#define OPENMW_COMPONENTS_SERIALIZATION_FORMAT_H
 
 #include <algorithm>
 #include <cstddef>
@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-namespace DetourNavigator::Serialization
+namespace Serialization
 {
     enum class Mode
     {
@@ -22,6 +22,9 @@ namespace DetourNavigator::Serialization
     template <class ... Args>
     struct IsContiguousContainer<std::vector<Args ...>> : std::true_type {};
 
+    template <class T, std::size_t n>
+    struct IsContiguousContainer<std::array<T, n>> : std::true_type {};
+
     template <class T>
     constexpr bool isContiguousContainer = IsContiguousContainer<std::decay_t<T>>::value;
 
@@ -31,24 +34,10 @@ namespace DetourNavigator::Serialization
         template <class Visitor, class T>
         void operator()(Visitor&& visitor, T* data, std::size_t size) const
         {
-            if constexpr (std::is_arithmetic_v<T>)
-            {
+            if constexpr (std::is_arithmetic_v<T> || std::is_enum_v<T>)
                 visitor(self(), data, size);
-            }
-            else if constexpr (std::is_enum_v<T>)
-            {
-                if constexpr (mode == Mode::Write)
-                    visitor(self(), reinterpret_cast<const std::underlying_type_t<T>*>(data), size);
-                else
-                {
-                    static_assert(mode == Mode::Read);
-                    visitor(self(), reinterpret_cast<std::underlying_type_t<T>*>(data), size);
-                }
-            }
             else
-            {
                 std::for_each(data, data + size, [&] (auto& v) { visitor(self(), v); });
-            }
         }
 
         template <class Visitor, class T, std::size_t size>

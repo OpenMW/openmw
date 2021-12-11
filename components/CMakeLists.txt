@@ -203,6 +203,11 @@ add_component_dir(detournavigator
     preparednavmeshdata
     navmeshcacheitem
     navigatorutils
+    generatenavmeshtile
+    navmeshdb
+    serialization
+    navmeshdbutils
+    recast
     )
 
 add_component_dir(loadinglistener

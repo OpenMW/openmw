@@ -464,3 +464,4 @@ default actor pathfind half extents
 :Default:	29.27999496459961 28.479997634887695 66.5
 
 Actor half extents used for exterior cells to generate navmesh.
+Changing the value will invalidate navmesh disk cache.

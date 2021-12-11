@@ -18,7 +18,7 @@ namespace DetourNavigator
         rcPolyMeshDetail mPolyMeshDetail;
 
         PreparedNavMeshData() noexcept;
-        PreparedNavMeshData(const PreparedNavMeshData&) = delete;
+        PreparedNavMeshData(const PreparedNavMeshData& other);
 
         ~PreparedNavMeshData() noexcept;
 

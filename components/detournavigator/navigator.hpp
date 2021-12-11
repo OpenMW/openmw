@@ -6,8 +6,11 @@
 #include "recastmeshtiles.hpp"
 #include "waitconditiontype.hpp"
 #include "heightfieldshape.hpp"
+#include "objecttransform.hpp"
 
 #include <components/resource/bulletshape.hpp>
+
+#include <string_view>
 
 namespace ESM
 {
@@ -27,10 +30,14 @@ namespace DetourNavigator
     struct ObjectShapes
     {
         osg::ref_ptr<const Resource::BulletShapeInstance> mShapeInstance;
+        ObjectTransform mTransform;
 
-        ObjectShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance)
+        ObjectShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance, const ObjectTransform& transform)
             : mShapeInstance(shapeInstance)
-        {}
+            , mTransform(transform)
+        {
+            assert(mShapeInstance != nullptr);
+        }
     };
 
     struct DoorShapes : ObjectShapes
@@ -39,8 +46,8 @@ namespace DetourNavigator
         osg::Vec3f mConnectionEnd;
 
         DoorShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance,
-                   const osg::Vec3f& connectionStart,const osg::Vec3f& connectionEnd)
-            : ObjectShapes(shapeInstance)
+                   const ObjectTransform& transform, const osg::Vec3f& connectionStart, const osg::Vec3f& connectionEnd)
+            : ObjectShapes(shapeInstance, transform)
             , mConnectionStart(connectionStart)
             , mConnectionEnd(connectionEnd)
         {}
@@ -69,6 +76,12 @@ namespace DetourNavigator
          * @param agentHalfExtents allows determine which agent to remove
          */
         virtual void removeAgent(const osg::Vec3f& agentHalfExtents) = 0;
+
+        /**
+         * @brief setWorldspace should be called before adding object from new worldspace
+         * @param worldspace
+         */
+        virtual void setWorldspace(std::string_view worldspace) = 0;
 
         /**
          * @brief addObject is used to add complex object with allowed to walk and avoided to walk shapes
@@ -183,7 +196,7 @@ namespace DetourNavigator
         virtual float getMaxNavmeshAreaRealRadius() const = 0;
     };
 
-    std::unique_ptr<Navigator> makeNavigator(const Settings& settings);
+    std::unique_ptr<Navigator> makeNavigator(const Settings& settings, const std::string& userDataPath);
 
     std::unique_ptr<Navigator> makeNavigatorStub();
 }

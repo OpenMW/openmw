@@ -254,9 +254,9 @@ namespace SceneUtil
         osg::ref_ptr<osg::Group> group(new osg::Group);
         group->setStateSet(groupStateSet);
         constexpr float shift = 10.0f;
-        DebugDraw debugDraw(*group, debugDrawStateSet, osg::Vec3f(0, 0, shift), 1.0f / settings.mRecastScaleFactor);
+        DebugDraw debugDraw(*group, debugDrawStateSet, osg::Vec3f(0, 0, shift), 1.0f / settings.mRecast.mRecastScaleFactor);
         dtNavMeshQuery navMeshQuery;
-        navMeshQuery.init(&navMesh, settings.mMaxNavMeshQueryNodes);
+        navMeshQuery.init(&navMesh, settings.mDetour.mMaxNavMeshQueryNodes);
         drawMeshTile(&debugDraw, navMesh, &navMeshQuery, &meshTile, DU_DRAWNAVMESH_OFFMESHCONS | DU_DRAWNAVMESH_CLOSEDLIST);
 
         return group;

@@ -122,7 +122,8 @@ namespace DetourNavigator
     {
         RecastMeshBuilder builder(mTileBounds);
         using Object = std::tuple<
-            osg::ref_ptr<const osg::Referenced>,
+            osg::ref_ptr<const Resource::BulletShapeInstance>,
+            ObjectTransform,
             std::reference_wrapper<const btCollisionShape>,
             btTransform,
             AreaType
@@ -139,12 +140,13 @@ namespace DetourNavigator
             for (const auto& [k, object] : mObjects)
             {
                 const RecastMeshObject& impl = object.getImpl();
-                objects.emplace_back(impl.getHolder(), impl.getShape(), impl.getTransform(), impl.getAreaType());
+                objects.emplace_back(impl.getInstance(), impl.getObjectTransform(), impl.getShape(),
+                                     impl.getTransform(), impl.getAreaType());
             }
             revision = mRevision;
         }
-        for (const auto& [holder, shape, transform, areaType] : objects)
-            builder.addObject(shape, transform, areaType);
+        for (const auto& [instance, objectTransform, shape, transform, areaType] : objects)
+            builder.addObject(shape, transform, areaType, instance->getSource(), objectTransform);
         return std::move(builder).create(mGeneration, revision);
     }
 

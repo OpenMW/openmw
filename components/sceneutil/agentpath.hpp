@@ -13,14 +13,14 @@ namespace osg
 
 namespace DetourNavigator
 {
-    struct Settings;
+    struct RecastSettings;
 }
 
 namespace SceneUtil
 {
     osg::ref_ptr<osg::Group> createAgentPathGroup(const std::deque<osg::Vec3f>& path,
             const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end,
-            const DetourNavigator::Settings& settings);
+            const DetourNavigator::RecastSettings& settings);
 }
 
 #endif

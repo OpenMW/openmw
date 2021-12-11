@@ -50,7 +50,8 @@ namespace DetourNavigator
         {
             return UpdateNavMeshStatus::ignored;
         }
-        const auto removed = ::removeTile(*mImpl, position);
+        bool removed = ::removeTile(*mImpl, position);
+        removed = mEmptyTiles.erase(position) > 0 || removed;
         const auto addStatus = addTile(*mImpl, navMeshData.mValue.get(), navMeshData.mSize);
         if (dtStatusSucceed(addStatus))
         {
@@ -82,12 +83,30 @@ namespace DetourNavigator
 
     UpdateNavMeshStatus NavMeshCacheItem::removeTile(const TilePosition& position)
     {
-        const auto removed = ::removeTile(*mImpl, position);
+        bool removed = ::removeTile(*mImpl, position);
+        removed = mEmptyTiles.erase(position) > 0 || removed;
         if (removed)
         {
             mUsedTiles.erase(position);
             ++mVersion.mRevision;
         }
         return UpdateNavMeshStatusBuilder().removed(removed).getResult();
+    }
+
+    UpdateNavMeshStatus NavMeshCacheItem::markAsEmpty(const TilePosition& position)
+    {
+        bool removed = ::removeTile(*mImpl, position);
+        removed = mEmptyTiles.insert(position).second || removed;
+        if (removed)
+        {
+            mUsedTiles.erase(position);
+            ++mVersion.mRevision;
+        }
+        return UpdateNavMeshStatusBuilder().removed(removed).getResult();
+    }
+
+    bool NavMeshCacheItem::isEmptyTile(const TilePosition& position) const
+    {
+        return mEmptyTiles.find(position) != mEmptyTiles.end();
     }
 }

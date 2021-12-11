@@ -84,6 +84,11 @@ namespace DetourNavigator
         return *mCached.lockConst();
     }
 
+    std::shared_ptr<RecastMesh> CachedRecastMeshManager::getNewMesh() const
+    {
+        return mImpl.getMesh();
+    }
+
     bool CachedRecastMeshManager::isEmpty() const
     {
         return mImpl.isEmpty();
