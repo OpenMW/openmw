@@ -451,6 +451,7 @@ namespace MWMechanics
         {
             std::set<MWWorld::Ptr> allySet;
             getActorsSidingWith(ptr, allySet);
+            allySet.insert(ptr);
             std::vector<MWWorld::Ptr> allies(allySet.begin(), allySet.end());
             for(const auto& ally : allies)
                 ally.getClass().getCreatureStats(ally).getAiSequence().stopCombat(targets);
