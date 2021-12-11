@@ -108,6 +108,7 @@
     Feature #6128: Soft Particles
     Feature #6161: Refactor Sky to use shaders and GLES/GL3 friendly
     Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
+    Feature #6189: Navigation mesh disk cache
     Feature #6199: Support FBO Rendering
     Feature #6248: Embedded error marker mesh
     Feature #6249: Alpha testing support for Collada
