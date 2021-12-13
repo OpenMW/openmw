@@ -78,11 +78,12 @@ namespace MWLua
         mInitialized = true;
     }
 
-    void LuaManager::update(bool paused, float dt)
+    void LuaManager::update()
     {
         if (mPlayer.isEmpty())
             return;  // The game is not started yet.
 
+        float frameDuration = MWBase::Environment::get().getFrameDuration();
         ObjectRegistry* objectRegistry = mWorldView.getObjectRegistry();
 
         MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -101,9 +102,9 @@ namespace MWLua
         mGlobalEvents = std::vector<GlobalEvent>();
         mLocalEvents = std::vector<LocalEvent>();
 
-        if (!paused)
+        if (!mWorldView.isPaused())
         {  // Update time and process timers
-            double seconds = mWorldView.getGameTimeInSeconds() + dt;
+            double seconds = mWorldView.getGameTimeInSeconds() + frameDuration;
             mWorldView.setGameTimeInSeconds(seconds);
             double hours = mWorldView.getGameTimeInHours();
 
@@ -146,10 +147,10 @@ namespace MWLua
         }
         mLocalEngineEvents.clear();
 
-        if (!paused)
+        if (!mWorldView.isPaused())
         {
             for (LocalScripts* scripts : mActiveLocalScripts)
-                scripts->update(dt);
+                scripts->update(frameDuration);
         }
 
         // Engine handlers in global scripts
@@ -168,24 +169,25 @@ namespace MWLua
             mGlobalScripts.actorActive(GObject(id, objectRegistry));
         mActorAddedEvents.clear();
 
-        if (!paused)
-            mGlobalScripts.update(dt);
+        if (!mWorldView.isPaused())
+            mGlobalScripts.update(frameDuration);
     }
 
-    void LuaManager::synchronizedUpdate(bool paused, float dt)
+    void LuaManager::synchronizedUpdate()
     {
         if (mPlayer.isEmpty())
             return;  // The game is not started yet.
 
         // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
-        if (playerScripts && !paused)
+        if (playerScripts && !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
         {
             for (const auto& event : mInputEvents)
                 playerScripts->processInputEvent(event);
-            playerScripts->inputUpdate(dt);
         }
         mInputEvents.clear();
+        if (playerScripts && !mWorldView.isPaused())
+            playerScripts->inputUpdate(MWBase::Environment::get().getFrameDuration());
 
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
         for (const std::string& message : mUIMessages)

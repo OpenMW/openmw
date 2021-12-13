@@ -1,4 +1,5 @@
 local camera = require('openmw.camera')
+local core = require('openmw.core')
 local input = require('openmw.input')
 local settings = require('openmw.settings')
 local util = require('openmw.util')
@@ -225,6 +226,7 @@ return {
         onUpdate = onUpdate,
         onInputUpdate = onInputUpdate,
         onInputAction = function(action)
+            if core.isWorldPaused() then return end
             if action == input.ACTION.ZoomIn then
                 zoom(10)
             elseif action == input.ACTION.ZoomOut then

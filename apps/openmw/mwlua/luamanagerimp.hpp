@@ -29,10 +29,10 @@ namespace MWLua
 
         // Called by engine.cpp every frame. For performance reasons it works in a separate
         // thread (in parallel with osg Cull). Can not use scene graph.
-        void update(bool paused, float dt);
+        void update();
 
         // Called by engine.cpp from the main thread. Can use scene graph.
-        void synchronizedUpdate(bool paused, float dt);
+        void synchronizedUpdate();
 
         // Available everywhere through the MWBase::LuaManager interface.
         // LuaManager queues these events and propagates to scripts on the next `update` call.

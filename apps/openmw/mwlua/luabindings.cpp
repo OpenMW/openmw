@@ -25,7 +25,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 10;
+        api["API_REVISION"] = 11;
         api["quit"] = [lua]()
         {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
@@ -37,6 +37,7 @@ namespace MWLua
         };
         api["getGameTimeInSeconds"] = [world=context.mWorldView]() { return world->getGameTimeInSeconds(); };
         api["getGameTimeInHours"] = [world=context.mWorldView]() { return world->getGameTimeInHours(); };
+        api["isWorldPaused"] = [world=context.mWorldView]() { return world->isPaused(); };
         api["OBJECT_TYPE"] = definitionList(*lua,
         {
             "Activator", "Armor", "Book", "Clothing", "Creature", "Door", "Ingredient",

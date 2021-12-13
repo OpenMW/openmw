@@ -22,7 +22,7 @@
 
 -------------------------------------------------------------------------------
 -- Game time in seconds.
--- The number of seconds in the game world, passed from starting a new game.
+-- The number of seconds passed in the game world since starting a new game.
 -- @function [parent=#core] getGameTimeInSeconds
 -- @return #number
 
@@ -31,6 +31,11 @@
 -- Note that the number of game seconds in a game hour is not guaranteed to be fixed.
 -- @function [parent=#core] getGameTimeInHours
 -- @return #number
+
+-------------------------------------------------------------------------------
+-- Whether the world is paused (onUpdate doesn't work when the world is paused).
+-- @function [parent=#core] isWorldPaused
+-- @return #boolean
 
 
 -------------------------------------------------------------------------------
