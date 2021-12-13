@@ -19,6 +19,12 @@
 -- @param #number angle Angle in radians
 -- @return #number Angle in range `[-pi, pi]`
 
+-------------------------------------------------------------------------------
+-- Makes a table read only.
+-- @function [parent=#util] makeReadOnly
+-- @param #table table Any table.
+-- @return #table The same table wrapped with read only userdata.
+
 
 -------------------------------------------------------------------------------
 -- Immutable 2D vector

@@ -5,6 +5,8 @@
 
 #include <components/misc/endianness.hpp>
 
+#include "luastate.hpp"
+
 namespace LuaUtil
 {
 
@@ -147,7 +149,8 @@ namespace LuaUtil
             throw std::runtime_error("Unknown Lua type.");
     }
 
-    static void deserializeImpl(sol::state& lua, std::string_view& binaryData, const UserdataSerializer* customSerializer)
+    static void deserializeImpl(lua_State* lua, std::string_view& binaryData,
+                                const UserdataSerializer* customSerializer, bool readOnly)
     {
         if (binaryData.empty())
             throw std::runtime_error("Unexpected end of serialized data.");
@@ -176,22 +179,22 @@ namespace LuaUtil
         if (type & SHORT_STRING_FLAG)
         {
             size_t size = type & 0x1f;
-            sol::stack::push<std::string_view>(lua.lua_state(), binaryData.substr(0, size));
+            sol::stack::push<std::string_view>(lua, binaryData.substr(0, size));
             binaryData = binaryData.substr(size);
             return;
         }
         switch (static_cast<SerializedType>(type))
         {
             case SerializedType::NUMBER:
-                sol::stack::push<double>(lua.lua_state(), getValue<double>(binaryData));
+                sol::stack::push<double>(lua, getValue<double>(binaryData));
                 return;
             case SerializedType::BOOLEAN:
-                sol::stack::push<bool>(lua.lua_state(), getValue<char>(binaryData) != 0);
+                sol::stack::push<bool>(lua, getValue<char>(binaryData) != 0);
                 return;
             case SerializedType::LONG_STRING:
             {
                 uint32_t size = getValue<uint32_t>(binaryData);
-                sol::stack::push<std::string_view>(lua.lua_state(), binaryData.substr(0, size));
+                sol::stack::push<std::string_view>(lua, binaryData.substr(0, size));
                 binaryData = binaryData.substr(size);
                 return;
             }
@@ -200,13 +203,15 @@ namespace LuaUtil
                 lua_createtable(lua, 0, 0);
                 while (!binaryData.empty() && binaryData[0] != char(SerializedType::TABLE_END))
                 {
-                    deserializeImpl(lua, binaryData, customSerializer);
-                    deserializeImpl(lua, binaryData, customSerializer);
+                    deserializeImpl(lua, binaryData, customSerializer, readOnly);
+                    deserializeImpl(lua, binaryData, customSerializer, readOnly);
                     lua_settable(lua, -3);
                 }
                 if (binaryData.empty())
                     throw std::runtime_error("Unexpected end of serialized data.");
                 binaryData = binaryData.substr(1);
+                if (readOnly)
+                    sol::stack::push(lua, makeReadOnly(sol::stack::pop<sol::table>(lua)));
                 return;
             }
             case SerializedType::TABLE_END:
@@ -215,7 +220,7 @@ namespace LuaUtil
             {
                 float x = getValue<float>(binaryData);
                 float y = getValue<float>(binaryData);
-                sol::stack::push<osg::Vec2f>(lua.lua_state(), osg::Vec2f(x, y));
+                sol::stack::push<osg::Vec2f>(lua, osg::Vec2f(x, y));
                 return;
             }
             case SerializedType::VEC3:
@@ -223,7 +228,7 @@ namespace LuaUtil
                 float x = getValue<float>(binaryData);
                 float y = getValue<float>(binaryData);
                 float z = getValue<float>(binaryData);
-                sol::stack::push<osg::Vec3f>(lua.lua_state(), osg::Vec3f(x, y, z));
+                sol::stack::push<osg::Vec3f>(lua, osg::Vec3f(x, y, z));
                 return;
             }
         }
@@ -240,7 +245,8 @@ namespace LuaUtil
         return res;
     }
 
-    sol::object deserialize(sol::state& lua, std::string_view binaryData, const UserdataSerializer* customSerializer)
+    sol::object deserialize(lua_State* lua, std::string_view binaryData,
+                            const UserdataSerializer* customSerializer, bool readOnly)
     {
         if (binaryData.empty())
             return sol::nil;
@@ -248,10 +254,10 @@ namespace LuaUtil
             throw std::runtime_error("Incorrect version of Lua serialization format: " +
                                      std::to_string(static_cast<unsigned>(binaryData[0])));
         binaryData = binaryData.substr(1);
-        deserializeImpl(lua, binaryData, customSerializer);
+        deserializeImpl(lua, binaryData, customSerializer, readOnly);
         if (!binaryData.empty())
             throw std::runtime_error("Unexpected data after serialized object");
-        return sol::stack::pop<sol::object>(lua.lua_state());
+        return sol::stack::pop<sol::object>(lua);
     }
 
 }

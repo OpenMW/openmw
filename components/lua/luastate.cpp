@@ -76,9 +76,8 @@ namespace LuaUtil
 
         lua_State* lua = table.lua_state();
         table[sol::meta_function::index] = table;
-        sol::stack::push(lua, std::move(table));
         lua_newuserdata(lua, 0);
-        lua_pushvalue(lua, -2);
+        sol::stack::push(lua, std::move(table));
         lua_setmetatable(lua, -2);
         return sol::stack::pop<sol::table>(lua);
     }

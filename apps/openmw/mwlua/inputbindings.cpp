@@ -54,7 +54,7 @@ namespace MWLua
         {
             return input->isControllerButtonPressed(static_cast<SDL_GameControllerButton>(button));
         };
-        api["isMouseButtonPressed"] = [input](int button) -> bool
+        api["isMouseButtonPressed"] = [](int button) -> bool
         {
             return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(button);
         };
