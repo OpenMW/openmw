@@ -24,6 +24,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         lua/test_querypackage.cpp
         lua/test_configuration.cpp
         lua/test_i18n.cpp
+        lua/test_storage.cpp
 
         lua/test_ui_content.cpp
 

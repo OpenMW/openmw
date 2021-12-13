@@ -8,7 +8,7 @@
 namespace MWLua
 {
 
-    static sol::table initSettingsPackage(const Context& context, bool /*global*/, bool player)
+    static sol::table initSettingsPackage(const Context& context, bool player)
     {
         LuaUtil::LuaState* lua = context.mLua;
         sol::table config(lua->sol(), sol::create);
@@ -65,8 +65,7 @@ namespace MWLua
         return LuaUtil::makeReadOnly(config);
     }
 
-    sol::table initGlobalSettingsPackage(const Context& context) { return initSettingsPackage(context, true, false); }
-    sol::table initLocalSettingsPackage(const Context& context) { return initSettingsPackage(context, false, false); }
-    sol::table initPlayerSettingsPackage(const Context& context) { return initSettingsPackage(context, false, true); }
+    sol::table initGlobalSettingsPackage(const Context& context) { return initSettingsPackage(context, false); }
+    sol::table initPlayerSettingsPackage(const Context& context) { return initSettingsPackage(context, true); }
 
 }
