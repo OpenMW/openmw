@@ -3,6 +3,14 @@
 stages:
   - build
 
+# https://blog.nimbleways.com/let-s-make-faster-gitlab-ci-cd-pipelines/
+variables:
+  FF_USE_NEW_SHELL_ESCAPE: "true"
+  FF_USE_FASTZIP: "true"
+  # These can be specified per job or per pipeline
+  ARTIFACT_COMPRESSION_LEVEL: "fast"
+  CACHE_COMPRESSION_LEVEL: "fast"
+
 .Ubuntu_Image:
   tags:
     - docker
