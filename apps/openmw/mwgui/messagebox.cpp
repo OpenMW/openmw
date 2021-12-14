@@ -206,11 +206,6 @@ namespace MWGui
         mMainWidget->setPosition(pos);
     }
 
-    const std::string MessageBox::getMessage()
-    { 
-        return mMessage;
-    }
-
     int MessageBox::getHeight ()
     {
         return mMainWidget->getHeight()+mNextBoxPadding;
