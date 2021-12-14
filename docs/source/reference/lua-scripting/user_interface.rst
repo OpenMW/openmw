@@ -22,9 +22,22 @@ Every widget is defined by a layout, which is a Lua table with the following fie
 4. `content`: a Content (`openmw.ui.content`), which contains layouts for the children of this widget.
 5. | `name`: an arbitrary string, the only limitatiion is it being unique within a `Content`.
    | Helpful for navigatilng through the layouts.
-6. `layer`: only applies for the root widget. (Windows, HUD, etc)
+6. `layer`: only applies for the root widget. 
 
-.. TODO: Write a more detailed documentation for layers when they are finished
+Layers
+------
+Layers control how widgets overlap - layers with higher indexes cover render over layers with lower indexes.
+Widgets within the same layer which were added later overlap the ones created earlier.
+A layer can also be set as non-interactive, which prevents all mouse interactions with the widgets in that layer.
+
+.. TODO: Move this list when layers are de-hardcoded
+
+Pre-defined OpenMW layers:
+
+1. `HUD` interactive
+2. `Windows` interactive
+3. `Notification` non-interactive
+4. `MessageBox` interactive
 
 Elements
 --------

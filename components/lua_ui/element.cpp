@@ -55,7 +55,6 @@ namespace LuaUi
     {
         std::string type = widgetType(layout);
         std::string skin = layout.get_or("skin", std::string());
-        std::string layer = layout.get_or("layer", std::string("Windows"));
         std::string name = layout.get_or("name", std::string());
 
         static auto widgetTypeMap = widgetTypeToName();
@@ -65,7 +64,7 @@ namespace LuaUi
         MyGUI::Widget* widget = MyGUI::Gui::getInstancePtr()->createWidgetT(
             type, skin,
             MyGUI::IntCoord(), MyGUI::Align::Default,
-            layer, name);
+            std::string(), name);
 
         LuaUi::WidgetExtension* ext = dynamic_cast<LuaUi::WidgetExtension*>(widget);
         if (!ext)
@@ -124,17 +123,36 @@ namespace LuaUi
             ext->addChild(createWidget(newContent.at(i), ext));
     }
 
+    void setLayer(const sol::table& layout, LuaUi::WidgetExtension* ext)
+    {
+        MyGUI::ILayer* layerNode = ext->widget()->getLayer();
+        std::string currentLayer = layerNode ? layerNode->getName() : std::string();
+        std::string newLayer = layout.get_or("layer", std::string());
+        if (!newLayer.empty() && !MyGUI::LayerManager::getInstance().isExist(newLayer))
+            throw std::logic_error(std::string("Layer ") += newLayer += " doesn't exist");
+        else if (newLayer != currentLayer)
+        {
+            MyGUI::LayerManager::getInstance().attachToLayerNode(newLayer, ext->widget());
+        }
+    }
+
     void Element::create()
     {
         assert(!mRoot);
         if (!mRoot)
+        {
             mRoot = createWidget(mLayout, nullptr);
+            setLayer(mLayout, mRoot);
+        }
     }
 
     void Element::update()
     {
         if (mRoot && mUpdate)
+        {
             updateWidget(mLayout, mRoot);
+            setLayer(mLayout, mRoot);
+        }
         mUpdate = false;
     }
 

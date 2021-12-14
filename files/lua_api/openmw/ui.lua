@@ -9,6 +9,10 @@
 -- @field [parent=#ui] #WIDGET_TYPE WIDGET_TYPE
 
 ---
+-- Tools for working with layers
+-- @field [parent=#ui] #Layers layers
+
+---
 -- @type WIDGET_TYPE
 -- @field [parent=#WIDGET_TYPE] Widget Base widget type
 -- @field [parent=#WIDGET_TYPE] Text Display text
@@ -39,6 +43,27 @@
 -- @field #table props Optional table of widget properties
 -- @field #table events Optional table of event callbacks
 -- @field #Content content Optional @{openmw.ui#Content} of children layouts
+
+---
+-- Layers
+-- @type Layers
+-- @usage
+-- ui.layers.insertAfter('HUD', 'NewLayer', { interactive = true })
+-- local fourthLayerName = ui.layers[4]
+-- local windowsIndex = ui.layers.indexOf('Windows')
+
+---
+-- Index of the layer with the givent name. Returns nil if the layer doesn't exist
+-- @function [parent=#Layers] indexOf
+-- @param #string name Name of the layer
+-- @return #number, #nil index
+
+---
+-- Creates a layer and inserts it after another layer (shifts indexes of some other layers).
+-- @function [parent=#Layers] insertAfter
+-- @param #string afterName Name of the layer after which the new layer will be inserted
+-- @param #string name Name of the new layer
+-- @param #table options Table with a boolean `interactive` field (default is true). Layers with interactive = false will ignore all mouse interactions.
 
 ---
 -- Content. An array-like container, which allows to reference elements by their name

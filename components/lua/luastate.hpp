@@ -119,6 +119,17 @@ namespace LuaUtil
     // String representation of a Lua object. Should be used for debugging/logging purposes only.
     std::string toString(const sol::object&);
 
+    template <class T>
+    T getValueOrDefault(const sol::object& obj, const T& defaultValue)
+    {
+        if (obj == sol::nil)
+            return defaultValue;
+        if (obj.is<T>())
+            return obj.as<T>();
+        else
+            throw std::logic_error(std::string("Value \"") + toString(obj) + std::string("\" has unexpected type"));
+    }
+
     // Makes a table read only (when accessed from Lua) by wrapping it with an empty userdata.
     // Needed to forbid any changes in common resources that can be accessed from different sandboxes.
     sol::table makeReadOnly(sol::table);
