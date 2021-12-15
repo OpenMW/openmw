@@ -63,6 +63,18 @@ namespace SceneUtil
 
     // Alpha-to-coverage requires a multisampled framebuffer, so we need to set that up for RTTs
     bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer, osg::Texture* texture, unsigned int level = 0, unsigned int face = 0, bool mipMapGeneration = false);
+
+    class OperationSequence : public osg::Operation
+    {
+    public:
+        OperationSequence(bool keep);
+
+        void operator()(osg::Object* object) override;
+
+        void add(osg::Operation* operation);
+    protected:
+        osg::ref_ptr<osg::OperationQueue> mOperationQueue;
+    };
 }
 
 #endif

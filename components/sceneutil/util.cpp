@@ -317,4 +317,20 @@ bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::
     return addMSAAIntermediateTarget;
 }
 
+OperationSequence::OperationSequence(bool keep)
+    : Operation("OperationSequence", keep)
+    , mOperationQueue(new osg::OperationQueue())
+{
+}
+
+void OperationSequence::operator()(osg::Object* object)
+{
+    mOperationQueue->runOperations(object);
+}
+
+void OperationSequence::add(osg::Operation* operation)
+{
+    mOperationQueue->add(operation);
+}
+
 }
