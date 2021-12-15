@@ -4,6 +4,8 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/loadcell.hpp>
 
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwclass/container.hpp"
 
 #include "../mwworld/class.hpp"
@@ -20,6 +22,7 @@ namespace MWLua
         mContainersInScene.updateList();
         mDoorsInScene.updateList();
         mItemsInScene.updateList();
+        mPaused = MWBase::Environment::get().getWindowManager()->isGuiMode();
     }
 
     void WorldView::clear()

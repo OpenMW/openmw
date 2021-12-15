@@ -120,6 +120,9 @@ namespace
         EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(0.1, 0, 1.5)"), 0.1);
         EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(-0.1, 0, 1.5)"), 0);
         EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(2.1, 0, 1.5)"), 1.5);
+        lua.safe_script("t = util.makeReadOnly({x = 1})");
+        EXPECT_FLOAT_EQ(get<float>(lua, "t.x"), 1);
+        EXPECT_ERROR(lua.safe_script("t.y = 2"), "userdata value");
     }
 
 }

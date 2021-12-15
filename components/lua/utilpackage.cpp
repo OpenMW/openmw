@@ -175,6 +175,7 @@ namespace LuaUtil
         util["clamp"] = [](float value, float from, float to) { return std::clamp(value, from, to); };
         // NOTE: `util["clamp"] = std::clamp<float>` causes error 'AddressSanitizer: stack-use-after-scope'
         util["normalizeAngle"] = &Misc::normalizeAngle;
+        util["makeReadOnly"] = &makeReadOnly;
 
         return util;
     }

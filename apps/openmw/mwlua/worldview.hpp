@@ -19,6 +19,9 @@ namespace MWLua
         void update();  // Should be called every frame.
         void clear();  // Should be called every time before starting or loading a new game.
 
+        // Whether the world is paused (i.e. game time is not changing and actors don't move).
+        bool isPaused() const { return mPaused; }
+
         // Returns the number of seconds passed from the beginning of the game.
         double getGameTimeInSeconds() const { return mGameSeconds; }
         void setGameTimeInSeconds(double t) { mGameSeconds = t; }
@@ -74,6 +77,7 @@ namespace MWLua
         ObjectGroup mItemsInScene;
 
         double mGameSeconds = 0;
+        bool mPaused = false;
     };
 
 }
