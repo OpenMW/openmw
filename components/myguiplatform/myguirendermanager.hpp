@@ -5,8 +5,6 @@
 
 #include <osg/ref_ptr>
 
-#include "myguicompat.h"
-
 namespace Resource
 {
     class ImageManager;
@@ -79,7 +77,7 @@ public:
     const MyGUI::IntSize& getViewSize() const override { return mViewSize; }
 
     /** @see RenderManager::getVertexFormat */
-    MyGUI::VertexColourType getVertexFormat() OPENMW_MYGUI_CONST_GETTER_3_4_1 override
+    MyGUI::VertexColourType getVertexFormat() const override
     { return mVertexFormat; }
 
     /** @see RenderManager::isFormatSupported */
@@ -112,7 +110,7 @@ public:
     void setInjectState(osg::StateSet* stateSet);
 
     /** @see IRenderTarget::getInfo */
-    const MyGUI::RenderTargetInfo& getInfo() OPENMW_MYGUI_CONST_GETTER_3_4_1 override { return mInfo; }
+    const MyGUI::RenderTargetInfo& getInfo() const override { return mInfo; }
 
     bool checkTexture(MyGUI::ITexture* _texture);
 
