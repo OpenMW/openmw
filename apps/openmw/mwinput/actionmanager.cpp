@@ -22,6 +22,8 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include "../mwgui/messagebox.hpp"
+
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
 
@@ -39,7 +41,6 @@ namespace MWInput
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mSneaking(false)
         , mAttemptJump(false)
-        , mOverencumberedMessageDelay(0.f)
         , mTimeIdle(0.f)
     {
     }
@@ -88,22 +89,26 @@ namespace MWInput
             {
                 player.setUpDown(1);
                 triedToMove = true;
-                mOverencumberedMessageDelay = 0.f;
             }
 
             // if player tried to start moving, but can't (due to being overencumbered), display a notification.
             if (triedToMove)
             {
                 MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-                mOverencumberedMessageDelay -= dt;
                 if (playerPtr.getClass().getEncumbrance(playerPtr) > playerPtr.getClass().getCapacity(playerPtr))
                 {
                     player.setAutoMove (false);
-                    if (mOverencumberedMessageDelay <= 0)
+                    std::vector<MWGui::MessageBox*> msgboxs = MWBase::Environment::get().getWindowManager()->getActiveMessageBoxes();
+                    const std::vector<MWGui::MessageBox*>::iterator it = std::find_if(msgboxs.begin(), msgboxs.end(), [](MWGui::MessageBox*& msgbox)
                     {
+                        return (msgbox->getMessage() == "#{sNotifyMessage59}");
+                    });
+
+                    // if an overencumbered messagebox is already present, reset its expiry timer, otherwise create new one.
+                    if (it != msgboxs.end())
+                        (*it)->mCurrentTime = 0;
+                    else
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage59}");
-                        mOverencumberedMessageDelay = 1.0;
-                    }
                 }
             }
 
