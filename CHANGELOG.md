@@ -54,6 +54,7 @@
     Bug #6174: Spellmaking and Enchanting sliders differences from vanilla
     Bug #6177: Followers of player follower stop following after waiting for a day
     Bug #6184: Command and Calm and Demoralize and Frenzy and Rally magic effects inconsistencies with vanilla
+    Bug #6191: Encumbrance messagebox timer works incorrectly
     Bug #6197: Infinite Casting Loop
     Bug #6253: Multiple instances of Reflect stack additively
     Bug #6255: Reflect is different from vanilla
