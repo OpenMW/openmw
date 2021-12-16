@@ -165,8 +165,6 @@ namespace osgMyGUI
         return nullptr;
     }
 
-#if MYGUI_VERSION > MYGUI_DEFINE_VERSION(3, 4, 0)
     void OSGTexture::setShader(const std::string& _shaderName)
     { Log(Debug::Warning) << "OSGTexture::setShader is not implemented"; }
-#endif
 }

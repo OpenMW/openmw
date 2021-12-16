@@ -586,7 +586,6 @@ bool RenderManager::checkTexture(MyGUI::ITexture* _texture)
     return true;
 }
 
-#if MYGUI_VERSION > MYGUI_DEFINE_VERSION(3, 4, 0)
 void RenderManager::registerShader(
     const std::string& _shaderName,
     const std::string& _vertexProgramFile,
@@ -594,6 +593,5 @@ void RenderManager::registerShader(
 {
     MYGUI_PLATFORM_LOG(Warning, "osgMyGUI::RenderManager::registerShader is not implemented");
 }
-#endif
 
 }

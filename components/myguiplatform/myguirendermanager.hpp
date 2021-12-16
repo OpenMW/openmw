@@ -116,17 +116,9 @@ public:
 
     bool checkTexture(MyGUI::ITexture* _texture);
 
-    // setViewSize() is a part of MyGUI::RenderManager interface since 3.4.0 release
-#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3, 4, 0)
-    void setViewSize(int width, int height);
-#else
     void setViewSize(int width, int height) override;
-#endif
 
-    // registerShader() is a part of MyGUI::RenderManager interface since 3.4.1 release
-#if MYGUI_VERSION > MYGUI_DEFINE_VERSION(3, 4, 0)
     void registerShader(const std::string& _shaderName, const std::string& _vertexProgramFile, const std::string& _fragmentProgramFile) override;
-#endif
 
 /*internal:*/
 
