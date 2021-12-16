@@ -4,10 +4,14 @@
 #include "objecttransform.hpp"
 #include "recastmesh.hpp"
 
+#include <components/misc/typetraits.hpp>
+
 #include <algorithm>
 #include <cstdint>
 #include <tuple>
 #include <vector>
+#include <optional>
+#include <type_traits>
 
 namespace DetourNavigator
 {
@@ -28,16 +32,27 @@ namespace DetourNavigator
     };
 
     template <class ResolveMeshSource>
-    inline std::vector<DbRefGeometryObject> makeDbRefGeometryObjects(const std::vector<MeshSource>& meshSources,
-        ResolveMeshSource&& resolveMeshSource)
+    inline auto makeDbRefGeometryObjects(const std::vector<MeshSource>& meshSources, ResolveMeshSource&& resolveMeshSource)
+        -> std::conditional_t<
+            Misc::isOptional<std::decay_t<decltype(resolveMeshSource(meshSources.front()))>>,
+            std::optional<std::vector<DbRefGeometryObject>>,
+            std::vector<DbRefGeometryObject>
+        >
     {
         std::vector<DbRefGeometryObject> result;
         result.reserve(meshSources.size());
-        std::transform(meshSources.begin(), meshSources.end(), std::back_inserter(result),
-            [&] (const MeshSource& meshSource)
+        for (const MeshSource& meshSource : meshSources)
+        {
+            const auto shapeId = resolveMeshSource(meshSource);
+            if constexpr (Misc::isOptional<std::decay_t<decltype(shapeId)>>)
             {
-                return DbRefGeometryObject {resolveMeshSource(meshSource), meshSource.mObjectTransform};
-            });
+                if (!shapeId.has_value())
+                    return std::nullopt;
+                result.push_back(DbRefGeometryObject {*shapeId, meshSource.mObjectTransform});
+            }
+            else
+                result.push_back(DbRefGeometryObject {shapeId, meshSource.mObjectTransform});
+        }
         std::sort(result.begin(), result.end());
         return result;
     }

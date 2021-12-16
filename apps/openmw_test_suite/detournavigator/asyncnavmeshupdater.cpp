@@ -26,6 +26,23 @@ namespace
         recastMeshManager.addHeightfield(cellPosition, cellSize, HeightfieldPlane {0});
     }
 
+    void addObject(const btBoxShape& shape, TileCachedRecastMeshManager& recastMeshManager)
+    {
+        const ObjectId id(&shape);
+        osg::ref_ptr<Resource::BulletShape> bulletShape(new Resource::BulletShape);
+        bulletShape->mFileName = "test.nif";
+        bulletShape->mFileHash = "test_hash";
+        ObjectTransform objectTransform;
+        std::fill(std::begin(objectTransform.mPosition.pos), std::end(objectTransform.mPosition.pos), 0.1f);
+        std::fill(std::begin(objectTransform.mPosition.rot), std::end(objectTransform.mPosition.rot), 0.2f);
+        objectTransform.mScale = 3.14f;
+        const CollisionShape collisionShape(
+            osg::ref_ptr<Resource::BulletShapeInstance>(new Resource::BulletShapeInstance(bulletShape)),
+            shape, objectTransform
+        );
+        recastMeshManager.addObject(id, collisionShape, btTransform::getIdentity(), AreaType_ground);
+    }
+
     struct DetourNavigatorAsyncNavMeshUpdaterTest : Test
     {
         Settings mSettings = makeSettings();
@@ -34,6 +51,7 @@ namespace
         const osg::Vec3f mAgentHalfExtents {29, 29, 66};
         const TilePosition mPlayerTile {0, 0};
         const std::string mWorldspace = "sys::default";
+        const btBoxShape mBox {btVector3(100, 100, 20)};
         Loading::Listener mListener;
     };
 
@@ -111,6 +129,7 @@ namespace
     {
         mRecastMeshManager.setWorldspace(mWorldspace);
         addHeightFieldPlane(mRecastMeshManager);
+        addObject(mBox, mRecastMeshManager);
         auto db = std::make_unique<NavMeshDb>(":memory:");
         NavMeshDb* const dbPtr = db.get();
         AsyncNavMeshUpdater updater(mSettings, mRecastMeshManager, mOffMeshConnectionsManager, std::move(db));
@@ -130,10 +149,11 @@ namespace
         EXPECT_EQ(tile->mVersion, mSettings.mNavMeshVersion);
     }
 
-    TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, post_when_writing_to_db_disabled_should_not_write)
+    TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, post_when_writing_to_db_disabled_should_not_write_tiles)
     {
         mRecastMeshManager.setWorldspace(mWorldspace);
         addHeightFieldPlane(mRecastMeshManager);
+        addObject(mBox, mRecastMeshManager);
         auto db = std::make_unique<NavMeshDb>(":memory:");
         NavMeshDb* const dbPtr = db.get();
         mSettings.mWriteToNavMeshDb = false;
@@ -150,6 +170,27 @@ namespace
             [&] (const MeshSource& v) { return resolveMeshSource(*dbPtr, v, nextShapeId); });
         const auto tile = dbPtr->findTile(mWorldspace, tilePosition, serialize(mSettings.mRecast, *recastMesh, objects));
         ASSERT_FALSE(tile.has_value());
+    }
+
+    TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, post_when_writing_to_db_disabled_should_not_write_shapes)
+    {
+        mRecastMeshManager.setWorldspace(mWorldspace);
+        addHeightFieldPlane(mRecastMeshManager);
+        addObject(mBox, mRecastMeshManager);
+        auto db = std::make_unique<NavMeshDb>(":memory:");
+        NavMeshDb* const dbPtr = db.get();
+        mSettings.mWriteToNavMeshDb = false;
+        AsyncNavMeshUpdater updater(mSettings, mRecastMeshManager, mOffMeshConnectionsManager, std::move(db));
+        const auto navMeshCacheItem = std::make_shared<GuardedNavMeshCacheItem>(makeEmptyNavMesh(mSettings), 1);
+        const TilePosition tilePosition {0, 0};
+        const std::map<TilePosition, ChangeType> changedTiles {{tilePosition, ChangeType::add}};
+        updater.post(mAgentHalfExtents, navMeshCacheItem, mPlayerTile, mWorldspace, changedTiles);
+        updater.wait(mListener, WaitConditionType::allJobsDone);
+        const auto recastMesh = mRecastMeshManager.getMesh(mWorldspace, tilePosition);
+        ASSERT_NE(recastMesh, nullptr);
+        const auto objects = makeDbRefGeometryObjects(recastMesh->getMeshSources(),
+            [&] (const MeshSource& v) { return resolveMeshSource(*dbPtr, v); });
+        EXPECT_FALSE(objects.has_value());
     }
 
     TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, post_should_read_from_db_on_cache_miss)
