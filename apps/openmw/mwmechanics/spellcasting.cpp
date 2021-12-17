@@ -128,9 +128,6 @@ namespace MWMechanics
             }
             canCastAnEffect = true;
 
-            if (!checkEffectTarget(effectIt->mEffectID, target, caster, castByPlayer))
-                continue;
-
             // caster needs to be an actor for linked effects (e.g. Absorb)
             if (magicEffect->mData.mFlags & ESM::MagicEffect::CasterLinked
                     && (caster.isEmpty() || !caster.getClass().isActor()))
