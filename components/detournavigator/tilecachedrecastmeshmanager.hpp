@@ -57,7 +57,7 @@ namespace DetourNavigator
                         changed = true;
                     }
                 };
-                getTilesPositions(shape.getShape(), transform, mSettings, onTilePosition);
+                getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mSettings), onTilePosition);
                 std::sort(newTiles.begin(), newTiles.end());
                 for (const auto& tile : currentTiles)
                 {

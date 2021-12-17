@@ -188,8 +188,13 @@ namespace NavMeshTool
             std::vector<TilePosition> worldspaceTiles;
 
             DetourNavigator::getTilesPositions(
-                Misc::Convert::toOsg(input->mAabb.m_min), Misc::Convert::toOsg(input->mAabb.m_max), settings.mRecast,
-                [&] (const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); });
+                DetourNavigator::makeTilesPositionsRange(
+                    Misc::Convert::toOsg(input->mAabb.m_min),
+                    Misc::Convert::toOsg(input->mAabb.m_max),
+                    settings.mRecast
+                ),
+                [&] (const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); }
+            );
 
             tiles += worldspaceTiles.size();
 

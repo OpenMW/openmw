@@ -9,6 +9,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/bullethelpers/heightfield.hpp>
+#include <components/misc/convert.hpp>
 
 #include <DetourNavMesh.h>
 
@@ -262,7 +263,7 @@ namespace DetourNavigator
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
             const ChangeType changeType)
     {
-        getTilesPositions(shape, transform, mSettings.mRecast,
+        getTilesPositions(makeTilesPositionsRange(shape, transform, mSettings.mRecast),
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 
@@ -272,7 +273,7 @@ namespace DetourNavigator
         if (cellSize == std::numeric_limits<int>::max())
             return;
 
-        getTilesPositions(cellSize, shift, mSettings.mRecast,
+        getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings.mRecast),
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 

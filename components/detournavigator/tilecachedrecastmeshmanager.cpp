@@ -4,6 +4,7 @@
 #include "settingsutils.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/convert.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -35,7 +36,8 @@ namespace DetourNavigator
         std::vector<TilePosition> tilesPositions;
         {
             const std::lock_guard lock(mMutex);
-            getTilesPositions(shape.getShape(), transform, mSettings, [&] (const TilePosition& tilePosition)
+            getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mSettings),
+                [&] (const TilePosition& tilePosition)
                 {
                     if (addTile(id, shape, transform, areaType, tilePosition, mTiles))
                         tilesPositions.push_back(tilePosition);
@@ -90,7 +92,8 @@ namespace DetourNavigator
         else
         {
             const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
-            getTilesPositions(cellSize, shift, mSettings, [&] (const TilePosition& tilePosition)
+            getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings),
+                [&] (const TilePosition& tilePosition)
                 {
                     const std::lock_guard lock(mMutex);
                     auto tile = mTiles.find(tilePosition);
@@ -148,7 +151,8 @@ namespace DetourNavigator
 
         bool result = false;
 
-        getTilesPositions(cellSize, shift, mSettings, [&] (const TilePosition& tilePosition)
+        getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings),
+            [&] (const TilePosition& tilePosition)
             {
                 const std::lock_guard lock(mMutex);
                 auto tile = mTiles.find(tilePosition);
