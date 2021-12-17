@@ -136,7 +136,7 @@ namespace DetourNavigator
         };
 
         DbWorker(AsyncNavMeshUpdater& updater, std::unique_ptr<NavMeshDb>&& db,
-            TileVersion version, const RecastSettings& recastSettings);
+            TileVersion version, const RecastSettings& recastSettings, bool writeToDb);
 
         ~DbWorker();
 
@@ -153,6 +153,7 @@ namespace DetourNavigator
         const RecastSettings& mRecastSettings;
         const std::unique_ptr<NavMeshDb> mDb;
         const TileVersion mVersion;
+        const bool mWriteToDb;
         TileId mNextTileId;
         ShapeId mNextShapeId;
         DbJobQueue mQueue;

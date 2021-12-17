@@ -5,12 +5,21 @@
 #include <components/debug/debuglog.hpp>
 
 #include <cassert>
+#include <optional>
 
 namespace DetourNavigator
 {
     namespace
     {
-        ShapeId getShapeId(NavMeshDb& db, const std::string& name, ShapeType type, const std::string& hash, ShapeId& nextShapeId)
+        std::optional<ShapeId> findShapeId(NavMeshDb& db, const std::string& name, ShapeType type,
+            const std::string& hash)
+        {
+            const Sqlite3::ConstBlob hashData {hash.data(), static_cast<int>(hash.size())};
+            return db.findShapeId(name, type, hashData);
+        }
+
+        ShapeId getShapeId(NavMeshDb& db, const std::string& name, ShapeType type,
+            const std::string& hash, ShapeId& nextShapeId)
         {
             const Sqlite3::ConstBlob hashData {hash.data(), static_cast<int>(hash.size())};
             if (const auto existingShapeId = db.findShapeId(name, type, hashData))
@@ -35,6 +44,20 @@ namespace DetourNavigator
                 Log(Debug::Warning) << "Trying to resolve recast mesh source with unsupported area type: " << source.mAreaType;
                 assert(false);
                 return ShapeId(0);
+        }
+    }
+
+    std::optional<ShapeId> resolveMeshSource(NavMeshDb& db, const MeshSource& source)
+    {
+        switch (source.mAreaType)
+        {
+            case AreaType_null:
+                return findShapeId(db, source.mShape->mFileName, ShapeType::Avoid, source.mShape->mFileHash);
+            case AreaType_ground:
+                return findShapeId(db, source.mShape->mFileName, ShapeType::Collision, source.mShape->mFileHash);
+            default:
+                Log(Debug::Warning) << "Trying to resolve recast mesh source with unsupported area type: " << source.mAreaType;
+                return std::nullopt;
         }
     }
 }

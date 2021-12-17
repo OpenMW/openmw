@@ -89,7 +89,8 @@ namespace DetourNavigator
         {
             if (db == nullptr)
                 return nullptr;
-            return std::make_unique<DbWorker>(updater, std::move(db), TileVersion(settings.mNavMeshVersion), settings.mRecast);
+            return std::make_unique<DbWorker>(updater, std::move(db), TileVersion(settings.mNavMeshVersion),
+                                              settings.mRecast, settings.mWriteToNavMeshDb);
         }
 
         void updateJobs(std::deque<JobIt>& jobs, TilePosition playerTile, int maxTiles)
@@ -704,11 +705,12 @@ namespace DetourNavigator
     }
 
     DbWorker::DbWorker(AsyncNavMeshUpdater& updater, std::unique_ptr<NavMeshDb>&& db,
-        TileVersion version, const RecastSettings& recastSettings)
+        TileVersion version, const RecastSettings& recastSettings, bool writeToDb)
         : mUpdater(updater)
         , mRecastSettings(recastSettings)
         , mDb(std::move(db))
         , mVersion(version)
+        , mWriteToDb(writeToDb)
         , mNextTileId(mDb->getMaxTileId() + 1)
         , mNextShapeId(mDb->getMaxShapeId() + 1)
         , mThread([this] { run(); })
@@ -799,12 +801,23 @@ namespace DetourNavigator
         if (job->mInput.empty())
         {
             Log(Debug::Debug) << "Serializing input for job " << job->mId;
-            const ShapeId shapeId = mNextShapeId;
-            const std::vector<DbRefGeometryObject> objects = makeDbRefGeometryObjects(job->mRecastMesh->getMeshSources(),
-                [&] (const MeshSource& v) { return resolveMeshSource(*mDb, v, mNextShapeId); });
-            if (shapeId != mNextShapeId)
-                ++mWrites;
-            job->mInput = serialize(mRecastSettings, *job->mRecastMesh, objects);
+            if (mWriteToDb)
+            {
+                const ShapeId shapeId = mNextShapeId;
+                const auto objects = makeDbRefGeometryObjects(job->mRecastMesh->getMeshSources(),
+                    [&] (const MeshSource& v) { return resolveMeshSource(*mDb, v, mNextShapeId); });
+                if (shapeId != mNextShapeId)
+                    ++mWrites;
+                job->mInput = serialize(mRecastSettings, *job->mRecastMesh, objects);
+            }
+            else
+            {
+                const auto objects = makeDbRefGeometryObjects(job->mRecastMesh->getMeshSources(),
+                    [&] (const MeshSource& v) { return resolveMeshSource(*mDb, v); });
+                if (!objects.has_value())
+                    return;
+                job->mInput = serialize(mRecastSettings, *job->mRecastMesh, *objects);
+            }
         }
 
         job->mCachedTileData = mDb->getTileData(job->mWorldspace, job->mChangedTile, job->mInput);
