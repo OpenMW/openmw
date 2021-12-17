@@ -457,11 +457,18 @@ void Launcher::DataFilesPage::updateNavMeshProgress()
     QRegularExpressionMatch match = pattern.match(text);
     if (!match.hasMatch())
         return;
-    int maximum = match.captured(2).toInt();
+    int value = match.captured(1).toInt();
+    const int maximum = match.captured(2).toInt();
     if (text.contains("cell"))
-        maximum *= 100;
-    ui.navMeshProgressBar->setMaximum(std::max(ui.navMeshProgressBar->maximum(), maximum));
-    ui.navMeshProgressBar->setValue(match.captured(1).toInt());
+        ui.navMeshProgressBar->setMaximum(maximum * 100);
+    else if (maximum > ui.navMeshProgressBar->maximum())
+        ui.navMeshProgressBar->setMaximum(maximum);
+    else
+        value += static_cast<int>(std::round(
+            (ui.navMeshProgressBar->maximum() - maximum)
+            * (static_cast<float>(value) / static_cast<float>(maximum))
+        ));
+    ui.navMeshProgressBar->setValue(value);
 }
 
 void Launcher::DataFilesPage::navMeshToolFinished(int exitCode, QProcess::ExitStatus exitStatus)
