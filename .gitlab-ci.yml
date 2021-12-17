@@ -227,6 +227,14 @@ macOS11_Xcode12:
   variables:
     CCACHE_SIZE: 3G
 
+macOS12_Xcode13:
+  extends: .MacOS
+  image: macos-12-xcode-13
+  cache:
+    key: macOS12_Xcode13.v1
+  variables:
+    CCACHE_SIZE: 3G
+
 variables: &engine-targets
   targets: "openmw,openmw-iniimporter,openmw-launcher,openmw-wizard,openmw-navmeshtool"
   package: "Engine"
