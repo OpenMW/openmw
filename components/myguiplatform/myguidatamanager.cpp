@@ -15,7 +15,7 @@ void DataManager::setResourcePath(const std::string &path)
     mResourcePath = path;
 }
 
-MyGUI::IDataStream *DataManager::getData(const std::string &name) OPENMW_MYGUI_CONST_GETTER_3_4_1
+MyGUI::IDataStream *DataManager::getData(const std::string &name) const
 {
     std::string fullpath = getDataPath(name);
     std::unique_ptr<boost::filesystem::ifstream> stream;
@@ -34,13 +34,13 @@ void DataManager::freeData(MyGUI::IDataStream *data)
     delete data;
 }
 
-bool DataManager::isDataExist(const std::string &name) OPENMW_MYGUI_CONST_GETTER_3_4_1
+bool DataManager::isDataExist(const std::string &name) const
 {
     std::string fullpath = mResourcePath + "/" + name;
     return boost::filesystem::exists(fullpath);
 }
 
-const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern) OPENMW_MYGUI_CONST_GETTER_3_4_1
+const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern) const
 {
     // TODO: pattern matching (unused?)
     static MyGUI::VectorString strings;
@@ -49,7 +49,7 @@ const MyGUI::VectorString &DataManager::getDataListNames(const std::string &patt
     return strings;
 }
 
-const std::string &DataManager::getDataPath(const std::string &name) OPENMW_MYGUI_CONST_GETTER_3_4_1
+const std::string &DataManager::getDataPath(const std::string &name) const
 {
     static std::string result;
     result.clear();

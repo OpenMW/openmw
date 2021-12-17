@@ -907,12 +907,6 @@ protected:
             return {};
 
         MyGUI::IntPoint pos (left, top);
-#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,2,3)
-        // work around inconsistency in MyGUI where the mouse press coordinates aren't
-        // transformed by the current Layer (even though mouse *move* events are).
-        if(!move)
-            pos = mNode->getLayer()->getPosition(left, top);
-#endif
         pos.left -= mCroppedParent->getAbsoluteLeft ();
         pos.top  -= mCroppedParent->getAbsoluteTop  ();
         pos.top += mViewTop;

@@ -93,19 +93,6 @@ void KeyboardNavigation::_unlinkWidget(MyGUI::Widget *widget)
         mCurrentFocus = nullptr;
 }
 
-#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,2,3)
-void styleFocusedButton(MyGUI::Widget* w)
-{
-    if (w)
-    {
-        if (MyGUI::Button* b = w->castType<MyGUI::Button>(false))
-        {
-            b->_setWidgetState("highlighted");
-        }
-    }
-}
-#endif
-
 bool isRootParent(MyGUI::Widget* widget, MyGUI::Widget* root)
 {
     while (widget && widget->getParent())
@@ -128,9 +115,6 @@ void KeyboardNavigation::onFrame()
 
     if (focus == mCurrentFocus)
     {
-#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,2,3)
-        styleFocusedButton(mCurrentFocus);
-#endif
         return;
     }
 
@@ -143,19 +127,8 @@ void KeyboardNavigation::onFrame()
 
     if (focus != mCurrentFocus)
     {
-#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,2,3)
-        if (mCurrentFocus)
-        {
-            if (MyGUI::Button* b = mCurrentFocus->castType<MyGUI::Button>(false))
-                b->_setWidgetState("normal");
-        }
-#endif
         mCurrentFocus = focus;
     }
-
-#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,2,3)
-    styleFocusedButton(mCurrentFocus);
-#endif
 }
 
 void KeyboardNavigation::setDefaultFocus(MyGUI::Widget *window, MyGUI::Widget *defaultFocus)

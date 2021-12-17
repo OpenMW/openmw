@@ -15,7 +15,6 @@
 #include <components/shader/shadermanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 
-#include "myguicompat.h"
 #include "myguitexture.hpp"
 
 #define MYGUI_PLATFORM_LOG_SECTION "Platform"
@@ -276,7 +275,7 @@ public:
     osg::VertexBufferObject* getVertexBuffer();
 
     void setVertexCount(size_t count) override;
-    size_t getVertexCount() OPENMW_MYGUI_CONST_GETTER_3_4_1 override;
+    size_t getVertexCount() const override;
 
     MyGUI::Vertex *lock() override;
     void unlock() override;
@@ -303,7 +302,7 @@ void OSGVertexBuffer::setVertexCount(size_t count)
     mNeedVertexCount = count;
 }
 
-size_t OSGVertexBuffer::getVertexCount() OPENMW_MYGUI_CONST_GETTER_3_4_1
+size_t OSGVertexBuffer::getVertexCount() const
 {
     return mNeedVertexCount;
 }
@@ -586,7 +585,6 @@ bool RenderManager::checkTexture(MyGUI::ITexture* _texture)
     return true;
 }
 
-#if MYGUI_VERSION > MYGUI_DEFINE_VERSION(3, 4, 0)
 void RenderManager::registerShader(
     const std::string& _shaderName,
     const std::string& _vertexProgramFile,
@@ -594,6 +592,5 @@ void RenderManager::registerShader(
 {
     MYGUI_PLATFORM_LOG(Warning, "osgMyGUI::RenderManager::registerShader is not implemented");
 }
-#endif
 
 }
