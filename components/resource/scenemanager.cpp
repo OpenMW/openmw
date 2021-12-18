@@ -1,6 +1,7 @@
 #include "scenemanager.hpp"
 
 #include <cstdlib>
+#include <filesystem>
 
 #include <osg/AlphaFunc>
 #include <osg/Node>
@@ -10,6 +11,7 @@
 
 #include <osgUtil/IncrementalCompileOperation>
 
+#include <osgDB/FileUtils>
 #include <osgDB/SharedStateManager>
 #include <osgDB/Registry>
 
@@ -472,9 +474,14 @@ namespace Resource
 
         osgDB::ReaderWriter::ReadResult readImage(const std::string& filename, const osgDB::Options* options) override
         {
+            std::filesystem::path filePath(filename);
+            if (filePath.is_absolute())
+                // It is a hack. Needed because either OSG or libcollada-dom tries to make an absolute path from
+                // our relative VFS path by adding current working directory.
+                filePath = std::filesystem::relative(filename, osgDB::getCurrentWorkingDirectory());
             try
             {
-                return osgDB::ReaderWriter::ReadResult(mImageManager->getImage(filename), osgDB::ReaderWriter::ReadResult::FILE_LOADED);
+                return osgDB::ReaderWriter::ReadResult(mImageManager->getImage(filePath), osgDB::ReaderWriter::ReadResult::FILE_LOADED);
             }
             catch (std::exception& e)
             {
