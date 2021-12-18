@@ -9,6 +9,8 @@
 #include <memory>
 #include <sstream>
 
+#include <SDL_messagebox.h>
+
 #include "windows_crashcatcher.hpp"
 #include "windows_crashmonitor.hpp"
 #include "windows_crashshm.hpp"
@@ -28,6 +30,7 @@ namespace Crash
 
         mShmMutex = mShm->mStartup.mShmMutex;
         mAppProcessHandle = mShm->mStartup.mAppProcessHandle;
+        mAppMainThreadId = mShm->mStartup.mAppMainThreadId;
         mSignalAppEvent = mShm->mStartup.mSignalApp;
         mSignalMonitorEvent = mShm->mStartup.mSignalMonitor;
     }
@@ -80,6 +83,44 @@ namespace Crash
         return code == STILL_ACTIVE;
     }
 
+    bool CrashMonitor::isAppFrozen()
+    {
+        if (!mAppWindowHandle)
+        {
+            EnumWindows([](HWND handle, LPARAM param) -> BOOL {
+                CrashMonitor& crashMonitor = *(CrashMonitor*)param;
+                DWORD processId;
+                if (GetWindowThreadProcessId(handle, &processId) == crashMonitor.mAppMainThreadId && processId == GetProcessId(crashMonitor.mAppProcessHandle))
+                {
+                    if (GetWindow(handle, GW_OWNER) == 0)
+                    {
+                        crashMonitor.mAppWindowHandle = handle;
+                        return false;
+                    }
+                }
+                return true;
+                }, (LPARAM)this);
+            if (mAppWindowHandle)
+            {
+                // TODO: use https://devblogs.microsoft.com/oldnewthing/20111026-00/?p=9263 to monitor for the window being destroyed
+            }
+            else
+                return false;
+        }
+        if (IsHungAppWindow)
+            return IsHungAppWindow(mAppWindowHandle);
+        else
+        {
+            BOOL debuggerPresent;
+
+            if (CheckRemoteDebuggerPresent(mAppProcessHandle, &debuggerPresent) && debuggerPresent)
+                return false;
+            if (SendMessageTimeoutA(mAppWindowHandle, WM_NULL, 0, 0, 0, 5000, nullptr) == 0)
+                return GetLastError() == ERROR_TIMEOUT;
+        }
+        return false;
+    }
+
     void CrashMonitor::run()
     {
         try
@@ -88,8 +129,16 @@ namespace Crash
             signalApp();
 
             bool running = true;
+            bool frozen = false;
             while (isAppAlive() && running)
             {
+                if (isAppFrozen())
+                {
+                    frozen = true;
+                    handleCrash();
+                    running = false;
+                    break;
+                }
                 if (waitApp())
                 {
                     shmLock();
@@ -111,6 +160,13 @@ namespace Crash
 
                     shmUnlock();
                 }
+            }
+
+            if (frozen)
+            {
+                TerminateProcess(mAppProcessHandle, -1);
+                std::string message = "OpenMW appears to have frozen.\nCrash log saved to '" + std::string(mShm->mStartup.mLogFilePath) + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
+                SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
             }
 
         } 

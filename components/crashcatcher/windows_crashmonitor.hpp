@@ -21,6 +21,8 @@ public:
 private:
 
     HANDLE mAppProcessHandle = nullptr;
+    DWORD mAppMainThreadId = 0;
+    HWND mAppWindowHandle = nullptr;
 
     // triggered when the monitor process wants to wake the parent process (received via SHM)
     HANDLE mSignalAppEvent = nullptr;
@@ -36,6 +38,8 @@ private:
     bool waitApp() const;
 
     bool isAppAlive() const;
+
+    bool isAppFrozen();
 
     void shmLock();
 

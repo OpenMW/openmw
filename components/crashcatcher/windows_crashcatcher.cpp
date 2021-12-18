@@ -144,6 +144,7 @@ namespace Crash
         mShm->mEvent = CrashSHM::Event::Startup;
         mShm->mStartup.mShmMutex = duplicateHandle(mShmMutex);
         mShm->mStartup.mAppProcessHandle = duplicateHandle(GetCurrentProcess());
+        mShm->mStartup.mAppMainThreadId = GetThreadId(GetCurrentThread());
         mShm->mStartup.mSignalApp = duplicateHandle(mSignalAppEvent);
         mShm->mStartup.mSignalMonitor = duplicateHandle(mSignalMonitorEvent);
 
@@ -196,7 +197,7 @@ namespace Crash
         // must remain until monitor has finished
         waitMonitor();
 
-        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(mShm->mStartup.mLogFilePath) + "'.\n Please report this to https://gitlab.com/OpenMW/openmw/issues !";
+        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(mShm->mStartup.mLogFilePath) + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
         SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
     }
 
