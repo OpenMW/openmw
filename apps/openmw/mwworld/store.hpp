@@ -159,6 +159,8 @@ namespace MWWorld
         typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Dynamic;
         Dynamic mDynamic;
 
+        uint64_t mModPoint;
+
         friend class ESMStore;
 
     public:
@@ -203,6 +205,8 @@ namespace MWWorld
         RecordId load(ESM::ESMReader &esm) override;
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const override;
         RecordId read(ESM::ESMReader& reader, bool overrideOnly = false) override;
+
+        uint64_t getModPoint() const { return mModPoint; }
     };
 
     template <>

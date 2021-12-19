@@ -77,12 +77,13 @@ namespace MWWorld
 
     template<typename T>
     Store<T>::Store()
+        : mModPoint(1)
     {
     }
 
     template<typename T>
     Store<T>::Store(const Store<T>& orig)
-        : mStatic(orig.mStatic)
+        : mStatic(orig.mStatic), mModPoint(orig.mModPoint + 1)
     {
     }
 
@@ -93,6 +94,8 @@ namespace MWWorld
         assert(mShared.size() >= mStatic.size());
         mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
         mDynamic.clear();
+
+        mModPoint++;
     }
 
     template<typename T>
@@ -162,6 +165,8 @@ namespace MWWorld
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
 
+        mModPoint++;
+
         return RecordId(record.mId, isDeleted);
     }
     template<typename T>
@@ -213,6 +218,9 @@ namespace MWWorld
         T *ptr = &result.first->second;
         if (result.second)
             mShared.push_back(ptr);
+
+        mModPoint++;
+
         return ptr;
     }
     template<typename T>
@@ -222,6 +230,9 @@ namespace MWWorld
         T *ptr = &result.first->second;
         if (result.second)
             mShared.push_back(ptr);
+
+        mModPoint++;
+
         return ptr;
     }
     template<typename T>
@@ -242,6 +253,8 @@ namespace MWWorld
                 ++sharedIter;
             }
             mStatic.erase(it);
+
+            mModPoint++;
         }
 
         return true;
@@ -259,6 +272,9 @@ namespace MWWorld
         for (auto it = mDynamic.begin(); it != mDynamic.end(); ++it) {
             mShared.push_back(&it->second);
         }
+
+        mModPoint++;
+
         return true;
     }
     template<typename T>
@@ -997,6 +1013,8 @@ namespace MWWorld
         // TODO: verify and document this inconsistent behaviour
         // TODO: if we require this behaviour, maybe we should move it to the place that requires it
         std::sort(mShared.begin(), mShared.end(), [](const ESM::Dialogue* l, const ESM::Dialogue* r) -> bool { return l->mId < r->mId; });
+
+        mModPoint++;
     }
 
     template <>
@@ -1018,6 +1036,8 @@ namespace MWWorld
             found->second.loadData(esm, isDeleted);
             dialogue.mId = found->second.mId;
         }
+        
+        mModPoint++;
 
         return RecordId(dialogue.mId, isDeleted);
     }
@@ -1025,7 +1045,9 @@ namespace MWWorld
     template<>
     bool Store<ESM::Dialogue>::eraseStatic(const std::string &id)
     {
-        mStatic.erase(id);
+        if (mStatic.erase(id))
+            mModPoint++;
+
         return true;
     }
 

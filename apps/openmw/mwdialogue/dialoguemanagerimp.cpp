@@ -43,7 +43,6 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "filter.hpp"
-#include "hypertextparser.hpp"
 
 namespace MWDialogue
 {
@@ -80,7 +79,7 @@ namespace MWDialogue
     {
         std::vector<std::string> topicIdList;
 
-        std::vector<HyperTextParser::Token> hypertext = HyperTextParser::parseHyperText(text);
+        std::vector<HyperTextParser::Token> hypertext = mHyperTextParser.parseHyperText(text);
 
         for (std::vector<HyperTextParser::Token>::iterator tok = hypertext.begin(); tok != hypertext.end(); ++tok)
         {
