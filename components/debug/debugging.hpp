@@ -5,6 +5,7 @@
 #include <boost/iostreams/stream.hpp>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/misc/guarded.hpp>
 
 #include <SDL_messagebox.h>
 
@@ -139,6 +140,10 @@ namespace Debug
 
 // Can be used to print messages without timestamps
 std::ostream& getRawStdout();
+
+std::ostream& getRawStderr();
+
+Misc::Locked<std::ostream&> getLockedRawStderr();
 
 void setupLogging(const std::string& logDir, const std::string& appName, std::ios_base::openmode = std::ios::out);
 

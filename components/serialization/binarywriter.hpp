@@ -12,6 +12,11 @@
 
 namespace Serialization
 {
+    struct NotEnoughSpace : std::runtime_error
+    {
+        NotEnoughSpace() : std::runtime_error("Not enough space") {}
+    };
+
     struct BinaryWriter
     {
     public:
@@ -31,7 +36,7 @@ namespace Serialization
             else if constexpr (std::is_arithmetic_v<T>)
             {
                 if (mEnd - mDest < static_cast<std::ptrdiff_t>(sizeof(T)))
-                    throw std::runtime_error("Not enough space");
+                    throw NotEnoughSpace();
                 writeValue(value);
             }
             else
@@ -49,7 +54,7 @@ namespace Serialization
             {
                 const std::size_t size = sizeof(T) * count;
                 if (mEnd - mDest < static_cast<std::ptrdiff_t>(size))
-                    throw std::runtime_error("Not enough space");
+                    throw NotEnoughSpace();
                 if constexpr (Misc::IS_LITTLE_ENDIAN)
                 {
                     std::memcpy(mDest, data, size);

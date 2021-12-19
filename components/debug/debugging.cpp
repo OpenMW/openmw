@@ -138,6 +138,7 @@ namespace Debug
 
 static std::unique_ptr<std::ostream> rawStdout = nullptr;
 static std::unique_ptr<std::ostream> rawStderr = nullptr;
+static std::unique_ptr<std::mutex> rawStderrMutex = nullptr;
 static boost::filesystem::ofstream logfile;
 
 #if defined(_WIN32) && defined(_DEBUG)
@@ -150,6 +151,16 @@ static boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
 std::ostream& getRawStdout()
 {
     return rawStdout ? *rawStdout : std::cout;
+}
+
+std::ostream& getRawStderr()
+{
+    return rawStderr ? *rawStderr : std::cerr;
+}
+
+Misc::Locked<std::ostream&> getLockedRawStderr()
+{
+    return Misc::Locked<std::ostream&>(*rawStderrMutex, getRawStderr());
 }
 
 // Redirect cout and cerr to the log file
@@ -180,6 +191,7 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
 #endif
     rawStdout = std::make_unique<std::ostream>(std::cout.rdbuf());
     rawStderr = std::make_unique<std::ostream>(std::cerr.rdbuf());
+    rawStderrMutex = std::make_unique<std::mutex>();
 
     int ret = 0;
     try

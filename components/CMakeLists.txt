@@ -319,6 +319,10 @@ add_component_dir(esmloader
     esmdata
 )
 
+add_component_dir(navmeshtool
+    protocol
+    )
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 

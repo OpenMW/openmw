@@ -12,6 +12,11 @@
 
 namespace Serialization
 {
+    struct NotEnoughData : std::runtime_error
+    {
+        NotEnoughData() : std::runtime_error("Not enough data") {}
+    };
+
     class BinaryReader
     {
     public:
@@ -31,11 +36,13 @@ namespace Serialization
             else if constexpr (std::is_arithmetic_v<T>)
             {
                 if (mEnd - mPos < static_cast<std::ptrdiff_t>(sizeof(T)))
-                    throw std::runtime_error("Not enough data");
+                    throw NotEnoughData();
                 std::memcpy(&value, mPos, sizeof(T));
                 mPos += sizeof(T);
                 value = Misc::toLittleEndian(value);
             }
+            else if constexpr (std::is_pointer_v<T>)
+                value = reinterpret_cast<T>(mPos);
             else
             {
                 format(*this, value);
@@ -51,7 +58,7 @@ namespace Serialization
             {
                 const std::size_t size = sizeof(T) * count;
                 if (mEnd - mPos < static_cast<std::ptrdiff_t>(size))
-                    throw std::runtime_error("Not enough data");
+                    throw NotEnoughData();
                 std::memcpy(data, mPos, size);
                 mPos += size;
                 if constexpr (!Misc::IS_LITTLE_ENDIAN)

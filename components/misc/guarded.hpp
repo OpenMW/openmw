@@ -4,6 +4,7 @@
 #include <mutex>
 #include <memory>
 #include <condition_variable>
+#include <type_traits>
 
 namespace Misc
 {
@@ -11,28 +12,28 @@ namespace Misc
     class Locked
     {
         public:
-            Locked(std::mutex& mutex, T& value)
+            Locked(std::mutex& mutex, std::remove_reference_t<T>& value)
                 : mLock(mutex), mValue(value)
             {}
 
-            T& get() const
+            std::remove_reference_t<T>& get() const
             {
                 return mValue.get();
             }
 
-            T* operator ->() const
+            std::remove_reference_t<T>* operator ->() const
             {
-                return std::addressof(get());
+                return &get();
             }
 
-            T& operator *() const
+            std::remove_reference_t<T>& operator *() const
             {
                 return get();
             }
 
         private:
             std::unique_lock<std::mutex> mLock;
-            std::reference_wrapper<T> mValue;
+            std::reference_wrapper<std::remove_reference_t<T>> mValue;
     };
 
     template <class T>

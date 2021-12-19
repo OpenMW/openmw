@@ -73,7 +73,8 @@ namespace Launcher
 
         void startNavMeshTool();
         void killNavMeshTool();
-        void updateNavMeshProgress();
+        void readNavMeshToolStdout();
+        void readNavMeshToolStderr();
         void navMeshToolFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
     public:
@@ -81,6 +82,14 @@ namespace Launcher
         const static char *mDefaultContentListName;
 
     private:
+        struct NavMeshToolProgress
+        {
+            QByteArray mLogData;
+            QByteArray mMessagesData;
+            std::map<std::uint64_t, std::string> mWorldspaces;
+            int mCellsCount = 0;
+            int mExpectedMaxProgress = 0;
+        };
 
         MainDialog *mMainDialog;
         TextInputDialog *mNewProfileDialog;
@@ -96,6 +105,7 @@ namespace Launcher
         QString mDataLocal;
 
         Process::ProcessInvoker* mNavMeshToolInvoker;
+        NavMeshToolProgress mNavMeshToolProgress;
 
         void buildView();
         void setProfile (int index, bool savePrevious);
@@ -107,6 +117,7 @@ namespace Launcher
         void populateFileViews(const QString& contentModelName);
         void reloadCells(QStringList selectedFiles);
         void refreshDataFilesView ();
+        void updateNavMeshProgress(int minDataSize);
 
         class PathIterator
         {

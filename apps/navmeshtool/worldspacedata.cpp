@@ -18,6 +18,8 @@
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/debug/debugging.hpp>
+#include <components/navmeshtool/protocol.hpp>
 
 #include <LinearMath/btVector3.h>
 
@@ -214,6 +216,13 @@ namespace NavMeshTool
             surface.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
             return {surface, landData.mMinHeight, landData.mMaxHeight};
         }
+
+        template <class T>
+        void serializeToStderr(const T& value)
+        {
+            const std::vector<std::byte> data = serialize(value);
+            getRawStderr().write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
+        }
     }
 
     WorldspaceNavMeshInput::WorldspaceNavMeshInput(std::string worldspace, const DetourNavigator::RecastSettings& settings)
@@ -226,7 +235,7 @@ namespace NavMeshTool
 
     WorldspaceData gatherWorldspaceData(const DetourNavigator::Settings& settings, std::vector<ESM::ESMReader>& readers,
         const VFS::Manager& vfs, Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
-        bool processInteriorCells)
+        bool processInteriorCells, bool writeBinaryLog)
     {
         Log(Debug::Info) << "Processing " << esmData.mCells.size() << " cells...";
 
@@ -235,6 +244,9 @@ namespace NavMeshTool
 
         std::size_t objectsCounter = 0;
 
+        if (writeBinaryLog)
+            serializeToStderr(ExpectedCells {static_cast<std::uint64_t>(esmData.mCells.size())});
+
         for (std::size_t i = 0; i < esmData.mCells.size(); ++i)
         {
             const ESM::Cell& cell = esmData.mCells[i];
@@ -242,6 +254,8 @@ namespace NavMeshTool
 
             if (!exterior && !processInteriorCells)
             {
+                if (writeBinaryLog)
+                    serializeToStderr(ProcessedCells {static_cast<std::uint64_t>(i + 1)});
                 Log(Debug::Info) << "Skipped interior"
                     << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") \"" << cell.getDescription() << "\"";
                 continue;
@@ -311,8 +325,13 @@ namespace NavMeshTool
                     data.mObjects.emplace_back(std::move(object));
                 });
 
+            const auto cellDescription = cell.getDescription();
+
+            if (writeBinaryLog)
+                serializeToStderr(ProcessedCells {static_cast<std::uint64_t>(i + 1)});
+
             Log(Debug::Info) << "Processed " << (exterior ? "exterior" : "interior")
-                << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") " << cell.getDescription()
+                << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") " << cellDescription
                 << " with " << (data.mObjects.size() - cellObjectsBegin) << " objects";
         }
 

@@ -31,6 +31,11 @@
 #include <thread>
 #include <vector>
 
+#ifdef WIN32
+#include <fcntl.h>
+#include <io.h>
+#endif
+
 namespace NavMeshTool
 {
     namespace
@@ -86,6 +91,9 @@ namespace NavMeshTool
 
                 ("remove-unused-tiles", bpo::value<bool>()->implicit_value(true)
                     ->default_value(false), "remove tiles from cache that will not be used with current content profile")
+
+                ("write-binary-log", bpo::value<bool>()->implicit_value(true)
+                    ->default_value(false), "write progress in binary messages to be consumed by the launcher")
             ;
             Files::ConfigurationManager::addCommonOptions(result);
 
@@ -145,6 +153,12 @@ namespace NavMeshTool
 
             const bool processInteriorCells = variables["process-interior-cells"].as<bool>();
             const bool removeUnusedTiles = variables["remove-unused-tiles"].as<bool>();
+            const bool writeBinaryLog = variables["write-binary-log"].as<bool>();
+
+#ifdef WIN32
+            if (writeBinaryLog)
+                _setmode(_fileno(stderr), _O_BINARY);
+#endif
 
             Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
 
@@ -180,10 +194,10 @@ namespace NavMeshTool
             navigatorSettings.mRecast.mSwimHeightScale = EsmLoader::getGameSetting(esmData.mGameSettings, "fSwimHeightScale").getFloat();
 
             WorldspaceData cellsData = gatherWorldspaceData(navigatorSettings, readers, vfs, bulletShapeManager,
-                                                            esmData, processInteriorCells);
+                                                            esmData, processInteriorCells, writeBinaryLog);
 
             generateAllNavMeshTiles(agentHalfExtents, navigatorSettings, threadsNumber, removeUnusedTiles,
-                                    cellsData, std::move(db));
+                                    writeBinaryLog, cellsData, std::move(db));
 
             Log(Debug::Info) << "Done";
 
