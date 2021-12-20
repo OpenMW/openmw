@@ -15,7 +15,7 @@ To use the Blender to OpenMW pipeline via COLLADA, you will need the following.
 
 * `OpenMW 0.47 <https://openmw.org/downloads/>`_ or later
 * `Blender 2.81 <https://www.blender.org/download/>`_ or later. Latest confirmed, working version is Blender 3.0
-* `Better COLLADA Exporter <https://github.com/unelsson/collada-exporter>`_ tuned for OpenMW
+* `OpenMW COLLADA Exporter <https://github.com/Lamoot/collada-exporter>`_
 * A model you would like to export. In our case, it's a barrel.
 
 The Barrel
@@ -25,7 +25,7 @@ the `Example Suite repository <https://gitlab.com/OpenMW/example-suite/-/tree/ma
 This should be useful for further study of how to set up a static prop in case
 the tutorial is not clear on any particular thing.
 
-.. image:: barrel-prop-in-blender.webp
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/barrel-prop-in-blender.webp
     :align: center
 
 * ``data/meshes/the_barrel.dae`` – exported model
@@ -74,7 +74,7 @@ way. In Blender, the mesh needs a default material with a diffuse texture
 connected to the ``Base Color`` socket. This is enough for the material to be
 included in the exported COLLADA file.
 
-.. image:: barrel-prop-in-blender-material.webp
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/barrel-prop-in-blender-material.webp
     :align: center
 
 Additional texture types, such as specular or normal maps, are used 
@@ -100,11 +100,11 @@ the name of the empty that is important. The ``tcb`` command in OpenMW's in-game
 console will make the collision shapes visible and you will be able to inspect 
 them.
 
-.. image:: barrel-prop-in-blender-collision.webp
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/barrel-prop-in-blender-collision.webp
     :align: center
 
-If not custom collision shape is present, OpenMW will use the regular 
-mesh itself, which is not optimal and needs to be avoided.
+If no custom collision shape is present, OpenMW will use the regular 
+mesh itself, which is not optimal and should be avoided.
 
 Exporter Settings
 *****************
@@ -114,7 +114,7 @@ all objects you wish to include in the exported file and have the "Selected
 Objects" option enabled. Without this, the exporter could fail.
 
 
-.. image:: dae-exporter-static.webp
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/dae-exporter-static.webp
     :align: center
 
 Getting the Model in-game
@@ -125,5 +125,5 @@ OpenMW will read it. In OpenMW-CS it can then be assigned to an object and added
 to a world cell.
 
 
-.. image:: barrel-prop-in-openmwcs.webp
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/barrel-prop-in-openmwcs.webp
     :align: center
