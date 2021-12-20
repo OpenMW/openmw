@@ -1,0 +1,23 @@
+FROM ubuntu
+LABEL maintainer="Wassim DHIF <wassimdhif@gmail.com>"
+
+ENV NPROC=1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends software-properties-common apt-utils \
+    && add-apt-repository ppa:openmw/openmw \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends openmw openmw-launcher \
+    && apt-get install -y --no-install-recommends git build-essential cmake \
+    libopenal-dev libopenscenegraph-dev libbullet-dev libsdl2-dev \
+    libmygui-dev libunshield-dev liblz4-dev libtinyxml-dev libqt5opengl5-dev \
+    libboost-filesystem-dev libboost-program-options-dev libboost-iostreams-dev \
+    libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev \
+    librecastnavigation-dev libluajit-5.1-dev
+
+COPY build.sh /build.sh
+
+RUN mkdir /openmw
+WORKDIR /openmw
+
+ENTRYPOINT ["/build.sh"]
