@@ -4,6 +4,8 @@
 #include <QTextCodec>
 #include <QDir>
 
+#include <components/debug/debugging.hpp>
+
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
 // We need to do this because of Qt: https://bugreports.qt-project.org/browse/QTBUG-22154
@@ -12,7 +14,7 @@
 
 #include "maindialog.hpp"
 
-int main(int argc, char *argv[])
+int runLauncher(int argc, char *argv[])
 {
     try
     {
@@ -48,4 +50,9 @@ int main(int argc, char *argv[])
         std::cerr << "ERROR: " << e.what() << std::endl;
         return 0;
     }
+}
+
+int main(int argc, char *argv[])
+{
+    return wrapApplication(runLauncher, argc, argv, "Launcher");
 }
