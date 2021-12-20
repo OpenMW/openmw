@@ -137,9 +137,8 @@ namespace Crash
                     frozen = true;
                     handleCrash();
                     running = false;
-                    break;
                 }
-                if (waitApp())
+                if (!frozen && waitApp())
                 {
                     shmLock();
 
