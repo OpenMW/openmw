@@ -1,6 +1,7 @@
 #include "advancedpage.hpp"
 
 #include <array>
+#include <string>
 
 #include <components/config/gamesettings.hpp>
 #include <QFileDialog>
@@ -20,13 +21,13 @@ Launcher::AdvancedPage::AdvancedPage(Config::GameSettings &gameSettings, QWidget
     setObjectName ("AdvancedPage");
     setupUi(this);
 
-    for(const char * name : Launcher::enumerateOpenALDevices())
+    for(const std::string& name : Launcher::enumerateOpenALDevices())
     {
-        audioDeviceSelectorComboBox->addItem(QString::fromUtf8(name), QString::fromUtf8(name));
+        audioDeviceSelectorComboBox->addItem(QString::fromStdString(name), QString::fromStdString(name));
     }
-    for(const char * name : Launcher::enumerateOpenALDevicesHrtf())
+    for(const std::string& name : Launcher::enumerateOpenALDevicesHrtf())
     {
-        hrtfProfileSelectorComboBox->addItem(QString::fromUtf8(name), QString::fromUtf8(name));
+        hrtfProfileSelectorComboBox->addItem(QString::fromStdString(name), QString::fromStdString(name));
     }
 
     loadSettings();
