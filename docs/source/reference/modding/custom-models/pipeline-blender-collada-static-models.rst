@@ -1,0 +1,129 @@
+########################
+Static Model via COLLADA
+########################
+
+This tutorial shows how to get a static model from Blender to OpenMW 
+using the COLLADA format. It does not cover using Blender itself, as there are 
+many better resources for that. The focus is solely on the pipeline and its 
+specific requirements. Static models are those that don’t have any animations 
+included in the exported file.
+
+Requirements
+************
+
+To use the Blender to OpenMW pipeline via COLLADA, you will need the following.
+
+* `OpenMW 0.47 <https://openmw.org/downloads/>`_ or later
+* `Blender 2.81 <https://www.blender.org/download/>`_ or later. Latest confirmed, working version is Blender 3.0
+* `OpenMW COLLADA Exporter <https://github.com/Lamoot/collada-exporter>`_
+* A model you would like to export. In our case, it's a barrel.
+
+The Barrel
+********
+The barrel shown in this tutorial, and its revelant files, are available from 
+the `Example Suite repository <https://gitlab.com/OpenMW/example-suite/-/tree/master/example_static_object>`_.
+This should be useful for further study of how to set up a static prop in case
+the tutorial is not clear on any particular thing.
+
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/barrel-prop-in-blender.webp
+    :align: center
+
+* ``data/meshes/the_barrel.dae`` – exported model
+* ``data/textures/the_barrel.dds`` – diffuse texture
+* ``data/textures/the_barrel_n.dds`` – normal map
+* ``data/textures/the_barrel_n.dds`` – specular map
+* ``source_assets/the_barrel.blend`` – source file configured as this tutorial specifies
+
+Location, Rotation, Scale
+*************************
+
+First, let's take a look at how the fundamental properties of a scene 
+in Blender translate to a COLLADA model suitable for use in OpenMW. These apply 
+the same to static and animated models.
+
+Location
+========
+
+Objects keep their visual location and origin they had in the original scene.
+
+Rotation
+========
+
+* Blender’s +Z axis is up axis in OpenMW
+* Blender’s +Y axis is front axis in OpenMW
+* Blender’s X axis is left-right axis in OpenMW
+
+Scale
+=====
+
+Scale ratio between Blender and OpenMW is 70 to 1. This means 70 units in 
+Blender translate to 1 m in OpenMW.
+
+However, a scale factor like this is impractical to work with. A better 
+approach is to work with a scale of 1 Blender unit = 1 m and apply the 70 scale 
+factor at export. The exporter will automatically scale all object, mesh, 
+armature and animation data.
+
+
+Materials
+*********
+
+OpenMW uses the classic, specular material setup and currently doesn't 
+support the more mainstream `PBR <https://en.wikipedia.org/wiki/Physically_based_rendering>`_
+way. In Blender, the mesh needs a default material with a diffuse texture
+connected to the ``Base Color`` socket. This is enough for the material to be
+included in the exported COLLADA file.
+
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/barrel-prop-in-blender-material.webp
+    :align: center
+
+Additional texture types, such as specular or normal maps, are used 
+when enabled in the OpenMW Launcher with the ``Auto use object normal maps`` 
+and ``Auto use object specular maps`` options. The textures need to follow the 
+name of the diffuse texture with an additional suffix, and be in the same 
+folder. OpenMW will then automatically recognize and use these textures. In the 
+case of the barrel, the textures are named:
+
+* ``the_barrel.dds`` - diffuse texture
+* ``the_barrel_n.dds`` - normal map
+* ``the_barrel_spec.dds`` - specular map
+
+Collision Shapes
+****************
+
+In Blender, a custom collision shape is set up with an empty named 
+``Collision`` or ``collision``. Any mesh that is a child of this empty will be 
+used for physics collision and will not be visible in-game. There can be 
+multiple child meshes under ``collision`` and they will all contribute to the 
+collision shapes. The meshes themselves can have an arbitrary name, it's only 
+the name of the empty that is important. The ``tcb`` command in OpenMW's in-game 
+console will make the collision shapes visible and you will be able to inspect 
+them.
+
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/barrel-prop-in-blender-collision.webp
+    :align: center
+
+If no custom collision shape is present, OpenMW will use the regular 
+mesh itself, which is not optimal and should be avoided.
+
+Exporter Settings
+*****************
+
+For static models, use the following exporter settings. Before export, select 
+all objects you wish to include in the exported file and have the "Selected 
+Objects" option enabled. Without this, the exporter could fail.
+
+
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/dae-exporter-static.webp
+    :align: center
+
+Getting the Model in-game
+*************************
+
+Once the model is exported, it needs to be placed in the correct folder where 
+OpenMW will read it. In OpenMW-CS it can then be assigned to an object and added 
+to a world cell.
+
+
+.. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/barrel-prop-in-openmwcs.webp
+    :align: center
