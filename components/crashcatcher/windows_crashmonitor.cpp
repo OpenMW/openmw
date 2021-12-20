@@ -18,6 +18,7 @@
 
 namespace Crash
 {
+    std::unordered_map<HWINEVENTHOOK, CrashMonitor*> CrashMonitor::smEventHookOwners{};
 
     CrashMonitor::CrashMonitor(HANDLE shmHandle)
         : mShmHandle(shmHandle)
@@ -85,6 +86,10 @@ namespace Crash
 
     bool CrashMonitor::isAppFrozen()
     {
+        MSG message;
+        // Allow the event hook callback to run
+        PeekMessage(&message, nullptr, 0, 0, PM_NOREMOVE);
+
         if (!mAppWindowHandle)
         {
             EnumWindows([](HWND handle, LPARAM param) -> BOOL {
@@ -102,7 +107,20 @@ namespace Crash
                 }, (LPARAM)this);
             if (mAppWindowHandle)
             {
-                // TODO: use https://devblogs.microsoft.com/oldnewthing/20111026-00/?p=9263 to monitor for the window being destroyed
+                DWORD processId;
+                GetWindowThreadProcessId(mAppWindowHandle, &processId);
+                HWINEVENTHOOK eventHookHandle = SetWinEventHook(EVENT_OBJECT_DESTROY, EVENT_OBJECT_DESTROY, nullptr,
+                    [](HWINEVENTHOOK hWinEventHook, DWORD event, HWND windowHandle, LONG objectId, LONG childId, DWORD eventThread, DWORD eventTime)
+                    {
+                        CrashMonitor& crashMonitor = *smEventHookOwners[hWinEventHook];
+                        if (event == EVENT_OBJECT_DESTROY && windowHandle == crashMonitor.mAppWindowHandle && objectId == OBJID_WINDOW && childId == INDEXID_CONTAINER)
+                        {
+                            crashMonitor.mAppWindowHandle = nullptr;
+                            smEventHookOwners.erase(hWinEventHook);
+                            UnhookWinEvent(hWinEventHook);
+                        }
+                    }, processId, mAppMainThreadId, WINEVENT_OUTOFCONTEXT);
+                smEventHookOwners[eventHookHandle] = this;
             }
             else
                 return false;

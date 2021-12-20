@@ -33,6 +33,8 @@ private:
     HANDLE mShmHandle = nullptr;
     HANDLE mShmMutex = nullptr;
 
+    static std::unordered_map<HWINEVENTHOOK, CrashMonitor*> smEventHookOwners;
+
     void signalApp() const;
 
     bool waitApp() const;
