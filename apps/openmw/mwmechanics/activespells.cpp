@@ -9,6 +9,8 @@
 
 #include <components/esm/loadmgef.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "creaturestats.hpp"
 #include "spellcasting.hpp"
 #include "spelleffects.hpp"
@@ -236,7 +238,13 @@ namespace MWMechanics
                 if(result == MagicApplicationResult::REFLECTED)
                 {
                     if(!reflected)
-                        reflected = {*spellIt, ptr};
+                    {
+                        static const bool keepOriginalCaster = Settings::Manager::getBool("classic reflected absorb spells behavior", "Game");
+                        if(keepOriginalCaster)
+                            reflected = {*spellIt, caster};
+                        else
+                            reflected = {*spellIt, ptr};
+                    }
                     auto& reflectedEffect = reflected->mEffects.emplace_back(*it);
                     reflectedEffect.mFlags = ESM::ActiveEffect::Flag_Ignore_Reflect | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
                     it = spellIt->mEffects.erase(it);
