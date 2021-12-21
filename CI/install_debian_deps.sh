@@ -65,4 +65,6 @@ export APT_CACHE_DIR="${PWD}/apt-cache"
 set -x
 mkdir -pv "$APT_CACHE_DIR"
 apt-get update -yqq
+apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends software-properties-common
+add-apt-repository -y ppa:openmw/openmw
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}"
