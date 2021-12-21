@@ -33,6 +33,9 @@ private:
     HANDLE mShmHandle = nullptr;
     HANDLE mShmMutex = nullptr;
 
+    DWORD mFreezeMessageBoxThreadId = 0;
+    std::atomic_bool mFreezeAbort;
+
     static std::unordered_map<HWINEVENTHOOK, CrashMonitor*> smEventHookOwners;
 
     void signalApp() const;
@@ -48,6 +51,10 @@ private:
     void shmUnlock();
 
     void handleCrash();
+
+    void showFreezeMessageBox();
+
+    void hideFreezeMessageBox();
 };
 
 } // namespace Crash

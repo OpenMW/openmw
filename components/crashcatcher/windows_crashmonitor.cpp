@@ -148,15 +148,23 @@ namespace Crash
 
             bool running = true;
             bool frozen = false;
-            while (isAppAlive() && running)
+            while (isAppAlive() && running && !mFreezeAbort)
             {
                 if (isAppFrozen())
                 {
-                    frozen = true;
-                    handleCrash();
-                    running = false;
+                    if (!frozen)
+                    {
+                        showFreezeMessageBox();
+                        frozen = true;
+                    }
                 }
-                if (!frozen && waitApp())
+                else if (frozen)
+                {
+                    hideFreezeMessageBox();
+                    frozen = false;
+                }
+
+                if (!mFreezeAbort && waitApp())
                 {
                     shmLock();
 
@@ -180,6 +188,9 @@ namespace Crash
             }
 
             if (frozen)
+                hideFreezeMessageBox();
+
+            if (mFreezeAbort)
             {
                 TerminateProcess(mAppProcessHandle, 0xDEAD);
                 std::string message = "OpenMW appears to have frozen.\nCrash log saved to '" + std::string(mShm->mStartup.mLogFilePath) + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
@@ -256,6 +267,45 @@ namespace Crash
         {
             Log(Debug::Error) << "CrashMonitor: unknown exception";
         }
+    }
+
+    void CrashMonitor::showFreezeMessageBox()
+    {
+        std::thread messageBoxThread([&]() {
+            SDL_MessageBoxButtonData button = { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "Abort" };
+            SDL_MessageBoxData messageBoxData = {
+                SDL_MESSAGEBOX_ERROR,
+                nullptr,
+                "OpenMW appears to have frozen",
+                "OpenMW appears to have frozen. Press Abort to terminate it and generate a crash dump.\nIf OpenMW hasn't actually frozen, this message box will disappear a within a few seconds of it becoming responsive.",
+                1,
+                &button,
+                nullptr
+            };
+
+            int buttonId;
+            if (SDL_ShowMessageBox(&messageBoxData, &buttonId) == 0 && buttonId == 0)
+                mFreezeAbort = true;
+            });
+
+        mFreezeMessageBoxThreadId = GetThreadId(messageBoxThread.native_handle());
+        messageBoxThread.detach();
+    }
+
+    void CrashMonitor::hideFreezeMessageBox()
+    {
+        if (!mFreezeMessageBoxThreadId)
+            return;
+
+        EnumWindows([](HWND handle, LPARAM param) -> BOOL {
+            CrashMonitor& crashMonitor = *(CrashMonitor*)param;
+            DWORD processId;
+            if (GetWindowThreadProcessId(handle, &processId) == crashMonitor.mFreezeMessageBoxThreadId && processId == GetCurrentProcessId())
+                PostMessage(handle, WM_CLOSE, 0, 0);
+            return true;
+            }, (LPARAM)this);
+
+        mFreezeMessageBoxThreadId = 0;
     }
 
 } // namespace Crash
