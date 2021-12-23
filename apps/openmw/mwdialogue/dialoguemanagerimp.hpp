@@ -16,8 +16,6 @@
 
 #include "../mwscript/compilercontext.hpp"
 
-#include "hypertextparser.hpp"
-
 namespace ESM
 {
     struct Dialogue;
@@ -58,8 +56,6 @@ namespace MWDialogue
             int mOriginalDisposition;
             int mCurrentDisposition;
             int mPermanentDispositionChange;
-
-            HyperTextParser mHyperTextParser;
 
             std::vector<std::string> parseTopicIdsFromText (const std::string& text);
             void addTopicsFromText (const std::string& text);

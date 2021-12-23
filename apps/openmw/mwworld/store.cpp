@@ -77,13 +77,12 @@ namespace MWWorld
 
     template<typename T>
     Store<T>::Store()
-        : mModPoint(1)
     {
     }
 
     template<typename T>
     Store<T>::Store(const Store<T>& orig)
-        : mStatic(orig.mStatic), mModPoint(orig.mModPoint + 1)
+        : mStatic(orig.mStatic)
     {
     }
 
@@ -94,8 +93,6 @@ namespace MWWorld
         assert(mShared.size() >= mStatic.size());
         mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
         mDynamic.clear();
-
-        mModPoint++;
     }
 
     template<typename T>
@@ -165,8 +162,6 @@ namespace MWWorld
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
 
-        mModPoint++;
-
         return RecordId(record.mId, isDeleted);
     }
     template<typename T>
@@ -218,9 +213,6 @@ namespace MWWorld
         T *ptr = &result.first->second;
         if (result.second)
             mShared.push_back(ptr);
-
-        mModPoint++;
-
         return ptr;
     }
     template<typename T>
@@ -230,9 +222,6 @@ namespace MWWorld
         T *ptr = &result.first->second;
         if (result.second)
             mShared.push_back(ptr);
-
-        mModPoint++;
-
         return ptr;
     }
     template<typename T>
@@ -253,8 +242,6 @@ namespace MWWorld
                 ++sharedIter;
             }
             mStatic.erase(it);
-
-            mModPoint++;
         }
 
         return true;
@@ -272,9 +259,6 @@ namespace MWWorld
         for (auto it = mDynamic.begin(); it != mDynamic.end(); ++it) {
             mShared.push_back(&it->second);
         }
-
-        mModPoint++;
-
         return true;
     }
     template<typename T>
@@ -997,8 +981,11 @@ namespace MWWorld
     // Dialogue
     //=========================================================================
 
+    Store<ESM::Dialogue>::Store()
+        : mKeywordSearchModFlag(true)
+    {
+    }
 
-    template<>
     void Store<ESM::Dialogue>::setUp()
     {
         // DialInfos marked as deleted are kept during the loading phase, so that the linked list
@@ -1014,10 +1001,45 @@ namespace MWWorld
         // TODO: if we require this behaviour, maybe we should move it to the place that requires it
         std::sort(mShared.begin(), mShared.end(), [](const ESM::Dialogue* l, const ESM::Dialogue* r) -> bool { return l->mId < r->mId; });
 
-        mModPoint++;
+        mKeywordSearchModFlag = true;
     }
 
-    template <>
+    const ESM::Dialogue *Store<ESM::Dialogue>::search(const std::string &id) const
+    {
+        typename Static::const_iterator it = mStatic.find(id);
+        if (it != mStatic.end())
+            return &(it->second);
+
+        return nullptr;
+    }
+
+    const ESM::Dialogue *Store<ESM::Dialogue>::find(const std::string &id) const
+    {
+        const ESM::Dialogue *ptr = search(id);
+        if (ptr == nullptr)
+        {
+            std::stringstream msg;
+            msg << ESM::Dialogue::getRecordType() << " '" << id << "' not found";
+            throw std::runtime_error(msg.str());
+        }
+        return ptr;
+    }
+
+    typename Store<ESM::Dialogue>::iterator Store<ESM::Dialogue>::begin() const
+    {
+        return mShared.begin();
+    }
+
+    typename Store<ESM::Dialogue>::iterator Store<ESM::Dialogue>::end() const
+    {
+        return mShared.end();
+    }
+
+    size_t Store<ESM::Dialogue>::getSize() const
+    {
+        return mShared.size();
+    }
+
     inline RecordId Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
         // The original letter case of a dialogue ID is saved, because it's printed
         ESM::Dialogue dialogue;
@@ -1037,20 +1059,39 @@ namespace MWWorld
             dialogue.mId = found->second.mId;
         }
         
-        mModPoint++;
+        mKeywordSearchModFlag = true;
 
         return RecordId(dialogue.mId, isDeleted);
     }
 
-    template<>
     bool Store<ESM::Dialogue>::eraseStatic(const std::string &id)
     {
         if (mStatic.erase(id))
-            mModPoint++;
+            mKeywordSearchModFlag = true;
 
         return true;
     }
 
+    const MWDialogue::KeywordSearch<std::string, int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch()
+    {
+        if (mKeywordSearchModFlag)
+        {
+            mKeywordSearch.clear();
+
+            std::vector<std::string> keywordList;
+            keywordList.reserve(getSize());
+            for (const auto& it : *this)
+                keywordList.push_back(Misc::StringUtils::lowerCase(it.mId));
+            sort(keywordList.begin(), keywordList.end());
+
+            for (const auto& it : keywordList)
+                mKeywordSearch.seed(it, 0 /*unused*/);
+
+            mKeywordSearchModFlag = false;
+        }
+
+        return mKeywordSearch;
+    }
 }
 
 template class MWWorld::Store<ESM::Activator>;

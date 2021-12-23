@@ -11,6 +11,8 @@
 #include <components/esm/records.hpp>
 #include <components/misc/stringops.hpp>
 
+#include "../mwdialogue/keywordsearch.hpp"
+
 namespace ESM
 {
     struct Land;
@@ -154,12 +156,9 @@ namespace MWWorld
         /// @par mShared usually preserves the record order as it came from the content files (this
         /// is relevant for the spell autocalc code and selection order
         /// for heads/hairs in the character creation)
-        /// @warning ESM::Dialogue Store currently implements a sorted order for unknown reasons.
         std::vector<T*> mShared;
         typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Dynamic;
         Dynamic mDynamic;
-
-        uint64_t mModPoint;
 
         friend class ESMStore;
 
@@ -205,8 +204,6 @@ namespace MWWorld
         RecordId load(ESM::ESMReader &esm) override;
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const override;
         RecordId read(ESM::ESMReader& reader, bool overrideOnly = false) override;
-
-        uint64_t getModPoint() const { return mModPoint; }
     };
 
     template <>
@@ -444,6 +441,41 @@ namespace MWWorld
         iterator end() const;
     };
 
+    template <>
+    class Store<ESM::Dialogue> : public StoreBase
+    {
+        typedef std::unordered_map<std::string, ESM::Dialogue, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Static;
+        Static mStatic;
+        /// @par mShared usually preserves the record order as it came from the content files (this
+        /// is relevant for the spell autocalc code and selection order
+        /// for heads/hairs in the character creation)
+        /// @warning ESM::Dialogue Store currently implements a sorted order for unknown reasons.
+        std::vector<ESM::Dialogue*> mShared;
+
+        bool mKeywordSearchModFlag;
+        MWDialogue::KeywordSearch<std::string, int /*unused*/> mKeywordSearch;
+
+    public:
+        Store();
+
+        typedef SharedIterator<ESM::Dialogue> iterator;
+
+        void setUp() override;
+
+        const ESM::Dialogue *search(const std::string &id) const;
+        const ESM::Dialogue *find(const std::string &id) const;
+
+        iterator begin() const;
+        iterator end() const;
+
+        size_t getSize() const override;
+
+        bool eraseStatic(const std::string &id) override;
+
+        RecordId load(ESM::ESMReader &esm) override;
+
+        const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch();
+    };
 
 } //end namespace
 

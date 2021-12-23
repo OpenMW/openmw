@@ -236,6 +236,9 @@ namespace MWWorld
 
             const MWWorld::ESMStore& getStore() const override;
 
+            const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() override {
+                return mStore.getDialogIdKeywordSearch(); }
+
             std::vector<ESM::ESMReader>& getEsmReader() override;
 
             LocalScripts& getLocalScripts() override;
