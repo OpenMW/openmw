@@ -1107,7 +1107,7 @@ template class MWWorld::Store<ESM::Clothing>;
 template class MWWorld::Store<ESM::Container>;
 template class MWWorld::Store<ESM::Creature>;
 template class MWWorld::Store<ESM::CreatureLevList>;
-template class MWWorld::Store<ESM::Dialogue>;
+//template class MWWorld::Store<ESM::Dialogue>;
 template class MWWorld::Store<ESM::Door>;
 template class MWWorld::Store<ESM::Enchantment>;
 template class MWWorld::Store<ESM::Faction>;
