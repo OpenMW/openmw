@@ -14,14 +14,14 @@ Requirements
 To use the Blender to OpenMW pipeline via COLLADA, you will need the following.
 
 * `OpenMW 0.47 <https://openmw.org/downloads/>`_ or later
-* `Blender 2.81 <https://www.blender.org/download/>`_ or later. Latest confirmed, working version is Blender 3.0
-* `OpenMW COLLADA Exporter <https://github.com/Lamoot/collada-exporter>`_
+* `Blender 2.83 <https://www.blender.org/download/>`_ or later. Latest confirmed, working version is Blender 3.0
+* `OpenMW COLLADA Exporter <https://github.com/openmw/collada-exporter>`_
 * A model you would like to export. In our case, it's a barrel.
 
 The Barrel
 ********
 The barrel shown in this tutorial, and its revelant files, are available from 
-the `Example Suite repository <https://gitlab.com/OpenMW/example-suite/-/tree/master/example_static_object>`_.
+the `Example Suite repository <https://gitlab.com/OpenMW/example-suite/-/tree/master/example_static_props>`_.
 This should be useful for further study of how to set up a static prop in case
 the tutorial is not clear on any particular thing.
 
