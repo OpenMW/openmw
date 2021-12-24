@@ -1,7 +1,6 @@
 #include "creaturestats.hpp"
 
 #include <algorithm>
-#include <climits>
 
 #include <components/esm/creaturestats.hpp>
 #include <components/esm/esmreader.hpp>
@@ -558,12 +557,13 @@ namespace MWMechanics
         state.mHasAiSettings = true;
         for (int i=0; i<4; ++i)
             mAiSettings[i].writeState (state.mAiSettings[i]);
+
+        state.mMissingACDT = false;
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
     {
-        // HACK: using mGoldPool as an indicator for lack of ACDT during .ess import
-        if (state.mGoldPool != INT_MIN)
+        if (!state.mMissingACDT)
         {
             for (int i=0; i<ESM::Attribute::Length; ++i)
                 mAttributes[i].readState (state.mAttributes[i]);
