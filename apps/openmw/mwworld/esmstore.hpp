@@ -284,9 +284,6 @@ namespace MWWorld
         /// Actors with the same ID share spells, abilities, etc.
         /// @return The shared spell list to use for this actor and whether or not it has already been initialized.
         std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
-
-        const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() {
-            return mDialogs.getDialogIdKeywordSearch(); }
     };
 
     template <>

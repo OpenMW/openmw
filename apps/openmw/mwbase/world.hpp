@@ -87,11 +87,6 @@ namespace MWWorld
     typedef std::vector<std::pair<MWWorld::Ptr,MWMechanics::Movement> > PtrMovementList;
 }
 
-namespace MWDialogue
-{
-    template <typename string_t, typename value_t> class KeywordSearch;
-}
-
 namespace MWBase
 {
     /// \brief Interface for the World (implemented in MWWorld)
@@ -155,7 +150,6 @@ namespace MWBase
             virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;
 
             virtual const MWWorld::ESMStore& getStore() const = 0;
-            virtual const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() = 0;
 
             virtual std::vector<ESM::ESMReader>& getEsmReader() = 0;
 

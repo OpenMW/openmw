@@ -452,8 +452,8 @@ namespace MWWorld
         /// @warning ESM::Dialogue Store currently implements a sorted order for unknown reasons.
         std::vector<ESM::Dialogue*> mShared;
 
-        bool mKeywordSearchModFlag;
-        MWDialogue::KeywordSearch<std::string, int /*unused*/> mKeywordSearch;
+        mutable bool mKeywordSearchModFlag;
+        mutable MWDialogue::KeywordSearch<std::string, int /*unused*/> mKeywordSearch;
 
     public:
         Store();
@@ -474,7 +474,7 @@ namespace MWWorld
 
         RecordId load(ESM::ESMReader &esm) override;
 
-        const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch();
+        const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() const;
     };
 
 } //end namespace

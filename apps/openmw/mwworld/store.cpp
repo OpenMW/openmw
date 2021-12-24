@@ -1072,7 +1072,7 @@ namespace MWWorld
         return true;
     }
 
-    const MWDialogue::KeywordSearch<std::string, int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch()
+    const MWDialogue::KeywordSearch<std::string, int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch() const
     {
         if (mKeywordSearchModFlag)
         {
