@@ -127,6 +127,13 @@ Ubuntu_GCC_tests_Debug:
 
 Ubuntu_GCC_Static_Deps:
   extends: Ubuntu_GCC
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"  
+      changes:
+        - "**/CMakeLists.txt"
+        - "cmake/**/*"
+        - "CI/**/*"
+        - ".gitlab-ci.yml"
   allow_failure: true
   cache:
     key: Ubuntu_GCC_Static_Deps
