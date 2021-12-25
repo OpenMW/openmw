@@ -74,13 +74,13 @@ public:
         return left.mBeg < right.mBeg;
     }
 
-    void highlightKeywords (Point beg, Point end, std::vector<Match>& out)
+    void highlightKeywords (Point beg, Point end, std::vector<Match>& out) const
     {
         std::vector<Match> matches;
         for (Point i = beg; i != end; ++i)
         {
             // check first character
-            typename Entry::childen_t::iterator candidate = mRoot.mChildren.find (Misc::StringUtils::toLower (*i));
+            typename Entry::childen_t::const_iterator candidate = mRoot.mChildren.find (Misc::StringUtils::toLower (*i));
 
             // no match, on to next character
             if (candidate == mRoot.mChildren.end ())
@@ -91,11 +91,11 @@ public:
 
             // some keywords might be longer variations of other keywords, so we definitely need a list of candidates
             // the first element in the pair is length of the match, i.e. depth from the first character on
-            std::vector< typename std::pair<int, typename Entry::childen_t::iterator> > candidates;
+            std::vector< typename std::pair<int, typename Entry::childen_t::const_iterator> > candidates;
 
             while ((j + 1) != end)
             {
-                typename Entry::childen_t::iterator next = candidate->second.mChildren.find (Misc::StringUtils::toLower (*++j));
+                typename Entry::childen_t::const_iterator next = candidate->second.mChildren.find (Misc::StringUtils::toLower (*++j));
 
                 if (next == candidate->second.mChildren.end ())
                 {
@@ -116,7 +116,7 @@ public:
             // shorter candidates will be added to the vector first. however, we want to check against longer candidates first
             std::reverse(candidates.begin(), candidates.end());
 
-            for (typename std::vector< std::pair<int, typename Entry::childen_t::iterator> >::iterator it = candidates.begin();
+            for (typename std::vector< std::pair<int, typename Entry::childen_t::const_iterator> >::iterator it = candidates.begin();
                  it != candidates.end(); ++it)
             {
                 candidate = it->second;

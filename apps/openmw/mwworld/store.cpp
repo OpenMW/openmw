@@ -981,8 +981,11 @@ namespace MWWorld
     // Dialogue
     //=========================================================================
 
+    Store<ESM::Dialogue>::Store()
+        : mKeywordSearchModFlag(true)
+    {
+    }
 
-    template<>
     void Store<ESM::Dialogue>::setUp()
     {
         // DialInfos marked as deleted are kept during the loading phase, so that the linked list
@@ -997,9 +1000,46 @@ namespace MWWorld
         // TODO: verify and document this inconsistent behaviour
         // TODO: if we require this behaviour, maybe we should move it to the place that requires it
         std::sort(mShared.begin(), mShared.end(), [](const ESM::Dialogue* l, const ESM::Dialogue* r) -> bool { return l->mId < r->mId; });
+
+        mKeywordSearchModFlag = true;
     }
 
-    template <>
+    const ESM::Dialogue *Store<ESM::Dialogue>::search(const std::string &id) const
+    {
+        typename Static::const_iterator it = mStatic.find(id);
+        if (it != mStatic.end())
+            return &(it->second);
+
+        return nullptr;
+    }
+
+    const ESM::Dialogue *Store<ESM::Dialogue>::find(const std::string &id) const
+    {
+        const ESM::Dialogue *ptr = search(id);
+        if (ptr == nullptr)
+        {
+            std::stringstream msg;
+            msg << ESM::Dialogue::getRecordType() << " '" << id << "' not found";
+            throw std::runtime_error(msg.str());
+        }
+        return ptr;
+    }
+
+    typename Store<ESM::Dialogue>::iterator Store<ESM::Dialogue>::begin() const
+    {
+        return mShared.begin();
+    }
+
+    typename Store<ESM::Dialogue>::iterator Store<ESM::Dialogue>::end() const
+    {
+        return mShared.end();
+    }
+
+    size_t Store<ESM::Dialogue>::getSize() const
+    {
+        return mShared.size();
+    }
+
     inline RecordId Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
         // The original letter case of a dialogue ID is saved, because it's printed
         ESM::Dialogue dialogue;
@@ -1018,17 +1058,40 @@ namespace MWWorld
             found->second.loadData(esm, isDeleted);
             dialogue.mId = found->second.mId;
         }
+        
+        mKeywordSearchModFlag = true;
 
         return RecordId(dialogue.mId, isDeleted);
     }
 
-    template<>
     bool Store<ESM::Dialogue>::eraseStatic(const std::string &id)
     {
-        mStatic.erase(id);
+        if (mStatic.erase(id))
+            mKeywordSearchModFlag = true;
+
         return true;
     }
 
+    const MWDialogue::KeywordSearch<std::string, int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch() const
+    {
+        if (mKeywordSearchModFlag)
+        {
+            mKeywordSearch.clear();
+
+            std::vector<std::string> keywordList;
+            keywordList.reserve(getSize());
+            for (const auto& it : *this)
+                keywordList.push_back(Misc::StringUtils::lowerCase(it.mId));
+            sort(keywordList.begin(), keywordList.end());
+
+            for (const auto& it : keywordList)
+                mKeywordSearch.seed(it, 0 /*unused*/);
+
+            mKeywordSearchModFlag = false;
+        }
+
+        return mKeywordSearch;
+    }
 }
 
 template class MWWorld::Store<ESM::Activator>;
@@ -1044,7 +1107,7 @@ template class MWWorld::Store<ESM::Clothing>;
 template class MWWorld::Store<ESM::Container>;
 template class MWWorld::Store<ESM::Creature>;
 template class MWWorld::Store<ESM::CreatureLevList>;
-template class MWWorld::Store<ESM::Dialogue>;
+//template class MWWorld::Store<ESM::Dialogue>;
 template class MWWorld::Store<ESM::Door>;
 template class MWWorld::Store<ESM::Enchantment>;
 template class MWWorld::Store<ESM::Faction>;
