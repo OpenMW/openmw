@@ -1,6 +1,9 @@
 #include "creaturestats.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "savedgame.hpp"
+
+#include <limits>
 
 void ESM::CreatureStats::load (ESMReader &esm)
 {
@@ -163,6 +166,13 @@ void ESM::CreatureStats::load (ESMReader &esm)
 
         mCorprusSpells[id] = stats;
     }
+    if(esm.getFormat() <= 18)
+        mMissingACDT = mGoldPool == std::numeric_limits<int>::min();
+    else
+    {
+        mMissingACDT = false;
+        esm.getHNOT(mMissingACDT, "NOAC");
+    }
 }
 
 void ESM::CreatureStats::save (ESMWriter &esm) const
@@ -173,8 +183,10 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     for (int i=0; i<3; ++i)
         mDynamic[i].save (esm);
 
-    if (mGoldPool)
-        esm.writeHNT ("GOLD", mGoldPool);
+    if (ESM::SavedGame::sCurrentFormat <= 18 && mMissingACDT)
+        esm.writeHNT("GOLD", std::numeric_limits<int>::min());
+    else if(mGoldPool)
+        esm.writeHNT("GOLD", mGoldPool);
 
     if (mTradeTime.mDay != 0 || mTradeTime.mHour != 0)
         esm.writeHNT ("TIME", mTradeTime);
@@ -246,6 +258,8 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
         for (int i=0; i<4; ++i)
             mAiSettings[i].save(esm);
     }
+    if(ESM::SavedGame::sCurrentFormat > 18 && mMissingACDT)
+        esm.writeHNT("NOAC", mMissingACDT);
 }
 
 void ESM::CreatureStats::blank()
@@ -274,4 +288,5 @@ void ESM::CreatureStats::blank()
     mDeathAnimation = -1;
     mLevel = 1;
     mCorprusSpells.clear();
+    mMissingACDT = false;
 }

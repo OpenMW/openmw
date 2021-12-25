@@ -85,6 +85,7 @@ namespace ESM
         signed char mDeathAnimation;
         ESM::TimeStamp mTimeOfDeath;
         int mLevel;
+        bool mMissingACDT;
 
         std::map<std::string, CorprusStats> mCorprusSpells;
         SpellState mSpells;
