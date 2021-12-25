@@ -92,6 +92,7 @@
     Bug #6473: Strings from NIF should be parsed only to first null terminator
     Bug #6493: Unlocking owned but not locked or unlocked containers is considered a crime
     Bug #6517: Rotations for KeyframeData in NIFs should be optional
+    Bug #6519: Effects tooltips for ingredients work incorrectly
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
