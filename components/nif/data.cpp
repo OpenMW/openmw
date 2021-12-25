@@ -428,7 +428,7 @@ void NiMorphData::read(NIFStream *nif)
     for(int i = 0;i < morphCount;i++)
     {
         mMorphs[i].mKeyFrames = std::make_shared<FloatKeyMap>();
-        mMorphs[i].mKeyFrames->read(nif, true, /*morph*/true);
+        mMorphs[i].mKeyFrames->read(nif, /*morph*/true);
         nif->getVector3s(mMorphs[i].mVertices, vertCount);
     }
 }
@@ -445,9 +445,9 @@ void NiKeyframeData::read(NIFStream *nif)
         mXRotations = std::make_shared<FloatKeyMap>();
         mYRotations = std::make_shared<FloatKeyMap>();
         mZRotations = std::make_shared<FloatKeyMap>();
-        mXRotations->read(nif, true);
-        mYRotations->read(nif, true);
-        mZRotations->read(nif, true);
+        mXRotations->read(nif);
+        mYRotations->read(nif);
+        mZRotations->read(nif);
     }
     mTranslations = std::make_shared<Vector3KeyMap>();
     mTranslations->read(nif);
