@@ -481,7 +481,8 @@ namespace Resource
                 filePath = std::filesystem::relative(filename, osgDB::getCurrentWorkingDirectory());
             try
             {
-                return osgDB::ReaderWriter::ReadResult(mImageManager->getImage(filePath), osgDB::ReaderWriter::ReadResult::FILE_LOADED);
+                return osgDB::ReaderWriter::ReadResult(mImageManager->getImage(filePath.string()),
+                                                       osgDB::ReaderWriter::ReadResult::FILE_LOADED);
             }
             catch (std::exception& e)
             {
