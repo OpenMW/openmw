@@ -12,7 +12,6 @@
 #include "generator.hpp"
 #include "extensions.hpp"
 #include "declarationparser.hpp"
-#include "exception.hpp"
 
 namespace Compiler
 {
@@ -259,33 +258,11 @@ namespace Compiler
                         mExplicit.clear();
                     }
 
-                    try
-                    {
-                        // workaround for broken positioncell instructions.
-                        /// \todo add option to disable this
-                        std::unique_ptr<ErrorDowngrade> errorDowngrade (nullptr);
-                        if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
-                            errorDowngrade = std::make_unique<ErrorDowngrade> (getErrorHandler());
-
-                        std::vector<Interpreter::Type_Code> code;
-                        int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
-                        mCode.insert (mCode.end(), code.begin(), code.end());
-                        extensions->generateInstructionCode (keyword, mCode, mLiterals,
-                            mExplicit, optionals);
-                    }
-                    catch (const SourceException&)
-                    {
-                        // Ignore argument exceptions for positioncell.
-                        /// \todo add option to disable this
-                        if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
-                        {
-                            SkipParser skip (getErrorHandler(), getContext());
-                            scanner.scan (skip);
-                            return false;
-                        }
-
-                        throw;
-                    }
+                    std::vector<Interpreter::Type_Code> code;
+                    int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
+                    mCode.insert (mCode.end(), code.begin(), code.end());
+                    extensions->generateInstructionCode (keyword, mCode, mLiterals,
+                        mExplicit, optionals);
 
                     mState = EndState;
                     return true;
