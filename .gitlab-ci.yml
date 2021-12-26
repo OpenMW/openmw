@@ -85,6 +85,7 @@ Coverity:
   variables:
     CC: clang
     CXX: clang++
+    CXXFLAGS: -O0
   artifacts:
     paths: []
     expire_in: 1 minute
