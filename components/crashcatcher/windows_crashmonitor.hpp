@@ -1,7 +1,9 @@
 #ifndef WINDOWS_CRASHMONITOR_HPP
 #define WINDOWS_CRASHMONITOR_HPP
 
-#include <windef.h>
+#undef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 namespace Crash
 {

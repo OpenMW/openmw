@@ -1,10 +1,11 @@
+#include "windows_crashcatcher.hpp"
+
 #include <cassert>
 #include <cwchar>
 #include <iostream>
 #include <sstream>
 #include <thread>
 
-#include "windows_crashcatcher.hpp"
 #include "windows_crashmonitor.hpp"
 #include "windows_crashshm.hpp"
 #include <SDL_messagebox.h>

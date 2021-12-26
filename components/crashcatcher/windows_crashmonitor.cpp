@@ -1,3 +1,5 @@
+#include "windows_crashmonitor.hpp"
+
 #undef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -12,7 +14,6 @@
 #include <SDL_messagebox.h>
 
 #include "windows_crashcatcher.hpp"
-#include "windows_crashmonitor.hpp"
 #include "windows_crashshm.hpp"
 #include <components/debug/debuglog.hpp>
 
