@@ -68,7 +68,7 @@ Coverity:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   before_script:
-    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic coverity
+    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic coverity
     - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64 --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - tar xfz /tmp/cov-analysis-linux64.tgz
   script:
@@ -83,8 +83,8 @@ Coverity:
       --form description="CI_COMMIT_SHORT_SHA / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
     - cat /builds/OpenMW/openmw/cov-int/build-log.txt
   variables:
-    CC: gcc
-    CXX: g++
+    CC: clang
+    CXX: clang++
   artifacts:
     paths: []
     expire_in: 1 minute
