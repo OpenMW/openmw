@@ -58,9 +58,9 @@ namespace MWWorld
         MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
 
         for (int i=0; i<ESM::Skill::Length; ++i)
-            mSaveSkills[i] = stats.getSkill(i);
+            mSaveSkills[i] = stats.getSkill(i).getModified();
         for (int i=0; i<ESM::Attribute::Length; ++i)
-            mSaveAttributes[i] = stats.getAttribute(i);
+            mSaveAttributes[i] = stats.getAttribute(i).getModified();
     }
 
     void Player::restoreStats()
@@ -69,11 +69,20 @@ namespace MWWorld
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
-        creatureStats.setHealth(int(health.getBase() / gmst.find("fWereWolfHealth")->mValue.getFloat()));
+        creatureStats.setHealth(health.getBase() / gmst.find("fWereWolfHealth")->mValue.getFloat());
         for (int i=0; i<ESM::Skill::Length; ++i)
-            npcStats.setSkill(i, mSaveSkills[i]);
+        {
+            auto& skill = npcStats.getSkill(i);
+            skill.restore(skill.getDamage());
+            skill.setModifier(mSaveSkills[i] - skill.getBase());
+        }
         for (int i=0; i<ESM::Attribute::Length; ++i)
-            npcStats.setAttribute(i, mSaveAttributes[i]);
+        {
+            auto attribute = npcStats.getAttribute(i);
+            attribute.restore(attribute.getDamage());
+            attribute.setModifier(mSaveAttributes[i] - attribute.getBase());
+            npcStats.setAttribute(i, attribute);
+        }
     }
 
     void Player::setWerewolfStats()
@@ -82,7 +91,7 @@ namespace MWWorld
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
-        creatureStats.setHealth(int(health.getBase() * gmst.find("fWereWolfHealth")->mValue.getFloat()));
+        creatureStats.setHealth(health.getBase() * gmst.find("fWereWolfHealth")->mValue.getFloat());
         for(size_t i = 0;i < ESM::Attribute::Length;++i)
         {
             // Oh, Bethesda. It's "Intelligence".
@@ -90,7 +99,7 @@ namespace MWWorld
                                             ESM::Attribute::sAttributeNames[i]);
 
             MWMechanics::AttributeValue value = npcStats.getAttribute(i);
-            value.setBase(int(gmst.find(name)->mValue.getFloat()));
+            value.setModifier(gmst.find(name)->mValue.getFloat() - value.getModified());
             npcStats.setAttribute(i, value);
         }
 
@@ -104,9 +113,8 @@ namespace MWWorld
             std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
                                             ESM::Skill::sSkillNames[i]);
 
-            MWMechanics::SkillValue value = npcStats.getSkill(i);
-            value.setBase(int(gmst.find(name)->mValue.getFloat()));
-            npcStats.setSkill(i, value);
+            MWMechanics::SkillValue& value = npcStats.getSkill(i);
+            value.setModifier(gmst.find(name)->mValue.getFloat() - value.getModified());
         }
     }
 
@@ -316,14 +324,12 @@ namespace MWWorld
 
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
-            mSaveSkills[i].setBase(0);
-            mSaveSkills[i].setModifier(0);
+            mSaveSkills[i] = 0.f;
         }
 
         for (int i=0; i<ESM::Attribute::Length; ++i)
         {
-            mSaveAttributes[i].setBase(0);
-            mSaveAttributes[i].setModifier(0);
+            mSaveAttributes[i] = 0.f;
         }
 
         mMarkedPosition.pos[0] = 0;
@@ -360,9 +366,9 @@ namespace MWWorld
             player.mHasMark = false;
 
         for (int i=0; i<ESM::Attribute::Length; ++i)
-            mSaveAttributes[i].writeState(player.mSaveAttributes[i]);
+            player.mSaveAttributes[i] = mSaveAttributes[i];
         for (int i=0; i<ESM::Skill::Length; ++i)
-            mSaveSkills[i].writeState(player.mSaveSkills[i]);
+            player.mSaveSkills[i] = mSaveSkills[i];
 
         player.mPreviousItems = mPreviousItems;
 
@@ -384,13 +390,7 @@ namespace MWWorld
                 throw std::runtime_error ("invalid player state record (object state)");
             }
             if (reader.getFormat() < 17)
-            {
                 convertMagicEffects(player.mObject.mCreatureStats, player.mObject.mInventory, &player.mObject.mNpcStats);
-                for(std::size_t i = 0; i < ESM::Attribute::Length; ++i)
-                    player.mSaveAttributes[i].mMod = 0.f;
-                for(std::size_t i = 0; i < ESM::Skill::Length; ++i)
-                    player.mSaveSkills[i].mMod = 0.f;
-            }
 
             if (!player.mObject.mEnabled)
             {
@@ -401,14 +401,23 @@ namespace MWWorld
             mPlayer.load (player.mObject);
 
             for (int i=0; i<ESM::Attribute::Length; ++i)
-                mSaveAttributes[i].readState(player.mSaveAttributes[i]);
+                mSaveAttributes[i] = player.mSaveAttributes[i];
             for (int i=0; i<ESM::Skill::Length; ++i)
-                mSaveSkills[i].readState(player.mSaveSkills[i]);
+                mSaveSkills[i] = player.mSaveSkills[i];
 
-            if (player.mObject.mNpcStats.mWerewolfDeprecatedData && player.mObject.mNpcStats.mIsWerewolf)
+            if (player.mObject.mNpcStats.mIsWerewolf)
             {
-                saveStats();
-                setWerewolfStats();
+                if (player.mObject.mNpcStats.mWerewolfDeprecatedData)
+                {
+                    saveStats();
+                    setWerewolfStats();
+                }
+                else if (reader.getFormat() < 19)
+                {
+                    setWerewolfStats();
+                    if (player.mSetWerewolfAcrobatics)
+                        MWBase::Environment::get().getMechanicsManager()->applyWerewolfAcrobatics(getPlayer());
+                }
             }
 
             getPlayer().getClass().getCreatureStats(getPlayer()).getAiSequence().clear();
