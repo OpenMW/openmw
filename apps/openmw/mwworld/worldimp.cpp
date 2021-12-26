@@ -550,6 +550,14 @@ namespace MWWorld
         const ESM::Cell *cell = mStore.get<ESM::Cell>().searchExtByName (cellName);
         if (cell)
             return cell;
+        // treat "Wilderness" like an empty string
+        static const std::string defaultName = mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
+        if (Misc::StringUtils::ciEqual(cellName, defaultName))
+        {
+            cell = mStore.get<ESM::Cell>().searchExtByName("");
+            if (cell)
+                return cell;
+        }
 
         // didn't work -> now check for regions
         for (const ESM::Region &region : mStore.get<ESM::Region>())
