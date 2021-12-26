@@ -493,6 +493,7 @@ namespace MWGui
             std::vector<MyGUI::Widget*> effectItems;
             int flag = info.isPotion ? Widgets::MWEffectList::EF_NoTarget : 0;
             flag |= info.isIngredient ? Widgets::MWEffectList::EF_NoMagnitude : 0;
+            flag |= info.isIngredient ? Widgets::MWEffectList::EF_Constant : 0;
             effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, flag);
             totalSize.height += coord.top-6;
             totalSize.width = std::max(totalSize.width, coord.width);
