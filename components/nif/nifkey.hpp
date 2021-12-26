@@ -101,7 +101,7 @@ struct KeyMapT {
             //    Re-runs the read function 3 more times.
             //        When it does that it's reading in a bunch of InterpolationType_Linear keys, not InterpolationType_XYZ.
         }
-        else if (count != 0 || morph)
+        else if (count != 0)
         {
             std::stringstream error;
             error << "Unhandled interpolation type: " << mInterpolationType;
