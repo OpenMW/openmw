@@ -106,7 +106,7 @@ return {
         }
         EXPECT_EQ(LuaUtil::call(script["useCounter"]).get<int>(), 45);
 
-        EXPECT_ERROR(LuaUtil::call(script["incorrectRequire"]), "Resource 'counter.lua' not found");
+        EXPECT_ERROR(LuaUtil::call(script["incorrectRequire"]), "module not found: counter");
     }
 
     TEST_F(LuaStateTest, ReadOnly)
@@ -161,7 +161,7 @@ return {
 
         sol::table script2 = lua.runInNewSandbox("bbb/tests.lua", "", {{"test.api", api2}});
 
-        EXPECT_ERROR(LuaUtil::call(script1["sqr"], 3), "Resource 'sqrlib.lua' not found");
+        EXPECT_ERROR(LuaUtil::call(script1["sqr"], 3), "module not found: sqrlib");
         EXPECT_EQ(LuaUtil::call(script2["sqr"], 3).get<int>(), 9);
 
         EXPECT_EQ(LuaUtil::call(script1["apiName"]).get<std::string>(), "api1");

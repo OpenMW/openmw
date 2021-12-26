@@ -5,6 +5,7 @@
 #include <set>
 
 #include <components/lua/luastate.hpp>
+#include <components/lua/i18n.hpp>
 
 #include "../mwbase/luamanager.hpp"
 
@@ -22,7 +23,7 @@ namespace MWLua
     class LuaManager : public MWBase::LuaManager
     {
     public:
-        LuaManager(const VFS::Manager* vfs);
+        LuaManager(const VFS::Manager* vfs, const std::string& libsDir);
 
         // Called by engine.cpp when the environment is fully initialized.
         void init();
@@ -91,6 +92,7 @@ namespace MWLua
         bool mGlobalScriptsStarted = false;
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
+        LuaUtil::I18nManager mI18n;
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;
         sol::table mCameraPackage;

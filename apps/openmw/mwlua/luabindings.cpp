@@ -1,6 +1,7 @@
 #include "luabindings.hpp"
 
 #include <components/lua/luastate.hpp>
+#include <components/lua/i18n.hpp>
 #include <components/queries/luabindings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -25,7 +26,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 11;
+        api["API_REVISION"] = 12;
         api["quit"] = [lua]()
         {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
@@ -64,6 +65,7 @@ namespace MWLua
             {"CarriedLeft", MWWorld::InventoryStore::Slot_CarriedLeft},
             {"Ammunition", MWWorld::InventoryStore::Slot_Ammunition}
         }));
+        api["i18n"] = [i18n=context.mI18n](const std::string& context) { return i18n->getContext(context); };
         return LuaUtil::makeReadOnly(api);
     }
 

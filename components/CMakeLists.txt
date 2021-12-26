@@ -29,7 +29,7 @@ endif (GIT_CHECKOUT)
 # source files
 
 add_component_dir (lua
-    luastate scriptscontainer utilpackage serialization configuration
+    luastate scriptscontainer utilpackage serialization configuration i18n
     )
 
 add_component_dir (settings
@@ -160,7 +160,7 @@ add_component_dir (fallback
 add_component_dir (queries
     query luabindings
     )
-    
+
 add_component_dir (lua_ui
     widget widgetlist element layers content
     text textedit window

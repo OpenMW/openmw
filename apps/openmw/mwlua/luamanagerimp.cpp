@@ -6,6 +6,8 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/luascripts.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include <components/lua/utilpackage.hpp>
 
 #include "../mwbase/windowmanager.hpp"
@@ -20,9 +22,10 @@
 namespace MWLua
 {
 
-    LuaManager::LuaManager(const VFS::Manager* vfs) : mLua(vfs, &mConfiguration)
+    LuaManager::LuaManager(const VFS::Manager* vfs, const std::string& libsDir) : mLua(vfs, &mConfiguration), mI18n(vfs, &mLua)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
+        mLua.addInternalLibSearchPath(libsDir);
 
         mGlobalSerializer = createUserdataSerializer(false, mWorldView.getObjectRegistry());
         mLocalSerializer = createUserdataSerializer(true, mWorldView.getObjectRegistry());
@@ -46,6 +49,7 @@ namespace MWLua
         context.mIsGlobal = true;
         context.mLuaManager = this;
         context.mLua = &mLua;
+        context.mI18n = &mI18n;
         context.mWorldView = &mWorldView;
         context.mLocalEventQueue = &mLocalEvents;
         context.mGlobalEventQueue = &mGlobalEvents;
@@ -54,6 +58,11 @@ namespace MWLua
         Context localContext = context;
         localContext.mIsGlobal = false;
         localContext.mSerializer = mLocalSerializer.get();
+
+        mI18n.init();
+        std::vector<std::string> preferredLanguages;
+        Misc::StringUtils::split(Settings::Manager::getString("i18n preferred languages", "Lua"), preferredLanguages, ", ");
+        mI18n.setPreferredLanguages(preferredLanguages);
 
         initObjectBindingsForGlobalScripts(context);
         initCellBindingsForGlobalScripts(context);

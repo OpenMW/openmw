@@ -2,12 +2,19 @@
 #define LUA_TESTING_UTIL_H
 
 #include <sstream>
+#include <sol/sol.hpp>
 
 #include <components/vfs/archive.hpp>
 #include <components/vfs/manager.hpp>
 
 namespace
 {
+
+    template <typename T>
+    T get(sol::state& lua, const std::string& luaCode)
+    {
+        return lua.safe_script("return " + luaCode).get<T>();
+    }
 
     class TestFile : public VFS::File
     {
