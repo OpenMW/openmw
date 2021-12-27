@@ -914,8 +914,8 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
             oldMagnitude = effect.mMagnitude;
         else
         {
-            if(spellParams.getType() == ESM::ActiveSpells::Type_Consumable || spellParams.getType() == ESM::ActiveSpells::Type_Temporary)
-                playEffects(target, *magicEffect);
+            if(spellParams.getType() != ESM::ActiveSpells::Type_Enchantment)
+                playEffects(target, *magicEffect, spellParams.getType() == ESM::ActiveSpells::Type_Consumable || spellParams.getType() == ESM::ActiveSpells::Type_Temporary);
             if(effect.mEffectId == ESM::MagicEffect::Soultrap && !target.getClass().isNpc() && target.getType() == ESM::Creature::sRecordId && target.get<ESM::Creature>()->mBase->mData.mSoul == 0 && caster == getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
         }
