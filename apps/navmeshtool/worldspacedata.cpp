@@ -246,7 +246,7 @@ namespace NavMeshTool
 
             if (!exterior && !processInteriorCells)
             {
-                Log(Debug::Info) << "Skipped " << (exterior ? "exterior" : "interior")
+                Log(Debug::Info) << "Skipped interior"
                     << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") \"" << cell.getDescription() << "\"";
                 continue;
             }

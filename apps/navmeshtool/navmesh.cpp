@@ -73,7 +73,7 @@ namespace NavMeshTool
         public:
             std::atomic_size_t mExpected {0};
 
-            explicit NavMeshTileConsumer(NavMeshDb db)
+            explicit NavMeshTileConsumer(NavMeshDb&& db)
                 : mDb(std::move(db))
                 , mTransaction(mDb.startTransaction())
                 , mNextTileId(mDb.getMaxTileId() + 1)
