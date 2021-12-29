@@ -4,10 +4,12 @@
 #include <cassert>
 #include <cstddef>
 #include <iostream>
+#include <memory>
 #include <thread>
 #include <chrono>
 
 #include <osg/Texture2D>
+#include <utility>
 
 #if defined(_MSC_VER)
     #pragma warning (push)
@@ -62,19 +64,19 @@ namespace
             av_frame_free(&frame);
         }
     };
-
-    template<class T>
-    struct AVFree
-    {
-        void operator()(T* frame) const
-        {
-            av_free(&frame);
-        }
-    };
 }
 
 namespace Video
 {
+
+struct PacketListFree
+{
+    void operator()(Video::PacketList* list) const
+    {
+        av_packet_free(&list->pkt);
+        av_free(&list);
+    }
+};
 
 VideoState::VideoState()
     : mAudioFactory(nullptr)
@@ -114,25 +116,29 @@ void VideoState::setAudioFactory(MovieAudioFactory *factory)
 
 void PacketQueue::put(AVPacket *pkt)
 {
-    std::unique_ptr<AVPacketList, AVFree<AVPacketList>> pkt1(static_cast<AVPacketList*>(av_malloc(sizeof(AVPacketList))));
+    std::unique_ptr<PacketList, PacketListFree> pkt1(static_cast<PacketList*>(av_malloc(sizeof(PacketList))));
     if(!pkt1) throw std::bad_alloc();
 
+
     if(pkt == &flush_pkt)
-        pkt1->pkt = *pkt;
+        pkt1->pkt = pkt;
     else
-        av_packet_move_ref(&pkt1->pkt, pkt);
+    {
+        pkt1->pkt = av_packet_alloc();
+        av_packet_move_ref(pkt1->pkt, pkt);
+    }
 
     pkt1->next = nullptr;
 
     std::lock_guard<std::mutex> lock(this->mutex);
-    AVPacketList* ptr = pkt1.release();
+    PacketList* ptr = pkt1.release();
     if(!last_pkt)
         this->first_pkt = ptr;
     else
         this->last_pkt->next = ptr;
     this->last_pkt = ptr;
     this->nb_packets++;
-    this->size += ptr->pkt.size;
+    this->size += ptr->pkt->size;
     this->cond.notify_one();
 }
 
@@ -141,17 +147,17 @@ int PacketQueue::get(AVPacket *pkt, VideoState *is)
     std::unique_lock<std::mutex> lock(this->mutex);
     while(!is->mQuit)
     {
-        AVPacketList *pkt1 = this->first_pkt;
+        PacketList *pkt1 = this->first_pkt;
         if(pkt1)
         {
             this->first_pkt = pkt1->next;
             if(!this->first_pkt)
                 this->last_pkt = nullptr;
             this->nb_packets--;
-            this->size -= pkt1->pkt.size;
+            this->size -= pkt1->pkt->size;
 
             av_packet_unref(pkt);
-            av_packet_move_ref(pkt, &pkt1->pkt);
+            av_packet_move_ref(pkt, pkt1->pkt);
             av_free(pkt1);
 
             return 1;
@@ -173,14 +179,14 @@ void PacketQueue::flush()
 
 void PacketQueue::clear()
 {
-    AVPacketList *pkt, *pkt1;
+    PacketList *pkt, *pkt1;
 
     std::lock_guard<std::mutex> lock(this->mutex);
     for(pkt = this->first_pkt; pkt != nullptr; pkt = pkt1)
     {
         pkt1 = pkt->next;
-        if (pkt->pkt.data != flush_pkt.data)
-            av_packet_unref(&pkt->pkt);
+        if (pkt->pkt->data != flush_pkt.data)
+            av_packet_unref(pkt->pkt);
         av_freep(&pkt);
     }
     this->last_pkt = nullptr;
@@ -415,7 +421,7 @@ double VideoState::synchronize_video(const AVFrame &src_frame, double pts)
 class VideoThread
 {
 public:
-    VideoThread(VideoState* self)
+    explicit VideoThread(VideoState* self)
         : mVideoState(self)
         , mThread([this]
         {
@@ -439,9 +445,8 @@ public:
     void run()
     {
         VideoState* self = mVideoState;
-        AVPacket packetData;
-        av_init_packet(&packetData);
-        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData);
+        AVPacket* packetData = av_packet_alloc();
+        std::unique_ptr<AVPacket, AVPacketUnref> packet(packetData);
         std::unique_ptr<AVFrame, AVFrameFree> pFrame{av_frame_alloc()};
 
         while(self->videoq.get(packet.get(), self) >= 0)
@@ -491,7 +496,7 @@ private:
 class ParseThread
 {
 public:
-    ParseThread(VideoState* self)
+    explicit ParseThread(VideoState* self)
         : mVideoState(self)
         , mThread([this] { run(); })
     {
@@ -507,9 +512,8 @@ public:
         VideoState* self = mVideoState;
 
         AVFormatContext *pFormatCtx = self->format_ctx;
-        AVPacket packetData;
-        av_init_packet(&packetData);
-        std::unique_ptr<AVPacket, AVPacketUnref> packet(&packetData);
+        AVPacket* packetData = av_packet_alloc();
+        std::unique_ptr<AVPacket, AVPacketUnref> packet(packetData);
 
         try
         {
@@ -632,13 +636,11 @@ bool VideoState::update()
 
 int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
 {
-    const AVCodec *codec;
-
     if(stream_index < 0 || stream_index >= static_cast<int>(pFormatCtx->nb_streams))
         return -1;
 
     // Get a pointer to the codec context for the video stream
-    codec = avcodec_find_decoder(pFormatCtx->streams[stream_index]->codecpar->codec_id);
+    const AVCodec *codec = avcodec_find_decoder(pFormatCtx->streams[stream_index]->codecpar->codec_id);
     if(!codec)
     {
         fprintf(stderr, "Unsupported codec!\n");
@@ -702,7 +704,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
             return -1;
         }
 
-        this->video_thread.reset(new VideoThread(this));
+        this->video_thread = std::make_unique<VideoThread>(this);
         break;
 
     default:
@@ -721,7 +723,7 @@ void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::stri
     this->av_sync_type = AV_SYNC_DEFAULT;
     this->mQuit = false;
 
-    this->stream = inputstream;
+    this->stream = std::move(inputstream);
     if(!this->stream.get())
         throw std::runtime_error("Failed to open video resource");
 
@@ -789,7 +791,7 @@ void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::stri
     }
 
 
-    this->parse_thread.reset(new ParseThread(this));
+    this->parse_thread = std::make_unique<ParseThread>(this);
 }
 
 void VideoState::deinit()
@@ -801,11 +803,11 @@ void VideoState::deinit()
 
     mAudioDecoder.reset();
 
-    if (this->parse_thread.get())
+    if (this->parse_thread)
     {
         this->parse_thread.reset();
     }
-    if (this->video_thread.get())
+    if (this->video_thread)
     {
         this->video_thread.reset();
     }
@@ -851,8 +853,8 @@ void VideoState::deinit()
     }
 
     // Dellocate RGBA frame queue.
-    for (std::size_t i = 0; i < VIDEO_PICTURE_ARRAY_SIZE; ++i)
-        this->pictq[i].rgbaFrame = nullptr;
+    for (auto & i : this->pictq)
+        i.rgbaFrame = nullptr;
 
 }
 
@@ -870,7 +872,7 @@ double VideoState::get_master_clock()
     return this->get_external_clock();
 }
 
-double VideoState::get_video_clock()
+double VideoState::get_video_clock() const
 {
     return this->frame_last_pts;
 }
@@ -896,7 +898,7 @@ void VideoState::seekTo(double time)
     mSeekRequested = true;
 }
 
-double VideoState::getDuration()
+double VideoState::getDuration() const
 {
     return this->format_ctx->duration / 1000000.0;
 }

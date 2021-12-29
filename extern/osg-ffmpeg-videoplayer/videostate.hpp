@@ -46,7 +46,6 @@ extern "C"
 extern "C"
 {
     struct SwsContext;
-    struct AVPacketList;
     struct AVPacket;
     struct AVFormatContext;
     struct AVStream;
@@ -78,6 +77,13 @@ struct ExternalClock
     void set(uint64_t time);
 };
 
+class PacketList
+{
+public:
+    AVPacket* pkt = nullptr;
+    PacketList *next = nullptr;
+};
+
 struct PacketQueue {
     PacketQueue()
       : first_pkt(nullptr), last_pkt(nullptr), flushing(false), nb_packets(0), size(0)
@@ -85,7 +91,7 @@ struct PacketQueue {
     ~PacketQueue()
     { clear(); }
 
-    AVPacketList *first_pkt, *last_pkt;
+    PacketList *first_pkt, *last_pkt;
     std::atomic<bool> flushing;
     std::atomic<int> nb_packets;
     std::atomic<int> size;
@@ -129,7 +135,7 @@ struct VideoState {
     void setPaused(bool isPaused);
     void seekTo(double time);
 
-    double getDuration();
+    double getDuration() const;
 
     int stream_open(int stream_index, AVFormatContext *pFormatCtx);
 
@@ -145,7 +151,7 @@ struct VideoState {
     double synchronize_video(const AVFrame &src_frame, double pts);
 
     double get_audio_clock();
-    double get_video_clock();
+    double get_video_clock() const;
     double get_external_clock();
     double get_master_clock();
 
