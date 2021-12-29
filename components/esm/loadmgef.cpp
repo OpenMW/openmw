@@ -281,14 +281,12 @@ short MagicEffect::getResistanceEffect(short effect)
         effects[DisintegrateArmor] = Sanctuary;
         effects[DisintegrateWeapon] = Sanctuary;
 
-        for (int i=0; i<5; ++i)
-            effects[DrainAttribute+i] = ResistMagicka;
-        for (int i=0; i<5; ++i)
-            effects[DamageAttribute+i] = ResistMagicka;
-        for (int i=0; i<5; ++i)
-            effects[AbsorbAttribute+i] = ResistMagicka;
-        for (int i=0; i<10; ++i)
-            effects[WeaknessToFire+i] = ResistMagicka;
+        for (int i = DrainAttribute; i <= DamageSkill; ++i)
+            effects[i] = ResistMagicka;
+        for (int i = AbsorbAttribute; i <= AbsorbSkill; ++i)
+            effects[i] = ResistMagicka;
+        for (int i = WeaknessToFire; i <= WeaknessToNormalWeapons; ++i)
+            effects[i] = ResistMagicka;
 
         effects[Burden] = ResistMagicka;
         effects[Charm] = ResistMagicka;
@@ -326,14 +324,12 @@ short MagicEffect::getWeaknessEffect(short effect)
     static std::map<short, short> effects;
     if (effects.empty())
     {
-        for (int i=0; i<5; ++i)
-            effects[DrainAttribute+i] = WeaknessToMagicka;
-        for (int i=0; i<5; ++i)
-            effects[DamageAttribute+i] = WeaknessToMagicka;
-        for (int i=0; i<5; ++i)
-            effects[AbsorbAttribute+i] = WeaknessToMagicka;
-        for (int i=0; i<10; ++i)
-            effects[WeaknessToFire+i] = WeaknessToMagicka;
+        for (int i = DrainAttribute; i <= DamageSkill; ++i)
+            effects[i] = WeaknessToMagicka;
+        for (int i = AbsorbAttribute; i <= AbsorbSkill; ++i)
+            effects[i] = WeaknessToMagicka;
+        for (int i = WeaknessToFire; i <= WeaknessToNormalWeapons; ++i)
+            effects[i] = WeaknessToMagicka;
 
         effects[Burden] = WeaknessToMagicka;
         effects[Charm] = WeaknessToMagicka;
