@@ -185,7 +185,8 @@ namespace
             }
             void operator()(MWPhysics::ProjectileSimulation& sim) const
             {
-                MWPhysics::MovementSolver::move(sim.second, mPhysicsDt, mCollisionWorld);
+                if (sim.first->isActive())
+                    MWPhysics::MovementSolver::move(sim.second, mPhysicsDt, mCollisionWorld);
             }
         };
 

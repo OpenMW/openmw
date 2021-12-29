@@ -33,6 +33,7 @@ Projectile::Projectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, f
 
     mPosition = position;
     mPreviousPosition = position;
+    mSimulationPosition = position;
     setCaster(caster);
 
     const int collisionMask = CollisionType_World | CollisionType_HeightMap |
