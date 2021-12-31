@@ -146,7 +146,7 @@ void main()
 
 #if @decalMap
     vec4 decalTex = texture2D(decalMap, decalMapUV);
-    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a);
+    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a * diffuseColor.a);
 #endif
 
 #if @envMap
