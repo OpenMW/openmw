@@ -1,5 +1,5 @@
 if (NOT DEFINED OPENMW_RESOURCES_ROOT)
-    message( FATAL_ERROR "OPENMW_RESOURCES_ROOT is not set" )
+    return()
 endif()
 
 # Copy resource files into the build directory
