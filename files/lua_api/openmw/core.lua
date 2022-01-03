@@ -37,6 +37,39 @@
 -- @function [parent=#core] isWorldPaused
 -- @return #boolean
 
+-------------------------------------------------------------------------------
+-- Return i18n formatting function for the given context.
+-- It is based on `i18n.lua` library.
+-- Language files should be stored in VFS as `i18n/<ContextName>/<Lang>.lua`.
+-- See https://github.com/kikito/i18n.lua for format details.
+-- @function [parent=#core] i18n
+-- @param #string context I18n context; recommended to use the name of the mod.
+-- @return #function
+-- @usage
+-- -- DataFiles/i18n/MyMod/en.lua
+-- return {
+--     good_morning = 'Good morning.',
+--     you_have_arrows = {
+--       one = 'You have one arrow.',
+--       other = 'You have %{count} arrows.',
+--     },
+-- }
+-- @usage
+-- -- DataFiles/i18n/MyMod/de.lua
+-- return {
+--     good_morning = "Guten Morgen.",
+--     you_have_arrows = {
+--       one = "Du hast ein Pfeil.",
+--       other = "Du hast %{count} Pfeile.",
+--     },
+--     ["Hello %{name}!"] = "Hallo %{name}!",
+-- }
+-- @usage
+-- local myMsg = core.i18n('MyMod')
+-- print( myMsg('good_morning') )
+-- print( myMsg('you_have_arrows', {count=5}) )
+-- print( myMsg('Hello %{name}!', {name='World'}) )
+
 
 -------------------------------------------------------------------------------
 -- @type OBJECT_TYPE

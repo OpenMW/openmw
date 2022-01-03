@@ -7,6 +7,7 @@ namespace LuaUtil
 {
     class LuaState;
     class UserdataSerializer;
+    class I18nManager;
 }
 
 namespace MWLua
@@ -20,6 +21,7 @@ namespace MWLua
         LuaManager* mLuaManager;
         LuaUtil::LuaState* mLua;
         LuaUtil::UserdataSerializer* mSerializer;
+        LuaUtil::I18nManager* mI18n;
         WorldView* mWorldView;
         LocalEventQueue* mLocalEventQueue;
         GlobalEventQueue* mGlobalEventQueue;

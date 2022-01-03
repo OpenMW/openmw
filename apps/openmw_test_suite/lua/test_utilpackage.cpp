@@ -10,12 +10,6 @@ namespace
 {
     using namespace testing;
 
-    template <typename T>
-    T get(sol::state& lua, std::string luaCode)
-    {
-        return lua.safe_script("return " + luaCode).get<T>();
-    }
-
     std::string getAsString(sol::state& lua, std::string luaCode)
     {
         return LuaUtil::toString(lua.safe_script("return " + luaCode));

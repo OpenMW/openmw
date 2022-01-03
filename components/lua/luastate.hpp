@@ -76,12 +76,18 @@ namespace LuaUtil
 
         const ScriptsConfiguration& getConfiguration() const { return *mConf; }
 
+        // Load internal Lua library. All libraries are loaded in one sandbox and shouldn't be exposed to scripts directly.
+        void addInternalLibSearchPath(const std::string& path) { mLibSearchPaths.push_back(path); }
+        sol::function loadInternalLib(std::string_view libName);
+        sol::function loadFromVFS(const std::string& path);
+        sol::environment newInternalLibEnvironment();
+
     private:
         static sol::protected_function_result throwIfError(sol::protected_function_result&&);
         template <typename... Args>
         friend sol::protected_function_result call(const sol::protected_function& fn, Args&&... args);
 
-        sol::function loadScript(const std::string& path);
+        sol::function loadScriptAndCache(const std::string& path);
 
         sol::state mLua;
         const ScriptsConfiguration* mConf;
@@ -89,6 +95,7 @@ namespace LuaUtil
         std::map<std::string, sol::bytecode> mCompiledScripts;
         std::map<std::string, sol::object> mCommonPackages;
         const VFS::Manager* mVFS;
+        std::vector<std::string> mLibSearchPaths;
     };
 
     // Should be used for every call of every Lua function.

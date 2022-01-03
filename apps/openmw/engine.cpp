@@ -737,7 +737,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mViewer->addEventHandler(mScreenCaptureHandler);
 
-    mLuaManager = new MWLua::LuaManager(mVFS.get());
+    mLuaManager = new MWLua::LuaManager(mVFS.get(), (mResDir / "lua_libs").string());
     mEnvironment.setLuaManager(mLuaManager);
 
     // Create input and UI first to set up a bootstrapping environment for

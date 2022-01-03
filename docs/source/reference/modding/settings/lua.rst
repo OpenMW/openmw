@@ -27,3 +27,14 @@ Values >1 are not yet supported.
 
 This setting can only be configured by editing the settings configuration file.
 
+i18n preferred languages
+------------------------
+
+:Type:		string
+:Default:	en
+
+List of the preferred languages separated by comma.
+For example "de,en" means German as the first prority and English as a fallback.
+
+This setting can only be configured by editing the settings configuration file.
+
