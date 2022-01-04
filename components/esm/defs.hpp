@@ -96,7 +96,7 @@ struct FourCC
     static constexpr unsigned int value = (((((d << 8) | c) << 8) | b) << 8) | a;
 };
 
-enum RecNameInts
+enum RecNameInts : unsigned int
 {
     // format 0 / legacy
     REC_ACTI = FourCC<'A','C','T','I'>::value,
