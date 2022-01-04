@@ -1,7 +1,8 @@
 #include <vector>
+#include <string>
 
 namespace Launcher
 {
-    std::vector<const char *> enumerateOpenALDevices();
-    std::vector<const char *> enumerateOpenALDevicesHrtf();
+    std::vector<std::string> enumerateOpenALDevices();
+    std::vector<std::string> enumerateOpenALDevicesHrtf();
 }
