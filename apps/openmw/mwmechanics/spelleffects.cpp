@@ -46,7 +46,7 @@ namespace
         {
             auto& creatureStats = target.getClass().getCreatureStats(target);
             auto stat = creatureStats.getAiSetting(setting);
-            stat.setModifier(static_cast<int>(stat.getModifier() - magnitude));
+            stat.setModifier(static_cast<int>(stat.getModifier() + magnitude));
             creatureStats.setAiSetting(setting, stat);
         }
     }
@@ -491,11 +491,11 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
             break;
         case ESM::MagicEffect::FrenzyCreature:
         case ESM::MagicEffect::FrenzyHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::FrenzyCreature, CreatureStats::AI_Fight, -effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::FrenzyCreature, CreatureStats::AI_Fight, effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::CalmCreature:
         case ESM::MagicEffect::CalmHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, CreatureStats::AI_Fight, effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, CreatureStats::AI_Fight, -effect.mMagnitude, invalid);
             if(!invalid && effect.mMagnitude > 0)
             {
                 auto& creatureStats = target.getClass().getCreatureStats(target);
@@ -998,11 +998,11 @@ void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellPara
             break;
         case ESM::MagicEffect::FrenzyCreature:
         case ESM::MagicEffect::FrenzyHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::FrenzyCreature, CreatureStats::AI_Fight, effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::FrenzyCreature, CreatureStats::AI_Fight, -effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::CalmCreature:
         case ESM::MagicEffect::CalmHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, CreatureStats::AI_Fight, -effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, CreatureStats::AI_Fight, effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::DemoralizeCreature:
         case ESM::MagicEffect::DemoralizeHumanoid:
