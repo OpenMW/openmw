@@ -75,6 +75,16 @@ namespace
         }
         return duration;
     }
+
+    bool isSpellActive(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const std::string& id)
+    {
+        int actorId = caster.getClass().getCreatureStats(caster).getActorId();
+        const auto& active = target.getClass().getCreatureStats(target).getActiveSpells();
+        return std::find_if(active.begin(), active.end(), [&](const auto& spell)
+        {
+            return spell.getCasterActorId() == actorId && Misc::StringUtils::ciEqual(spell.getId(), id);
+        }) != active.end();
+    }
 }
 
 namespace MWMechanics
@@ -105,8 +115,6 @@ namespace MWMechanics
 
     float rateSpell(const ESM::Spell *spell, const MWWorld::Ptr &actor, const MWWorld::Ptr& enemy)
     {
-        const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-
         float successChance = MWMechanics::getSpellSuccessChance(spell, actor);
         if (successChance == 0.f)
             return 0.f;
@@ -125,9 +133,9 @@ namespace MWMechanics
 
         // Spells don't stack, so early out if the spell is still active on the target
         int types = getRangeTypes(spell->mEffects);
-        if ((types & Self) && stats.getActiveSpells().isSpellActive(spell->mId))
+        if ((types & Self) && isSpellActive(actor, actor, spell->mId))
             return 0.f;
-        if ( ((types & Touch) || (types & Target)) && enemy.getClass().getCreatureStats(enemy).getActiveSpells().isSpellActive(spell->mId))
+        if ( ((types & Touch) || (types & Target)) && isSpellActive(actor, enemy, spell->mId))
             return 0.f;
 
         return rateEffects(spell->mEffects, actor, enemy) * (successChance / 100.f);
