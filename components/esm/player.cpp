@@ -44,13 +44,43 @@ void ESM::Player::load (ESMReader &esm)
             checkPrevItems = false;
     }
 
-    bool intFallback = esm.getFormat() < 11;
-    if (esm.hasMoreSubs())
+    if(esm.getFormat() < 19)
     {
-        for (int i=0; i<ESM::Attribute::Length; ++i)
-            mSaveAttributes[i].load(esm, intFallback);
-        for (int i=0; i<ESM::Skill::Length; ++i)
-            mSaveSkills[i].load(esm, intFallback);
+        bool intFallback = esm.getFormat() < 11;
+        bool clearModified = esm.getFormat() < 17 && !mObject.mNpcStats.mIsWerewolf;
+        if (esm.hasMoreSubs())
+        {
+            for (int i=0; i<ESM::Attribute::Length; ++i)
+            {
+                StatState<float> attribute;
+                attribute.load(esm, intFallback);
+                if (clearModified)
+                    attribute.mMod = 0.f;
+                mSaveAttributes[i] = attribute.mBase + attribute.mMod - attribute.mDamage;
+                if (mObject.mNpcStats.mIsWerewolf)
+                    mObject.mCreatureStats.mAttributes[i] = attribute;
+            }
+            for (int i=0; i<ESM::Skill::Length; ++i)
+            {
+                StatState<float> skill;
+                skill.load(esm, intFallback);
+                if (clearModified)
+                    skill.mMod = 0.f;
+                mSaveSkills[i] = skill.mBase + skill.mMod - skill.mDamage;
+                if (mObject.mNpcStats.mIsWerewolf)
+                {
+                    if(i == ESM::Skill::Acrobatics)
+                        mSetWerewolfAcrobatics = mObject.mNpcStats.mSkills[i].mBase != skill.mBase;
+                    mObject.mNpcStats.mSkills[i] = skill;
+                }
+            }
+        }
+    }
+    else
+    {
+        mSetWerewolfAcrobatics = false;
+        esm.getHNT(mSaveAttributes, "WWAT");
+        esm.getHNT(mSaveSkills, "WWSK");
     }
 }
 
@@ -79,8 +109,6 @@ void ESM::Player::save (ESMWriter &esm) const
         esm.writeHNString ("PREV", it->second);
     }
 
-    for (int i=0; i<ESM::Attribute::Length; ++i)
-        mSaveAttributes[i].save(esm);
-    for (int i=0; i<ESM::Skill::Length; ++i)
-        mSaveSkills[i].save(esm);
+    esm.writeHNT("WWAT", mSaveAttributes);
+    esm.writeHNT("WWSK", mSaveSkills);
 }

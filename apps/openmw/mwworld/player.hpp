@@ -53,8 +53,8 @@ namespace MWWorld
         PreviousItems mPreviousItems;
 
         // Saved stats prior to becoming a werewolf
-        MWMechanics::SkillValue mSaveSkills[ESM::Skill::Length];
-        MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
+        float mSaveSkills[ESM::Skill::Length];
+        float mSaveAttributes[ESM::Attribute::Length];
 
         bool mAttackingOrSpell;
         bool mJumping;

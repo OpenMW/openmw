@@ -77,6 +77,7 @@
     Bug #6324: Special Slave Companions: Can't buy the slave companions
     Bug #6326: Detect Enchantment/Key should detect items in unresolved containers
     Bug #6327: Blocking roots the character in place
+    Bug #6333: Werewolf stat changes should be implemented as damage/fortifications
     Bug #6343: Magic projectile speed doesn't take race weight into account
     Bug #6347: PlaceItem/PlaceItemCell/PlaceAt should work with levelled creatures
     Bug #6354: SFX abruptly cut off after crossing max distance; implement soft fading of sound effects

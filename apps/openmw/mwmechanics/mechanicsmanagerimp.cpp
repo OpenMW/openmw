@@ -1865,8 +1865,8 @@ namespace MWMechanics
     {
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         MWMechanics::NpcStats &stats = actor.getClass().getNpcStats(actor);
-
-        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->mValue.getInteger());
+        auto& skill = stats.getSkill(ESM::Skill::Acrobatics);
+        skill.setModifier(gmst.find("fWerewolfAcrobatics")->mValue.getFloat() - skill.getModified());
     }
 
     void MechanicsManager::cleanupSummonedCreature(const MWWorld::Ptr &caster, int creatureActorId)
