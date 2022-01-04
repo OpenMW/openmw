@@ -1,7 +1,6 @@
 #include "creaturestats.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "savedgame.hpp"
 
 #include <limits>
 
@@ -183,9 +182,7 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     for (int i=0; i<3; ++i)
         mDynamic[i].save (esm);
 
-    if (ESM::SavedGame::sCurrentFormat <= 18 && mMissingACDT)
-        esm.writeHNT("GOLD", std::numeric_limits<int>::min());
-    else if(mGoldPool)
+    if (mGoldPool)
         esm.writeHNT("GOLD", mGoldPool);
 
     if (mTradeTime.mDay != 0 || mTradeTime.mHour != 0)
@@ -258,7 +255,7 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
         for (int i=0; i<4; ++i)
             mAiSettings[i].save(esm);
     }
-    if(ESM::SavedGame::sCurrentFormat > 18 && mMissingACDT)
+    if (mMissingACDT)
         esm.writeHNT("NOAC", mMissingACDT);
 }
 
