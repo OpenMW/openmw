@@ -44,7 +44,7 @@ namespace MWMechanics
         float max = getFatigue().getModified();
         float current = getFatigue().getCurrent();
 
-        float normalised = floor(max) == 0 ? 1 : std::max (0.0f, current / max);
+        float normalised = std::floor(max) == 0 ? 1 : std::max (0.0f, current / max);
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
