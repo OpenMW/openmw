@@ -71,10 +71,10 @@ namespace MWMechanics
         int initialMerchantOffer = std::abs(merchantOffer);
 
         if ( !buying && (finalPrice > initialMerchantOffer) ) {
-            skillGain = floor(100.f * (finalPrice - initialMerchantOffer) / finalPrice);
+            skillGain = std::floor(100.f * (finalPrice - initialMerchantOffer) / finalPrice);
         }
         else if ( buying && (finalPrice < initialMerchantOffer) ) {
-            skillGain = floor(100.f * (initialMerchantOffer - finalPrice) / initialMerchantOffer);
+            skillGain = std::floor(100.f * (initialMerchantOffer - finalPrice) / initialMerchantOffer);
         }
         player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0, skillGain);
 
