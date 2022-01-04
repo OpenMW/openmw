@@ -650,7 +650,7 @@ namespace MWGui
 
     std::string ToolTips::getSoulString(const MWWorld::CellRef& cellref)
     {
-        std::string soul = cellref.getSoul();
+        const std::string& soul = cellref.getSoul();
         if (soul.empty())
             return std::string();
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -666,7 +666,7 @@ namespace MWGui
     {
         std::string ret;
         ret += getMiscString(cellref.getOwner(), "Owner");
-        const std::string factionId = cellref.getFaction();
+        const std::string& factionId = cellref.getFaction();
         if (!factionId.empty())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();

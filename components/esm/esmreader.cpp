@@ -70,7 +70,7 @@ void ESMReader::resolveParentFileIndices(const std::vector<ESMReader>& allPlugin
             const ESMReader& reader = allPlugins.at(i);
             if (reader.getFileSize() == 0)
                 continue;  // Content file in non-ESM format
-            const std::string candidate = reader.getName();
+            const std::string& candidate = reader.getName();
             std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
             if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
                 index = i;

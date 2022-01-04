@@ -11,7 +11,7 @@ namespace DetourNavigator
         const auto navMesh = navigator.getNavMesh(agentHalfExtents);
         if (!navMesh)
             return std::nullopt;
-        const auto settings = navigator.getSettings();
+        const auto& settings = navigator.getSettings();
         const auto result = DetourNavigator::findRandomPointAroundCircle(navMesh->lockConst()->getImpl(),
             toNavMeshCoordinates(settings.mRecast, agentHalfExtents), toNavMeshCoordinates(settings.mRecast, start),
             toNavMeshCoordinates(settings.mRecast, maxRadius), includeFlags, settings.mDetour);
@@ -26,7 +26,7 @@ namespace DetourNavigator
         const auto navMesh = navigator.getNavMesh(agentHalfExtents);
         if (navMesh == nullptr)
             return std::nullopt;
-        const auto settings = navigator.getSettings();
+        const auto& settings = navigator.getSettings();
         const auto result = DetourNavigator::raycast(navMesh->lockConst()->getImpl(),
             toNavMeshCoordinates(settings.mRecast, agentHalfExtents), toNavMeshCoordinates(settings.mRecast, start),
             toNavMeshCoordinates(settings.mRecast, end), includeFlags, settings.mDetour);
