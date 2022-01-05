@@ -170,7 +170,7 @@ namespace LuaUtil
         sol::environment env(mLua, sol::create, mSandboxEnv);
         sol::table loaded(mLua, sol::create);
         for (const std::string& s : safePackages)
-            loaded[s] = mSandboxEnv[s];
+            loaded[s] = static_cast<sol::object>(mSandboxEnv[s]);
         env["require"] = [this, loaded, env](const std::string& module) mutable
         {
             if (loaded[module] != sol::nil)
