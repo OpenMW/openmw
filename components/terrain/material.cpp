@@ -106,7 +106,7 @@ namespace
         osg::ref_ptr<osg::Depth> mValue;
 
         LequalDepth()
-            : mValue(new SceneUtil::AutoDepth)
+            : mValue(new SceneUtil::AutoDepth(osg::Depth::LEQUAL))
         {
         }
     };
