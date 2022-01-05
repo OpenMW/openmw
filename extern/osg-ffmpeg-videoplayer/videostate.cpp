@@ -97,7 +97,7 @@ VideoState::VideoState()
 {
     mFlushPktData = flush_pkt.data;
 
-// This is not needed anymore above FFMpeg version 4.0
+// This is not needed any more above FFMpeg version 4.0
 #if LIBAVCODEC_VERSION_INT < 3805796
     av_register_all();
 #endif
@@ -310,7 +310,7 @@ void VideoState::video_refresh()
         VideoPicture* vp = &this->pictq[this->pictq_rindex];
         this->video_display(vp);
 
-        this->pictq_rindex = (pictq_rindex+1) % VIDEO_PICTURE_ARRAY_SIZE;
+        this->pictq_rindex = (pictq_rindex+1) % pictq.size();
         this->frame_last_pts = vp->pts;
         this->pictq_size--;
         this->pictq_cond.notify_one();
@@ -327,12 +327,12 @@ void VideoState::video_refresh()
         for (; i<this->pictq_size-1; ++i)
         {
             if (this->pictq[pictq_rindex].pts + threshold <= this->get_master_clock())
-                this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_ARRAY_SIZE; // not enough time to show this picture
+                this->pictq_rindex = (this->pictq_rindex+1) % pictq.size(); // not enough time to show this picture
             else
                 break;
         }
 
-        assert (this->pictq_rindex < VIDEO_PICTURE_ARRAY_SIZE);
+        assert (this->pictq_rindex < pictq.size());
         VideoPicture* vp = &this->pictq[this->pictq_rindex];
 
         this->video_display(vp);
@@ -342,7 +342,7 @@ void VideoState::video_refresh()
         this->pictq_size -= i;
         // update queue for next picture
         this->pictq_size--;
-        this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_ARRAY_SIZE;
+        this->pictq_rindex = (this->pictq_rindex+1) % pictq.size();
         this->pictq_cond.notify_one();
     }
 }
@@ -392,7 +392,7 @@ int VideoState::queue_picture(const AVFrame &pFrame, double pts)
               0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);
 
     // now we inform our display thread that we have a pic ready
-    this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_ARRAY_SIZE;
+    this->pictq_windex = (this->pictq_windex+1) % pictq.size();
     this->pictq_size++;
 
     return 0;
@@ -656,7 +656,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->audio_ctx = avcodec_alloc_context3(codec);
         avcodec_parameters_to_context(this->audio_ctx, pFormatCtx->streams[stream_index]->codecpar);
 
-// This is not needed anymore above FFMpeg version 4.0
+// This is not needed any more above FFMpeg version 4.0
 #if LIBAVCODEC_VERSION_INT < 3805796
         av_codec_set_pkt_timebase(this->audio_ctx, pFormatCtx->streams[stream_index]->time_base);
 #endif
@@ -693,7 +693,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->video_ctx = avcodec_alloc_context3(codec);
         avcodec_parameters_to_context(this->video_ctx, pFormatCtx->streams[stream_index]->codecpar);
 
-// This is not needed anymore above FFMpeg version 4.0
+// This is not needed any more above FFMpeg version 4.0
 #if LIBAVCODEC_VERSION_INT < 3805796
         av_codec_set_pkt_timebase(this->video_ctx, pFormatCtx->streams[stream_index]->time_base);
 #endif
@@ -724,7 +724,7 @@ void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::stri
     this->mQuit = false;
 
     this->stream = std::move(inputstream);
-    if(!this->stream.get())
+    if(!this->stream)
         throw std::runtime_error("Failed to open video resource");
 
     AVIOContext *ioCtx = avio_alloc_context(nullptr, 0, 0, this, istream_read, istream_write, istream_seek);
@@ -852,7 +852,7 @@ void VideoState::deinit()
         mTexture = nullptr;
     }
 
-    // Dellocate RGBA frame queue.
+    // Deallocate RGBA frame queue.
     for (auto & i : this->pictq)
         i.rgbaFrame = nullptr;
 
@@ -879,7 +879,7 @@ double VideoState::get_video_clock() const
 
 double VideoState::get_audio_clock()
 {
-    if (!mAudioDecoder.get())
+    if (!mAudioDecoder)
         return 0.0;
     return mAudioDecoder->getAudioClock();
 }

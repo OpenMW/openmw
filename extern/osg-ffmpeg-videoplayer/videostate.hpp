@@ -1,8 +1,9 @@
 #ifndef VIDEOPLAYER_VIDEOSTATE_H
 #define VIDEOPLAYER_VIDEOSTATE_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <atomic>
+#include <array>
 #include <vector>
 #include <memory>
 #include <string>
@@ -40,8 +41,6 @@ extern "C"
 #include "videodefs.hpp"
 
 #define VIDEO_PICTURE_QUEUE_SIZE 50
-// allocate one extra to make sure we do not overwrite the osg::Image currently set on the texture
-#define VIDEO_PICTURE_ARRAY_SIZE (VIDEO_PICTURE_QUEUE_SIZE+1)
 
 extern "C"
 {
@@ -184,7 +183,7 @@ struct VideoState {
     PacketQueue videoq;
     SwsContext*  sws_context;
     int sws_context_w, sws_context_h;
-    VideoPicture pictq[VIDEO_PICTURE_ARRAY_SIZE];
+    std::array<VideoPicture, VIDEO_PICTURE_QUEUE_SIZE+1> pictq;  // allocate one extra to make sure we do not overwrite the osg::Image currently set on the texture
     int          pictq_size, pictq_rindex, pictq_windex;
     std::mutex pictq_mutex;
     std::condition_variable pictq_cond;
