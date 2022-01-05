@@ -33,7 +33,7 @@ namespace SceneUtil
             if (channelTargetName != umt->getName()) continue;
 
             // check if we can link a StackedTransformElement to the current Channel
-            for (auto stackedTransform : umt->getStackedTransforms())
+            for (const auto & stackedTransform : umt->getStackedTransforms())
             {
                 osgAnimation::StackedTransformElement* element = stackedTransform.get();
                 if (element && !element->getName().empty() && channelName == element->getName())
