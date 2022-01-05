@@ -1138,7 +1138,10 @@ namespace MWRender
 
     void RenderingManager::updateProjectionMatrix()
     {
-        double aspect = mViewer->getCamera()->getViewport()->aspectRatio();
+        double width = Settings::Manager::getInt("resolution x", "Video");
+        double height = Settings::Manager::getInt("resolution y", "Video");
+
+        double aspect = (height == 0.0) ? 1.0 : width / height;
         float fov = mFieldOfView;
         if (mFieldOfViewOverridden)
             fov = mFieldOfViewOverride;
@@ -1155,7 +1158,7 @@ namespace MWRender
 
         mSharedUniformStateUpdater->setNear(mNearClip);
         mSharedUniformStateUpdater->setFar(mViewDistance);
-        mSharedUniformStateUpdater->setScreenRes(mViewer->getCamera()->getViewport()->width(), mViewer->getCamera()->getViewport()->height()); 
+        mSharedUniformStateUpdater->setScreenRes(width, height);
 
         // Since our fog is not radial yet, we should take FOV in account, otherwise terrain near viewing distance may disappear.
         // Limit FOV here just for sure, otherwise viewing distance can be too high.
