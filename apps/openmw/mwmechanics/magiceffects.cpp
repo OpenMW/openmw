@@ -137,7 +137,7 @@ namespace MWMechanics
     {
         if (this==&effects)
         {
-            MagicEffects temp (effects);
+            const MagicEffects& temp (effects);
             *this += temp;
             return *this;
         }

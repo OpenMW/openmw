@@ -122,7 +122,7 @@ bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
         QString section(fullKey.at(0));
         section.prepend(QLatin1Char('['));
         section.append(QLatin1Char(']'));
-        QString key(fullKey.at(1));
+        const QString& key(fullKey.at(1));
 
         int index = buffer.lastIndexOf(section);
         if (index == -1) {
