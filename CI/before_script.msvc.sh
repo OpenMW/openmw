@@ -149,7 +149,7 @@ Options:
 		For mutli-config generators, this is ignored, and all configurations are set up.
 		For single-config generators, several configurations can be set up at once by specifying -c multiple times.
 	-C
-	    Use sccache.		
+	    Use ccache.
 	-d
 		Skip checking the downloads.
 	-e
@@ -509,7 +509,7 @@ if ! [ -z $UNITY_BUILD ]; then
 fi
 
 if ! [ -z $USE_SCCACHE ]; then
-	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=sccache  -DCMAKE_CXX_COMPILER_LAUNCHER=sccache"
+	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 fi
 
 echo

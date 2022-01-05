@@ -352,7 +352,7 @@ variables: &tests-targets
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
-  - choco install sccache -y
+  - choco install ccache -y
   - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
   - choco install vswhere -y
   - choco install ninja -y
@@ -375,11 +375,10 @@ variables: &tests-targets
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - $env:SCCACHE_BASEDIR = Get-Location
-    - $env:SCCACHE_DIR = "$(Get-Location)\sccache"
-    - New-Item -Type Directory -Force -Path $env:SCCACHE_DIR
-    - sccache --show-stats
-    # - sccache --start-server
+    - $env:CCACHE_BASEDIR = Get-Location
+    - $env:CCACHE_DIR = "$(Get-Location)\ccache"
+    - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - ccache --show-stats
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
@@ -394,13 +393,13 @@ variables: &tests-targets
       }
     - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
-    - sccache --show-stats
+    - ccache --show-stats
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
     key: ninja-v2
     paths:
-    - sccache
+    - ccache
     - deps
     - MSVC2019_64_Ninja/deps/Qt
   variables:
