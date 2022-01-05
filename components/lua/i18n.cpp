@@ -99,6 +99,9 @@ namespace LuaUtil
     {
         if (mI18nLoader == sol::nil)
             throw std::runtime_error("LuaUtil::I18nManager is not initialized");
+        auto it = mContexts.find(contextName);
+        if (it != mContexts.end())
+            return sol::make_object(mLua->sol(), it->second);
         Context ctx{contextName, mLua->newTable(), call(mI18nLoader, "i18n.init")};
         ctx.updateLang(this);
         mContexts.emplace(contextName, ctx);
