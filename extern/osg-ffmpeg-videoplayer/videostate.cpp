@@ -676,7 +676,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         }
 
         mAudioDecoder = mAudioFactory->createDecoder(this);
-        if (!mAudioDecoder.get())
+        if (!mAudioDecoder)
         {
             std::cerr << "Failed to create audio decoder, can not play audio stream" << std::endl;
             avcodec_free_context(&this->audio_ctx);
