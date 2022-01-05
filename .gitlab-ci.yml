@@ -403,7 +403,7 @@ variables: &tests-targets
     - deps
     - MSVC2019_64_Ninja/deps/Qt
   variables:
-    SCCACHE_SIZE: 2G    
+    CCACHE_SIZE: 2G
   artifacts:
     when: always
     paths:

@@ -62,7 +62,7 @@ VERBOSE=""
 STRIP=""
 SKIP_DOWNLOAD=""
 SKIP_EXTRACT=""
-USE_SCCACHE=""
+USE_CCACHE=""
 KEEP=""
 UNITY_BUILD=""
 VS_VERSION=""
@@ -102,7 +102,7 @@ while [ $# -gt 0 ]; do
 				SKIP_EXTRACT=true ;;
 
 			C )
-				USE_SCCACHE=true ;;
+				USE_CCACHE=true ;;
 			k )
 				KEEP=true ;;
 
@@ -508,7 +508,7 @@ if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
-if ! [ -z $USE_SCCACHE ]; then
+if ! [ -z $USE_CCACHE ]; then
 	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 fi
 
