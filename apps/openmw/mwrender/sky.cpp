@@ -248,6 +248,7 @@ namespace MWRender
         , mEnabled(true)
         , mSunEnabled(true)
         , mPrecipitationAlpha(0.f)
+        , mDirtyParticlesEffect(false)
     {
         osg::ref_ptr<CameraRelativeTransform> skyroot = new CameraRelativeTransform;
         skyroot->setName("Sky Root");
@@ -537,8 +538,7 @@ namespace MWRender
         if (!enabled && mParticleNode && mParticleEffect)
         {
             mCurrentParticleEffect.clear();
-            mParticleNode->removeChild(mParticleEffect);
-            mParticleEffect = nullptr;
+            mDirtyParticlesEffect = true;
         }
 
         mEnabled = enabled;
@@ -610,8 +610,9 @@ namespace MWRender
         if (mIsStorm)
             mStormDirection = weather.mStormDirection;
 
-        if (mCurrentParticleEffect != weather.mParticleEffect)
+        if (mDirtyParticlesEffect || (mCurrentParticleEffect != weather.mParticleEffect))
         {
+            mDirtyParticlesEffect = false;
             mCurrentParticleEffect = weather.mParticleEffect;
 
             // cleanup old particles

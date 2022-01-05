@@ -186,6 +186,7 @@ namespace MWRender
         bool mSunEnabled;
 
         float mPrecipitationAlpha;
+        bool mDirtyParticlesEffect;
 
         osg::Vec4f mMoonScriptColor;
     };
