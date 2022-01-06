@@ -4,6 +4,8 @@
 #include <mutex>
 #include <memory>
 
+#include <osg/Vec3d>
+
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 #include "../mwworld/ptr.hpp"
@@ -56,12 +58,12 @@ namespace MWPhysics
             mPosition = position;
         }
 
-        osg::Vec3f getPosition() const
+        osg::Vec3d getPosition() const
         {
             return mPosition;
         }
 
-        osg::Vec3f getPreviousPosition() const
+        osg::Vec3d getPreviousPosition() const
         {
             return mPreviousPosition;
         }
@@ -71,8 +73,8 @@ namespace MWPhysics
         std::unique_ptr<btCollisionObject> mCollisionObject;
         osg::Vec3f mVelocity;
         osg::Vec3f mSimulationPosition;
-        osg::Vec3f mPosition;
-        osg::Vec3f mPreviousPosition;
+        osg::Vec3d mPosition;
+        osg::Vec3d mPreviousPosition;
     };
 }
 
