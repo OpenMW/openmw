@@ -26,6 +26,7 @@ namespace Crash
         struct Startup
         {
             HANDLE mAppProcessHandle;
+            DWORD mAppMainThreadId;
             HANDLE mSignalApp;
             HANDLE mSignalMonitor;
             HANDLE mShmMutex;
