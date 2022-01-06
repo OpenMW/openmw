@@ -317,6 +317,7 @@ namespace MWRender
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         // Shadows and radial fog have problems with fixed-function mode
         bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders")
+                            || Settings::Manager::getBool("soft particles", "Shaders")
                             || Settings::Manager::getBool("force shaders", "Shaders")
                             || Settings::Manager::getBool("enable shadows", "Shadows")
                             || lightingMethod != SceneUtil::LightingMethod::FFP

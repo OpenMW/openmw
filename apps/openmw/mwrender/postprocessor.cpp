@@ -101,8 +101,15 @@ namespace
             : mOpaqueDepthFbo(new osg::FrameBufferObject)
             , mSourceFbo(sourceFbo)
             , mOpaqueDepthTex(opaqueDepthTex)
+            , mColorAttached(false)
         {
             mOpaqueDepthFbo->setAttachment(osg::FrameBufferObject::BufferComponent::DEPTH_BUFFER, osg::FrameBufferAttachment(opaqueDepthTex));
+
+#ifdef __APPLE__
+            // Mac OS drivers complain that a FBO is incomplete if it has no color attachment
+            mOpaqueDepthFbo->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER, osg::FrameBufferAttachment(new osg::RenderBuffer(mOpaqueDepthTex->getTextureWidth(), mOpaqueDepthTex->getTextureHeight(), GL_RGB)));
+            mColorAttached = true;
+#endif
         }
 
         void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override
@@ -113,7 +120,10 @@ namespace
                 osg::GLExtensions* ext = state.get<osg::GLExtensions>();
 
                 mSourceFbo->apply(state, osg::FrameBufferObject::READ_FRAMEBUFFER);
+                postBindOperation(state);
+
                 mOpaqueDepthFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+                postBindOperation(state);
 
                 ext->glBlitFramebuffer(0, 0, mOpaqueDepthTex->getTextureWidth(), mOpaqueDepthTex->getTextureHeight(), 0, 0, mOpaqueDepthTex->getTextureWidth(), mOpaqueDepthTex->getTextureHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
@@ -123,9 +133,20 @@ namespace
             bin->drawImplementation(renderInfo, previous);
         }
     private:
+        void postBindOperation(osg::State& state)
+        {
+            if (mColorAttached)
+                return;
+            #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GLES3_AVAILABLE)
+            state.glDrawBuffer(GL_NONE);
+            state.glReadBuffer(GL_NONE);
+            #endif
+        }
+
         osg::ref_ptr<osg::FrameBufferObject> mOpaqueDepthFbo;
         osg::ref_ptr<osg::FrameBufferObject> mSourceFbo;
         osg::ref_ptr<osg::Texture2D> mOpaqueDepthTex;
+        bool mColorAttached;
     };
 }
 

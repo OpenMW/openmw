@@ -1029,7 +1029,6 @@ namespace NifOsg
         void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
-            partsys->getOrCreateStateSet();
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
 
             const Nif::NiParticleSystemController* partctrl = nullptr;

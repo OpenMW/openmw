@@ -282,3 +282,6 @@ intersection between individual particles and other opaque geometry by blending
 between them. Note, this relies on overriding specific properties of particle
 systems that potentially differ from the source content, this setting may change
 the look of some particle systems.
+
+Note that the rendering will act as if you have 'force shaders' option enabled.
+This means that shaders will be used to render all objects and the terrain.

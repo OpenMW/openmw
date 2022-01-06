@@ -101,6 +101,9 @@ namespace Shader
             // -1 == no tangents required
             int mTexStageRequiringTangents;
 
+            bool mSoftParticles;
+            float mSoftParticleSize;
+
             // the Node that requested these requirements
             osg::Node* mNode;
         };
