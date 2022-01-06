@@ -310,7 +310,7 @@ void VideoState::video_refresh()
         VideoPicture* vp = &this->pictq[this->pictq_rindex];
         this->video_display(vp);
 
-        this->pictq_rindex = (pictq_rindex+1) % pictq.size();
+        this->pictq_rindex = (this->pictq_rindex+1) % this->pictq.size();
         this->frame_last_pts = vp->pts;
         this->pictq_size--;
         this->pictq_cond.notify_one();
@@ -326,13 +326,13 @@ void VideoState::video_refresh()
         int i=0;
         for (; i<this->pictq_size-1; ++i)
         {
-            if (this->pictq[pictq_rindex].pts + threshold <= this->get_master_clock())
-                this->pictq_rindex = (this->pictq_rindex+1) % pictq.size(); // not enough time to show this picture
+            if (this->pictq[this->pictq_rindex].pts + threshold <= this->get_master_clock())
+                this->pictq_rindex = (this->pictq_rindex+1) % this->pictq.size(); // not enough time to show this picture
             else
                 break;
         }
 
-        assert (this->pictq_rindex < pictq.size());
+        assert (this->pictq_rindex < this->pictq.size());
         VideoPicture* vp = &this->pictq[this->pictq_rindex];
 
         this->video_display(vp);
@@ -342,7 +342,7 @@ void VideoState::video_refresh()
         this->pictq_size -= i;
         // update queue for next picture
         this->pictq_size--;
-        this->pictq_rindex = (this->pictq_rindex+1) % pictq.size();
+        this->pictq_rindex = (this->pictq_rindex+1) % this->pictq.size();
         this->pictq_cond.notify_one();
     }
 }
@@ -392,7 +392,7 @@ int VideoState::queue_picture(const AVFrame &pFrame, double pts)
               0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);
 
     // now we inform our display thread that we have a pic ready
-    this->pictq_windex = (this->pictq_windex+1) % pictq.size();
+    this->pictq_windex = (this->pictq_windex+1) % this->pictq.size();
     this->pictq_size++;
 
     return 0;
