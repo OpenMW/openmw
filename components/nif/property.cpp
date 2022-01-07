@@ -180,7 +180,7 @@ void BSLightingShaderProperty::read(NIFStream *nif)
         case BSLightingShaderType::ShaderType_MultiLayerParallax:
             nif->skip(4); // Inner layer thickness
             nif->skip(4); // Refraction scale
-            nif->skip(4); // Inner layer texture scale
+            nif->skip(8); // Inner layer texture scale
             nif->skip(4); // Environment map strength
             break;
         case BSLightingShaderType::ShaderType_SparkleSnow:
