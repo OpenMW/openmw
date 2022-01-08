@@ -58,6 +58,11 @@ uniform vec2 envMapLumaBias;
 uniform mat2 bumpMapMatrix;
 #endif
 
+#if @glossMap
+uniform sampler2D glossMap;
+varying vec2 glossMapUV;
+#endif
+
 uniform bool simpleWater;
 
 varying float euclideanDepth;
@@ -168,8 +173,14 @@ void main()
     envLuma = clamp(bumpTex.b * envMapLumaBias.x + envMapLumaBias.y, 0.0, 1.0);
 #endif
 
+    vec3 envEffect = texture2D(envMap, envTexCoordGen).xyz * envMapColor.xyz * envLuma;
+
+#if @glossMap
+    envEffect *= texture2D(glossMap, glossMapUV).xyz;
+#endif
+
 #if @preLightEnv
-    gl_FragData[0].xyz += texture2D(envMap, envTexCoordGen).xyz * envMapColor.xyz * envLuma;
+    gl_FragData[0].xyz += envEffect;
 #endif
 
 #endif
@@ -189,7 +200,7 @@ void main()
     gl_FragData[0].xyz *= lighting;
 
 #if @envMap && !@preLightEnv
-    gl_FragData[0].xyz += texture2D(envMap, envTexCoordGen).xyz * envMapColor.xyz * envLuma;
+    gl_FragData[0].xyz += envEffect;
 #endif
 
 #if @emissiveMap

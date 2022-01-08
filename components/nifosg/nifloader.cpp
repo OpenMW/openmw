@@ -1552,14 +1552,8 @@ namespace NifOsg
                         case Nif::NiTexturingProperty::BumpTexture:
                         case Nif::NiTexturingProperty::DetailTexture:
                         case Nif::NiTexturingProperty::DecalTexture:
-                            break;
                         case Nif::NiTexturingProperty::GlossTexture:
-                        {
-                            // Not used by the vanilla engine. MCP (Morrowind Code Patch) adds an option to use Gloss maps:
-                            // "- Gloss map fix. Morrowind removed gloss map entries from model files after loading them. This stops Morrowind from removing them."
-                            // Log(Debug::Info) << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used.";
-                            continue;
-                        }
+                            break;
                         default:
                         {
                             Log(Debug::Info) << "Unhandled texture stage " << i << " on shape \"" << nodeName << "\" in " << mFilename;
@@ -1651,6 +1645,12 @@ namespace NifOsg
                         stateset->addUniform(new osg::Uniform("bumpMapMatrix", bumpMapMatrix));
                         stateset->addUniform(new osg::Uniform("envMapLumaBias", texprop->envMapLumaBias));
                     }
+                    else if (i == Nif::NiTexturingProperty::GlossTexture)
+                    {
+                        // A gloss map is an environment map mask.
+                        // Gloss maps are only implemented in the object shaders as well.
+                        stateset->setTextureMode(texUnit, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                    }
                     else if (i == Nif::NiTexturingProperty::DecalTexture)
                     {
                         // This is only an inaccurate imitation of the original implementation,
@@ -1693,6 +1693,9 @@ namespace NifOsg
                         break;
                     case Nif::NiTexturingProperty::DecalTexture:
                         texture2d->setName("decalMap");
+                        break;
+                    case Nif::NiTexturingProperty::GlossTexture:
+                        texture2d->setName("glossMap");
                         break;
                     default:
                         break;
