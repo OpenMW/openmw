@@ -96,6 +96,7 @@
     Bug #6517: Rotations for KeyframeData in NIFs should be optional
     Bug #6519: Effects tooltips for ingredients work incorrectly
     Bug #6523: Disintegrate Weapon is resisted by Resist Magicka instead of Sanctuary
+    Bug #6544: Far from world origin objects jitter when camera is still
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
@@ -123,6 +124,7 @@
     Feature #6288: Preserve the "blocked" record flag for referenceable objects.
     Feature #6380: Commas are treated as whitespace in vanilla
     Feature #6419: Topics shouldn't be greyed out if they can produce another topic reference
+    Feature #6534: Shader-based object texture blending
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
 
