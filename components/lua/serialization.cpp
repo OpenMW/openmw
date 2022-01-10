@@ -1,11 +1,15 @@
 #include "serialization.hpp"
 
+#include <osg/Matrixf>
+#include <osg/Quat>
 #include <osg/Vec2f>
 #include <osg/Vec3f>
+#include <osg/Vec4f>
 
 #include <components/misc/endianness.hpp>
 
 #include "luastate.hpp"
+#include "utilpackage.hpp"
 
 namespace LuaUtil
 {
@@ -22,6 +26,8 @@ namespace LuaUtil
 
         VEC2 =         0x10,
         VEC3 =         0x11,
+        TRANSFORM_M =  0x12,
+        TRANSFORM_Q =  0x13,
 
         // All values should be lesser than 0x20 (SHORT_STRING_FLAG).
     };
@@ -104,6 +110,23 @@ namespace LuaUtil
             appendValue<float>(out, v.x());
             appendValue<float>(out, v.y());
             appendValue<float>(out, v.z());
+            return;
+        }
+        if (data.is<TransformM>())
+        {
+            appendType(out, SerializedType::TRANSFORM_M);
+            osg::Matrixf matrix = data.as<TransformM>().mM;
+            for (size_t i = 0; i < 4; i++)
+                for (size_t j = 0; j < 4; j++)
+                    appendValue<double>(out, matrix(i,j));
+            return;
+        }
+        if (data.is<TransformQ>())
+        {
+            appendType(out, SerializedType::TRANSFORM_Q);
+            osg::Quat quat = data.as<TransformQ>().mQ;
+            for(size_t i = 0; i < 4; i++)
+                appendValue<double>(out, quat[i]);
             return;
         }
         if (customSerializer && customSerializer->serialize(out, data))
@@ -229,6 +252,23 @@ namespace LuaUtil
                 float y = getValue<float>(binaryData);
                 float z = getValue<float>(binaryData);
                 sol::stack::push<osg::Vec3f>(lua, osg::Vec3f(x, y, z));
+                return;
+            }
+            case SerializedType::TRANSFORM_M:
+            {
+                osg::Matrixf mat;
+                for (int i = 0; i < 4; i++)
+                    for (int j = 0; j < 4; j++)
+                        mat(i, j) = getValue<double>(binaryData);
+                sol::stack::push<TransformM>(lua, asTransform(mat));
+                return;
+            }
+            case SerializedType::TRANSFORM_Q:
+            {
+                osg::Quat q;
+                for (int i = 0; i < 4; i++)
+                    q[i] = getValue<double>(binaryData);
+                sol::stack::push<TransformQ>(lua, asTransform(q));
                 return;
             }
         }

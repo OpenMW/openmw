@@ -1,10 +1,13 @@
 #include "gmock/gmock.h"
 #include <gtest/gtest.h>
 
+#include <osg/Matrixf>
+#include <osg/Quat>
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
 #include <components/lua/serialization.hpp>
+#include <components/lua/utilpackage.hpp>
 
 #include <components/misc/endianness.hpp>
 
@@ -102,6 +105,33 @@ namespace
             ASSERT_TRUE(value.is<osg::Vec3f>());
             EXPECT_EQ(value.as<osg::Vec3f>(), vec3);
         }
+    }
+
+    TEST(LuaSerializationTest, Transform) {
+        sol::state lua;
+        osg::Matrixf matrix(1, 2, 3, 4,
+                            5, 6, 7, 8,
+                            9, 10, 11, 12,
+                            13, 14, 15, 16);
+        LuaUtil::TransformM transM = LuaUtil::asTransform(matrix);
+        osg::Quat quat(1, 2, 3, 4);
+        LuaUtil::TransformQ transQ = LuaUtil::asTransform(quat);
+
+        {
+            std::string serialized = LuaUtil::serialize(sol::make_object(lua, transM));
+            EXPECT_EQ(serialized.size(), 130); // version, type, 16x double
+            sol::object value = LuaUtil::deserialize(lua, serialized);
+            ASSERT_TRUE(value.is<LuaUtil::TransformM>());
+            EXPECT_EQ(value.as<LuaUtil::TransformM>().mM, transM.mM);
+        }
+        {
+            std::string serialized = LuaUtil::serialize(sol::make_object(lua, transQ));
+            EXPECT_EQ(serialized.size(), 34); // version, type, 4x double
+            sol::object value = LuaUtil::deserialize(lua, serialized);
+            ASSERT_TRUE(value.is<LuaUtil::TransformQ>());
+            EXPECT_EQ(value.as<LuaUtil::TransformQ>().mQ, transQ.mQ);
+        }
+
     }
 
     TEST(LuaSerializationTest, Table)
