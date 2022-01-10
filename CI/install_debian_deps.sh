@@ -22,9 +22,8 @@ declare -rA GROUPED_DEPS=(
     libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
     libsdl2-dev libqt5opengl5-dev libopenal-dev libunshield-dev libtinyxml-dev
     libbullet-dev liblz4-dev libpng-dev libjpeg-dev libluajit-5.1-dev
-    ca-certificates
+    librecast-dev libsqlite3-dev ca-certificates
   "
-  # TODO: add librecastnavigation-dev when debian is ready
 
   # These dependencies can alternatively be built and linked statically.
   [openmw-deps-dynamic]="libmygui-dev libopenscenegraph-dev libsqlite3-dev"
