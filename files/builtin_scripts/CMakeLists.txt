@@ -7,8 +7,14 @@ set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(DDIRRELATIVE resources/vfs)
 copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "builtin.omwscripts")
 
+set(LUA_AUX_FILES
+    openmw_aux/util.lua
+    openmw_aux/time.lua
+    openmw_aux/calendar.lua
+)
+
 set(DDIRRELATIVE resources/vfs/openmw_aux)
-copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "openmw_aux/util.lua")
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${LUA_AUX_FILES}")
 
 set(LUA_SCRIPTS_FILES
     scripts/omw/camera.lua

@@ -175,10 +175,12 @@ return {
     --- @module Camera
     -- @usage require('openmw.interfaces').Camera
     interface = {
-        --- @field [parent=#Camera] #number version Interface version
+        --- Interface version
+        -- @field [parent=#Camera] #number version
         version = 0,
 
-        --- @function [parent=#Camera] getPrimaryMode Returns primary mode (MODE.FirstPerson or MODE.ThirdPerson).
+        --- Return primary mode (MODE.FirstPerson or MODE.ThirdPerson).
+        -- @function [parent=#Camera] getPrimaryMode
         getPrimaryMode = function() return primaryMode end,
         --- @function [parent=#Camera] getBaseThirdPersonDistance
         getBaseThirdPersonDistance = function() return third_person.baseDistance end,
