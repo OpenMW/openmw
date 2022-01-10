@@ -115,6 +115,7 @@ Programmers
     John Blomberg (fstp)
     Jordan Ayers
     Jordan Milne
+    Josquin Frei
     Josua Grawitter
     Jules Blok (Armada651)
     julianko
