@@ -13,7 +13,7 @@ RUN apt-get update \
     libmygui-dev libunshield-dev liblz4-dev libtinyxml-dev libqt5opengl5-dev \
     libboost-filesystem-dev libboost-program-options-dev libboost-iostreams-dev \
     libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev \
-    librecastnavigation-dev libluajit-5.1-dev
+    librecast-dev libsqlite3-dev libluajit-5.1-dev
 
 COPY build.sh /build.sh
 
