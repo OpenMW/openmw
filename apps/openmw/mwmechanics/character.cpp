@@ -707,9 +707,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (mPtr.getClass().isActor())
         refreshHitRecoilAnims(idle);
 
-    std::string weap;
-    if (mPtr.getClass().hasInventoryStore(mPtr))
-        weap = getWeaponType(mWeaponType)->mShortGroup;
+    std::string weap = getWeaponType(mWeaponType)->mShortGroup;
 
     refreshJumpAnims(weap, jump, idle, force);
     refreshMovementAnims(weap, movement, idle, force);
@@ -1117,97 +1115,6 @@ void CharacterController::updateIdleStormState(bool inwater)
     {
         mAnimation->setLoopingEnabled("idlestorm", false);
     }
-}
-
-bool CharacterController::updateCreatureState()
-{
-    const MWWorld::Class &cls = mPtr.getClass();
-    CreatureStats &stats = cls.getCreatureStats(mPtr);
-
-    int weapType = ESM::Weapon::None;
-    if(stats.getDrawState() == DrawState_Weapon)
-        weapType = ESM::Weapon::HandToHand;
-    else if (stats.getDrawState() == DrawState_Spell)
-        weapType = ESM::Weapon::Spell;
-
-    if (weapType != mWeaponType)
-    {
-        mWeaponType = weapType;
-        if (mAnimation->isPlaying(mCurrentWeapon))
-            mAnimation->disable(mCurrentWeapon);
-    }
-
-    if(getAttackingOrSpell())
-    {
-        if(mUpperBodyState == UpperCharState_Nothing && mHitState == CharState_None)
-        {
-            MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
-
-            std::string startKey = "start";
-            std::string stopKey = "stop";
-            if (weapType == ESM::Weapon::Spell)
-            {
-                const std::string spellid = stats.getSpells().getSelectedSpell();
-                bool canCast = mCastingManualSpell || MWBase::Environment::get().getWorld()->startSpellCast(mPtr);
-
-                if (!spellid.empty() && canCast)
-                {
-                    MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
-                    cast.playSpellCastingEffects(spellid, false);
-
-                    if (!mAnimation->hasAnimation("spellcast"))
-                    {
-                        MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
-                        mCastingManualSpell = false;
-                    }
-                    else
-                    {
-                        const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellid);
-                        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
-
-                        switch(effectentry.mRange)
-                        {
-                            case 0: mAttackType = "self"; break;
-                            case 1: mAttackType = "touch"; break;
-                            case 2: mAttackType = "target"; break;
-                        }
-
-                        startKey = mAttackType + " " + startKey;
-                        stopKey = mAttackType + " " + stopKey;
-                        mCurrentWeapon = "spellcast";
-                    }
-                }
-                else
-                    mCurrentWeapon = "";
-            }
-
-            if (weapType != ESM::Weapon::Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
-            {
-                mCurrentWeapon = chooseRandomAttackAnimation();
-            }
-
-            if (!mCurrentWeapon.empty())
-            {
-                mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                 MWRender::Animation::BlendMask_All, true,
-                                 1, startKey, stopKey,
-                                 0.0f, 0);
-                mUpperBodyState = UpperCharState_StartToMinAttack;
-
-                mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
-
-                if (weapType == ESM::Weapon::HandToHand)
-                    playSwishSound(0.0f);
-            }
-        }
-
-        setAttackingOrSpell(false);
-    }
-
-    bool animPlaying = mAnimation->getInfo(mCurrentWeapon);
-    if (!animPlaying)
-        mUpperBodyState = UpperCharState_Nothing;
-    return false;
 }
 
 bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
@@ -2346,11 +2253,7 @@ void CharacterController::update(float duration)
 
         if (!mSkipAnim)
         {
-            // bipedal means hand-to-hand could be used (which is handled in updateWeaponState). an existing InventoryStore means an actual weapon could be used.
-            if(cls.isBipedal(mPtr) || cls.hasInventoryStore(mPtr))
-                forcestateupdate = updateWeaponState(idlestate) || forcestateupdate;
-            else
-                forcestateupdate = updateCreatureState() || forcestateupdate;
+            forcestateupdate = updateWeaponState(idlestate) || forcestateupdate;
 
             refreshCurrentAnims(idlestate, movestate, jumpstate, forcestateupdate);
             updateIdleStormState(inwater);
@@ -2879,10 +2782,7 @@ bool CharacterController::readyToStartAttack() const
     if (mHitState != CharState_None && mHitState != CharState_Block)
         return false;
 
-    if (mPtr.getClass().hasInventoryStore(mPtr) || mPtr.getClass().isBipedal(mPtr))
-        return mUpperBodyState == UpperCharState_WeapEquiped;
-    else
-        return mUpperBodyState == UpperCharState_Nothing;
+    return mUpperBodyState == UpperCharState_WeapEquiped;
 }
 
 float CharacterController::getAttackStrength() const
