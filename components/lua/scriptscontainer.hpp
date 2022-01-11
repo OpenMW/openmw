@@ -73,7 +73,7 @@ namespace LuaUtil
             ScriptsContainer* mContainer;
             int mIndex;  // index in LuaUtil::ScriptsConfiguration
         };
-        using TimeUnit = ESM::LuaTimer::TimeUnit;
+        using TimerType = ESM::LuaTimer::Type;
 
         // `namePrefix` is a common prefix for all scripts in the container. Used in logs for error messages and `print` output.
         // `autoStartMode` specifies the list of scripts that should be autostarted in this container; the list itself is
@@ -99,8 +99,7 @@ namespace LuaUtil
         bool hasScript(int scriptId) const { return mScripts.count(scriptId) != 0; }
         void removeScript(int scriptId);
 
-        // Processes timers. gameSeconds and gameHours are time (in seconds and in game hours) passed from the game start.
-        void processTimers(double gameSeconds, double gameHours);
+        void processTimers(double simulationTime, double gameTime);
 
         // Calls `onUpdate` (if present) for every script in the container.
         // Handlers are called in the same order as scripts were added.
@@ -134,17 +133,17 @@ namespace LuaUtil
         void registerTimerCallback(int scriptId, std::string_view callbackName, sol::function callback);
 
         // Sets up a timer, that can be automatically saved and loaded.
-        //   timeUnit - game seconds (TimeUnit::Seconds) or game hours (TimeUnit::Hours).
+        //   type - the type of timer, either SIMULATION_TIME or GAME_TIME.
         //   time - the absolute game time (in seconds or in hours) when the timer should be executed.
         //   scriptPath - script path in VFS is used as script id. The script with the given path should already present in the container.
         //   callbackName - callback (should be registered in advance) for this timer.
         //   callbackArg - parameter for the callback (should be serializable).
-        void setupSerializableTimer(TimeUnit timeUnit, double time, int scriptId,
+        void setupSerializableTimer(TimerType type, double time, int scriptId,
                                     std::string_view callbackName, sol::object callbackArg);
 
-        // Creates a timer. `callback` is an arbitrary Lua function. This type of timers is called "unsavable"
-        // because it can not be stored in saves. I.e. loading a saved game will not fully restore the state.
-        void setupUnsavableTimer(TimeUnit timeUnit, double time, int scriptId, sol::function callback);
+        // Creates a timer. `callback` is an arbitrary Lua function. These timers are called "unsavable"
+        // because they can not be stored in saves. I.e. loading a saved game will not fully restore the state.
+        void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::function callback);
 
     protected:
         struct Handler
@@ -237,8 +236,8 @@ namespace LuaUtil
         std::map<std::string_view, EngineHandlerList*> mEngineHandlers;
         std::map<std::string, EventHandlerList, std::less<>> mEventHandlers;
 
-        std::vector<Timer> mSecondsTimersQueue;
-        std::vector<Timer> mHoursTimersQueue;
+        std::vector<Timer> mSimulationTimersQueue;
+        std::vector<Timer> mGameTimersQueue;
         int64_t mTemporaryCallbackCounter = 0;
     };
 

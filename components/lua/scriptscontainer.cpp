@@ -309,21 +309,21 @@ namespace LuaUtil
     void ScriptsContainer::save(ESM::LuaScripts& data)
     {
         std::map<int, std::vector<ESM::LuaTimer>> timers;
-        auto saveTimerFn = [&](const Timer& timer, TimeUnit timeUnit)
+        auto saveTimerFn = [&](const Timer& timer, TimerType timerType)
         {
             if (!timer.mSerializable)
                 return;
             ESM::LuaTimer savedTimer;
             savedTimer.mTime = timer.mTime;
-            savedTimer.mUnit = timeUnit;
+            savedTimer.mType = timerType;
             savedTimer.mCallbackName = std::get<std::string>(timer.mCallback);
             savedTimer.mCallbackArgument = timer.mSerializedArg;
             timers[timer.mScriptId].push_back(std::move(savedTimer));
         };
-        for (const Timer& timer : mSecondsTimersQueue)
-            saveTimerFn(timer, TimeUnit::SECONDS);
-        for (const Timer& timer : mHoursTimersQueue)
-            saveTimerFn(timer, TimeUnit::HOURS);
+        for (const Timer& timer : mSimulationTimersQueue)
+            saveTimerFn(timer, TimerType::SIMULATION_TIME);
+        for (const Timer& timer : mGameTimersQueue)
+            saveTimerFn(timer, TimerType::GAME_TIME);
         data.mScripts.clear();
         for (auto& [scriptId, script] : mScripts)
         {
@@ -408,17 +408,17 @@ namespace LuaUtil
                     // updates refnums, so timer.mSerializedArg may be not equal to savedTimer.mCallbackArgument.
                     timer.mSerializedArg = serialize(timer.mArg, mSerializer);
 
-                    if (savedTimer.mUnit == TimeUnit::HOURS)
-                        mHoursTimersQueue.push_back(std::move(timer));
+                    if (savedTimer.mType == TimerType::GAME_TIME)
+                        mGameTimersQueue.push_back(std::move(timer));
                     else
-                        mSecondsTimersQueue.push_back(std::move(timer));
+                        mSimulationTimersQueue.push_back(std::move(timer));
                 }
                 catch (std::exception& e) { printError(scriptId, "can not load timer", e); }
             }
         }
 
-        std::make_heap(mSecondsTimersQueue.begin(), mSecondsTimersQueue.end());
-        std::make_heap(mHoursTimersQueue.begin(), mHoursTimersQueue.end());
+        std::make_heap(mSimulationTimersQueue.begin(), mSimulationTimersQueue.end());
+        std::make_heap(mGameTimersQueue.begin(), mGameTimersQueue.end());
     }
 
     ScriptsContainer::~ScriptsContainer()
@@ -437,8 +437,8 @@ namespace LuaUtil
         for (auto& [_, handlers] : mEngineHandlers)
             handlers->mList.clear();
         mEventHandlers.clear();
-        mSecondsTimersQueue.clear();
-        mHoursTimersQueue.clear();
+        mSimulationTimersQueue.clear();
+        mGameTimersQueue.clear();
 
         mPublicInterfaces.clear();
         // Assigned by LuaUtil::makeReadOnly, but `clear` removes it, so we need to assign it again.
@@ -464,7 +464,7 @@ namespace LuaUtil
         std::push_heap(timerQueue.begin(), timerQueue.end());
     }
 
-    void ScriptsContainer::setupSerializableTimer(TimeUnit timeUnit, double time, int scriptId,
+    void ScriptsContainer::setupSerializableTimer(TimerType type, double time, int scriptId,
                                                   std::string_view callbackName, sol::object callbackArg)
     {
         Timer t;
@@ -474,10 +474,10 @@ namespace LuaUtil
         t.mTime = time;
         t.mArg = callbackArg;
         t.mSerializedArg = serialize(t.mArg, mSerializer);
-        insertTimer(timeUnit == TimeUnit::HOURS ? mHoursTimersQueue : mSecondsTimersQueue, std::move(t));
+        insertTimer(type == TimerType::GAME_TIME ? mGameTimersQueue : mSimulationTimersQueue, std::move(t));
     }
 
-    void ScriptsContainer::setupUnsavableTimer(TimeUnit timeUnit, double time, int scriptId, sol::function callback)
+    void ScriptsContainer::setupUnsavableTimer(TimerType type, double time, int scriptId, sol::function callback)
     {
         Timer t;
         t.mScriptId = scriptId;
@@ -488,7 +488,7 @@ namespace LuaUtil
         getScript(t.mScriptId).mTemporaryCallbacks.emplace(mTemporaryCallbackCounter, std::move(callback));
         mTemporaryCallbackCounter++;
 
-        insertTimer(timeUnit == TimeUnit::HOURS ? mHoursTimersQueue : mSecondsTimersQueue, std::move(t));
+        insertTimer(type == TimerType::GAME_TIME ? mGameTimersQueue : mSimulationTimersQueue, std::move(t));
     }
 
     void ScriptsContainer::callTimer(const Timer& t)
@@ -524,10 +524,10 @@ namespace LuaUtil
         }
     }
 
-    void ScriptsContainer::processTimers(double gameSeconds, double gameHours)
+    void ScriptsContainer::processTimers(double simulationTime, double gameTime)
     {
-        updateTimerQueue(mSecondsTimersQueue, gameSeconds);
-        updateTimerQueue(mHoursTimersQueue, gameHours);
+        updateTimerQueue(mSimulationTimersQueue, simulationTime);
+        updateTimerQueue(mGameTimersQueue, gameTime);
     }
 
 }

@@ -15,35 +15,35 @@
 -- @return #TimerCallback
 
 -------------------------------------------------------------------------------
--- Calls callback(arg) in `delay` seconds.
+-- Calls callback(arg) in `delay` simulation seconds.
 -- Callback must be registered in advance.
--- @function [parent=#async] newTimerInSeconds
+-- @function [parent=#async] newSimulationTimer
 -- @param self
 -- @param #number delay
 -- @param #TimerCallback callback A callback returned by `registerTimerCallback`
 -- @param arg An argument for `callback`; can be `nil`.
 
 -------------------------------------------------------------------------------
--- Calls callback(arg) in `delay` game hours.
+-- Calls callback(arg) in `delay` game seconds.
 -- Callback must be registered in advance.
--- @function [parent=#async] newTimerInHours
+-- @function [parent=#async] newGameTimer
 -- @param self
 -- @param #number delay
 -- @param #TimerCallback callback A callback returned by `registerTimerCallback`
 -- @param arg An argument for `callback`; can be `nil`.
 
 -------------------------------------------------------------------------------
--- Calls `func()` in `delay` seconds.
+-- Calls `func()` in `delay` simulation seconds.
 -- The timer will be lost if the game is saved and loaded.
--- @function [parent=#async] newUnsavableTimerInSeconds
+-- @function [parent=#async] newUnsavableSimulationTimer
 -- @param self
 -- @param #number delay
 -- @param #function func
 
 -------------------------------------------------------------------------------
--- Calls `func()` in `delay` game hours.
+-- Calls `func()` in `delay` game seconds.
 -- The timer will be lost if the game is saved and loaded.
--- @function [parent=#async] newUnsavableTimerInHours
+-- @function [parent=#async] newUnsavableGameTimer
 -- @param self
 -- @param #number delay
 -- @param #function func

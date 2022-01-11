@@ -21,15 +21,24 @@
 -- @param eventData
 
 -------------------------------------------------------------------------------
--- Game time in seconds.
--- The number of seconds passed in the game world since starting a new game.
--- @function [parent=#core] getGameTimeInSeconds
+-- Simulation time in seconds.
+-- The number of simulation seconds passed in the game world since starting a new game.
+-- @function [parent=#core] getSimulationTime
 -- @return #number
 
 -------------------------------------------------------------------------------
--- Current time of the game world in hours.
--- Note that the number of game seconds in a game hour is not guaranteed to be fixed.
--- @function [parent=#core] getGameTimeInHours
+-- The scale of simulation time relative to real time.
+-- @function [parent=#core] getSimulationTimeScale
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Game time in seconds.
+-- @function [parent=#core] getGameTime
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- The scale of game time relative to simulation time.
+-- @function [parent=#core] getGameTimeScale
 -- @return #number
 
 -------------------------------------------------------------------------------

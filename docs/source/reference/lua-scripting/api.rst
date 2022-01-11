@@ -18,7 +18,9 @@ Lua API reference
     openmw_input
     openmw_ui
     openmw_camera
+    openmw_aux_calendar
     openmw_aux_util
+    openmw_aux_time
     interface_camera
 
 
@@ -73,7 +75,11 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 | Built-in library                                        | Can be used        | Description                                                   |
 +=========================================================+====================+===============================================================+
+|:ref:`openmw_aux.calendar <Package openmw_aux.calendar>` | everywhere         | | Game time calendar                                          |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw_aux.util <Package openmw_aux.util>`         | everywhere         | | Miscellaneous utils                                         |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw_aux.time <Package openmw_aux.time>`         | everywhere         | | Timers and game time utils                                  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
 **Interfaces of built-in scripts**

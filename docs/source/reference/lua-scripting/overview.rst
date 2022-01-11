@@ -15,10 +15,11 @@ Here are starting points for learning Lua:
 Each script works in a separate sandbox and doesn't have any access to the underlying operating system.
 Only a limited list of allowed standard libraries can be used:
 `coroutine <https://www.lua.org/manual/5.1/manual.html#5.2>`__,
-`math <https://www.lua.org/manual/5.1/manual.html#5.6>`__,
+`math <https://www.lua.org/manual/5.1/manual.html#5.6>`__ (except `math.randomseed` -- it is called by the engine on startup and not available from scripts),
 `string <https://www.lua.org/manual/5.1/manual.html#5.4>`__,
-`table <https://www.lua.org/manual/5.1/manual.html#5.5>`__.
-These libraries are loaded automatically and are always available (except the function `math.randomseed` -- it is called by the engine on startup and not available from scripts).
+`table <https://www.lua.org/manual/5.1/manual.html#5.5>`__,
+`os <https://www.lua.org/manual/5.1/manual.html#5.8>`__ (only `os.date`, `os.difftime`, `os.time`).
+These libraries are loaded automatically and are always available.
 
 Allowed `basic functions <https://www.lua.org/manual/5.1/manual.html#5.1>`__:
 ``assert``, ``error``, ``ipairs``, ``next``, ``pairs``, ``pcall``, ``print``, ``select``, ``tonumber``, ``tostring``, ``type``, ``unpack``, ``xpcall``, ``rawequal``, ``rawget``, ``rawset``, ``getmetatable``, ``setmetatable``.
@@ -364,15 +365,19 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 | Built-in library                                        | Can be used        | Description                                                   |
 +=========================================================+====================+===============================================================+
+|:ref:`openmw_aux.calendar <Package openmw_aux.calendar>` | everywhere         | | Game time calendar                                          |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw_aux.util <Package openmw_aux.util>`         | everywhere         | | Miscellaneous utils                                         |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw_aux.time <Package openmw_aux.time>`         | everywhere         | | Timers and game time utils                                  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
 They can be loaded with ``require`` the same as API packages. For example:
 
 .. code-block:: Lua
 
-    local aux_util = require('openmw_aux.util')
-    aux_util.runEveryNSeconds(15, doSomething)  -- run `doSomething()` every 15 seconds
+    local time = require('openmw_aux.time')
+    time.runRepeatedly(doSomething, 15 * time.second)  -- run `doSomething()` every 15 seconds
 
 
 Script interfaces

@@ -364,7 +364,7 @@ return {
 
     TEST_F(LuaScriptsContainerTest, Timers)
     {
-        using TimeUnit = LuaUtil::ScriptsContainer::TimeUnit;
+        using TimerType = LuaUtil::ScriptsContainer::TimerType;
         LuaUtil::ScriptsContainer scripts(&mLua, "Test");
         int test1Id = *mCfg.findId("test1.lua");
         int test2Id = *mCfg.findId("test2.lua");
@@ -387,18 +387,18 @@ return {
 
         scripts.processTimers(1, 2);
 
-        scripts.setupSerializableTimer(TimeUnit::SECONDS, 10, test1Id, "B", sol::make_object(mLua.sol(), 3));
-        scripts.setupSerializableTimer(TimeUnit::HOURS, 10, test2Id, "B", sol::make_object(mLua.sol(), 4));
-        scripts.setupSerializableTimer(TimeUnit::SECONDS, 5, test1Id, "A", sol::make_object(mLua.sol(), 1));
-        scripts.setupSerializableTimer(TimeUnit::HOURS, 5, test2Id, "A", sol::make_object(mLua.sol(), 2));
-        scripts.setupSerializableTimer(TimeUnit::SECONDS, 15, test1Id, "A", sol::make_object(mLua.sol(), 10));
-        scripts.setupSerializableTimer(TimeUnit::SECONDS, 15, test1Id, "B", sol::make_object(mLua.sol(), 20));
+        scripts.setupSerializableTimer(TimerType::SIMULATION_TIME, 10, test1Id, "B", sol::make_object(mLua.sol(), 3));
+        scripts.setupSerializableTimer(TimerType::GAME_TIME, 10, test2Id, "B", sol::make_object(mLua.sol(), 4));
+        scripts.setupSerializableTimer(TimerType::SIMULATION_TIME, 5, test1Id, "A", sol::make_object(mLua.sol(), 1));
+        scripts.setupSerializableTimer(TimerType::GAME_TIME, 5, test2Id, "A", sol::make_object(mLua.sol(), 2));
+        scripts.setupSerializableTimer(TimerType::SIMULATION_TIME, 15, test1Id, "A", sol::make_object(mLua.sol(), 10));
+        scripts.setupSerializableTimer(TimerType::SIMULATION_TIME, 15, test1Id, "B", sol::make_object(mLua.sol(), 20));
 
-        scripts.setupUnsavableTimer(TimeUnit::SECONDS, 10, test2Id, fn2);
-        scripts.setupUnsavableTimer(TimeUnit::HOURS, 10, test1Id, fn2);
-        scripts.setupUnsavableTimer(TimeUnit::SECONDS, 5, test2Id, fn1);
-        scripts.setupUnsavableTimer(TimeUnit::HOURS, 5, test1Id, fn1);
-        scripts.setupUnsavableTimer(TimeUnit::SECONDS, 15, test2Id, fn1);
+        scripts.setupUnsavableTimer(TimerType::SIMULATION_TIME, 10, test2Id, fn2);
+        scripts.setupUnsavableTimer(TimerType::GAME_TIME, 10, test1Id, fn2);
+        scripts.setupUnsavableTimer(TimerType::SIMULATION_TIME, 5, test2Id, fn1);
+        scripts.setupUnsavableTimer(TimerType::GAME_TIME, 5, test1Id, fn1);
+        scripts.setupUnsavableTimer(TimerType::SIMULATION_TIME, 15, test2Id, fn1);
 
         EXPECT_EQ(counter1, 0);
         EXPECT_EQ(counter3, 0);
