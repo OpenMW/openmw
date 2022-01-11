@@ -465,3 +465,12 @@ default actor pathfind half extents
 
 Actor half extents used for exterior cells to generate navmesh.
 Changing the value will invalidate navmesh disk cache.
+
+day night switches
+------------------
+
+:Type:      boolean
+:Range:		True/False
+:Default:	True
+
+Some mods add models which change visuals based on time of day. When this setting is enabled, supporting models will automatically make use of Day/night state.
