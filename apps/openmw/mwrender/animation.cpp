@@ -1831,7 +1831,7 @@ namespace MWRender
             visitor.remove();
         }
 
-        if (SceneUtil::hasUserDescription(mObjectRoot, Constants::NightDayLabel))
+        if (Settings::Manager::getBool("day night switches", "Game") && SceneUtil::hasUserDescription(mObjectRoot, Constants::NightDayLabel))
         {
             AddSwitchCallbacksVisitor visitor;
             mObjectRoot->accept(visitor);

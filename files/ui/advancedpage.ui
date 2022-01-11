@@ -558,6 +558,25 @@
             </widget>
            </item>
            <item>
+            <widget class="QGroupBox" name="miscGroup">
+             <property name="title">
+              <string>Models</string>
+             </property>
+             <layout class="QGridLayout" name="miscLayout">
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="nightDaySwitchesCheckBox">
+                <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, supporting models will make use of day night switch nodes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Day night switch nodes</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
             <spacer name="verticalSpacer">
              <property name="orientation">
               <enum>Qt::Vertical</enum>

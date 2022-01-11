@@ -38,6 +38,7 @@
     Bug #5842: GetDisposition adds temporary disposition change from different actors
     Bug #5863: GetEffect should return true after the player has teleported
     Bug #5913: Failed assertion during Ritual of Trees quest
+    Bug #5928: Glow in the Dahrk functionality used without mod installed
     Bug #5937: Lights always need to be rotated by 90 degrees
     Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
     Bug #6051: NaN water height in ESM file is not handled gracefully
