@@ -133,11 +133,16 @@ namespace Debug
         std::map<Level, int> mColors;
     };
 #endif
+
+
 }
 
 // Can be used to print messages without timestamps
 std::ostream& getRawStdout();
 
-int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[], const std::string& appName);
+void setupLogging(const std::string& logDir, const std::string& appName, std::ios_base::openmode = std::ios::out);
+
+int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[],
+                    const std::string& appName, bool autoSetupLogging = true);
 
 #endif

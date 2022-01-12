@@ -5,6 +5,7 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
+#include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/misc/rng.hpp>
@@ -105,6 +106,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     boost::program_options::notify(variables);
 
     mCfgMgr.readConfiguration(variables, desc, false);
+    setupLogging(mCfgMgr.getLogPath().string(), "OpenMW-CS");
 
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
 

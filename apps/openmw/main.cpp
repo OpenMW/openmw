@@ -65,6 +65,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.readConfiguration(variables, desc);
     Files::mergeComposingVariables(variables, composingVariables, desc);
 
+    setupLogging(cfgMgr.getLogPath().string(), "OpenMW");
+
     Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
     Log(Debug::Info) << v.describe();
 
@@ -230,7 +232,7 @@ extern "C" int SDL_main(int argc, char**argv)
 int main(int argc, char**argv)
 #endif
 {
-    return wrapApplication(&runApplication, argc, argv, "OpenMW");
+    return wrapApplication(&runApplication, argc, argv, "OpenMW", false);
 }
 
 // Platform specific for Windows when there is no console built into the executable.

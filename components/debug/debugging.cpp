@@ -137,61 +137,65 @@ namespace Debug
 }
 
 static std::unique_ptr<std::ostream> rawStdout = nullptr;
+static std::unique_ptr<std::ostream> rawStderr = nullptr;
+static boost::filesystem::ofstream logfile;
+
+#if defined(_WIN32) && defined(_DEBUG)
+static boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
+#else
+static boost::iostreams::stream_buffer<Debug::Tee> coutsb;
+static boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
+#endif
 
 std::ostream& getRawStdout()
 {
     return rawStdout ? *rawStdout : std::cout;
 }
 
-int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[], const std::string& appName)
+// Redirect cout and cerr to the log file
+void setupLogging(const std::string& logDir, const std::string& appName, std::ios_base::openmode mode)
+{
+#if defined(_WIN32) && defined(_DEBUG)
+    // Redirect cout and cerr to VS debug output when running in debug mode
+    sb.open(Debug::DebugOutput());
+    std::cout.rdbuf(&sb);
+    std::cerr.rdbuf(&sb);
+#else
+    const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
+    logfile.open(boost::filesystem::path(logDir) / logName, mode);
+
+    coutsb.open(Debug::Tee(logfile, *rawStdout));
+    cerrsb.open(Debug::Tee(logfile, *rawStderr));
+
+    std::cout.rdbuf(&coutsb);
+    std::cerr.rdbuf(&cerrsb);
+#endif
+}
+
+int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[],
+                    const std::string& appName, bool autoSetupLogging)
 {
 #if defined _WIN32
     (void)Debug::attachParentConsole();
 #endif
     rawStdout = std::make_unique<std::ostream>(std::cout.rdbuf());
-
-    // Some objects used to redirect cout and cerr
-    // Scope must be here, so this still works inside the catch block for logging exceptions
-    std::streambuf* cout_rdbuf = std::cout.rdbuf ();
-    std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
-
-#if defined(_WIN32) && defined(_DEBUG)
-    boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
-#else
-    boost::iostreams::stream_buffer<Debug::Tee> coutsb;
-    boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
-    std::ostream oldcout(cout_rdbuf);
-    std::ostream oldcerr(cerr_rdbuf);
-#endif
-
-    const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
-    boost::filesystem::ofstream logfile;
+    rawStderr = std::make_unique<std::ostream>(std::cerr.rdbuf());
 
     int ret = 0;
     try
     {
         Files::ConfigurationManager cfgMgr;
 
-#if defined(_WIN32) && defined(_DEBUG)
-        // Redirect cout and cerr to VS debug output when running in debug mode
-        sb.open(Debug::DebugOutput());
-        std::cout.rdbuf (&sb);
-        std::cerr.rdbuf (&sb);
-#else
-        // Redirect cout and cerr to the log file
-        // If we are collecting a stack trace, append to existing log file
-        std::ios_base::openmode mode = std::ios::out;
-        if(argc == 2 && strcmp(argv[1], crash_switch) == 0)
-            mode |= std::ios::app;
+        if (autoSetupLogging)
+        {
+            std::ios_base::openmode mode = std::ios::out;
 
-        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / logName), mode);
+            // If we are collecting a stack trace, append to existing log file
+            if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
+                mode |= std::ios::app;
 
-        coutsb.open (Debug::Tee(logfile, oldcout));
-        cerrsb.open (Debug::Tee(logfile, oldcerr));
-
-        std::cout.rdbuf (&coutsb);
-        std::cerr.rdbuf (&cerrsb);
-#endif
+            setupLogging(cfgMgr.getLogPath().string(), appName, mode);
+        }
 
 #if defined(_WIN32)
         const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
@@ -217,8 +221,8 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
     }
 
     // Restore cout and cerr
-    std::cout.rdbuf(cout_rdbuf);
-    std::cerr.rdbuf(cerr_rdbuf);
+    std::cout.rdbuf(rawStdout->rdbuf());
+    std::cerr.rdbuf(rawStderr->rdbuf());
     Debug::CurrentDebugLevel = Debug::NoLevel;
 
     return ret;
