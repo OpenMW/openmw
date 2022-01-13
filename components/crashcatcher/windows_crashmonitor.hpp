@@ -6,6 +6,7 @@
 #include <Windows.h>
 
 #include <atomic>
+#include <unordered_map>
 
 namespace Crash
 {
