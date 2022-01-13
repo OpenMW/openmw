@@ -520,20 +520,26 @@ void OMW::Engine::setSkipMenu (bool skipMenu, bool newGame)
 
 std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 {
-    // Create the settings manager and load default settings file
-    const std::string localdefault = (mCfgMgr.getLocalPath() / "defaults.bin").string();
-    const std::string globaldefault = (mCfgMgr.getGlobalPath() / "defaults.bin").string();
+    const std::vector<boost::filesystem::path>& paths = mCfgMgr.getActiveConfigPaths();
+    if (paths.empty())
+        throw std::runtime_error("No config dirs! ConfigurationManager::readConfiguration must be called first.");
 
-    // prefer local
-    if (boost::filesystem::exists(localdefault))
-        settings.loadDefault(localdefault);
-    else if (boost::filesystem::exists(globaldefault))
-        settings.loadDefault(globaldefault);
-    else
+    // Create the settings manager and load default settings file.
+    const std::string defaultsBin = (paths.front() / "defaults.bin").string();
+    if (!boost::filesystem::exists(defaultsBin))
         throw std::runtime_error ("No default settings file found! Make sure the file \"defaults.bin\" was properly installed.");
+    settings.loadDefault(defaultsBin);
 
-    // load user settings if they exist
-    std::string settingspath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
+    // Load "settings.cfg" from every config dir except the last one as additional default settings.
+    for (int i = 0; i < static_cast<int>(paths.size()) - 1; ++i)
+    {
+        const std::string additionalDefaults = (paths[i] / "settings.cfg").string();
+        if (boost::filesystem::exists(additionalDefaults))
+            settings.loadDefault(additionalDefaults, true);
+    }
+
+    // Load "settings.cfg" from the last config as user settings if they exist. This path will be used to save modified settings.
+    std::string settingspath = (paths.back() / "settings.cfg").string();
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
 

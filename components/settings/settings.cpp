@@ -19,10 +19,10 @@ void Manager::clear()
     mChangedSettings.clear();
 }
 
-void Manager::loadDefault(const std::string &file)
+void Manager::loadDefault(const std::string &file, bool overrideExisting)
 {
     SettingsFileParser parser;
-    parser.loadSettingsFile(file, mDefaultSettings, true);
+    parser.loadSettingsFile(file, mDefaultSettings, true, overrideExisting);
 }
 
 void Manager::loadUser(const std::string &file)

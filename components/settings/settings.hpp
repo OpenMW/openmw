@@ -26,7 +26,7 @@ namespace Settings
         void clear();
         ///< clears all settings and default settings
 
-        void loadDefault (const std::string& file);
+        void loadDefault (const std::string& file, bool overrideExisting = false);
         ///< load file as the default settings (can be overridden by user settings)
 
         void loadUser (const std::string& file);

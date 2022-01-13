@@ -103,6 +103,7 @@
     Bug #6579: OpenMW compilation error when using OSG doubles for BoundingSphere
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
+    Feature #2491: Ability to make OpenMW "portable"
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
