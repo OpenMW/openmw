@@ -84,6 +84,7 @@ namespace NavMeshTool
                 ("process-interior-cells", bpo::value<bool>()->implicit_value(true)
                     ->default_value(false), "build navmesh for interior cells")
             ;
+            Files::ConfigurationManager::addCommonOptions(result);
 
             return result;
         }

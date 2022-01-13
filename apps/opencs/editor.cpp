@@ -102,6 +102,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
     ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
         ->default_value(true), "enable script blacklisting");
+    Files::ConfigurationManager::addCommonOptions(desc);
 
     boost::program_options::notify(variables);
 
