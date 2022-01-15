@@ -1283,15 +1283,14 @@ namespace MWWorld
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
+        if (scale == ptr.getCellRef().getScale())
+            return;
         if (mPhysics->getActor(ptr))
             mNavigator->removeAgent(getPathfindingHalfExtents(ptr));
 
-        if (scale != ptr.getCellRef().getScale())
-        {
-            ptr.getCellRef().setScale(scale);
-            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
-            mWorldScene->removeFromPagedRefs(ptr);
-        }
+        ptr.getCellRef().setScale(scale);
+        mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+        mWorldScene->removeFromPagedRefs(ptr);
 
         if(ptr.getRefData().getBaseNode() != nullptr)
             mWorldScene->updateObjectScale(ptr);
