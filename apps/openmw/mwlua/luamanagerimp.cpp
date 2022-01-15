@@ -244,7 +244,10 @@ namespace MWLua
         mPlayer = ptr;
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (!localScripts)
+        {
             localScripts = createLocalScripts(ptr, ESM::LuaScriptCfg::sPlayer);
+            localScripts->addAutoStartedScripts();
+        }
         mActiveLocalScripts.insert(localScripts);
         mLocalEngineEvents.push_back({getId(ptr), LocalScripts::OnActive{}});
         mPlayerChanged = true;
@@ -274,7 +277,10 @@ namespace MWLua
         {
             ESM::LuaScriptCfg::Flags flag = getLuaScriptFlag(ptr);
             if (!mConfiguration.getListByFlag(flag).empty())
-                localScripts = createLocalScripts(ptr, flag);  // TODO: put to a queue and apply on next `update()`
+            {
+                localScripts = createLocalScripts(ptr, flag);
+                localScripts->addAutoStartedScripts();  // TODO: put to a queue and apply on next `update()`
+            }
         }
         if (localScripts)
         {
@@ -327,6 +333,7 @@ namespace MWLua
         if (!localScripts)
         {
             localScripts = createLocalScripts(ptr, getLuaScriptFlag(ptr));
+            localScripts->addAutoStartedScripts();
             if (ptr.isInCell() && MWBase::Environment::get().getWorld()->isCellActive(ptr.getCell()))
                 mActiveLocalScripts.insert(localScripts);
         }
@@ -354,7 +361,6 @@ namespace MWLua
         }
         scripts->addPackage("openmw.nearby", mNearbyPackage);
         scripts->setSerializer(mLocalSerializer.get());
-        scripts->addAutoStartedScripts();
 
         MWWorld::RefData& refData = ptr.getRefData();
         refData.setLuaScripts(std::move(scripts));
