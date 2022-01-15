@@ -6,7 +6,9 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/store.hpp"
 
 #include "eventqueue.hpp"
 #include "worldview.hpp"
@@ -47,7 +49,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 13;
+        api["API_REVISION"] = 14;
         api["quit"] = [lua]()
         {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
@@ -85,6 +87,17 @@ namespace MWLua
             {"Ammunition", MWWorld::InventoryStore::Slot_Ammunition}
         }));
         api["i18n"] = [i18n=context.mI18n](const std::string& context) { return i18n->getContext(context); };
+        const MWWorld::Store<ESM::GameSetting>* gmst = &MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        api["getGMST"] = [lua=context.mLua, gmst](const std::string& setting) -> sol::object
+        {
+            const ESM::Variant& value = gmst->find(setting)->mValue;
+            if (value.getType() == ESM::VT_String)
+                return sol::make_object<std::string>(lua->sol(), value.getString());
+            else if (value.getType() == ESM::VT_Int)
+                return sol::make_object<int>(lua->sol(), value.getInteger());
+            else
+                return sol::make_object<float>(lua->sol(), value.getFloat());
+        };
         return LuaUtil::makeReadOnly(api);
     }
 
@@ -160,6 +173,30 @@ namespace MWLua
             }
             subgroup[field->path().back()] = field;
         }
+        return LuaUtil::makeReadOnly(res);
+    }
+
+    sol::table initGlobalStoragePackage(const Context& context, LuaUtil::LuaStorage* globalStorage)
+    {
+        sol::table res(context.mLua->sol(), sol::create);
+        res["globalSection"] = [globalStorage](std::string_view section) { return globalStorage->getMutableSection(section); };
+        res["allGlobalSections"] = [globalStorage]() { return globalStorage->getAllSections(); };
+        return LuaUtil::makeReadOnly(res);
+    }
+
+    sol::table initLocalStoragePackage(const Context& context, LuaUtil::LuaStorage* globalStorage)
+    {
+        sol::table res(context.mLua->sol(), sol::create);
+        res["globalSection"] = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
+        return LuaUtil::makeReadOnly(res);
+    }
+
+    sol::table initPlayerStoragePackage(const Context& context, LuaUtil::LuaStorage* globalStorage, LuaUtil::LuaStorage* playerStorage)
+    {
+        sol::table res(context.mLua->sol(), sol::create);
+        res["globalSection"] = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
+        res["playerSection"] = [playerStorage](std::string_view section) { return playerStorage->getMutableSection(section); };
+        res["allPlayerSections"] = [playerStorage]() { return playerStorage->getAllSections(); };
         return LuaUtil::makeReadOnly(res);
     }
 

@@ -47,6 +47,12 @@
 -- @return #boolean
 
 -------------------------------------------------------------------------------
+-- Get a GMST setting from content files.
+-- @function [parent=#core] getGMST
+-- @param #string setting Setting name
+-- @return #any
+
+-------------------------------------------------------------------------------
 -- Return i18n formatting function for the given context.
 -- It is based on `i18n.lua` library.
 -- Language files should be stored in VFS as `i18n/<ContextName>/<Lang>.lua`.
