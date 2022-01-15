@@ -24,7 +24,6 @@ namespace MWLua
     {
     public:
         LuaManager(const VFS::Manager* vfs, const std::string& libsDir);
-        ~LuaManager() { clear(); }
 
         // Called by engine.cpp when the environment is fully initialized.
         void init();
