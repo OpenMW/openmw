@@ -93,14 +93,14 @@ namespace
 
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec2));
-            EXPECT_EQ(serialized.size(), 10);  // version, type, 2x float
+            EXPECT_EQ(serialized.size(), 18);  // version, type, 2x double
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<osg::Vec2f>());
             EXPECT_EQ(value.as<osg::Vec2f>(), vec2);
         }
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec3));
-            EXPECT_EQ(serialized.size(), 14);  // version, type, 3x float
+            EXPECT_EQ(serialized.size(), 26);  // version, type, 3x double
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<osg::Vec3f>());
             EXPECT_EQ(value.as<osg::Vec3f>(), vec3);
@@ -149,7 +149,7 @@ namespace
         table[2] = osg::Vec2f(2, 1);
 
         std::string serialized = LuaUtil::serialize(table);
-        EXPECT_EQ(serialized.size(), 123);
+        EXPECT_EQ(serialized.size(), 139);
         sol::table res_table = LuaUtil::deserialize(lua, serialized);
         sol::table res_readonly_table = LuaUtil::deserialize(lua, serialized, nullptr, true);
 

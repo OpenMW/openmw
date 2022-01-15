@@ -99,17 +99,17 @@ namespace LuaUtil
         {
             appendType(out, SerializedType::VEC2);
             osg::Vec2f v = data.as<osg::Vec2f>();
-            appendValue<float>(out, v.x());
-            appendValue<float>(out, v.y());
+            appendValue<double>(out, v.x());
+            appendValue<double>(out, v.y());
             return;
         }
         if (data.is<osg::Vec3f>())
         {
             appendType(out, SerializedType::VEC3);
             osg::Vec3f v = data.as<osg::Vec3f>();
-            appendValue<float>(out, v.x());
-            appendValue<float>(out, v.y());
-            appendValue<float>(out, v.z());
+            appendValue<double>(out, v.x());
+            appendValue<double>(out, v.y());
+            appendValue<double>(out, v.z());
             return;
         }
         if (data.is<TransformM>())
@@ -241,16 +241,16 @@ namespace LuaUtil
                 throw std::runtime_error("Unexpected end of table during deserialization.");
             case SerializedType::VEC2:
             {
-                float x = getValue<float>(binaryData);
-                float y = getValue<float>(binaryData);
+                float x = getValue<double>(binaryData);
+                float y = getValue<double>(binaryData);
                 sol::stack::push<osg::Vec2f>(lua, osg::Vec2f(x, y));
                 return;
             }
             case SerializedType::VEC3:
             {
-                float x = getValue<float>(binaryData);
-                float y = getValue<float>(binaryData);
-                float z = getValue<float>(binaryData);
+                float x = getValue<double>(binaryData);
+                float y = getValue<double>(binaryData);
+                float z = getValue<double>(binaryData);
                 sol::stack::push<osg::Vec3f>(lua, osg::Vec3f(x, y, z));
                 return;
             }
