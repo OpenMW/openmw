@@ -72,6 +72,7 @@
     Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
     Bug #6291: Can't pickup the dead mage's journal from the mysterious hunter mod
     Bug #6302: Teleporting disabled actor breaks its disabled state
+    Bug #6303: After "go to jail" weapon can stuck in the ready to attack state
     Bug #6307: Pathfinding in Infidelities quest from Tribunal addon is broken
     Bug #6321: Arrow enchantments should always be applied to the target
     Bug #6322: Total sold/cost should reset to 0 when there are no items offered

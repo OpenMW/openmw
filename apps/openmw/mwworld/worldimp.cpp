@@ -3621,13 +3621,12 @@ namespace MWWorld
 
     void World::goToJail()
     {
+        const MWWorld::Ptr player = getPlayerPtr();
         if (!mGoToJail)
         {
             // Reset bounty and forget the crime now, but don't change cell yet (the player should be able to read the dialog text first)
             mGoToJail = true;
             mPlayerInJail = true;
-
-            MWWorld::Ptr player = getPlayerPtr();
 
             int bounty = player.getClass().getNpcStats(player).getBounty();
             player.getClass().getNpcStats(player).setBounty(0);
@@ -3641,6 +3640,12 @@ namespace MWWorld
         }
         else
         {
+            if (MWBase::Environment::get().getMechanicsManager()->isAttackPreparing(player))
+            {
+                mPlayer->setAttackingOrSpell(false);
+            }
+
+            mPlayer->setDrawState(MWMechanics::DrawState_Nothing);
             mGoToJail = false;
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
