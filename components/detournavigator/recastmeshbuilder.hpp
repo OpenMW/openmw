@@ -4,12 +4,13 @@
 #include "recastmesh.hpp"
 #include "tilebounds.hpp"
 
+#include <components/resource/bulletshape.hpp>
+
 #include <osg/Vec3f>
 
 #include <LinearMath/btTransform.h>
 
 #include <array>
-#include <functional>
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -39,7 +40,8 @@ namespace DetourNavigator
     public:
         explicit RecastMeshBuilder(const TileBounds& bounds) noexcept;
 
-        void addObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType);
+        void addObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType,
+            osg::ref_ptr<const Resource::BulletShape> source, const ObjectTransform& objectTransform);
 
         void addObject(const btCompoundShape& shape, const btTransform& transform, const AreaType areaType);
 
@@ -49,11 +51,11 @@ namespace DetourNavigator
 
         void addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType);
 
-        void addWater(const int mCellSize, const osg::Vec3f& shift);
+        void addWater(const osg::Vec2i& cellPosition, const Water& water);
 
-        void addHeightfield(int cellSize, const osg::Vec3f& shift, float height);
+        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, float height);
 
-        void addHeightfield(int cellSize, const osg::Vec3f& shift, const float* heights, std::size_t size,
+        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const float* heights, std::size_t size,
             float minHeight, float maxHeight);
 
         std::shared_ptr<RecastMesh> create(std::size_t generation, std::size_t revision) &&;
@@ -61,9 +63,12 @@ namespace DetourNavigator
     private:
         const TileBounds mBounds;
         std::vector<RecastMeshTriangle> mTriangles;
-        std::vector<Cell> mWater;
+        std::vector<CellWater> mWater;
         std::vector<Heightfield> mHeightfields;
         std::vector<FlatHeightfield> mFlatHeightfields;
+        std::vector<MeshSource> mSources;
+
+        inline void addObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType);
 
         void addObject(const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback);
 

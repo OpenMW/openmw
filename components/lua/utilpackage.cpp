@@ -105,9 +105,9 @@ namespace LuaUtil
             [](const Vec3& v) { return TransformM{osg::Matrixf::scale(v)}; },
             [](float x, float y, float z) { return TransformM{osg::Matrixf::scale(x, y, z)}; });
         transforms["rotate"] = [](float angle, const Vec3& axis) { return TransformQ{osg::Quat(angle, axis)}; };
-        transforms["rotateX"] = [](float angle) { return TransformQ{osg::Quat(angle, Vec3(1, 0, 0))}; };
-        transforms["rotateY"] = [](float angle) { return TransformQ{osg::Quat(angle, Vec3(0, 1, 0))}; };
-        transforms["rotateZ"] = [](float angle) { return TransformQ{osg::Quat(angle, Vec3(0, 0, 1))}; };
+        transforms["rotateX"] = [](float angle) { return TransformQ{osg::Quat(angle, Vec3(-1, 0, 0))}; };
+        transforms["rotateY"] = [](float angle) { return TransformQ{osg::Quat(angle, Vec3(0, -1, 0))}; };
+        transforms["rotateZ"] = [](float angle) { return TransformQ{osg::Quat(angle, Vec3(0, 0, -1))}; };
 
         transMType[sol::meta_function::multiplication] = sol::overload(
             [](const TransformM& a, const Vec3& b) { return a.mM.preMult(b); },
@@ -175,6 +175,7 @@ namespace LuaUtil
         util["clamp"] = [](float value, float from, float to) { return std::clamp(value, from, to); };
         // NOTE: `util["clamp"] = std::clamp<float>` causes error 'AddressSanitizer: stack-use-after-scope'
         util["normalizeAngle"] = &Misc::normalizeAngle;
+        util["makeReadOnly"] = &makeReadOnly;
 
         return util;
     }

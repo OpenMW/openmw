@@ -1,33 +1,24 @@
 #include "groundcover.hpp"
 
+#include <osg/ComputeBoundsVisitor>
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
 #include <osg/Geometry>
 #include <osg/VertexAttribDivisor>
+#include <osg/Program>
 
 #include <components/esm/esmreader.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/nodecallback.hpp>
+#include <components/terrain/quadtreenode.hpp>
 #include <components/shader/shadermanager.hpp>
 
-#include "apps/openmw/mwworld/esmstore.hpp"
-#include "apps/openmw/mwbase/environment.hpp"
-#include "apps/openmw/mwbase/world.hpp"
+#include "../mwworld/groundcoverstore.hpp"
 
 #include "vismask.hpp"
 
 namespace MWRender
 {
-    std::string getGroundcoverModel(int type, const std::string& id, const MWWorld::ESMStore& store)
-    {
-        switch (type)
-        {
-          case ESM::REC_STAT:
-            return store.get<ESM::Static>().searchStatic(id)->mModel;
-          default:
-            return std::string();
-        }
-    }
-
     class InstancingVisitor : public osg::NodeVisitor
     {
     public:
@@ -106,6 +97,20 @@ namespace MWRender
         float mDensity = 0.f;
     };
 
+    class ViewDistanceCallback : public SceneUtil::NodeCallback<ViewDistanceCallback>
+    {
+    public:
+        ViewDistanceCallback(float dist, const osg::BoundingBox& box) : mViewDistance(dist), mBox(box) {}
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            if (Terrain::distance(mBox, nv->getEyePoint()) <= mViewDistance)
+                traverse(node, nv);
+        }
+    private:
+        float mViewDistance;
+        osg::BoundingBox mBox;
+    };
+
     inline bool isInChunkBorders(ESM::CellRef& ref, osg::Vec2f& minBound, osg::Vec2f& maxBound)
     {
         osg::Vec2f size = maxBound - minBound;
@@ -122,8 +127,9 @@ namespace MWRender
 
     osg::ref_ptr<osg::Node> Groundcover::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
+        if (lod > getMaxLodLevel())
+            return nullptr;
         GroundcoverChunkId id = std::make_tuple(center, size);
-
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
         if (obj)
             return static_cast<osg::Node*>(obj.get());
@@ -137,12 +143,14 @@ namespace MWRender
         }
     }
 
-    Groundcover::Groundcover(Resource::SceneManager* sceneManager, float density)
+    Groundcover::Groundcover(Resource::SceneManager* sceneManager, float density, float viewDistance, const MWWorld::GroundcoverStore& store)
          : GenericResourceManager<GroundcoverChunkId>(nullptr)
          , mSceneManager(sceneManager)
          , mDensity(density)
          , mStateset(new osg::StateSet)
+         , mGroundcoverStore(store)
     {
+         setViewDistance(viewDistance);
          // MGE uses default alpha settings for groundcover, so we can not rely on alpha properties
          // Force a unified alpha handling instead of data from meshes
          osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f / 255.f);
@@ -152,14 +160,19 @@ namespace MWRender
          mStateset->setAttribute(new osg::VertexAttribDivisor(6, 1));
          mStateset->setAttribute(new osg::VertexAttribDivisor(7, 1));
 
-         mProgramTemplate = mSceneManager->getShaderManager().getProgramTemplate() ? static_cast<osg::Program*>(mSceneManager->getShaderManager().getProgramTemplate()->clone(osg::CopyOp::SHALLOW_COPY)) : new osg::Program;
+         mProgramTemplate = mSceneManager->getShaderManager().getProgramTemplate() ? Shader::ShaderManager::cloneProgram(mSceneManager->getShaderManager().getProgramTemplate()) : osg::ref_ptr<osg::Program>(new osg::Program);
          mProgramTemplate->addBindAttribLocation("aOffset", 6);
          mProgramTemplate->addBindAttribLocation("aRotation", 7);
     }
 
+    Groundcover::~Groundcover()
+    {
+    }
+
     void Groundcover::collectInstances(InstanceMap& instances, float size, const osg::Vec2f& center)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        if (mDensity <=0.f) return;
+
         osg::Vec2f minBound = (center - osg::Vec2f(size/2.f, size/2.f));
         osg::Vec2f maxBound = (center + osg::Vec2f(size/2.f, size/2.f));
         DensityCalculator calculator(mDensity);
@@ -169,35 +182,37 @@ namespace MWRender
         {
             for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
             {
-                const ESM::Cell* cell = store.get<ESM::Cell>().searchStatic(cellX, cellY);
-                if (!cell) continue;
+                ESM::Cell cell;
+                mGroundcoverStore.initCell(cell, cellX, cellY);
+                if (cell.mContextList.empty()) continue;
 
                 calculator.reset();
-                for (size_t i=0; i<cell->mContextList.size(); ++i)
+                std::map<ESM::RefNum, ESM::CellRef> refs;
+                for (size_t i=0; i<cell.mContextList.size(); ++i)
                 {
-                    unsigned int index = cell->mContextList[i].index;
+                    unsigned int index = cell.mContextList[i].index;
                     if (esm.size() <= index)
                         esm.resize(index+1);
-                    cell->restore(esm[index], i);
+                    cell.restore(esm[index], i);
                     ESM::CellRef ref;
                     ref.mRefNum.unset();
                     bool deleted = false;
-                    while(cell->getNextRef(esm[index], ref, deleted))
+                    while(cell.getNextRef(esm[index], ref, deleted))
                     {
-                        if (deleted) continue;
-                        if (!ref.mRefNum.fromGroundcoverFile()) continue;
+                        if (!deleted && refs.find(ref.mRefNum) == refs.end() && !calculator.isInstanceEnabled()) deleted = true;
+                        if (!deleted && !isInChunkBorders(ref, minBound, maxBound)) deleted = true;
 
-                        if (!calculator.isInstanceEnabled()) continue;
-                        if (!isInChunkBorders(ref, minBound, maxBound)) continue;
-
-                        Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-                        int type = store.findStatic(ref.mRefID);
-                        std::string model = getGroundcoverModel(type, ref.mRefID, store);
-                        if (model.empty()) continue;
-                        model = "meshes/" + model;
-
-                        instances[model].emplace_back(std::move(ref));
+                        if (deleted) { refs.erase(ref.mRefNum); continue; }
+                        refs[ref.mRefNum] = std::move(ref);
                     }
+                }
+
+                for (auto& pair : refs)
+                {
+                    ESM::CellRef& ref = pair.second;
+                    const std::string& model = mGroundcoverStore.getGroundcoverModel(ref.mRefID);
+                    if (!model.empty())
+                        instances[model].emplace_back(std::move(ref));
                 }
             }
         }
@@ -220,10 +235,15 @@ namespace MWRender
             group->addChild(node);
         }
 
+        osg::ComputeBoundsVisitor cbv;
+        group->accept(cbv);
+        osg::BoundingBox box = cbv.getBoundingBox();
+        group->addCullCallback(new ViewDistanceCallback(getViewDistance(), box));
+
         group->setStateSet(mStateset);
         group->setNodeMask(Mask_Groundcover);
         if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
-            group->setCullCallback(new SceneUtil::LightListCallback);
+            group->addCullCallback(new SceneUtil::LightListCallback);
         mSceneManager->recreateShaders(group, "groundcover", true, mProgramTemplate);
         mSceneManager->shareState(group);
         group->getBound();

@@ -33,7 +33,7 @@ namespace MWLua
 
         // Deserializes userdata of type "typeName" from binaryData. Should push the result on stack using sol::stack::push.
         // Returns false if this type is not supported by this serializer.
-        bool deserialize(std::string_view typeName, std::string_view binaryData, sol::state& lua) const override
+        bool deserialize(std::string_view typeName, std::string_view binaryData, lua_State* lua) const override
         {
             if (typeName == "o")
             {

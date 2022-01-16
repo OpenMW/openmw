@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <string>
+#include <string_view>
 #include <tuple>
 
 class Utf8Stream
@@ -27,6 +28,11 @@ public:
 
     Utf8Stream (std::pair <Point, Point> range) :
         cur (range.first), nxt (range.first), end (range.second), val(Utf8Stream::sBadChar())
+    {
+    }
+
+    Utf8Stream (std::string_view str) :
+        Utf8Stream (reinterpret_cast<Point>(str.data()), reinterpret_cast<Point>(str.data() + str.size()))
     {
     }
 

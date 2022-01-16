@@ -169,7 +169,7 @@ namespace ESM
                     {
                         float height = mLandData->mHeights[int(row * vertMult) * ESM::Land::LAND_SIZE + int(col * vertMult)];
                         height /= height > 0 ? 128.f : 16.f;
-                        height = std::min(max, std::max(min, height));
+                        height = std::clamp(height, min, max);
                         wnam[row * LAND_GLOBAL_MAP_LOD_SIZE_SQRT + col] = static_cast<signed char>(height);
                     }
                 }

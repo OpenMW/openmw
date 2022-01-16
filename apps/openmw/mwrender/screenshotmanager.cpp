@@ -12,7 +12,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/shader/shadermanager.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -91,15 +91,18 @@ namespace MWRender
             int width = screenW - leftPadding*2;
             int height = screenH - topPadding*2;
 
-            // Ensure we are reading from the resolved framebuffer and not the multisampled render buffer when in use.
-            // glReadPixel() cannot read from multisampled targets.
+            // Ensure we are reading from the resolved framebuffer and not the multisampled render buffer. Also ensure that the readbuffer is set correctly with rendeirng to FBO.
+            // glReadPixel() cannot read from multisampled targets
             PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
 
-            if (postProcessor && postProcessor->getFbo() && postProcessor->getMsaaFbo())
+            if (postProcessor && postProcessor->getFbo())
             {
                 osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getContextID(), false);
                 if (ext)
+                {
                     ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, postProcessor->getFbo()->getHandle(renderInfo.getContextID()));
+                    renderInfo.getState()->glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+                }
             }
 
             mImage->readPixels(leftPadding, topPadding, width, height, GL_RGB, GL_UNSIGNED_BYTE);
@@ -331,7 +334,7 @@ namespace MWRender
         float nearClip = Settings::Manager::getFloat("near clip", "Camera");
         float viewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         // each cubemap side sees 90 degrees
-        if (SceneUtil::getReverseZ())
+        if (SceneUtil::AutoDepth::isReversed())
             rttCamera->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspectiveInf(90.0, w/float(h), nearClip));
         else
             rttCamera->setProjectionMatrixAsPerspective(90.0, w/float(h), nearClip, viewDistance);

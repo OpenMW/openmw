@@ -443,6 +443,23 @@ namespace MWMechanics
         }
     }
 
+    void Actors::stopCombat(const MWWorld::Ptr& ptr)
+    {
+        auto& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+        std::vector<MWWorld::Ptr> targets;
+        if(ai.getCombatTargets(targets))
+        {
+            std::set<MWWorld::Ptr> allySet;
+            getActorsSidingWith(ptr, allySet);
+            allySet.insert(ptr);
+            std::vector<MWWorld::Ptr> allies(allySet.begin(), allySet.end());
+            for(const auto& ally : allies)
+                ally.getClass().getCreatureStats(ally).getAiSequence().stopCombat(targets);
+            for(const auto& target : targets)
+                target.getClass().getCreatureStats(target).getAiSequence().stopCombat(allies);
+        }
+    }
+
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer)
     {
         // No combat for totally static creatures
@@ -979,7 +996,7 @@ namespace MWMechanics
                     // Calm witness down
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stopPursuit();
-                    creatureStats.getAiSequence().stopCombat();
+                    stopCombat(ptr);
 
                     // Reset factors to attack
                     creatureStats.setAttacked(false);
@@ -1013,13 +1030,10 @@ namespace MWMechanics
     void Actors::updateProcessingRange()
     {
         // We have to cap it since using high values (larger than 7168) will make some quests harder or impossible to complete (bug #1876)
-        static const float maxProcessingRange = 7168.f;
-        static const float minProcessingRange = maxProcessingRange / 2.f;
+        static const float maxRange = 7168.f;
+        static const float minRange = maxRange / 2.f;
 
-        float actorsProcessingRange = Settings::Manager::getFloat("actors processing range", "Game");
-        actorsProcessingRange = std::min(actorsProcessingRange, maxProcessingRange);
-        actorsProcessingRange = std::max(actorsProcessingRange, minProcessingRange);
-        mActorsProcessingRange = actorsProcessingRange;
+        mActorsProcessingRange = std::clamp(Settings::Manager::getFloat("actors processing range", "Game"), minRange, maxRange);
     }
 
     void Actors::addActor (const MWWorld::Ptr& ptr, bool updateImmediately)
@@ -1315,7 +1329,7 @@ namespace MWMechanics
                 angleToApproachingActor = std::atan2(deltaPos.x(), deltaPos.y());
                 osg::Vec2f posAtT = relPos + relSpeed * t;
                 float coef = (posAtT.x() * relSpeed.x() + posAtT.y() * relSpeed.y()) / (collisionDist * collisionDist * maxSpeed);
-                coef *= osg::clampBetween((maxDistForPartialAvoiding - dist) / (maxDistForPartialAvoiding - maxDistForStrictAvoiding), 0.f, 1.f);
+                coef *= std::clamp((maxDistForPartialAvoiding - dist) / (maxDistForPartialAvoiding - maxDistForStrictAvoiding), 0.f, 1.f);
                 movementCorrection = posAtT * coef;
                 if (otherPtr.getClass().getCreatureStats(otherPtr).isDead())
                     // In case of dead body still try to go around (it looks natural), but reduce the correction twice.
@@ -1601,6 +1615,7 @@ namespace MWMechanics
 
             if (playerCharacter)
             {
+                MWBase::Environment::get().getWorld()->applyDeferredPreviewRotationToPlayer(duration);
                 playerCharacter->update(duration);
                 playerCharacter->setVisibility(1.f);
             }
@@ -1969,7 +1984,7 @@ namespace MWMechanics
             if (stats.isDead())
                 continue;
 
-            // An actor counts as siding with this actor if Follow or Escort is the current AI package, or there are only Combat and Wander packages before the Follow/Escort package
+            // An actor counts as siding with this actor if Follow or Escort is the current AI package, or there are only Wander packages before the Follow/Escort package
             // Actors that are targeted by this actor's Follow or Escort packages also side with them
             for (const auto& package : stats.getAiSequence())
             {
@@ -1985,7 +2000,7 @@ namespace MWMechanics
                     }
                     break;
                 }
-                else if (package->getTypeId() != AiPackageTypeId::Combat && package->getTypeId() != AiPackageTypeId::Wander)
+                else if (package->getTypeId() > AiPackageTypeId::Wander && package->getTypeId() <= AiPackageTypeId::Activate) // Don't count "fake" package types
                     break;
             }
         }

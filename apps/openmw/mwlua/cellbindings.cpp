@@ -4,6 +4,14 @@
 
 #include "../mwworld/cellstore.hpp"
 
+namespace sol
+{
+    template <>
+    struct is_automagical<MWLua::LCell> : std::false_type {};
+    template <>
+    struct is_automagical<MWLua::GCell> : std::false_type {};
+}
+
 namespace MWLua
 {
 

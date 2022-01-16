@@ -31,14 +31,13 @@ void AiSequence::copy (const AiSequence& sequence)
     sequence.mAiState.copy<AiWanderStorage>(mAiState);
 }
 
-AiSequence::AiSequence() : mDone (false), mRepeat(false), mLastAiPackage(AiPackageTypeId::None) {}
+AiSequence::AiSequence() : mDone (false), mLastAiPackage(AiPackageTypeId::None) {}
 
 AiSequence::AiSequence (const AiSequence& sequence)
 {
     copy (sequence);
     mDone = sequence.mDone;
     mLastAiPackage = sequence.mLastAiPackage;
-    mRepeat = sequence.mRepeat;
 }
 
 AiSequence& AiSequence::operator= (const AiSequence& sequence)
@@ -159,11 +158,25 @@ bool AiSequence::isInCombat(const MWWorld::Ptr &actor) const
     return false;
 }
 
+// TODO: use std::list::remove_if for all these methods when we switch to C++20
 void AiSequence::stopCombat()
 {
     for(auto it = mPackages.begin(); it != mPackages.end(); )
     {
         if ((*it)->getTypeId() == AiPackageTypeId::Combat)
+        {
+            it = mPackages.erase(it);
+        }
+        else
+            ++it;
+    }
+}
+
+void AiSequence::stopCombat(const std::vector<MWWorld::Ptr>& targets)
+{
+    for(auto it = mPackages.begin(); it != mPackages.end(); )
+    {
+        if ((*it)->getTypeId() == AiPackageTypeId::Combat && std::find(targets.begin(), targets.end(), (*it)->getTarget()) != targets.end())
         {
             it = mPackages.erase(it);
         }
@@ -281,7 +294,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             if (package->execute(actor, characterController, mAiState, duration))
             {
                 // Put repeating noncombat AI packages on the end of the stack so they can be used again
-                if (isActualAiPackage(packageTypeId) && (mRepeat || package->getRepeat()))
+                if (isActualAiPackage(packageTypeId) && package->getRepeat())
                 {
                     package->reset();
                     mPackages.push_back(package->clone());
@@ -355,7 +368,6 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
             else
                 ++it;
         }
-        mRepeat=false;
     }
 
     // insert new package in correct place depending on priority
@@ -401,10 +413,6 @@ const AiPackage& MWMechanics::AiSequence::getActivePackage()
 
 void AiSequence::fill(const ESM::AIPackageList &list)
 {
-    // If there is more than one package in the list, enable repeating
-    if (list.mList.size() >= 2)
-        mRepeat = true;
-
     for (const auto& esmPackage : list.mList)
     {
         std::unique_ptr<MWMechanics::AiPackage> package;
@@ -420,22 +428,22 @@ void AiSequence::fill(const ESM::AIPackageList &list)
         else if (esmPackage.mType == ESM::AI_Escort)
         {
             ESM::AITarget data = esmPackage.mTarget;
-            package = std::make_unique<MWMechanics::AiEscort>(data.mId.toString(), data.mDuration, data.mX, data.mY, data.mZ);
+            package = std::make_unique<MWMechanics::AiEscort>(data.mId.toString(), data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
         }
         else if (esmPackage.mType == ESM::AI_Travel)
         {
             ESM::AITravel data = esmPackage.mTravel;
-            package = std::make_unique<MWMechanics::AiTravel>(data.mX, data.mY, data.mZ);
+            package = std::make_unique<MWMechanics::AiTravel>(data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
         }
         else if (esmPackage.mType == ESM::AI_Activate)
         {
             ESM::AIActivate data = esmPackage.mActivate;
-            package = std::make_unique<MWMechanics::AiActivate>(data.mName.toString());
+            package = std::make_unique<MWMechanics::AiActivate>(data.mName.toString(), data.mShouldRepeat != 0);
         }
         else //if (esmPackage.mType == ESM::AI_Follow)
         {
             ESM::AITarget data = esmPackage.mTarget;
-            package = std::make_unique<MWMechanics::AiFollow>(data.mId.toString(), data.mDuration, data.mX, data.mY, data.mZ);
+            package = std::make_unique<MWMechanics::AiFollow>(data.mId.toString(), data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
         }
         mPackages.push_back(std::move(package));
     }
@@ -453,24 +461,6 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
 {
     if (!sequence.mPackages.empty())
         clear();
-
-    // If there is more than one non-combat, non-pursue package in the list, enable repeating.
-    int count = 0;
-    for (auto& container : sequence.mPackages)
-    {
-        switch (container.mType)
-        {
-            case ESM::AiSequence::Ai_Wander:
-            case ESM::AiSequence::Ai_Travel:
-            case ESM::AiSequence::Ai_Escort:
-            case ESM::AiSequence::Ai_Follow:
-            case ESM::AiSequence::Ai_Activate:
-                ++count;
-        }
-    }
-
-    if (count > 1)
-        mRepeat = true;
 
     // Load packages
     for (auto& container : sequence.mPackages)

@@ -79,12 +79,11 @@ namespace DetourNavigator
         return result;
     }
 
-    void NavMeshTilesCache::reportStats(unsigned int frameNumber, osg::Stats& out) const
+    void reportStats(const NavMeshTilesCache::Stats& stats, unsigned int frameNumber, osg::Stats& out)
     {
-        const Stats stats = getStats();
-        out.setAttribute(frameNumber, "NavMesh CacheSize", stats.mNavMeshCacheSize);
-        out.setAttribute(frameNumber, "NavMesh UsedTiles", stats.mUsedNavMeshTiles);
-        out.setAttribute(frameNumber, "NavMesh CachedTiles", stats.mCachedNavMeshTiles);
+        out.setAttribute(frameNumber, "NavMesh CacheSize", static_cast<double>(stats.mNavMeshCacheSize));
+        out.setAttribute(frameNumber, "NavMesh UsedTiles", static_cast<double>(stats.mUsedNavMeshTiles));
+        out.setAttribute(frameNumber, "NavMesh CachedTiles", static_cast<double>(stats.mCachedNavMeshTiles));
         if (stats.mGetCount > 0)
             out.setAttribute(frameNumber, "NavMesh CacheHitRate", static_cast<double>(stats.mHitCount) / stats.mGetCount * 100.0);
     }

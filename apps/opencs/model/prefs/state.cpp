@@ -223,6 +223,7 @@ void CSMPrefs::State::declare()
     declareColour ("scene-night-gradient-colour", "Scene Night Gradient Colour", QColor (47, 51, 51, 255)).
         setTooltip("Sets the gradient color to use in conjunction with the night background color. Ignored if "
             "the gradient option is disabled.");
+    declareBool("scene-day-night-switch-nodes", "Use Day/Night Switch Nodes", true);
 
     declareCategory ("Tooltips");
     declareBool ("scene", "Show Tooltips in 3D scenes", true);

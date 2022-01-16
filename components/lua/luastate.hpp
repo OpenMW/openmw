@@ -35,8 +35,22 @@ namespace LuaUtil
         // Returns underlying sol::state.
         sol::state& sol() { return mLua; }
 
+        // Can be used by a C++ function that is called from Lua to get the Lua traceback.
+        // Makes no sense if called not from Lua code.
+        // Note: It is a slow function, should be used for debug purposes only.
+        std::string debugTraceback() { return mLua["debug"]["traceback"]().get<std::string>(); }
+
         // A shortcut to create a new Lua table.
         sol::table newTable() { return sol::table(mLua, sol::create); }
+
+        template <typename Key, typename Value>
+        sol::table tableFromPairs(std::initializer_list<std::pair<Key, Value>> list)
+        {
+            sol::table res(mLua, sol::create);
+            for (const auto& [k, v] : list)
+                res[k] = v;
+            return res;
+        }
 
         // Registers a package that will be available from every sandbox via `require(name)`.
         // The package can be either a sol::table with an API or a sol::function. If it is a function,
@@ -62,12 +76,18 @@ namespace LuaUtil
 
         const ScriptsConfiguration& getConfiguration() const { return *mConf; }
 
+        // Load internal Lua library. All libraries are loaded in one sandbox and shouldn't be exposed to scripts directly.
+        void addInternalLibSearchPath(const std::string& path) { mLibSearchPaths.push_back(path); }
+        sol::function loadInternalLib(std::string_view libName);
+        sol::function loadFromVFS(const std::string& path);
+        sol::environment newInternalLibEnvironment();
+
     private:
         static sol::protected_function_result throwIfError(sol::protected_function_result&&);
         template <typename... Args>
         friend sol::protected_function_result call(const sol::protected_function& fn, Args&&... args);
 
-        sol::function loadScript(const std::string& path);
+        sol::function loadScriptAndCache(const std::string& path);
 
         sol::state mLua;
         const ScriptsConfiguration* mConf;
@@ -75,6 +95,7 @@ namespace LuaUtil
         std::map<std::string, sol::bytecode> mCompiledScripts;
         std::map<std::string, sol::object> mCommonPackages;
         const VFS::Manager* mVFS;
+        std::vector<std::string> mLibSearchPaths;
     };
 
     // Should be used for every call of every Lua function.
@@ -104,6 +125,17 @@ namespace LuaUtil
 
     // String representation of a Lua object. Should be used for debugging/logging purposes only.
     std::string toString(const sol::object&);
+
+    template <class T>
+    T getValueOrDefault(const sol::object& obj, const T& defaultValue)
+    {
+        if (obj == sol::nil)
+            return defaultValue;
+        if (obj.is<T>())
+            return obj.as<T>();
+        else
+            throw std::logic_error(std::string("Value \"") + toString(obj) + std::string("\" has unexpected type"));
+    }
 
     // Makes a table read only (when accessed from Lua) by wrapping it with an empty userdata.
     // Needed to forbid any changes in common resources that can be accessed from different sandboxes.

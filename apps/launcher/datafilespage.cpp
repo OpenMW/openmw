@@ -1,4 +1,5 @@
 #include "datafilespage.hpp"
+#include "maindialog.hpp"
 
 #include <QDebug>
 
@@ -8,6 +9,7 @@
 #include <QSortFilterProxyModel>
 #include <thread>
 #include <mutex>
+#include <algorithm>
 
 #include <apps/launcher/utils/cellnameloader.hpp>
 #include <components/files/configurationmanager.hpp>
@@ -24,11 +26,14 @@
 
 const char *Launcher::DataFilesPage::mDefaultContentListName = "Default";
 
-Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings, Config::LauncherSettings &launcherSettings, QWidget *parent)
+Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
+                                       Config::LauncherSettings &launcherSettings, MainDialog *parent)
     : QWidget(parent)
+    , mMainDialog(parent)
     , mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
+    , mNavMeshToolInvoker(new Process::ProcessInvoker(this))
 {
     ui.setupUi (this);
     setObjectName ("DataFilesPage");
@@ -57,8 +62,6 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
 
 void Launcher::DataFilesPage::buildView()
 {
-    ui.verticalLayout->insertWidget (0, mSelector->uiWidget());
-
     QToolButton * refreshButton = mSelector->refreshButton();    
 
     //tool buttons
@@ -89,6 +92,13 @@ void Launcher::DataFilesPage::buildView()
              this, SLOT (slotProfileChangedByUser(QString, QString)));
 
     connect(ui.refreshDataFilesAction, SIGNAL(triggered()),this, SLOT(slotRefreshButtonClicked()));
+
+    connect(ui.updateNavMeshButton, SIGNAL(clicked()), this, SLOT(startNavMeshTool()));
+    connect(ui.cancelNavMeshButton, SIGNAL(clicked()), this, SLOT(killNavMeshTool()));
+
+    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(readyReadStandardOutput()), this, SLOT(updateNavMeshProgress()));
+    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(readyReadStandardError()), this, SLOT(updateNavMeshProgress()));
+    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(navMeshToolFinished(int, QProcess::ExitStatus)));
 }
 
 bool Launcher::DataFilesPage::loadSettings()
@@ -121,6 +131,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
     for (const QString &path : paths)
         mSelector->addFiles(path);
+    mSelector->sortFiles();
 
     PathIterator pathIterator(paths);
 
@@ -409,4 +420,63 @@ void Launcher::DataFilesPage::reloadCells(QStringList selectedFiles)
 #endif
     std::sort(cellNamesList.begin(), cellNamesList.end());
     emit signalLoadedCellsChanged(cellNamesList);
+}
+
+void Launcher::DataFilesPage::startNavMeshTool()
+{
+    mMainDialog->writeSettings();
+
+    ui.navMeshLogPlainTextEdit->clear();
+    ui.navMeshProgressBar->setValue(0);
+    ui.navMeshProgressBar->setMaximum(1);
+
+    if (!mNavMeshToolInvoker->startProcess(QLatin1String("openmw-navmeshtool")))
+        return;
+
+    ui.cancelNavMeshButton->setEnabled(true);
+    ui.navMeshProgressBar->setEnabled(true);
+}
+
+void Launcher::DataFilesPage::killNavMeshTool()
+{
+    mNavMeshToolInvoker->killProcess();
+}
+
+void Launcher::DataFilesPage::updateNavMeshProgress()
+{
+    QProcess& process = *mNavMeshToolInvoker->getProcess();
+    QString text;
+    while (process.canReadLine())
+    {
+        const QByteArray line = process.readLine();
+        const auto end = std::find_if(line.rbegin(), line.rend(), [] (auto v) { return v != '\n' && v != '\r'; });
+        text = QString::fromUtf8(line.mid(0, line.size() - (end - line.rbegin())));
+        ui.navMeshLogPlainTextEdit->appendPlainText(text);
+    }
+    const QRegularExpression pattern(R"([\( ](\d+)/(\d+)[\) ])");
+    QRegularExpressionMatch match = pattern.match(text);
+    if (!match.hasMatch())
+        return;
+    int value = match.captured(1).toInt();
+    const int maximum = match.captured(2).toInt();
+    if (text.contains("cell"))
+        ui.navMeshProgressBar->setMaximum(maximum * 100);
+    else if (maximum > ui.navMeshProgressBar->maximum())
+        ui.navMeshProgressBar->setMaximum(maximum);
+    else
+        value += static_cast<int>(std::round(
+            (ui.navMeshProgressBar->maximum() - maximum)
+            * (static_cast<float>(value) / static_cast<float>(maximum))
+        ));
+    ui.navMeshProgressBar->setValue(value);
+}
+
+void Launcher::DataFilesPage::navMeshToolFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    updateNavMeshProgress();
+    ui.navMeshLogPlainTextEdit->appendPlainText(QString::fromUtf8(mNavMeshToolInvoker->getProcess()->readAll()));
+    if (exitCode == 0 && exitStatus == QProcess::ExitStatus::NormalExit)
+        ui.navMeshProgressBar->setValue(ui.navMeshProgressBar->maximum());
+    ui.cancelNavMeshButton->setEnabled(false);
+    ui.navMeshProgressBar->setEnabled(false);
 }

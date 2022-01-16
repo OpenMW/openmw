@@ -149,6 +149,9 @@ public:
         inp->read(str.data(), length);
         if (inp->bad())
             throw std::runtime_error("Failed to read sized string of " + std::to_string(length) + " chars");
+        size_t end = str.find('\0');
+        if (end != std::string::npos)
+            str.erase(end);
         return str;
     }
     ///Read in a string of the length specified in the file

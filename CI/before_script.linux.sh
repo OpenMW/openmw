@@ -46,7 +46,7 @@ fi
 
 if [[ $CI_CLANG_TIDY ]]; then
 	CMAKE_CONF_OPTS+=(
-	      -DCMAKE_CXX_CLANG_TIDY='clang-tidy;-checks=-*,boost-*,clang-analyzer-*,concurrency-*,performance-*,-header-filter=.*,bugprone-*,misc-definitions-in-headers,misc-misplaced-const,misc-redundant-expression'
+	      -DCMAKE_CXX_CLANG_TIDY='clang-tidy;-checks=-*,boost-*,clang-analyzer-*,concurrency-*,performance-*,-header-filter=.*,bugprone-*,misc-definitions-in-headers,misc-misplaced-const,misc-redundant-expression,-bugprone-narrowing-conversions'
 	)
 fi
 
@@ -71,6 +71,7 @@ if [[ "${BUILD_TESTS_ONLY}" ]]; then
         -DBUILD_ESSIMPORTER=OFF \
         -DBUILD_OPENCS=OFF \
         -DBUILD_WIZARD=OFF \
+        -DBUILD_NAVMESHTOOL=OFF \
         -DBUILD_UNITTESTS=${BUILD_UNITTESTS} \
         -DBUILD_BENCHMARKS=${BUILD_BENCHMARKS} \
         -DGTEST_ROOT="${GOOGLETEST_DIR}" \

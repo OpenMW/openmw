@@ -5,6 +5,7 @@
 #include "navmeshmanager.hpp"
 
 #include <set>
+#include <memory>
 
 namespace DetourNavigator
 {
@@ -15,11 +16,13 @@ namespace DetourNavigator
          * @brief Navigator constructor initializes all internal data. Constructed object is ready to build a scene.
          * @param settings allows to customize navigator work. Constructor is only place to set navigator settings.
          */
-        explicit NavigatorImpl(const Settings& settings);
+        explicit NavigatorImpl(const Settings& settings, std::unique_ptr<NavMeshDb>&& db);
 
         void addAgent(const osg::Vec3f& agentHalfExtents) override;
 
         void removeAgent(const osg::Vec3f& agentHalfExtents) override;
+
+        void setWorldspace(std::string_view worldspace) override;
 
         bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
 
@@ -31,12 +34,11 @@ namespace DetourNavigator
 
         bool removeObject(const ObjectId id) override;
 
-        bool addWater(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift) override;
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level) override;
 
         bool removeWater(const osg::Vec2i& cellPosition) override;
 
-        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-            const HeightfieldShape& shape) override;
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape) override;
 
         bool removeHeightfield(const osg::Vec2i& cellPosition) override;
 

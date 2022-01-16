@@ -5,6 +5,8 @@
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>
 
+#include <components/sdlutil/sdlmappings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -13,7 +15,6 @@
 #include "../mwworld/player.hpp"
 
 #include "actions.hpp"
-#include "sdlmappings.hpp"
 
 namespace MWInput
 {
@@ -546,9 +547,9 @@ namespace MWInput
         ICS::Control* c = mInputBinder->getChannel(action)->getAttachedControls().front().control;
 
         if (mInputBinder->getJoystickAxisBinding(c, sFakeDeviceId, ICS::Control::INCREASE) != ICS::InputControlSystem::UNASSIGNED)
-            return sdlControllerAxisToString(mInputBinder->getJoystickAxisBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
+            return SDLUtil::sdlControllerAxisToString(mInputBinder->getJoystickAxisBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
         else if (mInputBinder->getJoystickButtonBinding(c, sFakeDeviceId, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
-            return sdlControllerButtonToString(mInputBinder->getJoystickButtonBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
+            return SDLUtil::sdlControllerButtonToString(mInputBinder->getJoystickButtonBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
         else
             return "#{sNone}";
     }
@@ -653,14 +654,13 @@ namespace MWInput
         return mInputBinder->getKeyBinding(mInputBinder->getControl(actionId), ICS::Control::INCREASE);
     }
 
-    float BindingsManager::getControllerAxisValue(SDL_GameControllerAxis axis) const
+    SDL_GameController* BindingsManager::getControllerOrNull() const
     {
         const auto& controllers = mInputBinder->getJoystickInstanceMap();
         if (controllers.empty())
-            return 0;
-        SDL_GameController* cntrl = controllers.begin()->second;
-        constexpr int AXIS_MAX_ABSOLUTE_VALUE = 32768;
-        return SDL_GameControllerGetAxis(cntrl, axis) / static_cast<float>(AXIS_MAX_ABSOLUTE_VALUE);
+            return nullptr;
+        else
+            return controllers.begin()->second;
     }
 
     void BindingsManager::actionValueChanged(int action, float currentValue, float previousValue)

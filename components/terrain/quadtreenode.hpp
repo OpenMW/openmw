@@ -34,6 +34,8 @@ namespace Terrain
 
     class ViewData;
 
+    float distance(const osg::BoundingBox&, const osg::Vec3f& v);
+
     class QuadTreeNode : public osg::Group
     {
     public:

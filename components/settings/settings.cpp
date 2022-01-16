@@ -39,7 +39,7 @@ void Manager::saveUser(const std::string &file)
 
 std::string Manager::getString(const std::string &setting, const std::string &category)
 {
-    CategorySettingValueMap::key_type key = std::make_pair(category, setting);
+    CategorySettingValueMap::key_type key (category, setting);
     CategorySettingValueMap::iterator it = mUserSettings.find(key);
     if (it != mUserSettings.end())
         return it->second;
@@ -79,6 +79,15 @@ int Manager::getInt (const std::string& setting, const std::string& category)
     return number;
 }
 
+std::int64_t Manager::getInt64 (const std::string& setting, const std::string& category)
+{
+    const std::string& value = getString(setting, category);
+    std::stringstream stream(value);
+    std::size_t number = 0;
+    stream >> number;
+    return number;
+}
+
 bool Manager::getBool (const std::string& setting, const std::string& category)
 {
     const std::string& string = getString(setting, category);
@@ -93,7 +102,7 @@ osg::Vec2f Manager::getVector2 (const std::string& setting, const std::string& c
     stream >> x >> y;
     if (stream.fail())
         throw std::runtime_error(std::string("Can't parse 2d vector: " + value));
-    return osg::Vec2f(x, y);
+    return {x, y};
 }
 
 osg::Vec3f Manager::getVector3 (const std::string& setting, const std::string& category)
@@ -104,14 +113,14 @@ osg::Vec3f Manager::getVector3 (const std::string& setting, const std::string& c
     stream >> x >> y >> z;
     if (stream.fail())
         throw std::runtime_error(std::string("Can't parse 3d vector: " + value));
-    return osg::Vec3f(x, y, z);
+    return {x, y, z};
 }
 
 void Manager::setString(const std::string &setting, const std::string &category, const std::string &value)
 {
-    CategorySettingValueMap::key_type key = std::make_pair(category, setting);
+    CategorySettingValueMap::key_type key (category, setting);
 
-    CategorySettingValueMap::iterator found = mUserSettings.find(key);
+    auto found = mUserSettings.find(key);
     if (found != mUserSettings.end())
     {
         if (found->second == value)
@@ -165,18 +174,35 @@ void Manager::setVector3 (const std::string &setting, const std::string &categor
 
 void Manager::resetPendingChange(const std::string &setting, const std::string &category)
 {
-    CategorySettingValueMap::key_type key = std::make_pair(category, setting);
+    CategorySettingValueMap::key_type key (category, setting);
     mChangedSettings.erase(key);
 }
 
-const CategorySettingVector Manager::getPendingChanges()
+CategorySettingVector Manager::getPendingChanges()
 {
     return mChangedSettings;
+}
+
+CategorySettingVector Manager::getPendingChanges(const CategorySettingVector& filter)
+{
+    CategorySettingVector intersection;
+    std::set_intersection(mChangedSettings.begin(), mChangedSettings.end(),
+                          filter.begin(), filter.end(),
+                          std::inserter(intersection, intersection.begin()));
+    return intersection;
 }
 
 void Manager::resetPendingChanges()
 {
     mChangedSettings.clear();
+}
+
+void Manager::resetPendingChanges(const CategorySettingVector& filter)
+{
+    for (const auto& key : filter)
+    {
+        mChangedSettings.erase(key);
+    }
 }
 
 }

@@ -29,7 +29,7 @@ endif (GIT_CHECKOUT)
 # source files
 
 add_component_dir (lua
-    luastate scriptscontainer utilpackage serialization configuration
+    luastate scriptscontainer utilpackage serialization configuration i18n storage
     )
 
 add_component_dir (settings
@@ -37,7 +37,7 @@ add_component_dir (settings
     )
 
 add_component_dir (bsa
-    bsa_file compressedbsafile memorystream
+    bsa_file compressedbsafile
     )
 
 add_component_dir (vfs
@@ -57,11 +57,11 @@ add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue pathgridutil waterutil writescene serialize optimizer
     actorutil detourdebugdraw navmesh agentpath shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
-    screencapture
+    screencapture depth
     )
 
 add_component_dir (nif
-    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey base nifstream
+    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey base nifstream physics
     )
 
 add_component_dir (nifosg
@@ -93,7 +93,7 @@ add_component_dir (esmterrain
 
 add_component_dir (misc
     constants utf8stream stringops resourcehelpers rng messageformatparser weakcache thread
-    compression
+    compression osguservalues errorMarker
     )
 
 add_component_dir (debug
@@ -105,8 +105,8 @@ IF(NOT WIN32 AND NOT APPLE)
     add_definitions(-DGLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
 ENDIF()
 add_component_dir (files
-    linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager escape
-    lowlevelfile constrainedfilestream memorystream
+    linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
+    lowlevelfile constrainedfilestream memorystream hash configfileparser
     )
 
 add_component_dir (compiler
@@ -146,7 +146,7 @@ add_component_dir (fontloader
     )
 
 add_component_dir (sdlutil
-    gl4es_init sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper events sdlcursormanager
+    gl4es_init sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper events sdlcursormanager sdlmappings
     )
 
 add_component_dir (version
@@ -160,6 +160,12 @@ add_component_dir (fallback
 add_component_dir (queries
     query luabindings
     )
+    
+add_component_dir (lua_ui
+    widget widgetlist element layers content
+    text textedit window
+    )
+
 
 if(WIN32)
     add_component_dir (crashcatcher
@@ -196,6 +202,12 @@ add_component_dir(detournavigator
     offmeshconnectionsmanager
     preparednavmeshdata
     navmeshcacheitem
+    navigatorutils
+    generatenavmeshtile
+    navmeshdb
+    serialization
+    navmeshdbutils
+    recast
     )
 
 add_component_dir(loadinglistener
@@ -276,6 +288,7 @@ target_link_libraries(components
     ${SDL2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
+    ${LUA_LIBRARIES}
     LZ4::LZ4
     RecastNavigation::DebugUtils
     RecastNavigation::Detour
@@ -283,6 +296,7 @@ target_link_libraries(components
 
     Base64
     SQLite::SQLite3
+    smhasher
     )
 
 target_link_libraries(components ${BULLET_LIBRARIES})
@@ -363,3 +377,7 @@ endif(OSG_STATIC)
 if(USE_QT)
     set_property(TARGET components_qt PROPERTY AUTOMOC ON)
 endif(USE_QT)
+
+if (MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+    target_precompile_headers(components PRIVATE ${SOL_INCLUDE_DIR}/sol/sol.hpp)
+endif ()

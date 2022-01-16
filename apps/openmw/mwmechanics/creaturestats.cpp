@@ -1,7 +1,6 @@
 #include "creaturestats.hpp"
 
 #include <algorithm>
-#include <climits>
 
 #include <components/esm/creaturestats.hpp>
 #include <components/esm/esmreader.hpp>
@@ -45,7 +44,7 @@ namespace MWMechanics
         float max = getFatigue().getModified();
         float current = getFatigue().getCurrent();
 
-        float normalised = floor(max) == 0 ? 1 : std::max (0.0f, current / max);
+        float normalised = std::floor(max) == 0 ? 1 : std::max (0.0f, current / max);
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -558,12 +557,13 @@ namespace MWMechanics
         state.mHasAiSettings = true;
         for (int i=0; i<4; ++i)
             mAiSettings[i].writeState (state.mAiSettings[i]);
+
+        state.mMissingACDT = false;
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
     {
-        // HACK: using mGoldPool as an indicator for lack of ACDT during .ess import
-        if (state.mGoldPool != INT_MIN)
+        if (!state.mMissingACDT)
         {
             for (int i=0; i<ESM::Attribute::Length; ++i)
                 mAttributes[i].readState (state.mAttributes[i]);

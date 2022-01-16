@@ -6,11 +6,13 @@
 #include "navmeshtilescache.hpp"
 #include "dtstatus.hpp"
 #include "navmeshdata.hpp"
+#include "version.hpp"
 
 #include <components/misc/guarded.hpp>
 
 #include <map>
 #include <ostream>
+#include <set>
 
 struct dtMeshTile;
 
@@ -123,11 +125,14 @@ namespace DetourNavigator
         }
     };
 
+    const dtMeshTile* getTile(const dtNavMesh& navMesh, const TilePosition& position);
+
     class NavMeshCacheItem
     {
     public:
         NavMeshCacheItem(const NavMeshPtr& impl, std::size_t generation)
-            : mImpl(impl), mGeneration(generation), mNavMeshRevision(0)
+            : mImpl(impl)
+            , mVersion {generation, 0}
         {
         }
 
@@ -136,26 +141,37 @@ namespace DetourNavigator
             return *mImpl;
         }
 
-        std::size_t getGeneration() const
-        {
-            return mGeneration;
-        }
-
-        std::size_t getNavMeshRevision() const
-        {
-            return mNavMeshRevision;
-        }
+        const Version& getVersion() const { return mVersion; }
 
         UpdateNavMeshStatus updateTile(const TilePosition& position, NavMeshTilesCache::Value&& cached,
                                        NavMeshData&& navMeshData);
 
         UpdateNavMeshStatus removeTile(const TilePosition& position);
 
+        UpdateNavMeshStatus markAsEmpty(const TilePosition& position);
+
+        bool isEmptyTile(const TilePosition& position) const;
+
+        template <class Function>
+        void forEachUsedTile(Function&& function) const
+        {
+            for (const auto& [position, tile] : mUsedTiles)
+                if (const dtMeshTile* meshTile = getTile(*mImpl, position))
+                    function(position, tile.mVersion, *meshTile);
+        }
+
     private:
+        struct Tile
+        {
+            Version mVersion;
+            NavMeshTilesCache::Value mCached;
+            NavMeshData mData;
+        };
+
         NavMeshPtr mImpl;
-        std::size_t mGeneration;
-        std::size_t mNavMeshRevision;
-        std::map<TilePosition, std::pair<NavMeshTilesCache::Value, NavMeshData>> mUsedTiles;
+        Version mVersion;
+        std::map<TilePosition, Tile> mUsedTiles;
+        std::set<TilePosition> mEmptyTiles;
     };
 
     using GuardedNavMeshCacheItem = Misc::ScopeGuarded<NavMeshCacheItem>;

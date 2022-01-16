@@ -8,6 +8,7 @@
 #include "waitconditiontype.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/bullethelpers/heightfield.hpp>
 
 #include <DetourNavMesh.h>
 
@@ -40,12 +41,22 @@ namespace
 
 namespace DetourNavigator
 {
-    NavMeshManager::NavMeshManager(const Settings& settings)
+    NavMeshManager::NavMeshManager(const Settings& settings, std::unique_ptr<NavMeshDb>&& db)
         : mSettings(settings)
-        , mRecastMeshManager(settings)
-        , mOffMeshConnectionsManager(settings)
-        , mAsyncNavMeshUpdater(settings, mRecastMeshManager, mOffMeshConnectionsManager)
+        , mRecastMeshManager(settings.mRecast)
+        , mOffMeshConnectionsManager(settings.mRecast)
+        , mAsyncNavMeshUpdater(settings, mRecastMeshManager, mOffMeshConnectionsManager, std::move(db))
     {}
+
+    void NavMeshManager::setWorldspace(std::string_view worldspace)
+    {
+        if (worldspace == mWorldspace)
+            return;
+        mRecastMeshManager.setWorldspace(worldspace);
+        for (auto& [agent, cache] : mCache)
+            cache = std::make_shared<GuardedNavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter);
+        mWorldspace = worldspace;
+    }
 
     bool NavMeshManager::addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                                    const AreaType areaType)
@@ -73,10 +84,11 @@ namespace DetourNavigator
         return true;
     }
 
-    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift)
+    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
-        if (!mRecastMeshManager.addWater(cellPosition, cellSize, shift))
+        if (!mRecastMeshManager.addWater(cellPosition, cellSize, level))
             return false;
+        const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
         addChangedTiles(cellSize, shift, ChangeType::add);
         return true;
     }
@@ -86,15 +98,16 @@ namespace DetourNavigator
         const auto water = mRecastMeshManager.removeWater(cellPosition);
         if (!water)
             return false;
-        addChangedTiles(water->mSize, water->mShift, ChangeType::remove);
+        const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, water->mCellSize, water->mLevel));
+        addChangedTiles(water->mCellSize, shift, ChangeType::remove);
         return true;
     }
 
-    bool NavMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-        const HeightfieldShape& shape)
+    bool NavMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape)
     {
-        if (!mRecastMeshManager.addHeightfield(cellPosition, cellSize, shift, shape))
+        if (!mRecastMeshManager.addHeightfield(cellPosition, cellSize, shape))
             return false;
+        const btVector3 shift = getHeightfieldShift(shape, cellPosition, cellSize);
         addChangedTiles(cellSize, shift, ChangeType::add);
         return true;
     }
@@ -104,7 +117,8 @@ namespace DetourNavigator
         const auto heightfield = mRecastMeshManager.removeHeightfield(cellPosition);
         if (!heightfield)
             return false;
-        addChangedTiles(heightfield->mSize, heightfield->mShift, ChangeType::remove);
+        const btVector3 shift = getHeightfieldShift(heightfield->mShape, cellPosition, heightfield->mCellSize);
+        addChangedTiles(heightfield->mCellSize, shift, ChangeType::remove);
         return true;
     }
 
@@ -136,8 +150,8 @@ namespace DetourNavigator
     {
         mOffMeshConnectionsManager.add(id, OffMeshConnection {start, end, areaType});
 
-        const auto startTilePosition = getTilePosition(mSettings, start);
-        const auto endTilePosition = getTilePosition(mSettings, end);
+        const auto startTilePosition = getTilePosition(mSettings.mRecast, start);
+        const auto endTilePosition = getTilePosition(mSettings.mRecast, end);
 
         addChangedTile(startTilePosition, ChangeType::add);
 
@@ -154,7 +168,7 @@ namespace DetourNavigator
 
     void NavMeshManager::update(const osg::Vec3f& playerPosition, const osg::Vec3f& agentHalfExtents)
     {
-        const auto playerTile = getTilePosition(mSettings, toNavMeshCoordinates(mSettings, playerPosition));
+        const auto playerTile = getTilePosition(mSettings.mRecast, toNavMeshCoordinates(mSettings.mRecast, playerPosition));
         auto& lastRevision = mLastRecastMeshManagerRevision[agentHalfExtents];
         auto lastPlayerTile = mPlayerTile.find(agentHalfExtents);
         if (lastRevision == mRecastMeshManager.getRevision() && lastPlayerTile != mPlayerTile.end()
@@ -197,14 +211,14 @@ namespace DetourNavigator
                 const auto shouldAdd = shouldAddTile(tile, playerTile, maxTiles);
                 const auto presentInNavMesh = bool(navMesh.getTileAt(tile.x(), tile.y(), 0));
                 if (shouldAdd && !presentInNavMesh)
-                    tilesToPost.insert(std::make_pair(tile, ChangeType::add));
+                    tilesToPost.insert(std::make_pair(tile, locked->isEmptyTile(tile) ? ChangeType::update : ChangeType::add));
                 else if (!shouldAdd && presentInNavMesh)
                     tilesToPost.insert(std::make_pair(tile, ChangeType::mixed));
                 else
                     recastMeshManager.reportNavMeshChange(recastMeshManager.getVersion(), Version {0, 0});
             });
         }
-        mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, tilesToPost);
+        mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, mRecastMeshManager.getWorldspace(), tilesToPost);
         if (changedTiles != mChangedTiles.end())
             changedTiles->second.clear();
         Log(Debug::Debug) << "Cache update posted for agent=" << agentHalfExtents <<
@@ -229,7 +243,7 @@ namespace DetourNavigator
 
     void NavMeshManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        mAsyncNavMeshUpdater.reportStats(frameNumber, stats);
+        DetourNavigator::reportStats(mAsyncNavMeshUpdater.getStats(), frameNumber, stats);
     }
 
     RecastMeshTiles NavMeshManager::getRecastMeshTiles() const
@@ -237,9 +251,10 @@ namespace DetourNavigator
         std::vector<TilePosition> tiles;
         mRecastMeshManager.forEachTile(
             [&tiles] (const TilePosition& tile, const CachedRecastMeshManager&) { tiles.push_back(tile); });
+        const std::string worldspace = mRecastMeshManager.getWorldspace();
         RecastMeshTiles result;
         for (const TilePosition& tile : tiles)
-            if (auto mesh = mRecastMeshManager.getCachedMesh(tile))
+            if (auto mesh = mRecastMeshManager.getCachedMesh(worldspace, tile))
                 result.emplace(tile, std::move(mesh));
         return result;
     }
@@ -247,17 +262,17 @@ namespace DetourNavigator
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
             const ChangeType changeType)
     {
-        getTilesPositions(shape, transform, mSettings,
+        getTilesPositions(shape, transform, mSettings.mRecast,
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 
-    void NavMeshManager::addChangedTiles(const int cellSize, const osg::Vec3f& shift,
+    void NavMeshManager::addChangedTiles(const int cellSize, const btVector3& shift,
             const ChangeType changeType)
     {
         if (cellSize == std::numeric_limits<int>::max())
             return;
 
-        getTilesPositions(cellSize, shift, mSettings,
+        getTilesPositions(cellSize, shift, mSettings.mRecast,
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 

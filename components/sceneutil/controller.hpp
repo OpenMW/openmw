@@ -85,8 +85,18 @@ namespace SceneUtil
         /// By default assigns the ControllerSource passed to the constructor of this class if no ControllerSource is assigned to that controller yet.
         void visit(osg::Node& node, Controller& ctrl) override;
 
-    private:
+    protected:
         std::shared_ptr<ControllerSource> mToAssign;
+    };
+
+    class ForceControllerSourcesVisitor : public AssignControllerSourcesVisitor
+    {
+    public:
+        ForceControllerSourcesVisitor();
+        ForceControllerSourcesVisitor(std::shared_ptr<ControllerSource> toAssign);
+
+        /// Assign the wanted ControllerSource even if one is already assigned to the controller.
+        void visit(osg::Node& node, Controller& ctrl) override;
     };
 
     /// Finds the maximum of all controller functions in the given scene graph

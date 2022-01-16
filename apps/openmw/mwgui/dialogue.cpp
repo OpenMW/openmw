@@ -347,8 +347,7 @@ namespace MWGui
     {
         if (!mScrollBar->getVisible())
             return;
-        mScrollBar->setScrollPosition(std::min(static_cast<int>(mScrollBar->getScrollRange()-1),
-                                               std::max(0, static_cast<int>(mScrollBar->getScrollPosition() - _rel*0.3))));
+        mScrollBar->setScrollPosition(std::clamp<int>(mScrollBar->getScrollPosition() - _rel*0.3, 0, mScrollBar->getScrollRange() - 1));
         onScrollbarMoved(mScrollBar, mScrollBar->getScrollPosition());
     }
 

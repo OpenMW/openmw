@@ -1,7 +1,7 @@
 #include "options.hpp"
 
 #include <components/fallback/validate.hpp>
-#include <components/files/escape.hpp>
+#include <components/files/configurationmanager.hpp>
 #include <components/misc/rng.hpp>
 
 #include <boost/program_options.hpp>
@@ -9,6 +9,7 @@
 namespace
 {
     namespace bpo = boost::program_options;
+    typedef std::vector<std::string> StringsVector;
 }
 
 namespace OpenMW
@@ -21,28 +22,28 @@ namespace OpenMW
             ("help", "print help message")
             ("version", "print version information and quit")
 
-            ("replace", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+            ("replace", bpo::value<StringsVector>()->default_value(StringsVector(), "")
                 ->multitoken()->composing(), "settings where the values from the current source should replace those from lower-priority sources instead of being appended")
 
-            ("data", bpo::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")
+            ("data", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")
                 ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
-            ("data-local", bpo::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""),
+            ("data-local", bpo::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""),
                 "set local data directory (highest priority)")
 
-            ("fallback-archive", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "fallback-archive")
+            ("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
                 ->multitoken()->composing(), "set fallback BSA archives (later archives have higher priority)")
 
-            ("resources", bpo::value<Files::EscapePath>()->default_value(Files::EscapePath(), "resources"),
+            ("resources", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"),
                 "set resources directory")
 
-            ("start", bpo::value<Files::EscapeHashString>()->default_value(""),
+            ("start", bpo::value<std::string>()->default_value(""),
                 "set initial cell")
 
-            ("content", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+            ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
                 ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon/omwscripts")
 
-            ("groundcover", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+            ("groundcover", bpo::value<StringsVector>()->default_value(StringsVector(), "")
                 ->multitoken()->composing(), "groundcover content file(s): esm/esp, or omwgame/omwaddon")
 
             ("no-sound", bpo::value<bool>()->implicit_value(true)
@@ -57,7 +58,7 @@ namespace OpenMW
             ("script-console", bpo::value<bool>()->implicit_value(true)
                 ->default_value(false), "enable console-only script functionality")
 
-            ("script-run", bpo::value<Files::EscapeHashString>()->default_value(""),
+            ("script-run", bpo::value<std::string>()->default_value(""),
                 "select a file containing a list of console commands that is executed on startup")
 
             ("script-warn", bpo::value<int>()->implicit_value (1)
@@ -67,13 +68,13 @@ namespace OpenMW
                 "\t1 - show warning but consider script as correctly compiled anyway\n"
                 "\t2 - treat warnings as errors")
 
-            ("script-blacklist", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+            ("script-blacklist", bpo::value<StringsVector>()->default_value(StringsVector(), "")
                 ->multitoken()->composing(), "ignore the specified script (if the use of the blacklist is enabled)")
 
             ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
                 ->default_value(true), "enable script blacklisting")
 
-            ("load-savegame", bpo::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""),
+            ("load-savegame", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), ""),
                 "load a save game file on game startup (specify an absolute filename or a filename relative to the current working directory)")
 
             ("skip-menu", bpo::value<bool>()->implicit_value(true)
@@ -85,7 +86,7 @@ namespace OpenMW
             ("fs-strict", bpo::value<bool>()->implicit_value(true)
                 ->default_value(false), "strict file system handling (no case folding)")
 
-            ("encoding", bpo::value<Files::EscapeHashString>()->
+            ("encoding", bpo::value<std::string>()->
                 default_value("win1252"),
                 "Character encoding used in OpenMW game messages:\n"
                 "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"

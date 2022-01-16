@@ -427,6 +427,16 @@ set 1 to 42
 
 End)mwscript";
 
+    const std::string sIssue6380 = R"mwscript(,Begin,issue6380,
+
+,short,a
+
+,set,a,to,,,,(a,+1)
+
+messagebox,"this is a %g",a
+
+,End,)mwscript";
+
     TEST_F(MWScriptTest, mwscript_test_invalid)
     {
         EXPECT_THROW(compile("this is not a valid script", true), Compiler::SourceException);
@@ -830,5 +840,10 @@ End)mwscript";
         {
             FAIL();
         }
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_6380)
+    {
+        EXPECT_FALSE(!compile(sIssue6380));
     }
 }

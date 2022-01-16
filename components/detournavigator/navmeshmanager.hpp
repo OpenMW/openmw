@@ -22,7 +22,9 @@ namespace DetourNavigator
     class NavMeshManager
     {
     public:
-        NavMeshManager(const Settings& settings);
+        explicit NavMeshManager(const Settings& settings, std::unique_ptr<NavMeshDb>&& db);
+
+        void setWorldspace(std::string_view worldspace);
 
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
@@ -34,12 +36,11 @@ namespace DetourNavigator
 
         void addAgent(const osg::Vec3f& agentHalfExtents);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift);
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
 
         bool removeWater(const osg::Vec2i& cellPosition);
 
-        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
-            const HeightfieldShape& shape);
+        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape);
 
         bool removeHeightfield(const osg::Vec2i& cellPosition);
 
@@ -63,6 +64,7 @@ namespace DetourNavigator
 
     private:
         const Settings& mSettings;
+        std::string mWorldspace;
         TileCachedRecastMeshManager mRecastMeshManager;
         OffMeshConnectionsManager mOffMeshConnectionsManager;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;
@@ -74,7 +76,7 @@ namespace DetourNavigator
 
         void addChangedTiles(const btCollisionShape& shape, const btTransform& transform, const ChangeType changeType);
 
-        void addChangedTiles(const int cellSize, const osg::Vec3f& shift, const ChangeType changeType);
+        void addChangedTiles(const int cellSize, const btVector3& shift, const ChangeType changeType);
 
         void addChangedTile(const TilePosition& tilePosition, const ChangeType changeType);
 

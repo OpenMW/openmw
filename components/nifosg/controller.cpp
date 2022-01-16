@@ -57,7 +57,7 @@ float ControllerFunction::calculate(float value) const
     }
     case Constant:
     default:
-        return std::min(mStopTime, std::max(mStartTime, time));
+        return std::clamp(time, mStartTime, mStopTime);
     }
 }
 
@@ -82,34 +82,37 @@ KeyframeController::KeyframeController(const KeyframeController &copy, const osg
 {
 }
 
-KeyframeController::KeyframeController(const Nif::NiKeyframeData *data)
-    : mRotations(data->mRotations)
-    , mXRotations(data->mXRotations, 0.f)
-    , mYRotations(data->mYRotations, 0.f)
-    , mZRotations(data->mZRotations, 0.f)
-    , mTranslations(data->mTranslations, osg::Vec3f())
-    , mScales(data->mScales, 1.f)
+KeyframeController::KeyframeController(const Nif::NiKeyframeController *keyctrl)
 {
-}
-
-KeyframeController::KeyframeController(const Nif::NiTransformInterpolator* interpolator)
-    : mRotations(interpolator->data->mRotations, interpolator->defaultRot)
-    , mXRotations(interpolator->data->mXRotations, 0.f)
-    , mYRotations(interpolator->data->mYRotations, 0.f)
-    , mZRotations(interpolator->data->mZRotations, 0.f)
-    , mTranslations(interpolator->data->mTranslations, interpolator->defaultPos)
-    , mScales(interpolator->data->mScales, interpolator->defaultScale)
-{
-}
-
-KeyframeController::KeyframeController(const float scale, const osg::Vec3f& pos, const osg::Quat& rot)
-    : mRotations(Nif::QuaternionKeyMapPtr(), rot)
-    , mXRotations(Nif::FloatKeyMapPtr(), 0.f)
-    , mYRotations(Nif::FloatKeyMapPtr(), 0.f)
-    , mZRotations(Nif::FloatKeyMapPtr(), 0.f)
-    , mTranslations(Nif::Vector3KeyMapPtr(), pos)
-    , mScales(Nif::FloatKeyMapPtr(), scale)
-{
+    if (!keyctrl->interpolator.empty())
+    {
+        const Nif::NiTransformInterpolator* interp = keyctrl->interpolator.getPtr();
+        if (!interp->data.empty())
+        {
+            mRotations = QuaternionInterpolator(interp->data->mRotations, interp->defaultRot);
+            mXRotations = FloatInterpolator(interp->data->mXRotations);
+            mYRotations = FloatInterpolator(interp->data->mYRotations);
+            mZRotations = FloatInterpolator(interp->data->mZRotations);
+            mTranslations = Vec3Interpolator(interp->data->mTranslations, interp->defaultPos);
+            mScales = FloatInterpolator(interp->data->mScales, interp->defaultScale);
+        }
+        else
+        {
+            mRotations = QuaternionInterpolator(Nif::QuaternionKeyMapPtr(), interp->defaultRot);
+            mTranslations = Vec3Interpolator(Nif::Vector3KeyMapPtr(), interp->defaultPos);
+            mScales = FloatInterpolator(Nif::FloatKeyMapPtr(), interp->defaultScale);
+        }
+    }
+    else if (!keyctrl->data.empty())
+    {
+        const Nif::NiKeyframeData* keydata = keyctrl->data.getPtr();
+        mRotations = QuaternionInterpolator(keydata->mRotations);
+        mXRotations = FloatInterpolator(keydata->mXRotations);
+        mYRotations = FloatInterpolator(keydata->mYRotations);
+        mZRotations = FloatInterpolator(keydata->mZRotations);
+        mTranslations = Vec3Interpolator(keydata->mTranslations);
+        mScales = FloatInterpolator(keydata->mScales, 1.f);
+    }
 }
 
 osg::Quat KeyframeController::getXYZRotation(float time) const
@@ -224,7 +227,7 @@ void GeomMorpherController::operator()(SceneUtil::MorphGeometry* node, osg::Node
         if (mKeyFrames.size() <= 1)
             return;
         float input = getInputValue(nv);
-        int i = 0;
+        int i = 1;
         for (std::vector<FloatInterpolator>::iterator it = mKeyFrames.begin()+1; it != mKeyFrames.end(); ++it,++i)
         {
             float val = 0;

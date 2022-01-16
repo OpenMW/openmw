@@ -88,16 +88,16 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
 
     desc.add_options()
-    ("data", boost::program_options::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")->multitoken()->composing())
-    ("data-local", boost::program_options::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""))
+    ("data", boost::program_options::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")->multitoken()->composing())
+    ("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-    ("encoding", boost::program_options::value<Files::EscapeHashString>()->default_value("win1252"))
-    ("resources", boost::program_options::value<Files::EscapePath>()->default_value(Files::EscapePath(), "resources"))
-    ("fallback-archive", boost::program_options::value<Files::EscapeStringVector>()->
-        default_value(Files::EscapeStringVector(), "fallback-archive")->multitoken())
+    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
+    ("resources", boost::program_options::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"))
+    ("fallback-archive", boost::program_options::value<std::vector<std::string>>()->
+        default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
     ("fallback", boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")
         ->multitoken()->composing(), "fallback values")
-    ("script-blacklist", boost::program_options::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+    ("script-blacklist", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
         ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
     ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
         ->default_value(true), "enable script blacklisting");
@@ -108,24 +108,24 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
 
-    mEncodingName = variables["encoding"].as<Files::EscapeHashString>().toStdString();
+    mEncodingName = variables["encoding"].as<std::string>();
     mDocumentManager.setEncoding(ToUTF8::calculateEncoding(mEncodingName));
     mFileDialog.setEncoding (QString::fromUtf8(mEncodingName.c_str()));
 
-    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapePath>().mPath);
+    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::MaybeQuotedPath>());
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
-            variables["script-blacklist"].as<Files::EscapeStringVector>().toStdStringVector());
+            variables["script-blacklist"].as<std::vector<std::string>>());
 
     mFsStrict = variables["fs-strict"].as<bool>();
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty()) {
-        dataDirs = Files::PathContainer(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
+        dataDirs = asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>());
     }
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::EscapePath>().mPath);
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
     if (!local.empty())
         dataLocal.push_back(local);
 
@@ -149,13 +149,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
     //iterate the data directories and add them to the file dialog for loading
-    for (Files::PathContainer::const_reverse_iterator iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
-    {
-        QString path = QString::fromUtf8 (iter->string().c_str());
-        mFileDialog.addFiles(path);
-    }
+    mFileDialog.addFiles(dataDirs);
 
-    return std::make_pair (dataDirs, variables["fallback-archive"].as<Files::EscapeStringVector>().toStdStringVector());
+    return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string>>());
 }
 
 void CS::Editor::createGame()

@@ -71,6 +71,7 @@ centroid varying vec3 shadowDiffuseLighting;
 #else
 uniform float emissiveMult;
 #endif
+uniform float specStrength;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
@@ -79,6 +80,10 @@ varying vec3 passNormal;
 #include "lighting.glsl"
 #include "parallax.glsl"
 #include "alpha.glsl"
+
+#if @softParticles
+#include "softparticles.glsl"
+#endif
 
 void main()
 {
@@ -141,7 +146,7 @@ void main()
 
 #if @decalMap
     vec4 decalTex = texture2D(decalMap, decalMapUV);
-    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a);
+    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a * diffuseColor.a);
 #endif
 
 #if @envMap
@@ -200,6 +205,7 @@ void main()
     vec3 matSpec = getSpecularColor().xyz;
 #endif
 
+    matSpec *= specStrength;
     if (matSpec != vec3(0.0))
     {
 #if (!@normalMap && !@parallax && !@forcePPL)
@@ -219,6 +225,10 @@ void main()
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+
+#if !defined(FORCE_OPAQUE) && @softParticles
+    gl_FragData[0].a *= calcSoftParticleFade();
+#endif
 
 #if defined(FORCE_OPAQUE) && FORCE_OPAQUE
     // having testing & blending isn't enough - we need to write an opaque pixel to be opaque

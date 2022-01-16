@@ -104,8 +104,8 @@ void MorphGeometry::accept(osg::PrimitiveFunctor& func) const
 osg::BoundingBox MorphGeometry::computeBoundingBox() const
 {
     bool anyMorphTarget = false;
-    for (unsigned int i=0; i<mMorphTargets.size(); ++i)
-        if (mMorphTargets[i].getWeight() > 0)
+    for (unsigned int i=1; i<mMorphTargets.size(); ++i)
+        if (mMorphTargets[i].getWeight() != 0)
         {
             anyMorphTarget = true;
             break;
@@ -122,8 +122,10 @@ osg::BoundingBox MorphGeometry::computeBoundingBox() const
     {
         mMorphedBoundingBox = true;
 
-        osg::Vec3Array& sourceVerts = *static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
-        std::vector<osg::BoundingBox> vertBounds(sourceVerts.size());
+        const osg::Vec3Array* sourceVerts = static_cast<const osg::Vec3Array*>(mSourceGeometry->getVertexArray());
+        if (mMorphTargets.size() != 0)
+            sourceVerts = mMorphTargets[0].getOffsets();
+        std::vector<osg::BoundingBox> vertBounds(sourceVerts->size());
 
         // Since we don't know what combinations of morphs are being applied we need to keep track of a bounding box for each vertex.
         // The minimum/maximum of the box is the minimum/maximum offset the vertex can have from its starting position.
@@ -132,7 +134,7 @@ osg::BoundingBox MorphGeometry::computeBoundingBox() const
         for (unsigned int i=0; i<vertBounds.size(); ++i)
             vertBounds[i].set(osg::Vec3f(0,0,0), osg::Vec3f(0,0,0));
 
-        for (unsigned int i = 0; i < mMorphTargets.size(); ++i)
+        for (unsigned int i = 1; i < mMorphTargets.size(); ++i)
         {
             const osg::Vec3Array& offsets = *mMorphTargets[i].getOffsets();
             for (unsigned int j=0; j<offsets.size() && j<vertBounds.size(); ++j)
@@ -146,8 +148,8 @@ osg::BoundingBox MorphGeometry::computeBoundingBox() const
         osg::BoundingBox box;
         for (unsigned int i=0; i<vertBounds.size(); ++i)
         {
-            vertBounds[i]._max += sourceVerts[i];
-            vertBounds[i]._min += sourceVerts[i];
+            vertBounds[i]._max += (*sourceVerts)[i];
+            vertBounds[i]._min += (*sourceVerts)[i];
             box.expandBy(vertBounds[i]);
         }
         return box;
@@ -156,7 +158,7 @@ osg::BoundingBox MorphGeometry::computeBoundingBox() const
 
 void MorphGeometry::cull(osg::NodeVisitor *nv)
 {
-    if (mLastFrameNumber == nv->getTraversalNumber() || !mDirty)
+    if (mLastFrameNumber == nv->getTraversalNumber() || !mDirty || mMorphTargets.size() == 0)
     {
         osg::Geometry& geom = *getGeometry(mLastFrameNumber);
         nv->pushOntoNodePath(&geom);
@@ -169,13 +171,13 @@ void MorphGeometry::cull(osg::NodeVisitor *nv)
     mLastFrameNumber = nv->getTraversalNumber();
     osg::Geometry& geom = *getGeometry(mLastFrameNumber);
 
-    const osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
+    const osg::Vec3Array* positionSrc = mMorphTargets[0].getOffsets();
     osg::Vec3Array* positionDst = static_cast<osg::Vec3Array*>(geom.getVertexArray());
     assert(positionSrc->size() == positionDst->size());
     for (unsigned int vertex=0; vertex<positionSrc->size(); ++vertex)
         (*positionDst)[vertex] = (*positionSrc)[vertex];
 
-    for (unsigned int i=0; i<mMorphTargets.size(); ++i)
+    for (unsigned int i=1; i<mMorphTargets.size(); ++i)
     {
         float weight = mMorphTargets[i].getWeight();
         if (weight == 0.f)

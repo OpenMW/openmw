@@ -73,7 +73,7 @@ namespace MWGui
         MyGUI::ImageBox* mCrosshair;
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
-        MyGUI::Widget *mDrowningFrame, *mDrowningFlash;
+        MyGUI::Widget *mDrowningBar, *mDrowningFrame, *mDrowningFlash;
 
         // bottom left elements
         int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft, mSneakBoxBaseLeft;

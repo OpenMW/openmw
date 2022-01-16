@@ -27,7 +27,7 @@ add_openmw_dir (mwrender
 
 add_openmw_dir (mwinput
     actions actionmanager bindingsmanager controllermanager controlswitch
-    inputmanagerimp mousemanager keyboardmanager sdlmappings sensormanager
+    inputmanagerimp mousemanager keyboardmanager sensormanager
     )
 
 add_openmw_dir (mwgui
@@ -74,7 +74,7 @@ add_openmw_dir (mwworld
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     store esmstore fallback actionrepair actionsoulgem livecellref actiondoor
     contentloader esmloader actiontrap cellreflist cellref weather projectilemanager
-    cellpreloader datetimemanager
+    cellpreloader datetimemanager groundcoverstore magiceffects
     )
 
 add_openmw_dir (mwphysics
@@ -153,8 +153,11 @@ target_link_libraries(openmw
     "osg-ffmpeg-videoplayer"
     "oics"
     components
-    ${LUA_LIBRARIES}
 )
+
+if (MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+    target_precompile_headers(openmw PRIVATE ${SOL_INCLUDE_DIR}/sol/sol.hpp)
+endif ()
 
 if (ANDROID)
     target_link_libraries(openmw EGL android log z)
@@ -176,8 +179,7 @@ endif()
 if(APPLE)
     set(BUNDLE_RESOURCES_DIR "${APP_BUNDLE_DIR}/Contents/Resources")
 
-    set(OPENMW_MYGUI_FILES_ROOT ${BUNDLE_RESOURCES_DIR})
-    set(OPENMW_SHADERS_ROOT ${BUNDLE_RESOURCES_DIR})
+    set(OPENMW_RESOURCES_ROOT ${BUNDLE_RESOURCES_DIR})
 
     add_subdirectory(../../files/ ${CMAKE_CURRENT_BINARY_DIR}/files)
 

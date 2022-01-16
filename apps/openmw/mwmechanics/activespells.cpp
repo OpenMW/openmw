@@ -9,6 +9,8 @@
 
 #include <components/esm/loadmgef.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "creaturestats.hpp"
 #include "spellcasting.hpp"
 #include "spelleffects.hpp"
@@ -216,8 +218,7 @@ namespace MWMechanics
                         return params.mSlot == slotIndex && params.mType == ESM::ActiveSpells::Type_Enchantment && params.mId == slot->getCellRef().getRefId();
                     }) != mSpells.end())
                         continue;
-                    ActiveSpellParams params(*slot, enchantment, slotIndex, ptr);
-                    mSpells.emplace_back(params);
+                    const ActiveSpellParams& params = mSpells.emplace_back(ActiveSpellParams{*slot, enchantment, slotIndex, ptr});
                     for(const auto& effect : params.mEffects)
                         MWMechanics::playEffects(ptr, *world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId), playNonLooping);
                 }
@@ -236,7 +237,13 @@ namespace MWMechanics
                 if(result == MagicApplicationResult::REFLECTED)
                 {
                     if(!reflected)
-                        reflected = {*spellIt, ptr};
+                    {
+                        static const bool keepOriginalCaster = Settings::Manager::getBool("classic reflected absorb spells behavior", "Game");
+                        if(keepOriginalCaster)
+                            reflected = {*spellIt, caster};
+                        else
+                            reflected = {*spellIt, ptr};
+                    }
                     auto& reflectedEffect = reflected->mEffects.emplace_back(*it);
                     reflectedEffect.mFlags = ESM::ActiveEffect::Flag_Ignore_Reflect | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
                     it = spellIt->mEffects.erase(it);

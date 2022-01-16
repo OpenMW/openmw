@@ -2,6 +2,9 @@
 #define DATAFILESPAGE_H
 
 #include "ui_datafilespage.h"
+
+#include <components/process/processinvoker.hpp>
+
 #include <QWidget>
 
 
@@ -19,6 +22,7 @@ namespace Config { class GameSettings;
 
 namespace Launcher
 {
+    class MainDialog;
     class TextInputDialog;
     class ProfilesComboBox;
 
@@ -31,7 +35,7 @@ namespace Launcher
 
     public:
         explicit DataFilesPage (Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
-                                Config::LauncherSettings &launcherSettings, QWidget *parent = nullptr);
+                                Config::LauncherSettings &launcherSettings, MainDialog *parent = nullptr);
 
         QAbstractItemModel* profilesModel() const;
 
@@ -69,12 +73,18 @@ namespace Launcher
         void on_cloneProfileAction_triggered();
         void on_deleteProfileAction_triggered();
 
+        void startNavMeshTool();
+        void killNavMeshTool();
+        void updateNavMeshProgress();
+        void navMeshToolFinished(int exitCode, QProcess::ExitStatus exitStatus);
+
     public:
         /// Content List that is always present
         const static char *mDefaultContentListName;
 
     private:
 
+        MainDialog *mMainDialog;
         TextInputDialog *mNewProfileDialog;
         TextInputDialog *mCloneProfileDialog;
 
@@ -86,6 +96,8 @@ namespace Launcher
         QString mPreviousProfile;
         QStringList previousSelectedFiles;
         QString mDataLocal;
+
+        Process::ProcessInvoker* mNavMeshToolInvoker;
 
         void buildView();
         void setProfile (int index, bool savePrevious);

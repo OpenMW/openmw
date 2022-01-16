@@ -7,6 +7,8 @@
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmreader.hpp>
@@ -27,10 +29,10 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include <components/detournavigator/debug.hpp>
-#include <components/detournavigator/navigatorimpl.hpp>
-#include <components/detournavigator/navigatorstub.hpp>
-#include <components/detournavigator/recastglobalallocator.hpp>
+#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/settings.hpp>
+
+#include <components/loadinglistener/loadinglistener.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -81,43 +83,40 @@ namespace MWWorld
 {
     struct GameContentLoader : public ContentLoader
     {
-        GameContentLoader(Loading::Listener& listener)
-          : ContentLoader(listener)
+        void addLoader(std::string&& extension, ContentLoader& loader)
         {
+            mLoaders.emplace(std::move(extension), &loader);
         }
 
-        bool addLoader(const std::string& extension, ContentLoader* loader)
+        void load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener) override
         {
-            return mLoaders.insert(std::make_pair(extension, loader)).second;
-        }
-
-        void load(const boost::filesystem::path& filepath, int& index) override
-        {
-            LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
+            const auto it = mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string()));
             if (it != mLoaders.end())
             {
-                it->second->load(filepath, index);
+                const std::string filename = filepath.filename().string();
+                Log(Debug::Info) << "Loading content file " << filename;
+                if (listener != nullptr)
+                    listener->setLabel(MyGUI::TextIterator::toTagsString(filename));
+                it->second->load(filepath, index, listener);
             }
             else
             {
-              std::string msg("Cannot load file: ");
-              msg += filepath.string();
-              throw std::runtime_error(msg.c_str());
+                std::string msg("Cannot load file: ");
+                msg += filepath.string();
+                throw std::runtime_error(msg.c_str());
             }
         }
 
         private:
-          typedef std::map<std::string, ContentLoader*> LoadersContainer;
-          LoadersContainer mLoaders;
+            std::map<std::string, ContentLoader*> mLoaders;
     };
 
     struct OMWScriptsLoader : public ContentLoader
     {
         ESMStore& mStore;
-        OMWScriptsLoader(Loading::Listener& listener, ESMStore& store) : ContentLoader(listener), mStore(store) {}
-        void load(const boost::filesystem::path& filepath, int& index) override
+        OMWScriptsLoader(ESMStore& store) : mStore(store) {}
+        void load(const boost::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
         {
-            ContentLoader::load(filepath.filename(), index);
             mStore.addOMWScripts(filepath.string());
         }
     };
@@ -154,33 +153,24 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
-        mEsm.resize(contentFiles.size() + groundcoverFiles.size());
+        mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
 
-        GameContentLoader gameContentLoader(*listener);
-        EsmLoader esmLoader(mStore, mEsm, encoder, *listener);
-
-        gameContentLoader.addLoader(".esm", &esmLoader);
-        gameContentLoader.addLoader(".esp", &esmLoader);
-        gameContentLoader.addLoader(".omwgame", &esmLoader);
-        gameContentLoader.addLoader(".omwaddon", &esmLoader);
-        gameContentLoader.addLoader(".project", &esmLoader);
-
-        OMWScriptsLoader omwScriptsLoader(*listener, mStore);
-        gameContentLoader.addLoader(".omwscripts", &omwScriptsLoader);
-
-        loadContentFiles(fileCollections, contentFiles, groundcoverFiles, gameContentLoader);
+        loadContentFiles(fileCollections, contentFiles, mStore, mEsm, encoder, listener);
+        loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder);
 
         listener->loadingOff();
 
-        // insert records that may not be present in all versions of MW
-        if (mEsm[0].getFormat() == 0)
-            ensureNeededRecords();
-
-        // TODO: We can and should validate before we call loadContentFiles().
-        // Currently we validate here to prevent merge conflicts with groundcover ESMStore fixes.
-        validateMasterFiles(mEsm);
+        // Find main game file
+        for (const ESM::ESMReader& reader : mEsm)
+        {
+            if (!Misc::StringUtils::ciEndsWith(reader.getName(), ".esm") && !Misc::StringUtils::ciEndsWith(reader.getName(), ".omwgame"))
+                continue;
+            if (reader.getFormat() == 0)
+                ensureNeededRecords();  // and insert records that may not be present in all versions of MW.
+            break;
+        }
 
         mCurrentDate.reset(new DateTimeManager());
 
@@ -196,16 +186,15 @@ namespace MWWorld
         if (Settings::Manager::getBool("enable", "Navigator"))
         {
             auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
-            navigatorSettings.mSwimHeightScale = mSwimHeightScale;
-            DetourNavigator::RecastGlobalAllocator::init();
-            mNavigator.reset(new DetourNavigator::NavigatorImpl(navigatorSettings));
+            navigatorSettings.mRecast.mSwimHeightScale = mSwimHeightScale;
+            mNavigator = DetourNavigator::makeNavigator(navigatorSettings, userDataPath);
         }
         else
         {
-            mNavigator.reset(new DetourNavigator::NavigatorStub());
+            mNavigator = DetourNavigator::makeNavigatorStub();
         }
 
-        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator));
+        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator, mGroundcoverStore));
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
         mRendering->preloadCommonAssets();
 
@@ -561,6 +550,14 @@ namespace MWWorld
         const ESM::Cell *cell = mStore.get<ESM::Cell>().searchExtByName (cellName);
         if (cell)
             return cell;
+        // treat "Wilderness" like an empty string
+        static const std::string defaultName = mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
+        if (Misc::StringUtils::ciEqual(cellName, defaultName))
+        {
+            cell = mStore.get<ESM::Cell>().searchExtByName("");
+            if (cell)
+                return cell;
+        }
 
         // didn't work -> now check for regions
         for (const ESM::Region &region : mStore.get<ESM::Region>())
@@ -609,13 +606,7 @@ namespace MWWorld
 
     void World::useDeathCamera()
     {
-        if(mRendering->getCamera()->isVanityOrPreviewModeEnabled() )
-        {
-            mRendering->getCamera()->togglePreviewMode(false);
-            mRendering->getCamera()->toggleVanityMode(false);
-        }
-        if(mRendering->getCamera()->isFirstPerson())
-            mRendering->getCamera()->toggleViewMode(true);
+        mRendering->getCamera()->setMode(MWRender::Camera::Mode::ThirdPerson);
     }
 
     MWWorld::Player& World::getPlayer()
@@ -1292,15 +1283,14 @@ namespace MWWorld
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
+        if (scale == ptr.getCellRef().getScale())
+            return;
         if (mPhysics->getActor(ptr))
             mNavigator->removeAgent(getPathfindingHalfExtents(ptr));
 
-        if (scale != ptr.getCellRef().getScale())
-        {
-            ptr.getCellRef().setScale(scale);
-            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
-            mWorldScene->removeFromPagedRefs(ptr);
-        }
+        ptr.getCellRef().setScale(scale);
+        mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+        mWorldScene->removeFromPagedRefs(ptr);
 
         if(ptr.getRefData().getBaseNode() != nullptr)
             mWorldScene->updateObjectScale(ptr);
@@ -1334,7 +1324,7 @@ namespace MWWorld
              * currently it's done so for rotating the camera, which needs
              * clamping.
              */
-            objRot[0] = osg::clampBetween<float>(objRot[0], -osg::PI_2, osg::PI_2);
+            objRot[0] = std::clamp<float>(objRot[0], -osg::PI_2, osg::PI_2);
             objRot[1] = Misc::normalizeAngle(objRot[1]);
             objRot[2] = Misc::normalizeAngle(objRot[2]);
         }
@@ -1541,16 +1531,19 @@ namespace MWWorld
             if (const auto object = mPhysics->getObject(door.first))
                 updateNavigatorObject(*object);
 
-        if (mShouldUpdateNavigator)
+        auto player = getPlayerPtr();
+        if (mShouldUpdateNavigator && player.getCell() != nullptr)
         {
-            mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
+            mNavigator->update(player.getRefData().getPosition().asVec3());
             mShouldUpdateNavigator = false;
         }
     }
 
     void World::updateNavigatorObject(const MWPhysics::Object& object)
     {
-        const DetourNavigator::ObjectShapes shapes(object.getShapeInstance());
+        const MWWorld::Ptr ptr = object.getPtr();
+        const DetourNavigator::ObjectShapes shapes(object.getShapeInstance(),
+            DetourNavigator::ObjectTransform {ptr.getRefData().getPosition(), ptr.getCellRef().getScale()});
         mShouldUpdateNavigator = mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform())
             || mShouldUpdateNavigator;
     }
@@ -1872,7 +1865,7 @@ namespace MWWorld
         }
 
         bool isWerewolf = player.getClass().getNpcStats(player).isWerewolf();
-        bool isFirstPerson = mRendering->getCamera()->isFirstPerson();
+        bool isFirstPerson = this->isFirstPerson();
         if (isWerewolf && isFirstPerson)
         {
             float werewolfFov = Fallback::Map::getFloat("General_Werewolf_FOV");
@@ -1901,7 +1894,7 @@ namespace MWWorld
         const auto& magicEffects = player.getClass().getCreatureStats(player).getMagicEffects();
         if (!mGodMode)
             blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getMagnitude());
-        MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
+        MWBase::Environment::get().getWindowManager()->setBlindness(std::clamp(blind, 0, 100));
 
         int nightEye = static_cast<int>(magicEffects.get(ESM::MagicEffect::NightEye).getMagnitude());
         mRendering->setNightEyeFactor(std::min(1.f, (nightEye/100.f)));
@@ -1942,11 +1935,12 @@ namespace MWWorld
 
     void World::updateSoundListener()
     {
+        osg::Vec3f cameraPosition = mRendering->getCamera()->getPosition();
         const ESM::Position& refpos = getPlayerPtr().getRefData().getPosition();
         osg::Vec3f listenerPos;
 
         if (isFirstPerson())
-            listenerPos = mRendering->getCameraPosition();
+            listenerPos = cameraPosition;
         else
             listenerPos = refpos.asVec3() + osg::Vec3f(0, 0, 1.85f * mPhysics->getHalfExtents(getPlayerPtr()).z());
 
@@ -1957,7 +1951,7 @@ namespace MWWorld
         osg::Vec3f forward = listenerOrient * osg::Vec3f(0,1,0);
         osg::Vec3f up = listenerOrient * osg::Vec3f(0,0,1);
 
-        bool underwater = isUnderwater(getPlayerPtr().getCell(), mRendering->getCameraPosition());
+        bool underwater = isUnderwater(getPlayerPtr().getCell(), cameraPosition);
 
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(listenerPos, forward, up, underwater);
     }
@@ -2409,17 +2403,12 @@ namespace MWWorld
 
     bool World::isFirstPerson() const
     {
-        return mRendering->getCamera()->isFirstPerson();
+        return mRendering->getCamera()->getMode() == MWRender::Camera::Mode::FirstPerson;
     }
     
     bool World::isPreviewModeEnabled() const
     {
         return mRendering->getCamera()->getMode() == MWRender::Camera::Mode::Preview;
-    }
-
-    void World::togglePreviewMode(bool enable)
-    {
-        mRendering->getCamera()->togglePreviewMode(enable);
     }
 
     bool World::toggleVanityMode(bool enable)
@@ -2437,23 +2426,17 @@ namespace MWWorld
         mRendering->getCamera()->applyDeferredPreviewRotationToPlayer(dt);
     }
 
-    void World::allowVanityMode(bool allow)
-    {
-        mRendering->getCamera()->allowVanityMode(allow);
-    }
+    MWRender::Camera* World::getCamera() { return mRendering->getCamera(); }
 
     bool World::vanityRotateCamera(float * rot)
     {
-        if(!mRendering->getCamera()->isVanityOrPreviewModeEnabled())
+        auto* camera = mRendering->getCamera();
+        if(!camera->isVanityOrPreviewModeEnabled())
             return false;
 
-        mRendering->getCamera()->rotateCamera(rot[0], rot[2], true);
+        camera->setPitch(camera->getPitch() + rot[0]);
+        camera->setYaw(camera->getYaw() + rot[2]);
         return true;
-    }
-
-    void World::adjustCameraDistance(float dist)
-    {
-        mRendering->getCamera()->adjustCameraDistance(dist);
     }
 
     void World::saveLoaded()
@@ -2962,9 +2945,21 @@ namespace MWWorld
         return mScriptsEnabled;
     }
 
-    void World::loadContentFiles(const Files::Collections& fileCollections,
-        const std::vector<std::string>& content, const std::vector<std::string>& groundcover, ContentLoader& contentLoader)
+    void World::loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
+        GameContentLoader gameContentLoader;
+        EsmLoader esmLoader(store, readers, encoder);
+        validateMasterFiles(readers);
+
+        gameContentLoader.addLoader(".esm", esmLoader);
+        gameContentLoader.addLoader(".esp", esmLoader);
+        gameContentLoader.addLoader(".omwgame", esmLoader);
+        gameContentLoader.addLoader(".omwaddon", esmLoader);
+        gameContentLoader.addLoader(".project", esmLoader);
+
+        OMWScriptsLoader omwScriptsLoader(store);
+        gameContentLoader.addLoader(".omwscripts", omwScriptsLoader);
+
         int idx = 0;
         for (const std::string &file : content)
         {
@@ -2972,7 +2967,7 @@ namespace MWWorld
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(file))
             {
-                contentLoader.load(col.getPath(file), idx);
+                gameContentLoader.load(col.getPath(file), idx, listener);
             }
             else
             {
@@ -2981,24 +2976,15 @@ namespace MWWorld
             }
             idx++;
         }
+    }
 
-        ESM::GroundcoverIndex = idx;
+    void World::loadGroundcoverFiles(const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder)
+    {
+        if (!Settings::Manager::getBool("enabled", "Groundcover")) return;
 
-        for (const std::string &file : groundcover)
-        {
-            boost::filesystem::path filename(file);
-            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
-            if (col.doesExist(file))
-            {
-                contentLoader.load(col.getPath(file), idx);
-            }
-            else
-            {
-                std::string message = "Failed loading " + file + ": the groundcover file does not exist";
-                throw std::runtime_error(message);
-            }
-            idx++;
-        }
+        Log(Debug::Info) << "Loading groundcover:";
+
+        mGroundcoverStore.init(mStore.get<ESM::Static>(), fileCollections, groundcoverFiles, encoder);
     }
 
     bool World::startSpellCast(const Ptr &actor)
@@ -3634,13 +3620,12 @@ namespace MWWorld
 
     void World::goToJail()
     {
+        const MWWorld::Ptr player = getPlayerPtr();
         if (!mGoToJail)
         {
             // Reset bounty and forget the crime now, but don't change cell yet (the player should be able to read the dialog text first)
             mGoToJail = true;
             mPlayerInJail = true;
-
-            MWWorld::Ptr player = getPlayerPtr();
 
             int bounty = player.getClass().getNpcStats(player).getBounty();
             player.getClass().getNpcStats(player).setBounty(0);
@@ -3654,6 +3639,12 @@ namespace MWWorld
         }
         else
         {
+            if (MWBase::Environment::get().getMechanicsManager()->isAttackPreparing(player))
+            {
+                mPlayer->setAttackingOrSpell(false);
+            }
+
+            mPlayer->setDrawState(MWMechanics::DrawState_Nothing);
             mGoToJail = false;
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);

@@ -15,10 +15,11 @@ Here are starting points for learning Lua:
 Each script works in a separate sandbox and doesn't have any access to the underlying operating system.
 Only a limited list of allowed standard libraries can be used:
 `coroutine <https://www.lua.org/manual/5.1/manual.html#5.2>`__,
-`math <https://www.lua.org/manual/5.1/manual.html#5.6>`__,
+`math <https://www.lua.org/manual/5.1/manual.html#5.6>`__ (except `math.randomseed` -- it is called by the engine on startup and not available from scripts),
 `string <https://www.lua.org/manual/5.1/manual.html#5.4>`__,
-`table <https://www.lua.org/manual/5.1/manual.html#5.5>`__.
-These libraries are loaded automatically and are always available (except the function `math.randomseed` -- it is called by the engine on startup and not available from scripts).
+`table <https://www.lua.org/manual/5.1/manual.html#5.5>`__,
+`os <https://www.lua.org/manual/5.1/manual.html#5.8>`__ (only `os.date`, `os.difftime`, `os.time`).
+These libraries are loaded automatically and are always available.
 
 Allowed `basic functions <https://www.lua.org/manual/5.1/manual.html#5.1>`__:
 ``assert``, ``error``, ``ipairs``, ``next``, ``pairs``, ``pcall``, ``print``, ``select``, ``tonumber``, ``tostring``, ``type``, ``unpack``, ``xpcall``, ``rawequal``, ``rawget``, ``rawset``, ``getmetatable``, ``setmetatable``.
@@ -333,8 +334,8 @@ Player scripts are local scripts that are attached to a player.
 |:ref:`openmw.util <Package openmw.util>`                 | everywhere         | | Defines utility functions and classes like 3D vectors,      |
 |                                                         |                    | | that don't depend on the game world.                        |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.settings <Package openmw.settings>`         | everywhere         | | Access to GMST records in content files (implemented) and   |
-|                                                         |                    | | to mod settings (not implemented).                          |
+|:ref:`openmw.storage <Package openmw.storage>`           | everywhere         | | Storage API. In particular can be used to store data        |
+|                                                         |                    | | between game sessions.                                      |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.core <Package openmw.core>`                 | everywhere         | | Functions that are common for both global and local scripts |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
@@ -350,9 +351,9 @@ Player scripts are local scripts that are attached to a player.
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input                                                  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls user interface                                     |
+|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls :ref:`user interface <User interface reference>`   |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|openmw.camera                                            | by player scripts  | | Controls camera (not implemented)                           |
+|:ref:`openmw.camera <Package openmw.camera>`             | by player scripts  | | Controls camera                                             |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
 openmw_aux
@@ -364,15 +365,19 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 | Built-in library                                        | Can be used        | Description                                                   |
 +=========================================================+====================+===============================================================+
+|:ref:`openmw_aux.calendar <Package openmw_aux.calendar>` | everywhere         | | Game time calendar                                          |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw_aux.util <Package openmw_aux.util>`         | everywhere         | | Miscellaneous utils                                         |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw_aux.time <Package openmw_aux.time>`         | everywhere         | | Timers and game time utils                                  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
 They can be loaded with ``require`` the same as API packages. For example:
 
 .. code-block:: Lua
 
-    local aux_util = require('openmw_aux.util')
-    aux_util.runEveryNSeconds(15, doSomething)  -- run `doSomething()` every 15 seconds
+    local time = require('openmw_aux.time')
+    time.runRepeatedly(doSomething, 15 * time.second)  -- run `doSomething()` every 15 seconds
 
 
 Script interfaces
@@ -438,6 +443,15 @@ Using the interface:
     return { engineHandlers = {onUpdate = onUpdate} }
 
 The order in which the scripts are started is important. So if one mod should override an interface provided by another mod, make sure that load order (i.e. the sequence of `lua-scripts=...` in `openmw.cfg`) is correct.
+
+**Interfaces of built-in scripts**
+
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+| Interface                                               | Can be used        | Description                                                   |
++=========================================================+====================+===============================================================+
+|:ref:`Camera <Interface Camera>`                         | by player scripts  | | Allows to alter behavior of the built-in camera script      |
+|                                                         |                    | | without overriding the script completely.                   |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
 
 Event system
@@ -719,8 +733,7 @@ you can import these files to get code autocompletion and integrated OpenMW API 
 .. image:: https://gitlab.com/OpenMW/openmw-docs/raw/master/docs/source/reference/lua-scripting/_static/lua-ide-project-settings.png
 
 - Press `Next`, choose the `Libraries` tab, and click `Add External Source Folder`.
-- Specify there the path to ``resources/lua_api`` in your OpenMW installation.
-- If you use `openmw_aux`_, add ``resources/vfs`` as an additional external source folder.
+- Specify there paths to ``resources/lua_api`` and ``resources/vfs`` in your OpenMW installation.
 
 .. image:: https://gitlab.com/OpenMW/openmw-docs/raw/master/docs/source/reference/lua-scripting/_static/lua-ide-import-api.png
 
@@ -749,6 +762,17 @@ You can add special hints to give LDT more information:
 
 .. image:: https://gitlab.com/OpenMW/openmw-docs/raw/master/docs/source/reference/lua-scripting/_static/lua-ide-code-completion2.png
 
+In order to have autocompletion for script interfaces the information where to find these interfaces should be provided.
+For example for the camera interface (defined in ``resources/vfs/scripts/omw/camera.lua``):
+
+.. code-block:: Lua
+
+    --- @type Interfaces
+    -- @field scripts.omw.camera#Interface Camera
+    -- ... other interfaces here
+    --- @field #Interfaces I
+    local I = require('openmw.interfaces')
+
+    I.Camera.disableZoom()
+
 See `LDT Documentation Language <https://wiki.eclipse.org/LDT/User_Area/Documentation_Language>`__ for more details.
-
-

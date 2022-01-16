@@ -19,6 +19,12 @@
 -- @param #number angle Angle in radians
 -- @return #number Angle in range `[-pi, pi]`
 
+-------------------------------------------------------------------------------
+-- Makes a table read only.
+-- @function [parent=#util] makeReadOnly
+-- @param #table table Any table.
+-- @return #table The same table wrapped with read only userdata.
+
 
 -------------------------------------------------------------------------------
 -- Immutable 2D vector
@@ -32,7 +38,7 @@
 -- v:length()     -- 5.0    length
 -- v:length2()    -- 25.0   square of the length
 -- v:normalize()  -- vector2(3/5, 4/5)
--- v:rotate(radians)    -- rotate clockwise (returns rotated vector)
+-- v:rotate(radians)    -- rotate counterclockwise (returns rotated vector)
 -- v1:dot(v2)     -- dot product (returns a number)
 -- v1 * v2        -- dot product
 -- v1 + v2        -- vector addition
@@ -183,26 +189,26 @@
 
 
 -------------------------------------------------------------------------------
--- Rotation (any axis).
+-- Rotation around a vector (counterclockwise if the vector points to us).
 -- @function [parent=#TRANSFORM] rotate
 -- @param #number angle
 -- @param #Vector3 axis.
 -- @return #Transform.
 
 -------------------------------------------------------------------------------
--- X-axis rotation.
+-- X-axis rotation (equivalent to `rotate(angle, vector3(-1, 0, 0))`).
 -- @function [parent=#TRANSFORM] rotateX
 -- @param #number angle
 -- @return #Transform.
 
 -------------------------------------------------------------------------------
--- Y-axis rotation.
+-- Y-axis rotation (equivalent to `rotate(angle, vector3(0, -1, 0))`).
 -- @function [parent=#TRANSFORM] rotateY
 -- @param #number angle
 -- @return #Transform.
 
 -------------------------------------------------------------------------------
--- Z-axis rotation.
+-- Z-axis rotation (equivalent to `rotate(angle, vector3(0, 0, -1))`).
 -- @function [parent=#TRANSFORM] rotateZ
 -- @param #number angle
 -- @return #Transform.

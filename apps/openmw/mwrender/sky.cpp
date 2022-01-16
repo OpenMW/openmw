@@ -14,7 +14,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -248,6 +248,7 @@ namespace MWRender
         , mEnabled(true)
         , mSunEnabled(true)
         , mPrecipitationAlpha(0.f)
+        , mDirtyParticlesEffect(false)
     {
         osg::ref_ptr<CameraRelativeTransform> skyroot = new CameraRelativeTransform;
         skyroot->setName("Sky Root");
@@ -300,7 +301,7 @@ namespace MWRender
         mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getImageManager(), forceShaders);
         atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
-        mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getImageManager()));
+        mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager));
         mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager, Fallback::Map::getFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
         mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager, Fallback::Map::getFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 
@@ -338,7 +339,7 @@ namespace MWRender
             mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
         }
 
-        auto depth = SceneUtil::createDepth();
+        osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
         depth->setWriteMask(false);
         mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(depth);
         mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
@@ -535,7 +536,10 @@ namespace MWRender
         mRootNode->setNodeMask(enabled ? Mask_Sky : 0u);
 
         if (!enabled && mParticleNode && mParticleEffect)
-            mCurrentParticleEffect = {};
+        {
+            mCurrentParticleEffect.clear();
+            mDirtyParticlesEffect = true;
+        }
 
         mEnabled = enabled;
     }
@@ -606,8 +610,9 @@ namespace MWRender
         if (mIsStorm)
             mStormDirection = weather.mStormDirection;
 
-        if (mCurrentParticleEffect != weather.mParticleEffect)
+        if (mDirtyParticlesEffect || (mCurrentParticleEffect != weather.mParticleEffect))
         {
+            mDirtyParticlesEffect = false;
             mCurrentParticleEffect = weather.mParticleEffect;
 
             // cleanup old particles
@@ -632,7 +637,6 @@ namespace MWRender
                     mParticleNode = new osg::PositionAttitudeTransform;
                     mParticleNode->addCullCallback(mUnderwaterSwitch);
                     mParticleNode->setNodeMask(Mask_WeatherParticles);
-                    mParticleNode->getOrCreateStateSet();
                     mRootNode->addChild(mParticleNode);
                 }
 
@@ -664,7 +668,6 @@ namespace MWRender
                         ps->getParticle(particleIndex)->update(0, true);
                     }
 
-                    ps->getOrCreateStateSet();
                     ps->setUserValue("simpleLighting", true);
                 }
 

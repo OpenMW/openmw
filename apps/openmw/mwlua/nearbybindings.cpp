@@ -47,14 +47,15 @@ namespace MWLua
                 return LObject(getId(r.mHitObject), worldView->getObjectRegistry());
         });
 
-        api["COLLISION_TYPE"] = LuaUtil::makeReadOnly(context.mLua->sol().create_table_with(
-            "World", MWPhysics::CollisionType_World,
-            "Door", MWPhysics::CollisionType_Door,
-            "Actor", MWPhysics::CollisionType_Actor,
-            "HeightMap", MWPhysics::CollisionType_HeightMap,
-            "Projectile", MWPhysics::CollisionType_Projectile,
-            "Water", MWPhysics::CollisionType_Water,
-            "Default", MWPhysics::CollisionType_Default));
+        api["COLLISION_TYPE"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, MWPhysics::CollisionType>({
+            {"World", MWPhysics::CollisionType_World},
+            {"Door", MWPhysics::CollisionType_Door},
+            {"Actor", MWPhysics::CollisionType_Actor},
+            {"HeightMap", MWPhysics::CollisionType_HeightMap},
+            {"Projectile", MWPhysics::CollisionType_Projectile},
+            {"Water", MWPhysics::CollisionType_Water},
+            {"Default", MWPhysics::CollisionType_Default}
+        }));
 
         api["castRay"] = [](const osg::Vec3f& from, const osg::Vec3f& to, sol::optional<sol::table> options)
         {

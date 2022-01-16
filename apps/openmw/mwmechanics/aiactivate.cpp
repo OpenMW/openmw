@@ -13,8 +13,8 @@
 
 namespace MWMechanics
 {
-    AiActivate::AiActivate(const std::string &objectId)
-        : mObjectId(objectId)
+    AiActivate::AiActivate(const std::string &objectId, bool repeat)
+        : TypedAiPackage<AiActivate>(repeat), mObjectId(objectId)
     {
     }
 
@@ -48,6 +48,7 @@ namespace MWMechanics
     {
         std::unique_ptr<ESM::AiSequence::AiActivate> activate(new ESM::AiSequence::AiActivate());
         activate->mTargetId = mObjectId;
+        activate->mRepeat = getRepeat();
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Activate;
@@ -56,7 +57,7 @@ namespace MWMechanics
     }
 
     AiActivate::AiActivate(const ESM::AiSequence::AiActivate *activate)
-        : mObjectId(activate->mTargetId)
+        : AiActivate(activate->mTargetId, activate->mRepeat)
     {
     }
 }

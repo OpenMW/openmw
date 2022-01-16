@@ -4,7 +4,9 @@
 #include <map>
 #include <set>
 
+#include <components/lua/i18n.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/storage.hpp>
 
 #include "../mwbase/luamanager.hpp"
 
@@ -22,17 +24,20 @@ namespace MWLua
     class LuaManager : public MWBase::LuaManager
     {
     public:
-        LuaManager(const VFS::Manager* vfs);
+        LuaManager(const VFS::Manager* vfs, const std::string& libsDir);
 
         // Called by engine.cpp when the environment is fully initialized.
         void init();
 
+        void loadPermanentStorage(const std::string& userConfigPath);
+        void savePermanentStorage(const std::string& userConfigPath);
+
         // Called by engine.cpp every frame. For performance reasons it works in a separate
         // thread (in parallel with osg Cull). Can not use scene graph.
-        void update(bool paused, float dt);
+        void update();
 
         // Called by engine.cpp from the main thread. Can use scene graph.
-        void applyQueuedChanges();
+        void synchronizedUpdate();
 
         // Available everywhere through the MWBase::LuaManager interface.
         // LuaManager queues these events and propagates to scripts on the next `update` call.
@@ -91,12 +96,15 @@ namespace MWLua
         bool mGlobalScriptsStarted = false;
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
+        LuaUtil::I18nManager mI18n;
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;
         sol::table mCameraPackage;
         sol::table mInputPackage;
         sol::table mLocalSettingsPackage;
         sol::table mPlayerSettingsPackage;
+        sol::table mLocalStoragePackage;
+        sol::table mPlayerStoragePackage;
 
         GlobalScripts mGlobalScripts{&mLua};
         std::set<LocalScripts*> mActiveLocalScripts;
@@ -137,6 +145,9 @@ namespace MWLua
         std::vector<std::unique_ptr<Action>> mActionQueue;
         std::unique_ptr<TeleportAction> mTeleportPlayerAction;
         std::vector<std::string> mUIMessages;
+
+        LuaUtil::LuaStorage mGlobalStorage{mLua.sol()};
+        LuaUtil::LuaStorage mPlayerStorage{mLua.sol()};
     };
 
 }

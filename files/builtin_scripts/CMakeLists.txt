@@ -1,8 +1,26 @@
-file(GLOB_RECURSE BUILTIN_SCRIPTS LIST_DIRECTORIES false RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS "*")
+if (NOT DEFINED OPENMW_RESOURCES_ROOT)
+    return()
+endif()
 
-foreach (f ${BUILTIN_SCRIPTS})
-    if (NOT ("CMakeLists.txt" STREQUAL "${f}"))
-        copy_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${OpenMW_BINARY_DIR}" "resources/vfs/${f}")
-    endif()
-endforeach (f)
+# Copy resource files into the build directory
+set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(DDIRRELATIVE resources/vfs)
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "builtin.omwscripts")
 
+set(LUA_AUX_FILES
+    openmw_aux/util.lua
+    openmw_aux/time.lua
+    openmw_aux/calendar.lua
+)
+
+set(DDIRRELATIVE resources/vfs/openmw_aux)
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${LUA_AUX_FILES}")
+
+set(LUA_SCRIPTS_FILES
+    scripts/omw/camera.lua
+    scripts/omw/head_bobbing.lua
+    scripts/omw/third_person.lua
+)
+
+set(DDIRRELATIVE resources/vfs/scripts/omw)
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${LUA_SCRIPTS_FILES}")

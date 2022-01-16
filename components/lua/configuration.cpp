@@ -30,6 +30,11 @@ namespace LuaUtil
             {"POTION", ESM::LuaScriptCfg::sPotion},
             {"WEAPON", ESM::LuaScriptCfg::sWeapon},
         };
+
+        bool isSpace(char c)
+        {
+            return std::isspace(static_cast<unsigned char>(c));
+        }
     }
 
     const std::vector<int> ScriptsConfiguration::sEmpty;
@@ -101,11 +106,11 @@ namespace LuaUtil
             if (!line.empty() && line.back() == '\r')
                 line = line.substr(0, line.size() - 1);
 
-            while (!line.empty() && std::isspace(line[0]))
+            while (!line.empty() && isSpace(line[0]))
                 line = line.substr(1);
             if (line.empty() || line[0] == '#')  // Skip empty lines and comments
                 continue;
-            while (!line.empty() && std::isspace(line.back()))
+            while (!line.empty() && isSpace(line.back()))
                 line = line.substr(0, line.size() - 1);
 
             if (!Misc::StringUtils::ciEndsWith(line, ".lua"))
@@ -118,7 +123,7 @@ namespace LuaUtil
                 throw std::runtime_error(Misc::StringUtils::format("No flags found in: %s", std::string(line)));
             std::string_view flagsStr = line.substr(0, semicolonPos);
             std::string_view scriptPath = line.substr(semicolonPos + 1);
-            while (std::isspace(scriptPath[0]))
+            while (isSpace(scriptPath[0]))
                 scriptPath = scriptPath.substr(1);
 
             // Parse flags
@@ -126,10 +131,10 @@ namespace LuaUtil
             size_t flagsPos = 0;
             while (true)
             {
-                while (flagsPos < flagsStr.size() && (std::isspace(flagsStr[flagsPos]) || flagsStr[flagsPos] == ','))
+                while (flagsPos < flagsStr.size() && (isSpace(flagsStr[flagsPos]) || flagsStr[flagsPos] == ','))
                     flagsPos++;
                 size_t startPos = flagsPos;
-                while (flagsPos < flagsStr.size() && !std::isspace(flagsStr[flagsPos]) && flagsStr[flagsPos] != ',')
+                while (flagsPos < flagsStr.size() && !isSpace(flagsStr[flagsPos]) && flagsStr[flagsPos] != ',')
                     flagsPos++;
                 if (startPos == flagsPos)
                     break;

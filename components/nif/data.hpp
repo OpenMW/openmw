@@ -170,6 +170,11 @@ struct NiSkinInstance : public Record
     void post(NIFFile *nif) override;
 };
 
+struct BSDismemberSkinInstance : public NiSkinInstance
+{
+    void read(NIFStream *nif) override;
+};
+
 struct NiSkinData : public Record
 {
     struct VertWeight

@@ -18,6 +18,7 @@
 
 #include <cassert>
 #include <vector>
+#include <functional>
 
 class dtNavMesh;
 
@@ -59,7 +60,7 @@ namespace DetourNavigator
     class OutputTransformIterator
     {
     public:
-        OutputTransformIterator(OutputIterator& impl, const Settings& settings)
+        explicit OutputTransformIterator(OutputIterator& impl, const RecastSettings& settings)
             : mImpl(impl), mSettings(settings)
         {
         }
@@ -90,7 +91,7 @@ namespace DetourNavigator
 
     private:
         std::reference_wrapper<OutputIterator> mImpl;
-        std::reference_wrapper<const Settings> mSettings;
+        std::reference_wrapper<const RecastSettings> mSettings;
     };
 
     inline bool initNavMeshQuery(dtNavMeshQuery& value, const dtNavMesh& navMesh, const int maxNodes)
@@ -260,7 +261,7 @@ namespace DetourNavigator
             const Settings& settings, float endTolerance, OutputIterator& out)
     {
         dtNavMeshQuery navMeshQuery;
-        if (!initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes))
+        if (!initNavMeshQuery(navMeshQuery, navMesh, settings.mDetour.mMaxNavMeshQueryNodes))
             return Status::InitNavMeshQueryFailed;
 
         dtQueryFilter queryFilter;
@@ -282,7 +283,7 @@ namespace DetourNavigator
         if (endRef == 0)
             return Status::EndPolygonNotFound;
 
-        std::vector<dtPolyRef> polygonPath(settings.mMaxPolygonPathSize);
+        std::vector<dtPolyRef> polygonPath(settings.mDetour.mMaxPolygonPathSize);
         const auto polygonPathSize = findPath(navMeshQuery, startRef, endRef, start, end, queryFilter,
                                               polygonPath.data(), polygonPath.size());
 
@@ -293,9 +294,9 @@ namespace DetourNavigator
             return Status::Success;
 
         const bool partialPath = polygonPath[*polygonPathSize - 1] != endRef;
-        auto outTransform = OutputTransformIterator<OutputIterator>(out, settings);
+        auto outTransform = OutputTransformIterator<OutputIterator>(out, settings.mRecast);
         const Status smoothStatus = makeSmoothPath(navMesh, navMeshQuery, queryFilter, start, end, stepSize,
-            polygonPath, *polygonPathSize, settings.mMaxSmoothPathSize, outTransform);
+            polygonPath, *polygonPathSize, settings.mDetour.mMaxSmoothPathSize, outTransform);
 
         if (smoothStatus != Status::Success)
             return smoothStatus;

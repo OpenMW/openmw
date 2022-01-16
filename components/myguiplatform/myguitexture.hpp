@@ -5,12 +5,6 @@
 
 #include <osg/ref_ptr>
 
-#if MYGUI_VERSION > MYGUI_DEFINE_VERSION(3, 4, 0)
-    #define OPENMW_MYGUI_CONST_GETTER_3_4_1 const
-#else
-    #define OPENMW_MYGUI_CONST_GETTER_3_4_1
-#endif
-
 namespace osg
 {
     class Image;
@@ -57,21 +51,18 @@ namespace osgMyGUI
 
         void* lock(MyGUI::TextureUsage access) override;
         void unlock() override;
-        bool isLocked() OPENMW_MYGUI_CONST_GETTER_3_4_1 override { return mLockedImage.valid(); }
+        bool isLocked() const override { return mLockedImage.valid(); }
 
-        int getWidth() OPENMW_MYGUI_CONST_GETTER_3_4_1 override { return mWidth; }
-        int getHeight() OPENMW_MYGUI_CONST_GETTER_3_4_1 override { return mHeight; }
+        int getWidth() const override { return mWidth; }
+        int getHeight() const override { return mHeight; }
 
-        MyGUI::PixelFormat getFormat() OPENMW_MYGUI_CONST_GETTER_3_4_1 override { return mFormat; }
-        MyGUI::TextureUsage getUsage() OPENMW_MYGUI_CONST_GETTER_3_4_1 override { return mUsage; }
-        size_t getNumElemBytes() OPENMW_MYGUI_CONST_GETTER_3_4_1 override { return mNumElemBytes; }
+        MyGUI::PixelFormat getFormat() const override { return mFormat; }
+        MyGUI::TextureUsage getUsage() const override { return mUsage; }
+        size_t getNumElemBytes() const override { return mNumElemBytes; }
 
         MyGUI::IRenderTarget *getRenderTarget() override;
 
-    // setShader() is a part of MyGUI::RenderManager interface since 3.4.1 release
-#if MYGUI_VERSION > MYGUI_DEFINE_VERSION(3, 4, 0)
-    void setShader(const std::string& _shaderName) override;
-#endif
+        void setShader(const std::string& _shaderName) override;
 
     /*internal:*/
         osg::Texture2D *getTexture() const { return mTexture.get(); }

@@ -55,12 +55,8 @@ namespace MWInput
 
         void setAttemptJump(bool enabled) { mAttemptJump = enabled; }
 
-        bool isPreviewModeEnabled();
-
     private:
         void handleGuiArrowKey(int action);
-
-        void updateIdleTime(float dt);
 
         BindingsManager* mBindingsManager;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
@@ -71,8 +67,6 @@ namespace MWInput
         bool mSneaking;
         bool mAttemptJump;
 
-        float mOverencumberedMessageDelay;
-        float mPreviewPOVDelay;
         float mTimeIdle;
     };
 }

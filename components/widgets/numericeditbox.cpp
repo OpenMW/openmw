@@ -31,7 +31,7 @@ namespace Gui
         try
         {
             mValue = std::stoi(newCaption);
-            int capped = std::min(mMaxValue, std::max(mValue, mMinValue));
+            int capped = std::clamp(mValue, mMinValue, mMaxValue);
             if (capped != mValue)
             {
                 mValue = capped;

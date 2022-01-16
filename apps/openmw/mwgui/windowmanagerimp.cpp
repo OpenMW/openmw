@@ -53,6 +53,8 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/frameratelimiter.hpp>
 
+#include <components/lua_ui/widgetlist.hpp>
+
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -163,6 +165,7 @@ namespace MWGui
       , mScreenFader(nullptr)
       , mDebugWindow(nullptr)
       , mJailScreen(nullptr)
+      , mContainerWindow(nullptr)
       , mTranslationDataStorage (translationDataStorage)
       , mCharGen(nullptr)
       , mInputBlocker(nullptr)
@@ -220,6 +223,7 @@ namespace MWGui
         ItemWidget::registerComponents();
         SpellView::registerComponents();
         Gui::registerAllWidgets();
+        LuaUi::registerAllWidgets();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerFollowMouse>("Controller");
 
@@ -357,10 +361,10 @@ namespace MWGui
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
         mTradeWindow->eventTradeDone += MyGUI::newDelegate(mDialogueWindow, &DialogueWindow::onTradeComplete);
 
-        ContainerWindow* containerWindow = new ContainerWindow(mDragAndDrop);
-        mWindows.push_back(containerWindow);
-        trackWindow(containerWindow, "container");
-        mGuiModeStates[GM_Container] = GuiModeState({containerWindow, mInventoryWindow});
+        mContainerWindow = new ContainerWindow(mDragAndDrop);
+        mWindows.push_back(mContainerWindow);
+        trackWindow(mContainerWindow, "container");
+        mGuiModeStates[GM_Container] = GuiModeState({mContainerWindow, mInventoryWindow});
 
         mHud = new HUD(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         mWindows.push_back(mHud);
@@ -635,6 +639,7 @@ namespace MWGui
             mMap->setVisible(false);
             mStatsWindow->setVisible(false);
             mSpellWindow->setVisible(false);
+            mHud->setDrowningBarVisible(false);
             mInventoryWindow->setVisible(getMode() == GM_Container || getMode() == GM_Barter || getMode() == GM_Companion);
         }
 
@@ -766,6 +771,11 @@ namespace MWGui
     void WindowManager::removeStaticMessageBox()
     {
         mMessageBoxManager->removeStaticMessageBox();
+    }
+
+    const std::vector<MWGui::MessageBox*> WindowManager::getActiveMessageBoxes()
+    {
+        return mMessageBoxManager->getActiveMessageBoxes();
     }
 
     int WindowManager::readPressedButton ()
@@ -1095,12 +1105,21 @@ namespace MWGui
 
     void WindowManager::windowResized(int x, int y)
     {
-        // Note: this is a side effect of resolution change or window resize.
-        // There is no need to track these changes.
         Settings::Manager::setInt("resolution x", "Video", x);
         Settings::Manager::setInt("resolution y", "Video", y);
-        Settings::Manager::resetPendingChange("resolution x", "Video");
-        Settings::Manager::resetPendingChange("resolution y", "Video");
+
+        // We only want to process changes to window-size related settings.
+        Settings::CategorySettingVector filter = {{"Video", "resolution x"},
+                                                  {"Video", "resolution y"}};
+
+        // If the HUD has not been initialised, the World singleton will not be available.
+        if (mHud)
+        {
+            MWBase::Environment::get().getWorld()->processChangedSettings(
+                    Settings::Manager::getPendingChanges(filter));
+        }
+
+        Settings::Manager::resetPendingChanges(filter);
 
         mGuiPlatform->getRenderManagerPtr()->setViewSize(x, y);
 
@@ -1164,6 +1183,16 @@ namespace MWGui
 
     void WindowManager::pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg)
     {
+        pushGuiMode(mode, arg, false);
+    }
+
+    void WindowManager::forceLootMode(const MWWorld::Ptr& ptr)
+    {
+        pushGuiMode(MWGui::GM_Container, ptr, true);
+    }
+
+    void WindowManager::pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg, bool force)
+    {
         if (mode==GM_Inventory && mAllowed==GW_None)
             return;
 
@@ -1185,6 +1214,8 @@ namespace MWGui
             mGuiModeStates[mode].update(true);
             playSound(mGuiModeStates[mode].mOpenSound);
         }
+        if(force)
+            mContainerWindow->treatNextOpenAsLoot();
         for (WindowBase* window : mGuiModeStates[mode].mWindows)
             window->setPtr(arg);
 

@@ -261,9 +261,6 @@ void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
         if (isEnchanted)
             SceneUtil::addEnchantedGlow(shieldNode, mResourceSystem, glowColor);
     }
-
-    if (mAlpha != 1.f)
-        mResourceSystem->getSceneManager()->recreateShaders(mHolsteredShield->getNode());
 }
 
 bool ActorAnimation::useShieldAnimations() const
@@ -335,7 +332,7 @@ void ActorAnimation::resetControllers(osg::Node* node)
 
     std::shared_ptr<SceneUtil::ControllerSource> src;
     src.reset(new NullAnimationTime);
-    SceneUtil::AssignControllerSourcesVisitor removeVisitor(src);
+    SceneUtil::ForceControllerSourcesVisitor removeVisitor(src);
     node->accept(removeVisitor);
 }
 

@@ -8,6 +8,18 @@
 # luarocks --local pack openmwluadocumentor-0.1.1-1.rockspec
 # luarocks --local install openmwluadocumentor-0.1.1-1.src.rock
 
+# How to install on Windows:
+
+# install LuaRocks (heavily recommended to use the standalone package)
+#   https://github.com/luarocks/luarocks/wiki/Installation-instructions-for-Windows
+# git clone https://gitlab.com/ptmikheev/openmw-luadocumentor.git
+# cd openmw-luadocumentor/luarocks
+# open "Developer Command Prompt for VS <2017/2019>" in this directory and run:
+#   luarocks --local pack openmwluadocumentor-0.1.1-1.rockspec
+#   luarocks --local install openmwluadocumentor-0.1.1-1.src.rock
+# open "Git Bash" in the same directory and run script:
+#   ./generate_luadoc.sh
+
 if [ -f /.dockerenv ]; then
     # We are inside readthedocs pipeline
     echo "Install lua 5.1"
@@ -32,7 +44,6 @@ if [ -f /.dockerenv ]; then
     cd ~
     git clone https://gitlab.com/ptmikheev/openmw-luadocumentor.git
     cd openmw-luadocumentor/luarocks
-    luarocks --local install checks
     luarocks --local pack openmwluadocumentor-0.1.1-1.rockspec
     luarocks --local install openmwluadocumentor-0.1.1-1.src.rock
 fi
@@ -40,12 +51,19 @@ fi
 DOCS_SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 FILES_DIR=$DOCS_SOURCE_DIR/../../files
 OUTPUT_DIR=$DOCS_SOURCE_DIR/reference/lua-scripting/generated_html
+DOCUMENTOR_PATH=~/.luarocks/bin/openmwluadocumentor
+
+if [ ! -x $DOCUMENTOR_PATH ]; then
+  # running on Windows?
+  DOCUMENTOR_PATH="$APPDATA/LuaRocks/bin/openmwluadocumentor.bat"
+fi
 
 rm -f $OUTPUT_DIR/*.html
 
 cd $FILES_DIR/lua_api
-~/.luarocks/bin/openmwluadocumentor -f doc -d $OUTPUT_DIR openmw/*lua
+$DOCUMENTOR_PATH -f doc -d $OUTPUT_DIR openmw/*lua
 
 cd $FILES_DIR/builtin_scripts
-~/.luarocks/bin/openmwluadocumentor -f doc -d $OUTPUT_DIR openmw_aux/*lua
+$DOCUMENTOR_PATH -f doc -d $OUTPUT_DIR openmw_aux/*lua
+$DOCUMENTOR_PATH -f doc -d $OUTPUT_DIR scripts/omw/camera.lua
 

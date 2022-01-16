@@ -11,7 +11,7 @@ namespace
     // Round value to prevent precision issues
     void truncate(float& value)
     {
-        value = std::roundf(value * 1024.f) / 1024.f;
+        value = static_cast<int>(value * 1024.f) / 1024.f;
     }
 }
 
@@ -131,28 +131,6 @@ namespace MWMechanics
         {
             mCollection[it->first].setModifier(it->second.getModifier());
         }
-    }
-
-    MagicEffects& MagicEffects::operator+= (const MagicEffects& effects)
-    {
-        if (this==&effects)
-        {
-            MagicEffects temp (effects);
-            *this += temp;
-            return *this;
-        }
-
-        for (Collection::const_iterator iter (effects.begin()); iter!=effects.end(); ++iter)
-        {
-            Collection::iterator result = mCollection.find (iter->first);
-
-            if (result!=mCollection.end())
-                result->second += iter->second;
-            else
-                mCollection.insert (*iter);
-        }
-
-        return *this;
     }
 
     EffectParam MagicEffects::get (const EffectKey& key) const

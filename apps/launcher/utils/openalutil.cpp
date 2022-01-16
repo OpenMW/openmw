@@ -9,9 +9,9 @@
 #define ALC_ALL_DEVICES_SPECIFIER 0x1013
 #endif
 
-std::vector<const char *> Launcher::enumerateOpenALDevices()
+std::vector<std::string> Launcher::enumerateOpenALDevices()
 {
-    std::vector<const char *> devlist;
+    std::vector<std::string> devlist;
     const ALCchar *devnames;
 
     if(alcIsExtensionPresent(nullptr, "ALC_ENUMERATE_ALL_EXT"))
@@ -22,7 +22,7 @@ std::vector<const char *> Launcher::enumerateOpenALDevices()
     {
         devnames = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     }
-    
+
     while(devnames && *devnames)
     {
         devlist.emplace_back(devnames);
@@ -31,9 +31,9 @@ std::vector<const char *> Launcher::enumerateOpenALDevices()
     return devlist;
 }
 
-std::vector<const char *> Launcher::enumerateOpenALDevicesHrtf()
+std::vector<std::string> Launcher::enumerateOpenALDevicesHrtf()
 {
-    std::vector<const char *> ret;
+    std::vector<std::string> ret;
 
     ALCdevice *device = alcOpenDevice(nullptr);
     if(device)

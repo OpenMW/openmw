@@ -21,16 +21,69 @@
 -- @param eventData
 
 -------------------------------------------------------------------------------
--- Game time in seconds.
--- The number of seconds in the game world, passed from starting a new game.
--- @function [parent=#core] getGameTimeInSeconds
+-- Simulation time in seconds.
+-- The number of simulation seconds passed in the game world since starting a new game.
+-- @function [parent=#core] getSimulationTime
 -- @return #number
 
 -------------------------------------------------------------------------------
--- Current time of the game world in hours.
--- Note that the number of game seconds in a game hour is not guaranteed to be fixed.
--- @function [parent=#core] getGameTimeInHours
+-- The scale of simulation time relative to real time.
+-- @function [parent=#core] getSimulationTimeScale
 -- @return #number
+
+-------------------------------------------------------------------------------
+-- Game time in seconds.
+-- @function [parent=#core] getGameTime
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- The scale of game time relative to simulation time.
+-- @function [parent=#core] getGameTimeScale
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Whether the world is paused (onUpdate doesn't work when the world is paused).
+-- @function [parent=#core] isWorldPaused
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Get a GMST setting from content files.
+-- @function [parent=#core] getGMST
+-- @param #string setting Setting name
+-- @return #any
+
+-------------------------------------------------------------------------------
+-- Return i18n formatting function for the given context.
+-- It is based on `i18n.lua` library.
+-- Language files should be stored in VFS as `i18n/<ContextName>/<Lang>.lua`.
+-- See https://github.com/kikito/i18n.lua for format details.
+-- @function [parent=#core] i18n
+-- @param #string context I18n context; recommended to use the name of the mod.
+-- @return #function
+-- @usage
+-- -- DataFiles/i18n/MyMod/en.lua
+-- return {
+--     good_morning = 'Good morning.',
+--     you_have_arrows = {
+--       one = 'You have one arrow.',
+--       other = 'You have %{count} arrows.',
+--     },
+-- }
+-- @usage
+-- -- DataFiles/i18n/MyMod/de.lua
+-- return {
+--     good_morning = "Guten Morgen.",
+--     you_have_arrows = {
+--       one = "Du hast ein Pfeil.",
+--       other = "Du hast %{count} Pfeile.",
+--     },
+--     ["Hello %{name}!"] = "Hallo %{name}!",
+-- }
+-- @usage
+-- local myMsg = core.i18n('MyMod')
+-- print( myMsg('good_morning') )
+-- print( myMsg('you_have_arrows', {count=5}) )
+-- print( myMsg('Hello %{name}!', {name='World'}) )
 
 
 -------------------------------------------------------------------------------

@@ -95,6 +95,8 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LZ4 DEFAULT_MSG
         LZ4_LIBRARY LZ4_INCLUDE_DIR LZ4_VERSION)
 
+set(LZ4_INCLUDE_DIR ${LZ4_INCLUDE_DIR} CACHE PATH "LZ4 include dir hint")
+set(LZ4_LIBRARY ${LZ4_LIBRARY} CACHE FILEPATH "LZ4 library path hint")
 mark_as_advanced(LZ4_INCLUDE_DIR LZ4_LIBRARY)
 
 set(LZ4_LIBRARIES ${LZ4_LIBRARY})

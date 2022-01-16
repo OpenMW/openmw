@@ -1,10 +1,14 @@
 #include "luamanagerimp.hpp"
 
+#include <filesystem>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/luascripts.hpp>
+
+#include <components/settings/settings.hpp>
 
 #include <components/lua/utilpackage.hpp>
 
@@ -20,9 +24,10 @@
 namespace MWLua
 {
 
-    LuaManager::LuaManager(const VFS::Manager* vfs) : mLua(vfs, &mConfiguration)
+    LuaManager::LuaManager(const VFS::Manager* vfs, const std::string& libsDir) : mLua(vfs, &mConfiguration), mI18n(vfs, &mLua)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
+        mLua.addInternalLibSearchPath(libsDir);
 
         mGlobalSerializer = createUserdataSerializer(false, mWorldView.getObjectRegistry());
         mLocalSerializer = createUserdataSerializer(true, mWorldView.getObjectRegistry());
@@ -46,6 +51,7 @@ namespace MWLua
         context.mIsGlobal = true;
         context.mLuaManager = this;
         context.mLua = &mLua;
+        context.mI18n = &mI18n;
         context.mWorldView = &mWorldView;
         context.mLocalEventQueue = &mLocalEvents;
         context.mGlobalEventQueue = &mGlobalEvents;
@@ -55,11 +61,17 @@ namespace MWLua
         localContext.mIsGlobal = false;
         localContext.mSerializer = mLocalSerializer.get();
 
+        mI18n.init();
+        std::vector<std::string> preferredLanguages;
+        Misc::StringUtils::split(Settings::Manager::getString("i18n preferred languages", "Lua"), preferredLanguages, ", ");
+        mI18n.setPreferredLanguages(preferredLanguages);
+
         initObjectBindingsForGlobalScripts(context);
         initCellBindingsForGlobalScripts(context);
         initObjectBindingsForLocalScripts(localContext);
         initCellBindingsForLocalScripts(localContext);
         LocalScripts::initializeSelfPackage(localContext);
+        LuaUtil::LuaStorage::initLuaBindings(mLua.sol());
 
         mLua.addCommonPackage("openmw.async", getAsyncPackageInitializer(context));
         mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
@@ -67,53 +79,70 @@ namespace MWLua
         mLua.addCommonPackage("openmw.query", initQueryPackage(context));
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
         mGlobalScripts.addPackage("openmw.settings", initGlobalSettingsPackage(context));
+        mGlobalScripts.addPackage("openmw.storage", initGlobalStoragePackage(context, &mGlobalStorage));
         mCameraPackage = initCameraPackage(localContext);
         mUserInterfacePackage = initUserInterfacePackage(localContext);
         mInputPackage = initInputPackage(localContext);
         mNearbyPackage = initNearbyPackage(localContext);
-        mLocalSettingsPackage = initLocalSettingsPackage(localContext);
+        mLocalSettingsPackage = initGlobalSettingsPackage(localContext);
         mPlayerSettingsPackage = initPlayerSettingsPackage(localContext);
+        mLocalStoragePackage = initLocalStoragePackage(localContext, &mGlobalStorage);
+        mPlayerStoragePackage = initPlayerStoragePackage(localContext, &mGlobalStorage, &mPlayerStorage);
 
         initConfiguration();
         mInitialized = true;
     }
 
-    void LuaManager::update(bool paused, float dt)
+    void LuaManager::loadPermanentStorage(const std::string& userConfigPath)
     {
+        auto globalPath = std::filesystem::path(userConfigPath) / "global_storage.bin";
+        auto playerPath = std::filesystem::path(userConfigPath) / "player_storage.bin";
+        if (std::filesystem::exists(globalPath))
+            mGlobalStorage.load(globalPath.string());
+        if (std::filesystem::exists(playerPath))
+            mPlayerStorage.load(playerPath.string());
+    }
+
+    void LuaManager::savePermanentStorage(const std::string& userConfigPath)
+    {
+        std::filesystem::path confDir(userConfigPath);
+        mGlobalStorage.save((confDir / "global_storage.bin").string());
+        mPlayerStorage.save((confDir / "player_storage.bin").string());
+    }
+
+    void LuaManager::update()
+    {
+        if (mPlayer.isEmpty())
+            return;  // The game is not started yet.
+
+        float frameDuration = MWBase::Environment::get().getFrameDuration();
         ObjectRegistry* objectRegistry = mWorldView.getObjectRegistry();
 
-        if (!mPlayer.isEmpty())
+        MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (!(getId(mPlayer) == getId(newPlayerPtr)))
+            throw std::logic_error("Player Refnum was changed unexpectedly");
+        if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
         {
-            MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            if (!(getId(mPlayer) == getId(newPlayerPtr)))
-                throw std::logic_error("Player Refnum was changed unexpectedly");
-            if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
-            {
-                mPlayer = newPlayerPtr;  // player was moved to another cell, update ptr in registry
-                objectRegistry->registerPtr(mPlayer);
-            }
+            mPlayer = newPlayerPtr;  // player was moved to another cell, update ptr in registry
+            objectRegistry->registerPtr(mPlayer);
         }
-        mWorldView.update();
 
-        if (paused)
-        {
-            mInputEvents.clear();
-            return;
-        }
+        mWorldView.update();
 
         std::vector<GlobalEvent> globalEvents = std::move(mGlobalEvents);
         std::vector<LocalEvent> localEvents = std::move(mLocalEvents);
         mGlobalEvents = std::vector<GlobalEvent>();
         mLocalEvents = std::vector<LocalEvent>();
 
+        if (!mWorldView.isPaused())
         {  // Update time and process timers
-            double seconds = mWorldView.getGameTimeInSeconds() + dt;
-            mWorldView.setGameTimeInSeconds(seconds);
-            double hours = mWorldView.getGameTimeInHours();
+            double simulationTime = mWorldView.getSimulationTime() + frameDuration;
+            mWorldView.setSimulationTime(simulationTime);
+            double gameTime = mWorldView.getGameTime();
 
-            mGlobalScripts.processTimers(seconds, hours);
+            mGlobalScripts.processTimers(simulationTime, gameTime);
             for (LocalScripts* scripts : mActiveLocalScripts)
-                scripts->processTimers(seconds, hours);
+                scripts->processTimers(simulationTime, gameTime);
         }
 
         // Receive events
@@ -136,14 +165,6 @@ namespace MWLua
         mQueuedCallbacks.clear();
 
         // Engine handlers in local scripts
-        PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
-        if (playerScripts)
-        {
-            for (const auto& event : mInputEvents)
-                playerScripts->processInputEvent(event);
-        }
-        mInputEvents.clear();
-
         for (const LocalEngineEvent& e : mLocalEngineEvents)
         {
             LObject obj(e.mDest, objectRegistry);
@@ -158,8 +179,11 @@ namespace MWLua
         }
         mLocalEngineEvents.clear();
 
-        for (LocalScripts* scripts : mActiveLocalScripts)
-            scripts->update(dt);
+        if (!mWorldView.isPaused())
+        {
+            for (LocalScripts* scripts : mActiveLocalScripts)
+                scripts->update(frameDuration);
+        }
 
         // Engine handlers in global scripts
         if (mPlayerChanged)
@@ -177,22 +201,37 @@ namespace MWLua
             mGlobalScripts.actorActive(GObject(id, objectRegistry));
         mActorAddedEvents.clear();
 
-        mGlobalScripts.update(dt);
+        if (!mWorldView.isPaused())
+            mGlobalScripts.update(frameDuration);
     }
 
-    void LuaManager::applyQueuedChanges()
+    void LuaManager::synchronizedUpdate()
     {
+        if (mPlayer.isEmpty())
+            return;  // The game is not started yet.
+
+        // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
+        PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+        if (playerScripts && !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
+        {
+            for (const auto& event : mInputEvents)
+                playerScripts->processInputEvent(event);
+        }
+        mInputEvents.clear();
+        if (playerScripts && !mWorldView.isPaused())
+            playerScripts->inputUpdate(MWBase::Environment::get().getFrameDuration());
+
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
         for (const std::string& message : mUIMessages)
             windowManager->messageBox(message);
         mUIMessages.clear();
 
         for (std::unique_ptr<Action>& action : mActionQueue)
-            action->apply(mWorldView);
+            action->safeApply(mWorldView);
         mActionQueue.clear();
         
         if (mTeleportPlayerAction)
-            mTeleportPlayerAction->apply(mWorldView);
+            mTeleportPlayerAction->safeApply(mWorldView);
         mTeleportPlayerAction.reset();
     }
 
@@ -215,6 +254,9 @@ namespace MWLua
             mPlayer.getRefData().setLuaScripts(nullptr);
             mPlayer = MWWorld::Ptr();
         }
+        clearUserInterface();
+        mGlobalStorage.clearTemporary();
+        mPlayerStorage.clearTemporary();
     }
 
     void LuaManager::setupPlayer(const MWWorld::Ptr& ptr)
@@ -227,7 +269,10 @@ namespace MWLua
         mPlayer = ptr;
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (!localScripts)
+        {
             localScripts = createLocalScripts(ptr, ESM::LuaScriptCfg::sPlayer);
+            localScripts->addAutoStartedScripts();
+        }
         mActiveLocalScripts.insert(localScripts);
         mLocalEngineEvents.push_back({getId(ptr), LocalScripts::OnActive{}});
         mPlayerChanged = true;
@@ -257,7 +302,10 @@ namespace MWLua
         {
             ESM::LuaScriptCfg::Flags flag = getLuaScriptFlag(ptr);
             if (!mConfiguration.getListByFlag(flag).empty())
-                localScripts = createLocalScripts(ptr, flag);  // TODO: put to a queue and apply on next `update()`
+            {
+                localScripts = createLocalScripts(ptr, flag);
+                localScripts->addAutoStartedScripts();  // TODO: put to a queue and apply on next `update()`
+            }
         }
         if (localScripts)
         {
@@ -310,6 +358,7 @@ namespace MWLua
         if (!localScripts)
         {
             localScripts = createLocalScripts(ptr, getLuaScriptFlag(ptr));
+            localScripts->addAutoStartedScripts();
             if (ptr.isInCell() && MWBase::Environment::get().getWorld()->isCellActive(ptr.getCell()))
                 mActiveLocalScripts.insert(localScripts);
         }
@@ -329,15 +378,16 @@ namespace MWLua
             scripts->addPackage("openmw.camera", mCameraPackage);
             scripts->addPackage("openmw.input", mInputPackage);
             scripts->addPackage("openmw.settings", mPlayerSettingsPackage);
+            scripts->addPackage("openmw.storage", mPlayerStoragePackage);
         }
         else
         {
             scripts = std::make_shared<LocalScripts>(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()), flag);
             scripts->addPackage("openmw.settings", mLocalSettingsPackage);
+            scripts->addPackage("openmw.storage", mLocalStoragePackage);
         }
         scripts->addPackage("openmw.nearby", mNearbyPackage);
         scripts->setSerializer(mLocalSerializer.get());
-        scripts->addAutoStartedScripts();
 
         MWWorld::RefData& refData = ptr.getRefData();
         refData.setLuaScripts(std::move(scripts));
@@ -420,6 +470,7 @@ namespace MWLua
                 continue;
             ESM::LuaScripts data;
             scripts->save(data);
+            clearUserInterface();
             scripts->load(data);
         }
         for (LocalScripts* scripts : mActiveLocalScripts)

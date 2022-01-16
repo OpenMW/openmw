@@ -4,7 +4,6 @@
 #include <osg/Texture2D>
 #include <osg/Group>
 #include <osg/Geometry>
-#include <osg/Depth>
 #include <osg/TexEnvCombine>
 
 #include <osgDB/WriteFile>
@@ -15,8 +14,8 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
-#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include <components/esm/globalmap.hpp>
 
@@ -326,8 +325,8 @@ namespace MWRender
         if (texture)
         {
             osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(srcLeft, srcTop, srcRight, srcBottom);
-            auto depth = SceneUtil::createDepth();
-            depth->setWriteMask(0);
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
+            depth->setWriteMask(false);
             osg::StateSet* stateset = geom->getOrCreateStateSet();
             stateset->setAttribute(depth);
             stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);

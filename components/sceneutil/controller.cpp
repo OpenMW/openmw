@@ -121,6 +121,21 @@ namespace SceneUtil
             ctrl.setSource(mToAssign);
     }
 
+    ForceControllerSourcesVisitor::ForceControllerSourcesVisitor()
+        : AssignControllerSourcesVisitor()
+    {
+    }
+
+    ForceControllerSourcesVisitor::ForceControllerSourcesVisitor(std::shared_ptr<ControllerSource> toAssign)
+        : AssignControllerSourcesVisitor(toAssign)
+    {
+    }
+
+    void ForceControllerSourcesVisitor::visit(osg::Node&, Controller &ctrl)
+    {
+        ctrl.setSource(mToAssign);
+    }
+
     FindMaxControllerLengthVisitor::FindMaxControllerLengthVisitor()
         : SceneUtil::ControllerVisitor()
         , mMaxLength(0)

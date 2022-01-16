@@ -34,8 +34,8 @@ bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
 
 namespace MWMechanics
 {
-    AiTravel::AiTravel(float x, float y, float z, AiTravel*)
-        : mX(x), mY(y), mZ(z), mHidden(false)
+    AiTravel::AiTravel(float x, float y, float z, bool repeat, AiTravel*)
+        : TypedAiPackage<AiTravel>(repeat), mX(x), mY(y), mZ(z), mHidden(false)
     {
     }
 
@@ -44,13 +44,13 @@ namespace MWMechanics
     {
     }
 
-    AiTravel::AiTravel(float x, float y, float z)
-        : AiTravel(x, y, z, this)
+    AiTravel::AiTravel(float x, float y, float z, bool repeat)
+        : AiTravel(x, y, z, repeat, this)
     {
     }
 
     AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
-        : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
+        : TypedAiPackage<AiTravel>(travel->mRepeat), mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
     {
         // Hidden ESM::AiSequence::AiTravel package should be converted into MWMechanics::AiInternalTravel type
         assert(!travel->mHidden);
@@ -125,6 +125,7 @@ namespace MWMechanics
         travel->mData.mY = mY;
         travel->mData.mZ = mZ;
         travel->mHidden = mHidden;
+        travel->mRepeat = getRepeat();
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Travel;

@@ -1,8 +1,9 @@
 #ifndef VIDEOPLAYER_VIDEOSTATE_H
 #define VIDEOPLAYER_VIDEOSTATE_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <atomic>
+#include <array>
 #include <vector>
 #include <memory>
 #include <string>
@@ -40,13 +41,10 @@ extern "C"
 #include "videodefs.hpp"
 
 #define VIDEO_PICTURE_QUEUE_SIZE 50
-// allocate one extra to make sure we do not overwrite the osg::Image currently set on the texture
-#define VIDEO_PICTURE_ARRAY_SIZE (VIDEO_PICTURE_QUEUE_SIZE+1)
 
 extern "C"
 {
     struct SwsContext;
-    struct AVPacketList;
     struct AVPacket;
     struct AVFormatContext;
     struct AVStream;
@@ -78,6 +76,13 @@ struct ExternalClock
     void set(uint64_t time);
 };
 
+class PacketList
+{
+public:
+    AVPacket* pkt = nullptr;
+    PacketList *next = nullptr;
+};
+
 struct PacketQueue {
     PacketQueue()
       : first_pkt(nullptr), last_pkt(nullptr), flushing(false), nb_packets(0), size(0)
@@ -85,7 +90,7 @@ struct PacketQueue {
     ~PacketQueue()
     { clear(); }
 
-    AVPacketList *first_pkt, *last_pkt;
+    PacketList *first_pkt, *last_pkt;
     std::atomic<bool> flushing;
     std::atomic<int> nb_packets;
     std::atomic<int> size;
@@ -129,7 +134,7 @@ struct VideoState {
     void setPaused(bool isPaused);
     void seekTo(double time);
 
-    double getDuration();
+    double getDuration() const;
 
     int stream_open(int stream_index, AVFormatContext *pFormatCtx);
 
@@ -145,7 +150,7 @@ struct VideoState {
     double synchronize_video(const AVFrame &src_frame, double pts);
 
     double get_audio_clock();
-    double get_video_clock();
+    double get_video_clock() const;
     double get_external_clock();
     double get_master_clock();
 
@@ -178,8 +183,9 @@ struct VideoState {
     PacketQueue videoq;
     SwsContext*  sws_context;
     int sws_context_w, sws_context_h;
-    VideoPicture pictq[VIDEO_PICTURE_ARRAY_SIZE];
-    int          pictq_size, pictq_rindex, pictq_windex;
+    std::array<VideoPicture, VIDEO_PICTURE_QUEUE_SIZE+1> pictq;  // allocate one extra to make sure we do not overwrite the osg::Image currently set on the texture
+    int pictq_size;
+    unsigned long pictq_rindex, pictq_windex;
     std::mutex pictq_mutex;
     std::condition_variable pictq_cond;
 

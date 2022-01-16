@@ -19,13 +19,19 @@ namespace MWLua
         void update();  // Should be called every frame.
         void clear();  // Should be called every time before starting or loading a new game.
 
-        // Returns the number of seconds passed from the beginning of the game.
-        double getGameTimeInSeconds() const { return mGameSeconds; }
-        void setGameTimeInSeconds(double t) { mGameSeconds = t; }
+        // Whether the world is paused (i.e. game time is not changing and actors don't move).
+        bool isPaused() const { return mPaused; }
 
-        // Returns the number of game hours passed from the beginning of the game.
-        // Note that the number of seconds in a game hour is not fixed.
-        double getGameTimeInHours() const;
+        // The number of seconds passed from the beginning of the game.
+        double getSimulationTime() const { return mSimulationTime; }
+        void setSimulationTime(double t) { mSimulationTime = t; }
+        double getSimulationTimeScale() const { return 1.0; }
+
+        // The game time (in game seconds) passed from the beginning of the game.
+        // Note that game time generally goes faster than the simulation time.
+        double getGameTime() const;
+        double getGameTimeScale() const { return MWBase::Environment::get().getWorld()->getTimeScaleFactor(); }
+        void setGameTimeScale(double s) { MWBase::Environment::get().getWorld()->setGlobalFloat("timescale", s); }
 
         ObjectIdList getActivatorsInScene() const { return mActivatorsInScene.mList; }
         ObjectIdList getActorsInScene() const { return mActorsInScene.mList; }
@@ -73,7 +79,8 @@ namespace MWLua
         ObjectGroup mDoorsInScene;
         ObjectGroup mItemsInScene;
 
-        double mGameSeconds = 0;
+        double mSimulationTime = 0;
+        bool mPaused = false;
     };
 
 }

@@ -19,5 +19,6 @@ Below is a quick overview of supported formats, followed by separate articles wi
 	:maxdepth: 1
 
 	pipeline-blender-collada
+	pipeline-blender-collada-static-models
 	pipeline-blender-osgnative
 	pipeline-blender-nif

@@ -76,7 +76,8 @@ namespace MWGui
 
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
-
+        // Check if quick key is still valid
+        inline void validate(int index);
         void unassign(keyData* key);
     };
 

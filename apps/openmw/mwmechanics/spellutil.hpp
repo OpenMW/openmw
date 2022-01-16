@@ -48,9 +48,6 @@ namespace MWMechanics
     /// Get whether or not the given spell contributes to skill progress.
     bool spellIncreasesSkill(const ESM::Spell* spell);
     bool spellIncreasesSkill(const std::string& spellId);
-
-    /// Check if the given effect can be applied to the target. If \a castByPlayer, emits a message box on failure.
-    bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer);
 }
 
 #endif

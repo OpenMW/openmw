@@ -1,6 +1,7 @@
 #include "advancedpage.hpp"
 
 #include <array>
+#include <string>
 
 #include <components/config/gamesettings.hpp>
 #include <QFileDialog>
@@ -20,13 +21,13 @@ Launcher::AdvancedPage::AdvancedPage(Config::GameSettings &gameSettings, QWidget
     setObjectName ("AdvancedPage");
     setupUi(this);
 
-    for(const char * name : Launcher::enumerateOpenALDevices())
+    for(const std::string& name : Launcher::enumerateOpenALDevices())
     {
-        audioDeviceSelectorComboBox->addItem(QString::fromUtf8(name), QString::fromUtf8(name));
+        audioDeviceSelectorComboBox->addItem(QString::fromStdString(name), QString::fromStdString(name));
     }
-    for(const char * name : Launcher::enumerateOpenALDevicesHrtf())
+    for(const std::string& name : Launcher::enumerateOpenALDevicesHrtf())
     {
-        hrtfProfileSelectorComboBox->addItem(QString::fromUtf8(name), QString::fromUtf8(name));
+        hrtfProfileSelectorComboBox->addItem(QString::fromStdString(name), QString::fromStdString(name));
     }
 
     loadSettings();
@@ -117,6 +118,11 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(autoUseTerrainSpecularMapsCheckBox, "auto use terrain specular maps", "Shaders");
         loadSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
         loadSettingBool(radialFogCheckBox, "radial fog", "Shaders");
+        loadSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
+        loadSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
+        if (Settings::Manager::getInt("antialiasing", "Video") == 0) {
+            antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
+        }
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
         loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
@@ -137,6 +143,8 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
         viewingDistanceComboBox->setValue(convertToCells(Settings::Manager::getInt("viewing distance", "Camera")));
         objectPagingMinSizeComboBox->setValue(Settings::Manager::getDouble("object paging min size", "Terrain"));
+
+        loadSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
     }
 
     // Audio
@@ -207,7 +215,7 @@ bool Launcher::AdvancedPage::loadSettings()
     {
         // Saves
         loadSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-        maximumQuicksavesComboBox->setValue(Settings::Manager::getInt("max quicksaves", "Saves"));
+        loadSettingInt(maximumQuicksavesComboBox,"max quicksaves", "Saves");
 
         // Other Settings
         QString screenshotFormatString = QString::fromStdString(Settings::Manager::getString("screenshot format", "General")).toUpper();
@@ -252,14 +260,10 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
         saveSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
         saveSettingBool(avoidCollisionsCheckBox, "NPCs avoid collisions", "Game");
-        int unarmedFactorsStrengthIndex = unarmedFactorsStrengthComboBox->currentIndex();
-        if (unarmedFactorsStrengthIndex != Settings::Manager::getInt("strength influences hand to hand", "Game"))
-            Settings::Manager::setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
+        saveSettingInt(unarmedFactorsStrengthComboBox, "strength influences hand to hand", "Game");
         saveSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
         saveSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
-        int numPhysicsThreads = physicsThreadsSpinBox->value();
-        if (numPhysicsThreads != Settings::Manager::getInt("async num threads", "Physics"))
-            Settings::Manager::setInt("async num threads", "Physics", numPhysicsThreads);
+        saveSettingInt(physicsThreadsSpinBox, "async num threads", "Physics");
     }
 
     // Visuals
@@ -270,6 +274,8 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(autoUseTerrainSpecularMapsCheckBox, "auto use terrain specular maps", "Shaders");
         saveSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
         saveSettingBool(radialFogCheckBox, "radial fog", "Shaders");
+        saveSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
+        saveSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
         saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         saveSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
         saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
@@ -294,6 +300,8 @@ void Launcher::AdvancedPage::saveSettings()
         double objectPagingMinSize = objectPagingMinSizeComboBox->value();
         if (objectPagingMinSize != Settings::Manager::getDouble("object paging min size", "Terrain"))
             Settings::Manager::setDouble("object paging min size", "Terrain", objectPagingMinSize);
+
+        saveSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
     }
     
     // Audio
@@ -349,9 +357,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
         saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
         saveSettingBool(changeDialogTopicsCheckBox, "color topic enable", "GUI");
-        int showOwnedCurrentIndex = showOwnedComboBox->currentIndex();
-        if (showOwnedCurrentIndex != Settings::Manager::getInt("show owned", "Game"))
-            Settings::Manager::setInt("show owned", "Game", showOwnedCurrentIndex);
+        saveSettingInt(showOwnedComboBox,"show owned", "Game");
         saveSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
         saveSettingBool(useZoomOnMapCheckBox, "allow zooming", "Map");
         saveSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
@@ -370,11 +376,7 @@ void Launcher::AdvancedPage::saveSettings()
     {
         // Saves Settings
         saveSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-        int maximumQuicksaves = maximumQuicksavesComboBox->value();
-        if (maximumQuicksaves != Settings::Manager::getInt("max quicksaves", "Saves"))
-        {
-            Settings::Manager::setInt("max quicksaves", "Saves", maximumQuicksaves);
-        }
+        saveSettingInt(maximumQuicksavesComboBox, "max quicksaves", "Saves");
 
         // Other Settings
         std::string screenshotFormatString = screenshotFormatComboBox->currentText().toLower().toStdString();
@@ -414,6 +416,32 @@ void Launcher::AdvancedPage::saveSettingBool(QCheckBox *checkbox, const std::str
     bool cValue = checkbox->checkState();
     if (cValue != Settings::Manager::getBool(setting, group))
         Settings::Manager::setBool(setting, group, cValue);
+}
+
+void Launcher::AdvancedPage::loadSettingInt(QComboBox *comboBox, const std::string &setting, const std::string &group)
+{
+    int currentIndex = Settings::Manager::getInt(setting, group);
+    comboBox->setCurrentIndex(currentIndex);
+}
+
+void Launcher::AdvancedPage::saveSettingInt(QComboBox *comboBox, const std::string &setting, const std::string &group)
+{
+    int currentIndex = comboBox->currentIndex();
+    if (currentIndex != Settings::Manager::getInt(setting, group))
+        Settings::Manager::setInt(setting, group, currentIndex);
+}
+
+void Launcher::AdvancedPage::loadSettingInt(QSpinBox *spinBox, const std::string &setting, const std::string &group)
+{
+    int value = Settings::Manager::getInt(setting, group);
+    spinBox->setValue(value);
+}
+
+void Launcher::AdvancedPage::saveSettingInt(QSpinBox *spinBox, const std::string &setting, const std::string &group)
+{
+    int value = spinBox->value();
+    if (value != Settings::Manager::getInt(setting, group))
+        Settings::Manager::setInt(setting, group, value);
 }
 
 void Launcher::AdvancedPage::slotLoadedCellsChanged(QStringList cellNames)

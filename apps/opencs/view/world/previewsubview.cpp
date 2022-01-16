@@ -25,6 +25,8 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
     else
         mScene = new CSVRender::PreviewWidget (document.getData(), id.getId(), true, this);
 
+    mScene->setExterior(true);
+
     CSVWidget::SceneToolbar *toolbar = new CSVWidget::SceneToolbar (48+6, this);
 
     CSVWidget::SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);

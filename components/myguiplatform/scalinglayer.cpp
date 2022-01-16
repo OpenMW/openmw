@@ -3,8 +3,6 @@
 #include <MyGUI_RenderManager.h>
 #include <algorithm>
 
-#include "myguicompat.h"
-
 namespace osgMyGUI
 {
 
@@ -39,7 +37,7 @@ namespace osgMyGUI
             mTarget->doRender(_buffer, _texture, _count);
         }
 
-        const MyGUI::RenderTargetInfo& getInfo() OPENMW_MYGUI_CONST_GETTER_3_4_1 override
+        const MyGUI::RenderTargetInfo& getInfo() const override
         {
             mInfo = mTarget->getInfo();
             mInfo.hOffset = mHOffset;

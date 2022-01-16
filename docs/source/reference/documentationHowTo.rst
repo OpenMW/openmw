@@ -154,9 +154,9 @@ A push is just copying those "committed" changes to your online repo.
 (Commit and push can be combined in one step in PyCharm, so yay) 
 Once you've pushed all the changes you need to contribute something to the project, you will then submit a pull request, 
 so called because you are *requesting* that the project maintainers "pull"
- and merge the changes you've made into the project master repository. One of the project maintainers will probably ask 
- you to make some corrections or clarifications. Go back and repeat this process to make those changes, 
- and repeat until they're good enough to get merged.
+and merge the changes you've made into the project master repository. One of the project maintainers will probably ask
+you to make some corrections or clarifications. Go back and repeat this process to make those changes,
+and repeat until they're good enough to get merged.
 
 So to go over all that again. You rebase *every* time you start working on something to ensure you're working on the most 
 updated version (I do literally every time I open PyCharm). Then make your edits. 

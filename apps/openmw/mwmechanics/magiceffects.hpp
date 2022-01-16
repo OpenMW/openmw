@@ -97,8 +97,6 @@ namespace MWMechanics
             /// Copy Modifier values from \a effects, but keep original mBase values.
             void setModifiers(const MagicEffects& effects);
 
-            MagicEffects& operator+= (const MagicEffects& effects);
-
             EffectParam get (const EffectKey& key) const;
             ///< This function can safely be used for keys that are not present.
 

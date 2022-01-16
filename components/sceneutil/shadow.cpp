@@ -27,8 +27,7 @@ namespace SceneUtil
         mShadowSettings->setLightNum(0);
         mShadowSettings->setReceivesShadowTraversalMask(~0u);
 
-        int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
-        numberOfShadowMapsPerLight = std::max(1, std::min(numberOfShadowMapsPerLight, 8));
+        const int numberOfShadowMapsPerLight = std::clamp(Settings::Manager::getInt("number of shadow maps", "Shadows"), 1, 8);
 
         mShadowSettings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
         mShadowSettings->setBaseShadowTextureUnit(8 - numberOfShadowMapsPerLight);
@@ -36,7 +35,7 @@ namespace SceneUtil
         const float maximumShadowMapDistance = Settings::Manager::getFloat("maximum shadow map distance", "Shadows");
         if (maximumShadowMapDistance > 0)
         {
-            const float shadowFadeStart = std::min(std::max(0.f, Settings::Manager::getFloat("shadow fade start", "Shadows")), 1.f);
+            const float shadowFadeStart = std::clamp(Settings::Manager::getFloat("shadow fade start", "Shadows"), 0.f, 1.f);
             mShadowSettings->setMaximumShadowMapDistance(maximumShadowMapDistance);
             mShadowTechnique->setShadowFadeStart(maximumShadowMapDistance * shadowFadeStart);
         }
@@ -78,8 +77,7 @@ namespace SceneUtil
         if (!Settings::Manager::getBool("enable shadows", "Shadows"))
             return;
 
-        int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
-        numberOfShadowMapsPerLight = std::max(1, std::min(numberOfShadowMapsPerLight, 8));
+        const int numberOfShadowMapsPerLight = std::clamp(Settings::Manager::getInt("number of shadow maps", "Shadows"), 1, 8);
 
         int baseShadowTextureUnit = 8 - numberOfShadowMapsPerLight;
         

@@ -566,9 +566,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	fi
 
 	# SDL2
-	download "SDL 2.0.12" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/SDL2-2.0.12.zip" \
-		"SDL2-2.0.12.zip"
+	download "SDL 2.0.18" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/SDL2-2.0.18.zip" \
+		"SDL2-2.0.18.zip"
 
 	# LZ4
 	download "LZ4 1.9.2" \
@@ -898,17 +898,17 @@ fi
 cd $DEPS
 echo
 # SDL2
-printf "SDL 2.0.12... "
+printf "SDL 2.0.18... "
 {
-	if [ -d SDL2-2.0.12 ]; then
+	if [ -d SDL2-2.0.18 ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf SDL2-2.0.12
-		eval 7z x -y SDL2-2.0.12.zip $STRIP
+		rm -rf SDL2-2.0.18
+		eval 7z x -y SDL2-2.0.18.zip $STRIP
 	fi
-	export SDL2DIR="$(real_pwd)/SDL2-2.0.12"
+	export SDL2DIR="$(real_pwd)/SDL2-2.0.18"
 	for config in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $config "$(pwd)/SDL2-2.0.12/lib/x${ARCHSUFFIX}/SDL2.dll"
+		add_runtime_dlls $config "$(pwd)/SDL2-2.0.18/lib/x${ARCHSUFFIX}/SDL2.dll"
 	done
 	echo Done.
 }

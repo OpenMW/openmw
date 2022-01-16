@@ -27,11 +27,12 @@
 
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/waterutil.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/stringops.hpp>
 
 #include <components/nifosg/controller.hpp>
 
@@ -267,7 +268,6 @@ public:
 
     void setDefaults(osg::Camera* camera) override
     {
-        SceneUtil::setCameraClearDepth(camera);
         camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
         camera->setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         camera->setName("RefractionCamera");
@@ -305,8 +305,7 @@ public:
 
     void setWaterLevel(float waterLevel)
     {
-        const float refractionScale = std::min(1.0f, std::max(0.0f,
-            Settings::Manager::getFloat("refraction scale", "Water")));
+        const float refractionScale = std::clamp(Settings::Manager::getFloat("refraction scale", "Water"), 0.f, 1.f);
 
         mViewMatrix = osg::Matrix::scale(1, 1, refractionScale) *
             osg::Matrix::translate(0, 0, (1.0 - refractionScale) * waterLevel);
@@ -344,7 +343,6 @@ public:
 
     void setDefaults(osg::Camera* camera) override
     {
-        SceneUtil::setCameraClearDepth(camera);
         camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
         camera->setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         camera->setName("ReflectionCamera");
@@ -400,7 +398,7 @@ private:
     unsigned int calcNodeMask()
     {
         int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        reflectionDetail = std::min(5, std::max(mInterior ? 2 : 0, reflectionDetail));
+        reflectionDetail = std::clamp(reflectionDetail, mInterior ? 2 : 0, 5);
         unsigned int extraMask = 0;
         if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
         if(reflectionDetail >= 2) extraMask |= Mask_Static;
@@ -583,7 +581,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 
     // Add animated textures
     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
-    int frameCount = std::max(0, std::min(Fallback::Map::getInt("Water_SurfaceFrameCount"), 320));
+    const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
     const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {
@@ -645,7 +643,7 @@ public:
         {
             stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
             stateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
-            osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
             depth->setWriteMask(false);
             stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
@@ -677,7 +675,10 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
 {
     // use a define map to conditionally compile the shader
     std::map<std::string, std::string> defineMap;
-    defineMap.insert(std::make_pair(std::string("refraction_enabled"), std::string(mRefraction ? "1" : "0")));
+    defineMap["refraction_enabled"] = std::string(mRefraction ? "1" : "0");
+    const auto rippleDetail = std::clamp(Settings::Manager::getInt("rain ripple detail", "Water"), 0, 2);
+    defineMap["rain_ripple_detail"] = std::to_string(rippleDetail);
+
 
     Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
     osg::ref_ptr<osg::Shader> vertexShader(shaderMgr.getShader("water_vertex.glsl", defineMap, osg::Shader::VERTEX));
@@ -724,7 +725,7 @@ Water::~Water()
 
 void Water::listAssetsToPreload(std::vector<std::string> &textures)
 {
-    int frameCount = std::max(0, std::min(Fallback::Map::getInt("Water_SurfaceFrameCount"), 320));
+    const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
     const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {

@@ -37,6 +37,7 @@ option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
 option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
+option(BUILD_NAVMESHTOOL        "Build navmesh tool" ON)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
 
@@ -398,7 +399,7 @@ set(Boost_NO_BOOST_CMAKE ON)
 
 find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
 if(OPENMW_USE_SYSTEM_MYGUI)
-    find_package(MyGUI 3.2.2 REQUIRED)
+    find_package(MyGUI 3.4.1 REQUIRED)
 endif()
 find_package(SDL2 2.0.9 REQUIRED)
 find_package(OpenAL REQUIRED)
@@ -414,7 +415,8 @@ else(USE_LUAJIT)
 endif(USE_LUAJIT)
 
 # C++ library binding to Lua
-set(SOL_INCLUDE_DIRS ${OpenMW_SOURCE_DIR}/extern/sol3.2.2 ${OpenMW_SOURCE_DIR}/extern/sol_config)
+set(SOL_INCLUDE_DIR ${OpenMW_SOURCE_DIR}/extern/sol3.2.2)
+set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 
 include_directories(
     BEFORE SYSTEM
@@ -426,7 +428,8 @@ include_directories(
     ${OPENGL_INCLUDE_DIR}
     ${BULLET_INCLUDE_DIRS}
     ${LUA_INCLUDE_DIR}
-    ${SOL_INCLUDE_DIRS}
+    ${SOL_INCLUDE_DIR}
+    ${SOL_CONFIG_DIR}
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
@@ -443,9 +446,8 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 endif (APPLE)
 
-if (NOT APPLE)
-    set(OPENMW_MYGUI_FILES_ROOT ${OpenMW_BINARY_DIR})
-    set(OPENMW_SHADERS_ROOT ${OpenMW_BINARY_DIR})
+if (NOT APPLE)  # this is modified for macOS use later in "apps/open[mw|cs]/CMakeLists.txt"
+    set(OPENMW_RESOURCES_ROOT ${OpenMW_BINARY_DIR})
 endif ()
 
 add_subdirectory(files/)
@@ -602,6 +604,10 @@ if (BUILD_BENCHMARKS)
   add_subdirectory(apps/benchmarks)
 endif()
 
+if (BUILD_NAVMESHTOOL)
+  add_subdirectory(apps/navmeshtool)
+endif()
+
 if (WIN32)
   if (MSVC)
     if (OPENMW_MP_BUILD)
@@ -701,6 +707,10 @@ if (WIN32)
     if (BUILD_BENCHMARKS)
         set_target_properties(openmw_detournavigator_navmeshtilescache_benchmark PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif()
+
+    if (BUILD_NAVMESHTOOL)
+        set_target_properties(openmw-navmeshtool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
   endif(MSVC)
 
   # TODO: At some point release builds should not use the console but rather write to a log file
@@ -709,8 +719,10 @@ if (WIN32)
 endif()
 
 if (BUILD_OPENMW AND APPLE)
-    # Without these flags LuaJit crashes on startup on OSX
-    set_target_properties(openmw PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+    if (USE_LUAJIT)
+        # Without these flags LuaJit crashes on startup on OSX
+        set_target_properties(openmw PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+    endif(USE_LUAJIT)
     target_compile_definitions(components PRIVATE GL_SILENCE_DEPRECATION=1)
     target_compile_definitions(openmw PRIVATE GL_SILENCE_DEPRECATION=1)
 endif()
@@ -941,6 +953,9 @@ elseif(NOT APPLE)
         IF(BUILD_WIZARD)
             INSTALL(PROGRAMS "${INSTALL_SOURCE}/openmw-wizard" DESTINATION "${BINDIR}" )
         ENDIF(BUILD_WIZARD)
+        if(BUILD_NAVMESHTOOL)
+            install(PROGRAMS "${INSTALL_SOURCE}/openmw-navmeshtool" DESTINATION "${BINDIR}" )
+        endif()
 
         # Install licenses
         INSTALL(FILES "files/mygui/DejaVuFontLicense.txt" DESTINATION "${LICDIR}" )

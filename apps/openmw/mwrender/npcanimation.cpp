@@ -20,6 +20,7 @@
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -310,7 +311,7 @@ class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
 public:
     DepthClearCallback()
     {
-        mDepth = SceneUtil::createDepth();
+        mDepth = new SceneUtil::AutoDepth;
         mDepth->setWriteMask(true);
 
         mStateSet = new osg::StateSet;
@@ -837,14 +838,18 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
                     }
                 }
             }
+            SceneUtil::ForceControllerSourcesVisitor assignVisitor(src);
+            node->accept(assignVisitor);
         }
-        else if (type == ESM::PRT_Weapon)
-            src = mWeaponAnimationTime;
         else
-            src.reset(new NullAnimationTime);
-
-        SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
-        node->accept(assignVisitor);
+        {
+            if (type == ESM::PRT_Weapon)
+                src = mWeaponAnimationTime;
+            else
+                src.reset(new NullAnimationTime);
+            SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
+            node->accept(assignVisitor);
+        }
     }
 
     return true;

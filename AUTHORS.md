@@ -31,6 +31,7 @@ Programmers
     Allofich
     Andreas Stöckel
     Andrei Kortunov (akortunov)
+    Andrew Appuhamy (andrew-app)
     AnyOldName3
     Ardekantur
     Armin Preiml
@@ -92,6 +93,7 @@ Programmers
     Haoda Wang (h313)
     hristoast
     Internecine
+    Ivan Beloborodov (myrix)
     Jackerty
     Jacob Essex (Yacoby)
     Jacob Turnbull (Tankinfrank)
@@ -113,6 +115,7 @@ Programmers
     John Blomberg (fstp)
     Jordan Ayers
     Jordan Milne
+    Josquin Frei
     Josua Grawitter
     Jules Blok (Armada651)
     julianko
@@ -215,6 +218,7 @@ Programmers
     tlmullis
     tri4ng1e
     Thoronador
+    Tom Lowe (Vulpen)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)
     unelsson
@@ -230,7 +234,7 @@ Programmers
     Yuri Krupenin
     zelurker
     Noah Gooder
-    Andrew Appuhamy (andrew-app)
+    
 
 Documentation
 -------------

@@ -48,7 +48,7 @@ namespace testing
     template <>
     inline testing::Message& Message::operator <<(const osg::Vec3f& value)
     {
-        return (*this) << "osg::Vec3f(" << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.x()
+        return (*this) << "Vec3fEq(" << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.x()
             << ", " << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.y()
             << ", " << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.z()
             << ')';

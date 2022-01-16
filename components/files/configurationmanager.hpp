@@ -77,6 +77,16 @@ void parseArgs(int argc, const char* const argv[], boost::program_options::varia
 void parseConfig(std::istream& stream, boost::program_options::variables_map& variables,
     boost::program_options::options_description& description);
 
+class MaybeQuotedPath : public boost::filesystem::path
+{
+};
+
+std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPath);
+
+typedef std::vector<MaybeQuotedPath> MaybeQuotedPathContainer;
+
+PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathContainer);
+
 } /* namespace Cfg */
 
 #endif /* COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP */

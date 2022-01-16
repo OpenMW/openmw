@@ -44,6 +44,7 @@ namespace ContentSelectorModel
         bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
 
         void addFiles(const QString &path);
+        void sortFiles();
         void clearFiles();
 
         QModelIndex indexFromItem(const EsmFile *item) const;
@@ -67,8 +68,6 @@ namespace ContentSelectorModel
     private:
 
         void addFile(EsmFile *file);
-
-        void sortFiles();
 
         /// Checks a specific plug-in for load order errors
         /// \return all errors found for specific plug-in

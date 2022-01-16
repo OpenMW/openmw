@@ -1,7 +1,12 @@
 #ifndef WINDOWS_CRASHMONITOR_HPP
 #define WINDOWS_CRASHMONITOR_HPP
 
-#include <windef.h>
+#undef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+
+#include <atomic>
+#include <unordered_map>
 
 namespace Crash
 {
@@ -21,6 +26,8 @@ public:
 private:
 
     HANDLE mAppProcessHandle = nullptr;
+    DWORD mAppMainThreadId = 0;
+    HWND mAppWindowHandle = nullptr;
 
     // triggered when the monitor process wants to wake the parent process (received via SHM)
     HANDLE mSignalAppEvent = nullptr;
@@ -31,17 +38,28 @@ private:
     HANDLE mShmHandle = nullptr;
     HANDLE mShmMutex = nullptr;
 
+    DWORD mFreezeMessageBoxThreadId = 0;
+    std::atomic_bool mFreezeAbort;
+
+    static std::unordered_map<HWINEVENTHOOK, CrashMonitor*> smEventHookOwners;
+
     void signalApp() const;
 
     bool waitApp() const;
 
     bool isAppAlive() const;
 
+    bool isAppFrozen();
+
     void shmLock();
 
     void shmUnlock();
 
     void handleCrash();
+
+    void showFreezeMessageBox();
+
+    void hideFreezeMessageBox();
 };
 
 } // namespace Crash

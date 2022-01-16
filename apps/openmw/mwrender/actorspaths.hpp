@@ -3,16 +3,20 @@
 
 #include <apps/openmw/mwworld/ptr.hpp>
 
-#include <components/detournavigator/navigator.hpp>
-
 #include <osg/ref_ptr>
 
 #include <unordered_map>
 #include <deque>
+#include <map>
 
 namespace osg
 {
     class Group;
+}
+
+namespace DetourNavigator
+{
+    struct Settings;
 }
 
 namespace MWRender

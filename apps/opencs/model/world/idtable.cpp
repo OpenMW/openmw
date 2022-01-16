@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include <components/esm/cellid.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
@@ -354,8 +355,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
     for (int i = 0; i < idCollection()->getSize(); ++i)
     {
         auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(i));
-        std::string texture = record.get().mTexture;
-        std::transform(texture.begin(), texture.end(), texture.begin(), tolower);
+        std::string texture = Misc::StringUtils::lowerCase(record.get().mTexture);
         if (record.isModified())
             reverseLookupMap.emplace(texture, idCollection()->getId(i));
     }
@@ -376,8 +376,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
 
         // Look for a pre-existing record
         auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(oldRow));
-        std::string texture = record.get().mTexture;
-        std::transform(texture.begin(), texture.end(), texture.begin(), tolower);
+        std::string texture = Misc::StringUtils::lowerCase(record.get().mTexture);
         auto searchIt = reverseLookupMap.find(texture);
         if (searchIt != reverseLookupMap.end())
         {

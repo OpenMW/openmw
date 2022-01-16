@@ -7,6 +7,7 @@
 #include <osg/BlendFunc>
 #include <osg/Material>
 #include <osg/Switch>
+#include <osg/LightModel>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
@@ -372,6 +373,19 @@ namespace
     private:
         int mEffectId;
     };
+
+    osg::ref_ptr<osg::LightModel> getVFXLightModelInstance()
+    {
+        static osg::ref_ptr<osg::LightModel> lightModel = nullptr;
+
+        if (!lightModel)
+        {
+            lightModel = new osg::LightModel;
+            lightModel->setAmbientIntensity({1,1,1,1});
+        }
+
+        return lightModel;
+    }
 }
 
 namespace MWRender
@@ -624,9 +638,8 @@ namespace MWRender
             return;
 
         const NodeMap& nodeMap = getNodeMap();
-
-        for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = animsrc->mKeyframes->mKeyframeControllers.begin();
-             it != animsrc->mKeyframes->mKeyframeControllers.end(); ++it)
+        const auto& controllerMap = animsrc->mKeyframes->mKeyframeControllers;
+        for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = controllerMap.begin(); it != controllerMap.end(); ++it)
         {
             std::string bonename = Misc::StringUtils::lowerCase(it->first);
             NodeMap::const_iterator found = nodeMap.find(bonename);
@@ -652,14 +665,32 @@ namespace MWRender
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(mAnimationTimePtr[0]);
         mObjectRoot->accept(assignVisitor);
 
+        // Determine the movement accumulation bone if necessary
         if (!mAccumRoot)
         {
-            NodeMap::const_iterator found = nodeMap.find("bip01");
-            if (found == nodeMap.end())
-                found = nodeMap.find("root bone");
-
-            if (found != nodeMap.end())
-                mAccumRoot = found->second;
+            // Priority matters! bip01 is preferred.
+            static const std::array<std::string, 2> accumRootNames =
+            {
+                "bip01",
+                "root bone"
+            };
+            NodeMap::const_iterator found = nodeMap.end();
+            for (const std::string& name : accumRootNames)
+            {
+                found = nodeMap.find(name);
+                if (found == nodeMap.end())
+                    continue;
+                for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = controllerMap.begin(); it != controllerMap.end(); ++it)
+                {
+                    if (Misc::StringUtils::lowerCase(it->first) == name)
+                    {
+                        mAccumRoot = found->second;
+                        break;
+                    }
+                }
+                if (mAccumRoot)
+                    break;
+            }
         }
     }
 
@@ -1530,7 +1561,9 @@ namespace MWRender
         parentNode->addChild(trans);
 
         osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model, trans);
-        node->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+        // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
+        node->getOrCreateStateSet()->setAttributeAndModes(getVFXLightModelInstance(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
         node->accept(findMaxLengthVisitor);
@@ -1798,7 +1831,7 @@ namespace MWRender
             visitor.remove();
         }
 
-        if (SceneUtil::hasUserDescription(mObjectRoot, Constants::NightDayLabel))
+        if (Settings::Manager::getBool("day night switches", "Game") && SceneUtil::hasUserDescription(mObjectRoot, Constants::NightDayLabel))
         {
             AddSwitchCallbacksVisitor visitor;
             mObjectRoot->accept(visitor);

@@ -13,6 +13,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "openal_output.hpp"
@@ -954,17 +955,7 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
     try
     {
         DecoderPtr decoder = mManager.getDecoder();
-        // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-        if(decoder->mResourceMgr->exists(fname))
-            decoder->open(fname);
-        else
-        {
-            std::string file = fname;
-            std::string::size_type pos = file.rfind('.');
-            if(pos != std::string::npos)
-                file = file.substr(0, pos)+".mp3";
-            decoder->open(file);
-        }
+        decoder->open(Misc::ResourceHelpers::correctSoundPath(fname, decoder->mResourceMgr));
 
         ChannelConfig chans;
         SampleType type;
@@ -1109,13 +1100,8 @@ void OpenAL_Output::initCommon3D(ALuint source, const osg::Vec3f &pos, ALfloat m
     alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
 }
 
-void OpenAL_Output::updateCommon(ALuint source, const osg::Vec3f& pos, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv, bool is3d)
+void OpenAL_Output::updateCommon(ALuint source, const osg::Vec3f& pos, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv)
 {
-    if(is3d)
-    {
-        if((pos - mListenerPos).length2() > maxdist*maxdist)
-            gain = 0.0f;
-    }
     if(useenv && mListenerEnv == Env_Underwater && !mWaterFilter)
     {
         gain *= 0.9f;
@@ -1243,7 +1229,7 @@ void OpenAL_Output::updateSound(Sound *sound)
     ALuint source = GET_PTRID(sound->mHandle);
 
     updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
-                 sound->getPitch(), sound->getUseEnv(), sound->getIs3D());
+                 sound->getPitch(), sound->getUseEnv());
     getALError();
 }
 
@@ -1369,7 +1355,7 @@ void OpenAL_Output::updateStream(Stream *sound)
     ALuint source = stream->mSource;
 
     updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
-                 sound->getPitch(), sound->getUseEnv(), sound->getIs3D());
+                 sound->getPitch(), sound->getUseEnv());
     getALError();
 }
 

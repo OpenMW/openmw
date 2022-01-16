@@ -4,12 +4,8 @@
 #include "settings.hpp"
 #include "tilebounds.hpp"
 #include "tileposition.hpp"
-#include "tilebounds.hpp"
-
-#include <LinearMath/btTransform.h>
 
 #include <osg/Vec2f>
-#include <osg/Vec2i>
 #include <osg/Vec3f>
 
 #include <algorithm>
@@ -17,38 +13,31 @@
 
 namespace DetourNavigator
 {
-    inline float getHeight(const Settings& settings,const osg::Vec3f& agentHalfExtents)
-    {
-        return 2.0f * agentHalfExtents.z() * settings.mRecastScaleFactor;
-    }
-
-    inline float getMaxClimb(const Settings& settings)
-    {
-        return settings.mMaxClimb * settings.mRecastScaleFactor;
-    }
-
-    inline float getRadius(const Settings& settings, const osg::Vec3f& agentHalfExtents)
-    {
-        return std::max(agentHalfExtents.x(), agentHalfExtents.y()) * std::sqrt(2) * settings.mRecastScaleFactor;
-    }
-
-    inline float toNavMeshCoordinates(const Settings& settings, float value)
+    inline float toNavMeshCoordinates(const RecastSettings& settings, float value)
     {
         return value * settings.mRecastScaleFactor;
     }
 
-    inline osg::Vec2f toNavMeshCoordinates(const Settings& settings, osg::Vec2f position)
+    inline osg::Vec2f toNavMeshCoordinates(const RecastSettings& settings, osg::Vec2f position)
     {
         return position * settings.mRecastScaleFactor;
     }
 
-    inline osg::Vec3f toNavMeshCoordinates(const Settings& settings, osg::Vec3f position)
+    inline osg::Vec3f toNavMeshCoordinates(const RecastSettings& settings, osg::Vec3f position)
     {
         std::swap(position.y(), position.z());
         return position * settings.mRecastScaleFactor;
     }
 
-    inline osg::Vec3f fromNavMeshCoordinates(const Settings& settings, osg::Vec3f position)
+    inline TileBounds toNavMeshCoordinates(const RecastSettings& settings, const TileBounds& value)
+    {
+        return TileBounds {
+            toNavMeshCoordinates(settings, value.mMin),
+            toNavMeshCoordinates(settings, value.mMax)
+        };
+    }
+
+    inline osg::Vec3f fromNavMeshCoordinates(const RecastSettings& settings, osg::Vec3f position)
     {
         const auto factor = 1.0f / settings.mRecastScaleFactor;
         position *= factor;
@@ -56,12 +45,12 @@ namespace DetourNavigator
         return position;
     }
 
-    inline float getTileSize(const Settings& settings)
+    inline float getTileSize(const RecastSettings& settings)
     {
         return static_cast<float>(settings.mTileSize) * settings.mCellSize;
     }
 
-    inline TilePosition getTilePosition(const Settings& settings, const osg::Vec3f& position)
+    inline TilePosition getTilePosition(const RecastSettings& settings, const osg::Vec3f& position)
     {
         return TilePosition(
             static_cast<int>(std::floor(position.x() / getTileSize(settings))),
@@ -69,7 +58,7 @@ namespace DetourNavigator
         );
     }
 
-    inline TileBounds makeTileBounds(const Settings& settings, const TilePosition& tilePosition)
+    inline TileBounds makeTileBounds(const RecastSettings& settings, const TilePosition& tilePosition)
     {
         return TileBounds {
             osg::Vec2f(tilePosition.x(), tilePosition.y()) * getTileSize(settings),
@@ -77,17 +66,12 @@ namespace DetourNavigator
         };
     }
 
-    inline float getBorderSize(const Settings& settings)
+    inline float getBorderSize(const RecastSettings& settings)
     {
         return static_cast<float>(settings.mBorderSize) * settings.mCellSize;
     }
 
-    inline float getSwimLevel(const Settings& settings, const float waterLevel, const float agentHalfExtentsZ)
-    {
-        return waterLevel - settings.mSwimHeightScale * agentHalfExtentsZ - agentHalfExtentsZ;;
-    }
-
-    inline float getRealTileSize(const Settings& settings)
+    inline float getRealTileSize(const RecastSettings& settings)
     {
         return settings.mTileSize * settings.mCellSize / settings.mRecastScaleFactor;
     }
@@ -95,6 +79,17 @@ namespace DetourNavigator
     inline float getMaxNavmeshAreaRadius(const Settings& settings)
     {
         return std::floor(std::sqrt(settings.mMaxTilesNumber / osg::PI)) - 1;
+    }
+
+    inline TileBounds makeRealTileBoundsWithBorder(const RecastSettings& settings, const TilePosition& tilePosition)
+    {
+        TileBounds result = makeTileBounds(settings, tilePosition);
+        const float border = getBorderSize(settings);
+        result.mMin -= osg::Vec2f(border, border);
+        result.mMax += osg::Vec2f(border, border);
+        result.mMin /= settings.mRecastScaleFactor;
+        result.mMax /= settings.mRecastScaleFactor;
+        return result;
     }
 }
 

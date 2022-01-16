@@ -1,5 +1,7 @@
 #include "filesystemarchive.hpp"
 
+#include <algorithm>
+
 #include <boost/filesystem.hpp>
 
 #include <components/debug/debuglog.hpp>

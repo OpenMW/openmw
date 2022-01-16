@@ -5,7 +5,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/esm/aisequence.hpp>
-#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navigatorutils.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
 #include "../mwbase/world.hpp"
@@ -105,7 +105,7 @@ namespace MWMechanics
     }
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
-        TypedAiPackage<AiWander>(makeDefaultOptions().withRepeat(repeat)),
+        TypedAiPackage<AiWander>(repeat),
         mDistance(std::max(0, distance)),
         mDuration(std::max(0, duration)),
         mRemainingDuration(duration), mTimeOfDay(timeOfDay),
@@ -337,7 +337,8 @@ namespace MWMechanics
             if (!isWaterCreature && !isFlyingCreature)
             {
                 // findRandomPointAroundCircle uses wanderDistance as limit for random and not as exact distance
-                if (const auto destination = navigator->findRandomPointAroundCircle(halfExtents, mInitialActorPosition, wanderDistance, navigatorFlags))
+                if (const auto destination = DetourNavigator::findRandomPointAroundCircle(*navigator, halfExtents,
+                        mInitialActorPosition, wanderDistance, navigatorFlags))
                     mDestination = *destination;
                 else
                     mDestination = getRandomPointAround(mInitialActorPosition, wanderRadius);

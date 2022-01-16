@@ -75,6 +75,16 @@ namespace
         }
         return duration;
     }
+
+    bool isSpellActive(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const std::string& id)
+    {
+        int actorId = caster.getClass().getCreatureStats(caster).getActorId();
+        const auto& active = target.getClass().getCreatureStats(target).getActiveSpells();
+        return std::find_if(active.begin(), active.end(), [&](const auto& spell)
+        {
+            return spell.getCasterActorId() == actorId && Misc::StringUtils::ciEqual(spell.getId(), id);
+        }) != active.end();
+    }
 }
 
 namespace MWMechanics
@@ -105,8 +115,6 @@ namespace MWMechanics
 
     float rateSpell(const ESM::Spell *spell, const MWWorld::Ptr &actor, const MWWorld::Ptr& enemy)
     {
-        const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-
         float successChance = MWMechanics::getSpellSuccessChance(spell, actor);
         if (successChance == 0.f)
             return 0.f;
@@ -125,9 +133,9 @@ namespace MWMechanics
 
         // Spells don't stack, so early out if the spell is still active on the target
         int types = getRangeTypes(spell->mEffects);
-        if ((types & Self) && stats.getActiveSpells().isSpellActive(spell->mId))
+        if ((types & Self) && isSpellActive(actor, actor, spell->mId))
             return 0.f;
-        if ( ((types & Touch) || (types & Target)) && enemy.getClass().getCreatureStats(enemy).getActiveSpells().isSpellActive(spell->mId))
+        if ( ((types & Touch) || (types & Target)) && isSpellActive(actor, enemy, spell->mId))
             return 0.f;
 
         return rateEffects(spell->mEffects, actor, enemy) * (successChance / 100.f);
@@ -368,6 +376,24 @@ namespace MWMechanics
                 return 0.f;
 
             break;
+        case ESM::MagicEffect::BoundShield:
+            if(!actor.getClass().hasInventoryStore(actor))
+                return 0.f;
+            else if(!actor.getClass().isNpc())
+            {
+                // If the actor is an NPC they can benefit from the armor rating, otherwise check if we've got a one-handed weapon to use with the shield
+                const auto& store = actor.getClass().getInventoryStore(actor);
+                auto oneHanded = std::find_if(store.cbegin(MWWorld::ContainerStore::Type_Weapon), store.cend(), [](const MWWorld::ConstPtr& weapon)
+                {
+                    if(weapon.getClass().getItemHealth(weapon) <= 0.f)
+                        return false;
+                    short type = weapon.get<ESM::Weapon>()->mBase->mData.mType;
+                    return !(MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::TwoHanded);
+                });
+                if(oneHanded == store.cend())
+                    return 0.f;
+            }
+            break;
         // Creatures can not wear armor
         case ESM::MagicEffect::BoundCuirass:
         case ESM::MagicEffect::BoundGloves:
@@ -550,6 +576,13 @@ namespace MWMechanics
             MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
 
             if (!creatureStats.getSummonedCreatureMap().empty())
+                return 0.f;
+        }
+        if(effect.mEffectID >= ESM::MagicEffect::BoundDagger && effect.mEffectID <= ESM::MagicEffect::BoundGloves)
+        {
+            // While rateSpell prevents actors from recasting the same spell, it doesn't prevent them from casting different spells with the same effect.
+            // Multiple instances of the same bound item don't stack so if the effect is already active, rate it as useless.
+            if(actor.getClass().getCreatureStats(actor).getMagicEffects().get(effect.mEffectID).getMagnitude() > 0.f)
                 return 0.f;
         }
 

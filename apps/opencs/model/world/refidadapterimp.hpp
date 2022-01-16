@@ -1678,7 +1678,7 @@ namespace CSMWorld
             newRow.mWander.mTimeOfDay = 0;
             for (int i = 0; i < 8; ++i)
                 newRow.mWander.mIdle[i] = 0;
-            newRow.mWander.mShouldRepeat = 0;
+            newRow.mWander.mShouldRepeat = 1;
             newRow.mCellName = "";
 
             if (position >= (int)list.size())
@@ -1784,9 +1784,15 @@ namespace CSMWorld
                         return static_cast<int>(content.mWander.mIdle[subColIndex-4]);
                     else
                         return QVariant();
-                case 12: // wander repeat
+                case 12: // repeat
                     if (content.mType == ESM::AI_Wander)
                         return content.mWander.mShouldRepeat != 0;
+                    else if (content.mType == ESM::AI_Travel)
+                        return content.mTravel.mShouldRepeat != 0;
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        return content.mTarget.mShouldRepeat != 0;
+                    else if (content.mType == ESM::AI_Activate)
+                        return content.mActivate.mShouldRepeat != 0;
                     else
                         return QVariant();
                 case 13: // activate name
@@ -1895,6 +1901,12 @@ namespace CSMWorld
                 case 12:
                     if (content.mType == ESM::AI_Wander)
                         content.mWander.mShouldRepeat = static_cast<unsigned char>(value.toInt());
+                    else if (content.mType == ESM::AI_Travel)
+                        content.mTravel.mShouldRepeat = static_cast<unsigned char>(value.toInt());
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mTarget.mShouldRepeat = static_cast<unsigned char>(value.toInt());
+                    else if (content.mType == ESM::AI_Activate)
+                        content.mActivate.mShouldRepeat = static_cast<unsigned char>(value.toInt());
                     else
                         return; // return without saving
 

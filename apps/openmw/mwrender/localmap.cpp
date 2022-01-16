@@ -18,7 +18,7 @@
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/files/memorystream.hpp>
@@ -178,7 +178,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 {
     osg::ref_ptr<osg::Camera> camera (new osg::Camera);
 
-    if (SceneUtil::getReverseZ())
+    if (SceneUtil::AutoDepth::isReversed())
         camera->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10));
     else
         camera->setProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10);
@@ -198,14 +198,10 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     osg::Camera::CullingMode cullingMode = (osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING) & ~(osg::Camera::SMALL_FEATURE_CULLING);
     camera->setCullingMode(cullingMode);
 
-    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-    stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
-
-    if (SceneUtil::getReverseZ())
-        stateset->setAttributeAndModes(SceneUtil::createDepth(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
     SceneUtil::setCameraClearDepth(camera);
 
+    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+    stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
     stateset->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(camera->getProjectionMatrix())), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
     // assign large value to effectively turn off fog
@@ -562,8 +558,8 @@ bool LocalMap::isPositionExplored (float nX, float nY, int x, int y)
     if (!segment.mFogOfWarImage)
         return false;
 
-    nX = std::max(0.f, std::min(1.f, nX));
-    nY = std::max(0.f, std::min(1.f, nY));
+    nX = std::clamp(nX, 0.f, 1.f);
+    nY = std::clamp(nY, 0.f, 1.f);
 
     int texU = static_cast<int>((sFogOfWarResolution - 1) * nX);
     int texV = static_cast<int>((sFogOfWarResolution - 1) * nY);
@@ -647,8 +643,7 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
 
                     uint32_t clr = *(uint32_t*)data;
                     uint8_t alpha = (clr >> 24);
-
-                    alpha = std::min( alpha, (uint8_t) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
+                    alpha = std::min(alpha, (uint8_t)(std::clamp(sqrDist/sqrExploreRadius, 0.f, 1.f) * 255));
                     uint32_t val = (uint32_t) (alpha << 24);
                     if ( *data != val)
                     {

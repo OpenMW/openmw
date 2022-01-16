@@ -550,6 +550,11 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
     {
         updateCameraParameters();
     }
+    else if (*setting == "Rendering/scene-day-night-switch-nodes")
+    {
+        if (mLighting)
+            setLighting(mLighting);
+    }
 }
 
 void RenderWidget::updateCameraParameters(double overrideAspect)

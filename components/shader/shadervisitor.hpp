@@ -3,6 +3,7 @@
 
 #include <osg/NodeVisitor>
 #include <osg/Program>
+#include <osg/Texture2D>
 
 namespace Resource
 {
@@ -44,6 +45,8 @@ namespace Shader
         void setApplyLightingToEnvMaps(bool apply);
 
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
+
+        void setOpaqueDepthTex(osg::ref_ptr<osg::Texture2D> texture);
 
         void apply(osg::Node& node) override;
 
@@ -98,6 +101,9 @@ namespace Shader
             // -1 == no tangents required
             int mTexStageRequiringTangents;
 
+            bool mSoftParticles;
+            float mSoftParticleSize;
+
             // the Node that requested these requirements
             osg::Node* mNode;
         };
@@ -110,6 +116,7 @@ namespace Shader
         bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
 
         osg::ref_ptr<const osg::Program> mProgramTemplate;
+        osg::ref_ptr<osg::Texture2D> mOpaqueDepthTex;
     };
 
     class ReinstateRemovedStateVisitor : public osg::NodeVisitor

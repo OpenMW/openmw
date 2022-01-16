@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_TILEBOUNDS_H
 
 #include <osg/Vec2f>
+#include <osg/Vec2i>
 
 #include <algorithm>
 #include <optional>
@@ -31,6 +32,14 @@ namespace DetourNavigator
         if (minY > maxY)
             return std::nullopt;
         return TileBounds {osg::Vec2f(minX, minY), osg::Vec2f(maxX, maxY)};
+    }
+
+    inline TileBounds maxCellTileBounds(const osg::Vec2i& position, int size)
+    {
+        return TileBounds {
+            osg::Vec2f(position.x(), position.y()) * size,
+            osg::Vec2f(position.x() + 1, position.y() + 1) * size
+        };
     }
 }
 

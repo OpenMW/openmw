@@ -19,11 +19,6 @@ namespace Convert
         return osg::Vec3f(values[0], values[1], values[2]);
     }
 
-    inline osg::Vec3f makeOsgVec3f(const btVector3& value)
-    {
-        return osg::Vec3f(value.x(), value.y(), value.z());
-    }
-
     inline osg::Vec3f makeOsgVec3f(const ESM::Pathgrid::Point& value)
     {
         return osg::Vec3f(value.mX, value.mY, value.mZ);
@@ -71,6 +66,11 @@ namespace Convert
     inline btQuaternion makeBulletQuaternion(const ESM::Position& position)
     {
         return makeBulletQuaternion(position.rot);
+    }
+
+    inline btTransform makeBulletTransform(const ESM::Position& position)
+    {
+        return btTransform(makeBulletQuaternion(position), toBullet(position.asVec3()));
     }
 }
 }

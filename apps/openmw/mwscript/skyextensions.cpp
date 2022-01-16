@@ -11,6 +11,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/esmstore.hpp"
+
 #include "interpretercontext.hpp"
 
 namespace MWScript
@@ -91,7 +93,11 @@ namespace MWScript
                     Interpreter::Type_Integer id = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWorld()->changeWeather(region, id);
+                    const ESM::Region* reg = MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(region);
+                    if (reg)
+                        MWBase::Environment::get().getWorld()->changeWeather(region, id);
+                    else
+                        runtime.getContext().report("Warning: Region \"" + region + "\" was not found");
                 }
         };
 
@@ -108,7 +114,7 @@ namespace MWScript
                     chances.reserve(10);
                     while(arg0 > 0)
                     {
-                        chances.push_back(std::max(0, std::min(127, runtime[0].mInteger)));
+                        chances.push_back(std::clamp(runtime[0].mInteger, 0, 127));
                         runtime.pop();
                         arg0--;
                     }

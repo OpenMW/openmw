@@ -162,7 +162,10 @@ namespace MWMechanics
         float castChance = baseChance + castBonus;
         castChance *= stats.getFatigueTerm();
 
-        return std::max(0.f, cap ? std::min(100.f, castChance) : castChance);
+        if (cap)
+            return std::clamp(castChance, 0.f, 100.f);
+
+        return std::max(castChance, 0.f);
     }
 
     float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
@@ -195,49 +198,5 @@ namespace MWMechanics
     {
         const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
         return spell && spellIncreasesSkill(spell);
-    }
-
-    bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer)
-    {
-        switch (effectId)
-        {
-            case ESM::MagicEffect::Levitate:
-            {
-                if (!MWBase::Environment::get().getWorld()->isLevitationEnabled())
-                {
-                    if (castByPlayer)
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sLevitateDisabled}");
-                    return false;
-                }
-                break;
-            }
-            case ESM::MagicEffect::Soultrap:
-            {
-                if (!target.getClass().isNpc() // no messagebox for NPCs
-                     && (target.getType() == ESM::Creature::sRecordId && target.get<ESM::Creature>()->mBase->mData.mSoul == 0))
-                {
-                    if (castByPlayer)
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
-                    return true; // must still apply to get visual effect and have target regard it as attack
-                }
-                break;
-            }
-            case ESM::MagicEffect::WaterWalking:
-            {
-                if (target.getClass().isPureWaterCreature(target) && MWBase::Environment::get().getWorld()->isSwimming(target))
-                    return false;
-
-                MWBase::World *world = MWBase::Environment::get().getWorld();
-
-                if (!world->isWaterWalkingCastableOnTarget(target))
-                {
-                    if (castByPlayer && caster == target)
-                        MWBase::Environment::get().getWindowManager()->messageBox ("#{sMagicInvalidEffect}");
-                    return false;
-                }
-                break;
-            }
-        }
-        return true;
     }
 }

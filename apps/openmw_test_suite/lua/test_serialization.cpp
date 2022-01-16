@@ -1,10 +1,13 @@
 #include "gmock/gmock.h"
 #include <gtest/gtest.h>
 
+#include <osg/Matrixf>
+#include <osg/Quat>
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
 #include <components/lua/serialization.hpp>
+#include <components/lua/utilpackage.hpp>
 
 #include <components/misc/endianness.hpp>
 
@@ -90,18 +93,45 @@ namespace
 
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec2));
-            EXPECT_EQ(serialized.size(), 10);  // version, type, 2x float
+            EXPECT_EQ(serialized.size(), 18);  // version, type, 2x double
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<osg::Vec2f>());
             EXPECT_EQ(value.as<osg::Vec2f>(), vec2);
         }
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec3));
-            EXPECT_EQ(serialized.size(), 14);  // version, type, 3x float
+            EXPECT_EQ(serialized.size(), 26);  // version, type, 3x double
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<osg::Vec3f>());
             EXPECT_EQ(value.as<osg::Vec3f>(), vec3);
         }
+    }
+
+    TEST(LuaSerializationTest, Transform) {
+        sol::state lua;
+        osg::Matrixf matrix(1, 2, 3, 4,
+                            5, 6, 7, 8,
+                            9, 10, 11, 12,
+                            13, 14, 15, 16);
+        LuaUtil::TransformM transM = LuaUtil::asTransform(matrix);
+        osg::Quat quat(1, 2, 3, 4);
+        LuaUtil::TransformQ transQ = LuaUtil::asTransform(quat);
+
+        {
+            std::string serialized = LuaUtil::serialize(sol::make_object(lua, transM));
+            EXPECT_EQ(serialized.size(), 130); // version, type, 16x double
+            sol::object value = LuaUtil::deserialize(lua, serialized);
+            ASSERT_TRUE(value.is<LuaUtil::TransformM>());
+            EXPECT_EQ(value.as<LuaUtil::TransformM>().mM, transM.mM);
+        }
+        {
+            std::string serialized = LuaUtil::serialize(sol::make_object(lua, transQ));
+            EXPECT_EQ(serialized.size(), 34); // version, type, 4x double
+            sol::object value = LuaUtil::deserialize(lua, serialized);
+            ASSERT_TRUE(value.is<LuaUtil::TransformQ>());
+            EXPECT_EQ(value.as<LuaUtil::TransformQ>().mQ, transQ.mQ);
+        }
+
     }
 
     TEST(LuaSerializationTest, Table)
@@ -119,16 +149,27 @@ namespace
         table[2] = osg::Vec2f(2, 1);
 
         std::string serialized = LuaUtil::serialize(table);
-        EXPECT_EQ(serialized.size(), 123);
+        EXPECT_EQ(serialized.size(), 139);
         sol::table res_table = LuaUtil::deserialize(lua, serialized);
+        sol::table res_readonly_table = LuaUtil::deserialize(lua, serialized, nullptr, true);
 
-        EXPECT_EQ(res_table.get<int>("aa"), 1);
-        EXPECT_EQ(res_table.get<bool>("ab"), true);
-        EXPECT_EQ(res_table.get<sol::table>("nested").get<int>("aa"), 2);
-        EXPECT_EQ(res_table.get<sol::table>("nested").get<std::string>("bb"), "something");
-        EXPECT_FLOAT_EQ(res_table.get<sol::table>("nested").get<double>(5), -0.5);
-        EXPECT_EQ(res_table.get<osg::Vec2f>(1), osg::Vec2f(1, 2));
-        EXPECT_EQ(res_table.get<osg::Vec2f>(2), osg::Vec2f(2, 1));
+        for (auto t : {res_table, res_readonly_table})
+        {
+            EXPECT_EQ(t.get<int>("aa"), 1);
+            EXPECT_EQ(t.get<bool>("ab"), true);
+            EXPECT_EQ(t.get<sol::table>("nested").get<int>("aa"), 2);
+            EXPECT_EQ(t.get<sol::table>("nested").get<std::string>("bb"), "something");
+            EXPECT_FLOAT_EQ(t.get<sol::table>("nested").get<double>(5), -0.5);
+            EXPECT_EQ(t.get<osg::Vec2f>(1), osg::Vec2f(1, 2));
+            EXPECT_EQ(t.get<osg::Vec2f>(2), osg::Vec2f(2, 1));
+        }
+
+        lua["t"] = res_table;
+        lua["ro_t"] = res_readonly_table;
+        EXPECT_NO_THROW(lua.safe_script("t.x = 5"));
+        EXPECT_NO_THROW(lua.safe_script("t.nested.x = 5"));
+        EXPECT_ERROR(lua.safe_script("ro_t.x = 5"), "userdata value");
+        EXPECT_ERROR(lua.safe_script("ro_t.nested.x = 5"), "userdata value");
     }
 
     struct TestStruct1 { double a, b; };
@@ -157,7 +198,7 @@ namespace
             return false;
         }
 
-        bool deserialize(std::string_view typeName, std::string_view binaryData, sol::state& lua) const override
+        bool deserialize(std::string_view typeName, std::string_view binaryData, lua_State* lua) const override
         {
             if (typeName == "ts1")
             {

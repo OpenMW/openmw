@@ -20,16 +20,16 @@
 
 namespace MWMechanics
 {
-    AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z)
-    : mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
+    AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z, bool repeat)
+    : TypedAiPackage<AiEscort>(repeat), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
         mTargetActorRefId = actorId;
     }
 
-    AiEscort::AiEscort(const std::string &actorId, const std::string &cellId, int duration, float x, float y, float z)
-    : mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
+    AiEscort::AiEscort(const std::string &actorId, const std::string &cellId, int duration, float x, float y, float z, bool repeat)
+    : TypedAiPackage<AiEscort>(repeat), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
@@ -37,11 +37,8 @@ namespace MWMechanics
     }
 
     AiEscort::AiEscort(const ESM::AiSequence::AiEscort *escort)
-        : mCellId(escort->mCellId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
-        // mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
-        // The exact value of mDuration only matters for repeating packages.
-        // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should fix old saves.
-        , mDuration(escort->mRemainingDuration > 0)
+        : TypedAiPackage<AiEscort>(escort->mRepeat), mCellId(escort->mCellId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
+        , mDuration(escort->mData.mDuration)
         , mRemainingDuration(escort->mRemainingDuration)
         , mCellX(std::numeric_limits<int>::max())
         , mCellY(std::numeric_limits<int>::max())
@@ -103,10 +100,12 @@ namespace MWMechanics
         escort->mData.mX = mX;
         escort->mData.mY = mY;
         escort->mData.mZ = mZ;
+        escort->mData.mDuration = mDuration;
         escort->mTargetId = mTargetActorRefId;
         escort->mTargetActorId = mTargetActorId;
         escort->mRemainingDuration = mRemainingDuration;
         escort->mCellId = mCellId;
+        escort->mRepeat = getRepeat();
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Escort;

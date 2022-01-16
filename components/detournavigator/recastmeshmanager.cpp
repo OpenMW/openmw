@@ -4,6 +4,7 @@
 #include "heightfieldshape.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/convert.hpp>
 
 #include <utility>
 
@@ -11,26 +12,26 @@ namespace
 {
     struct AddHeightfield
     {
-        const DetourNavigator::Cell& mCell;
+        osg::Vec2i mCellPosition;
+        int mCellSize;
         DetourNavigator::RecastMeshBuilder& mBuilder;
 
         void operator()(const DetourNavigator::HeightfieldSurface& v)
         {
-            mBuilder.addHeightfield(mCell.mSize, mCell.mShift, v.mHeights, v.mSize, v.mMinHeight, v.mMaxHeight);
+            mBuilder.addHeightfield(mCellPosition, mCellSize, v.mHeights, v.mSize, v.mMinHeight, v.mMaxHeight);
         }
 
         void operator()(DetourNavigator::HeightfieldPlane v)
         {
-            mBuilder.addHeightfield(mCell.mSize, mCell.mShift, v.mHeight);
+            mBuilder.addHeightfield(mCellPosition, mCellSize, v.mHeight);
         }
     };
 }
 
 namespace DetourNavigator
 {
-    RecastMeshManager::RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation)
-        : mSettings(settings)
-        , mGeneration(generation)
+    RecastMeshManager::RecastMeshManager(const TileBounds& bounds, std::size_t generation)
+        : mGeneration(generation)
         , mTileBounds(bounds)
     {
     }
@@ -74,57 +75,55 @@ namespace DetourNavigator
         return result;
     }
 
-    bool RecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const osg::Vec3f& shift)
+    bool RecastMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
         const std::lock_guard lock(mMutex);
-        if (!mWater.emplace(cellPosition, Cell {cellSize, shift}).second)
+        if (!mWater.emplace(cellPosition, Water {cellSize, level}).second)
             return false;
         ++mRevision;
         return true;
     }
 
-    std::optional<Cell> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<Water> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const std::lock_guard lock(mMutex);
         const auto water = mWater.find(cellPosition);
         if (water == mWater.end())
             return std::nullopt;
         ++mRevision;
-        const Cell result = water->second;
+        Water result = water->second;
         mWater.erase(water);
         return result;
     }
 
-    bool RecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const osg::Vec3f& shift,
+    bool RecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
         const HeightfieldShape& shape)
     {
         const std::lock_guard lock(mMutex);
-        if (!mHeightfields.emplace(cellPosition, Heightfield {Cell {cellSize, shift}, shape}).second)
+        if (!mHeightfields.emplace(cellPosition, SizedHeightfieldShape {cellSize, shape}).second)
             return false;
         ++mRevision;
         return true;
     }
 
-    std::optional<Cell> RecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    std::optional<SizedHeightfieldShape> RecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
     {
         const std::lock_guard lock(mMutex);
         const auto it = mHeightfields.find(cellPosition);
         if (it == mHeightfields.end())
             return std::nullopt;
         ++mRevision;
-        const auto result = std::make_optional(it->second.mCell);
+        auto result = std::make_optional(it->second);
         mHeightfields.erase(it);
         return result;
     }
 
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh() const
     {
-        TileBounds tileBounds = mTileBounds;
-        tileBounds.mMin /= mSettings.mRecastScaleFactor;
-        tileBounds.mMax /= mSettings.mRecastScaleFactor;
-        RecastMeshBuilder builder(tileBounds);
+        RecastMeshBuilder builder(mTileBounds);
         using Object = std::tuple<
-            osg::ref_ptr<const osg::Referenced>,
+            osg::ref_ptr<const Resource::BulletShapeInstance>,
+            ObjectTransform,
             std::reference_wrapper<const btCollisionShape>,
             btTransform,
             AreaType
@@ -134,19 +133,20 @@ namespace DetourNavigator
         {
             const std::lock_guard lock(mMutex);
             for (const auto& [k, v] : mWater)
-                builder.addWater(v.mSize, v.mShift);
+                builder.addWater(k, v);
             for (const auto& [cellPosition, v] : mHeightfields)
-                std::visit(AddHeightfield {v.mCell, builder}, v.mShape);
+                std::visit(AddHeightfield {cellPosition, v.mCellSize, builder}, v.mShape);
             objects.reserve(mObjects.size());
             for (const auto& [k, object] : mObjects)
             {
                 const RecastMeshObject& impl = object.getImpl();
-                objects.emplace_back(impl.getHolder(), impl.getShape(), impl.getTransform(), impl.getAreaType());
+                objects.emplace_back(impl.getInstance(), impl.getObjectTransform(), impl.getShape(),
+                                     impl.getTransform(), impl.getAreaType());
             }
             revision = mRevision;
         }
-        for (const auto& [holder, shape, transform, areaType] : objects)
-            builder.addObject(shape, transform, areaType);
+        for (const auto& [instance, objectTransform, shape, transform, areaType] : objects)
+            builder.addObject(shape, transform, areaType, instance->getSource(), objectTransform);
         return std::move(builder).create(mGeneration, revision);
     }
 

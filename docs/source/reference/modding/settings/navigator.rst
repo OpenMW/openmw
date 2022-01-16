@@ -1,5 +1,5 @@
 Navigator Settings
-################
+##################
 
 Main settings
 *************
@@ -43,7 +43,7 @@ Increasing this value may decrease performance.
     It's a limitation of `Recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ library.
 
 wait until min distance to player
-------------------------------
+---------------------------------
 
 :Type:		integer
 :Range:		>= 0
@@ -53,6 +53,26 @@ Distance in navmesh tiles around the player to keep loading screen until navigat
 Allows to complete cell loading only when minimal navigation mesh area is generated to correctly find path for actors
 nearby the player. Increasing this value will keep loading screen longer but will slightly increase nav mesh generation
 speed on systems bound by CPU. Zero means no waiting.
+
+enable nav mesh disk cache
+--------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+If true navmesh cache stored on disk will be used in addition to memory cache.
+If navmesh tile is not present in memory cache, it will be looked up in the disk cache.
+If it's not found there it will be generated.
+
+write to navmeshdb
+------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If true generated navmesh tiles will be stored into disk cache while game is running.
 
 Advanced settings
 *****************
@@ -87,7 +107,7 @@ Memory will be consumed in approximately linear dependency from number of nav me
 But only for new locations or already dropped from cache.
 
 min update interval ms
-----------------
+----------------------
 
 :Type:		integer
 :Range:		>= 0
@@ -181,7 +201,7 @@ Every nav mesh is visible and every update is noticable.
 Potentially decreases performance.
 
 enable agents paths render
--------------------
+--------------------------
 
 :Type:		boolean
 :Range:		True/False
@@ -193,7 +213,7 @@ Works even if Navigator is disabled.
 Potentially decreases performance.
 
 enable recast mesh render
-----------------------
+-------------------------
 
 :Type:		boolean
 :Range:		True/False
@@ -205,6 +225,17 @@ Little difference can be a result of floating point error.
 Absent pieces usually mean a bug in recast mesh tiles building.
 Allows to do in-game debug.
 Potentially decreases performance.
+
+nav mesh version
+----------------
+
+:Type:		integer
+:Range:		> 0
+:Default:	1
+
+Version of navigation mesh generation algorithm.
+Should be increased each time there is a difference between output of makeNavMeshTileData function for the same input.
+Changing the value will invalidate navmesh disk cache.
 
 Expert settings
 ***************
@@ -365,20 +396,20 @@ max verts per poly
 
 The maximum number of vertices allowed for polygons generated during the contour to polygon conversion process.
 
-region merge size
+region merge area
 -----------------
 
 :Type:		integer
 :Range:		>= 0
-:Default:	20
+:Default:	400
 
 Any regions with a span count smaller than this value will, if possible, be merged with larger regions.
 
-region min size
+region min area
 ---------------
 
 :Type:		integer
 :Range:		>= 0
-:Default:	8
+:Default:	64
 
 The minimum number of cells allowed to form isolated island areas.

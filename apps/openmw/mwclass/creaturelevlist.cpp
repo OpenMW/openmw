@@ -64,7 +64,13 @@ namespace MWClass
         if (customData.mSpawn)
             return;
 
-        MWWorld::Ptr creature = (customData.mSpawnActorId == -1) ? MWWorld::Ptr() : MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
+        MWWorld::Ptr creature;
+        if(customData.mSpawnActorId != -1)
+        {
+            creature = MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
+            if(creature.isEmpty())
+                creature = ptr.getCell()->getMovedActor(customData.mSpawnActorId);
+        }
         if (!creature.isEmpty())
         {
             const MWMechanics::CreatureStats& creatureStats = creature.getClass().getCreatureStats(creature);

@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <tuple>
+
 #include <osg/Vec3f>
 
 namespace ESM
@@ -59,6 +61,12 @@ struct Position
     {
         return osg::Vec3f(rot[0], rot[1], rot[2]);
     }
+
+    friend inline bool operator<(const Position& l, const Position& r)
+    {
+        const auto tuple = [] (const Position& v) { return std::tuple(v.asVec3(), v.asRotationVec3()); };
+        return tuple(l) < tuple(r);
+    }
 };
 #pragma pack(pop)
 
@@ -88,7 +96,7 @@ struct FourCC
     static constexpr unsigned int value = (((((d << 8) | c) << 8) | b) << 8) | a;
 };
 
-enum RecNameInts
+enum RecNameInts : unsigned int
 {
     // format 0 / legacy
     REC_ACTI = FourCC<'A','C','T','I'>::value,
