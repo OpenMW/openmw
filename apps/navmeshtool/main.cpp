@@ -89,23 +89,6 @@ namespace NavMeshTool
             return result;
         }
 
-        void loadSettings(const Files::ConfigurationManager& config, Settings::Manager& settings)
-        {
-            const std::string localDefault = (config.getLocalPath() / "defaults.bin").string();
-            const std::string globalDefault = (config.getGlobalPath() / "defaults.bin").string();
-
-            if (boost::filesystem::exists(localDefault))
-                settings.loadDefault(localDefault);
-            else if (boost::filesystem::exists(globalDefault))
-                settings.loadDefault(globalDefault);
-            else
-                throw std::runtime_error("No default settings file found! Make sure the file \"defaults.bin\" was properly installed.");
-
-            const std::string settingsPath = (config.getUserConfigPath() / "settings.cfg").string();
-            if (boost::filesystem::exists(settingsPath))
-                settings.loadUser(settingsPath);
-        }
-
         int runNavMeshTool(int argc, char *argv[])
         {
             bpo::options_description desc = makeOptionsDescription();
@@ -166,7 +149,7 @@ namespace NavMeshTool
             VFS::registerArchives(&vfs, fileCollections, archives, true);
 
             Settings::Manager settings;
-            loadSettings(config, settings);
+            settings.load(config);
 
             const osg::Vec3f agentHalfExtents = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
 

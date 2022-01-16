@@ -21,7 +21,7 @@
 using namespace Fallback;
 
 CS::Editor::Editor (int argc, char **argv)
-: mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
+: mConfigVariables(readConfiguration()), mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
   mPid(""), mLock(), mMerge (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(nullptr), mClientSocket(nullptr)
 {
@@ -83,7 +83,7 @@ CS::Editor::~Editor ()
         remove(mPid.string().c_str())); // ignore any error
 }
 
-std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig(bool quiet)
+boost::program_options::variables_map CS::Editor::readConfiguration()
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
@@ -108,6 +108,13 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     mCfgMgr.readConfiguration(variables, desc, false);
     setupLogging(mCfgMgr.getLogPath().string(), "OpenMW-CS");
+
+    return variables;
+}
+
+std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig(bool quiet)
+{
+    boost::program_options::variables_map& variables = mConfigVariables;
 
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
 
