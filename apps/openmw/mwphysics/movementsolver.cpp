@@ -322,6 +322,18 @@ namespace MWPhysics
                     newPosition = (newPosition + tracer.mEndPos)/2.0;
                 }
 
+                // short circuit if we went backwards, but only if it was mostly horizontal and we're on the ground
+                if (seenGround && newVelocity * origVelocity <= 0.0f)
+                {
+                    auto perpendicular = newVelocity ^ origVelocity;
+                    if (perpendicular.length2() > 0.0f)
+                    {
+                        perpendicular.normalize();
+                        if (std::abs(perpendicular.z()) > 0.7071f)
+                            break;
+                    }
+                }
+
                 // Do not allow sliding up steep slopes if there is gravity.
                 // The purpose of this is to prevent air control from letting you slide up tall, unwalkable slopes.
                 // For that purpose, it is not necessary to do it when trying to slide along acute seams/crevices (i.e. usedSeamLogic)
