@@ -314,7 +314,10 @@ const boost::filesystem::path& ConfigurationManager::getGlobalPath() const
 
 const boost::filesystem::path& ConfigurationManager::getUserConfigPath() const
 {
-    return mFixedPath.getUserConfigPath();
+    if (mActiveConfigPaths.empty())
+        return mFixedPath.getUserConfigPath();
+    else
+        return mActiveConfigPaths.back();
 }
 
 const boost::filesystem::path& ConfigurationManager::getUserDataPath() const

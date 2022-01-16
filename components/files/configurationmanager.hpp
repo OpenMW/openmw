@@ -32,10 +32,10 @@ struct ConfigurationManager
 
     /**< Fixed paths */
     const boost::filesystem::path& getGlobalPath() const;
-    const boost::filesystem::path& getUserConfigPath() const;
     const boost::filesystem::path& getLocalPath() const;
 
     const boost::filesystem::path& getGlobalDataPath() const;
+    const boost::filesystem::path& getUserConfigPath() const;
     const boost::filesystem::path& getUserDataPath() const;
     const boost::filesystem::path& getLocalDataPath() const;
     const boost::filesystem::path& getInstallPath() const;
