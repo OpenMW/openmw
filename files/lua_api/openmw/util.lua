@@ -133,7 +133,7 @@
 -------------------------------------------------------------------------------
 -- Normalizes vector.
 -- Returns two values: normalized vector and the length of the original vector.
--- It doesn't change the original vector. 
+-- It doesn't change the original vector.
 -- @function [parent=#Vector3] normalize
 -- @param self
 -- @return #Vector3, #number
@@ -151,6 +151,117 @@
 -- @param self
 -- @param #Vector3 v
 -- @return #Vector3
+
+
+-------------------------------------------------------------------------------
+-- Immutable 4D vector.
+-- @type Vector4
+-- @field #number x
+-- @field #number y
+-- @field #number z
+-- @field #number w
+-- @usage
+-- v = util.vector4(3, 4, 5, 6)
+-- v.x, v.y, v.z, v.w  -- 3.0, 4.0, 5.0, 6.0
+-- str(v)         -- "(3.0, 4.0, 5.0, 6.0)"
+-- v:length()     -- length
+-- v:length2()    -- square of the length
+-- v:normalize()  -- normalized vector
+-- v1:dot(v2)     -- dot product (returns a number)
+-- v1 * v2        -- dot product (returns a number)
+-- v1 + v2        -- vector addition
+-- v1 - v2        -- vector subtraction
+-- v1 * x         -- multiplication by a number
+-- v1 / x         -- division by a number
+
+-------------------------------------------------------------------------------
+-- Creates a new 4D vector. Vectors are immutable and can not be changed after creation.
+-- @function [parent=#util] vector4
+-- @param #number x.
+-- @param #number y.
+-- @param #number z.
+-- @param #number w.
+-- @return #Vector4.
+
+-------------------------------------------------------------------------------
+-- Length of the vector
+-- @function [parent=#Vector4] length
+-- @param self
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Square of the length of the vector
+-- @function [parent=#Vector4] length2
+-- @param self
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Normalizes vector.
+-- Returns two values: normalized vector and the length of the original vector.
+-- It doesn't change the original vector.
+-- @function [parent=#Vector4] normalize
+-- @param self
+-- @return #Vector4, #number
+
+-------------------------------------------------------------------------------
+-- Dot product.
+-- @function [parent=#Vector4] dot
+-- @param self
+-- @param #Vector4 v
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Color in RGBA format. All of the component values are in the range [0, 1].
+-- @type Color
+-- @field #number r Red component
+-- @field #number g Green component
+-- @field #number b Blue component
+-- @field #number a Alpha (transparency) component
+
+-------------------------------------------------------------------------------
+-- Returns a Vector4 with RGBA components of the Color.
+-- @function [parent=#Color] asRgba
+-- @param self
+-- @return #Vector4
+
+-------------------------------------------------------------------------------
+-- Returns a Vector3 with RGB components of the Color.
+-- @function [parent=#Color] asRgb
+-- @param self
+-- @return #Vector3
+
+-------------------------------------------------------------------------------
+-- Converts the color into a HEX string.
+-- @function [parent=#Color] asHex
+-- @param self
+-- @return #string
+
+-------------------------------------------------------------------------------
+-- @type COLOR
+-- @field [parent=#util] #COLOR color Methods for creating #Color values from different formats.
+
+-------------------------------------------------------------------------------
+-- Creates a Color from RGBA format
+-- @function [parent=#COLOR] rgba
+-- @param #number r
+-- @param #number g
+-- @param #number b
+-- @param #number a
+-- @return #Color
+
+-------------------------------------------------------------------------------
+-- Creates a Color from RGB format. Equivalent to calling util.rgba with a = 1.
+-- @function [parent=#COLOR] rgb
+-- @param #number r
+-- @param #number g
+-- @param #number b
+-- @return #Color
+
+-------------------------------------------------------------------------------
+-- Parses a hex color string into a Color.
+-- @function [parent=#COLOR] hex
+-- @param #string hex A hex color string in RRGGBB format (e. g. "ff0000").
+-- @return #Color
 
 -------------------------------------------------------------------------------
 -- @type Transform

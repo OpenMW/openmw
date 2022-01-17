@@ -3,6 +3,7 @@
 
 #include <osg/Vec2>
 #include <osg/Vec3>
+#include <osg/Vec4>
 #include <osg/Matrix>
 
 #include <sol/sol.hpp>
@@ -11,6 +12,7 @@ namespace LuaUtil
 {
     using Vec2 = osg::Vec2f;
     using Vec3 = osg::Vec3f;
+    using Vec4 = osg::Vec4f;
 
     // For performance reasons "Transform" is implemented as 2 types with the same interface.
     // Transform supports only composition, inversion, and applying to a 3d vector.

@@ -6,6 +6,7 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
+#include <components/misc/color.hpp>
 #include <components/misc/endianness.hpp>
 
 #include "luastate.hpp"
@@ -28,6 +29,8 @@ namespace LuaUtil
         VEC3 =         0x11,
         TRANSFORM_M =  0x12,
         TRANSFORM_Q =  0x13,
+        VEC4 =         0x14,
+        COLOR =        0x15,
 
         // All values should be lesser than 0x20 (SHORT_STRING_FLAG).
     };
@@ -127,6 +130,26 @@ namespace LuaUtil
             osg::Quat quat = data.as<TransformQ>().mQ;
             for(size_t i = 0; i < 4; i++)
                 appendValue<double>(out, quat[i]);
+            return;
+        }
+        if (data.is<osg::Vec4f>())
+        {
+            appendType(out, SerializedType::VEC4);
+            osg::Vec4f v = data.as<osg::Vec4f>();
+            appendValue<double>(out, v.x());
+            appendValue<double>(out, v.y());
+            appendValue<double>(out, v.z());
+            appendValue<double>(out, v.w());
+            return;
+        }
+        if (data.is<Misc::Color>())
+        {
+            appendType(out, SerializedType::COLOR);
+            Misc::Color v = data.as<Misc::Color> ();
+            appendValue<float>(out, v.r());
+            appendValue<float>(out, v.g());
+            appendValue<float>(out, v.b());
+            appendValue<float>(out, v.a());
             return;
         }
         if (customSerializer && customSerializer->serialize(out, data))
@@ -269,6 +292,24 @@ namespace LuaUtil
                 for (int i = 0; i < 4; i++)
                     q[i] = getValue<double>(binaryData);
                 sol::stack::push<TransformQ>(lua, asTransform(q));
+                return;
+            }
+            case SerializedType::VEC4:
+            {
+                float x = getValue<double>(binaryData);
+                float y = getValue<double>(binaryData);
+                float z = getValue<double>(binaryData);
+                float w = getValue<double>(binaryData);
+                sol::stack::push<osg::Vec4f>(lua, osg::Vec4f(x, y, z, w));
+                return;
+            }
+            case SerializedType::COLOR:
+            {
+                float r = getValue<float>(binaryData);
+                float g = getValue<float>(binaryData);
+                float b = getValue<float>(binaryData);
+                float a = getValue<float>(binaryData);
+                sol::stack::push<Misc::Color>(lua, Misc::Color(r, g, b, a));
                 return;
             }
         }
