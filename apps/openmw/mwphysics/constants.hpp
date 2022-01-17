@@ -15,7 +15,7 @@ namespace MWPhysics
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static constexpr int sMaxIterations = 8;
     // Allows for more precise movement solving without getting stuck or snagging too easily.
-    static constexpr float sCollisionMargin = 0.1f;
+    static constexpr float sCollisionMargin = 0.2f;
     // Allow for a small amount of penetration to prevent numerical precision issues from causing the "unstuck"ing code to run unnecessarily
     // Currently set to 0 because having the "unstuck"ing code run whenever possible prevents some glitchy snagging issues
     static constexpr float sAllowedPenetration = 0.0f;
