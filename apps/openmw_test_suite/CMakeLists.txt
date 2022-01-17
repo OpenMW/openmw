@@ -87,14 +87,6 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         target_link_libraries(openmw_test_suite gcov)
     endif()
 
-    if (MSVC)
-        if (CMAKE_CL_64)
-            # Debug version of openmw_unit_tests needs increased number of sections beyond 2^16
-            # just like openmw and openmw-cs
-            set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
-        endif (CMAKE_CL_64)
-    endif (MSVC)
-
     file(DOWNLOAD
         https://gitlab.com/OpenMW/example-suite/-/raw/8966dab24692555eec720c854fb0f73d108070cd/data/template.omwgame
         ${CMAKE_CURRENT_BINARY_DIR}/data/template.omwgame
