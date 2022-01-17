@@ -167,6 +167,16 @@ option(OPENMW_OSX_DEPLOYMENT OFF)
 
 if (MSVC)
     option(OPENMW_MP_BUILD "Build OpenMW with /MP flag" OFF)
+    if (OPENMW_MP_BUILD)
+        add_compile_options(/MP)
+    endif()
+
+    # \bigobj is required:
+    #  1) for OPENMW_UNITY_BUILD;
+    #  2) to compile lua bindings in components, openmw and tests, because sol3 is heavily templated.
+    # there should be no relevant downsides to having it on:
+    # https://docs.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file
+    add_compile_options(/bigobj)
 endif()
 
 # Set up common paths
@@ -610,10 +620,6 @@ endif()
 
 if (WIN32)
   if (MSVC)
-    if (OPENMW_MP_BUILD)
-        set( MT_BUILD "/MP")
-    endif()
-
     foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
         string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
         set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "$(SolutionDir)$(Configuration)" )
@@ -662,54 +668,55 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
-    set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+    set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     
     if (MSVC_VERSION GREATER_EQUAL 1915 AND MSVC_VERSION LESS 1920)
         target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
     endif()
 
     if (BUILD_BSATOOL)
-        set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
 
     if (BUILD_ESMTOOL)
-        set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
 
     if (BUILD_ESSIMPORTER)
-        set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
 
     if (BUILD_LAUNCHER)
-        set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
 
     if (BUILD_MWINIIMPORTER)
-        set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
 
     if (BUILD_OPENCS)
-        set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
 
     if (BUILD_OPENMW)
-        # \bigobj is required:
-        #  1) for OPENMW_UNITY_BUILD;
-        #  2) to compile lua bindings, because sol3 is heavily templated.
-        set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD} /bigobj")
+        set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
 
     if (BUILD_WIZARD)
-        set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+    endif()
+
+    if (BUILD_UNITTESTS)
+        set_target_properties(openmw_test_suite PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
 
     if (BUILD_BENCHMARKS)
-        set_target_properties(openmw_detournavigator_navmeshtilescache_benchmark PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(openmw_detournavigator_navmeshtilescache_benchmark PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
 
     if (BUILD_NAVMESHTOOL)
-        set_target_properties(openmw-navmeshtool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(openmw-navmeshtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
   endif(MSVC)
 
