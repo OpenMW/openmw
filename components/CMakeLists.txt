@@ -93,7 +93,7 @@ add_component_dir (esmterrain
 
 add_component_dir (misc
     constants utf8stream stringops resourcehelpers rng messageformatparser weakcache thread
-    compression osguservalues errorMarker
+    compression osguservalues errorMarker color
     )
 
 add_component_dir (debug

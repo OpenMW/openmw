@@ -5,11 +5,13 @@
 #include <osg/Quat>
 #include <osg/Vec2f>
 #include <osg/Vec3f>
+#include <osg/Vec4f>
 
 #include <components/lua/serialization.hpp>
 #include <components/lua/utilpackage.hpp>
 
 #include <components/misc/endianness.hpp>
+#include <components/misc/color.hpp>
 
 #include "testing_util.hpp"
 
@@ -90,6 +92,7 @@ namespace
         sol::state lua;
         osg::Vec2f vec2(1, 2);
         osg::Vec3f vec3(1, 2, 3);
+        osg::Vec4f vec4(1, 2, 3, 4);
 
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec2));
@@ -104,6 +107,27 @@ namespace
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<osg::Vec3f>());
             EXPECT_EQ(value.as<osg::Vec3f>(), vec3);
+        }
+        {
+            std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec4));
+            EXPECT_EQ(serialized.size(), 34); // version, type, 4x double
+            sol::object value = LuaUtil::deserialize(lua, serialized);
+            ASSERT_TRUE(value.is<osg::Vec4f>());
+            EXPECT_EQ(value.as<osg::Vec4f>(), vec4);
+        }
+    }
+
+    TEST(LuaSerializationTest, Color)
+    {
+        sol::state lua;
+        Misc::Color color(1, 1, 1, 1);
+
+        {
+            std::string serialized = LuaUtil::serialize(sol::make_object(lua, color));
+            EXPECT_EQ(serialized.size(), 18); // version, type, 4x float
+            sol::object value = LuaUtil::deserialize(lua, serialized);
+            ASSERT_TRUE(value.is<Misc::Color>());
+            EXPECT_EQ(value.as<Misc::Color>(), color);
         }
     }
 
