@@ -4,6 +4,8 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_Widget.h>
 
+#include <SDL.h>
+
 #include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
 
@@ -31,6 +33,7 @@ namespace MWInput
         : mBindingsManager(bindingsManager)
         , mActionManager(actionManager)
         , mMouseManager(mouseManager)
+        , mGyroAvailable(false)
         , mJoystickEnabled (Settings::Manager::getBool("enable controller", "Input"))
         , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
         , mSneakToggleShortcutTimer(0.f)
@@ -287,6 +290,7 @@ namespace MWInput
     void ControllerManager::controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg)
     {
         mBindingsManager->controllerAdded(deviceID, arg);
+        enableGyroSensor();
     }
 
     void ControllerManager::controllerRemoved(const SDL_ControllerDeviceEvent &arg)
@@ -399,4 +403,30 @@ namespace MWInput
             return false;
     }
 
+    void ControllerManager::enableGyroSensor()
+    {
+        mGyroAvailable = false;
+        SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+        if (!cntrl)
+            return;
+        if (!SDL_GameControllerHasSensor(cntrl, SDL_SENSOR_GYRO))
+            return;
+        if (SDL_GameControllerSetSensorEnabled(cntrl, SDL_SENSOR_GYRO, SDL_TRUE) < 0)
+            return;
+        mGyroAvailable = true;
+    }
+
+    bool ControllerManager::isGyroAvailable() const
+    {
+        return mGyroAvailable;
+    }
+
+    std::array<float, 3> ControllerManager::getGyroValues() const
+    {
+        float gyro[3] = { 0.f };
+        SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+        if (cntrl && mGyroAvailable)
+            SDL_GameControllerGetSensorData(cntrl, SDL_SENSOR_GYRO, gyro, 3);
+        return std::array<float, 3>({gyro[0], gyro[1], gyro[2]});
+    }
 }
