@@ -14,7 +14,6 @@ environment:
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 platform:
-#   - Win32
     - x64
 
 configuration:
@@ -22,26 +21,20 @@ configuration:
     - Release
 #    - RelWithDebInfo
 
-# For the Qt, Boost, CMake, etc installs
-#os: Visual Studio 2017
-
 # We want the git revision for versioning,
 # so shallow clones don't work.
 clone_depth: 1
 
 cache:
-    - C:\projects\openmw\deps\Bullet-2.87-msvc2015-win32.7z
-    - C:\projects\openmw\deps\Bullet-2.87-msvc2015-win64.7z
-    - C:\projects\openmw\deps\MyGUI-3.2.2-msvc2015-win32.7z
-    - C:\projects\openmw\deps\MyGUI-3.2.2-msvc2015-win64.7z
-    - C:\projects\openmw\deps\OSG-3.4.1-scrawl-msvc2015-win32.7z
-    - C:\projects\openmw\deps\OSG-3.4.1-scrawl-msvc2015-win64.7z
-    - C:\projects\openmw\deps\ffmpeg-3.2.4-dev-win32.zip
-    - C:\projects\openmw\deps\ffmpeg-3.2.4-dev-win64.zip
-    - C:\projects\openmw\deps\ffmpeg-3.2.4-win32.zip
-    - C:\projects\openmw\deps\ffmpeg-3.2.4-win64.zip
-    - C:\projects\openmw\deps\OpenAL-Soft-1.19.1.zip
-    - C:\projects\openmw\deps\SDL2-2.0.7.zip
+    - C:\projects\openmw\deps\Bullet-2.89-msvc2017-win64-double.7z
+    - C:\projects\openmw\deps\MyGUI-3.4.1-msvc2017-win64.7z
+    - C:\projects\openmw\deps\MyGUI-3.4.1-msvc2019-win64.7z
+    - C:\projects\openmw\deps\OSGoS-3.6.5-b02abe2-msvc2017-win64.7z
+    - C:\projects\openmw\deps\OSGoS-3.6.5-b02abe2-msvc2019-win64.7z
+    - C:\projects\openmw\deps\ffmpeg-4.2.2-dev-win64.zip
+    - C:\projects\openmw\deps\ffmpeg-4.2.2-win64.zip
+    - C:\projects\openmw\deps\OpenAL-Soft-1.20.1.zip
+    - C:\projects\openmw\deps\SDL2-2.0.18.zip
 
 clone_folder: C:\projects\openmw
 
@@ -53,7 +46,6 @@ before_build:
     - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -c %configuration% -p %PLATFORM% -v %msvc% -V -i %APPVEYOR_BUILD_FOLDER%\install
 
 build_script:
-    - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
     - cmd: if %PLATFORM%==x64 set build=MSVC%msvc%_64
     - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
     - cmd: cmake --install %build% --config %configuration%
