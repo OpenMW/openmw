@@ -162,7 +162,7 @@ add_component_dir (queries
     )
     
 add_component_dir (lua_ui
-    widget widgetlist element layers content
+    widget element util layers content
     text textedit window
     )
 

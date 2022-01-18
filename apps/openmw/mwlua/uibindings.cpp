@@ -1,4 +1,4 @@
-#include <components/lua_ui/widgetlist.hpp>
+#include <components/lua_ui/util.hpp>
 #include <components/lua_ui/element.hpp>
 #include <components/lua_ui/layers.hpp>
 #include <components/lua_ui/content.hpp>
@@ -11,8 +11,6 @@ namespace MWLua
 {
     namespace
     {
-        std::set<LuaUi::Element*> allElements;
-
         class UiAction final : public Action
         {
             public:
@@ -189,7 +187,6 @@ namespace MWLua
         {
             if (element->mDestroy)
                 return;
-            allElements.erase(element.get());
             element->mDestroy = true;
             context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::DESTROY, element, context.mLua));
         };
@@ -205,8 +202,7 @@ namespace MWLua
         };
         api["create"] = [context](const sol::table& layout)
         {
-            auto element = std::make_shared<LuaUi::Element>(layout);
-            allElements.emplace(element.get());
+            auto element = LuaUi::Element::make(layout);
             context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::CREATE, element, context.mLua));
             return element;
         };
@@ -243,12 +239,5 @@ namespace MWLua
         api["TYPE"] = LuaUtil::makeReadOnly(typeTable);
 
         return LuaUtil::makeReadOnly(api);
-    }
-    
-    void clearUserInterface()
-    {
-        for (auto element : allElements)
-            element->destroy();
-        allElements.clear();
     }
 }

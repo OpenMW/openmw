@@ -3,11 +3,10 @@
 #include <MyGUI_Gui.h>
 
 #include "content.hpp"
-#include "widgetlist.hpp"
+#include "util.hpp"
 
 namespace LuaUi
 {
-
     std::string widgetType(const sol::table& layout)
     {
         return layout.get_or("type", std::string("LuaWidget"));
@@ -70,7 +69,7 @@ namespace LuaUi
         if (!ext)
             throw std::runtime_error("Invalid widget!");
 
-        ext->create(layout.lua_state(), widget);
+        ext->initialize(layout.lua_state(), widget);
         if (parent != nullptr)
             widget->attachToWidget(parent->widget());
 
@@ -87,7 +86,7 @@ namespace LuaUi
 
     void destroyWidget(LuaUi::WidgetExtension* ext)
     {
-        ext->destroy();
+        ext->deinitialize();
         MyGUI::Gui::getInstancePtr()->destroyWidget(ext->widget());
     }
 
@@ -136,6 +135,23 @@ namespace LuaUi
         }
     }
 
+    std::map<Element*, std::shared_ptr<Element>> Element::sAllElements;
+
+    Element::Element(sol::table layout)
+        : mRoot{ nullptr }
+        , mLayout{ std::move(layout) }
+        , mUpdate{ false }
+        , mDestroy{ false }
+    {}
+
+
+    std::shared_ptr<Element> Element::make(sol::table layout)
+    {
+        std::shared_ptr<Element> ptr(new Element(std::move(layout)));
+        sAllElements[ptr.get()] = ptr;
+        return ptr;
+    }
+
     void Element::create()
     {
         assert(!mRoot);
@@ -161,5 +177,6 @@ namespace LuaUi
         if (mRoot)
             destroyWidget(mRoot);
         mRoot = nullptr;
+        sAllElements.erase(this);
     }
 }

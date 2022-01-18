@@ -53,7 +53,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/frameratelimiter.hpp>
 
-#include <components/lua_ui/widgetlist.hpp>
+#include <components/lua_ui/util.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -510,6 +510,8 @@ namespace MWGui
     {
         try
         {
+            LuaUi::clearUserInterface();
+
             mStatsWatcher.reset();
 
             MyGUI::LanguageManager::getInstance().eventRequestTag.clear();

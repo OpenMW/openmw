@@ -1,4 +1,4 @@
-#include "widgetlist.hpp"
+#include "util.hpp"
 
 #include <MyGUI_FactoryManager.h>
 
@@ -6,6 +6,8 @@
 #include "text.hpp"
 #include "textedit.hpp"
 #include "window.hpp"
+
+#include "element.hpp"
 
 namespace LuaUi
 {
@@ -27,5 +29,11 @@ namespace LuaUi
             { "LuaWindow", "Window" },
         };
         return types;
+    }
+
+    void clearUserInterface()
+    {
+        while (!Element::sAllElements.empty())
+            Element::sAllElements.begin()->second->destroy();
     }
 }
