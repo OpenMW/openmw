@@ -22,9 +22,9 @@ namespace LuaUi
     public:
         WidgetExtension();
         // must be called after creating the underlying MyGUI::Widget
-        void create(lua_State* lua, MyGUI::Widget* self);
+        void initialize(lua_State* lua, MyGUI::Widget* self);
         // must be called after before destroying the underlying MyGUI::Widget
-        void destroy();
+        virtual void deinitialize();
 
         void addChild(WidgetExtension* ext);
         WidgetExtension* childAt(size_t index) const;
@@ -46,11 +46,11 @@ namespace LuaUi
         void setLayout(const sol::table& layout) { mLayout = layout; }
 
     protected:
+        virtual void initialize();
         sol::table makeTable() const;
         sol::object keyEvent(MyGUI::KeyCode) const;
         sol::object mouseEvent(int left, int top, MyGUI::MouseButton button) const;
-        virtual void initialize();
-        virtual void deinitialize();
+        
         virtual MyGUI::IntSize calculateSize();
         virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size);
         MyGUI::IntCoord calculateCoord();

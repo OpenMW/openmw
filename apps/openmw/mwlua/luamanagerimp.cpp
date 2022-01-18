@@ -12,6 +12,8 @@
 
 #include <components/lua/utilpackage.hpp>
 
+#include <components/lua_ui/util.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
@@ -237,6 +239,7 @@ namespace MWLua
 
     void LuaManager::clear()
     {
+        LuaUi::clearUserInterface();
         mActiveLocalScripts.clear();
         mLocalEvents.clear();
         mGlobalEvents.clear();
@@ -254,7 +257,6 @@ namespace MWLua
             mPlayer.getRefData().setLuaScripts(nullptr);
             mPlayer = MWWorld::Ptr();
         }
-        clearUserInterface();
         mGlobalStorage.clearTemporary();
         mPlayerStorage.clearTemporary();
     }
@@ -454,6 +456,8 @@ namespace MWLua
     void LuaManager::reloadAllScripts()
     {
         Log(Debug::Info) << "Reload Lua";
+
+        LuaUi::clearUserInterface(); 
         mLua.dropScriptCache();
         initConfiguration();
 
@@ -470,7 +474,6 @@ namespace MWLua
                 continue;
             ESM::LuaScripts data;
             scripts->save(data);
-            clearUserInterface();
             scripts->load(data);
         }
         for (LocalScripts* scripts : mActiveLocalScripts)

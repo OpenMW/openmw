@@ -7,13 +7,7 @@ namespace LuaUi
 {
     struct Element
     {
-        Element(sol::table layout)
-            : mRoot{ nullptr }
-            , mLayout{ layout }
-            , mUpdate{ false }
-            , mDestroy{ false }
-        {
-        }
+        static std::shared_ptr<Element> make(sol::table layout);
 
         LuaUi::WidgetExtension* mRoot;
         sol::table mLayout;
@@ -25,6 +19,12 @@ namespace LuaUi
         void update();
 
         void destroy();
+
+        friend void clearUserInterface();
+
+        private:
+            Element(sol::table layout);
+            static std::map<Element*, std::shared_ptr<Element>> sAllElements;
     };
 }
 

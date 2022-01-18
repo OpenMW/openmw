@@ -26,7 +26,7 @@ namespace LuaUi
             it->second(argument, mLayout);
     }
 
-    void WidgetExtension::create(lua_State* lua, MyGUI::Widget* self)
+    void WidgetExtension::initialize(lua_State* lua, MyGUI::Widget* self)
     {
         mLua = lua;
         mWidget = self;
@@ -54,17 +54,9 @@ namespace LuaUi
         mWidget->eventKeyLostFocus += MyGUI::newDelegate(this, &WidgetExtension::focusLoss);
     }
 
-    void WidgetExtension::destroy()
-    {
-        clearCallbacks();
-        deinitialize();
-
-        for (WidgetExtension* child : mContent)
-            child->destroy();
-    }
-
     void WidgetExtension::deinitialize()
     {
+        clearCallbacks();
         mWidget->eventKeyButtonPressed.clear();
         mWidget->eventKeyButtonReleased.clear();
         mWidget->eventMouseButtonClick.clear();
@@ -78,6 +70,9 @@ namespace LuaUi
         mWidget->eventMouseLostFocus.clear();
         mWidget->eventKeySetFocus.clear();
         mWidget->eventKeyLostFocus.clear();
+
+        for (WidgetExtension* child : mContent)
+            child->deinitialize();
     }
 
     sol::table WidgetExtension::makeTable() const

@@ -13,7 +13,6 @@ namespace LuaUi
 
         public:
             LuaText();
-            virtual void initialize() override;
             virtual void setProperties(sol::object) override;
 
         private:
