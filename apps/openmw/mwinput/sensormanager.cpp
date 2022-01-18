@@ -13,8 +13,7 @@ namespace MWInput
     SensorManager::SensorManager()
         : mInvertX(Settings::Manager::getBool("invert x axis", "Input"))
         , mInvertY(Settings::Manager::getBool("invert y axis", "Input"))
-        , mGyroXSpeed(0.f)
-        , mGyroYSpeed(0.f)
+        , mGyroValues()
         , mGyroUpdateTimer(0.f)
         , mGyroHSensitivity(Settings::Manager::getFloat("gyro horizontal sensitivity", "Input"))
         , mGyroVSensitivity(Settings::Manager::getFloat("gyro vertical sensitivity", "Input"))
@@ -119,7 +118,6 @@ namespace MWInput
                     {
                         SDL_SensorClose(mGyroscope);
                         mGyroscope = nullptr;
-                        mGyroXSpeed = mGyroYSpeed = 0.f;
                         mGyroUpdateTimer = 0.f;
                     }
 
@@ -141,7 +139,6 @@ namespace MWInput
             {
                 SDL_SensorClose(mGyroscope);
                 mGyroscope = nullptr;
-                mGyroXSpeed = mGyroYSpeed = 0.f;
                 mGyroUpdateTimer = 0.f;
             }
         }
@@ -177,18 +174,18 @@ namespace MWInput
         }
     }
 
-    float SensorManager::getGyroAxisSpeed(GyroscopeAxis axis, const SDL_SensorEvent &arg) const
+    float SensorManager::getGyroAxisSpeed(GyroscopeAxis axis) const
     {
         switch (axis)
         {
             case GyroscopeAxis::X:
             case GyroscopeAxis::Y:
             case GyroscopeAxis::Z:
-                return std::abs(arg.data[0]) >= mGyroInputThreshold ? arg.data[axis-1] : 0.f;
+                return std::abs(mGyroValues[0]) >= mGyroInputThreshold ? mGyroValues[axis - 1] : 0.f;
             case GyroscopeAxis::Minus_X:
             case GyroscopeAxis::Minus_Y:
             case GyroscopeAxis::Minus_Z:
-                return std::abs(arg.data[0]) >= mGyroInputThreshold ? -arg.data[std::abs(axis)-1] : 0.f;
+                return std::abs(mGyroValues[0]) >= mGyroInputThreshold ? -mGyroValues[std::abs(axis) - 1] : 0.f;
             default:
                 return 0.f;
         }
@@ -217,8 +214,9 @@ namespace MWInput
                 break;
             case SDL_SENSOR_GYRO:
             {
-                mGyroXSpeed = getGyroAxisSpeed(mGyroHAxis, arg);
-                mGyroYSpeed = getGyroAxisSpeed(mGyroVAxis, arg);
+                mGyroValues[0] = arg.data[0];
+                mGyroValues[1] = arg.data[1];
+                mGyroValues[2] = arg.data[2];
                 mGyroUpdateTimer = 0.f;
 
                 break;
@@ -230,28 +228,29 @@ namespace MWInput
 
     void SensorManager::update(float dt)
     {
-        if (mGyroXSpeed == 0.f && mGyroYSpeed == 0.f)
-            return;
-
+        mGyroUpdateTimer += dt;
         if (mGyroUpdateTimer > 0.5f)
         {
             // More than half of second passed since the last gyroscope update.
             // A device more likely was disconnected or switched to the sleep mode.
             // Reset current rotation speed and wait for update.
-            mGyroXSpeed = 0.f;
-            mGyroYSpeed = 0.f;
+            mGyroValues = { 0, 0, 0 };
             mGyroUpdateTimer = 0.f;
             return;
         }
 
-        mGyroUpdateTimer += dt;
-
         if (!mGuiCursorEnabled)
         {
+            float gyroH = getGyroAxisSpeed(mGyroHAxis);
+            float gyroV = getGyroAxisSpeed(mGyroVAxis);
+
+            if (gyroH == 0 && gyroV == 0)
+                return;
+
             float rot[3];
-            rot[0] = -mGyroYSpeed * dt * mGyroVSensitivity * 4 * (mInvertY ? -1 : 1);
+            rot[0] = -gyroV * dt * mGyroVSensitivity * 4 * (mInvertY ? -1 : 1);
             rot[1] = 0.0f;
-            rot[2] = -mGyroXSpeed * dt * mGyroHSensitivity * 4 * (mInvertX ? -1 : 1);
+            rot[2] = -gyroH * dt * mGyroHSensitivity * 4 * (mInvertX ? -1 : 1);
 
             // Only actually turn player when we're not in vanity mode
             bool playerLooking = MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking");
@@ -266,5 +265,15 @@ namespace MWInput
 
             MWBase::Environment::get().getInputManager()->resetIdleTime();
         }
+    }
+
+    bool SensorManager::isGyroAvailable() const
+    {
+        return mGyroscope != nullptr;
+    }
+
+    std::array<float, 3> SensorManager::getGyroValues() const
+    {
+        return mGyroValues;
     }
 }

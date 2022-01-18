@@ -35,6 +35,9 @@ namespace MWInput
 
         void setGuiCursorEnabled(bool enabled) { mGuiCursorEnabled = enabled; }
 
+        bool isGyroAvailable() const;
+        std::array<float, 3> getGyroValues() const;
+
     private:
         enum GyroscopeAxis
         {
@@ -50,13 +53,12 @@ namespace MWInput
         void updateSensors();
         void correctGyroscopeAxes();
         GyroscopeAxis mapGyroscopeAxis(const std::string& axis);
-        float getGyroAxisSpeed(GyroscopeAxis axis, const SDL_SensorEvent &arg) const;
+        float getGyroAxisSpeed(GyroscopeAxis axis) const;
 
         bool mInvertX;
         bool mInvertY;
 
-        float mGyroXSpeed;
-        float mGyroYSpeed;
+        std::array<float, 3> mGyroValues;
         float mGyroUpdateTimer;
 
         float mGyroHSensitivity;
