@@ -11,15 +11,10 @@
 namespace MWInput
 {
     SensorManager::SensorManager()
-        : mInvertX(Settings::Manager::getBool("invert x axis", "Input"))
-        , mInvertY(Settings::Manager::getBool("invert y axis", "Input"))
-        , mGyroValues()
+        : mGyroValues()
         , mGyroUpdateTimer(0.f)
-        , mGyroHSensitivity(Settings::Manager::getFloat("gyro horizontal sensitivity", "Input"))
-        , mGyroVSensitivity(Settings::Manager::getFloat("gyro vertical sensitivity", "Input"))
         , mGyroHAxis(GyroscopeAxis::Minus_X)
         , mGyroVAxis(GyroscopeAxis::Y)
-        , mGyroInputThreshold(Settings::Manager::getFloat("gyro input threshold", "Input"))
         , mGyroscope(nullptr)
         , mGuiCursorEnabled(true)
     {
@@ -41,24 +36,6 @@ namespace MWInput
         }
     }
 
-    SensorManager::GyroscopeAxis SensorManager::mapGyroscopeAxis(const std::string& axis)
-    {
-        if (axis == "x")
-            return GyroscopeAxis::X;
-        else if (axis == "y")
-            return GyroscopeAxis::Y;
-        else if (axis == "z")
-            return GyroscopeAxis::Z;
-        else if (axis == "-x")
-            return GyroscopeAxis::Minus_X;
-        else if (axis == "-y")
-            return GyroscopeAxis::Minus_Y;
-        else if (axis == "-z")
-            return GyroscopeAxis::Minus_Z;
-
-        return GyroscopeAxis::Unknown;
-    }
-
     void SensorManager::correctGyroscopeAxes()
     {
         if (!Settings::Manager::getBool("enable gyroscope", "Input"))
@@ -67,8 +44,8 @@ namespace MWInput
         // Treat setting from config as axes for landscape mode.
         // If the device does not support orientation change, do nothing.
         // Note: in is unclear how to correct axes for devices with non-standart Z axis direction.
-        mGyroHAxis = mapGyroscopeAxis(Settings::Manager::getString("gyro horizontal axis", "Input"));
-        mGyroVAxis = mapGyroscopeAxis(Settings::Manager::getString("gyro vertical axis", "Input"));
+        mGyroHAxis = gyroscopeAxisFromString(Settings::Manager::getString("gyro horizontal axis", "Input"));
+        mGyroVAxis = gyroscopeAxisFromString(Settings::Manager::getString("gyro vertical axis", "Input"));
 
         SDL_DisplayOrientation currentOrientation = SDL_GetDisplayOrientation(Settings::Manager::getInt("screen", "Video"));
         switch (currentOrientation)
@@ -148,18 +125,6 @@ namespace MWInput
     {
         for (const auto& setting : changed)
         {
-            if (setting.first == "Input" && setting.second == "invert x axis")
-                mInvertX = Settings::Manager::getBool("invert x axis", "Input");
-
-            if (setting.first == "Input" && setting.second == "invert y axis")
-                mInvertY = Settings::Manager::getBool("invert y axis", "Input");
-
-            if (setting.first == "Input" && setting.second == "gyro horizontal sensitivity")
-                mGyroHSensitivity = Settings::Manager::getFloat("gyro horizontal sensitivity", "Input");
-
-            if (setting.first == "Input" && setting.second == "gyro vertical sensitivity")
-                mGyroVSensitivity = Settings::Manager::getFloat("gyro vertical sensitivity", "Input");
-
             if (setting.first == "Input" && setting.second == "enable gyroscope")
                 init();
 
@@ -168,26 +133,6 @@ namespace MWInput
 
             if (setting.first == "Input" && setting.second == "gyro vertical axis")
                 correctGyroscopeAxes();
-
-            if (setting.first == "Input" && setting.second == "gyro input threshold")
-                mGyroInputThreshold = Settings::Manager::getFloat("gyro input threshold", "Input");
-        }
-    }
-
-    float SensorManager::getGyroAxisSpeed(GyroscopeAxis axis) const
-    {
-        switch (axis)
-        {
-            case GyroscopeAxis::X:
-            case GyroscopeAxis::Y:
-            case GyroscopeAxis::Z:
-                return std::abs(mGyroValues[0]) >= mGyroInputThreshold ? mGyroValues[axis - 1] : 0.f;
-            case GyroscopeAxis::Minus_X:
-            case GyroscopeAxis::Minus_Y:
-            case GyroscopeAxis::Minus_Z:
-                return std::abs(mGyroValues[0]) >= mGyroInputThreshold ? -mGyroValues[std::abs(axis) - 1] : 0.f;
-            default:
-                return 0.f;
         }
     }
 
@@ -236,34 +181,6 @@ namespace MWInput
             // Reset current rotation speed and wait for update.
             mGyroValues = { 0, 0, 0 };
             mGyroUpdateTimer = 0.f;
-            return;
-        }
-
-        if (!mGuiCursorEnabled)
-        {
-            float gyroH = getGyroAxisSpeed(mGyroHAxis);
-            float gyroV = getGyroAxisSpeed(mGyroVAxis);
-
-            if (gyroH == 0 && gyroV == 0)
-                return;
-
-            float rot[3];
-            rot[0] = -gyroV * dt * mGyroVSensitivity * 4 * (mInvertY ? -1 : 1);
-            rot[1] = 0.0f;
-            rot[2] = -gyroH * dt * mGyroHSensitivity * 4 * (mInvertX ? -1 : 1);
-
-            // Only actually turn player when we're not in vanity mode
-            bool playerLooking = MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking");
-            if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && playerLooking)
-            {
-                MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-                player.yaw(-rot[2]);
-                player.pitch(-rot[0]);
-            }
-            else if (!playerLooking)
-                MWBase::Environment::get().getWorld()->disableDeferredPreviewRotation();
-
-            MWBase::Environment::get().getInputManager()->resetIdleTime();
         }
     }
 

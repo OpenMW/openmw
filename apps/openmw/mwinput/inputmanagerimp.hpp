@@ -39,6 +39,7 @@ namespace MWInput
     class KeyboardManager;
     class MouseManager;
     class SensorManager;
+    class GyroManager;
 
     /**
     * @brief Class that provides a high-level API for game input
@@ -128,6 +129,7 @@ namespace MWInput
         KeyboardManager* mKeyboardManager;
         MouseManager* mMouseManager;
         SensorManager* mSensorManager;
+        GyroManager* mGyroManager;
     };
 }
 #endif
