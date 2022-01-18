@@ -125,8 +125,8 @@ Ubuntu_GCC_tests_Debug:
     paths: []
     expire_in: 1 minute
 
-Ubuntu_GCC_Static_Deps:
-  extends: Ubuntu_GCC
+Ubuntu_Static_Deps:
+  extends: Ubuntu_Clang
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"  
       changes:
@@ -136,24 +136,30 @@ Ubuntu_GCC_Static_Deps:
         - ".gitlab-ci.yml"
   allow_failure: true
   cache:
-    key: Ubuntu_GCC_Static_Deps
+    key: Ubuntu_Static_Deps.V1
     paths:
     - apt-cache/
     - ccache/
     - build/extern/fetched/
   before_script:
-    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-static
+    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-static
   variables:
     CI_OPENMW_USE_STATIC_DEPS: 1
+    CC: clang
+    CXX: clang++
+    CXXFLAGS: -O0
   timeout: 3h
 
-Ubuntu_GCC_Static_Deps_tests:
-  extends: Ubuntu_GCC_Static_Deps
+Ubuntu_Static_Deps_tests:
+  extends: Ubuntu_Static_Deps
   cache:
-    key: Ubuntu_GCC_Static_Deps_tests
+    key: Ubuntu_Static_Deps_tests.V1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
+    CC: clang
+    CXX: clang++
+    CXXFLAGS: -O0
   artifacts:
     paths: []
     expire_in: 1 minute
