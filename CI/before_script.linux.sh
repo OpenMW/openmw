@@ -17,7 +17,7 @@ fi
 CXX_FLAGS='-Werror -Wno-error=deprecated-declarations -Wno-error=nonnull -Wno-error=deprecated-copy'
 
 if [[ "${CXX}" == 'clang++' ]]; then
-    CXX_FLAGS="${CXX_FLAGS} -Wno-error=unused-lambda-capture -Wno-error=gnu-zero-variadic-macro-arguments"
+    CXX_FLAGS="${CXX_FLAGS} -Wno-error=unused-lambda-capture -Wno-error=gnu-zero-variadic-macro-arguments -Wno-error=misleading-indentation"
 fi
 
 declare -a CMAKE_CONF_OPTS=(
@@ -30,7 +30,7 @@ declare -a CMAKE_CONF_OPTS=(
     -DBUILD_SHARED_LIBS=OFF
     -DUSE_SYSTEM_TINYXML=ON
     -DCMAKE_INSTALL_PREFIX=install
-    -DCMAKE_C_FLAGS='-Werror'
+    -DCMAKE_C_FLAGS="-Werror -Wno-error=misleading-indentation"
     -DCMAKE_CXX_FLAGS="${CXX_FLAGS}"
     -DOPENMW_CXX_FLAGS="-Werror=implicit-fallthrough"
 )
