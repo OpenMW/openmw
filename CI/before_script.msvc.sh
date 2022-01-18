@@ -878,7 +878,13 @@ fi
 		done
 		echo Done.
 	else
-		QT_SDK="C:/Qt/5.13/msvc2017${SUFFIX}"
+		# default to msvc2019 which pre-loads Qt 5.15.2
+		qt_version="5.15.2"
+		if [ "msvc${MSVC_REAL_YEAR}" == "msvc2017" ]; then
+			qt_version="5.13"
+    	fi
+		QT_SDK="C:/Qt/${qt_version}/msvc${MSVC_REAL_YEAR}${SUFFIX}"
+
 		add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
 		for CONFIGURATION in ${CONFIGURATIONS[@]}; do
