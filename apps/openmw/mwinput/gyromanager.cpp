@@ -12,8 +12,6 @@ namespace MWInput
         , mGuiCursorEnabled(true)
         , mSensitivityH(Settings::Manager::getFloat("gyro horizontal sensitivity", "Input"))
         , mSensitivityV(Settings::Manager::getFloat("gyro vertical sensitivity", "Input"))
-        , mInvertH(Settings::Manager::getBool("invert x axis", "Input"))
-        , mInvertV(Settings::Manager::getBool("invert y axis", "Input"))
         , mInputThreshold(Settings::Manager::getFloat("gyro input threshold", "Input"))
         , mAxisH(gyroscopeAxisFromString(Settings::Manager::getString("gyro horizontal axis", "Input")))
         , mAxisV(gyroscopeAxisFromString(Settings::Manager::getString("gyro vertical axis", "Input")))
@@ -26,13 +24,13 @@ namespace MWInput
             float gyroH = getAxisValue(mAxisH, values);
             float gyroV = getAxisValue(mAxisV, values);
 
-            if (gyroH == 0 && gyroV == 0)
+            if (gyroH == 0.f && gyroV == 0.f)
                 return;
 
             float rot[3];
-            rot[0] = -gyroV * dt * mSensitivityV * 4 * (mInvertV ? -1 : 1);
+            rot[0] = -gyroV * dt * mSensitivityV;
             rot[1] = 0.0f;
-            rot[2] = -gyroH * dt * mSensitivityH * 4 * (mInvertH ? -1 : 1);
+            rot[2] = -gyroH * dt * mSensitivityH;
 
             // Only actually turn player when we're not in vanity mode
             bool playerLooking = MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking");
@@ -62,10 +60,6 @@ namespace MWInput
                 mSensitivityH = Settings::Manager::getFloat("gyro horizontal sensitivity", "Input");
             else if (setting.second == "gyro vertical sensitivity")
                 mSensitivityV = Settings::Manager::getFloat("gyro vertical sensitivity", "Input");
-            else if (setting.second == "invert x axis")
-                mInvertH = Settings::Manager::getBool("invert x axis", "Input");
-            else if (setting.second == "invert y axis")
-                mInvertV = Settings::Manager::getBool("invert y axis", "Input");
             else if (setting.second == "gyro input threshold")
                 mInputThreshold = Settings::Manager::getFloat("gyro input threshold", "Input");
             else if (setting.second == "gyro horizontal axis")
@@ -75,21 +69,15 @@ namespace MWInput
         }
     }
 
-    namespace
-    {
-        int signum(int x)
-        {
-            return 0 < x - x < 0;
-        }
-    }
-
     float GyroManager::getAxisValue(GyroscopeAxis axis, std::array<float, 3> values) const
     {
         if (axis == GyroscopeAxis::Unknown)
             return 0;
-        float value = values[std::abs(axis) - 1] * signum(axis);
-        //if (std::abs(value) <= mInputThreshold)
-        //    value = 0;
+        float value = values[std::abs(axis) - 1];
+        if (axis < 0)
+            value *= -1;
+        if (std::abs(value) <= mInputThreshold)
+            value = 0;
         return value;
     }
 }

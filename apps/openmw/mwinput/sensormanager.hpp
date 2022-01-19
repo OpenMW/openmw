@@ -3,10 +3,11 @@
 
 #include <SDL_sensor.h>
 
+#include <osg/Matrixf>
+#include <osg/Vec3f>
+
 #include <components/settings/settings.hpp>
 #include <components/sdlutil/events.hpp>
-
-#include "gyroaxis.hpp"
 
 namespace SDLUtil
 {
@@ -45,11 +46,9 @@ namespace MWInput
         void updateSensors();
         void correctGyroscopeAxes();
 
-        std::array<float, 3> mGyroValues;
+        osg::Matrixf mRotation;
+        osg::Vec3f mGyroValues;
         float mGyroUpdateTimer;
-
-        GyroscopeAxis mGyroHAxis;
-        GyroscopeAxis mGyroVAxis;
 
         SDL_Sensor* mGyroscope;
 

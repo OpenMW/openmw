@@ -11,10 +11,9 @@
 namespace MWInput
 {
     SensorManager::SensorManager()
-        : mGyroValues()
+        : mRotation()
+        , mGyroValues()
         , mGyroUpdateTimer(0.f)
-        , mGyroHAxis(GyroscopeAxis::Minus_X)
-        , mGyroVAxis(GyroscopeAxis::Y)
         , mGyroscope(nullptr)
         , mGuiCursorEnabled(true)
     {
@@ -44,40 +43,36 @@ namespace MWInput
         // Treat setting from config as axes for landscape mode.
         // If the device does not support orientation change, do nothing.
         // Note: in is unclear how to correct axes for devices with non-standart Z axis direction.
-        mGyroHAxis = gyroscopeAxisFromString(Settings::Manager::getString("gyro horizontal axis", "Input"));
-        mGyroVAxis = gyroscopeAxisFromString(Settings::Manager::getString("gyro vertical axis", "Input"));
+
+        mRotation = osg::Matrixf::identity();
+
+        float angle = 0;
 
         SDL_DisplayOrientation currentOrientation = SDL_GetDisplayOrientation(Settings::Manager::getInt("screen", "Video"));
         switch (currentOrientation)
         {
             case SDL_ORIENTATION_UNKNOWN:
-                return;
+                break;
             case SDL_ORIENTATION_LANDSCAPE:
                 break;
             case SDL_ORIENTATION_LANDSCAPE_FLIPPED:
             {
-                mGyroHAxis = GyroscopeAxis(-mGyroHAxis);
-                mGyroVAxis = GyroscopeAxis(-mGyroVAxis);
-
+                angle = osg::PIf;
                 break;
             }
             case SDL_ORIENTATION_PORTRAIT:
             {
-                GyroscopeAxis oldVAxis = mGyroVAxis;
-                mGyroVAxis = mGyroHAxis;
-                mGyroHAxis = GyroscopeAxis(-oldVAxis);
-
+                angle = -0.5 * osg::PIf;
                 break;
             }
             case SDL_ORIENTATION_PORTRAIT_FLIPPED:
             {
-                GyroscopeAxis oldVAxis = mGyroVAxis;
-                mGyroVAxis = GyroscopeAxis(-mGyroHAxis);
-                mGyroHAxis = oldVAxis;
-
+                angle = 0.5 * osg::PIf;
                 break;
             }
         }
+
+        mRotation.makeRotate(angle, osg::Vec3f(0, 0, 1));
     }
 
     void SensorManager::updateSensors()
@@ -127,12 +122,6 @@ namespace MWInput
         {
             if (setting.first == "Input" && setting.second == "enable gyroscope")
                 init();
-
-            if (setting.first == "Input" && setting.second == "gyro horizontal axis")
-                correctGyroscopeAxes();
-
-            if (setting.first == "Input" && setting.second == "gyro vertical axis")
-                correctGyroscopeAxes();
         }
     }
 
@@ -159,11 +148,9 @@ namespace MWInput
                 break;
             case SDL_SENSOR_GYRO:
             {
-                mGyroValues[0] = arg.data[0];
-                mGyroValues[1] = arg.data[1];
-                mGyroValues[2] = arg.data[2];
+                osg::Vec3f gyro(arg.data[0], arg.data[1], arg.data[2]);
+                mGyroValues = mRotation * gyro;
                 mGyroUpdateTimer = 0.f;
-
                 break;
         }
         default:
@@ -179,7 +166,7 @@ namespace MWInput
             // More than half of second passed since the last gyroscope update.
             // A device more likely was disconnected or switched to the sleep mode.
             // Reset current rotation speed and wait for update.
-            mGyroValues = { 0, 0, 0 };
+            mGyroValues = osg::Vec3f();
             mGyroUpdateTimer = 0.f;
         }
     }
@@ -191,6 +178,6 @@ namespace MWInput
 
     std::array<float, 3> SensorManager::getGyroValues() const
     {
-        return mGyroValues;
+        return { mGyroValues.x(), mGyroValues.y(), mGyroValues.z() };
     }
 }

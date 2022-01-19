@@ -25,8 +25,6 @@ namespace MWInput
             bool mGuiCursorEnabled;
             float mSensitivityH;
             float mSensitivityV;
-            bool mInvertH;
-            bool mInvertV;
             float mInputThreshold;
             GyroscopeAxis mAxisH;
             GyroscopeAxis mAxisV;
