@@ -109,7 +109,7 @@ RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem*
 
     createWaterRippleStateSet(resourceSystem, mParticleNode);
 
-    resourceSystem->getSceneManager()->recreateShaders(mParticleNode);
+    resourceSystem->getSceneManager()->recreateShaders(mParticleNode, "objects", false, nullptr, true);
 
     mParent->addChild(mParticleNode);
 }
