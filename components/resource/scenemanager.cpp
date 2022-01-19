@@ -340,13 +340,15 @@ namespace Resource
         return mForceShaders;
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool forceShadersForNode, const osg::Program* programTemplate)
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool forceShadersForNode, const osg::Program* programTemplate, bool disableSoftParticles)
     {
         osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix));
         shaderVisitor->setAllowedToModifyStateSets(false);
         shaderVisitor->setProgramTemplate(programTemplate);
         if (forceShadersForNode)
             shaderVisitor->setForceShaders(true);
+        if (disableSoftParticles)
+            shaderVisitor->setOpaqueDepthTex(nullptr);
         node->accept(*shaderVisitor);
     }
 
