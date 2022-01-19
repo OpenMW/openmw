@@ -15,7 +15,7 @@ namespace MWInput
         , mInputThreshold(Settings::Manager::getFloat("gyro input threshold", "Input"))
         , mAxisH(gyroscopeAxisFromString(Settings::Manager::getString("gyro horizontal axis", "Input")))
         , mAxisV(gyroscopeAxisFromString(Settings::Manager::getString("gyro vertical axis", "Input")))
-    {};
+    {}
 
     void GyroManager::update(float dt, std::array<float, 3> values) const
     {
