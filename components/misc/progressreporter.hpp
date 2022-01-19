@@ -29,10 +29,10 @@ namespace Misc
             {
                 const std::lock_guard lock(mMutex);
                 const auto now = std::chrono::steady_clock::now();
-                const auto left = mNextReport - now;
-                if (left.count() > 0 || provided == expected)
+                if (mNextReport > now || provided == expected)
                     return false;
-                mNextReport += mInterval + left;
+                if (mInterval.count() > 0)
+                    mNextReport = mNextReport + mInterval * ((now - mNextReport + mInterval).count() / mInterval.count());
                 return true;
             } ();
             if (shouldReport)
