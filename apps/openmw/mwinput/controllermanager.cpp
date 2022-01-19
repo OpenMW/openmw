@@ -406,14 +406,16 @@ namespace MWInput
     void ControllerManager::enableGyroSensor()
     {
         mGyroAvailable = false;
-        SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
-        if (!cntrl)
-            return;
-        if (!SDL_GameControllerHasSensor(cntrl, SDL_SENSOR_GYRO))
-            return;
-        if (SDL_GameControllerSetSensorEnabled(cntrl, SDL_SENSOR_GYRO, SDL_TRUE) < 0)
-            return;
-        mGyroAvailable = true;
+        #if SDL_VERSION_ATLEAST(2, 0, 14)
+            SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+            if (!cntrl)
+                return;
+            if (!SDL_GameControllerHasSensor(cntrl, SDL_SENSOR_GYRO))
+                return;
+            if (SDL_GameControllerSetSensorEnabled(cntrl, SDL_SENSOR_GYRO, SDL_TRUE) < 0)
+                return;
+            mGyroAvailable = true;
+        #endif
     }
 
     bool ControllerManager::isGyroAvailable() const
@@ -424,9 +426,11 @@ namespace MWInput
     std::array<float, 3> ControllerManager::getGyroValues() const
     {
         float gyro[3] = { 0.f };
-        SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
-        if (cntrl && mGyroAvailable)
-            SDL_GameControllerGetSensorData(cntrl, SDL_SENSOR_GYRO, gyro, 3);
+        #if SDL_VERSION_ATLEAST(2, 0, 14)
+            SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+            if (cntrl && mGyroAvailable)
+                SDL_GameControllerGetSensorData(cntrl, SDL_SENSOR_GYRO, gyro, 3);
+        #endif
         return std::array<float, 3>({gyro[0], gyro[1], gyro[2]});
     }
 }
