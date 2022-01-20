@@ -27,6 +27,7 @@ struct ConfigurationManager
     void readConfiguration(boost::program_options::variables_map& variables,
         boost::program_options::options_description& description, bool quiet=false);
 
+    void processPath(boost::filesystem::path& path, bool create = false) const;
     void processPaths(Files::PathContainer& dataDirs, bool create = false) const;
     ///< \param create Try creating the directory, if it does not exist.
 
@@ -70,6 +71,7 @@ struct ConfigurationManager
         FixedPathType mFixedPath;
 
         boost::filesystem::path mLogPath;
+        boost::filesystem::path mUserDataPath;
         boost::filesystem::path mScreenshotPath;
 
         TokensMappingContainer mTokensMapping;

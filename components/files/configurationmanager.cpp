@@ -30,18 +30,10 @@ ConfigurationManager::ConfigurationManager(bool silent)
 {
     setupTokensMapping();
 
-    boost::filesystem::create_directories(mFixedPath.getUserConfigPath());
-    boost::filesystem::create_directories(mFixedPath.getUserDataPath());
-
+    // Initialize with fixed paths, will be overridden in `readConfiguration`.
     mLogPath = mFixedPath.getUserConfigPath();
-
+    mUserDataPath = mFixedPath.getUserDataPath();
     mScreenshotPath = mFixedPath.getUserDataPath() / "screenshots";
-
-    // probably not necessary but validate the creation of the screenshots directory and fallback to the original behavior if it fails
-    boost::system::error_code dirErr;
-    if (!boost::filesystem::create_directories(mScreenshotPath, dirErr) && !boost::filesystem::is_directory(mScreenshotPath)) {
-        mScreenshotPath = mFixedPath.getUserDataPath();
-    }
 }
 
 ConfigurationManager::~ConfigurationManager()
@@ -114,6 +106,30 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
     }
 
     mLogPath = mActiveConfigPaths.back();
+    mUserDataPath = variables["user-data"].as<Files::MaybeQuotedPath>();
+    if (mUserDataPath.empty())
+    {
+        if (!quiet)
+            Log(Debug::Warning) << "Error: `user-data` is not specified";
+        mUserDataPath = mFixedPath.getUserDataPath();
+    }
+    processPath(mUserDataPath, true);
+    mScreenshotPath = mUserDataPath / "screenshots";
+
+    boost::filesystem::create_directories(getUserConfigPath());
+    boost::filesystem::create_directories(mScreenshotPath);
+
+    // probably not necessary but validate the creation of the screenshots directory and fallback to the original behavior if it fails
+    if (!boost::filesystem::is_directory(mScreenshotPath))
+        mScreenshotPath = mUserDataPath;
+
+    if (!quiet)
+    {
+        Log(Debug::Info) << "Logs dir: " << getUserConfigPath().string();
+        Log(Debug::Info) << "User data dir: " << mUserDataPath.string();
+        Log(Debug::Info) << "Screenshots dir: " << mScreenshotPath.string();
+    }
+
     mSilent = silent;
 }
 
@@ -141,8 +157,9 @@ void ConfigurationManager::addExtraConfigDirs(std::stack<boost::filesystem::path
 void ConfigurationManager::addCommonOptions(boost::program_options::options_description& description)
 {
     description.add_options()
-        ("config", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "config")
-            ->multitoken()->composing(), "additional config directories");
+        ("config", bpo::value<Files::MaybeQuotedPathContainer>()->multitoken()->composing(), "additional config directories")
+        ("user-data", bpo::value<Files::MaybeQuotedPath>(),
+            "set user data directory (used for saves, screenshots, etc)");
 }
 
 boost::program_options::variables_map separateComposingVariables(boost::program_options::variables_map & variables,
@@ -230,54 +247,57 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
     boost::program_options::notify(first);
 }
 
+void ConfigurationManager::processPath(boost::filesystem::path& path, bool create) const
+{
+    std::string str = path.string();
+
+    // Do nothing if the path doesn't start with a token
+    if (str.empty() || str[0] != '?')
+        return;
+
+    std::string::size_type pos = str.find('?', 1);
+    if (pos != std::string::npos && pos != 0)
+    {
+        auto tokenIt = mTokensMapping.find(str.substr(0, pos + 1));
+        if (tokenIt != mTokensMapping.end())
+        {
+            boost::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
+            if (pos < str.length() - 1)
+            {
+                // There is something after the token, so we should
+                // append it to the path
+                tempPath /= str.substr(pos + 1, str.length() - pos);
+            }
+
+            path = tempPath;
+        }
+        else
+        {
+            if (!mSilent)
+                Log(Debug::Warning) << "Path starts with unknown token: " << path;
+            path.clear();
+        }
+    }
+
+    if (!boost::filesystem::is_directory(path) && create)
+    {
+        try
+        {
+            boost::filesystem::create_directories(path);
+        }
+        catch (...) {}
+    }
+}
+
 void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool create) const
 {
-    std::string path;
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
     {
-        path = it->string();
-
-        // Check if path contains a token
-        if (!path.empty() && *path.begin() == '?')
-        {
-            std::string::size_type pos = path.find('?', 1);
-            if (pos != std::string::npos && pos != 0)
-            {
-                auto tokenIt = mTokensMapping.find(path.substr(0, pos + 1));
-                if (tokenIt != mTokensMapping.end())
-                {
-                    boost::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
-                    if (pos < path.length() - 1)
-                    {
-                        // There is something after the token, so we should
-                        // append it to the path
-                        tempPath /= path.substr(pos + 1, path.length() - pos);
-                    }
-
-                    *it = tempPath;
-                }
-                else
-                {
-                    // Clean invalid / unknown token, it will be removed outside the loop
-                    (*it).clear();
-                }
-            }
-        }
-
+        processPath(*it, create);
         if (!boost::filesystem::is_directory(*it))
         {
-            if (create)
-            {
-                try
-                {
-                    boost::filesystem::create_directories (*it);
-                }
-                catch (...) {}
-
-                if (boost::filesystem::is_directory(*it))
-                    continue;
-            }
-
+            if (!mSilent)
+                Log(Debug::Warning) << "No such dir: " << *it;
             (*it).clear();
         }
     }
@@ -322,7 +342,7 @@ const boost::filesystem::path& ConfigurationManager::getUserConfigPath() const
 
 const boost::filesystem::path& ConfigurationManager::getUserDataPath() const
 {
-    return mFixedPath.getUserDataPath();
+    return mUserDataPath;
 }
 
 const boost::filesystem::path& ConfigurationManager::getLocalPath() const
