@@ -3,8 +3,6 @@
 
 #include <components/settings/settings.hpp>
 
-#include "gyroaxis.hpp"
-
 namespace MWInput
 {
     class GyroManager
@@ -21,6 +19,19 @@ namespace MWInput
             void setGuiCursorEnabled(bool enabled) { mGuiCursorEnabled = enabled; }
 
         private:
+            enum GyroscopeAxis
+            {
+                Unknown = 0,
+                X = 1,
+                Y = 2,
+                Z = 3,
+                Minus_X = -1,
+                Minus_Y = -2,
+                Minus_Z = -3
+            };
+
+            static GyroscopeAxis gyroscopeAxisFromString(std::string_view s);
+
             bool mEnabled;
             bool mGuiCursorEnabled;
             float mSensitivityH;
