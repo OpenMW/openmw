@@ -17,6 +17,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/misc/osguservalues.hpp>
+#include <components/nif/parent.hpp>
 
 // particle
 #include <osgParticle/ParticleSystem>
@@ -74,10 +75,10 @@ namespace
     }
 
     // Collect all properties affecting the given drawable that should be handled on drawable basis rather than on the node hierarchy above it.
-    void collectDrawableProperties(const Nif::Node* nifNode, std::vector<const Nif::Property*>& out)
+    void collectDrawableProperties(const Nif::Node* nifNode, const Nif::Parent* parent, std::vector<const Nif::Property*>& out)
     {
-        if (nifNode->parent)
-            collectDrawableProperties(nifNode->parent, out);
+        if (parent != nullptr)
+            collectDrawableProperties(&parent->mNiNode, parent->mParent, out);
         const Nif::PropertyList& props = nifNode->props;
         for (size_t i = 0; i <props.length();++i)
         {
@@ -300,7 +301,7 @@ namespace NifOsg
             created->setDataVariance(osg::Object::STATIC);
             for (const Nif::Node* root : roots)
             {
-                auto node = handleNode(root, nullptr, imageManager, std::vector<unsigned int>(), 0, false, false, false, &textkeys->mTextKeys);
+                auto node = handleNode(root, nullptr, nullptr, imageManager, std::vector<unsigned int>(), 0, false, false, false, &textkeys->mTextKeys);
                 created->addChild(node);
             }
             if (mHasNightDayLabel)
@@ -339,7 +340,7 @@ namespace NifOsg
                 {
                     // Get the lowest numbered recIndex of the NiTexturingProperty root node.
                     // This is what is overridden when a spell effect "particle texture" is used.
-                    if (nifNode->parent == nullptr && !mFoundFirstRootTexturingProperty && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    if (nifNode->parents.empty() && !mFoundFirstRootTexturingProperty && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
                         mFirstRootTextureIndex = props[i].getPtr()->recIndex;
                         mFoundFirstRootTexturingProperty = true;
@@ -483,7 +484,7 @@ namespace NifOsg
                 // The Root node can be created as a Group if no transformation is required.
                 // This takes advantage of the fact root nodes can't have additional controllers
                 // loaded from an external .kf file (original engine just throws "can't find node" errors if you try).
-                if (!nifNode->parent && nifNode->controller.empty() && nifNode->trafo.isIdentity())
+                if (nifNode->parents.empty() && nifNode->controller.empty() && nifNode->trafo.isIdentity())
                     node = new osg::Group;
 
                 dataVariance = nifNode->isBone ? osg::Object::DYNAMIC : osg::Object::STATIC;
@@ -505,8 +506,10 @@ namespace NifOsg
             return node;
         }
 
-        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
-                                std::vector<unsigned int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool hasAnimatedParents, SceneUtil::TextKeyMap* textKeys, osg::Node* rootNode=nullptr)
+        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
+            Resource::ImageManager* imageManager, std::vector<unsigned int> boundTextures, int animflags,
+            bool skipMeshes, bool hasMarkers, bool hasAnimatedParents, SceneUtil::TextKeyMap* textKeys,
+            osg::Node* rootNode=nullptr)
         {
             if (rootNode != nullptr && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
                 return nullptr;
@@ -615,9 +618,9 @@ namespace NifOsg
                     Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin;
 
                     if (skin.empty())
-                        handleGeometry(nifNode, node, composite, boundTextures, animflags);
+                        handleGeometry(nifNode, parent, node, composite, boundTextures, animflags);
                     else
-                        handleSkinnedGeometry(nifNode, node, composite, boundTextures, animflags);
+                        handleSkinnedGeometry(nifNode, parent, node, composite, boundTextures, animflags);
 
                     if (!nifNode->controller.empty())
                         handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
@@ -625,7 +628,7 @@ namespace NifOsg
             }
 
             if (nifNode->recType == Nif::RC_NiParticles)
-                handleParticleSystem(nifNode, node, composite, animflags);
+                handleParticleSystem(nifNode, parent, node, composite, animflags);
 
             if (composite->getNumControllers() > 0)
             {
@@ -681,10 +684,11 @@ namespace NifOsg
                 }
 
                 const Nif::NodeList &children = ninode->children;
+                const Nif::Parent currentParent {*ninode, parent};
                 for(size_t i = 0;i < children.length();++i)
                 {
                     if(!children[i].empty())
-                        handleNode(children[i].getPtr(), currentNode, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), &currentParent, currentNode, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
                 }
             }
 
@@ -1026,7 +1030,8 @@ namespace NifOsg
             mEmitterQueue.clear();
         }
 
-        void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
+        void handleParticleSystem(const Nif::Node *nifNode, const Nif::Parent* parent, osg::Group *parentNode,
+            SceneUtil::CompositeStateSetUpdater* composite, int animflags)
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
@@ -1095,7 +1100,7 @@ namespace NifOsg
             handleParticlePrograms(partctrl->affectors, partctrl->colliders, parentNode, partsys.get(), rf);
 
             std::vector<const Nif::Property*> drawableProps;
-            collectDrawableProperties(nifNode, drawableProps);
+            collectDrawableProperties(nifNode, parent, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, true, animflags);
 
             // particle system updater (after the emitters and affectors in the scene graph)
@@ -1146,7 +1151,9 @@ namespace NifOsg
             }
         }
 
-        void handleNiGeometry(const Nif::Node *nifNode, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
+        void handleNiGeometry(const Nif::Node *nifNode, const Nif::Parent* parent, osg::Geometry *geometry,
+            osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite,
+            const std::vector<unsigned int>& boundTextures, int animflags)
         {
             const Nif::NiGeometry* niGeometry = static_cast<const Nif::NiGeometry*>(nifNode);
             if (niGeometry->data.empty())
@@ -1198,15 +1205,17 @@ namespace NifOsg
             // - there are 3 "overlapping" nif properties that all affect the osg::Material, handling them
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
-            collectDrawableProperties(nifNode, drawableProps);
+            collectDrawableProperties(nifNode, parent, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->colors.empty(), animflags);
         }
 
-        void handleGeometry(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
+        void handleGeometry(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
+            SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
+            int animflags)
         {
             assert(isTypeGeometry(nifNode->recType));
             osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
-            handleNiGeometry(nifNode, geom, parentNode, composite, boundTextures, animflags);
+            handleNiGeometry(nifNode, parent, geom, parentNode, composite, boundTextures, animflags);
             // If the record had no valid geometry data in it, early-out
             if (geom->empty())
                 return;
@@ -1250,12 +1259,12 @@ namespace NifOsg
             return morphGeom;
         }
 
-        void handleSkinnedGeometry(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
-                                          const std::vector<unsigned int>& boundTextures, int animflags)
+        void handleSkinnedGeometry(const Nif::Node *nifNode, const Nif::Parent* parent, osg::Group *parentNode,
+            SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
             assert(isTypeGeometry(nifNode->recType));
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
-            handleNiGeometry(nifNode, geometry, parentNode, composite, boundTextures, animflags);
+            handleNiGeometry(nifNode, parent, geometry, parentNode, composite, boundTextures, animflags);
             if (geometry->empty())
                 return;
             osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
