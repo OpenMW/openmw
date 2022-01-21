@@ -118,7 +118,10 @@ namespace
             const btCollisionWorld* mCollisionWorld;
             void operator()(MWPhysics::ActorSimulation& sim) const
             {
-                auto& [actor, frameData] = sim;
+                auto& [actorPtr, frameData] = sim;
+                const auto actor = actorPtr.lock();
+                if (actor == nullptr)
+                    return;
                 actor->applyOffsetChange();
                 frameData.mPosition = actor->getPosition();
                 if (frameData.mWaterCollision && frameData.mPosition.z() < frameData.mWaterlevel && actor->canMoveToWaterSurface(frameData.mWaterlevel, mCollisionWorld))
@@ -157,7 +160,10 @@ namespace
             btCollisionWorld* mCollisionWorld;
             void operator()(MWPhysics::ActorSimulation& sim) const
             {
-                auto& [actor, frameData] = sim;
+                auto& [actorPtr, frameData] = sim;
+                const auto actor = actorPtr.lock();
+                if (actor == nullptr)
+                    return;
                 if (actor->setPosition(frameData.mPosition))
                 {
                     frameData.mPosition = actor->getPosition(); // account for potential position change made by script
@@ -167,7 +173,10 @@ namespace
             }
             void operator()(MWPhysics::ProjectileSimulation& sim) const
             {
-                auto& [proj, frameData] = sim;
+                auto& [projPtr, frameData] = sim;
+                const auto proj = projPtr.lock();
+                if (proj == nullptr)
+                    return;
                 proj->setPosition(frameData.mPosition);
                 proj->updateCollisionObjectPosition();
                 mCollisionWorld->updateSingleAabb(proj->getCollisionObject());
@@ -197,7 +206,10 @@ namespace
             const MWPhysics::PhysicsTaskScheduler* scheduler;
             void operator()(MWPhysics::ActorSimulation& sim) const
             {
-                auto& [actor, frameData] = sim;
+                auto& [actorPtr, frameData] = sim;
+                const auto actor = actorPtr.lock();
+                if (actor == nullptr)
+                    return;
                 auto ptr = actor->getPtr();
 
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
@@ -229,7 +241,10 @@ namespace
             }
             void operator()(MWPhysics::ProjectileSimulation& sim) const
             {
-                auto& [proj, frameData] = sim;
+                auto& [projPtr, frameData] = sim;
+                const auto proj = projPtr.lock();
+                if (proj == nullptr)
+                    return;
                 proj->setSimulationPosition(::interpolateMovements(*proj, mTimeAccum, mPhysicsDt));
             }
         };

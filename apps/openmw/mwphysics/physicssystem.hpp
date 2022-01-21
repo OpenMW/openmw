@@ -117,8 +117,8 @@ namespace MWPhysics
         osg::Vec3f mStormDirection;
     };
 
-    using ActorSimulation = std::pair<std::shared_ptr<Actor>, ActorFrameData>;
-    using ProjectileSimulation = std::pair<std::shared_ptr<Projectile>, ProjectileFrameData>;
+    using ActorSimulation = std::pair<std::weak_ptr<Actor>, ActorFrameData>;
+    using ProjectileSimulation = std::pair<std::weak_ptr<Projectile>, ProjectileFrameData>;
     using Simulation = std::variant<ActorSimulation, ProjectileSimulation>;
 
     class PhysicsSystem : public RayCastingInterface
