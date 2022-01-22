@@ -1,10 +1,5 @@
 #include "terrainstorage.hpp"
 
-#include "../../model/world/land.hpp"
-#include "../../model/world/landtexture.hpp"
-
-#include <components/esmterrain/storage.hpp>
-
 namespace CSVRender
 {
     TerrainStorage::TerrainStorage(const CSMWorld::Data &data)

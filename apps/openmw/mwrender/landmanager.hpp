@@ -4,7 +4,7 @@
 #include <osg/Object>
 
 #include <components/resource/resourcemanager.hpp>
-#include <components/esmterrain/storage.hpp>
+#include <components/esm3terrain/storage.hpp>
 
 namespace ESM
 {
