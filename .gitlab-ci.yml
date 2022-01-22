@@ -134,7 +134,6 @@ Ubuntu_Static_Deps:
         - "cmake/**/*"
         - "CI/**/*"
         - ".gitlab-ci.yml"
-  allow_failure: true
   cache:
     key: Ubuntu_Static_Deps.V1
     paths:
