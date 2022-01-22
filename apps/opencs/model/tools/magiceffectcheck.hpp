@@ -1,8 +1,8 @@
 #ifndef CSM_TOOLS_MAGICEFFECTCHECK_HPP
 #define CSM_TOOLS_MAGICEFFECTCHECK_HPP
 
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadsoun.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadsoun.hpp>
 
 #include "../world/idcollection.hpp"
 #include "../world/refidcollection.hpp"

@@ -3,12 +3,12 @@
 
 #include <QVariant>
 
-#include <components/esm/loadpgrd.hpp>
-#include <components/esm/effectlist.hpp>
-#include <components/esm/loadmgef.hpp> // for converting magic effect id to string & back
-#include <components/esm/loadskil.hpp> // for converting skill names
+#include <components/esm3/loadpgrd.hpp>
+#include <components/esm3/effectlist.hpp>
+#include <components/esm3/loadmgef.hpp> // for converting magic effect id to string & back
+#include <components/esm3/loadskil.hpp> // for converting skill names
 #include <components/esm/attr.hpp>     // for converting attributes
-#include <components/esm/loadrace.hpp>
+#include <components/esm3/loadrace.hpp>
 
 #include "nestedcolumnadapter.hpp"
 #include "nestedtablewrapper.hpp"

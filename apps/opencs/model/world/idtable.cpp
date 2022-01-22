@@ -7,7 +7,7 @@
 #include <map>
 #include <stdexcept>
 
-#include <components/esm/cellid.hpp>
+#include <components/esm3/cellid.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "collectionbase.hpp"

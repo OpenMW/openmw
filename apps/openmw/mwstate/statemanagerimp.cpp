@@ -2,10 +2,10 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/cellid.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/cellid.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 

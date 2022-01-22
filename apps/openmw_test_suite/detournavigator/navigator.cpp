@@ -7,7 +7,7 @@
 #include <components/detournavigator/navmeshdb.hpp>
 #include <components/misc/rng.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/resource/bulletshape.hpp>
 #include <components/bullethelpers/heightfield.hpp>
 

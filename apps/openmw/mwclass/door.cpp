@@ -1,7 +1,7 @@
 #include "door.hpp"
 
-#include <components/esm/loaddoor.hpp>
-#include <components/esm/doorstate.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/doorstate.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"

@@ -1,6 +1,6 @@
 #include "aiactivate.hpp"
 
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

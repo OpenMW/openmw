@@ -10,8 +10,8 @@
 #include <QObject>
 #include <QModelIndex>
 
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbody.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbody.hpp>
 #include <components/misc/weakcache.hpp>
 
 #include "refidcollection.hpp"

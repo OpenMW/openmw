@@ -4,7 +4,7 @@
 
 #include <QUndoStack>
 
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/loaddial.hpp>
 
 #include "../world/infocollection.hpp"
 #include "../world/cellcoordinates.hpp"

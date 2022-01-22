@@ -4,7 +4,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 #include <components/detournavigator/navigatorutils.hpp>
 #include <components/misc/coordinateconverter.hpp>
 

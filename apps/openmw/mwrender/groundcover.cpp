@@ -7,7 +7,7 @@
 #include <osg/VertexAttribDivisor>
 #include <osg/Program>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/terrain/quadtreenode.hpp>

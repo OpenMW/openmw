@@ -1,7 +1,7 @@
 #include "luascripts.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "components/esm3/esmreader.hpp"
+#include "components/esm3/esmwriter.hpp"
 
 // List of all records, that are related to Lua.
 //

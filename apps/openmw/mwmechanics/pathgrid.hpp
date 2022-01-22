@@ -3,7 +3,7 @@
 
 #include <deque>
 
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/loadpgrd.hpp>
 
 namespace ESM
 {

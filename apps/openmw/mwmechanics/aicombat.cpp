@@ -3,7 +3,7 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 
 #include <components/misc/mathutil.hpp>
 

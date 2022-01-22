@@ -6,7 +6,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Group>
 
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/loadpgrd.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/misc/coordinateconverter.hpp>

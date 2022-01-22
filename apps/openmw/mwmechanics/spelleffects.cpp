@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 

@@ -9,7 +9,7 @@
 #include <components/detournavigator/areatype.hpp>
 #include <components/detournavigator/status.hpp>
 #include <components/esm/defs.hpp>
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/loadpgrd.hpp>
 
 namespace MWWorld
 {

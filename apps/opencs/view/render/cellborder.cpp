@@ -5,7 +5,7 @@
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 
 #include "mask.hpp"
 

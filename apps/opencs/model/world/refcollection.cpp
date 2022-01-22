@@ -1,6 +1,6 @@
 #include "refcollection.hpp"
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include "ref.hpp"
 #include "cell.hpp"

@@ -17,7 +17,7 @@
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/depth.hpp>
 
-#include <components/esm/globalmap.hpp>
+#include <components/esm3/globalmap.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

@@ -3,7 +3,7 @@
 
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/resource/resourcemanager.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include <mutex>
 

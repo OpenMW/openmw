@@ -4,7 +4,7 @@
 #include <QSet>
 #include <QString>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
 namespace ESM {class ESMReader; struct Cell;}
 namespace ContentSelectorView {class ContentSelector;}

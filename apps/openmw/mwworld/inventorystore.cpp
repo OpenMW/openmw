@@ -4,8 +4,8 @@
 #include <algorithm>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadench.hpp>
-#include <components/esm/inventorystate.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/inventorystate.hpp>
 #include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"

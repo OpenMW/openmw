@@ -1,17 +1,17 @@
 #include "labels.hpp"
 
-#include <components/esm/loadbody.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadcont.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadlevlist.hpp>
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadrace.hpp>
-#include <components/esm/loadspel.hpp>
-#include <components/esm/loadweap.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadweap.hpp>
 
 #include <components/misc/stringops.hpp>
 

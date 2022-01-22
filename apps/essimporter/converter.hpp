@@ -6,23 +6,23 @@
 #include <osg/Image>
 #include <osg/ref_ptr>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loadglob.hpp>
-#include <components/esm/cellstate.hpp>
-#include <components/esm/loadfact.hpp>
-#include <components/esm/dialoguestate.hpp>
-#include <components/esm/custommarkerstate.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/weatherstate.hpp>
-#include <components/esm/globalscript.hpp>
-#include <components/esm/queststate.hpp>
-#include <components/esm/stolenitems.hpp>
-#include <components/esm/projectilestate.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/cellstate.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/dialoguestate.hpp>
+#include <components/esm3/custommarkerstate.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/weatherstate.hpp>
+#include <components/esm3/globalscript.hpp>
+#include <components/esm3/queststate.hpp>
+#include <components/esm3/stolenitems.hpp>
+#include <components/esm3/projectilestate.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"

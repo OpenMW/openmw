@@ -1,6 +1,6 @@
 #include "probe.hpp"
 
-#include <components/esm/loadprob.hpp>
+#include <components/esm3/loadprob.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

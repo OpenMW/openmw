@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_SOUNDCHECK_H
 #define CSM_TOOLS_SOUNDCHECK_H
 
-#include <components/esm/loadsoun.hpp>
+#include <components/esm3/loadsoun.hpp>
 
 #include "../world/resources.hpp"
 #include "../world/idcollection.hpp"

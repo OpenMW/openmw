@@ -3,7 +3,7 @@
 #include <sstream>
 #include <map>
 
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/loadspel.hpp>
 
 #include "../prefs/state.hpp"
 

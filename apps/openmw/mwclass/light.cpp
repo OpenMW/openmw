@@ -1,7 +1,7 @@
 #include "light.hpp"
 
-#include <components/esm/loadligh.hpp>
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/objectstate.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"

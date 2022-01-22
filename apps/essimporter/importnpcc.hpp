@@ -1,9 +1,9 @@
 #ifndef OPENMW_ESSIMPORT_NPCC_H
 #define OPENMW_ESSIMPORT_NPCC_H
 
-#include <components/esm/loadcont.hpp>
+#include <components/esm3/loadcont.hpp>
 
-#include <components/esm/aipackage.hpp>
+#include <components/esm3/aipackage.hpp>
 
 #include "importinventory.hpp"
 

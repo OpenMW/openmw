@@ -1,7 +1,7 @@
 #include "livecellref.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/objectstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

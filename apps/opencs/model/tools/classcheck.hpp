@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_CLASSCHECK_H
 #define CSM_TOOLS_CLASSCHECK_H
 
-#include <components/esm/loadclas.hpp>
+#include <components/esm3/loadclas.hpp>
 
 #include "../world/idcollection.hpp"
 

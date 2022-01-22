@@ -2,8 +2,8 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/globalscript.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/globalscript.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"

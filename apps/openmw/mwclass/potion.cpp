@@ -1,6 +1,6 @@
 #include "potion.hpp"
 
-#include <components/esm/loadalch.hpp>
+#include <components/esm3/loadalch.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

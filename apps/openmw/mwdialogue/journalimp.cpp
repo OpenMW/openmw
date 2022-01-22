@@ -2,10 +2,10 @@
 
 #include <iterator>
 
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/queststate.hpp>
-#include <components/esm/journalentry.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/queststate.hpp>
+#include <components/esm3/journalentry.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"

@@ -1,7 +1,7 @@
 #include "magiceffects.hpp"
 #include "esmstore.hpp"
 
-#include <components/esm/npcstate.hpp>
+#include <components/esm3/npcstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

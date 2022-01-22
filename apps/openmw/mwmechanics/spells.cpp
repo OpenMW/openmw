@@ -1,8 +1,8 @@
 #include "spells.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadspel.hpp>
-#include <components/esm/spellstate.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/spellstate.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/stringops.hpp>
 

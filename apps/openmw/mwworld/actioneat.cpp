@@ -1,6 +1,6 @@
 #include "actioneat.hpp"
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../mwworld/containerstore.hpp"
 

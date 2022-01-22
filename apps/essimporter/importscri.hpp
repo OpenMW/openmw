@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESSIMPORT_IMPORTSCRI_H
 #define OPENMW_ESSIMPORT_IMPORTSCRI_H
 
-#include <components/esm/variant.hpp>
+#include <components/esm3/variant.hpp>
 
 #include <vector>
 

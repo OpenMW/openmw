@@ -2,8 +2,8 @@
 
 #include <components/misc/rng.hpp>
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/creaturestate.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/creaturestate.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"

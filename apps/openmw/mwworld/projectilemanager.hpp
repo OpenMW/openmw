@@ -6,7 +6,7 @@
 #include <osg/ref_ptr>
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/effectlist.hpp>
+#include <components/esm3/effectlist.hpp>
 
 #include "../mwbase/soundmanager.hpp"
 

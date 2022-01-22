@@ -3,7 +3,7 @@
 
 #include "importscri.hpp"
 
-#include <components/esm/locals.hpp>
+#include <components/esm3/locals.hpp>
 
 namespace ESSImport
 {

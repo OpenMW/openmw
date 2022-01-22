@@ -1,6 +1,6 @@
 #include "quest.hpp"
 
-#include <components/esm/queststate.hpp>
+#include <components/esm3/queststate.hpp>
 
 #include "../mwworld/esmstore.hpp"
 

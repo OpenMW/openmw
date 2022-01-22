@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_ESMLOADER_LOAD_H
 #define OPENMW_COMPONENTS_ESMLOADER_LOAD_H
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
 #include <string>
 #include <vector>

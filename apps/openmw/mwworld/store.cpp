@@ -2,8 +2,8 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
@@ -433,7 +433,7 @@ namespace MWWorld
         return search(cell.mName);
     }
 
-    // this method *must* be called right after esm.loadCell()
+    // this method *must* be called right after esm3.loadCell()
     void Store<ESM::Cell>::handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell)
     {
         ESM::CellRef ref;

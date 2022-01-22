@@ -7,7 +7,7 @@
 #include "aistate.hpp"
 #include "aipackagetypeid.hpp"
 
-#include <components/esm/loadnpc.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 namespace MWWorld
 {

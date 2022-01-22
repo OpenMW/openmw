@@ -1,7 +1,7 @@
 #include "objects.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadcont.hpp>
+#include <components/esm3/loadcont.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

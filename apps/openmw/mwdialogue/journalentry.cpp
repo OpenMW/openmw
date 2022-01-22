@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include <components/esm/journalentry.hpp>
+#include <components/esm3/journalentry.hpp>
 
 #include <components/interpreter/defines.hpp>
 

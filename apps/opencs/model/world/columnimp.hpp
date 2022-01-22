@@ -9,9 +9,9 @@
 #include <QColor>
 #include <QVector>
 
-#include <components/esm/loadbody.hpp>
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadrace.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadrace.hpp>
 
 #include "columnbase.hpp"
 #include "columns.hpp"

@@ -3,7 +3,7 @@
 #include "settingsutils.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/loadpgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
 namespace DetourNavigator

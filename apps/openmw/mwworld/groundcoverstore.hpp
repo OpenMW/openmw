@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/files/collections.hpp>
 

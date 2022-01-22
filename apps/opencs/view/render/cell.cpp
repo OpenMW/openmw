@@ -8,8 +8,8 @@
 #include <osg/Group>
 
 #include <components/misc/stringops.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
 #include <components/terrain/terraingrid.hpp>
 

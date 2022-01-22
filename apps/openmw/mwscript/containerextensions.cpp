@@ -13,7 +13,7 @@
 
 #include <components/misc/stringops.hpp>
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

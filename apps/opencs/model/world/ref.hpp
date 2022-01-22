@@ -3,7 +3,7 @@
 
 #include <utility>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 namespace CSMWorld
 {

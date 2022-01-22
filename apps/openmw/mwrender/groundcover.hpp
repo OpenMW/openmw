@@ -3,7 +3,7 @@
 
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 
 namespace MWWorld
 {

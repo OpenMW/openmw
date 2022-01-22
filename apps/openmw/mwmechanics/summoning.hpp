@@ -5,7 +5,7 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include <components/esm/magiceffects.hpp>
+#include <components/esm3/magiceffects.hpp>
 
 #include "magiceffects.hpp"
 

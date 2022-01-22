@@ -3,7 +3,7 @@
 #include <limits>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 
 #include "aipackage.hpp"
 #include "aistate.hpp"

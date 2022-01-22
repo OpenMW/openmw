@@ -16,7 +16,7 @@
 #include <components/detournavigator/serialization.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
 #include <components/detournavigator/tileposition.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/misc/guarded.hpp>
 #include <components/misc/progressreporter.hpp>
 #include <components/sceneutil/workqueue.hpp>

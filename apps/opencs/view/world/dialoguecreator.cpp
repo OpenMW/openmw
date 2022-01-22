@@ -1,6 +1,6 @@
 #include "dialoguecreator.hpp"
 
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/loaddial.hpp>
 
 #include "../../model/doc/document.hpp"
 

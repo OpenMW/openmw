@@ -6,8 +6,8 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_RenderManager.h>
 
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/quickkeys.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/quickkeys.hpp>
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"

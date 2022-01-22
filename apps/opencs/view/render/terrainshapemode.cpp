@@ -15,7 +15,7 @@
 #include <osg/Group>
 #include <osg/Vec3f>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/debug/debuglog.hpp>
 
 #include "../widget/brushshapes.hpp"

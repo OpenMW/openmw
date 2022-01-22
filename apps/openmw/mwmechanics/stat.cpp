@@ -1,6 +1,6 @@
 #include "stat.hpp"
 
-#include <components/esm/statstate.hpp>
+#include <components/esm3/statstate.hpp>
 
 namespace MWMechanics
 {

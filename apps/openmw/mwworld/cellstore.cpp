@@ -5,18 +5,18 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/cellstate.hpp>
-#include <components/esm/cellid.hpp>
-#include <components/esm/cellref.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/objectstate.hpp>
-#include <components/esm/containerstate.hpp>
-#include <components/esm/npcstate.hpp>
-#include <components/esm/creaturestate.hpp>
-#include <components/esm/fogstate.hpp>
-#include <components/esm/creaturelevliststate.hpp>
-#include <components/esm/doorstate.hpp>
+#include <components/esm3/cellstate.hpp>
+#include <components/esm3/cellid.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/objectstate.hpp>
+#include <components/esm3/containerstate.hpp>
+#include <components/esm3/npcstate.hpp>
+#include <components/esm3/creaturestate.hpp>
+#include <components/esm3/fogstate.hpp>
+#include <components/esm3/creaturelevliststate.hpp>
+#include <components/esm3/doorstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"

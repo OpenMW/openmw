@@ -76,15 +76,18 @@ add_component_dir (to_utf8
     to_utf8
     )
 
-add_component_dir (esm
-    attr defs esmcommon esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
+add_component_dir(esm attr defs esmcommon records util luascripts)
+
+add_component_dir (esm3
+    esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loaddial loaddoor loadench loadfact loadglob loadgmst
     loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
-    loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
-    savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap inventorystate containerstate npcstate creaturestate dialoguestate statstate
-    npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
-    aisequence magiceffects util custommarkerstate stolenitems transport animationstate controlsstate mappings luascripts
+    loadweap aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
+    savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap
+    inventorystate containerstate npcstate creaturestate dialoguestate statstate npcstats creaturestats
+    weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
+    aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings
     )
 
 add_component_dir (esmterrain

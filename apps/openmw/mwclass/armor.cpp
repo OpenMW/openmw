@@ -1,8 +1,8 @@
 #include "armor.hpp"
 
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadgmst.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

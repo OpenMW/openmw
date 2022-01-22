@@ -4,7 +4,7 @@
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
-#include <components/esm/loadligh.hpp>
+#include <components/esm3/loadligh.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include "lightmanager.hpp"

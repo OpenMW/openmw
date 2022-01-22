@@ -18,8 +18,8 @@
 
 #include <components/resource/resourcesystem.hpp>
 
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadcrea.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadcrea.hpp>
 
 #include <components/vfs/manager.hpp>
 

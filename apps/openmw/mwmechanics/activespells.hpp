@@ -8,7 +8,7 @@
 #include <variant>
 #include <vector>
 
-#include <components/esm/activespells.hpp>
+#include <components/esm3/activespells.hpp>
 
 #include "../mwworld/timestamp.hpp"
 #include "../mwworld/ptr.hpp"

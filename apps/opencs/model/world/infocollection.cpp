@@ -4,8 +4,8 @@
 #include <iterator>
 #include <cassert>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/loaddial.hpp>
 
 #include <components/misc/stringops.hpp>
 

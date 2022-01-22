@@ -1,8 +1,8 @@
 #include "importacdt.hpp"
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 namespace ESSImport
 {

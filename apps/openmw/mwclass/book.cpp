@@ -1,6 +1,6 @@
 #include "book.hpp"
 
-#include <components/esm/loadbook.hpp>
+#include <components/esm3/loadbook.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../prefs/state.hpp"
 

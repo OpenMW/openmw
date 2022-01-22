@@ -1,6 +1,6 @@
 #include "misc.hpp"
 
-#include <components/esm/loadmisc.hpp>
+#include <components/esm3/loadmisc.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"

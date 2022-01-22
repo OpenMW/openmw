@@ -3,7 +3,7 @@
 #include <osg/Geometry>
 #include <osg/Material>
 
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/loadpgrd.hpp>
 
 namespace SceneUtil
 {

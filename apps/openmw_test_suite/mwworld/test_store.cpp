@@ -3,8 +3,8 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include <components/files/configurationmanager.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/stringops.hpp>
 

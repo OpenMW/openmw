@@ -1,8 +1,8 @@
 #include "metadata.hpp"
 
-#include <components/esm/loadtes3.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/loadtes3.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 
 void CSMWorld::MetaData::blank()
 {

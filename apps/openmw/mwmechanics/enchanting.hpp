@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <components/esm/effectlist.hpp>
-#include <components/esm/loadench.hpp>
+#include <components/esm3/effectlist.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include "../mwworld/ptr.hpp"
 

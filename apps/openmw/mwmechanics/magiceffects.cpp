@@ -3,8 +3,8 @@
 #include <cmath>
 #include <stdexcept>
 
-#include <components/esm/effectlist.hpp>
-#include <components/esm/magiceffects.hpp>
+#include <components/esm3/effectlist.hpp>
+#include <components/esm3/magiceffects.hpp>
 
 namespace
 {

@@ -6,8 +6,8 @@
 
 #include <components/terrain/storage.hpp>
 
-#include <components/esm/loadland.hpp>
-#include <components/esm/loadltex.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loadltex.hpp>
 
 namespace VFS
 {

@@ -5,7 +5,7 @@
 #include <ostream>
 #include <sstream>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/misc/constants.hpp>
 
 CSMWorld::CellCoordinates::CellCoordinates() : mX (0), mY (0) {}

@@ -3,7 +3,7 @@
 #include <assert.h>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/objectstate.hpp>
 
 namespace MWWorld
 {

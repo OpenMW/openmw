@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_BIRTHSIGNCHECK_H
 #define CSM_TOOLS_BIRTHSIGNCHECK_H
 
-#include <components/esm/loadbsgn.hpp>
+#include <components/esm3/loadbsgn.hpp>
 
 #include "../world/idcollection.hpp"
 #include "../world/resources.hpp"

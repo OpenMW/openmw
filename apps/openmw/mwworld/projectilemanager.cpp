@@ -8,8 +8,8 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/projectilestate.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/projectilestate.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>

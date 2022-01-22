@@ -1,7 +1,7 @@
 #include "generate.hpp"
 
 #include <components/detournavigator/navmeshdb.hpp>
-#include <components/esm/cellid.hpp>
+#include <components/esm3/cellid.hpp>
 
 #include <DetourAlloc.h>
 

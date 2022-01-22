@@ -1,6 +1,6 @@
 #include "luabindings.hpp"
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include "../mwworld/cellstore.hpp"
 

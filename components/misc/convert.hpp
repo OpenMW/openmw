@@ -2,7 +2,7 @@
 #define OPENMW_COMPONENTS_MISC_CONVERT_H
 
 #include <components/esm/defs.hpp>
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/loadpgrd.hpp>
 
 #include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>

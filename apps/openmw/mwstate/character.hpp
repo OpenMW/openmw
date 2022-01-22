@@ -3,7 +3,7 @@
 
 #include <boost/filesystem/path.hpp>
 
-#include <components/esm/savedgame.hpp>
+#include <components/esm3/savedgame.hpp>
 
 namespace MWState
 {

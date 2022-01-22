@@ -3,7 +3,7 @@
 #include <QPointer>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 
 #include "editmode.hpp"
 #include "terrainselection.hpp"

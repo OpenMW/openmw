@@ -5,8 +5,8 @@
 #include <osg/Group>
 #include <osg/Vec4f>
 
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>

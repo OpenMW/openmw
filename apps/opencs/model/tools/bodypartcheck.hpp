@@ -1,8 +1,8 @@
 #ifndef CSM_TOOLS_BODYPARTCHECK_H
 #define CSM_TOOLS_BODYPARTCHECK_H
 
-#include <components/esm/loadbody.hpp>
-#include <components/esm/loadrace.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadrace.hpp>
 
 #include "../world/resources.hpp"
 #include "../world/idcollection.hpp"

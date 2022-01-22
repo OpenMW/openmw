@@ -5,11 +5,11 @@
 
 #include <QVariant>
 
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadcrea.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadcrea.hpp>
 
 #include "columnbase.hpp"
 #include "record.hpp"

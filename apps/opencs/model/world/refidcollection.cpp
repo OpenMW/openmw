@@ -4,7 +4,7 @@
 #include <memory>
 #include <string_view>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
 #include "refidadapter.hpp"
 #include "refidadapterimp.hpp"

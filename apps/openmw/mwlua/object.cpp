@@ -142,7 +142,7 @@ namespace MWLua
         }
         else
         {
-            // TODO: If Ptr is empty then try to load the object from esp/esm.
+            // TODO: If Ptr is empty then try to load the object from esp/esm3.
         }
         return ptr;
     }

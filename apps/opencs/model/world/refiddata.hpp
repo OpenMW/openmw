@@ -7,26 +7,26 @@
 #include <cassert>
 #include <string_view>
 
-#include <components/esm/loadacti.hpp>
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadcont.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loaddoor.hpp>
-#include <components/esm/loadingr.hpp>
-#include <components/esm/loadlevlist.hpp>
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadlock.hpp>
-#include <components/esm/loadprob.hpp>
-#include <components/esm/loadrepa.hpp>
-#include <components/esm/loadstat.hpp>
-#include <components/esm/loadweap.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadmisc.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadlock.hpp>
+#include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadmisc.hpp>
+#include <components/esm3/esmwriter.hpp>
 
 #include <components/misc/stringops.hpp>
 

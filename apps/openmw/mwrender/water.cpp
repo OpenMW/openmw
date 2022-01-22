@@ -38,7 +38,7 @@
 
 #include <components/shader/shadermanager.hpp>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include <components/fallback/fallback.hpp>
 

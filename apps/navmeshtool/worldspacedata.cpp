@@ -7,10 +7,10 @@
 #include <components/detournavigator/objectid.hpp>
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
-#include <components/esm/cellref.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/lessbyid.hpp>
 #include <components/esmloader/record.hpp>

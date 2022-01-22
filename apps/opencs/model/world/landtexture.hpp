@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <components/esm/loadltex.hpp>
+#include <components/esm3/loadltex.hpp>
 
 namespace CSMWorld
 {

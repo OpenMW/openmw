@@ -1,7 +1,7 @@
-#include <components/esm/variant.hpp>
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/loadglob.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/loadglob.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
