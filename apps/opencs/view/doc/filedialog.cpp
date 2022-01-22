@@ -1,15 +1,10 @@
 #include "filedialog.hpp"
 
-#include <QCheckBox>
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <QSortFilterProxyModel>
-#include <QRegExpValidator>
 #include <QRegExp>
-#include <QSpacerItem>
-#include <QPushButton>
 #include <QLabel>
-#include <QGroupBox>
 
 #include "components/contentselector/model/esmfile.hpp"
 #include "components/contentselector/view/contentselector.hpp"

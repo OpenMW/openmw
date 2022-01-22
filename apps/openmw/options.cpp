@@ -4,7 +4,6 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/misc/rng.hpp>
 
-#include <boost/program_options.hpp>
 
 namespace
 {

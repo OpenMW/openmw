@@ -5,7 +5,7 @@
 #include <vector>
 #include <list>
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace Loading
 {

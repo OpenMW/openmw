@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_WEATHER_H
 #define GAME_MWWORLD_WEATHER_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <map>
 

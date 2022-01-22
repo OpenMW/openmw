@@ -3,7 +3,6 @@
 #include <QDebug>
 
 #include <QTime>
-#include <QCloseEvent>
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QDir>

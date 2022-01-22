@@ -2,7 +2,6 @@
 
 #include <iomanip>
 
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #include <osgDB/ReadFile>

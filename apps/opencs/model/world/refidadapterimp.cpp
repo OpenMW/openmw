@@ -1,8 +1,6 @@
 #include "refidadapterimp.hpp"
 
-#include <cassert>
 #include <stdexcept>
-#include <utility>
 
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadmgef.hpp>

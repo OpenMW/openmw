@@ -9,12 +9,9 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace ESM
-{
-namespace AiSequence
+namespace ESM::AiSequence
 {
     struct AiFollow;
-}
 }
 
 namespace MWMechanics

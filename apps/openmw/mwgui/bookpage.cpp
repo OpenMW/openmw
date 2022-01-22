@@ -10,8 +10,6 @@
 #include <components/misc/utf8stream.hpp>
 #include <components/sceneutil/depth.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {

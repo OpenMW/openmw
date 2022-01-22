@@ -2,8 +2,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include <QUndoStack>
-
 #include <components/esm3/loaddial.hpp>
 
 #include "../world/infocollection.hpp"

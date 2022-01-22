@@ -1,6 +1,6 @@
 #include "localmap.hpp"
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <osg/Fog>
 #include <osg/LightModel>
@@ -31,7 +31,6 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "vismask.hpp"
-#include "util.hpp"
 
 namespace
 {

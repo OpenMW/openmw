@@ -6,7 +6,6 @@
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
-#include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
 
 #include <components/debug/debuglog.hpp>
 

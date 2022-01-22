@@ -16,12 +16,9 @@
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/infotableproxymodel.hpp"
-#include "../../model/world/idtableproxymodel.hpp"
 #include "../../model/world/idtablebase.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexturetableproxymodel.hpp"
-#include "../../model/world/record.hpp"
-#include "../../model/world/columns.hpp"
 #include "../../model/world/commanddispatcher.hpp"
 
 #include "../../model/prefs/state.hpp"

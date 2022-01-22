@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <components/esm3/loadglob.hpp>
 

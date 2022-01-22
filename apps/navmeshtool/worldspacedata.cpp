@@ -1,7 +1,6 @@
 ﻿#include "worldspacedata.hpp"
 
 #include <components/bullethelpers/aabb.hpp>
-#include <components/bullethelpers/heightfield.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/detournavigator/gettilespositions.hpp>
 #include <components/detournavigator/objectid.hpp>
@@ -14,7 +13,6 @@
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/lessbyid.hpp>
 #include <components/esmloader/record.hpp>
-#include <components/misc/coordinateconverter.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/resource/bulletshapemanager.hpp>
@@ -24,7 +22,6 @@
 #include <LinearMath/btVector3.h>
 
 #include <osg/Vec2i>
-#include <osg/Vec3f>
 #include <osg/ref_ptr>
 
 #include <algorithm>
@@ -32,7 +29,6 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <thread>
 #include <tuple>
 #include <utility>
 #include <vector>

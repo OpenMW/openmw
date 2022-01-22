@@ -9,11 +9,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/nullaction.hpp"
-#include "../mwworld/containerstore.hpp"
-#include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/actionharvest.hpp"

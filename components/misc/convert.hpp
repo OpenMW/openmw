@@ -10,9 +10,7 @@
 #include <osg/Vec3f>
 #include <osg/Quat>
 
-namespace Misc
-{
-namespace Convert
+namespace Misc::Convert
 {
     inline osg::Vec3f makeOsgVec3f(const float* values)
     {
@@ -72,7 +70,6 @@ namespace Convert
     {
         return btTransform(makeBulletQuaternion(position), toBullet(position.asVec3()));
     }
-}
 }
 
 #endif

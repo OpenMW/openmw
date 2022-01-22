@@ -25,7 +25,6 @@
 
 #include "cellstore.hpp"
 #include "class.hpp"
-#include "esmloader.hpp"
 #include "ptr.hpp"
 
 namespace MWWorld

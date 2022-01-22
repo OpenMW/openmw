@@ -1,6 +1,5 @@
 #include "widgets.hpp"
 
-#include <sstream>
 #include <iomanip>
 
 #include <MyGUI_ProgressBar.h>
@@ -15,9 +14,7 @@
 
 #include "controllers.hpp"
 
-namespace MWGui
-{
-    namespace Widgets
+namespace MWGui::Widgets
     {
         /* MWSkill */
 
@@ -535,4 +532,3 @@ namespace MWGui
             assignWidget(mBarTextWidget, "BarText");
         }
     }
-}

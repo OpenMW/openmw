@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <set>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/esmreader.hpp>

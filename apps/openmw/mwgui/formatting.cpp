@@ -15,9 +15,7 @@
 
 #include "../mwscript/interpretercontext.hpp"
 
-namespace MWGui
-{
-    namespace Formatting
+namespace MWGui::Formatting
     {
         /* BookTextParser */
         BookTextParser::BookTextParser(const std::string & text)
@@ -489,4 +487,3 @@ namespace MWGui
             return mPaginator.getCurrentTop();
         }
     }
-}

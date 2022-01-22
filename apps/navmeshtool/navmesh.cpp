@@ -2,37 +2,25 @@
 
 #include "worldspacedata.hpp"
 
-#include <components/bullethelpers/aabb.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/detournavigator/generatenavmeshtile.hpp>
 #include <components/detournavigator/gettilespositions.hpp>
 #include <components/detournavigator/navmeshdb.hpp>
 #include <components/detournavigator/navmeshdbutils.hpp>
-#include <components/detournavigator/offmeshconnection.hpp>
-#include <components/detournavigator/offmeshconnectionsmanager.hpp>
 #include <components/detournavigator/preparednavmeshdata.hpp>
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/recastmeshprovider.hpp>
 #include <components/detournavigator/serialization.hpp>
-#include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
 #include <components/detournavigator/tileposition.hpp>
-#include <components/esm3/loadcell.hpp>
-#include <components/misc/guarded.hpp>
 #include <components/misc/progressreporter.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sqlite3/transaction.hpp>
 
-#include <DetourNavMesh.h>
-
 #include <osg/Vec3f>
 
-#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
-#include <stdexcept>
-#include <string>
-#include <string_view>
 #include <utility>
 #include <vector>
 

@@ -27,8 +27,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/actionequip.hpp"
 
-#include "../mwmechanics/actorutil.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 #include "itemview.hpp"
@@ -38,7 +36,6 @@
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
 #include "draganddrop.hpp"
-#include "widgets.hpp"
 #include "tooltips.hpp"
 
 namespace

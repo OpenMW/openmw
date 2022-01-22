@@ -5,7 +5,7 @@
 #include <deque>
 #include <map>
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "../mwdialogue/journalentry.hpp"
 #include "../mwdialogue/topic.hpp"

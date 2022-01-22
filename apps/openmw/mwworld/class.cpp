@@ -10,7 +10,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "ptr.hpp"
-#include "refdata.hpp"
 #include "nullaction.hpp"
 #include "failedaction.hpp"
 #include "actiontake.hpp"
@@ -18,7 +17,6 @@
 
 #include "../mwgui/tooltips.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 namespace MWWorld

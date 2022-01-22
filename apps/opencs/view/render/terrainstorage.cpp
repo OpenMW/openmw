@@ -1,5 +1,8 @@
 #include "terrainstorage.hpp"
 
+#include <components/esm3terrain/storage.hpp>
+
+
 namespace CSVRender
 {
     TerrainStorage::TerrainStorage(const CSMWorld::Data &data)

@@ -1,7 +1,7 @@
 #ifndef MWGUI_MAPWINDOW_H
 #define MWGUI_MAPWINDOW_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <memory>
 
 #include <osg/Vec2f>
