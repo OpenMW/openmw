@@ -36,8 +36,6 @@ namespace MWInput
         void displayOrientationChanged() override;
         void processChangedSettings(const Settings::CategorySettingVector& changed);
 
-        void setGuiCursorEnabled(bool enabled) { mGuiCursorEnabled = enabled; }
-
         bool isGyroAvailable() const;
         std::array<float, 3> getGyroValues() const;
 
@@ -51,8 +49,6 @@ namespace MWInput
         float mGyroUpdateTimer;
 
         SDL_Sensor* mGyroscope;
-
-        bool mGuiCursorEnabled;
     };
 }
 #endif

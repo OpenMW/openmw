@@ -15,7 +15,6 @@ namespace MWInput
         , mGyroValues()
         , mGyroUpdateTimer(0.f)
         , mGyroscope(nullptr)
-        , mGuiCursorEnabled(true)
     {
         init();
     }

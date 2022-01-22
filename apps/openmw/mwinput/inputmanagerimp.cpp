@@ -132,7 +132,6 @@ namespace MWInput
     {
         mControllerManager->setGuiCursorEnabled(guiMode);
         mMouseManager->setGuiCursorEnabled(guiMode);
-        mSensorManager->setGuiCursorEnabled(guiMode);
         mGyroManager->setGuiCursorEnabled(guiMode);
         mMouseManager->setMouseLookEnabled(!guiMode);
         if (guiMode)
