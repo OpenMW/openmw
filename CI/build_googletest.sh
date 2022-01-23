@@ -11,6 +11,7 @@ cmake \
     -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
     -D CMAKE_BUILD_TYPE="${CONFIGURATION}" \
     -D CMAKE_INSTALL_PREFIX="${GOOGLETEST_DIR}" \
+    -D CMAKE_CXX_FLAGS="-fsanitize=address" \
     -G "${GENERATOR}" \
     ..
 cmake --build . --config "${CONFIGURATION}" -- -j $(nproc)
