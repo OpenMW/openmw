@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include <osg/Array>
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
@@ -11,7 +10,6 @@
 
 #include <components/sceneutil/pathgridutil.hpp>
 
-#include "../../model/world/cell.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/data.hpp"
@@ -26,7 +24,7 @@ namespace CSVRender
 
             void operator()(osg::Node* node, osg::NodeVisitor* nv) override
             {
-                PathgridTag* tag = static_cast<PathgridTag*>(node->getUserData());
+                auto* tag = dynamic_cast<PathgridTag*>(node->getUserData());
                 tag->getPathgrid()->update();
             }
     };
@@ -77,8 +75,8 @@ namespace CSVRender
         mBaseNode->setNodeMask(Mask_Pathgrid);
         mParent->addChild(mBaseNode);
 
-        mPathgridGeode = new osg::Geode();
-        mBaseNode->addChild(mPathgridGeode);
+        mPathgridGroup = new osg::Group();
+        mBaseNode->addChild(mPathgridGroup);
 
         recreateGeometry();
 
@@ -135,7 +133,7 @@ namespace CSVRender
 
     void Pathgrid::toggleSelected(unsigned short node)
     {
-        NodeList::iterator searchResult = std::find(mSelected.begin(), mSelected.end(), node);
+        auto searchResult = std::find(mSelected.begin(), mSelected.end(), node);
         if (searchResult != mSelected.end())
         {
             mSelected.erase(searchResult);
@@ -222,7 +220,7 @@ namespace CSVRender
         mUseOffset = false;
         mMoveOffset.set(0, 0, 0);
 
-        mPathgridGeode->removeDrawable(mDragGeometry);
+        mPathgridGroup->removeChild(mDragGeometry);
         mDragGeometry = nullptr;
     }
 
@@ -317,10 +315,10 @@ namespace CSVRender
 
             QModelIndex parent = model->index(recordIndex, parentColumn);
 
-            for (size_t i = 0; i < mSelected.size(); ++i)
+            for (auto i : mSelected)
             {
-                const CSMWorld::Pathgrid::Point& point = source->mPoints[mSelected[i]];
-                int row = static_cast<int>(mSelected[i]);
+                const CSMWorld::Pathgrid::Point& point = source->mPoints[i];
+                int row = static_cast<int>(i);
 
                 commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent),
                     clampToCell(point.mX + offsetX)));
@@ -348,9 +346,9 @@ namespace CSVRender
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
-            for (size_t i = 0; i < mSelected.size(); ++i)
+            for (unsigned short i : mSelected)
             {
-                addEdge(commands, *source, node, mSelected[i]);
+                addEdge(commands, *source, node, i);
             }
         }
     }
@@ -363,18 +361,18 @@ namespace CSVRender
             CSMWorld::IdTree* model = &dynamic_cast<CSMWorld::IdTree&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids));
 
             // Want to remove nodes from end of list first
-            std::sort(mSelected.begin(), mSelected.end(), std::greater<int>());
+            std::sort(mSelected.begin(), mSelected.end(), std::greater<>());
 
             int recordIndex = mPathgridCollection.getIndex(mId);
             int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
 
-            for (std::vector<unsigned short>::iterator row = mSelected.begin(); row != mSelected.end(); ++row)
+            for (auto row : mSelected)
             {
-                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, static_cast<int>(*row), parentColumn));
+                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, static_cast<int>(row), parentColumn));
             }
 
             // Fix/remove edges
-            std::set<int, std::greater<int> > edgeRowsToRemove;
+            std::set<int, std::greater<>> edgeRowsToRemove;
 
             parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
 
@@ -392,9 +390,9 @@ namespace CSVRender
                 int adjustment1 = 0;
 
                 // Determine necessary adjustment
-                for (std::vector<unsigned short>::iterator point = mSelected.begin(); point != mSelected.end(); ++point)
+                for (unsigned short & point : mSelected)
                 {
-                    if (source->mEdges[edge].mV0 == *point || source->mEdges[edge].mV1 == *point)
+                    if (source->mEdges[edge].mV0 == point || source->mEdges[edge].mV1 == point)
                     {
                         edgeRowsToRemove.insert(static_cast<int>(edge));
 
@@ -403,10 +401,10 @@ namespace CSVRender
                         break;
                     }
 
-                    if (source->mEdges[edge].mV0 > *point)
+                    if (source->mEdges[edge].mV0 > point)
                         --adjustment0;
 
-                    if (source->mEdges[edge].mV1 > *point)
+                    if (source->mEdges[edge].mV1 > point)
                         --adjustment1;
                 }
 
@@ -425,7 +423,7 @@ namespace CSVRender
                 }
             }
 
-            std::set<int, std::greater<int> >::iterator row;
+            std::set<int, std::greater<> >::iterator row;
             for (row = edgeRowsToRemove.begin(); row != edgeRowsToRemove.end(); ++row)
             {
                 commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, *row, parentColumn));
@@ -441,7 +439,7 @@ namespace CSVRender
         if (source)
         {
             // Want to remove from end of row first
-            std::set<int, std::greater<int> > rowsToRemove;
+            std::set<int, std::greater<> > rowsToRemove;
             for (size_t i = 0; i <= mSelected.size(); ++i)
             {
                 for (size_t j = i + 1; j < mSelected.size(); ++j)
@@ -463,7 +461,7 @@ namespace CSVRender
             CSMWorld::IdTree* model = &dynamic_cast<CSMWorld::IdTree&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids));
             int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
 
-            std::set<int, std::greater<int> >::iterator row;
+            std::set<int, std::greater<>>::iterator row;
             for (row = rowsToRemove.begin(); row != rowsToRemove.end(); ++row)
             {
                 commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, *row, parentColumn));
@@ -512,11 +510,11 @@ namespace CSVRender
             {
                 temp = *source;
 
-                for (NodeList::iterator it = mSelected.begin(); it != mSelected.end(); ++it)
+                for (auto it : mSelected)
                 {
-                    temp.mPoints[*it].mX += mMoveOffset.x();
-                    temp.mPoints[*it].mY += mMoveOffset.y();
-                    temp.mPoints[*it].mZ += mMoveOffset.z();
+                    temp.mPoints[it].mX += mMoveOffset.x();
+                    temp.mPoints[it].mY += mMoveOffset.y();
+                    temp.mPoints[it].mZ += mMoveOffset.z();
                 }
 
                 source = &temp;
@@ -524,7 +522,7 @@ namespace CSVRender
 
             removePathgridGeometry();
             mPathgridGeometry = SceneUtil::createPathgridGeometry(*source);
-            mPathgridGeode->addDrawable(mPathgridGeometry);
+            mPathgridGroup->addChild(mPathgridGeometry);
 
             createSelectedGeometry(*source);
         }
@@ -553,14 +551,14 @@ namespace CSVRender
         removeSelectedGeometry();
 
         mSelectedGeometry = SceneUtil::createPathgridSelectedWireframe(source, mSelected);
-        mPathgridGeode->addDrawable(mSelectedGeometry);
+        mPathgridGroup->addChild(mSelectedGeometry);
     }
 
     void Pathgrid::removePathgridGeometry()
     {
         if (mPathgridGeometry)
         {
-            mPathgridGeode->removeDrawable(mPathgridGeometry);
+            mPathgridGroup->removeChild(mPathgridGeometry);
             mPathgridGeometry = nullptr;
         }
     }
@@ -569,7 +567,7 @@ namespace CSVRender
     {
         if (mSelectedGeometry)
         {
-            mPathgridGeode->removeDrawable(mSelectedGeometry);
+            mPathgridGroup->removeChild(mSelectedGeometry);
             mSelectedGeometry = nullptr;
         }
     }
@@ -577,7 +575,7 @@ namespace CSVRender
     void Pathgrid::createDragGeometry(const osg::Vec3f& start, const osg::Vec3f& end, bool valid)
     {
         if (mDragGeometry)
-            mPathgridGeode->removeDrawable(mDragGeometry);
+            mPathgridGroup->removeChild(mDragGeometry);
 
         mDragGeometry = new osg::Geometry();
 
@@ -605,7 +603,7 @@ namespace CSVRender
         mDragGeometry->addPrimitiveSet(indices);
         mDragGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
-        mPathgridGeode->addDrawable(mDragGeometry);
+        mPathgridGroup->addChild(mDragGeometry);
     }
 
     const CSMWorld::Pathgrid* Pathgrid::getPathgridSource()

@@ -12,7 +12,6 @@
 
 namespace osg
 {
-    class Geode;
     class Geometry;
     class Group;
     class PositionAttitudeTransform;
@@ -60,7 +59,7 @@ namespace CSVRender
             osg::Group* mParentNode;
 
             osg::ref_ptr<osg::PositionAttitudeTransform> mWaterTransform;
-            osg::ref_ptr<osg::Geode> mWaterNode;
+            osg::ref_ptr<osg::Group> mWaterGroup;
             osg::ref_ptr<osg::Geometry> mWaterGeometry;
 
             bool mDeleted;

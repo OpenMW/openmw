@@ -1,8 +1,8 @@
 #include "object.hpp"
 
+#include <memory>
 #include <stdexcept>
 #include <string>
-#include <iostream>
 
 #include <osg/Depth>
 #include <osg/Group>
@@ -10,17 +10,13 @@
 
 #include <osg/ShapeDrawable>
 #include <osg/Shape>
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
 #include <osgFX/Scribe>
 
 #include "../../model/world/data.hpp"
-#include "../../model/world/ref.hpp"
-#include "../../model/world/refidcollection.hpp"
 #include "../../model/world/commands.hpp"
-#include "../../model/world/universalid.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/prefs/state.hpp"
@@ -43,15 +39,15 @@ const float CSVRender::Object::MarkerHeadLength = 50;
 namespace
 {
 
-    osg::ref_ptr<osg::Geode> createErrorCube()
+    osg::ref_ptr<osg::Group> createErrorCube()
     {
         osg::ref_ptr<osg::Box> shape(new osg::Box(osg::Vec3f(0,0,0), 50.f));
         osg::ref_ptr<osg::ShapeDrawable> shapedrawable(new osg::ShapeDrawable);
         shapedrawable->setShape(shape);
 
-        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-        geode->addDrawable(shapedrawable);
-        return geode;
+        osg::ref_ptr<osg::Group> group (new osg::Group);
+        group->addChild(shapedrawable);
+        return group;
     }
 
 }
@@ -217,7 +213,7 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
     float shaftLength = MarkerShaftBaseLength + mBaseNode->getBound().radius();
 
     // shaft
-    osg::Vec3Array *vertices = new osg::Vec3Array;
+    auto *vertices = new osg::Vec3Array;
 
     for (int i=0; i<2; ++i)
     {
@@ -240,7 +236,7 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
 
     geometry->setVertexArray (vertices);
 
-    osg::DrawElementsUShort *primitives = new osg::DrawElementsUShort (osg::PrimitiveSet::TRIANGLES, 0);
+    auto *primitives = new osg::DrawElementsUShort (osg::PrimitiveSet::TRIANGLES, 0);
 
     // shaft
     for (int i=0; i<4; ++i)
@@ -282,7 +278,7 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
 
     geometry->addPrimitiveSet (primitives);
 
-    osg::Vec4Array *colours = new osg::Vec4Array;
+    auto *colours = new osg::Vec4Array;
 
     for (int i=0; i<8; ++i)
         colours->push_back (osg::Vec4f (axis==0 ? 1.0f : 0.2f, axis==1 ? 1.0f : 0.2f,
@@ -296,10 +292,10 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
 
     setupCommonMarkerState(geometry);
 
-    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-    geode->addDrawable (geometry);
+    osg::ref_ptr<osg::Group> group (new osg::Group);
+    group->addChild(geometry);
 
-    return geode;
+    return group;
 }
 
 osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
@@ -370,9 +366,9 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
         }
 
         size_t elementOffset = i * IndicesPerSegment;
-        for (size_t j = 0; j < IndicesPerSegment; ++j)
+        for (auto j : IndexPattern)
         {
-            primitives->setElement(elementOffset++, indices[IndexPattern[j]]);
+            primitives->setElement(elementOffset++, indices[j]);
         }
     }
 
@@ -382,13 +378,13 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
 
     setupCommonMarkerState(geometry);
 
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    geode->addDrawable (geometry);
+    osg::ref_ptr<osg::Group> group = new osg::Group();
+    group->addChild(geometry);
 
-    return geode;
+    return group;
 }
 
-void CSVRender::Object::setupCommonMarkerState(osg::ref_ptr<osg::Geometry> geometry)
+void CSVRender::Object::setupCommonMarkerState(const osg::ref_ptr<osg::Geometry>& geometry)
 {
     osg::ref_ptr<osg::StateSet> state = geometry->getOrCreateStateSet();
     state->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
@@ -401,12 +397,10 @@ osg::Vec3f CSVRender::Object::getMarkerPosition (float x, float y, float z, int 
 {
     switch (axis)
     {
-        case 2: return osg::Vec3f (x, y, z);
-        case 0: return osg::Vec3f (z, x, y);
-        case 1: return osg::Vec3f (y, z, x);
-
+        case 0: return {z, x, y};
+        case 1: return {y, z, x};
+        case 2: return {x, y, z};
         default:
-
             throw std::logic_error ("invalid axis for marker geometry");
     }
 }
@@ -576,7 +570,7 @@ std::string CSVRender::Object::getReferenceableId() const
 
 osg::ref_ptr<CSVRender::TagBase> CSVRender::Object::getTag() const
 {
-    return static_cast<CSVRender::TagBase *> (mBaseNode->getUserData());
+    return dynamic_cast<CSVRender::TagBase *> (mBaseNode->getUserData());
 }
 
 bool CSVRender::Object::isEdited() const

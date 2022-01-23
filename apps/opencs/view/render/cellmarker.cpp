@@ -2,19 +2,14 @@
 
 #include <osg/AutoTransform>
 #include <osg/Material>
-#include <osg/Geode>
 #include <osgText/Text>
 
 #include <components/misc/constants.hpp>
 
+
 CSVRender::CellMarkerTag::CellMarkerTag(CellMarker *marker)
 : TagBase(Mask_CellMarker), mMarker(marker)
 {}
-
-CSVRender::CellMarker *CSVRender::CellMarkerTag::getCellMarker() const
-{
-    return mMarker;
-}
 
 void CSVRender::CellMarker::buildMarker()
 {
@@ -44,9 +39,7 @@ void CSVRender::CellMarker::buildMarker()
     markerText->setText(coordinatesText);
 
     // Add text to marker node.
-    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-    geode->addDrawable(markerText);
-    mMarkerNode->addChild(geode);
+    mMarkerNode->addChild(markerText);
 }
 
 void CSVRender::CellMarker::positionMarker()

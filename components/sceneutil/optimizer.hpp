@@ -284,10 +284,10 @@ class Optimizer
                 FlattenStaticTransformsVisitor(Optimizer* optimizer=0):
                     BaseOptimizerVisitor(optimizer, FLATTEN_STATIC_TRANSFORMS) {}
 
-                void apply(osg::Node& geode) override;
+                void apply(osg::Node& node) override;
                 void apply(osg::Geometry& drawable) override;
                 void apply(osg::Drawable& drawable) override;
-                void apply(osg::Billboard& geode) override;
+                void apply(osg::Billboard& billboard) override;
                 void apply(osg::Transform& transform) override final;
                 void apply(osg::MatrixTransform& transform) override;
 

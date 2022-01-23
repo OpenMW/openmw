@@ -20,7 +20,6 @@ namespace osg
     class PositionAttitudeTransform;
     class Group;
     class Node;
-    class Geode;
 }
 
 namespace osgFX
@@ -94,7 +93,7 @@ namespace CSVRender
             osg::Group* mParentNode;
             Resource::ResourceSystem* mResourceSystem;
             bool mForceBaseToZero;
-            ESM::Position mPositionOverride;
+            ESM::Position mPositionOverride{};
             float mScaleOverride;
             int mOverrideFlags;
             osg::ref_ptr<osg::Node> mMarker[3];
@@ -127,7 +126,7 @@ namespace CSVRender
             osg::ref_ptr<osg::Node> makeRotateMarker (int axis);
 
             /// Sets up a stateset with properties common to all marker types.
-            void setupCommonMarkerState(osg::ref_ptr<osg::Geometry> geometry);
+            void setupCommonMarkerState(const osg::ref_ptr<osg::Geometry>& geometry);
 
             osg::Vec3f getMarkerPosition (float x, float y, float z, int axis);
 

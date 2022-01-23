@@ -15,7 +15,6 @@
 
 namespace osg
 {
-    class Geode;
     class Geometry;
     class Group;
     class PositionAttitudeTransform;
@@ -107,7 +106,7 @@ namespace CSVRender
 
             osg::Group* mParent;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
-            osg::ref_ptr<osg::Geode> mPathgridGeode;
+            osg::ref_ptr<osg::Group> mPathgridGroup;
             osg::ref_ptr<osg::Geometry> mPathgridGeometry;
             osg::ref_ptr<osg::Geometry> mSelectedGeometry;
             osg::ref_ptr<osg::Geometry> mDragGeometry;
