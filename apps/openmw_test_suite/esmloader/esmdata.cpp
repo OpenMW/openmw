@@ -1,4 +1,12 @@
-#include <components/esmloader/esmdata.cpp>
+#include <components/esm/loadacti.hpp>
+#include <components/esm/loadcell.hpp>
+#include <components/esm/loadcont.hpp>
+#include <components/esm/loaddoor.hpp>
+#include <components/esm/loadgmst.hpp>
+#include <components/esm/loadland.hpp>
+#include <components/esm/loadstat.hpp>
+#include <components/esm/variant.hpp>
+#include <components/esmloader/esmdata.hpp>
 
 #include <gtest/gtest.h>
 
