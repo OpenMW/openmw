@@ -8,12 +8,27 @@
 
 #include <algorithm>
 #include <vector>
+#include <limits>
 
 namespace DetourNavigator
 {
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const RecastSettings& settings)
         : mSettings(settings)
+        , mBounds {osg::Vec2f(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()),
+                   osg::Vec2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max())}
     {}
+
+    TileBounds TileCachedRecastMeshManager::getBounds() const
+    {
+        const std::lock_guard lock(mMutex);
+        return mBounds;
+    }
+
+    void TileCachedRecastMeshManager::setBounds(const TileBounds& bounds)
+    {
+        const std::lock_guard lock(mMutex);
+        mBounds = bounds;
+    }
 
     std::string TileCachedRecastMeshManager::getWorldspace() const
     {
@@ -36,7 +51,7 @@ namespace DetourNavigator
         std::vector<TilePosition> tilesPositions;
         {
             const std::lock_guard lock(mMutex);
-            getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mSettings),
+            getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mBounds, mSettings),
                 [&] (const TilePosition& tilePosition)
                 {
                     if (addTile(id, shape, transform, areaType, tilePosition, mTiles))
