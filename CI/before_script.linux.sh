@@ -58,7 +58,7 @@ cd build
 if [[ "${BUILD_TESTS_ONLY}" ]]; then
 
     # flags specific to our test suite
-    CXX_FLAGS="-Wno-error=deprecated-declarations -Wno-error=nonnull -Wno-error=deprecated-copy"
+    CXX_FLAGS="-Wno-error=deprecated-declarations -Wno-error=nonnull -Wno-error=deprecated-copy -fsanitize=address"
     if [[ "${CXX}" == 'clang++' ]]; then
         CXX_FLAGS="${CXX_FLAGS} -Wno-error=unused-lambda-capture -Wno-error=gnu-zero-variadic-macro-arguments"
     fi
