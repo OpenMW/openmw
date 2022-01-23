@@ -511,8 +511,7 @@ namespace MWWorld
         if (mCurrentCell == nullptr)
             return;
 
-        const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        mNavigator.updatePlayerPosition(player.getRefData().getPosition().asVec3());
+        mNavigator.updatePlayerPosition(pos);
 
         if (!mCurrentCell->isExterior())
             return;
