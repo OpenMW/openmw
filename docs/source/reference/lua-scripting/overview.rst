@@ -452,6 +452,8 @@ The order in which the scripts are started is important. So if one mod should ov
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 | Interface                                               | Can be used        | Description                                                   |
 +=========================================================+====================+===============================================================+
+|:ref:`AI <Interface AI>`                                 | by local scripts   | | Control basic AI of NPCs and creatures.                     |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`Camera <Interface Camera>`                         | by player scripts  | | Allows to alter behavior of the built-in camera script      |
 |                                                         |                    | | without overriding the script completely.                   |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
@@ -484,7 +486,7 @@ At some moment it will send the 'DamagedByDarkPower' event to all nearby actors:
     local self = require('openmw.self')
     local nearby = require('openmw.nearby')
 
-    local function onActivate()
+    local function onActivated()
         for i, actor in nearby.actors:ipairs() do
             local dist = (self.position - actor.position):length()
             if dist < 500 then
@@ -494,7 +496,7 @@ At some moment it will send the 'DamagedByDarkPower' event to all nearby actors:
         end
     end
 
-    return { engineHandlers = { ... } }
+    return { engineHandlers = { onActivated = onActivated } }
 
 And every actor should have a local script that processes this event:
 
@@ -525,6 +527,8 @@ The protection mod attaches an additional local script to every actor. The scrip
     }
 
 In order to be able to intercept the event, the protection script should be placed in the load order below the original script.
+
+See :ref:`the list of events <Built-in events>` that are used by built-in scripts.
 
 
 Timers

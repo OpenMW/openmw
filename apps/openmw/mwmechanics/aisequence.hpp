@@ -38,7 +38,7 @@ namespace MWMechanics
     class AiSequence
     {
             ///AiPackages to run though
-            std::list<std::unique_ptr<AiPackage>> mPackages;
+            std::list<std::shared_ptr<AiPackage>> mPackages;
 
             ///Finished with top AIPackage, set for one frame
             bool mDone;
@@ -63,10 +63,12 @@ namespace MWMechanics
             virtual ~AiSequence();
 
             /// Iterator may be invalidated by any function calls other than begin() or end().
-            std::list<std::unique_ptr<AiPackage>>::const_iterator begin() const;
-            std::list<std::unique_ptr<AiPackage>>::const_iterator end() const;
+            std::list<std::shared_ptr<AiPackage>>::const_iterator begin() const { return mPackages.begin(); }
+            std::list<std::shared_ptr<AiPackage>>::const_iterator end() const { return mPackages.end(); }
 
-            void erase(std::list<std::unique_ptr<AiPackage>>::const_iterator package);
+            void erase(std::list<std::shared_ptr<AiPackage>>::const_iterator package);
+
+            std::list<std::shared_ptr<AiPackage>>& getUnderlyingList() { return mPackages; }
 
             /// Returns currently executing AiPackage type
             /** \see enum class AiPackageTypeId **/
