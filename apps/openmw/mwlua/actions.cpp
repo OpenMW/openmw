@@ -95,7 +95,7 @@ namespace MWLua
             else
             {
                 const std::string& recordId = std::get<std::string>(item);
-                if (old_it != store.end() && old_it->getCellRef().getRefIdRef() == recordId)
+                if (old_it != store.end() && old_it->getCellRef().getRefId() == recordId)
                     return true;  // already equipped
                 itemPtr = store.search(recordId);
                 if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0)

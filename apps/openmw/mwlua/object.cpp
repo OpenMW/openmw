@@ -44,7 +44,7 @@ namespace MWLua
 
     bool isMarker(const MWWorld::Ptr& ptr)
     {
-        std::string_view id = ptr.getCellRef().getRefIdRef();
+        std::string_view id = ptr.getCellRef().getRefId();
         return id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker";
     }
 
@@ -55,7 +55,7 @@ namespace MWLua
         // and can be accidentally changed. We use `ptr.getTypeDescription()` only as a fallback
         // for types that are not present in `luaObjectTypeInfo` (for such types result stability
         // is not necessary because they are not listed in OpenMW Lua documentation).
-        if (ptr.getCellRef().getRefIdRef() == "player")
+        if (ptr.getCellRef().getRefId() == "player")
             return "Player";
         if (isMarker(ptr))
             return "Marker";
@@ -64,7 +64,7 @@ namespace MWLua
 
     ESM::LuaScriptCfg::Flags getLuaScriptFlag(const MWWorld::Ptr& ptr)
     {
-        if (ptr.getCellRef().getRefIdRef() == "player")
+        if (ptr.getCellRef().getRefId() == "player")
             return ESM::LuaScriptCfg::sPlayer;
         if (isMarker(ptr))
             return 0;
@@ -82,7 +82,7 @@ namespace MWLua
         res.append(" (");
         res.append(getLuaObjectTypeName(ptr));
         res.append(", ");
-        res.append(ptr.getCellRef().getRefIdRef());
+        res.append(ptr.getCellRef().getRefId());
         res.append(")");
         return res;
     }

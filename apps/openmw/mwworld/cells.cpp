@@ -36,7 +36,7 @@ namespace
             }
             bool cont = cell.second.forEach([&] (MWWorld::Ptr ptr)
             {
-                if (ptr.getCellRef().getRefIdRef() == id)
+                if (ptr.getCellRef().getRefId() == id)
                 {
                     return visitor(ptr);
                 }
