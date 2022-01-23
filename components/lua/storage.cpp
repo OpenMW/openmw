@@ -121,7 +121,10 @@ namespace LuaUtil
         while (it != mData.end())
         {
             if (!it->second->mPermanent)
+            {
+                it->second->mValues.clear();
                 it = mData.erase(it);
+            }
             else
                 ++it;
         }
@@ -129,7 +132,7 @@ namespace LuaUtil
 
     void LuaStorage::load(const std::string& path)
     {
-        mData.clear();
+        assert(mData.empty());  // Shouldn't be used before loading
         try
         {
             Log(Debug::Info) << "Loading Lua storage \"" << path << "\" (" << std::filesystem::file_size(path) << " bytes)";
@@ -138,7 +141,7 @@ namespace LuaUtil
             sol::table data = deserialize(mLua, serializedData);
             for (const auto& [sectionName, sectionTable] : data)
             {
-                Section* section = getSection(sectionName.as<std::string_view>());
+                const std::shared_ptr<Section>& section = getSection(sectionName.as<std::string_view>());
                 for (const auto& [key, value] : sol::table(sectionTable))
                     section->set(key.as<std::string_view>(), value);
             }
@@ -164,26 +167,26 @@ namespace LuaUtil
         fout.close();
     }
 
-    LuaStorage::Section* LuaStorage::getSection(std::string_view sectionName)
+    const std::shared_ptr<LuaStorage::Section>& LuaStorage::getSection(std::string_view sectionName)
     {
         auto it = mData.find(sectionName);
         if (it != mData.end())
-            return it->second.get();
-        auto section = std::make_unique<Section>(this, std::string(sectionName));
+            return it->second;
+        auto section = std::make_shared<Section>(this, std::string(sectionName));
         sectionName = section->mSectionName;
         auto [newIt, _] = mData.emplace(sectionName, std::move(section));
-        return newIt->second.get();
+        return newIt->second;
     }
 
     sol::object LuaStorage::getReadOnlySection(std::string_view sectionName)
     {
-        Section* section = getSection(sectionName);
+        const std::shared_ptr<Section>& section = getSection(sectionName);
         return sol::make_object<SectionReadOnlyView>(mLua, SectionReadOnlyView{section, section->mChangeCounter});
     }
 
     sol::object LuaStorage::getMutableSection(std::string_view sectionName)
     {
-        Section* section = getSection(sectionName);
+        const std::shared_ptr<Section>& section = getSection(sectionName);
         return sol::make_object<SectionMutableView>(mLua, SectionMutableView{section, section->mChangeCounter});
     }
 

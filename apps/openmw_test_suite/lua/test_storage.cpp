@@ -91,10 +91,10 @@ namespace
         mLua.safe_script("permanent:set('z', 4)");
 
         LuaUtil::LuaStorage storage2(mLua);
+        storage2.load(tmpFile);
         mLua["permanent"] = storage2.getMutableSection("permanent");
         mLua["temporary"] = storage2.getMutableSection("temporary");
 
-        storage2.load(tmpFile);
         EXPECT_EQ(get<int>(mLua, "permanent:get('x')"), 1);
         EXPECT_TRUE(get<bool>(mLua, "permanent:get('z') == nil"));
         EXPECT_TRUE(get<bool>(mLua, "temporary:get('y') == nil"));
