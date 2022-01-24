@@ -60,19 +60,19 @@ namespace LuaUtil
         };
         struct SectionMutableView
         {
-            Section* mSection = nullptr;
+            std::shared_ptr<Section> mSection = nullptr;
             int64_t mLastCheck = 0;
         };
         struct SectionReadOnlyView
         {
-            Section* mSection = nullptr;
+            std::shared_ptr<Section> mSection = nullptr;
             int64_t mLastCheck = 0;
         };
 
-        Section* getSection(std::string_view sectionName);
+        const std::shared_ptr<Section>& getSection(std::string_view sectionName);
 
         lua_State* mLua;
-        std::map<std::string_view, std::unique_ptr<Section>> mData;
+        std::map<std::string_view, std::shared_ptr<Section>> mData;
         std::optional<ListenerFn> mListener;
     };
 
