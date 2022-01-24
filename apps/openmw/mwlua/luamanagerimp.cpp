@@ -200,7 +200,13 @@ namespace MWLua
         }
 
         for (ObjectId id : mActorAddedEvents)
-            mGlobalScripts.actorActive(GObject(id, objectRegistry));
+        {
+            GObject obj(id, objectRegistry);
+            if (obj.isValid())
+                mGlobalScripts.actorActive(obj);
+            else
+                Log(Debug::Verbose) << "Can not call onActorActive engine handler: object" << idToString(id) << " is already removed";
+        }
         mActorAddedEvents.clear();
 
         if (!mWorldView.isPaused())
