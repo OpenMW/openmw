@@ -258,10 +258,8 @@ namespace MWWorld
             friend class MWClass::Container;
     };
 
-    
     template<class PtrType>
     class ContainerStoreIteratorBase
-        : public std::iterator<std::forward_iterator_tag, PtrType, std::ptrdiff_t, PtrType *, PtrType&>
     {
         template<class From, class To, class Dummy>
         struct IsConvertible
@@ -362,6 +360,12 @@ namespace MWWorld
         /// \return reached the end?
 
         public:
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = PtrType;
+            using difference_type = std::ptrdiff_t;
+            using pointer = PtrType*;
+            using reference = PtrType&;
+
             template<class T>
             ContainerStoreIteratorBase (const ContainerStoreIteratorBase<T>& other)
             {
