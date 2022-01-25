@@ -165,7 +165,7 @@ add_component_dir (queries
     )
     
 add_component_dir (lua_ui
-    properties widget element util layers content
+    properties widget element util layers content scriptsettings
     text textedit window image
     )
 

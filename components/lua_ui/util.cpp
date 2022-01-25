@@ -9,6 +9,7 @@
 #include "image.hpp"
 
 #include "element.hpp"
+#include "scriptsettings.hpp"
 
 namespace LuaUi
 {
@@ -37,6 +38,7 @@ namespace LuaUi
 
     void clearUserInterface()
     {
+        clearSettings();
         while (!Element::sAllElements.empty())
             Element::sAllElements.begin()->second->destroy();
     }

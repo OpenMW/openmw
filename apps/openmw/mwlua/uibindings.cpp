@@ -2,6 +2,7 @@
 #include <components/lua_ui/element.hpp>
 #include <components/lua_ui/layers.hpp>
 #include <components/lua_ui/content.hpp>
+#include <components/lua_ui/scriptsettings.hpp>
 
 #include "context.hpp"
 #include "actions.hpp"
@@ -43,7 +44,7 @@ namespace MWLua
                                 break;
                         }
                     }
-                    catch (std::exception& e)
+                    catch (std::exception&)
                     {
                         // prevent any actions on a potentially corrupted widget
                         mElement->mRoot = nullptr;
@@ -237,6 +238,20 @@ namespace MWLua
         for (const auto& it : LuaUi::widgetTypeToName())
             typeTable.set(it.second, it.first);
         api["TYPE"] = LuaUtil::makeReadOnly(typeTable);
+
+        api["registerSettings"] = [](sol::table options)
+        {
+            LuaUi::ScriptSettings script;
+            script.mName = options.get_or("name", std::string());
+            if (script.mName.empty())
+                throw std::logic_error("No name provided for script settings");
+            script.mSearchHints = options.get_or("searchHints", std::string());
+            auto element = options.get_or<std::shared_ptr<LuaUi::Element>>("element", nullptr);
+            if (!element)
+                throw std::logic_error("No UI element provided for script settings");
+            script.mElement = element.get();
+            LuaUi::registerSettings(script);
+        };
 
         return LuaUtil::makeReadOnly(api);
     }

@@ -1,17 +1,19 @@
 #include "settingswindow.hpp"
 
+#include <regex>
+#include <iomanip>
+#include <numeric>
+#include <array>
+
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Window.h>
 #include <MyGUI_ComboBox.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
+#include <MyGUI_TabItem.h>
 
 #include <SDL_video.h>
-
-#include <iomanip>
-#include <numeric>
-#include <array>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
@@ -21,6 +23,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/lua_ui/scriptsettings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -33,7 +36,6 @@
 
 namespace
 {
-
     std::string textureMipmappingToStr(const std::string& val)
     {
         if (val == "linear")  return "Trilinear";
@@ -236,6 +238,10 @@ namespace MWGui
         getWidget(mLightingMethodButton, "LightingMethodButton");
         getWidget(mLightsResetButton, "LightsResetButton");
         getWidget(mMaxLights, "MaxLights");
+        getWidget(mScriptFilter, "ScriptFilter");
+        getWidget(mScriptList, "ScriptList");
+        getWidget(mScriptView, "ScriptView");
+        getWidget(mScriptDisabled, "ScriptDisabled");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -321,9 +327,12 @@ namespace MWGui
 
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);
+
+        mScriptFilter->eventEditTextChange += MyGUI::newDelegate(this, &SettingsWindow::onScriptFilterChange);
+        mScriptList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SettingsWindow::onScriptListSelection);
     }
 
-    void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
+    void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t index)
     {
         resetScrollbars();
     }
@@ -699,6 +708,67 @@ namespace MWGui
         mControlsBox->setVisibleVScroll(true);
     }
 
+    void SettingsWindow::resizeScriptSettings()
+    {
+        static int minListWidth = 150;
+        static float relativeListWidth = 0.2f;
+        MyGUI::IntSize parentSize = mScriptFilter->getParent()->getClientCoord().size();
+        int listWidth = std::max(minListWidth, static_cast<int>(parentSize.width * relativeListWidth));
+        int filterHeight = mScriptFilter->getSize().height;
+        int listBorder = (mScriptList->getSize().height - mScriptList->getClientCoord().height) / 2;
+        int listHeight = parentSize.height - listBorder - mScriptList->getPosition().top;
+        mScriptFilter->setSize({ listWidth, filterHeight });
+        mScriptList->setSize({ listWidth, listHeight });
+        mScriptView->setPosition({ listWidth, 0 });
+        mScriptView->setSize({ parentSize.width - listWidth, parentSize.height });
+        mScriptDisabled->setPosition({0, 0});
+        mScriptDisabled->setSize(parentSize);
+    }
+
+    void SettingsWindow::renderScriptSettings()
+    {
+        while (mScriptView->getChildCount() > 0)
+            mScriptView->getChildAt(0)->detachFromWidget();
+        mScriptList->removeAllItems();
+
+        std::string filter(".*");
+        filter += mScriptFilter->getCaption();
+        filter += ".*";
+        auto flags = std::regex_constants::icase;
+        std::regex filterRegex(filter, flags);
+
+        auto scriptSettings = LuaUi::scriptSettings();
+        for (size_t i = 0; i < scriptSettings.size(); ++i)
+        {
+            LuaUi::ScriptSettings script = scriptSettings[i];
+            if (std::regex_match(script.mName, filterRegex) || std::regex_match(script.mSearchHints, filterRegex))
+                mScriptList->addItem(script.mName, i);
+        }
+
+        // Hide script settings tab when the game world isn't loaded and scripts couldn't add their settings
+        bool disabled = scriptSettings.empty();
+        mScriptDisabled->setVisible(disabled);
+        mScriptFilter->setVisible(!disabled);
+        mScriptList->setVisible(!disabled);
+        mScriptView->setVisible(!disabled);
+    }
+
+    void SettingsWindow::onScriptFilterChange(MyGUI::Widget*)
+    {
+        renderScriptSettings();
+    }
+
+    void SettingsWindow::onScriptListSelection(MyGUI::Widget*, size_t index)
+    {
+        while (mScriptView->getChildCount() > 0)
+            mScriptView->getChildAt(0)->detachFromWidget();
+        if (index >= mScriptList->getItemCount())
+            return;
+        size_t scriptIndex = *mScriptList->getItemDataAt<size_t>(index);
+        LuaUi::ScriptSettings script = LuaUi::scriptSettings()[scriptIndex];
+        LuaUi::attachToWidget(script, mScriptView);
+    }
+
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)
     {
         int actionId = *_sender->getUserData<int>();
@@ -744,12 +814,15 @@ namespace MWGui
         updateControlsBox();
         updateLightSettings();
         resetScrollbars();
+        renderScriptSettings();
+        resizeScriptSettings();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
     }
 
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)
     {
         layoutControlsBox();
+        resizeScriptSettings();
     }
 
     void SettingsWindow::computeMinimumWindowSize()
