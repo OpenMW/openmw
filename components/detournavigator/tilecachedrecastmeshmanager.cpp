@@ -4,7 +4,6 @@
 #include "settingsutils.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/convert.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -14,18 +13,6 @@ namespace DetourNavigator
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const RecastSettings& settings)
         : mSettings(settings)
     {}
-
-    TileBounds TileCachedRecastMeshManager::getBounds() const
-    {
-        const std::lock_guard lock(mMutex);
-        return mBounds;
-    }
-
-    void TileCachedRecastMeshManager::setBounds(const TileBounds& bounds)
-    {
-        const std::lock_guard lock(mMutex);
-        mBounds = bounds;
-    }
 
     std::string TileCachedRecastMeshManager::getWorldspace() const
     {
@@ -48,8 +35,7 @@ namespace DetourNavigator
         std::vector<TilePosition> tilesPositions;
         {
             const std::lock_guard lock(mMutex);
-            getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mBounds, mSettings),
-                [&] (const TilePosition& tilePosition)
+            getTilesPositions(shape.getShape(), transform, mSettings, [&] (const TilePosition& tilePosition)
                 {
                     if (addTile(id, shape, transform, areaType, tilePosition, mTiles))
                         tilesPositions.push_back(tilePosition);
@@ -104,8 +90,7 @@ namespace DetourNavigator
         else
         {
             const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
-            getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings),
-                [&] (const TilePosition& tilePosition)
+            getTilesPositions(cellSize, shift, mSettings, [&] (const TilePosition& tilePosition)
                 {
                     const std::lock_guard lock(mMutex);
                     auto tile = mTiles.find(tilePosition);
@@ -163,8 +148,7 @@ namespace DetourNavigator
 
         bool result = false;
 
-        getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings),
-            [&] (const TilePosition& tilePosition)
+        getTilesPositions(cellSize, shift, mSettings, [&] (const TilePosition& tilePosition)
             {
                 const std::lock_guard lock(mMutex);
                 auto tile = mTiles.find(tilePosition);

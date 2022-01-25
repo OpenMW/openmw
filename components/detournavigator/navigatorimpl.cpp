@@ -5,7 +5,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadpgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
-#include <components/misc/convert.hpp>
 
 namespace DetourNavigator
 {

@@ -37,11 +37,6 @@ namespace DetourNavigator
         };
     }
 
-    inline float fromNavMeshCoordinates(const RecastSettings& settings, float value)
-    {
-        return value / settings.mRecastScaleFactor;
-    }
-
     inline osg::Vec3f fromNavMeshCoordinates(const RecastSettings& settings, osg::Vec3f position)
     {
         const auto factor = 1.0f / settings.mRecastScaleFactor;

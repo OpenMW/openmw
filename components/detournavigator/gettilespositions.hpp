@@ -1,43 +1,72 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_GETTILESPOSITIONS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_GETTILESPOSITIONS_H
 
-#include "tilebounds.hpp"
+#include "settings.hpp"
+#include "settingsutils.hpp"
 #include "tileposition.hpp"
 
-class btVector3;
-class btTransform;
-class btCollisionShape;
+#include <components/misc/convert.hpp>
 
-namespace osg
-{
-    class Vec3f;
-}
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
+
+#include <osg/Vec3f>
 
 namespace DetourNavigator
 {
-    struct RecastSettings;
-
-    struct TilesPositionsRange
+    template <class Callback>
+    void getTilesPositions(const osg::Vec3f& aabbMin, const osg::Vec3f& aabbMax,
+        const RecastSettings& settings, Callback&& callback)
     {
-        TilePosition mMin;
-        TilePosition mMax;
-    };
+        auto min = toNavMeshCoordinates(settings, aabbMin);
+        auto max = toNavMeshCoordinates(settings, aabbMax);
 
-    TilesPositionsRange makeTilesPositionsRange(const osg::Vec3f& aabbMin,
-        const osg::Vec3f& aabbMax, const RecastSettings& settings);
+        const auto border = getBorderSize(settings);
+        min -= osg::Vec3f(border, border, border);
+        max += osg::Vec3f(border, border, border);
 
-    TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape,
-        const btTransform& transform, const TileBounds& bounds, const RecastSettings& settings);
+        auto minTile = getTilePosition(settings, min);
+        auto maxTile = getTilePosition(settings, max);
 
-    TilesPositionsRange makeTilesPositionsRange(const int cellSize, const btVector3& shift,
-        const RecastSettings& settings);
+        if (minTile.x() > maxTile.x())
+            std::swap(minTile.x(), maxTile.x());
+
+        if (minTile.y() > maxTile.y())
+            std::swap(minTile.y(), maxTile.y());
+
+        for (int tileX = minTile.x(); tileX <= maxTile.x(); ++tileX)
+            for (int tileY = minTile.y(); tileY <= maxTile.y(); ++tileY)
+                callback(TilePosition {tileX, tileY});
+    }
 
     template <class Callback>
-    void getTilesPositions(const TilesPositionsRange& range, Callback&& callback)
+    void getTilesPositions(const btCollisionShape& shape, const btTransform& transform,
+        const RecastSettings& settings, Callback&& callback)
     {
-        for (int tileX = range.mMin.x(); tileX <= range.mMax.x(); ++tileX)
-            for (int tileY = range.mMin.y(); tileY <= range.mMax.y(); ++tileY)
-                callback(TilePosition {tileX, tileY});
+        btVector3 aabbMin;
+        btVector3 aabbMax;
+        shape.getAabb(transform, aabbMin, aabbMax);
+
+        getTilesPositions(Misc::Convert::toOsg(aabbMin), Misc::Convert::toOsg(aabbMax), settings, std::forward<Callback>(callback));
+    }
+
+    template <class Callback>
+    void getTilesPositions(const int cellSize, const btVector3& shift,
+        const RecastSettings& settings, Callback&& callback)
+    {
+        using Misc::Convert::toOsg;
+
+        const auto halfCellSize = cellSize / 2;
+        const btTransform transform(btMatrix3x3::getIdentity(), shift);
+        auto aabbMin = transform(btVector3(-halfCellSize, -halfCellSize, 0));
+        auto aabbMax = transform(btVector3(halfCellSize, halfCellSize, 0));
+
+        aabbMin.setX(std::min(aabbMin.x(), aabbMax.x()));
+        aabbMin.setY(std::min(aabbMin.y(), aabbMax.y()));
+
+        aabbMax.setX(std::max(aabbMin.x(), aabbMax.x()));
+        aabbMax.setY(std::max(aabbMin.y(), aabbMax.y()));
+
+        getTilesPositions(toOsg(aabbMin), toOsg(aabbMax), settings, std::forward<Callback>(callback));
     }
 }
 

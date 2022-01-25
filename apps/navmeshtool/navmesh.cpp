@@ -35,7 +35,6 @@
 #include <string_view>
 #include <utility>
 #include <vector>
-#include <random>
 
 namespace NavMeshTool
 {
@@ -181,36 +180,26 @@ namespace NavMeshTool
         SceneUtil::WorkQueue workQueue(threadsNumber);
         auto navMeshTileConsumer = std::make_shared<NavMeshTileConsumer>(std::move(db));
         std::size_t tiles = 0;
-        std::mt19937_64 random;
 
         for (const std::unique_ptr<WorldspaceNavMeshInput>& input : data.mNavMeshInputs)
         {
-            std::vector<TilePosition> worldspaceTiles;
-
             DetourNavigator::getTilesPositions(
-                DetourNavigator::makeTilesPositionsRange(
-                    Misc::Convert::toOsg(input->mAabb.m_min),
-                    Misc::Convert::toOsg(input->mAabb.m_max),
-                    settings.mRecast
-                ),
-                [&] (const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); }
-            );
+                Misc::Convert::toOsg(input->mAabb.m_min), Misc::Convert::toOsg(input->mAabb.m_max), settings.mRecast,
+                [&] (const TilePosition& tilePosition)
+                {
+                    workQueue.addWorkItem(new GenerateNavMeshTile(
+                        input->mWorldspace,
+                        tilePosition,
+                        RecastMeshProvider(input->mTileCachedRecastMeshManager),
+                        agentHalfExtents,
+                        settings,
+                        navMeshTileConsumer
+                    ));
 
-            tiles += worldspaceTiles.size();
+                    ++tiles;
+                });
 
             navMeshTileConsumer->mExpected = tiles;
-
-            std::shuffle(worldspaceTiles.begin(), worldspaceTiles.end(), random);
-
-            for (const TilePosition& tilePosition : worldspaceTiles)
-                workQueue.addWorkItem(new GenerateNavMeshTile(
-                    input->mWorldspace,
-                    tilePosition,
-                    RecastMeshProvider(input->mTileCachedRecastMeshManager),
-                    agentHalfExtents,
-                    settings,
-                    navMeshTileConsumer
-                ));
         }
 
         navMeshTileConsumer->wait();

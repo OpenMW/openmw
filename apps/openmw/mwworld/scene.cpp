@@ -511,7 +511,8 @@ namespace MWWorld
         if (mCurrentCell == nullptr)
             return;
 
-        mNavigator.updatePlayerPosition(pos);
+        const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        mNavigator.updatePlayerPosition(player.getRefData().getPosition().asVec3());
 
         if (!mCurrentCell->isExterior())
             return;
@@ -822,8 +823,6 @@ namespace MWWorld
 
         loadingListener->setProgressRange(cell->count());
 
-        mNavigator.updatePlayerPosition(position.asVec3());
-
         // Load cell.
         mPagedRefs.clear();
         loadCell(cell, loadingListener, changeEvent);
@@ -856,8 +855,6 @@ namespace MWWorld
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
-
-        mNavigator.updatePlayerPosition(position.asVec3());
 
         changeCellGrid(position.asVec3(), x, y, changeEvent);
 
