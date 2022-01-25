@@ -20,6 +20,7 @@
 #include <array>
 #include <vector>
 #include <sstream>
+#include <cmath>
 
 namespace DetourNavigator
 {
@@ -39,6 +40,16 @@ namespace DetourNavigator
         float getHeightfieldScale(int cellSize, std::size_t dataSize)
         {
             return static_cast<float>(cellSize) / (dataSize - 1);
+        }
+
+        bool isNan(const RecastMeshTriangle& triangle)
+        {
+            for (std::size_t i = 0; i < 3; ++i)
+                if (std::isnan(triangle.mVertices[i].x())
+                    || std::isnan(triangle.mVertices[i].y())
+                    || std::isnan(triangle.mVertices[i].z()))
+                    return true;
+            return false;
         }
     }
 
@@ -264,6 +275,7 @@ namespace DetourNavigator
 
     std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision) &&
     {
+        mTriangles.erase(std::remove_if(mTriangles.begin(), mTriangles.end(), isNan), mTriangles.end());
         std::sort(mTriangles.begin(), mTriangles.end());
         std::sort(mWater.begin(), mWater.end());
         Mesh mesh = makeMesh(std::move(mTriangles));

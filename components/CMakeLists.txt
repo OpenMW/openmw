@@ -208,6 +208,7 @@ add_component_dir(detournavigator
     serialization
     navmeshdbutils
     recast
+    gettilespositions
     )
 
 add_component_dir(loadinglistener
