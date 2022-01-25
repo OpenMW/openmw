@@ -380,7 +380,7 @@ namespace MWLua
         std::shared_ptr<LocalScripts> scripts;
         if (flag == ESM::LuaScriptCfg::sPlayer)
         {
-            assert(ptr.getCellRef().getRefIdRef() == "player");
+            assert(ptr.getCellRef().getRefId() == "player");
             scripts = std::make_shared<PlayerScripts>(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
             scripts->addPackage("openmw.ui", mUserInterfacePackage);
             scripts->addPackage("openmw.camera", mCameraPackage);
