@@ -9,6 +9,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/bullethelpers/heightfield.hpp>
+#include <components/misc/convert.hpp>
 
 #include <DetourNavMesh.h>
 
@@ -41,6 +42,18 @@ namespace
 
 namespace DetourNavigator
 {
+    namespace
+    {
+        TileBounds makeBounds(const RecastSettings& settings, const osg::Vec2f& center, int maxTiles)
+        {
+            const float radius = fromNavMeshCoordinates(settings, std::ceil(std::sqrt(static_cast<float>(maxTiles) / osg::PIf) + 1) * getTileSize(settings));
+            TileBounds result;
+            result.mMin = center - osg::Vec2f(radius, radius);
+            result.mMax = center + osg::Vec2f(radius, radius);
+            return result;
+        }
+    }
+
     NavMeshManager::NavMeshManager(const Settings& settings, std::unique_ptr<NavMeshDb>&& db)
         : mSettings(settings)
         , mRecastMeshManager(settings.mRecast)
@@ -204,6 +217,7 @@ namespace DetourNavigator
                     }
             }
             const auto maxTiles = std::min(mSettings.mMaxTilesNumber, navMesh.getParams()->maxTiles);
+            mRecastMeshManager.setBounds(makeBounds(mSettings.mRecast, osg::Vec2f(playerPosition.x(), playerPosition.y()), maxTiles));
             mRecastMeshManager.forEachTile([&] (const TilePosition& tile, CachedRecastMeshManager& recastMeshManager)
             {
                 if (tilesToPost.count(tile))
@@ -262,7 +276,7 @@ namespace DetourNavigator
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
             const ChangeType changeType)
     {
-        getTilesPositions(shape, transform, mSettings.mRecast,
+        getTilesPositions(makeTilesPositionsRange(shape, transform, mRecastMeshManager.getBounds(), mSettings.mRecast),
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 
@@ -272,7 +286,7 @@ namespace DetourNavigator
         if (cellSize == std::numeric_limits<int>::max())
             return;
 
-        getTilesPositions(cellSize, shift, mSettings.mRecast,
+        getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings.mRecast),
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 
