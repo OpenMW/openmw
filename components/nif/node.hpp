@@ -166,7 +166,7 @@ struct Node : public Named
         if (nif->getVersion() >= NIFStream::generateVersion(10,0,1,0))
             collision.read(nif);
 
-        parent = nullptr;
+        parents.clear();
 
         isBone = false;
     }
@@ -180,7 +180,7 @@ struct Node : public Named
 
     // Parent node, or nullptr for the root node. As far as I'm aware, only
     // NiNodes (or types derived from NiNodes) can be parents.
-    NiNode *parent;
+    std::vector<NiNode*> parents;
 
     bool isBone{false};
 
@@ -238,7 +238,7 @@ struct NiNode : Node
         {
             // Why would a unique list of children contain empty refs?
             if(!children[i].empty())
-                children[i]->parent = this;
+                children[i]->parents.push_back(this);
         }
     }
 };
