@@ -8,11 +8,14 @@
 
 #include <algorithm>
 #include <vector>
+#include <limits>
 
 namespace DetourNavigator
 {
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const RecastSettings& settings)
         : mSettings(settings)
+        , mBounds {osg::Vec2f(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()),
+                   osg::Vec2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max())}
     {}
 
     TileBounds TileCachedRecastMeshManager::getBounds() const
