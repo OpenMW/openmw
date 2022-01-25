@@ -4,6 +4,8 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_Widget.h>
 
+#include <SDL.h>
+
 #include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
 
@@ -32,6 +34,7 @@ namespace MWInput
         , mActionManager(actionManager)
         , mMouseManager(mouseManager)
         , mJoystickEnabled (Settings::Manager::getBool("enable controller", "Input"))
+        , mGyroAvailable(false)
         , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
         , mSneakToggleShortcutTimer(0.f)
         , mGamepadGuiCursorEnabled(true)
@@ -287,6 +290,7 @@ namespace MWInput
     void ControllerManager::controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg)
     {
         mBindingsManager->controllerAdded(deviceID, arg);
+        enableGyroSensor();
     }
 
     void ControllerManager::controllerRemoved(const SDL_ControllerDeviceEvent &arg)
@@ -399,4 +403,34 @@ namespace MWInput
             return false;
     }
 
+    void ControllerManager::enableGyroSensor()
+    {
+        mGyroAvailable = false;
+        #if SDL_VERSION_ATLEAST(2, 0, 14)
+            SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+            if (!cntrl)
+                return;
+            if (!SDL_GameControllerHasSensor(cntrl, SDL_SENSOR_GYRO))
+                return;
+            if (SDL_GameControllerSetSensorEnabled(cntrl, SDL_SENSOR_GYRO, SDL_TRUE) < 0)
+                return;
+            mGyroAvailable = true;
+        #endif
+    }
+
+    bool ControllerManager::isGyroAvailable() const
+    {
+        return mGyroAvailable;
+    }
+
+    std::array<float, 3> ControllerManager::getGyroValues() const
+    {
+        float gyro[3] = { 0.f };
+        #if SDL_VERSION_ATLEAST(2, 0, 14)
+            SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+            if (cntrl && mGyroAvailable)
+                SDL_GameControllerGetSensorData(cntrl, SDL_SENSOR_GYRO, gyro, 3);
+        #endif
+        return std::array<float, 3>({gyro[0], gyro[1], gyro[2]});
+    }
 }

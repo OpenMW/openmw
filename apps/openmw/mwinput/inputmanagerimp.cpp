@@ -19,6 +19,7 @@
 #include "keyboardmanager.hpp"
 #include "mousemanager.hpp"
 #include "sensormanager.hpp"
+#include "gyromanager.hpp"
 
 namespace MWInput
 {
@@ -51,6 +52,8 @@ namespace MWInput
 
         mSensorManager = new SensorManager();
         mInputWrapper->setSensorEventCallback(mSensorManager);
+
+        mGyroManager = new GyroManager();
     }
 
     void InputManager::clear()
@@ -72,6 +75,8 @@ namespace MWInput
         delete mBindingsManager;
 
         delete mInputWrapper;
+
+        delete mGyroManager;
     }
 
     void InputManager::setAttemptJump(bool jumping)
@@ -100,6 +105,17 @@ namespace MWInput
         mMouseManager->update(dt);
         mSensorManager->update(dt);
         mActionManager->update(dt, controllerMove);
+
+        if (mGyroManager->isEnabled())
+        {
+            bool controllerAvailable = mControllerManager->isGyroAvailable();
+            bool sensorAvailable = mSensorManager->isGyroAvailable();
+            if (controllerAvailable || sensorAvailable)
+            {
+                mGyroManager->update(dt,
+                    controllerAvailable ? mControllerManager->getGyroValues() : mSensorManager->getGyroValues());
+            }
+        }
     }
 
     void InputManager::setDragDrop(bool dragDrop)
@@ -116,7 +132,7 @@ namespace MWInput
     {
         mControllerManager->setGuiCursorEnabled(guiMode);
         mMouseManager->setGuiCursorEnabled(guiMode);
-        mSensorManager->setGuiCursorEnabled(guiMode);
+        mGyroManager->setGuiCursorEnabled(guiMode);
         mMouseManager->setMouseLookEnabled(!guiMode);
         if (guiMode)
             MWBase::Environment::get().getWindowManager()->showCrosshair(false);
@@ -130,6 +146,7 @@ namespace MWInput
     {
         mMouseManager->processChangedSettings(changed);
         mSensorManager->processChangedSettings(changed);
+        mGyroManager->processChangedSettings(changed);
     }
 
     bool InputManager::getControlSwitch(std::string_view sw)

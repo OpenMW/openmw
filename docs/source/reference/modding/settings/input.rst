@@ -158,6 +158,11 @@ Enable the support of camera rotation based on the information supplied from the
 
 This setting can only be configured by editing the settings configuration file.
 
+Built-in (e. g. in a phone or tablet) and controller gyroscopes are supported. If both are present, controller gyroscope takes priority.
+
+Note: controller gyroscopes are only supported when OpenMW is built with SDL 2.0.14 or higher,
+and were tested only on Windows.
+
 gyro horizontal axis
 --------------------
 
@@ -190,8 +195,8 @@ gyro input threshold
 --------------------
 
 :Type:		floating point
-:Range:		> 0
-:Default:	0.01
+:Range:		>=0
+:Default:	0.0
 
 This setting determines the minimum value of the rotation that will be accepted.
 It allows to avoid crosshair oscillation due to gyroscope "noise".
@@ -209,6 +214,8 @@ This setting controls the overall gyroscope horizontal sensitivity.
 The smaller this sensitivity is, the less visible effect the device rotation
 will have on the horizontal camera rotation, and vice versa.
 
+Value of X means that rotating the device by 1 degree will cause the player to rotate by X degrees.
+
 This setting can only be configured by editing the settings configuration file.
 
 gyro vertical sensitivity
@@ -221,5 +228,7 @@ gyro vertical sensitivity
 This setting controls the overall gyroscope vertical sensitivity.
 The smaller this sensitivity is, the less visible effect the device
 rotation will have on the vertical camera rotation, and vice versa.
+
+Value of X means that rotating the device by 1 degree will cause the player to rotate by X degrees.
 
 This setting can only be configured by editing the settings configuration file.
