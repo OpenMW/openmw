@@ -1,7 +1,6 @@
 #include <components/sqlite3/db.hpp>
 #include <components/sqlite3/request.hpp>
 #include <components/sqlite3/statement.hpp>
-#include <components/sqlite3/transaction.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
