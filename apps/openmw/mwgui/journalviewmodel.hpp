@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 #include <functional>
-#include <stdint.h>
+#include <cstdint>
 
 #include <components/misc/utf8stream.hpp>
 

@@ -8,7 +8,7 @@
 #include <memory>
 #include <utility>
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "locals.hpp"
 

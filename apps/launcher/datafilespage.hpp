@@ -6,8 +6,6 @@
 #include <components/process/processinvoker.hpp>
 
 #include <QWidget>
-
-
 #include <QDir>
 #include <QStringList>
 

@@ -21,7 +21,6 @@
 #include <components/config/launchersettings.hpp>
 
 #include "utils/textinputdialog.hpp"
-#include "utils/profilescombobox.hpp"
 
 
 const char *Launcher::DataFilesPage::mDefaultContentListName = "Default";

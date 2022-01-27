@@ -1,7 +1,7 @@
 #include "nestedcoladapterimp.hpp"
 
-#include <components/esm/loadregn.hpp>
-#include <components/esm/loadfact.hpp>
+#include <components/esm3/loadregn.hpp>
+#include <components/esm3/loadfact.hpp>
 
 #include "idcollection.hpp"
 #include "pathgrid.hpp"

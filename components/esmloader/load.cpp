@@ -4,16 +4,16 @@
 #include "record.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 #include <components/esm/defs.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/loadacti.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadcont.hpp>
-#include <components/esm/loaddoor.hpp>
-#include <components/esm/loadgmst.hpp>
-#include <components/esm/loadland.hpp>
-#include <components/esm/loadstat.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loadstat.hpp>
 #include <components/files/collections.hpp>
 #include <components/files/multidircollection.hpp>
 #include <components/misc/resourcehelpers.hpp>

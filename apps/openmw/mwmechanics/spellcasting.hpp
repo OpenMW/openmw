@@ -1,8 +1,8 @@
 #ifndef MWMECHANICS_SPELLCASTING_H
 #define MWMECHANICS_SPELLCASTING_H
 
-#include <components/esm/activespells.hpp>
-#include <components/esm/effectlist.hpp>
+#include <components/esm3/activespells.hpp>
+#include <components/esm3/effectlist.hpp>
 
 #include "../mwworld/ptr.hpp"
 

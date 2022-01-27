@@ -11,10 +11,10 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/cellid.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/cellid.hpp>
+#include <components/esm3/cellref.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/mathutil.hpp>

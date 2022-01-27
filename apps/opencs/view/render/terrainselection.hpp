@@ -8,7 +8,7 @@
 #include <osg/ref_ptr>
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include "../../model/world/cellcoordinates.hpp"
 
 namespace osg

@@ -8,7 +8,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmwriter.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
 

@@ -5,8 +5,8 @@
 #include <osg/Geometry>
 
 #include "world.hpp"
-#include "../esm/loadland.hpp"
 
+#include <components/esm3/loadland.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/terrain/storage.hpp>
 

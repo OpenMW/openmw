@@ -1,7 +1,7 @@
 #ifndef MWMECHANICS_SPELLUTIL_H
 #define MWMECHANICS_SPELLUTIL_H
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace ESM
 {

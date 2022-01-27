@@ -4,8 +4,8 @@
 #include <components/debug/debugging.hpp>
 #include <components/detournavigator/navmeshdb.hpp>
 #include <components/detournavigator/recastglobalallocator.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/variant.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/variant.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/load.hpp>
 #include <components/fallback/fallback.hpp>
@@ -28,7 +28,6 @@
 
 #include <cstddef>
 #include <stdexcept>
-#include <string>
 #include <thread>
 #include <vector>
 

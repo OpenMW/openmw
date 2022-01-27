@@ -1,6 +1,6 @@
 #include "cellnameloader.hpp"
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/contentselector/view/contentselector.hpp>
 
 QSet<QString> CellNameLoader::getCellNames(QStringList &contentPaths)

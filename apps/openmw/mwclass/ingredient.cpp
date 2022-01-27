@@ -1,6 +1,6 @@
 #include "ingredient.hpp"
 
-#include <components/esm/loadingr.hpp>
+#include <components/esm3/loadingr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

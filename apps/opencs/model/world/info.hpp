@@ -1,7 +1,7 @@
 #ifndef CSM_WOLRD_INFO_H
 #define CSM_WOLRD_INFO_H
 
-#include <components/esm/loadinfo.hpp>
+#include <components/esm3/loadinfo.hpp>
 
 namespace CSMWorld
 {

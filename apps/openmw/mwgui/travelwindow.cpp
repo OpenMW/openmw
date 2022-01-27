@@ -11,14 +11,11 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/actorutil.hpp"
-
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/actionteleport.hpp"
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
+
 
 namespace MWGui
 {

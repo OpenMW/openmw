@@ -5,7 +5,7 @@
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btConvexShape.h>
 
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/loadgmst.hpp>
 #include <components/misc/convert.hpp>
 
 #include "../mwbase/world.hpp"

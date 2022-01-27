@@ -3,13 +3,13 @@
 
 #include <map>
 
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/player.hpp>
-#include <components/esm/dialoguestate.hpp>
-#include <components/esm/globalmap.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/controlsstate.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/player.hpp>
+#include <components/esm3/dialoguestate.hpp>
+#include <components/esm3/globalmap.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/controlsstate.hpp>
 
 #include "importnpcc.hpp"
 #include "importcrec.hpp"

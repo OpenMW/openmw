@@ -1,14 +1,8 @@
 #include "commands.hpp"
 
-#include <QPointer>
-
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadland.hpp>
 
-#include "editmode.hpp"
-#include "terrainselection.hpp"
 #include "terrainshapemode.hpp"
-#include "terraintexturemode.hpp"
 #include "worldspacewidget.hpp"
 
 CSVRender::DrawTerrainSelectionCommand::DrawTerrainSelectionCommand(WorldspaceWidget* worldspaceWidget, QUndoCommand* parent)

@@ -1,6 +1,6 @@
 #include "weapon.hpp"
 
-#include <components/esm/loadweap.hpp>
+#include <components/esm3/loadweap.hpp>
 #include <components/misc/constants.hpp>
 #include <components/settings/settings.hpp>
 

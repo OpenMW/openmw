@@ -6,7 +6,6 @@
 #include <osg/Material>
 
 #include <limits>
-#include <sstream>
 
 #include <components/misc/constants.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>

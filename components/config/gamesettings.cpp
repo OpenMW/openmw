@@ -465,7 +465,7 @@ bool Config::GameSettings::hasMaster()
     QStringList content = mSettings.values(QString(Config::GameSettings::sContentKey));
     for (int i = 0; i < content.count(); ++i) 
     {
-        if (content.at(i).endsWith(QLatin1String(".omwgame"), Qt::CaseInsensitive) || content.at(i).endsWith(QLatin1String(".esm"), Qt::CaseInsensitive)) 
+        if (content.at(i).endsWith(QLatin1String(".omwgame"), Qt::CaseInsensitive) || content.at(i).endsWith(QLatin1String(".esm"), Qt::CaseInsensitive))
         {
             result = true;
             break;

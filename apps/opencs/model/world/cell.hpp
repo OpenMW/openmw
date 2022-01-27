@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 
 namespace CSMWorld
 {

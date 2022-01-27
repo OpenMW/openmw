@@ -7,7 +7,7 @@
 #include <set>
 #include <vector>
 
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/loadspel.hpp>
 
 namespace ESM
 {

@@ -2,7 +2,7 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/loaddial.hpp>
 
 #include <components/compiler/locals.hpp>
 

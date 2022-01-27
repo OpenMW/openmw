@@ -1,8 +1,6 @@
 #include "engine.hpp"
 
-#include <condition_variable>
 #include <iomanip>
-#include <fstream>
 #include <chrono>
 #include <thread>
 
@@ -11,7 +9,6 @@
 #include <osg/Version>
 
 #include <osgViewer/ViewerEventHandlers>
-#include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 
 #include <SDL.h>

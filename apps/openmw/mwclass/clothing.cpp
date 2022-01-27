@@ -1,6 +1,6 @@
 #include "clothing.hpp"
 
-#include <components/esm/loadclot.hpp>
+#include <components/esm3/loadclot.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

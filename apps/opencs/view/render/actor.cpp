@@ -3,7 +3,7 @@
 #include <osg/Group>
 #include <osg/Node>
 
-#include <components/esm/mappings.hpp>
+#include <components/esm3/mappings.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcemanager.hpp>
 #include <components/resource/scenemanager.hpp>

@@ -1,6 +1,6 @@
 #include "merchantrepair.hpp"
 
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/loadgmst.hpp>
 
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>

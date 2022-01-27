@@ -1,7 +1,7 @@
 #include "creaturelevlist.hpp"
 
-#include <components/esm/loadlevlist.hpp>
-#include <components/esm/creaturelevliststate.hpp>
+#include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/creaturelevliststate.hpp>
 
 #include "../mwmechanics/levelledlist.hpp"
 

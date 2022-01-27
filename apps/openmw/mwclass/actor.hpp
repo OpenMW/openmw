@@ -3,7 +3,7 @@
 
 #include "../mwworld/class.hpp"
 
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 namespace ESM
 {

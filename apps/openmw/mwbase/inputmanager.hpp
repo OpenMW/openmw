@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <SDL_gamecontroller.h>
-#include <stdint.h>
+#include <cstdint>
 
 namespace Loading
 {

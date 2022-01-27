@@ -1,6 +1,6 @@
 #include "apparatus.hpp"
 
-#include <components/esm/loadappa.hpp>
+#include <components/esm3/loadappa.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

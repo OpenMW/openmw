@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 #include "importscri.hpp"
 

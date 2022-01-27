@@ -3,8 +3,8 @@
 
 #include "../mwmechanics/stat.hpp"
 
-#include <components/esm/effectlist.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/effectlist.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>

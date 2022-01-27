@@ -4,7 +4,7 @@
 #include <map>
 #include <optional>
 
-#include <components/esm/luascripts.hpp>
+#include "components/esm/luascripts.hpp"
 
 namespace LuaUtil
 {

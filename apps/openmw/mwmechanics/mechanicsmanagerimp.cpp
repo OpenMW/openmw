@@ -4,8 +4,8 @@
 
 #include <components/misc/rng.hpp>
 
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/stolenitems.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/stolenitems.hpp>
 
 #include <components/detournavigator/navigator.hpp>
 

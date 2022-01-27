@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/settings/settings.hpp>

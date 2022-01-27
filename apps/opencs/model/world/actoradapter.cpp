@@ -1,10 +1,10 @@
 #include "actoradapter.hpp"
 
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadrace.hpp>
-#include <components/esm/mappings.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/mappings.hpp>
 #include <components/sceneutil/actorutil.hpp>
 
 #include "data.hpp"

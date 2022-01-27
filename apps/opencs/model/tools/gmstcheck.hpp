@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_GMSTCHECK_H
 #define CSM_TOOLS_GMSTCHECK_H
 
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/loadgmst.hpp>
 
 #include "../world/idcollection.hpp"
 

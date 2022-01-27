@@ -1,6 +1,6 @@
 #include "loudness.hpp"
 
-#include <stdint.h>
+#include <cstdint>
 #include <limits>
 #include <algorithm>
 

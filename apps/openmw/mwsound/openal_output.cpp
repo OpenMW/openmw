@@ -6,10 +6,9 @@
 #include <atomic>
 #include <condition_variable>
 #include <thread>
-#include <mutex>
 #include <chrono>
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/constants.hpp>

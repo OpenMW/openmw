@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWWORLD_CELLREF_H
 #define OPENMW_MWWORLD_CELLREF_H
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 namespace ESM
 {

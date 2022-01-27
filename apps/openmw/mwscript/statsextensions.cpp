@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <components/esm/loadnpc.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../mwworld/esmstore.hpp"
 

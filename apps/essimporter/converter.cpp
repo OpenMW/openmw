@@ -5,8 +5,8 @@
 
 #include <osgDB/WriteFile>
 
-#include <components/esm/creaturestate.hpp>
-#include <components/esm/containerstate.hpp>
+#include <components/esm3/creaturestate.hpp>
+#include <components/esm3/containerstate.hpp>
 
 #include <components/misc/constants.hpp>
 

@@ -2,11 +2,10 @@
 
 #include <map>
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../prefs/state.hpp"
 
-#include "../world/universalid.hpp"
 
 CSMTools::FactionCheckStage::FactionCheckStage (const CSMWorld::IdCollection<ESM::Faction>& factions)
 : mFactions (factions)

@@ -1,7 +1,7 @@
 #ifndef GAME_SOUND_FFMPEG_DECODER_H
 #define GAME_SOUND_FFMPEG_DECODER_H
 
-#include <stdint.h>
+#include <cstdint>
 
 #if defined(_MSC_VER)
     #pragma warning (push)

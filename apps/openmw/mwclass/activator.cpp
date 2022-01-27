@@ -1,6 +1,6 @@
 #include "activator.hpp"
 
-#include <components/esm/loadacti.hpp>
+#include <components/esm3/loadacti.hpp>
 #include <components/misc/rng.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 

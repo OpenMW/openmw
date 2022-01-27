@@ -2,26 +2,25 @@
 
 #include <iomanip>
 
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #include <osgDB/ReadFile>
 #include <osg/ImageUtils>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 #include <components/esm/defs.hpp>
 
-#include <components/esm/savedgame.hpp>
-#include <components/esm/player.hpp>
+#include <components/esm3/savedgame.hpp>
+#include <components/esm3/player.hpp>
 
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadspel.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadweap.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadlevlist.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadlevlist.hpp>
 
 #include <components/misc/constants.hpp>
 

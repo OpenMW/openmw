@@ -1,6 +1,6 @@
 #include "repair.hpp"
 
-#include <components/esm/loadrepa.hpp>
+#include <components/esm3/loadrepa.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

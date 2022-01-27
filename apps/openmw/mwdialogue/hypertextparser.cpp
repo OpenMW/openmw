@@ -1,4 +1,4 @@
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/loaddial.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

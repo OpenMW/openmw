@@ -3,7 +3,7 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_InputManager.h>
 
-#include <components/esm/loadbook.hpp>
+#include <components/esm3/loadbook.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

@@ -7,7 +7,7 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/loadscpt.hpp>
+#include <components/esm3/loadscpt.hpp>
 
 #include <components/misc/stringops.hpp>
 

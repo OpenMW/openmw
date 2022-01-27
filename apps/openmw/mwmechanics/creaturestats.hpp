@@ -14,7 +14,7 @@
 #include "drawstate.hpp"
 
 #include <components/esm/attr.hpp>
-#include <components/esm/magiceffects.hpp>
+#include <components/esm3/magiceffects.hpp>
 
 namespace ESM
 {

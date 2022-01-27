@@ -1,9 +1,9 @@
 #include "cellref.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/objectstate.hpp>
 
 namespace MWWorld
 {

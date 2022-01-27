@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_SPELLCHECK_H
 #define CSM_TOOLS_SPELLCHECK_H
 
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/loadspel.hpp>
 
 #include "../world/idcollection.hpp"
 

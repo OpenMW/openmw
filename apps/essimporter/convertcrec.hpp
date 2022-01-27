@@ -3,7 +3,7 @@
 
 #include "importcrec.hpp"
 
-#include <components/esm/creaturestate.hpp>
+#include <components/esm3/creaturestate.hpp>
 
 namespace ESSImport
 {

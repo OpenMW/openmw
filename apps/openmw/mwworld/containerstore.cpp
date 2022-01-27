@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/inventorystate.hpp>
+#include <components/esm3/inventorystate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

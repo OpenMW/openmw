@@ -3,7 +3,6 @@
 #include <QDebug>
 
 #include <QReadLocker>
-#include <QWriteLocker>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QStringList>

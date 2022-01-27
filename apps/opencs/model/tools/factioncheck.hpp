@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_FACTIONCHECK_H
 #define CSM_TOOLS_FACTIONCHECK_H
 
-#include <components/esm/loadfact.hpp>
+#include <components/esm3/loadfact.hpp>
 
 #include "../world/idcollection.hpp"
 

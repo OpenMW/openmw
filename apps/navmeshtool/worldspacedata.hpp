@@ -3,7 +3,7 @@
 
 #include <components/bullethelpers/collisionobject.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/misc/convert.hpp>
 #include <components/resource/bulletshape.hpp>
 

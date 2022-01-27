@@ -1,23 +1,15 @@
 #include "cell.hpp"
 
-#include <math.h>
-
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geode>
-#include <osg/Geometry>
 #include <osg/Group>
 
 #include <components/misc/stringops.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadland.hpp>
-#include <components/sceneutil/pathgridutil.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/terrain/terraingrid.hpp>
 
 #include "../../model/world/idtable.hpp"
-#include "../../model/world/columns.hpp"
-#include "../../model/world/data.hpp"
-#include "../../model/world/refcollection.hpp"
-#include "../../model/world/cellcoordinates.hpp"
 
 #include "cellwater.hpp"
 #include "cellborder.hpp"

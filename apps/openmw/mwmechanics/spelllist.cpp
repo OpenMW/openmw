@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/loadspel.hpp>
 
 #include "spells.hpp"
 

@@ -1,7 +1,6 @@
 ///Program to test .nif files both on the FileSystem and in BSA archives.
 
 #include <iostream>
-#include <fstream>
 
 #include <components/misc/stringops.hpp>
 #include <components/nif/niffile.hpp>

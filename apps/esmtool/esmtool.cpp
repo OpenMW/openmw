@@ -4,14 +4,13 @@
 #include <list>
 #include <unordered_set>
 #include <map>
-#include <set>
 #include <fstream>
 #include <cmath>
 
 #include <boost/program_options.hpp>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 #include <components/esm/records.hpp>
 
 #include "record.hpp"

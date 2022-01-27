@@ -1,16 +1,16 @@
 #ifndef MWGUI_MAPWINDOW_H
 #define MWGUI_MAPWINDOW_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <memory>
 
 #include <osg/Vec2f>
 
 #include "windowpinnablebase.hpp"
 
-#include <components/esm/cellid.hpp>
+#include <components/esm3/cellid.hpp>
 
-#include <components/esm/custommarkerstate.hpp>
+#include <components/esm3/custommarkerstate.hpp>
 #include <components/misc/constants.hpp>
 
 namespace MWRender

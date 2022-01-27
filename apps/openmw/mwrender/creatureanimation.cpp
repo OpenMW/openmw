@@ -2,7 +2,7 @@
 
 #include <osg/MatrixTransform>
 
-#include <components/esm/loadcrea.hpp>
+#include <components/esm3/loadcrea.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>

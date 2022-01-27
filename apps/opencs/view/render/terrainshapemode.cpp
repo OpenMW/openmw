@@ -2,36 +2,25 @@
 
 #include <algorithm>
 #include <string>
-#include <sstream>
 #include <memory>
 
 #include <QWidget>
 #include <QIcon>
 #include <QEvent>
 #include <QDropEvent>
-#include <QDragEnterEvent>
-#include <QDrag>
 
 #include <osg/Group>
 #include <osg/Vec3f>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/debug/debuglog.hpp>
 
-#include "../widget/brushshapes.hpp"
-#include "../widget/modebutton.hpp"
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolshapebrush.hpp"
 
-#include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
-#include "../../model/world/commands.hpp"
-#include "../../model/world/data.hpp"
-#include "../../model/world/idtable.hpp"
 #include "../../model/world/idtree.hpp"
-#include "../../model/world/land.hpp"
 #include "../../model/world/tablemimedata.hpp"
-#include "../../model/world/universalid.hpp"
 
 #include "brushdraw.hpp"
 #include "commands.hpp"

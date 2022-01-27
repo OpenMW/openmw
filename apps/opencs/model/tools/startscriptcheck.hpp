@@ -1,8 +1,8 @@
 #ifndef CSM_TOOLS_STARTSCRIPTCHECK_H
 #define CSM_TOOLS_STARTSCRIPTCHECK_H
 
-#include <components/esm/loadsscr.hpp>
-#include <components/esm/loadscpt.hpp>
+#include <components/esm3/loadsscr.hpp>
+#include <components/esm3/loadscpt.hpp>
 
 #include "../doc/stage.hpp"
 

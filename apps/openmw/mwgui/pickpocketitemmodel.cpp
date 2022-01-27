@@ -1,7 +1,7 @@
 #include "pickpocketitemmodel.hpp"
 
 #include <components/misc/rng.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"

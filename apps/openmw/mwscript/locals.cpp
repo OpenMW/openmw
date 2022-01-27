@@ -1,9 +1,9 @@
 #include "locals.hpp"
 #include "globalscripts.hpp"
 
-#include <components/esm/loadscpt.hpp>
-#include <components/esm/variant.hpp>
-#include <components/esm/locals.hpp>
+#include <components/esm3/loadscpt.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/esm3/locals.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/compiler/locals.hpp>
 

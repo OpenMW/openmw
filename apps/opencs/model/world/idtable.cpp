@@ -1,13 +1,12 @@
 #include "idtable.hpp"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdint>
 #include <limits>
 #include <map>
 #include <stdexcept>
 
-#include <components/esm/cellid.hpp>
+#include <components/esm3/cellid.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "collectionbase.hpp"

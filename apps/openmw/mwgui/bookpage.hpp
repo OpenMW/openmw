@@ -7,7 +7,7 @@
 
 #include <functional>
 #include <memory>
-#include <stdint.h>
+#include <cstdint>
 
 #include <components/settings/settings.hpp>
 

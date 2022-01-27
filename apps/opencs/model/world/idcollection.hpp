@@ -1,7 +1,7 @@
 #ifndef CSM_WOLRD_IDCOLLECTION_H
 #define CSM_WOLRD_IDCOLLECTION_H
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
 #include "collection.hpp"
 #include "land.hpp"

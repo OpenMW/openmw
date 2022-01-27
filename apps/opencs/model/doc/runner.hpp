@@ -10,7 +10,7 @@
 #include <QProcess>
 #include <QTextDocument>
 
-#include <components/esm/debugprofile.hpp>
+#include <components/esm3/debugprofile.hpp>
 
 class QTemporaryFile;
 

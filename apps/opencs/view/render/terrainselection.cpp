@@ -4,11 +4,9 @@
 
 #include <osg/Group>
 #include <osg/Geometry>
-#include <osg/PositionAttitudeTransform>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 
-#include "../../model/world/cellcoordinates.hpp"
 #include "../../model/world/columnimp.hpp"
 #include "../../model/world/idtable.hpp"
 

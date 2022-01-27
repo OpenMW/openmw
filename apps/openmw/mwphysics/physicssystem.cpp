@@ -22,7 +22,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/loadgmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/misc/convert.hpp>
 

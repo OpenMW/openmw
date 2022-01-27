@@ -1,8 +1,8 @@
 #include "controlswitch.hpp"
 
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/controlsstate.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/controlsstate.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 

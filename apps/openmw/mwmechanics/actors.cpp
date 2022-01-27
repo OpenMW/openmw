@@ -2,8 +2,8 @@
 
 #include <optional>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/debug/debuglog.hpp>

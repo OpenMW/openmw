@@ -1,20 +1,18 @@
 ﻿#include "worldspacedata.hpp"
 
 #include <components/bullethelpers/aabb.hpp>
-#include <components/bullethelpers/heightfield.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/detournavigator/gettilespositions.hpp>
 #include <components/detournavigator/objectid.hpp>
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
-#include <components/esm/cellref.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/lessbyid.hpp>
 #include <components/esmloader/record.hpp>
-#include <components/misc/coordinateconverter.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/resource/bulletshapemanager.hpp>
@@ -24,7 +22,6 @@
 #include <LinearMath/btVector3.h>
 
 #include <osg/Vec2i>
-#include <osg/Vec3f>
 #include <osg/ref_ptr>
 
 #include <algorithm>
@@ -32,7 +29,6 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <thread>
 #include <tuple>
 #include <utility>
 #include <vector>

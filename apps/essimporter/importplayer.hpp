@@ -5,7 +5,7 @@
 #include <string>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 #include <components/esm/esmcommon.hpp>
 
 #include "importacdt.hpp"

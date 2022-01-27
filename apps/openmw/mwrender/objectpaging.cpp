@@ -9,7 +9,7 @@
 #include <osg/Material>
 #include <osgUtil/IncrementalCompileOperation>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/optimizer.hpp>

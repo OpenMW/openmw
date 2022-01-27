@@ -1,6 +1,6 @@
 #include "itemlevlist.hpp"
 
-#include <components/esm/loadlevlist.hpp>
+#include <components/esm3/loadlevlist.hpp>
 
 namespace MWClass
 {

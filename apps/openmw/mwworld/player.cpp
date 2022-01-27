@@ -4,11 +4,11 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/player.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/player.hpp>
 #include <components/esm/defs.hpp>
-#include <components/esm/loadbsgn.hpp>
+#include <components/esm3/loadbsgn.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -25,7 +25,6 @@
 
 #include "cellstore.hpp"
 #include "class.hpp"
-#include "esmloader.hpp"
 #include "ptr.hpp"
 
 namespace MWWorld

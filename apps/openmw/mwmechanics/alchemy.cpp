@@ -9,10 +9,10 @@
 
 #include <components/misc/rng.hpp>
 
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadgmst.hpp>
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

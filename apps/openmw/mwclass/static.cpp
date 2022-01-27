@@ -1,6 +1,6 @@
 #include "static.hpp"
 
-#include <components/esm/loadstat.hpp>
+#include <components/esm3/loadstat.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/ptr.hpp"

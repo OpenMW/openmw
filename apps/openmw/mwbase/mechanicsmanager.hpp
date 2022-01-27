@@ -5,7 +5,7 @@
 #include <vector>
 #include <list>
 #include <set>
-#include <stdint.h>
+#include <cstdint>
 
 #include "../mwmechanics/actorutil.hpp"
 // For MWMechanics::GreetingState

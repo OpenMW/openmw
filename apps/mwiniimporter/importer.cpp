@@ -1,13 +1,12 @@
 #include "importer.hpp"
 
 #include <iostream>
-#include <sstream>
 #include <components/misc/stringops.hpp>
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/version.hpp>
+
 
 namespace bfs = boost::filesystem;
 

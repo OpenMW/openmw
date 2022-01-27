@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_RACECHECK_H
 #define CSM_TOOLS_RACECHECK_H
 
-#include <components/esm/loadrace.hpp>
+#include <components/esm3/loadrace.hpp>
 
 #include "../world/idcollection.hpp"
 

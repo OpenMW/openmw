@@ -1,6 +1,6 @@
 #include "lockpick.hpp"
 
-#include <components/esm/loadlock.hpp>
+#include <components/esm3/loadlock.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

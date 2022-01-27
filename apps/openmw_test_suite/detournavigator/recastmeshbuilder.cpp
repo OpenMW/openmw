@@ -3,7 +3,7 @@
 #include <components/detournavigator/recastmeshbuilder.hpp>
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/exceptions.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/misc/convert.hpp>
 #include <components/debug/debuglog.hpp>
 

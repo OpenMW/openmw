@@ -16,7 +16,6 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
 
 #include <MyGUI_Macros.h>
 #include <components/esm/records.hpp>

@@ -1,6 +1,6 @@
 #include "localmap.hpp"
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <osg/Fog>
 #include <osg/LightModel>
@@ -12,8 +12,8 @@
 #include <osgDB/ReadFile>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/fogstate.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/fogstate.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/misc/constants.hpp>
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
@@ -31,7 +31,6 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "vismask.hpp"
-#include "util.hpp"
 
 namespace
 {

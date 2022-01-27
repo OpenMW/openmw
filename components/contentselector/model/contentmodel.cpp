@@ -8,7 +8,7 @@
 #include <QTextCodec>
 #include <QDebug>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
 ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon, bool showOMWScripts) :
     QAbstractTableModel(parent),

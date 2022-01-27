@@ -6,7 +6,7 @@
 
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/loadnpc.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 

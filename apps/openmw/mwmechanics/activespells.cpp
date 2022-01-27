@@ -7,7 +7,7 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/stringops.hpp>
 
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include <components/settings/settings.hpp>
 

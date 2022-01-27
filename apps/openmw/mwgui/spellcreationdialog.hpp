@@ -1,8 +1,8 @@
 #ifndef MWGUI_SPELLCREATION_H
 #define MWGUI_SPELLCREATION_H
 
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadspel.hpp>
 
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"

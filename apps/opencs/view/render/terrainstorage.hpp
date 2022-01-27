@@ -3,7 +3,7 @@
 
 #include <array>
 
-#include <components/esmterrain/storage.hpp>
+#include <components/esm3terrain/storage.hpp>
 
 #include "../../model/world/data.hpp"
 

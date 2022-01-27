@@ -5,7 +5,7 @@
 
 #include <MyGUI_ImageBox.h>
 
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"

@@ -1,11 +1,11 @@
 #include "cells.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 #include <components/esm/defs.hpp>
-#include <components/esm/cellstate.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellstate.hpp>
+#include <components/esm3/cellref.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/settings.hpp>
 

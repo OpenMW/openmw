@@ -2,7 +2,7 @@
 #define GAME_MWWORLD_REFDATA_H
 
 #include <components/esm/defs.hpp>
-#include <components/esm/animationstate.hpp>
+#include <components/esm3/animationstate.hpp>
 
 #include "../mwscript/locals.hpp"
 #include "../mwworld/customdata.hpp"

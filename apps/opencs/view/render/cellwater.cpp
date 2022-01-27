@@ -5,7 +5,7 @@
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/resource/imagemanager.hpp>

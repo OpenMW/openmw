@@ -4,7 +4,7 @@
 #include <set>
 
 #include <components/esm/attr.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../mwmechanics/stat.hpp"
 

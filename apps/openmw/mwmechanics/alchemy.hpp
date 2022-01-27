@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 
-#include <components/esm/effectlist.hpp>
+#include <components/esm3/effectlist.hpp>
 
 #include "../mwworld/ptr.hpp"
 

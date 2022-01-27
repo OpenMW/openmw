@@ -1,11 +1,9 @@
 #include "refidadapterimp.hpp"
 
-#include <cassert>
 #include <stdexcept>
-#include <utility>
 
-#include <components/esm/loadcont.hpp>
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "nestedtablewrapper.hpp"
 

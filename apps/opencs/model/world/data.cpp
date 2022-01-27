@@ -5,10 +5,9 @@
 
 #include <QAbstractItemModel>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 #include <components/esm/defs.hpp>
-#include <components/esm/loadglob.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/loadglob.hpp>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/shadow.hpp>

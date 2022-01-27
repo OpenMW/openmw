@@ -2,7 +2,7 @@
 #define OPENMW_ESSIMPORT_CREC_H
 
 #include "importinventory.hpp"
-#include <components/esm/aipackage.hpp>
+#include <components/esm3/aipackage.hpp>
 
 namespace ESM
 {
