@@ -20,20 +20,20 @@
 
 namespace MWMechanics
 {
-    AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z, bool repeat)
+    AiEscort::AiEscort(std::string_view actorId, int duration, float x, float y, float z, bool repeat)
     : TypedAiPackage<AiEscort>(repeat), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
-        mTargetActorRefId = actorId;
+        mTargetActorRefId = std::string(actorId);
     }
 
-    AiEscort::AiEscort(const std::string &actorId, const std::string &cellId, int duration, float x, float y, float z, bool repeat)
+    AiEscort::AiEscort(std::string_view actorId, std::string_view cellId, int duration, float x, float y, float z, bool repeat)
     : TypedAiPackage<AiEscort>(repeat), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
-        mTargetActorRefId = actorId;
+        mTargetActorRefId = std::string(actorId);
     }
 
     AiEscort::AiEscort(const ESM::AiSequence::AiEscort *escort)

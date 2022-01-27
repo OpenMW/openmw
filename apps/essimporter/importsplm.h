@@ -41,7 +41,7 @@ struct SPLM
     {
         int mUnknown;
         unsigned char mUnknown2;
-        ESM::FIXED_STRING<35> mItemId; // disintegrated item / bound item / item to re-equip after expiration
+        ESM::FixedString<35> mItemId; // disintegrated item / bound item / item to re-equip after expiration
     };
 
     struct CNAM // 36 bytes

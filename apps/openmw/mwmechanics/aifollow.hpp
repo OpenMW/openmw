@@ -4,6 +4,7 @@
 #include "typedaipackage.hpp"
 
 #include <string>
+#include <string_view>
 
 #include <components/esm/defs.hpp>
 
@@ -38,9 +39,9 @@ namespace MWMechanics
     {
         public:
             /// Follow Actor for duration or until you arrive at a world position
-            AiFollow(const std::string &actorId, float duration, float x, float y, float z, bool repeat);
+            AiFollow(std::string_view actorId, float duration, float x, float y, float z, bool repeat);
             /// Follow Actor for duration or until you arrive at a position in a cell
-            AiFollow(const std::string &actorId, const std::string &CellId, float duration, float x, float y, float z, bool repeat);
+            AiFollow(std::string_view actorId, std::string_view cellId, float duration, float x, float y, float z, bool repeat);
             /// Follow Actor indefinitively
             AiFollow(const MWWorld::Ptr& actor, bool commanded=false);
 

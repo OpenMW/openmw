@@ -208,9 +208,9 @@ void ESMReader::getSubName()
     }
 
     // reading the subrecord data anyway.
-    const int subNameSize = static_cast<int>(mCtx.subName.data_size());
-    getExact(mCtx.subName.rw_data(), subNameSize);
-    mCtx.leftRec -= static_cast<uint32_t>(subNameSize);
+    const std::size_t subNameSize = decltype(mCtx.subName)::sCapacity;
+    getExact(mCtx.subName.mData, static_cast<int>(subNameSize));
+    mCtx.leftRec -= static_cast<std::uint32_t>(subNameSize);
 }
 
 void ESMReader::skipHSub()
@@ -257,7 +257,7 @@ NAME ESMReader::getRecName()
     if (!hasMoreRecs())
         fail("No more records, getRecName() failed");
     getName(mCtx.recName);
-    mCtx.leftFile -= mCtx.recName.data_size();
+    mCtx.leftFile -= decltype(mCtx.recName)::sCapacity;
 
     // Make sure we don't carry over any old cached subrecord
     // names. This can happen in some cases when we skip parts of a
@@ -331,8 +331,8 @@ std::string ESMReader::getString(int size)
 
     ss << "ESM Error: " << msg;
     ss << "\n  File: " << mCtx.filename;
-    ss << "\n  Record: " << mCtx.recName.toString();
-    ss << "\n  Subrecord: " << mCtx.subName.toString();
+    ss << "\n  Record: " << mCtx.recName.toStringView();
+    ss << "\n  Subrecord: " << mCtx.subName.toStringView();
     if (mEsm.get())
         ss << "\n  Offset: 0x" << std::hex << mEsm->tellg();
     throw std::runtime_error(ss.str());

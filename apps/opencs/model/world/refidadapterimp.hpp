@@ -1913,14 +1913,20 @@ namespace CSMWorld
                     break; // always save
                 case 13: // NAME32
                     if (content.mType == ESM::AI_Activate)
-                        content.mActivate.mName.assign(value.toString().toUtf8().constData());
+                    {
+                        const QByteArray name = value.toString().toUtf8();
+                        content.mActivate.mName.assign(std::string_view(name.constData(), name.size()));
+                    }
                     else
                         return; // return without saving
 
                     break; // always save
                 case 14: // NAME32
                     if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
-                        content.mTarget.mId.assign(value.toString().toUtf8().constData());
+                    {
+                        const QByteArray id = value.toString().toUtf8();
+                        content.mTarget.mId.assign(std::string_view(id.constData(), id.size()));
+                    }
                     else
                         return; // return without saving
 

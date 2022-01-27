@@ -123,7 +123,7 @@ TEST(EsmFixedString, assign_should_only_truncate_for_4)
 
 TEST(EsmFixedString, assign_should_truncate_and_set_last_element_to_zero)
 {
-    ESM::FIXED_STRING<17> value;
+    ESM::FixedString<17> value;
     value.assign(std::string(20, 'a'));
     EXPECT_EQ(value, std::string(16, 'a'));
 }
