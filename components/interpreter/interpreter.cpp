@@ -7,90 +7,73 @@
 
 namespace Interpreter
 {
+    [[noreturn]] static void abortUnknownCode(int segment, int opcode)
+    {
+        const std::string error = "unknown opcode " + std::to_string(opcode) + " in segment " + std::to_string(segment);
+        throw std::runtime_error(error);
+    }
+
+    [[noreturn]] static void abortUnknownSegment(Type_Code code)
+    {
+        const std::string error = "opcode outside of the allocated segment range: " + std::to_string(code);
+        throw std::runtime_error(error);
+    }
+
+    template<typename T>
+    auto& getDispatcher(const T& segment, unsigned int seg, int opcode)
+    {
+        auto it = segment.find(opcode);
+        if (it == segment.end())
+        {
+            abortUnknownCode(seg, opcode);
+        }
+        return it->second;
+    }
+
     void Interpreter::execute (Type_Code code)
     {
-        unsigned int segSpec = code>>30;
+        unsigned int segSpec = code >> 30;
 
         switch (segSpec)
         {
             case 0:
             {
-                int opcode = code>>24;
-                unsigned int arg0 = code & 0xffffff;
+                const int opcode = code >> 24;
+                const unsigned int arg0 = code & 0xffffff;
 
-                std::map<int, Opcode1 *>::iterator iter = mSegment0.find (opcode);
-
-                if (iter==mSegment0.end())
-                    abortUnknownCode (0, opcode);
-
-                iter->second->execute (mRuntime, arg0);
-
-                return;
+                return getDispatcher(mSegment0, 0, opcode)->execute(mRuntime, arg0);
             }
 
             case 2:
             {
-                int opcode = (code>>20) & 0x3ff;
-                unsigned int arg0 = code & 0xfffff;
+                const int opcode = (code >> 20) & 0x3ff;
+                const unsigned int arg0 = code & 0xfffff;
 
-                std::map<int, Opcode1 *>::iterator iter = mSegment2.find (opcode);
-
-                if (iter==mSegment2.end())
-                    abortUnknownCode (2, opcode);
-
-                iter->second->execute (mRuntime, arg0);
-
-                return;
+                return getDispatcher(mSegment2, 2, opcode)->execute(mRuntime, arg0);
             }
         }
 
-        segSpec = code>>26;
+        segSpec = code >> 26;
 
         switch (segSpec)
         {
             case 0x30:
             {
-                int opcode = (code>>8) & 0x3ffff;
-                unsigned int arg0 = code & 0xff;
+                const int opcode = (code >> 8) & 0x3ffff;
+                const unsigned int arg0 = code & 0xff;
 
-                std::map<int, Opcode1 *>::iterator iter = mSegment3.find (opcode);
-
-                if (iter==mSegment3.end())
-                    abortUnknownCode (3, opcode);
-
-                iter->second->execute (mRuntime, arg0);
-
-                return;
+                return getDispatcher(mSegment3, 3, opcode)->execute(mRuntime, arg0);
             }
 
             case 0x32:
             {
-                int opcode = code & 0x3ffffff;
+                const int opcode = code & 0x3ffffff;
 
-                std::map<int, Opcode0 *>::iterator iter = mSegment5.find (opcode);
-
-                if (iter==mSegment5.end())
-                    abortUnknownCode (5, opcode);
-
-                iter->second->execute (mRuntime);
-
-                return;
+                return getDispatcher(mSegment5, 5, opcode)->execute(mRuntime);
             }
         }
 
         abortUnknownSegment (code);
-    }
-
-    [[noreturn]] void Interpreter::abortUnknownCode (int segment, int opcode)
-    {
-        const std::string error = "unknown opcode " + std::to_string(opcode) + " in segment " + std::to_string(segment);
-        throw std::runtime_error (error);
-    }
-
-    [[noreturn]] void Interpreter::abortUnknownSegment (Type_Code code)
-    {
-        const std::string error = "opcode outside of the allocated segment range: " + std::to_string(code);
-        throw std::runtime_error (error);
     }
 
     void Interpreter::begin()
@@ -122,49 +105,6 @@ namespace Interpreter
 
     Interpreter::Interpreter() : mRunning (false)
     {}
-
-    Interpreter::~Interpreter()
-    {
-        for (std::map<int, Opcode1 *>::iterator iter (mSegment0.begin());
-            iter!=mSegment0.end(); ++iter)
-            delete iter->second;
-
-        for (std::map<int, Opcode1 *>::iterator iter (mSegment2.begin());
-            iter!=mSegment2.end(); ++iter)
-            delete iter->second;
-
-        for (std::map<int, Opcode1 *>::iterator iter (mSegment3.begin());
-            iter!=mSegment3.end(); ++iter)
-            delete iter->second;
-
-        for (std::map<int, Opcode0 *>::iterator iter (mSegment5.begin());
-            iter!=mSegment5.end(); ++iter)
-            delete iter->second;
-    }
-
-    void Interpreter::installSegment0 (int code, Opcode1 *opcode)
-    {
-        assert(mSegment0.find(code) == mSegment0.end());
-        mSegment0.insert (std::make_pair (code, opcode));
-    }
-
-    void Interpreter::installSegment2 (int code, Opcode1 *opcode)
-    {
-        assert(mSegment2.find(code) == mSegment2.end());
-        mSegment2.insert (std::make_pair (code, opcode));
-    }
-
-    void Interpreter::installSegment3 (int code, Opcode1 *opcode)
-    {
-        assert(mSegment3.find(code) == mSegment3.end());
-        mSegment3.insert (std::make_pair (code, opcode));
-    }
-
-    void Interpreter::installSegment5 (int code, Opcode0 *opcode)
-    {
-        assert(mSegment5.find(code) == mSegment5.end());
-        mSegment5.insert (std::make_pair (code, opcode));
-    }
 
     void Interpreter::run (const Type_Code *code, int codeSize, Context& context)
     {

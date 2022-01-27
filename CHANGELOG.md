@@ -130,6 +130,7 @@
     Feature #6534: Shader-based object texture blending
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
+    Task #6553: Simplify interpreter instruction registration
 
 0.47.0
 ------

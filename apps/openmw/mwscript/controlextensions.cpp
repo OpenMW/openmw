@@ -188,67 +188,51 @@ namespace MWScript
         };
 
 
-        void installOpcodes (Interpreter::Interpreter& interpreter)
+        void installOpcodes(Interpreter::Interpreter& interpreter)
         {
-            for (int i=0; i<Compiler::Control::numberOfControls; ++i)
+            for (int i = 0; i < Compiler::Control::numberOfControls; ++i)
             {
-                interpreter.installSegment5 (Compiler::Control::opcodeEnable+i, new OpSetControl (Compiler::Control::controls[i], true));
-                interpreter.installSegment5 (Compiler::Control::opcodeDisable+i, new OpSetControl (Compiler::Control::controls[i], false));
-                interpreter.installSegment5 (Compiler::Control::opcodeGetDisabled+i, new OpGetDisabled (Compiler::Control::controls[i]));
+                interpreter.installSegment5<OpSetControl>(Compiler::Control::opcodeEnable + i, Compiler::Control::controls[i], true);
+                interpreter.installSegment5<OpSetControl>(Compiler::Control::opcodeDisable + i, Compiler::Control::controls[i], false);
+                interpreter.installSegment5<OpGetDisabled>(Compiler::Control::opcodeGetDisabled + i, Compiler::Control::controls[i]);
             }
 
-            interpreter.installSegment5 (Compiler::Control::opcodeToggleCollision, new OpToggleCollision);
+            interpreter.installSegment5<OpToggleCollision>(Compiler::Control::opcodeToggleCollision);
 
             //Force Run
-            interpreter.installSegment5 (Compiler::Control::opcodeClearForceRun,
-                new OpClearMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceRun));
-            interpreter.installSegment5 (Compiler::Control::opcodeClearForceRunExplicit,
-                new OpClearMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceRun));
-            interpreter.installSegment5 (Compiler::Control::opcodeForceRun,
-                new OpSetMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceRun));
-            interpreter.installSegment5 (Compiler::Control::opcodeForceRunExplicit,
-                new OpSetMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceRun));
+            interpreter.installSegment5<OpClearMovementFlag<ImplicitRef>>(Compiler::Control::opcodeClearForceRun, MWMechanics::CreatureStats::Flag_ForceRun);
+            interpreter.installSegment5<OpClearMovementFlag<ExplicitRef>>(Compiler::Control::opcodeClearForceRunExplicit, MWMechanics::CreatureStats::Flag_ForceRun);
+            interpreter.installSegment5<OpSetMovementFlag<ImplicitRef>>(Compiler::Control::opcodeForceRun, MWMechanics::CreatureStats::Flag_ForceRun);
+            interpreter.installSegment5<OpSetMovementFlag<ExplicitRef>>(Compiler::Control::opcodeForceRunExplicit, MWMechanics::CreatureStats::Flag_ForceRun);
 
             //Force Jump
-            interpreter.installSegment5 (Compiler::Control::opcodeClearForceJump,
-                new OpClearMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceJump));
-            interpreter.installSegment5 (Compiler::Control::opcodeClearForceJumpExplicit,
-                new OpClearMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceJump));
-            interpreter.installSegment5 (Compiler::Control::opcodeForceJump,
-                new OpSetMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceJump));
-            interpreter.installSegment5 (Compiler::Control::opcodeForceJumpExplicit,
-                new OpSetMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceJump));
+            interpreter.installSegment5<OpClearMovementFlag<ImplicitRef>>(Compiler::Control::opcodeClearForceJump, MWMechanics::CreatureStats::Flag_ForceJump);
+            interpreter.installSegment5<OpClearMovementFlag<ExplicitRef>>(Compiler::Control::opcodeClearForceJumpExplicit, MWMechanics::CreatureStats::Flag_ForceJump);
+            interpreter.installSegment5<OpSetMovementFlag<ImplicitRef>>(Compiler::Control::opcodeForceJump, MWMechanics::CreatureStats::Flag_ForceJump);
+            interpreter.installSegment5<OpSetMovementFlag<ExplicitRef>>(Compiler::Control::opcodeForceJumpExplicit, MWMechanics::CreatureStats::Flag_ForceJump);
 
             //Force MoveJump
-            interpreter.installSegment5 (Compiler::Control::opcodeClearForceMoveJump,
-                new OpClearMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceMoveJump));
-            interpreter.installSegment5 (Compiler::Control::opcodeClearForceMoveJumpExplicit,
-                new OpClearMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceMoveJump));
-            interpreter.installSegment5 (Compiler::Control::opcodeForceMoveJump,
-                new OpSetMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceMoveJump));
-            interpreter.installSegment5 (Compiler::Control::opcodeForceMoveJumpExplicit,
-                new OpSetMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceMoveJump));
+            interpreter.installSegment5<OpClearMovementFlag<ImplicitRef>>(Compiler::Control::opcodeClearForceMoveJump, MWMechanics::CreatureStats::Flag_ForceMoveJump);
+            interpreter.installSegment5<OpClearMovementFlag<ExplicitRef>>(Compiler::Control::opcodeClearForceMoveJumpExplicit, MWMechanics::CreatureStats::Flag_ForceMoveJump);
+            interpreter.installSegment5<OpSetMovementFlag<ImplicitRef>>(Compiler::Control::opcodeForceMoveJump, MWMechanics::CreatureStats::Flag_ForceMoveJump);
+            interpreter.installSegment5<OpSetMovementFlag<ExplicitRef>>(Compiler::Control::opcodeForceMoveJumpExplicit, MWMechanics::CreatureStats::Flag_ForceMoveJump);
 
             //Force Sneak
-            interpreter.installSegment5 (Compiler::Control::opcodeClearForceSneak,
-                new OpClearMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceSneak));
-            interpreter.installSegment5 (Compiler::Control::opcodeClearForceSneakExplicit,
-                new OpClearMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceSneak));
-            interpreter.installSegment5 (Compiler::Control::opcodeForceSneak,
-                new OpSetMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceSneak));
-            interpreter.installSegment5 (Compiler::Control::opcodeForceSneakExplicit,
-                new OpSetMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceSneak));
+            interpreter.installSegment5<OpClearMovementFlag<ImplicitRef>>(Compiler::Control::opcodeClearForceSneak, MWMechanics::CreatureStats::Flag_ForceSneak);
+            interpreter.installSegment5<OpClearMovementFlag<ExplicitRef>>(Compiler::Control::opcodeClearForceSneakExplicit, MWMechanics::CreatureStats::Flag_ForceSneak);
+            interpreter.installSegment5<OpSetMovementFlag<ImplicitRef>>(Compiler::Control::opcodeForceSneak, MWMechanics::CreatureStats::Flag_ForceSneak);
+            interpreter.installSegment5<OpSetMovementFlag<ExplicitRef>>(Compiler::Control::opcodeForceSneakExplicit, MWMechanics::CreatureStats::Flag_ForceSneak);
 
-            interpreter.installSegment5 (Compiler::Control::opcodeGetPcRunning, new OpGetPcRunning);
-            interpreter.installSegment5 (Compiler::Control::opcodeGetPcSneaking, new OpGetPcSneaking);
-            interpreter.installSegment5 (Compiler::Control::opcodeGetForceRun, new OpGetForceRun<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Control::opcodeGetForceRunExplicit, new OpGetForceRun<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Control::opcodeGetForceJump, new OpGetForceJump<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Control::opcodeGetForceJumpExplicit, new OpGetForceJump<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Control::opcodeGetForceMoveJump, new OpGetForceMoveJump<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Control::opcodeGetForceMoveJumpExplicit, new OpGetForceMoveJump<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Control::opcodeGetForceSneak, new OpGetForceSneak<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Control::opcodeGetForceSneakExplicit, new OpGetForceSneak<ExplicitRef>);
+            interpreter.installSegment5<OpGetPcRunning>(Compiler::Control::opcodeGetPcRunning);
+            interpreter.installSegment5<OpGetPcSneaking>(Compiler::Control::opcodeGetPcSneaking);
+            interpreter.installSegment5<OpGetForceRun<ImplicitRef>>(Compiler::Control::opcodeGetForceRun);
+            interpreter.installSegment5<OpGetForceRun<ExplicitRef>>(Compiler::Control::opcodeGetForceRunExplicit);
+            interpreter.installSegment5<OpGetForceJump<ImplicitRef>>(Compiler::Control::opcodeGetForceJump);
+            interpreter.installSegment5<OpGetForceJump<ExplicitRef>>(Compiler::Control::opcodeGetForceJumpExplicit);
+            interpreter.installSegment5<OpGetForceMoveJump<ImplicitRef>>(Compiler::Control::opcodeGetForceMoveJump);
+            interpreter.installSegment5<OpGetForceMoveJump<ExplicitRef>>(Compiler::Control::opcodeGetForceMoveJumpExplicit);
+            interpreter.installSegment5<OpGetForceSneak<ImplicitRef>>(Compiler::Control::opcodeGetForceSneak);
+            interpreter.installSegment5<OpGetForceSneak<ExplicitRef>>(Compiler::Control::opcodeGetForceSneakExplicit);
         }
     }
 }
