@@ -3,8 +3,6 @@
 # (see: https://openmw.readthedocs.io/en/master/reference/modding/paths.html)
 
 content=builtin.omwscripts
-data="?global?data"
-data=./data
 data-local="?userdata?data"
 resources=./resources
 script-blacklist=Museum

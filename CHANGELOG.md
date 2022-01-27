@@ -132,6 +132,7 @@
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
     Task #6553: Simplify interpreter instruction registration
+    Task #6564: Remove predefined data paths `data="?global?data"`, `data=./data`
 
 0.47.0
 ------
