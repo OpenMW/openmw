@@ -284,28 +284,28 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeJournal, new OpJournal<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeJournalExplicit, new OpJournal<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetJournalIndex, new OpSetJournalIndex);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeGetJournalIndex, new OpGetJournalIndex);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeAddTopic, new OpAddTopic);
-            interpreter.installSegment3 (Compiler::Dialogue::opcodeChoice,new OpChoice);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeForceGreeting, new OpForceGreeting<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeForceGreetingExplicit, new OpForceGreeting<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeGoodbye, new OpGoodbye);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeGetReputation, new OpGetReputation<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetReputation, new OpSetReputation<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeModReputation, new OpModReputation<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetReputationExplicit, new OpSetReputation<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeModReputationExplicit, new OpModReputation<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeGetReputationExplicit, new OpGetReputation<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFaction, new OpSameFaction<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeModFactionReaction, new OpModFactionReaction);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetFactionReaction, new OpSetFactionReaction);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeGetFactionReaction, new OpGetFactionReaction);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActor, new OpClearInfoActor<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActorExplicit, new OpClearInfoActor<ExplicitRef>);
+            interpreter.installSegment5<OpJournal<ImplicitRef>>(Compiler::Dialogue::opcodeJournal);
+            interpreter.installSegment5<OpJournal<ExplicitRef>>(Compiler::Dialogue::opcodeJournalExplicit);
+            interpreter.installSegment5<OpSetJournalIndex>(Compiler::Dialogue::opcodeSetJournalIndex);
+            interpreter.installSegment5<OpGetJournalIndex>(Compiler::Dialogue::opcodeGetJournalIndex);
+            interpreter.installSegment5<OpAddTopic>(Compiler::Dialogue::opcodeAddTopic);
+            interpreter.installSegment3<OpChoice>(Compiler::Dialogue::opcodeChoice);
+            interpreter.installSegment5<OpForceGreeting<ImplicitRef>>(Compiler::Dialogue::opcodeForceGreeting);
+            interpreter.installSegment5<OpForceGreeting<ExplicitRef>>(Compiler::Dialogue::opcodeForceGreetingExplicit);
+            interpreter.installSegment5<OpGoodbye>(Compiler::Dialogue::opcodeGoodbye);
+            interpreter.installSegment5<OpGetReputation<ImplicitRef>>(Compiler::Dialogue::opcodeGetReputation);
+            interpreter.installSegment5<OpSetReputation<ImplicitRef>>(Compiler::Dialogue::opcodeSetReputation);
+            interpreter.installSegment5<OpModReputation<ImplicitRef>>(Compiler::Dialogue::opcodeModReputation);
+            interpreter.installSegment5<OpSetReputation<ExplicitRef>>(Compiler::Dialogue::opcodeSetReputationExplicit);
+            interpreter.installSegment5<OpModReputation<ExplicitRef>>(Compiler::Dialogue::opcodeModReputationExplicit);
+            interpreter.installSegment5<OpGetReputation<ExplicitRef>>(Compiler::Dialogue::opcodeGetReputationExplicit);
+            interpreter.installSegment5<OpSameFaction<ImplicitRef>>(Compiler::Dialogue::opcodeSameFaction);
+            interpreter.installSegment5<OpSameFaction<ExplicitRef>>(Compiler::Dialogue::opcodeSameFactionExplicit);
+            interpreter.installSegment5<OpModFactionReaction>(Compiler::Dialogue::opcodeModFactionReaction);
+            interpreter.installSegment5<OpSetFactionReaction>(Compiler::Dialogue::opcodeSetFactionReaction);
+            interpreter.installSegment5<OpGetFactionReaction>(Compiler::Dialogue::opcodeGetFactionReaction);
+            interpreter.installSegment5<OpClearInfoActor<ImplicitRef>>(Compiler::Dialogue::opcodeClearInfoActor);
+            interpreter.installSegment5<OpClearInfoActor<ExplicitRef>>(Compiler::Dialogue::opcodeClearInfoActorExplicit);
         }
     }
 

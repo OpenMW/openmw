@@ -250,16 +250,16 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (Compiler::Cell::opcodeCellChanged, new OpCellChanged);
-            interpreter.installSegment5 (Compiler::Cell::opcodeTestCells, new OpTestCells);
-            interpreter.installSegment5 (Compiler::Cell::opcodeTestInteriorCells, new OpTestInteriorCells);
-            interpreter.installSegment5 (Compiler::Cell::opcodeCOC, new OpCOC);
-            interpreter.installSegment5 (Compiler::Cell::opcodeCOE, new OpCOE);
-            interpreter.installSegment5 (Compiler::Cell::opcodeGetInterior, new OpGetInterior);
-            interpreter.installSegment5 (Compiler::Cell::opcodeGetPCCell, new OpGetPCCell);
-            interpreter.installSegment5 (Compiler::Cell::opcodeGetWaterLevel, new OpGetWaterLevel);
-            interpreter.installSegment5 (Compiler::Cell::opcodeSetWaterLevel, new OpSetWaterLevel);
-            interpreter.installSegment5 (Compiler::Cell::opcodeModWaterLevel, new OpModWaterLevel);
+            interpreter.installSegment5<OpCellChanged>(Compiler::Cell::opcodeCellChanged);
+            interpreter.installSegment5<OpTestCells>(Compiler::Cell::opcodeTestCells);
+            interpreter.installSegment5<OpTestInteriorCells>(Compiler::Cell::opcodeTestInteriorCells);
+            interpreter.installSegment5<OpCOC>(Compiler::Cell::opcodeCOC);
+            interpreter.installSegment5<OpCOE>(Compiler::Cell::opcodeCOE);
+            interpreter.installSegment5<OpGetInterior>(Compiler::Cell::opcodeGetInterior);
+            interpreter.installSegment5<OpGetPCCell>(Compiler::Cell::opcodeGetPCCell);
+            interpreter.installSegment5<OpGetWaterLevel>(Compiler::Cell::opcodeGetWaterLevel);
+            interpreter.installSegment5<OpSetWaterLevel>(Compiler::Cell::opcodeSetWaterLevel);
+            interpreter.installSegment5<OpModWaterLevel>(Compiler::Cell::opcodeModWaterLevel);
         }
     }
 }

@@ -206,13 +206,10 @@ namespace Interpreter
             }
     };
 
+    template<bool TGlobal>
     class OpStoreMemberShort : public Opcode0
     {
-            bool mGlobal;
-
         public:
-
-            OpStoreMemberShort (bool global) : mGlobal (global) {}
 
             void execute (Runtime& runtime) override
             {
@@ -222,7 +219,7 @@ namespace Interpreter
                 index = runtime[2].mInteger;
                 std::string variable = runtime.getStringLiteral (index);
 
-                runtime.getContext().setMemberShort (id, variable, data, mGlobal);
+                runtime.getContext().setMemberShort (id, variable, data, TGlobal);
 
                 runtime.pop();
                 runtime.pop();
@@ -230,13 +227,10 @@ namespace Interpreter
             }
     };
 
+    template<bool TGlobal>
     class OpStoreMemberLong : public Opcode0
     {
-            bool mGlobal;
-
         public:
-
-            OpStoreMemberLong (bool global) : mGlobal (global) {}
 
             void execute (Runtime& runtime) override
             {
@@ -246,7 +240,7 @@ namespace Interpreter
                 index = runtime[2].mInteger;
                 std::string variable = runtime.getStringLiteral (index);
 
-                runtime.getContext().setMemberLong (id, variable, data, mGlobal);
+                runtime.getContext().setMemberLong (id, variable, data, TGlobal);
 
                 runtime.pop();
                 runtime.pop();
@@ -254,13 +248,10 @@ namespace Interpreter
             }
     };
 
+    template<bool TGlobal>
     class OpStoreMemberFloat : public Opcode0
     {
-            bool mGlobal;
-
         public:
-
-            OpStoreMemberFloat (bool global) : mGlobal (global) {}
 
             void execute (Runtime& runtime) override
             {
@@ -270,7 +261,7 @@ namespace Interpreter
                 index = runtime[2].mInteger;
                 std::string variable = runtime.getStringLiteral (index);
 
-                runtime.getContext().setMemberFloat (id, variable, data, mGlobal);
+                runtime.getContext().setMemberFloat (id, variable, data, TGlobal);
 
                 runtime.pop();
                 runtime.pop();
@@ -278,13 +269,10 @@ namespace Interpreter
             }
     };
 
+    template<bool TGlobal>
     class OpFetchMemberShort : public Opcode0
     {
-            bool mGlobal;
-
         public:
-
-            OpFetchMemberShort (bool global) : mGlobal (global) {}
 
             void execute (Runtime& runtime) override
             {
@@ -294,18 +282,15 @@ namespace Interpreter
                 std::string variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
-                int value = runtime.getContext().getMemberShort (id, variable, mGlobal);
+                int value = runtime.getContext().getMemberShort (id, variable, TGlobal);
                 runtime[0].mInteger = value;
             }
     };
 
+    template<bool TGlobal>
     class OpFetchMemberLong : public Opcode0
     {
-            bool mGlobal;
-
         public:
-
-            OpFetchMemberLong (bool global) : mGlobal (global) {}
 
             void execute (Runtime& runtime) override
             {
@@ -315,18 +300,15 @@ namespace Interpreter
                 std::string variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
-                int value = runtime.getContext().getMemberLong (id, variable, mGlobal);
+                int value = runtime.getContext().getMemberLong (id, variable, TGlobal);
                 runtime[0].mInteger = value;
             }
     };
 
+    template<bool TGlobal>
     class OpFetchMemberFloat : public Opcode0
     {
-            bool mGlobal;
-
         public:
-
-            OpFetchMemberFloat (bool global) : mGlobal (global) {}
 
             void execute (Runtime& runtime) override
             {
@@ -336,7 +318,7 @@ namespace Interpreter
                 std::string variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
-                float value = runtime.getContext().getMemberFloat (id, variable, mGlobal);
+                float value = runtime.getContext().getMemberFloat (id, variable, TGlobal);
                 runtime[0].mFloat = value;
             }
     };

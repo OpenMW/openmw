@@ -11,89 +11,77 @@
 
 namespace Interpreter
 {
-    void installOpcodes (Interpreter& interpreter)
+    void installOpcodes(Interpreter& interpreter)
     {
         // generic
-        interpreter.installSegment0 (0, new OpPushInt);
-        interpreter.installSegment5 (3, new OpIntToFloat);
-        interpreter.installSegment5 (6, new OpFloatToInt);
-        interpreter.installSegment5 (7, new OpNegateInt);
-        interpreter.installSegment5 (8, new OpNegateFloat);
-        interpreter.installSegment5 (17, new OpIntToFloat1);
-        interpreter.installSegment5 (18, new OpFloatToInt1);
+        interpreter.installSegment0<OpPushInt>(0);
+        interpreter.installSegment5<OpIntToFloat>(3);
+        interpreter.installSegment5<OpFloatToInt>(6);
+        interpreter.installSegment5<OpNegateInt>(7);
+        interpreter.installSegment5<OpNegateFloat>(8);
+        interpreter.installSegment5<OpIntToFloat1>(17);
+        interpreter.installSegment5<OpFloatToInt1>(18);
 
         // local variables, global variables & literals
-        interpreter.installSegment5 (0, new OpStoreLocalShort);
-        interpreter.installSegment5 (1, new OpStoreLocalLong);
-        interpreter.installSegment5 (2, new OpStoreLocalFloat);
-        interpreter.installSegment5 (4, new OpFetchIntLiteral);
-        interpreter.installSegment5 (5, new OpFetchFloatLiteral);
-        interpreter.installSegment5 (21, new OpFetchLocalShort);
-        interpreter.installSegment5 (22, new OpFetchLocalLong);
-        interpreter.installSegment5 (23, new OpFetchLocalFloat);
-        interpreter.installSegment5 (39, new OpStoreGlobalShort);
-        interpreter.installSegment5 (40, new OpStoreGlobalLong);
-        interpreter.installSegment5 (41, new OpStoreGlobalFloat);
-        interpreter.installSegment5 (42, new OpFetchGlobalShort);
-        interpreter.installSegment5 (43, new OpFetchGlobalLong);
-        interpreter.installSegment5 (44, new OpFetchGlobalFloat);
-        interpreter.installSegment5 (59, new OpStoreMemberShort (false));
-        interpreter.installSegment5 (60, new OpStoreMemberLong (false));
-        interpreter.installSegment5 (61, new OpStoreMemberFloat (false));
-        interpreter.installSegment5 (62, new OpFetchMemberShort (false));
-        interpreter.installSegment5 (63, new OpFetchMemberLong (false));
-        interpreter.installSegment5 (64, new OpFetchMemberFloat (false));
-        interpreter.installSegment5 (65, new OpStoreMemberShort (true));
-        interpreter.installSegment5 (66, new OpStoreMemberLong (true));
-        interpreter.installSegment5 (67, new OpStoreMemberFloat (true));
-        interpreter.installSegment5 (68, new OpFetchMemberShort (true));
-        interpreter.installSegment5 (69, new OpFetchMemberLong (true));
-        interpreter.installSegment5 (70, new OpFetchMemberFloat (true));
+        interpreter.installSegment5<OpStoreLocalShort>(0);
+        interpreter.installSegment5<OpStoreLocalLong>(1);
+        interpreter.installSegment5<OpStoreLocalFloat>(2);
+        interpreter.installSegment5<OpFetchIntLiteral>(4);
+        interpreter.installSegment5<OpFetchFloatLiteral>(5);
+        interpreter.installSegment5<OpFetchLocalShort>(21);
+        interpreter.installSegment5<OpFetchLocalLong>(22);
+        interpreter.installSegment5<OpFetchLocalFloat>(23);
+        interpreter.installSegment5<OpStoreGlobalShort>(39);
+        interpreter.installSegment5<OpStoreGlobalLong>(40);
+        interpreter.installSegment5<OpStoreGlobalFloat>(41);
+        interpreter.installSegment5<OpFetchGlobalShort>(42);
+        interpreter.installSegment5<OpFetchGlobalLong>(43);
+        interpreter.installSegment5<OpFetchGlobalFloat>(44);
+        interpreter.installSegment5<OpStoreMemberShort<false>>(59);
+        interpreter.installSegment5<OpStoreMemberLong<false>>(60);
+        interpreter.installSegment5<OpStoreMemberFloat<false>>(61);
+        interpreter.installSegment5<OpFetchMemberShort<false>>(62);
+        interpreter.installSegment5<OpFetchMemberLong<false>>(63);
+        interpreter.installSegment5<OpFetchMemberFloat<false>>(64);
+        interpreter.installSegment5<OpStoreMemberShort<true>>(65);
+        interpreter.installSegment5<OpStoreMemberLong<true>>(66);
+        interpreter.installSegment5<OpStoreMemberFloat<true>>(67);
+        interpreter.installSegment5<OpFetchMemberShort<true>>(68);
+        interpreter.installSegment5<OpFetchMemberLong<true>>(69);
+        interpreter.installSegment5<OpFetchMemberFloat<true>>(70);
 
         // math
-        interpreter.installSegment5 (9, new OpAddInt<Type_Integer>);
-        interpreter.installSegment5 (10, new OpAddInt<Type_Float>);
-        interpreter.installSegment5 (11, new OpSubInt<Type_Integer>);
-        interpreter.installSegment5 (12, new OpSubInt<Type_Float>);
-        interpreter.installSegment5 (13, new OpMulInt<Type_Integer>);
-        interpreter.installSegment5 (14, new OpMulInt<Type_Float>);
-        interpreter.installSegment5 (15, new OpDivInt<Type_Integer>);
-        interpreter.installSegment5 (16, new OpDivInt<Type_Float>);
-        interpreter.installSegment5 (26,
-            new OpCompare<Type_Integer, std::equal_to<Type_Integer> >);
-        interpreter.installSegment5 (27,
-            new OpCompare<Type_Integer, std::not_equal_to<Type_Integer> >);
-        interpreter.installSegment5 (28,
-            new OpCompare<Type_Integer, std::less<Type_Integer> >);
-        interpreter.installSegment5 (29,
-            new OpCompare<Type_Integer, std::less_equal<Type_Integer> >);
-        interpreter.installSegment5 (30,
-            new OpCompare<Type_Integer, std::greater<Type_Integer> >);
-        interpreter.installSegment5 (31,
-            new OpCompare<Type_Integer, std::greater_equal<Type_Integer> >);
+        interpreter.installSegment5<OpAddInt<Type_Integer>>(9);
+        interpreter.installSegment5<OpAddInt<Type_Float>>(10);
+        interpreter.installSegment5<OpSubInt<Type_Integer>>(11);
+        interpreter.installSegment5<OpSubInt<Type_Float>>(12);
+        interpreter.installSegment5<OpMulInt<Type_Integer>>(13);
+        interpreter.installSegment5<OpMulInt<Type_Float>>(14);
+        interpreter.installSegment5<OpDivInt<Type_Integer>>(15);
+        interpreter.installSegment5<OpDivInt<Type_Float>>(16);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::equal_to<Type_Integer> >>(26);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::not_equal_to<Type_Integer> >>(27);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::less<Type_Integer> >>(28);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::less_equal<Type_Integer> >>(29);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::greater<Type_Integer> >>(30);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::greater_equal<Type_Integer> >>(31);
 
-        interpreter.installSegment5 (32,
-            new OpCompare<Type_Float, std::equal_to<Type_Float> >);
-        interpreter.installSegment5 (33,
-            new OpCompare<Type_Float, std::not_equal_to<Type_Float> >);
-        interpreter.installSegment5 (34,
-            new OpCompare<Type_Float, std::less<Type_Float> >);
-        interpreter.installSegment5 (35,
-            new OpCompare<Type_Float, std::less_equal<Type_Float> >);
-        interpreter.installSegment5 (36,
-            new OpCompare<Type_Float, std::greater<Type_Float> >);
-        interpreter.installSegment5 (37,
-            new OpCompare<Type_Float, std::greater_equal<Type_Float> >);
+        interpreter.installSegment5<OpCompare<Type_Float, std::equal_to<Type_Float> >>(32);
+        interpreter.installSegment5<OpCompare<Type_Float, std::not_equal_to<Type_Float> >>(33);
+        interpreter.installSegment5<OpCompare<Type_Float, std::less<Type_Float> >>(34);
+        interpreter.installSegment5<OpCompare<Type_Float, std::less_equal<Type_Float> >>(35);
+        interpreter.installSegment5<OpCompare<Type_Float, std::greater<Type_Float> >>(36);
+        interpreter.installSegment5<OpCompare<Type_Float, std::greater_equal<Type_Float> >>(37);
 
         // control structures
-        interpreter.installSegment5 (20, new OpReturn);
-        interpreter.installSegment5 (24, new OpSkipZero);
-        interpreter.installSegment5 (25, new OpSkipNonZero);
-        interpreter.installSegment0 (1, new OpJumpForward);
-        interpreter.installSegment0 (2, new OpJumpBackward);
+        interpreter.installSegment5<OpReturn>(20);
+        interpreter.installSegment5<OpSkipZero>(24);
+        interpreter.installSegment5<OpSkipNonZero>(25);
+        interpreter.installSegment0<OpJumpForward>(1);
+        interpreter.installSegment0<OpJumpBackward>(2);
 
         // misc
-        interpreter.installSegment3 (0, new OpMessageBox);
-        interpreter.installSegment5 (58, new OpReport);
+        interpreter.installSegment3<OpMessageBox>(0);
+        interpreter.installSegment5<OpReport>(58);
     }
 }

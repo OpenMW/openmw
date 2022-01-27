@@ -49,10 +49,12 @@ namespace
             mInterpreter.run(&script.mByteCode[0], static_cast<int>(script.mByteCode.size()), context);
         }
 
-        void installOpcode(int code, Interpreter::Opcode0* opcode)
+        template<typename T, typename ...TArgs>
+        void installOpcode(int code, TArgs&& ...args)
         {
-            mInterpreter.installSegment5(code, opcode);
+            mInterpreter.installSegment5<T>(code, std::forward<TArgs&&>(args)...);
         }
+		
     protected:
         void SetUp() override
         {
@@ -472,7 +474,7 @@ messagebox,"this is a %g",a
                     EXPECT_EQ(topic, "OpenMW Unit Test");
                 }
             };
-            installOpcode(Compiler::Dialogue::opcodeAddTopic, new AddTopic(failed));
+            installOpcode<AddTopic>(Compiler::Dialogue::opcodeAddTopic, failed);
             TestInterpreterContext context;
             run(*script, context);
         }
@@ -715,7 +717,7 @@ messagebox,"this is a %g",a
                     mTopics.erase(mTopics.begin());
                 }
             };
-            installOpcode(Compiler::Dialogue::opcodeAddTopic, new AddTopic(topics));
+            installOpcode<AddTopic>(Compiler::Dialogue::opcodeAddTopic, topics);
             TestInterpreterContext context;
             run(*script, context);
             EXPECT_TRUE(topics.empty());
@@ -826,7 +828,7 @@ messagebox,"this is a %g",a
                 }
             };
             bool ran = false;
-            installOpcode(Compiler::Transformation::opcodePositionCell, new PositionCell(ran));
+            installOpcode<PositionCell>(Compiler::Transformation::opcodePositionCell, ran);
             TestInterpreterContext context;
             context.setLocalShort(0, 0);
             run(*script, context);

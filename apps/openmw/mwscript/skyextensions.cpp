@@ -126,14 +126,14 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (Compiler::Sky::opcodeToggleSky, new OpToggleSky);
-            interpreter.installSegment5 (Compiler::Sky::opcodeTurnMoonWhite, new OpTurnMoonWhite);
-            interpreter.installSegment5 (Compiler::Sky::opcodeTurnMoonRed, new OpTurnMoonRed);
-            interpreter.installSegment5 (Compiler::Sky::opcodeGetMasserPhase, new OpGetMasserPhase);
-            interpreter.installSegment5 (Compiler::Sky::opcodeGetSecundaPhase, new OpGetSecundaPhase);
-            interpreter.installSegment5 (Compiler::Sky::opcodeGetCurrentWeather, new OpGetCurrentWeather);
-            interpreter.installSegment5 (Compiler::Sky::opcodeChangeWeather, new OpChangeWeather);
-            interpreter.installSegment3 (Compiler::Sky::opcodeModRegion, new OpModRegion);
+            interpreter.installSegment5<OpToggleSky>(Compiler::Sky::opcodeToggleSky);
+            interpreter.installSegment5<OpTurnMoonWhite>(Compiler::Sky::opcodeTurnMoonWhite);
+            interpreter.installSegment5<OpTurnMoonRed>(Compiler::Sky::opcodeTurnMoonRed);
+            interpreter.installSegment5<OpGetMasserPhase>(Compiler::Sky::opcodeGetMasserPhase);
+            interpreter.installSegment5<OpGetSecundaPhase>(Compiler::Sky::opcodeGetSecundaPhase);
+            interpreter.installSegment5<OpGetCurrentWeather>(Compiler::Sky::opcodeGetCurrentWeather);
+            interpreter.installSegment5<OpChangeWeather>(Compiler::Sky::opcodeChangeWeather);
+            interpreter.installSegment3<OpModRegion>(Compiler::Sky::opcodeModRegion);
         }
     }
 }

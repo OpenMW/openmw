@@ -553,69 +553,68 @@ namespace MWScript
             }
         };
 
-        void installOpcodes (Interpreter::Interpreter& interpreter)
+        void installOpcodes(Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment3 (Compiler::Ai::opcodeAIActivate, new OpAiActivate<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAIActivateExplicit, new OpAiActivate<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiTravel, new OpAiTravel<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiTravelExplicit, new OpAiTravel<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiEscort, new OpAiEscort<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiEscortExplicit, new OpAiEscort<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiEscortCell, new OpAiEscortCell<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiEscortCellExplicit, new OpAiEscortCell<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiWander, new OpAiWander<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiWanderExplicit, new OpAiWander<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiFollow, new OpAiFollow<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiFollowExplicit, new OpAiFollow<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiFollowCell, new OpAiFollowCell<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeAiFollowCellExplicit, new OpAiFollowCell<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetAiPackageDone, new OpGetAiPackageDone<ImplicitRef>);
+            interpreter.installSegment3<OpAiActivate<ImplicitRef>>(Compiler::Ai::opcodeAIActivate);
+            interpreter.installSegment3<OpAiActivate<ExplicitRef>>(Compiler::Ai::opcodeAIActivateExplicit);
+            interpreter.installSegment3<OpAiTravel<ImplicitRef>>(Compiler::Ai::opcodeAiTravel);
+            interpreter.installSegment3<OpAiTravel<ExplicitRef>>(Compiler::Ai::opcodeAiTravelExplicit);
+            interpreter.installSegment3<OpAiEscort<ImplicitRef>>(Compiler::Ai::opcodeAiEscort);
+            interpreter.installSegment3<OpAiEscort<ExplicitRef>>(Compiler::Ai::opcodeAiEscortExplicit);
+            interpreter.installSegment3<OpAiEscortCell<ImplicitRef>>(Compiler::Ai::opcodeAiEscortCell);
+            interpreter.installSegment3<OpAiEscortCell<ExplicitRef>>(Compiler::Ai::opcodeAiEscortCellExplicit);
+            interpreter.installSegment3<OpAiWander<ImplicitRef>>(Compiler::Ai::opcodeAiWander);
+            interpreter.installSegment3<OpAiWander<ExplicitRef>>(Compiler::Ai::opcodeAiWanderExplicit);
+            interpreter.installSegment3<OpAiFollow<ImplicitRef>>(Compiler::Ai::opcodeAiFollow);
+            interpreter.installSegment3<OpAiFollow<ExplicitRef>>(Compiler::Ai::opcodeAiFollowExplicit);
+            interpreter.installSegment3<OpAiFollowCell<ImplicitRef>>(Compiler::Ai::opcodeAiFollowCell);
+            interpreter.installSegment3<OpAiFollowCell<ExplicitRef>>(Compiler::Ai::opcodeAiFollowCellExplicit);
+            interpreter.installSegment5<OpGetAiPackageDone<ImplicitRef>>(Compiler::Ai::opcodeGetAiPackageDone);
 
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetAiPackageDoneExplicit,
-                new OpGetAiPackageDone<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetCurrentAiPackage, new OpGetCurrentAIPackage<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetCurrentAiPackageExplicit, new OpGetCurrentAIPackage<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetDetected, new OpGetDetected<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetDetectedExplicit, new OpGetDetected<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSight, new OpGetLineOfSight<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSightExplicit, new OpGetLineOfSight<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetTarget, new OpGetTarget<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetTargetExplicit, new OpGetTarget<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeStartCombat, new OpStartCombat<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeStartCombatExplicit, new OpStartCombat<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeStopCombat, new OpStopCombat<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeStopCombatExplicit, new OpStopCombat<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAI, new OpToggleAI);
+            interpreter.installSegment5<OpGetAiPackageDone<ExplicitRef>>(Compiler::Ai::opcodeGetAiPackageDoneExplicit);
+            interpreter.installSegment5<OpGetCurrentAIPackage<ImplicitRef>>(Compiler::Ai::opcodeGetCurrentAiPackage);
+            interpreter.installSegment5<OpGetCurrentAIPackage<ExplicitRef>>(Compiler::Ai::opcodeGetCurrentAiPackageExplicit);
+            interpreter.installSegment5<OpGetDetected<ImplicitRef>>(Compiler::Ai::opcodeGetDetected);
+            interpreter.installSegment5<OpGetDetected<ExplicitRef>>(Compiler::Ai::opcodeGetDetectedExplicit);
+            interpreter.installSegment5<OpGetLineOfSight<ImplicitRef>>(Compiler::Ai::opcodeGetLineOfSight);
+            interpreter.installSegment5<OpGetLineOfSight<ExplicitRef>>(Compiler::Ai::opcodeGetLineOfSightExplicit);
+            interpreter.installSegment5<OpGetTarget<ImplicitRef>>(Compiler::Ai::opcodeGetTarget);
+            interpreter.installSegment5<OpGetTarget<ExplicitRef>>(Compiler::Ai::opcodeGetTargetExplicit);
+            interpreter.installSegment5<OpStartCombat<ImplicitRef>>(Compiler::Ai::opcodeStartCombat);
+            interpreter.installSegment5<OpStartCombat<ExplicitRef>>(Compiler::Ai::opcodeStartCombatExplicit);
+            interpreter.installSegment5<OpStopCombat<ImplicitRef>>(Compiler::Ai::opcodeStopCombat);
+            interpreter.installSegment5<OpStopCombat<ExplicitRef>>(Compiler::Ai::opcodeStopCombatExplicit);
+            interpreter.installSegment5<OpToggleAI>(Compiler::Ai::opcodeToggleAI);
 
-            interpreter.installSegment5 (Compiler::Ai::opcodeSetHello, new OpSetAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Hello));
-            interpreter.installSegment5 (Compiler::Ai::opcodeSetHelloExplicit, new OpSetAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Hello));
-            interpreter.installSegment5 (Compiler::Ai::opcodeSetFight, new OpSetAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Fight));
-            interpreter.installSegment5 (Compiler::Ai::opcodeSetFightExplicit, new OpSetAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Fight));
-            interpreter.installSegment5 (Compiler::Ai::opcodeSetFlee, new OpSetAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Flee));
-            interpreter.installSegment5 (Compiler::Ai::opcodeSetFleeExplicit, new OpSetAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Flee));
-            interpreter.installSegment5 (Compiler::Ai::opcodeSetAlarm, new OpSetAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Alarm));
-            interpreter.installSegment5 (Compiler::Ai::opcodeSetAlarmExplicit, new OpSetAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Alarm));
+            interpreter.installSegment5<OpSetAiSetting<ImplicitRef>>(Compiler::Ai::opcodeSetHello, MWMechanics::CreatureStats::AiSetting::AI_Hello);
+            interpreter.installSegment5<OpSetAiSetting<ExplicitRef>>(Compiler::Ai::opcodeSetHelloExplicit, MWMechanics::CreatureStats::AiSetting::AI_Hello);
+            interpreter.installSegment5<OpSetAiSetting<ImplicitRef>>(Compiler::Ai::opcodeSetFight, MWMechanics::CreatureStats::AiSetting::AI_Fight);
+            interpreter.installSegment5<OpSetAiSetting<ExplicitRef>>(Compiler::Ai::opcodeSetFightExplicit, MWMechanics::CreatureStats::AiSetting::AI_Fight);
+            interpreter.installSegment5<OpSetAiSetting<ImplicitRef>>(Compiler::Ai::opcodeSetFlee, MWMechanics::CreatureStats::AiSetting::AI_Flee);
+            interpreter.installSegment5<OpSetAiSetting<ExplicitRef>>(Compiler::Ai::opcodeSetFleeExplicit, MWMechanics::CreatureStats::AiSetting::AI_Flee);
+            interpreter.installSegment5<OpSetAiSetting<ImplicitRef>>(Compiler::Ai::opcodeSetAlarm, MWMechanics::CreatureStats::AiSetting::AI_Alarm);
+            interpreter.installSegment5<OpSetAiSetting<ExplicitRef>>(Compiler::Ai::opcodeSetAlarmExplicit, MWMechanics::CreatureStats::AiSetting::AI_Alarm);
 
-            interpreter.installSegment5 (Compiler::Ai::opcodeModHello, new OpModAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Hello));
-            interpreter.installSegment5 (Compiler::Ai::opcodeModHelloExplicit, new OpModAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Hello));
-            interpreter.installSegment5 (Compiler::Ai::opcodeModFight, new OpModAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Fight));
-            interpreter.installSegment5 (Compiler::Ai::opcodeModFightExplicit, new OpModAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Fight));
-            interpreter.installSegment5 (Compiler::Ai::opcodeModFlee, new OpModAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Flee));
-            interpreter.installSegment5 (Compiler::Ai::opcodeModFleeExplicit, new OpModAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Flee));
-            interpreter.installSegment5 (Compiler::Ai::opcodeModAlarm, new OpModAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Alarm));
-            interpreter.installSegment5 (Compiler::Ai::opcodeModAlarmExplicit, new OpModAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Alarm));
+            interpreter.installSegment5<OpModAiSetting<ImplicitRef>>(Compiler::Ai::opcodeModHello, MWMechanics::CreatureStats::AiSetting::AI_Hello);
+            interpreter.installSegment5<OpModAiSetting<ExplicitRef>>(Compiler::Ai::opcodeModHelloExplicit, MWMechanics::CreatureStats::AiSetting::AI_Hello);
+            interpreter.installSegment5<OpModAiSetting<ImplicitRef>>(Compiler::Ai::opcodeModFight, MWMechanics::CreatureStats::AiSetting::AI_Fight);
+            interpreter.installSegment5<OpModAiSetting<ExplicitRef>>(Compiler::Ai::opcodeModFightExplicit, MWMechanics::CreatureStats::AiSetting::AI_Fight);
+            interpreter.installSegment5<OpModAiSetting<ImplicitRef>>(Compiler::Ai::opcodeModFlee, MWMechanics::CreatureStats::AiSetting::AI_Flee);
+            interpreter.installSegment5<OpModAiSetting<ExplicitRef>>(Compiler::Ai::opcodeModFleeExplicit, MWMechanics::CreatureStats::AiSetting::AI_Flee);
+            interpreter.installSegment5<OpModAiSetting<ImplicitRef>>(Compiler::Ai::opcodeModAlarm, MWMechanics::CreatureStats::AiSetting::AI_Alarm);
+            interpreter.installSegment5<OpModAiSetting<ExplicitRef>>(Compiler::Ai::opcodeModAlarmExplicit, MWMechanics::CreatureStats::AiSetting::AI_Alarm);
 
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetHello, new OpGetAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Hello));
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetHelloExplicit, new OpGetAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Hello));
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetFight, new OpGetAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Fight));
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetFightExplicit, new OpGetAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Fight));
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetFlee, new OpGetAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Flee));
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetFleeExplicit, new OpGetAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Flee));
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetAlarm, new OpGetAiSetting<ImplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Alarm));
-            interpreter.installSegment5 (Compiler::Ai::opcodeGetAlarmExplicit, new OpGetAiSetting<ExplicitRef>(MWMechanics::CreatureStats::AiSetting::AI_Alarm));
+            interpreter.installSegment5<OpGetAiSetting<ImplicitRef>>(Compiler::Ai::opcodeGetHello, MWMechanics::CreatureStats::AiSetting::AI_Hello);
+            interpreter.installSegment5<OpGetAiSetting<ExplicitRef>>(Compiler::Ai::opcodeGetHelloExplicit, MWMechanics::CreatureStats::AiSetting::AI_Hello);
+            interpreter.installSegment5<OpGetAiSetting<ImplicitRef>>(Compiler::Ai::opcodeGetFight, MWMechanics::CreatureStats::AiSetting::AI_Fight);
+            interpreter.installSegment5<OpGetAiSetting<ExplicitRef>>(Compiler::Ai::opcodeGetFightExplicit, MWMechanics::CreatureStats::AiSetting::AI_Fight);
+            interpreter.installSegment5<OpGetAiSetting<ImplicitRef>>(Compiler::Ai::opcodeGetFlee, MWMechanics::CreatureStats::AiSetting::AI_Flee);
+            interpreter.installSegment5<OpGetAiSetting<ExplicitRef>>(Compiler::Ai::opcodeGetFleeExplicit, MWMechanics::CreatureStats::AiSetting::AI_Flee);
+            interpreter.installSegment5<OpGetAiSetting<ImplicitRef>>(Compiler::Ai::opcodeGetAlarm, MWMechanics::CreatureStats::AiSetting::AI_Alarm);
+            interpreter.installSegment5<OpGetAiSetting<ExplicitRef>>(Compiler::Ai::opcodeGetAlarmExplicit, MWMechanics::CreatureStats::AiSetting::AI_Alarm);
 
-            interpreter.installSegment5 (Compiler::Ai::opcodeFace, new OpFace<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeFaceExplicit, new OpFace<ExplicitRef>);
+            interpreter.installSegment5<OpFace<ImplicitRef>>(Compiler::Ai::opcodeFace);
+            interpreter.installSegment5<OpFace<ExplicitRef>>(Compiler::Ai::opcodeFaceExplicit);
         }
     }
 }

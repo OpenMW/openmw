@@ -488,22 +488,22 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-             interpreter.installSegment5 (Compiler::Container::opcodeAddItem, new OpAddItem<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeAddItemExplicit, new OpAddItem<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetItemCount, new OpGetItemCount<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetItemCountExplicit, new OpGetItemCount<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeRemoveItem, new OpRemoveItem<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeRemoveItemExplicit, new OpRemoveItem<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeEquip, new OpEquip<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeEquipExplicit, new OpEquip<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetArmorType, new OpGetArmorType<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetArmorTypeExplicit, new OpGetArmorType<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeHasItemEquipped, new OpHasItemEquipped<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeHasItemEquippedExplicit, new OpHasItemEquipped<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeHasSoulGem, new OpHasSoulGem<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeHasSoulGemExplicit, new OpHasSoulGem<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetWeaponType, new OpGetWeaponType<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetWeaponTypeExplicit, new OpGetWeaponType<ExplicitRef>);
+            interpreter.installSegment5<OpAddItem<ImplicitRef>>(Compiler::Container::opcodeAddItem);
+            interpreter.installSegment5<OpAddItem<ExplicitRef>>(Compiler::Container::opcodeAddItemExplicit);
+            interpreter.installSegment5<OpGetItemCount<ImplicitRef>>(Compiler::Container::opcodeGetItemCount);
+            interpreter.installSegment5<OpGetItemCount<ExplicitRef>>(Compiler::Container::opcodeGetItemCountExplicit);
+            interpreter.installSegment5<OpRemoveItem<ImplicitRef>>(Compiler::Container::opcodeRemoveItem);
+            interpreter.installSegment5<OpRemoveItem<ExplicitRef>>(Compiler::Container::opcodeRemoveItemExplicit);
+            interpreter.installSegment5<OpEquip<ImplicitRef>>(Compiler::Container::opcodeEquip);
+            interpreter.installSegment5<OpEquip<ExplicitRef>>(Compiler::Container::opcodeEquipExplicit);
+            interpreter.installSegment5<OpGetArmorType<ImplicitRef>>(Compiler::Container::opcodeGetArmorType);
+            interpreter.installSegment5<OpGetArmorType<ExplicitRef>>(Compiler::Container::opcodeGetArmorTypeExplicit);
+            interpreter.installSegment5<OpHasItemEquipped<ImplicitRef>>(Compiler::Container::opcodeHasItemEquipped);
+            interpreter.installSegment5<OpHasItemEquipped<ExplicitRef>>(Compiler::Container::opcodeHasItemEquippedExplicit);
+            interpreter.installSegment5<OpHasSoulGem<ImplicitRef>>(Compiler::Container::opcodeHasSoulGem);
+            interpreter.installSegment5<OpHasSoulGem<ExplicitRef>>(Compiler::Container::opcodeHasSoulGemExplicit);
+            interpreter.installSegment5<OpGetWeaponType<ImplicitRef>>(Compiler::Container::opcodeGetWeaponType);
+            interpreter.installSegment5<OpGetWeaponType<ExplicitRef>>(Compiler::Container::opcodeGetWeaponTypeExplicit);
         }
     }
 }

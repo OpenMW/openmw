@@ -101,12 +101,12 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (Compiler::Animation::opcodeSkipAnim, new OpSkipAnim<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Animation::opcodeSkipAnimExplicit, new OpSkipAnim<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Animation::opcodePlayAnim, new OpPlayAnim<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Animation::opcodePlayAnimExplicit, new OpPlayAnim<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Animation::opcodeLoopAnim, new OpLoopAnim<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Animation::opcodeLoopAnimExplicit, new OpLoopAnim<ExplicitRef>);
+            interpreter.installSegment5<OpSkipAnim<ImplicitRef>>(Compiler::Animation::opcodeSkipAnim);
+            interpreter.installSegment5<OpSkipAnim<ExplicitRef>>(Compiler::Animation::opcodeSkipAnimExplicit);
+            interpreter.installSegment3<OpPlayAnim<ImplicitRef>>(Compiler::Animation::opcodePlayAnim);
+            interpreter.installSegment3<OpPlayAnim<ExplicitRef>>(Compiler::Animation::opcodePlayAnimExplicit);
+            interpreter.installSegment3<OpLoopAnim<ImplicitRef>>(Compiler::Animation::opcodeLoopAnim);
+            interpreter.installSegment3<OpLoopAnim<ExplicitRef>>(Compiler::Animation::opcodeLoopAnimExplicit);
         }
     }
 }
