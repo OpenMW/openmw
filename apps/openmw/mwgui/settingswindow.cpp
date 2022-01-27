@@ -240,6 +240,7 @@ namespace MWGui
         getWidget(mMaxLights, "MaxLights");
         getWidget(mScriptFilter, "ScriptFilter");
         getWidget(mScriptList, "ScriptList");
+        getWidget(mScriptBox, "ScriptBox");
         getWidget(mScriptView, "ScriptView");
         getWidget(mScriptDisabled, "ScriptDisabled");
 
@@ -332,7 +333,7 @@ namespace MWGui
         mScriptList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SettingsWindow::onScriptListSelection);
     }
 
-    void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t index)
+    void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
     {
         resetScrollbars();
     }
@@ -710,26 +711,28 @@ namespace MWGui
 
     void SettingsWindow::resizeScriptSettings()
     {
-        static int minListWidth = 150;
-        static float relativeListWidth = 0.2f;
+        static const int minListWidth = 150;
+        static const float relativeListWidth = 0.2f;
+        static const int padding = 2;
+        static const int outerPadding = padding * 2;
         MyGUI::IntSize parentSize = mScriptFilter->getParent()->getClientCoord().size();
         int listWidth = std::max(minListWidth, static_cast<int>(parentSize.width * relativeListWidth));
         int filterHeight = mScriptFilter->getSize().height;
-        int listBorder = (mScriptList->getSize().height - mScriptList->getClientCoord().height) / 2;
-        int listHeight = parentSize.height - listBorder - mScriptList->getPosition().top;
+        int listHeight = parentSize.height - mScriptList->getPosition().top - outerPadding;
         mScriptFilter->setSize({ listWidth, filterHeight });
         mScriptList->setSize({ listWidth, listHeight });
-        mScriptView->setPosition({ listWidth, 0 });
-        mScriptView->setSize({ parentSize.width - listWidth, parentSize.height });
+        mScriptBox->setPosition({ listWidth + padding, 0 });
+        mScriptBox->setSize({ parentSize.width - listWidth - padding, parentSize.height - outerPadding });
         mScriptDisabled->setPosition({0, 0});
         mScriptDisabled->setSize(parentSize);
     }
-
+         
     void SettingsWindow::renderScriptSettings()
     {
         while (mScriptView->getChildCount() > 0)
             mScriptView->getChildAt(0)->detachFromWidget();
         mScriptList->removeAllItems();
+        mScriptView->setCanvasSize({0, 0});
 
         std::string filter(".*");
         filter += mScriptFilter->getCaption();
@@ -750,7 +753,7 @@ namespace MWGui
         mScriptDisabled->setVisible(disabled);
         mScriptFilter->setVisible(!disabled);
         mScriptList->setVisible(!disabled);
-        mScriptView->setVisible(!disabled);
+        mScriptBox->setVisible(!disabled);
     }
 
     void SettingsWindow::onScriptFilterChange(MyGUI::Widget*)
@@ -767,6 +770,10 @@ namespace MWGui
         size_t scriptIndex = *mScriptList->getItemDataAt<size_t>(index);
         LuaUi::ScriptSettings script = LuaUi::scriptSettings()[scriptIndex];
         LuaUi::attachToWidget(script, mScriptView);
+        MyGUI::IntSize canvasSize;
+        if (mScriptView->getChildCount() > 0)
+            canvasSize = mScriptView->getChildAt(0)->getSize();
+        mScriptView->setCanvasSize(canvasSize);
     }
 
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)

@@ -46,7 +46,8 @@ namespace MWGui
 
             MyGUI::EditBox* mScriptFilter;
             MyGUI::ListBox* mScriptList;
-            MyGUI::Widget* mScriptView;
+            MyGUI::Widget* mScriptBox;
+            MyGUI::ScrollView* mScriptView;
             MyGUI::EditBox* mScriptDisabled;
 
             void onTabChanged(MyGUI::TabControl* _sender, size_t index);

@@ -14,4 +14,11 @@
         <Child type="ScrollBar" skin="MW_HScroll" offset="3 498 513 14" align="Left Bottom HStretch" name="HScroll"/>
     </Resource>
 
+    <Resource type="ResourceSkin" name="MW_ScrollViewVH" size="516 516">
+        <Property key="NeedKey" value="false"/>
+        <Child type="Widget" skin="" offset="0 0 502 502" align="Stretch" name="Client"/>
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 492" align="Right Top VStretch" name="VScroll"/>
+        <Child type="ScrollBar" skin="MW_HScroll" offset="3 498 492 14" align="Left Bottom HStretch" name="HScroll"/>
+    </Resource>
+
 </MyGUI>

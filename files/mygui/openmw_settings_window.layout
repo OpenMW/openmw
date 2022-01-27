@@ -658,10 +658,16 @@
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
                 <Property key="Caption" value="  Scripts  "/>
-                <Widget name="ScriptFilter" type="EditBox" skin="MW_TextEdit" position="0 0 150 40" />
-                <Widget name="ScriptList" type="ListBox" skin="MW_List" position="0 40 150 268" />
-                <Widget name="ScriptView" type="Widget" skin="" position="0 0 360 308" />
-                <Widget name="ScriptDisabled" type="EditBox" skin="SandText" position="0 0 360 308" align="Center" visible="false">
+                <Widget name="ScriptFilter" type="EditBox" skin="MW_TextEdit" position="0 0 150 40"/>
+                <Widget name="ScriptList" type="ListBox" skin="MW_List" position="0 40 150 268"/>
+                <Widget name="ScriptBox" type="Widget" skin="MW_Box" position="150 0 250 250" name="ScriptBox">
+                    <Widget name="ScriptView" type="ScrollView" skin="MW_ScrollViewVH" position="2 2 246 246" align="Stretch">
+                        <Property key="CanvasAlign" value="Left Top"/>
+                        <Property key="CanvasSize" value="246 246"/>
+                    </Widget>
+                </Widget>
+                <Widget name="ScriptDisabled" type="EditBox" skin="SandText" position="0 0 360 308" align="Center">
+                    <Property key="Visible" value="false"/>
                     <Property key="Caption" value="Scripts settings are only available when a game is loaded."/>
                     <Property key="TextAlign" value="Center" />
                     <Property key="MultiLine" value="true" />
