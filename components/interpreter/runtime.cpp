@@ -100,7 +100,7 @@ namespace Interpreter
         if (mStack.empty())
             throw std::runtime_error ("stack underflow");
 
-        mStack.resize (mStack.size()-1);
+        mStack.pop_back();
     }
 
     Data& Runtime::operator[] (int Index)
