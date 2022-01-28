@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 #include "components/esm/esmcommon.hpp"
+#include "components/esm/defs.hpp"
 
 TEST(EsmFixedString, operator__eq_ne)
 {
     {
         SCOPED_TRACE("asdc == asdc");
-        ESM::NAME name;
-        name.assign("asdc");
+        constexpr ESM::NAME name("asdc");
         char s[4] = {'a', 's', 'd', 'c'};
         std::string ss(s, 4);
 
@@ -16,8 +16,7 @@ TEST(EsmFixedString, operator__eq_ne)
     }
     {
         SCOPED_TRACE("asdc == asdcx");
-        ESM::NAME name;
-        name.assign("asdc");
+        constexpr ESM::NAME name("asdc");
         char s[5] = {'a', 's', 'd', 'c', 'x'};
         std::string ss(s, 5);
 
@@ -27,8 +26,7 @@ TEST(EsmFixedString, operator__eq_ne)
     }
     {
         SCOPED_TRACE("asdc == asdc[NULL]");
-        ESM::NAME name;
-        name.assign("asdc");
+        const ESM::NAME name("asdc");
         char s[5] = {'a', 's', 'd', 'c', '\0'};
         std::string ss(s, 5);
 
@@ -41,8 +39,7 @@ TEST(EsmFixedString, operator__eq_ne_const)
 {
     {
         SCOPED_TRACE("asdc == asdc (const)");
-        ESM::NAME name;
-        name.assign("asdc");
+        constexpr ESM::NAME name("asdc");
         const char s[4] = { 'a', 's', 'd', 'c' };
         std::string ss(s, 4);
 
@@ -52,8 +49,7 @@ TEST(EsmFixedString, operator__eq_ne_const)
     }
     {
         SCOPED_TRACE("asdc == asdcx (const)");
-        ESM::NAME name;
-        name.assign("asdc");
+        constexpr ESM::NAME name("asdc");
         const char s[5] = { 'a', 's', 'd', 'c', 'x' };
         std::string ss(s, 5);
 
@@ -63,8 +59,7 @@ TEST(EsmFixedString, operator__eq_ne_const)
     }
     {
         SCOPED_TRACE("asdc == asdc[NULL] (const)");
-        ESM::NAME name;
-        name.assign("asdc");
+        constexpr ESM::NAME name("asdc");
         const char s[5] = { 'a', 's', 'd', 'c', '\0' };
         std::string ss(s, 5);
 
@@ -147,4 +142,16 @@ TEST(EsmFixedString, assignment_operator_is_supported_for_uint32)
     ESM::NAME value;
     value = static_cast<uint32_t>(0xFEDCBA98u);
     EXPECT_EQ(value, static_cast<uint32_t>(0xFEDCBA98u)) << value.toInt();
+}
+
+TEST(EsmFixedString, construction_from_uint32_is_supported)
+{
+    constexpr ESM::NAME value(0xFEDCBA98u);
+    EXPECT_EQ(value, static_cast<std::uint32_t>(0xFEDCBA98u)) << value.toInt();
+}
+
+TEST(EsmFixedString, construction_from_RecNameInts_is_supported)
+{
+    constexpr ESM::NAME value(ESM::RecNameInts::REC_ACTI);
+    EXPECT_EQ(value, static_cast<std::uint32_t>(ESM::RecNameInts::REC_ACTI)) << value.toInt();
 }
