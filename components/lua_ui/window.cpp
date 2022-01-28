@@ -11,46 +11,40 @@ namespace LuaUi
         , mMoveResize()
     {}
 
-    void LuaWindow::initialize()
+    void LuaWindow::updateTemplate()
     {
-        WidgetExtension::initialize();
-
-        assignWidget(mCaption, "Caption");
-        if (mCaption)
-        {
-            mCaption->eventMouseButtonPressed += MyGUI::newDelegate(this, &LuaWindow::notifyMousePress);
-            mCaption->eventMouseDrag += MyGUI::newDelegate(this, &LuaWindow::notifyMouseDrag);
-        }
-        for (auto w : getSkinWidgetsByName("Action"))
-        {
-            w->eventMouseButtonPressed += MyGUI::newDelegate(this, &LuaWindow::notifyMousePress);
-            w->eventMouseDrag += MyGUI::newDelegate(this, &LuaWindow::notifyMouseDrag);
-        }
-    }
-
-    void LuaWindow::deinitialize()
-    {
-        WidgetExtension::deinitialize();
-
-        if (mCaption)
-        {
-            mCaption->eventMouseButtonPressed.clear();
-            mCaption->eventMouseDrag.m_event.clear();
-        }
-        for (auto w : getSkinWidgetsByName("Action"))
+        for (auto& [w, _] : mActionWidgets)
         {
             w->eventMouseButtonPressed.clear();
             w->eventMouseDrag.m_event.clear();
         }
+        mActionWidgets.clear();
+
+        WidgetExtension* captionWidget = findFirstInTemplates("caption");
+        mCaption = dynamic_cast<LuaText*>(captionWidget);
+
+        if (mCaption)
+            mActionWidgets.emplace(mCaption->widget(), mCaption);
+        for (WidgetExtension* ext : findAllInTemplates("action"))
+            mActionWidgets.emplace(ext->widget(), ext);
+
+        for (auto& [w, _] : mActionWidgets)
+        {
+            w->eventMouseButtonPressed += MyGUI::newDelegate(this, &LuaWindow::notifyMousePress);
+            w->eventMouseDrag += MyGUI::newDelegate(this, &LuaWindow::notifyMouseDrag);
+        }
+
+        WidgetExtension::updateTemplate();
     }
 
-    void LuaWindow::setProperties(sol::object props)
+    void LuaWindow::updateProperties()
     {
         if (mCaption)
-            mCaption->setCaption(parseProperty(props, "caption", std::string()));
+            mCaption->setCaption(propertyValue("caption", std::string()));
         mMoveResize = MyGUI::IntCoord();
         setForcedCoord(mMoveResize);
-        WidgetExtension::setProperties(props);
+
+        WidgetExtension::updateProperties();
     }
 
     void LuaWindow::notifyMousePress(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
@@ -61,10 +55,11 @@ namespace LuaUi
         mPreviousMouse.left = left;
         mPreviousMouse.top = top;
 
-        if (sender->isUserString("Scale"))
-            mChangeScale = MyGUI::IntCoord::parse(sender->getUserString("Scale"));
-        else
-            mChangeScale = MyGUI::IntCoord(1, 1, 0, 0);
+        WidgetExtension* ext = mActionWidgets[sender];
+
+        mChangeScale = MyGUI::IntCoord(
+            ext->externalValue("move", MyGUI::IntPoint(1, 1)),
+            ext->externalValue("resize", MyGUI::IntSize(0, 0)));
     }
 
     void LuaWindow::notifyMouseDrag(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)

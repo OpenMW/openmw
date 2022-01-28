@@ -5,13 +5,22 @@ namespace LuaUi
 {
     LuaText::LuaText()
         : mAutoSized(true)
-    {}
-
-    void LuaText::setProperties(sol::object props)
     {
-        setCaption(parseProperty(props, "caption", std::string()));
-        mAutoSized = parseProperty(props, "autoSize", true);
-        WidgetExtension::setProperties(props);
+        changeWidgetSkin("NormalText");
+    }
+
+    void LuaText::updateProperties()
+    {
+        setCaption(propertyValue("caption", std::string()));
+        mAutoSized = propertyValue("autoSize", true);
+        WidgetExtension::updateProperties();
+    }
+
+    void LuaText::setCaption(const MyGUI::UString& caption)
+    {
+        MyGUI::TextBox::setCaption(caption);
+        if (mAutoSized)
+            updateCoord();
     }
 
     MyGUI::IntSize LuaText::calculateSize()

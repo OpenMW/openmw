@@ -13,7 +13,8 @@ namespace LuaUi
 
         public:
             LuaText();
-            virtual void setProperties(sol::object) override;
+            virtual void updateProperties() override;
+            void setCaption(const MyGUI::UString& caption) override;
 
         private:
             bool mAutoSized;

@@ -63,7 +63,6 @@ namespace MWLua
 
     // Implemented in uibindings.cpp
     sol::table initUserInterfacePackage(const Context&);
-    void clearUserInterface();
 
     // Implemented in inputbindings.cpp
     sol::table initInputPackage(const Context&);

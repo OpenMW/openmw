@@ -22,7 +22,9 @@ Every widget is defined by a layout, which is a Lua table with the following fie
 4. `content`: a Content (`openmw.ui.content`), which contains layouts for the children of this widget.
 5. | `name`: an arbitrary string, the only limitatiion is it being unique within a `Content`.
    | Helpful for navigatilng through the layouts.
-6. `layer`: only applies for the root widget. 
+6. `layer`: only applies for the root widget. (Windows, HUD, etc)
+7. `template`: a Lua table which pre-defines a layout for this widget. See Templates below for more details.
+8. `external`: similar to properties, but they affect how other widgets interact with this one. See the widget pages for details.
 
 Layers
 ------
@@ -57,7 +59,14 @@ A container holding all the widget's children. It has a few important difference
    | While there is nothing preventing you from changing the `name` of a table inside a content, it is not supported, and will lead to undefined behaviour.
    | If you have to change the name, assign a new table to the index instead.
 
-.. TODO: Talk about skins/templates here when they are ready
+Templates
+---------
+
+Templates are Lua tables with the following (optional) fields:
+
+1. `props`: Same as in layouts, defines the behaviour of this widget. Can be overwritten by `props` values in the layout.
+2. | `content`: Extra children to add to the widget. For example, the frame and caption for Window widgets.
+   | Contains normal layouts
 
 Events
 ------
@@ -97,7 +106,7 @@ Example
    local layout = {
       layers = 'Windows',
       type = ui.TYPE.Window,
-      skin = 'MW_Window', -- TODO: replace all skins here when they are properly implemented
+      template = { skin = 'MW_Window' }, -- TODO: replace all skins here when they are re-implemented in Lua
       props = {
          size = v2(200, 250),
          -- put the window in the middle of the screen
@@ -107,7 +116,7 @@ Example
       content = ui.content {
          {
             type = ui.TYPE.Text,
-            skin = 'SandText',
+            template = { skin = 'SandText' },
             props = {
                caption = 'Input password',
                relativePosition = v2(0.5, 0),
@@ -117,7 +126,7 @@ Example
          {
             name = 'input',
             type = ui.TYPE.TextEdit,
-            skin = "MW_TextEdit",
+            template = { skin = "MW_TextEdit" },
             props = {
                caption = '',
                relativePosition = v2(0.5, 0.5),
@@ -129,7 +138,7 @@ Example
          {
             name = 'submit',
             type = ui.TYPE.Text, -- TODO: replace with button when implemented
-            skin = "MW_Button",
+            template = { skin = "MW_Button" },
             props = {
                caption = 'Submit',
                -- position at the bottom

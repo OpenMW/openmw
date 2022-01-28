@@ -11,7 +11,7 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaTextEdit)
 
-        virtual void setProperties(sol::object) override;
+        virtual void updateProperties() override;
     };
 }
 

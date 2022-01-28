@@ -2,9 +2,10 @@
 
 namespace LuaUi
 {
-    void LuaTextEdit::setProperties(sol::object props)
+    void LuaTextEdit::updateProperties()
     {
-        setCaption(parseProperty(props, "caption", std::string()));
-        WidgetExtension::setProperties(props);
+        setCaption(propertyValue("caption", std::string()));
+
+        WidgetExtension::updateProperties();
     }
 }

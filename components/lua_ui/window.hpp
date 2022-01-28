@@ -3,9 +3,8 @@
 
 #include <optional>
 
-#include <MyGUI_TextBox.h>
-
 #include "widget.hpp"
+#include "text.hpp"
 
 namespace LuaUi
 {
@@ -15,20 +14,18 @@ namespace LuaUi
 
         public:
             LuaWindow();
-            virtual void setProperties(sol::object) override;
+            virtual void updateTemplate() override;
+            virtual void updateProperties() override;
 
         private:
-            // \todo replace with LuaText when skins are properly implemented
-            MyGUI::TextBox* mCaption;
+            LuaText* mCaption;
+            std::map<MyGUI::Widget*, WidgetExtension*> mActionWidgets;
             MyGUI::IntPoint mPreviousMouse;
             MyGUI::IntCoord mChangeScale;
 
             MyGUI::IntCoord mMoveResize;
 
         protected:
-            virtual void initialize() override;
-            virtual void deinitialize() override;
-
             void notifyMousePress(MyGUI::Widget*, int, int, MyGUI::MouseButton);
             void notifyMouseDrag(MyGUI::Widget*, int, int, MyGUI::MouseButton);
     };
