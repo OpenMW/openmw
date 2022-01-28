@@ -19,7 +19,7 @@ namespace LuaUi
     const std::vector<ScriptSettings>& scriptSettings();
     void registerSettings(const ScriptSettings& script);
     void clearSettings();
-    void attachToWidget(const ScriptSettings& script, MyGUI::Widget* widget);
+    void attachToWidget(size_t index, MyGUI::Widget* widget = nullptr);
 }
 
 #endif // !OPENMW_LUAUI_SCRIPTSETTINGS

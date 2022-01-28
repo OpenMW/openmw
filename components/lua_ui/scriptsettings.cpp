@@ -26,12 +26,9 @@ namespace LuaUi
         allSettings.clear();
     }
 
-    void attachToWidget(const ScriptSettings& script, MyGUI::Widget* widget)
+    void attachToWidget(size_t index, MyGUI::Widget* widget)
     {
-        WidgetExtension* root = script.mElement->mRoot;
-        if (!root)
-            return;
-        root->widget()->attachToWidget(widget);
-        root->updateCoord();
+        if (0 <= index && index < allSettings.size())
+            allSettings[index].mElement->attachToWidget(widget);
     }
 }

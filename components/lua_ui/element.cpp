@@ -138,7 +138,7 @@ namespace LuaUi
         ext->setChildren(updateContent(ext->children(), layout.get<sol::object>(LayoutKeys::content)));
     }
 
-    void setLayer(WidgetExtension* ext, const sol::table& layout)
+    std::string setLayer(WidgetExtension* ext, const sol::table& layout)
     {
         MyGUI::ILayer* layerNode = ext->widget()->getLayer();
         std::string currentLayer = layerNode ? layerNode->getName() : std::string();
@@ -149,15 +149,18 @@ namespace LuaUi
         {
             MyGUI::LayerManager::getInstance().attachToLayerNode(newLayer, ext->widget());
         }
+        return newLayer;
     }
 
     std::map<Element*, std::shared_ptr<Element>> Element::sAllElements;
 
     Element::Element(sol::table layout)
-        : mRoot{ nullptr }
-        , mLayout{ std::move(layout) }
-        , mUpdate{ false }
-        , mDestroy{ false }
+        : mRoot(nullptr)
+        , mAttachedTo(nullptr)
+        , mLayout(std::move(layout))
+        , mLayer()
+        , mUpdate(false)
+        , mDestroy(false)
     {}
 
 
@@ -174,7 +177,8 @@ namespace LuaUi
         if (!mRoot)
         {
             mRoot = createWidget(mLayout);
-            setLayer(mRoot, mLayout);
+            mLayer = setLayer(mRoot, mLayout);
+            updateAttachment();
         }
     }
 
@@ -182,8 +186,17 @@ namespace LuaUi
     {
         if (mRoot && mUpdate)
         {
-            updateWidget(mRoot, mLayout);
-            setLayer(mRoot, mLayout);
+            if (mRoot->widget()->getTypeName() != widgetType(mLayout))
+            {
+                destroyWidget(mRoot);
+                mRoot = createWidget(mLayout);
+            }
+            else
+            {
+                updateWidget(mRoot, mLayout);
+            }
+            mLayer = setLayer(mRoot, mLayout);
+            updateAttachment();
         }
         mUpdate = false;
     }
@@ -194,5 +207,36 @@ namespace LuaUi
             destroyWidget(mRoot);
         mRoot = nullptr;
         sAllElements.erase(this);
+    }
+
+    void Element::attachToWidget(MyGUI::Widget* w)
+    {
+        if (mAttachedTo && w)
+            throw std::logic_error("A UI element can't be attached to two widgets at once");
+        mAttachedTo = w;
+        updateAttachment();
+    }
+
+    void Element::updateAttachment()
+    {
+        if (!mRoot)
+            return;
+        if (mAttachedTo)
+        {
+            if (!mLayer.empty())
+                Log(Debug::Warning) << "Ignoring element's layer " << mLayer << " because it's attached to a widget";
+            if (mRoot->widget()->getParent() != mAttachedTo)
+            {
+                mRoot->widget()->attachToWidget(mAttachedTo);
+                mRoot->updateCoord();
+            }
+        }
+        else
+        {
+            if (mRoot->widget()->getParent() != nullptr)
+            {
+                mRoot->widget()->detachFromWidget();
+            }
+        }
     }
 }

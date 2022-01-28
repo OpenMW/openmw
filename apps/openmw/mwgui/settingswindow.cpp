@@ -207,9 +207,9 @@ namespace MWGui
         }
     }
 
-    SettingsWindow::SettingsWindow() :
-        WindowBase("openmw_settings_window.layout"),
-        mKeyboardMode(true)
+    SettingsWindow::SettingsWindow() : WindowBase("openmw_settings_window.layout")
+        , mKeyboardMode(true)
+        , mCurrentPage(-1)
     {
         bool terrain = Settings::Manager::getBool("distant terrain", "Terrain");
         const std::string widgetName = terrain ? "RenderingDistanceSlider" : "LargeRenderingDistanceSlider";
@@ -729,8 +729,8 @@ namespace MWGui
          
     void SettingsWindow::renderScriptSettings()
     {
-        while (mScriptView->getChildCount() > 0)
-            mScriptView->getChildAt(0)->detachFromWidget();
+        LuaUi::attachToWidget(mCurrentPage);
+        mCurrentPage = -1;
         mScriptList->removeAllItems();
         mScriptView->setCanvasSize({0, 0});
 
@@ -763,13 +763,13 @@ namespace MWGui
 
     void SettingsWindow::onScriptListSelection(MyGUI::Widget*, size_t index)
     {
-        while (mScriptView->getChildCount() > 0)
-            mScriptView->getChildAt(0)->detachFromWidget();
+        if (mCurrentPage >= 0)
+            LuaUi::attachToWidget(mCurrentPage);
+        mCurrentPage = -1;
         if (index >= mScriptList->getItemCount())
             return;
-        size_t scriptIndex = *mScriptList->getItemDataAt<size_t>(index);
-        LuaUi::ScriptSettings script = LuaUi::scriptSettings()[scriptIndex];
-        LuaUi::attachToWidget(script, mScriptView);
+        mCurrentPage = *mScriptList->getItemDataAt<size_t>(index);
+        LuaUi::attachToWidget(mCurrentPage, mScriptView);
         MyGUI::IntSize canvasSize;
         if (mScriptView->getChildCount() > 0)
             canvasSize = mScriptView->getChildAt(0)->getSize();

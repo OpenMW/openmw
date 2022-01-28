@@ -49,6 +49,7 @@ namespace MWGui
             MyGUI::Widget* mScriptBox;
             MyGUI::ScrollView* mScriptView;
             MyGUI::EditBox* mScriptDisabled;
+            int mCurrentPage;
 
             void onTabChanged(MyGUI::TabControl* _sender, size_t index);
             void onOkButtonClicked(MyGUI::Widget* _sender);
