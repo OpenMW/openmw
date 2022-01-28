@@ -9,55 +9,81 @@
 
 namespace LuaUi
 {
-    template <typename T>
-    sol::optional<T> getProperty(sol::object from, std::string_view field) {
-        sol::object value = LuaUtil::getFieldOrNil(from, field);
-        if (value == sol::nil)
-            return sol::nullopt;
-        if (value.is<T>())
-            return value.as<T>();
-        std::string error("Property \"");
-        error += field;
-        error += "\" has an invalid value \"";
-        error += LuaUtil::toString(value);
-        error += "\"";
-        throw std::logic_error(error);
-    }
-
     template<typename T>
-    T parseProperty(sol::object from, std::string_view field, const T& defaultValue)
+    constexpr bool isMyGuiVector() {
+        return
+            std::is_same<T, MyGUI::IntPoint>() ||
+            std::is_same<T, MyGUI::IntSize>() ||
+            std::is_same<T, MyGUI::FloatPoint>() ||
+            std::is_same<T, MyGUI::FloatSize>();
+    }
+
+    template <typename T, typename LuaT>
+    sol::optional<T> parseValue(
+        sol::object table,
+        std::string_view field,
+        std::string_view errorPrefix)
     {
-        sol::optional<T> opt = getProperty<T>(from, field);
-        if (opt.has_value())
-            return opt.value();
+        sol::object opt = LuaUtil::getFieldOrNil(table, field);
+        if (opt != sol::nil && !opt.is<LuaT>())
+        {
+            std::string error(errorPrefix);
+            error += " \"";
+            error += field;
+            error += "\" has an invalid value \"";
+            error += LuaUtil::toString(opt);
+            error += "\"";
+            throw std::logic_error(error);
+        }
+        if (!opt.is<LuaT>())
+            return sol::nullopt;
+
+        LuaT luaT = opt.as<LuaT>();
+        if constexpr (isMyGuiVector<T>())
+            return T(luaT.x(), luaT.y());
+        else
+            return luaT;
+    }
+
+    template <typename T>
+    sol::optional<T> parseValue(
+        sol::object table,
+        std::string_view field,
+        std::string_view errorPrefix)
+    {
+        if constexpr (isMyGuiVector<T>())
+            return parseValue<T, osg::Vec2f>(table, field, errorPrefix);
+        else
+            return parseValue<T, T>(table, field, errorPrefix);
+    }
+
+    template <typename T>
+    T parseProperty(
+        sol::object props,
+        sol::object templateProps,
+        std::string_view field,
+        const T& defaultValue)
+    {
+        auto propOptional = parseValue<T>(props, field, "Property");
+        auto templateOptional = parseValue<T>(templateProps, field, "Template property");
+
+        if (propOptional.has_value())
+            return propOptional.value();
+        else if (templateOptional.has_value())
+            return templateOptional.value();
         else
             return defaultValue;
     }
 
     template <typename T>
-    MyGUI::types::TPoint<T> parseProperty(
-        sol::object from,
+    T parseExternal(
+        sol::object external,
         std::string_view field,
-        const MyGUI::types::TPoint<T>& defaultValue)
+        const T& defaultValue)
     {
-        auto v = getProperty<osg::Vec2f>(from, field);
-        if (v.has_value())
-            return MyGUI::types::TPoint<T>(v.value().x(), v.value().y());
-        else
-            return defaultValue;
-    }
+        auto optional = parseValue<T>(external, field, "External value");
 
-    template <typename T>
-    MyGUI::types::TSize<T> parseProperty(
-        sol::object from,
-        std::string_view field,
-        const MyGUI::types::TSize<T>& defaultValue)
-    {
-        auto v = getProperty<osg::Vec2f>(from, field);
-        if (v.has_value())
-            return MyGUI::types::TSize<T>(v.value().x(), v.value().y());
-        else
-            return defaultValue;
+        return optional.value_or(defaultValue);
     }
 }
 

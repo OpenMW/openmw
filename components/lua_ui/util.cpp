@@ -6,6 +6,7 @@
 #include "text.hpp"
 #include "textedit.hpp"
 #include "window.hpp"
+#include "image.hpp"
 
 #include "element.hpp"
 
@@ -18,6 +19,8 @@ namespace LuaUi
         MyGUI::FactoryManager::getInstance().registerFactory<LuaText>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaTextEdit>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaWindow>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<LuaImage>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<LuaTileRect>("BasisSkin");
     }
 
     const std::unordered_map<std::string, std::string>& widgetTypeToName()
@@ -27,6 +30,7 @@ namespace LuaUi
             { "LuaText", "Text" },
             { "LuaTextEdit", "TextEdit" },
             { "LuaWindow", "Window" },
+            { "LuaImage", "Image" },
         };
         return types;
     }
