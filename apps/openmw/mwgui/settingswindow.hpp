@@ -78,8 +78,8 @@ namespace MWGui
 
             void onWindowResize(MyGUI::Window* _sender);
 
-            void onScriptFilterChange(MyGUI::Widget*);
-            void onScriptListSelection(MyGUI::Widget*, size_t index);
+            void onScriptFilterChange(MyGUI::EditBox*);
+            void onScriptListSelection(MyGUI::ListBox*, size_t index);
 
             void apply();
 

@@ -9,7 +9,7 @@
 
 namespace LuaUi
 {
-    class Element;
+    struct Element;
     struct ScriptSettings
     {
         std::string mName;

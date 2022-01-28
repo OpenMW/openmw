@@ -729,7 +729,8 @@ namespace MWGui
          
     void SettingsWindow::renderScriptSettings()
     {
-        LuaUi::attachToWidget(mCurrentPage);
+        if (mCurrentPage >= 0)
+            LuaUi::attachToWidget(mCurrentPage);
         mCurrentPage = -1;
         mScriptList->removeAllItems();
         mScriptView->setCanvasSize({0, 0});
@@ -756,12 +757,12 @@ namespace MWGui
         mScriptBox->setVisible(!disabled);
     }
 
-    void SettingsWindow::onScriptFilterChange(MyGUI::Widget*)
+    void SettingsWindow::onScriptFilterChange(MyGUI::EditBox*)
     {
         renderScriptSettings();
     }
 
-    void SettingsWindow::onScriptListSelection(MyGUI::Widget*, size_t index)
+    void SettingsWindow::onScriptListSelection(MyGUI::ListBox*, size_t index)
     {
         if (mCurrentPage >= 0)
             LuaUi::attachToWidget(mCurrentPage);

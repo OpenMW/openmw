@@ -28,7 +28,7 @@ namespace LuaUi
 
     void attachToWidget(size_t index, MyGUI::Widget* widget)
     {
-        if (0 <= index && index < allSettings.size())
+        if (index < allSettings.size())
             allSettings[index].mElement->attachToWidget(widget);
     }
 }
