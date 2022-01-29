@@ -664,6 +664,7 @@
                     <Widget name="ScriptView" type="ScrollView" skin="MW_ScrollViewVH" position="2 2 246 246" align="Stretch">
                         <Property key="CanvasAlign" value="Left Top"/>
                         <Property key="CanvasSize" value="246 246"/>
+                        <Widget name="ScriptAdapter" type="LuaAdapter" position="0 0 246 246"/>
                     </Widget>
                     <Widget name="ScriptDescription" type = "EditBox" skin="SandText" position="2 2 246 246" align="Stretch">
                         <Property key="Visible" value="false"/>

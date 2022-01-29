@@ -10,7 +10,7 @@ namespace LuaUi
         static std::shared_ptr<Element> make(sol::table layout);
 
         WidgetExtension* mRoot;
-        MyGUI::Widget* mAttachedTo;
+        WidgetExtension* mAttachedTo;
         sol::table mLayout;
         std::string mLayer;
         bool mUpdate;
@@ -24,7 +24,8 @@ namespace LuaUi
 
         friend void clearUserInterface();
 
-        void attachToWidget(MyGUI::Widget* w = nullptr);
+        void attachToWidget(WidgetExtension* w);
+        void detachFromWidget();
 
         private:
             Element(sol::table layout);

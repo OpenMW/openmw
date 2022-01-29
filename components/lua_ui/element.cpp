@@ -4,6 +4,7 @@
 
 #include "content.hpp"
 #include "util.hpp"
+#include "widget.hpp"
 
 namespace LuaUi
 {
@@ -209,12 +210,24 @@ namespace LuaUi
         sAllElements.erase(this);
     }
 
-    void Element::attachToWidget(MyGUI::Widget* w)
+    void Element::attachToWidget(WidgetExtension* w)
     {
-        if (mAttachedTo && w)
+        if (mAttachedTo)
             throw std::logic_error("A UI element can't be attached to two widgets at once");
         mAttachedTo = w;
         updateAttachment();
+    }
+
+    void Element::detachFromWidget()
+    {
+        if (mRoot)
+        {
+            mRoot->onSizeChange({});
+            mRoot->widget()->detachFromWidget();
+        }
+        if (mAttachedTo)
+            mAttachedTo->setChildren({});
+        mAttachedTo = nullptr;
     }
 
     void Element::updateAttachment()
@@ -225,18 +238,17 @@ namespace LuaUi
         {
             if (!mLayer.empty())
                 Log(Debug::Warning) << "Ignoring element's layer " << mLayer << " because it's attached to a widget";
-            if (mRoot->widget()->getParent() != mAttachedTo)
+            mAttachedTo->setChildren({ mRoot });
+            auto callback = [this](MyGUI::IntSize size)
             {
-                mRoot->widget()->attachToWidget(mAttachedTo);
-                mRoot->updateCoord();
-            }
-        }
-        else
-        {
-            if (mRoot->widget()->getParent() != nullptr)
-            {
-                mRoot->widget()->detachFromWidget();
-            }
+                if (!mAttachedTo)
+                    return;
+                mAttachedTo->setForcedSize(mRoot->widget()->getSize());
+                mAttachedTo->updateCoord();
+            };
+            mRoot->onSizeChange(callback);
+            mRoot->updateCoord();
+            callback(mRoot->widget()->getSize());
         }
     }
 }

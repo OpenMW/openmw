@@ -194,6 +194,11 @@ namespace LuaUi
         mForcedCoord = offset;
     }
 
+    void WidgetExtension::setForcedSize(const MyGUI::IntSize& size)
+    {
+        mForcedCoord = size;
+    }
+
     void WidgetExtension::updateCoord()
     {
         MyGUI::IntCoord oldCoord = mWidget->getCoord();
@@ -202,7 +207,11 @@ namespace LuaUi
         if (oldCoord != newCoord)
             mWidget->setCoord(newCoord);
         if (oldCoord.size() != newCoord.size())
+        {
             updateChildrenCoord();
+            if (mOnSizeChange.has_value())
+                mOnSizeChange.value()(newCoord.size());
+        }
     }
 
     void WidgetExtension::setProperties(sol::object props)

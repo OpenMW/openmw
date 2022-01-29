@@ -2,6 +2,7 @@
 
 #include <MyGUI_FactoryManager.h>
 
+#include "adapter.hpp"
 #include "widget.hpp"
 #include "text.hpp"
 #include "textedit.hpp"
@@ -16,6 +17,7 @@ namespace LuaUi
 
     void registerAllWidgets()
     {
+        MyGUI::FactoryManager::getInstance().registerFactory<LuaAdapter>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaText>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaTextEdit>("Widget");

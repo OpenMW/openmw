@@ -2,6 +2,7 @@
 #define OPENMW_LUAUI_WIDGET
 
 #include <map>
+#include <functional>
 
 #include <MyGUI_Widget.h>
 #include <sol/sol.hpp>
@@ -44,6 +45,7 @@ namespace LuaUi
 
         MyGUI::IntCoord forcedCoord();
         void setForcedCoord(const MyGUI::IntCoord& offset);
+        void setForcedSize(const MyGUI::IntSize& size);
         void updateCoord();
 
         const sol::table& getLayout() { return mLayout; }
@@ -53,6 +55,11 @@ namespace LuaUi
         T externalValue(std::string_view name, const T& defaultValue)
         {
             return parseExternal(mExternal, name, defaultValue);
+        }
+
+        void onSizeChange(const std::optional<std::function<void(MyGUI::IntSize)>>& callback)
+        {
+            mOnSizeChange = callback;
         }
 
     protected:
@@ -119,6 +126,8 @@ namespace LuaUi
         void mouseRelease(MyGUI::Widget*, int, int, MyGUI::MouseButton);
         void focusGain(MyGUI::Widget*, MyGUI::Widget*);
         void focusLoss(MyGUI::Widget*, MyGUI::Widget*);
+
+        std::optional<std::function<void(MyGUI::IntSize)>> mOnSizeChange;
     };
 
     class LuaWidget : public MyGUI::Widget, public WidgetExtension

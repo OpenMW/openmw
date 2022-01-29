@@ -1,8 +1,10 @@
 #include "scriptsettings.hpp"
 
 #include <map>
+#include <sol/sol.hpp>
 
 #include "element.hpp"
+#include "adapter.hpp"
 
 namespace LuaUi
 {
@@ -19,7 +21,7 @@ namespace LuaUi
             if (!element.get())
                 Log(Debug::Warning) << "A script settings page has no UI element assigned";
             return {
-                name, description, element.get()
+                name, description, element
             };
         }
     }
@@ -44,13 +46,14 @@ namespace LuaUi
         allPages.clear();
     }
 
-    void attachToWidget(size_t index, MyGUI::Widget* widget)
+    void attachPageAt(size_t index, LuaAdapter* adapter)
     {
         if (index < allPages.size())
         {
             ScriptSettingsPage page = parse(allPages[index]);
-            if (page.mElement)
-                page.mElement->attachToWidget(widget);
+            adapter->detach();
+            if (page.mElement.get())
+                adapter->attach(page.mElement);
         }
     }
 }
