@@ -91,7 +91,7 @@ namespace Files
             // Invariant: no element is prefix of other element.
             std::set<std::string> allowed_prefixes;
             std::string m_prefix;
-            bool m_allow_unregistered;
+            bool m_allow_unregistered = false;
         };
 
         common_config_file_iterator::common_config_file_iterator(
