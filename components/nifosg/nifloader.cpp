@@ -1136,18 +1136,18 @@ namespace NifOsg
 
             const auto& uvlist = data->uvlist;
             int textureStage = 0;
-            for (const unsigned int uvSet : boundTextures)
+            for (std::vector<unsigned int>::const_iterator it = boundTextures.begin(); it != boundTextures.end(); ++it, ++textureStage)
             {
+                unsigned int uvSet = *it;
                 if (uvSet >= uvlist.size())
                 {
                     Log(Debug::Verbose) << "Out of bounds UV set " << uvSet << " on shape \"" << name << "\" in " << mFilename;
-                    if (!uvlist.empty())
-                        geometry->setTexCoordArray(textureStage, new osg::Vec2Array(uvlist[0].size(), uvlist[0].data()), osg::Array::BIND_PER_VERTEX);
-                    continue;
+                    if (uvlist.empty())
+                        continue;
+                    uvSet = 0;
                 }
 
                 geometry->setTexCoordArray(textureStage, new osg::Vec2Array(uvlist[uvSet].size(), uvlist[uvSet].data()), osg::Array::BIND_PER_VERTEX);
-                textureStage++;
             }
         }
 
