@@ -1,6 +1,8 @@
 #ifndef OPENMW_LUAUI_ADAPTER
 #define OPENMW_LUAUI_ADAPTER
 
+#include <memory>
+
 #include <MyGUI_Widget.h>
 
 namespace LuaUi
@@ -16,11 +18,11 @@ namespace LuaUi
 
             void attach(const std::shared_ptr<Element>& element);
             void detach();
-            bool empty() { return mElement.get() == nullptr; }
 
         private:
-            LuaContainer* mContent;
             std::shared_ptr<Element> mElement;
+            LuaContainer* mContainer;
+
             void attachElement();
             void detachElement();
     };

@@ -3,6 +3,7 @@
 #include <map>
 #include <sol/sol.hpp>
 
+#include "registerscriptsettings.hpp"
 #include "element.hpp"
 #include "adapter.hpp"
 

@@ -11,7 +11,7 @@
 #include "container.hpp"
 
 #include "element.hpp"
-#include "scriptsettings.hpp"
+#include "registerscriptsettings.hpp"
 
 namespace LuaUi
 {

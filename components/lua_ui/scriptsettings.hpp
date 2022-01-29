@@ -3,6 +3,7 @@
 
 #include <string>
 #include <string_view>
+#include <memory>
 
 #include <MyGUI_Widget.h>
 
@@ -18,8 +19,6 @@ namespace LuaUi
     };
     size_t scriptSettingsPageCount();
     ScriptSettingsPage scriptSettingsPageAt(size_t index);
-    void registerSettingsPage(const sol::table& options);
-    void clearSettings();
     void attachPageAt(size_t index, LuaAdapter* adapter);
 }
 

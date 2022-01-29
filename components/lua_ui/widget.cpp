@@ -17,8 +17,8 @@ namespace LuaUi
         , mLua(nullptr)
         , mWidget(nullptr)
         , mSlot(this)
-        , mParent(nullptr)
         , mLayout(sol::nil)
+        , mParent(nullptr)
     {}
 
     void WidgetExtension::initialize(lua_State* lua, MyGUI::Widget* self)

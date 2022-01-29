@@ -14,16 +14,16 @@ namespace LuaUi
 
     LuaAdapter::LuaAdapter()
         : mElement(nullptr)
-        , mContent(nullptr)
+        , mContainer(nullptr)
     {
-        mContent = MyGUI::Gui::getInstancePtr()->createWidget<LuaContainer>(
+        mContainer = MyGUI::Gui::getInstancePtr()->createWidget<LuaContainer>(
             "", MyGUI::IntCoord(), MyGUI::Align::Default, "", "");
-        mContent->initialize(luaState, mContent);
-        mContent->onCoordChange([this](WidgetExtension* ext, MyGUI::IntCoord coord)
+        mContainer->initialize(luaState, mContainer);
+        mContainer->onCoordChange([this](WidgetExtension* ext, MyGUI::IntCoord coord)
         {
             setSize(coord.size());
         });
-        mContent->widget()->attachToWidget(this);
+        mContainer->widget()->attachToWidget(this);
     }
 
     void LuaAdapter::attach(const std::shared_ptr<Element>& element)
@@ -31,7 +31,7 @@ namespace LuaUi
         detachElement();
         mElement = element;
         attachElement();
-        setSize(mContent->widget()->getSize());
+        setSize(mContainer->widget()->getSize());
 
         // workaround for MyGUI bug
         // parent visibility doesn't affect added children
@@ -48,7 +48,7 @@ namespace LuaUi
     void LuaAdapter::attachElement()
     {
         if (mElement.get())
-            mElement->attachToWidget(mContent);
+            mElement->attachToWidget(mContainer);
     }
 
     void LuaAdapter::detachElement()
