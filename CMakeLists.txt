@@ -154,6 +154,8 @@ option(RECASTNAVIGATION_STATIC "Build recastnavigation static libraries" ${_reca
 
 option(OPENMW_USE_SYSTEM_SQLITE3 "Use system provided SQLite3 library" ON)
 
+option(OPENMW_USE_SYSTEM_BENCHMARK "Use system Google Benchmark library." OFF)
+
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
 
