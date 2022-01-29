@@ -245,7 +245,7 @@ namespace MWLua
             page.mName = options.get_or("name", std::string());
             if (page.mName.empty())
                 throw std::logic_error("No name provided for the settings page");
-            page.mSearchHints = options.get_or("searchHints", std::string());
+            page.mDescription = options.get_or("description", std::string());
             auto element = options.get_or<std::shared_ptr<LuaUi::Element>>("element", nullptr);
             if (!element)
                 throw std::logic_error("No UI element provided for the settings page");

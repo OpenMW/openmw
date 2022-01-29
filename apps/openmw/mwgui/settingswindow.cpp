@@ -243,6 +243,8 @@ namespace MWGui
         getWidget(mScriptBox, "ScriptBox");
         getWidget(mScriptView, "ScriptView");
         getWidget(mScriptDisabled, "ScriptDisabled");
+        getWidget(mScriptDescription, "ScriptDescription");
+        mScriptChild = nullptr;
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -331,6 +333,7 @@ namespace MWGui
 
         mScriptFilter->eventEditTextChange += MyGUI::newDelegate(this, &SettingsWindow::onScriptFilterChange);
         mScriptList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SettingsWindow::onScriptListSelection);
+        mScriptList->eventListMouseItemFocus += MyGUI::newDelegate(this, &SettingsWindow::onScriptListFocus);
     }
 
     void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
@@ -745,7 +748,7 @@ namespace MWGui
         for (size_t i = 0; i < scriptSettings.size(); ++i)
         {
             LuaUi::ScriptSettingsPage page = scriptSettings[i];
-            if (std::regex_match(page.mName, filterRegex) || std::regex_match(page.mSearchHints, filterRegex))
+            if (std::regex_match(page.mName, filterRegex) || std::regex_match(page.mDescription, filterRegex))
                 mScriptList->addItem(page.mName, i);
         }
 
@@ -767,14 +770,32 @@ namespace MWGui
         if (mCurrentPage >= 0)
             LuaUi::attachToWidget(mCurrentPage);
         mCurrentPage = -1;
-        if (index >= mScriptList->getItemCount())
-            return;
-        mCurrentPage = *mScriptList->getItemDataAt<size_t>(index);
-        LuaUi::attachToWidget(mCurrentPage, mScriptView);
-        MyGUI::IntSize canvasSize;
-        if (mScriptView->getChildCount() > 0)
-            canvasSize = mScriptView->getChildAt(0)->getSize();
+        if (index < mScriptList->getItemCount())
+        {
+            mCurrentPage = *mScriptList->getItemDataAt<size_t>(index);
+            LuaUi::attachToWidget(mCurrentPage, mScriptView);
+        }
+        mScriptChild = mScriptView->getChildCount() > 0 ? mScriptView->getChildAt(0) : nullptr;
+        MyGUI::IntSize canvasSize = mScriptChild ? mScriptChild->getSize() : MyGUI::IntSize();
+        if (mScriptChild)
+            mScriptChild->setVisible(mScriptView->isVisible());
         mScriptView->setCanvasSize(canvasSize);
+    }
+
+    void SettingsWindow::onScriptListFocus(MyGUI::ListBox*, size_t index)
+    {
+        if (index >= mScriptList->getItemCount())
+        {
+            mScriptDescription->setVisible(false);
+            mScriptView->setVisible(true);
+            if (mScriptChild)
+                mScriptChild->setVisible(true);
+            return;
+        }
+        size_t page = *mScriptList->getItemDataAt<size_t>(index);
+        mScriptDescription->setCaption(LuaUi::scriptSettingsPages()[page].mDescription);
+        mScriptDescription->setVisible(true);
+        mScriptView->setVisible(false);
     }
 
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)

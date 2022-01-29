@@ -49,7 +49,12 @@ namespace MWGui
             MyGUI::Widget* mScriptBox;
             MyGUI::ScrollView* mScriptView;
             MyGUI::EditBox* mScriptDisabled;
+            MyGUI::EditBox* mScriptDescription;
             int mCurrentPage;
+
+            // only necessary to work around a MyGUI bug
+            // adding a child to an invisible widget doesn't make the child invisible
+            MyGUI::Widget* mScriptChild;
 
             void onTabChanged(MyGUI::TabControl* _sender, size_t index);
             void onOkButtonClicked(MyGUI::Widget* _sender);
@@ -80,6 +85,7 @@ namespace MWGui
 
             void onScriptFilterChange(MyGUI::EditBox*);
             void onScriptListSelection(MyGUI::ListBox*, size_t index);
+            void onScriptListFocus(MyGUI::ListBox*, size_t index);
 
             void apply();
 

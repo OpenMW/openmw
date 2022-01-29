@@ -13,7 +13,7 @@ namespace LuaUi
     struct ScriptSettingsPage
     {
         std::string mName;
-        std::string mSearchHints;
+        std::string mDescription;
         Element* mElement; // TODO: figure out if this can lead to use after free
     };
     const std::vector<ScriptSettingsPage>& scriptSettingsPages();
