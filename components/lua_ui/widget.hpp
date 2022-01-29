@@ -57,6 +57,11 @@ namespace LuaUi
             return parseExternal(mExternal, name, defaultValue);
         }
 
+        void onCoordChange(const std::optional<std::function<void(WidgetExtension*, MyGUI::IntCoord)>>& callback)
+        {
+            mOnCoordChange = callback;
+        }
+
         void onSizeChange(const std::optional<std::function<void(MyGUI::IntSize)>>& callback)
         {
             mOnSizeChange = callback;
@@ -68,9 +73,11 @@ namespace LuaUi
         sol::object keyEvent(MyGUI::KeyCode) const;
         sol::object mouseEvent(int left, int top, MyGUI::MouseButton button) const;
 
+        MyGUI::IntSize parentSize();
         virtual MyGUI::IntSize calculateSize();
         virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size);
         MyGUI::IntCoord calculateCoord();
+        virtual MyGUI::IntSize childScalingSize();
 
         template<typename T>
         T propertyValue(std::string_view name, const T& defaultValue)
@@ -83,6 +90,7 @@ namespace LuaUi
 
         virtual void updateTemplate();
         virtual void updateProperties();
+        virtual void updateChildren() {};
 
         void triggerEvent(std::string_view name, const sol::object& argument) const;
 
@@ -108,6 +116,7 @@ namespace LuaUi
         sol::object mProperties;
         sol::object mTemplateProperties;
         sol::object mExternal;
+        WidgetExtension* mParent;
 
         void attach(WidgetExtension* ext);
 
@@ -127,6 +136,7 @@ namespace LuaUi
         void focusGain(MyGUI::Widget*, MyGUI::Widget*);
         void focusLoss(MyGUI::Widget*, MyGUI::Widget*);
 
+        std::optional<std::function<void(WidgetExtension*, MyGUI::IntCoord)>> mOnCoordChange;
         std::optional<std::function<void(MyGUI::IntSize)>> mOnSizeChange;
     };
 

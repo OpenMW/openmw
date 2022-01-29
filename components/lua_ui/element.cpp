@@ -221,10 +221,7 @@ namespace LuaUi
     void Element::detachFromWidget()
     {
         if (mRoot)
-        {
-            mRoot->onSizeChange({});
             mRoot->widget()->detachFromWidget();
-        }
         if (mAttachedTo)
             mAttachedTo->setChildren({});
         mAttachedTo = nullptr;
@@ -239,16 +236,7 @@ namespace LuaUi
             if (!mLayer.empty())
                 Log(Debug::Warning) << "Ignoring element's layer " << mLayer << " because it's attached to a widget";
             mAttachedTo->setChildren({ mRoot });
-            auto callback = [this](MyGUI::IntSize size)
-            {
-                if (!mAttachedTo)
-                    return;
-                mAttachedTo->setForcedSize(mRoot->widget()->getSize());
-                mAttachedTo->updateCoord();
-            };
-            mRoot->onSizeChange(callback);
             mRoot->updateCoord();
-            callback(mRoot->widget()->getSize());
         }
     }
 }

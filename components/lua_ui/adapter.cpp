@@ -3,6 +3,7 @@
 #include <MyGUI_Gui.h>
 
 #include "element.hpp"
+#include "container.hpp"
 
 namespace LuaUi
 {
@@ -15,18 +16,12 @@ namespace LuaUi
         : mElement(nullptr)
         , mContent(nullptr)
     {
-        MyGUI::Widget* widget = MyGUI::Gui::getInstancePtr()->createWidgetT(
-            "LuaWidget", "",
-            MyGUI::IntCoord(), MyGUI::Align::Default,
-            std::string(), "");
-
-        mContent = dynamic_cast<WidgetExtension*>(widget);
-        if (!mContent)
-            throw std::runtime_error("Invalid widget!");
-        mContent->initialize(luaState, widget);
-        mContent->onSizeChange([this](MyGUI::IntSize size)
+        mContent = MyGUI::Gui::getInstancePtr()->createWidget<LuaContainer>(
+            "", MyGUI::IntCoord(), MyGUI::Align::Default, "", "");
+        mContent->initialize(luaState, mContent);
+        mContent->onCoordChange([this](WidgetExtension* ext, MyGUI::IntCoord coord)
         {
-            setSize(size);
+            setSize(coord.size());
         });
         mContent->widget()->attachToWidget(this);
     }

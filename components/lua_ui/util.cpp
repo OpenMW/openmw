@@ -8,6 +8,7 @@
 #include "textedit.hpp"
 #include "window.hpp"
 #include "image.hpp"
+#include "container.hpp"
 
 #include "element.hpp"
 #include "scriptsettings.hpp"
@@ -23,6 +24,7 @@ namespace LuaUi
         MyGUI::FactoryManager::getInstance().registerFactory<LuaTextEdit>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaImage>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<LuaContainer>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaTileRect>("BasisSkin");
     }
 
@@ -34,6 +36,7 @@ namespace LuaUi
             { "LuaTextEdit", "TextEdit" },
             { "LuaWindow", "Window" },
             { "LuaImage", "Image" },
+            { "LuaContainer", "Container" },
         };
         return types;
     }

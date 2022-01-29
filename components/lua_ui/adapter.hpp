@@ -5,7 +5,7 @@
 
 namespace LuaUi
 {
-    class WidgetExtension;
+    class LuaContainer;
     struct Element;
     class LuaAdapter : public MyGUI::Widget
     {
@@ -19,7 +19,7 @@ namespace LuaUi
             bool empty() { return mElement.get() == nullptr; }
 
         private:
-            WidgetExtension* mContent;
+            LuaContainer* mContent;
             std::shared_ptr<Element> mElement;
             void attachElement();
             void detachElement();
