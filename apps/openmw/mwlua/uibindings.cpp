@@ -239,18 +239,18 @@ namespace MWLua
             typeTable.set(it.second, it.first);
         api["TYPE"] = LuaUtil::makeReadOnly(typeTable);
 
-        api["registerSettings"] = [](sol::table options)
+        api["registerSettingsPage"] = [](sol::table options)
         {
-            LuaUi::ScriptSettings script;
-            script.mName = options.get_or("name", std::string());
-            if (script.mName.empty())
-                throw std::logic_error("No name provided for script settings");
-            script.mSearchHints = options.get_or("searchHints", std::string());
+            LuaUi::ScriptSettingsPage page;
+            page.mName = options.get_or("name", std::string());
+            if (page.mName.empty())
+                throw std::logic_error("No name provided for the settings page");
+            page.mSearchHints = options.get_or("searchHints", std::string());
             auto element = options.get_or<std::shared_ptr<LuaUi::Element>>("element", nullptr);
             if (!element)
-                throw std::logic_error("No UI element provided for script settings");
-            script.mElement = element.get();
-            LuaUi::registerSettings(script);
+                throw std::logic_error("No UI element provided for the settings page");
+            page.mElement = element.get();
+            LuaUi::registerSettingsPage(page);
         };
 
         return LuaUtil::makeReadOnly(api);

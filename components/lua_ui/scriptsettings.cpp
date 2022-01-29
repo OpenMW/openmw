@@ -8,27 +8,27 @@ namespace LuaUi
 {
     namespace
     {
-        std::vector<ScriptSettings> allSettings;
+        std::vector<ScriptSettingsPage> allPages;
     }
 
-    const std::vector<ScriptSettings>& scriptSettings()
+    const std::vector<ScriptSettingsPage>& scriptSettingsPages()
     {
-        return allSettings;
+        return allPages;
     }
 
-    void registerSettings(const ScriptSettings& script)
+    void registerSettingsPage(const ScriptSettingsPage& page)
     {
-        allSettings.push_back(script);
+        allPages.push_back(page);
     }
 
     void clearSettings()
     {
-        allSettings.clear();
+        allPages.clear();
     }
 
     void attachToWidget(size_t index, MyGUI::Widget* widget)
     {
-        if (index < allSettings.size())
-            allSettings[index].mElement->attachToWidget(widget);
+        if (index < allPages.size())
+            allPages[index].mElement->attachToWidget(widget);
     }
 }

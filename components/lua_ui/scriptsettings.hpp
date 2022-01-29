@@ -10,14 +10,14 @@
 namespace LuaUi
 {
     struct Element;
-    struct ScriptSettings
+    struct ScriptSettingsPage
     {
         std::string mName;
         std::string mSearchHints;
         Element* mElement; // TODO: figure out if this can lead to use after free
     };
-    const std::vector<ScriptSettings>& scriptSettings();
-    void registerSettings(const ScriptSettings& script);
+    const std::vector<ScriptSettingsPage>& scriptSettingsPages();
+    void registerSettingsPage(const ScriptSettingsPage& page);
     void clearSettings();
     void attachToWidget(size_t index, MyGUI::Widget* widget = nullptr);
 }

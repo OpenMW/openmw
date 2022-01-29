@@ -741,12 +741,12 @@ namespace MWGui
         auto flags = std::regex_constants::icase;
         std::regex filterRegex(filter, flags);
 
-        auto scriptSettings = LuaUi::scriptSettings();
+        auto scriptSettings = LuaUi::scriptSettingsPages();
         for (size_t i = 0; i < scriptSettings.size(); ++i)
         {
-            LuaUi::ScriptSettings script = scriptSettings[i];
-            if (std::regex_match(script.mName, filterRegex) || std::regex_match(script.mSearchHints, filterRegex))
-                mScriptList->addItem(script.mName, i);
+            LuaUi::ScriptSettingsPage page = scriptSettings[i];
+            if (std::regex_match(page.mName, filterRegex) || std::regex_match(page.mSearchHints, filterRegex))
+                mScriptList->addItem(page.mName, i);
         }
 
         // Hide script settings tab when the game world isn't loaded and scripts couldn't add their settings
