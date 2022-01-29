@@ -18,68 +18,64 @@
 MWBase::Environment *MWBase::Environment::sThis = nullptr;
 
 MWBase::Environment::Environment()
-: mWorld (nullptr), mSoundManager (nullptr), mScriptManager (nullptr), mWindowManager (nullptr),
-  mMechanicsManager (nullptr),  mDialogueManager (nullptr), mJournal (nullptr), mInputManager (nullptr),
-    mStateManager (nullptr), mLuaManager (nullptr), mResourceSystem (nullptr),  mFrameDuration (0), mFrameRateLimit(0.f)
 {
-    assert (!sThis);
+    assert(!sThis);
     sThis = this;
 }
 
 MWBase::Environment::~Environment()
 {
-    cleanup();
     sThis = nullptr;
 }
 
-void MWBase::Environment::setWorld (World *world)
+void MWBase::Environment::setWorld (std::unique_ptr<World>&& world)
 {
-    mWorld = world;
+    mWorld = std::move(world);
 }
 
-void MWBase::Environment::setSoundManager (SoundManager *soundManager)
+void MWBase::Environment::setSoundManager (std::unique_ptr<SoundManager>&& soundManager)
 {
-    mSoundManager = soundManager;
+    mSoundManager = std::move(soundManager);
 }
 
-void MWBase::Environment::setScriptManager (ScriptManager *scriptManager)
+void MWBase::Environment::setScriptManager (std::unique_ptr<ScriptManager>&& scriptManager)
 {
-    mScriptManager = scriptManager;
+    mScriptManager = std::move(scriptManager);
 }
 
-void MWBase::Environment::setWindowManager (WindowManager *windowManager)
+void MWBase::Environment::setWindowManager (std::unique_ptr<WindowManager>&& windowManager)
 {
-    mWindowManager = windowManager;
+    mWindowManager = std::move(windowManager);
 }
 
-void MWBase::Environment::setMechanicsManager (MechanicsManager *mechanicsManager)
+void MWBase::Environment::setMechanicsManager (std::unique_ptr<MechanicsManager>&& mechanicsManager)
 {
-    mMechanicsManager = mechanicsManager;
+    mMechanicsManager = std::move(mechanicsManager);
 }
 
-void MWBase::Environment::setDialogueManager (DialogueManager *dialogueManager)
+void MWBase::Environment::setDialogueManager (std::unique_ptr<DialogueManager>&& dialogueManager)
 {
-    mDialogueManager = dialogueManager;
+    mDialogueManager = std::move(dialogueManager);
 }
 
-void MWBase::Environment::setJournal (Journal *journal)
+void MWBase::Environment::setJournal (std::unique_ptr<Journal>&& journal)
 {
-    mJournal = journal;
+    mJournal = std::move(journal);
 }
 
-void MWBase::Environment::setInputManager (InputManager *inputManager)
+void MWBase::Environment::setInputManager (std::unique_ptr<InputManager>&& inputManager)
 {
-    mInputManager = inputManager;
+    mInputManager = std::move(inputManager);
 }
 
-void MWBase::Environment::setStateManager (StateManager *stateManager)
+void MWBase::Environment::setStateManager (std::unique_ptr<StateManager>&& stateManager)
 {
-    mStateManager = stateManager;
+    mStateManager = std::move(stateManager);
 }
 
-void MWBase::Environment::setLuaManager (LuaManager *luaManager)
+void MWBase::Environment::setLuaManager (std::unique_ptr<LuaManager>&& luaManager)
 {
-    mLuaManager = luaManager;
+    mLuaManager = std::move(luaManager);
 }
 
 void MWBase::Environment::setResourceSystem (Resource::ResourceSystem *resourceSystem)
@@ -105,61 +101,61 @@ float MWBase::Environment::getFrameRateLimit() const
 MWBase::World *MWBase::Environment::getWorld() const
 {
     assert (mWorld);
-    return mWorld;
+    return mWorld.get();
 }
 
 MWBase::SoundManager *MWBase::Environment::getSoundManager() const
 {
     assert (mSoundManager);
-    return mSoundManager;
+    return mSoundManager.get();
 }
 
 MWBase::ScriptManager *MWBase::Environment::getScriptManager() const
 {
     assert (mScriptManager);
-    return mScriptManager;
+    return mScriptManager.get();
 }
 
 MWBase::WindowManager *MWBase::Environment::getWindowManager() const
 {
     assert (mWindowManager);
-    return mWindowManager;
+    return mWindowManager.get();
 }
 
 MWBase::MechanicsManager *MWBase::Environment::getMechanicsManager() const
 {
     assert (mMechanicsManager);
-    return mMechanicsManager;
+    return mMechanicsManager.get();
 }
 
 MWBase::DialogueManager *MWBase::Environment::getDialogueManager() const
 {
     assert (mDialogueManager);
-    return mDialogueManager;
+    return mDialogueManager.get();
 }
 
 MWBase::Journal *MWBase::Environment::getJournal() const
 {
     assert (mJournal);
-    return mJournal;
+    return mJournal.get();
 }
 
 MWBase::InputManager *MWBase::Environment::getInputManager() const
 {
     assert (mInputManager);
-    return mInputManager;
+    return mInputManager.get();
 }
 
 MWBase::StateManager *MWBase::Environment::getStateManager() const
 {
     assert (mStateManager);
-    return mStateManager;
+    return mStateManager.get();
 }
 
 MWBase::LuaManager *MWBase::Environment::getLuaManager() const
 {
     assert (mLuaManager);
-    return mLuaManager;
+    return mLuaManager.get();
 }
 
 Resource::ResourceSystem *MWBase::Environment::getResourceSystem() const
@@ -174,35 +170,17 @@ float MWBase::Environment::getFrameDuration() const
 
 void MWBase::Environment::cleanup()
 {
-    delete mMechanicsManager;
-    mMechanicsManager = nullptr;
-
-    delete mDialogueManager;
-    mDialogueManager = nullptr;
-
-    delete mJournal;
-    mJournal = nullptr;
-
-    delete mScriptManager;
-    mScriptManager = nullptr;
-
-    delete mWindowManager;
-    mWindowManager = nullptr;
-
-    delete mWorld;
-    mWorld = nullptr;
-
-    delete mSoundManager;
-    mSoundManager = nullptr;
-
-    delete mInputManager;
-    mInputManager = nullptr;
-
-    delete mStateManager;
-    mStateManager = nullptr;
-
-    delete mLuaManager;
-    mLuaManager = nullptr;
+    mMechanicsManager.reset();
+    mDialogueManager.reset();
+    mJournal.reset();
+    mScriptManager.reset();
+    mWindowManager.reset();
+    mWorld.reset();
+    mSoundManager.reset();
+    mInputManager.reset();
+    mStateManager.reset();
+    mLuaManager.reset();
+    mResourceSystem = nullptr;
 }
 
 const MWBase::Environment& MWBase::Environment::get()
