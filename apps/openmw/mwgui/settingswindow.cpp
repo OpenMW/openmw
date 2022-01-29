@@ -744,16 +744,15 @@ namespace MWGui
         auto flags = std::regex_constants::icase;
         std::regex filterRegex(filter, flags);
 
-        auto scriptSettings = LuaUi::scriptSettingsPages();
-        for (size_t i = 0; i < scriptSettings.size(); ++i)
+        for (size_t i = 0; i < LuaUi::scriptSettingsPageCount(); ++i)
         {
-            LuaUi::ScriptSettingsPage page = scriptSettings[i];
+            LuaUi::ScriptSettingsPage page = LuaUi::scriptSettingsPageAt(i);
             if (std::regex_match(page.mName, filterRegex) || std::regex_match(page.mDescription, filterRegex))
                 mScriptList->addItem(page.mName, i);
         }
 
         // Hide script settings tab when the game world isn't loaded and scripts couldn't add their settings
-        bool disabled = scriptSettings.empty();
+        bool disabled = LuaUi::scriptSettingsPageCount() == 0;
         mScriptDisabled->setVisible(disabled);
         mScriptFilter->setVisible(!disabled);
         mScriptList->setVisible(!disabled);
@@ -793,7 +792,7 @@ namespace MWGui
             return;
         }
         size_t page = *mScriptList->getItemDataAt<size_t>(index);
-        mScriptDescription->setCaption(LuaUi::scriptSettingsPages()[page].mDescription);
+        mScriptDescription->setCaption(LuaUi::scriptSettingsPageAt(page).mDescription);
         mScriptDescription->setVisible(true);
         mScriptView->setVisible(false);
     }

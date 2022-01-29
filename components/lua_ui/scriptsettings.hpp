@@ -16,8 +16,9 @@ namespace LuaUi
         std::string mDescription;
         Element* mElement; // TODO: figure out if this can lead to use after free
     };
-    const std::vector<ScriptSettingsPage>& scriptSettingsPages();
-    void registerSettingsPage(const ScriptSettingsPage& page);
+    size_t scriptSettingsPageCount();
+    ScriptSettingsPage scriptSettingsPageAt(size_t index);
+    void registerSettingsPage(const sol::table& options);
     void clearSettings();
     void attachToWidget(size_t index, MyGUI::Widget* widget = nullptr);
 }

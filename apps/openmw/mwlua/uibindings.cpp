@@ -241,16 +241,7 @@ namespace MWLua
 
         api["registerSettingsPage"] = [](sol::table options)
         {
-            LuaUi::ScriptSettingsPage page;
-            page.mName = options.get_or("name", std::string());
-            if (page.mName.empty())
-                throw std::logic_error("No name provided for the settings page");
-            page.mDescription = options.get_or("description", std::string());
-            auto element = options.get_or<std::shared_ptr<LuaUi::Element>>("element", nullptr);
-            if (!element)
-                throw std::logic_error("No UI element provided for the settings page");
-            page.mElement = element.get();
-            LuaUi::registerSettingsPage(page);
+            LuaUi::registerSettingsPage(options);
         };
 
         return LuaUtil::makeReadOnly(api);

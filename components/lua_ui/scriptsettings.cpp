@@ -8,17 +8,35 @@ namespace LuaUi
 {
     namespace
     {
-        std::vector<ScriptSettingsPage> allPages;
+        std::vector<sol::table> allPages;
+        ScriptSettingsPage parse(const sol::table& options)
+        {
+            auto name = options.get_or("name", std::string());
+            auto description = options.get_or("description", std::string());
+            auto element = options.get_or<std::shared_ptr<LuaUi::Element>>("element", nullptr);
+            if (name.empty())
+                Log(Debug::Warning) << "A script settings page has an empty name";
+            if (!element.get())
+                Log(Debug::Warning) << "A script settings page has no UI element assigned";
+            return {
+                name, description, element.get()
+            };
+        }
     }
 
-    const std::vector<ScriptSettingsPage>& scriptSettingsPages()
+    size_t scriptSettingsPageCount()
     {
-        return allPages;
+        return allPages.size();
     }
 
-    void registerSettingsPage(const ScriptSettingsPage& page)
+    ScriptSettingsPage scriptSettingsPageAt(size_t index)
     {
-        allPages.push_back(page);
+        return parse(allPages[index]);
+    }
+
+    void registerSettingsPage(const sol::table& options)
+    {
+        allPages.push_back(options);
     }
 
     void clearSettings()
@@ -29,6 +47,10 @@ namespace LuaUi
     void attachToWidget(size_t index, MyGUI::Widget* widget)
     {
         if (index < allPages.size())
-            allPages[index].mElement->attachToWidget(widget);
+        {
+            ScriptSettingsPage page = parse(allPages[index]);
+            if (page.mElement)
+                page.mElement->attachToWidget(widget);
+        }
     }
 }
