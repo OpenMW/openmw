@@ -28,8 +28,15 @@ void ESM::ObjectState::load (ESMReader &esm)
     mCount = 1;
     esm.getHNOT (mCount, "COUN");
 
-    mPosition = mRef.mPos;
-    esm.getHNOT (mPosition, "POS_", 24);
+    if(esm.isNextSub("POS_"))
+    {
+        std::array<float, 6> pos;
+        esm.getHT(pos);
+        memcpy(mPosition.pos, pos.data(), sizeof(float) * 3);
+        memcpy(mPosition.rot, pos.data() + 3, sizeof(float) * 3);
+    }
+    else
+        mPosition = mRef.mPos;
 
     if (esm.isNextSub("LROT"))
         esm.skipHSub(); // local rotation, no longer used
@@ -67,7 +74,12 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
         esm.writeHNT ("COUN", mCount);
 
     if (!inInventory && mPosition != mRef.mPos)
-        esm.writeHNT ("POS_", mPosition, 24);
+    {
+        std::array<float, 6> pos;
+        memcpy(pos.data(), mPosition.pos, sizeof(float) * 3);
+        memcpy(pos.data() + 3, mPosition.rot, sizeof(float) * 3);
+        esm.writeHNT ("POS_", pos.data(), 24);
+    }
 
     if (mFlags != 0)
         esm.writeHNT ("FLAG", mFlags);
