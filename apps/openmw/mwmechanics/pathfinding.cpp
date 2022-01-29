@@ -6,6 +6,7 @@
 #include <components/detournavigator/navigatorutils.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/coordinateconverter.hpp>
+#include <components/misc/math.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -315,17 +316,31 @@ namespace MWMechanics
         while (mPath.size() > 1 && sqrDistanceIgnoreZ(mPath.front(), position) < pointTolerance * pointTolerance)
             mPath.pop_front();
 
+        const IsValidShortcut isValidShortcut {
+            MWBase::Environment::get().getWorld()->getNavigator(),
+            halfExtents, flags
+        };
+
         if (shortenIfAlmostStraight)
         {
-            const IsValidShortcut isValidShortcut {
-                MWBase::Environment::get().getWorld()->getNavigator(),
-                halfExtents, flags
-            };
             while (mPath.size() > 2 && isAlmostStraight(mPath[0], mPath[1], mPath[2], pointTolerance)
                    && isValidShortcut(mPath[0], mPath[2]))
                 mPath.erase(mPath.begin() + 1);
             if (mPath.size() > 1 && isAlmostStraight(position, mPath[0], mPath[1], pointTolerance)
                     && isValidShortcut(position, mPath[1]))
+                mPath.pop_front();
+        }
+
+        if (mPath.size() > 1)
+        {
+            std::size_t begin = 0;
+            for (std::size_t i = 1; i < mPath.size(); ++i)
+            {
+                const float sqrDistance = Misc::getVectorToLine(position, mPath[i - 1], mPath[i]).length2();
+                if (sqrDistance < pointTolerance * pointTolerance && isValidShortcut(position, mPath[i]))
+                    begin = i;
+            }
+            for (std::size_t i = 0; i < begin; ++i)
                 mPath.pop_front();
         }
 
