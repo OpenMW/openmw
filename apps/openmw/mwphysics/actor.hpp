@@ -158,15 +158,15 @@ namespace MWPhysics
 
         bool canMoveToWaterSurface(float waterlevel, const btCollisionWorld* world) const;
 
+        /// Returns the mesh translation, scaled and rotated as necessary
+        osg::Vec3f getScaledMeshTranslation() const;
+
     private:
         MWWorld::Ptr mStandingOnPtr;
         /// Removes then re-adds the collision object to the dynamics world
         void updateCollisionMask();
         void addCollisionMask(int collisionMask);
         int getCollisionMask() const;
-
-        /// Returns the mesh translation, scaled and rotated as necessary
-        osg::Vec3f getScaledMeshTranslation() const;
 
         bool mCanWaterWalk;
         bool mWalkingOnWater;
