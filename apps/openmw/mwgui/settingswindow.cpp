@@ -777,7 +777,7 @@ namespace MWGui
         mScriptChild = mScriptView->getChildCount() > 0 ? mScriptView->getChildAt(0) : nullptr;
         MyGUI::IntSize canvasSize = mScriptChild ? mScriptChild->getSize() : MyGUI::IntSize();
         if (mScriptChild)
-            mScriptChild->setVisible(mScriptView->isVisible());
+            mScriptChild->setVisible(mScriptView->getVisible());
         mScriptView->setCanvasSize(canvasSize);
     }
 
