@@ -19,6 +19,9 @@ Engine handler is a function defined by a script, that can be called by the engi
 | onLoad(savedData, initData)      | | Called on loading with the data previosly returned by              |
 |                                  | | onSave. During loading the object is always inactive. initData is  |
 |                                  | | the same as in onInit.                                             |
+|                                  | | Note that onLoad means loading a script rather than loading a game.|
+|                                  | | If a script did not exist when a game was saved onLoad will not be |
+|                                  | | called, but onInit will.                                           |
 +----------------------------------+----------------------------------------------------------------------+
 | onInterfaceOverride(base)        | | Called if the current script has an interface and overrides an     |
 |                                  | | interface (``base``) of another script.                            |

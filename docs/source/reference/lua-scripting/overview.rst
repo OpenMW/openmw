@@ -251,8 +251,8 @@ The value that `onSave` returns will be passed to `onLoad` when the game is load
 It is the only way to save the internal state of a script. All other script variables will be lost after closing the game.
 The saved state must be :ref:`serializable <Serializable data>`.
 
-Note that `onLoad` means loading a script rather than loading a game. During loading a game `onLoad` works only for the scripts that were already existed when the game was saved (i.e. present in the save file).
-If a completely new script was started (for example if it is a script of a newly installed mod) then the `onInit` handler is used even if it happened when loading a saved game.
+Note that `onLoad` means loading a script rather than loading a game.
+If a script did not exist when a game was saved then `onLoad` will not be called, but `onInit` will.
 
 `onSave` and `onLoad` can be called even for objects in inactive state, so it shouldn't use `openmw.nearby`.
 
