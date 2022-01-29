@@ -52,13 +52,25 @@ if [[ "${CMAKE_BUILD_TYPE}" ]]; then
     )
 fi
 
+if [[ "${CMAKE_CXX_FLAGS_DEBUG}" ]]; then
+    CMAKE_CONF_OPTS+=(
+        -DCMAKE_CXX_FLAGS_DEBUG="${CMAKE_CXX_FLAGS_DEBUG}"
+    )
+fi
+
+if [[ "${CMAKE_EXE_LINKER_FLAGS}" ]]; then
+    CMAKE_CONF_OPTS+=(
+        -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}"
+    )
+fi
+
 mkdir -p build
 cd build
 
 if [[ "${BUILD_TESTS_ONLY}" ]]; then
 
     # flags specific to our test suite
-    CXX_FLAGS="-Wno-error=deprecated-declarations -Wno-error=nonnull -Wno-error=deprecated-copy -fsanitize=address"
+    CXX_FLAGS="-Wno-error=deprecated-declarations -Wno-error=nonnull -Wno-error=deprecated-copy"
     if [[ "${CXX}" == 'clang++' ]]; then
         CXX_FLAGS="${CXX_FLAGS} -Wno-error=unused-lambda-capture -Wno-error=gnu-zero-variadic-macro-arguments"
     fi
