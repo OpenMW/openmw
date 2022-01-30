@@ -729,6 +729,42 @@ namespace MWGui
         mScriptDisabled->setPosition({0, 0});
         mScriptDisabled->setSize(parentSize);
     }
+
+    namespace
+    {
+        std::string escapeRegex(const std::string& str)
+        {
+            static std::regex specialChars(R"r([\^\.\[\$\(\)\|\*\+\?\{])r", std::regex_constants::extended);
+            return std::regex_replace(str, specialChars, R"(\$&)");
+        }
+
+        std::regex wordSearch(const std::string& query)
+        {
+            static std::regex wordsRegex(R"([^[:space:]]+)", std::regex_constants::extended);
+            auto wordsBegin = std::sregex_iterator(query.begin(), query.end(), wordsRegex);
+            auto wordsEnd = std::sregex_iterator();
+            std::string searchRegex("(");
+            for (auto it = wordsBegin; it != wordsEnd; ++it)
+            {
+                if (it != wordsBegin)
+                    searchRegex += '|';
+                searchRegex += escapeRegex(query.substr(it->position(), it->length()));
+            }
+            searchRegex += ')';
+            // query had only whitespace characters
+            if (searchRegex == "()")
+                searchRegex = "^(.*)$";
+            static auto flags = std::regex_constants::icase | std::regex_constants::extended;
+            return std::regex(searchRegex, flags);
+        }
+
+        int weightedSearch(const std::regex& regex, const std::string& text)
+        {
+            std::smatch matches;
+            std::regex_search(text, matches, regex);
+            return matches.size();
+        }
+    }
          
     void SettingsWindow::renderScriptSettings()
     {
@@ -737,18 +773,26 @@ namespace MWGui
         mScriptList->removeAllItems();
         mScriptView->setCanvasSize({0, 0});
 
-        std::string filter(".*");
-        filter += mScriptFilter->getCaption();
-        filter += ".*";
-        auto flags = std::regex_constants::icase;
-        std::regex filterRegex(filter, flags);
-
+        std::regex searchRegex = wordSearch(mScriptFilter->getCaption());
+        std::vector<std::tuple<size_t, LuaUi::ScriptSettingsPage, int>> weightedPages;
+        weightedPages.reserve(LuaUi::scriptSettingsPageCount());
         for (size_t i = 0; i < LuaUi::scriptSettingsPageCount(); ++i)
         {
             LuaUi::ScriptSettingsPage page = LuaUi::scriptSettingsPageAt(i);
-            if (std::regex_match(page.mName, filterRegex) || std::regex_match(page.mDescription, filterRegex))
-                mScriptList->addItem(page.mName, i);
+            int nameSearch = 2 * weightedSearch(searchRegex, page.mName);
+            int descriptionSearch = weightedSearch(searchRegex, page.mDescription);
+            int search = nameSearch + descriptionSearch;
+            if (search > 0)
+                weightedPages.push_back({ i, page, search });
         }
+        std::sort(weightedPages.begin(), weightedPages.end(), [](const auto& a, const auto& b)
+        {
+            const auto& [iA, pageA, weightA] = a;
+            const auto& [iB, pageB, weightB] = b;
+            return weightA == weightB ? pageA.mName < pageB.mName : weightA > weightB;
+        });
+        for (const auto & [i, page, weight] : weightedPages)
+            mScriptList->addItem(page.mName, i);
 
         // Hide script settings tab when the game world isn't loaded and scripts couldn't add their settings
         bool disabled = LuaUi::scriptSettingsPageCount() == 0;
