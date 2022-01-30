@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 #include <list>
+#include <type_traits>
 
 #include "components/esm/esmcommon.hpp"
 #include "loadtes3.hpp"
@@ -111,6 +112,7 @@ class ESMWriter
         template<typename T>
         void writeT(const T& data)
         {
+            static_assert(!std::is_pointer_v<T>);
             write((char*)&data, sizeof(T));
         }
 
@@ -123,6 +125,7 @@ class ESMWriter
         template<typename T>
         void writeT(const T& data, size_t size)
         {
+            static_assert(!std::is_pointer_v<T>);
             write((char*)&data, size);
         }
 
