@@ -47,7 +47,7 @@ namespace ESM
             std::stringstream ss;
             ss << "Malformed string table";
             ss << "\n  File: " << esm.getName();
-            ss << "\n  Record: " << esm.getContext().recName.toString();
+            ss << "\n  Record: " << esm.getContext().recName.toStringView();
             ss << "\n  Subrecord: " << "SCVR";
             ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
             Log(Debug::Verbose) << ss.str();
@@ -68,7 +68,7 @@ namespace ESM
                     std::stringstream ss;
                     ss << "String table overflow";
                     ss << "\n  File: " << esm.getName();
-                    ss << "\n  Record: " << esm.getContext().recName.toString();
+                    ss << "\n  Record: " << esm.getContext().recName.toStringView();
                     ss << "\n  Subrecord: " << "SCVR";
                     ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
                     Log(Debug::Verbose) << ss.str();

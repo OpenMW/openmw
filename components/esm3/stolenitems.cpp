@@ -32,15 +32,14 @@ namespace ESM
             std::map<std::pair<std::string, bool>, int> ownerMap;
             while (esm.isNextSub("FNAM") || esm.isNextSub("ONAM"))
             {
-                std::string subname = esm.retSubName().toString();
+                const bool isFaction = (esm.retSubName() == "FNAM");
                 std::string owner = esm.getHString();
-                bool isFaction = (subname == "FNAM");
                 int count;
                 esm.getHNT(count, "COUN");
-                ownerMap.insert(std::make_pair(std::make_pair(owner, isFaction), count));
+                ownerMap.emplace(std::make_pair(std::move(owner), isFaction), count);
             }
 
-            mStolenItems[itemid] = ownerMap;
+            mStolenItems.insert_or_assign(std::move(itemid), std::move(ownerMap));
         }
     }
 
