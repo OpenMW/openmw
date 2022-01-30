@@ -36,7 +36,6 @@ namespace LuaUi
             { "LuaTextEdit", "TextEdit" },
             { "LuaWindow", "Window" },
             { "LuaImage", "Image" },
-            { "LuaContainer", "Container" },
         };
         return types;
     }

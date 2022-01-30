@@ -65,7 +65,7 @@ namespace LuaUi
         mWidget->eventKeySetFocus.clear();
         mWidget->eventKeyLostFocus.clear();
 
-        mOnSizeChange.reset();
+        mOnCoordChange.reset();
 
         for (WidgetExtension* w : mChildren)
             w->deinitialize();
@@ -212,11 +212,7 @@ namespace LuaUi
         if (oldCoord != newCoord)
             mWidget->setCoord(newCoord);
         if (oldCoord.size() != newCoord.size())
-        {
             updateChildrenCoord();
-            if (mOnSizeChange.has_value())
-                mOnSizeChange.value()(newCoord.size());
-        }
         if (oldCoord != newCoord && mOnCoordChange.has_value())
             mOnCoordChange.value()(this, newCoord);
     }

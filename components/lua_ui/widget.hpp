@@ -62,11 +62,6 @@ namespace LuaUi
             mOnCoordChange = callback;
         }
 
-        void onSizeChange(const std::optional<std::function<void(MyGUI::IntSize)>>& callback)
-        {
-            mOnSizeChange = callback;
-        }
-
     protected:
         virtual void initialize();
         sol::table makeTable() const;
@@ -137,7 +132,6 @@ namespace LuaUi
         void focusLoss(MyGUI::Widget*, MyGUI::Widget*);
 
         std::optional<std::function<void(WidgetExtension*, MyGUI::IntCoord)>> mOnCoordChange;
-        std::optional<std::function<void(MyGUI::IntSize)>> mOnSizeChange;
     };
 
     class LuaWidget : public MyGUI::Widget, public WidgetExtension
