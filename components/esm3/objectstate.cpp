@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <typeinfo>
+#include <array>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
