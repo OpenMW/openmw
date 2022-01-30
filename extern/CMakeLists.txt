@@ -211,7 +211,7 @@ endif()
 
 add_subdirectory(smhasher)
 
-if (NOT OPENMW_USE_SYSTEM_BENCHMARK)
+if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
     cmake_minimum_required(VERSION 3.11)
 
     set(BENCHMARK_ENABLE_TESTING OFF)
