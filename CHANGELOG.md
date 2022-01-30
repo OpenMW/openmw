@@ -36,7 +36,6 @@
     Bug #5788: Texture editing parses the selected indexes wrongly
     Bug #5801: A multi-effect spell with the intervention effects and recall always favors Almsivi intervention
     Bug #5842: GetDisposition adds temporary disposition change from different actors
-    Bug #5858: Animated model freezes the game
     Bug #5863: GetEffect should return true after the player has teleported
     Bug #5913: Failed assertion during Ritual of Trees quest
     Bug #5928: Glow in the Dahrk functionality used without mod installed
