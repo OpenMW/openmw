@@ -74,6 +74,8 @@ namespace
     {
         auto& creatureStats = target.getClass().getCreatureStats(target);
         auto attr = creatureStats.getAttribute(effect.mArg);
+        if(effect.mEffectId == ESM::MagicEffect::DamageAttribute)
+            magnitude = std::min(attr.getModified(), magnitude);
         attr.damage(magnitude);
         creatureStats.setAttribute(effect.mArg, attr);
     }
@@ -98,6 +100,8 @@ namespace
     {
         auto& npcStats = target.getClass().getNpcStats(target);
         auto& skill = npcStats.getSkill(effect.mArg);
+        if(effect.mEffectId == ESM::MagicEffect::DamageSkill)
+            magnitude = std::min(skill.getModified(), magnitude);
         skill.damage(magnitude);
     }
 
