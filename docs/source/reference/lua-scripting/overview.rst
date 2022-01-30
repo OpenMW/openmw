@@ -246,10 +246,13 @@ See :ref:`Engine handlers reference`.
 onSave and onLoad
 =================
 
-When a game is saved or loaded, the engine calls the engine handlers `onSave` or `onLoad` for every script.
+When a game is saved or loaded, the engine calls the engine handlers `onSave` or `onLoad` to save or load each script.
 The value that `onSave` returns will be passed to `onLoad` when the game is loaded.
 It is the only way to save the internal state of a script. All other script variables will be lost after closing the game.
 The saved state must be :ref:`serializable <Serializable data>`.
+
+Note that `onLoad` means loading a script rather than loading a game.
+If a script did not exist when a game was saved then `onLoad` will not be called, but `onInit` will.
 
 `onSave` and `onLoad` can be called even for objects in inactive state, so it shouldn't use `openmw.nearby`.
 
