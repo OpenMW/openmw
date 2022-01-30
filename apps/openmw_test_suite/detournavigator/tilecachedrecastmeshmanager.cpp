@@ -90,10 +90,6 @@ namespace
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        TileBounds bounds;
-        bounds.mMin = osg::Vec2f(-1000, -1000);
-        bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds);
         manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
         EXPECT_TRUE(manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground,
                                          [&] (const auto& v) { onChangedTile(v); }));
@@ -141,10 +137,6 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_mesh_for_moved_object_should_return_recast_mesh_for_each_used_tile)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        TileBounds bounds;
-        bounds.mMin = osg::Vec2f(-1000, -1000);
-        bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds);
         manager.setWorldspace("worldspace");
 
         const btBoxShape boxShape(btVector3(20, 20, 100));

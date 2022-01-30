@@ -20,10 +20,6 @@ namespace DetourNavigator
     public:
         explicit TileCachedRecastMeshManager(const RecastSettings& settings);
 
-        TileBounds getBounds() const;
-
-        void setBounds(const TileBounds& bounds);
-
         std::string getWorldspace() const;
 
         void setWorldspace(std::string_view worldspace);
@@ -61,7 +57,7 @@ namespace DetourNavigator
                         changed = true;
                     }
                 };
-                getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mBounds, mSettings), onTilePosition);
+                getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mSettings), onTilePosition);
                 std::sort(newTiles.begin(), newTiles.end());
                 for (const auto& tile : currentTiles)
                 {
@@ -113,7 +109,6 @@ namespace DetourNavigator
 
         const RecastSettings& mSettings;
         mutable std::mutex mMutex;
-        TileBounds mBounds;
         std::string mWorldspace;
         TilesMap mTiles;
         std::unordered_map<ObjectId, std::vector<TilePosition>> mObjectsTilesPositions;

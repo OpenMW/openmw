@@ -1,7 +1,6 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_GETTILESPOSITIONS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_GETTILESPOSITIONS_H
 
-#include "tilebounds.hpp"
 #include "tileposition.hpp"
 
 class btVector3;
@@ -27,7 +26,7 @@ namespace DetourNavigator
         const osg::Vec3f& aabbMax, const RecastSettings& settings);
 
     TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape,
-        const btTransform& transform, const TileBounds& bounds, const RecastSettings& settings);
+        const btTransform& transform, const RecastSettings& settings);
 
     TilesPositionsRange makeTilesPositionsRange(const int cellSize, const btVector3& shift,
         const RecastSettings& settings);
