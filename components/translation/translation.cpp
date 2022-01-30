@@ -53,13 +53,14 @@ namespace Translation
 
             if (!line.empty())
             {
-                line = mEncoder->getUtf8(line);
+                std::string utf8Line;
+                mEncoder->toUtf8(line, utf8Line, line.size());
 
-                size_t tab_pos = line.find('\t');
-                if (tab_pos != std::string::npos && tab_pos > 0 && tab_pos < line.size() - 1)
+                size_t tab_pos = utf8Line.find('\t');
+                if (tab_pos != std::string::npos && tab_pos > 0 && tab_pos < utf8Line.size() - 1)
                 {
-                    std::string key = line.substr(0, tab_pos);
-                    std::string value = line.substr(tab_pos + 1);
+                    std::string key = utf8Line.substr(0, tab_pos);
+                    std::string value = utf8Line.substr(tab_pos + 1);
 
                     if (!key.empty() && !value.empty())
                         container.insert(std::make_pair(key, value));

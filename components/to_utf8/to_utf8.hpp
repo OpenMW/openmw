@@ -34,6 +34,9 @@ namespace ToUTF8
                 return getUtf8(str.c_str(), str.size());
             }
 
+            // Convert input to UTF8 to the given output string
+            void toUtf8(std::string& input, std::string& output, size_t size);
+
             std::string getLegacyEnc(const char *input, size_t size);
             inline std::string getLegacyEnc(const std::string &str)
             {

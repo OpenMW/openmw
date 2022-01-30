@@ -84,6 +84,15 @@ std::string Utf8Encoder::getUtf8(const char* input, size_t size)
     // is also ok.)
     assert(input[size] == 0);
 
+    std::string inputString(input, size);
+    std::string output;
+    toUtf8(inputString, output, size);
+
+    return output;
+}
+
+void Utf8Encoder::toUtf8(std::string& input, std::string& output, size_t size)
+{
     // Note: The rest of this function is designed for single-character
     // input encodings only. It also assumes that the input encoding
     // shares its first 128 values (0-127) with ASCII. There are no plans
@@ -93,29 +102,36 @@ std::string Utf8Encoder::getUtf8(const char* input, size_t size)
     // Compute output length, and check for pure ascii input at the same
     // time.
     bool ascii;
-    size_t outlen = getLength(input, ascii);
+    size_t outlen = getLength(input.c_str(), ascii);
 
     // If we're pure ascii, then don't bother converting anything.
     if(ascii)
-        return std::string(input, outlen);
+    {
+        std::swap(input, output);
+        return;
+    }
 
     // Make sure the output is large enough
-    resize(outlen);
-    char *out = &mOutput[0];
+    if (output.size() <= outlen)
+        // Add some extra padding to reduce the chance of having to resize
+        // again later.
+        output.resize(3*outlen);
+
+    // And make sure the string is zero terminated
+    output[outlen] = 0;
+    char *in = &input[0];
+    char *out = &output[0];
 
     // Translate
-    while (*input)
-        copyFromArray(*(input++), out);
+    while (*in)
+        copyFromArray(*(in++), out);
 
     // Make sure that we wrote the correct number of bytes
-    assert((out-&mOutput[0]) == (int)outlen);
+    assert((out-&output[0]) == (int)outlen);
 
     // And make extra sure the output is null terminated
-    assert(mOutput.size() > outlen);
-    assert(mOutput[outlen] == 0);
-
-    // Return a string
-    return std::string(&mOutput[0], outlen);
+    assert(output.size() > outlen);
+    assert(output[outlen] == 0);
 }
 
 std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)

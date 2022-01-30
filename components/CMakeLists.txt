@@ -76,7 +76,7 @@ add_component_dir (to_utf8
     to_utf8
     )
 
-add_component_dir(esm attr defs esmcommon records util luascripts)
+add_component_dir(esm attr common defs esmcommon reader records util luascripts)
 
 add_component_dir (esm3
     esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
@@ -93,6 +93,16 @@ add_component_dir (esm3
 add_component_dir (esm3terrain
     storage
     )
+
+add_component_dir (esm4
+    loadachr loadacre loadacti loadalch loadaloc loadammo loadanio loadappa loadarma loadarmo loadaspc loadbook
+    loadbptd loadcell loadclas loadclfm loadclot common loadcont loadcrea loaddial loaddobj loaddoor loadeyes
+    loadflor loadflst formid loadfurn loadglob loadgras loadhair loadhdpt loadidle loadidlm loadimod loadinfo
+    loadingr loadkeym loadland loadlgtm loadligh loadltex loadlvlc loadlvli loadlvln loadmato loadmisc loadmset
+    loadmstt loadmusc loadnavi loadnavm loadnote loadnpc loadotft loadpack loadpgrd loadpgre loadpwat loadqust
+    loadrace loadrefr loadregn loadroad loadsbsp loadscol loadscpt loadscrl loadsgst loadslgm loadsndr
+    loadsoun loadstat loadtact loadterm loadtes4 loadtree loadtxst loadweap loadwrld reader
+)
 
 add_component_dir (misc
     constants utf8stream stringops resourcehelpers rng messageformatparser weakcache thread
