@@ -29,7 +29,7 @@ namespace Misc
         for (size_t i = 0; i < rgb.size(); i++)
         {
             auto sub = hex.substr(i * 2, 2);
-            int v;
+            int v = 0;
             auto [_, ec] = std::from_chars(sub.data(), sub.data() + sub.size(), v, 16);
             if (ec != std::errc())
                 throw std::logic_error(std::string("Invalid hex color: ") += hex);

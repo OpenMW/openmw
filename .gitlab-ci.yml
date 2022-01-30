@@ -105,7 +105,7 @@ Ubuntu_GCC:
 Ubuntu_GCC_tests:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests.v2
+    key: Ubuntu_GCC_tests.v3
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -121,6 +121,50 @@ Ubuntu_GCC_tests_Debug:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
     CMAKE_BUILD_TYPE: Debug
+  artifacts:
+    paths: []
+    expire_in: 1 minute
+
+Ubuntu_GCC_tests_asan:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_asan.v1
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak
+    CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak
+    ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1
+  artifacts:
+    paths: []
+    expire_in: 1 minute
+
+Ubuntu_GCC_tests_ubsan:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_ubsan.v1
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O0 -fsanitize=undefined
+    UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+  artifacts:
+    paths: []
+    expire_in: 1 minute
+
+Ubuntu_GCC_tests_tsan:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_tsan.v1
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O2 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=thread -fPIE
+    CMAKE_EXE_LINKER_FLAGS: -pthread -pie -fsanitize=thread
+    TSAN_OPTIONS: second_deadlock_stack=1:halt_on_error=1
   artifacts:
     paths: []
     expire_in: 1 minute
@@ -179,7 +223,7 @@ Ubuntu_Clang:
 Ubuntu_Clang_tests:
   extends: Ubuntu_Clang
   cache:
-    key: Ubuntu_Clang_tests.v2
+    key: Ubuntu_Clang_tests.v3
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1

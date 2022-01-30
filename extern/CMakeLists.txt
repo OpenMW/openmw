@@ -210,3 +210,19 @@ if (NOT OPENMW_USE_SYSTEM_SQLITE3)
 endif()
 
 add_subdirectory(smhasher)
+
+if (NOT OPENMW_USE_SYSTEM_BENCHMARK)
+    cmake_minimum_required(VERSION 3.11)
+
+    set(BENCHMARK_ENABLE_TESTING OFF)
+    set(BENCHMARK_ENABLE_INSTALL OFF)
+    set(BENCHMARK_ENABLE_GTEST_TESTS OFF)
+
+    include(FetchContent)
+    FetchContent_Declare(benchmark
+        URL https://github.com/google/benchmark/archive/refs/tags/v1.5.2.zip
+        URL_HASH MD5=49395b757a7c4656d70f1328d93efd00
+        SOURCE_DIR fetched/benchmark
+    )
+    FetchContent_MakeAvailableExcludeFromAll(benchmark)
+endif()
