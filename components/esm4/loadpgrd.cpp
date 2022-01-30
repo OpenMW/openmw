@@ -115,7 +115,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                 for (std::size_t i = 0; i < numForeign; ++i)
                 {
                     reader.get(mForeign.at(i));
-                    mForeign.at(i).localNode;// &= 0xffff; // some have junk high bits (maybe flags?)
+                    // mForeign.at(i).localNode;// &= 0xffff; // some have junk high bits (maybe flags?)
                 }
 
                 break;
