@@ -79,7 +79,7 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
         std::array<float, 6> pos;
         memcpy(pos.data(), mPosition.pos, sizeof(float) * 3);
         memcpy(pos.data() + 3, mPosition.rot, sizeof(float) * 3);
-        esm.writeHNT ("POS_", pos.data(), 24);
+        esm.writeHNT ("POS_", pos, 24);
     }
 
     if (mFlags != 0)
