@@ -116,7 +116,7 @@ namespace MWWorld
             osg::Vec2i getNewGridCenter(const osg::Vec3f &pos, const osg::Vec2i *currentGridCenter = nullptr) const;
 
             void unloadCell(CellStore* cell);
-            void loadCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn);
+            void loadCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position);
 
         public:
 
