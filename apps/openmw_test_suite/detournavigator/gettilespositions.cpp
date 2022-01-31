@@ -37,35 +37,35 @@ namespace
 
     TEST_F(DetourNavigatorGetTilesPositionsTest, for_object_in_single_tile_should_return_one_tile)
     {
-        getTilesPositions(makeTilesPositionsRange(osg::Vec3f(2, 2, 0), osg::Vec3f(31, 31, 1), mSettings), mCollect);
+        getTilesPositions(makeTilesPositionsRange(osg::Vec2f(2, 2), osg::Vec2f(31, 31), mSettings), mCollect);
 
         EXPECT_THAT(mTilesPositions, ElementsAre(TilePosition(0, 0)));
     }
 
     TEST_F(DetourNavigatorGetTilesPositionsTest, for_object_with_x_bounds_in_two_tiles_should_return_two_tiles)
     {
-        getTilesPositions(makeTilesPositionsRange(osg::Vec3f(0, 0, 0), osg::Vec3f(32, 31, 1), mSettings), mCollect);
+        getTilesPositions(makeTilesPositionsRange(osg::Vec2f(0, 0), osg::Vec2f(32, 31), mSettings), mCollect);
 
         EXPECT_THAT(mTilesPositions, ElementsAre(TilePosition(0, 0), TilePosition(1, 0)));
     }
 
     TEST_F(DetourNavigatorGetTilesPositionsTest, for_object_with_y_bounds_in_two_tiles_should_return_two_tiles)
     {
-        getTilesPositions(makeTilesPositionsRange(osg::Vec3f(0, 0, 0), osg::Vec3f(31, 32, 1), mSettings), mCollect);
+        getTilesPositions(makeTilesPositionsRange(osg::Vec2f(0, 0), osg::Vec2f(31, 32), mSettings), mCollect);
 
         EXPECT_THAT(mTilesPositions, ElementsAre(TilePosition(0, 0), TilePosition(0, 1)));
     }
 
     TEST_F(DetourNavigatorGetTilesPositionsTest, tiling_works_only_for_x_and_y_coordinates)
     {
-        getTilesPositions(makeTilesPositionsRange(osg::Vec3f(0, 0, 0), osg::Vec3f(31, 31, 32), mSettings), mCollect);
+        getTilesPositions(makeTilesPositionsRange(osg::Vec2f(0, 0), osg::Vec2f(31, 31), mSettings), mCollect);
 
         EXPECT_THAT(mTilesPositions, ElementsAre(TilePosition(0, 0)));
     }
 
     TEST_F(DetourNavigatorGetTilesPositionsTest, tiling_should_work_with_negative_coordinates)
     {
-        getTilesPositions(makeTilesPositionsRange(osg::Vec3f(-31, -31, 0), osg::Vec3f(31, 31, 1), mSettings), mCollect);
+        getTilesPositions(makeTilesPositionsRange(osg::Vec2f(-31, -31), osg::Vec2f(31, 31), mSettings), mCollect);
 
         EXPECT_THAT(mTilesPositions, ElementsAre(
             TilePosition(-1, -1),
@@ -79,7 +79,7 @@ namespace
     {
         mSettings.mBorderSize = 1;
 
-        getTilesPositions(makeTilesPositionsRange(osg::Vec3f(0, 0, 0), osg::Vec3f(31.5, 31.5, 1), mSettings), mCollect);
+        getTilesPositions(makeTilesPositionsRange(osg::Vec2f(0, 0), osg::Vec2f(31.5, 31.5), mSettings), mCollect);
 
         EXPECT_THAT(mTilesPositions, ElementsAre(
             TilePosition(-1, -1),
@@ -98,7 +98,7 @@ namespace
     {
         mSettings.mRecastScaleFactor = 0.5;
 
-        getTilesPositions(makeTilesPositionsRange(osg::Vec3f(0, 0, 0), osg::Vec3f(32, 32, 1), mSettings), mCollect);
+        getTilesPositions(makeTilesPositionsRange(osg::Vec2f(0, 0), osg::Vec2f(32, 32), mSettings), mCollect);
 
         EXPECT_THAT(mTilesPositions, ElementsAre(TilePosition(0, 0)));
     }

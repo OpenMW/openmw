@@ -177,8 +177,8 @@ namespace NavMeshTool
 
             DetourNavigator::getTilesPositions(
                 DetourNavigator::makeTilesPositionsRange(
-                    Misc::Convert::toOsg(input->mAabb.m_min),
-                    Misc::Convert::toOsg(input->mAabb.m_max),
+                    Misc::Convert::toOsgXY(input->mAabb.m_min),
+                    Misc::Convert::toOsgXY(input->mAabb.m_max),
                     settings.mRecast
                 ),
                 [&] (const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); }

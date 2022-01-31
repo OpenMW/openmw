@@ -9,7 +9,7 @@ class btCollisionShape;
 
 namespace osg
 {
-    class Vec3f;
+    class Vec2f;
 }
 
 namespace DetourNavigator
@@ -22,8 +22,8 @@ namespace DetourNavigator
         TilePosition mMax;
     };
 
-    TilesPositionsRange makeTilesPositionsRange(const osg::Vec3f& aabbMin,
-        const osg::Vec3f& aabbMax, const RecastSettings& settings);
+    TilesPositionsRange makeTilesPositionsRange(const osg::Vec2f& aabbMin,
+        const osg::Vec2f& aabbMax, const RecastSettings& settings);
 
     TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape,
         const btTransform& transform, const RecastSettings& settings);

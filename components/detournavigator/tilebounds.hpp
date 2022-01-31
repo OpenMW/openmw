@@ -1,8 +1,13 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_TILEBOUNDS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_TILEBOUNDS_H
 
+#include <components/misc/convert.hpp>
+
 #include <osg/Vec2f>
 #include <osg/Vec2i>
+
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <LinearMath/btTransform.h>
 
 #include <algorithm>
 #include <optional>
@@ -40,6 +45,14 @@ namespace DetourNavigator
             osg::Vec2f(position.x(), position.y()) * size,
             osg::Vec2f(position.x() + 1, position.y() + 1) * size
         };
+    }
+
+    inline TileBounds makeObjectTileBounds(const btCollisionShape& shape, const btTransform& transform)
+    {
+        btVector3 aabbMin;
+        btVector3 aabbMax;
+        shape.getAabb(transform, aabbMin, aabbMax);
+        return TileBounds {Misc::Convert::toOsgXY(aabbMin), Misc::Convert::toOsgXY(aabbMax)};
     }
 }
 

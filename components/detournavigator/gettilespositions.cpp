@@ -2,6 +2,7 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 #include "tileposition.hpp"
+#include "tilebounds.hpp"
 
 #include <components/misc/convert.hpp>
 
@@ -9,15 +10,15 @@
 
 namespace DetourNavigator
 {
-    TilesPositionsRange makeTilesPositionsRange(const osg::Vec3f& aabbMin, const osg::Vec3f& aabbMax,
+    TilesPositionsRange makeTilesPositionsRange(const osg::Vec2f& aabbMin, const osg::Vec2f& aabbMax,
         const RecastSettings& settings)
     {
-        osg::Vec3f min = toNavMeshCoordinates(settings, aabbMin);
-        osg::Vec3f max = toNavMeshCoordinates(settings, aabbMax);
+        osg::Vec2f min = toNavMeshCoordinates(settings, aabbMin);
+        osg::Vec2f max = toNavMeshCoordinates(settings, aabbMax);
 
         const float border = getBorderSize(settings);
-        min -= osg::Vec3f(border, border, border);
-        max += osg::Vec3f(border, border, border);
+        min -= osg::Vec2f(border, border);
+        max += osg::Vec2f(border, border);
 
         TilePosition minTile = getTilePosition(settings, min);
         TilePosition maxTile = getTilePosition(settings, max);
@@ -34,18 +35,13 @@ namespace DetourNavigator
     TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape, const btTransform& transform,
         const RecastSettings& settings)
     {
-        btVector3 aabbMin;
-        btVector3 aabbMax;
-        shape.getAabb(transform, aabbMin, aabbMax);
-
-        return makeTilesPositionsRange(Misc::Convert::toOsg(aabbMin), Misc::Convert::toOsg(aabbMax), settings);
+        const TileBounds bounds = makeObjectTileBounds(shape, transform);
+        return makeTilesPositionsRange(bounds.mMin, bounds.mMax, settings);
     }
 
     TilesPositionsRange makeTilesPositionsRange(const int cellSize, const btVector3& shift,
         const RecastSettings& settings)
     {
-        using Misc::Convert::toOsg;
-
         const int halfCellSize = cellSize / 2;
         const btTransform transform(btMatrix3x3::getIdentity(), shift);
         btVector3 aabbMin = transform(btVector3(-halfCellSize, -halfCellSize, 0));
@@ -57,6 +53,6 @@ namespace DetourNavigator
         aabbMax.setX(std::max(aabbMin.x(), aabbMax.x()));
         aabbMax.setY(std::max(aabbMin.y(), aabbMax.y()));
 
-        return makeTilesPositionsRange(toOsg(aabbMin), toOsg(aabbMax), settings);
+        return makeTilesPositionsRange(Misc::Convert::toOsgXY(aabbMin), Misc::Convert::toOsgXY(aabbMax), settings);
     }
 }
