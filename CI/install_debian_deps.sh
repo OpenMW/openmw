@@ -9,13 +9,11 @@ print_help() {
 }
 
 declare -rA GROUPED_DEPS=(
-  [gcc]="binutils gcc g++ libc-dev"
-  [clang]="binutils clang"
+  [gcc]="binutils gcc build-essential cmake ccache curl unzip git pkg-config"
+  [clang]="binutils clang make cmake ccache curl unzip git pkg-config"
 
   # Common dependencies for building OpenMW.
   [openmw-deps]="
-    make cmake ccache git pkg-config
-
     libboost-filesystem-dev libboost-program-options-dev
     libboost-system-dev libboost-iostreams-dev
 
@@ -27,7 +25,6 @@ declare -rA GROUPED_DEPS=(
 
   # These dependencies can alternatively be built and linked statically.
   [openmw-deps-dynamic]="libmygui-dev libopenscenegraph-dev libsqlite3-dev"
-  [coverity]="curl"
   [clang-tidy]="clang-tidy"
 
   # Pre-requisites for building MyGUI and OSG for static linking.
@@ -40,8 +37,7 @@ declare -rA GROUPED_DEPS=(
   #   * JPEG: libjpeg-dev
   #   * PNG: libpng-dev
   [openmw-deps-static]="
-    make cmake
-    ccache curl unzip libcollada-dom-dev libfreetype6-dev libjpeg-dev libpng-dev
+    libcollada-dom-dev libfreetype6-dev libjpeg-dev libpng-dev
     libsdl2-dev libboost-system-dev libboost-filesystem-dev libgl-dev
   "
 )

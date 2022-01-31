@@ -68,7 +68,7 @@ Coverity:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   before_script:
-    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic coverity
+    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
     - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64 --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - tar xfz /tmp/cov-analysis-linux64.tgz
   script:
@@ -181,9 +181,9 @@ Ubuntu_Static_Deps:
   cache:
     key: Ubuntu_Static_Deps.V1
     paths:
-    - apt-cache/
-    - ccache/
-    - build/extern/fetched/
+      - apt-cache/
+      - ccache/
+      - build/extern/fetched/
   before_script:
     - CI/install_debian_deps.sh clang openmw-deps openmw-deps-static
   variables:
@@ -555,15 +555,13 @@ Ubuntu_AndroidNDK_arm64-v8a:
   variables:
     CCACHE_SIZE: 3G
   cache:
-    key: Ubuntu__Focal_AndroidNDK_r22b_arm64-v8a.v1
+    key: Ubuntu__Focal_AndroidNDK_r22b_arm64-v8a.v2
     paths:
       - apt-cache/
       - ccache/
       - build/extern/fetched/
   before_script:
-    - export APT_CACHE_DIR=`pwd`/apt-cache && mkdir -pv $APT_CACHE_DIR
-    - apt-get update -yq
-    - apt-get -q -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake ccache curl unzip git build-essential
+    - CI/install_debian_deps.sh gcc
   stage: build
   script:
     - export CCACHE_BASEDIR="`pwd`"
