@@ -38,8 +38,9 @@ namespace DetourNavigator
             return false;
         std::vector<TilePosition> tilesPositions;
         {
+            const TilesPositionsRange range = makeTilesPositionsRange(shape.getShape(), transform, mSettings);
             const std::lock_guard lock(mMutex);
-            getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mSettings),
+            getTilesPositions(range,
                 [&] (const TilePosition& tilePosition)
                 {
                     if (addTile(id, shape, transform, areaType, tilePosition, mTiles))

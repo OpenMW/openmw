@@ -38,7 +38,6 @@ namespace DetourNavigator
             bool changed = false;
             std::vector<TilePosition> newTiles;
             {
-                const std::lock_guard lock(mMutex);
                 const auto onTilePosition = [&] (const TilePosition& tilePosition)
                 {
                     if (std::binary_search(currentTiles.begin(), currentTiles.end(), tilePosition))
@@ -57,7 +56,9 @@ namespace DetourNavigator
                         changed = true;
                     }
                 };
-                getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mSettings), onTilePosition);
+                const TilesPositionsRange range = makeTilesPositionsRange(shape.getShape(), transform, mSettings);
+                const std::lock_guard lock(mMutex);
+                getTilesPositions(range, onTilePosition);
                 std::sort(newTiles.begin(), newTiles.end());
                 for (const auto& tile : currentTiles)
                 {
