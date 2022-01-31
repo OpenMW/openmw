@@ -29,7 +29,7 @@ namespace DetourNavigator
         if (minTile.y() > maxTile.y())
             std::swap(minTile.y(), maxTile.y());
 
-        return {minTile, maxTile};
+        return {minTile, maxTile + osg::Vec2i(1, 1)};
     }
 
     TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape, const btTransform& transform,

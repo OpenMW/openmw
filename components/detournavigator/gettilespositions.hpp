@@ -18,8 +18,8 @@ namespace DetourNavigator
 
     struct TilesPositionsRange
     {
-        TilePosition mMin;
-        TilePosition mMax;
+        TilePosition mBegin;
+        TilePosition mEnd;
     };
 
     TilesPositionsRange makeTilesPositionsRange(const osg::Vec2f& aabbMin,
@@ -32,10 +32,10 @@ namespace DetourNavigator
         const RecastSettings& settings);
 
     template <class Callback>
-    void getTilesPositions(const TilesPositionsRange& range, Callback&& callback)
+    inline void getTilesPositions(const TilesPositionsRange& range, Callback&& callback)
     {
-        for (int tileX = range.mMin.x(); tileX <= range.mMax.x(); ++tileX)
-            for (int tileY = range.mMin.y(); tileY <= range.mMax.y(); ++tileY)
+        for (int tileX = range.mBegin.x(); tileX < range.mEnd.x(); ++tileX)
+            for (int tileY = range.mBegin.y(); tileY < range.mEnd.y(); ++tileY)
                 callback(TilePosition {tileX, tileY});
     }
 }
