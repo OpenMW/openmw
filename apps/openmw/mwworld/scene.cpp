@@ -819,8 +819,6 @@ namespace MWWorld
 
         loadingListener->setProgressRange(cell->count());
 
-        mNavigator.updatePlayerPosition(position.asVec3());
-
         // Load cell.
         mPagedRefs.clear();
         loadCell(cell, loadingListener, changeEvent);
@@ -853,8 +851,6 @@ namespace MWWorld
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
-
-        mNavigator.updatePlayerPosition(position.asVec3());
 
         changeCellGrid(position.asVec3(), x, y, changeEvent);
 

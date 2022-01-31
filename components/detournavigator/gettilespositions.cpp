@@ -2,7 +2,6 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 #include "tileposition.hpp"
-#include "tilebounds.hpp"
 
 #include <components/misc/convert.hpp>
 
@@ -33,15 +32,12 @@ namespace DetourNavigator
     }
 
     TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape, const btTransform& transform,
-        const TileBounds& bounds, const RecastSettings& settings)
+        const RecastSettings& settings)
     {
         btVector3 aabbMin;
         btVector3 aabbMax;
         shape.getAabb(transform, aabbMin, aabbMax);
-        aabbMin.setX(std::max<btScalar>(aabbMin.x(), bounds.mMin.x()));
-        aabbMin.setY(std::max<btScalar>(aabbMin.y(), bounds.mMin.y()));
-        aabbMax.setX(std::min<btScalar>(aabbMax.x(), bounds.mMax.x()));
-        aabbMax.setY(std::min<btScalar>(aabbMax.y(), bounds.mMax.y()));
+
         return makeTilesPositionsRange(Misc::Convert::toOsg(aabbMin), Misc::Convert::toOsg(aabbMax), settings);
     }
 
