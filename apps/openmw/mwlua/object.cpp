@@ -17,20 +17,24 @@ namespace MWLua
     };
 
     const static std::unordered_map<ESM::RecNameInts, LuaObjectTypeInfo> luaObjectTypeInfo = {
-        {ESM::REC_ACTI, {"Activator", ESM::LuaScriptCfg::sActivator}},
-        {ESM::REC_ARMO, {"Armor", ESM::LuaScriptCfg::sArmor}},
-        {ESM::REC_BOOK, {"Book", ESM::LuaScriptCfg::sBook}},
-        {ESM::REC_CLOT, {"Clothing", ESM::LuaScriptCfg::sClothing}},
-        {ESM::REC_CONT, {"Container", ESM::LuaScriptCfg::sContainer}},
-        {ESM::REC_CREA, {"Creature", ESM::LuaScriptCfg::sCreature}},
-        {ESM::REC_DOOR, {"Door", ESM::LuaScriptCfg::sDoor}},
-        {ESM::REC_INGR, {"Ingredient", ESM::LuaScriptCfg::sIngredient}},
-        {ESM::REC_LIGH, {"Light", ESM::LuaScriptCfg::sLight}},
-        {ESM::REC_MISC, {"Miscellaneous", ESM::LuaScriptCfg::sMiscItem}},
-        {ESM::REC_NPC_, {"NPC", ESM::LuaScriptCfg::sNPC}},
-        {ESM::REC_ALCH, {"Potion", ESM::LuaScriptCfg::sPotion}},
-        {ESM::REC_STAT, {"Static"}},
-        {ESM::REC_WEAP, {"Weapon", ESM::LuaScriptCfg::sWeapon}},
+        {ESM::REC_ACTI, {ObjectTypeName::Activator, ESM::LuaScriptCfg::sActivator}},
+        {ESM::REC_ARMO, {ObjectTypeName::Armor, ESM::LuaScriptCfg::sArmor}},
+        {ESM::REC_BOOK, {ObjectTypeName::Book, ESM::LuaScriptCfg::sBook}},
+        {ESM::REC_CLOT, {ObjectTypeName::Clothing, ESM::LuaScriptCfg::sClothing}},
+        {ESM::REC_CONT, {ObjectTypeName::Container, ESM::LuaScriptCfg::sContainer}},
+        {ESM::REC_CREA, {ObjectTypeName::Creature, ESM::LuaScriptCfg::sCreature}},
+        {ESM::REC_DOOR, {ObjectTypeName::Door, ESM::LuaScriptCfg::sDoor}},
+        {ESM::REC_INGR, {ObjectTypeName::Ingredient, ESM::LuaScriptCfg::sIngredient}},
+        {ESM::REC_LIGH, {ObjectTypeName::Light, ESM::LuaScriptCfg::sLight}},
+        {ESM::REC_MISC, {ObjectTypeName::MiscItem, ESM::LuaScriptCfg::sMiscItem}},
+        {ESM::REC_NPC_, {ObjectTypeName::NPC, ESM::LuaScriptCfg::sNPC}},
+        {ESM::REC_ALCH, {ObjectTypeName::Potion, ESM::LuaScriptCfg::sPotion}},
+        {ESM::REC_STAT, {ObjectTypeName::Static}},
+        {ESM::REC_WEAP, {ObjectTypeName::Weapon, ESM::LuaScriptCfg::sWeapon}},
+        {ESM::REC_APPA, {ObjectTypeName::Apparatus}},
+        {ESM::REC_LOCK, {ObjectTypeName::Lockpick}},
+        {ESM::REC_PROB, {ObjectTypeName::Probe}},
+        {ESM::REC_REPA, {ObjectTypeName::Repair}},
     };
 
     std::string_view getLuaObjectTypeName(ESM::RecNameInts type, std::string_view fallback)
