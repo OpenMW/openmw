@@ -56,7 +56,9 @@ namespace MWBase
             bool mRun = false;
             float mMovement = 0;
             float mSideMovement = 0;
-            float mTurn = 0;
+            float mPitchChange = 0;
+            float mYawChange = 0;
+            int mUse = 0;
         };
 
         virtual ActorControls* getActorControls(const MWWorld::Ptr&) const = 0;

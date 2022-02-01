@@ -92,6 +92,7 @@ namespace MWMechanics
 
     protected:
         int mLevel;
+        bool mAttackingOrSpell;
 
     public:
         CreatureStats();
@@ -124,7 +125,7 @@ namespace MWMechanics
 
         const MagicEffects & getMagicEffects() const;
 
-        bool getAttackingOrSpell() const;
+        bool getAttackingOrSpell() const { return mAttackingOrSpell; }
 
         int getLevel() const;
 
@@ -149,7 +150,7 @@ namespace MWMechanics
         /// Set Modifier for each magic effect according to \a effects. Does not touch Base values.
         void modifyMagicEffects(const MagicEffects &effects);
 
-        void setAttackingOrSpell(bool attackingOrSpell);
+        void setAttackingOrSpell(bool attackingOrSpell) { mAttackingOrSpell = attackingOrSpell; }
 
         void setLevel(int level);
 

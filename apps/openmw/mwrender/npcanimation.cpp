@@ -957,7 +957,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
         removeIndividualPart(ESM::PRT_Weapon);
         // If we remove/hide weapon from player, we should reset attack animation as well
         if (mPtr == MWMechanics::getPlayer())
-            MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
+            mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(false);
     }
 
     updateHolsteredWeapon(!mShowWeapons);
