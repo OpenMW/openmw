@@ -88,7 +88,7 @@ namespace MWMechanics
         void stopCombatMove();
         void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController,
             const ESM::Weapon* weapon, bool distantCombat);
-        void updateAttack(CharacterController& characterController);
+        void updateAttack(const MWWorld::Ptr& actor, CharacterController& characterController);
         void stopAttack();
 
         void startFleeing();

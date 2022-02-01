@@ -39,7 +39,6 @@ namespace MWWorld
         mTeleported(false),
         mCurrentCrimeId(-1),
         mPaidCrimeId(-1),
-        mAttackingOrSpell(false),
         mJumping(false)
     {
         ESM::CellRef cellRef;
@@ -266,12 +265,7 @@ namespace MWWorld
 
     void Player::setAttackingOrSpell(bool attackingOrSpell)
     {
-        mAttackingOrSpell = attackingOrSpell;
-    }
-
-    bool Player::getAttackingOrSpell() const
-    {
-        return mAttackingOrSpell;
+        getPlayer().getClass().getCreatureStats(getPlayer()).setAttackingOrSpell(attackingOrSpell);
     }
 
     void Player::setJumping(bool jumping)
@@ -314,7 +308,6 @@ namespace MWWorld
         mAutoMove = false;
         mForwardBackward = 0;
         mTeleported = false;
-        mAttackingOrSpell = false;
         mJumping = false;
         mCurrentCrimeId = -1;
         mPaidCrimeId = -1;

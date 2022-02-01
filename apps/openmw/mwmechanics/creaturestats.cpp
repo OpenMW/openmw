@@ -24,6 +24,7 @@ namespace MWMechanics
           mHitRecovery(false), mBlock(false), mMovementFlags(0),
           mFallHeight(0), mLastRestock(0,0), mGoldPool(0), mActorId(-1), mHitAttemptActorId(-1),
           mDeathAnimation(-1), mTimeOfDeath(), mSideMovementAngle(0), mLevel (0)
+        , mAttackingOrSpell(false)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;

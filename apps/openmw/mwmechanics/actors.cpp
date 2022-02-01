@@ -1401,9 +1401,6 @@ namespace MWMechanics
                 // AI processing is only done within given distance to the player.
                 bool inProcessingRange = distSqr <= mActorsProcessingRange*mActorsProcessingRange;
 
-                if (isPlayer)
-                    ctrl->setAttackingOrSpell(world->getPlayer().getAttackingOrSpell());
-
                 // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for the player.
                 if (iter->first != player && (iter->first.getClass().getCreatureStats(iter->first).isDead()
                     || !iter->first.getClass().getCreatureStats(iter->first).getAiSequence().isInCombat()
@@ -1524,25 +1521,31 @@ namespace MWMechanics
                         CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
                         float speedFactor = isPlayer ? 1.f : mov.mSpeedFactor;
                         osg::Vec2f movement = osg::Vec2f(mov.mPosition[0], mov.mPosition[1]) * speedFactor;
+                        float rotationX = mov.mRotation[0];
                         float rotationZ = mov.mRotation[2];
                         bool jump = mov.mPosition[2] == 1;
                         bool runFlag = stats.getMovementFlag(MWMechanics::CreatureStats::Flag_Run);
+                        bool attackingOrSpell = stats.getAttackingOrSpell();
                         if (luaControls->mChanged)
                         {
                             mov.mPosition[0] = luaControls->mSideMovement;
                             mov.mPosition[1] = luaControls->mMovement;
                             mov.mPosition[2] = luaControls->mJump ? 1 : 0;
+                            mov.mRotation[0] = luaControls->mPitchChange;
                             mov.mRotation[1] = 0;
-                            mov.mRotation[2] = luaControls->mTurn;
+                            mov.mRotation[2] = luaControls->mYawChange;
                             mov.mSpeedFactor = osg::Vec2(luaControls->mMovement, luaControls->mSideMovement).length();
                             stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, luaControls->mRun);
+                            stats.setAttackingOrSpell(luaControls->mUse == 1);
                             luaControls->mChanged = false;
                         }
                         luaControls->mSideMovement = movement.x();
                         luaControls->mMovement = movement.y();
-                        luaControls->mTurn = rotationZ;
+                        luaControls->mPitchChange = rotationX;
+                        luaControls->mYawChange = rotationZ;
                         luaControls->mJump = jump;
                         luaControls->mRun = runFlag;
+                        luaControls->mUse = attackingOrSpell ? luaControls->mUse | 1 : luaControls->mUse & ~1;
                     }
                 }
             }

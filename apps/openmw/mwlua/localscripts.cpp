@@ -27,9 +27,11 @@ namespace MWLua
                                            [](ActorControls& c, const TYPE& v) { c.FIELD = v; c.mChanged = true; })
         controls["movement"] = CONTROL(float, mMovement);
         controls["sideMovement"] = CONTROL(float, mSideMovement);
-        controls["turn"] = CONTROL(float, mTurn);
+        controls["pitchChange"] = CONTROL(float, mPitchChange);
+        controls["yawChange"] = CONTROL(float, mYawChange);
         controls["run"] = CONTROL(bool, mRun);
         controls["jump"] = CONTROL(bool, mJump);
+        controls["use"] = CONTROL(int, mUse);
 #undef CONTROL
 
         sol::usertype<SelfObject> selfAPI =
