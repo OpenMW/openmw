@@ -88,7 +88,7 @@ namespace MWLua
         : LuaUtil::ScriptsContainer(lua, "L" + idToString(obj.id()), autoStartMode), mData(obj)
     {
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
-        registerEngineHandlers({&mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers});
+        registerEngineHandlers({&mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers});
     }
 
     void LocalScripts::receiveEngineEvent(const EngineEvent& event)
@@ -105,6 +105,10 @@ namespace MWLua
             {
                 mData.mIsActive = false;
                 callEngineHandlers(mOnInactiveHandlers);
+            }
+            else if constexpr (std::is_same_v<EventT, OnActivated>)
+            {
+                callEngineHandlers(mOnActivatedHandlers, arg.mActivatingActor);
             }
             else
             {

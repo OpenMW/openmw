@@ -218,6 +218,7 @@ Programmers
     tlmullis
     tri4ng1e
     Thoronador
+    Tobias Tribble (zackogenic)
     Tom Lowe (Vulpen)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)
@@ -234,7 +235,6 @@ Programmers
     Yuri Krupenin
     zelurker
     Noah Gooder
-    
 
 Documentation
 -------------

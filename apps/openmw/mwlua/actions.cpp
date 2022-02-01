@@ -6,10 +6,13 @@
 #include <components/lua/luastate.hpp>
 #include <components/settings/settings.hpp>
 
-#include "../mwworld/cellstore.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/inventorystore.hpp"
-#include "../mwworld/player.hpp"
+#include <apps/openmw/mwbase/luamanager.hpp>
+
+#include <apps/openmw/mwworld/action.hpp>
+#include <apps/openmw/mwworld/cellstore.hpp>
+#include <apps/openmw/mwworld/class.hpp>
+#include <apps/openmw/mwworld/inventorystore.hpp>
+#include <apps/openmw/mwworld/player.hpp>
 
 namespace MWLua
 {
@@ -143,6 +146,26 @@ namespace MWLua
         for (const auto& [slot, item] : mEquipment)
             if (slot >= MWWorld::InventoryStore::Slots)
                 tryEquipToSlot(anySlot, item);
+    }
+
+    void ActivateAction::apply(WorldView& worldView) const
+    {
+        MWWorld::Ptr object = worldView.getObjectRegistry()->getPtr(mObject, true);
+        if (object.isEmpty())
+            throw std::runtime_error(std::string("Object not found: " + idToString(mObject)));
+        MWWorld::Ptr actor = worldView.getObjectRegistry()->getPtr(mActor, true);
+        if (actor.isEmpty())
+            throw std::runtime_error(std::string("Actor not found: " + idToString(mActor)));
+
+        MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
+        std::shared_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
+        action->execute(actor);
+    }
+
+    std::string ActivateAction::toString() const
+    {
+        return std::string("ActivateAction object=") + idToString(mObject) +
+               std::string(" actor=") + idToString(mActor);
     }
 
 }

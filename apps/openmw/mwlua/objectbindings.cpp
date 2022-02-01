@@ -137,6 +137,14 @@ namespace MWLua
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getWalkSpeed(o.ptr());
         };
+        objectT["activateBy"] = [context](const ObjectT& o, const ObjectT& actor)
+        {
+            uint32_t esmRecordType = actor.ptr().getType();
+            if (esmRecordType != ESM::REC_CREA && esmRecordType != ESM::REC_NPC_)
+                throw std::runtime_error("The argument of `activateBy` must be an actor who activates the object. Got: " +
+                                         ptrToString(actor.ptr()));
+            context.mLuaManager->addAction(std::make_unique<ActivateAction>(context.mLua, o.id(), actor.id()));
+        };
 
         if constexpr (std::is_same_v<ObjectT, GObject>)
         {  // Only for global scripts

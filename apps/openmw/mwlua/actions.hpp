@@ -65,6 +65,20 @@ namespace MWLua
         Equipment mEquipment;
     };
 
+    class ActivateAction final : public Action
+    {
+    public:
+        ActivateAction(LuaUtil::LuaState* state, ObjectId object, ObjectId actor)
+            : Action(state), mObject(object), mActor(actor) {}
+
+        void apply(WorldView&) const override;
+        std::string toString() const override;
+
+    private:
+        ObjectId mObject;
+        ObjectId mActor;
+    };
+
 }
 
 #endif // MWLUA_ACTIONS_H

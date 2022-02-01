@@ -352,6 +352,11 @@ namespace MWLua
         mLocalEngineEvents.push_back({getId(toPtr), LocalScripts::OnConsume{std::string(recordId)}});
     }
 
+    void LuaManager::objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor)
+    {
+        mLocalEngineEvents.push_back({getId(object), LocalScripts::OnActivated{LObject(getId(actor), mWorldView.getObjectRegistry())}});
+    }
+
     MWBase::LuaManager::ActorControls* LuaManager::getActorControls(const MWWorld::Ptr& ptr) const
     {
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
