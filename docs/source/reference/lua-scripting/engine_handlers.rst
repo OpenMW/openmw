@@ -43,6 +43,12 @@ Engine handler is a function defined by a script, that can be called by the engi
 |                                  | | can not access anything nearby, but it is possible to send         |
 |                                  | | an event to global scripts.                                        |
 +----------------------------------+----------------------------------------------------------------------+
+| onActivated(actor)               | | Called on an object when an actor activates it. Note that picking  |
+|                                  | | up an item is also an activation and works this way: (1) a copy of |
+|                                  | | the item is placed to the actor's inventory, (2) count of          |
+|                                  | | the original item is set to zero, (3) and only then onActivated is |
+|                                  | | called on the original item, so self.count is already zero.        |
++----------------------------------+----------------------------------------------------------------------+
 | onConsume(recordId)              | | Called if `recordId` (e.g. a potion) is consumed.                  |
 +----------------------------------+----------------------------------------------------------------------+
 | **Only for local scripts attached to a player**                                                         |

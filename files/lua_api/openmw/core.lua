@@ -218,6 +218,14 @@
 -- @param eventData
 
 -------------------------------------------------------------------------------
+-- Activate the object.
+-- @function [parent=#GameObject] activateBy
+-- @param self
+-- @param #GameObject actor The actor who activates the object
+-- @usage local self = require('openmw.self')
+-- object:activateBy(self)
+
+-------------------------------------------------------------------------------
 -- Returns `true` if the item is equipped on the object.
 -- @function [parent=#GameObject] isEquipped
 -- @param self

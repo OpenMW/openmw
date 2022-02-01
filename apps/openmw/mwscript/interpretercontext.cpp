@@ -12,6 +12,7 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
@@ -417,6 +418,7 @@ namespace MWScript
 
     void InterpreterContext::executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor)
     {
+        MWBase::Environment::get().getLuaManager()->objectActivated(ptr, actor);
         std::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
         action->execute (actor);
         if (action->getTarget() != MWWorld::Ptr() && action->getTarget() != ptr)

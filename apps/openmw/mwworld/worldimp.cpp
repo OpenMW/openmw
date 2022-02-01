@@ -3827,7 +3827,8 @@ namespace MWWorld
 
         if (object.getRefData().activate())
         {
-            std::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
+            MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
+            std::shared_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
             action->execute (actor);
         }
     }

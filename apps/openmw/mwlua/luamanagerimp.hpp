@@ -49,6 +49,7 @@ namespace MWLua
         void deregisterObject(const MWWorld::Ptr& ptr) override;
         void inputEvent(const InputEvent& event) override { mInputEvents.push_back(event); }
         void appliedToObject(const MWWorld::Ptr& toPtr, std::string_view recordId, const MWWorld::Ptr& fromPtr) override;
+        void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 

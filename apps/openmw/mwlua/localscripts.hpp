@@ -33,11 +33,15 @@ namespace MWLua
 
         struct OnActive {};
         struct OnInactive {};
+        struct OnActivated
+        {
+           LObject mActivatingActor;
+        };
         struct OnConsume
         {
             std::string mRecordId;
         };
-        using EngineEvent = std::variant<OnActive, OnInactive, OnConsume>;
+        using EngineEvent = std::variant<OnActive, OnInactive, OnConsume, OnActivated>;
 
         void receiveEngineEvent(const EngineEvent&);
 
@@ -48,6 +52,7 @@ namespace MWLua
         EngineHandlerList mOnActiveHandlers{"onActive"};
         EngineHandlerList mOnInactiveHandlers{"onInactive"};
         EngineHandlerList mOnConsumeHandlers{"onConsume"};
+        EngineHandlerList mOnActivatedHandlers{"onActivated"};
     };
 
 }
