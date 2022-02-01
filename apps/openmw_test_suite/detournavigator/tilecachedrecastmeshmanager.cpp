@@ -63,7 +63,7 @@ namespace
         EXPECT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
     }
 
-    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_object_for_existing_object_should_return_false)
+    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_object_for_existing_object_should_throw_exception)
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
@@ -225,7 +225,7 @@ namespace
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         const auto beforeAddRevision = manager.getRevision();
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        EXPECT_FALSE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
         EXPECT_EQ(manager.getRevision(), beforeAddRevision);
     }
 

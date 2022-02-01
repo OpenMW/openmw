@@ -33,6 +33,9 @@ namespace DetourNavigator
     bool TileCachedRecastMeshManager::addObject(const ObjectId id, const CollisionShape& shape,
                                                 const btTransform& transform, const AreaType areaType)
     {
+        const auto it = mObjectsTilesPositions.find(id);
+        if (it != mObjectsTilesPositions.end())
+            return false;
         std::vector<TilePosition> tilesPositions;
         {
             const std::lock_guard lock(mMutex);
@@ -46,7 +49,7 @@ namespace DetourNavigator
         if (tilesPositions.empty())
             return false;
         std::sort(tilesPositions.begin(), tilesPositions.end());
-        mObjectsTilesPositions.insert_or_assign(id, std::move(tilesPositions));
+        mObjectsTilesPositions.emplace_hint(it, id, std::move(tilesPositions));
         ++mRevision;
         return true;
     }
@@ -66,6 +69,7 @@ namespace DetourNavigator
                     result = removed;
             }
         }
+        mObjectsTilesPositions.erase(object);
         if (result)
             ++mRevision;
         return result;
@@ -73,7 +77,12 @@ namespace DetourNavigator
 
     bool TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
-        auto& tilesPositions = mWaterTilesPositions[cellPosition];
+        const auto it = mWaterTilesPositions.find(cellPosition);
+        if (it != mWaterTilesPositions.end())
+            return false;
+
+        std::vector<TilePosition>& tilesPositions = mWaterTilesPositions.emplace_hint(
+            it, cellPosition, std::vector<TilePosition>())->second;
 
         bool result = false;
 
@@ -138,6 +147,7 @@ namespace DetourNavigator
             if (tileResult && !result)
                 result = tileResult;
         }
+        mWaterTilesPositions.erase(object);
         if (result)
             ++mRevision;
         return result;
@@ -146,8 +156,13 @@ namespace DetourNavigator
     bool TileCachedRecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
         const HeightfieldShape& shape)
     {
+        const auto it = mHeightfieldTilesPositions.find(cellPosition);
+        if (it != mHeightfieldTilesPositions.end())
+            return false;
+
+        std::vector<TilePosition>& tilesPositions = mHeightfieldTilesPositions.emplace_hint(
+            it, cellPosition, std::vector<TilePosition>())->second;
         const btVector3 shift = getHeightfieldShift(shape, cellPosition, cellSize);
-        auto& tilesPositions = mHeightfieldTilesPositions[cellPosition];
 
         bool result = false;
 
@@ -196,6 +211,7 @@ namespace DetourNavigator
             if (tileResult && !result)
                 result = tileResult;
         }
+        mHeightfieldTilesPositions.erase(object);
         if (result)
             ++mRevision;
         return result;
