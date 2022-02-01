@@ -756,7 +756,8 @@ namespace MWGui
             return std::regex(searchRegex, flags);
         }
 
-        int weightedSearch(const std::regex& regex, const std::string& text)
+        // use double to guarantee no overflow when casting from size_t
+        double weightedSearch(const std::regex& regex, const std::string& text)
         {
             std::smatch matches;
             std::regex_search(text, matches, regex);
@@ -772,24 +773,23 @@ namespace MWGui
         mScriptView->setCanvasSize({0, 0});
 
         std::regex searchRegex = wordSearch(mScriptFilter->getCaption());
-        std::vector<std::tuple<size_t, LuaUi::ScriptSettingsPage, int>> weightedPages;
+        std::vector<std::tuple<size_t, LuaUi::ScriptSettingsPage, double, double>> weightedPages;
         weightedPages.reserve(LuaUi::scriptSettingsPageCount());
         for (size_t i = 0; i < LuaUi::scriptSettingsPageCount(); ++i)
         {
             LuaUi::ScriptSettingsPage page = LuaUi::scriptSettingsPageAt(i);
-            int nameSearch = 2 * weightedSearch(searchRegex, page.mName);
-            int descriptionSearch = weightedSearch(searchRegex, page.mSearchHints);
-            int search = nameSearch + descriptionSearch;
-            if (search > 0)
-                weightedPages.push_back({ i, page, search });
+            double nameSearch = 2 * weightedSearch(searchRegex, page.mName);
+            double hintSearch = weightedSearch(searchRegex, page.mSearchHints);
+            if ((nameSearch + hintSearch) > 0)
+                weightedPages.push_back({ i, page, -nameSearch, -hintSearch });
         }
         std::sort(weightedPages.begin(), weightedPages.end(), [](const auto& a, const auto& b)
         {
-            const auto& [iA, pageA, weightA] = a;
-            const auto& [iB, pageB, weightB] = b;
-            return weightA == weightB ? pageA.mName < pageB.mName : weightA > weightB;
+            const auto& [iA, pageA, nameA, hintA] = a;
+            const auto& [iB, pageB, nameB, hintB] = b;
+            return std::tie(nameA, hintA, pageA.mName) < std::tie(nameB, hintB, pageB.mName);
         });
-        for (const auto & [i, page, weight] : weightedPages)
+        for (const auto & [i, page, name, hint] : weightedPages)
             mScriptList->addItem(page.mName, i);
 
         // Hide script settings tab when the game world isn't loaded and scripts couldn't add their settings
@@ -814,8 +814,7 @@ namespace MWGui
             mCurrentPage = *mScriptList->getItemDataAt<size_t>(index);
             LuaUi::attachPageAt(mCurrentPage, mScriptAdapter);
         }
-        MyGUI::IntSize canvasSize = mScriptAdapter->getSize();
-        mScriptView->setCanvasSize(canvasSize);
+        mScriptView->setCanvasSize(mScriptAdapter->getSize());
     }
 
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)
