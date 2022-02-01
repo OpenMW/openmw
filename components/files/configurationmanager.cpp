@@ -187,7 +187,7 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
     if (description.find_nothrow("replace", false))
     {
         auto replace = second["replace"];
-        if (!replace.empty())
+        if (!replace.defaulted() && !replace.empty())
         {
             std::vector<std::string> replaceVector = replace.as<std::vector<std::string>>();
             replacedVariables.insert(replaceVector.begin(), replaceVector.end());
@@ -206,13 +206,13 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
                 continue;
             }
 
-            if (replacedVariables.count(name))
+            if (replacedVariables.count(name) || firstPosition->second.defaulted() || firstPosition->second.empty())
             {
                 firstPosition->second = second[name];
                 continue;
             }
 
-            if (second[name].empty())
+            if (second[name].defaulted() || second[name].empty())
                 continue;
 
             boost::any& firstValue = firstPosition->second.value();
