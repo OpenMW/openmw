@@ -13,19 +13,24 @@ local aux_util = {}
 -- @function [parent=#util] findNearestTo
 -- @param openmw.util#Vector3 point
 -- @param openmw.core#ObjectList objectList
+-- @param #number minDist (optional) ignore objects that are closer than minDist
+-- @param #number maxDist (optional) ignore objects that are farther than maxDist
 -- @return openmw.core#GameObject, #number the nearest object and the distance
-function aux_util.findNearestTo(point, objectList)
+function aux_util.findNearestTo(point, objectList, minDist, maxDist)
     local res = nil
     local resDist = nil
+    local minDist = minDist or 0
     for i = 1, #objectList do
         local obj = objectList[i]
         local dist = (obj.position - point):length()
-        if i == 1 or dist < resDist then
+        if dist >= minDist and (not res or dist < resDist) then
             res = obj
             resDist = dist
         end
     end
-    return res, resDist
+    if res and (not maxDist or resDist <= maxDist) then
+        return res, resDist
+    end
 end
 
 return aux_util
