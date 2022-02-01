@@ -12,14 +12,6 @@
 
 #include <gtest/gtest.h>
 
-namespace DetourNavigator
-{
-    static inline bool operator ==(const TileBounds& lhs, const TileBounds& rhs)
-    {
-        return lhs.mMin == rhs.mMin && lhs.mMax == rhs.mMax;
-    }
-}
-
 namespace
 {
     template <class T>

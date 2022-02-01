@@ -24,6 +24,8 @@ namespace DetourNavigator
 
         void setWorldspace(std::string_view worldspace) override;
 
+        void updateBounds(const osg::Vec3f& playerPosition) override;
+
         bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
 
         bool addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) override;

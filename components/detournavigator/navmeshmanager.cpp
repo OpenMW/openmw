@@ -42,6 +42,18 @@ namespace
 
 namespace DetourNavigator
 {
+    namespace
+    {
+        TileBounds makeBounds(const RecastSettings& settings, const osg::Vec2f& center, int maxTiles)
+        {
+            const float radius = fromNavMeshCoordinates(settings, std::ceil(std::sqrt(static_cast<float>(maxTiles) / osg::PIf) + 1) * getTileSize(settings));
+            TileBounds result;
+            result.mMin = center - osg::Vec2f(radius, radius);
+            result.mMax = center + osg::Vec2f(radius, radius);
+            return result;
+        }
+    }
+
     NavMeshManager::NavMeshManager(const Settings& settings, std::unique_ptr<NavMeshDb>&& db)
         : mSettings(settings)
         , mRecastMeshManager(settings.mRecast)
@@ -59,21 +71,37 @@ namespace DetourNavigator
         mWorldspace = worldspace;
     }
 
+    void NavMeshManager::updateBounds(const osg::Vec3f& playerPosition)
+    {
+        const TileBounds bounds = makeBounds(mSettings.mRecast, osg::Vec2f(playerPosition.x(), playerPosition.y()),
+                                             mSettings.mMaxTilesNumber);
+        const auto changedTiles = mRecastMeshManager.setBounds(bounds);
+        for (const auto& [agent, cache] : mCache)
+        {
+            auto& tiles = mChangedTiles[agent];
+            for (const auto& [tilePosition, changeType] : changedTiles)
+            {
+                auto tile = tiles.find(tilePosition);
+                if (tile == tiles.end())
+                    tiles.emplace_hint(tile, tilePosition, changeType);
+                else
+                    tile->second = addChangeType(tile->second, changeType);
+            }
+        }
+    }
+
     bool NavMeshManager::addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                                    const AreaType areaType)
     {
-        const btCollisionShape& collisionShape = shape.getShape();
-        if (!mRecastMeshManager.addObject(id, shape, transform, areaType))
-            return false;
-        addChangedTiles(collisionShape, transform, ChangeType::add);
-        return true;
+        return mRecastMeshManager.addObject(id, shape, transform, areaType,
+            [&] (const TilePosition& tile) { addChangedTile(tile, ChangeType::add); });
     }
 
     bool NavMeshManager::updateObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
         return mRecastMeshManager.updateObject(id, shape, transform, areaType,
-            [&] (const TilePosition& tile) { addChangedTile(tile, ChangeType::update); });
+            [&] (const TilePosition& tile, ChangeType changeType) { addChangedTile(tile, changeType); });
     }
 
     bool NavMeshManager::removeObject(const ObjectId id)
@@ -263,7 +291,8 @@ namespace DetourNavigator
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
             const ChangeType changeType)
     {
-        getTilesPositions(makeTilesPositionsRange(shape, transform, mSettings.mRecast),
+        const auto bounds = mRecastMeshManager.getBounds();
+        getTilesPositions(makeTilesPositionsRange(shape, transform, bounds, mSettings.mRecast),
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 

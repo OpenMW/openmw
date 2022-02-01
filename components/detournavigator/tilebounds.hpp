@@ -21,9 +21,24 @@ namespace DetourNavigator
         osg::Vec2f mMax;
     };
 
+    inline auto tie(const TileBounds& value) noexcept
+    {
+        return std::tie(value.mMin, value.mMax);
+    }
+
     inline bool operator<(const TileBounds& lhs, const TileBounds& rhs) noexcept
     {
-        return std::tie(lhs.mMin, lhs.mMax) < std::tie(rhs.mMin, rhs.mMax);
+        return tie(lhs) < tie(rhs);
+    }
+
+    inline bool operator ==(const TileBounds& lhs, const TileBounds& rhs) noexcept
+    {
+        return tie(lhs) == tie(rhs);
+    }
+
+    inline bool operator !=(const TileBounds& lhs, const TileBounds& rhs) noexcept
+    {
+        return !(lhs == rhs);
     }
 
     inline std::optional<TileBounds> getIntersection(const TileBounds& a, const TileBounds& b) noexcept

@@ -534,6 +534,8 @@ namespace MWWorld
                 unloadCell (cell);
         }
 
+        mNavigator.updateBounds(pos);
+
         mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
         osg::Vec4i newGrid = gridCenterToBounds(mCurrentGridCenter);
         mRendering.setActiveGrid(newGrid);
@@ -820,6 +822,8 @@ namespace MWWorld
         assert(mActiveCells.empty());
 
         loadingListener->setProgressRange(cell->count());
+
+        mNavigator.updateBounds(position.asVec3());
 
         // Load cell.
         mPagedRefs.clear();

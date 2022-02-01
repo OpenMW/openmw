@@ -84,6 +84,12 @@ namespace DetourNavigator
         virtual void setWorldspace(std::string_view worldspace) = 0;
 
         /**
+         * @brief updateBounds should be called before adding object from loading cell
+         * @param playerPosition corresponds to the bounds center
+         */
+        virtual void updateBounds(const osg::Vec3f& playerPosition) = 0;
+
+        /**
          * @brief addObject is used to add complex object with allowed to walk and avoided to walk shapes
          * @param id is used to distinguish different objects
          * @param shape members must live until object is updated by another shape removed from Navigator

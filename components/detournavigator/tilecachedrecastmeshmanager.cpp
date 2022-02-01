@@ -2,18 +2,92 @@
 #include "makenavmesh.hpp"
 #include "gettilespositions.hpp"
 #include "settingsutils.hpp"
+#include "changetype.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
 
 #include <algorithm>
 #include <vector>
+#include <limits>
 
 namespace DetourNavigator
 {
+    namespace
+    {
+        const TileBounds infiniteTileBounds {
+            osg::Vec2f(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()),
+            osg::Vec2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
+        };
+    }
+
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const RecastSettings& settings)
         : mSettings(settings)
+        , mBounds(infiniteTileBounds)
+        , mRange(makeTilesPositionsRange(mBounds.mMin, mBounds.mMax, mSettings))
     {}
+
+    TileBounds TileCachedRecastMeshManager::getBounds() const
+    {
+        return mBounds;
+    }
+
+    std::vector<std::pair<TilePosition, ChangeType>> TileCachedRecastMeshManager::setBounds(const TileBounds& bounds)
+    {
+        std::vector<std::pair<TilePosition, ChangeType>> changedTiles;
+
+        if (mBounds == bounds)
+            return changedTiles;
+
+        const auto newRange = makeTilesPositionsRange(bounds.mMin, bounds.mMax, mSettings);
+
+        if (mBounds != infiniteTileBounds)
+        {
+            const std::lock_guard lock(mMutex);
+            for (auto& object : mObjects)
+            {
+                const ObjectId id = object.first;
+                ObjectData& data = object.second;
+                const TilesPositionsRange objectRange = makeTilesPositionsRange(data.mShape.getShape(), data.mTransform, mSettings);
+
+                const auto onOldTilePosition = [&] (const TilePosition& position)
+                {
+                    if (isInTilesPositionsRange(newRange, position))
+                        return;
+                    const auto it = data.mTiles.find(position);
+                    if (it == data.mTiles.end())
+                        return;
+                    data.mTiles.erase(it);
+                    if (removeTile(id, position, mTiles))
+                        changedTiles.emplace_back(position, ChangeType::remove);
+                };
+                getTilesPositions(getIntersection(mRange, objectRange), onOldTilePosition);
+
+                const auto onNewTilePosition = [&] (const TilePosition& position)
+                {
+                    if (data.mTiles.find(position) != data.mTiles.end())
+                        return;
+                    if (addTile(id, data.mShape, data.mTransform, data.mAreaType, position, mTiles))
+                    {
+                        data.mTiles.insert(position);
+                        changedTiles.emplace_back(position, ChangeType::add);
+                    }
+                };
+                getTilesPositions(getIntersection(newRange, objectRange), onNewTilePosition);
+            }
+
+            std::sort(changedTiles.begin(), changedTiles.end());
+            changedTiles.erase(std::unique(changedTiles.begin(), changedTiles.end()), changedTiles.end());
+        }
+
+        if (!changedTiles.empty())
+            ++mRevision;
+
+        mBounds = bounds;
+        mRange = newRange;
+
+        return changedTiles;
+    }
 
     std::string TileCachedRecastMeshManager::getWorldspace() const
     {
@@ -30,47 +104,22 @@ namespace DetourNavigator
         mWorldspace = worldspace;
     }
 
-    bool TileCachedRecastMeshManager::addObject(const ObjectId id, const CollisionShape& shape,
-                                                const btTransform& transform, const AreaType areaType)
-    {
-        const auto it = mObjectsTilesPositions.find(id);
-        if (it != mObjectsTilesPositions.end())
-            return false;
-        std::vector<TilePosition> tilesPositions;
-        {
-            const TilesPositionsRange range = makeTilesPositionsRange(shape.getShape(), transform, mSettings);
-            const std::lock_guard lock(mMutex);
-            getTilesPositions(range,
-                [&] (const TilePosition& tilePosition)
-                {
-                    if (addTile(id, shape, transform, areaType, tilePosition, mTiles))
-                        tilesPositions.push_back(tilePosition);
-                });
-        }
-        if (tilesPositions.empty())
-            return false;
-        std::sort(tilesPositions.begin(), tilesPositions.end());
-        mObjectsTilesPositions.emplace_hint(it, id, std::move(tilesPositions));
-        ++mRevision;
-        return true;
-    }
-
     std::optional<RemovedRecastMeshObject> TileCachedRecastMeshManager::removeObject(const ObjectId id)
     {
-        const auto object = mObjectsTilesPositions.find(id);
-        if (object == mObjectsTilesPositions.end())
+        const auto object = mObjects.find(id);
+        if (object == mObjects.end())
             return std::nullopt;
         std::optional<RemovedRecastMeshObject> result;
         {
             const std::lock_guard lock(mMutex);
-            for (const auto& tilePosition : object->second)
+            for (const auto& tilePosition : object->second.mTiles)
             {
                 const auto removed = removeTile(id, tilePosition, mTiles);
                 if (removed && !result)
                     result = removed;
             }
         }
-        mObjectsTilesPositions.erase(object);
+        mObjects.erase(object);
         if (result)
             ++mRevision;
         return result;

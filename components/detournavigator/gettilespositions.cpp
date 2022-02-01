@@ -39,6 +39,14 @@ namespace DetourNavigator
         return makeTilesPositionsRange(bounds.mMin, bounds.mMax, settings);
     }
 
+    TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape, const btTransform& transform,
+        const TileBounds& bounds, const RecastSettings& settings)
+    {
+        if (const auto intersection = getIntersection(bounds, makeObjectTileBounds(shape, transform)))
+            return makeTilesPositionsRange(intersection->mMin, intersection->mMax, settings);
+        return {};
+    }
+
     TilesPositionsRange makeTilesPositionsRange(const int cellSize, const btVector3& shift,
         const RecastSettings& settings)
     {
@@ -54,5 +62,18 @@ namespace DetourNavigator
         aabbMax.setY(std::max(aabbMin.y(), aabbMax.y()));
 
         return makeTilesPositionsRange(Misc::Convert::toOsgXY(aabbMin), Misc::Convert::toOsgXY(aabbMax), settings);
+    }
+
+    TilesPositionsRange getIntersection(const TilesPositionsRange& a, const TilesPositionsRange& b) noexcept
+    {
+        const int beginX = std::max(a.mBegin.x(), b.mBegin.x());
+        const int endX = std::min(a.mEnd.x(), b.mEnd.x());
+        if (beginX > endX)
+            return {};
+        const int beginY = std::max(a.mBegin.y(), b.mBegin.y());
+        const int endY = std::min(a.mEnd.y(), b.mEnd.y());
+        if (beginY > endY)
+            return {};
+        return TilesPositionsRange {TilePosition(beginX, beginY), TilePosition(endX, endY)};
     }
 }
