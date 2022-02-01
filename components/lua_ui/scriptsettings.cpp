@@ -15,14 +15,14 @@ namespace LuaUi
         ScriptSettingsPage parse(const sol::table& options)
         {
             auto name = options.get_or("name", std::string());
-            auto description = options.get_or("description", std::string());
+            auto searchHints = options.get_or("searchHints", std::string());
             auto element = options.get_or<std::shared_ptr<LuaUi::Element>>("element", nullptr);
             if (name.empty())
                 Log(Debug::Warning) << "A script settings page has an empty name";
             if (!element.get())
                 Log(Debug::Warning) << "A script settings page has no UI element assigned";
             return {
-                name, description, element
+                name, searchHints, element
             };
         }
     }

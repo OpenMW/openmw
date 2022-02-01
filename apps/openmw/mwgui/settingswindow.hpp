@@ -52,7 +52,6 @@ namespace MWGui
             MyGUI::ScrollView* mScriptView;
             LuaUi::LuaAdapter* mScriptAdapter;
             MyGUI::EditBox* mScriptDisabled;
-            MyGUI::EditBox* mScriptDescription;
             int mCurrentPage;
 
             void onTabChanged(MyGUI::TabControl* _sender, size_t index);
@@ -84,7 +83,6 @@ namespace MWGui
 
             void onScriptFilterChange(MyGUI::EditBox*);
             void onScriptListSelection(MyGUI::ListBox*, size_t index);
-            void onScriptListFocus(MyGUI::ListBox*, size_t index);
 
             void apply();
 

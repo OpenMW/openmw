@@ -244,7 +244,6 @@ namespace MWGui
         getWidget(mScriptView, "ScriptView");
         getWidget(mScriptAdapter, "ScriptAdapter");
         getWidget(mScriptDisabled, "ScriptDisabled");
-        getWidget(mScriptDescription, "ScriptDescription");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -333,7 +332,6 @@ namespace MWGui
 
         mScriptFilter->eventEditTextChange += MyGUI::newDelegate(this, &SettingsWindow::onScriptFilterChange);
         mScriptList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SettingsWindow::onScriptListSelection);
-        mScriptList->eventListMouseItemFocus += MyGUI::newDelegate(this, &SettingsWindow::onScriptListFocus);
     }
 
     void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
@@ -780,7 +778,7 @@ namespace MWGui
         {
             LuaUi::ScriptSettingsPage page = LuaUi::scriptSettingsPageAt(i);
             int nameSearch = 2 * weightedSearch(searchRegex, page.mName);
-            int descriptionSearch = weightedSearch(searchRegex, page.mDescription);
+            int descriptionSearch = weightedSearch(searchRegex, page.mSearchHints);
             int search = nameSearch + descriptionSearch;
             if (search > 0)
                 weightedPages.push_back({ i, page, search });
@@ -818,21 +816,6 @@ namespace MWGui
         }
         MyGUI::IntSize canvasSize = mScriptAdapter->getSize();
         mScriptView->setCanvasSize(canvasSize);
-    }
-
-    void SettingsWindow::onScriptListFocus(MyGUI::ListBox*, size_t index)
-    {
-        if (index >= mScriptList->getItemCount())
-        {
-            mScriptDescription->setVisible(false);
-            mScriptView->setVisible(true);
-        }
-        else {
-            size_t page = *mScriptList->getItemDataAt<size_t>(index);
-            mScriptDescription->setCaption(LuaUi::scriptSettingsPageAt(page).mDescription);
-            mScriptDescription->setVisible(true);
-            mScriptView->setVisible(false);
-        }
     }
 
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)

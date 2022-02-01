@@ -14,7 +14,7 @@ namespace LuaUi
     struct ScriptSettingsPage
     {
         std::string mName;
-        std::string mDescription;
+        std::string mSearchHints;
         std::shared_ptr<Element> mElement;
     };
     size_t scriptSettingsPageCount();

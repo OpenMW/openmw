@@ -666,14 +666,6 @@
                         <Property key="CanvasSize" value="246 246"/>
                         <Widget name="ScriptAdapter" type="LuaAdapter" position="0 0 246 246"/>
                     </Widget>
-                    <Widget name="ScriptDescription" type = "EditBox" skin="SandText" position="2 2 246 246" align="Stretch">
-                        <Property key="Visible" value="false"/>
-                        <Property key="Caption" value="Scripts settings are only available when a game is loaded."/>
-                        <Property key="TextAlign" value="Center" />
-                        <Property key="MultiLine" value="true" />
-                        <Property key="WordWrap" value="true" />
-                        <Property key="Static" value="true"/>
-                    </Widget>
                 </Widget>
                 <Widget name="ScriptDisabled" type="EditBox" skin="SandText" position="0 0 360 308" align="Center">
                     <Property key="Visible" value="false"/>
