@@ -239,10 +239,7 @@ namespace MWLua
             typeTable.set(it.second, it.first);
         api["TYPE"] = LuaUtil::makeReadOnly(typeTable);
 
-        api["registerSettingsPage"] = [](sol::table options)
-        {
-            LuaUi::registerSettingsPage(options);
-        };
+        api["registerSettingsPage"] = &LuaUi::registerSettingsPage;
 
         return LuaUtil::makeReadOnly(api);
     }

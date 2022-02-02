@@ -38,7 +38,7 @@
 
 ---
 -- Adds a settings page to main menu setting's Scripts tab.
--- @function [parent=#ui] regregisterSettingsPageister
+-- @function [parent=#ui] registerSettingsPage
 -- @param #SettingsPage page
 
 ---
@@ -143,7 +143,7 @@
 -- @field #number button Mouse button which triggered the event (could be nil)
 
 ---
--- Settings page parameters, passed as an argument to uyi.registerSettingsPage
+-- Settings page parameters, passed as an argument to ui.registerSettingsPage
 -- @type SettingsPage
 -- @field #string name Name of the page, displayed in the list, used for search
 -- @field #string searchHints Additional keywords used in search, not displayed anywhere

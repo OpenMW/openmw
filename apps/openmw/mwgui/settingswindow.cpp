@@ -712,10 +712,10 @@ namespace MWGui
 
     void SettingsWindow::resizeScriptSettings()
     {
-        static const int minListWidth = 150;
-        static const float relativeListWidth = 0.2f;
-        static const int padding = 2;
-        static const int outerPadding = padding * 2;
+        constexpr int minListWidth = 150;
+        constexpr float relativeListWidth = 0.2f;
+        constexpr int padding = 2;
+        constexpr int outerPadding = padding * 2;
         MyGUI::IntSize parentSize = mScriptFilter->getParent()->getClientCoord().size();
         int listWidth = std::max(minListWidth, static_cast<int>(parentSize.width * relativeListWidth));
         int filterHeight = mScriptFilter->getSize().height;
@@ -732,13 +732,13 @@ namespace MWGui
     {
         std::string escapeRegex(const std::string& str)
         {
-            static std::regex specialChars(R"r([\^\.\[\$\(\)\|\*\+\?\{])r", std::regex_constants::extended);
+            static const std::regex specialChars(R"r([\^\.\[\$\(\)\|\*\+\?\{])r", std::regex_constants::extended);
             return std::regex_replace(str, specialChars, R"(\$&)");
         }
 
         std::regex wordSearch(const std::string& query)
         {
-            static std::regex wordsRegex(R"([^[:space:]]+)", std::regex_constants::extended);
+            static const std::regex wordsRegex(R"([^[:space:]]+)", std::regex_constants::extended);
             auto wordsBegin = std::sregex_iterator(query.begin(), query.end(), wordsRegex);
             auto wordsEnd = std::sregex_iterator();
             std::string searchRegex("(");
@@ -752,16 +752,15 @@ namespace MWGui
             // query had only whitespace characters
             if (searchRegex == "()")
                 searchRegex = "^(.*)$";
-            static auto flags = std::regex_constants::icase | std::regex_constants::extended;
-            return std::regex(searchRegex, flags);
+            return std::regex(searchRegex, std::regex_constants::extended | std::regex_constants::icase);
         }
 
-        // use double to guarantee no overflow when casting from size_t
         double weightedSearch(const std::regex& regex, const std::string& text)
         {
             std::smatch matches;
             std::regex_search(text, matches, regex);
-            return matches.size();
+            // need a signed value, so cast to double (not an integer type to guarantee no overflow)
+            return static_cast<double>(matches.size());
         }
     }
          
@@ -772,25 +771,31 @@ namespace MWGui
         mScriptList->removeAllItems();
         mScriptView->setCanvasSize({0, 0});
 
+        struct WeightedPage {
+            size_t mIndex;
+            std::string mName;
+            double mNameWeight;
+            double mHintWeight;
+
+            constexpr auto tie() const { return std::tie(mNameWeight, mHintWeight, mName); }
+
+            constexpr bool operator<(const WeightedPage& rhs) const { return tie() < rhs.tie(); }
+        };
+
         std::regex searchRegex = wordSearch(mScriptFilter->getCaption());
-        std::vector<std::tuple<size_t, LuaUi::ScriptSettingsPage, double, double>> weightedPages;
+        std::vector<WeightedPage> weightedPages;
         weightedPages.reserve(LuaUi::scriptSettingsPageCount());
         for (size_t i = 0; i < LuaUi::scriptSettingsPageCount(); ++i)
         {
             LuaUi::ScriptSettingsPage page = LuaUi::scriptSettingsPageAt(i);
-            double nameSearch = 2 * weightedSearch(searchRegex, page.mName);
-            double hintSearch = weightedSearch(searchRegex, page.mSearchHints);
-            if ((nameSearch + hintSearch) > 0)
-                weightedPages.push_back({ i, page, -nameSearch, -hintSearch });
+            double nameWeight = weightedSearch(searchRegex, page.mName);
+            double hintWeight = weightedSearch(searchRegex, page.mSearchHints);
+            if ((nameWeight + hintWeight) > 0)
+                weightedPages.push_back({ i, page.mName, -nameWeight, -hintWeight });
         }
-        std::sort(weightedPages.begin(), weightedPages.end(), [](const auto& a, const auto& b)
-        {
-            const auto& [iA, pageA, nameA, hintA] = a;
-            const auto& [iB, pageB, nameB, hintB] = b;
-            return std::tie(nameA, hintA, pageA.mName) < std::tie(nameB, hintB, pageB.mName);
-        });
-        for (const auto & [i, page, name, hint] : weightedPages)
-            mScriptList->addItem(page.mName, i);
+        std::sort(weightedPages.begin(), weightedPages.end());
+        for (const WeightedPage& weightedPage : weightedPages)
+            mScriptList->addItem(weightedPage.mName, weightedPage.mIndex);
 
         // Hide script settings tab when the game world isn't loaded and scripts couldn't add their settings
         bool disabled = LuaUi::scriptSettingsPageCount() == 0;
