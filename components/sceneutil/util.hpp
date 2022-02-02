@@ -49,7 +49,37 @@ namespace SceneUtil
     // Transform a bounding sphere by a matrix
     // based off private code in osg::Transform
     // TODO: patch osg to make public
-    void transformBoundingSphere (const osg::Matrixf& matrix, osg::BoundingSphere& bsphere);
+    template<typename VT>
+    inline void transformBoundingSphere (const osg::Matrixf& matrix, osg::BoundingSphereImpl<VT>& bsphere)
+    {
+        VT xdash = bsphere._center;
+        xdash.x() += bsphere._radius;
+        xdash = xdash*matrix;
+
+        VT ydash = bsphere._center;
+        ydash.y() += bsphere._radius;
+        ydash = ydash*matrix;
+
+        VT zdash = bsphere._center;
+        zdash.z() += bsphere._radius;
+        zdash = zdash*matrix;
+
+        bsphere._center = bsphere._center*matrix;
+
+        xdash -= bsphere._center;
+        typename VT::value_type sqrlen_xdash = xdash.length2();
+
+        ydash -= bsphere._center;
+        typename VT::value_type sqrlen_ydash = ydash.length2();
+
+        zdash -= bsphere._center;
+        typename VT::value_type sqrlen_zdash = zdash.length2();
+
+        bsphere._radius = sqrlen_xdash;
+        if (bsphere._radius<sqrlen_ydash) bsphere._radius = sqrlen_ydash;
+        if (bsphere._radius<sqrlen_zdash) bsphere._radius = sqrlen_zdash;
+        bsphere._radius = sqrtf(bsphere._radius);
+    }
 
     osg::Vec4f colourFromRGB (unsigned int clr);
 
