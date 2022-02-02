@@ -123,6 +123,18 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
     if (!boost::filesystem::is_directory(mScreenshotPath))
         mScreenshotPath = mUserDataPath;
 
+    if (!quiet && !variables["replace"].empty())
+    {
+        for (const std::string& var : variables["replace"].as<std::vector<std::string>>())
+        {
+            if (var == "config")
+            {
+                Log(Debug::Warning) << "replace=config is not allowed and was ignored";
+                break;
+            }
+        }
+    }
+
     if (!quiet)
     {
         Log(Debug::Info) << "Logs dir: " << getUserConfigPath().string();
