@@ -1109,7 +1109,8 @@ namespace SceneUtil
                 if (transform.mLightSource->getLastAppliedFrame() != frameNum && mPointLightFadeEnd != 0.f)
                 {
                     const float fadeDelta = mPointLightFadeEnd - mPointLightFadeStart;
-                    float fade = 1 - std::clamp((viewBound.center().length() - mPointLightFadeStart) / fadeDelta, 0.f, 1.f);
+                    const float viewDelta = viewBound.center().length() - mPointLightFadeStart;
+                    float fade = 1 - std::clamp(viewDelta / fadeDelta, 0.f, 1.f);
                     if (fade == 0.f)
                         continue;
 
