@@ -165,8 +165,9 @@ add_component_dir (queries
     )
     
 add_component_dir (lua_ui
+    registerscriptsettings scriptsettings
     properties widget element util layers content
-    text textedit window image
+    adapter text textedit window image container
     )
 
 

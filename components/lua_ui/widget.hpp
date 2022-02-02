@@ -2,6 +2,7 @@
 #define OPENMW_LUAUI_WIDGET
 
 #include <map>
+#include <functional>
 
 #include <MyGUI_Widget.h>
 #include <sol/sol.hpp>
@@ -44,6 +45,7 @@ namespace LuaUi
 
         MyGUI::IntCoord forcedCoord();
         void setForcedCoord(const MyGUI::IntCoord& offset);
+        void setForcedSize(const MyGUI::IntSize& size);
         void updateCoord();
 
         const sol::table& getLayout() { return mLayout; }
@@ -55,15 +57,22 @@ namespace LuaUi
             return parseExternal(mExternal, name, defaultValue);
         }
 
+        void onCoordChange(const std::optional<std::function<void(WidgetExtension*, MyGUI::IntCoord)>>& callback)
+        {
+            mOnCoordChange = callback;
+        }
+
     protected:
         virtual void initialize();
         sol::table makeTable() const;
         sol::object keyEvent(MyGUI::KeyCode) const;
         sol::object mouseEvent(int left, int top, MyGUI::MouseButton button) const;
 
+        MyGUI::IntSize parentSize();
         virtual MyGUI::IntSize calculateSize();
         virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size);
         MyGUI::IntCoord calculateCoord();
+        virtual MyGUI::IntSize childScalingSize();
 
         template<typename T>
         T propertyValue(std::string_view name, const T& defaultValue)
@@ -76,6 +85,7 @@ namespace LuaUi
 
         virtual void updateTemplate();
         virtual void updateProperties();
+        virtual void updateChildren() {};
 
         void triggerEvent(std::string_view name, const sol::object& argument) const;
 
@@ -101,6 +111,7 @@ namespace LuaUi
         sol::object mProperties;
         sol::object mTemplateProperties;
         sol::object mExternal;
+        WidgetExtension* mParent;
 
         void attach(WidgetExtension* ext);
 
@@ -119,6 +130,8 @@ namespace LuaUi
         void mouseRelease(MyGUI::Widget*, int, int, MyGUI::MouseButton);
         void focusGain(MyGUI::Widget*, MyGUI::Widget*);
         void focusLoss(MyGUI::Widget*, MyGUI::Widget*);
+
+        std::optional<std::function<void(WidgetExtension*, MyGUI::IntCoord)>> mOnCoordChange;
     };
 
     class LuaWidget : public MyGUI::Widget, public WidgetExtension

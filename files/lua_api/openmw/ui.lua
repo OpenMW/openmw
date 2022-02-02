@@ -37,6 +37,11 @@
 -- @return #Element
 
 ---
+-- Adds a settings page to main menu setting's Scripts tab.
+-- @function [parent=#ui] registerSettingsPage
+-- @param #SettingsPage page
+
+---
 -- Layout
 -- @type Layout
 -- @field #string name Optional name of the layout. Allows access by name from Content
@@ -136,5 +141,12 @@
 -- @field openmw.util#Vector2 position Absolute position of the mouse cursor
 -- @field openmw.util#Vector2 offset Position of the mouse cursor relative to the widget
 -- @field #number button Mouse button which triggered the event (could be nil)
+
+---
+-- Settings page parameters, passed as an argument to ui.registerSettingsPage
+-- @type SettingsPage
+-- @field #string name Name of the page, displayed in the list, used for search
+-- @field #string searchHints Additional keywords used in search, not displayed anywhere
+-- @field #Element element The page's UI, which will be attached to the settings tab. The root widget has to have a fixed size (set `size` field in `props`, see Widget documentation, `relativeSize` is ignored)
 
 return nil
