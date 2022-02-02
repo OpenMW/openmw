@@ -490,7 +490,7 @@ namespace MWPhysics
         mObjects.emplace(ptr.mRef, obj);
 
         if (obj->isAnimated())
-            mAnimatedObjects.insert(obj.get());
+            mAnimatedObjects.emplace(obj.get(), false);
     }
 
     void PhysicsSystem::remove(const MWWorld::Ptr &ptr)
@@ -739,13 +739,18 @@ namespace MWPhysics
 
     void PhysicsSystem::stepSimulation(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
-        for (Object* animatedObject : mAnimatedObjects)
+        for (auto& [animatedObject, changed] : mAnimatedObjects)
         {
             if (animatedObject->animateCollisionShapes())
             {
                 auto obj = mObjects.find(animatedObject->getPtr().mRef);
                 assert(obj != mObjects.end());
                 mTaskScheduler->updateSingleAabb(obj->second);
+                changed = true;
+            }
+            else
+            {
+                changed = false;
             }
         }
 

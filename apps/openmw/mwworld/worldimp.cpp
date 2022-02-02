@@ -1525,7 +1525,12 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
-        mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object) { updateNavigatorObject(*object); });
+        mPhysics->forEachAnimatedObject([&] (const auto& pair)
+        {
+            const auto [object, changed] = pair;
+            if (changed)
+                updateNavigatorObject(*object);
+        });
 
         for (const auto& door : mDoorStates)
             if (const auto object = mPhysics->getObject(door.first))

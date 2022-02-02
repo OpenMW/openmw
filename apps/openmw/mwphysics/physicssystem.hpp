@@ -300,7 +300,7 @@ namespace MWPhysics
             using ObjectMap = std::unordered_map<const MWWorld::LiveCellRefBase*, std::shared_ptr<Object>>;
             ObjectMap mObjects;
 
-            std::set<Object*> mAnimatedObjects; // stores pointers to elements in mObjects
+            std::map<Object*, bool> mAnimatedObjects; // stores pointers to elements in mObjects
 
             ActorMap mActors;
 
