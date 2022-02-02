@@ -656,11 +656,10 @@ namespace MWRender
             if (relativeLuminance < mMinimumAmbientLuminance)
             {
                 // brighten ambient so it reaches the minimum threshold but no more, we want to mess with content data as least we can
-                float targetBrightnessIncreaseFactor = mMinimumAmbientLuminance / relativeLuminance;
                 if (ambient.r() == 0.f && ambient.g() == 0.f && ambient.b() == 0.f)
                     ambient = osg::Vec4(mMinimumAmbientLuminance, mMinimumAmbientLuminance, mMinimumAmbientLuminance, ambient.a());
                 else
-                    ambient *= targetBrightnessIncreaseFactor;
+                    ambient *= mMinimumAmbientLuminance / relativeLuminance;
             }
         }
 
