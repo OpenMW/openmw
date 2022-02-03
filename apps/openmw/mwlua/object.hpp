@@ -14,6 +14,31 @@
 
 namespace MWLua
 {
+    namespace ObjectTypeName
+    {
+        // Names of object types in Lua.
+        // These names are part of OpenMW Lua API.
+        constexpr std::string_view Activator = "Activator";
+        constexpr std::string_view Armor = "Armor";
+        constexpr std::string_view Book = "Book";
+        constexpr std::string_view Clothing = "Clothing";
+        constexpr std::string_view Container = "Container";
+        constexpr std::string_view Creature = "Creature";
+        constexpr std::string_view Door = "Door";
+        constexpr std::string_view Ingredient = "Ingredient";
+        constexpr std::string_view Light = "Light";
+        constexpr std::string_view MiscItem = "Miscellaneous";
+        constexpr std::string_view NPC = "NPC";
+        constexpr std::string_view Player = "Player";
+        constexpr std::string_view Potion = "Potion";
+        constexpr std::string_view Static = "Static";
+        constexpr std::string_view Weapon = "Weapon";
+        constexpr std::string_view Apparatus = "Apparatus";
+        constexpr std::string_view Lockpick = "Lockpick";
+        constexpr std::string_view Probe = "Probe";
+        constexpr std::string_view Repair = "Repair";
+    }
+
     // ObjectId is a unique identifier of a game object.
     // It can change only if the order of content files was change.
     using ObjectId = ESM::RefNum;
