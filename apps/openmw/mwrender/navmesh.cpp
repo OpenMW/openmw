@@ -12,6 +12,8 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/StateSet>
 
+#include <DetourNavMesh.h>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
@@ -43,6 +45,7 @@ namespace MWRender
         const osg::ref_ptr<osg::StateSet> mDebugDrawStateSet;
         const DetourNavigator::Settings mSettings;
         std::map<DetourNavigator::TilePosition, Tile> mTiles;
+        NavMeshMode mMode;
         std::atomic_bool mAborted {false};
         std::mutex mMutex;
         bool mStarted = false;
@@ -52,7 +55,8 @@ namespace MWRender
         explicit CreateNavMeshTileGroups(std::size_t id, DetourNavigator::Version version,
             std::weak_ptr<DetourNavigator::GuardedNavMeshCacheItem> navMesh,
             const osg::ref_ptr<osg::StateSet>& groupStateSet, const osg::ref_ptr<osg::StateSet>& debugDrawStateSet,
-            const DetourNavigator::Settings& settings, const std::map<DetourNavigator::TilePosition, Tile>& tiles)
+            const DetourNavigator::Settings& settings, const std::map<DetourNavigator::TilePosition, Tile>& tiles,
+            NavMeshMode mode)
             : mId(id)
             , mVersion(version)
             , mNavMesh(navMesh)
@@ -60,6 +64,7 @@ namespace MWRender
             , mDebugDrawStateSet(debugDrawStateSet)
             , mSettings(settings)
             , mTiles(tiles)
+            , mMode(mode)
         {
         }
 
@@ -79,10 +84,14 @@ namespace MWRender
                 return;
 
             std::vector<std::pair<DetourNavigator::TilePosition, Version>> existingTiles;
+            unsigned minSalt = std::numeric_limits<unsigned>::max();
+            unsigned maxSalt = 0;
 
-            navMeshPtr->lockConst()->forEachUsedTile([&] (const TilePosition& position, const Version& version, const dtMeshTile& /*meshTile*/)
+            navMeshPtr->lockConst()->forEachUsedTile([&] (const TilePosition& position, const Version& version, const dtMeshTile& meshTile)
             {
                 existingTiles.emplace_back(position, version);
+                minSalt = std::min(minSalt, meshTile.salt);
+                maxSalt = std::max(maxSalt, meshTile.salt);
             });
 
             if (mAborted.load(std::memory_order_acquire))
@@ -98,10 +107,15 @@ namespace MWRender
 
             std::vector<std::pair<TilePosition, Tile>> updatedTiles;
 
+            const unsigned char flags = SceneUtil::NavMeshTileDrawFlagsOffMeshConnections
+                | SceneUtil::NavMeshTileDrawFlagsClosedList
+                | (mMode == NavMeshMode::UpdateFrequency ? SceneUtil::NavMeshTileDrawFlagsHeat : 0);
+
             for (const auto& [position, version] : existingTiles)
             {
                 const auto it = mTiles.find(position);
-                if (it != mTiles.end() && it->second.mGroup != nullptr && it->second.mVersion == version)
+                if (it != mTiles.end() && it->second.mGroup != nullptr && it->second.mVersion == version
+                        && mMode != NavMeshMode::UpdateFrequency)
                     continue;
 
                 osg::ref_ptr<osg::Group> group;
@@ -114,7 +128,8 @@ namespace MWRender
                     if (mAborted.load(std::memory_order_acquire))
                         return;
 
-                    group = SceneUtil::createNavMeshTileGroup(navMesh->getImpl(), *meshTile, mSettings, mGroupStateSet, mDebugDrawStateSet);
+                    group = SceneUtil::createNavMeshTileGroup(navMesh->getImpl(), *meshTile, mSettings, mGroupStateSet,
+                        mDebugDrawStateSet, flags, minSalt, maxSalt);
                 }
                 if (group == nullptr)
                 {
@@ -147,12 +162,14 @@ namespace MWRender
             : mWorkItem(std::move(workItem)) {}
     };
 
-    NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, const osg::ref_ptr<SceneUtil::WorkQueue>& workQueue, bool enabled)
+    NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, const osg::ref_ptr<SceneUtil::WorkQueue>& workQueue,
+                     bool enabled, NavMeshMode mode)
         : mRootNode(root)
         , mWorkQueue(workQueue)
         , mGroupStateSet(SceneUtil::makeNavMeshTileStateSet())
         , mDebugDrawStateSet(SceneUtil::DebugDraw::makeStateSet())
         , mEnabled(enabled)
+        , mMode(mode)
         , mId(std::numeric_limits<std::size_t>::max())
     {
     }
@@ -261,11 +278,13 @@ namespace MWRender
             workItem->mId = id;
             workItem->mVersion = version;
             workItem->mTiles = mTiles;
+            workItem->mMode = mMode;
 
             return;
         }
 
-        osg::ref_ptr<CreateNavMeshTileGroups> workItem = new CreateNavMeshTileGroups(id, version, navMesh, mGroupStateSet, mDebugDrawStateSet, settings, mTiles);
+        osg::ref_ptr<CreateNavMeshTileGroups> workItem = new CreateNavMeshTileGroups(id, version, navMesh,
+            mGroupStateSet, mDebugDrawStateSet, settings, mTiles, mMode);
         mWorkQueue->addWorkItem(workItem);
         mWorkItems.push_back(std::move(workItem));
     }
@@ -289,5 +308,13 @@ namespace MWRender
     {
         reset();
         mEnabled = false;
+    }
+
+    void NavMesh::setMode(NavMeshMode value)
+    {
+        if (mMode == value)
+            return;
+        reset();
+        mMode = value;
     }
 }

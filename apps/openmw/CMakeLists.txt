@@ -23,7 +23,7 @@ add_openmw_dir (mwrender
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation screenshotmanager
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
     renderbin actoranimation landmanager navmesh actorspaths recastmesh fogmanager objectpaging groundcover
-    postprocessor pingpongcull hdr pingpongcanvas transparentpass
+    postprocessor pingpongcull hdr pingpongcanvas transparentpass navmeshmode
     )
 
 add_openmw_dir (mwinput
@@ -61,7 +61,7 @@ add_openmw_dir (mwscript
 add_openmw_dir (mwlua
     luamanagerimp object worldview userdataserializer eventqueue
     luabindings localscripts playerscripts objectbindings cellbindings asyncbindings settingsbindings
-    camerabindings uibindings inputbindings nearbybindings postprocessingbindings stats
+    camerabindings uibindings inputbindings nearbybindings postprocessingbindings stats debugbindings
     types/types types/door types/actor types/container types/weapon types/npc types/creature
     )
 

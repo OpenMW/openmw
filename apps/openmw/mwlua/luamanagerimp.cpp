@@ -23,6 +23,7 @@
 #include "luabindings.hpp"
 #include "userdataserializer.hpp"
 #include "types/types.hpp"
+#include "debugbindings.hpp"
 
 namespace MWLua
 {
@@ -96,6 +97,7 @@ namespace MWLua
         mLocalStoragePackage = initLocalStoragePackage(localContext, &mGlobalStorage);
         mPlayerStoragePackage = initPlayerStoragePackage(localContext, &mGlobalStorage, &mPlayerStorage);
         mPostprocessingPackage = initPostprocessingPackage(localContext);
+        mDebugPackage = initDebugPackage(localContext);
 
         initConfiguration();
         mInitialized = true;
@@ -409,6 +411,7 @@ namespace MWLua
             scripts->addPackage("openmw.settings", mPlayerSettingsPackage);
             scripts->addPackage("openmw.storage", mPlayerStoragePackage);
             scripts->addPackage("openmw.postprocessing", mPostprocessingPackage);
+            scripts->addPackage("openmw.debug", mDebugPackage);
         }
         else
         {

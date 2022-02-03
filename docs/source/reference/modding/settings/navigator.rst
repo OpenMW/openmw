@@ -204,10 +204,21 @@ enable nav mesh render
 :Range:		True/False
 :Default:	False
 
-Render nav mesh.
+Render navigation mesh.
 Allows to do in-game debug.
 Every nav mesh is visible and every update is noticable.
 Potentially decreases performance.
+
+nav mesh render mode
+--------------------
+
+:Type:		string
+:Range:		"area type", "update frequency"
+:Default:	"area type"
+
+Render navigation mesh in specific mode.
+"area type" - show area types using different colours.
+"update frequency" - show tiles update frequency as a heatmap.
 
 enable agents paths render
 --------------------------

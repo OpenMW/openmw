@@ -78,6 +78,7 @@ local env = {
     ui = require('openmw.ui'),
     camera = require('openmw.camera'),
     aux_util = require('openmw_aux.util'),
+    debug = require('openmw.debug'),
     view = require('openmw_aux.util').deepToString,
     print = printToConsole,
     exit = exitLuaMode,
