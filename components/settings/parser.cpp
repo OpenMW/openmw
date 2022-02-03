@@ -9,7 +9,8 @@
 
 #include <Base64.h>
 
-void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings, bool base64Encoded)
+void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings,
+                                                    bool base64Encoded, bool overrideExisting)
 {
     mFile = file;
     boost::filesystem::ifstream fstream;
@@ -73,7 +74,9 @@ void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, Cat
         std::string value = line.substr(valueBegin);
         Misc::StringUtils::trim(value);
 
-        if (settings.insert(std::make_pair(std::make_pair(currentCategory, setting), value)).second == false)
+        if (overrideExisting)
+            settings[std::make_pair(currentCategory, setting)] = value;
+        else if (settings.insert(std::make_pair(std::make_pair(currentCategory, setting), value)).second == false)
             fail(std::string("duplicate setting: [" + currentCategory + "] " + setting));
     }
 }

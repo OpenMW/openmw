@@ -518,28 +518,6 @@ void OMW::Engine::setSkipMenu (bool skipMenu, bool newGame)
     mNewGame = newGame;
 }
 
-std::string OMW::Engine::loadSettings (Settings::Manager & settings)
-{
-    // Create the settings manager and load default settings file
-    const std::string localdefault = (mCfgMgr.getLocalPath() / "defaults.bin").string();
-    const std::string globaldefault = (mCfgMgr.getGlobalPath() / "defaults.bin").string();
-
-    // prefer local
-    if (boost::filesystem::exists(localdefault))
-        settings.loadDefault(localdefault);
-    else if (boost::filesystem::exists(globaldefault))
-        settings.loadDefault(globaldefault);
-    else
-        throw std::runtime_error ("No default settings file found! Make sure the file \"defaults.bin\" was properly installed.");
-
-    // load user settings if they exist
-    std::string settingspath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
-    if (boost::filesystem::exists(settingspath))
-        settings.loadUser(settingspath);
-
-    return settingspath;
-}
-
 void OMW::Engine::createWindow(Settings::Manager& settings)
 {
     int screen = settings.getInt("screen", "Video");
@@ -975,8 +953,7 @@ void OMW::Engine::go()
 
     // Load settings
     Settings::Manager settings;
-    std::string settingspath;
-    settingspath = loadSettings (settings);
+    std::string settingspath = settings.load(mCfgMgr);
 
     MWClass::registerClasses();
 

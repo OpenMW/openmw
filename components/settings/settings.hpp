@@ -9,6 +9,11 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
+namespace Files
+{
+    struct ConfigurationManager;
+}
+
 namespace Settings
 {
     ///
@@ -26,11 +31,8 @@ namespace Settings
         void clear();
         ///< clears all settings and default settings
 
-        void loadDefault (const std::string& file);
-        ///< load file as the default settings (can be overridden by user settings)
-
-        void loadUser (const std::string& file);
-        ///< load file as user settings
+        std::string load(const Files::ConfigurationManager& cfgMgr);
+        ///< load settings from all active config dirs. Returns the path of the last loaded file.
 
         void saveUser (const std::string& file);
         ///< save user settings to file

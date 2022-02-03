@@ -4,6 +4,8 @@
 
 content=builtin.omwscripts
 data-local="?userdata?data"
+user-data="?userdata?"
+config="?userconfig?"
 resources=./resources
 script-blacklist=Museum
 script-blacklist=MockChangeScript

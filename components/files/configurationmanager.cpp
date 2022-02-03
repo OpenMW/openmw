@@ -20,6 +20,7 @@ static const char* const applicationName = "openmw";
 #endif
 
 const char* const localToken = "?local?";
+const char* const userConfigToken = "?userconfig?";
 const char* const userDataToken = "?userdata?";
 const char* const globalToken = "?global?";
 
@@ -29,18 +30,10 @@ ConfigurationManager::ConfigurationManager(bool silent)
 {
     setupTokensMapping();
 
-    boost::filesystem::create_directories(mFixedPath.getUserConfigPath());
-    boost::filesystem::create_directories(mFixedPath.getUserDataPath());
-
+    // Initialize with fixed paths, will be overridden in `readConfiguration`.
     mLogPath = mFixedPath.getUserConfigPath();
-
+    mUserDataPath = mFixedPath.getUserDataPath();
     mScreenshotPath = mFixedPath.getUserDataPath() / "screenshots";
-
-    // probably not necessary but validate the creation of the screenshots directory and fallback to the original behavior if it fails
-    boost::system::error_code dirErr;
-    if (!boost::filesystem::create_directories(mScreenshotPath, dirErr) && !boost::filesystem::is_directory(mScreenshotPath)) {
-        mScreenshotPath = mFixedPath.getUserDataPath();
-    }
 }
 
 ConfigurationManager::~ConfigurationManager()
@@ -50,6 +43,7 @@ ConfigurationManager::~ConfigurationManager()
 void ConfigurationManager::setupTokensMapping()
 {
     mTokensMapping.insert(std::make_pair(localToken, &FixedPath<>::getLocalPath));
+    mTokensMapping.insert(std::make_pair(userConfigToken, &FixedPath<>::getUserConfigPath));
     mTokensMapping.insert(std::make_pair(userDataToken, &FixedPath<>::getUserDataPath));
     mTokensMapping.insert(std::make_pair(globalToken, &FixedPath<>::getGlobalDataPath));
 }
@@ -57,29 +51,127 @@ void ConfigurationManager::setupTokensMapping()
 void ConfigurationManager::readConfiguration(boost::program_options::variables_map& variables,
     boost::program_options::options_description& description, bool quiet)
 {
+    using ParsedConfigFile = bpo::basic_parsed_options<char>;
     bool silent = mSilent;
     mSilent = quiet;
-    
-    // User config has the highest priority.
-    auto composingVariables = separateComposingVariables(variables, description);
-    loadConfig(mFixedPath.getUserConfigPath(), variables, description);
-    mergeComposingVariables(variables, composingVariables, description);
-    boost::program_options::notify(variables);
 
-    // read either local or global config depending on type of installation
-    composingVariables = separateComposingVariables(variables, description);
-    bool loaded = loadConfig(mFixedPath.getLocalPath(), variables, description);
-    mergeComposingVariables(variables, composingVariables, description);
-    boost::program_options::notify(variables);
-    if (!loaded)
+    std::optional<ParsedConfigFile> config = loadConfig(mFixedPath.getLocalPath(), description);
+    if (config)
+        mActiveConfigPaths.push_back(mFixedPath.getLocalPath());
+    else
     {
-        composingVariables = separateComposingVariables(variables, description);
-        loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
+        mActiveConfigPaths.push_back(mFixedPath.getGlobalConfigPath());
+        config = loadConfig(mFixedPath.getGlobalConfigPath(), description);
+    }
+    if (!config)
+    {
+        if (!quiet)
+            Log(Debug::Error) << "Neither local config nor global config are available.";
+        mSilent = silent;
+        return;
+    }
+
+    std::stack<boost::filesystem::path> extraConfigDirs;
+    addExtraConfigDirs(extraConfigDirs, variables);
+    addExtraConfigDirs(extraConfigDirs, *config);
+
+    std::vector<ParsedConfigFile> parsedOptions{*std::move(config)};
+    std::set<boost::filesystem::path> alreadyParsedPaths;  // needed to prevent infinite loop in case of a circular link
+    alreadyParsedPaths.insert(boost::filesystem::path(mActiveConfigPaths.front()));
+
+    while (!extraConfigDirs.empty())
+    {
+        boost::filesystem::path path = extraConfigDirs.top();
+        extraConfigDirs.pop();
+        if (alreadyParsedPaths.count(path) > 0)
+        {
+            if (!quiet)
+                Log(Debug::Warning) << "Repeated config dir: " << path;
+            continue;
+        }
+        alreadyParsedPaths.insert(path);
+        mActiveConfigPaths.push_back(path);
+        config = loadConfig(path, description);
+        if (!config)
+            continue;
+        addExtraConfigDirs(extraConfigDirs, *config);
+        parsedOptions.push_back(*std::move(config));
+    }
+
+    for (auto it = parsedOptions.rbegin(); it != parsedOptions.rend(); ++it)
+    {
+        auto composingVariables = separateComposingVariables(variables, description);
+        boost::program_options::store(std::move(*it), variables);
         mergeComposingVariables(variables, composingVariables, description);
-        boost::program_options::notify(variables);
+    }
+
+    mLogPath = mActiveConfigPaths.back();
+    mUserDataPath = variables["user-data"].as<Files::MaybeQuotedPath>();
+    if (mUserDataPath.empty())
+    {
+        if (!quiet)
+            Log(Debug::Warning) << "Error: `user-data` is not specified";
+        mUserDataPath = mFixedPath.getUserDataPath();
+    }
+    processPath(mUserDataPath, true);
+    mScreenshotPath = mUserDataPath / "screenshots";
+
+    boost::filesystem::create_directories(getUserConfigPath());
+    boost::filesystem::create_directories(mScreenshotPath);
+
+    // probably not necessary but validate the creation of the screenshots directory and fallback to the original behavior if it fails
+    if (!boost::filesystem::is_directory(mScreenshotPath))
+        mScreenshotPath = mUserDataPath;
+
+    if (!quiet && !variables["replace"].empty())
+    {
+        for (const std::string& var : variables["replace"].as<std::vector<std::string>>())
+        {
+            if (var == "config")
+            {
+                Log(Debug::Warning) << "replace=config is not allowed and was ignored";
+                break;
+            }
+        }
+    }
+
+    if (!quiet)
+    {
+        Log(Debug::Info) << "Logs dir: " << getUserConfigPath().string();
+        Log(Debug::Info) << "User data dir: " << mUserDataPath.string();
+        Log(Debug::Info) << "Screenshots dir: " << mScreenshotPath.string();
     }
 
     mSilent = silent;
+}
+
+void ConfigurationManager::addExtraConfigDirs(std::stack<boost::filesystem::path>& dirs,
+                                              const bpo::basic_parsed_options<char>& options) const
+{
+    boost::program_options::variables_map variables;
+    boost::program_options::store(options, variables);
+    boost::program_options::notify(variables);
+    addExtraConfigDirs(dirs, variables);
+}
+
+void ConfigurationManager::addExtraConfigDirs(std::stack<boost::filesystem::path>& dirs,
+                                              const boost::program_options::variables_map& variables) const
+{
+    auto configIt = variables.find("config");
+    if (configIt == variables.end())
+        return;
+    Files::PathContainer newDirs = asPathContainer(configIt->second.as<Files::MaybeQuotedPathContainer>());
+    processPaths(newDirs);
+    for (auto it = newDirs.rbegin(); it != newDirs.rend(); ++it)
+        dirs.push(*it);
+}
+
+void ConfigurationManager::addCommonOptions(boost::program_options::options_description& description)
+{
+    description.add_options()
+        ("config", bpo::value<Files::MaybeQuotedPathContainer>()->multitoken()->composing(), "additional config directories")
+        ("user-data", bpo::value<Files::MaybeQuotedPath>(),
+            "set user data directory (used for saves, screenshots, etc)");
 }
 
 boost::program_options::variables_map separateComposingVariables(boost::program_options::variables_map & variables,
@@ -126,7 +218,7 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
                 continue;
             }
 
-            if (replacedVariables.count(name))
+            if (replacedVariables.count(name) || firstPosition->second.defaulted() || firstPosition->second.empty())
             {
                 firstPosition->second = second[name];
                 continue;
@@ -142,7 +234,6 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
             {
                 auto& firstPathContainer = boost::any_cast<Files::MaybeQuotedPathContainer&>(firstValue);
                 const auto& secondPathContainer = boost::any_cast<const Files::MaybeQuotedPathContainer&>(secondValue);
-
                 firstPathContainer.insert(firstPathContainer.end(), secondPathContainer.begin(), secondPathContainer.end());
             }
             else if (firstValue.type() == typeid(std::vector<std::string>))
@@ -165,57 +256,60 @@ void mergeComposingVariables(boost::program_options::variables_map& first, boost
                 Log(Debug::Error) << "Unexpected composing variable type. Curse boost and their blasted arcane templates.";
         }
     }
-
+    boost::program_options::notify(first);
 }
 
-void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool create)
+void ConfigurationManager::processPath(boost::filesystem::path& path, bool create) const
 {
-    std::string path;
+    std::string str = path.string();
+
+    // Do nothing if the path doesn't start with a token
+    if (str.empty() || str[0] != '?')
+        return;
+
+    std::string::size_type pos = str.find('?', 1);
+    if (pos != std::string::npos && pos != 0)
+    {
+        auto tokenIt = mTokensMapping.find(str.substr(0, pos + 1));
+        if (tokenIt != mTokensMapping.end())
+        {
+            boost::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
+            if (pos < str.length() - 1)
+            {
+                // There is something after the token, so we should
+                // append it to the path
+                tempPath /= str.substr(pos + 1, str.length() - pos);
+            }
+
+            path = tempPath;
+        }
+        else
+        {
+            if (!mSilent)
+                Log(Debug::Warning) << "Path starts with unknown token: " << path;
+            path.clear();
+        }
+    }
+
+    if (!boost::filesystem::is_directory(path) && create)
+    {
+        try
+        {
+            boost::filesystem::create_directories(path);
+        }
+        catch (...) {}
+    }
+}
+
+void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool create) const
+{
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
     {
-        path = it->string();
-
-        // Check if path contains a token
-        if (!path.empty() && *path.begin() == '?')
-        {
-            std::string::size_type pos = path.find('?', 1);
-            if (pos != std::string::npos && pos != 0)
-            {
-                TokensMappingContainer::iterator tokenIt = mTokensMapping.find(path.substr(0, pos + 1));
-                if (tokenIt != mTokensMapping.end())
-                {
-                    boost::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
-                    if (pos < path.length() - 1)
-                    {
-                        // There is something after the token, so we should
-                        // append it to the path
-                        tempPath /= path.substr(pos + 1, path.length() - pos);
-                    }
-
-                    *it = tempPath;
-                }
-                else
-                {
-                    // Clean invalid / unknown token, it will be removed outside the loop
-                    (*it).clear();
-                }
-            }
-        }
-
+        processPath(*it, create);
         if (!boost::filesystem::is_directory(*it))
         {
-            if (create)
-            {
-                try
-                {
-                    boost::filesystem::create_directories (*it);
-                }
-                catch (...) {}
-
-                if (boost::filesystem::is_directory(*it))
-                    continue;
-            }
-
+            if (!mSilent)
+                Log(Debug::Warning) << "No such dir: " << *it;
             (*it).clear();
         }
     }
@@ -224,8 +318,8 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool cre
         std::bind(&boost::filesystem::path::empty, std::placeholders::_1)), dataDirs.end());
 }
 
-bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
-    boost::program_options::variables_map& variables,
+std::optional<bpo::basic_parsed_options<char>> ConfigurationManager::loadConfig(
+    const boost::filesystem::path& path,
     boost::program_options::options_description& description)
 {
     boost::filesystem::path cfgFile(path);
@@ -238,20 +332,11 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
         boost::filesystem::ifstream configFileStream(cfgFile);
 
         if (configFileStream.is_open())
-        {
-            parseConfig(configFileStream, variables, description);
-
-            return true;
-        }
-        else
-        {
-            if (!mSilent)
-                Log(Debug::Error) << "Loading failed.";
-
-            return false;
-        }
+            return Files::parse_config_file(configFileStream, description, true);
+        else if (!mSilent)
+            Log(Debug::Error) << "Loading failed.";
     }
-    return false;
+    return std::nullopt;
 }
 
 const boost::filesystem::path& ConfigurationManager::getGlobalPath() const
@@ -261,12 +346,15 @@ const boost::filesystem::path& ConfigurationManager::getGlobalPath() const
 
 const boost::filesystem::path& ConfigurationManager::getUserConfigPath() const
 {
-    return mFixedPath.getUserConfigPath();
+    if (mActiveConfigPaths.empty())
+        return mFixedPath.getUserConfigPath();
+    else
+        return mActiveConfigPaths.back();
 }
 
 const boost::filesystem::path& ConfigurationManager::getUserDataPath() const
 {
-    return mFixedPath.getUserDataPath();
+    return mUserDataPath;
 }
 
 const boost::filesystem::path& ConfigurationManager::getLocalPath() const
@@ -344,4 +432,4 @@ PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathCon
     return PathContainer(MaybeQuotedPathContainer.begin(), MaybeQuotedPathContainer.end());
 }
 
-} /* namespace Cfg */
+} /* namespace Files */
