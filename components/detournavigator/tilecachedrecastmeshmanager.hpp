@@ -9,6 +9,8 @@
 #include "heightfieldshape.hpp"
 #include "changetype.hpp"
 
+#include <components/misc/guarded.hpp>
+
 #include <algorithm>
 #include <map>
 #include <mutex>
@@ -42,11 +44,11 @@ namespace DetourNavigator
             std::set<TilePosition> tilesPositions;
             if (range.mBegin != range.mEnd)
             {
-                const std::lock_guard lock(mMutex);
+                const auto locked = mWorldspaceTiles.lock();
                 getTilesPositions(range,
                     [&] (const TilePosition& tilePosition)
                     {
-                        if (addTile(id, shape, transform, areaType, tilePosition, mTiles))
+                        if (addTile(id, shape, transform, areaType, tilePosition, locked->mTiles))
                             tilesPositions.insert(tilePosition);
                     });
             }
@@ -67,31 +69,31 @@ namespace DetourNavigator
             bool changed = false;
             std::set<TilePosition> newTiles;
             {
+                const TilesPositionsRange objectRange = makeTilesPositionsRange(shape.getShape(), transform, mSettings);
+                const TilesPositionsRange range = getIntersection(mRange, objectRange);
+                const auto locked = mWorldspaceTiles.lock();
                 const auto onTilePosition = [&] (const TilePosition& tilePosition)
                 {
                     if (data.mTiles.find(tilePosition) != data.mTiles.end())
                     {
                         newTiles.insert(tilePosition);
-                        if (updateTile(id, transform, areaType, tilePosition, mTiles))
+                        if (updateTile(id, transform, areaType, tilePosition, locked->mTiles))
                         {
                             onChangedTile(tilePosition, ChangeType::update);
                             changed = true;
                         }
                     }
-                    else if (addTile(id, shape, transform, areaType, tilePosition, mTiles))
+                    else if (addTile(id, shape, transform, areaType, tilePosition, locked->mTiles))
                     {
                         newTiles.insert(tilePosition);
                         onChangedTile(tilePosition, ChangeType::add);
                         changed = true;
                     }
                 };
-                const TilesPositionsRange objectRange = makeTilesPositionsRange(shape.getShape(), transform, mSettings);
-                const TilesPositionsRange range = getIntersection(mRange, objectRange);
-                const std::lock_guard lock(mMutex);
                 getTilesPositions(range, onTilePosition);
                 for (const auto& tile : data.mTiles)
                 {
-                    if (newTiles.find(tile) == newTiles.end() && removeTile(id, tile, mTiles))
+                    if (newTiles.find(tile) == newTiles.end() && removeTile(id, tile, locked->mTiles))
                     {
                         onChangedTile(tile, ChangeType::remove);
                         changed = true;
@@ -125,8 +127,8 @@ namespace DetourNavigator
         template <class Function>
         void forEachTile(Function&& function) const
         {
-            const std::lock_guard lock(mMutex);
-            for (auto& [tilePosition, recastMeshManager] : mTiles)
+            const auto& locked = mWorldspaceTiles.lockConst();
+            for (const auto& [tilePosition, recastMeshManager] : locked->mTiles)
                 function(tilePosition, *recastMeshManager);
         }
 
@@ -145,12 +147,16 @@ namespace DetourNavigator
             std::set<TilePosition> mTiles;
         };
 
+        struct WorldspaceTiles
+        {
+            std::string mWorldspace;
+            TilesMap mTiles;
+        };
+
         const RecastSettings& mSettings;
-        mutable std::mutex mMutex;
         TileBounds mBounds;
         TilesPositionsRange mRange;
-        std::string mWorldspace;
-        TilesMap mTiles;
+        Misc::ScopeGuarded<WorldspaceTiles> mWorldspaceTiles;
         std::unordered_map<ObjectId, ObjectData> mObjects;
         std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;
         std::map<osg::Vec2i, std::vector<TilePosition>> mHeightfieldTilesPositions;
