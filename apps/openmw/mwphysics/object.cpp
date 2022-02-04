@@ -112,6 +112,7 @@ namespace MWPhysics
         assert (mShapeInstance->mCollisionShape->isCompound());
 
         btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->mCollisionShape.get());
+        bool result = false;
         for (const auto& [recIndex, shapeIndex] : mShapeInstance->mAnimatedShapes)
         {
             auto nodePathFound = mRecIndexToNodePath.find(recIndex);
@@ -145,8 +146,11 @@ namespace MWPhysics
             // Note: we can not apply scaling here for now since we treat scaled shapes
             // as new shapes (btScaledBvhTriangleMeshShape) with 1.0 scale for now
             if (!(transform == compound->getChildTransform(shapeIndex)))
+            {
                 compound->updateChildTransform(shapeIndex, transform);
+                result = true;
+            }
         }
-        return true;
+        return result;
     }
 }

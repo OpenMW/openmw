@@ -360,7 +360,7 @@ namespace MWWorld
         mActiveCells.erase(cell);
     }
 
-    void Scene::loadCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn)
+    void Scene::loadCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position)
     {
         using DetourNavigator::HeightfieldShape;
 
@@ -461,7 +461,7 @@ namespace MWWorld
             mPhysics->traceDown(player, player.getRefData().getPosition().asVec3(), 10.f);
         }
 
-        mNavigator.update(player.getRefData().getPosition().asVec3());
+        mNavigator.update(position);
 
         if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
             mRendering.configureAmbient(cell->getCell());
@@ -533,6 +533,8 @@ namespace MWWorld
             else
                 unloadCell (cell);
         }
+
+        mNavigator.updateBounds(pos);
 
         mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
         osg::Vec4i newGrid = gridCenterToBounds(mCurrentGridCenter);
@@ -608,7 +610,7 @@ namespace MWWorld
             if (!isCellInCollection(x, y, mActiveCells))
             {
                 CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
-                loadCell (cell, loadingListener, changeEvent);
+                loadCell(cell, loadingListener, changeEvent, pos);
             }
         }
 
@@ -641,7 +643,7 @@ namespace MWWorld
             loadingListener->setLabel("Testing exterior cells ("+std::to_string(i)+"/"+std::to_string(cells.getExtSize())+")...");
 
             CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(it->mData.mX, it->mData.mY);
-            loadCell(cell, nullptr, false);
+            loadCell(cell, nullptr, false, osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits);
 
             auto iter = mActiveCells.begin();
             while (iter != mActiveCells.end())
@@ -686,7 +688,9 @@ namespace MWWorld
             loadingListener->setLabel("Testing interior cells ("+std::to_string(i)+"/"+std::to_string(cells.getIntSize())+")...");
 
             CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(it->mName);
-            loadCell(cell, nullptr, false);
+            ESM::Position position;
+            MWBase::Environment::get().getWorld()->findInteriorPosition(it->mName, position);
+            loadCell(cell, nullptr, false, position.asVec3());
 
             auto iter = mActiveCells.begin();
             while (iter != mActiveCells.end())
@@ -819,9 +823,11 @@ namespace MWWorld
 
         loadingListener->setProgressRange(cell->count());
 
+        mNavigator.updateBounds(position.asVec3());
+
         // Load cell.
         mPagedRefs.clear();
-        loadCell(cell, loadingListener, changeEvent);
+        loadCell(cell, loadingListener, changeEvent, position.asVec3());
 
         changePlayerCell(cell, position, adjustPlayerPos);
 

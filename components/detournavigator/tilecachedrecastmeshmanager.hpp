@@ -7,11 +7,15 @@
 #include "gettilespositions.hpp"
 #include "version.hpp"
 #include "heightfieldshape.hpp"
+#include "changetype.hpp"
+
+#include <components/misc/guarded.hpp>
 
 #include <algorithm>
 #include <map>
 #include <mutex>
 #include <vector>
+#include <set>
 
 namespace DetourNavigator
 {
@@ -20,57 +24,85 @@ namespace DetourNavigator
     public:
         explicit TileCachedRecastMeshManager(const RecastSettings& settings);
 
+        TileBounds getBounds() const;
+
+        std::vector<std::pair<TilePosition, ChangeType>> setBounds(const TileBounds& bounds);
+
         std::string getWorldspace() const;
 
         void setWorldspace(std::string_view worldspace);
 
+        template <class OnChangedTile>
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
-                       const AreaType areaType);
+            const AreaType areaType, OnChangedTile&& onChangedTile)
+        {
+            auto it = mObjects.find(id);
+            if (it != mObjects.end())
+                return false;
+            const TilesPositionsRange objectRange = makeTilesPositionsRange(shape.getShape(), transform, mSettings);
+            const TilesPositionsRange range = getIntersection(mRange, objectRange);
+            std::set<TilePosition> tilesPositions;
+            if (range.mBegin != range.mEnd)
+            {
+                const auto locked = mWorldspaceTiles.lock();
+                getTilesPositions(range,
+                    [&] (const TilePosition& tilePosition)
+                    {
+                        if (addTile(id, shape, transform, areaType, tilePosition, locked->mTiles))
+                            tilesPositions.insert(tilePosition);
+                    });
+            }
+            it = mObjects.emplace_hint(it, id, ObjectData {shape, transform, areaType, std::move(tilesPositions)});
+            std::for_each(it->second.mTiles.begin(), it->second.mTiles.end(), std::forward<OnChangedTile>(onChangedTile));
+            ++mRevision;
+            return true;
+        }
 
         template <class OnChangedTile>
         bool updateObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
             const AreaType areaType, OnChangedTile&& onChangedTile)
         {
-            const auto object = mObjectsTilesPositions.find(id);
-            if (object == mObjectsTilesPositions.end())
+            const auto object = mObjects.find(id);
+            if (object == mObjects.end())
                 return false;
-            auto& currentTiles = object->second;
+            auto& data = object->second;
             bool changed = false;
-            std::vector<TilePosition> newTiles;
+            std::set<TilePosition> newTiles;
             {
-                const std::lock_guard lock(mMutex);
+                const TilesPositionsRange objectRange = makeTilesPositionsRange(shape.getShape(), transform, mSettings);
+                const TilesPositionsRange range = getIntersection(mRange, objectRange);
+                const auto locked = mWorldspaceTiles.lock();
                 const auto onTilePosition = [&] (const TilePosition& tilePosition)
                 {
-                    if (std::binary_search(currentTiles.begin(), currentTiles.end(), tilePosition))
+                    if (data.mTiles.find(tilePosition) != data.mTiles.end())
                     {
-                        newTiles.push_back(tilePosition);
-                        if (updateTile(id, transform, areaType, tilePosition, mTiles))
+                        newTiles.insert(tilePosition);
+                        if (updateTile(id, transform, areaType, tilePosition, locked->mTiles))
                         {
-                            onChangedTile(tilePosition);
+                            onChangedTile(tilePosition, ChangeType::update);
                             changed = true;
                         }
                     }
-                    else if (addTile(id, shape, transform, areaType, tilePosition, mTiles))
+                    else if (addTile(id, shape, transform, areaType, tilePosition, locked->mTiles))
                     {
-                        newTiles.push_back(tilePosition);
-                        onChangedTile(tilePosition);
+                        newTiles.insert(tilePosition);
+                        onChangedTile(tilePosition, ChangeType::add);
                         changed = true;
                     }
                 };
-                getTilesPositions(makeTilesPositionsRange(shape.getShape(), transform, mSettings), onTilePosition);
-                std::sort(newTiles.begin(), newTiles.end());
-                for (const auto& tile : currentTiles)
+                getTilesPositions(range, onTilePosition);
+                for (const auto& tile : data.mTiles)
                 {
-                    if (!std::binary_search(newTiles.begin(), newTiles.end(), tile) && removeTile(id, tile, mTiles))
+                    if (newTiles.find(tile) == newTiles.end() && removeTile(id, tile, locked->mTiles))
                     {
-                        onChangedTile(tile);
+                        onChangedTile(tile, ChangeType::remove);
                         changed = true;
                     }
                 }
             }
             if (changed)
             {
-                currentTiles = std::move(newTiles);
+                data.mTiles = std::move(newTiles);
                 ++mRevision;
             }
             return changed;
@@ -95,8 +127,8 @@ namespace DetourNavigator
         template <class Function>
         void forEachTile(Function&& function) const
         {
-            const std::lock_guard lock(mMutex);
-            for (auto& [tilePosition, recastMeshManager] : mTiles)
+            const auto& locked = mWorldspaceTiles.lockConst();
+            for (const auto& [tilePosition, recastMeshManager] : locked->mTiles)
                 function(tilePosition, *recastMeshManager);
         }
 
@@ -107,11 +139,25 @@ namespace DetourNavigator
     private:
         using TilesMap = std::map<TilePosition, std::shared_ptr<CachedRecastMeshManager>>;
 
+        struct ObjectData
+        {
+            const CollisionShape mShape;
+            const btTransform mTransform;
+            const AreaType mAreaType;
+            std::set<TilePosition> mTiles;
+        };
+
+        struct WorldspaceTiles
+        {
+            std::string mWorldspace;
+            TilesMap mTiles;
+        };
+
         const RecastSettings& mSettings;
-        mutable std::mutex mMutex;
-        std::string mWorldspace;
-        TilesMap mTiles;
-        std::unordered_map<ObjectId, std::vector<TilePosition>> mObjectsTilesPositions;
+        TileBounds mBounds;
+        TilesPositionsRange mRange;
+        Misc::ScopeGuarded<WorldspaceTiles> mWorldspaceTiles;
+        std::unordered_map<ObjectId, ObjectData> mObjects;
         std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;
         std::map<osg::Vec2i, std::vector<TilePosition>> mHeightfieldTilesPositions;
         std::size_t mRevision = 0;

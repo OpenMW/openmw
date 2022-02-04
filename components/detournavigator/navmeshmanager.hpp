@@ -26,6 +26,8 @@ namespace DetourNavigator
 
         void setWorldspace(std::string_view worldspace);
 
+        void updateBounds(const osg::Vec3f& playerPosition);
+
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 

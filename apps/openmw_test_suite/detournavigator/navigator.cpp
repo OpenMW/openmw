@@ -1132,4 +1132,16 @@ namespace
             Vec3fEq(306, 56.66666412353515625, -2.6667339801788330078125)
         )) << mPath;
     }
+
+    TEST_F(DetourNavigatorNavigatorTest, only_one_water_per_cell_is_allowed)
+    {
+        const int cellSize1 = 100;
+        const float level1 = 1;
+        const int cellSize2 = 200;
+        const float level2 = 2;
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        EXPECT_TRUE(mNavigator->addWater(mCellPosition, cellSize1, level1));
+        EXPECT_FALSE(mNavigator->addWater(mCellPosition, cellSize2, level2));
+    }
 }

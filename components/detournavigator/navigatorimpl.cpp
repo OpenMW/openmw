@@ -38,6 +38,11 @@ namespace DetourNavigator
         mNavMeshManager.setWorldspace(worldspace);
     }
 
+    void NavigatorImpl::updateBounds(const osg::Vec3f& playerPosition)
+    {
+        mNavMeshManager.updateBounds(playerPosition);
+    }
+
     bool NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
         const CollisionShape collisionShape(shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape, shapes.mTransform);
@@ -158,6 +163,7 @@ namespace DetourNavigator
         const TilePosition tilePosition = getTilePosition(mSettings.mRecast, toNavMeshCoordinates(mSettings.mRecast, playerPosition));
         if (mLastPlayerPosition.has_value() && *mLastPlayerPosition == tilePosition)
             return;
+        mNavMeshManager.updateBounds(playerPosition);
         update(playerPosition);
         mLastPlayerPosition = tilePosition;
     }
