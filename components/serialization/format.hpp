@@ -7,6 +7,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <cstdint>
 
 namespace Serialization
 {
@@ -51,13 +52,13 @@ namespace Serialization
             -> std::enable_if_t<isContiguousContainer<T>>
         {
             if constexpr (mode == Mode::Write)
-                visitor(self(), value.size());
+                visitor(self(), static_cast<std::uint64_t>(value.size()));
             else
             {
                 static_assert(mode == Mode::Read);
-                std::size_t size = 0;
+                std::uint64_t size = 0;
                 visitor(self(), size);
-                value.resize(size);
+                value.resize(static_cast<std::size_t>(size));
             }
             self()(std::forward<Visitor>(visitor), value.data(), value.size());
         }
