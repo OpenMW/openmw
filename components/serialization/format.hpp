@@ -27,7 +27,7 @@ namespace Serialization
     struct IsContiguousContainer<std::array<T, n>> : std::true_type {};
 
     template <class T>
-    constexpr bool isContiguousContainer = IsContiguousContainer<std::decay_t<T>>::value;
+    inline constexpr bool isContiguousContainer = IsContiguousContainer<std::decay_t<T>>::value;
 
     template <Mode mode, class Derived>
     struct Format
