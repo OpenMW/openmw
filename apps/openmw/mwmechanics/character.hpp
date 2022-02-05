@@ -205,7 +205,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void clearAnimQueue(bool clearPersistAnims = false);
 
-    bool updateWeaponState(CharacterState& idle);
+    bool updateState(CharacterState& idle);
     void updateIdleStormState(bool inwater);
 
     std::string chooseRandomAttackAnimation() const;

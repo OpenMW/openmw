@@ -1125,7 +1125,7 @@ bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
     return mAnimation->updateCarriedLeftVisible(weaptype);
 }
 
-bool CharacterController::updateWeaponState(CharacterState& idle)
+bool CharacterController::updateState(CharacterState& idle)
 {
     const MWWorld::Class &cls = mPtr.getClass();
     CreatureStats &stats = cls.getCreatureStats(mPtr);
@@ -1363,20 +1363,24 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
     ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
     if(getAttackingOrSpell())
     {
-        MWWorld::Ptr player = getPlayer();
-
         bool resetIdle = ammunition;
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
             mAttackStrength = 0;
 
-            // Randomize attacks for non-bipedal creatures with Weapon flag
+            // Randomize attacks for non-bipedal creatures
             if (mPtr.getClass().getType() == ESM::Creature::sRecordId &&
                 !mPtr.getClass().isBipedal(mPtr) &&
                 (!mAnimation->hasAnimation(mCurrentWeapon) || isRandomAttackAnimation(mCurrentWeapon)))
             {
                 mCurrentWeapon = chooseRandomAttackAnimation();
+                if (!mPtr.getClass().hasInventoryStore(mPtr))
+                {
+                    mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
+                    if (mWeaponType == ESM::Weapon::HandToHand)
+                        playSwishSound(0.0f);
+                }
             }
 
             if(mWeaponType == ESM::Weapon::Spell)
@@ -1384,7 +1388,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 // Unset casting flag, otherwise pressing the mouse button down would
                 // continue casting every frame if there is no animation
                 setAttackingOrSpell(false);
-                if (mPtr == player)
+                if (mPtr == getPlayer())
                 {
                     // For the player, set the spell we want to cast
                     // This has to be done at the start of the casting animation,
@@ -2253,7 +2257,7 @@ void CharacterController::update(float duration)
 
         if (!mSkipAnim)
         {
-            forcestateupdate = updateWeaponState(idlestate) || forcestateupdate;
+            forcestateupdate = updateState(idlestate) || forcestateupdate;
 
             refreshCurrentAnims(idlestate, movestate, jumpstate, forcestateupdate);
             updateIdleStormState(inwater);
