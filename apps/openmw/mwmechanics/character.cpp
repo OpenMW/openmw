@@ -435,6 +435,8 @@ std::string CharacterController::getWeaponAnimation(int weaponType) const
         else if (isRealWeapon)
             weaponGroup = oneHandFallback;
     }
+    else if (weaponType == ESM::Weapon::HandToHand && !mPtr.getClass().isBipedal(mPtr))
+        return "attack1";
 
     return weaponGroup;
 }
@@ -1293,7 +1295,7 @@ bool CharacterController::updateState(CharacterState& idle)
                 }
 
                 mWeaponType = weaptype;
-                mCurrentWeapon = getWeaponAnimation(mWeaponType);
+                mCurrentWeapon = weapgroup;
 
                 if(!upSoundId.empty() && !isStillWeapon)
                 {
@@ -1376,11 +1378,7 @@ bool CharacterController::updateState(CharacterState& idle)
             {
                 mCurrentWeapon = chooseRandomAttackAnimation();
                 if (!mPtr.getClass().hasInventoryStore(mPtr))
-                {
                     mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
-                    if (mWeaponType == ESM::Weapon::HandToHand)
-                        playSwishSound(0.0f);
-                }
             }
 
             if(mWeaponType == ESM::Weapon::Spell)
@@ -1561,7 +1559,11 @@ bool CharacterController::updateState(CharacterState& idle)
                                  weapSpeed, startKey, stopKey,
                                  0.0f, 0);
                 if(mAnimation->getCurrentTime(mCurrentWeapon) != -1.f)
+                {
                     mUpperBodyState = UpperCharState_StartToMinAttack;
+                    if (mWeaponType == ESM::Weapon::HandToHand && !mPtr.getClass().isBipedal(mPtr))
+                        playSwishSound(0.0f);
+                }
             }
         }
 
