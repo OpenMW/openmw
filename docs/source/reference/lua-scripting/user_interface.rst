@@ -1,11 +1,6 @@
 User interface reference
 ========================
 
-.. toctree::
-    :hidden:
-
-    widgets/widget
-
 Layouts
 -------
 
@@ -79,103 +74,57 @@ Events
 Widget types
 ------------
 
-.. list-table::
-   :widths: 30 70
+.. toctree::
+   :maxdepth: 1
 
-   * - :ref:`Widget`
-     - Base widget type, all the other widget inherit its properties and events.
-   * - `Text`
-     - Displays text.
-   * - EditText
-     - Accepts text input from the user.
-   * - Window
-     - Can be moved and resized by the user.
+   Widget: Base widget type, all the other widgets inherit its properties and events. <widgets/widget>
+   Text: Displays text. <widgets/text>
+   TextEdit: Accepts text input from the user. <widgets/textedit>
 
 Example
 -------
 
-*scripts/requirePassword.lua*
+*scripts/clock.lua*
 
 .. code-block:: Lua
 
-   local core = require('openmw.core')
-   local async = require('openmw.async')
-   local ui = require('openmw.ui')
-   local v2 = require('openmw.util').vector2
+  local ui = require('openmw.ui')
+  local util = require('openmw.util')
+  local calendar = require('openmw_aux.calendar')
+  local time = require('openmw_aux.time')
 
-   local layout = {
-      layers = 'Windows',
-      type = ui.TYPE.Window,
-      template = { skin = 'MW_Window' }, -- TODO: replace all skins here when they are re-implemented in Lua
-      props = {
-         size = v2(200, 250),
-         -- put the window in the middle of the screen
-         relativePosition = v2(0.5, 0.5),
-         anchor = v2(0.5, 0.5),
-      },
-      content = ui.content {
-         {
-            type = ui.TYPE.Text,
-            template = { skin = 'SandText' },
-            props = {
-               caption = 'Input password',
-               relativePosition = v2(0.5, 0),
-               anchor = v2(0.5, 0),
-            },
-         },
-         {
-            name = 'input',
-            type = ui.TYPE.TextEdit,
-            template = { skin = "MW_TextEdit" },
-            props = {
-               caption = '',
-               relativePosition = v2(0.5, 0.5),
-               anchor = v2(0.5, 0.5),
-               size = v2(125, 50),
-            },
-            events = {}
-         },
-         {
-            name = 'submit',
-            type = ui.TYPE.Text, -- TODO: replace with button when implemented
-            template = { skin = "MW_Button" },
-            props = {
-               caption = 'Submit',
-               -- position at the bottom
-               relativePosition = v2(0.5, 1.0),
-               anchor = v2(0.5, 1.0),
-               autoSize = false,
-               size = v2(75, 50),
-            },
-            events = {},
-         },
-      },
-   }
+  local element = ui.create {
+    -- important not to forget the layer
+    -- by default widgets are not attached to any layer and are not visible
+    layer = 'HUD',
+    type = ui.TYPE.Text,
+    props = {
+      -- position in the top right corner
+      relativePosition = util.vector2(1, 0),
+      -- position is for the top left corner of the widget by default
+      -- change it to align exactly to the top right corner of the screen
+      anchor = util.vector2(1, 0),
+      text = calendar.formatGameTime('%H:%M'),
+      textSize = 24,
+      -- default black text color isn't always visible
+      textColor = util.color.rgb(0, 1, 0),
+    },
+  }
 
-   local element = nil
+  local function updateTime()
+    -- formatGameTime uses current time by default
+    -- otherwise we could get it by calling `core.getGameTime()`
+    element.layout.props.text = calendar.formatGameTime('%H:%M')
+    -- the layout changes won't affect the widget unless we request an update
+    element:update()
+  end
 
-   local input = layout.content.input
-   -- TODO: replace with a better event when TextEdit is finished
-   input.events.textInput = async:callback(function(text)
-      input.props.caption = input.props.caption .. text
-   end)
+  -- we are showing game time in hours and minutes
+  -- so no need to update more often than ones a game minute
+  time.runRepeatedly(updateTime, 1 * time.minute, { type = time.GameTime })
 
-   local submit = layout.content.submit
-   submit.events.mouseClick = async:callback(function()
-      if input.props.caption == 'very secret password' then
-         if element then
-            element:destroy()
-         end
-      else
-         print('wrong password', input.props.caption)
-         core.quit()
-      end
-   end)
-
-   element = ui.create(layout)
-
-*requirePassword.omwscripts*
+*clock.omwscripts*
 
 ::
 
-  PLAYER: scripts/requirePassword.lua
+  PLAYER: scripts/clock.lua

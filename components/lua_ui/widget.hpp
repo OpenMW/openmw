@@ -50,6 +50,7 @@ namespace LuaUi
 
         const sol::table& getLayout() { return mLayout; }
         void setLayout(const sol::table& layout) { mLayout = layout; }
+        void resetSlot() { mSlot = this; }
 
         template <typename T>
         T externalValue(std::string_view name, const T& defaultValue)
@@ -80,13 +81,14 @@ namespace LuaUi
             return parseProperty(mProperties, mTemplateProperties, name, defaultValue);
         }
 
-        WidgetExtension* findFirstInTemplates(std::string_view flagName);
+        WidgetExtension* findDeepInTemplates(std::string_view flagName);
         std::vector<WidgetExtension*> findAllInTemplates(std::string_view flagName);
 
         virtual void updateTemplate();
         virtual void updateProperties();
         virtual void updateChildren() {};
 
+        lua_State* lua() { return mLua; }
         void triggerEvent(std::string_view name, const sol::object& argument) const;
 
         // offsets the position and size, used only in C++ widget code
@@ -114,8 +116,9 @@ namespace LuaUi
         WidgetExtension* mParent;
 
         void attach(WidgetExtension* ext);
+        void attachTemplate(WidgetExtension* ext);
 
-        WidgetExtension* findFirst(std::string_view name);
+        WidgetExtension* findDeep(std::string_view name);
         void findAll(std::string_view flagName, std::vector<WidgetExtension*>& result);
 
         void updateChildrenCoord();

@@ -29,7 +29,7 @@ namespace LuaUi
             LuaImage();
 
         protected:
-            virtual void updateProperties() override;
+            void updateProperties() override;
             LuaTileRect* mTileRect;
     };
 }

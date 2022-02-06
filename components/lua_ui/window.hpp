@@ -14,8 +14,8 @@ namespace LuaUi
 
         public:
             LuaWindow();
-            virtual void updateTemplate() override;
-            virtual void updateProperties() override;
+            void updateTemplate() override;
+            void updateProperties() override;
 
         private:
             LuaText* mCaption;

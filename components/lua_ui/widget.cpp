@@ -10,14 +10,13 @@
 namespace LuaUi
 {
     WidgetExtension::WidgetExtension()
-        : mForcedCoord()
-        , mAbsoluteCoord()
-        , mRelativeCoord()
-        , mAnchor()
-        , mLua(nullptr)
+        : mLua(nullptr)
         , mWidget(nullptr)
         , mSlot(this)
         , mLayout(sol::nil)
+        , mProperties(sol::nil)
+        , mTemplateProperties(sol::nil)
+        , mExternal(sol::nil)
         , mParent(nullptr)
     {}
 
@@ -80,16 +79,22 @@ namespace LuaUi
         ext->updateCoord();
     }
 
-    WidgetExtension* WidgetExtension::findFirst(std::string_view flagName)
+    void WidgetExtension::attachTemplate(WidgetExtension* ext)
     {
-        if (externalValue(flagName, false))
-            return this;
+        ext->widget()->attachToWidget(widget());
+        ext->updateCoord();
+    }
+
+    WidgetExtension* WidgetExtension::findDeep(std::string_view flagName)
+    {
         for (WidgetExtension* w : mChildren)
         {
-            WidgetExtension* result = w->findFirst(flagName);
+            WidgetExtension* result = w->findDeep(flagName);
             if (result != nullptr)
                 return result;
         }
+        if (externalValue(flagName, false))
+            return this;
         return nullptr;
     }
 
@@ -101,11 +106,11 @@ namespace LuaUi
             w->findAll(flagName, result);
     }
 
-    WidgetExtension* WidgetExtension::findFirstInTemplates(std::string_view flagName)
+    WidgetExtension* WidgetExtension::findDeepInTemplates(std::string_view flagName)
     {
         for (WidgetExtension* w : mTemplateChildren)
         {
-            WidgetExtension* result = w->findFirst(flagName);
+            WidgetExtension* result = w->findDeep(flagName);
             if (result != nullptr)
                 return result;
         }
@@ -163,7 +168,7 @@ namespace LuaUi
         for (size_t i = 0; i < children.size(); ++i)
         {
             mTemplateChildren[i] = children[i];
-            mTemplateChildren[i]->widget()->attachToWidget(mWidget);
+            attachTemplate(mTemplateChildren[i]);
         }
         updateTemplate();
     }
@@ -171,9 +176,11 @@ namespace LuaUi
     void WidgetExtension::updateTemplate()
     {
         WidgetExtension* oldSlot = mSlot;
-        mSlot = findFirstInTemplates("slot");
-        if (mSlot == nullptr)
+        WidgetExtension* slot = findDeepInTemplates("slot");
+        if (slot == nullptr)
             mSlot = this;
+        else
+            mSlot = slot->mSlot;
         if (mSlot != oldSlot)
             for (WidgetExtension* w : mChildren)
                 attach(w);
@@ -281,7 +288,7 @@ namespace LuaUi
 
     MyGUI::IntSize WidgetExtension::childScalingSize()
     {
-        return widget()->getSize();
+        return mSlot->widget()->getSize();
     }
 
     void WidgetExtension::triggerEvent(std::string_view name, const sol::object& argument = sol::nil) const

@@ -43,6 +43,7 @@ set(MYGUI_FILES
     openmw_journal.layout
     openmw_journal.skin.xml
     openmw_layers.xml
+    openmw_lua.xml
     openmw_list.skin.xml
     openmw_mainmenu.layout
     openmw_mainmenu.skin.xml

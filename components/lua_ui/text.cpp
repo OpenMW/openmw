@@ -1,18 +1,40 @@
-
 #include "text.hpp"
+
+#include "alignment.hpp"
 
 namespace LuaUi
 {
     LuaText::LuaText()
         : mAutoSized(true)
+    {}
+
+    void LuaText::initialize()
     {
-        changeWidgetSkin("NormalText");
+        changeWidgetSkin("SandText");
+        setEditStatic(true);
+        setVisibleHScroll(false);
+        setVisibleVScroll(false);
+
+        WidgetExtension::initialize();
     }
 
     void LuaText::updateProperties()
     {
-        setCaption(propertyValue("caption", std::string()));
         mAutoSized = propertyValue("autoSize", true);
+
+        setCaption(propertyValue("text", std::string()));
+        setFontHeight(propertyValue("textSize", 10));
+        setTextColour(propertyValue("textColor", MyGUI::Colour(0, 0, 0, 1)));
+        setEditMultiLine(propertyValue("multiline", false));
+        setEditWordWrap(propertyValue("wordWrap", false));
+
+        Alignment horizontal(propertyValue("textAlignH", Alignment::Start));
+        Alignment vertical(propertyValue("textAlignV", Alignment::Start));
+        setTextAlign(alignmentToMyGui(horizontal, vertical));
+
+        setTextShadow(propertyValue("textShadow", false));
+        setTextShadowColour(propertyValue("textShadowColor", MyGUI::Colour(0, 0, 0, 1)));
+
         WidgetExtension::updateProperties();
     }
 

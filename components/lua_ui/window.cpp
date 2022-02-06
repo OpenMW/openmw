@@ -5,10 +5,7 @@
 namespace LuaUi
 {
     LuaWindow::LuaWindow()
-        : mCaption()
-        , mPreviousMouse()
-        , mChangeScale()
-        , mMoveResize()
+        : mCaption(nullptr)
     {}
 
     void LuaWindow::updateTemplate()
@@ -20,7 +17,7 @@ namespace LuaUi
         }
         mActionWidgets.clear();
 
-        WidgetExtension* captionWidget = findFirstInTemplates("caption");
+        WidgetExtension* captionWidget = findDeepInTemplates("caption");
         mCaption = dynamic_cast<LuaText*>(captionWidget);
 
         if (mCaption)

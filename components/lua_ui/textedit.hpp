@@ -11,7 +11,13 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaTextEdit)
 
-        virtual void updateProperties() override;
+        protected:
+            void initialize() override;
+            void deinitialize() override;
+            void updateProperties() override;
+
+        private:
+            void textChange(MyGUI::EditBox*);
     };
 }
 
