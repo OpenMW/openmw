@@ -439,10 +439,7 @@ namespace LuaUtil
         mEventHandlers.clear();
         mSimulationTimersQueue.clear();
         mGameTimersQueue.clear();
-
         mPublicInterfaces.clear();
-        // Assigned by LuaUtil::makeReadOnly, but `clear` removes it, so we need to assign it again.
-        mPublicInterfaces[sol::meta_function::index] = mPublicInterfaces;
     }
 
     ScriptsContainer::Script& ScriptsContainer::getScript(int scriptId)
