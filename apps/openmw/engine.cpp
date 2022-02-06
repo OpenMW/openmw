@@ -672,18 +672,18 @@ void OMW::Engine::setWindowIcon()
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
     mEnvironment.setStateManager (
-        new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles));
+        std::make_unique<MWState::StateManager> (mCfgMgr.getUserDataPath() / "saves", mContentFiles));
 
     createWindow(settings);
 
     osg::ref_ptr<osg::Group> rootNode (new osg::Group);
     mViewer->setSceneData(rootNode);
 
-    mVFS.reset(new VFS::Manager(mFSStrict));
+    mVFS = std::make_unique<VFS::Manager>(mFSStrict);
 
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 
-    mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
+    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get());
     mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(false); // keep to Off for now to allow better state sharing
     mResourceSystem->getSceneManager()->setFilterSettings(
         Settings::Manager::getString("texture mag filter", "General"),
@@ -712,8 +712,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mViewer->addEventHandler(mScreenCaptureHandler);
 
-    mLuaManager = new MWLua::LuaManager(mVFS.get(), (mResDir / "lua_libs").string());
-    mEnvironment.setLuaManager(mLuaManager);
+    auto luaMgr = std::make_unique<MWLua::LuaManager>(mVFS.get(), (mResDir / "lua_libs").string());
+    mLuaManager = luaMgr.get();
+    mEnvironment.setLuaManager(std::move(luaMgr));
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
@@ -784,33 +785,35 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     guiRoot->setName("GUI Root");
     guiRoot->setNodeMask(MWRender::Mask_GUI);
     rootNode->addChild(guiRoot);
-    MWGui::WindowManager* window = new MWGui::WindowManager(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
+
+    auto windowMgr = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
                 Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string(), shadersSupported);
-    mEnvironment.setWindowManager (window);
+    auto* windowMgrInternal = windowMgr.get();
+    mEnvironment.setWindowManager (std::move(windowMgr));
 
-    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
-    mEnvironment.setInputManager (input);
+    auto inputMgr = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
+    mEnvironment.setInputManager (std::move(inputMgr));
 
     // Create sound system
-    mEnvironment.setSoundManager (new MWSound::SoundManager(mVFS.get(), mUseSound));
+    mEnvironment.setSoundManager (std::make_unique<MWSound::SoundManager>(mVFS.get(), mUseSound));
 
     if (!mSkipMenu)
     {
         const std::string& logo = Fallback::Map::getString("Movies_Company_Logo");
         if (!logo.empty())
-            window->playVideo(logo, true);
+            mEnvironment.getWindowManager()->playVideo(logo, true);
     }
 
     // Create the world
-    mEnvironment.setWorld( new MWWorld::World (mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(),
+    mEnvironment.setWorld(std::make_unique<MWWorld::World>(mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(),
         mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder, mActivationDistanceOverride, mCellName,
         mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string()));
     mEnvironment.getWorld()->setupPlayer();
 
-    window->setStore(mEnvironment.getWorld()->getStore());
-    window->initUI();
+    windowMgrInternal->setStore(mEnvironment.getWorld()->getStore());
+    windowMgrInternal->initUI();
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);
@@ -823,16 +826,15 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
     mScriptContext->setExtensions (&mExtensions);
 
-    mEnvironment.setScriptManager (new MWScript::ScriptManager (mEnvironment.getWorld()->getStore(), *mScriptContext, mWarningsMode,
+    mEnvironment.setScriptManager (std::make_unique<MWScript::ScriptManager>(mEnvironment.getWorld()->getStore(), *mScriptContext, mWarningsMode,
         mScriptBlacklistUse ? mScriptBlacklist : std::vector<std::string>()));
 
     // Create game mechanics system
-    MWMechanics::MechanicsManager* mechanics = new MWMechanics::MechanicsManager;
-    mEnvironment.setMechanicsManager (mechanics);
+    mEnvironment.setMechanicsManager (std::make_unique<MWMechanics::MechanicsManager>());
 
     // Create dialog system
-    mEnvironment.setJournal (new MWDialogue::Journal);
-    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mTranslationDataStorage));
+    mEnvironment.setJournal (std::make_unique<MWDialogue::Journal>());
+    mEnvironment.setDialogueManager (std::make_unique<MWDialogue::DialogueManager>(mExtensions, mTranslationDataStorage));
     mEnvironment.setResourceSystem(mResourceSystem.get());
 
     // scripts
