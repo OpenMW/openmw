@@ -5,6 +5,7 @@
         <List file="openmw_layers.xml" />
         <List file="openmw_pointer.xml" />
         <List file="openmw_settings.xml" />
+        <List file="openmw_lua.xml" />
     </MyGUI>
 </MyGUI>
 

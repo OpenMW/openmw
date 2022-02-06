@@ -6,18 +6,32 @@
 -- local ui = require('openmw.ui')
 
 ---
--- @field [parent=#ui] #WIDGET_TYPE WIDGET_TYPE
+-- Widget types
+-- @field [parent=#ui] #TYPE TYPE
+
+---
+-- Alignment values (left to right, top to bottom)
+-- @field [parent=#ui] #ALIGNMENT ALIGNMENT
 
 ---
 -- Tools for working with layers
 -- @field [parent=#ui] #Layers layers
 
 ---
--- @type WIDGET_TYPE
--- @field [parent=#WIDGET_TYPE] Widget Base widget type
--- @field [parent=#WIDGET_TYPE] Text Display text
--- @field [parent=#WIDGET_TYPE] TextEdit Accepts user text input
--- @field [parent=#WIDGET_TYPE] Window Can be moved and resized by the user
+-- All available widget types
+-- @type TYPE
+-- @field Widget Base widget type
+-- @field Text Display text
+-- @field TextEdit Accepts user text input
+-- @field Window Can be moved and resized by the user
+
+---
+-- Alignment values (details depend on the specific property).
+-- For horizontal alignment the order is left to right, for vertical alignment the order is top to bottom.
+-- @type ALIGNMENT
+-- @field Start
+-- @field Center
+-- @field End
 
 ---
 -- Shows given message at the bottom of the screen.

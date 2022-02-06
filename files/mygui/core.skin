@@ -15,8 +15,4 @@
     <Resource type="ResourceSkin" name="ImageBox" size="16 16">
         <BasisSkin type="MainSkin" offset="0 0 16 16"/>
     </Resource>
-
-    <Resource type="ResourceSkin" name="LuaImage">
-        <BasisSkin type="LuaTileRect"/>
-    </Resource>
 </MyGUI>

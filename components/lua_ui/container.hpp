@@ -10,8 +10,8 @@ namespace LuaUi
         MYGUI_RTTI_DERIVED(LuaContainer)
 
         protected:
-            virtual void updateChildren() override;
-            virtual MyGUI::IntSize childScalingSize() override;
+            void updateChildren() override;
+            MyGUI::IntSize childScalingSize() override;
 
         private:
             void updateSizeToFit();

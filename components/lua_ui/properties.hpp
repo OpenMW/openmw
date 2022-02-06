@@ -6,6 +6,7 @@
 #include <osg/Vec2>
 
 #include <components/lua/luastate.hpp>
+#include <components/misc/color.hpp>
 
 namespace LuaUi
 {
@@ -16,6 +17,12 @@ namespace LuaUi
             std::is_same<T, MyGUI::IntSize>() ||
             std::is_same<T, MyGUI::FloatPoint>() ||
             std::is_same<T, MyGUI::FloatSize>();
+    }
+
+    template <typename T>
+    constexpr bool isMyGuiColor()
+    {
+        return std::is_same<T, MyGUI::Colour>();
     }
 
     template <typename T, typename LuaT>
@@ -41,6 +48,8 @@ namespace LuaUi
         LuaT luaT = opt.as<LuaT>();
         if constexpr (isMyGuiVector<T>())
             return T(luaT.x(), luaT.y());
+        else if constexpr (isMyGuiColor<T>())
+            return T(luaT.r(), luaT.g(), luaT.b(), luaT.a());
         else
             return luaT;
     }
@@ -53,6 +62,8 @@ namespace LuaUi
     {
         if constexpr (isMyGuiVector<T>())
             return parseValue<T, osg::Vec2f>(table, field, errorPrefix);
+        else if constexpr (isMyGuiColor<T>())
+            return parseValue<T, Misc::Color>(table, field, errorPrefix);
         else
             return parseValue<T, T>(table, field, errorPrefix);
     }
