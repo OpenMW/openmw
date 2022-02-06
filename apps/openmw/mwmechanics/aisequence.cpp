@@ -87,17 +87,7 @@ bool AiSequence::getCombatTargets(std::vector<MWWorld::Ptr> &targetActors) const
     return !targetActors.empty();
 }
 
-std::list<std::unique_ptr<AiPackage>>::const_iterator AiSequence::begin() const
-{
-    return mPackages.begin();
-}
-
-std::list<std::unique_ptr<AiPackage>>::const_iterator AiSequence::end() const
-{
-    return mPackages.end();
-}
-
-void AiSequence::erase(std::list<std::unique_ptr<AiPackage>>::const_iterator package)
+void AiSequence::erase(std::list<std::shared_ptr<AiPackage>>::const_iterator package)
 {
     // Not sure if manually terminated packages should trigger mDone, probably not?
     for(auto it = mPackages.begin(); it != mPackages.end(); ++it)

@@ -1,9 +1,17 @@
 #include "localscripts.hpp"
 
+#include <components/esm3/loadcell.hpp>
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwmechanics/aisequence.hpp"
 #include "../mwmechanics/aicombat.hpp"
+#include "../mwmechanics/aiescort.hpp"
+#include "../mwmechanics/aifollow.hpp"
+#include "../mwmechanics/aipursue.hpp"
+#include "../mwmechanics/aitravel.hpp"
+#include "../mwmechanics/aiwander.hpp"
+#include "../mwmechanics/aipackage.hpp"
 
 #include "luamanagerimp.hpp"
 
@@ -60,27 +68,105 @@ namespace MWLua
             }
             context.mLuaManager->addAction(std::make_unique<SetEquipmentAction>(context.mLua, obj.id(), std::move(eqp)));
         };
-        selfAPI["getCombatTarget"] = [worldView=context.mWorldView](SelfObject& self) -> sol::optional<LObject>
+
+        using AiPackage = MWMechanics::AiPackage;
+        sol::usertype<AiPackage> aiPackage = context.mLua->sol().new_usertype<AiPackage>("AiPackage");
+        aiPackage["type"] = sol::readonly_property([](const AiPackage& p) -> std::string_view
         {
-            const MWWorld::Ptr& ptr = self.ptr();
-            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            MWWorld::Ptr target;
-            if (ai.getCombatTarget(target))
-                return LObject(getId(target), worldView->getObjectRegistry());
+            switch (p.getTypeId())
+            {
+                case MWMechanics::AiPackageTypeId::Wander: return "Wander";
+                case MWMechanics::AiPackageTypeId::Travel: return "Travel";
+                case MWMechanics::AiPackageTypeId::Escort: return "Escort";
+                case MWMechanics::AiPackageTypeId::Follow: return "Follow";
+                case MWMechanics::AiPackageTypeId::Activate: return "Activate";
+                case MWMechanics::AiPackageTypeId::Combat: return "Combat";
+                case MWMechanics::AiPackageTypeId::Pursue: return "Pursue";
+                case MWMechanics::AiPackageTypeId::AvoidDoor: return "AvoidDoor";
+                case MWMechanics::AiPackageTypeId::Face: return "Face";
+                case MWMechanics::AiPackageTypeId::Breathe: return "Breathe";
+                case MWMechanics::AiPackageTypeId::Cast: return "Cast";
+                default: return "Unknown";
+            }
+        });
+        aiPackage["target"] = sol::readonly_property([worldView=context.mWorldView](const AiPackage& p) -> sol::optional<LObject>
+        {
+            MWWorld::Ptr target = p.getTarget();
+            if (target.isEmpty())
+                return sol::nullopt;
             else
-                return {};
-        };
-        selfAPI["stopCombat"] = [](SelfObject& self)
+                return LObject(getId(target), worldView->getObjectRegistry());
+        });
+        aiPackage["sideWithTarget"] = sol::readonly_property([](const AiPackage& p) { return p.sideWithTarget(); });
+        aiPackage["destination"] = sol::readonly_property([](const AiPackage& p) { return p.getDestination(); });
+
+        selfAPI["_getActiveAiPackage"] = [](SelfObject& self) -> sol::optional<std::shared_ptr<AiPackage>>
         {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            ai.stopCombat();
+            if (ai.isEmpty())
+                return sol::nullopt;
+            else
+                return *ai.begin();
         };
-        selfAPI["startCombat"] = [](SelfObject& self, const LObject& target)
+        selfAPI["_iterateAndFilterAiSequence"] = [](SelfObject& self, sol::function callback)
+        {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            std::list<std::shared_ptr<AiPackage>>& list = ai.getUnderlyingList();
+            for (auto it = list.begin(); it != list.end();)
+            {
+                bool keep = LuaUtil::call(callback, *it).get<bool>();
+                if (keep)
+                    ++it;
+                else
+                    it = list.erase(it);
+            }
+        };
+        selfAPI["_startAiCombat"] = [](SelfObject& self, const LObject& target)
         {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             ai.stack(MWMechanics::AiCombat(target.ptr()), ptr);
+        };
+        selfAPI["_startAiPursue"] = [](SelfObject& self, const LObject& target)
+        {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            ai.stack(MWMechanics::AiPursue(target.ptr()), ptr);
+        };
+        selfAPI["_startAiFollow"] = [](SelfObject& self, const LObject& target)
+        {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            ai.stack(MWMechanics::AiFollow(target.ptr()), ptr);
+        };
+        selfAPI["_startAiEscort"] = [](SelfObject& self, const LObject& target, LCell cell,
+                                       float duration, const osg::Vec3f& dest)
+        {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            // TODO: change AiEscort implementation to accept ptr instead of a non-unique refId.
+            const std::string& refId = target.ptr().getCellRef().getRefId();
+            int gameHoursDuration = static_cast<int>(std::ceil(duration / 3600.0));
+            const ESM::Cell* esmCell = cell.mStore->getCell();
+            if (esmCell->isExterior())
+                ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), false), ptr);
+            else
+                ai.stack(MWMechanics::AiEscort(refId, esmCell->mName, gameHoursDuration, dest.x(), dest.y(), dest.z(), false), ptr);
+        };
+        selfAPI["_startAiWander"] = [](SelfObject& self, int distance, float duration)
+        {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            int gameHoursDuration = static_cast<int>(std::ceil(duration / 3600.0));
+            ai.stack(MWMechanics::AiWander(distance, gameHoursDuration, 0, {}, false), ptr);
+        };
+        selfAPI["_startAiTravel"] = [](SelfObject& self, const osg::Vec3f& target)
+        {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            ai.stack(MWMechanics::AiTravel(target.x(), target.y(), target.z(), false), ptr);
         };
     }
 

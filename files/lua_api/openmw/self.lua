@@ -37,27 +37,10 @@
 -- @field [parent=#ActorControls] #number use if 1 - activates the readied weapon/spell. For weapons, keeping at 1 will charge the attack until set to 0.
 
 -------------------------------------------------------------------------------
--- Enables or disables standart AI (enabled by default).
+-- Enables or disables standard AI (enabled by default).
 -- @function [parent=#self] enableAI
 -- @param self
 -- @param #boolean v
-
--------------------------------------------------------------------------------
--- Returns current target or nil if not in combat
--- @function [parent=#self] getCombatTarget
--- @param self
--- @return openmw.core#GameObject
-
--------------------------------------------------------------------------------
--- Remove all combat packages from the actor.
--- @function [parent=#self] stopCombat
--- @param self
-
--------------------------------------------------------------------------------
--- Attack `target`.
--- @function [parent=#self] startCombat
--- @param self
--- @param openmw.core#GameObject target
 
 return nil
 
