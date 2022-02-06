@@ -1377,8 +1377,6 @@ bool CharacterController::updateState(CharacterState& idle)
                 (!mAnimation->hasAnimation(mCurrentWeapon) || isRandomAttackAnimation(mCurrentWeapon)))
             {
                 mCurrentWeapon = chooseRandomAttackAnimation();
-                if (!mPtr.getClass().hasInventoryStore(mPtr))
-                    mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
             }
 
             if(mWeaponType == ESM::Weapon::Spell)
@@ -1561,8 +1559,11 @@ bool CharacterController::updateState(CharacterState& idle)
                 if(mAnimation->getCurrentTime(mCurrentWeapon) != -1.f)
                 {
                     mUpperBodyState = UpperCharState_StartToMinAttack;
-                    if (mWeaponType == ESM::Weapon::HandToHand && !mPtr.getClass().isBipedal(mPtr))
+                    if (isRandomAttackAnimation(mCurrentWeapon))
+                    {
+                        mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
                         playSwishSound(0.0f);
+                    }
                 }
             }
         }
