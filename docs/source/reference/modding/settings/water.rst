@@ -82,7 +82,7 @@ rain ripple detail
 
 :Type:		integer
 :Range:		0, 1, 2
-:Default:	2
+:Default:	1
 
 Controls how detailed the raindrop ripples on water are.
 
