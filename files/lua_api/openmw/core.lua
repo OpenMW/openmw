@@ -294,11 +294,6 @@
 -- @extends #list<#GameObject>
 
 -------------------------------------------------------------------------------
--- Create iterator.
--- @function [parent=#ObjectList] ipairs
--- @param self
-
--------------------------------------------------------------------------------
 -- Filter list with a Query.
 -- @function [parent=#ObjectList] select
 -- @param self

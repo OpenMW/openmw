@@ -58,20 +58,41 @@ namespace LuaUtil
         mLua["math"]["randomseed"] = []{};
 
         mLua["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };
-        mLua.script(R"(printToLog = function(name, ...)
-            local msg = name
-            for _, v in ipairs({...}) do
-                msg = msg .. '\t' .. tostring(v)
+        mLua["cmetatable"] = [](const sol::table& v) -> sol::object { return v[sol::metatable_key]; };
+        mLua.script(R"(
+            local _pairs = pairs
+            local _ipairs = ipairs
+            local _tostring = tostring
+            local _write = writeToLog
+            local printToLog = function(name, ...)
+                local msg = name
+                for _, v in _ipairs({...}) do
+                    msg = msg .. '\t' .. _tostring(v)
+                end
+                return _write(msg)
             end
-            return writeToLog(msg)
-        end)");
-        mLua.script("printGen = function(name) return function(...) return printToLog(name, ...) end end");
+            printGen = function(name) return function(...) return printToLog(name, ...) end end
+
+            local _cmeta = cmetatable
+            function pairsForReadOnly(v) return _pairs(_cmeta(v).__index) end
+            function ipairsForReadOnly(v) return _ipairs(_cmeta(v).__index) end
+        )");
 
         // Some fixes for compatibility between different Lua versions
         if (mLua["unpack"] == sol::nil)
             mLua["unpack"] = mLua["table"]["unpack"];
         else if (mLua["table"]["unpack"] == sol::nil)
             mLua["table"]["unpack"] = mLua["unpack"];
+        if (LUA_VERSION_NUM <= 501)
+        {
+            mLua.script(R"(
+                local _pairs = pairs
+                local _ipairs = ipairs
+                local _cmeta = cmetatable
+                pairs = function(v) return ((_cmeta(v) or v).__pairs or _pairs)(v) end
+                ipairs = function(v) return ((_cmeta(v) or v).__ipairs or _ipairs)(v) end
+            )");
+        }
 
         mSandboxEnv = sol::table(mLua, sol::create);
         mSandboxEnv["_VERSION"] = mLua["_VERSION"];
@@ -106,24 +127,22 @@ namespace LuaUtil
         if (table.is<sol::userdata>())
             return table;  // it is already userdata, no sense to wrap it again
 
-        lua_State* lua = table.lua_state();
-        table[sol::meta_function::index] = table;
-        lua_newuserdata(lua, 0);
-        sol::stack::push(lua, std::move(table));
-        lua_setmetatable(lua, -2);
-        return sol::stack::pop<sol::table>(lua);
+        lua_State* luaState = table.lua_state();
+        sol::state_view lua(luaState);
+        sol::table meta(lua, sol::create);
+        meta["__index"] = table;
+        meta["__pairs"] = lua["pairsForReadOnly"];
+        meta["__ipairs"] = lua["ipairsForReadOnly"];
+
+        lua_newuserdata(luaState, 0);
+        sol::stack::push(luaState, meta);
+        lua_setmetatable(luaState, -2);
+        return sol::stack::pop<sol::table>(luaState);
     }
 
     sol::table getMutableFromReadOnly(const sol::userdata& ro)
     {
-        lua_State* lua = ro.lua_state();
-        sol::stack::push(lua, ro);
-        int ok = lua_getmetatable(lua, -1);
-        assert(ok);
-        (void)ok;
-        sol::table res = sol::stack::pop<sol::table>(lua);
-        lua_pop(lua, 1);
-        return res;
+        return ro[sol::metatable_key].get<sol::table>()["__index"];
     }
 
     void LuaState::addCommonPackage(std::string packageName, sol::object package)

@@ -72,7 +72,7 @@ namespace MWLua
             else
                 throw std::runtime_error("Index out of range");
         };
-        listT["ipairs"] = [registry](const ListT& list)
+        listT[sol::meta_function::ipairs] = [registry](const ListT& list)
         {
             auto iter = [registry](const ListT& l, int64_t i) -> sol::optional<std::tuple<int64_t, ObjectT>>
             {
