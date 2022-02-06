@@ -172,7 +172,8 @@ void ConfigurationManager::addCommonOptions(boost::program_options::options_desc
     static_cast<boost::filesystem::path&>(defaultUserData) = boost::filesystem::path("?userdata?");
 
     description.add_options()
-        ("config", bpo::value<Files::MaybeQuotedPathContainer>()->multitoken()->composing(), "additional config directories")
+        ("config", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "")
+            ->multitoken()->composing(), "additional config directories")
         ("user-data", bpo::value<Files::MaybeQuotedPath>()->default_value(defaultUserData, ""),
             "set user data directory (used for saves, screenshots, etc)");
 }
