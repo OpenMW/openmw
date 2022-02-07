@@ -348,7 +348,7 @@ namespace MWRender
 
         rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & ~(Mask_GUI|Mask_FirstPerson));
 
-        rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         renderCameraToImage(rttCamera.get(),image,w,h);
     }

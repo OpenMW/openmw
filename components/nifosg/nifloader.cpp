@@ -310,17 +310,9 @@ namespace NifOsg
             if (mHasHerbalismLabel)
                 created->getOrCreateUserDataContainer()->addDescription(Constants::HerbalismLabel);
 
-            // Morrowind is particular about draw order with stenciling, there is no real way around not using traversal order drawing.
-            static osg::ref_ptr<osgUtil::RenderBin> traversalOrderBin;
-
-            if (!traversalOrderBin)
-            {
-                traversalOrderBin = new osgUtil::RenderBin(osgUtil::RenderBin::TRAVERSAL_ORDER);
-                osgUtil::RenderBin::addRenderBinPrototype("TraversalOrder", traversalOrderBin);
-            }
-
+            // When dealing with stencil buffer, draw order is especially sensitive. Make sure such objects are drawn with traversal order.
             if (mHasStencilProperty)
-                created->getOrCreateStateSet()->setRenderBinDetails(2, "TraversalOrder");
+                created->getOrCreateStateSet()->setRenderBinDetails(2, "TraversalOrderBin");
 
             // Attach particle emitters to their nodes which should all be loaded by now.
             handleQueuedParticleEmitters(created, nif);
