@@ -114,6 +114,7 @@ namespace MWLua
 
     void LuaManager::update()
     {
+        static const bool luaDebug = Settings::Manager::getBool("lua debug", "Lua");
         if (mPlayer.isEmpty())
             return;  // The game is not started yet.
 
@@ -172,7 +173,8 @@ namespace MWLua
             LObject obj(e.mDest, objectRegistry);
             if (!obj.isValid())
             {
-                Log(Debug::Verbose) << "Can not call engine handlers: object" << idToString(e.mDest) << " is not found";
+                if (luaDebug)
+                    Log(Debug::Verbose) << "Can not call engine handlers: object" << idToString(e.mDest) << " is not found";
                 continue;
             }
             LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
@@ -204,7 +206,7 @@ namespace MWLua
             GObject obj(id, objectRegistry);
             if (obj.isValid())
                 mGlobalScripts.actorActive(obj);
-            else
+            else if (luaDebug)
                 Log(Debug::Verbose) << "Can not call onActorActive engine handler: object" << idToString(id) << " is already removed";
         }
         mActorAddedEvents.clear();
