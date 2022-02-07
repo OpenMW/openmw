@@ -53,7 +53,15 @@
 ---
 -- Adds a settings page to main menu setting's Scripts tab.
 -- @function [parent=#ui] registerSettingsPage
--- @param #SettingsPage page
+-- @param #SettingsPageOptions page
+
+---
+-- Table with settings page options, passed as an argument to ui.registerSettingsPage
+-- @type SettingsPageOptions
+-- @field #string name Name of the page, displayed in the list, used for search
+-- @field #string searchHints Additional keywords used in search, not displayed anywhere
+-- @field #Element element The page's UI, which will be attached to the settings tab. The root widget has to have a fixed size (set `size` field in `props`, see Widget documentation, `relativeSize` is ignored)
+
 
 ---
 -- Layout
@@ -162,10 +170,20 @@
 -- @field #number button Mouse button which triggered the event (could be nil)
 
 ---
--- Settings page parameters, passed as an argument to ui.registerSettingsPage
--- @type SettingsPage
--- @field #string name Name of the page, displayed in the list, used for search
--- @field #string searchHints Additional keywords used in search, not displayed anywhere
--- @field #Element element The page's UI, which will be attached to the settings tab. The root widget has to have a fixed size (set `size` field in `props`, see Widget documentation, `relativeSize` is ignored)
+-- Register a new texture resource
+-- @function [parent=#ui] texture #TextureResource
+-- @param #TextureResourceOptions options
+
+---
+-- A texture ready to be used by UI widgets
+-- @type TextureResource
+
+---
+-- Table with argument passed to ui.texture
+-- @type TextureResourceOptions
+-- @field #string path Path to the texture file. Required
+-- @field openmw.util#Vector2 offset Offset of this resource in the texture. (0, 0) by default
+-- @field openmw.util#Vector2 size Size of the resource  in the texture. (0, 0) by default.
+-- 0 means the whole texture size is used.
 
 return nil

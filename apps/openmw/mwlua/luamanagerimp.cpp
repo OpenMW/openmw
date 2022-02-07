@@ -37,6 +37,8 @@ namespace MWLua
         mLocalLoader = createUserdataSerializer(true, mWorldView.getObjectRegistry(), &mContentFileMapping);
 
         mGlobalScripts.setSerializer(mGlobalSerializer.get());
+
+        mUiResourceManager = std::make_unique<LuaUi::ResourceManager>(vfs);
     }
 
     void LuaManager::initConfiguration()

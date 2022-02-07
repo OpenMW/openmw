@@ -80,6 +80,7 @@ Widget types
    Widget: Base widget type, all the other widgets inherit its properties and events. <widgets/widget>
    Text: Displays text. <widgets/text>
    TextEdit: Accepts text input from the user. <widgets/textedit>
+   Image: Renders a texture. <widgets/image>
 
 Example
 -------

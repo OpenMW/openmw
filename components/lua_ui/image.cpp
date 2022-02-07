@@ -2,6 +2,8 @@
 
 #include <MyGUI_RenderManager.h>
 
+#include "resources.hpp"
+
 namespace LuaUi
 {
     void LuaTileRect::_setAlign(const MyGUI::IntSize& _oldsize)
@@ -33,18 +35,37 @@ namespace LuaUi
 
     void LuaImage::updateProperties()
     {
-        setImageTexture(propertyValue("path", std::string()));
+        TextureResource* resource = propertyValue<TextureResource*>("resource", nullptr);
+        MyGUI::IntCoord atlasCoord;
+        if (resource)
+        {
+            auto& data = resource->data();
+            atlasCoord = MyGUI::IntCoord(
+                static_cast<int>(data.mOffset.x()),
+                static_cast<int>(data.mOffset.y()),
+                static_cast<int>(data.mSize.x()),
+                static_cast<int>(data.mSize.y()));
+            setImageTexture(data.mPath);
+        }
 
         bool tileH = propertyValue("tileH", false);
         bool tileV = propertyValue("tileV", false);
+
         MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture(_getTextureName());
         MyGUI::IntSize textureSize;
         if (texture != nullptr)
             textureSize = MyGUI::IntSize(texture->getWidth(), texture->getHeight());
+
         mTileRect->updateSize(MyGUI::IntSize(
             tileH ? textureSize.width : 0,
             tileV ? textureSize.height : 0
         ));
+
+        if (atlasCoord.width == 0)
+            atlasCoord.width = textureSize.width;
+        if (atlasCoord.height == 0)
+            atlasCoord.height = textureSize.height;
+        setImageCoord(atlasCoord);
 
         WidgetExtension::updateProperties();
     }

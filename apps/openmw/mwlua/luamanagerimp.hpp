@@ -8,6 +8,8 @@
 #include <components/lua/luastate.hpp>
 #include <components/lua/storage.hpp>
 
+#include <components/lua_ui/resources.hpp>
+
 #include "../mwbase/luamanager.hpp"
 
 #include "actions.hpp"
@@ -89,9 +91,13 @@ namespace MWLua
             return [this, c](Arg arg) { this->queueCallback(c, sol::make_object(c.mFunc.lua_state(), arg)); };
         }
 
+        LuaUi::ResourceManager* uiResourceManager() { return mUiResourceManager.get(); }
+
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScriptCfg::Flags);
+
+        std::unique_ptr<LuaUi::ResourceManager> mUiResourceManager;
 
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;

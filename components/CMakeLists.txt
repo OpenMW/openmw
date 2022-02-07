@@ -259,7 +259,7 @@ add_component_dir (queries
     
 add_component_dir (lua_ui
     registerscriptsettings scriptsettings
-    properties widget element util layers content alignment
+    properties widget element util layers content alignment resources
     adapter text textedit window image container
     )
 

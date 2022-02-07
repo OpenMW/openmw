@@ -4,6 +4,7 @@
 #include <components/lua_ui/content.hpp>
 #include <components/lua_ui/registerscriptsettings.hpp>
 #include <components/lua_ui/alignment.hpp>
+#include <components/lua_ui/resources.hpp>
 
 #include "context.hpp"
 #include "actions.hpp"
@@ -77,45 +78,45 @@ namespace MWLua
                 std::shared_ptr<LuaUi::Element> mElement;
         };
 
+        class LayerAction final : public Action
+        {
+            public:
+                LayerAction(std::string_view name, std::string_view afterName,
+                    LuaUi::Layers::Options options, LuaUtil::LuaState* state)
+                    : Action(state)
+                    , mName(name)
+                    , mAfterName(afterName)
+                    , mOptions(options)
+                {}
+
+                void apply(WorldView&) const override
+                {
+                    size_t index = LuaUi::Layers::indexOf(mAfterName);
+                    if (index == LuaUi::Layers::size())
+                        throw std::logic_error(std::string("Layer not found"));
+                    LuaUi::Layers::insert(index, mName, mOptions);
+                }
+
+                std::string toString() const override
+                {
+                    std::string result("Insert UI layer \"");
+                    result += mName;
+                    result += "\" after \"";
+                    result += mAfterName;
+                    result += "\"";
+                    return result;
+                }
+
+            private:
+                std::string mName;
+                std::string mAfterName;
+                LuaUi::Layers::Options mOptions;
+        };
+
         // Lua arrays index from 1
         inline size_t fromLuaIndex(size_t i) { return i - 1; }
         inline size_t toLuaIndex(size_t i) { return i + 1; }
     }
-
-    class LayerAction final : public Action
-    {
-        public:
-            LayerAction(std::string_view name, std::string_view afterName,
-                LuaUi::Layers::Options options, LuaUtil::LuaState* state)
-                : Action(state)
-                , mName(name)
-                , mAfterName(afterName)
-                , mOptions(options)
-            {}
-
-            void apply(WorldView&) const override
-            {
-                size_t index = LuaUi::Layers::indexOf(mAfterName);
-                if (index == LuaUi::Layers::size())
-                    throw std::logic_error(std::string("Layer not found"));
-                LuaUi::Layers::insert(index, mName, mOptions);
-            }
-
-            std::string toString() const override
-            {
-                std::string result("Insert UI layer \"");
-                result += mName;
-                result += "\" after \"";
-                result += mAfterName;
-                result += "\"";
-                return result;
-            }
-
-        private:
-            std::string mName;
-            std::string mAfterName;
-            LuaUi::Layers::Options mOptions;
-    };
 
     sol::table initUserInterfacePackage(const Context& context)
     {
@@ -277,6 +278,23 @@ namespace MWLua
         }));
 
         api["registerSettingsPage"] = &LuaUi::registerSettingsPage;
+
+        api["texture"] = [luaManager=context.mLuaManager](const sol::table& options)
+        {
+            LuaUi::TextureData data;
+            sol::object path = LuaUtil::getFieldOrNil(options, "path");
+            if (path.is<std::string>() and !path.as<std::string>().empty())
+                data.mPath = path.as<std::string>();
+            else
+                throw sol::error("Invalid texture path");
+            sol::object offset = LuaUtil::getFieldOrNil(options, "offset");
+            if (offset.is<osg::Vec2f>())
+                data.mOffset = offset.as<osg::Vec2f>();
+            sol::object size = LuaUtil::getFieldOrNil(options, "size");
+            if (size.is<osg::Vec2f>())
+                data.mSize = size.as<osg::Vec2f>();
+            return luaManager->uiResourceManager()->registerTexture(data);
+        };
 
         return LuaUtil::makeReadOnly(api);
     }
