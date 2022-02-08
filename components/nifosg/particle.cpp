@@ -11,6 +11,52 @@
 #include <components/misc/rng.hpp>
 #include <components/nif/controlled.hpp>
 #include <components/nif/data.hpp>
+#include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/riggeometry.hpp>
+
+namespace
+{
+    class FindFirstGeometry : public osg::NodeVisitor
+    {
+    public:
+        FindFirstGeometry()
+            : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+            , mGeometry(nullptr)
+        {
+        }
+
+        void apply(osg::Node& node) override
+        {
+            if (mGeometry)
+                return;
+
+            traverse(node);
+        }
+
+        void apply(osg::Drawable& drawable) override
+        {
+            if (auto morph = dynamic_cast<SceneUtil::MorphGeometry*>(&drawable))
+            {
+                mGeometry = morph->getSourceGeometry();
+                return;
+            }
+            else if (auto rig = dynamic_cast<SceneUtil::RigGeometry*>(&drawable))
+            {
+                mGeometry = rig->getSourceGeometry();
+                return;
+            }
+
+            traverse(drawable);
+        }
+
+        void apply(osg::Geometry& geometry) override
+        {
+            mGeometry = &geometry;
+        }
+
+        osg::Geometry* mGeometry;
+    };
+}
 
 namespace NifOsg
 {
@@ -264,6 +310,8 @@ void GravityAffector::operate(osgParticle::Particle *particle, double dt)
 
 Emitter::Emitter()
     : osgParticle::Emitter()
+    , mUseGeometryEmitter(false)
+    , mGeometryEmitterTarget(std::nullopt)
 {
 }
 
@@ -274,27 +322,17 @@ Emitter::Emitter(const Emitter &copy, const osg::CopyOp &copyop)
     , mShooter(copy.mShooter)
     // need a deep copy because the remainder is stored in the object
     , mCounter(static_cast<osgParticle::Counter*>(copy.mCounter->clone(osg::CopyOp::DEEP_COPY_ALL)))
+    , mUseGeometryEmitter(copy.mUseGeometryEmitter)
+    , mGeometryEmitterTarget(copy.mGeometryEmitterTarget)
+    , mCachedGeometryEmitter(copy.mCachedGeometryEmitter)
 {
 }
 
 Emitter::Emitter(const std::vector<int> &targets)
     : mTargets(targets)
+    , mUseGeometryEmitter(false)
+    , mGeometryEmitterTarget(std::nullopt)
 {
-}
-
-void Emitter::setShooter(osgParticle::Shooter *shooter)
-{
-    mShooter = shooter;
-}
-
-void Emitter::setPlacer(osgParticle::Placer *placer)
-{
-    mPlacer = placer;
-}
-
-void Emitter::setCounter(osgParticle::Counter *counter)
-{
-    mCounter = counter;
 }
 
 void Emitter::emitParticles(double dt)
@@ -316,19 +354,51 @@ void Emitter::emitParticles(double dt)
     const osg::Matrix& ltw = getLocalToWorldMatrix();
     osg::Matrix emitterToPs = ltw * worldToPs;
 
-    if (!mTargets.empty())
+    osg::ref_ptr<osg::Vec3Array> geometryVertices = nullptr;
+
+    if (mUseGeometryEmitter || !mTargets.empty())
     {
-        int randomIndex = Misc::Rng::rollClosedProbability() * (mTargets.size() - 1);
-        int randomRecIndex = mTargets[randomIndex];
+        int recIndex;
+
+        if (mUseGeometryEmitter)
+        {
+            if (!mGeometryEmitterTarget.has_value())
+                return;
+
+            recIndex = mGeometryEmitterTarget.value();
+        }
+        else
+        {
+            int randomIndex = Misc::Rng::rollClosedProbability() * (mTargets.size() - 1);
+            recIndex = mTargets[randomIndex];
+        }
 
         // we could use a map here for faster lookup
-        FindGroupByRecIndex visitor(randomRecIndex);
+        FindGroupByRecIndex visitor(recIndex);
         getParent(0)->accept(visitor);
 
         if (!visitor.mFound)
         {
-            Log(Debug::Info) << "Can't find emitter node" << randomRecIndex;
+            Log(Debug::Info) << "Can't find emitter node" << recIndex;
             return;
+        }
+
+        if (mUseGeometryEmitter)
+        {
+            if (!mCachedGeometryEmitter.lock(geometryVertices))
+            {
+                FindFirstGeometry geometryVisitor;
+                visitor.mFound->accept(geometryVisitor);
+
+                if (geometryVisitor.mGeometry)
+                {
+                    if (auto* vertices = dynamic_cast<osg::Vec3Array*>(geometryVisitor.mGeometry->getVertexArray()))
+                    {
+                        mCachedGeometryEmitter = osg::observer_ptr<osg::Vec3Array>(vertices);
+                        geometryVertices = vertices;
+                    }
+                }
+            }
         }
 
         osg::NodePath path = visitor.mFoundPath;
@@ -338,12 +408,18 @@ void Emitter::emitParticles(double dt)
 
     emitterToPs.orthoNormalize(emitterToPs);
 
+    if (mUseGeometryEmitter && (!geometryVertices.valid() || geometryVertices->empty()))
+        return;
+
     for (int i=0; i<n; ++i)
     {
         osgParticle::Particle* P = getParticleSystem()->createParticle(nullptr);
         if (P)
         {
-            mPlacer->place(P);
+            if (mUseGeometryEmitter)
+                P->setPosition((*geometryVertices)[Misc::Rng::rollDice(geometryVertices->getNumElements())]);
+            else if (mPlacer)
+                mPlacer->place(P);
 
             mShooter->shoot(P);
 
