@@ -283,7 +283,7 @@ namespace MWLua
         {
             LuaUi::TextureData data;
             sol::object path = LuaUtil::getFieldOrNil(options, "path");
-            if (path.is<std::string>() and !path.as<std::string>().empty())
+            if (path.is<std::string>() && !path.as<std::string>().empty())
                 data.mPath = path.as<std::string>();
             else
                 throw sol::error("Invalid texture path");

@@ -27,7 +27,7 @@ namespace LuaUi
             mTileSize.height = 1e7;
     }
 
-    LuaImage::LuaImage()
+    void LuaImage::initialize()
     {
         changeWidgetSkin("LuaImage");
         mTileRect = dynamic_cast<LuaTileRect*>(getSubWidgetMain());

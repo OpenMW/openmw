@@ -6,7 +6,7 @@ namespace LuaUi
 {
     void LuaTextEdit::initialize()
     {
-        changeWidgetSkin("LuaTextEdit");
+        changeWidgetSkin("LuaText");
 
         eventEditTextChange += MyGUI::newDelegate(this, &LuaTextEdit::textChange);
 

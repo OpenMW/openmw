@@ -24,9 +24,8 @@ namespace LuaUi
     {
         mLua = lua;
         mWidget = self;
-        updateTemplate();
-
         initialize();
+        updateTemplate();
     }
 
     void WidgetExtension::initialize()
@@ -70,6 +69,13 @@ namespace LuaUi
             w->deinitialize();
         for (WidgetExtension* w : mTemplateChildren)
             w->deinitialize();
+    }
+
+    void WidgetExtension::reset()
+    {
+        // detach all children from the slot widget, in case it gets destroyed
+        for (auto& w: mChildren)
+            w->widget()->detachFromWidget();
     }
 
     void WidgetExtension::attach(WidgetExtension* ext)
@@ -182,8 +188,15 @@ namespace LuaUi
         else
             mSlot = slot->mSlot;
         if (mSlot != oldSlot)
-            for (WidgetExtension* w : mChildren)
-                attach(w);
+        {
+            MyGUI::IntSize slotSize = mSlot->widget()->getSize();
+            MyGUI::IntPoint slotPosition = mSlot->widget()->getAbsolutePosition() - widget()->getAbsolutePosition();
+            MyGUI::IntCoord slotCoord(slotPosition, slotSize);
+            if (mWidget->getSubWidgetMain())
+                mWidget->getSubWidgetMain()->setCoord(slotCoord);
+            if (mWidget->getSubWidgetText())
+                mWidget->getSubWidgetText()->setCoord(slotCoord);
+        }
     }
 
     void WidgetExtension::setCallback(const std::string& name, const LuaUtil::Callback& callback)

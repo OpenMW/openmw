@@ -28,6 +28,9 @@ namespace LuaUi
         virtual void deinitialize();
 
         MyGUI::Widget* widget() const { return mWidget; }
+        WidgetExtension* slot() const { return mSlot; }
+
+        void reset();
 
         const std::vector<WidgetExtension*>& children() { return mChildren; }
         void setChildren(const std::vector<WidgetExtension*>&);
@@ -50,7 +53,6 @@ namespace LuaUi
 
         const sol::table& getLayout() { return mLayout; }
         void setLayout(const sol::table& layout) { mLayout = layout; }
-        void resetSlot() { mSlot = this; }
 
         template <typename T>
         T externalValue(std::string_view name, const T& defaultValue)
