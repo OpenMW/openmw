@@ -218,6 +218,7 @@ namespace NifOsg
 
         bool mHasNightDayLabel = false;
         bool mHasHerbalismLabel = false;
+        bool mHasStencilProperty = false;
 
         // This is used to queue emitters that weren't attached to their node yet.
         std::vector<std::pair<size_t, osg::ref_ptr<Emitter>>> mEmitterQueue;
@@ -309,6 +310,10 @@ namespace NifOsg
             if (mHasHerbalismLabel)
                 created->getOrCreateUserDataContainer()->addDescription(Constants::HerbalismLabel);
 
+            // When dealing with stencil buffer, draw order is especially sensitive. Make sure such objects are drawn with traversal order.
+            if (mHasStencilProperty)
+                created->getOrCreateStateSet()->setRenderBinDetails(2, "TraversalOrderBin");
+
             // Attach particle emitters to their nodes which should all be loaded by now.
             handleQueuedParticleEmitters(created, nif);
 
@@ -334,6 +339,21 @@ namespace NifOsg
         void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
+
+            bool hasStencilProperty = false;
+
+            for (size_t i = 0; i <props.length(); ++i)
+            {
+                if (props[i].empty())
+                    continue;
+
+                if (props[i].getPtr()->recType == Nif::RC_NiStencilProperty)
+                {
+                    hasStencilProperty = true;
+                    break;
+                }
+            }
+
             for (size_t i = 0; i <props.length(); ++i)
             {
                 if (!props[i].empty())
@@ -350,14 +370,14 @@ namespace NifOsg
                         if (props[i].getPtr()->recIndex == mFirstRootTextureIndex)
                             applyTo->setUserValue("overrideFx", 1);
                     }
-                    handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
+                    handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags, hasStencilProperty);
                 }
             }
 
             auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
             // NiGeometry's NiAlphaProperty doesn't get handled here because it's a drawable property
             if (geometry && !geometry->shaderprop.empty())
-                handleProperty(geometry->shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
+                handleProperty(geometry->shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags, hasStencilProperty);
         }
 
         static void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
@@ -1347,7 +1367,7 @@ namespace NifOsg
             case 4: return osg::Stencil::GREATER;
             case 5: return osg::Stencil::NOTEQUAL;
             case 6: return osg::Stencil::GEQUAL;
-            case 7: return osg::Stencil::NEVER; // NifSkope says this is GL_ALWAYS, but in MW it's GL_NEVER
+            case 7: return osg::Stencil::ALWAYS;
             default:
                 Log(Debug::Info) << "Unexpected stencil function: " << func << " in " << mFilename;
                 return osg::Stencil::NEVER;
@@ -1772,7 +1792,7 @@ namespace NifOsg
         }
 
         void handleProperty(const Nif::Property *property,
-                            osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
+                            osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags, bool hasStencilProperty)
         {
             switch (property->recType)
             {
@@ -1800,6 +1820,7 @@ namespace NifOsg
 
                 if (stencilprop->data.enabled != 0)
                 {
+                    mHasStencilProperty = true;
                     osg::ref_ptr<osg::Stencil> stencil = new osg::Stencil;
                     stencil->setFunction(getStencilFunction(stencilprop->data.compareFunc), stencilprop->data.stencilRef, stencilprop->data.stencilMask);
                     stencil->setStencilFailOperation(getStencilOperation(stencilprop->data.failAction));
@@ -1831,7 +1852,9 @@ namespace NifOsg
                 osg::ref_ptr<osg::Depth> depth = new osg::Depth;
                 // Depth write flag
                 depth->setWriteMask((zprop->flags>>1)&1);
-                // Morrowind ignores depth test function
+                // Morrowind ignores depth test function, unless a NiStencilProperty is present, in which case it uses a fixed depth function of GL_ALWAYS.
+                if (hasStencilProperty)
+                    depth->setFunction(osg::Depth::ALWAYS);
                 depth = shareAttribute(depth);
                 stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 break;
@@ -2049,7 +2072,10 @@ namespace NifOsg
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
+                        {
                             node->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                            node->getOrCreateStateSet()->setNestRenderBins(false);
+                        }
                         else
                             node->getOrCreateStateSet()->setRenderBinToInherit();
                     }
