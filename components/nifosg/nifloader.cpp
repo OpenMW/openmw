@@ -51,8 +51,7 @@ namespace
 
     void getAllNiNodes(const Nif::Node* node, std::vector<int>& outIndices)
     {
-        const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node);
-        if (ninode)
+        if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node))
         {
             outIndices.push_back(ninode->recIndex);
             for (unsigned int i=0; i<ninode->children.length(); ++i)
@@ -1000,7 +999,8 @@ namespace NifOsg
         osg::ref_ptr<Emitter> handleParticleEmitter(const Nif::NiParticleSystemController* partctrl)
         {
             std::vector<int> targets;
-            if (partctrl->recType == Nif::RC_NiBSPArrayController)
+            const bool atVertex = (partctrl->flags & Nif::NiNode::BSPArrayController_AtVertex);
+            if (partctrl->recType == Nif::RC_NiBSPArrayController && !atVertex)
             {
                 getAllNiNodes(partctrl->emitter.getPtr(), targets);
             }
@@ -1024,12 +1024,20 @@ namespace NifOsg
                                                            partctrl->lifetime, partctrl->lifetimeRandom);
             emitter->setShooter(shooter);
 
-            osgParticle::BoxPlacer* placer = new osgParticle::BoxPlacer;
-            placer->setXRange(-partctrl->offsetRandom.x() / 2.f, partctrl->offsetRandom.x() / 2.f);
-            placer->setYRange(-partctrl->offsetRandom.y() / 2.f, partctrl->offsetRandom.y() / 2.f);
-            placer->setZRange(-partctrl->offsetRandom.z() / 2.f, partctrl->offsetRandom.z() / 2.f);
+            if (atVertex && (partctrl->recType == Nif::RC_NiBSPArrayController))
+            {
+                emitter->setUseGeometryEmitter(true);
+                emitter->setGeometryEmitterTarget(partctrl->emitter->recIndex);
+            }
+            else
+            {
+                osgParticle::BoxPlacer* placer = new osgParticle::BoxPlacer;
+                placer->setXRange(-partctrl->offsetRandom.x() / 2.f, partctrl->offsetRandom.x() / 2.f);
+                placer->setYRange(-partctrl->offsetRandom.y() / 2.f, partctrl->offsetRandom.y() / 2.f);
+                placer->setZRange(-partctrl->offsetRandom.z() / 2.f, partctrl->offsetRandom.z() / 2.f);
+                emitter->setPlacer(placer);
+            }
 
-            emitter->setPlacer(placer);
             return emitter;
         }
 

@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_NIFOSG_PARTICLE_H
 #define OPENMW_COMPONENTS_NIFOSG_PARTICLE_H
 
+#include <optional>
+
 #include <osgParticle/Particle>
 #include <osgParticle/Shooter>
 #include <osgParticle/Operator>
@@ -233,9 +235,12 @@ namespace NifOsg
 
         void emitParticles(double dt) override;
 
-        void setShooter(osgParticle::Shooter* shooter);
-        void setPlacer(osgParticle::Placer* placer);
-        void setCounter(osgParticle::Counter* counter);
+        void setShooter(osgParticle::Shooter* shooter) { mShooter = shooter; }
+        void setPlacer(osgParticle::Placer* placer) { mPlacer = placer; }
+        void setCounter(osgParticle::Counter* counter) { mCounter = counter;}
+
+        void setUseGeometryEmitter(bool useGeometryEmitter) { mUseGeometryEmitter = useGeometryEmitter; }
+        void setGeometryEmitterTarget(std::optional<int> recIndex) { mGeometryEmitterTarget = recIndex; }
 
     private:
         // NIF Record indices
@@ -244,6 +249,10 @@ namespace NifOsg
         osg::ref_ptr<osgParticle::Placer> mPlacer;
         osg::ref_ptr<osgParticle::Shooter> mShooter;
         osg::ref_ptr<osgParticle::Counter> mCounter;
+
+        bool mUseGeometryEmitter;
+        std::optional<int> mGeometryEmitterTarget;
+        osg::observer_ptr<osg::Vec3Array> mCachedGeometryEmitter;
     };
 
 }
