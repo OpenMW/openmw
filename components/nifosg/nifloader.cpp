@@ -349,8 +349,12 @@ namespace NifOsg
 
                 if (props[i].getPtr()->recType == Nif::RC_NiStencilProperty)
                 {
-                    hasStencilProperty = true;
-                    break;
+                    const Nif::NiStencilProperty* stencilprop = static_cast<const Nif::NiStencilProperty*>(props[i].getPtr());
+                    if (stencilprop->data.enabled != 0)
+                    {
+                        hasStencilProperty = true;
+                        break;
+                    }
                 }
             }
 
