@@ -460,6 +460,7 @@ struct NiSortAdjustNode : NiNode
     }
     void post(NIFFile *nif) override
     {
+        NiNode::post(nif);
         mSubSorter.post(nif);
     }
 };
