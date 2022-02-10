@@ -67,6 +67,7 @@ namespace MWMechanics
             const T& getBase() const { return mStatic.getBase(); };
             T getModified(bool capped = true) const { return mStatic.getModified(capped); };
             const T& getCurrent() const { return mCurrent; };
+            T getRatio(bool nanIsZero = true) const;
 
             /// Set base and adjust current accordingly.
             void setBase(const T& value) { mStatic.setBase(value); };

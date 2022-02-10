@@ -66,6 +66,19 @@ namespace MWMechanics
     }
 
     template<typename T>
+    T DynamicStat<T>::getRatio(bool nanIsZero) const
+    {
+        T modified = getModified();
+        if(modified == T{})
+        {
+            if(nanIsZero)
+                return modified;
+            return {1};
+        }
+        return getCurrent() / modified;
+    }
+
+    template<typename T>
     void DynamicStat<T>::writeState (ESM::StatState<T>& state) const
     {
         mStatic.writeState (state);

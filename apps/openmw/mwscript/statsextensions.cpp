@@ -324,17 +324,9 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
-
-                    Interpreter::Type_Float value = 0;
-
-                    Interpreter::Type_Float max = stats.getDynamic(mIndex).getModified();
-
-                    if (max>0)
-                        value = stats.getDynamic(mIndex).getCurrent() / max;
-
-                    runtime.push (value);
+                    runtime.push(stats.getDynamic(mIndex).getRatio());
                 }
         };
 
