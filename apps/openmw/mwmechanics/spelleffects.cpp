@@ -64,8 +64,7 @@ namespace
         auto& creatureStats = target.getClass().getCreatureStats(target);
         auto stat = creatureStats.getDynamic(index);
         float current = stat.getCurrent();
-        stat.setModified(stat.getModified() + magnitude, 0);
-        stat.setCurrentModified(stat.getCurrentModified() + magnitude);
+        stat.setBase(std::max(0.f, stat.getBase() + magnitude));
         stat.setCurrent(current + magnitude);
         creatureStats.setDynamic(index, stat);
     }

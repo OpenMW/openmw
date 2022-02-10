@@ -399,7 +399,7 @@ namespace MWGui
             skillWidget = mSkillList->createWidget<Widgets::MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default,
                                                            std::string("Skill") + MyGUI::utility::toString(i));
             skillWidget->setSkillNumber(skillId);
-            skillWidget->setSkillValue(Widgets::MWSkill::SkillValue(static_cast<float>(race->mData.mBonus[i].mBonus)));
+            skillWidget->setSkillValue(Widgets::MWSkill::SkillValue(static_cast<float>(race->mData.mBonus[i].mBonus), 0.f));
             ToolTips::createSkillToolTip(skillWidget, skillId);
 
 
