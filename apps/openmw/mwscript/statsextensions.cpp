@@ -219,7 +219,7 @@ namespace MWScript
                         .getDynamic (mIndex));
 
                     stat.setBase(value);
-                    stat.setCurrent(value, true);
+                    stat.setCurrent(stat.getModified(false), true, true);
 
                     ptr.getClass().getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
@@ -268,7 +268,7 @@ namespace MWScript
                     if(mIndex != 2)
                         base = std::max(base, 0.f);
                     stat.setBase(base);
-                    stat.setCurrent(diff + current, true);
+                    stat.setCurrent(diff + current, true, true);
 
                     stats.setDynamic (mIndex, stat);
                 }

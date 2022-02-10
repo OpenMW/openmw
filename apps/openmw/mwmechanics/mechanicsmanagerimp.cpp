@@ -255,7 +255,7 @@ namespace MWMechanics
         for (int i=0; i<3; ++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic (i);
-            stat.setCurrent(stat.getModified());
+            stat.setCurrent (stat.getModified());
             creatureStats.setDynamic (i, stat);
         }
 
