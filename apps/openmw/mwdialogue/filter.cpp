@@ -257,9 +257,9 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
         case SelectWrapper::Function_PcHealthPercent:
         {
             MWWorld::Ptr player = MWMechanics::getPlayer();
-
-            float ratio = player.getClass().getCreatureStats (player).getHealth().getCurrent() /
-                player.getClass().getCreatureStats (player).getHealth().getModified();
+            float ratio = player.getClass().getCreatureStats(player).getHealth().getModified();
+            if(ratio > 0)
+                ratio = player.getClass().getCreatureStats(player).getHealth().getCurrent() / ratio;
 
             return select.selectCompare (static_cast<int>(ratio*100));
         }
@@ -276,8 +276,9 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
         case SelectWrapper::Function_HealthPercent:
         {
-            float ratio = mActor.getClass().getCreatureStats (mActor).getHealth().getCurrent() /
-                mActor.getClass().getCreatureStats (mActor).getHealth().getModified();
+            float ratio = mActor.getClass().getCreatureStats(mActor).getHealth().getModified();
+            if(ratio > 0)
+                ratio = mActor.getClass().getCreatureStats(mActor).getHealth().getCurrent() / ratio;
 
             return select.selectCompare (static_cast<int>(ratio*100));
         }
