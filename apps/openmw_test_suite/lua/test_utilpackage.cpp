@@ -39,6 +39,10 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "v2 == util.vector2(3/5, 4/5)"));
         lua.safe_script("_, len = util.vector2(0, 0):normalize()");
         EXPECT_FLOAT_EQ(get<float>(lua, "len"), 0);
+        lua.safe_script("ediv0 = util.vector2(1, 0):ediv(util.vector2(0, 0))");
+        EXPECT_TRUE(get<bool>(lua, "ediv0.x == math.huge and ediv0.y ~= ediv0.y"));
+        EXPECT_TRUE(get<bool>(lua, "util.vector2(1, 2):emul(util.vector2(3, 4)) == util.vector2(3, 8)"));
+        EXPECT_TRUE(get<bool>(lua, "util.vector2(4, 6):ediv(util.vector2(2, 3)) == util.vector2(2, 2)"));
     }
 
     TEST(LuaUtilPackageTest, Vector3)
@@ -68,6 +72,10 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "v2 == util.vector3(3/5, 4/5, 0)"));
         lua.safe_script("_, len = util.vector3(0, 0, 0):normalize()");
         EXPECT_FLOAT_EQ(get<float>(lua, "len"), 0);
+        lua.safe_script("ediv0 = util.vector3(1, 1, 1):ediv(util.vector3(0, 0, 0))");
+        EXPECT_TRUE(get<bool>(lua, "ediv0.z == math.huge"));
+        EXPECT_TRUE(get<bool>(lua, "util.vector3(1, 2, 3):emul(util.vector3(3, 4, 5)) == util.vector3(3, 8, 15)"));
+        EXPECT_TRUE(get<bool>(lua, "util.vector3(4, 6, 8):ediv(util.vector3(2, 3, 4)) == util.vector3(2, 2, 2)"));
     }
 
     TEST(LuaUtilPackageTest, Vector4)
@@ -95,6 +103,10 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "v2 == util.vector4(3/5, 0, 0, 4/5)"));
         lua.safe_script("_, len = util.vector4(0, 0, 0, 0):normalize()");
         EXPECT_FLOAT_EQ(get<float>(lua, "len"), 0);
+        lua.safe_script("ediv0 = util.vector4(1, 1, 1, -1):ediv(util.vector4(0, 0, 0, 0))");
+        EXPECT_TRUE(get<bool>(lua, "ediv0.w == -math.huge"));
+        EXPECT_TRUE(get<bool>(lua, "util.vector4(1, 2, 3, 4):emul(util.vector4(3, 4, 5, 6)) == util.vector4(3, 8, 15, 24)"));
+        EXPECT_TRUE(get<bool>(lua, "util.vector4(4, 6, 8, 9):ediv(util.vector4(2, 3, 4, 3)) == util.vector4(2, 2, 2, 3)"));
     }
 
     TEST(LuaUtilPackageTest, Color)

@@ -55,6 +55,29 @@ namespace LuaUtil
                 else
                     return std::make_tuple(v * (1.f / len), len);
             };
+            vectorType["emul"] = [](const T& a, const T& b)
+            {
+                T result;
+                for (int i = 0; i < T::num_components; ++i)
+                    result[i] = a[i] * b[i];
+                return result;
+            };
+            vectorType["ediv"] = [](const T& a, const T& b)
+            {
+                T result;
+                for (int i = 0; i < T::num_components; ++i)
+                    result[i] = a[i] / b[i];
+                return result;
+            };
+            vectorType[sol::meta_function::to_string] = [](const T& v)
+            {
+                std::stringstream ss;
+                ss << "(" << v[0];
+                for (int i = 1; i < T::num_components; ++i)
+                    ss << ", " << v[i];
+                ss << ")";
+                return ss.str();
+            };
         }
     }
 
@@ -67,12 +90,6 @@ namespace LuaUtil
         sol::usertype<Vec2> vec2Type = lua.new_usertype<Vec2>("Vec2");
         vec2Type["x"] = sol::readonly_property([](const Vec2& v) -> float { return v.x(); } );
         vec2Type["y"] = sol::readonly_property([](const Vec2& v) -> float { return v.y(); } );
-        vec2Type[sol::meta_function::to_string] = [](const Vec2& v)
-        {
-            std::stringstream ss;
-            ss << "(" << v.x() << ", " << v.y() << ")";
-            return ss.str();
-        };
         addVectorMethods<Vec2>(vec2Type);
         vec2Type["rotate"] = &Misc::rotateVec2f;
 
@@ -82,12 +99,6 @@ namespace LuaUtil
         vec3Type["x"] = sol::readonly_property([](const Vec3& v) -> float { return v.x(); } );
         vec3Type["y"] = sol::readonly_property([](const Vec3& v) -> float { return v.y(); } );
         vec3Type["z"] = sol::readonly_property([](const Vec3& v) -> float { return v.z(); } );
-        vec3Type[sol::meta_function::to_string] = [](const Vec3& v)
-        {
-            std::stringstream ss;
-            ss << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
-            return ss.str();
-        };
         addVectorMethods<Vec3>(vec3Type);
         vec3Type[sol::meta_function::involution] = [](const Vec3& a, const Vec3& b) { return a ^ b; };
         vec3Type["cross"] = [](const Vec3& a, const Vec3& b) { return a ^ b; };
@@ -100,12 +111,6 @@ namespace LuaUtil
         vec4Type["y"] = sol::readonly_property([](const Vec4& v) -> float { return v.y(); });
         vec4Type["z"] = sol::readonly_property([](const Vec4& v) -> float { return v.z(); });
         vec4Type["w"] = sol::readonly_property([](const Vec4& v) -> float { return v.w(); });
-        vec4Type[sol::meta_function::to_string] = [](const Vec4& v)
-        {
-            std::stringstream ss;
-            ss << "(" << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << ")";
-            return ss.str();
-        };
         addVectorMethods<Vec4>(vec4Type);
 
         // Lua bindings for Color
