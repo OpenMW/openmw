@@ -2122,6 +2122,8 @@ namespace NifOsg
                     specStrength = shaderprop->mSpecStrength;
                     break;
                 }
+                default:
+                    break;
                 }
             }
 
