@@ -6,6 +6,7 @@
 #include <array>
 #include <map>
 #include <sstream>
+#include <algorithm>
 
 namespace Nif
 {
@@ -181,17 +182,10 @@ void NIFFile::parse(Files::IStreamPtr stream)
         "NetImmerse File Format",
         "Gamebryo File Format"
     };
-    bool supported = false;
-    for (const std::string& verString : verStrings)
-    {
-        supported = (head.compare(0, verString.size(), verString) == 0);
-        if (supported)
-            break;
-    }
-    if (!supported)
+    const bool supportedHeader = std::any_of(verStrings.begin(), verStrings.end(),
+        [&] (const std::string& verString) { return head.compare(0, verString.size(), verString) == 0; });
+    if (!supportedHeader)
         fail("Invalid NIF header: " + head);
-
-    supported = false;
 
     // Get BCD version
     ver = nif.getUInt();
@@ -202,13 +196,8 @@ void NIFFile::parse(Files::IStreamPtr stream)
         NIFStream::generateVersion(4,0,0,0),
         VER_MW
     };
-    for (uint32_t supportedVer : supportedVers)
-    {
-        supported = (ver == supportedVer);
-        if (supported)
-            break;
-    }
-    if (!supported)
+    const bool supportedVersion = std::find(supportedVers.begin(), supportedVers.end(), ver) != supportedVers.end();
+    if (!supportedVersion)
     {
         if (sLoadUnsupportedFiles)
             warn("Unsupported NIF version: " + printVersion(ver) + ". Proceed with caution!");
@@ -311,7 +300,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
 
         r = entry->second();
 
-        if (!supported)
+        if (!supportedVersion)
             Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " (" << filename << ")";
 
         assert(r != nullptr);
