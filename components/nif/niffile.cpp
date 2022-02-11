@@ -17,144 +17,143 @@ NIFFile::NIFFile(Files::IStreamPtr stream, const std::string &name)
     parse(stream);
 }
 
-template <typename NodeType> static std::unique_ptr<Record> construct() { return std::make_unique<NodeType>(); }
+template <typename NodeType, RecordType recordType>
+static std::unique_ptr<Record> construct()
+{
+    auto result = std::make_unique<NodeType>();
+    result->recType = recordType;
+    return result;
+}
 
-struct RecordFactoryEntry {
-
-    using create_t = std::unique_ptr<Record> (*)();
-
-    create_t        mCreate;
-    RecordType      mType;
-
-};
+using CreateRecord = std::unique_ptr<Record> (*)();
 
 ///These are all the record types we know how to read.
-static std::map<std::string,RecordFactoryEntry> makeFactory()
+static std::map<std::string, CreateRecord> makeFactory()
 {
-    std::map<std::string,RecordFactoryEntry> factory;
-    factory["NiNode"]                       = {&construct <NiNode>                      , RC_NiNode                     };
-    factory["NiSwitchNode"]                 = {&construct <NiSwitchNode>                , RC_NiSwitchNode               };
-    factory["NiLODNode"]                    = {&construct <NiLODNode>                   , RC_NiLODNode                  };
-    factory["AvoidNode"]                    = {&construct <NiNode>                      , RC_AvoidNode                  };
-    factory["NiCollisionSwitch"]            = {&construct <NiNode>                      , RC_NiCollisionSwitch          };
-    factory["NiBSParticleNode"]             = {&construct <NiNode>                      , RC_NiBSParticleNode           };
-    factory["NiBSAnimationNode"]            = {&construct <NiNode>                      , RC_NiBSAnimationNode          };
-    factory["NiBillboardNode"]              = {&construct <NiNode>                      , RC_NiBillboardNode            };
-    factory["NiTriShape"]                   = {&construct <NiTriShape>                  , RC_NiTriShape                 };
-    factory["NiTriStrips"]                  = {&construct <NiTriStrips>                 , RC_NiTriStrips                };
-    factory["NiLines"]                      = {&construct <NiLines>                     , RC_NiLines                    };
-    factory["NiParticles"]                  = {&construct <NiParticles>                 , RC_NiParticles                };
-    factory["NiRotatingParticles"]          = {&construct <NiParticles>                 , RC_NiParticles                };
-    factory["NiAutoNormalParticles"]        = {&construct <NiParticles>                 , RC_NiParticles                };
-    factory["NiCamera"]                     = {&construct <NiCamera>                    , RC_NiCamera                   };
-    factory["RootCollisionNode"]            = {&construct <NiNode>                      , RC_RootCollisionNode          };
-    factory["NiTexturingProperty"]          = {&construct <NiTexturingProperty>         , RC_NiTexturingProperty        };
-    factory["NiFogProperty"]                = {&construct <NiFogProperty>               , RC_NiFogProperty              };
-    factory["NiMaterialProperty"]           = {&construct <NiMaterialProperty>          , RC_NiMaterialProperty         };
-    factory["NiZBufferProperty"]            = {&construct <NiZBufferProperty>           , RC_NiZBufferProperty          };
-    factory["NiAlphaProperty"]              = {&construct <NiAlphaProperty>             , RC_NiAlphaProperty            };
-    factory["NiVertexColorProperty"]        = {&construct <NiVertexColorProperty>       , RC_NiVertexColorProperty      };
-    factory["NiShadeProperty"]              = {&construct <NiShadeProperty>             , RC_NiShadeProperty            };
-    factory["NiDitherProperty"]             = {&construct <NiDitherProperty>            , RC_NiDitherProperty           };
-    factory["NiWireframeProperty"]          = {&construct <NiWireframeProperty>         , RC_NiWireframeProperty        };
-    factory["NiSpecularProperty"]           = {&construct <NiSpecularProperty>          , RC_NiSpecularProperty         };
-    factory["NiStencilProperty"]            = {&construct <NiStencilProperty>           , RC_NiStencilProperty          };
-    factory["NiVisController"]              = {&construct <NiVisController>             , RC_NiVisController            };
-    factory["NiGeomMorpherController"]      = {&construct <NiGeomMorpherController>     , RC_NiGeomMorpherController    };
-    factory["NiKeyframeController"]         = {&construct <NiKeyframeController>        , RC_NiKeyframeController       };
-    factory["NiAlphaController"]            = {&construct <NiAlphaController>           , RC_NiAlphaController          };
-    factory["NiRollController"]             = {&construct <NiRollController>            , RC_NiRollController           };
-    factory["NiUVController"]               = {&construct <NiUVController>              , RC_NiUVController             };
-    factory["NiPathController"]             = {&construct <NiPathController>            , RC_NiPathController           };
-    factory["NiMaterialColorController"]    = {&construct <NiMaterialColorController>   , RC_NiMaterialColorController  };
-    factory["NiBSPArrayController"]         = {&construct <NiBSPArrayController>        , RC_NiBSPArrayController       };
-    factory["NiParticleSystemController"]   = {&construct <NiParticleSystemController>  , RC_NiParticleSystemController };
-    factory["NiFlipController"]             = {&construct <NiFlipController>            , RC_NiFlipController           };
-    factory["NiAmbientLight"]               = {&construct <NiLight>                     , RC_NiLight                    };
-    factory["NiDirectionalLight"]           = {&construct <NiLight>                     , RC_NiLight                    };
-    factory["NiPointLight"]                 = {&construct <NiPointLight>                , RC_NiLight                    };
-    factory["NiSpotLight"]                  = {&construct <NiSpotLight>                 , RC_NiLight                    };
-    factory["NiTextureEffect"]              = {&construct <NiTextureEffect>             , RC_NiTextureEffect            };
-    factory["NiExtraData"]                  = {&construct <NiExtraData>                 , RC_NiExtraData                };
-    factory["NiVertWeightsExtraData"]       = {&construct <NiVertWeightsExtraData>      , RC_NiVertWeightsExtraData     };
-    factory["NiTextKeyExtraData"]           = {&construct <NiTextKeyExtraData>          , RC_NiTextKeyExtraData         };
-    factory["NiStringExtraData"]            = {&construct <NiStringExtraData>           , RC_NiStringExtraData          };
-    factory["NiGravity"]                    = {&construct <NiGravity>                   , RC_NiGravity                  };
-    factory["NiPlanarCollider"]             = {&construct <NiPlanarCollider>            , RC_NiPlanarCollider           };
-    factory["NiSphericalCollider"]          = {&construct <NiSphericalCollider>         , RC_NiSphericalCollider        };
-    factory["NiParticleGrowFade"]           = {&construct <NiParticleGrowFade>          , RC_NiParticleGrowFade         };
-    factory["NiParticleColorModifier"]      = {&construct <NiParticleColorModifier>     , RC_NiParticleColorModifier    };
-    factory["NiParticleRotation"]           = {&construct <NiParticleRotation>          , RC_NiParticleRotation         };
-    factory["NiFloatData"]                  = {&construct <NiFloatData>                 , RC_NiFloatData                };
-    factory["NiTriShapeData"]               = {&construct <NiTriShapeData>              , RC_NiTriShapeData             };
-    factory["NiTriStripsData"]              = {&construct <NiTriStripsData>             , RC_NiTriStripsData            };
-    factory["NiLinesData"]                  = {&construct <NiLinesData>                 , RC_NiLinesData                };
-    factory["NiVisData"]                    = {&construct <NiVisData>                   , RC_NiVisData                  };
-    factory["NiColorData"]                  = {&construct <NiColorData>                 , RC_NiColorData                };
-    factory["NiPixelData"]                  = {&construct <NiPixelData>                 , RC_NiPixelData                };
-    factory["NiMorphData"]                  = {&construct <NiMorphData>                 , RC_NiMorphData                };
-    factory["NiKeyframeData"]               = {&construct <NiKeyframeData>              , RC_NiKeyframeData             };
-    factory["NiSkinData"]                   = {&construct <NiSkinData>                  , RC_NiSkinData                 };
-    factory["NiUVData"]                     = {&construct <NiUVData>                    , RC_NiUVData                   };
-    factory["NiPosData"]                    = {&construct <NiPosData>                   , RC_NiPosData                  };
-    factory["NiParticlesData"]              = {&construct <NiParticlesData>             , RC_NiParticlesData            };
-    factory["NiRotatingParticlesData"]      = {&construct <NiRotatingParticlesData>     , RC_NiParticlesData            };
-    factory["NiAutoNormalParticlesData"]    = {&construct <NiParticlesData>             , RC_NiParticlesData            };
-    factory["NiSequenceStreamHelper"]       = {&construct <NiSequenceStreamHelper>      , RC_NiSequenceStreamHelper     };
-    factory["NiSourceTexture"]              = {&construct <NiSourceTexture>             , RC_NiSourceTexture            };
-    factory["NiSkinInstance"]               = {&construct <NiSkinInstance>              , RC_NiSkinInstance             };
-    factory["NiLookAtController"]           = {&construct <NiLookAtController>          , RC_NiLookAtController         };
-    factory["NiPalette"]                    = {&construct <NiPalette>                   , RC_NiPalette                  };
-    factory["NiIntegerExtraData"]           = {&construct <NiIntegerExtraData>          , RC_NiIntegerExtraData         };
-    factory["NiIntegersExtraData"]          = {&construct <NiIntegersExtraData>         , RC_NiIntegersExtraData        };
-    factory["NiBinaryExtraData"]            = {&construct <NiBinaryExtraData>           , RC_NiBinaryExtraData          };
-    factory["NiBooleanExtraData"]           = {&construct <NiBooleanExtraData>          , RC_NiBooleanExtraData         };
-    factory["NiVectorExtraData"]            = {&construct <NiVectorExtraData>           , RC_NiVectorExtraData          };
-    factory["NiColorExtraData"]             = {&construct <NiVectorExtraData>           , RC_NiColorExtraData           };
-    factory["NiFloatExtraData"]             = {&construct <NiFloatExtraData>            , RC_NiFloatExtraData           };
-    factory["NiFloatsExtraData"]            = {&construct <NiFloatsExtraData>           , RC_NiFloatsExtraData          };
-    factory["NiStringPalette"]              = {&construct <NiStringPalette>             , RC_NiStringPalette            };
-    factory["NiBoolData"]                   = {&construct <NiBoolData>                  , RC_NiBoolData                 };
-    factory["NiSkinPartition"]              = {&construct <NiSkinPartition>             , RC_NiSkinPartition            };
-    factory["BSXFlags"]                     = {&construct <NiIntegerExtraData>          , RC_BSXFlags                   };
-    factory["BSBound"]                      = {&construct <BSBound>                     , RC_BSBound                    };
-    factory["NiTransformData"]              = {&construct <NiKeyframeData>              , RC_NiKeyframeData             };
-    factory["BSFadeNode"]                   = {&construct <NiNode>                      , RC_NiNode                     };
-    factory["bhkBlendController"]           = {&construct <bhkBlendController>          , RC_bhkBlendController         };
-    factory["NiFloatInterpolator"]          = {&construct <NiFloatInterpolator>         , RC_NiFloatInterpolator        };
-    factory["NiBoolInterpolator"]           = {&construct <NiBoolInterpolator>          , RC_NiBoolInterpolator         };
-    factory["NiPoint3Interpolator"]         = {&construct <NiPoint3Interpolator>        , RC_NiPoint3Interpolator       };
-    factory["NiTransformController"]        = {&construct <NiKeyframeController>        , RC_NiKeyframeController       };
-    factory["NiTransformInterpolator"]      = {&construct <NiTransformInterpolator>     , RC_NiTransformInterpolator    };
-    factory["NiColorInterpolator"]          = {&construct <NiColorInterpolator>         , RC_NiColorInterpolator        };
-    factory["BSShaderTextureSet"]           = {&construct <BSShaderTextureSet>          , RC_BSShaderTextureSet         };
-    factory["BSLODTriShape"]                = {&construct <BSLODTriShape>               , RC_BSLODTriShape              };
-    factory["BSShaderProperty"]             = {&construct <BSShaderProperty>            , RC_BSShaderProperty           };
-    factory["BSShaderPPLightingProperty"]   = {&construct <BSShaderPPLightingProperty>  , RC_BSShaderPPLightingProperty };
-    factory["BSShaderNoLightingProperty"]   = {&construct <BSShaderNoLightingProperty>  , RC_BSShaderNoLightingProperty };
-    factory["BSFurnitureMarker"]            = {&construct <BSFurnitureMarker>           , RC_BSFurnitureMarker          };
-    factory["NiCollisionObject"]            = {&construct <NiCollisionObject>           , RC_NiCollisionObject          };
-    factory["bhkCollisionObject"]           = {&construct <bhkCollisionObject>          , RC_bhkCollisionObject         };
-    factory["BSDismemberSkinInstance"]      = {&construct <BSDismemberSkinInstance>     , RC_BSDismemberSkinInstance    };
-    factory["NiControllerManager"]          = {&construct <NiControllerManager>         , RC_NiControllerManager        };
-    factory["bhkMoppBvTreeShape"]           = {&construct <bhkMoppBvTreeShape>          , RC_bhkMoppBvTreeShape         };
-    factory["bhkNiTriStripsShape"]          = {&construct <bhkNiTriStripsShape>         , RC_bhkNiTriStripsShape        };
-    factory["bhkPackedNiTriStripsShape"]    = {&construct <bhkPackedNiTriStripsShape>   , RC_bhkPackedNiTriStripsShape  };
-    factory["hkPackedNiTriStripsData"]      = {&construct <hkPackedNiTriStripsData>     , RC_hkPackedNiTriStripsData    };
-    factory["bhkConvexVerticesShape"]       = {&construct <bhkConvexVerticesShape>      , RC_bhkConvexVerticesShape     };
-    factory["bhkBoxShape"]                  = {&construct <bhkBoxShape>                 , RC_bhkBoxShape                };
-    factory["bhkListShape"]                 = {&construct <bhkListShape>                , RC_bhkListShape               };
-    factory["bhkRigidBody"]                 = {&construct <bhkRigidBody>                , RC_bhkRigidBody               };
-    factory["bhkRigidBodyT"]                = {&construct <bhkRigidBody>                , RC_bhkRigidBodyT              };
-    factory["BSLightingShaderProperty"]     = {&construct <BSLightingShaderProperty>    , RC_BSLightingShaderProperty   };
-    factory["NiSortAdjustNode"]             = {&construct <NiSortAdjustNode>            , RC_NiNode                     };
-    factory["NiClusterAccumulator"]         = {&construct <NiClusterAccumulator>        , RC_NiClusterAccumulator       };
-    factory["NiAlphaAccumulator"]           = {&construct <NiAlphaAccumulator>          , RC_NiAlphaAccumulator         };
-    return factory;
+    return {
+        {"NiNode"                       , &construct <NiNode                      , RC_NiNode                     >},
+        {"NiSwitchNode"                 , &construct <NiSwitchNode                , RC_NiSwitchNode               >},
+        {"NiLODNode"                    , &construct <NiLODNode                   , RC_NiLODNode                  >},
+        {"AvoidNode"                    , &construct <NiNode                      , RC_AvoidNode                  >},
+        {"NiCollisionSwitch"            , &construct <NiNode                      , RC_NiCollisionSwitch          >},
+        {"NiBSParticleNode"             , &construct <NiNode                      , RC_NiBSParticleNode           >},
+        {"NiBSAnimationNode"            , &construct <NiNode                      , RC_NiBSAnimationNode          >},
+        {"NiBillboardNode"              , &construct <NiNode                      , RC_NiBillboardNode            >},
+        {"NiTriShape"                   , &construct <NiTriShape                  , RC_NiTriShape                 >},
+        {"NiTriStrips"                  , &construct <NiTriStrips                 , RC_NiTriStrips                >},
+        {"NiLines"                      , &construct <NiLines                     , RC_NiLines                    >},
+        {"NiParticles"                  , &construct <NiParticles                 , RC_NiParticles                >},
+        {"NiRotatingParticles"          , &construct <NiParticles                 , RC_NiParticles                >},
+        {"NiAutoNormalParticles"        , &construct <NiParticles                 , RC_NiParticles                >},
+        {"NiCamera"                     , &construct <NiCamera                    , RC_NiCamera                   >},
+        {"RootCollisionNode"            , &construct <NiNode                      , RC_RootCollisionNode          >},
+        {"NiTexturingProperty"          , &construct <NiTexturingProperty         , RC_NiTexturingProperty        >},
+        {"NiFogProperty"                , &construct <NiFogProperty               , RC_NiFogProperty              >},
+        {"NiMaterialProperty"           , &construct <NiMaterialProperty          , RC_NiMaterialProperty         >},
+        {"NiZBufferProperty"            , &construct <NiZBufferProperty           , RC_NiZBufferProperty          >},
+        {"NiAlphaProperty"              , &construct <NiAlphaProperty             , RC_NiAlphaProperty            >},
+        {"NiVertexColorProperty"        , &construct <NiVertexColorProperty       , RC_NiVertexColorProperty      >},
+        {"NiShadeProperty"              , &construct <NiShadeProperty             , RC_NiShadeProperty            >},
+        {"NiDitherProperty"             , &construct <NiDitherProperty            , RC_NiDitherProperty           >},
+        {"NiWireframeProperty"          , &construct <NiWireframeProperty         , RC_NiWireframeProperty        >},
+        {"NiSpecularProperty"           , &construct <NiSpecularProperty          , RC_NiSpecularProperty         >},
+        {"NiStencilProperty"            , &construct <NiStencilProperty           , RC_NiStencilProperty          >},
+        {"NiVisController"              , &construct <NiVisController             , RC_NiVisController            >},
+        {"NiGeomMorpherController"      , &construct <NiGeomMorpherController     , RC_NiGeomMorpherController    >},
+        {"NiKeyframeController"         , &construct <NiKeyframeController        , RC_NiKeyframeController       >},
+        {"NiAlphaController"            , &construct <NiAlphaController           , RC_NiAlphaController          >},
+        {"NiRollController"             , &construct <NiRollController            , RC_NiRollController           >},
+        {"NiUVController"               , &construct <NiUVController              , RC_NiUVController             >},
+        {"NiPathController"             , &construct <NiPathController            , RC_NiPathController           >},
+        {"NiMaterialColorController"    , &construct <NiMaterialColorController   , RC_NiMaterialColorController  >},
+        {"NiBSPArrayController"         , &construct <NiBSPArrayController        , RC_NiBSPArrayController       >},
+        {"NiParticleSystemController"   , &construct <NiParticleSystemController  , RC_NiParticleSystemController >},
+        {"NiFlipController"             , &construct <NiFlipController            , RC_NiFlipController           >},
+        {"NiAmbientLight"               , &construct <NiLight                     , RC_NiLight                    >},
+        {"NiDirectionalLight"           , &construct <NiLight                     , RC_NiLight                    >},
+        {"NiPointLight"                 , &construct <NiPointLight                , RC_NiLight                    >},
+        {"NiSpotLight"                  , &construct <NiSpotLight                 , RC_NiLight                    >},
+        {"NiTextureEffect"              , &construct <NiTextureEffect             , RC_NiTextureEffect            >},
+        {"NiExtraData"                  , &construct <NiExtraData                 , RC_NiExtraData                >},
+        {"NiVertWeightsExtraData"       , &construct <NiVertWeightsExtraData      , RC_NiVertWeightsExtraData     >},
+        {"NiTextKeyExtraData"           , &construct <NiTextKeyExtraData          , RC_NiTextKeyExtraData         >},
+        {"NiStringExtraData"            , &construct <NiStringExtraData           , RC_NiStringExtraData          >},
+        {"NiGravity"                    , &construct <NiGravity                   , RC_NiGravity                  >},
+        {"NiPlanarCollider"             , &construct <NiPlanarCollider            , RC_NiPlanarCollider           >},
+        {"NiSphericalCollider"          , &construct <NiSphericalCollider         , RC_NiSphericalCollider        >},
+        {"NiParticleGrowFade"           , &construct <NiParticleGrowFade          , RC_NiParticleGrowFade         >},
+        {"NiParticleColorModifier"      , &construct <NiParticleColorModifier     , RC_NiParticleColorModifier    >},
+        {"NiParticleRotation"           , &construct <NiParticleRotation          , RC_NiParticleRotation         >},
+        {"NiFloatData"                  , &construct <NiFloatData                 , RC_NiFloatData                >},
+        {"NiTriShapeData"               , &construct <NiTriShapeData              , RC_NiTriShapeData             >},
+        {"NiTriStripsData"              , &construct <NiTriStripsData             , RC_NiTriStripsData            >},
+        {"NiLinesData"                  , &construct <NiLinesData                 , RC_NiLinesData                >},
+        {"NiVisData"                    , &construct <NiVisData                   , RC_NiVisData                  >},
+        {"NiColorData"                  , &construct <NiColorData                 , RC_NiColorData                >},
+        {"NiPixelData"                  , &construct <NiPixelData                 , RC_NiPixelData                >},
+        {"NiMorphData"                  , &construct <NiMorphData                 , RC_NiMorphData                >},
+        {"NiKeyframeData"               , &construct <NiKeyframeData              , RC_NiKeyframeData             >},
+        {"NiSkinData"                   , &construct <NiSkinData                  , RC_NiSkinData                 >},
+        {"NiUVData"                     , &construct <NiUVData                    , RC_NiUVData                   >},
+        {"NiPosData"                    , &construct <NiPosData                   , RC_NiPosData                  >},
+        {"NiParticlesData"              , &construct <NiParticlesData             , RC_NiParticlesData            >},
+        {"NiRotatingParticlesData"      , &construct <NiRotatingParticlesData     , RC_NiParticlesData            >},
+        {"NiAutoNormalParticlesData"    , &construct <NiParticlesData             , RC_NiParticlesData            >},
+        {"NiSequenceStreamHelper"       , &construct <NiSequenceStreamHelper      , RC_NiSequenceStreamHelper     >},
+        {"NiSourceTexture"              , &construct <NiSourceTexture             , RC_NiSourceTexture            >},
+        {"NiSkinInstance"               , &construct <NiSkinInstance              , RC_NiSkinInstance             >},
+        {"NiLookAtController"           , &construct <NiLookAtController          , RC_NiLookAtController         >},
+        {"NiPalette"                    , &construct <NiPalette                   , RC_NiPalette                  >},
+        {"NiIntegerExtraData"           , &construct <NiIntegerExtraData          , RC_NiIntegerExtraData         >},
+        {"NiIntegersExtraData"          , &construct <NiIntegersExtraData         , RC_NiIntegersExtraData        >},
+        {"NiBinaryExtraData"            , &construct <NiBinaryExtraData           , RC_NiBinaryExtraData          >},
+        {"NiBooleanExtraData"           , &construct <NiBooleanExtraData          , RC_NiBooleanExtraData         >},
+        {"NiVectorExtraData"            , &construct <NiVectorExtraData           , RC_NiVectorExtraData          >},
+        {"NiColorExtraData"             , &construct <NiVectorExtraData           , RC_NiColorExtraData           >},
+        {"NiFloatExtraData"             , &construct <NiFloatExtraData            , RC_NiFloatExtraData           >},
+        {"NiFloatsExtraData"            , &construct <NiFloatsExtraData           , RC_NiFloatsExtraData          >},
+        {"NiStringPalette"              , &construct <NiStringPalette             , RC_NiStringPalette            >},
+        {"NiBoolData"                   , &construct <NiBoolData                  , RC_NiBoolData                 >},
+        {"NiSkinPartition"              , &construct <NiSkinPartition             , RC_NiSkinPartition            >},
+        {"BSXFlags"                     , &construct <NiIntegerExtraData          , RC_BSXFlags                   >},
+        {"BSBound"                      , &construct <BSBound                     , RC_BSBound                    >},
+        {"NiTransformData"              , &construct <NiKeyframeData              , RC_NiKeyframeData             >},
+        {"BSFadeNode"                   , &construct <NiNode                      , RC_NiNode                     >},
+        {"bhkBlendController"           , &construct <bhkBlendController          , RC_bhkBlendController         >},
+        {"NiFloatInterpolator"          , &construct <NiFloatInterpolator         , RC_NiFloatInterpolator        >},
+        {"NiBoolInterpolator"           , &construct <NiBoolInterpolator          , RC_NiBoolInterpolator         >},
+        {"NiPoint3Interpolator"         , &construct <NiPoint3Interpolator        , RC_NiPoint3Interpolator       >},
+        {"NiTransformController"        , &construct <NiKeyframeController        , RC_NiKeyframeController       >},
+        {"NiTransformInterpolator"      , &construct <NiTransformInterpolator     , RC_NiTransformInterpolator    >},
+        {"NiColorInterpolator"          , &construct <NiColorInterpolator         , RC_NiColorInterpolator        >},
+        {"BSShaderTextureSet"           , &construct <BSShaderTextureSet          , RC_BSShaderTextureSet         >},
+        {"BSLODTriShape"                , &construct <BSLODTriShape               , RC_BSLODTriShape              >},
+        {"BSShaderProperty"             , &construct <BSShaderProperty            , RC_BSShaderProperty           >},
+        {"BSShaderPPLightingProperty"   , &construct <BSShaderPPLightingProperty  , RC_BSShaderPPLightingProperty >},
+        {"BSShaderNoLightingProperty"   , &construct <BSShaderNoLightingProperty  , RC_BSShaderNoLightingProperty >},
+        {"BSFurnitureMarker"            , &construct <BSFurnitureMarker           , RC_BSFurnitureMarker          >},
+        {"NiCollisionObject"            , &construct <NiCollisionObject           , RC_NiCollisionObject          >},
+        {"bhkCollisionObject"           , &construct <bhkCollisionObject          , RC_bhkCollisionObject         >},
+        {"BSDismemberSkinInstance"      , &construct <BSDismemberSkinInstance     , RC_BSDismemberSkinInstance    >},
+        {"NiControllerManager"          , &construct <NiControllerManager         , RC_NiControllerManager        >},
+        {"bhkMoppBvTreeShape"           , &construct <bhkMoppBvTreeShape          , RC_bhkMoppBvTreeShape         >},
+        {"bhkNiTriStripsShape"          , &construct <bhkNiTriStripsShape         , RC_bhkNiTriStripsShape        >},
+        {"bhkPackedNiTriStripsShape"    , &construct <bhkPackedNiTriStripsShape   , RC_bhkPackedNiTriStripsShape  >},
+        {"hkPackedNiTriStripsData"      , &construct <hkPackedNiTriStripsData     , RC_hkPackedNiTriStripsData    >},
+        {"bhkConvexVerticesShape"       , &construct <bhkConvexVerticesShape      , RC_bhkConvexVerticesShape     >},
+        {"bhkBoxShape"                  , &construct <bhkBoxShape                 , RC_bhkBoxShape                >},
+        {"bhkListShape"                 , &construct <bhkListShape                , RC_bhkListShape               >},
+        {"bhkRigidBody"                 , &construct <bhkRigidBody                , RC_bhkRigidBody               >},
+        {"bhkRigidBodyT"                , &construct <bhkRigidBody                , RC_bhkRigidBodyT              >},
+        {"BSLightingShaderProperty"     , &construct <BSLightingShaderProperty    , RC_BSLightingShaderProperty   >},
+        {"NiSortAdjustNode"             , &construct <NiSortAdjustNode            , RC_NiNode                     >},
+        {"NiClusterAccumulator"         , &construct <NiClusterAccumulator        , RC_NiClusterAccumulator       >},
+        {"NiAlphaAccumulator"           , &construct <NiAlphaAccumulator          , RC_NiAlphaAccumulator         >},
+    };
 }
 
 ///Make the factory map used for parsing the file
-static const std::map<std::string,RecordFactoryEntry> factories = makeFactory();
+static const std::map<std::string, CreateRecord> factories = makeFactory();
 
 std::string NIFFile::printVersion(unsigned int version)
 {
@@ -305,15 +304,12 @@ void NIFFile::parse(Files::IStreamPtr stream)
             }
         }
 
-        std::map<std::string,RecordFactoryEntry>::const_iterator entry = factories.find(rec);
+        const auto entry = factories.find(rec);
 
-        if (entry != factories.end())
-        {
-            r = entry->second.mCreate();
-            r->recType = entry->second.mType;
-        }
-        else
+        if (entry == factories.end())
             fail("Unknown record type " + rec);
+
+        r = entry->second();
 
         if (!supported)
             Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " (" << filename << ")";
