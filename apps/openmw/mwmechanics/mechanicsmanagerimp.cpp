@@ -1450,7 +1450,7 @@ namespace MWMechanics
                 std::string script = target.getClass().getScript(target);
                 if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == player)
                 {
-                    int fight = std::max(0, target.getClass().getCreatureStats(target).getAiSetting(CreatureStats::AI_Fight).getModified());
+                    int fight = target.getClass().getCreatureStats(target).getAiSetting(CreatureStats::AI_Fight).getModified();
                     peaceful = (fight == 0);
                 }
 

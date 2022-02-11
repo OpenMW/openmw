@@ -26,8 +26,6 @@ namespace MWMechanics
           mDeathAnimation(-1), mTimeOfDeath(), mSideMovementAngle(0), mLevel (0)
         , mAttackingOrSpell(false)
     {
-        for (int i=0; i<4; ++i)
-            mAiSettings[i] = 0;
     }
 
     const AiSequence& CreatureStats::getAiSequence() const
@@ -158,9 +156,8 @@ namespace MWMechanics
                 float agility      = getAttribute(ESM::Attribute::Agility).getModified();
                 float endurance    = getAttribute(ESM::Attribute::Endurance).getModified();
                 DynamicStat<float> fatigue = getFatigue();
-                float diff = (strength+willpower+agility+endurance) - fatigue.getBase();
                 float currentToBaseRatio = fatigue.getBase() > 0 ? (fatigue.getCurrent() / fatigue.getBase()) : 0;
-                fatigue.setModified(fatigue.getModified() + diff, 0);
+                fatigue.setBase(std::max(0.f, strength + willpower + agility + endurance));
                 fatigue.setCurrent(fatigue.getBase() * currentToBaseRatio, false, true);
                 setFatigue(fatigue);
             }
@@ -196,8 +193,6 @@ namespace MWMechanics
 
             mDead = true;
 
-            mDynamic[index].setModifier(0);
-            mDynamic[index].setCurrentModifier(0);
             mDynamic[index].setCurrent(0);
         }
     }
@@ -281,10 +276,7 @@ namespace MWMechanics
     {
         if (mDead)
         {
-            if (mDynamic[0].getModified() < 1)
-                mDynamic[0].setModified(1, 0);
-
-            mDynamic[0].setCurrent(mDynamic[0].getModified());
+            mDynamic[0].setCurrent(mDynamic[0].getBase());
             mDead = false;
             mDeathAnimationFinished = false;
         }
@@ -415,9 +407,8 @@ namespace MWMechanics
         double magickaFactor = base + mMagicEffects.get(EffectKey(ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
 
         DynamicStat<float> magicka = getMagicka();
-        float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
         float currentToBaseRatio = magicka.getBase() > 0 ? magicka.getCurrent() / magicka.getBase() : 0;
-        magicka.setModified(magicka.getModified() + diff, 0);
+        magicka.setBase(magickaFactor * intelligence);
         magicka.setCurrent(magicka.getBase() * currentToBaseRatio, false, true);
         setMagicka(magicka);
     }

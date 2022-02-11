@@ -608,7 +608,7 @@ namespace MWGui
         mEnemyHealth->setProgressRange(100);
         // Health is usually cast to int before displaying. Actors die whenever they are < 1 health.
         // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)
-        mEnemyHealth->setProgressPosition(static_cast<size_t>(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100));
+        mEnemyHealth->setProgressPosition(static_cast<size_t>(stats.getHealth().getRatio() * 100));
 
         static const float fNPCHealthBarFade = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCHealthBarFade")->mValue.getFloat();
         if (fNPCHealthBarFade > 0.f)

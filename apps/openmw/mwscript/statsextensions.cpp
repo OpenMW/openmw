@@ -218,8 +218,8 @@ namespace MWScript
                     MWMechanics::DynamicStat<float> stat (ptr.getClass().getCreatureStats (ptr)
                         .getDynamic (mIndex));
 
-                    stat.setModified (value, 0);
-                    stat.setCurrent(value);
+                    stat.setBase(value);
+                    stat.setCurrent(stat.getModified(false), true, true);
 
                     ptr.getClass().getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
@@ -259,19 +259,18 @@ namespace MWScript
                         }
                     }
 
-                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
+                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                    Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
+                    MWMechanics::DynamicStat<float> stat = stats.getDynamic(mIndex);
 
-                    MWMechanics::DynamicStat<float> stat (ptr.getClass().getCreatureStats (ptr)
-                        .getDynamic (mIndex));
+                    float current = stat.getCurrent();
+                    float base = diff + stat.getBase();
+                    if(mIndex != 2)
+                        base = std::max(base, 0.f);
+                    stat.setBase(base);
+                    stat.setCurrent(diff + current, true, true);
 
-                    stat.setModified (diff + stat.getModified(), 0);
-                    stat.setCurrentModified (diff + stat.getCurrentModified());
-
-                    stat.setCurrent (diff + current);
-
-                    ptr.getClass().getCreatureStats (ptr).setDynamic (mIndex, stat);
+                    stats.setDynamic (mIndex, stat);
                 }
         };
 
@@ -325,17 +324,9 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
-
-                    Interpreter::Type_Float value = 0;
-
-                    Interpreter::Type_Float max = stats.getDynamic(mIndex).getModified();
-
-                    if (max>0)
-                        value = stats.getDynamic(mIndex).getCurrent() / max;
-
-                    runtime.push (value);
+                    runtime.push(stats.getDynamic(mIndex).getRatio());
                 }
         };
 
