@@ -344,7 +344,7 @@ bool NIFFile::getUseSkinning() const
     return mUseSkinning;
 }
 
-bool NIFFile::sLoadUnsupportedFiles = false;
+std::atomic_bool NIFFile::sLoadUnsupportedFiles = false;
 
 void NIFFile::setLoadUnsupportedFiles(bool load)
 {

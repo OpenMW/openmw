@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include <atomic>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/constrainedfilestream.hpp>
@@ -65,7 +66,7 @@ class NIFFile final : public File
 
     bool mUseSkinning = false;
 
-    static bool sLoadUnsupportedFiles;
+    static std::atomic_bool sLoadUnsupportedFiles;
 
     /// Parse the file
     void parse(Files::IStreamPtr stream);
