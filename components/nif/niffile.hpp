@@ -55,7 +55,7 @@ class NIFFile final : public File
     std::string hash;
 
     /// Record list
-    std::vector<Record*> records;
+    std::vector<std::unique_ptr<Record>> records;
 
     /// Root list.  This is a select portion of the pointers from records
     std::vector<Record*> roots;
@@ -107,13 +107,11 @@ public:
 
     /// Open a NIF stream. The name is used for error messages.
     NIFFile(Files::IStreamPtr stream, const std::string &name);
-    ~NIFFile();
 
     /// Get a given record
     Record *getRecord(size_t index) const override
     {
-        Record *res = records.at(index);
-        return res;
+        return records.at(index).get();
     }
     /// Number of records
     size_t numRecords() const override { return records.size(); }

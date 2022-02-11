@@ -17,17 +17,11 @@ NIFFile::NIFFile(Files::IStreamPtr stream, const std::string &name)
     parse(stream);
 }
 
-NIFFile::~NIFFile()
-{
-    for (Record* record : records)
-        delete record;
-}
-
-template <typename NodeType> static Record* construct() { return new NodeType; }
+template <typename NodeType> static std::unique_ptr<Record> construct() { return std::make_unique<NodeType>(); }
 
 struct RecordFactoryEntry {
 
-    using create_t = Record* (*)();
+    using create_t = std::unique_ptr<Record> (*)();
 
     create_t        mCreate;
     RecordType      mType;
@@ -290,7 +284,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
     const bool hasRecordSeparators = ver >= NIFStream::generateVersion(10,0,0,0) && ver < NIFStream::generateVersion(10,2,0,0);
     for (std::size_t i = 0; i < recNum; i++)
     {
-        Record *r = nullptr;
+        std::unique_ptr<Record> r;
 
         std::string rec = hasRecTypeListings ? recTypes[recTypeIndices[i]] : nif.getString();
         if(rec.empty())
@@ -315,7 +309,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
 
         if (entry != factories.end())
         {
-            r = entry->second.mCreate ();
+            r = entry->second.mCreate();
             r->recType = entry->second.mType;
         }
         else
@@ -328,8 +322,8 @@ void NIFFile::parse(Files::IStreamPtr stream)
         assert(r->recType != RC_MISSING);
         r->recName = rec;
         r->recIndex = i;
-        records[i] = r;
         r->read(&nif);
+        records[i] = std::move(r);
     }
 
     const std::size_t rootNum = nif.getUInt();
@@ -341,7 +335,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
         int idx = nif.getInt();
         if (idx >= 0 && static_cast<std::size_t>(idx) < records.size())
         {
-            roots[i] = records[idx];
+            roots[i] = records[idx].get();
         }
         else
         {
@@ -351,7 +345,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
     }
 
     // Once parsing is done, do post-processing.
-    for (Record* record : records)
+    for (const auto& record : records)
         record->post(this);
 }
 
