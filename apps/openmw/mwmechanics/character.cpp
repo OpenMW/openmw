@@ -55,9 +55,9 @@ namespace
 
 std::string getBestAttack (const ESM::Weapon* weapon)
 {
-    int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
-    int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
-    int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
+    int slash = weapon->mData.mSlash[0] + weapon->mData.mSlash[1];
+    int chop = weapon->mData.mChop[0] + weapon->mData.mChop[1];
+    int thrust = weapon->mData.mThrust[0] + weapon->mData.mThrust[1];
     if (slash == chop && slash == thrust)
         return "slash";
     else if (thrust >= chop && thrust >= slash)
