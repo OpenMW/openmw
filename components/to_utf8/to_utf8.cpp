@@ -77,7 +77,7 @@ Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
     }
 }
 
-std::string Utf8Encoder::getUtf8(std::string_view input)
+std::string_view Utf8Encoder::getUtf8(std::string_view input)
 {
     if (input.empty())
         return input;
@@ -100,7 +100,7 @@ std::string Utf8Encoder::getUtf8(std::string_view input)
 
     // If we're pure ascii, then don't bother converting anything.
     if(ascii)
-        return std::string(input.data(), outlen);
+        return std::string_view(input.data(), outlen);
 
     // Make sure the output is large enough
     resize(outlen);
@@ -117,11 +117,10 @@ std::string Utf8Encoder::getUtf8(std::string_view input)
     assert(mOutput.size() > outlen);
     assert(mOutput[outlen] == 0);
 
-    // Return a string
-    return std::string(&mOutput[0], outlen);
+    return std::string_view(mOutput.data(), outlen);
 }
 
-std::string Utf8Encoder::getLegacyEnc(std::string_view input)
+std::string_view Utf8Encoder::getLegacyEnc(std::string_view input)
 {
     if (input.empty())
         return input;
@@ -144,7 +143,7 @@ std::string Utf8Encoder::getLegacyEnc(std::string_view input)
 
     // If we're pure ascii, then don't bother converting anything.
     if(ascii)
-        return std::string(input.data(), outlen);
+        return std::string_view(input.data(), outlen);
 
     // Make sure the output is large enough
     resize(outlen);
@@ -161,8 +160,7 @@ std::string Utf8Encoder::getLegacyEnc(std::string_view input)
     assert(mOutput.size() > outlen);
     assert(mOutput[outlen] == 0);
 
-    // Return a string
-    return std::string(&mOutput[0], outlen);
+    return std::string_view(mOutput.data(), outlen);
 }
 
 // Make sure the output vector is large enough for 'size' bytes,

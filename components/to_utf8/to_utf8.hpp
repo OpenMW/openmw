@@ -28,10 +28,14 @@ namespace ToUTF8
         public:
             Utf8Encoder(FromType sourceEncoding);
 
-            // Convert to UTF8 from the previously given code page.
-            std::string getUtf8(std::string_view input);
+            /// Convert to UTF8 from the previously given code page.
+            /// Returns a view to internal buffer invalidate by next getUtf8 or getLegacyEnc call if input is not
+            /// ASCII-only string. Otherwise returns a view to the input.
+            std::string_view getUtf8(std::string_view input);
 
-            std::string getLegacyEnc(std::string_view input);
+            /// Returns a view to internal buffer invalidate by next getUtf8 or getLegacyEnc call if input is not
+            /// ASCII-only string. Otherwise returns a view to the input.
+            std::string_view getLegacyEnc(std::string_view input);
 
         private:
             void resize(size_t size);
