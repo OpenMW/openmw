@@ -7,6 +7,8 @@
 #include <components/esm3/queststate.hpp>
 #include <components/esm3/journalentry.hpp>
 
+#include <components/misc/stringops.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -93,7 +95,16 @@ namespace MWDialogue
         StampedJournalEntry entry = StampedJournalEntry::makeFromQuest (id, index, actor);
 
         Quest& quest = getQuest (id);
-        quest.addEntry (entry); // we are doing slicing on purpose here
+        if(quest.addEntry(entry)) // we are doing slicing on purpose here
+        {
+            // Restart all "other" quests with the same name as well
+            std::string name = quest.getName();
+            for(auto& it : mQuests)
+            {
+                if(it.second.isFinished() && Misc::StringUtils::ciEqual(it.second.getName(), name))
+                    it.second.setFinished(false);
+            }
+        }
 
         // there is no need to show empty entries in journal
         if (!entry.getText().empty())
