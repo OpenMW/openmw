@@ -201,10 +201,10 @@ namespace MWWorld
         {
             auto& dynamic = creatureStats.mDynamic[i];
             dynamic.mCurrent -= dynamic.mMod - dynamic.mBase;
-            dynamic.mMod = 0.f;
+            dynamic.mMod = dynamic.mBase;
         }
         for(std::size_t i = 0; i < 4; ++i)
-            creatureStats.mAiSettings[i].mMod = 0.f;
+            creatureStats.mAiSettings[i].mMod = creatureStats.mAiSettings[i].mBase;
         if(npcStats)
         {
             for(std::size_t i = 0; i < ESM::Skill::Length; ++i)
