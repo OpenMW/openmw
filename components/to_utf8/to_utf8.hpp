@@ -4,6 +4,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <string_view>
 
 namespace ToUTF8
 {
@@ -28,17 +29,9 @@ namespace ToUTF8
             Utf8Encoder(FromType sourceEncoding);
 
             // Convert to UTF8 from the previously given code page.
-            std::string getUtf8(const char *input, size_t size);
-            inline std::string getUtf8(const std::string &str)
-            {
-                return getUtf8(str.c_str(), str.size());
-            }
+            std::string getUtf8(std::string_view input);
 
-            std::string getLegacyEnc(const char *input, size_t size);
-            inline std::string getLegacyEnc(const std::string &str)
-            {
-                return getLegacyEnc(str.c_str(), str.size());
-            }
+            std::string getLegacyEnc(std::string_view input);
 
         private:
             void resize(size_t size);
