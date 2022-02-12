@@ -21,13 +21,13 @@ namespace MWMechanics
     void Stat<T>::writeState (ESM::StatState<T>& state) const
     {
         state.mBase = mBase;
-        state.mMod = mModifier;
+        state.mMod = mModifier + mBase;
     }
     template<typename T>
     void Stat<T>::readState (const ESM::StatState<T>& state)
     {
         mBase = state.mBase;
-        mModifier = state.mMod;
+        mModifier = state.mMod - mBase;
     }
 
 
