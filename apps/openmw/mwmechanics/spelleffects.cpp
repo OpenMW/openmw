@@ -979,12 +979,10 @@ void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellPara
             if(magnitudes.get(effect.mEffectId).getMagnitude() <= 0.f)
             {
                 auto& seq = target.getClass().getCreatureStats(target).getAiSequence();
-                auto it = std::find_if(seq.begin(), seq.end(), [&](const auto& package)
+                seq.erasePackageIf([&](const auto& package)
                 {
                     return package->getTypeId() == MWMechanics::AiPackageTypeId::Follow && static_cast<const MWMechanics::AiFollow*>(package.get())->isCommanded();
                 });
-                if(it != seq.end())
-                    seq.erase(it);
             }
             break;
         case ESM::MagicEffect::ExtraSpell:
