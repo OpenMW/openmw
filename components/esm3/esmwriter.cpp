@@ -193,9 +193,9 @@ namespace ESM
         else
         {
             // Convert to UTF8 and return
-            std::string string = mEncoder ? mEncoder->getLegacyEnc(data) : data;
+            const std::string_view string = mEncoder != nullptr ? mEncoder->getLegacyEnc(data) : data;
 
-            write(string.c_str(), string.size());
+            write(string.data(), string.size());
         }
     }
 

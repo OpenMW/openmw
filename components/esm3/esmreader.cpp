@@ -320,7 +320,7 @@ std::string ESMReader::getString(int size)
 
     // Convert to UTF8 and return
     if (mEncoder)
-        return mEncoder->getUtf8(ptr, size);
+        return std::string(mEncoder->getUtf8(std::string_view(ptr, size)));
 
     return std::string (ptr, size);
 }

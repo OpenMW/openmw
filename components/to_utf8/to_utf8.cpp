@@ -77,12 +77,15 @@ Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
     }
 }
 
-std::string Utf8Encoder::getUtf8(const char* input, size_t size)
+std::string_view Utf8Encoder::getUtf8(std::string_view input)
 {
+    if (input.empty())
+        return input;
+
     // Double check that the input string stops at some point (it might
     // contain zero terminators before this, inside its own data, which
     // is also ok.)
-    assert(input[size] == 0);
+    assert(input[input.size()] == 0);
 
     // Note: The rest of this function is designed for single-character
     // input encodings only. It also assumes that the input encoding
@@ -93,19 +96,19 @@ std::string Utf8Encoder::getUtf8(const char* input, size_t size)
     // Compute output length, and check for pure ascii input at the same
     // time.
     bool ascii;
-    size_t outlen = getLength(input, ascii);
+    size_t outlen = getLength(input.data(), ascii);
 
     // If we're pure ascii, then don't bother converting anything.
     if(ascii)
-        return std::string(input, outlen);
+        return std::string_view(input.data(), outlen);
 
     // Make sure the output is large enough
     resize(outlen);
     char *out = &mOutput[0];
 
     // Translate
-    while (*input)
-        copyFromArray(*(input++), out);
+    for (const char* ptr = input.data(); *ptr;)
+        copyFromArray(*(ptr++), out);
 
     // Make sure that we wrote the correct number of bytes
     assert((out-&mOutput[0]) == (int)outlen);
@@ -114,16 +117,18 @@ std::string Utf8Encoder::getUtf8(const char* input, size_t size)
     assert(mOutput.size() > outlen);
     assert(mOutput[outlen] == 0);
 
-    // Return a string
-    return std::string(&mOutput[0], outlen);
+    return std::string_view(mOutput.data(), outlen);
 }
 
-std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)
+std::string_view Utf8Encoder::getLegacyEnc(std::string_view input)
 {
+    if (input.empty())
+        return input;
+
     // Double check that the input string stops at some point (it might
     // contain zero terminators before this, inside its own data, which
     // is also ok.)
-    assert(input[size] == 0);
+    assert(input[input.size()] == 0);
 
     // TODO: The rest of this function is designed for single-character
     // input encodings only. It also assumes that the input the input
@@ -134,19 +139,19 @@ std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)
     // Compute output length, and check for pure ascii input at the same
     // time.
     bool ascii;
-    size_t outlen = getLength2(input, ascii);
+    size_t outlen = getLength2(input.data(), ascii);
 
     // If we're pure ascii, then don't bother converting anything.
     if(ascii)
-        return std::string(input, outlen);
+        return std::string_view(input.data(), outlen);
 
     // Make sure the output is large enough
     resize(outlen);
     char *out = &mOutput[0];
 
     // Translate
-    while(*input)
-        copyFromArray2(input, out);
+    for (const char* ptr = input.data(); *ptr;)
+        copyFromArray2(ptr, out);
 
     // Make sure that we wrote the correct number of bytes
     assert((out-&mOutput[0]) == (int)outlen);
@@ -155,8 +160,7 @@ std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)
     assert(mOutput.size() > outlen);
     assert(mOutput[outlen] == 0);
 
-    // Return a string
-    return std::string(&mOutput[0], outlen);
+    return std::string_view(mOutput.data(), outlen);
 }
 
 // Make sure the output vector is large enough for 'size' bytes,
