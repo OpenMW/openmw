@@ -162,26 +162,27 @@ namespace LuaUtil
         std::string envName = namePrefix + "[" + path + "]:";
         env["print"] = mLua["printGen"](envName);
 
+        auto maybeRunLoader = [&hiddenData](const sol::object& package) -> sol::object
+        {
+            if (package.is<sol::function>())
+                return call(package.as<sol::function>(), hiddenData);
+            else
+                return package;
+        };
         sol::table loaded(mLua, sol::create);
         for (const auto& [key, value] : mCommonPackages)
-            loaded[key] = value;
+            loaded[key] = maybeRunLoader(value);
         for (const auto& [key, value] : packages)
-            loaded[key] = value;
-        env["require"] = [this, env, loaded, hiddenData](std::string_view packageName)
+            loaded[key] = maybeRunLoader(value);
+        env["require"] = [this, env, loaded, hiddenData](std::string_view packageName) mutable
         {
-            sol::table packages = loaded;
-            sol::object package = packages[packageName];
-            if (package == sol::nil)
-            {
-                sol::protected_function packageLoader = loadScriptAndCache(packageNameToVfsPath(packageName, mVFS));
-                sol::set_environment(env, packageLoader);
-                package = call(packageLoader, packageName);
-                if (!package.is<sol::table>())
-                    throw std::runtime_error("Lua package must return a table.");
-                packages[packageName] = package;
-            }
-            else if (package.is<sol::function>())
-                package = packages[packageName] = call(package.as<sol::protected_function>(), hiddenData);
+            sol::object package = loaded[packageName];
+            if (package != sol::nil)
+                return package;
+            sol::protected_function packageLoader = loadScriptAndCache(packageNameToVfsPath(packageName, mVFS));
+            sol::set_environment(env, packageLoader);
+            package = call(packageLoader, packageName);
+            loaded[packageName] = package;
             return package;
         };
 
