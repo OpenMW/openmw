@@ -1,5 +1,7 @@
 #include "quest.hpp"
 
+#include <algorithm>
+
 #include <components/esm3/queststate.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -50,42 +52,33 @@ namespace MWDialogue
         return mFinished;
     }
 
-    void Quest::addEntry (const JournalEntry& entry)
+    void Quest::setFinished(bool finished)
     {
-        int index = -1;
+        mFinished = finished;
+    }
 
+    bool Quest::addEntry (const JournalEntry& entry)
+    {
         const ESM::Dialogue *dialogue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (entry.mTopic);
 
-        for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
-            iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->mId == entry.mInfoId)
-            {
-                index = iter->mData.mJournalIndex;
-                break;
-            }
+        auto info = std::find_if(dialogue->mInfo.begin(), dialogue->mInfo.end(), [&](const auto& info) { return info.mId == entry.mInfoId; });
 
-        if (index==-1)
+        if (info == dialogue->mInfo.end() || info->mData.mJournalIndex == -1)
             throw std::runtime_error ("unknown journal entry for topic " + mTopic);
 
-        for (auto &info : dialogue->mInfo)
-        {
-            if (info.mData.mJournalIndex == index
-            && (info.mQuestStatus == ESM::DialInfo::QS_Finished || info.mQuestStatus == ESM::DialInfo::QS_Restart))
-            {
-                mFinished = (info.mQuestStatus == ESM::DialInfo::QS_Finished);
-                break;
-            }
-        }
+        if (info->mQuestStatus == ESM::DialInfo::QS_Finished || info->mQuestStatus == ESM::DialInfo::QS_Restart)
+            mFinished = info->mQuestStatus == ESM::DialInfo::QS_Finished;
 
-        if (index > mIndex)
-            mIndex = index;
+        if (info->mData.mJournalIndex > mIndex)
+            mIndex = info->mData.mJournalIndex;
 
         for (TEntryIter iter (mEntries.begin()); iter!=mEntries.end(); ++iter)
             if (iter->mInfoId==entry.mInfoId)
-                return;
+                return info->mQuestStatus == ESM::DialInfo::QS_Restart;
 
         mEntries.push_back (entry); // we want slicing here
+        return info->mQuestStatus == ESM::DialInfo::QS_Restart;
     }
 
     void Quest::write (ESM::QuestState& state) const
