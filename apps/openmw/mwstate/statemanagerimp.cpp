@@ -188,6 +188,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
     try
     {
+        const auto start = std::chrono::steady_clock::now();
+
         if (!character)
         {
             MWWorld::ConstPtr player = MWMechanics::getPlayer();
@@ -302,6 +304,11 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         Settings::Manager::setString ("character", "Saves",
             slot->mPath.parent_path().filename().string());
+
+        const auto finish = std::chrono::steady_clock::now();
+
+        Log(Debug::Info) << '\'' << description << "' is saved in "
+            << std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(finish - start).count() << "ms";
     }
     catch (const std::exception& e)
     {
