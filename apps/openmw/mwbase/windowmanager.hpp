@@ -358,6 +358,8 @@ namespace MWBase
 
             virtual void onDeleteCustomData(const MWWorld::Ptr& ptr) = 0;
             virtual void forceLootMode(const MWWorld::Ptr& ptr) = 0;
+
+            virtual void asyncPrepareSaveMap() = 0;
     };
 }
 

@@ -190,6 +190,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     {
         const auto start = std::chrono::steady_clock::now();
 
+        MWBase::Environment::get().getWindowManager()->asyncPrepareSaveMap();
+
         if (!character)
         {
             MWWorld::ConstPtr player = MWMechanics::getPlayer();
@@ -257,9 +259,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
                 +MWBase::Environment::get().getWorld()->countSavedGameRecords()
                 +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
                 +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
-                +MWBase::Environment::get().getWindowManager()->countSavedGameRecords()
                 +MWBase::Environment::get().getMechanicsManager()->countSavedGameRecords()
-                +MWBase::Environment::get().getInputManager()->countSavedGameRecords();
+                +MWBase::Environment::get().getInputManager()->countSavedGameRecords()
+                +MWBase::Environment::get().getWindowManager()->countSavedGameRecords();
         writer.setRecordCount (recordCount);
 
         writer.save (stream);
@@ -282,9 +284,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         MWBase::Environment::get().getLuaManager()->write(writer, listener);
         MWBase::Environment::get().getWorld()->write (writer, listener);
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer, listener);
-        MWBase::Environment::get().getWindowManager()->write(writer, listener);
         MWBase::Environment::get().getMechanicsManager()->write(writer, listener);
         MWBase::Environment::get().getInputManager()->write(writer, listener);
+        MWBase::Environment::get().getWindowManager()->write(writer, listener);
 
         // Ensure we have written the number of records that was estimated
         if (writer.getRecordCount() != recordCount+1) // 1 extra for TES3 record

@@ -392,6 +392,8 @@ namespace MWGui
     void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
     void forceLootMode(const MWWorld::Ptr& ptr) override;
 
+    void asyncPrepareSaveMap() override;
+
   private:
     unsigned int mOldUpdateMask; unsigned int mOldCullMask;
 
