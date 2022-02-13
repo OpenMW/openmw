@@ -38,11 +38,11 @@ namespace ToUTF8
             std::string_view getLegacyEnc(std::string_view input);
 
         private:
-            void resize(size_t size);
-            size_t getLength(const char* input, bool &ascii) const;
-            void copyFromArray(unsigned char chp, char* &out) const;
-            size_t getLength2(const char* input, bool &ascii) const;
-            void copyFromArray2(const char*& chp, char* &out) const;
+            inline void resize(std::size_t size);
+            inline std::pair<std::size_t, bool> getLength(std::string_view input) const;
+            inline void copyFromArray(unsigned char chp, char* &out) const;
+            inline std::pair<std::size_t, bool> getLengthLegacyEnc(std::string_view input) const;
+            inline void copyFromArrayLegacyEnc(std::string_view::iterator& chp, std::string_view::iterator end, char* &out) const;
 
             std::vector<char> mOutput;
             const signed char* translationArray;
