@@ -18,7 +18,7 @@ Below is a quick overview of supported formats, followed by separate articles wi
 	:caption: Table of Contents
 	:maxdepth: 1
 
-	pipeline-blender-collada
 	pipeline-blender-collada-static-models
+	pipeline-blender-collada-animated-creature
 	pipeline-blender-osgnative
 	pipeline-blender-nif
