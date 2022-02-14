@@ -30,6 +30,8 @@ namespace
 {
     unsigned long utf8ToUnicode(std::string_view utf8)
     {
+        if (utf8.empty())
+            return 0;
         size_t i = 0;
         unsigned long unicode;
         size_t numbytes;
