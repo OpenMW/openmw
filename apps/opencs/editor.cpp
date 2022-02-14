@@ -370,7 +370,7 @@ int CS::Editor::run()
     else
     {
         ESM::ESMReader fileReader;
-        ToUTF8::Utf8Encoder encoder = ToUTF8::calculateEncoding(mEncodingName);
+        ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncodingName));
         fileReader.setEncoder(&encoder);
         fileReader.open(mFileToLoad.string());
 

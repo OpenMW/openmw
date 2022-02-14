@@ -445,8 +445,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
 
         try {
             ESM::ESMReader fileReader;
-            ToUTF8::Utf8Encoder encoder =
-            ToUTF8::calculateEncoding(mEncoding.toStdString());
+            ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding.toStdString()));
             fileReader.setEncoder(&encoder);
             fileReader.open(std::string(dir.absoluteFilePath(path2).toUtf8().constData()));
 
