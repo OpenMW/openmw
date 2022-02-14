@@ -70,6 +70,8 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         esmloader/esmdata.cpp
 
         files/hash.cpp
+
+        toutf8/toutf8.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
@@ -93,6 +95,8 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         EXPECTED_MD5 bf3691034a38611534c74c3b89a7d2c3
     )
 
-    target_compile_definitions(openmw_test_suite PRIVATE OPENMW_DATA_DIR="${CMAKE_CURRENT_BINARY_DIR}/data")
+    target_compile_definitions(openmw_test_suite
+        PRIVATE OPENMW_DATA_DIR="${CMAKE_CURRENT_BINARY_DIR}/data"
+                OPENMW_TEST_SUITE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 endif()
