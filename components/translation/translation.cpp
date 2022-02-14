@@ -53,16 +53,16 @@ namespace Translation
 
             if (!line.empty())
             {
-                line = mEncoder->getUtf8(line);
+                const std::string_view utf8 = mEncoder->getUtf8(line);
 
-                size_t tab_pos = line.find('\t');
-                if (tab_pos != std::string::npos && tab_pos > 0 && tab_pos < line.size() - 1)
+                size_t tab_pos = utf8.find('\t');
+                if (tab_pos != std::string::npos && tab_pos > 0 && tab_pos < utf8.size() - 1)
                 {
-                    std::string key = line.substr(0, tab_pos);
-                    std::string value = line.substr(tab_pos + 1);
+                    const std::string_view key = utf8.substr(0, tab_pos);
+                    const std::string_view value = utf8.substr(tab_pos + 1);
 
                     if (!key.empty() && !value.empty())
-                        container.insert(std::make_pair(key, value));
+                        container.emplace(key, value);
                 }
             }
         }
