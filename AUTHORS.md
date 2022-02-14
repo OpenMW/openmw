@@ -249,6 +249,7 @@ Documentation
     Joakim Berg (lysol90)
     Ryan Tucker (Ravenwing)
     sir_herrbatka
+    David Nagy (zuzaman)
 
 Packagers
 ---------
