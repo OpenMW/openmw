@@ -77,7 +77,7 @@ namespace ESM4 {
 
         ReaderContext        mCtx;
 
-        ToUTF8::Utf8Encoder* mEncoder;
+        ToUTF8::StatelessUtf8Encoder* mEncoder;
 
         std::size_t          mFileSize;
 
@@ -140,7 +140,7 @@ namespace ESM4 {
 
         inline bool isEsm4() const final { return true; }
 
-        inline void setEncoder(ToUTF8::Utf8Encoder* encoder) final { mEncoder = encoder; };
+        inline void setEncoder(ToUTF8::StatelessUtf8Encoder* encoder) final { mEncoder = encoder; };
 
         const std::vector<ESM::MasterData>& getGameFiles() const final { return mHeader.mMaster; }
 

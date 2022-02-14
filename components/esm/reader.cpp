@@ -38,45 +38,17 @@ namespace ESM
     }
 
     bool Reader::getStringImpl(std::string& str, std::size_t size,
-            Files::IStreamPtr filestream, ToUTF8::Utf8Encoder* encoder, bool hasNull)
+            Files::IStreamPtr filestream, ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull)
     {
         std::size_t newSize = size;
 
         if (encoder)
         {
-            if (!hasNull)
-                newSize += 1; // Utf8Encoder::getLength() expects a null terminator
-
-            std::string tmp;
-            tmp.resize(newSize);
-            filestream->read(&tmp[0], size);
-            if ((std::size_t)filestream->gcount() == size)
+            std::string input(size, '\0');
+            filestream->read(input.data(), size);
+            if (filestream->gcount() == static_cast<std::streamsize>(size))
             {
-                if (hasNull)
-                {
-                    assert (tmp[newSize - 1] == '\0'
-                            && "ESM4::Reader::getString string is not terminated with a null");
-                }
-                else
-                {
-                    // NOTE: script text of some mods have terminating null;
-                    //       unfortunately we just have to deal with it
-                    //if (tmp[newSize - 2] != '\0')
-                    tmp[newSize - 1] = '\0'; // for Utf8Encoder::getLength()
-                }
-
-                encoder->toUtf8(tmp, str, newSize - 1);
-                // NOTE: the encoder converts “keep” as â€œkeepâ€ which increases the length,
-                //       which results in below resize() truncating the string
-                if (str.size() == newSize)   // ascii
-                    str.resize(newSize - 1); // don't want the null terminator
-                else
-                {
-                    // this is a horrible hack but fortunately there's only a few like this
-                    std::string tmp2(str.data());
-                    str.swap(tmp2);
-                }
-
+                encoder->getUtf8(input, ToUTF8::BufferAllocationPolicy::FitToRequiredSize, str);
                 return true;
             }
         }
