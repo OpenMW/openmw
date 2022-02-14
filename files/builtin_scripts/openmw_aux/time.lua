@@ -66,7 +66,7 @@ end
 --     function() print('Test2') end, 5 * time.minute,
 --     { initialDelay = 30 * time.second })
 -- @usage
--- local timeBeforeMidnight = time.day - time.gameTime() % time.day
+-- local timeBeforeMidnight = time.day - core.getGameTime() % time.day
 -- time.runRepeatedly(doSomething, time.day, {
 --     initialDelay = timeBeforeMidnight,
 --     type = time.GameTime,

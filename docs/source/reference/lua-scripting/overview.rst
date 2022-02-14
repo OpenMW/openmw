@@ -546,10 +546,10 @@ Timers
 ======
 
 Timers are in the :ref:`openmw.async <Package openmw.async>` package.
-They can be set either in game seconds or in game hours.
+They can be set either in simulation time or in game time.
 
-- `Game seconds`: the number of seconds in the game world (i.e. seconds when the game is not paused), passed from starting a new game.
-- `Game hours`: current time of the game world in hours. The number of seconds in a game hour is not guaranteed to be fixed.
+- `Simulation time`: the number of seconds in the game world (i.e. seconds when the game is not paused), passed from starting a new game.
+- `Game time`: current time of the game world in seconds. Note that game time generally goes faster than the simulation time.
 
 When the game is paused, all timers are paused as well.
 
@@ -578,7 +578,7 @@ An example:
     end)
 
     local function teleportWithDelay(delay, actor, cellName, pos)
-        async:newTimerInSeconds(delay, teleportWithDelayCallback, {
+        async:newSimulationTimer(delay, teleportWithDelayCallback, {
             actor = actor,
             destCellName = cellName,
             destPos = pos,
@@ -603,7 +603,7 @@ An example:
         engineHandlers = {
             onKeyPress = function(key)
                 if key.symbol == 'x' then
-                    async:newUnsavableTimerInSeconds(
+                    async:newUnsavableSimulationTimer(
                         10,
                         function()
                             ui.showMessage('You have pressed "X" 10 seconds ago')
@@ -613,28 +613,21 @@ An example:
         }
     }
 
-Also in `openmw_aux`_ are the helper functions ``runEveryNSeconds`` and ``runEveryNHours``, they are implemented on top of unsavable timers:
+Also in `openmw_aux`_ is the helper function ``runRepeatedly``, it is implemented on top of unsavable timers:
 
 .. code-block:: Lua
 
-    local async = require('openmw.async')
     local core = require('openmw.core')
+    local time = require('openmw_aux.time')
 
-    -- call `doSomething()` at the end of every game day.
-    -- `timeBeforeMidnight` is a delay before the first call. `24` is an interval.
+    -- call `doSomething()` at the end of every game day. 
+    -- the second argument (`time.day`) is the interval.
     -- the periodical evaluation can be stopped at any moment by calling `stopFn()`
-    local timeBeforeMidnight = 24 - math.fmod(core.getGameTimeInHours(), 24)
-    local stopFn = aux_util.runEveryNHours(24, doSomething, timeBeforeMidnight)
-
-    return {
-        engineHandlers = {
-            onLoad = function()
-                -- the timer is unsavable, so we need to restart it in `onLoad`.
-                timeBeforeMidnight = 24 - math.fmod(core.getGameTimeInHours(), 24)
-                stopFn = aux_util.runEveryNHours(24, doSomething, timeBeforeMidnight)
-            end,
-        }
-    }
+    local timeBeforeMidnight = time.day - core.getGameTime() % time.day
+    local stopFn = time.runRepeatedly(doSomething, time.day, {
+        initialDelay = timeBeforeMidnight,
+        type = time.GameTime,
+    })
 
 
 Queries
