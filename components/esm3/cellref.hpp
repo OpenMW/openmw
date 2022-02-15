@@ -5,6 +5,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/esmcommon.hpp"
 
 namespace ESM
 {
@@ -18,9 +19,9 @@ namespace ESM
         unsigned int mIndex;
         int mContentFile;
 
-        void load (ESMReader& esm, bool wide = false, const std::string& tag = "FRMR");
+        void load(ESMReader& esm, bool wide = false, ESM::NAME tag = "FRMR");
 
-        void save (ESMWriter &esm, bool wide = false, const std::string& tag = "FRMR") const;
+        void save(ESMWriter &esm, bool wide = false, ESM::NAME tag = "FRMR") const;
 
         inline bool hasContentFile() const { return mContentFile >= 0; }
 

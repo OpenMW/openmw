@@ -19,7 +19,7 @@ class ESMWriter
 {
         struct RecordData
         {
-            std::string name;
+            ESM::NAME name;
             std::streampos position;
             uint32_t size;
         };
@@ -56,27 +56,27 @@ class ESMWriter
         void close();
         ///< \note Does not close the stream.
 
-        void writeHNString(const std::string& name, const std::string& data);
-        void writeHNString(const std::string& name, const std::string& data, size_t size);
-        void writeHNCString(const std::string& name, const std::string& data)
+        void writeHNString(ESM::NAME name, const std::string& data);
+        void writeHNString(ESM::NAME name, const std::string& data, size_t size);
+        void writeHNCString(ESM::NAME name, const std::string& data)
         {
             startSubRecord(name);
             writeHCString(data);
             endRecord(name);
         }
-        void writeHNOString(const std::string& name, const std::string& data)
+        void writeHNOString(ESM::NAME name, const std::string& data)
         {
             if (!data.empty())
                 writeHNString(name, data);
         }
-        void writeHNOCString(const std::string& name, const std::string& data)
+        void writeHNOCString(ESM::NAME name, const std::string& data)
         {
             if (!data.empty())
                 writeHNCString(name, data);
         }
 
         template<typename T>
-        void writeHNT(const std::string& name, const T& data)
+        void writeHNT(ESM::NAME name, const T& data)
         {
             startSubRecord(name);
             writeT(data);
@@ -84,7 +84,7 @@ class ESMWriter
         }
 
         template<typename T, std::size_t size>
-        void writeHNT(const std::string& name, const T (&data)[size])
+        void writeHNT(ESM::NAME name, const T (&data)[size])
         {
             startSubRecord(name);
             writeT(data);
@@ -94,15 +94,15 @@ class ESMWriter
         // Prevent using writeHNT with strings. This already happened by accident and results in
         // state being discarded without any error on writing or reading it. :(
         // writeHNString and friends must be used instead.
-        void writeHNT(const std::string& name, const std::string& data) = delete;
+        void writeHNT(ESM::NAME name, const std::string& data) = delete;
 
-        void writeT(const std::string& data) = delete;
+        void writeT(ESM::NAME data) = delete;
 
         template<typename T, std::size_t size>
-        void writeHNT(const std::string& name, const T (&data)[size], int) = delete;
+        void writeHNT(ESM::NAME name, const T (&data)[size], int) = delete;
 
         template<typename T>
-        void writeHNT(const std::string& name, const T& data, int size)
+        void writeHNT(ESM::NAME name, const T& data, int size)
         {
             startSubRecord(name);
             writeT(data, size);
@@ -129,16 +129,16 @@ class ESMWriter
             write((char*)&data, size);
         }
 
-        void startRecord(const std::string& name, uint32_t flags = 0);
+        void startRecord(ESM::NAME name, uint32_t flags = 0);
         void startRecord(uint32_t name, uint32_t flags = 0);
         /// @note Sub-record hierarchies are not properly supported in ESMReader. This should be fixed later.
-        void startSubRecord(const std::string& name);
-        void endRecord(const std::string& name);
+        void startSubRecord(ESM::NAME name);
+        void endRecord(ESM::NAME name);
         void endRecord(uint32_t name);
         void writeFixedSizeString(const std::string& data, int size);
         void writeHString(const std::string& data);
         void writeHCString(const std::string& data);
-        void writeName(const std::string& data);
+        void writeName(ESM::NAME data);
         void write(const char* data, size_t size);
 
     private:

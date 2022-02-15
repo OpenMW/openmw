@@ -5,7 +5,7 @@
 
 namespace
 {
-    void save(ESM::ESMWriter& esm, const std::vector<ESM::ActiveSpells::ActiveSpellParams>& spells, const std::string& tag)
+    void save(ESM::ESMWriter& esm, const std::vector<ESM::ActiveSpells::ActiveSpellParams>& spells, ESM::NAME tag)
     {
         for (const auto& params : spells)
         {
@@ -38,7 +38,7 @@ namespace
         }
     }
 
-    void load(ESM::ESMReader& esm, std::vector<ESM::ActiveSpells::ActiveSpellParams>& spells, const char* tag)
+    void load(ESM::ESMReader& esm, std::vector<ESM::ActiveSpells::ActiveSpellParams>& spells, ESM::NAME tag)
     {
         int format = esm.getFormat();
 

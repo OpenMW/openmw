@@ -5,17 +5,17 @@
 
 namespace
 {
-    const char* currentRegionRecord     = "CREG";
-    const char* timePassedRecord        = "TMPS";
-    const char* fastForwardRecord       = "FAST";
-    const char* weatherUpdateTimeRecord = "WUPD";
-    const char* transitionFactorRecord  = "TRFC";
-    const char* currentWeatherRecord    = "CWTH";
-    const char* nextWeatherRecord       = "NWTH";
-    const char* queuedWeatherRecord     = "QWTH";
-    const char* regionNameRecord        = "RGNN";
-    const char* regionWeatherRecord     = "RGNW";
-    const char* regionChanceRecord      = "RGNC";
+    constexpr ESM::NAME currentRegionRecord     = "CREG";
+    constexpr ESM::NAME timePassedRecord        = "TMPS";
+    constexpr ESM::NAME fastForwardRecord       = "FAST";
+    constexpr ESM::NAME weatherUpdateTimeRecord = "WUPD";
+    constexpr ESM::NAME transitionFactorRecord  = "TRFC";
+    constexpr ESM::NAME currentWeatherRecord    = "CWTH";
+    constexpr ESM::NAME nextWeatherRecord       = "NWTH";
+    constexpr ESM::NAME queuedWeatherRecord     = "QWTH";
+    constexpr ESM::NAME regionNameRecord        = "RGNN";
+    constexpr ESM::NAME regionWeatherRecord     = "RGNW";
+    constexpr ESM::NAME regionChanceRecord      = "RGNC";
 }
 
 namespace ESM

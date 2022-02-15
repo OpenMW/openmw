@@ -5,15 +5,15 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-void ESM::RefNum::load (ESMReader& esm, bool wide, const std::string& tag)
+void ESM::RefNum::load(ESMReader& esm, bool wide, ESM::NAME tag)
 {
     if (wide)
-        esm.getHNT (*this, tag.c_str(), 8);
+        esm.getHNT(*this, tag, 8);
     else
-        esm.getHNT (mIndex, tag.c_str());
+        esm.getHNT(mIndex, tag);
 }
 
-void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
+void ESM::RefNum::save(ESMWriter &esm, bool wide, ESM::NAME tag) const
 {
     if (wide)
         esm.writeHNT (tag, *this, 8);
