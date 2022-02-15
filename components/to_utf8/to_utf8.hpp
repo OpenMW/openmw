@@ -18,34 +18,55 @@ namespace ToUTF8
         CP437           // Used for fonts (*.fnt) if data files encoding is 1252. Otherwise, uses the same encoding as the data files.
     };
 
+    enum class BufferAllocationPolicy
+    {
+        FitToRequiredSize,
+        UseGrowFactor,
+    };
+
     FromType calculateEncoding(const std::string& encodingName);
     std::string encodingUsingMessage(const std::string& encodingName);
 
-    // class
+    class StatelessUtf8Encoder
+    {
+        public:
+            explicit StatelessUtf8Encoder(FromType sourceEncoding);
+
+            /// Convert to UTF8 from the previously given code page.
+            /// Returns a view to passed buffer that will be resized to fit output if it's too small.
+            std::string_view getUtf8(std::string_view input, BufferAllocationPolicy bufferAllocationPolicy, std::string& buffer) const;
+
+            /// Convert from UTF-8 to sourceEncoding.
+            /// Returns a view to passed buffer that will be resized to fit output if it's too small.
+            std::string_view getLegacyEnc(std::string_view input, BufferAllocationPolicy bufferAllocationPolicy, std::string& buffer) const;
+
+        private:
+            inline std::pair<std::size_t, bool> getLength(std::string_view input) const;
+            inline void copyFromArray(unsigned char chp, char* &out) const;
+            inline std::pair<std::size_t, bool> getLengthLegacyEnc(std::string_view input) const;
+            inline void copyFromArrayLegacyEnc(std::string_view::iterator& chp, std::string_view::iterator end, char* &out) const;
+
+            const std::basic_string_view<signed char> mTranslationArray;
+    };
 
     class Utf8Encoder
     {
         public:
-            Utf8Encoder(FromType sourceEncoding);
+            explicit Utf8Encoder(FromType sourceEncoding);
 
             /// Convert to UTF8 from the previously given code page.
             /// Returns a view to internal buffer invalidate by next getUtf8 or getLegacyEnc call if input is not
             /// ASCII-only string. Otherwise returns a view to the input.
             std::string_view getUtf8(std::string_view input);
 
+            /// Convert from UTF-8 to sourceEncoding.
             /// Returns a view to internal buffer invalidate by next getUtf8 or getLegacyEnc call if input is not
             /// ASCII-only string. Otherwise returns a view to the input.
             std::string_view getLegacyEnc(std::string_view input);
 
         private:
-            inline void resize(std::size_t size);
-            inline std::pair<std::size_t, bool> getLength(std::string_view input) const;
-            inline void copyFromArray(unsigned char chp, char* &out) const;
-            inline std::pair<std::size_t, bool> getLengthLegacyEnc(std::string_view input) const;
-            inline void copyFromArrayLegacyEnc(std::string_view::iterator& chp, std::string_view::iterator end, char* &out) const;
-
-            std::vector<char> mOutput;
-            const signed char* translationArray;
+            std::string mBuffer;
+            StatelessUtf8Encoder mImpl;
     };
 }
 
