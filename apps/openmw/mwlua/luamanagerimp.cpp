@@ -82,6 +82,7 @@ namespace MWLua
         mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
         mLua.addCommonPackage("openmw.core", initCorePackage(context));
         mLua.addCommonPackage("openmw.query", initQueryPackage(context));
+        mLua.addCommonPackage("openmw.types", initTypesPackage(context));
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
         mGlobalScripts.addPackage("openmw.settings", initGlobalSettingsPackage(context));
         mGlobalScripts.addPackage("openmw.storage", initGlobalStoragePackage(context, &mGlobalStorage));

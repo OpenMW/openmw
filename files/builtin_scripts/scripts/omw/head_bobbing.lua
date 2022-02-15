@@ -3,6 +3,8 @@ local self = require('openmw.self')
 local settings = require('openmw.settings')
 local util = require('openmw.util')
 
+local Actor = require('openmw.types').Actor
+
 local doubleStepLength = settings._getFloatFromSettingsCfg('Camera', 'head bobbing step') * 2
 local stepHeight = settings._getFloatFromSettingsCfg('Camera', 'head bobbing height')
 local maxRoll = math.rad(settings._getFloatFromSettingsCfg('Camera', 'head bobbing roll'))
@@ -20,14 +22,14 @@ local sampleArc = function(x) return 1 - math.cos(x * halfArc) end
 local arcHeight = sampleArc(1)
 
 function M.update(dt, smoothedSpeed)
-    local speed = self:getCurrentSpeed()
+    local speed = Actor.currentSpeed(self)
     speed = speed / (1 + speed / 500)  -- limit bobbing frequency if the speed is very high
     totalMovement = totalMovement + speed * dt
     if not M.enabled or camera.getMode() ~= camera.MODE.FirstPerson then
         effectWeight = 0
         return
     end
-    if self:isOnGround() then
+    if Actor.isOnGround(self) then
         effectWeight = math.min(1, effectWeight + dt * 5)
     else
         effectWeight = math.max(0, effectWeight - dt * 5)

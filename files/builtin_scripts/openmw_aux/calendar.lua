@@ -91,7 +91,7 @@ local function formatGameTime(formatStr, timestamp)
         error('Unknown tag "'..tag..'"')
     end
 
-    res, _ = string.gsub(formatStr or '%c', '%%.', replFn)
+    local res, _ = string.gsub(formatStr or '%c', '%%.', replFn)
     return res
 end
 

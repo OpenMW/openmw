@@ -3,6 +3,8 @@
 
 #include <typeindex>
 
+#include <sol/sol.hpp>
+
 #include <components/esm3/cellref.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/luascripts.hpp>
@@ -48,6 +50,7 @@ namespace MWLua
     bool isMarker(const MWWorld::Ptr& ptr);
     std::string_view getLuaObjectTypeName(ESM::RecNameInts recordType, std::string_view fallback = "Unknown");
     std::string_view getLuaObjectTypeName(const MWWorld::Ptr& ptr);
+    const MWWorld::Ptr& verifyType(ESM::RecNameInts recordType, const MWWorld::Ptr& ptr);
 
     // Each script has a set of flags that controls to which objects the script should be
     // automatically attached. This function maps each object types to one of the flags. 
@@ -103,6 +106,9 @@ namespace MWLua
         // Returns `true` if calling `ptr()` is safe.
         bool isValid() const;
 
+        virtual sol::object getObject(lua_State* lua, ObjectId id) const = 0;  // returns LObject or GOBject
+        virtual sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const = 0;  // returns LCell or GCell
+
     protected:
         virtual void updatePtr() const = 0;
 
@@ -114,17 +120,29 @@ namespace MWLua
     };
 
     // Used only in local scripts
+    struct LCell
+    {
+        MWWorld::CellStore* mStore;
+    };
     class LObject : public Object
     {
         using Object::Object;
         void updatePtr() const final { mPtr = mObjectRegistry->getPtr(mId, true); }
+        sol::object getObject(lua_State* lua, ObjectId id) const final { return sol::make_object<LObject>(lua, id, mObjectRegistry); }
+        sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const final { return sol::make_object(lua, LCell{store}); }
     };
 
     // Used only in global scripts
+    struct GCell
+    {
+        MWWorld::CellStore* mStore;
+    };
     class GObject : public Object
     {
         using Object::Object;
         void updatePtr() const final { mPtr = mObjectRegistry->getPtr(mId, false); }
+        sol::object getObject(lua_State* lua, ObjectId id) const final { return sol::make_object<GObject>(lua, id, mObjectRegistry); }
+        sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const final { return sol::make_object(lua, GCell{store}); }
     };
 
     using ObjectIdList = std::shared_ptr<std::vector<ObjectId>>;

@@ -4,6 +4,8 @@ local util = require('openmw.util')
 local self = require('openmw.self')
 local nearby = require('openmw.nearby')
 
+local Actor = require('openmw.types').Actor
+
 local MODE = camera.MODE
 local STATE = { RightShoulder = 0, LeftShoulder = 1, Combat = 2, Swimming = 3 }
 
@@ -70,9 +72,9 @@ local noThirdPersonLastFrame = true
 local function updateState()
     local mode = camera.getMode()
     local oldState = state
-    if (self:isInWeaponStance() or self:isInMagicStance()) and mode == MODE.ThirdPerson then
+    if Actor.stance(self) ~= Actor.STANCE.Nothing and mode == MODE.ThirdPerson then
         state = STATE.Combat
-    elseif self:isSwimming() then
+    elseif Actor.isSwimming(self) then
         state = STATE.Swimming
     elseif oldState == STATE.Combat or oldState == STATE.Swimming then
         state = defaultShoulder

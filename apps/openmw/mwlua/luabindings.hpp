@@ -23,6 +23,7 @@ namespace MWLua
     sol::table initCorePackage(const Context&);
     sol::table initWorldPackage(const Context&);
     sol::table initQueryPackage(const Context&);
+    sol::table initTypesPackage(const Context&);
 
     sol::table initFieldGroup(const Context&, const QueryFieldGroup&);
 
@@ -38,14 +39,6 @@ namespace MWLua
     void initObjectBindingsForGlobalScripts(const Context&);
 
     // Implemented in cellbindings.cpp
-    struct LCell  // for local scripts
-    {
-        MWWorld::CellStore* mStore;
-    };
-    struct GCell  // for global scripts
-    {
-        MWWorld::CellStore* mStore;
-    };
     void initCellBindingsForLocalScripts(const Context&);
     void initCellBindingsForGlobalScripts(const Context&);
 

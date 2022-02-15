@@ -12,6 +12,7 @@
 
 #include "eventqueue.hpp"
 #include "worldview.hpp"
+#include "types/types.hpp"
 
 namespace MWLua
 {
@@ -45,11 +46,57 @@ namespace MWLua
         // api["resume"] = []() {};
     }
 
+    sol::table initTypesPackage(const Context& context)
+    {
+        auto* lua = context.mLua;
+        sol::table types(lua->sol(), sol::create);
+        auto addType = [&](std::string_view name, std::optional<std::string_view> base = std::nullopt) -> sol::table
+        {
+            sol::table t(lua->sol(), sol::create);
+            sol::table ro = LuaUtil::makeReadOnly(t);
+            sol::table meta = ro[sol::metatable_key];
+            meta[sol::meta_function::to_string] = [name]() { return name; };
+            if (base)
+            {
+                t[sol::metatable_key] = LuaUtil::getMutableFromReadOnly(types[*base]);
+                t["baseType"] = types[*base];
+            }
+            types[name] = ro;
+            return t;
+        };
+
+        addActorBindings(addType("Actor"), context);
+        addType("Item");
+
+        addType(ObjectTypeName::Creature, "Actor");
+        addType(ObjectTypeName::NPC, "Actor");
+        addType(ObjectTypeName::Player, ObjectTypeName::NPC);
+
+        addType(ObjectTypeName::Armor, "Item");
+        addType(ObjectTypeName::Book, "Item");
+        addType(ObjectTypeName::Clothing, "Item");
+        addType(ObjectTypeName::Ingredient, "Item");
+        addType(ObjectTypeName::Light, "Item");
+        addType(ObjectTypeName::MiscItem, "Item");
+        addType(ObjectTypeName::Potion, "Item");
+        addType(ObjectTypeName::Weapon, "Item");
+        addType(ObjectTypeName::Apparatus, "Item");
+        addType(ObjectTypeName::Lockpick, "Item");
+        addType(ObjectTypeName::Probe, "Item");
+        addType(ObjectTypeName::Repair, "Item");
+
+        addType(ObjectTypeName::Activator);
+        addDoorBindings(addType(ObjectTypeName::Door), context);
+        addType(ObjectTypeName::Static);
+
+        return LuaUtil::makeReadOnly(types);
+    }
+
     sol::table initCorePackage(const Context& context)
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 17;
+        api["API_REVISION"] = 18;
         api["quit"] = [lua]()
         {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
@@ -60,35 +107,14 @@ namespace MWLua
             context.mGlobalEventQueue->push_back({std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
         };
         addTimeBindings(api, context, false);
-        api["OBJECT_TYPE"] = definitionList(*lua,
+        api["OBJECT_TYPE"] = definitionList(*lua,  // TODO: remove, use require('openmw.types') instead
         {
             ObjectTypeName::Activator, ObjectTypeName::Armor, ObjectTypeName::Book, ObjectTypeName::Clothing,
             ObjectTypeName::Creature, ObjectTypeName::Door, ObjectTypeName::Ingredient, ObjectTypeName::Light,
             ObjectTypeName::MiscItem, ObjectTypeName::NPC, ObjectTypeName::Player, ObjectTypeName::Potion,
-            ObjectTypeName::Static, ObjectTypeName::Weapon, ObjectTypeName::Activator, ObjectTypeName::Lockpick,
+            ObjectTypeName::Static, ObjectTypeName::Weapon, ObjectTypeName::Apparatus, ObjectTypeName::Lockpick,
             ObjectTypeName::Probe, ObjectTypeName::Repair
         });
-        api["EQUIPMENT_SLOT"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            {"Helmet", MWWorld::InventoryStore::Slot_Helmet},
-            {"Cuirass", MWWorld::InventoryStore::Slot_Cuirass},
-            {"Greaves", MWWorld::InventoryStore::Slot_Greaves},
-            {"LeftPauldron", MWWorld::InventoryStore::Slot_LeftPauldron},
-            {"RightPauldron", MWWorld::InventoryStore::Slot_RightPauldron},
-            {"LeftGauntlet", MWWorld::InventoryStore::Slot_LeftGauntlet},
-            {"RightGauntlet", MWWorld::InventoryStore::Slot_RightGauntlet},
-            {"Boots", MWWorld::InventoryStore::Slot_Boots},
-            {"Shirt", MWWorld::InventoryStore::Slot_Shirt},
-            {"Pants", MWWorld::InventoryStore::Slot_Pants},
-            {"Skirt", MWWorld::InventoryStore::Slot_Skirt},
-            {"Robe", MWWorld::InventoryStore::Slot_Robe},
-            {"LeftRing", MWWorld::InventoryStore::Slot_LeftRing},
-            {"RightRing", MWWorld::InventoryStore::Slot_RightRing},
-            {"Amulet", MWWorld::InventoryStore::Slot_Amulet},
-            {"Belt", MWWorld::InventoryStore::Slot_Belt},
-            {"CarriedRight", MWWorld::InventoryStore::Slot_CarriedRight},
-            {"CarriedLeft", MWWorld::InventoryStore::Slot_CarriedLeft},
-            {"Ammunition", MWWorld::InventoryStore::Slot_Ammunition}
-        }));
         api["i18n"] = [i18n=context.mI18n](const std::string& context) { return i18n->getContext(context); };
         const MWWorld::Store<ESM::GameSetting>* gmst = &MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         api["getGMST"] = [lua=context.mLua, gmst](const std::string& setting) -> sol::object

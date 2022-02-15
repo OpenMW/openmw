@@ -42,19 +42,6 @@ namespace MWLua
     template <typename ObjT>
     using Cell = std::conditional_t<std::is_same_v<ObjT, LObject>, LCell, GCell>;
 
-    static const MWWorld::Ptr& requireRecord(ESM::RecNameInts recordType, const MWWorld::Ptr& ptr)
-    {
-        if (ptr.getType() != recordType)
-        {
-            std::string msg = "Requires type '";
-            msg.append(getLuaObjectTypeName(recordType));
-            msg.append("', but applied to ");
-            msg.append(ptrToString(ptr));
-            throw std::runtime_error(msg);
-        }
-        return ptr;
-    }
-
     template <class ObjectT>
     static void registerObjectList(const std::string& prefix, const Context& context)
     {
@@ -122,21 +109,6 @@ namespace MWLua
             context.mLocalEventQueue->push_back({dest.id(), std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
         };
 
-        objectT["canMove"] = [](const ObjectT& o)
-        {
-            const MWWorld::Class& cls = o.ptr().getClass();
-            return cls.getMaxSpeed(o.ptr()) > 0;
-        };
-        objectT["getRunSpeed"] = [](const ObjectT& o)
-        {
-            const MWWorld::Class& cls = o.ptr().getClass();
-            return cls.getRunSpeed(o.ptr());
-        };
-        objectT["getWalkSpeed"] = [](const ObjectT& o)
-        {
-            const MWWorld::Class& cls = o.ptr().getClass();
-            return cls.getWalkSpeed(o.ptr());
-        };
         objectT["activateBy"] = [context](const ObjectT& o, const ObjectT& actor)
         {
             uint32_t esmRecordType = actor.ptr().getType();
@@ -199,111 +171,13 @@ namespace MWLua
                     context.mLuaManager->addAction(std::move(action));
             };
         }
-        else
-        {  // Only for local scripts
-            objectT["isOnGround"] = [](const ObjectT& o)
-            {
-                return MWBase::Environment::get().getWorld()->isOnGround(o.ptr());
-            };
-            objectT["isSwimming"] = [](const ObjectT& o)
-            {
-                return MWBase::Environment::get().getWorld()->isSwimming(o.ptr());
-            };
-            objectT["isInWeaponStance"] = [](const ObjectT& o)
-            {
-                const MWWorld::Class& cls = o.ptr().getClass();
-                return cls.isActor() && cls.getCreatureStats(o.ptr()).getDrawState() == MWMechanics::DrawState_Weapon;
-            };
-            objectT["isInMagicStance"] = [](const ObjectT& o)
-            {
-                const MWWorld::Class& cls = o.ptr().getClass();
-                return cls.isActor() && cls.getCreatureStats(o.ptr()).getDrawState() == MWMechanics::DrawState_Spell;
-            };
-            objectT["getCurrentSpeed"] = [](const ObjectT& o)
-            {
-                const MWWorld::Class& cls = o.ptr().getClass();
-                return cls.getCurrentSpeed(o.ptr());
-            };
-        }
     }
 
-    template <class ObjectT>
-    static void addDoorBindings(sol::usertype<ObjectT>& objectT, const Context& context)
-    {
-        auto ptr = [](const ObjectT& o) -> const MWWorld::Ptr& { return requireRecord(ESM::REC_DOOR, o.ptr()); };
-
-        objectT["isTeleport"] = sol::readonly_property([ptr](const ObjectT& o)
-        {
-            return ptr(o).getCellRef().getTeleport();
-        });
-        objectT["destPosition"] = sol::readonly_property([ptr](const ObjectT& o) -> osg::Vec3f
-        {
-            return ptr(o).getCellRef().getDoorDest().asVec3();
-        });
-        objectT["destRotation"] = sol::readonly_property([ptr](const ObjectT& o) -> osg::Vec3f
-        {
-            return ptr(o).getCellRef().getDoorDest().asRotationVec3();
-        });
-        objectT["destCell"] = sol::readonly_property(
-            [ptr, worldView=context.mWorldView](const ObjectT& o) -> sol::optional<Cell<ObjectT>>
-        {
-            const MWWorld::CellRef& cellRef = ptr(o).getCellRef();
-            if (!cellRef.getTeleport())
-                return sol::nullopt;
-            MWWorld::CellStore* cell = worldView->findCell(cellRef.getDestCell(), cellRef.getDoorDest().asVec3());
-            if (cell)
-                return Cell<ObjectT>{cell};
-            else
-                return sol::nullopt;
-        });
-    }
-
-    static SetEquipmentAction::Equipment parseEquipmentTable(sol::table equipment)
-    {
-        SetEquipmentAction::Equipment eqp;
-        for (auto& [key, value] : equipment)
-        {
-            int slot = key.as<int>();
-            if (value.is<GObject>())
-                eqp[slot] = value.as<GObject>().id();
-            else
-                eqp[slot] = value.as<std::string>();
-        }
-        return eqp;
-    }
-    
     template <class ObjectT>
     static void addInventoryBindings(sol::usertype<ObjectT>& objectT, const std::string& prefix, const Context& context)
     {
         using InventoryT = Inventory<ObjectT>;
         sol::usertype<InventoryT> inventoryT = context.mLua->sol().new_usertype<InventoryT>(prefix + "Inventory");
-
-        objectT["getEquipment"] = [context](const ObjectT& o)
-        {
-            const MWWorld::Ptr& ptr = o.ptr();
-            sol::table equipment(context.mLua->sol(), sol::create);
-            if (!ptr.getClass().hasInventoryStore(ptr))
-                return equipment;
-
-            MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-            for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
-            {
-                auto it = store.getSlot(slot);
-                if (it == store.end())
-                    continue;
-                context.mWorldView->getObjectRegistry()->registerPtr(*it);
-                equipment[slot] = ObjectT(getId(*it), context.mWorldView->getObjectRegistry());
-            }
-            return equipment;
-        };
-        objectT["isEquipped"] = [](const ObjectT& actor, const ObjectT& item)
-        {
-            const MWWorld::Ptr& ptr = actor.ptr();
-            if (!ptr.getClass().hasInventoryStore(ptr))
-                return false;
-            MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-            return store.isEquipped(item.ptr());
-        };
 
         objectT["inventory"] = sol::readonly_property([](const ObjectT& o) { return InventoryT{o}; });
         inventoryT[sol::meta_function::to_string] =
@@ -363,18 +237,6 @@ namespace MWLua
 
         if constexpr (std::is_same_v<ObjectT, GObject>)
         {  // Only for global scripts
-            objectT["setEquipment"] = [context](const GObject& obj, sol::table equipment)
-            {
-                if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
-                {
-                    if (!equipment.empty())
-                        throw std::runtime_error(ptrToString(obj.ptr()) + " has no equipment slots");
-                    return;
-                }
-                context.mLuaManager->addAction(std::make_unique<SetEquipmentAction>(
-                    context.mLua, obj.id(), parseEquipmentTable(equipment)));
-            };
-
             // TODO
             // obj.inventory:drop(obj2, [count])
             // obj.inventory:drop(recordId, [count])
@@ -390,9 +252,9 @@ namespace MWLua
     template <class ObjectT>
     static void initObjectBindings(const std::string& prefix, const Context& context)
     {
-        sol::usertype<ObjectT> objectT = context.mLua->sol().new_usertype<ObjectT>(prefix + "Object");
+        sol::usertype<ObjectT> objectT = context.mLua->sol().new_usertype<ObjectT>(
+            prefix + "Object", sol::base_classes, sol::bases<Object>());
         addBasicBindings<ObjectT>(objectT, context);
-        addDoorBindings<ObjectT>(objectT, context);
         addInventoryBindings<ObjectT>(objectT, prefix, context);
 
         registerObjectList<ObjectT>(prefix, context);

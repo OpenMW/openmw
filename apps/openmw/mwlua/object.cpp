@@ -60,7 +60,7 @@ namespace MWLua
         // for types that are not present in `luaObjectTypeInfo` (for such types result stability
         // is not necessary because they are not listed in OpenMW Lua documentation).
         if (ptr.getCellRef().getRefId() == "player")
-            return "Player";
+            return ObjectTypeName::Player;
         if (isMarker(ptr))
             return "Marker";
         return getLuaObjectTypeName(static_cast<ESM::RecNameInts>(ptr.getType()), /*fallback=*/ptr.getTypeDescription());
@@ -77,6 +77,19 @@ namespace MWLua
             return it->second.mFlag;
         else
             return 0;
+    }
+
+    const MWWorld::Ptr& verifyType(ESM::RecNameInts recordType, const MWWorld::Ptr& ptr)
+    {
+        if (ptr.getType() != recordType)
+        {
+            std::string msg = "Requires type '";
+            msg.append(getLuaObjectTypeName(recordType));
+            msg.append("', but applied to ");
+            msg.append(ptrToString(ptr));
+            throw std::runtime_error(msg);
+        }
+        return ptr;
     }
 
     std::string ptrToString(const MWWorld::Ptr& ptr)
