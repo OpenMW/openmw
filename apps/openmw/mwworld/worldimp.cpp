@@ -1281,9 +1281,9 @@ namespace MWWorld
         return moveObject(ptr, newpos);
     }
 
-    void World::scaleObject (const Ptr& ptr, float scale)
+    void World::scaleObject (const Ptr& ptr, float scale, bool force)
     {
-        if (scale == ptr.getCellRef().getScale())
+        if (!force && scale == ptr.getCellRef().getScale())
             return;
         if (mPhysics->getActor(ptr))
             mNavigator->removeAgent(getPathfindingHalfExtents(ptr));
@@ -2482,7 +2482,7 @@ namespace MWWorld
         player.getClass().getInventoryStore(player).setInvListener(anim, player);
         player.getClass().getInventoryStore(player).setContListener(anim);
 
-        scaleObject(player, player.getCellRef().getScale()); // apply race height
+        scaleObject(player, player.getCellRef().getScale(), true); // apply race height
         rotateObject(player, osg::Vec3f(), MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());

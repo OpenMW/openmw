@@ -293,7 +293,7 @@ namespace MWBase
             virtual MWWorld::Ptr moveObjectBy(const MWWorld::Ptr &ptr, const osg::Vec3f& vec) = 0;
             ///< @return an updated Ptr
 
-            virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
+            virtual void scaleObject (const MWWorld::Ptr& ptr, float scale, bool force = false) = 0;
 
             virtual void rotateObject(const MWWorld::Ptr& ptr, const osg::Vec3f& rot, RotationFlags flags = RotationFlag_inverseOrder) = 0;
 
