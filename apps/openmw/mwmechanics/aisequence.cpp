@@ -238,8 +238,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
         return;
     }
 
-    auto packageIt = mPackages.begin();
-    MWMechanics::AiPackage* package = packageIt->get();
+    auto* package = mPackages.front().get();
     if (!package->alwaysActive() && outOfRange)
         return;
 
@@ -291,7 +290,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             }
         }
 
-        assert(!mPackages.empty());
+        if (mPackages.empty())
+            return;
 
         if (nearestDist < std::numeric_limits<float>::max() && mPackages.begin() != itActualCombat)
         {
@@ -300,8 +300,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             std::rotate(mPackages.begin(), itActualCombat, std::next(itActualCombat));
         }
 
-        packageIt = mPackages.begin();
-        package = packageIt->get();
+        package = mPackages.front().get();
         packageTypeId = package->getTypeId();
     }
 
@@ -309,15 +308,16 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
     {
         if (package->execute(actor, characterController, mAiState, duration))
         {
-            // Put repeating noncombat AI packages on the end of the stack so they can be used again
+            // Put repeating non-combat AI packages on the end of the stack so they can be used again
             if (isActualAiPackage(packageTypeId) && package->getRepeat())
             {
                 package->reset();
                 mPackages.push_back(package->clone());
             }
+
             // To account for the rare case where AiPackage::execute() queued another AI package
             // (e.g. AiPursue executing a dialogue script that uses startCombat)
-            erase(packageIt);
+            erase(mPackages.begin());
             if (isActualAiPackage(packageTypeId))
                 mDone = true;
         }
