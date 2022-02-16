@@ -291,7 +291,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             }
         }
 
-        assert(!mPackages.empty());
+        if (mPackages.empty())
+            return;
 
         if (nearestDist < std::numeric_limits<float>::max() && mPackages.begin() != itActualCombat)
         {
