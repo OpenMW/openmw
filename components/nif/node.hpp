@@ -211,6 +211,9 @@ struct NiNode : Node
     enum ControllerFlags {
         ControllerFlag_Active = 0x8
     };
+    enum BSPArrayController {
+        BSPArrayController_AtVertex = 0x10
+    };
 
     void read(NIFStream *nif) override
     {
@@ -457,6 +460,7 @@ struct NiSortAdjustNode : NiNode
     }
     void post(NIFFile *nif) override
     {
+        NiNode::post(nif);
         mSubSorter.post(nif);
     }
 };

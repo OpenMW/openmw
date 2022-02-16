@@ -18,7 +18,7 @@ namespace MWDialogue
     Topic::~Topic()
     {}
 
-    void Topic::addEntry (const JournalEntry& entry)
+    bool Topic::addEntry (const JournalEntry& entry)
     {
         if (entry.mTopic!=mTopic)
             throw std::runtime_error ("topic does not match: " + mTopic);
@@ -27,10 +27,11 @@ namespace MWDialogue
         for (Topic::TEntryIter it = mEntries.begin(); it != mEntries.end(); ++it)
         {
             if (it->mInfoId == entry.mInfoId)
-                return;
+                return false;
         }
 
         mEntries.push_back (entry); // we want slicing here
+        return false;
     }
 
     void Topic::insertEntry (const ESM::JournalEntry& entry)

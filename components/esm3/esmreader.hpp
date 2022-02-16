@@ -98,7 +98,7 @@ public:
 
   // Read data of a given type, stored in a subrecord of a given name
   template <typename X>
-  void getHNT(X &x, const char* name)
+  void getHNT(X &x, NAME name)
   {
     getSubNameIs(name);
     getHT(x);
@@ -106,7 +106,7 @@ public:
 
   // Optional version of getHNT
   template <typename X>
-  void getHNOT(X &x, const char* name)
+  void getHNOT(X &x, NAME name)
   {
       if(isNextSub(name))
           getHT(x);
@@ -115,7 +115,7 @@ public:
   // Version with extra size checking, to make sure the compiler
   // doesn't mess up our struct padding.
   template <typename X>
-  void getHNT(X &x, const char* name, int size)
+  void getHNT(X &x, NAME name, int size)
   {
       assert(sizeof(X) == size);
       getSubNameIs(name);
@@ -123,7 +123,7 @@ public:
   }
 
   template <typename X>
-  void getHNOT(X &x, const char* name, int size)
+  void getHNOT(X &x, NAME name, int size)
   {
       assert(sizeof(X) == size);
       if(isNextSub(name))
@@ -150,10 +150,10 @@ public:
   }
 
   // Read a string by the given name if it is the next record.
-  std::string getHNOString(const char* name);
+  std::string getHNOString(NAME name);
 
   // Read a string with the given sub-record name
-  std::string getHNString(const char* name);
+  std::string getHNString(NAME name);
 
   // Read a string, including the sub-record header (but not the name)
   std::string getHString();
@@ -162,7 +162,7 @@ public:
   void getHExact(void*p, int size);
 
   // Read the given number of bytes from a named subrecord
-  void getHNExact(void*p, int size, const char* name);
+  void getHNExact(void*p, int size, NAME name);
 
   /*************************************************************************
    *
@@ -171,16 +171,16 @@ public:
    *************************************************************************/
 
   // Get the next subrecord name and check if it matches the parameter
-  void getSubNameIs(const char* name);
+  void getSubNameIs(NAME name);
 
   /** Checks if the next sub record name matches the parameter. If it
       does, it is read into 'subName' just as if getSubName() was
       called. If not, the read name will still be available for future
       calls to getSubName(), isNextSub() and getSubNameIs().
    */
-  bool isNextSub(const char* name);
+  bool isNextSub(NAME name);
 
-  bool peekNextSub(const char* name);
+  bool peekNextSub(NAME name);
 
   // Store the current subrecord name for the next call of getSubName()
   void cacheSubName() {mCtx.subCached = true; };
@@ -197,7 +197,7 @@ public:
   void skipHSubSize(int size);
 
   // Skip all subrecords until the given subrecord or no more subrecords remaining
-  void skipHSubUntil(const char* name);
+  void skipHSubUntil(NAME name);
 
   /* Sub-record header. This updates leftRec beyond the current
      sub-record as well. leftSub contains size of current sub-record.

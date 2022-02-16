@@ -16,10 +16,10 @@
 namespace MWLua
 {
 
-    static sol::table definitionList(LuaUtil::LuaState& lua, std::initializer_list<std::string> values)
+    static sol::table definitionList(LuaUtil::LuaState& lua, std::initializer_list<std::string_view> values)
     {
         sol::table res(lua.sol(), sol::create);
-        for (const std::string& v : values)
+        for (const std::string_view& v : values)
             res[v] = v;
         return LuaUtil::makeReadOnly(res);
     }
@@ -49,7 +49,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 14;
+        api["API_REVISION"] = 17;
         api["quit"] = [lua]()
         {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
@@ -62,8 +62,11 @@ namespace MWLua
         addTimeBindings(api, context, false);
         api["OBJECT_TYPE"] = definitionList(*lua,
         {
-            "Activator", "Armor", "Book", "Clothing", "Creature", "Door", "Ingredient",
-            "Light", "Miscellaneous", "NPC", "Player", "Potion", "Static", "Weapon"
+            ObjectTypeName::Activator, ObjectTypeName::Armor, ObjectTypeName::Book, ObjectTypeName::Clothing,
+            ObjectTypeName::Creature, ObjectTypeName::Door, ObjectTypeName::Ingredient, ObjectTypeName::Light,
+            ObjectTypeName::MiscItem, ObjectTypeName::NPC, ObjectTypeName::Player, ObjectTypeName::Potion,
+            ObjectTypeName::Static, ObjectTypeName::Weapon, ObjectTypeName::Activator, ObjectTypeName::Lockpick,
+            ObjectTypeName::Probe, ObjectTypeName::Repair
         });
         api["EQUIPMENT_SLOT"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
             {"Helmet", MWWorld::InventoryStore::Slot_Helmet},

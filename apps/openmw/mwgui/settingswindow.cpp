@@ -1,17 +1,19 @@
 #include "settingswindow.hpp"
 
+#include <regex>
+#include <iomanip>
+#include <numeric>
+#include <array>
+
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Window.h>
 #include <MyGUI_ComboBox.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
+#include <MyGUI_TabItem.h>
 
 #include <SDL_video.h>
-
-#include <iomanip>
-#include <numeric>
-#include <array>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
@@ -21,6 +23,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/lua_ui/scriptsettings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -33,7 +36,6 @@
 
 namespace
 {
-
     std::string textureMipmappingToStr(const std::string& val)
     {
         if (val == "linear")  return "Trilinear";
@@ -205,9 +207,9 @@ namespace MWGui
         }
     }
 
-    SettingsWindow::SettingsWindow() :
-        WindowBase("openmw_settings_window.layout"),
-        mKeyboardMode(true)
+    SettingsWindow::SettingsWindow() : WindowBase("openmw_settings_window.layout")
+        , mKeyboardMode(true)
+        , mCurrentPage(-1)
     {
         bool terrain = Settings::Manager::getBool("distant terrain", "Terrain");
         const std::string widgetName = terrain ? "RenderingDistanceSlider" : "LargeRenderingDistanceSlider";
@@ -236,6 +238,12 @@ namespace MWGui
         getWidget(mLightingMethodButton, "LightingMethodButton");
         getWidget(mLightsResetButton, "LightsResetButton");
         getWidget(mMaxLights, "MaxLights");
+        getWidget(mScriptFilter, "ScriptFilter");
+        getWidget(mScriptList, "ScriptList");
+        getWidget(mScriptBox, "ScriptBox");
+        getWidget(mScriptView, "ScriptView");
+        getWidget(mScriptAdapter, "ScriptAdapter");
+        getWidget(mScriptDisabled, "ScriptDisabled");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -321,6 +329,9 @@ namespace MWGui
 
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);
+
+        mScriptFilter->eventEditTextChange += MyGUI::newDelegate(this, &SettingsWindow::onScriptFilterChange);
+        mScriptList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SettingsWindow::onScriptListSelection);
     }
 
     void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
@@ -699,6 +710,118 @@ namespace MWGui
         mControlsBox->setVisibleVScroll(true);
     }
 
+    void SettingsWindow::resizeScriptSettings()
+    {
+        constexpr int minListWidth = 150;
+        constexpr float relativeListWidth = 0.2f;
+        constexpr int padding = 2;
+        constexpr int outerPadding = padding * 2;
+        MyGUI::IntSize parentSize = mScriptFilter->getParent()->getClientCoord().size();
+        int listWidth = std::max(minListWidth, static_cast<int>(parentSize.width * relativeListWidth));
+        int filterHeight = mScriptFilter->getSize().height;
+        int listHeight = parentSize.height - mScriptList->getPosition().top - outerPadding;
+        mScriptFilter->setSize({ listWidth, filterHeight });
+        mScriptList->setSize({ listWidth, listHeight });
+        mScriptBox->setPosition({ listWidth + padding, 0 });
+        mScriptBox->setSize({ parentSize.width - listWidth - padding, parentSize.height - outerPadding });
+        mScriptDisabled->setPosition({0, 0});
+        mScriptDisabled->setSize(parentSize);
+    }
+
+    namespace
+    {
+        std::string escapeRegex(const std::string& str)
+        {
+            static const std::regex specialChars(R"r([\^\.\[\$\(\)\|\*\+\?\{])r", std::regex_constants::extended);
+            return std::regex_replace(str, specialChars, R"(\$&)");
+        }
+
+        std::regex wordSearch(const std::string& query)
+        {
+            static const std::regex wordsRegex(R"([^[:space:]]+)", std::regex_constants::extended);
+            auto wordsBegin = std::sregex_iterator(query.begin(), query.end(), wordsRegex);
+            auto wordsEnd = std::sregex_iterator();
+            std::string searchRegex("(");
+            for (auto it = wordsBegin; it != wordsEnd; ++it)
+            {
+                if (it != wordsBegin)
+                    searchRegex += '|';
+                searchRegex += escapeRegex(query.substr(it->position(), it->length()));
+            }
+            searchRegex += ')';
+            // query had only whitespace characters
+            if (searchRegex == "()")
+                searchRegex = "^(.*)$";
+            return std::regex(searchRegex, std::regex_constants::extended | std::regex_constants::icase);
+        }
+
+        double weightedSearch(const std::regex& regex, const std::string& text)
+        {
+            std::smatch matches;
+            std::regex_search(text, matches, regex);
+            // need a signed value, so cast to double (not an integer type to guarantee no overflow)
+            return static_cast<double>(matches.size());
+        }
+    }
+         
+    void SettingsWindow::renderScriptSettings()
+    {
+        mScriptAdapter->detach();
+        mCurrentPage = -1;
+        mScriptList->removeAllItems();
+        mScriptView->setCanvasSize({0, 0});
+
+        struct WeightedPage {
+            size_t mIndex;
+            std::string mName;
+            double mNameWeight;
+            double mHintWeight;
+
+            constexpr auto tie() const { return std::tie(mNameWeight, mHintWeight, mName); }
+
+            constexpr bool operator<(const WeightedPage& rhs) const { return tie() < rhs.tie(); }
+        };
+
+        std::regex searchRegex = wordSearch(mScriptFilter->getCaption());
+        std::vector<WeightedPage> weightedPages;
+        weightedPages.reserve(LuaUi::scriptSettingsPageCount());
+        for (size_t i = 0; i < LuaUi::scriptSettingsPageCount(); ++i)
+        {
+            LuaUi::ScriptSettingsPage page = LuaUi::scriptSettingsPageAt(i);
+            double nameWeight = weightedSearch(searchRegex, page.mName);
+            double hintWeight = weightedSearch(searchRegex, page.mSearchHints);
+            if ((nameWeight + hintWeight) > 0)
+                weightedPages.push_back({ i, page.mName, -nameWeight, -hintWeight });
+        }
+        std::sort(weightedPages.begin(), weightedPages.end());
+        for (const WeightedPage& weightedPage : weightedPages)
+            mScriptList->addItem(weightedPage.mName, weightedPage.mIndex);
+
+        // Hide script settings tab when the game world isn't loaded and scripts couldn't add their settings
+        bool disabled = LuaUi::scriptSettingsPageCount() == 0;
+        mScriptDisabled->setVisible(disabled);
+        mScriptFilter->setVisible(!disabled);
+        mScriptList->setVisible(!disabled);
+        mScriptBox->setVisible(!disabled);
+    }
+
+    void SettingsWindow::onScriptFilterChange(MyGUI::EditBox*)
+    {
+        renderScriptSettings();
+    }
+
+    void SettingsWindow::onScriptListSelection(MyGUI::ListBox*, size_t index)
+    {
+        mScriptAdapter->detach();
+        mCurrentPage = -1;
+        if (index < mScriptList->getItemCount())
+        {
+            mCurrentPage = *mScriptList->getItemDataAt<size_t>(index);
+            LuaUi::attachPageAt(mCurrentPage, mScriptAdapter);
+        }
+        mScriptView->setCanvasSize(mScriptAdapter->getSize());
+    }
+
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)
     {
         int actionId = *_sender->getUserData<int>();
@@ -744,12 +867,15 @@ namespace MWGui
         updateControlsBox();
         updateLightSettings();
         resetScrollbars();
+        renderScriptSettings();
+        resizeScriptSettings();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
     }
 
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)
     {
         layoutControlsBox();
+        resizeScriptSettings();
     }
 
     void SettingsWindow::computeMinimumWindowSize()

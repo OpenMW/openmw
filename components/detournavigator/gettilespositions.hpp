@@ -10,7 +10,7 @@ class btCollisionShape;
 
 namespace osg
 {
-    class Vec3f;
+    class Vec2f;
 }
 
 namespace DetourNavigator
@@ -19,12 +19,15 @@ namespace DetourNavigator
 
     struct TilesPositionsRange
     {
-        TilePosition mMin;
-        TilePosition mMax;
+        TilePosition mBegin;
+        TilePosition mEnd;
     };
 
-    TilesPositionsRange makeTilesPositionsRange(const osg::Vec3f& aabbMin,
-        const osg::Vec3f& aabbMax, const RecastSettings& settings);
+    TilesPositionsRange makeTilesPositionsRange(const osg::Vec2f& aabbMin,
+        const osg::Vec2f& aabbMax, const RecastSettings& settings);
+
+    TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape,
+        const btTransform& transform, const RecastSettings& settings);
 
     TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape,
         const btTransform& transform, const TileBounds& bounds, const RecastSettings& settings);
@@ -33,12 +36,25 @@ namespace DetourNavigator
         const RecastSettings& settings);
 
     template <class Callback>
-    void getTilesPositions(const TilesPositionsRange& range, Callback&& callback)
+    inline void getTilesPositions(const TilesPositionsRange& range, Callback&& callback)
     {
-        for (int tileX = range.mMin.x(); tileX <= range.mMax.x(); ++tileX)
-            for (int tileY = range.mMin.y(); tileY <= range.mMax.y(); ++tileY)
+        for (int tileX = range.mBegin.x(); tileX < range.mEnd.x(); ++tileX)
+            for (int tileY = range.mBegin.y(); tileY < range.mEnd.y(); ++tileY)
                 callback(TilePosition {tileX, tileY});
     }
+
+    inline bool isInTilesPositionsRange(int begin, int end, int coordinate)
+    {
+        return begin <= coordinate && coordinate < end;
+    }
+
+    inline bool isInTilesPositionsRange(const TilesPositionsRange& range, const TilePosition& position)
+    {
+        return isInTilesPositionsRange(range.mBegin.x(), range.mEnd.x(), position.x())
+            && isInTilesPositionsRange(range.mBegin.y(), range.mEnd.y(), position.y());
+    }
+
+    TilesPositionsRange getIntersection(const TilesPositionsRange& a, const TilesPositionsRange& b) noexcept;
 }
 
 #endif

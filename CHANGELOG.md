@@ -19,6 +19,7 @@
     Bug #4700: Editor: Incorrect command implementation
     Bug #4744: Invisible particles must still be processed
     Bug #4949: Incorrect particle lighting
+    Bug #5054: Non-biped creatures don't use spellcast equip/unequip animations
     Bug #5088: Sky abruptly changes direction during certain weather transitions
     Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
@@ -36,7 +37,6 @@
     Bug #5788: Texture editing parses the selected indexes wrongly
     Bug #5801: A multi-effect spell with the intervention effects and recall always favors Almsivi intervention
     Bug #5842: GetDisposition adds temporary disposition change from different actors
-    Bug #5858: Animated model freezes the game
     Bug #5863: GetEffect should return true after the player has teleported
     Bug #5913: Failed assertion during Ritual of Trees quest
     Bug #5928: Glow in the Dahrk functionality used without mod installed
@@ -101,8 +101,10 @@
     Bug #6519: Effects tooltips for ingredients work incorrectly
     Bug #6523: Disintegrate Weapon is resisted by Resist Magicka instead of Sanctuary
     Bug #6544: Far from world origin objects jitter when camera is still
+    Bug #6579: OpenMW compilation error when using OSG doubles for BoundingSphere
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
+    Feature #2491: Ability to make OpenMW "portable"
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
     Feature #3616: Allow Zoom levels on the World Map
@@ -128,7 +130,9 @@
     Feature #6288: Preserve the "blocked" record flag for referenceable objects.
     Feature #6380: Commas are treated as whitespace in vanilla
     Feature #6419: Topics shouldn't be greyed out if they can produce another topic reference
+    Feature #6443: NiStencilProperty is not fully supported
     Feature #6534: Shader-based object texture blending
+    Feature #6592: Missing support for NiTriShape particle emitters
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
     Task #6553: Simplify interpreter instruction registration
@@ -270,6 +274,7 @@
     Bug #6142: Groundcover plugins change cells flags
     Bug #6276: Deleted groundcover instances are not deleted in game
     Bug #6294: Game crashes with empty pathgrid
+    Bug #6606: Quests with multiple IDs cannot always be restarted
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu

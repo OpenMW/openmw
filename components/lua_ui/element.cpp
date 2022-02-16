@@ -4,6 +4,7 @@
 
 #include "content.hpp"
 #include "util.hpp"
+#include "widget.hpp"
 
 namespace LuaUi
 {
@@ -129,6 +130,8 @@ namespace LuaUi
 
     void updateWidget(WidgetExtension* ext, const sol::table& layout)
     {
+        ext->resetSlot(); // otherwise if template gets changed, all non-template children will get destroyed
+
         ext->setLayout(layout);
         ext->setExternal(layout.get<sol::object>(LayoutKeys::external));
         setTemplate(ext, layout.get<sol::object>(LayoutKeys::templateLayout));
@@ -138,7 +141,7 @@ namespace LuaUi
         ext->setChildren(updateContent(ext->children(), layout.get<sol::object>(LayoutKeys::content)));
     }
 
-    void setLayer(WidgetExtension* ext, const sol::table& layout)
+    std::string setLayer(WidgetExtension* ext, const sol::table& layout)
     {
         MyGUI::ILayer* layerNode = ext->widget()->getLayer();
         std::string currentLayer = layerNode ? layerNode->getName() : std::string();
@@ -149,15 +152,18 @@ namespace LuaUi
         {
             MyGUI::LayerManager::getInstance().attachToLayerNode(newLayer, ext->widget());
         }
+        return newLayer;
     }
 
     std::map<Element*, std::shared_ptr<Element>> Element::sAllElements;
 
     Element::Element(sol::table layout)
-        : mRoot{ nullptr }
-        , mLayout{ std::move(layout) }
-        , mUpdate{ false }
-        , mDestroy{ false }
+        : mRoot(nullptr)
+        , mAttachedTo(nullptr)
+        , mLayout(std::move(layout))
+        , mLayer()
+        , mUpdate(false)
+        , mDestroy(false)
     {}
 
 
@@ -174,7 +180,8 @@ namespace LuaUi
         if (!mRoot)
         {
             mRoot = createWidget(mLayout);
-            setLayer(mRoot, mLayout);
+            mLayer = setLayer(mRoot, mLayout);
+            updateAttachment();
         }
     }
 
@@ -182,8 +189,17 @@ namespace LuaUi
     {
         if (mRoot && mUpdate)
         {
-            updateWidget(mRoot, mLayout);
-            setLayer(mRoot, mLayout);
+            if (mRoot->widget()->getTypeName() != widgetType(mLayout))
+            {
+                destroyWidget(mRoot);
+                mRoot = createWidget(mLayout);
+            }
+            else
+            {
+                updateWidget(mRoot, mLayout);
+            }
+            mLayer = setLayer(mRoot, mLayout);
+            updateAttachment();
         }
         mUpdate = false;
     }
@@ -194,5 +210,35 @@ namespace LuaUi
             destroyWidget(mRoot);
         mRoot = nullptr;
         sAllElements.erase(this);
+    }
+
+    void Element::attachToWidget(WidgetExtension* w)
+    {
+        if (mAttachedTo)
+            throw std::logic_error("A UI element can't be attached to two widgets at once");
+        mAttachedTo = w;
+        updateAttachment();
+    }
+
+    void Element::detachFromWidget()
+    {
+        if (mRoot)
+            mRoot->widget()->detachFromWidget();
+        if (mAttachedTo)
+            mAttachedTo->setChildren({});
+        mAttachedTo = nullptr;
+    }
+
+    void Element::updateAttachment()
+    {
+        if (!mRoot)
+            return;
+        if (mAttachedTo)
+        {
+            if (!mLayer.empty())
+                Log(Debug::Warning) << "Ignoring element's layer " << mLayer << " because it's attached to a widget";
+            mAttachedTo->setChildren({ mRoot });
+            mRoot->updateCoord();
+        }
     }
 }

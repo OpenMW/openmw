@@ -40,6 +40,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     typedef std::vector<std::string> StringsVector;
 
     bpo::options_description desc = OpenMW::makeOptionsDescription();
+    Files::ConfigurationManager::addCommonOptions(desc);
 
     bpo::variables_map variables;
 
@@ -61,9 +62,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         return false;
     }
 
-    bpo::variables_map composingVariables = Files::separateComposingVariables(variables, desc);
     cfgMgr.readConfiguration(variables, desc);
-    Files::mergeComposingVariables(variables, composingVariables, desc);
+
+    setupLogging(cfgMgr.getLogPath().string(), "OpenMW");
 
     Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
     Log(Debug::Info) << v.describe();
@@ -230,7 +231,7 @@ extern "C" int SDL_main(int argc, char**argv)
 int main(int argc, char**argv)
 #endif
 {
-    return wrapApplication(&runApplication, argc, argv, "OpenMW");
+    return wrapApplication(&runApplication, argc, argv, "OpenMW", false);
 }
 
 // Platform specific for Windows when there is no console built into the executable.

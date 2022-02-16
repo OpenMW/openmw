@@ -1,6 +1,8 @@
 #ifndef GAME_BASE_ENVIRONMENT_H
 #define GAME_BASE_ENVIRONMENT_H
 
+#include <memory>
+
 namespace osg
 {
     class Stats;
@@ -28,25 +30,23 @@ namespace MWBase
     ///
     /// This class allows each mw-subsystem to access any others subsystem's top-level manager class.
     ///
-    /// \attention Environment takes ownership of the manager class instances it is handed over in
-    /// the set* functions.
     class Environment
     {
             static Environment *sThis;
 
-            World *mWorld;
-            SoundManager *mSoundManager;
-            ScriptManager *mScriptManager;
-            WindowManager *mWindowManager;
-            MechanicsManager *mMechanicsManager;
-            DialogueManager *mDialogueManager;
-            Journal *mJournal;
-            InputManager *mInputManager;
-            StateManager *mStateManager;
-            LuaManager *mLuaManager;
-            Resource::ResourceSystem *mResourceSystem;
-            float mFrameDuration;
-            float mFrameRateLimit;
+            std::unique_ptr<World> mWorld;
+            std::unique_ptr<SoundManager> mSoundManager;
+            std::unique_ptr<ScriptManager> mScriptManager;
+            std::unique_ptr<WindowManager> mWindowManager;
+            std::unique_ptr<MechanicsManager> mMechanicsManager;
+            std::unique_ptr<DialogueManager> mDialogueManager;
+            std::unique_ptr<Journal> mJournal;
+            std::unique_ptr<InputManager> mInputManager;
+            std::unique_ptr<StateManager> mStateManager;
+            std::unique_ptr<LuaManager> mLuaManager;
+            Resource::ResourceSystem* mResourceSystem{};
+            float mFrameDuration{};
+            float mFrameRateLimit{};
 
             Environment (const Environment&);
             ///< not implemented
@@ -60,25 +60,25 @@ namespace MWBase
 
             ~Environment();
 
-            void setWorld (World *world);
+            void setWorld (std::unique_ptr<World>&& world);
 
-            void setSoundManager (SoundManager *soundManager);
+            void setSoundManager (std::unique_ptr<SoundManager>&& soundManager);
 
-            void setScriptManager (MWBase::ScriptManager *scriptManager);
+            void setScriptManager (std::unique_ptr<ScriptManager>&& scriptManager);
 
-            void setWindowManager (WindowManager *windowManager);
+            void setWindowManager (std::unique_ptr<WindowManager>&& windowManager);
 
-            void setMechanicsManager (MechanicsManager *mechanicsManager);
+            void setMechanicsManager (std::unique_ptr<MechanicsManager>&& mechanicsManager);
 
-            void setDialogueManager (DialogueManager *dialogueManager);
+            void setDialogueManager (std::unique_ptr<DialogueManager>&& dialogueManager);
 
-            void setJournal (Journal *journal);
+            void setJournal (std::unique_ptr<Journal>&& journal);
 
-            void setInputManager (InputManager *inputManager);
+            void setInputManager (std::unique_ptr<InputManager>&& inputManager);
 
-            void setStateManager (StateManager *stateManager);
+            void setStateManager (std::unique_ptr<StateManager>&& stateManager);
 
-            void setLuaManager (LuaManager *luaManager);
+            void setLuaManager (std::unique_ptr<LuaManager>&& luaManager);
 
             void setResourceSystem (Resource::ResourceSystem *resourceSystem);
 

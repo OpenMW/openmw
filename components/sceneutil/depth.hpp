@@ -5,6 +5,10 @@
 
 #include "util.hpp"
 
+#ifndef GL_DEPTH32F_STENCIL8_NV
+#define GL_DEPTH32F_STENCIL8_NV 0x8DAC
+#endif
+
 namespace SceneUtil
 {
     // Sets camera clear depth to 0 if reversed depth buffer is in use, 1 otherwise.

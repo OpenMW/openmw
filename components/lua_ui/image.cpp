@@ -19,9 +19,9 @@ namespace LuaUi
 
         // mCoord could be zero, prevent division by 0
         // use arbitrary large numbers to prevent performance issues
-        if (mTileSize.width == 0)
+        if (mTileSize.width <= 0)
             mTileSize.width = 1e7;
-        if (mTileSize.height == 0)
+        if (mTileSize.height <= 0)
             mTileSize.height = 1e7;
     }
 

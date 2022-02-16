@@ -70,6 +70,11 @@ namespace Misc::Convert
     {
         return btTransform(makeBulletQuaternion(position), toBullet(position.asVec3()));
     }
+
+    inline osg::Vec2f toOsgXY(const btVector3& value)
+    {
+        return osg::Vec2f(static_cast<float>(value.x()), static_cast<float>(value.y()));
+    }
 }
 
 #endif

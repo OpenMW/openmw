@@ -178,7 +178,7 @@ namespace NavMeshTool
                 static_cast<btScalar>(cellPosition.y() * ESM::Land::REAL_SIZE),
                 minHeight
             );
-            aabb.m_min = btVector3(
+            aabb.m_max = btVector3(
                 static_cast<btScalar>((cellPosition.x() + 1) * ESM::Land::REAL_SIZE),
                 static_cast<btScalar>((cellPosition.y() + 1) * ESM::Land::REAL_SIZE),
                 maxHeight
@@ -298,12 +298,14 @@ namespace NavMeshTool
                     const ObjectId objectId(++objectsCounter);
                     const CollisionShape shape(object.getShapeInstance(), *object.getCollisionObject().getCollisionShape(), object.getObjectTransform());
 
-                    navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, shape, transform, DetourNavigator::AreaType_ground);
+                    navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, shape, transform,
+                        DetourNavigator::AreaType_ground, [] (const auto&) {});
 
                     if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
                     {
                         const CollisionShape avoidShape(object.getShapeInstance(), *avoid, object.getObjectTransform());
-                        navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, avoidShape, transform, DetourNavigator::AreaType_null);
+                        navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, avoidShape, transform,
+                            DetourNavigator::AreaType_null, [] (const auto&) {});
                     }
 
                     data.mObjects.emplace_back(std::move(object));

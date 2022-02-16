@@ -58,6 +58,7 @@ struct ContentFileTest : public ::testing::Test
         ("content", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
             ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
         ("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""));
+        Files::ConfigurationManager::addCommonOptions(desc);
 
         boost::program_options::notify(variables);
 

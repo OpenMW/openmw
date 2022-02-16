@@ -72,7 +72,13 @@ namespace
     // including a terminating zero after it.
     void resize(std::size_t size, BufferAllocationPolicy bufferAllocationPolicy, std::string& buffer)
     {
-        if (buffer.size() >= size)
+        if (buffer.size() > size)
+        {
+            buffer[size] = 0;
+            return;
+        }
+
+        if (buffer.size() == size)
             return;
 
         switch (bufferAllocationPolicy)

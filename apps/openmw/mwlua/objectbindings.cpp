@@ -72,7 +72,7 @@ namespace MWLua
             else
                 throw std::runtime_error("Index out of range");
         };
-        listT["ipairs"] = [registry](const ListT& list)
+        listT[sol::meta_function::ipairs] = [registry](const ListT& list)
         {
             auto iter = [registry](const ListT& l, int64_t i) -> sol::optional<std::tuple<int64_t, ObjectT>>
             {
@@ -136,6 +136,14 @@ namespace MWLua
         {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getWalkSpeed(o.ptr());
+        };
+        objectT["activateBy"] = [context](const ObjectT& o, const ObjectT& actor)
+        {
+            uint32_t esmRecordType = actor.ptr().getType();
+            if (esmRecordType != ESM::REC_CREA && esmRecordType != ESM::REC_NPC_)
+                throw std::runtime_error("The argument of `activateBy` must be an actor who activates the object. Got: " +
+                                         ptrToString(actor.ptr()));
+            context.mLuaManager->addAction(std::make_unique<ActivateAction>(context.mLua, o.id(), actor.id()));
         };
 
         if constexpr (std::is_same_v<ObjectT, GObject>)
@@ -301,8 +309,38 @@ namespace MWLua
         inventoryT[sol::meta_function::to_string] =
             [](const InventoryT& inv) { return "Inventory[" + inv.mObj.toString() + "]"; };
 
-        auto getWithMask = [context](const InventoryT& inventory, int mask)
+        inventoryT["getAll"] = [worldView=context.mWorldView](const InventoryT& inventory, sol::optional<std::string_view> type)
         {
+            int mask;
+            if (!type.has_value())
+                mask = MWWorld::ContainerStore::Type_All;
+            else if (*type == ObjectTypeName::Potion)
+                mask = MWWorld::ContainerStore::Type_Potion;
+            else if (*type == ObjectTypeName::Armor)
+                mask = MWWorld::ContainerStore::Type_Armor;
+            else if (*type == ObjectTypeName::Book)
+                mask = MWWorld::ContainerStore::Type_Book;
+            else if (*type == ObjectTypeName::Clothing)
+                mask = MWWorld::ContainerStore::Type_Clothing;
+            else if (*type == ObjectTypeName::Ingredient)
+                mask = MWWorld::ContainerStore::Type_Ingredient;
+            else if (*type == ObjectTypeName::Light)
+                mask = MWWorld::ContainerStore::Type_Light;
+            else if (*type == ObjectTypeName::MiscItem)
+                mask = MWWorld::ContainerStore::Type_Miscellaneous;
+            else if (*type == ObjectTypeName::Weapon)
+                mask = MWWorld::ContainerStore::Type_Weapon;
+            else if (*type == ObjectTypeName::Apparatus)
+                mask = MWWorld::ContainerStore::Type_Apparatus;
+            else if (*type == ObjectTypeName::Lockpick)
+                mask = MWWorld::ContainerStore::Type_Lockpick;
+            else if (*type == ObjectTypeName::Probe)
+                mask = MWWorld::ContainerStore::Type_Probe;
+            else if (*type == ObjectTypeName::Repair)
+                mask = MWWorld::ContainerStore::Type_Repair;
+            else
+                throw std::runtime_error(std::string("inventory:getAll doesn't support type " + std::string(*type)));
+
             const MWWorld::Ptr& ptr = inventory.mObj.ptr();
             MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
             ObjectIdList list = std::make_shared<std::vector<ObjectId>>();
@@ -310,39 +348,12 @@ namespace MWLua
             while (it.getType() != -1)
             {
                 const MWWorld::Ptr& item = *(it++);
-                context.mWorldView->getObjectRegistry()->registerPtr(item);
+                worldView->getObjectRegistry()->registerPtr(item);
                 list->push_back(getId(item));
             }
             return ObjectList<ObjectT>{list};
         };
 
-        inventoryT["getAll"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_All); };
-        inventoryT["getPotions"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Potion); };
-        inventoryT["getApparatuses"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Apparatus); };
-        inventoryT["getArmor"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Armor); };
-        inventoryT["getBooks"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Book); };
-        inventoryT["getClothing"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Clothing); };
-        inventoryT["getIngredients"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Ingredient); };
-        inventoryT["getLights"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Light); };
-        inventoryT["getLockpicks"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Lockpick); };
-        inventoryT["getMiscellaneous"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Miscellaneous); };
-        inventoryT["getProbes"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Probe); };
-        inventoryT["getRepairKits"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Repair); };
-        inventoryT["getWeapons"] =
-            [getWithMask](const InventoryT& inventory) { return getWithMask(inventory, MWWorld::ContainerStore::Type_Weapon); };
-            
         inventoryT["countOf"] = [](const InventoryT& inventory, const std::string& recordId)
         {
             const MWWorld::Ptr& ptr = inventory.mObj.ptr();

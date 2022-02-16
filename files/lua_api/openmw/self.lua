@@ -30,32 +30,17 @@
 -- @type ActorControls
 -- @field [parent=#ActorControls] #number movement +1 - move forward, -1 - move backward
 -- @field [parent=#ActorControls] #number sideMovement +1 - move right, -1 - move left
--- @field [parent=#ActorControls] #number turn Turn right (radians); if negative - turn left
+-- @field [parent=#ActorControls] #number yawChange Turn right (radians); if negative - turn left
+-- @field [parent=#ActorControls] #number pitchChange Look down (radians); if negative - look up
 -- @field [parent=#ActorControls] #boolean run true - run, false - walk
 -- @field [parent=#ActorControls] #boolean jump If true - initiate a jump
+-- @field [parent=#ActorControls] #number use if 1 - activates the readied weapon/spell. For weapons, keeping at 1 will charge the attack until set to 0.
 
 -------------------------------------------------------------------------------
--- Enables or disables standart AI (enabled by default).
+-- Enables or disables standard AI (enabled by default).
 -- @function [parent=#self] enableAI
 -- @param self
 -- @param #boolean v
-
--------------------------------------------------------------------------------
--- Returns current target or nil if not in combat
--- @function [parent=#self] getCombatTarget
--- @param self
--- @return openmw.core#GameObject
-
--------------------------------------------------------------------------------
--- Remove all combat packages from the actor.
--- @function [parent=#self] stopCombat
--- @param self
-
--------------------------------------------------------------------------------
--- Attack `target`.
--- @function [parent=#self] startCombat
--- @param self
--- @param openmw.core#GameObject target
 
 return nil
 

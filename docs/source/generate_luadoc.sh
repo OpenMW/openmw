@@ -65,5 +65,6 @@ $DOCUMENTOR_PATH -f doc -d $OUTPUT_DIR openmw/*lua
 
 cd $FILES_DIR/builtin_scripts
 $DOCUMENTOR_PATH -f doc -d $OUTPUT_DIR openmw_aux/*lua
+$DOCUMENTOR_PATH -f doc -d $OUTPUT_DIR scripts/omw/ai.lua
 $DOCUMENTOR_PATH -f doc -d $OUTPUT_DIR scripts/omw/camera.lua
 

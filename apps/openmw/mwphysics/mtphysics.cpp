@@ -1,3 +1,5 @@
+#include <functional>
+
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
@@ -111,17 +113,49 @@ namespace
         return ptr.getPosition() * interpolationFactor + ptr.getPreviousPosition() * (1.f - interpolationFactor);
     }
 
+    using LockedActorSimulation = std::pair<
+        std::shared_ptr<MWPhysics::Actor>,
+        std::reference_wrapper<MWPhysics::ActorFrameData>
+    >;
+    using LockedProjectileSimulation = std::pair<
+        std::shared_ptr<MWPhysics::Projectile>,
+        std::reference_wrapper<MWPhysics::ProjectileFrameData>
+    >;
+
     namespace Visitors
     {
+        template <class Impl, template <class> class Lock>
+        struct WithLockedPtr
+        {
+            const Impl& mImpl;
+            std::shared_mutex& mCollisionWorldMutex;
+            const int mNumJobs;
+
+            template <class Ptr, class FrameData>
+            void operator()(MWPhysics::SimulationImpl<Ptr, FrameData>& sim) const
+            {
+                auto locked = sim.lock();
+                if (!locked.has_value())
+                    return;
+                auto&& [ptr, frameData] = *std::move(locked);
+                // Locked shared_ptr has to be destructed after releasing mCollisionWorldMutex to avoid
+                // possible deadlock. Ptr destructor also acquires mCollisionWorldMutex.
+                const std::pair arg(std::move(ptr), frameData);
+                const Lock<std::shared_mutex> lock(mCollisionWorldMutex, mNumJobs);
+                mImpl(arg);
+            }
+        };
+
         struct InitPosition
         {
             const btCollisionWorld* mCollisionWorld;
             void operator()(MWPhysics::ActorSimulation& sim) const
             {
-                auto& [actorPtr, frameData] = sim;
-                const auto actor = actorPtr.lock();
-                if (actor == nullptr)
+                auto locked = sim.lock();
+                if (!locked.has_value())
                     return;
+                auto& [actor, frameDataRef] = *locked;
+                auto& frameData = frameDataRef.get();
                 actor->applyOffsetChange();
                 frameData.mPosition = actor->getPosition();
                 if (frameData.mWaterCollision && frameData.mPosition.z() < frameData.mWaterlevel && actor->canMoveToWaterSurface(frameData.mWaterlevel, mCollisionWorld))
@@ -138,7 +172,7 @@ namespace
                 frameData.mStuckFrames = actor->getStuckFrames();
                 frameData.mLastStuckPosition = actor->getLastStuckPosition();
             }
-            void operator()(MWPhysics::ProjectileSimulation& sim) const
+            void operator()(MWPhysics::ProjectileSimulation& /*sim*/) const
             {
             }
         };
@@ -146,11 +180,11 @@ namespace
         struct PreStep
         {
             btCollisionWorld* mCollisionWorld;
-            void operator()(MWPhysics::ActorSimulation& sim) const
+            void operator()(const LockedActorSimulation& sim) const
             {
                 MWPhysics::MovementSolver::unstuck(sim.second, mCollisionWorld);
             }
-            void operator()(MWPhysics::ProjectileSimulation& sim) const
+            void operator()(const LockedProjectileSimulation& /*sim*/) const
             {
             }
         };
@@ -158,12 +192,10 @@ namespace
         struct UpdatePosition
         {
             btCollisionWorld* mCollisionWorld;
-            void operator()(MWPhysics::ActorSimulation& sim) const
+            void operator()(const LockedActorSimulation& sim) const
             {
-                auto& [actorPtr, frameData] = sim;
-                const auto actor = actorPtr.lock();
-                if (actor == nullptr)
-                    return;
+                auto& [actor, frameDataRef] = sim;
+                auto& frameData = frameDataRef.get();
                 if (actor->setPosition(frameData.mPosition))
                 {
                     frameData.mPosition = actor->getPosition(); // account for potential position change made by script
@@ -171,12 +203,10 @@ namespace
                     mCollisionWorld->updateSingleAabb(actor->getCollisionObject());
                 }
             }
-            void operator()(MWPhysics::ProjectileSimulation& sim) const
+            void operator()(const LockedProjectileSimulation& sim) const
             {
-                auto& [projPtr, frameData] = sim;
-                const auto proj = projPtr.lock();
-                if (proj == nullptr)
-                    return;
+                auto& [proj, frameDataRef] = sim;
+                auto& frameData = frameDataRef.get();
                 proj->setPosition(frameData.mPosition);
                 proj->updateCollisionObjectPosition();
                 mCollisionWorld->updateSingleAabb(proj->getCollisionObject());
@@ -188,11 +218,11 @@ namespace
             const float mPhysicsDt;
             const btCollisionWorld* mCollisionWorld;
             const MWPhysics::WorldFrameData& mWorldFrameData;
-            void operator()(MWPhysics::ActorSimulation& sim) const
+            void operator()(const LockedActorSimulation& sim) const
             {
                 MWPhysics::MovementSolver::move(sim.second, mPhysicsDt, mCollisionWorld, mWorldFrameData);
             }
-            void operator()(MWPhysics::ProjectileSimulation& sim) const
+            void operator()(const LockedProjectileSimulation& sim) const
             {
                 MWPhysics::MovementSolver::move(sim.second, mPhysicsDt, mCollisionWorld);
             }
@@ -206,10 +236,11 @@ namespace
             const MWPhysics::PhysicsTaskScheduler* scheduler;
             void operator()(MWPhysics::ActorSimulation& sim) const
             {
-                auto& [actorPtr, frameData] = sim;
-                const auto actor = actorPtr.lock();
-                if (actor == nullptr)
+                auto locked = sim.lock();
+                if (!locked.has_value())
                     return;
+                auto& [actor, frameDataRef] = *locked;
+                auto& frameData = frameDataRef.get();
                 auto ptr = actor->getPtr();
 
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
@@ -241,10 +272,10 @@ namespace
             }
             void operator()(MWPhysics::ProjectileSimulation& sim) const
             {
-                auto& [projPtr, frameData] = sim;
-                const auto proj = projPtr.lock();
-                if (proj == nullptr)
+                auto locked = sim.lock();
+                if (!locked.has_value())
                     return;
+                auto& [proj, frameData] = *locked;
                 proj->setSimulationPosition(::interpolateMovements(*proj, mTimeAccum, mPhysicsDt));
             }
         };
@@ -612,12 +643,10 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::updateActorsPositions()
     {
-        const Visitors::UpdatePosition vis{mCollisionWorld};
-        for (auto& sim : mSimulations)
-        {
-            MaybeExclusiveLock lock(mCollisionWorldMutex, mNumThreads);
+        const Visitors::UpdatePosition impl{mCollisionWorld};
+        const Visitors::WithLockedPtr<Visitors::UpdatePosition, MaybeExclusiveLock> vis{impl, mCollisionWorldMutex, mNumThreads};
+        for (Simulation& sim : mSimulations)
             std::visit(vis, sim);
-        }
     }
 
     bool PhysicsTaskScheduler::hasLineOfSight(const Actor* actor1, const Actor* actor2)
@@ -641,12 +670,10 @@ namespace MWPhysics
         {
             mPreStepBarrier->wait([this] { afterPreStep(); });
             int job = 0;
-            const Visitors::Move vis{mPhysicsDt, mCollisionWorld, *mWorldFrameData};
+            const Visitors::Move impl{mPhysicsDt, mCollisionWorld, *mWorldFrameData};
+            const Visitors::WithLockedPtr<Visitors::Move, MaybeLock> vis{impl, mCollisionWorldMutex, mNumThreads};
             while ((job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
-            {
-                MaybeLock lockColWorld(mCollisionWorldMutex, mNumThreads);
                 std::visit(vis, mSimulations[job]);
-            }
 
             mPostStepBarrier->wait([this] { afterPostStep(); });
         }
@@ -697,12 +724,10 @@ namespace MWPhysics
         updateAabbs();
         if (!mRemainingSteps)
             return;
-        const Visitors::PreStep vis{mCollisionWorld};
+        const Visitors::PreStep impl{mCollisionWorld};
+        const Visitors::WithLockedPtr<Visitors::PreStep, MaybeExclusiveLock> vis{impl, mCollisionWorldMutex, mNumThreads};
         for (auto& sim : mSimulations)
-        {
-            MaybeExclusiveLock lock(mCollisionWorldMutex, mNumThreads);
             std::visit(vis, sim);
-        }
     }
 
     void PhysicsTaskScheduler::afterPostStep()

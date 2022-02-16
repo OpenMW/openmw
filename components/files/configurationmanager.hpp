@@ -2,6 +2,8 @@
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
 #include <map>
+#include <optional>
+#include <stack>
 
 #include <boost/program_options.hpp>
 
@@ -25,23 +27,27 @@ struct ConfigurationManager
     void readConfiguration(boost::program_options::variables_map& variables,
         boost::program_options::options_description& description, bool quiet=false);
 
-    void processPaths(Files::PathContainer& dataDirs, bool create = false);
+    void processPath(boost::filesystem::path& path, bool create = false) const;
+    void processPaths(Files::PathContainer& dataDirs, bool create = false) const;
     ///< \param create Try creating the directory, if it does not exist.
 
     /**< Fixed paths */
     const boost::filesystem::path& getGlobalPath() const;
-    const boost::filesystem::path& getUserConfigPath() const;
     const boost::filesystem::path& getLocalPath() const;
 
     const boost::filesystem::path& getGlobalDataPath() const;
+    const boost::filesystem::path& getUserConfigPath() const;
     const boost::filesystem::path& getUserDataPath() const;
     const boost::filesystem::path& getLocalDataPath() const;
     const boost::filesystem::path& getInstallPath() const;
+    const std::vector<boost::filesystem::path>& getActiveConfigPaths() const { return mActiveConfigPaths; }
 
     const boost::filesystem::path& getCachePath() const;
 
     const boost::filesystem::path& getLogPath() const;
     const boost::filesystem::path& getScreenshotPath() const;
+
+    static void addCommonOptions(boost::program_options::options_description& description);
 
     private:
         typedef Files::FixedPath<> FixedPathType;
@@ -49,15 +55,23 @@ struct ConfigurationManager
         typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
         typedef std::map<std::string, path_type_f> TokensMappingContainer;
 
-        bool loadConfig(const boost::filesystem::path& path,
-            boost::program_options::variables_map& variables,
+        std::optional<boost::program_options::basic_parsed_options<char>> loadConfig(
+            const boost::filesystem::path& path,
             boost::program_options::options_description& description);
 
+        void addExtraConfigDirs(std::stack<boost::filesystem::path>& dirs,
+            const boost::program_options::variables_map& variables) const;
+        void addExtraConfigDirs(std::stack<boost::filesystem::path>& dirs,
+            const boost::program_options::basic_parsed_options<char>& options) const;
+
         void setupTokensMapping();
+
+        std::vector<boost::filesystem::path> mActiveConfigPaths;
 
         FixedPathType mFixedPath;
 
         boost::filesystem::path mLogPath;
+        boost::filesystem::path mUserDataPath;
         boost::filesystem::path mScreenshotPath;
 
         TokensMappingContainer mTokensMapping;

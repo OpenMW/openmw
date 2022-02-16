@@ -39,6 +39,7 @@ return {
     -- should throw an error
     incorrectRequire = function() require('counter') end,
     modifySystemLib = function() math.sin = 5 end,
+    modifySystemLib2 = function() math.__index.sin = 5 end,
     rawsetSystemLib = function() rawset(math, 'sin', 5) end,
     callLoadstring = function() loadstring('print(1)') end,
     setSqr = function() require('sqrlib').sqr = math.sin end,
@@ -119,6 +120,7 @@ return {
         // but read-only object can not be modified even with rawset
         EXPECT_ERROR(LuaUtil::call(script["rawsetSystemLib"]), "bad argument #1 to 'rawset' (table expected, got userdata)");
         EXPECT_ERROR(LuaUtil::call(script["modifySystemLib"]), "a userdata value");
+        EXPECT_ERROR(LuaUtil::call(script["modifySystemLib2"]), "a nil value");
 
         EXPECT_EQ(LuaUtil::getMutableFromReadOnly(LuaUtil::makeReadOnly(script)), script);
     }

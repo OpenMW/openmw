@@ -1,6 +1,7 @@
 #include "nifloader.hpp"
 
 #include <mutex>
+#include <string_view>
 
 #include <osg/Matrixf>
 #include <osg/Geometry>
@@ -51,8 +52,7 @@ namespace
 
     void getAllNiNodes(const Nif::Node* node, std::vector<int>& outIndices)
     {
-        const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node);
-        if (ninode)
+        if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node))
         {
             outIndices.push_back(ninode->recIndex);
             for (unsigned int i=0; i<ninode->children.length(); ++i)
@@ -218,6 +218,7 @@ namespace NifOsg
 
         bool mHasNightDayLabel = false;
         bool mHasHerbalismLabel = false;
+        bool mHasStencilProperty = false;
 
         // This is used to queue emitters that weren't attached to their node yet.
         std::vector<std::pair<size_t, osg::ref_ptr<Emitter>>> mEmitterQueue;
@@ -309,6 +310,10 @@ namespace NifOsg
             if (mHasHerbalismLabel)
                 created->getOrCreateUserDataContainer()->addDescription(Constants::HerbalismLabel);
 
+            // When dealing with stencil buffer, draw order is especially sensitive. Make sure such objects are drawn with traversal order.
+            if (mHasStencilProperty)
+                created->getOrCreateStateSet()->setRenderBinDetails(2, "TraversalOrderBin");
+
             // Attach particle emitters to their nodes which should all be loaded by now.
             handleQueuedParticleEmitters(created, nif);
 
@@ -334,6 +339,25 @@ namespace NifOsg
         void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
+
+            bool hasStencilProperty = false;
+
+            for (size_t i = 0; i <props.length(); ++i)
+            {
+                if (props[i].empty())
+                    continue;
+
+                if (props[i].getPtr()->recType == Nif::RC_NiStencilProperty)
+                {
+                    const Nif::NiStencilProperty* stencilprop = static_cast<const Nif::NiStencilProperty*>(props[i].getPtr());
+                    if (stencilprop->data.enabled != 0)
+                    {
+                        hasStencilProperty = true;
+                        break;
+                    }
+                }
+            }
+
             for (size_t i = 0; i <props.length(); ++i)
             {
                 if (!props[i].empty())
@@ -350,14 +374,14 @@ namespace NifOsg
                         if (props[i].getPtr()->recIndex == mFirstRootTextureIndex)
                             applyTo->setUserValue("overrideFx", 1);
                     }
-                    handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
+                    handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags, hasStencilProperty);
                 }
             }
 
             auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
             // NiGeometry's NiAlphaProperty doesn't get handled here because it's a drawable property
             if (geometry && !geometry->shaderprop.empty())
-                handleProperty(geometry->shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
+                handleProperty(geometry->shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags, hasStencilProperty);
         }
 
         static void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
@@ -976,7 +1000,8 @@ namespace NifOsg
         osg::ref_ptr<Emitter> handleParticleEmitter(const Nif::NiParticleSystemController* partctrl)
         {
             std::vector<int> targets;
-            if (partctrl->recType == Nif::RC_NiBSPArrayController)
+            const bool atVertex = (partctrl->flags & Nif::NiNode::BSPArrayController_AtVertex);
+            if (partctrl->recType == Nif::RC_NiBSPArrayController && !atVertex)
             {
                 getAllNiNodes(partctrl->emitter.getPtr(), targets);
             }
@@ -1000,12 +1025,20 @@ namespace NifOsg
                                                            partctrl->lifetime, partctrl->lifetimeRandom);
             emitter->setShooter(shooter);
 
-            osgParticle::BoxPlacer* placer = new osgParticle::BoxPlacer;
-            placer->setXRange(-partctrl->offsetRandom.x() / 2.f, partctrl->offsetRandom.x() / 2.f);
-            placer->setYRange(-partctrl->offsetRandom.y() / 2.f, partctrl->offsetRandom.y() / 2.f);
-            placer->setZRange(-partctrl->offsetRandom.z() / 2.f, partctrl->offsetRandom.z() / 2.f);
+            if (atVertex && (partctrl->recType == Nif::RC_NiBSPArrayController))
+            {
+                emitter->setUseGeometryEmitter(true);
+                emitter->setGeometryEmitterTarget(partctrl->emitter->recIndex);
+            }
+            else
+            {
+                osgParticle::BoxPlacer* placer = new osgParticle::BoxPlacer;
+                placer->setXRange(-partctrl->offsetRandom.x() / 2.f, partctrl->offsetRandom.x() / 2.f);
+                placer->setYRange(-partctrl->offsetRandom.y() / 2.f, partctrl->offsetRandom.y() / 2.f);
+                placer->setZRange(-partctrl->offsetRandom.z() / 2.f, partctrl->offsetRandom.z() / 2.f);
+                emitter->setPlacer(placer);
+            }
 
-            emitter->setPlacer(placer);
             return emitter;
         }
 
@@ -1347,7 +1380,7 @@ namespace NifOsg
             case 4: return osg::Stencil::GREATER;
             case 5: return osg::Stencil::NOTEQUAL;
             case 6: return osg::Stencil::GEQUAL;
-            case 7: return osg::Stencil::NEVER; // NifSkope says this is GL_ALWAYS, but in MW it's GL_NEVER
+            case 7: return osg::Stencil::ALWAYS;
             default:
                 Log(Debug::Info) << "Unexpected stencil function: " << func << " in " << mFilename;
                 return osg::Stencil::NEVER;
@@ -1711,68 +1744,59 @@ namespace NifOsg
             }
         }
 
-        const std::string& getBSShaderPrefix(unsigned int type) const
+        std::string_view getBSShaderPrefix(unsigned int type) const
         {
-            static const std::unordered_map<Nif::BSShaderType, std::string> mapping =
+            switch (static_cast<Nif::BSShaderType>(type))
             {
-                {Nif::BSShaderType::ShaderType_TallGrass,    std::string()},
-                {Nif::BSShaderType::ShaderType_Default,       "nv_default"},
-                {Nif::BSShaderType::ShaderType_Sky,          std::string()},
-                {Nif::BSShaderType::ShaderType_Skin,         std::string()},
-                {Nif::BSShaderType::ShaderType_Water,        std::string()},
-                {Nif::BSShaderType::ShaderType_Lighting30,   std::string()},
-                {Nif::BSShaderType::ShaderType_Tile,         std::string()},
-                {Nif::BSShaderType::ShaderType_NoLighting, "nv_nolighting"},
-            };
-            auto prefix = mapping.find(static_cast<Nif::BSShaderType>(type));
-            if (prefix == mapping.end())
-                Log(Debug::Warning) << "Unknown BSShaderType " << type << " in " << mFilename;
-            else if (prefix->second.empty())
-                Log(Debug::Warning) << "Unhandled BSShaderType " << type << " in " << mFilename;
-            else
-                return prefix->second;
-
-            return mapping.at(Nif::BSShaderType::ShaderType_Default);
+                case Nif::BSShaderType::ShaderType_Default: return "nv_default";
+                case Nif::BSShaderType::ShaderType_NoLighting: return "nv_nolighting";
+                case Nif::BSShaderType::ShaderType_TallGrass:
+                case Nif::BSShaderType::ShaderType_Sky:
+                case Nif::BSShaderType::ShaderType_Skin:
+                case Nif::BSShaderType::ShaderType_Water:
+                case Nif::BSShaderType::ShaderType_Lighting30:
+                case Nif::BSShaderType::ShaderType_Tile:
+                    Log(Debug::Warning) << "Unhandled BSShaderType " << type << " in " << mFilename;
+                    return std::string_view();
+            }
+            Log(Debug::Warning) << "Unknown BSShaderType " << type << " in " << mFilename;
+            return std::string_view();
         }
 
-        const std::string& getBSLightingShaderPrefix(unsigned int type) const
+        std::string_view getBSLightingShaderPrefix(unsigned int type) const
         {
-            static const std::unordered_map<Nif::BSLightingShaderType, std::string> mapping =
+            switch (static_cast<Nif::BSLightingShaderType>(type))
             {
-                {Nif::BSLightingShaderType::ShaderType_Default,                "nv_default"},
-                {Nif::BSLightingShaderType::ShaderType_EnvMap,                std::string()},
-                {Nif::BSLightingShaderType::ShaderType_Glow,                  std::string()},
-                {Nif::BSLightingShaderType::ShaderType_Parallax,              std::string()},
-                {Nif::BSLightingShaderType::ShaderType_FaceTint,              std::string()},
-                {Nif::BSLightingShaderType::ShaderType_HairTint,              std::string()},
-                {Nif::BSLightingShaderType::ShaderType_ParallaxOcc,           std::string()},
-                {Nif::BSLightingShaderType::ShaderType_MultitexLand,          std::string()},
-                {Nif::BSLightingShaderType::ShaderType_LODLand,               std::string()},
-                {Nif::BSLightingShaderType::ShaderType_Snow,                  std::string()},
-                {Nif::BSLightingShaderType::ShaderType_MultiLayerParallax,    std::string()},
-                {Nif::BSLightingShaderType::ShaderType_TreeAnim,              std::string()},
-                {Nif::BSLightingShaderType::ShaderType_LODObjects,            std::string()},
-                {Nif::BSLightingShaderType::ShaderType_SparkleSnow,           std::string()},
-                {Nif::BSLightingShaderType::ShaderType_LODObjectsHD,          std::string()},
-                {Nif::BSLightingShaderType::ShaderType_EyeEnvmap,             std::string()},
-                {Nif::BSLightingShaderType::ShaderType_Cloud,                 std::string()},
-                {Nif::BSLightingShaderType::ShaderType_LODNoise,              std::string()},
-                {Nif::BSLightingShaderType::ShaderType_MultitexLandLODBlend,  std::string()},
-                {Nif::BSLightingShaderType::ShaderType_Dismemberment,         std::string()}
-            };
-            auto prefix = mapping.find(static_cast<Nif::BSLightingShaderType>(type));
-            if (prefix == mapping.end())
-                Log(Debug::Warning) << "Unknown BSLightingShaderType " << type << " in " << mFilename;
-            else if (prefix->second.empty())
-                Log(Debug::Warning) << "Unhandled BSLightingShaderType " << type << " in " << mFilename;
-            else
-                return prefix->second;
-
-            return mapping.at(Nif::BSLightingShaderType::ShaderType_Default);
+                case Nif::BSLightingShaderType::ShaderType_Default: return "nv_default";
+                case Nif::BSLightingShaderType::ShaderType_EnvMap:
+                case Nif::BSLightingShaderType::ShaderType_Glow:
+                case Nif::BSLightingShaderType::ShaderType_Parallax:
+                case Nif::BSLightingShaderType::ShaderType_FaceTint:
+                case Nif::BSLightingShaderType::ShaderType_SkinTint:
+                case Nif::BSLightingShaderType::ShaderType_HairTint:
+                case Nif::BSLightingShaderType::ShaderType_ParallaxOcc:
+                case Nif::BSLightingShaderType::ShaderType_MultitexLand:
+                case Nif::BSLightingShaderType::ShaderType_LODLand:
+                case Nif::BSLightingShaderType::ShaderType_Snow:
+                case Nif::BSLightingShaderType::ShaderType_MultiLayerParallax:
+                case Nif::BSLightingShaderType::ShaderType_TreeAnim:
+                case Nif::BSLightingShaderType::ShaderType_LODObjects:
+                case Nif::BSLightingShaderType::ShaderType_SparkleSnow:
+                case Nif::BSLightingShaderType::ShaderType_LODObjectsHD:
+                case Nif::BSLightingShaderType::ShaderType_EyeEnvmap:
+                case Nif::BSLightingShaderType::ShaderType_Cloud:
+                case Nif::BSLightingShaderType::ShaderType_LODNoise:
+                case Nif::BSLightingShaderType::ShaderType_MultitexLandLODBlend:
+                case Nif::BSLightingShaderType::ShaderType_Dismemberment:
+                    Log(Debug::Warning) << "Unhandled BSLightingShaderType " << type << " in " << mFilename;
+                    return std::string_view();
+            }
+            Log(Debug::Warning) << "Unknown BSLightingShaderType " << type << " in " << mFilename;
+            return std::string_view();
         }
 
         void handleProperty(const Nif::Property *property,
-                            osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
+                            osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags, bool hasStencilProperty)
         {
             switch (property->recType)
             {
@@ -1800,6 +1824,7 @@ namespace NifOsg
 
                 if (stencilprop->data.enabled != 0)
                 {
+                    mHasStencilProperty = true;
                     osg::ref_ptr<osg::Stencil> stencil = new osg::Stencil;
                     stencil->setFunction(getStencilFunction(stencilprop->data.compareFunc), stencilprop->data.stencilRef, stencilprop->data.stencilMask);
                     stencil->setStencilFailOperation(getStencilOperation(stencilprop->data.failAction));
@@ -1831,7 +1856,9 @@ namespace NifOsg
                 osg::ref_ptr<osg::Depth> depth = new osg::Depth;
                 // Depth write flag
                 depth->setWriteMask((zprop->flags>>1)&1);
-                // Morrowind ignores depth test function
+                // Morrowind ignores depth test function, unless a NiStencilProperty is present, in which case it uses a fixed depth function of GL_ALWAYS.
+                if (hasStencilProperty)
+                    depth->setFunction(osg::Depth::ALWAYS);
                 depth = shareAttribute(depth);
                 stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 break;
@@ -1860,7 +1887,7 @@ namespace NifOsg
             {
                 auto texprop = static_cast<const Nif::BSShaderPPLightingProperty*>(property);
                 bool shaderRequired = true;
-                node->setUserValue("shaderPrefix", getBSShaderPrefix(texprop->type));
+                node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->type)));
                 node->setUserValue("shaderRequired", shaderRequired);
                 osg::StateSet* stateset = node->getOrCreateStateSet();
                 if (!texprop->textureSet.empty())
@@ -1875,7 +1902,7 @@ namespace NifOsg
             {
                 auto texprop = static_cast<const Nif::BSShaderNoLightingProperty*>(property);
                 bool shaderRequired = true;
-                node->setUserValue("shaderPrefix", getBSShaderPrefix(texprop->type));
+                node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->type)));
                 node->setUserValue("shaderRequired", shaderRequired);
                 osg::StateSet* stateset = node->getOrCreateStateSet();
                 if (!texprop->filename.empty())
@@ -1917,7 +1944,7 @@ namespace NifOsg
             {
                 auto texprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
                 bool shaderRequired = true;
-                node->setUserValue("shaderPrefix", getBSLightingShaderPrefix(texprop->type));
+                node->setUserValue("shaderPrefix", std::string(getBSLightingShaderPrefix(texprop->type)));
                 node->setUserValue("shaderRequired", shaderRequired);
                 osg::StateSet* stateset = node->getOrCreateStateSet();
                 if (!texprop->mTextureSet.empty())
@@ -2049,7 +2076,10 @@ namespace NifOsg
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
+                        {
                             node->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                            node->getOrCreateStateSet()->setNestRenderBins(false);
+                        }
                         else
                             node->getOrCreateStateSet()->setRenderBinToInherit();
                     }
@@ -2084,6 +2114,8 @@ namespace NifOsg
                     specStrength = shaderprop->mSpecStrength;
                     break;
                 }
+                default:
+                    break;
                 }
             }
 

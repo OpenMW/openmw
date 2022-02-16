@@ -17,6 +17,7 @@ set(DDIRRELATIVE resources/vfs/openmw_aux)
 copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${LUA_AUX_FILES}")
 
 set(LUA_SCRIPTS_FILES
+    scripts/omw/ai.lua
     scripts/omw/camera.lua
     scripts/omw/head_bobbing.lua
     scripts/omw/third_person.lua

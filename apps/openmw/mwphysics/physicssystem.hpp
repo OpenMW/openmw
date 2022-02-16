@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <algorithm>
 #include <variant>
+#include <optional>
+#include <functional>
 
 #include <osg/Quat>
 #include <osg/BoundingBox>
@@ -117,8 +119,26 @@ namespace MWPhysics
         osg::Vec3f mStormDirection;
     };
 
-    using ActorSimulation = std::pair<std::weak_ptr<Actor>, ActorFrameData>;
-    using ProjectileSimulation = std::pair<std::weak_ptr<Projectile>, ProjectileFrameData>;
+    template <class Ptr, class FrameData>
+    class SimulationImpl
+    {
+        public:
+            explicit SimulationImpl(const std::weak_ptr<Ptr>& ptr, FrameData&& data) : mPtr(ptr), mData(data) {}
+
+            std::optional<std::pair<std::shared_ptr<Ptr>, std::reference_wrapper<FrameData>>> lock()
+            {
+                if (auto locked = mPtr.lock())
+                    return {{std::move(locked), std::ref(mData)}};
+                return std::nullopt;
+            }
+
+        private:
+            std::weak_ptr<Ptr> mPtr;
+            FrameData mData;
+    };
+
+    using ActorSimulation = SimulationImpl<Actor, ActorFrameData>;
+    using ProjectileSimulation = SimulationImpl<Projectile, ProjectileFrameData>;
     using Simulation = std::variant<ActorSimulation, ProjectileSimulation>;
 
     class PhysicsSystem : public RayCastingInterface
@@ -280,7 +300,7 @@ namespace MWPhysics
             using ObjectMap = std::unordered_map<const MWWorld::LiveCellRefBase*, std::shared_ptr<Object>>;
             ObjectMap mObjects;
 
-            std::set<Object*> mAnimatedObjects; // stores pointers to elements in mObjects
+            std::map<Object*, bool> mAnimatedObjects; // stores pointers to elements in mObjects
 
             ActorMap mActors;
 

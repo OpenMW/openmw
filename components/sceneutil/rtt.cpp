@@ -50,7 +50,7 @@ namespace SceneUtil
 
     osg::Texture* RTTNode::getDepthTexture(osgUtil::CullVisitor* cv)
     {
-        return getViewDependentData(cv)->mCamera->getBufferAttachmentMap()[osg::Camera::DEPTH_BUFFER]._texture;
+        return getViewDependentData(cv)->mCamera->getBufferAttachmentMap()[osg::Camera::PACKED_DEPTH_STENCIL_BUFFER]._texture;
     }
 
     RTTNode::ViewDependentData* RTTNode::getViewDependentData(osgUtil::CullVisitor* cv)
@@ -67,7 +67,7 @@ namespace SceneUtil
             mViewDependentDataMap[cv]->mCamera = camera;
 
             camera->setRenderOrder(osg::Camera::PRE_RENDER, mRenderOrderNum);
-            camera->setClearMask(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+            camera->setClearMask(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
             camera->setViewport(0, 0, mTextureWidth, mTextureHeight);
             SceneUtil::setCameraClearDepth(camera);
@@ -88,18 +88,18 @@ namespace SceneUtil
                 SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER, colorBuffer);
             }
 
-            if (camera->getBufferAttachmentMap().count(osg::Camera::DEPTH_BUFFER) == 0)
+            if (camera->getBufferAttachmentMap().count(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER) == 0)
             {
                 auto depthBuffer = new osg::Texture2D;
                 depthBuffer->setTextureSize(mTextureWidth, mTextureHeight);
-                depthBuffer->setSourceFormat(GL_DEPTH_COMPONENT);
-                depthBuffer->setInternalFormat(GL_DEPTH_COMPONENT24);
+                depthBuffer->setSourceFormat(GL_DEPTH_STENCIL_EXT);
+                depthBuffer->setInternalFormat(GL_DEPTH24_STENCIL8_EXT);
                 depthBuffer->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
                 depthBuffer->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-                depthBuffer->setSourceType(GL_UNSIGNED_INT);
+                depthBuffer->setSourceType(GL_UNSIGNED_INT_24_8_EXT);
                 depthBuffer->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
                 depthBuffer->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-                camera->attach(osg::Camera::DEPTH_BUFFER, depthBuffer);
+                camera->attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, depthBuffer);
             }
         }
 

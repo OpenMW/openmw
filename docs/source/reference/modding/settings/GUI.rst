@@ -70,7 +70,7 @@ stretch menu background
 Stretch or shrink the main menu screen, loading splash screens, introductory movie,
 and cut scenes to fill the specified video resolution, distorting their aspect ratio.
 The Bethesda provided assets have a 4:3 aspect ratio, but other assets are permitted to have other aspect ratios.
-If this setting is false, the assets will be centered in their correct aspect ratio,
+If this setting is false, the assets will be centered in the mentioned 4:3 aspect ratio,
 with black bars filling the remainder of the screen.
 
 This setting can be configured in the Interface section of Advanced tab of the launcher.

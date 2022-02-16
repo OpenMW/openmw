@@ -7,6 +7,8 @@ Lua API reference
 
     engine_handlers
     user_interface
+    aipackages
+    events
     openmw_util
     openmw_storage
     openmw_core
@@ -21,6 +23,7 @@ Lua API reference
     openmw_aux_calendar
     openmw_aux_util
     openmw_aux_time
+    interface_ai
     interface_camera
 
 
@@ -28,6 +31,8 @@ Lua API reference
 - :ref:`User interface reference <User interface reference>`
 - `Game object reference <openmw_core.html##(GameObject)>`_
 - `Cell reference <openmw_core.html##(Cell)>`_
+- :ref:`Built-in AI packages`
+- :ref:`Built-in events`
 
 **API packages**
 
@@ -87,6 +92,8 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 | Interface                                               | Can be used        | Description                                                   |
 +=========================================================+====================+===============================================================+
+|:ref:`AI <Interface AI>`                                 | by local scripts   | | Control basic AI of NPCs and creatures.                     |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`Camera <Interface Camera>`                         | by player scripts  | | Allows to alter behavior of the built-in camera script      |
 |                                                         |                    | | without overriding the script completely.                   |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+

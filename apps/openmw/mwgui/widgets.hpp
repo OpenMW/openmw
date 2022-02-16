@@ -181,8 +181,6 @@ namespace MWGui
         public:
             MWSpell();
 
-            typedef MWMechanics::Stat<int> SpellValue;
-
             void setSpellId(const std::string &id);
 
             /**
@@ -214,8 +212,6 @@ namespace MWGui
             MYGUI_RTTI_DERIVED( MWEffectList )
         public:
             MWEffectList();
-
-            typedef MWMechanics::Stat<int> EnchantmentValue;
 
             enum EffectFlags
             {

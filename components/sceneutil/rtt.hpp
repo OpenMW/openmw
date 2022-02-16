@@ -27,7 +27,7 @@ namespace SceneUtil
     /// @par Camera settings should be effectuated by overriding the setDefaults() and apply() methods, following a pattern similar to SceneUtil::StateSetUpdater
     /// @par When using the RTT texture in your statesets, it is recommended to use SceneUtil::StateSetUpdater as a cull callback to handle this as the appropriate
     ///     textures can be retrieved during SceneUtil::StateSetUpdater::Apply()
-    /// @par For any of COLOR_BUFFER or DEPTH_BUFFER not added during setDefaults(), RTTNode will attach a default buffer. The default color buffer has an internal format of GL_RGB.
+    /// @par For any of COLOR_BUFFER or PACKED_DEPTH_STENCIL_BUFFER not added during setDefaults(), RTTNode will attach a default buffer. The default color buffer has an internal format of GL_RGB.
     ///     The default depth buffer has internal format GL_DEPTH_COMPONENT24, source format GL_DEPTH_COMPONENT, and source type GL_UNSIGNED_INT. Default wrap is CLAMP_TO_EDGE and filter LINEAR.
     class RTTNode : public osg::Node
     {

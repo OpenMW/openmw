@@ -2,6 +2,8 @@
 #include <components/lua_ui/element.hpp>
 #include <components/lua_ui/layers.hpp>
 #include <components/lua_ui/content.hpp>
+#include <components/lua_ui/registerscriptsettings.hpp>
+#include <components/lua_ui/alignment.hpp>
 
 #include "context.hpp"
 #include "actions.hpp"
@@ -43,7 +45,7 @@ namespace MWLua
                                 break;
                         }
                     }
-                    catch (std::exception& e)
+                    catch (std::exception&)
                     {
                         // prevent any actions on a potentially corrupted widget
                         mElement->mRoot = nullptr;
@@ -237,6 +239,14 @@ namespace MWLua
         for (const auto& it : LuaUi::widgetTypeToName())
             typeTable.set(it.second, it.first);
         api["TYPE"] = LuaUtil::makeReadOnly(typeTable);
+
+        api["ALIGNMENT"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, LuaUi::Alignment>({
+            { "Start", LuaUi::Alignment::Start },
+            { "Center", LuaUi::Alignment::Center },
+            { "End", LuaUi::Alignment::End }
+        }));
+
+        api["registerSettingsPage"] = &LuaUi::registerSettingsPage;
 
         return LuaUtil::makeReadOnly(api);
     }

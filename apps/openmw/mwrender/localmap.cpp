@@ -187,7 +187,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT);
     camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
     camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 1.f));
-    camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     camera->setRenderOrder(osg::Camera::PRE_RENDER);
 
     camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
@@ -460,8 +460,10 @@ void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
                 yOffset++;
                 mBounds.yMin() = fog->mBounds.mMinY - yOffset * mMapWorldSize;
             }
-            mBounds.xMax() = std::max(mBounds.xMax(), fog->mBounds.mMaxX);
-            mBounds.yMax() = std::max(mBounds.yMax(), fog->mBounds.mMaxY);
+            if (fog->mBounds.mMaxX > mBounds.xMax())
+                mBounds.xMax() = fog->mBounds.mMaxX;
+            if (fog->mBounds.mMaxY > mBounds.yMax())
+                mBounds.yMax() = fog->mBounds.mMaxY;
 
             if(xOffset != 0 || yOffset != 0)
                 Log(Debug::Warning) << "Warning: expanding fog by " << xOffset << ", " << yOffset;

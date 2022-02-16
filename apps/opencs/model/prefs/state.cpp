@@ -16,22 +16,7 @@ CSMPrefs::State *CSMPrefs::State::sThis = nullptr;
 
 void CSMPrefs::State::load()
 {
-    // default settings file
-    boost::filesystem::path local = mConfigurationManager.getLocalPath() / mDefaultConfigFile;
-    boost::filesystem::path global = mConfigurationManager.getGlobalPath() / mDefaultConfigFile;
-
-    if (boost::filesystem::exists (local))
-        mSettings.loadDefault (local.string());
-    else if (boost::filesystem::exists (global))
-        mSettings.loadDefault (global.string());
-    else
-        throw std::runtime_error ("No default settings file found! Make sure the file \"" + mDefaultConfigFile + "\" was properly installed.");
-
-    // user settings file
-    boost::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
-
-    if (boost::filesystem::exists (user))
-        mSettings.loadUser (user.string());
+    mSettings.load(mConfigurationManager);
 }
 
 void CSMPrefs::State::declare()
