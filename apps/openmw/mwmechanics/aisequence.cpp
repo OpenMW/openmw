@@ -309,12 +309,18 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
     {
         if (package->execute(actor, characterController, mAiState, duration))
         {
-            // Put repeating noncombat AI packages on the end of the stack so they can be used again
+            const auto packageIdx = std::distance(mPackages.begin(), packageIt);
+
+            // Put repeating non-combat AI packages on the end of the stack so they can be used again
             if (isActualAiPackage(packageTypeId) && package->getRepeat())
             {
                 package->reset();
                 mPackages.push_back(package->clone());
             }
+
+            // Iterator may have been invalidated by push back ensure its correct.
+            packageIt = mPackages.begin() + packageIdx;
+
             // To account for the rare case where AiPackage::execute() queued another AI package
             // (e.g. AiPursue executing a dialogue script that uses startCombat)
             erase(packageIt);
