@@ -178,7 +178,7 @@ namespace NavMeshTool
                 static_cast<btScalar>(cellPosition.y() * ESM::Land::REAL_SIZE),
                 minHeight
             );
-            aabb.m_min = btVector3(
+            aabb.m_max = btVector3(
                 static_cast<btScalar>((cellPosition.x() + 1) * ESM::Land::REAL_SIZE),
                 static_cast<btScalar>((cellPosition.y() + 1) * ESM::Land::REAL_SIZE),
                 maxHeight
