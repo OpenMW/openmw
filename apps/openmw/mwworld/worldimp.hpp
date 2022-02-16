@@ -377,7 +377,7 @@ namespace MWWorld
             MWWorld::Ptr moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec) override;
             ///< @return an updated Ptr
 
-            void scaleObject (const Ptr& ptr, float scale) override;
+            void scaleObject (const Ptr& ptr, float scale, bool force = false) override;
 
             /// World rotates object, uses radians
             /// @note Rotations via this method use a different rotation order than the initial rotations in the CS. This
