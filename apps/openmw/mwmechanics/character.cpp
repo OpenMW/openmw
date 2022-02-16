@@ -709,7 +709,9 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (mPtr.getClass().isActor())
         refreshHitRecoilAnims(idle);
 
-    std::string weap = getWeaponType(mWeaponType)->mShortGroup;
+    std::string weap;
+    if (mWeaponType != ESM::Weapon::HandToHand || mPtr.getClass().isBipedal(mPtr))
+        weap = getWeaponType(mWeaponType)->mShortGroup;
 
     refreshJumpAnims(weap, jump, idle, force);
     refreshMovementAnims(weap, movement, idle, force);
@@ -1127,7 +1129,7 @@ bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
     return mAnimation->updateCarriedLeftVisible(weaptype);
 }
 
-bool CharacterController::updateState(CharacterState& idle)
+bool CharacterController::updateState(CharacterState idle)
 {
     const MWWorld::Class &cls = mPtr.getClass();
     CreatureStats &stats = cls.getCreatureStats(mPtr);
