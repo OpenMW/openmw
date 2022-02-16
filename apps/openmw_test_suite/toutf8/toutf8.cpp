@@ -136,4 +136,24 @@ namespace
         Params {ToUTF8::WINDOWS_1251, "russian-win1251.txt", "russian-utf8.txt"},
         Params {ToUTF8::WINDOWS_1252, "french-win1252.txt", "french-utf8.txt"}
     ));
+
+    TEST(StatelessUtf8EncoderTest, shouldCleanupBuffer)
+    {
+        std::string buffer;
+        StatelessUtf8Encoder encoder(FromType::WINDOWS_1252);
+        encoder.getUtf8(std::string_view("long string\x92"), BufferAllocationPolicy::UseGrowFactor, buffer);
+        const std::string shortString("short\x92");
+        ASSERT_GT(buffer.size(), shortString.size());
+        const std::string_view shortUtf8 = encoder.getUtf8(shortString, BufferAllocationPolicy::UseGrowFactor, buffer);
+        ASSERT_GE(buffer.size(), shortUtf8.size());
+        EXPECT_EQ(buffer[shortUtf8.size()], '\0') << buffer;
+    }
+
+    TEST(StatelessUtf8EncoderTest, withFitToRequiredSizeShouldResizeBuffer)
+    {
+        std::string buffer;
+        StatelessUtf8Encoder encoder(FromType::WINDOWS_1252);
+        const std::string_view utf8 = encoder.getUtf8(std::string_view("long string\x92"), BufferAllocationPolicy::FitToRequiredSize, buffer);
+        EXPECT_EQ(buffer.size(), utf8.size());
+    }
 }
