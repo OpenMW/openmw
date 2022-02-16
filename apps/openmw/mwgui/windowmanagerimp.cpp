@@ -2263,4 +2263,9 @@ namespace MWGui
         for(auto* window : mWindows)
             window->onDeleteCustomData(ptr);
     }
+
+    void WindowManager::asyncPrepareSaveMap()
+    {
+        mMap->asyncPrepareSaveMap();
+    }
 }

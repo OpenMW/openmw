@@ -93,6 +93,26 @@ namespace
         MWRender::GlobalMap* mParent;
     };
 
+    std::vector<char> writePng(const osg::Image& overlayImage)
+    {
+        std::ostringstream ostream;
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+        if (!readerwriter)
+        {
+            Log(Debug::Error) << "Error: Can't write map overlay: no png readerwriter found";
+            return std::vector<char>();
+        }
+
+        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(overlayImage, ostream);
+        if (!result.success())
+        {
+            Log(Debug::Warning) << "Error: Can't write map overlay: " << result.message() << " code " << result.status();
+            return std::vector<char>();
+        }
+
+        std::string data = ostream.str();
+        return std::vector<char>(data.begin(), data.end());
+    }
 }
 
 namespace MWRender
@@ -219,6 +239,20 @@ namespace MWRender
 
         osg::ref_ptr<osg::Image> mOverlayImage;
         osg::ref_ptr<osg::Texture2D> mOverlayTexture;
+    };
+
+    struct GlobalMap::WritePng final : public SceneUtil::WorkItem
+    {
+        osg::ref_ptr<const osg::Image> mOverlayImage;
+        std::vector<char> mImageData;
+
+        explicit WritePng(osg::ref_ptr<const osg::Image> overlayImage)
+            : mOverlayImage(std::move(overlayImage)) {}
+
+        void doWork() override
+        {
+            mImageData = writePng(*mOverlayImage);
+        }
     };
 
     GlobalMap::GlobalMap(osg::Group* root, SceneUtil::WorkQueue* workQueue)
@@ -400,23 +434,15 @@ namespace MWRender
         map.mBounds.mMinY = mMinY;
         map.mBounds.mMaxY = mMaxY;
 
-        std::ostringstream ostream;
-        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
-        if (!readerwriter)
+        if (mWritePng != nullptr)
         {
-            Log(Debug::Error) << "Error: Can't write map overlay: no png readerwriter found";
+            mWritePng->waitTillDone();
+            map.mImageData = std::move(mWritePng->mImageData);
+            mWritePng = nullptr;
             return;
         }
 
-        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mOverlayImage, ostream);
-        if (!result.success())
-        {
-            Log(Debug::Warning) << "Error: Can't write map overlay: " << result.message() << " code " << result.status();
-            return;
-        }
-
-        std::string data = ostream.str();
-        map.mImageData = std::vector<char>(data.begin(), data.end());
+        map.mImageData = writePng(*mOverlayImage);
     }
 
     struct Box
@@ -605,5 +631,12 @@ namespace MWRender
     {
         cam->removeChildren(0, cam->getNumChildren());
         mRoot->removeChild(cam);
+    }
+
+    void GlobalMap::asyncWritePng()
+    {
+        // Use deep copy to avoid any sychronization
+        mWritePng = new WritePng(new osg::Image(*mOverlayImage, osg::CopyOp::DEEP_COPY_ALL));
+        mWorkQueue->addWorkItem(mWritePng, /*front=*/true);
     }
 }
