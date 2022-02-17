@@ -113,15 +113,12 @@ namespace MWLua
         {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            std::list<std::shared_ptr<AiPackage>>& list = ai.getUnderlyingList();
-            for (auto it = list.begin(); it != list.end();)
+
+            ai.erasePackagesIf([&](auto& entry)
             {
-                bool keep = LuaUtil::call(callback, *it).get<bool>();
-                if (keep)
-                    ++it;
-                else
-                    it = list.erase(it);
-            }
+                bool keep = LuaUtil::call(callback, entry).template get<bool>();
+                return !keep;
+            });
         };
         selfAPI["_startAiCombat"] = [](SelfObject& self, const LObject& target)
         {

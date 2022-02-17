@@ -185,6 +185,11 @@ namespace
             else if constexpr (std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory, &state.mNpcStats);
         }
+        else if(state.mVersion < 20)
+        {
+            if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
+                MWWorld::convertStats(state.mCreatureStats);
+        }
 
         if (state.mRef.mRefNum.hasContentFile())
         {

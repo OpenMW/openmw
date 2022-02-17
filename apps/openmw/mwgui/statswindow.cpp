@@ -179,7 +179,7 @@ namespace MWGui
     void StatsWindow::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = static_cast<int>(value.getCurrent());
-        int modified = static_cast<int>(value.getModified());
+        int modified = static_cast<int>(value.getModified(false));
 
         // Fatigue can be negative
         if (id != "FBar")

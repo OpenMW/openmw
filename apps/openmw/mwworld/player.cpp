@@ -383,6 +383,8 @@ namespace MWWorld
             }
             if (reader.getFormat() < 17)
                 convertMagicEffects(player.mObject.mCreatureStats, player.mObject.mInventory, &player.mObject.mNpcStats);
+            else if(reader.getFormat() < 20)
+                convertStats(player.mObject.mCreatureStats);
 
             if (!player.mObject.mEnabled)
             {

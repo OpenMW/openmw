@@ -5,174 +5,41 @@
 namespace MWMechanics
 {
     template<typename T>
-    Stat<T>::Stat() : mBase (0), mModified (0), mCurrentModified (0) {}
+    Stat<T>::Stat() : mBase (0), mModifier (0) {}
     template<typename T>
-    Stat<T>::Stat(T base) : mBase (base), mModified (base), mCurrentModified (base) {}
-    template<typename T>
-    Stat<T>::Stat(T base, T modified) : mBase (base), mModified (modified), mCurrentModified (modified) {}
-
-    template<typename T>
-    const T& Stat<T>::getBase() const
-    {
-        return mBase;
-    }
+    Stat<T>::Stat(T base, T modified) : mBase (base), mModifier (modified) {}
 
     template<typename T>
     T Stat<T>::getModified(bool capped) const
     {
-        if(!capped)
-            return mModified;
-        return std::max(static_cast<T>(0), mModified);
-    }
-
-    template<typename T>
-    T Stat<T>::getCurrentModified() const
-    {
-        return mCurrentModified;
-    }
-
-    template<typename T>
-    T Stat<T>::getModifier() const
-    {
-        return mModified-mBase;
-    }
-
-    template<typename T>
-    T Stat<T>::getCurrentModifier() const
-    {
-        return mCurrentModified - mModified;
-    }
-
-    template<typename T>
-    void Stat<T>::set (const T& value)
-    {
-        T diff = value - mBase;
-        mBase = mModified = value;
-        mCurrentModified += diff;
-    }
-
-    template<typename T>
-    void Stat<T>::setBase (const T& value)
-    {
-        T diff = value - mBase;
-        mBase = value;
-        mModified += diff;
-        mCurrentModified += diff;
-    }
-
-    template<typename T>
-    void Stat<T>::setModified (T value, const T& min, const T& max)
-    {
-        T diff = value - mModified;
-
-        if (mBase+diff<min)
-        {
-            value = min + (mModified - mBase);
-            diff = value - mModified;
-        }
-        else if (mBase+diff>max)
-        {
-            value = max + (mModified - mBase);
-            diff = value - mModified;
-        }
-
-        mModified = value;
-        mBase += diff;
-        mCurrentModified += diff;
-    }
-
-    template<typename T>
-    void Stat<T>::setCurrentModified(T value)
-    {
-        mCurrentModified = value;
-    }
-
-    template<typename T>
-    void Stat<T>::setModifier (const T& modifier)
-    {
-        mModified = mBase + modifier;
-    }
-
-    template<typename T>
-    void Stat<T>::setCurrentModifier(const T& modifier)
-    {
-        mCurrentModified = mModified + modifier;
+        if(capped)
+            return std::max({}, mModifier + mBase);
+        return mModifier + mBase;
     }
 
     template<typename T>
     void Stat<T>::writeState (ESM::StatState<T>& state) const
     {
         state.mBase = mBase;
-        state.mMod = mCurrentModified;
+        state.mMod = mModifier;
     }
     template<typename T>
     void Stat<T>::readState (const ESM::StatState<T>& state)
     {
         mBase = state.mBase;
-        mModified = state.mBase;
-        mCurrentModified = state.mMod;
+        mModifier = state.mMod;
     }
 
 
     template<typename T>
-    DynamicStat<T>::DynamicStat() : mStatic (0), mCurrent (0) {}
+    DynamicStat<T>::DynamicStat() : mStatic(0, 0), mCurrent(0) {}
     template<typename T>
-    DynamicStat<T>::DynamicStat(T base) : mStatic (base), mCurrent (base) {}
+    DynamicStat<T>::DynamicStat(T base) : mStatic(base, 0), mCurrent(base) {}
     template<typename T>
     DynamicStat<T>::DynamicStat(T base, T modified, T current) : mStatic(base, modified), mCurrent (current) {}
     template<typename T>
     DynamicStat<T>::DynamicStat(const Stat<T> &stat, T current) : mStatic(stat), mCurrent (current) {}
 
-
-    template<typename T>
-    const T& DynamicStat<T>::getBase() const
-    {
-        return mStatic.getBase();
-    }
-    template<typename T>
-    T DynamicStat<T>::getModified() const
-    {
-        return mStatic.getModified();
-    }
-    template<typename T>
-    T DynamicStat<T>::getCurrentModified() const
-    {
-        return mStatic.getCurrentModified();
-    }
-
-    template<typename T>
-    const T& DynamicStat<T>::getCurrent() const
-    {
-        return mCurrent;
-    }
-
-    template<typename T>
-    void DynamicStat<T>::set (const T& value)
-    {
-        mStatic.set (value);
-        mCurrent = value;
-    }
-    template<typename T>
-    void DynamicStat<T>::setBase (const T& value)
-    {
-        mStatic.setBase (value);
-
-        if (mCurrent>getModified())
-            mCurrent = getModified();
-    }
-    template<typename T>
-    void DynamicStat<T>::setModified (T value, const T& min, const T& max)
-    {
-        mStatic.setModified (value, min, max);
-
-        if (mCurrent>getModified())
-            mCurrent = getModified();
-    }
-    template<typename T>
-    void DynamicStat<T>::setCurrentModified(T value)
-    {
-        mStatic.setCurrentModified(value);
-    }
     template<typename T>
     void DynamicStat<T>::setCurrent (const T& value, bool allowDecreaseBelowZero, bool allowIncreaseAboveModified)
     {
@@ -197,22 +64,18 @@ namespace MWMechanics
             mCurrent = 0;
         }
     }
-    template<typename T>
-    void DynamicStat<T>::setModifier (const T& modifier, bool allowCurrentDecreaseBelowZero)
-    {
-        T diff =  modifier - mStatic.getModifier();
-        mStatic.setModifier (modifier);
-        setCurrent (getCurrent()+diff, allowCurrentDecreaseBelowZero);
-    }
 
     template<typename T>
-    void DynamicStat<T>::setCurrentModifier(const T& modifier, bool allowCurrentDecreaseBelowZero)
+    T DynamicStat<T>::getRatio(bool nanIsZero) const
     {
-        T diff = modifier - mStatic.getCurrentModifier();
-        mStatic.setCurrentModifier(modifier);
-
-        // The (modifier > 0) check here allows increase over modified only if the modifier is positive (a fortify effect is active).
-        setCurrent (getCurrent() + diff, allowCurrentDecreaseBelowZero, (modifier > 0));
+        T modified = getModified();
+        if(modified == T{})
+        {
+            if(nanIsZero)
+                return modified;
+            return {1};
+        }
+        return getCurrent() / modified;
     }
 
     template<typename T>

@@ -19,6 +19,7 @@
     Bug #4700: Editor: Incorrect command implementation
     Bug #4744: Invisible particles must still be processed
     Bug #4949: Incorrect particle lighting
+    Bug #5054: Non-biped creatures don't use spellcast equip/unequip animations
     Bug #5088: Sky abruptly changes direction during certain weather transitions
     Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
@@ -274,6 +275,7 @@
     Bug #6142: Groundcover plugins change cells flags
     Bug #6276: Deleted groundcover instances are not deleted in game
     Bug #6294: Game crashes with empty pathgrid
+    Bug #6606: Quests with multiple IDs cannot always be restarted
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu

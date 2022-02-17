@@ -73,23 +73,20 @@ bool isCommanded(const MWWorld::Ptr& actor)
 // Check for command effects having ended and remove package if necessary
 void adjustCommandedActor (const MWWorld::Ptr& actor)
 {
+    if (!isCommanded(actor))
+        return;
+
     MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-    bool hasCommandPackage = false;
-
-    auto it = stats.getAiSequence().begin();
-    for (; it != stats.getAiSequence().end(); ++it)
+    stats.getAiSequence().erasePackageIf([](auto& entry)
     {
-        if ((*it)->getTypeId() == MWMechanics::AiPackageTypeId::Follow &&
-                static_cast<const MWMechanics::AiFollow*>(it->get())->isCommanded())
+        if (entry->getTypeId() == MWMechanics::AiPackageTypeId::Follow &&
+            static_cast<const MWMechanics::AiFollow*>(entry.get())->isCommanded())
         {
-            hasCommandPackage = true;
-            break;
+            return true;
         }
-    }
-
-    if (!isCommanded(actor) && hasCommandPackage)
-        stats.getAiSequence().erase(it);
+        return false;
+    });
 }
 
 void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float& magicka)

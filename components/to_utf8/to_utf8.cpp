@@ -3,6 +3,7 @@
 #include <vector>
 #include <cassert>
 #include <stdexcept>
+#include <algorithm>
 
 #include <components/debug/debuglog.hpp>
 
@@ -44,45 +45,67 @@
 
 using namespace ToUTF8;
 
-Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
-    mOutput(50*1024)
+namespace
 {
-    switch (sourceEncoding)
+    std::string_view::iterator skipAscii(std::string_view input)
     {
-        case ToUTF8::WINDOWS_1252:
+        return std::find_if(input.begin(), input.end(), [] (unsigned char v) { return v == 0 || v >= 128; });
+    }
+
+    std::basic_string_view<signed char> getTranslationArray(FromType sourceEncoding)
+    {
+        switch (sourceEncoding)
         {
-            translationArray = ToUTF8::windows_1252;
-            break;
+            case ToUTF8::WINDOWS_1252:
+                return {ToUTF8::windows_1252, std::size(ToUTF8::windows_1252)};
+            case ToUTF8::WINDOWS_1250:
+                return {ToUTF8::windows_1250, std::size(ToUTF8::windows_1250)};
+            case ToUTF8::WINDOWS_1251:
+                return {ToUTF8::windows_1251, std::size(ToUTF8::windows_1251)};
+            case ToUTF8::CP437:
+                return {ToUTF8::cp437, std::size(ToUTF8::cp437)};
         }
-        case ToUTF8::WINDOWS_1250:
+        throw std::logic_error("Invalid source encoding: " + std::to_string(sourceEncoding));
+    }
+
+    // Make sure the output vector is large enough for 'size' bytes,
+    // including a terminating zero after it.
+    void resize(std::size_t size, BufferAllocationPolicy bufferAllocationPolicy, std::string& buffer)
+    {
+        if (buffer.size() > size)
         {
-            translationArray = ToUTF8::windows_1250;
-            break;
-        }
-        case ToUTF8::WINDOWS_1251:
-        {
-            translationArray = ToUTF8::windows_1251;
-            break;
-        }
-        case ToUTF8::CP437:
-        {
-            translationArray = ToUTF8::cp437;
-            break;
+            buffer[size] = 0;
+            return;
         }
 
-        default:
+        if (buffer.size() == size)
+            return;
+
+        switch (bufferAllocationPolicy)
         {
-            assert(0);
+            case BufferAllocationPolicy::FitToRequiredSize:
+                buffer.resize(size);
+                break;
+            case BufferAllocationPolicy::UseGrowFactor:
+                // Add some extra padding to reduce the chance of having to resize
+                // again later.
+                buffer.resize(3 * size);
+                // And make sure the string is zero terminated
+                buffer[size] = 0;
+                break;
         }
     }
 }
 
-std::string Utf8Encoder::getUtf8(const char* input, size_t size)
+StatelessUtf8Encoder::StatelessUtf8Encoder(FromType sourceEncoding)
+    : mTranslationArray(getTranslationArray(sourceEncoding))
 {
-    // Double check that the input string stops at some point (it might
-    // contain zero terminators before this, inside its own data, which
-    // is also ok.)
-    assert(input[size] == 0);
+}
+
+std::string_view StatelessUtf8Encoder::getUtf8(std::string_view input, BufferAllocationPolicy bufferAllocationPolicy, std::string& buffer) const
+{
+    if (input.empty())
+        return input;
 
     // Note: The rest of this function is designed for single-character
     // input encodings only. It also assumes that the input encoding
@@ -92,38 +115,34 @@ std::string Utf8Encoder::getUtf8(const char* input, size_t size)
 
     // Compute output length, and check for pure ascii input at the same
     // time.
-    bool ascii;
-    size_t outlen = getLength(input, ascii);
+    const auto [outlen, ascii] = getLength(input);
 
     // If we're pure ascii, then don't bother converting anything.
     if(ascii)
-        return std::string(input, outlen);
+        return std::string_view(input.data(), outlen);
 
     // Make sure the output is large enough
-    resize(outlen);
-    char *out = &mOutput[0];
+    resize(outlen, bufferAllocationPolicy, buffer);
+    char *out = buffer.data();
 
     // Translate
-    while (*input)
-        copyFromArray(*(input++), out);
+    for (auto it = input.begin(); it != input.end() && *it != 0; ++it)
+        copyFromArray(*it, out);
 
     // Make sure that we wrote the correct number of bytes
-    assert((out-&mOutput[0]) == (int)outlen);
+    assert((out - buffer.data()) == (int)outlen);
 
     // And make extra sure the output is null terminated
-    assert(mOutput.size() > outlen);
-    assert(mOutput[outlen] == 0);
+    assert(buffer.size() >= outlen);
+    assert(buffer[outlen] == 0);
 
-    // Return a string
-    return std::string(&mOutput[0], outlen);
+    return std::string_view(buffer.data(), outlen);
 }
 
-std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)
+std::string_view StatelessUtf8Encoder::getLegacyEnc(std::string_view input, BufferAllocationPolicy bufferAllocationPolicy, std::string& buffer) const
 {
-    // Double check that the input string stops at some point (it might
-    // contain zero terminators before this, inside its own data, which
-    // is also ok.)
-    assert(input[size] == 0);
+    if (input.empty())
+        return input;
 
     // TODO: The rest of this function is designed for single-character
     // input encodings only. It also assumes that the input the input
@@ -133,43 +152,28 @@ std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)
 
     // Compute output length, and check for pure ascii input at the same
     // time.
-    bool ascii;
-    size_t outlen = getLength2(input, ascii);
+    const auto [outlen, ascii] = getLengthLegacyEnc(input);
 
     // If we're pure ascii, then don't bother converting anything.
     if(ascii)
-        return std::string(input, outlen);
+        return std::string_view(input.data(), outlen);
 
     // Make sure the output is large enough
-    resize(outlen);
-    char *out = &mOutput[0];
+    resize(outlen, bufferAllocationPolicy, buffer);
+    char *out = buffer.data();
 
     // Translate
-    while(*input)
-        copyFromArray2(input, out);
+    for (auto it = input.begin(); it != input.end() && *it != 0;)
+        copyFromArrayLegacyEnc(it, input.end(), out);
 
     // Make sure that we wrote the correct number of bytes
-    assert((out-&mOutput[0]) == (int)outlen);
+    assert((out - buffer.data()) == static_cast<int>(outlen));
 
     // And make extra sure the output is null terminated
-    assert(mOutput.size() > outlen);
-    assert(mOutput[outlen] == 0);
+    assert(buffer.size() >= outlen);
+    assert(buffer[outlen] == 0);
 
-    // Return a string
-    return std::string(&mOutput[0], outlen);
-}
-
-// Make sure the output vector is large enough for 'size' bytes,
-// including a terminating zero after it.
-void Utf8Encoder::resize(size_t size)
-{
-    if (mOutput.size() <= size)
-        // Add some extra padding to reduce the chance of having to resize
-        // again later.
-        mOutput.resize(3*size);
-
-    // And make sure the string is zero terminated
-    mOutput[size] = 0;
+    return std::string_view(buffer.data(), outlen);
 }
 
 /** Get the total length length needed to decode the given string with
@@ -182,39 +186,35 @@ void Utf8Encoder::resize(size_t size)
   is the case, then the ascii parameter is set to true, and the
   caller can optimize for this case.
  */
-size_t Utf8Encoder::getLength(const char* input, bool &ascii) const
+std::pair<std::size_t, bool> StatelessUtf8Encoder::getLength(std::string_view input) const
 {
-    ascii = true;
-    size_t len = 0;
-    const char* ptr = input;
-    unsigned char inp = *ptr;
-
     // Do away with the ascii part of the string first (this is almost
     // always the entire string.)
-    while (inp && inp < 128)
-        inp = *(++ptr);
-    len += (ptr-input);
+    auto it = skipAscii(input);
 
     // If we're not at the null terminator at this point, then there
     // were some non-ascii characters to deal with. Go to slow-mode for
     // the rest of the string.
-    if (inp)
+    if (it == input.end() || *it == 0)
+        return {it - input.begin(), true};
+
+    std::size_t len = it - input.begin();
+
+    do
     {
-        ascii = false;
-        while (inp)
-        {
-            // Find the translated length of this character in the
-            // lookup table.
-            len += translationArray[inp*6];
-            inp = *(++ptr);
-        }
+        // Find the translated length of this character in the
+        // lookup table.
+        len += mTranslationArray[static_cast<unsigned char>(*it) * 6];
+        ++it;
     }
-    return len;
+    while (it != input.end() && *it != 0);
+
+    return {len, false};
 }
 
 // Translate one character 'ch' using the translation array 'arr', and
 // advance the output pointer accordingly.
-void Utf8Encoder::copyFromArray(unsigned char ch, char* &out) const
+void StatelessUtf8Encoder::copyFromArray(unsigned char ch, char* &out) const
 {
     // Optimize for ASCII values
     if (ch < 128)
@@ -223,57 +223,58 @@ void Utf8Encoder::copyFromArray(unsigned char ch, char* &out) const
         return;
     }
 
-    const signed char *in = translationArray + ch*6;
+    const signed char *in = &mTranslationArray[ch * 6];
     int len = *(in++);
     memcpy(out, in, len);
     out += len;
 }
 
-size_t Utf8Encoder::getLength2(const char* input, bool &ascii) const
+std::pair<std::size_t, bool> StatelessUtf8Encoder::getLengthLegacyEnc(std::string_view input) const
 {
-    ascii = true;
-    size_t len = 0;
-    const char* ptr = input;
-    unsigned char inp = *ptr;
-
     // Do away with the ascii part of the string first (this is almost
     // always the entire string.)
-    while (inp && inp < 128)
-        inp = *(++ptr);
-    len += (ptr-input);
+    auto it = skipAscii(input);
 
     // If we're not at the null terminator at this point, then there
     // were some non-ascii characters to deal with. Go to slow-mode for
     // the rest of the string.
-    if (inp)
-    {
-        ascii = false;
-        while(inp)
-        {
-            len += 1;
-            // Find the translated length of this character in the
-            // lookup table.
-            switch(inp)
-            {
-                case 0xe2: len -= 2; break;
-                case 0xc2:
-                case 0xcb:
-                case 0xc4:
-                case 0xc6:
-                case 0xc3:
-                case 0xd0:
-                case 0xd1:
-                case 0xd2:
-                case 0xc5: len -= 1; break;
-            }
+    if (it == input.end() || *it == 0)
+        return {it - input.begin(), true};
 
-            inp = *(++ptr);
+    std::size_t len = it - input.begin();
+    std::size_t symbolLen = 0;
+
+    do
+    {
+        symbolLen += 1;
+        // Find the translated length of this character in the
+        // lookup table.
+        switch (static_cast<unsigned char>(*it))
+        {
+            case 0xe2: symbolLen -= 2; break;
+            case 0xc2:
+            case 0xcb:
+            case 0xc4:
+            case 0xc6:
+            case 0xc3:
+            case 0xd0:
+            case 0xd1:
+            case 0xd2:
+            case 0xc5: symbolLen -= 1; break;
+            default:
+                len += symbolLen;
+                symbolLen = 0;
+                break;
         }
+
+        ++it;
     }
-    return len;
+    while (it != input.end() && *it != 0);
+
+    return {len, false};
 }
 
-void Utf8Encoder::copyFromArray2(const char*& chp, char* &out) const
+void StatelessUtf8Encoder::copyFromArrayLegacyEnc(std::string_view::iterator& chp, std::string_view::iterator end, char* &out) const
 {
     unsigned char ch = *(chp++);
     // Optimize for ASCII values
@@ -304,14 +305,21 @@ void Utf8Encoder::copyFromArray2(const char*& chp, char* &out) const
         return;
     }
 
+    if (chp == end)
+        return;
+
     unsigned char ch2 = *(chp++);
     unsigned char ch3 = '\0';
     if (len == 3)
+    {
+        if (chp == end)
+            return;
         ch3 = *(chp++);
+    }
 
     for (int i = 128; i < 256; i++)
     {
-        unsigned char b1 = translationArray[i*6 + 1], b2 = translationArray[i*6 + 2], b3 = translationArray[i*6 + 3];
+        unsigned char b1 = mTranslationArray[i*6 + 1], b2 = mTranslationArray[i*6 + 2], b3 = mTranslationArray[i*6 + 3];
         if (b1 == ch && b2 == ch2 && (len != 3 || b3 == ch3))
         {
             *(out++) = (char)i;
@@ -322,6 +330,22 @@ void Utf8Encoder::copyFromArray2(const char*& chp, char* &out) const
     Log(Debug::Info) << "Could not find glyph " << std::hex << (int)ch << " " << (int)ch2 << " " << (int)ch3;
 
     *(out++) = ch; // Could not find glyph, just put whatever
+}
+
+Utf8Encoder::Utf8Encoder(FromType sourceEncoding)
+    : mBuffer(50 * 1024, '\0')
+    , mImpl(sourceEncoding)
+{
+}
+
+std::string_view Utf8Encoder::getUtf8(std::string_view input)
+{
+    return mImpl.getUtf8(input, BufferAllocationPolicy::UseGrowFactor, mBuffer);
+}
+
+std::string_view Utf8Encoder::getLegacyEnc(std::string_view input)
+{
+    return mImpl.getLegacyEnc(input, BufferAllocationPolicy::UseGrowFactor, mBuffer);
 }
 
 ToUTF8::FromType ToUTF8::calculateEncoding(const std::string& encodingName)

@@ -116,11 +116,12 @@ Ubuntu_GCC_tests:
 Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_Debug.v1
+    key: Ubuntu_GCC_tests_Debug.v2
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
     CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O0 -D_GLIBCXX_ASSERTIONS
   artifacts:
     paths: []
     expire_in: 1 minute

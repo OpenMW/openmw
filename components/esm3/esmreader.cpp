@@ -113,14 +113,14 @@ void ESMReader::open(const std::string &file)
     open (Files::openConstrainedFileStream (file.c_str ()), file);
 }
 
-std::string ESMReader::getHNOString(const char* name)
+std::string ESMReader::getHNOString(NAME name)
 {
     if (isNextSub(name))
         return getHString();
     return "";
 }
 
-std::string ESMReader::getHNString(const char* name)
+std::string ESMReader::getHNString(NAME name)
 {
     getSubNameIs(name);
     return getHString();
@@ -156,21 +156,21 @@ void ESMReader::getHExact(void*p, int size)
 }
 
 // Read the given number of bytes from a named subrecord
-void ESMReader::getHNExact(void*p, int size, const char* name)
+void ESMReader::getHNExact(void*p, int size, NAME name)
 {
     getSubNameIs(name);
     getHExact(p, size);
 }
 
 // Get the next subrecord name and check if it matches the parameter
-void ESMReader::getSubNameIs(const char* name)
+void ESMReader::getSubNameIs(NAME name)
 {
     getSubName();
     if (mCtx.subName != name)
-        fail("Expected subrecord " + std::string(name) + " but got " + mCtx.subName.toString());
+        fail("Expected subrecord " + name.toString() + " but got " + mCtx.subName.toString());
 }
 
-bool ESMReader::isNextSub(const char* name)
+bool ESMReader::isNextSub(NAME name)
 {
     if (!hasMoreSubs())
         return false;
@@ -185,7 +185,7 @@ bool ESMReader::isNextSub(const char* name)
     return !mCtx.subCached;
 }
 
-bool ESMReader::peekNextSub(const char *name)
+bool ESMReader::peekNextSub(NAME name)
 {
     if (!hasMoreSubs())
         return false;
@@ -226,7 +226,7 @@ void ESMReader::skipHSubSize(int size)
         reportSubSizeMismatch(mCtx.leftSub, size);
 }
 
-void ESMReader::skipHSubUntil(const char *name)
+void ESMReader::skipHSubUntil(NAME name)
 {
     while (hasMoreSubs() && !isNextSub(name))
     {
@@ -320,7 +320,7 @@ std::string ESMReader::getString(int size)
 
     // Convert to UTF8 and return
     if (mEncoder)
-        return mEncoder->getUtf8(ptr, size);
+        return std::string(mEncoder->getUtf8(std::string_view(ptr, size)));
 
     return std::string (ptr, size);
 }

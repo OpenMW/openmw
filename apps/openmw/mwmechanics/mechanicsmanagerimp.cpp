@@ -1318,7 +1318,7 @@ namespace MWMechanics
                 // once the bounty has been paid.
                 actor.getClass().getNpcStats(actor).setCrimeId(id);
 
-                if (!actor.getClass().getCreatureStats(actor).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
+                if (!actor.getClass().getCreatureStats(actor).getAiSequence().isInPursuit())
                 {
                     actor.getClass().getCreatureStats(actor).getAiSequence().stack(AiPursue(player), actor);
                 }
@@ -1396,7 +1396,7 @@ namespace MWMechanics
             {
                 // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
                 // Note: accidental or collateral damage attacks are ignored.
-                if (!victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
+                if (!victim.getClass().getCreatureStats(victim).getAiSequence().isInPursuit())
                     startCombat(victim, player);
 
                 // Set the crime ID, which we will use to calm down participants
@@ -1442,7 +1442,7 @@ namespace MWMechanics
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
-            if (!target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
+            if (!target.getClass().getCreatureStats(target).getAiSequence().isInPursuit())
             {
                 // If an actor has OnPCHitMe declared in his script, his Fight = 0 and the attacker is player,
                 // he will attack the player only if we will force him (e.g. via StartCombat console command)
@@ -1450,7 +1450,7 @@ namespace MWMechanics
                 std::string script = target.getClass().getScript(target);
                 if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == player)
                 {
-                    int fight = std::max(0, target.getClass().getCreatureStats(target).getAiSetting(CreatureStats::AI_Fight).getModified());
+                    int fight = target.getClass().getCreatureStats(target).getAiSetting(CreatureStats::AI_Fight).getModified();
                     peaceful = (fight == 0);
                 }
 
@@ -1467,7 +1467,7 @@ namespace MWMechanics
         const MWMechanics::AiSequence& seq = target.getClass().getCreatureStats(target).getAiSequence();
         return target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
                 && !isAggressive(target, attacker) && !seq.isEngagedWithActor()
-                && !target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackageTypeId::Pursue);
+                && !target.getClass().getCreatureStats(target).getAiSequence().isInPursuit();
     }
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)

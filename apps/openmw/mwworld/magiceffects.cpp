@@ -198,7 +198,11 @@ namespace MWWorld
         for(std::size_t i = 0; i < ESM::Attribute::Length; ++i)
             creatureStats.mAttributes[i].mMod = 0.f;
         for(std::size_t i = 0; i < 3; ++i)
-            creatureStats.mDynamic[i].mMod = 0.f;
+        {
+            auto& dynamic = creatureStats.mDynamic[i];
+            dynamic.mCurrent -= dynamic.mMod - dynamic.mBase;
+            dynamic.mMod = 0.f;
+        }
         for(std::size_t i = 0; i < 4; ++i)
             creatureStats.mAiSettings[i].mMod = 0.f;
         if(npcStats)
@@ -206,5 +210,14 @@ namespace MWWorld
             for(std::size_t i = 0; i < ESM::Skill::Length; ++i)
                 npcStats->mSkills[i].mMod = 0.f;
         }
+    }
+
+    // Versions 17-19 wrote different modifiers to the savegame depending on whether the save had upgraded from a pre-17 version or not
+    void convertStats(ESM::CreatureStats& creatureStats)
+    {
+        for(std::size_t i = 0; i < 3; ++i)
+            creatureStats.mDynamic[i].mMod = 0.f;
+        for(std::size_t i = 0; i < 4; ++i)
+            creatureStats.mAiSettings[i].mMod = 0.f;
     }
 }

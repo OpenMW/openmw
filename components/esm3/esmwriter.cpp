@@ -86,7 +86,7 @@ namespace ESM
             throw std::runtime_error ("Unclosed record remaining");
     }
 
-    void ESMWriter::startRecord(const std::string& name, uint32_t flags)
+    void ESMWriter::startRecord(ESM::NAME name, uint32_t flags)
     {
         mRecordCount++;
 
@@ -105,15 +105,10 @@ namespace ESM
 
     void ESMWriter::startRecord (uint32_t name, uint32_t flags)
     {
-        std::string type;
-        for (int i=0; i<4; ++i)
-            /// \todo make endianess agnostic
-            type += reinterpret_cast<const char *> (&name)[i];
-
-        startRecord (type, flags);
+        startRecord(ESM::NAME(name), flags);
     }
 
-    void ESMWriter::startSubRecord(const std::string& name)
+    void ESMWriter::startSubRecord(ESM::NAME name)
     {
         // Sub-record hierarchies are not properly supported in ESMReader. This should be fixed later.
         assert (mRecords.size() <= 1);
@@ -129,7 +124,7 @@ namespace ESM
         assert(mRecords.back().size == 0);
     }
 
-    void ESMWriter::endRecord(const std::string& name)
+    void ESMWriter::endRecord(ESM::NAME name)
     {
         RecordData rec = mRecords.back();
         assert(rec.name == name);
@@ -147,22 +142,17 @@ namespace ESM
 
     void ESMWriter::endRecord (uint32_t name)
     {
-        std::string type;
-        for (int i=0; i<4; ++i)
-            /// \todo make endianess agnostic
-            type += reinterpret_cast<const char *> (&name)[i];
-
-        endRecord (type);
+        endRecord(ESM::NAME(name));
     }
 
-    void ESMWriter::writeHNString(const std::string& name, const std::string& data)
+    void ESMWriter::writeHNString(ESM::NAME name, const std::string& data)
     {
         startSubRecord(name);
         writeHString(data);
         endRecord(name);
     }
 
-    void ESMWriter::writeHNString(const std::string& name, const std::string& data, size_t size)
+    void ESMWriter::writeHNString(ESM::NAME name, const std::string& data, size_t size)
     {
         assert(data.size() <= size);
         startSubRecord(name);
@@ -177,7 +167,7 @@ namespace ESM
         endRecord(name);
     }
 
-    void ESMWriter::writeFixedSizeString(const std::string &data, int size)
+    void ESMWriter::writeFixedSizeString(const std::string& data, int size)
     {
         std::string string;
         if (!data.empty())
@@ -193,9 +183,9 @@ namespace ESM
         else
         {
             // Convert to UTF8 and return
-            std::string string = mEncoder ? mEncoder->getLegacyEnc(data) : data;
+            const std::string_view string = mEncoder != nullptr ? mEncoder->getLegacyEnc(data) : data;
 
-            write(string.c_str(), string.size());
+            write(string.data(), string.size());
         }
     }
 
@@ -206,10 +196,9 @@ namespace ESM
             write("\0", 1);
     }
 
-    void ESMWriter::writeName(const std::string& name)
+    void ESMWriter::writeName(ESM::NAME name)
     {
-        assert((name.size() == 4 && name[3] != '\0'));
-        write(name.c_str(), name.size());
+        write(name.mData, ESM::NAME::sCapacity);
     }
 
     void ESMWriter::write(const char* data, size_t size)

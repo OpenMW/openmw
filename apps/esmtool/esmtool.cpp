@@ -484,9 +484,9 @@ int clone(Arguments& info)
         if (i <= 0)
             break;
 
-        const ESM::NAME& typeName = record->getType();
+        const ESM::NAME typeName = record->getType();
 
-        esm.startRecord(typeName.toString(), record->getFlags());
+        esm.startRecord(typeName, record->getFlags());
 
         record->save(esm);
         if (typeName.toInt() == ESM::REC_CELL) {
@@ -498,7 +498,7 @@ int clone(Arguments& info)
             }
         }
 
-        esm.endRecord(typeName.toString());
+        esm.endRecord(typeName);
 
         saved++;
         int perc = recordCount == 0 ? 100 : (int)((saved / (float)recordCount)*100);

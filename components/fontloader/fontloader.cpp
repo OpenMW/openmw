@@ -1,6 +1,8 @@
 #include "fontloader.hpp"
 
 #include <stdexcept>
+#include <string_view>
+#include <array>
 
 #include <osg/Image>
 
@@ -26,8 +28,10 @@
 
 namespace
 {
-    unsigned long utf8ToUnicode(const std::string& utf8)
+    unsigned long utf8ToUnicode(std::string_view utf8)
     {
+        if (utf8.empty())
+            return 0;
         size_t i = 0;
         unsigned long unicode;
         size_t numbytes;
@@ -116,16 +120,21 @@ namespace
         }
     }
 
-    // getUtf8, aka the worst function ever written.
-    // This includes various hacks for dealing with Morrowind's .fnt files that are *mostly*
+    // getUnicode includes various hacks for dealing with Morrowind's .fnt files that are *mostly*
     // in the expected win12XX encoding, but also have randomly swapped characters sometimes.
     // Looks like the Morrowind developers found standard encodings too boring and threw in some twists for fun.
-    std::string getUtf8 (unsigned char c, ToUTF8::Utf8Encoder& encoder, ToUTF8::FromType encoding)
+    unsigned long getUnicode(unsigned char c, ToUTF8::Utf8Encoder& encoder, ToUTF8::FromType encoding)
     {
         if (encoding == ToUTF8::WINDOWS_1250) // Hack for polish font
-            return encoder.getUtf8(std::string(1, mapUtf8Char(c)));
+        {
+            const std::array<char, 2> str {static_cast<char>(mapUtf8Char(c)), '\0'};
+            return utf8ToUnicode(encoder.getUtf8(std::string_view(str.data(), 1)));
+        }
         else
-            return encoder.getUtf8(std::string(1, c));
+        {
+            const std::array<char, 2> str {static_cast<char>(c), '\0'};
+            return utf8ToUnicode(encoder.getUtf8(std::string_view(str.data(), 1)));
+        }
     }
 
     [[noreturn]] void fail (Files::IStreamPtr file, const std::string& fileName, const std::string& message)
@@ -355,7 +364,7 @@ namespace Gui
             float h  = data[i].bottom_left.y*height - y1;
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
-            unsigned long unicodeVal = utf8ToUnicode(getUtf8(i, encoder, mEncoding));
+            unsigned long unicodeVal = getUnicode(i, encoder, mEncoding);
 
             MyGUI::xml::ElementPtr code = codes->createChild("Code");
             code->addAttribute("index", unicodeVal);

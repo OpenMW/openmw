@@ -35,7 +35,7 @@ namespace MWDialogue
 
             virtual ~Topic();
 
-            virtual void addEntry (const JournalEntry& entry);
+            virtual bool addEntry (const JournalEntry& entry);
             ///< Add entry
             ///
             /// \note Redundant entries are ignored.

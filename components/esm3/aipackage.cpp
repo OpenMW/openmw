@@ -65,7 +65,7 @@ namespace ESM
 
             case AI_Escort:
             case AI_Follow: {
-                const char *name = (it->mType == AI_Escort) ? "AI_E" : "AI_F";
+                const ESM::NAME name = (it->mType == AI_Escort) ? ESM::NAME("AI_E") : ESM::NAME("AI_F");
                 esm.writeHNT(name, it->mTarget, sizeof(it->mTarget));
                 esm.writeHNOCString("CNDT", it->mCellName);
                 break;

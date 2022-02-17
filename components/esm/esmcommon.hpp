@@ -6,6 +6,8 @@
 #include <vector>
 #include <string_view>
 #include <cstdint>
+#include <cassert>
+#include <limits>
 
 namespace ESM
 {
@@ -29,6 +31,41 @@ struct FixedString
     static constexpr std::size_t sCapacity = capacity;
 
     char mData[capacity];
+
+    FixedString() = default;
+
+    template <std::size_t size>
+    constexpr FixedString(const char (&value)[size]) noexcept
+        : mData()
+    {
+        if constexpr (capacity == sizeof(std::uint32_t))
+        {
+            static_assert(capacity == size || capacity + 1 == size);
+            if constexpr (capacity + 1 == size)
+                assert(value[capacity] == '\0');
+            for (std::size_t i = 0; i < capacity; ++i)
+                mData[i] = value[i];
+        }
+        else
+        {
+            const std::size_t length = std::min(capacity, size);
+            for (std::size_t i = 0; i < length; ++i)
+                mData[i] = value[i];
+            mData[std::min(capacity - 1, length)] = '\0';
+        }
+    }
+
+    constexpr explicit FixedString(std::uint32_t value) noexcept
+        : mData()
+    {
+        static_assert(capacity == sizeof(std::uint32_t));
+        for (std::size_t i = 0; i < capacity; ++i)
+            mData[i] = static_cast<char>((value >> (i * std::numeric_limits<std::uint8_t>::digits)) & std::numeric_limits<std::uint8_t>::max());
+    }
+
+    template <class T>
+    constexpr explicit FixedString(T value) noexcept
+        : FixedString(static_cast<std::uint32_t>(value)) {}
 
     std::string_view toStringView() const noexcept
     {
@@ -114,6 +151,11 @@ inline bool operator==(const FixedString<capacity>& lhs, const char (&rhs)[rhsSi
 inline bool operator==(const FixedString<4>& lhs, std::uint32_t rhs) noexcept
 {
     return lhs.toInt() == rhs;
+}
+
+inline bool operator==(const FixedString<4>& lhs, const FixedString<4>& rhs) noexcept
+{
+    return lhs.toInt() == rhs.toInt();
 }
 
 template <std::size_t capacity, class Rhs>

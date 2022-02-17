@@ -296,7 +296,7 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
         return;
 
     mViewMode = viewMode;
-    MWBase::Environment::get().getWorld()->scaleObject(mPtr, mPtr.getCellRef().getScale()); // apply race height after view change
+    MWBase::Environment::get().getWorld()->scaleObject(mPtr, mPtr.getCellRef().getScale(), true); // apply race height after view change
 
     mAmmunition.reset();
     rebuild();

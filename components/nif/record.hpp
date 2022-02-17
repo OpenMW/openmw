@@ -150,7 +150,7 @@ enum RecordType
 struct Record
 {
     // Record type and type name
-    int recType{RC_MISSING};
+    RecordType recType{RC_MISSING};
     std::string recName;
     unsigned int recIndex{~0u};
 

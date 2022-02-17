@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <components/esm/esmcommon.hpp>
+
 namespace ESM
 {
 
@@ -27,7 +29,7 @@ struct LevelledListBase
 
     // Record name used to read references. Must be set before load() is
     // called.
-    const char *mRecName;
+    ESM::NAME mRecName;
 
     struct LevelItem
     {
@@ -36,6 +38,8 @@ struct LevelledListBase
     };
 
     std::vector<LevelItem> mList;
+
+    explicit LevelledListBase(ESM::NAME recName) : mRecName(recName) {}
 
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;
@@ -58,10 +62,7 @@ struct CreatureLevList: LevelledListBase
                           // player.
     };
 
-    CreatureLevList()
-    {
-        mRecName = "CNAM";
-    }
+    CreatureLevList() : LevelledListBase("CNAM") {}
 };
 
 struct ItemLevList: LevelledListBase
@@ -84,10 +85,7 @@ struct ItemLevList: LevelledListBase
                           // player.
     };
 
-    ItemLevList()
-    {
-        mRecName = "INAM";
-    }
+    ItemLevList() : LevelledListBase("INAM") {}
 };
 
 }

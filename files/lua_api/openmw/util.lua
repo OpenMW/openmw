@@ -87,6 +87,20 @@
 -- @param #Vector2 v
 -- @return #number
 
+---
+-- Element-wise multiplication
+-- @function [parent=#Vector2] emul
+-- @param self
+-- @param #Vector2 v
+-- @return #Vector2
+
+---
+-- Element-wise division
+-- @function [parent=#Vector2] ediv
+-- @param self
+-- @param #Vector2 v
+-- @return #Vector2
+
 
 ---
 -- Immutable 3D vector
@@ -152,6 +166,20 @@
 -- @param #Vector3 v
 -- @return #Vector3
 
+---
+-- Element-wise multiplication
+-- @function [parent=#Vector3] emul
+-- @param self
+-- @param #Vector3 v
+-- @return #Vector3
+
+---
+-- Element-wise division
+-- @function [parent=#Vector3] ediv
+-- @param self
+-- @param #Vector3 v
+-- @return #Vector3
+
 
 ---
 -- Immutable 4D vector.
@@ -209,6 +237,21 @@
 -- @param self
 -- @param #Vector4 v
 -- @return #number
+
+---
+-- Element-wise multiplication
+-- @function [parent=#Vector4] emul
+-- @param self
+-- @param #Vector4 v
+-- @return #Vector4
+
+---
+-- Element-wise division
+-- @function [parent=#Vector4] ediv
+-- @param self
+-- @param #Vector4 v
+-- @return #Vector4
+
 
 ---
 -- Color in RGBA format. All of the component values are in the range [0, 1].

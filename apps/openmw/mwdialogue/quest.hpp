@@ -33,9 +33,10 @@ namespace MWDialogue
             ///< Calling this function with a non-existent index will throw an exception.
 
             bool isFinished() const;
+            void setFinished(bool finished);
 
-            void addEntry (const JournalEntry& entry) override;
-            ///< Add entry and adjust index accordingly.
+            bool addEntry (const JournalEntry& entry) override;
+            ///< Add entry and adjust index accordingly. Returns true if the quest should be restarted.
             ///
             /// \note Redundant entries are ignored, but the index is still adjusted.
 
