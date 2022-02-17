@@ -676,11 +676,8 @@ namespace MWDialogue
     {
         ESM::DialogueState state;
 
-        for (std::set<std::string>::const_iterator iter (mKnownTopics.begin());
-            iter!=mKnownTopics.end(); ++iter)
-        {
-            state.mKnownTopics.push_back (*iter);
-        }
+        state.mKnownTopics.reserve(mKnownTopics.size());
+        std::copy(mKnownTopics.begin(), mKnownTopics.end(), std::back_inserter(state.mKnownTopics));
 
         state.mChangedFactionReaction = mChangedFactionReaction;
 
