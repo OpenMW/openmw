@@ -31,7 +31,8 @@ using CreateRecord = std::unique_ptr<Record> (*)();
 ///These are all the record types we know how to read.
 static std::map<std::string, CreateRecord> makeFactory()
 {
-    return {
+    return 
+    {
         {"NiNode"                       , &construct <NiNode                      , RC_NiNode                     >},
         {"NiSwitchNode"                 , &construct <NiSwitchNode                , RC_NiSwitchNode               >},
         {"NiLODNode"                    , &construct <NiLODNode                   , RC_NiLODNode                  >},
@@ -147,7 +148,7 @@ static std::map<std::string, CreateRecord> makeFactory()
         {"bhkRigidBody"                 , &construct <bhkRigidBody                , RC_bhkRigidBody               >},
         {"bhkRigidBodyT"                , &construct <bhkRigidBody                , RC_bhkRigidBodyT              >},
         {"BSLightingShaderProperty"     , &construct <BSLightingShaderProperty    , RC_BSLightingShaderProperty   >},
-        {"NiSortAdjustNode"             , &construct <NiSortAdjustNode            , RC_NiNode                     >},
+        {"NiSortAdjustNode"             , &construct <NiSortAdjustNode            , RC_NiSortAdjustNode           >},
         {"NiClusterAccumulator"         , &construct <NiClusterAccumulator        , RC_NiClusterAccumulator       >},
         {"NiAlphaAccumulator"           , &construct <NiAlphaAccumulator          , RC_NiAlphaAccumulator         >},
     };
