@@ -15,7 +15,6 @@
 #include <cstring>
 #include <optional>
 #include <stdexcept>
-#include <string>
 #include <string_view>
 #include <tuple>
 #include <utility>
@@ -64,21 +63,21 @@ namespace DetourNavigator
         struct FindTile
         {
             static std::string_view text() noexcept;
-            static void bind(sqlite3& db, sqlite3_stmt& statement, const std::string& worldspace,
+            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view worldspace,
                 const TilePosition& tilePosition, const std::vector<std::byte>& input);
         };
 
         struct GetTileData
         {
             static std::string_view text() noexcept;
-            static void bind(sqlite3& db, sqlite3_stmt& statement, const std::string& worldspace,
+            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view worldspace,
                 const TilePosition& tilePosition, const std::vector<std::byte>& input);
         };
 
         struct InsertTile
         {
             static std::string_view text() noexcept;
-            static void bind(sqlite3& db, sqlite3_stmt& statement, TileId tileId, const std::string& worldspace,
+            static void bind(sqlite3& db, sqlite3_stmt& statement, TileId tileId, std::string_view worldspace,
                 const TilePosition& tilePosition, TileVersion version, const std::vector<std::byte>& input,
                 const std::vector<std::byte>& data);
         };
@@ -99,14 +98,14 @@ namespace DetourNavigator
         struct FindShapeId
         {
             static std::string_view text() noexcept;
-            static void bind(sqlite3& db, sqlite3_stmt& statement, const std::string& name,
+            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view name,
                 ShapeType type, const Sqlite3::ConstBlob& hash);
         };
 
         struct InsertShape
         {
             static std::string_view text() noexcept;
-            static void bind(sqlite3& db, sqlite3_stmt& statement, ShapeId shapeId, const std::string& name,
+            static void bind(sqlite3& db, sqlite3_stmt& statement, ShapeId shapeId, std::string_view name,
                 ShapeType type, const Sqlite3::ConstBlob& hash);
         };
     }
@@ -120,22 +119,22 @@ namespace DetourNavigator
 
         TileId getMaxTileId();
 
-        std::optional<Tile> findTile(const std::string& worldspace,
+        std::optional<Tile> findTile(std::string_view worldspace,
             const TilePosition& tilePosition, const std::vector<std::byte>& input);
 
-        std::optional<TileData> getTileData(const std::string& worldspace,
+        std::optional<TileData> getTileData(std::string_view worldspace,
             const TilePosition& tilePosition, const std::vector<std::byte>& input);
 
-        int insertTile(TileId tileId, const std::string& worldspace, const TilePosition& tilePosition,
+        int insertTile(TileId tileId, std::string_view worldspace, const TilePosition& tilePosition,
             TileVersion version, const std::vector<std::byte>& input, const std::vector<std::byte>& data);
 
         int updateTile(TileId tileId, TileVersion version, const std::vector<std::byte>& data);
 
         ShapeId getMaxShapeId();
 
-        std::optional<ShapeId> findShapeId(const std::string& name, ShapeType type, const Sqlite3::ConstBlob& hash);
+        std::optional<ShapeId> findShapeId(std::string_view name, ShapeType type, const Sqlite3::ConstBlob& hash);
 
-        int insertShape(ShapeId shapeId, const std::string& name, ShapeType type, const Sqlite3::ConstBlob& hash);
+        int insertShape(ShapeId shapeId, std::string_view name, ShapeType type, const Sqlite3::ConstBlob& hash);
 
     private:
         Sqlite3::Db mDb;

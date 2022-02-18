@@ -24,6 +24,7 @@
 #include <utility>
 #include <vector>
 #include <random>
+#include <string_view>
 
 namespace NavMeshTool
 {
@@ -81,7 +82,7 @@ namespace NavMeshTool
                 return DetourNavigator::resolveMeshSource(mDb, source, mNextShapeId);
             }
 
-            std::optional<NavMeshTileInfo> find(const std::string& worldspace, const TilePosition &tilePosition,
+            std::optional<NavMeshTileInfo> find(std::string_view worldspace, const TilePosition &tilePosition,
                 const std::vector<std::byte> &input) override
             {
                 std::optional<NavMeshTileInfo> result;
@@ -98,7 +99,7 @@ namespace NavMeshTool
 
             void ignore() override { report(); }
 
-            void insert(const std::string& worldspace, const TilePosition& tilePosition, std::int64_t version,
+            void insert(std::string_view worldspace, const TilePosition& tilePosition, std::int64_t version,
                 const std::vector<std::byte>& input, PreparedNavMeshData& data) override
             {
                 data.mUserId = static_cast<unsigned>(mNextTileId);

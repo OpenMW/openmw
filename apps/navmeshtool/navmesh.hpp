@@ -4,7 +4,6 @@
 #include <osg/Vec3f>
 
 #include <cstddef>
-#include <string_view>
 
 namespace DetourNavigator
 {

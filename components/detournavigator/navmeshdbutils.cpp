@@ -6,19 +6,20 @@
 
 #include <cassert>
 #include <optional>
+#include <string_view>
 
 namespace DetourNavigator
 {
     namespace
     {
-        std::optional<ShapeId> findShapeId(NavMeshDb& db, const std::string& name, ShapeType type,
+        std::optional<ShapeId> findShapeId(NavMeshDb& db, std::string_view name, ShapeType type,
             const std::string& hash)
         {
             const Sqlite3::ConstBlob hashData {hash.data(), static_cast<int>(hash.size())};
             return db.findShapeId(name, type, hashData);
         }
 
-        ShapeId getShapeId(NavMeshDb& db, const std::string& name, ShapeType type,
+        ShapeId getShapeId(NavMeshDb& db, std::string_view name, ShapeType type,
             const std::string& hash, ShapeId& nextShapeId)
         {
             const Sqlite3::ConstBlob hashData {hash.data(), static_cast<int>(hash.size())};
