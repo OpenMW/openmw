@@ -3,6 +3,8 @@
 
 #include "tileposition.hpp"
 
+#include <components/detournavigator/tilespositionsrange.hpp>
+
 #include <components/sqlite3/db.hpp>
 #include <components/sqlite3/statement.hpp>
 #include <components/sqlite3/transaction.hpp>
@@ -89,6 +91,27 @@ namespace DetourNavigator
                 const std::vector<std::byte>& data);
         };
 
+        struct DeleteTilesAt
+        {
+            static std::string_view text() noexcept;
+            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view worldspace,
+                const TilePosition& tilePosition);
+        };
+
+        struct DeleteTilesAtExcept
+        {
+            static std::string_view text() noexcept;
+            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view worldspace,
+                const TilePosition& tilePosition, TileId excludeTileId);
+        };
+
+        struct DeleteTilesOutsideRange
+        {
+            static std::string_view text() noexcept;
+            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view worldspace,
+                const TilesPositionsRange& range);
+        };
+
         struct GetMaxShapeId
         {
             static std::string_view text() noexcept;
@@ -107,6 +130,12 @@ namespace DetourNavigator
             static std::string_view text() noexcept;
             static void bind(sqlite3& db, sqlite3_stmt& statement, ShapeId shapeId, std::string_view name,
                 ShapeType type, const Sqlite3::ConstBlob& hash);
+        };
+
+        struct Vacuum
+        {
+            static std::string_view text() noexcept;
+            static void bind(sqlite3&, sqlite3_stmt&) {}
         };
     }
 
@@ -130,11 +159,19 @@ namespace DetourNavigator
 
         int updateTile(TileId tileId, TileVersion version, const std::vector<std::byte>& data);
 
+        int deleteTilesAt(std::string_view worldspace, const TilePosition& tilePosition);
+
+        int deleteTilesAtExcept(std::string_view worldspace, const TilePosition& tilePosition, TileId excludeTileId);
+
+        int deleteTilesOutsideRange(std::string_view worldspace, const TilesPositionsRange& range);
+
         ShapeId getMaxShapeId();
 
         std::optional<ShapeId> findShapeId(std::string_view name, ShapeType type, const Sqlite3::ConstBlob& hash);
 
         int insertShape(ShapeId shapeId, std::string_view name, ShapeType type, const Sqlite3::ConstBlob& hash);
+
+        void vacuum();
 
     private:
         Sqlite3::Db mDb;
@@ -143,9 +180,13 @@ namespace DetourNavigator
         Sqlite3::Statement<DbQueries::GetTileData> mGetTileData;
         Sqlite3::Statement<DbQueries::InsertTile> mInsertTile;
         Sqlite3::Statement<DbQueries::UpdateTile> mUpdateTile;
+        Sqlite3::Statement<DbQueries::DeleteTilesAt> mDeleteTilesAt;
+        Sqlite3::Statement<DbQueries::DeleteTilesAtExcept> mDeleteTilesAtExcept;
+        Sqlite3::Statement<DbQueries::DeleteTilesOutsideRange> mDeleteTilesOutsideRange;
         Sqlite3::Statement<DbQueries::GetMaxShapeId> mGetMaxShapeId;
         Sqlite3::Statement<DbQueries::FindShapeId> mFindShapeId;
         Sqlite3::Statement<DbQueries::InsertShape> mInsertShape;
+        Sqlite3::Statement<DbQueries::Vacuum> mVacuum;
     };
 }
 

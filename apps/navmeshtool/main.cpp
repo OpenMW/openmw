@@ -83,6 +83,9 @@ namespace NavMeshTool
 
                 ("process-interior-cells", bpo::value<bool>()->implicit_value(true)
                     ->default_value(false), "build navmesh for interior cells")
+
+                ("remove-unused-tiles", bpo::value<bool>()->implicit_value(true)
+                    ->default_value(false), "remove tiles from cache that will not be used with current content profile")
             ;
             Files::ConfigurationManager::addCommonOptions(result);
 
@@ -141,6 +144,7 @@ namespace NavMeshTool
             }
 
             const bool processInteriorCells = variables["process-interior-cells"].as<bool>();
+            const bool removeUnusedTiles = variables["remove-unused-tiles"].as<bool>();
 
             Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
 
@@ -177,7 +181,8 @@ namespace NavMeshTool
             WorldspaceData cellsData = gatherWorldspaceData(navigatorSettings, readers, vfs, bulletShapeManager,
                                                             esmData, processInteriorCells);
 
-            generateAllNavMeshTiles(agentHalfExtents, navigatorSettings, threadsNumber, cellsData, std::move(db));
+            generateAllNavMeshTiles(agentHalfExtents, navigatorSettings, threadsNumber, removeUnusedTiles,
+                                    cellsData, std::move(db));
 
             Log(Debug::Info) << "Done";
 

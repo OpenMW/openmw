@@ -109,4 +109,61 @@ namespace
         EXPECT_THROW(mDb.insertTile(tileId, worldspace, tilePosition, version, input, data), std::runtime_error);
         EXPECT_NO_THROW(insertTile(TileId {54}, version));
     }
+
+    TEST_F(DetourNavigatorNavMeshDbTest, delete_tiles_at_should_remove_all_tiles_with_given_worldspace_and_position)
+    {
+        const TileVersion version {1};
+        const std::string worldspace = "sys::default";
+        const TilePosition tilePosition {3, 4};
+        const std::vector<std::byte> input1 = generateData();
+        const std::vector<std::byte> input2 = generateData();
+        const std::vector<std::byte> data = generateData();
+        ASSERT_EQ(mDb.insertTile(TileId {53}, worldspace, tilePosition, version, input1, data), 1);
+        ASSERT_EQ(mDb.insertTile(TileId {54}, worldspace, tilePosition, version, input2, data), 1);
+        ASSERT_EQ(mDb.deleteTilesAt(worldspace, tilePosition), 2);
+        EXPECT_FALSE(mDb.findTile(worldspace, tilePosition, input1).has_value());
+        EXPECT_FALSE(mDb.findTile(worldspace, tilePosition, input2).has_value());
+    }
+
+    TEST_F(DetourNavigatorNavMeshDbTest, delete_tiles_at_except_should_leave_tile_with_given_id)
+    {
+        const TileId leftTileId {53};
+        const TileId removedTileId {54};
+        const TileVersion version {1};
+        const std::string worldspace = "sys::default";
+        const TilePosition tilePosition {3, 4};
+        const std::vector<std::byte> leftInput = generateData();
+        const std::vector<std::byte> removedInput = generateData();
+        const std::vector<std::byte> data = generateData();
+        ASSERT_EQ(mDb.insertTile(leftTileId, worldspace, tilePosition, version, leftInput, data), 1);
+        ASSERT_EQ(mDb.insertTile(removedTileId, worldspace, tilePosition, version, removedInput, data), 1);
+        ASSERT_EQ(mDb.deleteTilesAtExcept(worldspace, tilePosition, leftTileId), 1);
+        const auto left = mDb.findTile(worldspace, tilePosition, leftInput);
+        ASSERT_TRUE(left.has_value());
+        EXPECT_EQ(left->mTileId, leftTileId);
+        EXPECT_FALSE(mDb.findTile(worldspace, tilePosition, removedInput).has_value());
+    }
+
+    TEST_F(DetourNavigatorNavMeshDbTest, delete_tiles_outside_range_should_leave_tiles_inside_given_rectangle)
+    {
+        TileId tileId {1};
+        const TileVersion version {1};
+        const std::string worldspace = "sys::default";
+        const std::vector<std::byte> input = generateData();
+        const std::vector<std::byte> data = generateData();
+        for (int x = -2; x <= 2; ++x)
+        {
+            for (int y = -2; y <= 2; ++y)
+            {
+                ASSERT_EQ(mDb.insertTile(tileId, worldspace, TilePosition {x, y}, version, input, data), 1);
+                ++tileId.t;
+            }
+        }
+        const TilesPositionsRange range {TilePosition {-1, -1}, TilePosition {2, 2}};
+        ASSERT_EQ(mDb.deleteTilesOutsideRange(worldspace, range), 16);
+        for (int x = -2; x <= 2; ++x)
+            for (int y = -2; y <= 2; ++y)
+                ASSERT_EQ(mDb.findTile(worldspace, TilePosition {x, y}, input).has_value(),
+                          -1 <= x && x <= 1 && -1 <= y && y <= 1) << "x=" << x << " y=" << y;
+    }
 }

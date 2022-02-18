@@ -3,6 +3,7 @@
 
 #include "tilebounds.hpp"
 #include "tileposition.hpp"
+#include "tilespositionsrange.hpp"
 
 class btVector3;
 class btTransform;
@@ -16,12 +17,6 @@ namespace osg
 namespace DetourNavigator
 {
     struct RecastSettings;
-
-    struct TilesPositionsRange
-    {
-        TilePosition mBegin;
-        TilePosition mEnd;
-    };
 
     TilesPositionsRange makeTilesPositionsRange(const osg::Vec2f& aabbMin,
         const osg::Vec2f& aabbMax, const RecastSettings& settings);

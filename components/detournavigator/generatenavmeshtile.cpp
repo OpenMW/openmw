@@ -25,12 +25,14 @@ namespace DetourNavigator
     {
         struct Ignore
         {
+            std::string_view mWorldspace;
+            const TilePosition& mTilePosition;
             std::shared_ptr<NavMeshTileConsumer> mConsumer;
 
             ~Ignore() noexcept
             {
                 if (mConsumer != nullptr)
-                    mConsumer->ignore();
+                    mConsumer->ignore(mWorldspace, mTilePosition);
             }
         };
     }
@@ -59,7 +61,7 @@ namespace DetourNavigator
 
         try
         {
-            Ignore ignore {consumer};
+            Ignore ignore {mWorldspace, mTilePosition, consumer};
 
             const std::shared_ptr<RecastMesh> recastMesh = mRecastMeshProvider.getMesh(mWorldspace, mTilePosition);
 
@@ -72,7 +74,11 @@ namespace DetourNavigator
             const std::optional<NavMeshTileInfo> info = consumer->find(mWorldspace, mTilePosition, input);
 
             if (info.has_value() && info->mVersion == mSettings.mNavMeshVersion)
+            {
+                consumer->identity(mWorldspace, mTilePosition, info->mTileId);
+                ignore.mConsumer = nullptr;
                 return;
+            }
 
             const auto data = prepareNavMeshTileData(*recastMesh, mTilePosition, mAgentHalfExtents, mSettings.mRecast);
 
@@ -80,7 +86,7 @@ namespace DetourNavigator
                 return;
 
             if (info.has_value())
-                consumer->update(info->mTileId, mSettings.mNavMeshVersion, *data);
+                consumer->update(mWorldspace, mTilePosition, info->mTileId, mSettings.mNavMeshVersion, *data);
             else
                 consumer->insert(mWorldspace, mTilePosition, mSettings.mNavMeshVersion, input, *data);
 
