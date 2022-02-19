@@ -79,6 +79,7 @@ KeyframeController::KeyframeController(const KeyframeController &copy, const osg
     , mZRotations(copy.mZRotations)
     , mTranslations(copy.mTranslations)
     , mScales(copy.mScales)
+    , mAxisOrder(copy.mAxisOrder)
 {
 }
 
@@ -95,6 +96,7 @@ KeyframeController::KeyframeController(const Nif::NiKeyframeController *keyctrl)
             mZRotations = FloatInterpolator(interp->data->mZRotations);
             mTranslations = Vec3Interpolator(interp->data->mTranslations, interp->defaultPos);
             mScales = FloatInterpolator(interp->data->mScales, interp->defaultScale);
+            mAxisOrder = interp->data->mAxisOrder;
         }
         else
         {
@@ -112,6 +114,7 @@ KeyframeController::KeyframeController(const Nif::NiKeyframeController *keyctrl)
         mZRotations = FloatInterpolator(keydata->mZRotations);
         mTranslations = Vec3Interpolator(keydata->mTranslations);
         mScales = FloatInterpolator(keydata->mScales, 1.f);
+        mAxisOrder = keydata->mAxisOrder;
     }
 }
 
@@ -124,10 +127,31 @@ osg::Quat KeyframeController::getXYZRotation(float time) const
         yrot = mYRotations.interpKey(time);
     if (!mZRotations.empty())
         zrot = mZRotations.interpKey(time);
-    osg::Quat xr(xrot, osg::Vec3f(1,0,0));
-    osg::Quat yr(yrot, osg::Vec3f(0,1,0));
-    osg::Quat zr(zrot, osg::Vec3f(0,0,1));
-    return (xr*yr*zr);
+    osg::Quat xr(xrot, osg::X_AXIS);
+    osg::Quat yr(yrot, osg::Y_AXIS);
+    osg::Quat zr(zrot, osg::Z_AXIS);
+    switch (mAxisOrder)
+    {
+        case Nif::NiKeyframeData::AxisOrder::Order_XYZ:
+            return xr * yr * zr;
+        case Nif::NiKeyframeData::AxisOrder::Order_XZY:
+            return xr * zr * yr;
+        case Nif::NiKeyframeData::AxisOrder::Order_YZX:
+            return yr * zr * xr;
+        case Nif::NiKeyframeData::AxisOrder::Order_YXZ:
+            return yr * xr * zr;
+        case Nif::NiKeyframeData::AxisOrder::Order_ZXY:
+            return zr * xr * yr;
+        case Nif::NiKeyframeData::AxisOrder::Order_ZYX:
+            return zr * yr * xr;
+        case Nif::NiKeyframeData::AxisOrder::Order_XYX:
+            return xr * yr * xr;
+        case Nif::NiKeyframeData::AxisOrder::Order_YZY:
+            return yr * zr * yr;
+        case Nif::NiKeyframeData::AxisOrder::Order_ZXZ:
+            return zr * xr * zr;
+    }
+    return xr * yr * zr;
 }
 
 osg::Vec3f KeyframeController::getTranslation(float time) const

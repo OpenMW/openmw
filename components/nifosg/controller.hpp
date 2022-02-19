@@ -255,6 +255,8 @@ namespace NifOsg
         Vec3Interpolator mTranslations;
         FloatInterpolator mScales;
 
+        Nif::NiKeyframeData::AxisOrder mAxisOrder{Nif::NiKeyframeData::AxisOrder::Order_XYZ};
+
         osg::Quat getXYZRotation(float time) const;
     };
 

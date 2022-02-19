@@ -439,9 +439,8 @@ void NiKeyframeData::read(NIFStream *nif)
     mRotations->read(nif);
     if(mRotations->mInterpolationType == InterpolationType_XYZ)
     {
-        //Chomp unused float
         if (nif->getVersion() <= NIFStream::generateVersion(10,1,0,0))
-            nif->getFloat();
+            mAxisOrder = static_cast<AxisOrder>(nif->getInt());
         mXRotations = std::make_shared<FloatKeyMap>();
         mYRotations = std::make_shared<FloatKeyMap>();
         mZRotations = std::make_shared<FloatKeyMap>();
