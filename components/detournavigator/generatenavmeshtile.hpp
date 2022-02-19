@@ -36,15 +36,19 @@ namespace DetourNavigator
 
         virtual std::int64_t resolveMeshSource(const MeshSource& source) = 0;
 
-        virtual std::optional<NavMeshTileInfo> find(const std::string& worldspace, const TilePosition& tilePosition,
+        virtual std::optional<NavMeshTileInfo> find(std::string_view worldspace, const TilePosition& tilePosition,
             const std::vector<std::byte>& input) = 0;
 
-        virtual void ignore() = 0;
+        virtual void ignore(std::string_view worldspace, const TilePosition& tilePosition) = 0;
 
-        virtual void insert(const std::string& worldspace, const TilePosition& tilePosition,
+        virtual void identity(std::string_view worldspace, const TilePosition& tilePosition,
+                              std::int64_t tileId) = 0;
+
+        virtual void insert(std::string_view worldspace, const TilePosition& tilePosition,
                             std::int64_t version, const std::vector<std::byte>& input, PreparedNavMeshData& data) = 0;
 
-        virtual void update(std::int64_t tileId, std::int64_t version, PreparedNavMeshData& data) = 0;
+        virtual void update(std::string_view worldspace, const TilePosition& tilePosition,
+                            std::int64_t tileId, std::int64_t version, PreparedNavMeshData& data) = 0;
     };
 
     class GenerateNavMeshTile final : public SceneUtil::WorkItem

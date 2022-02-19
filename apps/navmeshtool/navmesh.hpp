@@ -4,7 +4,6 @@
 #include <osg/Vec3f>
 
 #include <cstddef>
-#include <string_view>
 
 namespace DetourNavigator
 {
@@ -17,7 +16,8 @@ namespace NavMeshTool
     struct WorldspaceData;
 
     void generateAllNavMeshTiles(const osg::Vec3f& agentHalfExtents, const DetourNavigator::Settings& settings,
-        const std::size_t threadsNumber, WorldspaceData& cellsData, DetourNavigator::NavMeshDb&& db);
+        std::size_t threadsNumber, bool removeUnusedTiles, WorldspaceData& cellsData,
+        DetourNavigator::NavMeshDb&& db);
 }
 
 #endif

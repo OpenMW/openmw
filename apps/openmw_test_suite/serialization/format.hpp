@@ -5,6 +5,7 @@
 
 #include <utility>
 #include <type_traits>
+#include <cstdint>
 
 namespace SerializationTesting
 {
@@ -20,7 +21,7 @@ namespace SerializationTesting
         }
     };
 
-    enum Enum
+    enum Enum : std::int32_t
     {
         A,
         B,
@@ -30,7 +31,7 @@ namespace SerializationTesting
     struct Composite
     {
         short mFloatArray[3] = {0};
-        std::vector<int> mIntVector;
+        std::vector<std::int32_t> mIntVector;
         std::vector<Enum> mEnumVector;
         std::vector<Pod> mPodVector;
         std::size_t mPodDataSize = 0;
