@@ -315,9 +315,16 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                 mPackages.push_back(package->clone());
             }
 
-            // To account for the rare case where AiPackage::execute() queued another AI package
-            // (e.g. AiPursue executing a dialogue script that uses startCombat)
-            erase(mPackages.begin());
+            // The active package is typically the first entry, this is however not always the case
+            // e.g. AiPursue executing a dialogue script that uses startCombat adds a combat package to the front
+            // due to the priority.
+            auto activePackageIt = std::find_if(mPackages.begin(), mPackages.end(), [&](auto& entry)
+                {
+                    return entry.get() == package;
+                });
+
+            erase(activePackageIt);
+
             if (isActualAiPackage(packageTypeId))
                 mDone = true;
         }
