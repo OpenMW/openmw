@@ -635,6 +635,8 @@ namespace MWRender
 
     void GlobalMap::asyncWritePng()
     {
+        if (mOverlayImage == nullptr)
+            return;
         // Use deep copy to avoid any sychronization
         mWritePng = new WritePng(new osg::Image(*mOverlayImage, osg::CopyOp::DEEP_COPY_ALL));
         mWorkQueue->addWorkItem(mWritePng, /*front=*/true);
