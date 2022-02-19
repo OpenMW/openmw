@@ -33,17 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Quest::Quest() : mFormId(0), mFlags(0), mQuestScript(0)
-{
-    mEditorId.clear();
-    mQuestName.clear();
-    mFileName.clear();
-
-    std::memset(&mScript.scriptHeader, 0, sizeof(ScriptHeader));
-    mScript.scriptSource.clear();
-    mScript.globReference = 0;
-}
-
 ESM4::Quest::~Quest()
 {
 }
