@@ -64,7 +64,7 @@ Armature / Rig
   Only a single rig object should be included in the exported file. Exporting multiple rigs is not reliably supported and can lead to errors.
 
 Root
-----
+====
 
 The rig needs to be structured in a specific way. There should be a single top 
 bone in the rig’s hierarchy, the root bone named ``Bip01``. The name is 
@@ -77,7 +77,7 @@ needs to have its ``Deform`` flag **enabled**.
 
 
 Deform Bones
-------------
+============
 
 Below the root bone, the bones are divided into two branches. One branch 
 contains the deform bones which get included in the final exported file. These 
@@ -90,7 +90,7 @@ convention used for NPC and player models.
     :align: center
 
 Control Bones
--------------
+=============
 
 The other branch holds control and helper bones that enable comfortable 
 animation in Blender, but are neither required nor included in the exported 
