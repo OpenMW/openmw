@@ -32,25 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::World::World() : mFormId(0), mFlags(0), mParent(0), mWorldFlags(0), mClimate(0), mWater(0),
-                       mLandLevel(0.f), mWaterLevel(0.f), // -2700.f and -14000.f for TES5
-                       mMinX(0), mMinY(0), mMaxX(0), mMaxY(0), mSound(0), mMusic(0), mParentUseFlags(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mMapFile.clear();
-
-    mMap.width = 0;
-    mMap.height = 0;
-    mMap.NWcellX = 0;
-    mMap.NWcellY = 0;
-    mMap.SEcellX = 0;
-    mMap.SEcellY = 0;
-    mMap.minHeight = 0.f;
-    mMap.maxHeight = 0.f;
-    mMap.initialPitch = 0.f;
-}
-
 ESM4::World::~World()
 {
 }

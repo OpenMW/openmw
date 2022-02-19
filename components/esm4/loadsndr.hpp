@@ -73,7 +73,6 @@ namespace ESM4
 
         TargetCondition mTargetCondition;
 
-        SoundReference();
         virtual ~SoundReference();
 
         virtual void load(ESM4::Reader& reader);

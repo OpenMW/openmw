@@ -42,7 +42,7 @@ namespace ESM4
         struct Data
         {
             std::uint32_t time;               // FO/FONV only
-            float         duration;
+            float         duration = -1;
             std::uint32_t radius;
             std::uint32_t colour; // RGBA
             // flags:
@@ -57,18 +57,14 @@ namespace ESM4
             // 0x00000200 = Spot Light
             // 0x00000400 = Spot Shadow
             std::int32_t  flags;
-            float         falloff;
-            float         FOV;
+            float         falloff = 1.f;
+            float         FOV = 90; // FIXME: FOV in degrees or radians?
             float         nearClip;           // TES5 only
             float         frequency;          // TES5 only
             float         intensityAmplitude; // TES5 only
             float         movementAmplitude;  // TES5 only
             std::uint32_t value;   // gold
             float         weight;
-            Data() : duration(-1), radius(0), colour(0), flags(0), falloff(1.f), FOV(90),
-                     nearClip(0.f), frequency(0.f), intensityAmplitude(0.f), movementAmplitude(0.f),
-                     value(0), weight(0.f) // FIXME: FOV in degrees or radians?
-            {}
         };
 
         FormId mFormId;       // from the header
@@ -88,7 +84,6 @@ namespace ESM4
 
         Data mData;
 
-        Light();
         virtual ~Light();
 
         virtual void load(ESM4::Reader& reader);

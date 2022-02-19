@@ -32,11 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::GlobalVariable::GlobalVariable() : mFormId(0), mFlags(0), mType(0), mValue(0.f)
-{
-    mEditorId.clear();
-}
-
 ESM4::GlobalVariable::~GlobalVariable()
 {
 }

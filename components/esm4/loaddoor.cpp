@@ -31,14 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Door::Door() : mFormId(0), mFlags(0), mBoundRadius(0.f), mDoorFlags(0), mScriptId(0),
-                     mOpenSound(0), mCloseSound(0), mLoopSound(0), mRandomTeleport(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-}
-
 ESM4::Door::~Door()
 {
 }

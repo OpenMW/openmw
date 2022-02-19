@@ -31,14 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Furniture::Furniture() : mFormId(0), mFlags(0), mBoundRadius(0.f), mScriptId(0),
-                               mActiveMarkerFlags(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-}
-
 ESM4::Furniture::~Furniture()
 {
 }

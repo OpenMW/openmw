@@ -33,14 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Road::Road() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-
-    mNodes.clear();
-    mLinks.clear();
-}
-
 ESM4::Road::~Road()
 {
 }

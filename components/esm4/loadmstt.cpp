@@ -32,12 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::MovableStatic::MovableStatic() : mFormId(0), mFlags(0), mData(0), mLoopingSound(0)
-{
-    mEditorId.clear();
-    mModel.clear();
-}
-
 ESM4::MovableStatic::~MovableStatic()
 {
 }

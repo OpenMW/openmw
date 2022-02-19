@@ -31,12 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Material::Material() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-    mModel.clear();
-}
-
 ESM4::Material::~Material()
 {
 }

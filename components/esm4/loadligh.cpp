@@ -31,15 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Light::Light() : mFormId(0), mFlags(0), mBoundRadius(0.f), mScriptId(0), mSound(0),
-                       mFade(0.f)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-    mIcon.clear();
-}
-
 ESM4::Light::~Light()
 {
 }

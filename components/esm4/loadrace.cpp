@@ -35,28 +35,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Race::Race() : mFormId(0), mFlags(0), mIsTES5(false)
-                   , mHeightMale(1.f), mHeightFemale(1.f), mWeightMale(1.f), mWeightFemale(1.f)
-                   , mRaceFlags(0), mFaceGenMainClamp(0.f), mFaceGenFaceClamp(0.f), mNumKeywords(0)
-                   , mSkin(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mDesc.clear();
-    mModelMale.clear();
-    mModelFemale.clear();
-
-    std::memset(&mAttribMale, 0, sizeof(AttributeValues));
-    std::memset(&mAttribFemale, 0, sizeof(AttributeValues));
-
-    mVNAM.resize(2);
-    mDefaultHair.resize(2);
-
-    mBodyTemplate.bodyPart = 0;
-    mBodyTemplate.flags = 0;
-    mBodyTemplate.type = 0;
-}
-
 ESM4::Race::~Race()
 {
 }

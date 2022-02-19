@@ -50,7 +50,6 @@ namespace ESM4
         float mIdleTimer;
         std::vector<FormId> mIdleAnim;
 
-        IdleMarker();
         virtual ~IdleMarker();
 
         virtual void load(ESM4::Reader& reader);

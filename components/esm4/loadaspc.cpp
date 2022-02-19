@@ -32,12 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::AcousticSpace::AcousticSpace() : mFormId(0), mFlags(0), mEnvironmentType(0), mSoundRegion(0),
-    mIsInterior(0)
-{
-    mEditorId.clear();
-}
-
 ESM4::AcousticSpace::~AcousticSpace()
 {
 }

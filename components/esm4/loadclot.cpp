@@ -32,22 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Clothing::Clothing() : mFormId(0), mFlags(0), mBoundRadius(0.f), mClothingFlags(0),
-                             mScriptId(0), mEnchantmentPoints(0), mEnchantment(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModelMale.clear();
-    mModelMaleWorld.clear();
-    mModelFemale.clear();
-    mModelFemaleWorld.clear();
-    mIconMale.clear();
-    mIconFemale.clear();
-
-    mData.value = 0;
-    mData.weight = 0.f;
-}
-
 ESM4::Clothing::~Clothing()
 {
 }

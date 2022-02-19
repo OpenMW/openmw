@@ -51,7 +51,6 @@ namespace ESM4
         FormId mScriptId;
         std::uint32_t mActiveMarkerFlags;
 
-        Furniture();
         virtual ~Furniture();
 
         virtual void load(ESM4::Reader& reader);

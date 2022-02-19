@@ -31,16 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Ammunition::Ammunition() : mFormId(0), mFlags(0), mPickUpSound(0), mDropSound(0), mBoundRadius(0.f)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-    mText.clear();
-    mIcon.clear();
-    mMiniIcon.clear();
-}
-
 ESM4::Ammunition::~Ammunition()
 {
 }

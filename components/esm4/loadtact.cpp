@@ -32,14 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::TalkingActivator::TalkingActivator() : mFormId(0), mFlags(0), mScriptId(0), mVoiceType(0), mLoopSound(0),
-    mRadioTemplate(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-}
-
 ESM4::TalkingActivator::~TalkingActivator()
 {
 }

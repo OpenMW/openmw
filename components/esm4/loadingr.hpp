@@ -70,7 +70,6 @@ namespace ESM4
 
         Data mData;
 
-        Ingredient();
         virtual ~Ingredient();
 
         virtual void load(ESM4::Reader& reader);

@@ -33,20 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::AIPackage::AIPackage() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-
-    std::memset(&mData, 0, sizeof(PKDT));
-    std::memset(&mSchedule, 0, sizeof(PSDT));
-    std::memset(&mLocation, 0, sizeof(PLDT));
-    mLocation.type = 0xff; // default to indicate no location data
-    std::memset(&mTarget, 0, sizeof(PTDT));
-    mTarget.type = 0xff;   // default to indicate no target data
-
-    mConditions.clear();
-}
-
 ESM4::AIPackage::~AIPackage()
 {
 }

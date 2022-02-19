@@ -47,7 +47,6 @@ namespace ESM4
         std::string mModel;
         std::string mIcon;
 
-        Note();
         virtual ~Note();
 
         virtual void load(ESM4::Reader& reader);

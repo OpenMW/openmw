@@ -58,7 +58,6 @@ namespace ESM4
         bool calcEachItemInCount() const;
         std::int8_t chanceNone() const;
 
-        LevelledCreature();
         virtual ~LevelledCreature();
 
         virtual void load(ESM4::Reader& reader);

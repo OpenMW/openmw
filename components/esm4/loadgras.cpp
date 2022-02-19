@@ -31,12 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Grass::Grass() : mFormId(0), mFlags(0), mBoundRadius(0.f)
-{
-    mEditorId.clear();
-    mModel.clear();
-}
-
 ESM4::Grass::~Grass()
 {
 }

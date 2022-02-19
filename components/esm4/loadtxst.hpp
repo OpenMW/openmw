@@ -53,7 +53,6 @@ namespace ESM4
         std::string mUnknown;
         std::string mSpecular;
 
-        TextureSet();
         virtual ~TextureSet();
 
         virtual void load(ESM4::Reader& reader);

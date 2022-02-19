@@ -45,7 +45,6 @@ namespace ESM4
         std::string mEditorId;
         std::string mModel;
 
-        Material();
         virtual ~Material();
 
         virtual void load(ESM4::Reader& reader);

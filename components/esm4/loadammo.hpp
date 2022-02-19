@@ -71,7 +71,6 @@ namespace ESM4
 
         Data mData;
 
-        Ammunition();
         virtual ~Ammunition();
 
         virtual void load(ESM4::Reader& reader);

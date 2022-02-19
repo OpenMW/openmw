@@ -32,21 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Ingredient::Ingredient() : mFormId(0), mFlags(0), mBoundRadius(0.f), mScriptId(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-    mIcon.clear();
-
-    mData.value = 0;
-    mData.weight = 0.f;
-    mEnchantment.value = 0;
-    mEnchantment.flags = 0;
-
-    std::memset(&mEffect, 0, sizeof(ScriptEffect));
-}
-
 ESM4::Ingredient::~Ingredient()
 {
 }

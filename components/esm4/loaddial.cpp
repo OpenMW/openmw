@@ -33,15 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Dialogue::Dialogue() : mFormId(0), mFlags(0), mDoAllBeforeRepeat(false),
-                             mDialType(0), mDialFlags(0), mPriority(0.f)
-{
-    mEditorId.clear();
-    mTopicName.clear();
-
-    mTextDumb.clear(); // FIXME: temp name
-}
-
 ESM4::Dialogue::~Dialogue()
 {
 }

@@ -28,6 +28,7 @@
 #define ESM4_LIGHTING_H
 
 #include <cstdint>
+#include <limits>
 
 namespace ESM4
 {
@@ -44,7 +45,7 @@ namespace ESM4
         std::int32_t  rotationZ;   // rotation z    | 00 00 00 00 = 0
         float         fogDirFade;  // Fog dir fade  | 00 00 80 3F = 1.f
         float         fogClipDist; // Fog clip dist | 00 80 3B 45 = 3000.f
-        float         fogPower;
+        float         fogPower = std::numeric_limits<float>::max();
     };
 
     struct Lighting_TES5

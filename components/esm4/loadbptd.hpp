@@ -115,7 +115,6 @@ namespace ESM4
 
         std::vector<BodyPart> mBodyParts;
 
-        BodyPartData();
         virtual ~BodyPartData();
 
         virtual void load(ESM4::Reader& reader);

@@ -32,24 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::MediaSet::MediaSet() : mFormId(0), mFlags(0), mSetType(-1), mEnabled(0),
-    mBoundaryDayOuter(0.f), mBoundaryDayMiddle(0.f), mBoundaryDayInner(0.f),
-    mBoundaryNightOuter(0.f), mBoundaryNightMiddle(0.f), mBoundaryNightInner(0.f),
-    mLevel8(0.f), mLevel9(0.f), mLevel0(0.f), mLevelA(0.f), mLevelB(0.f), mLevelC(0.f),
-    mTime1(0.f), mTime2(0.f), mTime3(0.f), mTime4(0.f),
-    mSoundIntro(0), mSoundOutro(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-
-    mSet2.clear();
-    mSet3.clear();
-    mSet4.clear();
-    mSet5.clear();
-    mSet6.clear();
-    mSet7.clear();
-}
-
 ESM4::MediaSet::~MediaSet()
 {
 }

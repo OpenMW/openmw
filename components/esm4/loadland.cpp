@@ -38,17 +38,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Land::Land() : mFormId(0), mFlags(0), mLandFlags(0), mDataTypes(0)
-{
-    for (int i = 0; i < 4; ++i)
-    {
-        mTextures[i].base.formId = 0;
-        mTextures[i].base.quadrant = 0;
-        mTextures[i].base.unknown1 = 0;
-        mTextures[i].base.unknown2 = 0;
-    }
-}
-
 ESM4::Land::~Land()
 {
 }

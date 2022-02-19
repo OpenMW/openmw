@@ -32,12 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::LevelledItem::LevelledItem() : mFormId(0), mFlags(0), mChanceNone(0), mHasLvlItemFlags(false),
-    mLvlItemFlags(0), mData(0)
-{
-    mEditorId.clear();
-}
-
 ESM4::LevelledItem::~LevelledItem()
 {
 }

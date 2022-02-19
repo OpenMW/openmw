@@ -51,7 +51,7 @@ namespace ESM4
         //              night outer (NAM5), night middle (NAM6), night inner (NAM7)
         // Dungeon    - intro (HNAM), battle (NAM2), explore (NAM3), suspence (NAM4), outro (INAM)
         // Incidental - daytime (HNAM), nighttime (INAM)
-        std::int32_t mSetType;
+        std::int32_t mSetType = -1;
         // 0x01 day outer,   0x02 day middle,   0x04 day inner
         // 0x08 night outer, 0x10 night middle, 0x20 night inner
         std::uint8_t mEnabled; // for location
@@ -86,7 +86,6 @@ namespace ESM4
         FormId mSoundIntro; // HNAM
         FormId mSoundOutro; // INAM
 
-        MediaSet();
         virtual ~MediaSet();
 
         virtual void load(ESM4::Reader& reader);

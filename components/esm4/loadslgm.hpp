@@ -63,7 +63,6 @@ namespace ESM4
 
         Data mData;
 
-        SoulGem();
         virtual ~SoulGem();
 
         virtual void load(ESM4::Reader& reader);

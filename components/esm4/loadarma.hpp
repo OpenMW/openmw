@@ -57,7 +57,6 @@ namespace ESM4
 
         BodyTemplate mBodyTemplate; // TES5
 
-        ArmorAddon();
         virtual ~ArmorAddon();
 
         virtual void load(ESM4::Reader& reader);

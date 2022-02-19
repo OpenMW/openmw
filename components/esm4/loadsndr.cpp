@@ -32,12 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::SoundReference::SoundReference() : mFormId(0), mFlags(0), mSoundCategory(0), mSoundId(0), mOutputModel(0)
-{
-    mEditorId.clear();
-    mSoundFile.clear();
-}
-
 ESM4::SoundReference::~SoundReference()
 {
 }

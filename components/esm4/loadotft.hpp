@@ -47,7 +47,6 @@ namespace ESM4
 
         std::vector<FormId> mInventory;
 
-        Outfit();
         virtual ~Outfit();
 
         virtual void load(ESM4::Reader& reader);

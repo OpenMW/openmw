@@ -65,7 +65,6 @@ namespace ESM4
         FormId mSound;
         Production mPercentHarvest;
 
-        Flora();
         virtual ~Flora();
 
         virtual void load(ESM4::Reader& reader);

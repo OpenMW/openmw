@@ -53,7 +53,6 @@ namespace ESM4
         FormId mPasswordNote;
         FormId mSound;
 
-        Terminal();
         virtual ~Terminal();
 
         virtual void load(ESM4::Reader& reader);

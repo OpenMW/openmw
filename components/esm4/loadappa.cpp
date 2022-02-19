@@ -31,20 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Apparatus::Apparatus() : mFormId(0), mFlags(0), mBoundRadius(0.f), mScriptId(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-    mText.clear();
-    mIcon.clear();
-
-    mData.type = 0;
-    mData.value = 0;
-    mData.weight = 0.f;
-    mData.quality = 0.f;
-}
-
 ESM4::Apparatus::~Apparatus()
 {
 }

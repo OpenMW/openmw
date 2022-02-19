@@ -31,15 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Eyes::Eyes() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mIcon.clear();
-
-    mData.flags = 0;
-}
-
 ESM4::Eyes::~Eyes()
 {
 }

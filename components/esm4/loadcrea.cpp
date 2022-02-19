@@ -40,28 +40,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Creature::Creature() : mFormId(0), mFlags(0), mDeathItem(0), mScriptId(0), mCombatStyle(0),
-                             mSoundBase(0), mSound(0), mSoundChance(0), mBaseScale(0.f),
-                             mTurningSpeed(0.f), mFootWeight(0.f), mBoundRadius(0.f)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-
-    mBloodSpray.clear();
-    mBloodDecal.clear();
-
-    mAIData.aggression = 0;
-    mAIData.confidence = 0;
-    mAIData.energyLevel = 0;
-    mAIData.responsibility = 0;
-    mAIData.aiFlags = 0;
-    mAIData.trainSkill = 0;
-    mAIData.trainLevel = 0;
-
-    std::memset(&mData, 0, sizeof(Data));
-}
-
 ESM4::Creature::~Creature()
 {
 }

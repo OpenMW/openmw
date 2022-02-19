@@ -76,7 +76,6 @@ namespace ESM4
         std::vector<PGRP> mNodes;
         std::vector<PGRR> mLinks;
 
-        Road();
         virtual ~Road();
 
         virtual void load(ESM4::Reader& reader);

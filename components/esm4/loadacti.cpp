@@ -32,16 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Activator::Activator() : mFormId(0), mFlags(0), mScriptId(0), mLoopingSound(0), mActivationSound(0),
-    mBoundRadius(0.f), mRadioTemplate(0), mRadioStation(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-
-    mActivationPrompt.clear();
-}
-
 ESM4::Activator::~Activator()
 {
 }

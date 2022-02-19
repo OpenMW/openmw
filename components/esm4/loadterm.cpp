@@ -32,16 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Terminal::Terminal() : mFormId(0), mFlags(0), mScriptId(0), mPasswordNote(0), mSound(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mText.clear();
-
-    mModel.clear();
-    mResultText.clear();
-}
-
 ESM4::Terminal::~Terminal()
 {
 }

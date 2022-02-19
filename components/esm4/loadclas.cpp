@@ -36,14 +36,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Class::Class()
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mDesc.clear();
-    mIcon.clear();
-}
-
 ESM4::Class::~Class()
 {
 }

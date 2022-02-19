@@ -49,7 +49,6 @@ namespace ESM4
         FormId      mParent;  // IDLE or AACT
         FormId      mPrevious;
 
-        IdleAnimation();
         virtual ~IdleAnimation();
 
         virtual void load(ESM4::Reader& reader);

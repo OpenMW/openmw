@@ -32,15 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::ArmorAddon::ArmorAddon() : mFormId(0), mFlags(0), mTextureMale(0), mTextureFemale(0),
-                                 mRacePrimary(0)
-{
-    mEditorId.clear();
-
-    mModelMale.clear();
-    mModelFemale.clear();
-}
-
 ESM4::ArmorAddon::~ArmorAddon()
 {
 }

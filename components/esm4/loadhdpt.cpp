@@ -32,15 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::HeadPart::HeadPart() : mFormId(0), mFlags(0), mData(0), mAdditionalPart(0), mBaseTexture(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-
-    mTriFile.resize(3);
-}
-
 ESM4::HeadPart::~HeadPart()
 {
 }

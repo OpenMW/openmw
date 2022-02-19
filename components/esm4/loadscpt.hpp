@@ -46,7 +46,6 @@ namespace ESM4
 
         ScriptDefinition mScript;
 
-        Script();
         virtual ~Script();
 
         virtual void load(ESM4::Reader& reader);
