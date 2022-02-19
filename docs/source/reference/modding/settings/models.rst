@@ -37,10 +37,15 @@ xbaseanim
 :Range:		
 :Default:	meshes/xbase_anim.nif
 
-Path to the file used for 3rd person base animation model that looks also for the corresponding kf-file.
+Path to the file used for 3rd person base animation model that looks also for 
+the corresponding kf-file.
 
 .. note::
-	If you are using the COLLADA format, you don't need to separate the files as they are separated between .nif and .kf files. It works if you plug the same COLLADA file into all animation-related entries, just make sure there is a corresponding textkeys file. You can read more about the textkeys in :doc:`../../modding/custom-models/pipeline-blender-collada`.
+	If you are using the COLLADA format, you don't need to separate the files as 
+	they are separated between .nif and .kf files. It works if you plug the same 
+	COLLADA file into all animation-related entries, just make sure there is a 
+	corresponding textkeys file. You can read more about the textkeys in 
+	:doc:`../../modding/custom-models/pipeline-blender-collada-animated-creature`.
 
 baseanim
 --------
@@ -58,7 +63,8 @@ xbaseanim1st
 :Range:		
 :Default:	meshes/xbase_anim.1st.nif
 
-Path to the file used for 1st person base animation model that looks also for corresponding kf-file.
+Path to the file used for 1st person base animation model that looks also for 
+corresponding kf-file.
 
 baseanimkna
 -----------
@@ -175,7 +181,9 @@ skyatmosphere
 :Range:		
 :Default:	meshes/sky_atmosphere.nif
 
-Path to the file used for the sky atmosphere mesh, which is one of the three meshes needed to render the sky. It's used to make the top half of the sky blue and renders in front of the background color.
+Path to the file used for the sky atmosphere mesh, which is one of the three 
+meshes needed to render the sky. It's used to make the top half of the sky blue 
+and renders in front of the background color.
 
 skyclouds
 ---------
@@ -184,7 +192,9 @@ skyclouds
 :Range:		
 :Default:	meshes/sky_clouds_01.nif.
 
-Path to the file used for the sky clouds mesh, which is one of the three meshes needed to render the sky. It displays a scrolling texture of clouds in front of the atmosphere mesh and background color
+Path to the file used for the sky clouds mesh, which is one of the three meshes 
+needed to render the sky. It displays a scrolling texture of clouds in front of 
+the atmosphere mesh and background color
 
 skynight01
 ----------
@@ -193,7 +203,10 @@ skynight01
 :Range:		
 :Default:	meshes/sky_night_01.nif
 
-Path to the file used for the sky stars mesh, which is one of the three meshes needed to render the sky. During night, it displays a texture with stars in front of the atmosphere and behind the clouds. If skynight02 is present, skynight01 will not be used.
+Path to the file used for the sky stars mesh, which is one of the three meshes 
+needed to render the sky. During night, it displays a texture with stars in 
+front of the atmosphere and behind the clouds. If skynight02 is present, 
+skynight01 will not be used.
 
 skynight02
 ----------
@@ -202,7 +215,10 @@ skynight02
 :Range:		
 :Default:	meshes/sky_night_02.nif
 
-Path to the file used for the sky stars mesh, which is one of the three meshes needed to render the sky. During night, it displays a texture with stars in front of the atmosphere and behind the clouds. If it's present it will be used instead of skynight01.
+Path to the file used for the sky stars mesh, which is one of the three meshes 
+needed to render the sky. During night, it displays a texture with stars in 
+front of the atmosphere and behind the clouds. If it's present it will be used 
+instead of skynight01.
 
 weatherashcloud
 ---------------
@@ -211,7 +227,9 @@ weatherashcloud
 :Range:		
 :Default:	meshes/ashcloud.nif
 
-Path to the file used for the ash clouds weather effect in Morrowind. OpenMW doesn't use this file, instead it renders a similar looking particle effect. Changing this won't have any effect.
+Path to the file used for the ash clouds weather effect in Morrowind. OpenMW 
+doesn't use this file, instead it renders a similar looking particle effect. 
+Changing this won't have any effect.
 
 weatherblightcloud
 ------------------
@@ -220,7 +238,9 @@ weatherblightcloud
 :Range:		
 :Default:	meshes/blightcloud.nif
 
-Path to the file used for the blight clouds weather effect in Morrowind. OpenMW doesn't use this file, instead it renders a similar looking particle effect. Changing this won't have any effect.
+Path to the file used for the blight clouds weather effect in Morrowind. OpenMW 
+doesn't use this file, instead it renders a similar looking particle effect. 
+Changing this won't have any effect.
 
 weathersnow
 -----------
@@ -229,7 +249,9 @@ weathersnow
 :Range:		
 :Default:	meshes/snow.nif
 
-Path to the file used for the snow falling weather effect in Morrowind. OpenMW doesn't use this file, instead it renders a similar looking particle effect. Changing this won't have any effect.
+Path to the file used for the snow falling weather effect in Morrowind. OpenMW 
+doesn't use this file, instead it renders a similar looking particle effect. 
+Changing this won't have any effect.
 
 weatherblizzard
 ---------------
@@ -238,4 +260,6 @@ weatherblizzard
 :Range:		
 :Default:	meshes/blizzard.nif
 
-Path to the file used for the blizzard clouds weather effect in Morrowind. OpenMW doesn't use this file, instead it renders a similar looking particle effect. Changing this won't have any effect.
+Path to the file used for the blizzard clouds weather effect in Morrowind. 
+OpenMW doesn't use this file, instead it renders a similar looking particle 
+effect. Changing this won't have any effect.
