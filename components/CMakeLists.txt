@@ -95,13 +95,96 @@ add_component_dir (esm3terrain
     )
 
 add_component_dir (esm4
-    loadachr loadacre loadacti loadalch loadaloc loadammo loadanio loadappa loadarma loadarmo loadaspc loadbook
-    loadbptd loadcell loadclas loadclfm loadclot common loadcont loadcrea loaddial loaddobj loaddoor loadeyes
-    loadflor loadflst formid loadfurn loadglob loadgras loadhair loadhdpt loadidle loadidlm loadimod loadinfo
-    loadingr loadkeym loadland loadlgtm loadligh loadltex loadlvlc loadlvli loadlvln loadmato loadmisc loadmset
-    loadmstt loadmusc loadnavi loadnavm loadnote loadnpc loadotft loadpack loadpgrd loadpgre loadpwat loadqust
-    loadrace loadrefr loadregn loadroad loadsbsp loadscol loadscpt loadscrl loadsgst loadslgm loadsndr
-    loadsoun loadstat loadtact loadterm loadtes4 loadtree loadtxst loadweap loadwrld reader
+    acti
+    actor
+    common
+    dialogue
+    effect
+    formid
+    inventory
+    lighting
+    loadachr
+    loadacre
+    loadacti
+    loadalch
+    loadaloc
+    loadammo
+    loadanio
+    loadappa
+    loadarma
+    loadarmo
+    loadaspc
+    loadbook
+    loadbptd
+    loadcell
+    loadclas
+    loadclfm
+    loadclot
+    loadcont
+    loadcrea
+    loaddial
+    loaddobj
+    loaddoor
+    loadeyes
+    loadflor
+    loadflst
+    loadfurn
+    loadglob
+    loadgras
+    loadgrup
+    loadhair
+    loadhdpt
+    loadidle
+    loadidlm
+    loadimod
+    loadinfo
+    loadingr
+    loadkeym
+    loadland
+    loadlgtm
+    loadligh
+    loadltex
+    loadlvlc
+    loadlvli
+    loadlvln
+    loadmato
+    loadmisc
+    loadmset
+    loadmstt
+    loadmusc
+    loadnavi
+    loadnavm
+    loadnote
+    loadnpc
+    loadotft
+    loadpack
+    loadpgrd
+    loadpgre
+    loadpwat
+    loadqust
+    loadrace
+    loadrefr
+    loadregn
+    loadroad
+    loadsbsp
+    loadscol
+    loadscpt
+    loadscrl
+    loadsgst
+    loadslgm
+    loadsndr
+    loadsoun
+    loadstat
+    loadtact
+    loadterm
+    loadtes4
+    loadtree
+    loadtxst
+    loadweap
+    loadwrld
+    reader
+    reference
+    script
 )
 
 add_component_dir (misc

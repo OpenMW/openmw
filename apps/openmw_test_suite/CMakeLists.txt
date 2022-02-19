@@ -72,6 +72,8 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         files/hash.cpp
 
         toutf8/toutf8.cpp
+
+        esm4/includes.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
