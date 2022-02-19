@@ -71,7 +71,6 @@ namespace ESM4
 
         ScriptDefinition mScript;
 
-        Quest();
         virtual ~Quest();
 
         virtual void load(ESM4::Reader& reader);
