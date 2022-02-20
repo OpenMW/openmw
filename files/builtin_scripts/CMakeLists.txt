@@ -25,3 +25,6 @@ set(LUA_SCRIPTS_FILES
 
 set(DDIRRELATIVE resources/vfs/scripts/omw)
 copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${LUA_SCRIPTS_FILES}")
+
+set(DDIRRELATIVE resources/vfs/i18n/Calendar)
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "i18n/Calendar/en.lua")
