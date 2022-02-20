@@ -23,6 +23,7 @@
     Bug #5088: Sky abruptly changes direction during certain weather transitions
     Bug #5100: Persuasion doesn't always clamp the resulting disposition
     Bug #5120: Scripted object spawning updates physics system
+    Bug #5192: Actor turn rate is too slow
     Bug #5207: Loose summons can be present in scene
     Bug #5377: console does not appear after using menutest in inventory
     Bug #5379: Wandering NPCs falling through cantons
