@@ -94,6 +94,11 @@ constexpr unsigned int fourCC(const char(&name)[len]) {
 
 enum RecNameInts : unsigned int
 {
+    // Special values. Can not be used in any ESM.
+    // Added to this enum to guarantee that the values don't collide with any records.
+    REC_INTERNAL_PLAYER = 0,
+    REC_INTERNAL_MARKER = 1,
+
     // format 0 / legacy
     REC_ACTI = fourCC("ACTI"),
     REC_ALCH = fourCC("ALCH"),

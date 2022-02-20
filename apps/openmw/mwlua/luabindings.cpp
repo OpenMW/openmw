@@ -17,14 +17,6 @@
 namespace MWLua
 {
 
-    static sol::table definitionList(LuaUtil::LuaState& lua, std::initializer_list<std::string_view> values)
-    {
-        sol::table res(lua.sol(), sol::create);
-        for (const std::string_view& v : values)
-            res[v] = v;
-        return LuaUtil::makeReadOnly(res);
-    }
-
     static void addTimeBindings(sol::table& api, const Context& context, bool global)
     {
         api["getSimulationTime"] = [world=context.mWorldView]() { return world->getSimulationTime(); };
@@ -46,52 +38,6 @@ namespace MWLua
         // api["resume"] = []() {};
     }
 
-    sol::table initTypesPackage(const Context& context)
-    {
-        auto* lua = context.mLua;
-        sol::table types(lua->sol(), sol::create);
-        auto addType = [&](std::string_view name, std::optional<std::string_view> base = std::nullopt) -> sol::table
-        {
-            sol::table t(lua->sol(), sol::create);
-            sol::table ro = LuaUtil::makeReadOnly(t);
-            sol::table meta = ro[sol::metatable_key];
-            meta[sol::meta_function::to_string] = [name]() { return name; };
-            if (base)
-            {
-                t[sol::metatable_key] = LuaUtil::getMutableFromReadOnly(types[*base]);
-                t["baseType"] = types[*base];
-            }
-            types[name] = ro;
-            return t;
-        };
-
-        addActorBindings(addType("Actor"), context);
-        addType("Item");
-
-        addType(ObjectTypeName::Creature, "Actor");
-        addType(ObjectTypeName::NPC, "Actor");
-        addType(ObjectTypeName::Player, ObjectTypeName::NPC);
-
-        addType(ObjectTypeName::Armor, "Item");
-        addType(ObjectTypeName::Book, "Item");
-        addType(ObjectTypeName::Clothing, "Item");
-        addType(ObjectTypeName::Ingredient, "Item");
-        addType(ObjectTypeName::Light, "Item");
-        addType(ObjectTypeName::MiscItem, "Item");
-        addType(ObjectTypeName::Potion, "Item");
-        addType(ObjectTypeName::Weapon, "Item");
-        addType(ObjectTypeName::Apparatus, "Item");
-        addType(ObjectTypeName::Lockpick, "Item");
-        addType(ObjectTypeName::Probe, "Item");
-        addType(ObjectTypeName::Repair, "Item");
-
-        addType(ObjectTypeName::Activator);
-        addDoorBindings(addType(ObjectTypeName::Door), context);
-        addType(ObjectTypeName::Static);
-
-        return LuaUtil::makeReadOnly(types);
-    }
-
     sol::table initCorePackage(const Context& context)
     {
         auto* lua = context.mLua;
@@ -107,14 +53,6 @@ namespace MWLua
             context.mGlobalEventQueue->push_back({std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
         };
         addTimeBindings(api, context, false);
-        api["OBJECT_TYPE"] = definitionList(*lua,  // TODO: remove, use require('openmw.types') instead
-        {
-            ObjectTypeName::Activator, ObjectTypeName::Armor, ObjectTypeName::Book, ObjectTypeName::Clothing,
-            ObjectTypeName::Creature, ObjectTypeName::Door, ObjectTypeName::Ingredient, ObjectTypeName::Light,
-            ObjectTypeName::MiscItem, ObjectTypeName::NPC, ObjectTypeName::Player, ObjectTypeName::Potion,
-            ObjectTypeName::Static, ObjectTypeName::Weapon, ObjectTypeName::Apparatus, ObjectTypeName::Lockpick,
-            ObjectTypeName::Probe, ObjectTypeName::Repair
-        });
         api["i18n"] = [i18n=context.mI18n](const std::string& context) { return i18n->getContext(context); };
         const MWWorld::Store<ESM::GameSetting>* gmst = &MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         api["getGMST"] = [lua=context.mLua, gmst](const std::string& setting) -> sol::object

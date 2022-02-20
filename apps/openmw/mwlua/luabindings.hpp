@@ -23,7 +23,6 @@ namespace MWLua
     sol::table initCorePackage(const Context&);
     sol::table initWorldPackage(const Context&);
     sol::table initQueryPackage(const Context&);
-    sol::table initTypesPackage(const Context&);
 
     sol::table initFieldGroup(const Context&, const QueryFieldGroup&);
 

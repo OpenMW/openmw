@@ -47,6 +47,23 @@ namespace MWWorld
                 throw std::runtime_error("Can't get type name from an empty object.");
             }
 
+            // `getType()` is not exactly what we usually mean by "type" because some refids have special meaning.
+            // This function handles these special refids (and by this adds some performance overhead).
+            // We use this "fixed" type in Lua because we don't want to expose the weirdness of Morrowind internals to our API.
+            // TODO: Implement https://gitlab.com/OpenMW/openmw/-/issues/6617 and make `getType` work the same as `getLuaType`.
+            unsigned int getLuaType() const
+            {
+                if(mRef == nullptr)
+                    throw std::runtime_error("Can't get type name from an empty object.");
+                std::string_view id = mRef->mRef.getRefId();
+                if (id == "player")
+                    return ESM::REC_INTERNAL_PLAYER;
+                else if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
+                    return ESM::REC_INTERNAL_MARKER;
+                else
+                    return mRef->getType();
+            }
+
             std::string_view getTypeDescription() const
             {
                 return mRef ? mRef->getTypeDescription() : "nullptr";

@@ -22,6 +22,7 @@
 
 #include "luabindings.hpp"
 #include "userdataserializer.hpp"
+#include "types/types.hpp"
 
 namespace MWLua
 {
@@ -86,6 +87,7 @@ namespace MWLua
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
         mGlobalScripts.addPackage("openmw.settings", initGlobalSettingsPackage(context));
         mGlobalScripts.addPackage("openmw.storage", initGlobalStoragePackage(context, &mGlobalStorage));
+
         mCameraPackage = initCameraPackage(localContext);
         mUserInterfacePackage = initUserInterfacePackage(localContext);
         mInputPackage = initInputPackage(localContext);
