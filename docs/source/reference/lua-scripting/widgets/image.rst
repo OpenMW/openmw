@@ -16,7 +16,7 @@ Properties
     - The texture resource to display
   * - tileH
     - boolean (false)
-    - Whether to tile the texture horizontally
+    - Tile the texture horizontally
   * - tileV
     - boolean (false)
-    - Whether to tile the texture vertically
+    - Tile the texture vertically

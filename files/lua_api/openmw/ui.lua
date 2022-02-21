@@ -60,7 +60,7 @@
 -- @type SettingsPageOptions
 -- @field #string name Name of the page, displayed in the list, used for search
 -- @field #string searchHints Additional keywords used in search, not displayed anywhere
--- @field #Element element The page's UI, which will be attached to the settings tab. The root widget has to have a fixed size (set `size` field in `props`, see Widget documentation, `relativeSize` is ignored)
+-- @field #Element element The page's UI, which will be attached to the settings tab. The root widget has to have a fixed size. Set the `size` field in `props`, `relativeSize` is ignored.
 
 
 ---
@@ -183,7 +183,7 @@
 -- @type TextureResourceOptions
 -- @field #string path Path to the texture file. Required
 -- @field openmw.util#Vector2 offset Offset of this resource in the texture. (0, 0) by default
--- @field openmw.util#Vector2 size Size of the resource  in the texture. (0, 0) by default.
+-- @field openmw.util#Vector2 size Size of the resource in the texture. (0, 0) by default.
 -- 0 means the whole texture size is used.
 
 return nil
