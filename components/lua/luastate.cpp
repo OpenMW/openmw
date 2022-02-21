@@ -59,6 +59,23 @@ namespace LuaUtil
 
         mLua["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };
         mLua["cmetatable"] = [](const sol::table& v) -> sol::object { return v[sol::metatable_key]; };
+
+        // Some fixes for compatibility between different Lua versions
+        if (mLua["unpack"] == sol::nil)
+            mLua["unpack"] = mLua["table"]["unpack"];
+        else if (mLua["table"]["unpack"] == sol::nil)
+            mLua["table"]["unpack"] = mLua["unpack"];
+        if (LUA_VERSION_NUM <= 501)
+        {
+            mLua.script(R"(
+                local _pairs = pairs
+                local _ipairs = ipairs
+                local _cmeta = cmetatable
+                pairs = function(v) return ((_cmeta(v) or v).__pairs or _pairs)(v) end
+                ipairs = function(v) return ((_cmeta(v) or v).__ipairs or _ipairs)(v) end
+            )");
+        }
+
         mLua.script(R"(
             local _pairs = pairs
             local _ipairs = ipairs
@@ -77,22 +94,6 @@ namespace LuaUtil
             function pairsForReadOnly(v) return _pairs(_cmeta(v).__index) end
             function ipairsForReadOnly(v) return _ipairs(_cmeta(v).__index) end
         )");
-
-        // Some fixes for compatibility between different Lua versions
-        if (mLua["unpack"] == sol::nil)
-            mLua["unpack"] = mLua["table"]["unpack"];
-        else if (mLua["table"]["unpack"] == sol::nil)
-            mLua["table"]["unpack"] = mLua["unpack"];
-        if (LUA_VERSION_NUM <= 501)
-        {
-            mLua.script(R"(
-                local _pairs = pairs
-                local _ipairs = ipairs
-                local _cmeta = cmetatable
-                pairs = function(v) return ((_cmeta(v) or v).__pairs or _pairs)(v) end
-                ipairs = function(v) return ((_cmeta(v) or v).__ipairs or _ipairs)(v) end
-            )");
-        }
 
         mSandboxEnv = sol::table(mLua, sol::create);
         mSandboxEnv["_VERSION"] = mLua["_VERSION"];

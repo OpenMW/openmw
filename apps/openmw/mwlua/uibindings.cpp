@@ -166,6 +166,21 @@ namespace MWLua
             else
                 return sol::nullopt;
         };
+        {
+            auto pairs = [](LuaUi::Content& content)
+            {
+                auto next = [](LuaUi::Content& content, size_t i) -> sol::optional<std::tuple<size_t, sol::table>>
+                {
+                    if (i < content.size())
+                        return std::make_tuple(i + 1, content.at(i));
+                    else
+                        return sol::nullopt;
+                };
+                return std::make_tuple(next, content, 0);
+            };
+            uiContent[sol::meta_function::ipairs] = pairs;
+            uiContent[sol::meta_function::pairs] = pairs;
+        }
 
         auto element = context.mLua->sol().new_usertype<LuaUi::Element>("Element");
         element["layout"] = sol::property(
@@ -233,6 +248,21 @@ namespace MWLua
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
             context.mLuaManager->addAction(std::make_unique<LayerAction>(name, afterName, options, context.mLua));
         };
+        {
+            auto pairs = [layers](const sol::object&)
+            {
+                auto next = [](const sol::table& l, size_t i) -> sol::optional<std::tuple<size_t, std::string>>
+                {
+                    if (i < LuaUi::Layers::size())
+                        return std::make_tuple(i + 1, LuaUi::Layers::at(i));
+                    else
+                        return sol::nullopt;
+                };
+                return std::make_tuple(next, layers, 0);
+            };
+            layers[sol::meta_function::pairs] = pairs;
+            layers[sol::meta_function::ipairs] = pairs;
+        }
         api["layers"] = LuaUtil::makeReadOnly(layers);
 
         sol::table typeTable = context.mLua->newTable();

@@ -64,12 +64,16 @@
 -- @field #Content content Optional @{openmw.ui#Content} of children layouts
 
 ---
--- Layers
+-- Layers. Implements [iterables#List](iterables.html#List) of #string.
 -- @type Layers
+-- @list <#string>
 -- @usage
 -- ui.layers.insertAfter('HUD', 'NewLayer', { interactive = true })
 -- local fourthLayerName = ui.layers[4]
 -- local windowsIndex = ui.layers.indexOf('Windows')
+-- for i, name in ipairs(ui.layers) do
+--   print('layer', i, name)
+-- end
 
 ---
 -- Index of the layer with the givent name. Returns nil if the layer doesn't exist
@@ -85,7 +89,8 @@
 -- @param #table options Table with a boolean `interactive` field (default is true). Layers with interactive = false will ignore all mouse interactions.
 
 ---
--- Content. An array-like container, which allows to reference elements by their name
+-- Content. An array-like container, which allows to reference elements by their name.
+-- Implements [iterables#List](iterables.html#List) of #Layout and [iterables#Map](iterables.html#Map) of #string to #Layout.
 -- @type Content
 -- @list <#Layout>
 -- @usage

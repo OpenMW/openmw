@@ -25,6 +25,7 @@ Lua API reference
     openmw_aux_time
     interface_ai
     interface_camera
+    iterables
 
 
 - :ref:`Engine handlers reference`
