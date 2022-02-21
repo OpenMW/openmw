@@ -4,6 +4,8 @@
 #include <SDL_gamecontroller.h>
 #include <SDL_mouse.h>
 
+#include <components/sdlutil/events.hpp>
+
 #include "../mwbase/inputmanager.hpp"
 #include "../mwinput/actions.hpp"
 
@@ -31,6 +33,16 @@ namespace MWLua
         keyEvent["withCtrl"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_CTRL; });
         keyEvent["withAlt"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_ALT; });
         keyEvent["withSuper"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_GUI; });
+
+        auto touchpadEvent = context.mLua->sol().new_usertype<SDLUtil::TouchEvent>("TouchpadEvent");
+        touchpadEvent["device"] = sol::readonly_property(
+            [](const SDLUtil::TouchEvent& e) -> int { return e.mDevice; });
+        touchpadEvent["finger"] = sol::readonly_property(
+            [](const SDLUtil::TouchEvent& e) -> int { return e.mFinger; });
+        touchpadEvent["position"] = sol::readonly_property(
+            [](const SDLUtil::TouchEvent& e) -> osg::Vec2f { return osg::Vec2f(e.mX, e.mY);});
+        touchpadEvent["pressure"] = sol::readonly_property(
+            [](const SDLUtil::TouchEvent& e) -> float { return e.mPressure; });
 
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         sol::table api(context.mLua->sol(), sol::create);

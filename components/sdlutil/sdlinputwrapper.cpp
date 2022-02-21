@@ -146,6 +146,20 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     if(mConListener)
                         mConListener->axisMoved(1, evt.caxis);
                     break;
+                #if SDL_VERSION_ATLEAST(2, 0, 14)
+                case SDL_CONTROLLERSENSORUPDATE:
+                    // controller sensor data is received on demand
+                    break;
+                case SDL_CONTROLLERTOUCHPADDOWN:
+                    mConListener->touchpadPressed(1, TouchEvent(evt.ctouchpad));
+                    break;
+                case SDL_CONTROLLERTOUCHPADMOTION:
+                    mConListener->touchpadMoved(1, TouchEvent(evt.ctouchpad));
+                    break;
+                case SDL_CONTROLLERTOUCHPADUP:
+                    mConListener->touchpadReleased(1, TouchEvent(evt.ctouchpad));
+                    break;
+                #endif
                 case SDL_WINDOWEVENT:
                     handleWindowEvent(evt);
                     break;

@@ -4,6 +4,8 @@
 #include <variant>
 #include <SDL_events.h>
 
+#include <components/sdlutil/events.hpp>
+
 namespace MWWorld
 {
     class Ptr;
@@ -43,8 +45,17 @@ namespace MWBase
 
         struct InputEvent
         {
-            enum {KeyPressed, KeyReleased, ControllerPressed, ControllerReleased, Action} mType;
-            std::variant<SDL_Keysym, int> mValue;
+            enum {
+                KeyPressed,
+                KeyReleased,
+                ControllerPressed,
+                ControllerReleased,
+                Action,
+                TouchPressed,
+                TouchReleased,
+                TouchMoved,
+            } mType;
+            std::variant<SDL_Keysym, int, SDLUtil::TouchEvent> mValue;
         };
         virtual void inputEvent(const InputEvent& event) = 0;
 

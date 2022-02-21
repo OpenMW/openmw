@@ -31,6 +31,10 @@ namespace MWInput
         void controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg) override;
         void controllerRemoved(const SDL_ControllerDeviceEvent &arg) override;
 
+        void touchpadMoved(int deviceId, const SDLUtil::TouchEvent& arg) override;
+        void touchpadPressed(int deviceId, const SDLUtil::TouchEvent& arg) override;
+        void touchpadReleased(int deviceId, const SDLUtil::TouchEvent& arg) override;
+
         void processChangedSettings(const Settings::CategorySettingVector& changed);
 
         void setJoystickLastUsed(bool enabled) { mJoystickLastUsed = enabled; }

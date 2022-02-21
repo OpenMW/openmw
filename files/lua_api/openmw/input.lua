@@ -313,5 +313,13 @@
 -- @field [parent=#KeyboardEvent] #boolean withAlt Is `Alt` key pressed.
 -- @field [parent=#KeyboardEvent] #boolean withSuper Is `Super`/`Win` key pressed.
 
+---
+-- The argument of onTouchPress/onTouchRelease/onTouchMove engine handlers.
+-- @type TouchEvent
+-- @field [parent=#TouchEvent] #number device Device id (there might be multiple touch devices connected). Note: the specific device ids are not guaranteed. Always use previous user input (onTouch... handlers) to get a valid device id (e. g. in your script's settings page).
+-- @field [parent=#TouchEvent] #number finger Finger id (the device might support multitouch).
+-- @field [parent=#TouchEvent] openmw.util#Vector2 position Relative position on the touch device (0 to 1 from top left corner),
+-- @field [parent=#TouchEvent] #number pressure Pressure of the finger.
+
 return nil
 
