@@ -27,14 +27,16 @@ namespace LuaUi
         public:
             TextureResource(TextureData data)
                 : mData(data)
-                {}
+            {}
 
             const TextureData& data() { return mData; }
+
         private:
             TextureData mData;
     };
 
-    class ResourceManager {
+    class ResourceManager
+    {
         public:
             ResourceManager(const VFS::Manager* vfs)
                 : mVfs(vfs)
@@ -42,10 +44,9 @@ namespace LuaUi
 
             std::shared_ptr<TextureResource> registerTexture(TextureData data);
 
-        protected:
+        private:
             const VFS::Manager* vfs() const { return mVfs; }
 
-        private:
             const VFS::Manager* mVfs;
             using TextureResources = std::vector<std::shared_ptr<TextureResource>>;
             std::unordered_map<std::string, TextureResources> mTextures;

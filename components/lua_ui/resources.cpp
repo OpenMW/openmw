@@ -1,6 +1,7 @@
 #include "resources.hpp"
 
 #include <components/vfs/manager.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace LuaUi
 {
@@ -9,9 +10,7 @@ namespace LuaUi
         std::string normalizedPath = vfs()->normalizeFilename(data.mPath);
         if (!vfs()->exists(normalizedPath))
         {
-            std::string error("Texture with path \"");
-            error += data.mPath;
-            error += "\" doesn't exist";
+            auto error = Misc::StringUtils::format("Texture with path \"%s\" doesn't exist", data.mPath);
             throw std::logic_error(error);
         }
         data.mPath = normalizedPath;
