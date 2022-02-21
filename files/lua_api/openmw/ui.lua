@@ -170,20 +170,33 @@
 -- @field #number button Mouse button which triggered the event (could be nil)
 
 ---
--- Register a new texture resource
+-- Register a new texture resource. Can be used to manually atlas UI textures.
 -- @function [parent=#ui] texture #TextureResource
 -- @param #TextureResourceOptions options
+-- @usage
+-- local ui = require('openmw.ui')
+-- local vector2 = require('openmw.util').vector2
+-- local myAtlas = 'textures/my_atlas.dds' -- a 128x128 atlas
+-- local texture1 = ui.texture { -- texture in the top left corner of the atlas
+--     path = myAtlas,
+--     offset = vector2(0, 0),
+--     size = vector2(64, 64),
+-- }
+-- local texture2 = ui.texture { -- texture in the top right corner of the atlas
+--     path = myAtlas,
+--     offset = vector2(64, 0),
+--     size = vector2(64, 64),
+-- }
 
 ---
 -- A texture ready to be used by UI widgets
 -- @type TextureResource
 
 ---
--- Table with argument passed to ui.texture
+-- Table with arguments passed to ui.texture.
 -- @type TextureResourceOptions
 -- @field #string path Path to the texture file. Required
 -- @field openmw.util#Vector2 offset Offset of this resource in the texture. (0, 0) by default
--- @field openmw.util#Vector2 size Size of the resource in the texture. (0, 0) by default.
--- 0 means the whole texture size is used.
+-- @field openmw.util#Vector2 size Size of the resource in the texture. (0, 0) by default. 0 means the whole texture size is used.
 
 return nil
