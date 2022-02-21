@@ -3,6 +3,8 @@
 
 #include <SDL_events.h>
 
+#include <components/sdlutil/events.hpp>
+
 #include "../mwbase/luamanager.hpp"
 
 #include "localscripts.hpp"
@@ -15,9 +17,12 @@ namespace MWLua
     public:
         PlayerScripts(LuaUtil::LuaState* lua, const LObject& obj) : LocalScripts(lua, obj, ESM::LuaScriptCfg::sPlayer)
         {
-            registerEngineHandlers({&mKeyPressHandlers, &mKeyReleaseHandlers,
-                                    &mControllerButtonPressHandlers, &mControllerButtonReleaseHandlers,
-                                    &mActionHandlers, &mInputUpdateHandlers});
+            registerEngineHandlers({
+                &mKeyPressHandlers, &mKeyReleaseHandlers,
+                &mControllerButtonPressHandlers, &mControllerButtonReleaseHandlers,
+                &mActionHandlers, &mInputUpdateHandlers,
+                &mTouchpadPressed, &mTouchpadReleased, &mTouchpadMoved
+            });
         }
 
         void processInputEvent(const MWBase::LuaManager::InputEvent& event)
@@ -40,6 +45,15 @@ namespace MWLua
             case InputEvent::Action:
                 callEngineHandlers(mActionHandlers, std::get<int>(event.mValue));
                 break;
+            case InputEvent::TouchPressed:
+                callEngineHandlers(mTouchpadPressed, std::get<SDLUtil::TouchEvent>(event.mValue));
+                break;
+            case InputEvent::TouchReleased:
+                callEngineHandlers(mTouchpadReleased, std::get<SDLUtil::TouchEvent>(event.mValue));
+                break;
+            case InputEvent::TouchMoved:
+                callEngineHandlers(mTouchpadMoved, std::get<SDLUtil::TouchEvent>(event.mValue));
+                break;
             }
         }
 
@@ -52,6 +66,9 @@ namespace MWLua
         EngineHandlerList mControllerButtonReleaseHandlers{"onControllerButtonRelease"};
         EngineHandlerList mActionHandlers{"onInputAction"};
         EngineHandlerList mInputUpdateHandlers{"onInputUpdate"};
+        EngineHandlerList mTouchpadPressed{ "onTouchPress" };
+        EngineHandlerList mTouchpadReleased{ "onTouchRelease" };
+        EngineHandlerList mTouchpadMoved{ "onTouchMove" };
     };
 
 }

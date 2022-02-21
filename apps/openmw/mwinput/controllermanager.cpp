@@ -433,4 +433,22 @@ namespace MWInput
         #endif
         return std::array<float, 3>({gyro[0], gyro[1], gyro[2]});
     }
+
+    void ControllerManager::touchpadMoved(int deviceId, const SDLUtil::TouchEvent& arg)
+    {
+        MWBase::Environment::get().getLuaManager()->inputEvent(
+            { MWBase::LuaManager::InputEvent::TouchMoved, arg });
+    }
+
+    void ControllerManager::touchpadPressed(int deviceId, const SDLUtil::TouchEvent& arg)
+    {
+        MWBase::Environment::get().getLuaManager()->inputEvent(
+            { MWBase::LuaManager::InputEvent::TouchPressed, arg });
+    }
+
+    void ControllerManager::touchpadReleased(int deviceId, const SDLUtil::TouchEvent& arg)
+    {
+        MWBase::Environment::get().getLuaManager()->inputEvent(
+            { MWBase::LuaManager::InputEvent::TouchReleased, arg });
+    }
 }
