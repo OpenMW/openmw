@@ -289,9 +289,9 @@
 
 
 -------------------------------------------------------------------------------
--- List of GameObjects.
+-- List of GameObjects. Implements [iterables#List](iterables.html#List) of #GameObject
 -- @type ObjectList
--- @extends #list<#GameObject>
+-- @list <#GameObject>
 
 -------------------------------------------------------------------------------
 -- Filter list with a Query.

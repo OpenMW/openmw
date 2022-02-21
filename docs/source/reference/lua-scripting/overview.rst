@@ -498,7 +498,7 @@ At some moment it will send the 'DamagedByDarkPower' event to all nearby actors:
     local nearby = require('openmw.nearby')
 
     local function onActivated()
-        for i, actor in nearby.actors:ipairs() do
+        for i, actor in ipairs(nearby.actors) do
             local dist = (self.position - actor.position):length()
             if dist < 500 then
                 local damage = (1 - dist / 500) * 200
