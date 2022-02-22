@@ -134,6 +134,8 @@ namespace MWPhysics
 
         // Adjust for collision mesh offset relative to actor's "location"
         // (doTrace doesn't take local/interior collision shape translation into account, so we have to do it on our own)
+        // for compatibility with vanilla assets, we have to derive this from the vertical half extent instead of from internal hull translation
+        // if not for this hack, the "correct" collision hull position would be physicActor->getScaledMeshTranslation()
         actor.mPosition.z() += actor.mHalfExtentsZ; // vanilla-accurate
 
         float swimlevel = actor.mSwimLevel + actor.mHalfExtentsZ;
@@ -463,6 +465,8 @@ namespace MWPhysics
             }
         }
 
+        // use vanilla-accurate collision hull position hack (do same hitbox offset hack as movement solver)
+        // if vanilla compatibility didn't matter, the "correct" collision hull position would be physicActor->getScaledMeshTranslation()
         const auto verticalHalfExtent = osg::Vec3f(0.0, 0.0, actor.mHalfExtentsZ);
 
         // use a 3d approximation of the movement vector to better judge player intent
