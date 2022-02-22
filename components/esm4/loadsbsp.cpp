@@ -31,15 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::SubSpace::SubSpace() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-
-    mDimension.x = 0.f;
-    mDimension.y = 0.f;
-    mDimension.z = 0.f;
-}
-
 ESM4::SubSpace::~SubSpace()
 {
 }

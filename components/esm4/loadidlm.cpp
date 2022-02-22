@@ -32,11 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::IdleMarker::IdleMarker() : mFormId(0), mFlags(0), mIdleFlags(0), mIdleCount(0), mIdleTimer(0.f), mIdleAnim(0)
-{
-    mEditorId.clear();
-}
-
 ESM4::IdleMarker::~IdleMarker()
 {
 }

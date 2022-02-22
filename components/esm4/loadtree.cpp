@@ -31,13 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Tree::Tree() : mFormId(0), mFlags(0), mBoundRadius(0.f)
-{
-    mEditorId.clear();
-    mModel.clear();
-    mLeafTexture.clear();
-}
-
 ESM4::Tree::~Tree()
 {
 }

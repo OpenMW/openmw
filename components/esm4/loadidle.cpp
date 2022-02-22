@@ -31,13 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::IdleAnimation::IdleAnimation() : mFormId(0), mFlags(0), mParent(0), mPrevious(0)
-{
-    mEditorId.clear();
-    mCollision.clear();
-    mEvent.clear();
-}
-
 ESM4::IdleAnimation::~IdleAnimation()
 {
 }

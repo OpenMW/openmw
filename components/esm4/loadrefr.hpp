@@ -82,10 +82,10 @@ namespace ESM4
         FormId      mBaseObj;
 
         Placement mPlacement;
-        float    mScale;      // default 1.f
+        float    mScale = 1.0f;
         FormId   mOwner;
         FormId   mGlobal;
-        std::int32_t mFactionRank;
+        std::int32_t mFactionRank = -1;
 
         bool mInitiallyDisabled; // TODO may need to check mFlags & 0x800 (initially disabled)
         bool mIsMapMarker;
@@ -93,7 +93,7 @@ namespace ESM4
 
         EnableParent mEsp;
 
-        std::uint32_t mCount; // only if > 1 (default 1)
+        std::uint32_t mCount = 1; // only if > 1
 
         FormId mAudioLocation;
 
@@ -106,7 +106,6 @@ namespace ESM4
 
         FormId mTargetRef;
 
-        Reference();
         virtual ~Reference();
 
         virtual void load(ESM4::Reader& reader);

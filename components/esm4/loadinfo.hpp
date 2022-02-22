@@ -77,7 +77,6 @@ namespace ESM4
 
         ScriptDefinition mScript; // FIXME: ignoring the second one after the NEXT sub-record
 
-        DialogInfo();
         virtual ~DialogInfo();
 
         virtual void load(ESM4::Reader& reader);

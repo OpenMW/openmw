@@ -52,7 +52,6 @@ namespace ESM4
         std::uint8_t mListCount;
         std::vector<LVLO> mLvlObject;
 
-        LevelledNpc();
         virtual ~LevelledNpc();
 
         inline bool calcAllLvlLessThanPlayer() const { return (mLvlActorFlags & 0x01) != 0; }

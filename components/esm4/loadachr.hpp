@@ -49,7 +49,7 @@ namespace ESM4
         FormId      mBaseObj;
 
         Placement mPlacement;
-        float    mScale;      // default 1.f
+        float    mScale = 1.0f;
         FormId   mOwner;
         FormId   mGlobal;
 
@@ -57,7 +57,6 @@ namespace ESM4
 
         EnableParent mEsp;
 
-        ActorCharacter();
         virtual ~ActorCharacter();
 
         virtual void load(ESM4::Reader& reader);

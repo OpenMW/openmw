@@ -57,7 +57,6 @@ namespace ESM4
 
         float mPriority;
 
-        Dialogue();
         virtual ~Dialogue();
 
         virtual void load(ESM4::Reader& reader);

@@ -35,10 +35,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::NavMesh::NavMesh() : mFormId(0), mFlags(0)
-{
-}
-
 ESM4::NavMesh::~NavMesh()
 {
 }

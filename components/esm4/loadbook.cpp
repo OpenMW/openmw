@@ -31,22 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Book::Book() : mFormId(0), mFlags(0), mBoundRadius(0.f), mScriptId(0),
-                     mEnchantmentPoints(0), mEnchantment(0), mPickUpSound(0), mDropSound(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-    mText.clear();
-    mIcon.clear();
-
-    mData.flags = 0;
-    mData.type = 0;
-    mData.bookSkill = 0;
-    mData.value = 0;
-    mData.weight = 0.f;
-}
-
 ESM4::Book::~Book()
 {
 }

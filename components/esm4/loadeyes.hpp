@@ -55,7 +55,6 @@ namespace ESM4
 
         Data mData;
 
-        Eyes();
         virtual ~Eyes();
 
         virtual void load(ESM4::Reader& reader);

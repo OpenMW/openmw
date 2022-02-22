@@ -58,7 +58,6 @@ namespace ESM4
 
         std::vector<InventoryItem> mInventory;
 
-        Container();
         virtual ~Container();
 
         virtual void load(ESM4::Reader& reader);

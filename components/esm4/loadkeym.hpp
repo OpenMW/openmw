@@ -64,7 +64,6 @@ namespace ESM4
 
         Data mData;
 
-        Key();
         virtual ~Key();
 
         virtual void load(ESM4::Reader& reader);

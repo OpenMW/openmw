@@ -36,16 +36,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Pathgrid::Pathgrid() : mFormId(0), mFlags(0), mData(0)
-{
-    mEditorId.clear();
-
-    mNodes.clear();
-    mLinks.clear();
-    mForeign.clear();
-    mObjects.clear();
-}
-
 ESM4::Pathgrid::~Pathgrid()
 {
 }

@@ -41,27 +41,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Npc::Npc() : mFormId(0), mFlags(0), mIsTES4(false), mIsFONV(false), mRace(0), mClass(0), mHair(0),
-                   mEyes(0), mHairLength(0.f), mHairColourId(0), mDeathItem(0),
-                   mScriptId(0), mCombatStyle(0), mSoundBase(0), mSound(0), mSoundChance(0),
-                   mFootWeight(0.f), mBoundRadius(0.f), mBaseTemplate(0), mWornArmor(0),
-                   mDefaultOutfit(0), mSleepOutfit(0), mDefaultPkg(0), mFgRace(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-
-    mHairColour.red = 0;
-    mHairColour.green = 0;
-    mHairColour.blue = 0;
-    mHairColour.custom = 0;
-
-    std::memset(&mAIData, 0, sizeof(AIData));
-    std::memset(&mData, 0, sizeof(Data));
-    std::memset(&mBaseConfig, 0, sizeof(ActorBaseConfig));
-    std::memset(&mFaction, 0, sizeof(ActorFaction));
-}
-
 ESM4::Npc::~Npc()
 {
 }

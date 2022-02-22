@@ -32,11 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::FormIdList::FormIdList() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-}
-
 ESM4::FormIdList::~FormIdList()
 {
 }

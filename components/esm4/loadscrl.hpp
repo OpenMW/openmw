@@ -55,7 +55,6 @@ namespace ESM4
 
         Data mData;
 
-        Scroll();
         virtual ~Scroll();
 
         virtual void load(ESM4::Reader& reader);

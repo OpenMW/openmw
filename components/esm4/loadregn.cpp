@@ -39,13 +39,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Region::Region() : mFormId(0), mFlags(0), mWorldId(0), mEdgeFalloff(0)
-{
-    mEditorId.clear();
-    mShader.clear();
-    mMapName.clear();
-}
-
 ESM4::Region::~Region()
 {
 }

@@ -49,7 +49,6 @@ namespace ESM4
 
         std::string mLeafTexture;
 
-        Tree();
         virtual ~Tree();
 
         virtual void load(ESM4::Reader& reader);

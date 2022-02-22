@@ -57,7 +57,6 @@ namespace ESM4
         ColourRGB mColour;
         std::uint32_t mPlayable;
 
-        Colour();
         virtual ~Colour();
 
         virtual void load(ESM4::Reader& reader);

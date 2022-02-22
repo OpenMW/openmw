@@ -101,7 +101,6 @@ namespace ESM4
         FormId mPickUpSound;
         FormId mDropSound;
 
-        Book();
         virtual ~Book();
 
         virtual void load(ESM4::Reader& reader);

@@ -34,11 +34,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::PlacedGrenade::PlacedGrenade() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-}
-
 ESM4::PlacedGrenade::~PlacedGrenade()
 {
 }

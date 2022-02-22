@@ -62,7 +62,6 @@ namespace ESM4
 
         Data mData;
 
-        SigilStone();
         virtual ~SigilStone();
 
         virtual void load(ESM4::Reader& reader);

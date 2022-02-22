@@ -33,19 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Potion::Potion() : mFormId(0), mFlags(0), mPickUpSound(0), mDropSound(0), mScriptId(0), mBoundRadius(0.f)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-    mIcon.clear();
-    mMiniIcon.clear();
-
-    mData.weight = 0.f;
-
-    std::memset(&mEffect, 0, sizeof(ScriptEffect));
-}
-
 ESM4::Potion::~Potion()
 {
 }

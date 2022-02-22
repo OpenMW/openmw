@@ -43,13 +43,6 @@ void ESM4::BodyPartData::BodyPart::clear()
     mGoreEffectsTarget.clear();
 }
 
-ESM4::BodyPartData::BodyPartData() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-}
-
 ESM4::BodyPartData::~BodyPartData()
 {
 }

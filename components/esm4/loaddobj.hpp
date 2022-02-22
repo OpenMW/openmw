@@ -87,7 +87,6 @@ namespace ESM4
 
         Defaults mData;
 
-        DefaultObj();
         virtual ~DefaultObj();
 
         virtual void load(ESM4::Reader& reader);

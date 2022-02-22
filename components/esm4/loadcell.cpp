@@ -39,28 +39,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Cell::Cell() : mParent(0), mFormId(0), mFlags(0), mCellFlags(0), mX(0), mY(0), mOwner(0),
-                     mGlobal(0), mClimate(0), mWater(0), mWaterHeight(0.f),
-                     mLightingTemplate(0), mLightingTemplateFlags(0), mMusic(0), mAcousticSpace(0),
-                     mMusicType(0), mPreloaded(false)
-{
-    mEditorId.clear();
-    mFullName.clear();
-
-    mLighting.ambient = 0;
-    mLighting.directional = 0;
-    mLighting.fogColor = 0;
-    mLighting.fogNear = 0.f;
-    mLighting.fogFar = 0.f;
-    mLighting.rotationXY = 0;
-    mLighting.rotationZ = 0;
-    mLighting.fogDirFade = 0.f;
-    mLighting.fogClipDist = 0.f;
-    mLighting.fogPower = FLT_MAX; // hack way to detect TES4
-
-    mRegions.clear();
-}
-
 ESM4::Cell::~Cell()
 {
 }

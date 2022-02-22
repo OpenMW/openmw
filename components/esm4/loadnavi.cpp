@@ -38,11 +38,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Navigation::Navigation()
-{
-    mEditorId.clear();
-}
-
 ESM4::Navigation::~Navigation()
 {
 }

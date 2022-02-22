@@ -32,14 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Note::Note() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-    mIcon.clear();
-}
-
 ESM4::Note::~Note()
 {
 }

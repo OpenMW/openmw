@@ -35,22 +35,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::LightingTemplate::LightingTemplate() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-
-    mLighting.ambient = 0;
-    mLighting.directional = 0;
-    mLighting.fogColor = 0;
-    mLighting.fogNear = 0.f;
-    mLighting.fogFar = 0.f;
-    mLighting.rotationXY = 0;
-    mLighting.rotationZ = 0;
-    mLighting.fogDirFade = 0.f;
-    mLighting.fogClipDist = 0.f;
-    mLighting.fogPower = FLT_MAX; // hack way to detect TES4
-}
-
 ESM4::LightingTemplate::~LightingTemplate()
 {
 }

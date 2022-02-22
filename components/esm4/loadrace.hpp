@@ -30,6 +30,7 @@
 #include <cstdint>
 #include <vector>
 #include <map>
+#include <array>
 
 #include "formid.hpp"
 #include "actor.hpp" // AttributeValues, BodyTemplate
@@ -122,10 +123,10 @@ namespace ESM4
         std::map<SkillIndex, std::uint8_t> mSkillBonus;
 
         // DATA
-        float mHeightMale;
-        float mHeightFemale;
-        float mWeightMale;
-        float mWeightFemale;
+        float mHeightMale = 1.0f;
+        float mHeightFemale = 1.0f;
+        float mWeightMale = 1.0f;
+        float mWeightFemale = 1.0f;
         std::uint32_t mRaceFlags; // 0x0001 = playable?
 
         std::vector<BodyPart> mHeadParts;       // see HeadPartIndex
@@ -148,8 +149,8 @@ namespace ESM4
 
         std::map<FormId, std::int32_t> mDisposition; // race adjustments
         std::vector<FormId> mBonusSpells;            // race ability/power
-        std::vector<FormId> mVNAM; // don't know what these are; 1 or 2 RACE FormIds
-        std::vector<FormId> mDefaultHair; // male/female (HAIR FormId for TES4)
+        std::array<FormId, 2> mVNAM; // don't know what these are; 1 or 2 RACE FormIds
+        std::array<FormId, 2> mDefaultHair; // male/female (HAIR FormId for TES4)
 
         std::uint32_t mNumKeywords;
 
@@ -161,7 +162,6 @@ namespace ESM4
         std::vector<FormId> mHeadPartIdsMale;   // TES5
         std::vector<FormId> mHeadPartIdsFemale; // TES5
 
-        Race();
         virtual ~Race();
 
         virtual void load(ESM4::Reader& reader);

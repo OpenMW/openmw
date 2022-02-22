@@ -32,17 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Colour::Colour() : mFormId(0), mFlags(0), mPlayable(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-
-    mColour.red = 0;
-    mColour.green = 0;
-    mColour.blue = 0;
-    mColour.custom = 0;
-}
-
 ESM4::Colour::~Colour()
 {
 }

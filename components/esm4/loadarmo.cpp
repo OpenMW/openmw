@@ -32,28 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Armor::Armor() : mFormId(0), mFlags(0), mIsTES4(false), mIsFO3(false), mIsFONV(false),
-                       mPickUpSound(0), mDropSound(0), mBoundRadius(0.f),
-                       mArmorFlags(0), mGeneralFlags(0), mScriptId(0), mEnchantmentPoints(0), mEnchantment(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModelMale.clear();
-    mModelMaleWorld.clear();
-    mModelFemale.clear();
-    mModelFemaleWorld.clear();
-    mText.clear();
-    mIconMale.clear();
-    mMiniIconMale.clear();
-    mIconFemale.clear();
-    mMiniIconFemale.clear();
-
-    mData.armor = 0;
-    mData.value = 0;
-    mData.health = 0;
-    mData.weight = 0.f;
-}
-
 ESM4::Armor::~Armor()
 {
 }

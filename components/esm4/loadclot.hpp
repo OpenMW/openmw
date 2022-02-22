@@ -70,7 +70,6 @@ namespace ESM4
 
         Data mData;
 
-        Clothing();
         virtual ~Clothing();
 
         virtual void load(ESM4::Reader& reader);

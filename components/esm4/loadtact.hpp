@@ -63,7 +63,6 @@ namespace ESM4
         FormId mLoopSound;     // SOUN
         FormId mRadioTemplate; // SOUN
 
-        TalkingActivator();
         virtual ~TalkingActivator();
 
         virtual void load(ESM4::Reader& reader);

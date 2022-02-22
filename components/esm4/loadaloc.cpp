@@ -38,15 +38,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::MediaLocationController::MediaLocationController() : mFormId(0), mFlags(0),
-    mConditionalFaction(0), mLocationDelay(0.f), mRetriggerDelay(0.f), mDayStart(0), mNightStart(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-
-    std::memset(&mMediaFlags, 0, sizeof(MLC_Flags));
-}
-
 ESM4::MediaLocationController::~MediaLocationController()
 {
 }

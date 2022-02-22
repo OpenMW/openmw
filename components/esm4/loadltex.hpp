@@ -62,7 +62,6 @@ namespace ESM4
 
         // ----------------------
 
-        LandTexture();
         virtual ~LandTexture();
 
         virtual void load(ESM4::Reader& reader);

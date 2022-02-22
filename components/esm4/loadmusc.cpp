@@ -36,12 +36,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Music::Music() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-    mMusicFile.clear();
-}
-
 ESM4::Music::~Music()
 {
 }

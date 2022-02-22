@@ -64,7 +64,6 @@ namespace ESM4
 
         Data mData;
 
-        MiscItem();
         virtual ~MiscItem();
 
         virtual void load(ESM4::Reader& reader);

@@ -33,11 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Script::Script() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-}
-
 ESM4::Script::~Script()
 {
 }

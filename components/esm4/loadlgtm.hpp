@@ -50,7 +50,6 @@ namespace ESM4
 
         Lighting mLighting;
 
-        LightingTemplate();
         virtual ~LightingTemplate();
 
         virtual void load(ESM4::Reader& reader);

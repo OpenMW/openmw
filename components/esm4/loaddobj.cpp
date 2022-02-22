@@ -37,13 +37,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::DefaultObj::DefaultObj() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-
-    std::memset(&mData, 0, sizeof(Defaults));
-}
-
 ESM4::DefaultObj::~DefaultObj()
 {
 }

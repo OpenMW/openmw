@@ -85,7 +85,6 @@ namespace ESM4
 
         Data mData;
 
-        Grass();
         virtual ~Grass();
 
         virtual void load(ESM4::Reader& reader);

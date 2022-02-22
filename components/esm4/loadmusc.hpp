@@ -47,7 +47,6 @@ namespace ESM4
         std::string mEditorId;
         std::string mMusicFile;
 
-        Music();
         virtual ~Music();
 
         virtual void load(ESM4::Reader& reader);

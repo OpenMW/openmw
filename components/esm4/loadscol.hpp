@@ -46,7 +46,6 @@ namespace ESM4
 
         std::string mEditorId;
 
-        StaticCollection();
         virtual ~StaticCollection();
 
         virtual void load(ESM4::Reader& reader);

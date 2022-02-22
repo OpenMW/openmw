@@ -32,29 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Reference::Reference() : mParent(0), mFormId(0), mFlags(0),
-                               mBaseObj(0), mScale(1.f), mOwner(0), mGlobal(0), mFactionRank(-1),
-                               mInitiallyDisabled(false), mIsMapMarker(false), mMapMarker(0), mCount(1),
-                               mAudioLocation(0), mIsLocked(false), mLockLevel(0), mKey(0), mTargetRef(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-
-    //mPlacement.
-
-    mEsp.parent = 0;
-    mEsp.flags = 0;
-
-    mRadio.rangeRadius = 0.f;
-    mRadio.broadcastRange = 0;
-    mRadio.staticPercentage = 0.f;
-    mRadio.posReference = 0;
-
-    mDoor.destDoor = 0;
-    //mDoor.destPos.
-    mDoor.flags = 0;
-}
-
 ESM4::Reference::~Reference()
 {
 }

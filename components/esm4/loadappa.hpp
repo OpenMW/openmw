@@ -62,7 +62,6 @@ namespace ESM4
 
         Data mData;
 
-        Apparatus();
         virtual ~Apparatus();
 
         virtual void load(ESM4::Reader& reader);

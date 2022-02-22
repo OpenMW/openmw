@@ -138,7 +138,6 @@ namespace ESM4
         FormId mBaseTemplate;           // FO3/FONV
         std::vector<FormId> mBodyParts; // FO3/FONV
 
-        Creature();
         virtual ~Creature();
 
         virtual void load(ESM4::Reader& reader);

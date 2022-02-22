@@ -32,17 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Scroll::Scroll() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-    mText.clear();
-
-    mData.value = 0;
-    mData.weight = 0.f;
-}
-
 ESM4::Scroll::~Scroll()
 {
 }

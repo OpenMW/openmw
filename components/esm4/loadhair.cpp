@@ -32,16 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Hair::Hair() : mFormId(0), mFlags(0), mBoundRadius(0.f)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-    mIcon.clear();
-
-    mData.flags = 0;
-}
-
 ESM4::Hair::~Hair()
 {
 }

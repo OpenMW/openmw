@@ -47,7 +47,6 @@ namespace ESM4
 
         std::vector<FormId> mObjects;
 
-        FormIdList();
         virtual ~FormIdList();
 
         virtual void load(ESM4::Reader& reader);

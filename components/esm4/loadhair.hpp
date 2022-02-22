@@ -58,7 +58,6 @@ namespace ESM4
 
         Data mData;
 
-        Hair();
         virtual ~Hair();
 
         virtual void load(ESM4::Reader& reader);

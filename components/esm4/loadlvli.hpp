@@ -54,7 +54,6 @@ namespace ESM4
 
         std::vector<LVLO> mLvlObject;
 
-        LevelledItem();
         virtual ~LevelledItem();
 
         bool calcAllLvlLessThanPlayer() const;

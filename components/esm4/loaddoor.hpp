@@ -63,7 +63,6 @@ namespace ESM4
         FormId mLoopSound;
         FormId mRandomTeleport;
 
-        Door();
         virtual ~Door();
 
         virtual void load(ESM4::Reader& reader);

@@ -32,19 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::TextureSet::TextureSet() : mFormId(0), mFlags(0)
-{
-    mEditorId.clear();
-    mDiffuse.clear();
-    mNormalMap.clear();
-    mEnvMask.clear();
-    mToneMap.clear();
-    mDetailMap.clear();
-    mEnvMap.clear();
-    mUnknown.clear();
-    mSpecular.clear();
-}
-
 ESM4::TextureSet::~TextureSet()
 {
 }

@@ -46,7 +46,6 @@ namespace ESM4
 
         std::string mEditorId;
 
-        ItemMod();
         virtual ~ItemMod();
 
         virtual void load(ESM4::Reader& reader);

@@ -32,12 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::LevelledCreature::LevelledCreature() : mFormId(0), mFlags(0), mScriptId(0), mTemplate(0),
-                                           mChanceNone(0), mLvlCreaFlags(0)
-{
-    mEditorId.clear();
-}
-
 ESM4::LevelledCreature::~LevelledCreature()
 {
 }

@@ -217,7 +217,6 @@ namespace ESM4
         std::vector<float> mSymTextureModeCoefficients;  // size 0 or 50
         std::int16_t mFgRace;
 
-        Npc();
         virtual ~Npc();
 
         virtual void load(ESM4::Reader& reader);

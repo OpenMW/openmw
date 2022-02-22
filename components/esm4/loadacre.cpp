@@ -32,15 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::ActorCreature::ActorCreature() : mFormId(0), mFlags(0), mBaseObj(0), mScale(1.f),
-                                       mOwner(0), mGlobal(0), mFactionRank(0), mInitiallyDisabled(false)
-{
-    mEditorId.clear();
-
-    mEsp.parent = 0;
-    mEsp.flags = 0;
-}
-
 ESM4::ActorCreature::~ActorCreature()
 {
 }

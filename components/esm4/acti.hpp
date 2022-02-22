@@ -57,7 +57,6 @@ namespace ESM4
 
         std::string mActivationPrompt;
 
-        Activator();
         virtual ~Activator();
 
         virtual void load(ESM4::Reader& reader);

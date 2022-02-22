@@ -33,21 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::DialogInfo::DialogInfo() : mFormId(0), mFlags(0), mQuest(0), mSound(0),
-    mDialType(0), mNextSpeaker(0), mInfoFlags(0), mParam3(0)
-{
-    std::memset(&mResponseData, 0, sizeof(TargetResponseData));
-    mResponse.clear();
-    mNotes.clear();
-    mEdits.clear();
-
-    std::memset(&mTargetCondition, 0, sizeof(TargetCondition));
-
-    std::memset(&mScript.scriptHeader, 0, sizeof(ScriptHeader));
-    mScript.scriptSource.clear();
-    mScript.globReference = 0;
-}
-
 ESM4::DialogInfo::~DialogInfo()
 {
 }

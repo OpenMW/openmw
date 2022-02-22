@@ -47,7 +47,6 @@ namespace ESM4
         std::uint8_t mType;
         float mValue;
 
-        GlobalVariable();
         virtual ~GlobalVariable();
 
         virtual void load(ESM4::Reader& reader);

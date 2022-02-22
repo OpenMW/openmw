@@ -32,12 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::LevelledNpc::LevelledNpc() : mFormId(0), mFlags(0), mChanceNone(0), mLvlActorFlags(0), mListCount(0)
-{
-    mEditorId.clear();
-    mModel.clear();
-}
-
 ESM4::LevelledNpc::~LevelledNpc()
 {
 }

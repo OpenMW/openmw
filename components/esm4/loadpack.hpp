@@ -58,14 +58,14 @@ namespace ESM4
 
         struct PLDT // location
         {
-            std::int32_t type; // 0 = near ref, 1 = in cell, 2 = current loc, 3 = editor loc, 4 = obj id, 5 = obj type
+            std::int32_t type = 0xff; // 0 = near ref, 1 = in cell, 2 = current loc, 3 = editor loc, 4 = obj id, 5 = obj type, 0xff = no location data
             FormId location;   // uint32_t if type = 5
             std::int32_t radius;
         };
 
         struct PTDT // target
         {
-            std::int32_t type; // 0 = specific ref, 1 = obj id, 2 = obj type
+            std::int32_t type = 0xff; // 0 = specific ref, 1 = obj id, 2 = obj type, 0xff = no target data
             FormId target;   // uint32_t if type = 2
             std::int32_t distance;
         };

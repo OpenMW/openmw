@@ -31,14 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Container::Container() : mFormId(0), mFlags(0), mBoundRadius(0.f), mDataFlags(0), mWeight(0.f),
-                               mOpenSound(0), mCloseSound(0), mScriptId(0)
-{
-    mEditorId.clear();
-    mFullName.clear();
-    mModel.clear();
-}
-
 ESM4::Container::~Container()
 {
 }
