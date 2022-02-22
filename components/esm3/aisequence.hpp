@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "components/esm/defs.hpp"
 
@@ -149,7 +150,7 @@ namespace ESM
     {
         int mType;
 
-        AiPackage* mPackage;
+        std::unique_ptr<AiPackage> mPackage;
     };
 
     struct AiSequence
@@ -158,7 +159,6 @@ namespace ESM
         {
             mLastAiPackage = -1;
         }
-        ~AiSequence();
 
         std::vector<AiPackageContainer> mPackages;
         int mLastAiPackage;

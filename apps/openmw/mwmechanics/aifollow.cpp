@@ -217,8 +217,8 @@ void AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
 
     ESM::AiSequence::AiPackageContainer package;
     package.mType = ESM::AiSequence::Ai_Follow;
-    package.mPackage = follow.release();
-    sequence.mPackages.push_back(package);
+    package.mPackage = std::move(follow);
+    sequence.mPackages.push_back(std::move(package));
 }
 
 int AiFollow::getFollowIndex() const

@@ -460,8 +460,8 @@ namespace MWMechanics
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Combat;
-        package.mPackage = combat.release();
-        sequence.mPackages.push_back(package);
+        package.mPackage = std::move(combat);
+        sequence.mPackages.push_back(std::move(package));
     }
 
     void AiCombatStorage::startCombatMove(bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target)

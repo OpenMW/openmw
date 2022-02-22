@@ -152,12 +152,6 @@ namespace AiSequence
         esm.writeHNT ("TARG", mTargetActorId);
     }
 
-    AiSequence::~AiSequence()
-    {
-        for (std::vector<AiPackageContainer>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
-            delete it->mPackage;
-    }
-
     void AiSequence::save(ESMWriter &esm) const
     {
         for (std::vector<AiPackageContainer>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
@@ -166,25 +160,25 @@ namespace AiSequence
             switch (it->mType)
             {
             case Ai_Wander:
-                static_cast<const AiWander*>(it->mPackage)->save(esm);
+                static_cast<const AiWander&>(*it->mPackage).save(esm);
                 break;
             case Ai_Travel:
-                static_cast<const AiTravel*>(it->mPackage)->save(esm);
+                static_cast<const AiTravel&>(*it->mPackage).save(esm);
                 break;
             case Ai_Escort:
-                static_cast<const AiEscort*>(it->mPackage)->save(esm);
+                static_cast<const AiEscort&>(*it->mPackage).save(esm);
                 break;
             case Ai_Follow:
-                static_cast<const AiFollow*>(it->mPackage)->save(esm);
+                static_cast<const AiFollow&>(*it->mPackage).save(esm);
                 break;
             case Ai_Activate:
-                static_cast<const AiActivate*>(it->mPackage)->save(esm);
+                static_cast<const AiActivate&>(*it->mPackage).save(esm);
                 break;
             case Ai_Combat:
-                static_cast<const AiCombat*>(it->mPackage)->save(esm);
+                static_cast<const AiCombat&>(*it->mPackage).save(esm);
                 break;
             case Ai_Pursue:
-                static_cast<const AiPursue*>(it->mPackage)->save(esm);
+                static_cast<const AiPursue&>(*it->mPackage).save(esm);
                 break;
 
             default:
@@ -212,7 +206,7 @@ namespace AiSequence
             {
                 std::unique_ptr<AiWander> ptr = std::make_unique<AiWander>();
                 ptr->load(esm);
-                mPackages.back().mPackage = ptr.release();
+                mPackages.back().mPackage = std::move(ptr);
                 ++count;
                 break;
             }
@@ -220,7 +214,7 @@ namespace AiSequence
             {
                 std::unique_ptr<AiTravel> ptr = std::make_unique<AiTravel>();
                 ptr->load(esm);
-                mPackages.back().mPackage = ptr.release();
+                mPackages.back().mPackage = std::move(ptr);
                 ++count;
                 break;
             }
@@ -228,7 +222,7 @@ namespace AiSequence
             {
                 std::unique_ptr<AiEscort> ptr = std::make_unique<AiEscort>();
                 ptr->load(esm);
-                mPackages.back().mPackage = ptr.release();
+                mPackages.back().mPackage = std::move(ptr);
                 ++count;
                 break;
             }
@@ -236,7 +230,7 @@ namespace AiSequence
             {
                 std::unique_ptr<AiFollow> ptr = std::make_unique<AiFollow>();
                 ptr->load(esm);
-                mPackages.back().mPackage = ptr.release();
+                mPackages.back().mPackage = std::move(ptr);
                 ++count;
                 break;
             }
@@ -244,7 +238,7 @@ namespace AiSequence
             {
                 std::unique_ptr<AiActivate> ptr = std::make_unique<AiActivate>();
                 ptr->load(esm);
-                mPackages.back().mPackage = ptr.release();
+                mPackages.back().mPackage = std::move(ptr);
                 ++count;
                 break;
             }
@@ -252,14 +246,14 @@ namespace AiSequence
             {
                 std::unique_ptr<AiCombat> ptr = std::make_unique<AiCombat>();
                 ptr->load(esm);
-                mPackages.back().mPackage = ptr.release();
+                mPackages.back().mPackage = std::move(ptr);
                 break;
             }
             case Ai_Pursue:
             {
                 std::unique_ptr<AiPursue> ptr = std::make_unique<AiPursue>();
                 ptr->load(esm);
-                mPackages.back().mPackage = ptr.release();
+                mPackages.back().mPackage = std::move(ptr);
                 break;
             }
             default:
@@ -274,15 +268,15 @@ namespace AiSequence
             for(auto& pkg : mPackages)
             {
                 if(pkg.mType == Ai_Wander)
-                    static_cast<AiWander*>(pkg.mPackage)->mData.mShouldRepeat = true;
+                    static_cast<AiWander&>(*pkg.mPackage).mData.mShouldRepeat = true;
                 else if(pkg.mType == Ai_Travel)
-                    static_cast<AiTravel*>(pkg.mPackage)->mRepeat = true;
+                    static_cast<AiTravel&>(*pkg.mPackage).mRepeat = true;
                 else if(pkg.mType == Ai_Escort)
-                    static_cast<AiEscort*>(pkg.mPackage)->mRepeat = true;
+                    static_cast<AiEscort&>(*pkg.mPackage).mRepeat = true;
                 else if(pkg.mType == Ai_Follow)
-                    static_cast<AiFollow*>(pkg.mPackage)->mRepeat = true;
+                    static_cast<AiFollow&>(*pkg.mPackage).mRepeat = true;
                 else if(pkg.mType == Ai_Activate)
-                    static_cast<AiActivate*>(pkg.mPackage)->mRepeat = true;
+                    static_cast<AiActivate&>(*pkg.mPackage).mRepeat = true;
             }
         }
     }

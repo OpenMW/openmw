@@ -109,8 +109,8 @@ namespace MWMechanics
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Escort;
-        package.mPackage = escort.release();
-        sequence.mPackages.push_back(package);
+        package.mPackage = std::move(escort);
+        sequence.mPackages.push_back(std::move(package));
     }
 
     void AiEscort::fastForward(const MWWorld::Ptr& actor, AiState &state)
