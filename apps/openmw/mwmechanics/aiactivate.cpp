@@ -52,8 +52,8 @@ namespace MWMechanics
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Activate;
-        package.mPackage = activate.release();
-        sequence.mPackages.push_back(package);
+        package.mPackage = std::move(activate);
+        sequence.mPackages.push_back(std::move(package));
     }
 
     AiActivate::AiActivate(const ESM::AiSequence::AiActivate *activate)

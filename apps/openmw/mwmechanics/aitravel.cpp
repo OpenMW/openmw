@@ -129,8 +129,8 @@ namespace MWMechanics
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Travel;
-        package.mPackage = travel.release();
-        sequence.mPackages.push_back(package);
+        package.mPackage = std::move(travel);
+        sequence.mPackages.push_back(std::move(package));
     }
 
     AiInternalTravel::AiInternalTravel(float x, float y, float z)

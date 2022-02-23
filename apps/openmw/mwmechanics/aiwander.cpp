@@ -888,8 +888,8 @@ namespace MWMechanics
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Wander;
-        package.mPackage = wander.release();
-        sequence.mPackages.push_back(package);
+        package.mPackage = std::move(wander);
+        sequence.mPackages.push_back(std::move(package));
     }
 
     AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
