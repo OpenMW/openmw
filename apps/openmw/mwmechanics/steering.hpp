@@ -16,9 +16,11 @@ namespace MWMechanics
 // Max rotating speed, radian/sec
 inline float getAngularVelocity(const float actorSpeed)
 {
-    const float baseAngluarVelocity = 10;
+    constexpr float degreesPerFrame = 15.f;
+    constexpr int framesPerSecond = 60;
+    const float baseAngularVelocity = osg::DegreesToRadians(degreesPerFrame * framesPerSecond);
     const float baseSpeed = 200;
-    return baseAngluarVelocity * std::max(actorSpeed / baseSpeed, 1.0f);
+    return baseAngularVelocity * std::max(actorSpeed / baseSpeed, 1.0f);
 }
 
 /// configure rotation settings for an actor to reach this target angle (eventually)
