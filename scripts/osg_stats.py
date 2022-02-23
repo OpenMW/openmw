@@ -19,7 +19,8 @@ import re
 @click.option('--print_keys', is_flag=True,
               help='Print a list of all present keys in the input file.')
 @click.option('--regexp_match', is_flag=True,
-              help='Use all metric that match given key. Can be used with stats and timeseries.')
+              help='Use all metric that match given key. '
+                   'Can be used with stats, timeseries, commulative_timeseries, hist, hist_threshold')
 @click.option('--timeseries', type=str, multiple=True,
               help='Show a graph for given metric over time.')
 @click.option('--commulative_timeseries', type=str, multiple=True,
@@ -72,14 +73,18 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if print_keys:
         for v in keys:
             print(v)
+    def matching_keys(patterns):
+        if regexp_match:
+            return [key for pattern in patterns for key in keys if re.search(pattern, key)]
+        return keys
     if timeseries:
-        draw_timeseries(sources=frames, keys=matching_keys(keys, timeseries, regexp_match), add_sum=timeseries_sum,
+        draw_timeseries(sources=frames, keys=matching_keys(timeseries), add_sum=timeseries_sum,
                         begin_frame=begin_frame, end_frame=end_frame)
     if commulative_timeseries:
-        draw_commulative_timeseries(sources=frames, keys=matching_keys(keys, commulative_timeseries, regexp_match), add_sum=commulative_timeseries_sum,
+        draw_commulative_timeseries(sources=frames, keys=matching_keys(commulative_timeseries), add_sum=commulative_timeseries_sum,
                                     begin_frame=begin_frame, end_frame=end_frame)
     if hist:
-        draw_hists(sources=frames, keys=hist)
+        draw_hists(sources=frames, keys=matching_keys(hist))
     if hist_ratio:
         draw_hist_ratio(sources=frames, pairs=hist_ratio)
     if stdev_hist:
@@ -87,9 +92,9 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if plot:
         draw_plots(sources=frames, plots=plot)
     if stats:
-        print_stats(sources=frames, keys=matching_keys(keys, stats, regexp_match), stats_sum=stats_sum, precision=precision)
+        print_stats(sources=frames, keys=matching_keys(stats), stats_sum=stats_sum, precision=precision)
     if hist_threshold:
-        draw_hist_threshold(sources=frames, keys=hist_threshold, begin_frame=begin_frame,
+        draw_hist_threshold(sources=frames, keys=matching_keys(hist_threshold), begin_frame=begin_frame,
                             threshold_name=threshold_name, threshold_value=threshold_value)
     matplotlib.pyplot.show()
 
@@ -143,12 +148,6 @@ def collect_unique_keys(sources):
             for key in frame.keys():
                 result.add(key)
     return sorted(result)
-
-
-def matching_keys(keys, patterns, regexp_match):
-    if regexp_match:
-        return { key for pattern in patterns for key in keys if re.search(pattern, key) }
-    return keys
 
 
 def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
