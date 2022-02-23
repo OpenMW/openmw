@@ -35,8 +35,8 @@ variables:
     - cd build
     - cmake --build . -- -j $(nproc)
     - cmake --install .
-    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite; fi
-    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite --gtest_output="xml:tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - ccache -s
   artifacts:
     paths:
@@ -111,7 +111,10 @@ Ubuntu_GCC_tests:
     BUILD_TESTS_ONLY: 1
   artifacts:
     paths: []
-    expire_in: 1 minute
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
 Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
@@ -124,7 +127,10 @@ Ubuntu_GCC_tests_Debug:
     CMAKE_CXX_FLAGS_DEBUG: -g -O0 -D_GLIBCXX_ASSERTIONS
   artifacts:
     paths: []
-    expire_in: 1 minute
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
 Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
@@ -139,7 +145,10 @@ Ubuntu_GCC_tests_asan:
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1
   artifacts:
     paths: []
-    expire_in: 1 minute
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
@@ -153,7 +162,10 @@ Ubuntu_GCC_tests_ubsan:
     UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
   artifacts:
     paths: []
-    expire_in: 1 minute
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
 Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
@@ -168,7 +180,29 @@ Ubuntu_GCC_tests_tsan:
     TSAN_OPTIONS: second_deadlock_stack=1:halt_on_error=1
   artifacts:
     paths: []
-    expire_in: 1 minute
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
+
+Ubuntu_GCC_tests_coverage:
+  extends: Ubuntu_GCC_tests_Debug
+  cache:
+    key: Ubuntu_GCC_tests_coverage.v1
+  variables:
+    BUILD_WITH_CODE_COVERAGE: 1
+  before_script:
+    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic openmw-coverage
+  after_script:
+    - gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root ${CI_PROJECT_DIR} -j $(nproc) -o coverage.xml
+  coverage: /^\s*lines:\s*\d+.\d+\%/
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      cobertura: coverage.xml
+      junit: build/tests.xml
 
 Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
@@ -206,7 +240,10 @@ Ubuntu_Static_Deps_tests:
     CXXFLAGS: -O0
   artifacts:
     paths: []
-    expire_in: 1 minute
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
 Ubuntu_Clang:
   extends: .Ubuntu
@@ -230,7 +267,10 @@ Ubuntu_Clang_tests:
     BUILD_TESTS_ONLY: 1
   artifacts:
     paths: []
-    expire_in: 1 minute
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
@@ -242,7 +282,10 @@ Ubuntu_Clang_tests_Debug:
     CMAKE_BUILD_TYPE: Debug
   artifacts:
     paths: []
-    expire_in: 1 minute
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
 .MacOS:
   image: macos-11-xcode-12

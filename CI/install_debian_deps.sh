@@ -40,6 +40,8 @@ declare -rA GROUPED_DEPS=(
     libcollada-dom-dev libfreetype6-dev libjpeg-dev libpng-dev
     libsdl2-dev libboost-system-dev libboost-filesystem-dev libgl-dev
   "
+
+  [openmw-coverage]="gcovr"
 )
 
 if [[ $# -eq 0 ]]; then

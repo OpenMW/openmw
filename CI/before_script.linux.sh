@@ -64,6 +64,12 @@ if [[ "${CMAKE_EXE_LINKER_FLAGS}" ]]; then
     )
 fi
 
+if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then
+    CMAKE_CONF_OPTS+=(
+        -DBUILD_WITH_CODE_COVERAGE="${BUILD_WITH_CODE_COVERAGE}"
+    )
+fi
+
 mkdir -p build
 cd build
 
