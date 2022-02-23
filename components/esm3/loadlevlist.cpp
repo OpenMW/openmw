@@ -6,7 +6,7 @@
 
 namespace ESM
 {
-    void LevelledListBase::load(ESMReader &esm, bool &isDeleted)
+    void LevelledListBase::load(ESMReader& esm, ESM::NAME recName, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -43,7 +43,7 @@ namespace ESM
                     for (size_t i = 0; i < mList.size(); i++)
                     {
                         LevelItem &li = mList[i];
-                        li.mId = esm.getHNString(mRecName);
+                        li.mId = esm.getHNString(recName);
                         esm.getHNT(li.mLevel, "INTV");
                     }
 
@@ -75,7 +75,7 @@ namespace ESM
             esm.fail("Missing NAME subrecord");
     }
 
-    void LevelledListBase::save(ESMWriter &esm, bool isDeleted) const
+    void LevelledListBase::save(ESMWriter& esm, ESM::NAME recName, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -91,7 +91,7 @@ namespace ESM
 
         for (std::vector<LevelItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
         {
-            esm.writeHNCString(mRecName, it->mId);
+            esm.writeHNCString(recName, it->mId);
             esm.writeHNT("INTV", it->mLevel);
         }
     }
@@ -102,8 +102,4 @@ namespace ESM
         mChanceNone = 0;
         mList.clear();
     }
-
-    unsigned int CreatureLevList::sRecordId = REC_LEVC;
-
-    unsigned int ItemLevList::sRecordId = REC_LEVI;
 }
