@@ -305,8 +305,8 @@ namespace MWClass
             {
                 damage = attack[0] + ((attack[1]-attack[0])*attackStrength);
                 MWMechanics::adjustWeaponDamage(damage, weapon, ptr);
-                MWMechanics::resistNormalWeapon(victim, ptr, weapon, damage);
                 MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
+                MWMechanics::resistNormalWeapon(victim, ptr, weapon, damage);
             }
 
             // Apply "On hit" enchanted weapons

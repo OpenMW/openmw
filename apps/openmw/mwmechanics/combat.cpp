@@ -200,17 +200,17 @@ namespace MWMechanics
 
         bool validVictim = !victim.isEmpty() && victim.getClass().isActor();
 
+        int weaponSkill = ESM::Skill::Marksman;
+        if (!weapon.isEmpty())
+            weaponSkill = weapon.getClass().getEquipmentSkill(weapon);
+
         float damage = 0.f;
         if (validVictim)
         {
             if (attacker == getPlayer())
                 MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
-            int weaponSkill = ESM::Skill::Marksman;
-            if (!weapon.isEmpty())
-                weaponSkill = weapon.getClass().getEquipmentSkill(weapon);
-
-            int skillValue = attacker.getClass().getSkill(attacker, weapon.getClass().getEquipmentSkill(weapon));
+            int skillValue = attacker.getClass().getSkill(attacker, weaponSkill);
 
             if (Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
             {
@@ -228,6 +228,12 @@ namespace MWMechanics
             damage += attack[0] + ((attack[1] - attack[0]) * attackStrength);
 
             adjustWeaponDamage(damage, weapon, attacker);
+        }
+
+        reduceWeaponCondition(damage, validVictim, weapon, attacker);
+
+        if (validVictim)
+        {
             if (weapon == projectile || Settings::Manager::getBool("only appropriate ammunition bypasses resistance", "Game") || isNormalWeapon(weapon))
                 resistNormalWeapon(victim, attacker, projectile, damage);
             applyWerewolfDamageMult(victim, projectile, damage);
@@ -246,8 +252,6 @@ namespace MWMechanics
                     MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
         }
-
-        reduceWeaponCondition(damage, validVictim, weapon, attacker);
 
         // Apply "On hit" effect of the projectile
         bool appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition, true);
