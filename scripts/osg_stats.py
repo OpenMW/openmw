@@ -160,7 +160,7 @@ def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
             ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label=f'sum:{name}')
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('timeseries')
+    fig.canvas.manager.set_window_title('timeseries')
 
 
 def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
@@ -173,7 +173,7 @@ def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
             ax.plot(x, numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}')
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('commulative_timeseries')
+    fig.canvas.manager.set_window_title('commulative_timeseries')
 
 
 def draw_hists(sources, keys):
@@ -189,7 +189,7 @@ def draw_hists(sources, keys):
     ax.set_xticks(bins)
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('hists')
+    fig.canvas.manager.set_window_title('hists')
 
 
 def draw_hist_ratio(sources, pairs):
@@ -205,7 +205,7 @@ def draw_hist_ratio(sources, pairs):
     ax.set_xticks(bins)
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('hists_ratio')
+    fig.canvas.manager.set_window_title('hists_ratio')
 
 
 def draw_stdev_hists(sources, stdev_hists):
@@ -224,7 +224,7 @@ def draw_stdev_hists(sources, stdev_hists):
         ax.set_xticks(bins)
         ax.grid(True)
         ax.legend()
-        fig.canvas.set_window_title('stdev_hists')
+        fig.canvas.manager.set_window_title('stdev_hists')
 
 
 def draw_plots(sources, plots):
@@ -249,7 +249,7 @@ def draw_plots(sources, plots):
                 )
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('plots')
+    fig.canvas.manager.set_window_title('plots')
 
 
 def print_stats(sources, keys, stats_sum, precision):
@@ -285,7 +285,7 @@ def draw_hist_threshold(sources, keys, begin_frame, threshold_name, threshold_va
         ax.xaxis.set_major_formatter(matplotlib.pyplot.FixedFormatter(numbers))
         ax.grid(True)
         ax.legend()
-        fig.canvas.set_window_title(f'hist_threshold:{name}')
+        fig.canvas.manager.set_window_title(f'hist_threshold:{name}')
 
 
 def filter_not_none(values):
