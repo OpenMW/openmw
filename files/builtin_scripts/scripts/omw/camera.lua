@@ -172,7 +172,8 @@ end
 
 return {
     interfaceName = 'Camera',
-    --- @module Camera
+    ---
+    -- @module Camera
     -- @usage require('openmw.interfaces').Camera
     interface = {
         --- Interface version

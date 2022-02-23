@@ -1,95 +1,95 @@
--------------------------------------------------------------------------------
+---
 -- `openmw.input` can be used only in scripts attached to a player.
 -- @module input
 -- @usage local input = require('openmw.input')
 
 
 
--------------------------------------------------------------------------------
+---
 -- Is player idle.
 -- @function [parent=#input] isIdle
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is a specific control currently pressed.
 -- Input bindings can be changed ingame using Options/Controls menu.
 -- @function [parent=#input] isActionPressed
 -- @param #number actionId One of @{openmw.input#ACTION}
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is a keyboard button currently pressed.
 -- @function [parent=#input] isKeyPressed
 -- @param #number keyCode Key code (see @{openmw.input#KEY})
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is a controller button currently pressed.
 -- @function [parent=#input] isControllerButtonPressed
 -- @param #number buttonId Button index (see @{openmw.input#CONTROLLER_BUTTON})
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is `Shift` key pressed.
 -- @function [parent=#input] isShiftPressed
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is `Ctrl` key pressed.
 -- @function [parent=#input] isCtrlPressed
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is `Alt` key pressed.
 -- @function [parent=#input] isAltPressed
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is `Super`/`Win` key pressed.
 -- @function [parent=#input] isSuperPressed
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is a mouse button currently pressed.
 -- @function [parent=#input] isMouseButtonPressed
 -- @param #number buttonId Button index (1 - left, 2 - middle, 3 - right, 4 - X1, 5 - X2)
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Horizontal mouse movement during the last frame.
 -- @function [parent=#input] getMouseMoveX
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- Vertical mouse movement during the last frame.
 -- @function [parent=#input] getMouseMoveY
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- Get value of an axis of a game controller.
 -- @function [parent=#input] getAxisValue
 -- @param #number axisId Index of a controller axis, one of @{openmw.input#CONTROLLER_AXIS}.
 -- @return #number Value in range [-1, 1].
 
--------------------------------------------------------------------------------
+---
 -- Get state of a control switch. I.e. is player able to move/fight/jump/etc.
 -- @function [parent=#input] getControlSwitch
 -- @param #string key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Set state of a control switch. I.e. forbid or allow player to move/fight/jump/etc.
 -- @function [parent=#input] setControlSwitch
 -- @param #string key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @param #boolean value
 
--------------------------------------------------------------------------------
+---
 -- Returns a human readable name for the given key code
 -- @function [parent=#input] getKeyName
 -- @param #number code A key code (see @{openmw.input#KEY})
 -- @return #string
 
--------------------------------------------------------------------------------
+---
 -- @type CONTROL_SWITCH
 -- @field [parent=#CONTROL_SWITCH] #string Controls Ability to move
 -- @field [parent=#CONTROL_SWITCH] #string Fighting Ability to attack
@@ -99,11 +99,11 @@
 -- @field [parent=#CONTROL_SWITCH] #string ViewMode Ability to toggle 1st/3rd person view
 -- @field [parent=#CONTROL_SWITCH] #string VanityMode Vanity view if player doesn't touch controls for a long time
 
--------------------------------------------------------------------------------
+---
 -- Values that can be used with getControlSwitch/setControlSwitch.
 -- @field [parent=#input] #CONTROL_SWITCH CONTROL_SWITCH
 
--------------------------------------------------------------------------------
+---
 -- @type ACTION
 -- @field [parent=#ACTION] #number GameMenu
 -- @field [parent=#ACTION] #number Screenshot
@@ -150,11 +150,11 @@
 -- @field [parent=#ACTION] #number ZoomIn
 -- @field [parent=#ACTION] #number ZoomOut
 
--------------------------------------------------------------------------------
+---
 -- Values that can be used with isActionPressed.
 -- @field [parent=#input] #ACTION ACTION
 
--------------------------------------------------------------------------------
+---
 -- @type CONTROLLER_BUTTON
 -- @field [parent=#CONTROLLER_BUTTON] #number A
 -- @field [parent=#CONTROLLER_BUTTON] #number B
@@ -172,11 +172,11 @@
 -- @field [parent=#CONTROLLER_BUTTON] #number DPadLeft
 -- @field [parent=#CONTROLLER_BUTTON] #number DPadRight
 
--------------------------------------------------------------------------------
+---
 -- Values that can be passed to onControllerButtonPress/onControllerButtonRelease engine handlers.
 -- @field [parent=#input] #CONTROLLER_BUTTON CONTROLLER_BUTTON
 
--------------------------------------------------------------------------------
+---
 -- Ids of game controller axises. Used as an argument in getAxisValue.
 -- @type CONTROLLER_AXIS
 -- @field [parent=#CONTROLLER_AXIS] #number LeftX Left stick horizontal axis (from -1 to 1)
@@ -190,11 +190,11 @@
 -- @field [parent=#CONTROLLER_AXIS] #number MoveForwardBackward Movement forward/backward (LeftY by default, can be mapped to another axis in Options/Controls menu)
 -- @field [parent=#CONTROLLER_AXIS] #number MoveLeftRight Side movement (LeftX by default, can be mapped to another axis in Options/Controls menu)
 
--------------------------------------------------------------------------------
+---
 -- Values that can be used with getAxisValue.
 -- @field [parent=#input] #CONTROLLER_AXIS CONTROLLER_AXIS
 
--------------------------------------------------------------------------------
+---
 -- @type KEY
 -- @field #number _0
 -- @field #number _1
@@ -299,11 +299,11 @@
 -- @field #number Space
 -- @field #number Tab
 
--------------------------------------------------------------------------------
+---
 -- Key codes.
 -- @field [parent=#input] #KEY KEY
 
--------------------------------------------------------------------------------
+---
 -- The argument of `onKeyPress`/`onKeyRelease` engine handlers.
 -- @type KeyboardEvent
 -- @field [parent=#KeyboardEvent] #string symbol The pressed symbol (1-symbol string if can be represented or an empty string otherwise).

@@ -23,7 +23,7 @@ Every widget is defined by a layout, which is a Lua table with the following fie
 
 Layers
 ------
-Layers control how widgets overlap - layers with higher indexes cover render over layers with lower indexes.
+Layers control how widgets overlap - layers with higher indexes render over layers with lower indexes.
 Widgets within the same layer which were added later overlap the ones created earlier.
 A layer can also be set as non-interactive, which prevents all mouse interactions with the widgets in that layer.
 
@@ -120,7 +120,7 @@ Example
   end
 
   -- we are showing game time in hours and minutes
-  -- so no need to update more often than ones a game minute
+  -- so no need to update more often than once a game minute
   time.runRepeatedly(updateTime, 1 * time.minute, { type = time.GameTime })
 
 *clock.omwscripts*
