@@ -19,7 +19,8 @@ import re
 @click.option('--print_keys', is_flag=True,
               help='Print a list of all present keys in the input file.')
 @click.option('--regexp_match', is_flag=True,
-              help='Use all metric that match given key. Can be used with stats and timeseries.')
+              help='Use all metric that match given key. '
+                   'Can be used with stats, timeseries, commulative_timeseries, hist, hist_threshold')
 @click.option('--timeseries', type=str, multiple=True,
               help='Show a graph for given metric over time.')
 @click.option('--commulative_timeseries', type=str, multiple=True,
@@ -72,14 +73,18 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if print_keys:
         for v in keys:
             print(v)
+    def matching_keys(patterns):
+        if regexp_match:
+            return [key for pattern in patterns for key in keys if re.search(pattern, key)]
+        return keys
     if timeseries:
-        draw_timeseries(sources=frames, keys=matching_keys(keys, timeseries, regexp_match), add_sum=timeseries_sum,
+        draw_timeseries(sources=frames, keys=matching_keys(timeseries), add_sum=timeseries_sum,
                         begin_frame=begin_frame, end_frame=end_frame)
     if commulative_timeseries:
-        draw_commulative_timeseries(sources=frames, keys=matching_keys(keys, commulative_timeseries, regexp_match), add_sum=commulative_timeseries_sum,
+        draw_commulative_timeseries(sources=frames, keys=matching_keys(commulative_timeseries), add_sum=commulative_timeseries_sum,
                                     begin_frame=begin_frame, end_frame=end_frame)
     if hist:
-        draw_hists(sources=frames, keys=hist)
+        draw_hists(sources=frames, keys=matching_keys(hist))
     if hist_ratio:
         draw_hist_ratio(sources=frames, pairs=hist_ratio)
     if stdev_hist:
@@ -87,9 +92,9 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if plot:
         draw_plots(sources=frames, plots=plot)
     if stats:
-        print_stats(sources=frames, keys=matching_keys(keys, stats, regexp_match), stats_sum=stats_sum, precision=precision)
+        print_stats(sources=frames, keys=matching_keys(stats), stats_sum=stats_sum, precision=precision)
     if hist_threshold:
-        draw_hist_threshold(sources=frames, keys=hist_threshold, begin_frame=begin_frame,
+        draw_hist_threshold(sources=frames, keys=matching_keys(hist_threshold), begin_frame=begin_frame,
                             threshold_name=threshold_name, threshold_value=threshold_value)
     matplotlib.pyplot.show()
 
@@ -145,12 +150,6 @@ def collect_unique_keys(sources):
     return sorted(result)
 
 
-def matching_keys(keys, patterns, regexp_match):
-    if regexp_match:
-        return { key for pattern in patterns for key in keys if re.search(pattern, key) }
-    return keys
-
-
 def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     fig, ax = matplotlib.pyplot.subplots()
     x = numpy.array(range(begin_frame, end_frame))
@@ -161,7 +160,7 @@ def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
             ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label=f'sum:{name}')
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('timeseries')
+    fig.canvas.manager.set_window_title('timeseries')
 
 
 def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
@@ -174,7 +173,7 @@ def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
             ax.plot(x, numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}')
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('commulative_timeseries')
+    fig.canvas.manager.set_window_title('commulative_timeseries')
 
 
 def draw_hists(sources, keys):
@@ -190,7 +189,7 @@ def draw_hists(sources, keys):
     ax.set_xticks(bins)
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('hists')
+    fig.canvas.manager.set_window_title('hists')
 
 
 def draw_hist_ratio(sources, pairs):
@@ -206,7 +205,7 @@ def draw_hist_ratio(sources, pairs):
     ax.set_xticks(bins)
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('hists_ratio')
+    fig.canvas.manager.set_window_title('hists_ratio')
 
 
 def draw_stdev_hists(sources, stdev_hists):
@@ -225,7 +224,7 @@ def draw_stdev_hists(sources, stdev_hists):
         ax.set_xticks(bins)
         ax.grid(True)
         ax.legend()
-        fig.canvas.set_window_title('stdev_hists')
+        fig.canvas.manager.set_window_title('stdev_hists')
 
 
 def draw_plots(sources, plots):
@@ -250,7 +249,7 @@ def draw_plots(sources, plots):
                 )
     ax.grid(True)
     ax.legend()
-    fig.canvas.set_window_title('plots')
+    fig.canvas.manager.set_window_title('plots')
 
 
 def print_stats(sources, keys, stats_sum, precision):
@@ -286,7 +285,7 @@ def draw_hist_threshold(sources, keys, begin_frame, threshold_name, threshold_va
         ax.xaxis.set_major_formatter(matplotlib.pyplot.FixedFormatter(numbers))
         ax.grid(True)
         ax.legend()
-        fig.canvas.set_window_title(f'hist_threshold:{name}')
+        fig.canvas.manager.set_window_title(f'hist_threshold:{name}')
 
 
 def filter_not_none(values):
