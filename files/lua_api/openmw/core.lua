@@ -1,4 +1,4 @@
--------------------------------------------------------------------------------
+---
 -- `openmw.core` defines functions and types that are available in both local
 -- and global scripts.
 -- @module core
@@ -6,53 +6,53 @@
 
 
 
--------------------------------------------------------------------------------
+---
 -- The revision of OpenMW Lua API. It is an integer that is incremented every time the API is changed.
 -- @field [parent=#core] #number API_REVISION
 
--------------------------------------------------------------------------------
+---
 -- Terminates the game and quits to the OS. Should be used only for testing purposes.
 -- @function [parent=#core] quit
 
--------------------------------------------------------------------------------
+---
 -- Send an event to global scripts.
 -- @function [parent=#core] sendGlobalEvent
 -- @param #string eventName
 -- @param eventData
 
--------------------------------------------------------------------------------
+---
 -- Simulation time in seconds.
 -- The number of simulation seconds passed in the game world since starting a new game.
 -- @function [parent=#core] getSimulationTime
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- The scale of simulation time relative to real time.
 -- @function [parent=#core] getSimulationTimeScale
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- Game time in seconds.
 -- @function [parent=#core] getGameTime
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- The scale of game time relative to simulation time.
 -- @function [parent=#core] getGameTimeScale
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- Whether the world is paused (onUpdate doesn't work when the world is paused).
 -- @function [parent=#core] isWorldPaused
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Get a GMST setting from content files.
 -- @function [parent=#core] getGMST
 -- @param #string setting Setting name
 -- @return #any
 
--------------------------------------------------------------------------------
+---
 -- Return i18n formatting function for the given context.
 -- It is based on `i18n.lua` library.
 -- Language files should be stored in VFS as `i18n/<ContextName>/<Lang>.lua`.
@@ -86,7 +86,7 @@
 -- print( myMsg('Hello %{name}!', {name='World'}) )
 
 
--------------------------------------------------------------------------------
+---
 -- @type OBJECT_TYPE
 -- @field #string Activator "Activator"
 -- @field #string Armor "Armor"
@@ -107,12 +107,12 @@
 -- @field #string Probe "Probe"
 -- @field #string Repair "Repair"
 
--------------------------------------------------------------------------------
+---
 -- Possible `object.type` values.
 -- @field [parent=#core] #OBJECT_TYPE OBJECT_TYPE
 
 
--------------------------------------------------------------------------------
+---
 -- @type EQUIPMENT_SLOT
 -- @field #number Helmet
 -- @field #number Cuirass
@@ -134,12 +134,12 @@
 -- @field #number CarriedLeft
 -- @field #number Ammunition
 
--------------------------------------------------------------------------------
+---
 -- Available equipment slots. Used in `object:getEquipment` and `object:setEquipment`.
 -- @field [parent=#core] #EQUIPMENT_SLOT EQUIPMENT_SLOT
 
 
--------------------------------------------------------------------------------
+---
 -- Any object that exists in the game world and has a specific location.
 -- Player, actors, items, and statics are game objects.
 -- @type GameObject
@@ -155,7 +155,7 @@
 -- @field openmw.util#Vector3 destRotation Destination rotation (only if a teleport door).
 -- @field #string destCell Destination cell (only if a teleport door).
 
--------------------------------------------------------------------------------
+---
 -- Is the object still exists/available.
 -- Returns true if the object exists and loaded, and false otherwise. If false, then every
 -- access to the object will raise an error.
@@ -163,7 +163,7 @@
 -- @param self
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Returns true if the object is an actor and is able to move. For dead, paralized,
 -- or knocked down actors in returns false.
 -- access to the object will raise an error.
@@ -171,56 +171,56 @@
 -- @param self
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Speed of running. Returns 0 if not an actor, but for dead actors it still returns a positive value.
 -- @function [parent=#GameObject] getRunSpeed
 -- @param self
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- Speed of walking. Returns 0 if not an actor, but for dead actors it still returns a positive value.
 -- @function [parent=#GameObject] getWalkSpeed
 -- @param self
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- Current speed. Can be called only from a local script.
 -- @function [parent=#GameObject] getCurrentSpeed
 -- @param self
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- Is the actor standing on ground. Can be called only from a local script.
 -- @function [parent=#GameObject] isOnGround
 -- @param self
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is the actor in water. Can be called only from a local script.
 -- @function [parent=#GameObject] isSwimming
 -- @param self
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is the actor in weapon stance. Can be called only from a local script.
 -- @function [parent=#GameObject] isInWeaponStance
 -- @param self
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Is the actor in magic stance. Can be called only from a local script.
 -- @function [parent=#GameObject] isInMagicStance
 -- @param self
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Send local event to the object.
 -- @function [parent=#GameObject] sendEvent
 -- @param self
 -- @param #string eventName
 -- @param eventData
 
--------------------------------------------------------------------------------
+---
 -- Activate the object.
 -- @function [parent=#GameObject] activateBy
 -- @param self
@@ -228,14 +228,14 @@
 -- @usage local self = require('openmw.self')
 -- object:activateBy(self)
 
--------------------------------------------------------------------------------
+---
 -- Returns `true` if the item is equipped on the object.
 -- @function [parent=#GameObject] isEquipped
 -- @param self
 -- @param #GameObject item
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Get equipment.
 -- Returns a table `slot` -> `GameObject` of currently equipped items.
 -- See @{openmw.core#EQUIPMENT_SLOT}. Returns empty table if the object doesn't have
@@ -244,7 +244,7 @@
 -- @param self
 -- @return #map<#number,#GameObject>
 
--------------------------------------------------------------------------------
+---
 -- Set equipment.
 -- Keys in the table are equipment slots (see @{openmw.core#EQUIPMENT_SLOT}). Each
 -- value can be either a `GameObject` or recordId. Raises an error if
@@ -254,7 +254,7 @@
 -- @param self
 -- @param equipment
 
--------------------------------------------------------------------------------
+---
 -- Add new local script to the object.
 -- Can be called only from a global script. Script should be specified in a content
 -- file (omwgame/omwaddon/omwscripts) with a CUSTOM flag.
@@ -262,7 +262,7 @@
 -- @param self
 -- @param #string scriptPath Path to the script in OpenMW virtual filesystem.
 
--------------------------------------------------------------------------------
+---
 -- Whether a script with given path is attached to this object.
 -- Can be called only from a global script.
 -- @function [parent=#GameObject] hasScript
@@ -270,14 +270,14 @@
 -- @param #string scriptPath Path to the script in OpenMW virtual filesystem.
 -- @return #boolean
 
--------------------------------------------------------------------------------
+---
 -- Removes script that was attached by `addScript`
 -- Can be called only from a global script.
 -- @function [parent=#GameObject] removeScript
 -- @param self
 -- @param #string scriptPath Path to the script in OpenMW virtual filesystem.
 
--------------------------------------------------------------------------------
+---
 -- Moves object to given cell and position.
 -- The effect is not immediate: the position will be updated only in the next
 -- frame. Can be called only from a global script.
@@ -288,12 +288,12 @@
 -- @param openmw.util#Vector3 rotation New rotation. Optional argument. If missed, then the current rotation is used.
 
 
--------------------------------------------------------------------------------
+---
 -- List of GameObjects. Implements [iterables#List](iterables.html#List) of #GameObject
 -- @type ObjectList
 -- @list <#GameObject>
 
--------------------------------------------------------------------------------
+---
 -- Filter list with a Query.
 -- @function [parent=#ObjectList] select
 -- @param self
@@ -301,7 +301,7 @@
 -- @return #ObjectList
 
 
--------------------------------------------------------------------------------
+---
 -- A cell of the game world.
 -- @type Cell
 -- @field #string name Name of the cell (can be empty string).
@@ -311,7 +311,7 @@
 -- @field #number gridY Index of the cell by Y (only for exteriors).
 -- @field #boolean hasWater True if the cell contains water.
 
--------------------------------------------------------------------------------
+---
 -- Returns true either if the cell contains the object or if the cell is an exterior and the object is also in an exterior.
 -- @function [parent=#Cell] isInSameSpace
 -- @param self
@@ -324,7 +324,7 @@
 --     -- the distance can't be calculated because the coordinates are in different spaces
 -- end
 
--------------------------------------------------------------------------------
+---
 -- Select objects from the cell with a Query (only in global scripts).
 -- Returns an empty list if the cell is not loaded.
 -- @function [parent=#Cell] selectObjects
@@ -333,18 +333,18 @@
 -- @return #ObjectList
 
 
--------------------------------------------------------------------------------
+---
 -- Inventory of a player/NPC or a content of a container.
 -- @type Inventory
 
--------------------------------------------------------------------------------
+---
 -- The number of items with given recordId.
 -- @function [parent=#Inventory] countOf
 -- @param self
 -- @param #string recordId
 -- @return #number
 
--------------------------------------------------------------------------------
+---
 -- Get all items of given type from the inventory.
 -- @function [parent=#Inventory] getAll
 -- @param self

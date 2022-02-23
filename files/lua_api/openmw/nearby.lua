@@ -1,4 +1,4 @@
--------------------------------------------------------------------------------
+---
 -- `openmw.nearby` provides read-only access to the nearest area of the game world.
 -- Can be used only from local scripts.
 -- @module nearby
@@ -6,33 +6,33 @@
 
 
 
--------------------------------------------------------------------------------
+---
 -- List of nearby activators.
 -- @field [parent=#nearby] openmw.core#ObjectList activators
 
--------------------------------------------------------------------------------
+---
 -- List of nearby actors.
 -- @field [parent=#nearby] openmw.core#ObjectList actors
 
--------------------------------------------------------------------------------
+---
 -- List of nearby containers.
 -- @field [parent=#nearby] openmw.core#ObjectList containers
 
--------------------------------------------------------------------------------
+---
 -- List of nearby doors.
 -- @field [parent=#nearby] openmw.core#ObjectList doors
 
--------------------------------------------------------------------------------
+---
 -- Everything that can be picked up in the nearby.
 -- @field [parent=#nearby] openmw.core#ObjectList items
 
--------------------------------------------------------------------------------
+---
 -- Evaluates a Query.
 -- @function [parent=#nearby] selectObjects
 -- @param openmw.query#Query query
 -- @return openmw.core#ObjectList
 
--------------------------------------------------------------------------------
+---
 -- @type COLLISION_TYPE
 -- @field [parent=#COLLISION_TYPE] #number World
 -- @field [parent=#COLLISION_TYPE] #number Door
@@ -42,12 +42,12 @@
 -- @field [parent=#COLLISION_TYPE] #number Water
 -- @field [parent=#COLLISION_TYPE] #number Default Used by deafult: World+Door+Actor+HeightMap
 
--------------------------------------------------------------------------------
+---
 -- Collision types that are used in `castRay`.
 -- Several types can be combined with '+'.
 -- @field [parent=#nearby] #COLLISION_TYPE COLLISION_TYPE
 
--------------------------------------------------------------------------------
+---
 -- Result of raycasing
 -- @type RayCastingResult
 -- @field [parent=#RayCastingResult] #boolean hit Is there a collision? (true/false)
@@ -55,7 +55,7 @@
 -- @field [parent=#RayCastingResult] openmw.util#Vector3 hitNormal Normal to the surface in the collision point (nil if no collision)
 -- @field [parent=#RayCastingResult] openmw.core#GameObject hitObject The object the ray has collided with (can be nil)
 
--------------------------------------------------------------------------------
+---
 -- Cast ray from one point to another and return the first collision.
 -- @function [parent=#nearby] castRay
 -- @param openmw.util#Vector3 from Start point of the ray.
