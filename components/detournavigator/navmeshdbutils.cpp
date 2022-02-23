@@ -28,7 +28,7 @@ namespace DetourNavigator
             const ShapeId newShapeId = nextShapeId;
             db.insertShape(newShapeId, name, type, hashData);
             Log(Debug::Verbose) << "Added " << name << " " << type << " shape to navmeshdb with id " << newShapeId;
-            ++nextShapeId.t;
+            ++nextShapeId;
             return newShapeId;
         }
     }

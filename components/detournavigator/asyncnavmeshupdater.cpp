@@ -733,7 +733,7 @@ namespace DetourNavigator
     {
         Stats result;
         result.mJobs = mQueue.size();
-        result.mGetTileCount = mGetTileCount.load(std::memory_order::memory_order_relaxed);
+        result.mGetTileCount = mGetTileCount.load(std::memory_order_relaxed);
         return result;
     }
 
@@ -857,6 +857,6 @@ namespace DetourNavigator
         Log(Debug::Debug) << "Insert db tile by job " << job->mId;
         mDb->insertTile(mNextTileId, job->mWorldspace, job->mChangedTile,
                         mVersion, job->mInput, serialize(*job->mGeneratedNavMeshData));
-        ++mNextTileId.t;
+        ++mNextTileId;
     }
 }

@@ -17,9 +17,18 @@ namespace
 
     namespace bpo = boost::program_options;
 
-    std::vector<std::string> generateSupportedCharacters(std::vector<std::string>&& base = {})
+    template <class T, std::size_t size>
+    std::string makeString(const T (&range)[size])
     {
-        std::vector<std::string> result = std::move(base);
+        static_assert(size > 0);
+        return std::string(std::begin(range), std::end(range) - 1);
+    }
+
+    template <class ... Args>
+    std::vector<std::string> generateSupportedCharacters(Args&& ... args)
+    {
+        std::vector<std::string> result;
+        (result.emplace_back(makeString(args)) , ...);
         for (int i = 1; i <= std::numeric_limits<char>::max(); ++i)
             if (i != '&' && i != '"' && i != ' ' && i != '\n')
                 result.push_back(std::string(1, i));
@@ -193,7 +202,7 @@ namespace
     INSTANTIATE_TEST_SUITE_P(
         SupportedCharacters,
         OpenMWOptionsFromArgumentsStrings,
-        ValuesIn(generateSupportedCharacters({u8"👍", u8"Ъ", u8"Ǽ", "\n"}))
+        ValuesIn(generateSupportedCharacters(u8"👍", u8"Ъ", u8"Ǽ", "\n"))
     );
 
     TEST(OpenMWOptionsFromConfig, should_support_single_word_load_savegame_path)
@@ -381,6 +390,6 @@ namespace
     INSTANTIATE_TEST_SUITE_P(
         SupportedCharacters,
         OpenMWOptionsFromConfigStrings,
-        ValuesIn(generateSupportedCharacters({u8"👍", u8"Ъ", u8"Ǽ"}))
+        ValuesIn(generateSupportedCharacters(u8"👍", u8"Ъ", u8"Ǽ"))
     );
 }

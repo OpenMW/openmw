@@ -156,7 +156,7 @@ namespace
             for (int y = -2; y <= 2; ++y)
             {
                 ASSERT_EQ(mDb.insertTile(tileId, worldspace, TilePosition {x, y}, version, input, data), 1);
-                ++tileId.t;
+                ++tileId;
             }
         }
         const TilesPositionsRange range {TilePosition {-1, -1}, TilePosition {2, 2}};
