@@ -150,7 +150,7 @@ The order of lines determines the script load order (i.e. script priorities).
 
 Possible flags are:
 
-- ``GLOBAL`` - a global script; always active, can not by stopped;
+- ``GLOBAL`` - a global script; always active, can not be stopped;
 - ``CUSTOM`` - dynamic local script that can be started or stopped by a global script;
 - ``PLAYER`` - an auto started player script;
 - ``ACTIVATOR`` - a local script that will be automatically attached to any activator;
