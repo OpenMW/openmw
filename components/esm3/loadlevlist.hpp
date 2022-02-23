@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <components/esm/esmcommon.hpp>
+#include <components/esm/defs.hpp>
 
 namespace ESM
 {
@@ -27,10 +28,6 @@ struct LevelledListBase
     unsigned int mRecordFlags;
     std::string mId;
 
-    // Record name used to read references. Must be set before load() is
-    // called.
-    ESM::NAME mRecName;
-
     struct LevelItem
     {
         std::string mId;
@@ -39,18 +36,25 @@ struct LevelledListBase
 
     std::vector<LevelItem> mList;
 
-    explicit LevelledListBase(ESM::NAME recName) : mRecName(recName) {}
-
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+    void load(ESMReader& esm, ESM::NAME recName, bool& isDeleted);
+    void save(ESMWriter& esm, ESM::NAME recName, bool isDeleted) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).
 };
 
-struct CreatureLevList: LevelledListBase
+template <class Base>
+struct CustomLevelledListBase : LevelledListBase
 {
-    static unsigned int sRecordId;
+    void load(ESMReader &esm, bool& isDeleted) { LevelledListBase::load(esm, Base::sRecName, isDeleted); }
+    void save(ESMWriter &esm, bool isDeleted = false) const { LevelledListBase::save(esm, Base::sRecName, isDeleted); }
+};
+
+struct CreatureLevList : CustomLevelledListBase<CreatureLevList>
+{
+    /// Record name used to read references.
+    static constexpr ESM::NAME sRecName {"CNAM"};
+    static constexpr RecNameInts sRecordId = RecNameInts::REC_LEVC;
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "CreatureLevList"; }
 
@@ -61,13 +65,13 @@ struct CreatureLevList: LevelledListBase
                           // level, not just the closest below
                           // player.
     };
-
-    CreatureLevList() : LevelledListBase("CNAM") {}
 };
 
-struct ItemLevList: LevelledListBase
+struct ItemLevList : CustomLevelledListBase<ItemLevList>
 {
-    static unsigned int sRecordId;
+    /// Record name used to read references.
+    static constexpr ESM::NAME sRecName {"INAM"};
+    static constexpr RecNameInts sRecordId = RecNameInts::REC_LEVI;
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "ItemLevList"; }
 
@@ -84,8 +88,6 @@ struct ItemLevList: LevelledListBase
                           // level, not just the closest below
                           // player.
     };
-
-    ItemLevList() : LevelledListBase("INAM") {}
 };
 
 }
