@@ -54,7 +54,7 @@ namespace MWPhysics
             void setCollisionFilterMask(btCollisionObject* collisionObject, int collisionFilterMask);
             void addCollisionObject(btCollisionObject* collisionObject, int collisionFilterGroup, int collisionFilterMask);
             void removeCollisionObject(btCollisionObject* collisionObject);
-            void updateSingleAabb(std::shared_ptr<PtrHolder> ptr, bool immediate=false);
+            void updateSingleAabb(const std::shared_ptr<PtrHolder>& ptr, bool immediate=false);
             bool getLineOfSight(const std::shared_ptr<Actor>& actor1, const std::shared_ptr<Actor>& actor2);
             void debugDraw();
             void* getUserPointer(const btCollisionObject* object) const;
@@ -85,7 +85,7 @@ namespace MWPhysics
             btCollisionWorld* mCollisionWorld;
             MWRender::DebugDrawer* mDebugDrawer;
             std::vector<LOSRequest> mLOSCache;
-            std::set<std::shared_ptr<PtrHolder>> mUpdateAabb;
+            std::set<std::weak_ptr<PtrHolder>, std::owner_less<std::weak_ptr<PtrHolder>>> mUpdateAabb;
 
             // TODO: use std::experimental::flex_barrier or std::barrier once it becomes a thing
             std::unique_ptr<Misc::Barrier> mPreStepBarrier;

@@ -550,7 +550,7 @@ namespace MWPhysics
         mCollisionWorld->removeCollisionObject(collisionObject);
     }
 
-    void PhysicsTaskScheduler::updateSingleAabb(std::shared_ptr<PtrHolder> ptr, bool immediate)
+    void PhysicsTaskScheduler::updateSingleAabb(const std::shared_ptr<PtrHolder>& ptr, bool immediate)
     {
         if (immediate || mNumThreads == 0)
         {
@@ -559,7 +559,7 @@ namespace MWPhysics
         else
         {
             MaybeExclusiveLock lock(mUpdateAabbMutex, mNumThreads);
-            mUpdateAabb.insert(std::move(ptr));
+            mUpdateAabb.insert(ptr);
         }
     }
 
@@ -602,7 +602,12 @@ namespace MWPhysics
     {
         MaybeExclusiveLock lock(mUpdateAabbMutex, mNumThreads);
         std::for_each(mUpdateAabb.begin(), mUpdateAabb.end(),
-            [this](const std::shared_ptr<PtrHolder>& ptr) { updatePtrAabb(ptr); });
+            [this](const std::weak_ptr<PtrHolder>& ptr)
+            {
+                auto p = ptr.lock();
+                if (p != nullptr)
+                    updatePtrAabb(p);
+            });
         mUpdateAabb.clear();
     }
 
