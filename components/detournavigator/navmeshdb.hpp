@@ -4,13 +4,12 @@
 #include "tileposition.hpp"
 
 #include <components/detournavigator/tilespositionsrange.hpp>
+#include <components/misc/strongtypedef.hpp>
 
 #include <components/sqlite3/db.hpp>
 #include <components/sqlite3/statement.hpp>
 #include <components/sqlite3/transaction.hpp>
 #include <components/sqlite3/types.hpp>
-
-#include <boost/serialization/strong_typedef.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -28,10 +27,10 @@ struct sqlite3_stmt;
 
 namespace DetourNavigator
 {
-    BOOST_STRONG_TYPEDEF(std::int64_t, TileId)
-    BOOST_STRONG_TYPEDEF(std::int64_t, TileRevision)
-    BOOST_STRONG_TYPEDEF(std::int64_t, TileVersion)
-    BOOST_STRONG_TYPEDEF(std::int64_t, ShapeId)
+    using TileId = Misc::StrongTypedef<std::int64_t, struct TiledIdTag>;
+    using TileRevision = Misc::StrongTypedef<std::int64_t, struct TileRevisionTag>;
+    using TileVersion = Misc::StrongTypedef<std::int64_t, struct TileVersionTag>;
+    using ShapeId = Misc::StrongTypedef<std::int64_t, struct ShapeIdTag>;
 
     struct Tile
     {

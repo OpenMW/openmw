@@ -493,7 +493,7 @@ void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, const osg::L
         lightDir.set(-lightPos.x(), -lightPos.y(), -lightPos.z());
         lightDir.normalize();
         OSG_INFO<<"   Directional light, lightPos="<<lightPos<<", lightDir="<<lightDir<<std::endl;
-        if (lightMatrix.valid() && *lightMatrix != osg::Matrixf(modelViewMatrix))
+        if (lightMatrix.valid() && lightMatrix->operator==(osg::Matrixf(modelViewMatrix)))
         {
             OSG_INFO<<"   Light matrix "<<*lightMatrix<<std::endl;
             osg::Matrix lightToLocalMatrix(*lightMatrix * osg::Matrix::inverse(modelViewMatrix) );

@@ -137,7 +137,7 @@ namespace NavMeshTool
                 {
                     std::lock_guard lock(mMutex);
                     mDb.insertTile(mNextTileId, worldspace, tilePosition, TileVersion {version}, input, serialize(data));
-                    ++mNextTileId.t;
+                    ++mNextTileId;
                 }
                 ++mInserted;
                 report();
