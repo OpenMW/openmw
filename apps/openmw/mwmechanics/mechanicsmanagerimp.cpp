@@ -1639,17 +1639,17 @@ namespace MWMechanics
         return mActors.isAnyObjectInRange(position, radius);
     }
 
-    std::list<MWWorld::Ptr> MechanicsManager::getActorsSidingWith(const MWWorld::Ptr& actor)
+    std::vector<MWWorld::Ptr> MechanicsManager::getActorsSidingWith(const MWWorld::Ptr& actor)
     {
         return mActors.getActorsSidingWith(actor);
     }
 
-    std::list<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)
+    std::vector<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)
     {
         return mActors.getActorsFollowing(actor);
     }
 
-    std::list<int> MechanicsManager::getActorsFollowingIndices(const MWWorld::Ptr& actor)
+    std::vector<int> MechanicsManager::getActorsFollowingIndices(const MWWorld::Ptr& actor)
     {
         return mActors.getActorsFollowingIndices(actor);
     }
@@ -1659,11 +1659,11 @@ namespace MWMechanics
         return mActors.getActorsFollowingByIndex(actor);
     }
 
-    std::list<MWWorld::Ptr> MechanicsManager::getActorsFighting(const MWWorld::Ptr& actor) {
+    std::vector<MWWorld::Ptr> MechanicsManager::getActorsFighting(const MWWorld::Ptr& actor) {
         return mActors.getActorsFighting(actor);
     }
 
-    std::list<MWWorld::Ptr> MechanicsManager::getEnemiesNearby(const MWWorld::Ptr& actor) {
+    std::vector<MWWorld::Ptr> MechanicsManager::getEnemiesNearby(const MWWorld::Ptr& actor) {
         return mActors.getEnemiesNearby(actor);
     }
 

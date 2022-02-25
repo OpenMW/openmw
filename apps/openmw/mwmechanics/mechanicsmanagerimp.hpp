@@ -149,13 +149,13 @@ namespace MWMechanics
             /// Check if there are actors in selected range
             bool isAnyActorInRange(const osg::Vec3f &position, float radius) override;
 
-            std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor) override;
-            std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) override;
-            std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor) override;
+            std::vector<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor) override;
+            std::vector<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) override;
+            std::vector<int> getActorsFollowingIndices(const MWWorld::Ptr& actor) override;
             std::map<int, MWWorld::Ptr> getActorsFollowingByIndex(const MWWorld::Ptr& actor) override;
 
-            std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) override;
-            std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor) override;
+            std::vector<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) override;
+            std::vector<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor) override;
 
             /// Recursive version of getActorsFollowing
             void getActorsFollowing(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) override;
