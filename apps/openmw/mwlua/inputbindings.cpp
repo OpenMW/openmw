@@ -40,7 +40,7 @@ namespace MWLua
         touchpadEvent["finger"] = sol::readonly_property(
             [](const SDLUtil::TouchEvent& e) -> int { return e.mFinger; });
         touchpadEvent["position"] = sol::readonly_property(
-            [](const SDLUtil::TouchEvent& e) -> osg::Vec2f { return osg::Vec2f(e.mX, e.mY);});
+            [](const SDLUtil::TouchEvent& e) -> osg::Vec2f { return {e.mX, e.mY};});
         touchpadEvent["pressure"] = sol::readonly_property(
             [](const SDLUtil::TouchEvent& e) -> float { return e.mPressure; });
 
@@ -177,10 +177,10 @@ namespace MWLua
             {"TriggerLeft", SDL_CONTROLLER_AXIS_TRIGGERLEFT},
             {"TriggerRight", SDL_CONTROLLER_AXIS_TRIGGERRIGHT},
 
-            {"LookUpDown", SDL_CONTROLLER_AXIS_MAX + MWInput::A_LookUpDown},
-            {"LookLeftRight", SDL_CONTROLLER_AXIS_MAX + MWInput::A_LookLeftRight},
-            {"MoveForwardBackward", SDL_CONTROLLER_AXIS_MAX + MWInput::A_MoveForwardBackward},
-            {"MoveLeftRight", SDL_CONTROLLER_AXIS_MAX + MWInput::A_MoveLeftRight}
+            {"LookUpDown", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_LookUpDown)},
+            {"LookLeftRight", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_LookLeftRight)},
+            {"MoveForwardBackward", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_MoveForwardBackward)},
+            {"MoveLeftRight", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_MoveLeftRight)}
         }));
 
         api["KEY"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, SDL_Scancode>({
