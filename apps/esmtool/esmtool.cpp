@@ -293,7 +293,7 @@ void printRaw(ESM::ESMReader &esm)
     while(esm.hasMoreRecs())
     {
         ESM::NAME n = esm.getRecName();
-        std::cout << "Record: " << n.toString() << '\n';
+        std::cout << "Record: " << n.toStringView() << '\n';
         esm.getRecHeader();
         while(esm.hasMoreSubs())
         {
@@ -302,7 +302,7 @@ void printRaw(ESM::ESMReader &esm)
             esm.skipHSub();
             n = esm.retSubName();
             std::ios::fmtflags f(std::cout.flags());
-            std::cout << "    " << n.toString() << " - " << esm.getSubSize()
+            std::cout << "    " << n.toStringView() << " - " << esm.getSubSize()
                  << " bytes @ 0x" << std::hex << offs << '\n';
             std::cout.flags(f);
         }
@@ -367,9 +367,9 @@ int load(Arguments& info)
             auto record = EsmTool::RecordBase::create(n);
             if (record == nullptr)
             {
-                if (skipped.count(n.toInt()) == 0)
+                if (!quiet && skipped.count(n.toInt()) == 0)
                 {
-                    std::cout << "Skipping " << n.toString() << " records.\n";
+                    std::cout << "Skipping " << n.toStringView() << " records.\n";
                     skipped.emplace(n.toInt());
                 }
 
@@ -389,7 +389,7 @@ int load(Arguments& info)
             if (!info.types.empty())
             {
                 std::vector<std::string>::iterator match;
-                match = std::find(info.types.begin(), info.types.end(), n.toString());
+                match = std::find(info.types.begin(), info.types.end(), n.toStringView());
                 if (match == info.types.end()) interested = false;
             }
 
@@ -398,7 +398,7 @@ int load(Arguments& info)
 
             if(!quiet && interested)
             {
-                std::cout << "\nRecord: " << n.toString() << " '" << record->getId() << "'\n";
+                std::cout << "\nRecord: " << n.toStringView() << " '" << record->getId() << "'\n";
                 record->print();
             }
 
@@ -454,7 +454,7 @@ int clone(Arguments& info)
         ESM::NAME name;
         name = stat.first;
         int amount = stat.second;
-        std::cout << std::setw(digitCount) << amount << " " << name.toString() << "  ";
+        std::cout << std::setw(digitCount) << amount << " " << name.toStringView() << "  ";
         if (++i % 3 == 0)
             std::cout << '\n';
     }
