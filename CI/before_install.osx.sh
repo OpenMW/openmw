@@ -9,7 +9,7 @@ brew update --quiet
 [ -z "${TRAVIS}" ] && brew uninstall --ignore-dependencies qt@6 || true
 
 # Some of these tools can come from places other than brew, so check before installing
-[ -z "${TRAVIS}" ] && brew install fontconfig
+[ -z "${TRAVIS}" ] && brew reinstall fontconfig
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
 command -v qmake >/dev/null 2>&1 || brew install qt@5
