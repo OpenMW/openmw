@@ -4,12 +4,20 @@
     <Resource type="ResourceSkin" name="LuaImage">
         <BasisSkin type="LuaTileRect"/>
     </Resource>
-    
-    <Resource type="ResourceSkin" name="LuaTextEdit" size="512 20">
-        <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Left VCenter"/>
-        <Property key="TextColour" value="#{fontcolour=normal}"/>
 
-        <Child type="TextBox" skin="MW_TextEditClient" offset="0 0 502 20" align="Stretch" name="Client"/>
+    <Resource type="ResourceSkin" name="LuaText" size="16 16">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left Top"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch" name="Client" />
+    </Resource>
+
+    <Resource type="ResourceSkin" name="LuaTextEditClient" size="16 16">
+        <BasisSkin type="EditText" offset="0 0 16 16" align="Stretch" name="Client" />
+    </Resource>
+
+    <Resource type="ResourceSkin" name="LuaTextEdit" size="16 16">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left Top"/>
+        <Child type="TextBox" skin="LuaTextEditClient" offset="0 0 16 16" align="Stretch" name="Client"/>
     </Resource>
 </MyGUI>

@@ -130,8 +130,7 @@ namespace LuaUi
 
     void updateWidget(WidgetExtension* ext, const sol::table& layout)
     {
-        ext->resetSlot(); // otherwise if template gets changed, all non-template children will get destroyed
-
+        ext->reset();
         ext->setLayout(layout);
         ext->setExternal(layout.get<sol::object>(LayoutKeys::external));
         setTemplate(ext, layout.get<sol::object>(LayoutKeys::templateLayout));

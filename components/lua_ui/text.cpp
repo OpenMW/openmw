@@ -10,7 +10,7 @@ namespace LuaUi
 
     void LuaText::initialize()
     {
-        changeWidgetSkin("SandText");
+        changeWidgetSkin("LuaText");
         setEditStatic(true);
         setVisibleHScroll(false);
         setVisibleVScroll(false);
