@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout" version="3.2.0">
-    <Widget type="Window" skin="MW_Window" position="0 0 400 485" layer="Windows" name="_Main">
+    <Widget type="Window" skin="MW_Window" position="0 0 400 485" layer="MainMenu" name="_Main">
         <Property key="MinSize" value="430 446"/>
         <Widget type="TabControl" skin="TabControl" position="8 8 368 405" align="Stretch" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>

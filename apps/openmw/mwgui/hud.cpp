@@ -99,8 +99,6 @@ namespace MWGui
         , mIsDrowning(false)
         , mDrowningFlashTheta(0.f)
     {
-        mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
-
         // Energy bars
         getWidget(mHealthFrame, "HealthFrame");
         getWidget(mHealth, "Health");

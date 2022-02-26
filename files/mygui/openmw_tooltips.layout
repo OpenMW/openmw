@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Widget" layer="Popup" position="0 0 300 300" name="_Main">
+    <Widget type="Widget" layer="Tooltip" position="0 0 300 300" name="_Main">
 
         <!-- Dynamically constructed tooltip goes here -->
         <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="DynamicToolTipBox">

@@ -2,7 +2,6 @@
 
 #include <MyGUI_TabControl.h>
 #include <MyGUI_TabItem.h>
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_EditBox.h>
 
 #include <LinearMath/btQuickprof.h>
@@ -92,11 +91,6 @@ namespace MWGui
         MyGUI::TabItem* item = mTabControl->addItem("Physics Profiler");
         mBulletProfilerEdit = item->createWidgetReal<MyGUI::EditBox>
                 ("LogEdit", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Stretch);
-
-        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        mMainWidget->setSize(viewSize);
-
-
     }
 
     void DebugWindow::onFrame(float dt)

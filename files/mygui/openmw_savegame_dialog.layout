@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="VBox" skin="MW_DialogNoTransp" layer="Windows" position="0 0 600 400" align="Center" name="_Main">
+    <Widget type="VBox" skin="MW_DialogNoTransp" layer="Modal" position="0 0 600 400" align="Center" name="_Main">
         <Property key="Padding" value="8"/>
         <Property key="Spacing" value="8"/>
 

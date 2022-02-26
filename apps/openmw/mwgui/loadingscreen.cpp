@@ -8,7 +8,6 @@
 #include <osg/Texture2D>
 #include <osg/Version>
 
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TextBox.h>
@@ -45,18 +44,13 @@ namespace MWGui
         , mProgress(0)
         , mShowWallpaper(true)
     {
-        mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
-
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
         getWidget(mLoadingBox, "LoadingBox");
+        getWidget(mSceneImage, "Scene");
+        getWidget(mSplashImage, "Splash");
 
         mProgressBar->setScrollViewPage(1);
-
-        mBackgroundImage = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
-            MyGUI::Align::Stretch, "Menu");
-        mSceneImage = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
-            MyGUI::Align::Stretch, "Scene");
 
         findSplashScreens();
     }
@@ -100,7 +94,7 @@ namespace MWGui
     void LoadingScreen::setVisible(bool visible)
     {
         WindowBase::setVisible(visible);
-        mBackgroundImage->setVisible(visible);
+        mSplashImage->setVisible(visible);
         mSceneImage->setVisible(visible);
     }
 
@@ -207,7 +201,6 @@ namespace MWGui
         mViewer->getSceneData()->setComputeBoundingSphereCallback(nullptr);
         mViewer->getSceneData()->dirtyBound();
 
-        //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;
         setVisible(false);
 
         if (osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation())
@@ -229,8 +222,8 @@ namespace MWGui
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
             // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed as 4:3
             bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
-            mBackgroundImage->setVisible(true);
-            mBackgroundImage->setBackgroundImage(randomSplash, true, stretch);
+            mSplashImage->setVisible(true);
+            mSplashImage->setBackgroundImage(randomSplash, true, stretch);
         }
         mSceneImage->setBackgroundImage("");
         mSceneImage->setVisible(false);
@@ -320,8 +313,8 @@ namespace MWGui
 #endif
         mCopyFramebufferToTextureCallback->reset();
 
-        mBackgroundImage->setBackgroundImage("");
-        mBackgroundImage->setVisible(false);
+        mSplashImage->setBackgroundImage("");
+        mSplashImage->setVisible(false);
 
         mSceneImage->setRenderItemTexture(mGuiTexture.get());
         mSceneImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));

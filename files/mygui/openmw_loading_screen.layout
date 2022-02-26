@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <!-- The entire screen -->
     <Widget type="Widget" layer="LoadingScreen" position="0 0 300 300" name="_Main" align="Stretch">
 
         <Widget type="Window" skin="MW_Dialog" position="0 245 300 48" align="Bottom HCenter" name="LoadingBox">
@@ -16,4 +15,7 @@
         </Widget>
 
     </Widget>
+
+    <Widget name="Scene" layer="LoadingScreenBackground" type="BackgroundImage" skin="ImageBox" position="0 0 300 300" align="Stretch" />
+    <Widget name="Splash" layer="LoadingScreenBackground" type="BackgroundImage" skin="ImageBox" position="0 0 300 300" align="Stretch" />
 </MyGUI>
