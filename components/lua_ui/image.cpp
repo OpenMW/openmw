@@ -39,13 +39,12 @@ namespace LuaUi
         MyGUI::IntCoord atlasCoord;
         if (resource)
         {
-            auto& data = resource->data();
             atlasCoord = MyGUI::IntCoord(
-                static_cast<int>(data.mOffset.x()),
-                static_cast<int>(data.mOffset.y()),
-                static_cast<int>(data.mSize.x()),
-                static_cast<int>(data.mSize.y()));
-            setImageTexture(data.mPath);
+                static_cast<int>(resource->mOffset.x()),
+                static_cast<int>(resource->mOffset.y()),
+                static_cast<int>(resource->mSize.x()),
+                static_cast<int>(resource->mSize.y()));
+            setImageTexture(resource->mPath);
         }
 
         bool tileH = propertyValue("tileH", false);

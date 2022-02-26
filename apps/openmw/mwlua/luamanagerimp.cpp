@@ -26,7 +26,10 @@
 namespace MWLua
 {
 
-    LuaManager::LuaManager(const VFS::Manager* vfs, const std::string& libsDir) : mLua(vfs, &mConfiguration), mI18n(vfs, &mLua)
+    LuaManager::LuaManager(const VFS::Manager* vfs, const std::string& libsDir)
+        : mLua(vfs, &mConfiguration)
+        , mUiResourceManager(vfs)
+        , mI18n(vfs, &mLua)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
         mLua.addInternalLibSearchPath(libsDir);
@@ -37,8 +40,6 @@ namespace MWLua
         mLocalLoader = createUserdataSerializer(true, mWorldView.getObjectRegistry(), &mContentFileMapping);
 
         mGlobalScripts.setSerializer(mGlobalSerializer.get());
-
-        mUiResourceManager = std::make_unique<LuaUi::ResourceManager>(vfs);
     }
 
     void LuaManager::initConfiguration()
@@ -250,6 +251,7 @@ namespace MWLua
     void LuaManager::clear()
     {
         LuaUi::clearUserInterface();
+        mUiResourceManager.clear();
         mActiveLocalScripts.clear();
         mLocalEvents.clear();
         mGlobalEvents.clear();
@@ -472,7 +474,8 @@ namespace MWLua
     {
         Log(Debug::Info) << "Reload Lua";
 
-        LuaUi::clearUserInterface(); 
+        LuaUi::clearUserInterface();
+        mUiResourceManager.clear();
         mLua.dropScriptCache();
         initConfiguration();
 

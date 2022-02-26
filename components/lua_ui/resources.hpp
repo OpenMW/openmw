@@ -22,18 +22,8 @@ namespace LuaUi
         osg::Vec2f mSize;
     };
 
-    class TextureResource
-    {
-        public:
-            TextureResource(TextureData data)
-                : mData(data)
-            {}
-
-            const TextureData& data() { return mData; }
-
-        private:
-            TextureData mData;
-    };
+    // will have more/different data when automated atlasing is supported
+    using TextureResource = TextureData;
 
     class ResourceManager
     {
@@ -43,10 +33,9 @@ namespace LuaUi
             {}
 
             std::shared_ptr<TextureResource> registerTexture(TextureData data);
+            void clear();
 
         private:
-            const VFS::Manager* vfs() const { return mVfs; }
-
             const VFS::Manager* mVfs;
             using TextureResources = std::vector<std::shared_ptr<TextureResource>>;
             std::unordered_map<std::string, TextureResources> mTextures;

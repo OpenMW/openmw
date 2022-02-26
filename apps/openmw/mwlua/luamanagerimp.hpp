@@ -91,18 +91,17 @@ namespace MWLua
             return [this, c](Arg arg) { this->queueCallback(c, sol::make_object(c.mFunc.lua_state(), arg)); };
         }
 
-        LuaUi::ResourceManager* uiResourceManager() { return mUiResourceManager.get(); }
+        LuaUi::ResourceManager* uiResourceManager() { return &mUiResourceManager; }
 
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScriptCfg::Flags);
 
-        std::unique_ptr<LuaUi::ResourceManager> mUiResourceManager;
-
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
+        LuaUi::ResourceManager mUiResourceManager;
         LuaUtil::I18nManager mI18n;
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;

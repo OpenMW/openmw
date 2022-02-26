@@ -78,10 +78,10 @@ namespace MWLua
                 std::shared_ptr<LuaUi::Element> mElement;
         };
 
-        class LayerAction final : public Action
+        class InsertLayerAction final : public Action
         {
             public:
-                LayerAction(std::string_view name, std::string_view afterName,
+                InsertLayerAction(std::string_view name, std::string_view afterName,
                     LuaUi::Layers::Options options, LuaUtil::LuaState* state)
                     : Action(state)
                     , mName(name)
@@ -247,7 +247,7 @@ namespace MWLua
         {
             LuaUi::Layers::Options options;
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
-            context.mLuaManager->addAction(std::make_unique<LayerAction>(name, afterName, options, context.mLua));
+            context.mLuaManager->addAction(std::make_unique<InsertLayerAction>(name, afterName, options, context.mLua));
         };
         {
             auto pairs = [layers](const sol::object&)
@@ -283,10 +283,10 @@ namespace MWLua
         {
             LuaUi::TextureData data;
             sol::object path = LuaUtil::getFieldOrNil(options, "path");
-            if (path.is<std::string>() && !path.as<std::string>().empty())
+            if (path.is<std::string>())
                 data.mPath = path.as<std::string>();
-            else
-                throw sol::error("Invalid texture path");
+            if (data.mPath.empty())
+                throw std::logic_error("Invalid texture path");
             sol::object offset = LuaUtil::getFieldOrNil(options, "offset");
             if (offset.is<osg::Vec2f>())
                 data.mOffset = offset.as<osg::Vec2f>();
