@@ -8,7 +8,7 @@ namespace VFS
 
 BsaArchive::BsaArchive(const std::string &filename)
 {
-    mFile = std::make_unique<Bsa::BSAFile>(Bsa::BSAFile());
+    mFile = std::make_unique<Bsa::BSAFile>();
     mFile->open(filename);
 
     const Bsa::BSAFile::FileList &filelist = mFile->getList();
@@ -53,31 +53,6 @@ std::string BsaArchive::getDescription() const
     return std::string{"BSA: "} + mFile->getFilename();
 }
 
-CompressedBsaArchive::CompressedBsaArchive(const std::string &filename)
-    : BsaArchive()
-{
-    mFile = std::make_unique<Bsa::BSAFile>(Bsa::CompressedBSAFile());
-    mFile->open(filename);
-
-    const Bsa::BSAFile::FileList &filelist = mFile->getList();
-    for(Bsa::BSAFile::FileList::const_iterator it = filelist.begin();it != filelist.end();++it)
-    {
-        mResources.emplace_back(&*it, mFile.get());
-        mCompressedResources.emplace_back(&*it, static_cast<Bsa::CompressedBSAFile*>(mFile.get()));
-    }
-}
-
-void CompressedBsaArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
-{
-    for (std::vector<CompressedBsaArchiveFile>::iterator it = mCompressedResources.begin(); it != mCompressedResources.end(); ++it)
-    {
-        std::string ent = it->mInfo->name();
-        std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
-
-        out[ent] = &*it;
-    }
-}
-
 // ------------------------------------------------------------------------------
 
 BsaArchiveFile::BsaArchiveFile(const Bsa::BSAFile::FileStruct *info, Bsa::BSAFile* bsa)
@@ -92,8 +67,50 @@ Files::IStreamPtr BsaArchiveFile::open()
     return mFile->getFile(mInfo);
 }
 
+CompressedBsaArchive::CompressedBsaArchive(const std::string &filename)
+    : Archive()
+{
+    mCompressedFile = std::make_unique<Bsa::CompressedBSAFile>();
+    mCompressedFile->open(filename);
+
+    const Bsa::BSAFile::FileList &filelist = mCompressedFile->getList();
+    for(Bsa::BSAFile::FileList::const_iterator it = filelist.begin();it != filelist.end();++it)
+    {
+        mCompressedResources.emplace_back(&*it, mCompressedFile.get());
+    }
+}
+
+void CompressedBsaArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
+{
+    for (std::vector<CompressedBsaArchiveFile>::iterator it = mCompressedResources.begin(); it != mCompressedResources.end(); ++it)
+    {
+        std::string ent = it->mInfo->name();
+        std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
+
+        out[ent] = &*it;
+    }
+}
+
+bool CompressedBsaArchive::contains(const std::string& file, char (*normalize_function)(char)) const
+{
+    for (const auto& it : mCompressedResources)
+    {
+        std::string ent = it.mInfo->name();
+        std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
+        if(file == ent)
+            return true;
+    }
+    return false;
+}
+
+std::string CompressedBsaArchive::getDescription() const
+{
+    return std::string{"BSA: "} + mCompressedFile->getFilename();
+}
+
+
 CompressedBsaArchiveFile::CompressedBsaArchiveFile(const Bsa::BSAFile::FileStruct *info, Bsa::CompressedBSAFile* bsa)
-    : BsaArchiveFile(info, bsa)
+    : mInfo(info)
     , mCompressedFile(bsa)
 {
 

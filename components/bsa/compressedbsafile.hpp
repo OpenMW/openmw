@@ -39,7 +39,7 @@ namespace Bsa
         BSAVER_COMPRESSED = 0x415342 //B, S, A
     };
 
-    class CompressedBSAFile : public BSAFile
+    class CompressedBSAFile : private BSAFile
     {
     private:
         //special marker for invalid records,
@@ -85,6 +85,10 @@ namespace Bsa
         static std::uint64_t generateHash(std::string stem, std::string extension) ;
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
     public:
+        using BSAFile::open;
+        using BSAFile::getList;
+        using BSAFile::getFilename;
+
         CompressedBSAFile();
         virtual ~CompressedBSAFile();
 
@@ -96,7 +100,7 @@ namespace Bsa
        
         Files::IStreamPtr getFile(const char* filePath);
         Files::IStreamPtr getFile(const FileStruct* fileStruct);
-        void addFile(const std::string& filename, std::istream& file) override;
+        void addFile(const std::string& filename, std::istream& file);
     };
 }
 
