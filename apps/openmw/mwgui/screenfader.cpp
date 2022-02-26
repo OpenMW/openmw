@@ -1,6 +1,5 @@
 #include "screenfader.hpp"
 
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
@@ -90,8 +89,6 @@ namespace MWGui
         , mRepeat(false)
     {
         MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate(this, &ScreenFader::onFrameStart);
-
-        mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
         MyGUI::ImageBox* imageBox = mMainWidget->castType<MyGUI::ImageBox>(false);
         if (imageBox)

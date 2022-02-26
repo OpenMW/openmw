@@ -453,11 +453,7 @@
         <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Right" name="Right"/>
     </Resource>
 
-<!-- ----------------------------------------------------
-
-                 WINDOW DEFINITION
-
------------------------------------------------------- -->
+<!-- WINDOW DEFINITION -->
 
     <Resource type="ResourceSkin" name="MW_Window" size="256 256">
         <Property key="TextAlign" value="Center"/>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 247 231" align="Center" name="_Main">
+    <Widget type="Window" skin="MW_DialogNoTransp" layer="Modal" position="0 0 247 231" align="Center" name="_Main">
         <Widget type="Widget" skin="" position="14 14 216 204" align="HCenter VStretch">
 
             <!-- Label -->
