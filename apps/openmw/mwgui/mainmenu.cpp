@@ -167,11 +167,11 @@ namespace MWGui
             {
                 // Use black background to correct aspect ratio
                 mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
-                    MyGUI::Align::Default, "Menu");
+                    MyGUI::Align::Default, "MainMenuBackground");
                 mVideoBackground->setImageTexture("black");
 
                 mVideo = mVideoBackground->createWidget<VideoWidget>("ImageBox", 0,0,1,1,
-                    MyGUI::Align::Stretch, "Menu");
+                    MyGUI::Align::Stretch, "MainMenuBackground");
                 mVideo->setVFS(mVFS);
 
                 mVideo->playVideo("video\\menu_background.bik");
@@ -191,7 +191,7 @@ namespace MWGui
             if (!mBackground)
             {
                 mBackground = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
-                    MyGUI::Align::Stretch, "Menu");
+                    MyGUI::Align::Stretch, "MainMenuBackground");
                 mBackground->setBackgroundImage("textures\\menu_morrowind.dds", true, stretch);
             }
             mBackground->setVisible(true);
