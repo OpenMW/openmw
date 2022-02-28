@@ -109,10 +109,6 @@ namespace MWGui
     {
         bool allowSelf = (effect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
         bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
-        bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
-
-        if (!allowSelf && !allowTouch && !allowTarget)
-            return; // TODO: Show an error message popup?
 
         setMagicEffect(effect);
         mEditing = false;
@@ -616,6 +612,13 @@ namespace MWGui
 
         const ESM::MagicEffect* effect =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+
+        bool allowSelf = (effect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
+        bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
+        bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
+
+        if (!allowSelf && !allowTouch && !allowTarget)
+            return; // TODO: Show an error message popup?
 
         if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {

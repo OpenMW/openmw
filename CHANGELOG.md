@@ -278,6 +278,7 @@
     Bug #6276: Deleted groundcover instances are not deleted in game
     Bug #6294: Game crashes with empty pathgrid
     Bug #6606: Quests with multiple IDs cannot always be restarted
+    Bug #6655: Constant effect absorb attribute causes the game to break
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
