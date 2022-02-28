@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <list>
 #include <set>
 #include <cstdint>
 
@@ -199,16 +198,16 @@ namespace MWBase
 
             ///Returns the list of actors which are siding with the given actor in fights
             /**ie AiFollow or AiEscort is active and the target is the actor **/
-            virtual std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor) = 0;
-            virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) = 0;
-            virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor) = 0;
+            virtual std::vector<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor) = 0;
+            virtual std::vector<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) = 0;
+            virtual std::vector<int> getActorsFollowingIndices(const MWWorld::Ptr& actor) = 0;
             virtual std::map<int, MWWorld::Ptr> getActorsFollowingByIndex(const MWWorld::Ptr& actor) = 0;
 
             ///Returns a list of actors who are fighting the given actor within the fAlarmDistance
             /** ie AiCombat is active and the target is the actor **/
-            virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) = 0;
+            virtual std::vector<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) = 0;
 
-            virtual std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor) = 0;
+            virtual std::vector<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor) = 0;
 
             /// Recursive versions of above methods
             virtual void getActorsFollowing(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) = 0;

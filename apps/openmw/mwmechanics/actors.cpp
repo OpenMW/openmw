@@ -1969,9 +1969,9 @@ namespace MWMechanics
         return false;
     }
 
-    std::list<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actor)
+    std::vector<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actor)
     {
-        std::list<MWWorld::Ptr> list;
+        std::vector<MWWorld::Ptr> list;
         for(PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
         {
             const MWWorld::Ptr &iteratedActor = iter->first;
@@ -2007,9 +2007,9 @@ namespace MWMechanics
         return list;
     }
 
-    std::list<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
+    std::vector<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
     {
-        std::list<MWWorld::Ptr> list;
+        std::vector<MWWorld::Ptr> list;
         forEachFollowingPackage(mActors, actor, getPlayer(), [&] (auto& iter, const std::shared_ptr<AiPackage>& package)
         {
             if (package->followTargetThroughDoors() && package->getTarget() == actor)
@@ -2022,14 +2022,14 @@ namespace MWMechanics
     }
 
     void Actors::getActorsFollowing(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out) {
-        std::list<MWWorld::Ptr> followers = getActorsFollowing(actor);
+        auto followers = getActorsFollowing(actor);
         for(const MWWorld::Ptr &follower : followers)
             if (out.insert(follower).second)
                 getActorsFollowing(follower, out);
     }
 
     void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out) {
-        std::list<MWWorld::Ptr> followers = getActorsSidingWith(actor);
+        auto followers = getActorsSidingWith(actor);
         for(const MWWorld::Ptr &follower : followers)
             if (out.insert(follower).second)
                 getActorsSidingWith(follower, out);
@@ -2042,7 +2042,7 @@ namespace MWMechanics
             out.insert(search->second.begin(), search->second.end());
         else
         {
-            std::list<MWWorld::Ptr> followers = getActorsSidingWith(actor);
+            auto followers = getActorsSidingWith(actor);
             for (const MWWorld::Ptr &follower : followers)
                 if (out.insert(follower).second)
                     getActorsSidingWith(follower, out, cachedAllies);
@@ -2058,9 +2058,9 @@ namespace MWMechanics
         }
     }
 
-    std::list<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
+    std::vector<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
     {
-        std::list<int> list;
+        std::vector<int> list;
         forEachFollowingPackage(mActors, actor, getPlayer(), [&] (auto& iter, const std::shared_ptr<AiPackage>& package)
         {
             if (package->followTargetThroughDoors() && package->getTarget() == actor)
@@ -2093,8 +2093,8 @@ namespace MWMechanics
         return map;
     }
 
-    std::list<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
-        std::list<MWWorld::Ptr> list;
+    std::vector<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
+        std::vector<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position, mActorsProcessingRange, neighbors);
@@ -2108,14 +2108,14 @@ namespace MWMechanics
                 continue;
 
             if (stats.getAiSequence().isInCombat(actor))
-                list.push_front(neighbor);
+                list.push_back(neighbor);
         }
         return list;
     }
 
-    std::list<MWWorld::Ptr> Actors::getEnemiesNearby(const MWWorld::Ptr& actor)
+    std::vector<MWWorld::Ptr> Actors::getEnemiesNearby(const MWWorld::Ptr& actor)
     {
-        std::list<MWWorld::Ptr> list;
+        std::vector<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position, mActorsProcessingRange, neighbors);

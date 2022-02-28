@@ -164,8 +164,8 @@ namespace MWMechanics
 
             ///Returns the list of actors which are siding with the given actor in fights
             /**ie AiFollow or AiEscort is active and the target is the actor **/
-            std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
-            std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
+            std::vector<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
+            std::vector<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
             /// Recursive version of getActorsFollowing
             void getActorsFollowing(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out);
@@ -175,15 +175,15 @@ namespace MWMechanics
             void getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies);
 
             /// Get the list of AiFollow::mFollowIndex for all actors following this target
-            std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);
+            std::vector<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);
             std::map<int, MWWorld::Ptr> getActorsFollowingByIndex(const MWWorld::Ptr& actor);
 
             ///Returns the list of actors which are fighting the given actor
             /**ie AiCombat is active and the target is the actor **/
-            std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
+            std::vector<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
 
             /// Unlike getActorsFighting, also returns actors that *would* fight the given actor if they saw him.
-            std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor);
+            std::vector<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor);
 
             void write (ESM::ESMWriter& writer, Loading::Listener& listener) const;
 

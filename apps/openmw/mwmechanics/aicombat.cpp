@@ -171,7 +171,7 @@ namespace MWMechanics
             actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
             storage.mActionCooldown = 0.f;
             // Continue combat if target is player or player follower/escorter and an attack has been attempted
-            const std::list<MWWorld::Ptr>& playerFollowersAndEscorters = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(MWMechanics::getPlayer());
+            const auto& playerFollowersAndEscorters = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(MWMechanics::getPlayer());
             bool targetSidesWithPlayer = (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), target) != playerFollowersAndEscorters.end());
             if ((target == MWMechanics::getPlayer() || targetSidesWithPlayer)
                 && ((actor.getClass().getCreatureStats(actor).getHitAttemptActorId() == target.getClass().getCreatureStats(target).getActorId())
