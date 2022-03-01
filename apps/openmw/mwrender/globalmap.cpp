@@ -453,7 +453,7 @@ namespace MWRender
             : mLeft(left), mTop(top), mRight(right), mBottom(bottom)
         {
         }
-        bool operator == (const Box& other)
+        bool operator == (const Box& other) const
         {
             return mLeft == other.mLeft && mTop == other.mTop && mRight == other.mRight && mBottom == other.mBottom;
         }

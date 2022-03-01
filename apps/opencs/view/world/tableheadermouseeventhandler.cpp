@@ -14,7 +14,7 @@ TableHeaderMouseEventHandler::TableHeaderMouseEventHandler(DragRecordTable * par
 {
     header.setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
     connect(
-        &header, &QHeaderView::customContextMenuRequested, [=](const QPoint & position) { showContextMenu(position); });
+        &header, &QHeaderView::customContextMenuRequested, [this](const QPoint & position) { showContextMenu(position); });
 
     header.viewport()->installEventFilter(this);
 }
@@ -52,7 +52,7 @@ QMenu & TableHeaderMouseEventHandler::createContextMenu()
         action->setChecked(!table.isColumnHidden(i));
         menu->addAction(action);
 
-        connect(action, &QAction::triggered, [=]() {
+        connect(action, &QAction::triggered, [this, &action, &i]() {
             table.setColumnHidden(i, !action->isChecked());
             action->setChecked(!action->isChecked());
             action->toggle();

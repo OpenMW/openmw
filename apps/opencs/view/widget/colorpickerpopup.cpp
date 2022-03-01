@@ -11,7 +11,7 @@ CSVWidget::ColorPickerPopup::ColorPickerPopup(QWidget *parent)
     : QFrame(parent)
 {
     setWindowFlags(Qt::Popup);
-    setFrameStyle(QFrame::Box | QFrame::Plain);
+    setFrameStyle(QFrame::Box | static_cast<int>(QFrame::Plain));
     hide();
 
     mColorPicker = new QColorDialog(this);
