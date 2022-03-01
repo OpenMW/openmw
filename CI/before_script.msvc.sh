@@ -149,7 +149,7 @@ Options:
 		For mutli-config generators, this is ignored, and all configurations are set up.
 		For single-config generators, several configurations can be set up at once by specifying -c multiple times.
 	-C
-	    Use ccache.
+		Use ccache.
 	-d
 		Skip checking the downloads.
 	-e
