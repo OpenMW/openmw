@@ -378,12 +378,11 @@ variables: &tests-targets
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-    - ccache --show-stats
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C
-    - ccache -s
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
     - cmake --build . --config $config --target ($targets.Split(','))
+    - ccache --show-stats
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - Get-ChildItem -Recurse *.ilk | Remove-Item
@@ -394,7 +393,6 @@ variables: &tests-targets
       }
     - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
-    - ccache --show-stats
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
@@ -403,8 +401,6 @@ variables: &tests-targets
     - ccache
     - deps
     - MSVC2019_64_Ninja/deps/Qt
-  variables:
-    CCACHE_SIZE: 2G
   artifacts:
     when: always
     paths:
@@ -508,11 +504,10 @@ Windows_Ninja_Tests_RelWithDebInfo:
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-    - ccache --show-stats
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C
     - cd MSVC2019_64
     - cmake --build . --config $config --target ($targets.Split(','))
-    - ccache -s
+    - ccache --show-stats
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - Get-ChildItem -Recurse *.ilk | Remove-Item
@@ -531,8 +526,6 @@ Windows_Ninja_Tests_RelWithDebInfo:
     - ccache
     - deps
     - MSVC2019_64/deps/Qt
-  variables:
-    CCACHE_SIZE: 2G
   artifacts:
     when: always
     paths:
