@@ -128,7 +128,7 @@ public:
         return Files::openConstrainedFileStream (mFilename.c_str (), file->offset, file->fileSize);
     }
 
-    virtual void addFile(const std::string& filename, std::istream& file);
+    void addFile(const std::string& filename, std::istream& file);
 
     /// Get a list of all files
     /// @note Thread safe.

@@ -40,7 +40,7 @@ namespace Bsa
 
     Memory buffer is freed once the class instance is destroyed.
  */
-class MemoryInputStream : private std::vector<char>, public virtual Files::MemBuf, public std::istream {
+class MemoryInputStream : private std::vector<char>, public Files::MemBuf, public std::istream {
 public:
     explicit MemoryInputStream(size_t bufferSize)
         : std::vector<char>(bufferSize)

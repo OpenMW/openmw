@@ -19,12 +19,14 @@ namespace VFS
         Bsa::BSAFile* mFile;
     };
 
-    class CompressedBsaArchiveFile : public BsaArchiveFile
+    class CompressedBsaArchiveFile : public File
     {
     public:
         CompressedBsaArchiveFile(const Bsa::BSAFile::FileStruct* info, Bsa::CompressedBSAFile* bsa);
 
         Files::IStreamPtr open() override;
+
+        const Bsa::BSAFile::FileStruct* mInfo;
         Bsa::CompressedBSAFile* mCompressedFile;
     };
 
@@ -44,12 +46,14 @@ namespace VFS
         std::vector<BsaArchiveFile> mResources;
     };
 
-    class CompressedBsaArchive : public BsaArchive
+    class CompressedBsaArchive : public Archive
     {
     public:
         CompressedBsaArchive(const std::string& filename);
-        void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
         virtual ~CompressedBsaArchive() {}
+        void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
+        bool contains(const std::string& file, char (*normalize_function) (char)) const override;
+        std::string getDescription() const override;
 
     private:
         std::unique_ptr<Bsa::CompressedBSAFile> mCompressedFile;
