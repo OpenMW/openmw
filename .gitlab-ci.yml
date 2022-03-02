@@ -352,6 +352,7 @@ variables: &tests-targets
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
+  - choco install ccache -y
   - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
   - choco install vswhere -y
   - choco install ninja -y
@@ -374,10 +375,14 @@ variables: &tests-targets
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t
+    - $env:CCACHE_BASEDIR = Get-Location
+    - $env:CCACHE_DIR = "$(Get-Location)\ccache"
+    - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
     - cmake --build . --config $config --target ($targets.Split(','))
+    - ccache --show-stats
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - Get-ChildItem -Recurse *.ilk | Remove-Item
@@ -393,6 +398,7 @@ variables: &tests-targets
   cache:
     key: ninja-v2
     paths:
+    - ccache
     - deps
     - MSVC2019_64_Ninja/deps/Qt
   artifacts:
@@ -473,6 +479,7 @@ Windows_Ninja_Tests_RelWithDebInfo:
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
+  - choco install ccache -y
   - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
   - choco install vswhere -y
   - choco install python -y
@@ -494,9 +501,13 @@ Windows_Ninja_Tests_RelWithDebInfo:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t
+    - $env:CCACHE_BASEDIR = Get-Location
+    - $env:CCACHE_DIR = "$(Get-Location)\ccache"
+    - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C
     - cd MSVC2019_64
     - cmake --build . --config $config --target ($targets.Split(','))
+    - ccache --show-stats
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - Get-ChildItem -Recurse *.ilk | Remove-Item
@@ -512,6 +523,7 @@ Windows_Ninja_Tests_RelWithDebInfo:
   cache:
     key: msbuild-v2
     paths:
+    - ccache
     - deps
     - MSVC2019_64/deps/Qt
   artifacts:
