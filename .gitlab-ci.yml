@@ -117,13 +117,13 @@ Coverity:
 Ubuntu_GCC:
   extends: .Ubuntu
   cache:
-    key: Ubuntu_GCC.v2
+    key: Ubuntu_GCC.v3
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
     CC: gcc
     CXX: g++
-    CCACHE_SIZE: 3G
+    CCACHE_SIZE: 4G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -414,7 +414,7 @@ variables: &tests-targets
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-v2
+    key: ninja-v3
     paths:
     - ccache
     - deps
@@ -550,7 +550,7 @@ variables: &tests-targets
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-v2
+    key: msbuild-v3
     paths:
     - ccache
     - deps
