@@ -1457,26 +1457,32 @@ namespace MWMechanics
 
                             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
                             bool firstPersonPlayer = isPlayer && world->isFirstPerson();
-                            bool inCombatOrPursue = stats.getAiSequence().isInCombat() || stats.getAiSequence().hasPackage(AiPackageTypeId::Pursue);
-                            MWWorld::Ptr activePackageTarget;
-
+  
                             // 1. Unconsious actor can not track target
                             // 2. Actors in combat and pursue mode do not bother to headtrack anyone except their target
                             // 3. Player character does not use headtracking in the 1st-person view
                             if (!stats.getKnockedDown() && !firstPersonPlayer)
                             {
+                                bool inCombatOrPursue = stats.getAiSequence().isInCombat() || stats.getAiSequence().isInPursuit();
                                 if (inCombatOrPursue)
-                                    activePackageTarget = stats.getAiSequence().getActivePackage().getTarget();
-
-                                for (PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                                 {
-                                    if (it->first == iter->first)
-                                        continue;
+                                    auto activePackageTarget = stats.getAiSequence().getActivePackage().getTarget();
+                                    if (!activePackageTarget.isEmpty())
+                                    {
+                                        // Track the specified target of package.
+                                        updateHeadTracking(iter->first, activePackageTarget, headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
+                                    }
+                                }
+                                else
+                                {
+                                    // Find something nearby.
+                                    for (auto& [ptr, _] : mActors)
+                                    {
+                                        if (ptr == iter->first)
+                                            continue;
 
-                                    if (inCombatOrPursue && it->first != activePackageTarget)
-                                        continue;
-
-                                    updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
+                                        updateHeadTracking(iter->first, ptr, headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
+                                    }
                                 }
                             }
 
