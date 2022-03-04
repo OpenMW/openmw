@@ -16,7 +16,7 @@ CSMPrefs::State *CSMPrefs::State::sThis = nullptr;
 
 void CSMPrefs::State::load()
 {
-    mSettings.load(mConfigurationManager);
+    mSettings.load(mConfigurationManager, true);
 }
 
 void CSMPrefs::State::declare()
