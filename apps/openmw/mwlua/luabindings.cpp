@@ -2,7 +2,6 @@
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/i18n.hpp>
-#include <components/queries/luabindings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -90,57 +89,8 @@ namespace MWLua
                 return sol::nullopt;
         };
         api["activeActors"] = GObjectList{worldView->getActorsInScene()};
-        api["selectObjects"] = [context](const Queries::Query& query)
-        {
-            ObjectIdList list;
-            WorldView* worldView = context.mWorldView;
-            if (query.mQueryType == "activators")
-                list = worldView->getActivatorsInScene();
-            else if (query.mQueryType == "actors")
-                list = worldView->getActorsInScene();
-            else if (query.mQueryType == "containers")
-                list = worldView->getContainersInScene();
-            else if (query.mQueryType == "doors")
-                list = worldView->getDoorsInScene();
-            else if (query.mQueryType == "items")
-                list = worldView->getItemsInScene();
-            return GObjectList{selectObjectsFromList(query, list, context)};
-            // TODO: Use sqlite to search objects that are not in the scene
-            // return GObjectList{worldView->selectObjects(query, false)};
-        };
         // TODO: add world.placeNewObject(recordId, cell, pos, [rot])
         return LuaUtil::makeReadOnly(api);
-    }
-
-    sol::table initQueryPackage(const Context& context)
-    {
-        Queries::registerQueryBindings(context.mLua->sol());
-        sol::table query(context.mLua->sol(), sol::create);
-        for (std::string_view t : ObjectQueryTypes::types)
-            query[t] = Queries::Query(std::string(t));
-        for (const QueryFieldGroup& group : getBasicQueryFieldGroups())
-            query[group.mName] = initFieldGroup(context, group);
-        return query;  // makeReadOnly is applied by LuaState::addCommonPackage
-    }
-
-    sol::table initFieldGroup(const Context& context, const QueryFieldGroup& group)
-    {
-        sol::table res(context.mLua->sol(), sol::create);
-        for (const Queries::Field* field : group.mFields)
-        {
-            sol::table subgroup = res;
-            if (field->path().empty())
-                throw std::logic_error("Empty path in Queries::Field");
-            for (size_t i = 0; i < field->path().size() - 1; ++i)
-            {
-                const std::string& name = field->path()[i];
-                if (subgroup[name] == sol::nil)
-                    subgroup[name] = LuaUtil::makeReadOnly(context.mLua->newTable());
-                subgroup = LuaUtil::getMutableFromReadOnly(subgroup[name]);
-            }
-            subgroup[field->path().back()] = field;
-        }
-        return LuaUtil::makeReadOnly(res);
     }
 
     sol::table initGlobalStoragePackage(const Context& context, LuaUtil::LuaStorage* globalStorage)

@@ -21,7 +21,6 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         lua/test_scriptscontainer.cpp
         lua/test_utilpackage.cpp
         lua/test_serialization.cpp
-        lua/test_querypackage.cpp
         lua/test_configuration.cpp
         lua/test_i18n.cpp
         lua/test_storage.cpp

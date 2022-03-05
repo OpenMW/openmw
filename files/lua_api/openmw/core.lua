@@ -159,13 +159,6 @@
 -- @type ObjectList
 -- @list <#GameObject>
 
----
--- Filter list with a Query.
--- @function [parent=#ObjectList] select
--- @param self
--- @param openmw.query#Query query
--- @return #ObjectList
-
 
 ---
 -- A cell of the game world.

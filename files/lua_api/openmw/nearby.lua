@@ -27,12 +27,6 @@
 -- @field [parent=#nearby] openmw.core#ObjectList items
 
 ---
--- Evaluates a Query.
--- @function [parent=#nearby] selectObjects
--- @param openmw.query#Query query
--- @return openmw.core#ObjectList
-
----
 -- @type COLLISION_TYPE
 -- @field [parent=#COLLISION_TYPE] #number World
 -- @field [parent=#COLLISION_TYPE] #number Door

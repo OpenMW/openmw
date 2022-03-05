@@ -57,7 +57,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwlua
-    luamanagerimp actions object worldview userdataserializer eventqueue query
+    luamanagerimp actions object worldview userdataserializer eventqueue
     luabindings localscripts playerscripts objectbindings cellbindings asyncbindings settingsbindings
     camerabindings uibindings inputbindings nearbybindings
     types/types types/door types/actor types/container

@@ -1,10 +1,8 @@
 #include "luabindings.hpp"
 
 #include <components/lua/luastate.hpp>
-#include <components/queries/query.hpp>
 
-#include "../mwclass/door.hpp"
-
+#include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
@@ -77,10 +75,6 @@ namespace MWLua
                 });
                 listT[sol::meta_function::ipairs] = [iter](const LObjectList& list) { return std::make_tuple(iter, list, 0); };
             }
-            listT["select"] = [context](const ListT& list, const Queries::Query& query)
-            {
-                return ListT{selectObjectsFromList(query, list.mIds, context)};
-            };
         }
 
         template <class ObjectT>
