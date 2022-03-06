@@ -359,6 +359,12 @@ namespace MWWorld
         writer.writeHNT("LEVT", mLevitationEnabled);
         writer.endRecord(ESM::REC_ENAB);
 
+        std::stringstream ssPrng;
+        ssPrng << mPrng;
+        writer.startRecord(ESM::REC_RAND);
+        writer.writeHString(ssPrng.str());
+        writer.endRecord(ESM::REC_RAND);
+
         writer.startRecord(ESM::REC_CAM_);
         writer.writeHNT("FIRS", isFirstPerson());
         writer.endRecord(ESM::REC_CAM_);
@@ -376,6 +382,14 @@ namespace MWWorld
                 reader.getHNT(mTeleportEnabled, "TELE");
                 reader.getHNT(mLevitationEnabled, "LEVT");
                 return;
+            case ESM::REC_RAND:
+                {
+                    std::stringstream ssPrng;
+                    ssPrng << reader.getHString();
+                    ssPrng.seekg(0);
+                    ssPrng >> mPrng;
+                }
+                break;
             case ESM::REC_PLAY:
                 mStore.checkPlayer();
                 mPlayer->readRecord(reader, type);
@@ -3999,4 +4013,10 @@ namespace MWWorld
     {
         return mCells.getAll(id);
     }
+
+    Misc::Rng::Generator& World::getPrng()
+    {
+        return mPrng;
+    }
+
 }

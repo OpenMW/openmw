@@ -9,6 +9,7 @@
 #include <deque>
 
 #include <components/esm3/cellid.hpp>
+#include <components/misc/rng.hpp>
 
 #include <osg/Timer>
 
@@ -658,6 +659,8 @@ namespace MWBase
             virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
 
             virtual std::vector<MWWorld::Ptr> getAll(const std::string& id) = 0;
+
+            virtual Misc::Rng::Generator& getPrng() = 0;
     };
 }
 

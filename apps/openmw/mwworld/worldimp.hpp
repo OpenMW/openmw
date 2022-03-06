@@ -4,6 +4,7 @@
 #include <osg/ref_ptr>
 
 #include <components/settings/settings.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/world.hpp"
 
@@ -84,7 +85,7 @@ namespace MWWorld
             GroundcoverStore mGroundcoverStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
-
+            Misc::Rng::Generator mPrng;
             Cells mCells;
 
             std::string mCurrentWorldSpace;
@@ -736,6 +737,8 @@ namespace MWWorld
             void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
 
             std::vector<MWWorld::Ptr> getAll(const std::string& id) override;
+
+            Misc::Rng::Generator& getPrng() override;
     };
 }
 
