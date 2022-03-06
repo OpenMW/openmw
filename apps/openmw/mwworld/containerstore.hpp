@@ -126,8 +126,8 @@ namespace MWWorld
             std::weak_ptr<ResolutionListener> mResolutionListener;
 
             ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true);
-            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true);
+            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng::Generator* prng, bool topLevel=true);
+            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Generator* prng, bool topLevel=true);
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -221,7 +221,7 @@ namespace MWWorld
             virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Seed& seed = Misc::Rng::getSeed());
+            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Generator& seed = Misc::Rng::getGenerator());
             ///< Insert items into *this.
 
             void fillNonRandom (const ESM::InventoryList& items, const std::string& owner, unsigned int seed);
