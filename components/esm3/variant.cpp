@@ -48,7 +48,7 @@ namespace
     };
 }
 
-std::string ESM::Variant::getString() const
+const std::string& ESM::Variant::getString() const
 {
     return std::get<std::string>(mData);
 }

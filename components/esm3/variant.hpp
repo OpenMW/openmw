@@ -49,7 +49,7 @@ namespace ESM
 
             VarType getType() const { return mType; }
 
-            std::string getString() const;
+            const std::string& getString() const;
             ///< Will throw an exception, if value can not be represented as a string.
 
             int getInteger() const;

@@ -109,7 +109,7 @@ namespace MWGui
 
         for (const int& skill : skills)
         {
-            std::string skillName = gmst.find(ESM::Skill::sSkillNameIds[skill])->mValue.getString();
+            const std::string& skillName = gmst.find(ESM::Skill::sSkillNameIds[skill])->mValue.getString();
             int skillValue = player.getClass().getNpcStats(player).getSkill(skill).getBase();
             std::string skillMsg = gmst.find("sNotifyMessage44")->mValue.getString();
             if (skill == ESM::Skill::Sneak || skill == ESM::Skill::Security)
