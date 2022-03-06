@@ -368,15 +368,15 @@ namespace MWGui
 
         const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        const std::string sPersuasion = gmst.find("sPersuasion")->mValue.getString();
-        const std::string sCompanionShare = gmst.find("sCompanionShare")->mValue.getString();
-        const std::string sBarter = gmst.find("sBarter")->mValue.getString();
-        const std::string sSpells = gmst.find("sSpells")->mValue.getString();
-        const std::string sTravel = gmst.find("sTravel")->mValue.getString();
-        const std::string sSpellMakingMenuTitle = gmst.find("sSpellMakingMenuTitle")->mValue.getString();
-        const std::string sEnchanting = gmst.find("sEnchanting")->mValue.getString();
-        const std::string sServiceTrainingTitle = gmst.find("sServiceTrainingTitle")->mValue.getString();
-        const std::string sRepair = gmst.find("sRepair")->mValue.getString();
+        const std::string& sPersuasion = gmst.find("sPersuasion")->mValue.getString();
+        const std::string& sCompanionShare = gmst.find("sCompanionShare")->mValue.getString();
+        const std::string& sBarter = gmst.find("sBarter")->mValue.getString();
+        const std::string& sSpells = gmst.find("sSpells")->mValue.getString();
+        const std::string& sTravel = gmst.find("sTravel")->mValue.getString();
+        const std::string& sSpellMakingMenuTitle = gmst.find("sSpellMakingMenuTitle")->mValue.getString();
+        const std::string& sEnchanting = gmst.find("sEnchanting")->mValue.getString();
+        const std::string& sServiceTrainingTitle = gmst.find("sServiceTrainingTitle")->mValue.getString();
+        const std::string& sRepair = gmst.find("sRepair")->mValue.getString();
 
         if (topic != sPersuasion && topic != sCompanionShare && topic != sBarter 
          && topic != sSpells && topic != sTravel && topic != sSpellMakingMenuTitle 
@@ -605,10 +605,10 @@ namespace MWGui
             Goodbye* link = new Goodbye();
             link->eventActivated += MyGUI::newDelegate(this, &DialogueWindow::onGoodbyeActivated);
             mLinks.push_back(link);
-            std::string goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->mValue.getString();
+            const std::string& goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->mValue.getString();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
-                                                                              textColours.answerPressed,
-                                                                              TypesetBook::InteractiveId(link));
+                textColours.answerPressed,
+                TypesetBook::InteractiveId(link));
             typesetter->lineBreak();
             typesetter->write(questionStyle, to_utf8_span(goodbye.c_str()));
         }
