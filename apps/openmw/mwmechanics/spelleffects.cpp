@@ -35,7 +35,8 @@ namespace
     {
         if(effect.mMinMagnitude == effect.mMaxMagnitude)
             return effect.mMinMagnitude;
-        return effect.mMinMagnitude + Misc::Rng::rollDice(effect.mMaxMagnitude - effect.mMinMagnitude + 1);
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        return effect.mMinMagnitude + Misc::Rng::rollDice(effect.mMaxMagnitude - effect.mMinMagnitude + 1, prng);
     }
 
     void modifyAiSetting(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, ESM::MagicEffect::Effects creatureEffect, MWMechanics::CreatureStats::AiSetting setting, float magnitude, bool& invalid)
@@ -305,6 +306,7 @@ namespace
             bool canAbsorb = !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_SpellAbsorption) && magnitudes.get(ESM::MagicEffect::SpellAbsorption).getMagnitude() > 0.f;
             if(canReflect || canAbsorb)
             {
+                auto& prng = MWBase::Environment::get().getWorld()->getPrng();
                 for(const auto& activeParam : stats.getActiveSpells())
                 {
                     for(const auto& activeEffect : activeParam.getEffects())
@@ -313,14 +315,14 @@ namespace
                             continue;
                         if(activeEffect.mEffectId == ESM::MagicEffect::Reflect)
                         {
-                            if(canReflect && Misc::Rng::roll0to99() < activeEffect.mMagnitude)
+                            if(canReflect && Misc::Rng::roll0to99(prng) < activeEffect.mMagnitude)
                             {
                                 return MWMechanics::MagicApplicationResult::REFLECTED;
                             }
                         }
                         else if(activeEffect.mEffectId == ESM::MagicEffect::SpellAbsorption)
                         {
-                            if(canAbsorb && Misc::Rng::roll0to99() < activeEffect.mMagnitude)
+                            if(canAbsorb && Misc::Rng::roll0to99(prng) < activeEffect.mMagnitude)
                             {
                                 absorbSpell(spellParams.getId(), caster, target);
                                 return MWMechanics::MagicApplicationResult::REMOVED;
@@ -405,8 +407,11 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 if(params.getType() == ESM::ActiveSpells::Type_Temporary)
                 {
                     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(params.getId());
-                    if(spell && spell->mData.mType == ESM::Spell::ST_Spell)
-                        return Misc::Rng::roll0to99() < magnitude;
+                    if (spell && spell->mData.mType == ESM::Spell::ST_Spell)
+                    {
+                        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+                        return Misc::Rng::roll0to99(prng) < magnitude;
+                    }
                 }
                 return false;
             }, target);

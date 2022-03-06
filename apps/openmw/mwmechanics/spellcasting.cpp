@@ -87,7 +87,8 @@ namespace MWMechanics
                 : ESM::MagicEffect::ResistBlightDisease;
             float x = target.getClass().getCreatureStats(target).getMagicEffects().get(requiredResistance).getMagnitude();
 
-            if (Misc::Rng::roll0to99() <= x)
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            if (Misc::Rng::roll0to99(prng) <= x)
             {
                 // Fully resisted, show message
                 if (target == getPlayer())
@@ -339,7 +340,8 @@ namespace MWMechanics
 
                 // Check success
                 float successChance = getSpellSuccessChance(spell, mCaster, nullptr, true, false);
-                if (Misc::Rng::roll0to99() >= successChance)
+                auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+                if (Misc::Rng::roll0to99(prng) >= successChance)
                 {
                     if (mCaster == getPlayer())
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
@@ -403,7 +405,8 @@ namespace MWMechanics
                     + 0.1f * creatureStats.getAttribute (ESM::Attribute::Luck).getModified())
                     * creatureStats.getFatigueTerm();
 
-        int roll = Misc::Rng::roll0to99();
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        int roll = Misc::Rng::roll0to99(prng);
         if (roll > x)
         {
             // "X has no effect on you"

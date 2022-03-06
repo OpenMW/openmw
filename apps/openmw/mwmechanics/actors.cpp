@@ -305,7 +305,7 @@ namespace MWMechanics
         // We chose to use the chance MW would have when run at 60 FPS with the default value of the GMST.
         const float delta = MWBase::Environment::get().getFrameDuration() * 6.f;
         static const float fVoiceIdleOdds = world->getStore().get<ESM::GameSetting>().find("fVoiceIdleOdds")->mValue.getFloat();
-        if (Misc::Rng::rollProbability() * 10000.f < fVoiceIdleOdds * delta && world->getLOS(getPlayer(), actor))
+        if (Misc::Rng::rollProbability(world->getPrng()) * 10000.f < fVoiceIdleOdds * delta && world->getLOS(getPlayer(), actor))
             MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
     }
 

@@ -10,6 +10,7 @@
 
 #include <components/esm/records.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwdialogue/keywordsearch.hpp"
 
@@ -181,7 +182,7 @@ namespace MWWorld
         bool isDynamic(const std::string &id) const;
 
         /** Returns a random record that starts with the named ID, or nullptr if not found. */
-        const T *searchRandom(const std::string &id) const;
+        const T *searchRandom(const std::string &id, Misc::Rng::Generator& prng) const;
 
         const T *find(const std::string &id) const;
 

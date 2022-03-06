@@ -80,7 +80,8 @@ bool MWMechanics::AiAvoidDoor::isStuck(const osg::Vec3f& actorPos) const
 
 void MWMechanics::AiAvoidDoor::adjustDirection()
 {
-    mDirection = Misc::Rng::rollDice(MAX_DIRECTIONS);
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    mDirection = Misc::Rng::rollDice(MAX_DIRECTIONS, prng);
 }
 
 float MWMechanics::AiAvoidDoor::getAdjustedAngle() const

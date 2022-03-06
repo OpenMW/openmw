@@ -43,10 +43,7 @@ namespace MWMechanics
         bool isTurningToPlayer() const;
         void setTurningToPlayer(bool turning);
 
-        Misc::TimerStatus updateEngageCombatTimer(float duration)
-        {
-            return mEngageCombat.update(duration);
-        }
+        Misc::TimerStatus updateEngageCombatTimer(float duration);
 
         void setPositionAdjusted(bool adjusted);
         bool getPositionAdjusted() const;
@@ -57,7 +54,7 @@ namespace MWMechanics
         float mTargetAngleRadians{0.f};
         GreetingState mGreetingState{Greet_None};
         bool mIsTurningToPlayer{false};
-        Misc::DeviatingPeriodicTimer mEngageCombat{1.0f, 0.25f, Misc::Rng::deviate(0, 0.25f)};
+        Misc::DeviatingPeriodicTimer mEngageCombat{1.0f, 0.25f, Misc::Rng::deviate(0, 0.25f, MWBase::Environment::get().getWorld()->getPrng())};
         bool mPositionAdjusted;
     };
 

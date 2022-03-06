@@ -59,7 +59,8 @@ namespace MWMechanics
 
         osg::Vec3f getRandomPointAround(const osg::Vec3f& position, const float distance)
         {
-            const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * osg::PI;
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            const float randomDirection = Misc::Rng::rollClosedProbability(prng) * 2.0f * osg::PI;
             osg::Matrixf rotation;
             rotation.makeRotate(randomDirection, osg::Vec3f(0.0, 0.0, 1.0));
             return position + osg::Vec3f(distance, 0.0, 0.0) * rotation;
@@ -102,6 +103,22 @@ namespace MWMechanics
         {
             return std::vector<unsigned char>(std::begin(idle), std::end(idle));
         }
+
+    }
+
+    AiWanderStorage::AiWanderStorage() :
+        mState(Wander_ChooseAction),
+        mIsWanderingManually(false),
+        mCanWanderAlongPathGrid(true),
+        mIdleAnimation(0),
+        mBadIdles(),
+        mPopulateAvailableNodes(true),
+        mAllowedNodes(),
+        mTrimCurrentNode(false),
+        mCheckIdlePositionTimer(0),
+        mStuckCount(0),
+        mReaction(MWBase::Environment::get().getWorld()->getPrng())
+    {
     }
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
@@ -250,9 +267,10 @@ namespace MWMechanics
             getAllowedNodes(actor, actor.getCell()->getCell(), storage);
         }
 
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         if (canActorMoveByZAxis(actor) && mDistance > 0) {
             // Typically want to idle for a short time before the next wander
-            if (Misc::Rng::rollDice(100) >= 92 && storage.mState != AiWanderStorage::Wander_Walking) {
+            if (Misc::Rng::rollDice(100, prng) >= 92 && storage.mState != AiWanderStorage::Wander_Walking) {
                 wanderNearStart(actor, storage, mDistance);
             }
 
@@ -262,7 +280,7 @@ namespace MWMechanics
         // randomly idle or wander near spawn point
         else if(storage.mAllowedNodes.empty() && mDistance > 0 && !storage.mIsWanderingManually) {
             // Typically want to idle for a short time before the next wander
-            if (Misc::Rng::rollDice(100) >= 96) {
+            if (Misc::Rng::rollDice(100, prng) >= 96) {
                 wanderNearStart(actor, storage, mDistance);
             } else {
                 storage.setState(AiWanderStorage::Wander_IdleNow);
@@ -330,10 +348,12 @@ namespace MWMechanics
         const auto navigator = world->getNavigator();
         const auto navigatorFlags = getNavigatorFlags(actor);
         const auto areaCosts = getAreaCosts(actor);
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
 
         do {
+
             // Determine a random location within radius of original position
-            const float wanderRadius = (0.2f + Misc::Rng::rollClosedProbability() * 0.8f) * wanderDistance;
+            const float wanderRadius = (0.2f + Misc::Rng::rollClosedProbability(prng) * 0.8f) * wanderDistance;
             if (!isWaterCreature && !isFlyingCreature)
             {
                 // findRandomPointAroundCircle uses wanderDistance as limit for random and not as exact distance
@@ -544,7 +564,8 @@ namespace MWMechanics
 
     void AiWander::setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)
     {
-        unsigned int randNode = Misc::Rng::rollDice(storage.mAllowedNodes.size());
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        unsigned int randNode = Misc::Rng::rollDice(storage.mAllowedNodes.size(), prng);
         ESM::Pathgrid::Point dest(storage.mAllowedNodes[randNode]);
 
         ToWorldCoordinates(dest, actor.getCell()->getCell());
@@ -650,11 +671,11 @@ namespace MWMechanics
 
         for(unsigned int counter = 0; counter < mIdle.size(); counter++)
         {
-            static float fIdleChanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
-                .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->mValue.getFloat();
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            static float fIdleChanceMultiplier = world->getStore().get<ESM::GameSetting>().find("fIdleChanceMultiplier")->mValue.getFloat();
 
             unsigned short idleChance = static_cast<unsigned short>(fIdleChanceMultiplier * mIdle[counter]);
-            unsigned short randSelect = (int)(Misc::Rng::rollProbability() * int(100 / fIdleChanceMultiplier));
+            unsigned short randSelect = (int)(Misc::Rng::rollProbability(world->getPrng()) * int(100 / fIdleChanceMultiplier));
             if(randSelect < idleChance && randSelect > idleRoll)
             {
                 selectedAnimation = counter + GroupIndex_MinIdle;
@@ -678,7 +699,8 @@ namespace MWMechanics
         if (storage.mAllowedNodes.empty())
             return;
 
-        int index = Misc::Rng::rollDice(storage.mAllowedNodes.size());
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        int index = Misc::Rng::rollDice(storage.mAllowedNodes.size(), prng);
         ESM::Pathgrid::Point dest = storage.mAllowedNodes[index];
         ESM::Pathgrid::Point worldDest = dest;
         ToWorldCoordinates(worldDest, actor.getCell()->getCell());
@@ -700,7 +722,7 @@ namespace MWMechanics
             // AI will try to move the NPC towards every neighboring node until suitable place will be found
             for (int i = 0; i < initialSize; i++)
             {
-                int randomIndex = Misc::Rng::rollDice(points.size());
+                int randomIndex = Misc::Rng::rollDice(points.size(), prng);
                 ESM::Pathgrid::Point connDest = points[randomIndex];
 
                 // add an offset towards random neighboring node

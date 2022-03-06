@@ -87,7 +87,8 @@ namespace MWGui
         std::set<int> skills;
         for (int day=0; day<mDays; ++day)
         {
-            int skill = Misc::Rng::rollDice(ESM::Skill::Length);
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            int skill = Misc::Rng::rollDice(ESM::Skill::Length, prng);
             skills.insert(skill);
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);

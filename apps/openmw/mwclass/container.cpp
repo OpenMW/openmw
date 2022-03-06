@@ -32,7 +32,8 @@ namespace MWClass
 {
     ContainerCustomData::ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell)
     {
-        unsigned int seed = Misc::Rng::rollDice(std::numeric_limits<int>::max());
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        unsigned int seed = Misc::Rng::rollDice(std::numeric_limits<int>::max(), prng);
         // setting ownership not needed, since taking items from a container inherits the
         // container's owner automatically
         mStore.fillNonRandom(container.mInventory, "", seed);
@@ -139,7 +140,8 @@ namespace MWClass
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer");
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer", prng);
 
             std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);

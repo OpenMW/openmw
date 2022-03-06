@@ -193,11 +193,13 @@ public:
 
 std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num) const
 {
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+
     int numAnims=0;
     while (mAnimation->hasAnimation(prefix + std::to_string(numAnims+1)))
         ++numAnims;
 
-    int roll = Misc::Rng::rollDice(numAnims) + 1; // [1, numAnims]
+    int roll = Misc::Rng::rollDice(numAnims, prng) + 1; // [1, numAnims]
     if (num)
         *num = roll;
     return prefix + std::to_string(roll);
@@ -209,12 +211,13 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
     bool knockdown = mPtr.getClass().getCreatureStats(mPtr).getKnockedDown();
     bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
     bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
     if(mHitState == CharState_None)
     {
         if ((mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0
                 || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0))
         {
-            mTimeUntilWake = Misc::Rng::rollClosedProbability() * 2 + 1; // Wake up after 1 to 3 seconds
+            mTimeUntilWake = Misc::Rng::rollClosedProbability(prng) * 2 + 1; // Wake up after 1 to 3 seconds
             if (isSwimming && mAnimation->hasAnimation("swimknockout"))
             {
                 mHitState = CharState_SwimKnockOut;
@@ -678,7 +681,8 @@ void CharacterController::refreshIdleAnims(const std::string& weapShortGroup, Ch
 
                 // play until the Loop Stop key 2 to 5 times, then play until the Stop key
                 // this replicates original engine behavior for the "Idle1h" 1st-person animation
-                numLoops = 1 + Misc::Rng::rollDice(4); 
+                auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+                numLoops = 1 + Misc::Rng::rollDice(4, prng); 
             }
         }
 
@@ -1131,6 +1135,8 @@ bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
 
 bool CharacterController::updateState(CharacterState idle)
 {
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+
     const MWWorld::Class &cls = mPtr.getClass();
     CreatureStats &stats = cls.getCreatureStats(mPtr);
     int weaptype = ESM::Weapon::None;
@@ -1288,7 +1294,7 @@ bool CharacterController::updateState(CharacterState idle)
                 if(isWerewolf)
                 {
                     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                    const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfEquip");
+                    const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfEquip", prng);
                     if(sound)
                     {
                         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -1563,7 +1569,7 @@ bool CharacterController::updateState(CharacterState idle)
                     mUpperBodyState = UpperCharState_StartToMinAttack;
                     if (isRandomAttackAnimation(mCurrentWeapon))
                     {
-                        mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
+                        mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
                         playSwishSound(0.0f);
                     }
                 }
@@ -1596,7 +1602,7 @@ bool CharacterController::updateState(CharacterState idle)
                 // most creatures don't actually have an attack wind-up animation, so use a uniform random value
                 // (even some creatures that can use weapons don't have a wind-up animation either, e.g. Rieklings)
                 // Note: vanilla MW uses a random value for *all* non-player actors, but we probably don't need to go that far.
-                attackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
+                attackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
             }
 
             if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
@@ -1606,7 +1612,7 @@ bool CharacterController::updateState(CharacterState idle)
                 if(isWerewolf)
                 {
                     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                    const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfSwing");
+                    const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfSwing", prng);
                     if(sound)
                         sndMgr->playSound3D(mPtr, sound->mId, 1.0f, 1.0f);
                 }
@@ -2771,7 +2777,8 @@ void CharacterController::setAIAttackType(const std::string& attackType)
 
 void CharacterController::setAttackTypeRandomly(std::string& attackType)
 {
-    float random = Misc::Rng::rollProbability();
+    MWBase::World* world = MWBase::Environment::get().getWorld();
+    float random = Misc::Rng::rollProbability(world->getPrng());
     if (random >= 2/3.f)
         attackType = "thrust";
     else if (random >= 1/3.f)

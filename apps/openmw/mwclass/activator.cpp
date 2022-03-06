@@ -120,7 +120,8 @@ namespace MWClass
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfActivator");
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfActivator", prng);
 
             std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
@@ -156,6 +157,7 @@ namespace MWClass
         int type = getSndGenTypeFromName(name);
 
         std::vector<const ESM::SoundGenerator*> fallbacksounds;
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         if (!creatureId.empty())
         {
             std::vector<const ESM::SoundGenerator*> sounds;
@@ -168,9 +170,9 @@ namespace MWClass
             }
 
             if (!sounds.empty())
-                return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+                return sounds[Misc::Rng::rollDice(sounds.size(), prng)]->mSound;
             if (!fallbacksounds.empty())
-                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
         }
         else
         {
@@ -180,7 +182,7 @@ namespace MWClass
                     fallbacksounds.push_back(&*sound);
 
             if (!fallbacksounds.empty())
-                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
         }
 
         return std::string();

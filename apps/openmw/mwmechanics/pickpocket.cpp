@@ -41,7 +41,8 @@ namespace MWMechanics
         int iPickMaxChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("iPickMaxChance")->mValue.getInteger();
 
-        int roll = Misc::Rng::roll0to99();
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        int roll = Misc::Rng::roll0to99(prng);
         if (t < pcSneak / iPickMinChance)
         {
             return (roll > int(pcSneak / iPickMinChance));

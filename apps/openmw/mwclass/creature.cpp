@@ -159,7 +159,8 @@ namespace MWClass
 
             resetter.mPtr = {};
 
-            getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId(), prng);
 
             if (hasInventory)
                 getInventoryStore(ptr).autoEquip(ptr);
@@ -264,8 +265,8 @@ namespace MWClass
         osg::Vec3f hitPosition (result.second);
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
-
-        if(Misc::Rng::roll0to99() >= hitchance)
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        if(Misc::Rng::roll0to99(prng) >= hitchance)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, osg::Vec3f(), false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -392,7 +393,8 @@ namespace MWClass
                 float agilityTerm = stats.getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->mValue.getFloat();
                 float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
                         * getGmst().iKnockDownOddsMult->mValue.getInteger() * 0.01f + getGmst().iKnockDownOddsBase->mValue.getInteger();
-                if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
+                auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+                if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99(prng))
                     stats.setKnockedDown(true);
                 else
                     stats.setHitRecovery(true); // Is this supposed to always occur?
@@ -429,7 +431,8 @@ namespace MWClass
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfCreature");
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfCreature", prng);
 
             std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
@@ -642,10 +645,11 @@ namespace MWClass
             }
         }
 
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         if (!sounds.empty())
-            return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+            return sounds[Misc::Rng::rollDice(sounds.size(), prng)]->mSound;
         if (!fallbacksounds.empty())
-            return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
+            return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
 
         return std::string();
     }

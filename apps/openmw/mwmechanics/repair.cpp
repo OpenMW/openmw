@@ -44,7 +44,8 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
 
     float x = (0.1f * pcStrength + 0.1f * pcLuck + armorerSkill) * fatigueTerm;
 
-    int roll = Misc::Rng::roll0to99();
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    int roll = Misc::Rng::roll0to99(prng);
     if (roll <= x)
     {
         int y = static_cast<int>(fRepairAmountMult * toolQuality * roll);

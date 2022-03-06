@@ -289,7 +289,8 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
 
     newRecord.mName = name;
 
-    int index = Misc::Rng::rollDice(6);
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    int index = Misc::Rng::rollDice(6, prng);
     assert (index>=0 && index<6);
 
     static const char *meshes[] = { "standard", "bargain", "cheap", "fresh", "exclusive", "quality" };
@@ -527,8 +528,8 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::createSingle ()
         removeIngredients();
         return Result_RandomFailure;
     }
-
-    if (getAlchemyFactor() < Misc::Rng::roll0to99())
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    if (getAlchemyFactor() < Misc::Rng::roll0to99(prng))
     {
         removeIngredients();
         return Result_RandomFailure;
