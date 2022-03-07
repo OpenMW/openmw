@@ -3,6 +3,8 @@
 #include <chrono>
 #include <random>
 
+#include <components/debug/debuglog.hpp>
+
 namespace Misc::Rng
 {
     static Generator sGenerator;
@@ -12,9 +14,21 @@ namespace Misc::Rng
         return sGenerator;
     }
 
+    unsigned int generateDefaultSeed()
+    {
+        auto res = static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+        Log(Debug::Info) << __FUNCTION__ << ": " << res;
+        return res;
+    }
+
     void init(unsigned int seed)
     {
         sGenerator.seed(seed);
+    }
+
+    float rollProbability()
+    {
+        return std::uniform_real_distribution<float>(0, 1 - std::numeric_limits<float>::epsilon())(getGenerator());
     }
 
     float rollProbability(Generator& prng)
@@ -22,9 +36,19 @@ namespace Misc::Rng
         return std::uniform_real_distribution<float>(0, 1 - std::numeric_limits<float>::epsilon())(prng);
     }
 
+    float rollClosedProbability()
+    {
+        return std::uniform_real_distribution<float>(0, 1)(getGenerator());
+    }
+
     float rollClosedProbability(Generator& prng)
     {
         return std::uniform_real_distribution<float>(0, 1)(prng);
+    }
+
+    int rollDice(int max)
+    {
+        return max > 0 ? std::uniform_int_distribution<int>(0, max - 1)(getGenerator()) : 0;
     }
 
     int rollDice(int max, Generator& prng)
@@ -32,9 +56,9 @@ namespace Misc::Rng
         return max > 0 ? std::uniform_int_distribution<int>(0, max - 1)(prng) : 0;
     }
 
-    unsigned int generateDefaultSeed()
+    float deviate(float mean, float deviation)
     {
-        return static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+        return std::uniform_real_distribution<float>(mean - deviation, mean + deviation)(getGenerator());
     }
 
     float deviate(float mean, float deviation, Generator& prng)

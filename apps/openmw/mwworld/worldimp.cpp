@@ -338,6 +338,10 @@ namespace MWWorld
 
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
+        writer.startRecord(ESM::REC_RAND);
+        writer.writeHNT("RAND", mPrng.getSeed());
+        writer.endRecord(ESM::REC_RAND);
+
         // Active cells could have a dirty fog of war, sync it to the CellStore first
         for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
@@ -359,12 +363,6 @@ namespace MWWorld
         writer.writeHNT("LEVT", mLevitationEnabled);
         writer.endRecord(ESM::REC_ENAB);
 
-        std::stringstream ssPrng;
-        ssPrng << mPrng;
-        writer.startRecord(ESM::REC_RAND);
-        writer.writeHString(ssPrng.str());
-        writer.endRecord(ESM::REC_RAND);
-
         writer.startRecord(ESM::REC_CAM_);
         writer.writeHNT("FIRS", isFirstPerson());
         writer.endRecord(ESM::REC_CAM_);
@@ -384,10 +382,11 @@ namespace MWWorld
                 return;
             case ESM::REC_RAND:
                 {
-                    std::stringstream ssPrng;
-                    ssPrng << reader.getHString();
-                    ssPrng.seekg(0);
-                    ssPrng >> mPrng;
+                    Misc::Rng::Generator::result_type seed{};
+                    reader.getHNT(seed, "RAND");
+                    Log(Debug::Info) << "---- World random state: " << seed << " ----";
+                    mPrng.seed(seed);
+                    Misc::Rng::getGenerator().seed(seed);
                 }
                 break;
             case ESM::REC_PLAY:
@@ -3723,9 +3722,10 @@ namespace MWWorld
         static int iNumberCreatures = mStore.get<ESM::GameSetting>().find("iNumberCreatures")->mValue.getInteger();
         int numCreatures = 1 + Misc::Rng::rollDice(iNumberCreatures); // [1, iNumberCreatures]
 
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         for (int i=0; i<numCreatures; ++i)
         {
-            std::string selectedCreature = MWMechanics::getLevelledItem(list, true);
+            std::string selectedCreature = MWMechanics::getLevelledItem(list, true, prng);
             if (selectedCreature.empty())
                 continue;
 
