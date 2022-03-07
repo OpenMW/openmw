@@ -514,12 +514,12 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     return count - toRemove;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Seed& seed)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Generator& prng)
 {
     for (const ESM::ContItem& iter : items.mList)
     {
         std::string id = Misc::StringUtils::lowerCase(iter.mItem);
-        addInitialItem(id, owner, iter.mCount, &seed);
+        addInitialItem(id, owner, iter.mCount, &prng);
     }
 
     flagAsModified();
@@ -540,7 +540,7 @@ void MWWorld::ContainerStore::fillNonRandom (const ESM::InventoryList& items, co
 }
 
 void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, int count,
-                                            Misc::Rng::Seed* seed, bool topLevel)
+                                            Misc::Rng::Generator* prng, bool topLevel)
 {
     if (count == 0) return; //Don't restock with nothing.
     try
@@ -548,13 +548,13 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
         if (ref.getPtr().getClass().getScript(ref.getPtr()).empty())
         {
-            addInitialItemImp(ref.getPtr(), owner, count, seed, topLevel);
+            addInitialItemImp(ref.getPtr(), owner, count, prng, topLevel);
         }
         else
         {
             // Adding just one item per time to make sure there isn't a stack of scripted items
             for (int i = 0; i < std::abs(count); i++)
-                addInitialItemImp(ref.getPtr(), owner, count < 0 ? -1 : 1, seed, topLevel);
+                addInitialItemImp(ref.getPtr(), owner, count < 0 ? -1 : 1, prng, topLevel);
         }
     }
     catch (const std::exception& e)
@@ -564,26 +564,26 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 }
 
 void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const std::string& owner, int count,
-                                               Misc::Rng::Seed* seed, bool topLevel)
+                                               Misc::Rng::Generator* prng, bool topLevel)
 {
     if (ptr.getType()==ESM::ItemLevList::sRecordId)
     {
-        if(!seed)
+        if(!prng)
             return;
         const ESM::ItemLevList* levItemList = ptr.get<ESM::ItemLevList>()->mBase;
 
         if (topLevel && std::abs(count) > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
         {
             for (int i=0; i<std::abs(count); ++i)
-                addInitialItem(ptr.getCellRef().getRefId(), owner, count > 0 ? 1 : -1, seed, true);
+                addInitialItem(ptr.getCellRef().getRefId(), owner, count > 0 ? 1 : -1, prng, true);
             return;
         }
         else
         {
-            std::string itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *seed);
+            std::string itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *prng);
             if (itemId.empty())
                 return;
-            addInitialItem(itemId, owner, count, seed, false);
+            addInitialItem(itemId, owner, count, prng, false);
         }
     }
     else
@@ -619,8 +619,8 @@ void MWWorld::ContainerStore::resolve()
     {
         for(const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
-        Misc::Rng::Seed seed{mSeed};
-        fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", seed);
+        Misc::Rng::Generator prng{mSeed};
+        fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", prng);
         addScripts(*this, mPtr.mCell);
     }
     mModified = true;
@@ -640,8 +640,8 @@ MWWorld::ResolutionHandle MWWorld::ContainerStore::resolveTemporarily()
     {
         for(const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
-        Misc::Rng::Seed seed{mSeed};
-        fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", seed);
+        Misc::Rng::Generator prng{mSeed};
+        fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", prng);
         addScripts(*this, mPtr.mCell);
     }
     return {listener};
