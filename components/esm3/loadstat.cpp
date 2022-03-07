@@ -25,7 +25,7 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
+                case ESM::fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
                 case ESM::SREC_DELE:

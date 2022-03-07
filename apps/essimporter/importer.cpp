@@ -263,14 +263,14 @@ namespace ESSImport
         const ESM::Header& header = esm.getHeader();
         context.mPlayerCellName = header.mGameData.mCurrentCell.toString();
 
-        const unsigned int recREFR = ESM::FourCC<'R','E','F','R'>::value;
-        const unsigned int recPCDT = ESM::FourCC<'P','C','D','T'>::value;
-        const unsigned int recFMAP = ESM::FourCC<'F','M','A','P'>::value;
-        const unsigned int recKLST = ESM::FourCC<'K','L','S','T'>::value;
-        const unsigned int recSTLN = ESM::FourCC<'S','T','L','N'>::value;
-        const unsigned int recGAME = ESM::FourCC<'G','A','M','E'>::value;
-        const unsigned int recJOUR = ESM::FourCC<'J','O','U','R'>::value;
-        const unsigned int recSPLM = ESM::FourCC<'S','P','L','M'>::value;
+        const unsigned int recREFR = ESM::fourCC("REFR");
+        const unsigned int recPCDT = ESM::fourCC("PCDT");
+        const unsigned int recFMAP = ESM::fourCC("FMAP");
+        const unsigned int recKLST = ESM::fourCC("KLST");
+        const unsigned int recSTLN = ESM::fourCC("STLN");
+        const unsigned int recGAME = ESM::fourCC("GAME");
+        const unsigned int recJOUR = ESM::fourCC("JOUR");
+        const unsigned int recSPLM = ESM::fourCC("SPLM");
 
         std::map<unsigned int, std::shared_ptr<Converter> > converters;
         converters[ESM::REC_GLOB] = std::shared_ptr<Converter>(new ConvertGlobal());

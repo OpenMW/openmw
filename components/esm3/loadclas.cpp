@@ -54,16 +54,16 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'C','L','D','T'>::value:
+                case ESM::fourCC("CLDT"):
                     esm.getHT(mData, 60);
                     if (mData.mIsPlayable > 1)
                         esm.fail("Unknown bool value");
                     hasData = true;
                     break;
-                case ESM::FourCC<'D','E','S','C'>::value:
+                case ESM::fourCC("DESC"):
                     mDescription = esm.getHString();
                     break;
                 case ESM::SREC_DELE:

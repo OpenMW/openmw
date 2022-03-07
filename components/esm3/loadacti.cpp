@@ -23,13 +23,13 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
+                case ESM::fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'S','C','R','I'>::value:
+                case ESM::fourCC("SCRI"):
                     mScript = esm.getHString();
                     break;
                 case ESM::SREC_DELE:

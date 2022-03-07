@@ -19,13 +19,13 @@ void ESM::DebugProfile::load (ESMReader& esm, bool &isDeleted)
             case ESM::SREC_NAME:
                 mId = esm.getHString();
                 break;
-            case ESM::FourCC<'D','E','S','C'>::value:
+            case ESM::fourCC("DESC"):
                 mDescription = esm.getHString();
                 break;
-            case ESM::FourCC<'S','C','R','P'>::value:
+            case ESM::fourCC("SCRP"):
                 mScriptText = esm.getHString();
                 break;
-            case ESM::FourCC<'F','L','A','G'>::value:
+            case ESM::fourCC("FLAG"):
                 esm.getHT(mFlags);
                 break;
             case ESM::SREC_DELE:

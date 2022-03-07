@@ -37,43 +37,43 @@ namespace ESM {
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
+                case ESM::fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
-                case ESM::FourCC<'C','N','A','M'>::value:
+                case ESM::fourCC("CNAM"):
                     mOriginal = esm.getHString();
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'S','C','R','I'>::value:
+                case ESM::fourCC("SCRI"):
                     mScript = esm.getHString();
                     break;
-                case ESM::FourCC<'N','P','D','T'>::value:
+                case ESM::fourCC("NPDT"):
                     esm.getHT(mData, 96);
                     hasNpdt = true;
                     break;
-                case ESM::FourCC<'F','L','A','G'>::value:
+                case ESM::fourCC("FLAG"):
                     int flags;
                     esm.getHT(flags);
                     mFlags = flags & 0xFF;
                     mBloodType = ((flags >> 8) & 0xFF) >> 2;
                     hasFlags = true;
                     break;
-                case ESM::FourCC<'X','S','C','L'>::value:
+                case ESM::fourCC("XSCL"):
                     esm.getHT(mScale);
                     break;
-                case ESM::FourCC<'N','P','C','O'>::value:
+                case ESM::fourCC("NPCO"):
                     mInventory.add(esm);
                     break;
-                case ESM::FourCC<'N','P','C','S'>::value:
+                case ESM::fourCC("NPCS"):
                     mSpells.add(esm);
                     break;
-                case ESM::FourCC<'A','I','D','T'>::value:
+                case ESM::fourCC("AIDT"):
                     esm.getHExact(&mAiData, sizeof(mAiData));
                     break;
-                case ESM::FourCC<'D','O','D','T'>::value:
-                case ESM::FourCC<'D','N','A','M'>::value:
+                case ESM::fourCC("DODT"):
+                case ESM::fourCC("DNAM"):
                     mTransport.add(esm);
                     break;
                 case AI_Wander:
@@ -88,7 +88,7 @@ namespace ESM {
                     esm.skipHSub();
                     isDeleted = true;
                     break;
-                case ESM::FourCC<'I','N','D','X'>::value:
+                case ESM::fourCC("INDX"):
                     // seems to occur only in .ESS files, unsure of purpose
                     int index;
                     esm.getHT(index);

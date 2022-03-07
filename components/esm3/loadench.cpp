@@ -25,11 +25,11 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'E','N','D','T'>::value:
+                case ESM::fourCC("ENDT"):
                     esm.getHT(mData, 16);
                     hasData = true;
                     break;
-                case ESM::FourCC<'E','N','A','M'>::value:
+                case ESM::fourCC("ENAM"):
                     mEffects.add(esm);
                     break;
                 case ESM::SREC_DELE:

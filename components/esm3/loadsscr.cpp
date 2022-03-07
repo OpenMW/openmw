@@ -24,7 +24,7 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM::fourCC("DATA"):
                     mData = esm.getHString();
                     hasData = true;
                     break;

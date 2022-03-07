@@ -211,37 +211,37 @@ void MagicEffect::load(ESMReader &esm, bool &isDeleted)
         esm.getSubName();
         switch (esm.retSubName().toInt())
         {
-            case ESM::FourCC<'I','T','E','X'>::value:
+            case ESM::fourCC("ITEX"):
                 mIcon = esm.getHString();
                 break;
-            case ESM::FourCC<'P','T','E','X'>::value:
+            case ESM::fourCC("PTEX"):
                 mParticle = esm.getHString();
                 break;
-            case ESM::FourCC<'B','S','N','D'>::value:
+            case ESM::fourCC("BSND"):
                 mBoltSound = esm.getHString();
                 break;
-            case ESM::FourCC<'C','S','N','D'>::value:
+            case ESM::fourCC("CSND"):
                 mCastSound = esm.getHString();
                 break;
-            case ESM::FourCC<'H','S','N','D'>::value:
+            case ESM::fourCC("HSND"):
                 mHitSound = esm.getHString();
                 break;
-            case ESM::FourCC<'A','S','N','D'>::value:
+            case ESM::fourCC("ASND"):
                 mAreaSound = esm.getHString();
                 break;
-            case ESM::FourCC<'C','V','F','X'>::value:
+            case ESM::fourCC("CVFX"):
                 mCasting = esm.getHString();
                 break;
-            case ESM::FourCC<'B','V','F','X'>::value:
+            case ESM::fourCC("BVFX"):
                 mBolt = esm.getHString();
                 break;
-            case ESM::FourCC<'H','V','F','X'>::value:
+            case ESM::fourCC("HVFX"):
                 mHit = esm.getHString();
                 break;
-            case ESM::FourCC<'A','V','F','X'>::value:
+            case ESM::fourCC("AVFX"):
                 mArea = esm.getHString();
                 break;
-            case ESM::FourCC<'D','E','S','C'>::value:
+            case ESM::fourCC("DESC"):
                 mDescription = esm.getHString();
                 break;
             default:

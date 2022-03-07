@@ -51,11 +51,11 @@ namespace ESM
                 case ESM::SREC_NAME:
                     mCell = esm.getHString();
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM::fourCC("DATA"):
                     esm.getHT(mData, 12);
                     hasData = true;
                     break;
-                case ESM::FourCC<'P','G','R','P'>::value:
+                case ESM::fourCC("PGRP"):
                 {
                     esm.getSubHeader();
                     int size = esm.getSubSize();
@@ -76,7 +76,7 @@ namespace ESM
                     }
                     break;
                 }
-                case ESM::FourCC<'P','G','R','C'>::value:
+                case ESM::fourCC("PGRC"):
                 {
                     esm.getSubHeader();
                     int size = esm.getSubSize();

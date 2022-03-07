@@ -139,15 +139,15 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::FourCC<'I','N','D','X'>::value:
+                case ESM::fourCC("INDX"):
                     esm.getHT(mIndex);
                     hasIndex = true;
                     break;
-                case ESM::FourCC<'S','K','D','T'>::value:
+                case ESM::fourCC("SKDT"):
                     esm.getHT(mData, 24);
                     hasData = true;
                     break;
-                case ESM::FourCC<'D','E','S','C'>::value:
+                case ESM::fourCC("DESC"):
                     mDescription = esm.getHString();
                     break;
                 default:

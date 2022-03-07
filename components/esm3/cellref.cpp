@@ -63,57 +63,57 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
         esm.getSubName();
         switch (esm.retSubName().toInt())
         {
-            case ESM::FourCC<'U','N','A','M'>::value:
+            case ESM::fourCC("UNAM"):
                 esm.getHT(mReferenceBlocked);
                 break;
-            case ESM::FourCC<'X','S','C','L'>::value:
+            case ESM::fourCC("XSCL"):
                 esm.getHT(mScale);
                 mScale = std::clamp(mScale, 0.5f, 2.0f);
                 break;
-            case ESM::FourCC<'A','N','A','M'>::value:
+            case ESM::fourCC("ANAM"):
                 mOwner = esm.getHString();
                 break;
-            case ESM::FourCC<'B','N','A','M'>::value:
+            case ESM::fourCC("BNAM"):
                 mGlobalVariable = esm.getHString();
                 break;
-            case ESM::FourCC<'X','S','O','L'>::value:
+            case ESM::fourCC("XSOL"):
                 mSoul = esm.getHString();
                 break;
-            case ESM::FourCC<'C','N','A','M'>::value:
+            case ESM::fourCC("CNAM"):
                 mFaction = esm.getHString();
                 break;
-            case ESM::FourCC<'I','N','D','X'>::value:
+            case ESM::fourCC("INDX"):
                 esm.getHT(mFactionRank);
                 break;
-            case ESM::FourCC<'X','C','H','G'>::value:
+            case ESM::fourCC("XCHG"):
                 esm.getHT(mEnchantmentCharge);
                 break;
-            case ESM::FourCC<'I','N','T','V'>::value:
+            case ESM::fourCC("INTV"):
                 esm.getHT(mChargeInt);
                 break;
-            case ESM::FourCC<'N','A','M','9'>::value:
+            case ESM::fourCC("NAM9"):
                 esm.getHT(mGoldValue);
                 break;
-            case ESM::FourCC<'D','O','D','T'>::value:
+            case ESM::fourCC("DODT"):
                 esm.getHT(mDoorDest);
                 mTeleport = true;
                 break;
-            case ESM::FourCC<'D','N','A','M'>::value:
+            case ESM::fourCC("DNAM"):
                 mDestCell = esm.getHString();
                 break;
-            case ESM::FourCC<'F','L','T','V'>::value:
+            case ESM::fourCC("FLTV"):
                 esm.getHT(mLockLevel);
                 break;
-            case ESM::FourCC<'K','N','A','M'>::value:
+            case ESM::fourCC("KNAM"):
                 mKey = esm.getHString();
                 break;
-            case ESM::FourCC<'T','N','A','M'>::value:
+            case ESM::fourCC("TNAM"):
                 mTrap = esm.getHString();
                 break;
-            case ESM::FourCC<'D','A','T','A'>::value:
+            case ESM::fourCC("DATA"):
                 esm.getHT(mPos, 24);
                 break;
-            case ESM::FourCC<'N','A','M','0'>::value:
+            case ESM::fourCC("NAM0"):
             {
                 esm.skipHSub();
                 break;

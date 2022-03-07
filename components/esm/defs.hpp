@@ -61,7 +61,7 @@ struct Position
 
     friend inline bool operator<(const Position& l, const Position& r)
     {
-        const auto tuple = [] (const Position& v) { return std::tuple(v.asVec3(), v.asRotationVec3()); };
+        const auto tuple = [](const Position& v) { return std::tuple(v.asVec3(), v.asRotationVec3()); };
         return tuple(l) < tuple(r);
     }
 };
@@ -86,100 +86,100 @@ bool inline operator!= (const Position& left, const Position& right) noexcept
            left.rot[2] != right.rot[2];
 }
 
-template <int a, int b, int c, int d>
-struct FourCC
-{
-    static constexpr unsigned int value = (((((d << 8) | c) << 8) | b) << 8) | a;
-};
+template<std::size_t len>
+constexpr unsigned int fourCC(const char(&name)[len]) {
+    static_assert(len == 5, "Constant must be 4 characters long. (Plus null terminator)");
+    return static_cast<unsigned char>(name[0]) | (static_cast<unsigned char>(name[1]) << 8) | (static_cast<unsigned char>(name[2]) << 16) | (static_cast<unsigned char>(name[3]) << 24);
+}
 
 enum RecNameInts : unsigned int
 {
     // format 0 / legacy
-    REC_ACTI = FourCC<'A','C','T','I'>::value,
-    REC_ALCH = FourCC<'A','L','C','H'>::value,
-    REC_APPA = FourCC<'A','P','P','A'>::value,
-    REC_ARMO = FourCC<'A','R','M','O'>::value,
-    REC_BODY = FourCC<'B','O','D','Y'>::value,
-    REC_BOOK = FourCC<'B','O','O','K'>::value,
-    REC_BSGN = FourCC<'B','S','G','N'>::value,
-    REC_CELL = FourCC<'C','E','L','L'>::value,
-    REC_CLAS = FourCC<'C','L','A','S'>::value,
-    REC_CLOT = FourCC<'C','L','O','T'>::value,
-    REC_CNTC = FourCC<'C','N','T','C'>::value,
-    REC_CONT = FourCC<'C','O','N','T'>::value,
-    REC_CREA = FourCC<'C','R','E','A'>::value,
-    REC_CREC = FourCC<'C','R','E','C'>::value,
-    REC_DIAL = FourCC<'D','I','A','L'>::value,
-    REC_DOOR = FourCC<'D','O','O','R'>::value,
-    REC_ENCH = FourCC<'E','N','C','H'>::value,
-    REC_FACT = FourCC<'F','A','C','T'>::value,
-    REC_GLOB = FourCC<'G','L','O','B'>::value,
-    REC_GMST = FourCC<'G','M','S','T'>::value,
-    REC_INFO = FourCC<'I','N','F','O'>::value,
-    REC_INGR = FourCC<'I','N','G','R'>::value,
-    REC_LAND = FourCC<'L','A','N','D'>::value,
-    REC_LEVC = FourCC<'L','E','V','C'>::value,
-    REC_LEVI = FourCC<'L','E','V','I'>::value,
-    REC_LIGH = FourCC<'L','I','G','H'>::value,
-    REC_LOCK = FourCC<'L','O','C','K'>::value,
-    REC_LTEX = FourCC<'L','T','E','X'>::value,
-    REC_MGEF = FourCC<'M','G','E','F'>::value,
-    REC_MISC = FourCC<'M','I','S','C'>::value,
-    REC_NPC_ = FourCC<'N','P','C','_'>::value,
-    REC_NPCC = FourCC<'N','P','C','C'>::value,
-    REC_PGRD = FourCC<'P','G','R','D'>::value,
-    REC_PROB = FourCC<'P','R','O','B'>::value,
-    REC_RACE = FourCC<'R','A','C','E'>::value,
-    REC_REGN = FourCC<'R','E','G','N'>::value,
-    REC_REPA = FourCC<'R','E','P','A'>::value,
-    REC_SCPT = FourCC<'S','C','P','T'>::value,
-    REC_SKIL = FourCC<'S','K','I','L'>::value,
-    REC_SNDG = FourCC<'S','N','D','G'>::value,
-    REC_SOUN = FourCC<'S','O','U','N'>::value,
-    REC_SPEL = FourCC<'S','P','E','L'>::value,
-    REC_SSCR = FourCC<'S','S','C','R'>::value,
-    REC_STAT = FourCC<'S','T','A','T'>::value,
-    REC_WEAP = FourCC<'W','E','A','P'>::value,
+    REC_ACTI = fourCC("ACTI"),
+    REC_ALCH = fourCC("ALCH"),
+    REC_APPA = fourCC("APPA"),
+    REC_ARMO = fourCC("ARMO"),
+    REC_BODY = fourCC("BODY"),
+    REC_BOOK = fourCC("BOOK"),
+    REC_BSGN = fourCC("BSGN"),
+    REC_CELL = fourCC("CELL"),
+    REC_CLAS = fourCC("CLAS"),
+    REC_CLOT = fourCC("CLOT"),
+    REC_CNTC = fourCC("CNTC"),
+    REC_CONT = fourCC("CONT"),
+    REC_CREA = fourCC("CREA"),
+    REC_CREC = fourCC("CREC"),
+    REC_DIAL = fourCC("DIAL"),
+    REC_DOOR = fourCC("DOOR"),
+    REC_ENCH = fourCC("ENCH"),
+    REC_FACT = fourCC("FACT"),
+    REC_GLOB = fourCC("GLOB"),
+    REC_GMST = fourCC("GMST"),
+    REC_INFO = fourCC("INFO"),
+    REC_INGR = fourCC("INGR"),
+    REC_LAND = fourCC("LAND"),
+    REC_LEVC = fourCC("LEVC"),
+    REC_LEVI = fourCC("LEVI"),
+    REC_LIGH = fourCC("LIGH"),
+    REC_LOCK = fourCC("LOCK"),
+    REC_LTEX = fourCC("LTEX"),
+    REC_MGEF = fourCC("MGEF"),
+    REC_MISC = fourCC("MISC"),
+    REC_NPC_ = fourCC("NPC_"),
+    REC_NPCC = fourCC("NPCC"),
+    REC_PGRD = fourCC("PGRD"),
+    REC_PROB = fourCC("PROB"),
+    REC_RACE = fourCC("RACE"),
+    REC_REGN = fourCC("REGN"),
+    REC_REPA = fourCC("REPA"),
+    REC_SCPT = fourCC("SCPT"),
+    REC_SKIL = fourCC("SKIL"),
+    REC_SNDG = fourCC("SNDG"),
+    REC_SOUN = fourCC("SOUN"),
+    REC_SPEL = fourCC("SPEL"),
+    REC_SSCR = fourCC("SSCR"),
+    REC_STAT = fourCC("STAT"),
+    REC_WEAP = fourCC("WEAP"),
 
     // format 0 - saved games
-    REC_SAVE = FourCC<'S','A','V','E'>::value,
-    REC_JOUR_LEGACY = FourCC<0xa4,'U','O','R'>::value, // "\xa4UOR", rather than "JOUR", little oversight when magic numbers were
-                                                       // calculated by hand, needs to be supported for older files now
-    REC_JOUR = FourCC<'J','O','U','R'>::value,
-    REC_QUES = FourCC<'Q','U','E','S'>::value,
-    REC_GSCR = FourCC<'G','S','C','R'>::value,
-    REC_PLAY = FourCC<'P','L','A','Y'>::value,
-    REC_CSTA = FourCC<'C','S','T','A'>::value,
-    REC_GMAP = FourCC<'G','M','A','P'>::value,
-    REC_DIAS = FourCC<'D','I','A','S'>::value,
-    REC_WTHR = FourCC<'W','T','H','R'>::value,
-    REC_KEYS = FourCC<'K','E','Y','S'>::value,
-    REC_DYNA = FourCC<'D','Y','N','A'>::value,
-    REC_ASPL = FourCC<'A','S','P','L'>::value,
-    REC_ACTC = FourCC<'A','C','T','C'>::value,
-    REC_MPRJ = FourCC<'M','P','R','J'>::value,
-    REC_PROJ = FourCC<'P','R','O','J'>::value,
-    REC_DCOU = FourCC<'D','C','O','U'>::value,
-    REC_MARK = FourCC<'M','A','R','K'>::value,
-    REC_ENAB = FourCC<'E','N','A','B'>::value,
-    REC_CAM_ = FourCC<'C','A','M','_'>::value,
-    REC_STLN = FourCC<'S','T','L','N'>::value,
-    REC_INPU = FourCC<'I','N','P','U'>::value,
+    REC_SAVE = fourCC("SAVE"),
+    REC_JOUR_LEGACY = fourCC("\xa4UOR"), // "\xa4UOR", rather than "JOUR", little oversight when magic numbers were
+                                         // calculated by hand, needs to be supported for older files now
+    REC_JOUR = fourCC("JOUR"),
+    REC_QUES = fourCC("QUES"),
+    REC_GSCR = fourCC("GSCR"),
+    REC_PLAY = fourCC("PLAY"),
+    REC_CSTA = fourCC("CSTA"),
+    REC_GMAP = fourCC("GMAP"),
+    REC_DIAS = fourCC("DIAS"),
+    REC_WTHR = fourCC("WTHR"),
+    REC_KEYS = fourCC("KEYS"),
+    REC_DYNA = fourCC("DYNA"),
+    REC_ASPL = fourCC("ASPL"),
+    REC_ACTC = fourCC("ACTC"),
+    REC_MPRJ = fourCC("MPRJ"),
+    REC_PROJ = fourCC("PROJ"),
+    REC_DCOU = fourCC("DCOU"),
+    REC_MARK = fourCC("MARK"),
+    REC_ENAB = fourCC("ENAB"),
+    REC_CAM_ = fourCC("CAM_"),
+    REC_STLN = fourCC("STLN"),
+    REC_INPU = fourCC("INPU"),
 
     // format 1
-    REC_FILT = FourCC<'F','I','L','T'>::value,
-    REC_DBGP = FourCC<'D','B','G','P'>::value, ///< only used in project files
-    REC_LUAL = FourCC<'L','U','A','L'>::value,  // LuaScriptsCfg
+    REC_FILT = fourCC("FILT"),
+    REC_DBGP = fourCC("DBGP"), ///< only used in project files
+    REC_LUAL = fourCC("LUAL"),  // LuaScriptsCfg
 
     // format 16 - Lua scripts in saved games
-    REC_LUAM = FourCC<'L','U','A','M'>::value,  // LuaManager data
+    REC_LUAM = fourCC("LUAM"),  // LuaManager data
 };
 
 /// Common subrecords
 enum SubRecNameInts
 {
-    SREC_DELE = ESM::FourCC<'D','E','L','E'>::value,
-    SREC_NAME = ESM::FourCC<'N','A','M','E'>::value
+    SREC_DELE = ESM::fourCC("DELE"),
+    SREC_NAME = ESM::fourCC("NAME")
 };
 
 }

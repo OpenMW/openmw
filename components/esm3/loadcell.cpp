@@ -75,7 +75,7 @@ namespace ESM
                 case ESM::SREC_NAME:
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM::fourCC("DATA"):
                     esm.getHT(mData, 12);
                     hasData = true;
                     break;
@@ -119,13 +119,13 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::FourCC<'I','N','T','V'>::value:
+                case ESM::fourCC("INTV"):
                     int waterl;
                     esm.getHT(waterl);
                     mWater = static_cast<float>(waterl);
                     mWaterInt = true;
                     break;
-                case ESM::FourCC<'W','H','G','T'>::value:
+                case ESM::fourCC("WHGT"):
                     float waterLevel;
                     esm.getHT(waterLevel);
                     mWaterInt = false;
@@ -138,17 +138,17 @@ namespace ESM
                     else
                         mWater = waterLevel;
                     break;
-                case ESM::FourCC<'A','M','B','I'>::value:
+                case ESM::fourCC("AMBI"):
                     esm.getHT(mAmbi);
                     mHasAmbi = true;
                     break;
-                case ESM::FourCC<'R','G','N','N'>::value:
+                case ESM::fourCC("RGNN"):
                     mRegion = esm.getHString();
                     break;
-                case ESM::FourCC<'N','A','M','5'>::value:
+                case ESM::fourCC("NAM5"):
                     esm.getHT(mMapColor);
                     break;
-                case ESM::FourCC<'N','A','M','0'>::value:
+                case ESM::fourCC("NAM0"):
                     esm.getHT(mRefNumCounter);
                     break;
                 default:

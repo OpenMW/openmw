@@ -30,7 +30,7 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM::fourCC("DATA"):
                 {
                     esm.getSubHeader();
                     int size = esm.getSubSize();

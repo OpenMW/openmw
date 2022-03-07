@@ -26,23 +26,23 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
+                case ESM::fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
-                case ESM::FourCC<'T','E','X','T'>::value: // not ITEX here for some reason
+                case ESM::fourCC("TEXT"): // not ITEX here for some reason
                     mIcon = esm.getHString();
                     break;
-                case ESM::FourCC<'S','C','R','I'>::value:
+                case ESM::fourCC("SCRI"):
                     mScript = esm.getHString();
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'A','L','D','T'>::value:
+                case ESM::fourCC("ALDT"):
                     esm.getHT(mData, 12);
                     hasData = true;
                     break;
-                case ESM::FourCC<'E','N','A','M'>::value:
+                case ESM::fourCC("ENAM"):
                     mEffects.add(esm);
                     break;
                 case ESM::SREC_DELE:
