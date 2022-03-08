@@ -18,7 +18,7 @@
     <Layer name="LoadingScreenBackground" overlapped="false" pick="true"/>
     <Layer name="LoadingScreen" overlapped="false" pick="true"/>
     <Layer name="Modal" overlapped="true" pick="true"/>
-    <Layer name="Tooltip" overlapped="true" pick="true"/>
+    <Layer name="Popup" overlapped="true" pick="true"/>
     <Layer name="Video" overlapped="false" pick="true"/>
     <Layer name="InputBlocker" overlapped="false" pick="true"/>
     <Layer name="Pointer" overlapped="false" pick="false"/>
