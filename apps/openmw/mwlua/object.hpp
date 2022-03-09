@@ -118,6 +118,9 @@ namespace MWLua
     using GObjectList = ObjectList<GObject>;
     using LObjectList = ObjectList<LObject>;
 
+    template <typename Obj>
+    struct Inventory { Obj mObj; };
+
 }
 
 #endif  // MWLUA_OBJECT_H

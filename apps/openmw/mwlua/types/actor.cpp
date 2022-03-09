@@ -83,7 +83,11 @@ namespace MWLua
             return MWBase::Environment::get().getWorld()->isSwimming(o.ptr());
         };
 
-        actor["getEquipment"] = [context](const Object& o)
+        actor["inventory"] = sol::overload(
+            [](const LObject& o) { return Inventory<LObject>{o}; },
+            [](const GObject& o) { return Inventory<GObject>{o}; }
+        );
+        actor["equipment"] = [context](const Object& o)
         {
             const MWWorld::Ptr& ptr = o.ptr();
             sol::table equipment(context.mLua->sol(), sol::create);
@@ -109,12 +113,8 @@ namespace MWLua
             MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
             return store.isEquipped(item.ptr());
         };
-        actor["setEquipment"] = [context](const sol::object& luaObj, const sol::table& equipment)
+        actor["setEquipment"] = [context](const SelfObject& obj, const sol::table& equipment)
         {
-            if (!luaObj.is<GObject>() && !luaObj.is<SelfObject>())
-                throw std::runtime_error("Incorrect type of the first argument. "
-                                         "Can be either self (in local scripts) or game object (in global scripts)");
-            const Object& obj = luaObj.as<Object>();
             if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
             {
                 if (!equipment.empty())

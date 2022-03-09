@@ -391,6 +391,7 @@ namespace MWLua
     {
         assert(mInitialized);
         assert(flag != ESM::LuaScriptCfg::sGlobal);
+        assert(ptr.getType() != ESM::REC_STAT);
         std::shared_ptr<LocalScripts> scripts;
         if (flag == ESM::LuaScriptCfg::sPlayer)
         {

@@ -12,15 +12,6 @@
 #include "luamanagerimp.hpp"
 #include "types/types.hpp"
 
-namespace MWLua
-{
-    template <typename ObjectT>
-    struct Inventory
-    {
-        ObjectT mObj;
-    };
-}
-
 namespace sol
 {
     template <>
@@ -149,6 +140,8 @@ namespace MWLua
                         throw std::runtime_error("Unknown script: " + std::string(path));
                     if (!(cfg[*scriptId].mFlags & ESM::LuaScriptCfg::sCustom))
                         throw std::runtime_error("Script without CUSTOM tag can not be added dynamically: " + std::string(path));
+                    if (object.ptr().getType() == ESM::REC_STAT)
+                        throw std::runtime_error("Attaching scripts to Static is not allowed: " + std::string(path));
                     luaManager->addCustomLocalScript(object.ptr(), *scriptId);
                 };
                 objectT["hasScript"] = [lua=context.mLua](const GObject& object, std::string_view path)
@@ -200,7 +193,6 @@ namespace MWLua
             using InventoryT = Inventory<ObjectT>;
             sol::usertype<InventoryT> inventoryT = context.mLua->sol().new_usertype<InventoryT>(prefix + "Inventory");
 
-            objectT["inventory"] = sol::readonly_property([](const ObjectT& o) { return InventoryT{o}; });
             inventoryT[sol::meta_function::to_string] =
                 [](const InventoryT& inv) { return "Inventory[" + inv.mObj.toString() + "]"; };
 

@@ -173,7 +173,7 @@ namespace MWLua
         addType(ObjectTypeName::Repair, {ESM::REC_REPA}, ObjectTypeName::Item);
 
         addType(ObjectTypeName::Activator, {ESM::REC_ACTI});
-        addType(ObjectTypeName::Container, {ESM::REC_CONT});
+        addContainerBindings(addType(ObjectTypeName::Container, {ESM::REC_CONT}), context);
         addDoorBindings(addType(ObjectTypeName::Door, {ESM::REC_DOOR}), context);
         addType(ObjectTypeName::Static, {ESM::REC_STAT});
 

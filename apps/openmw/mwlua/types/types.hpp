@@ -24,6 +24,7 @@ namespace MWLua
     sol::table initTypesPackage(const Context& context);
 
     // used in initTypesPackage
+    void addContainerBindings(sol::table door, const Context& context);
     void addDoorBindings(sol::table door, const Context& context);
     void addActorBindings(sol::table actor, const Context& context);
 }
