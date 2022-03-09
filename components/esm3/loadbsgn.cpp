@@ -25,16 +25,16 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'T','N','A','M'>::value:
+                case ESM::fourCC("TNAM"):
                     mTexture = esm.getHString();
                     break;
-                case ESM::FourCC<'D','E','S','C'>::value:
+                case ESM::fourCC("DESC"):
                     mDescription = esm.getHString();
                     break;
-                case ESM::FourCC<'N','P','C','S'>::value:
+                case ESM::fourCC("NPCS"):
                     mPowers.add(esm);
                     break;
                 case ESM::SREC_DELE:

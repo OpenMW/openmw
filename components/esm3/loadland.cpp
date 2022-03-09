@@ -46,7 +46,7 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::FourCC<'I','N','T','V'>::value:
+                case ESM::fourCC("INTV"):
                     esm.getSubHeader();
                     if (esm.getSubSize() != 8)
                         esm.fail("Subrecord size is not equal to 8");
@@ -54,7 +54,7 @@ namespace ESM
                     esm.getT<int>(mY);
                     hasLocation = true;
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM::fourCC("DATA"):
                     esm.getHT(mFlags);
                     break;
                 case ESM::SREC_DELE:
@@ -82,23 +82,23 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::FourCC<'V','N','M','L'>::value:
+                case ESM::fourCC("VNML"):
                     esm.skipHSub();
                     mDataTypes |= DATA_VNML;
                     break;
-                case ESM::FourCC<'V','H','G','T'>::value:
+                case ESM::fourCC("VHGT"):
                     esm.skipHSub();
                     mDataTypes |= DATA_VHGT;
                     break;
-                case ESM::FourCC<'W','N','A','M'>::value:
+                case ESM::fourCC("WNAM"):
                     esm.getHExact(mWnam, sizeof(mWnam));
                     mDataTypes |= DATA_WNAM;
                     break;
-                case ESM::FourCC<'V','C','L','R'>::value:
+                case ESM::fourCC("VCLR"):
                     esm.skipHSub();
                     mDataTypes |= DATA_VCLR;
                     break;
-                case ESM::FourCC<'V','T','E','X'>::value:
+                case ESM::fourCC("VTEX"):
                     esm.skipHSub();
                     mDataTypes |= DATA_VTEX;
                     break;

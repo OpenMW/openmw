@@ -22,13 +22,13 @@ namespace ESM
 
     enum AiPackages
     {
-        Ai_Wander = ESM::FourCC<'W','A','N','D'>::value,
-        Ai_Travel = ESM::FourCC<'T','R','A','V'>::value,
-        Ai_Escort = ESM::FourCC<'E','S','C','O'>::value,
-        Ai_Follow = ESM::FourCC<'F','O','L','L'>::value,
-        Ai_Activate = ESM::FourCC<'A','C','T','I'>::value,
-        Ai_Combat = ESM::FourCC<'C','O','M','B'>::value,
-        Ai_Pursue = ESM::FourCC<'P','U','R','S'>::value
+        Ai_Wander = ESM::fourCC("WAND"),
+        Ai_Travel = ESM::fourCC("TRAV"),
+        Ai_Escort = ESM::fourCC("ESCO"),
+        Ai_Follow = ESM::fourCC("FOLL"),
+        Ai_Activate = ESM::fourCC("ACTI"),
+        Ai_Combat = ESM::fourCC("COMB"),
+        Ai_Pursue = ESM::fourCC("PURS")
     };
 
 

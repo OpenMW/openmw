@@ -25,19 +25,19 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM::fourCC("DATA"):
                     esm.getHT(mData, 12);
                     break;
-                case ESM::FourCC<'O','N','A','M'>::value:
+                case ESM::fourCC("ONAM"):
                     mActor = esm.getHString();
                     break;
-                case ESM::FourCC<'R','N','A','M'>::value:
+                case ESM::fourCC("RNAM"):
                     mRace = esm.getHString();
                     break;
-                case ESM::FourCC<'C','N','A','M'>::value:
+                case ESM::fourCC("CNAM"):
                     mClass = esm.getHString();
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                 {
                     mFaction = esm.getHString();
                     if (mFaction == "FFFF")
@@ -46,19 +46,19 @@ namespace ESM
                     }
                     break;
                 }
-                case ESM::FourCC<'A','N','A','M'>::value:
+                case ESM::fourCC("ANAM"):
                     mCell = esm.getHString();
                     break;
-                case ESM::FourCC<'D','N','A','M'>::value:
+                case ESM::fourCC("DNAM"):
                     mPcFaction = esm.getHString();
                     break;
-                case ESM::FourCC<'S','N','A','M'>::value:
+                case ESM::fourCC("SNAM"):
                     mSound = esm.getHString();
                     break;
                 case ESM::SREC_NAME:
                     mResponse = esm.getHString();
                     break;
-                case ESM::FourCC<'S','C','V','R'>::value:
+                case ESM::fourCC("SCVR"):
                 {
                     SelectStruct ss;
                     ss.mSelectRule = esm.getHString();
@@ -66,18 +66,18 @@ namespace ESM
                     mSelects.push_back(ss);
                     break;
                 }
-                case ESM::FourCC<'B','N','A','M'>::value:
+                case ESM::fourCC("BNAM"):
                     mResultScript = esm.getHString();
                     break;
-                case ESM::FourCC<'Q','S','T','N'>::value:
+                case ESM::fourCC("QSTN"):
                     mQuestStatus = QS_Name;
                     esm.skipRecord();
                     break;
-                case ESM::FourCC<'Q','S','T','F'>::value:
+                case ESM::fourCC("QSTF"):
                     mQuestStatus = QS_Finished;
                     esm.skipRecord();
                     break;
-                case ESM::FourCC<'Q','S','T','R'>::value:
+                case ESM::fourCC("QSTR"):
                     mQuestStatus = QS_Restart;
                     esm.skipRecord();
                     break;

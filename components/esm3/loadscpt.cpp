@@ -93,7 +93,7 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::FourCC<'S','C','H','D'>::value:
+                case ESM::fourCC("SCHD"):
                 {
                     esm.getSubHeader();
                     mId = esm.getString(32);
@@ -102,11 +102,11 @@ namespace ESM
                     hasHeader = true;
                     break;
                 }
-                case ESM::FourCC<'S','C','V','R'>::value:
+                case ESM::fourCC("SCVR"):
                     // list of local variables
                     loadSCVR(esm);
                     break;
-                case ESM::FourCC<'S','C','D','T'>::value:
+                case ESM::fourCC("SCDT"):
                 {
                     // compiled script
                     esm.getSubHeader();
@@ -125,7 +125,7 @@ namespace ESM
                     esm.getExact(mScriptData.data(), mScriptData.size());
                     break;
                 }
-                case ESM::FourCC<'S','C','T','X'>::value:
+                case ESM::fourCC("SCTX"):
                     mScriptText = esm.getHString();
                     break;
                 case ESM::SREC_DELE:

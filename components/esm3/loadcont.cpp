@@ -48,17 +48,17 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
+                case ESM::fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'C','N','D','T'>::value:
+                case ESM::fourCC("CNDT"):
                     esm.getHT(mWeight, 4);
                     hasWeight = true;
                     break;
-                case ESM::FourCC<'F','L','A','G'>::value:
+                case ESM::fourCC("FLAG"):
                     esm.getHT(mFlags, 4);
                     if (mFlags & 0xf4)
                         esm.fail("Unknown flags");
@@ -66,10 +66,10 @@ namespace ESM
                         esm.fail("Flag 8 not set");
                     hasFlags = true;
                     break;
-                case ESM::FourCC<'S','C','R','I'>::value:
+                case ESM::fourCC("SCRI"):
                     mScript = esm.getHString();
                     break;
-                case ESM::FourCC<'N','P','C','O'>::value:
+                case ESM::fourCC("NPCO"):
                     mInventory.add(esm);
                     break;
                 case ESM::SREC_DELE:

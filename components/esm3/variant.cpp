@@ -10,10 +10,10 @@
 
 namespace
 {
-    constexpr uint32_t STRV = ESM::FourCC<'S','T','R','V'>::value;
-    constexpr uint32_t INTV = ESM::FourCC<'I','N','T','V'>::value;
-    constexpr uint32_t FLTV = ESM::FourCC<'F','L','T','V'>::value;
-    constexpr uint32_t STTV = ESM::FourCC<'S','T','T','V'>::value;
+    constexpr uint32_t STRV = ESM::fourCC("STRV");
+    constexpr uint32_t INTV = ESM::fourCC("INTV");
+    constexpr uint32_t FLTV = ESM::fourCC("FLTV");
+    constexpr uint32_t STTV = ESM::fourCC("STTV");
 
     template <typename T, bool orDefault = false>
     struct GetValue

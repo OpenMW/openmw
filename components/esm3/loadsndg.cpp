@@ -24,14 +24,14 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM::fourCC("DATA"):
                     esm.getHT(mType, 4);
                     hasData = true;
                     break;
-                case ESM::FourCC<'C','N','A','M'>::value:
+                case ESM::fourCC("CNAM"):
                     mCreature = esm.getHString();
                     break;
-                case ESM::FourCC<'S','N','A','M'>::value:
+                case ESM::fourCC("SNAM"):
                     mSound = esm.getHString();
                     break;
                 case ESM::SREC_DELE:

@@ -20,10 +20,10 @@ void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
             case ESM::SREC_NAME:
                 mId = esm.getHString();
                 break;
-            case ESM::FourCC<'F','I','L','T'>::value:
+            case ESM::fourCC("FILT"):
                 mFilter = esm.getHString();
                 break;
-            case ESM::FourCC<'D','E','S','C'>::value:
+            case ESM::fourCC("DESC"):
                 mDescription = esm.getHString();
                 break;
             case ESM::SREC_DELE:

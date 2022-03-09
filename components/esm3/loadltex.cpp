@@ -23,11 +23,11 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'I','N','T','V'>::value:
+                case ESM::fourCC("INTV"):
                     esm.getHT(mIndex);
                     hasIndex = true;
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM::fourCC("DATA"):
                     mTexture = esm.getHString();
                     break;
                 case ESM::SREC_DELE:

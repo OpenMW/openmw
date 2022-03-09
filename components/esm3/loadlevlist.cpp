@@ -22,13 +22,13 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM::fourCC("DATA"):
                     esm.getHT(mFlags);
                     break;
-                case ESM::FourCC<'N','N','A','M'>::value:
+                case ESM::fourCC("NNAM"):
                     esm.getHT(mChanceNone);
                     break;
-                case ESM::FourCC<'I','N','D','X'>::value:
+                case ESM::fourCC("INDX"):
                 {
                     int length = 0;
                     esm.getHT(length);

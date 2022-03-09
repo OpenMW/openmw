@@ -10,13 +10,13 @@ namespace ESM
 
     void Transport::add(ESMReader &esm)
     {
-        if (esm.retSubName().toInt() == ESM::FourCC<'D','O','D','T'>::value)
+        if (esm.retSubName().toInt() == ESM::fourCC("DODT"))
         {
             Dest dodt;
             esm.getHExact(&dodt.mPos, 24);
             mList.push_back(dodt);
         }
-        else if (esm.retSubName().toInt() == ESM::FourCC<'D','N','A','M'>::value)
+        else if (esm.retSubName().toInt() == ESM::fourCC("DNAM"))
         {
             const std::string name = esm.getHString();
             if (mList.empty())

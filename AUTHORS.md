@@ -71,6 +71,7 @@ Programmers
     David Teviotdale (dteviot)
     Diggory Hardy
     Dmitry Marakasov (AMDmi3)
+    Duncan Frost (duncans_pumpkin)
     Edmondo Tommasina (edmondo)
     Eduard Cot (trombonecot)
     Eli2

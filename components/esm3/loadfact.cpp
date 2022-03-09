@@ -47,21 +47,21 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'R','N','A','M'>::value:
+                case ESM::fourCC("RNAM"):
                     if (rankCounter >= 10)
                         esm.fail("Rank out of range");
                     mRanks[rankCounter++] = esm.getHString();
                     break;
-                case ESM::FourCC<'F','A','D','T'>::value:
+                case ESM::fourCC("FADT"):
                     esm.getHT(mData, 240);
                     if (mData.mIsHidden > 1)
                         esm.fail("Unknown flag!");
                     hasData = true;
                     break;
-                case ESM::FourCC<'A','N','A','M'>::value:
+                case ESM::fourCC("ANAM"):
                 {
                     std::string faction = esm.getHString();
                     int reaction;

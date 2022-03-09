@@ -26,14 +26,14 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'S','P','D','T'>::value:
+                case ESM::fourCC("SPDT"):
                     esm.getHT(mData, 12);
                     hasData = true;
                     break;
-                case ESM::FourCC<'E','N','A','M'>::value:
+                case ESM::fourCC("ENAM"):
                     ENAMstruct s;
                     esm.getHT(s, 24);
                     mEffects.mList.push_back(s);

@@ -24,13 +24,13 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
+                case ESM::fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mRace = esm.getHString();
                     break;
-                case ESM::FourCC<'B','Y','D','T'>::value:
+                case ESM::fourCC("BYDT"):
                     esm.getHT(mData, 4);
                     hasData = true;
                     break;

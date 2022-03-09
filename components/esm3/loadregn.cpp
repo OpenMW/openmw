@@ -23,10 +23,10 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM::fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::FourCC<'W','E','A','T'>::value:
+                case ESM::fourCC("WEAT"):
                 {
                     esm.getSubHeader();
                     if (esm.getVer() == VER_12)
@@ -55,13 +55,13 @@ namespace ESM
                     }
                     break;
                 }
-                case ESM::FourCC<'B','N','A','M'>::value:
+                case ESM::fourCC("BNAM"):
                     mSleepList = esm.getHString();
                     break;
-                case ESM::FourCC<'C','N','A','M'>::value:
+                case ESM::fourCC("CNAM"):
                     esm.getHT(mMapColor);
                     break;
-                case ESM::FourCC<'S','N','A','M'>::value:
+                case ESM::fourCC("SNAM"):
                 {
                     esm.getSubHeader();
                     SoundRef sr;
