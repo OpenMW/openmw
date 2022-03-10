@@ -23,6 +23,7 @@
 #include <array>
 #include <deque>
 #include <memory>
+#include <limits>
 
 MATCHER_P3(Vec3fEq, x, y, z, "")
 {
@@ -64,7 +65,7 @@ namespace
             , mOut(mPath)
             , mStepSize(28.333332061767578125f)
         {
-            mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:")));
+            mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max())));
         }
     };
 
@@ -831,7 +832,7 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, multiple_threads_should_lock_tiles)
     {
         mSettings.mAsyncNavMeshUpdaterThreads = 2;
-        mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:")));
+        mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max())));
 
         const std::array<float, 5 * 5> heightfieldData {{
             0,   0,    0,    0,    0,

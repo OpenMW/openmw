@@ -96,6 +96,7 @@ namespace DetourNavigator
         {
             Log(Debug::Warning) << "Failed to generate navmesh for worldspace \"" << mWorldspace
                                 << "\" tile " << mTilePosition << ": " << e.what();
+            consumer->cancel();
         }
     }
 }

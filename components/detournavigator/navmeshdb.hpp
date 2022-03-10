@@ -141,9 +141,9 @@ namespace DetourNavigator
     class NavMeshDb
     {
     public:
-        explicit NavMeshDb(std::string_view path);
+        explicit NavMeshDb(std::string_view path, std::uint64_t maxFileSize);
 
-        Sqlite3::Transaction startTransaction();
+        Sqlite3::Transaction startTransaction(Sqlite3::TransactionMode mode = Sqlite3::TransactionMode::Default);
 
         TileId getMaxTileId();
 

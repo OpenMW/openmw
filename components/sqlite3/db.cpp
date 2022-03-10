@@ -10,7 +10,7 @@ namespace Sqlite3
 {
     void CloseSqlite3::operator()(sqlite3* handle) const noexcept
     {
-        sqlite3_close(handle);
+        sqlite3_close_v2(handle);
     }
 
     Db makeDb(std::string_view path, const char* schema)

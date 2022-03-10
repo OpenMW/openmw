@@ -87,7 +87,7 @@ namespace DetourNavigator
     public:
         void push(JobIt job);
 
-        std::optional<JobIt> pop();
+        std::optional<JobIt> pop(std::chrono::steady_clock::duration timeout);
 
         void update(TilePosition playerTile, int maxTiles);
 
@@ -131,13 +131,13 @@ namespace DetourNavigator
         const RecastSettings& mRecastSettings;
         const std::unique_ptr<NavMeshDb> mDb;
         const TileVersion mVersion;
-        const bool mWriteToDb;
+        bool mWriteToDb;
         TileId mNextTileId;
         ShapeId mNextShapeId;
         DbJobQueue mQueue;
         std::atomic_bool mShouldStop {false};
         std::atomic_size_t mGetTileCount {0};
-        std::size_t mWrites = 0;
+        bool mHasChanges = false;
         std::thread mThread;
 
         inline void run() noexcept;
@@ -172,6 +172,8 @@ namespace DetourNavigator
             const std::map<TilePosition, ChangeType>& changedTiles);
 
         void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
+
+        void stop();
 
         Stats getStats() const;
 
