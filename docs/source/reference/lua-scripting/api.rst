@@ -12,6 +12,7 @@ Lua API reference
     openmw_util
     openmw_storage
     openmw_core
+    openmw_types
     openmw_async
     openmw_query
     openmw_world
@@ -55,6 +56,8 @@ Player scripts are local scripts that are attached to a player.
 |                                                         |                    | | between game sessions.                                      |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.core <Package openmw.core>`                 | everywhere         | | Functions that are common for both global and local scripts |
++---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.types <Package openmw.types>`               | everywhere         | | Functions for specific types of game objects.               |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.async <Package openmw.async>`               | everywhere         | | Timers (implemented) and coroutine utils (not implemented)  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
