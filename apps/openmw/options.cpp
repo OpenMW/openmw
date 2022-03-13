@@ -27,7 +27,7 @@ namespace OpenMW
             ("data", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")
                 ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
-            ("data-local", bpo::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""),
+            ("data-local", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), ""),
                 "set local data directory (highest priority)")
 
             ("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")

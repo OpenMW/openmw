@@ -168,9 +168,13 @@ void ConfigurationManager::addExtraConfigDirs(std::stack<boost::filesystem::path
 
 void ConfigurationManager::addCommonOptions(boost::program_options::options_description& description)
 {
+    Files::MaybeQuotedPath defaultUserData;
+    static_cast<boost::filesystem::path&>(defaultUserData) = boost::filesystem::path("?userdata?");
+
     description.add_options()
-        ("config", bpo::value<Files::MaybeQuotedPathContainer>()->multitoken()->composing(), "additional config directories")
-        ("user-data", bpo::value<Files::MaybeQuotedPath>(),
+        ("config", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "")
+            ->multitoken()->composing(), "additional config directories")
+        ("user-data", bpo::value<Files::MaybeQuotedPath>()->default_value(defaultUserData, ""),
             "set user data directory (used for saves, screenshots, etc)");
 }
 
