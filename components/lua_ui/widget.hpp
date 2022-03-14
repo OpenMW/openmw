@@ -90,8 +90,28 @@ namespace LuaUi
         virtual void updateProperties();
         virtual void updateChildren() {};
 
-        lua_State* lua() { return mLua; }
-        void triggerEvent(std::string_view name, const sol::object& argument) const;
+        lua_State* lua() const { return mLua; }
+
+        void triggerEvent(std::string_view name, sol::object argument) const;
+        template<class ArgFactory>
+        void propagateEvent(std::string_view name, const ArgFactory& argumentFactory) const
+        {
+            const WidgetExtension* w = this;
+            while (w)
+            {
+                bool shouldPropagate = true;
+                auto it = w->mCallbacks.find(name);
+                if (it != w->mCallbacks.end())
+                {
+                    sol::object res = it->second(argumentFactory(w), w->mLayout);
+                    shouldPropagate = res.is<bool>() && res.as<bool>();
+                }
+                if (w->mParent && w->mPropagateEvents && shouldPropagate)
+                    w = w->mParent;
+                else
+                    w = nullptr;
+            }
+        }
 
         // offsets the position and size, used only in C++ widget code
         MyGUI::IntCoord mForcedCoord;
@@ -102,6 +122,8 @@ namespace LuaUi
         // negative position offset as a ratio of this widget's size
         // used in combination with relative coord to align the widget, e. g. center it
         MyGUI::FloatSize mAnchor;
+
+        bool mPropagateEvents;
 
     private:
         // use lua_State* instead of sol::state_view because MyGUI requires a default constructor
@@ -116,6 +138,7 @@ namespace LuaUi
         sol::object mTemplateProperties;
         sol::object mExternal;
         WidgetExtension* mParent;
+        bool mTemplateChild;
 
         void attach(WidgetExtension* ext);
         void attachTemplate(WidgetExtension* ext);
