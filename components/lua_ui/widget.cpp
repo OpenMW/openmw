@@ -10,7 +10,8 @@
 namespace LuaUi
 {
     WidgetExtension::WidgetExtension()
-        : mLua(nullptr)
+        : mPropagateEvents(true)
+        , mLua(nullptr)
         , mWidget(nullptr)
         , mSlot(this)
         , mLayout(sol::nil)
@@ -18,6 +19,7 @@ namespace LuaUi
         , mTemplateProperties(sol::nil)
         , mExternal(sol::nil)
         , mParent(nullptr)
+        , mTemplateChild(false)
     {}
 
     void WidgetExtension::initialize(lua_State* lua, MyGUI::Widget* self)
@@ -81,12 +83,15 @@ namespace LuaUi
     void WidgetExtension::attach(WidgetExtension* ext)
     {
         ext->mParent = this;
+        ext->mTemplateChild = false;
         ext->widget()->attachToWidget(mSlot->widget());
         ext->updateCoord();
     }
 
     void WidgetExtension::attachTemplate(WidgetExtension* ext)
     {
+        ext->mParent = this;
+        ext->mTemplateChild = true;
         ext->widget()->attachToWidget(widget());
         ext->updateCoord();
     }
@@ -133,7 +138,7 @@ namespace LuaUi
 
     sol::table WidgetExtension::makeTable() const
     {
-        return sol::table(mLua, sol::create);
+        return sol::table(lua(), sol::create);
     }
 
     sol::object WidgetExtension::keyEvent(MyGUI::KeyCode code) const
@@ -142,7 +147,7 @@ namespace LuaUi
         keySym.sym = SDLUtil::myGuiKeyToSdl(code);
         keySym.scancode = SDL_GetScancodeFromKey(keySym.sym);
         keySym.mod = SDL_GetModState();
-        return sol::make_object(mLua, keySym);
+        return sol::make_object(lua(), keySym);
     }
 
     sol::object WidgetExtension::mouseEvent(int left, int top, MyGUI::MouseButton button = MyGUI::MouseButton::None) const
@@ -246,6 +251,7 @@ namespace LuaUi
 
     void WidgetExtension::updateProperties()
     {
+        mPropagateEvents = propertyValue("propagateEvents", true);
         mAbsoluteCoord = propertyValue("position", MyGUI::IntPoint());
         mAbsoluteCoord = propertyValue("size", MyGUI::IntSize());
         mRelativeCoord = propertyValue("relativePosition", MyGUI::FloatPoint());
@@ -265,7 +271,7 @@ namespace LuaUi
 
     MyGUI::IntSize WidgetExtension::parentSize()
     {
-        if (mParent)
+        if (mParent && !mTemplateChild)
             return mParent->childScalingSize();
         else
             return widget()->getParentSize();
@@ -304,7 +310,7 @@ namespace LuaUi
         return mSlot->widget()->getSize();
     }
 
-    void WidgetExtension::triggerEvent(std::string_view name, const sol::object& argument = sol::nil) const
+    void WidgetExtension::triggerEvent(std::string_view name, sol::object argument) const
     {
         auto it = mCallbacks.find(name);
         if (it != mCallbacks.end())
@@ -315,57 +321,58 @@ namespace LuaUi
     {
         if (code == MyGUI::KeyCode::None)
         {
-            // \todo decide how to handle unicode strings in Lua
-            MyGUI::UString uString;
-            uString.push_back(static_cast<MyGUI::UString::unicode_char>(ch));
-            triggerEvent("textInput", sol::make_object(mLua, uString.asUTF8()));
+            propagateEvent("textInput", [ch](auto w) {
+                MyGUI::UString uString;
+                uString.push_back(static_cast<MyGUI::UString::unicode_char>(ch));
+                return sol::make_object(w->lua(), uString.asUTF8());
+            });
         }
         else
-            triggerEvent("keyPress", keyEvent(code));
+            propagateEvent("keyPress", [code](auto w){ return w->keyEvent(code); });
     }
 
     void WidgetExtension::keyRelease(MyGUI::Widget*, MyGUI::KeyCode code)
     {
-        triggerEvent("keyRelease", keyEvent(code));
+        propagateEvent("keyRelease", [code](auto w) { return w->keyEvent(code); });
     }
 
     void WidgetExtension::mouseMove(MyGUI::Widget*, int left, int top)
     {
-        triggerEvent("mouseMove", mouseEvent(left, top));
+        propagateEvent("mouseMove", [left, top](auto w) { return w->mouseEvent(left, top); });
     }
 
     void WidgetExtension::mouseDrag(MyGUI::Widget*, int left, int top, MyGUI::MouseButton button)
     {
-        triggerEvent("mouseMove", mouseEvent(left, top, button));
+        propagateEvent("mouseMove", [left, top, button](auto w) { return w->mouseEvent(left, top, button); });
     }
 
     void WidgetExtension::mouseClick(MyGUI::Widget* _widget)
     {
-        triggerEvent("mouseClick");
+        propagateEvent("mouseClick", [](auto){ return sol::nil; });
     }
 
     void WidgetExtension::mouseDoubleClick(MyGUI::Widget* _widget)
     {
-        triggerEvent("mouseDoubleClick");
+        propagateEvent("mouseDoubleClick", [](auto){ return sol::nil; });
     }
 
     void WidgetExtension::mousePress(MyGUI::Widget*, int left, int top, MyGUI::MouseButton button)
     {
-        triggerEvent("mousePress", mouseEvent(left, top, button));
+        propagateEvent("mousePress", [left, top, button](auto w) { return w->mouseEvent(left, top, button); });
     }
 
     void WidgetExtension::mouseRelease(MyGUI::Widget*, int left, int top, MyGUI::MouseButton button)
     {
-        triggerEvent("mouseRelease", mouseEvent(left, top, button));
+        propagateEvent("mouseRelease", [left, top, button](auto w) { return w->mouseEvent(left, top, button); });
     }
 
     void WidgetExtension::focusGain(MyGUI::Widget*, MyGUI::Widget*)
     {
-        triggerEvent("focusGain");
+        propagateEvent("focusGain", [](auto){ return sol::nil; });
     }
 
     void WidgetExtension::focusLoss(MyGUI::Widget*, MyGUI::Widget*)
     {
-        triggerEvent("focusLoss");
+        propagateEvent("focusLoss", [](auto){ return sol::nil; });
     }
 }

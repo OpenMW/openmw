@@ -250,13 +250,14 @@ namespace LuaUtil
         sol::table mHiddenData;  // same object as Script::mHiddenData in ScriptsContainer
 
         template <typename... Args>
-        void operator()(Args&&... args) const
+        sol::object operator()(Args&&... args) const
         {
             if (mHiddenData[ScriptsContainer::sScriptIdKey] != sol::nil)
-                LuaUtil::call(mFunc, std::forward<Args>(args)...);
+                return LuaUtil::call(mFunc, std::forward<Args>(args)...);
             else
                 Log(Debug::Debug) << "Ignored callback to the removed script "
                                   << mHiddenData.get<std::string>(ScriptsContainer::sScriptDebugNameKey);
+            return sol::nil;
         }
     };
 
