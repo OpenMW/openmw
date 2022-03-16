@@ -104,6 +104,9 @@
     Bug #6544: Far from world origin objects jitter when camera is still
     Bug #6559: Weapon condition inconsistency between melee and ranged critical / sneak / KO attacks
     Bug #6579: OpenMW compilation error when using OSG doubles for BoundingSphere
+    Bug #6606: Quests with multiple IDs cannot always be restarted
+    Bug #6655: Constant effect absorb attribute causes the game to break
+    Bug #6670: Dialogue order is incorrect
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
@@ -277,9 +280,6 @@
     Bug #6142: Groundcover plugins change cells flags
     Bug #6276: Deleted groundcover instances are not deleted in game
     Bug #6294: Game crashes with empty pathgrid
-    Bug #6606: Quests with multiple IDs cannot always be restarted
-    Bug #6655: Constant effect absorb attribute causes the game to break
-    Bug #6670: Dialogue order is incorrect
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
