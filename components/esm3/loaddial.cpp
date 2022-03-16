@@ -86,49 +86,28 @@ namespace ESM
             return;
         }
 
-        InfoContainer::iterator it = mInfo.end();
-
-        LookupMap::iterator lookup;
-        lookup = mLookup.find(info.mId);
+        LookupMap::iterator lookup = mLookup.find(info.mId);
 
         if (lookup != mLookup.end())
         {
-            it = lookup->second.first;
+            auto it = lookup->second.first;
             // Since the new version of this record may have changed the next/prev linked list connection, we need to re-insert the record
             mInfo.erase(it);
             mLookup.erase(lookup);
         }
 
-        if (info.mNext.empty())
+        if (!info.mPrev.empty())
         {
-            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.end(), info), isDeleted);
-            return;
+            lookup = mLookup.find(info.mPrev);
+            if (lookup != mLookup.end())
+            {
+                auto it = lookup->second.first;
+
+                mLookup[info.mId] = std::make_pair(mInfo.insert(++it, info), isDeleted);
+                return;
+            }
         }
-        if (info.mPrev.empty())
-        {
-            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.begin(), info), isDeleted);
-            return;
-        }
-
-        lookup = mLookup.find(info.mPrev);
-        if (lookup != mLookup.end())
-        {
-            it = lookup->second.first;
-
-            mLookup[info.mId] = std::make_pair(mInfo.insert(++it, info), isDeleted);
-            return;
-        }
-
-        lookup = mLookup.find(info.mNext);
-        if (lookup != mLookup.end())
-        {
-            it = lookup->second.first;
-
-            mLookup[info.mId] = std::make_pair(mInfo.insert(it, info), isDeleted);
-            return;
-        }
-
-        Log(Debug::Warning) << "Warning: Failed to insert info " << info.mId;
+        mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.begin(), info), isDeleted);
     }
 
     void Dialogue::clearDeletedInfos()
