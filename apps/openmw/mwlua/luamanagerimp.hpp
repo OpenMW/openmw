@@ -111,12 +111,15 @@ namespace MWLua
 
         LuaUi::ResourceManager* uiResourceManager() { return &mUiResourceManager; }
 
+        bool isProcessingInputEvents() const { return mProcessingInputEvents; }
+
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScriptCfg::Flags);
 
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;
+        bool mProcessingInputEvents = false;
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         LuaUi::ResourceManager mUiResourceManager;

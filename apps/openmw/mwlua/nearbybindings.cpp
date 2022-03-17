@@ -6,6 +6,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwphysics/raycasting.hpp"
 
+#include "luamanagerimp.hpp"
 #include "worldview.hpp"
 
 namespace sol
@@ -91,6 +92,27 @@ namespace MWLua
             //       and use this callback from the main thread at the beginning of the next frame processing.
             rayCasting->asyncCastRay(callback, from, to, ignore, std::vector<MWWorld::Ptr>(), collisionType);
         };*/
+        api["castRenderingRay"] = [manager=context.mLuaManager](const osg::Vec3f& from, const osg::Vec3f& to)
+        {
+            if (!manager->isProcessingInputEvents())
+            {
+                throw std::logic_error("castRenderingRay can be used only in player scripts during processing of input events; "
+                                       "use asyncCastRenderingRay instead.");
+            }
+            MWPhysics::RayCastingResult res;
+            MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false);
+            return res;
+        };
+        api["asyncCastRenderingRay"] =
+            [manager=context.mLuaManager](const LuaUtil::Callback& callback, const osg::Vec3f& from, const osg::Vec3f& to)
+        {
+            manager->addAction([manager, callback, from, to]
+            {
+                MWPhysics::RayCastingResult res;
+                MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false);
+                manager->queueCallback(callback, sol::make_object(callback.mFunc.lua_state(), res));
+            });
+        };
 
         api["activators"] = LObjectList{worldView->getActivatorsInScene()};
         api["actors"] = LObjectList{worldView->getActorsInScene()};

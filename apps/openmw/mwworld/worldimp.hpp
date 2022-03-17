@@ -421,6 +421,9 @@ namespace MWWorld
 
             bool castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore) override;
 
+            bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
+                                  bool ignorePlayer, bool ignoreActors) override;
+
             void setActorCollisionMode(const Ptr& ptr, bool internal, bool external) override;
             bool isActorCollisionEnabled(const Ptr& ptr) override;
 

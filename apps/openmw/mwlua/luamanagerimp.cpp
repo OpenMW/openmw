@@ -226,6 +226,7 @@ namespace MWLua
             return;  // The game is not started yet.
 
         // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
+        mProcessingInputEvents = true;
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
         if (playerScripts && !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
         {
@@ -235,6 +236,7 @@ namespace MWLua
         mInputEvents.clear();
         if (playerScripts && !mWorldView.isPaused())
             playerScripts->inputUpdate(MWBase::Environment::get().getFrameDuration());
+        mProcessingInputEvents = false;
 
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
         for (const std::string& message : mUIMessages)
