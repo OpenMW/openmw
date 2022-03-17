@@ -3,49 +3,19 @@
 
 #include <cassert>
 #include <random>
+#include <string_view>
 
 /*
   Provides central implementation of the RNG logic
 */
 namespace Misc::Rng
 {
-    class Generator
-    {
-        uint32_t mState{};
-
-    public:
-        using result_type = uint32_t;
-
-        constexpr Generator() = default;
-        constexpr Generator(result_type seed) : mState{ seed } {}
-        constexpr result_type operator()() noexcept
-        {
-            mState = (214013 * mState + 2531011);
-            return (mState >> 16) & max();
-        }
-
-        static constexpr result_type min() noexcept
-        {
-            return 0u;
-        }
-
-        static constexpr result_type max() noexcept
-        {
-            return 0x7FFFu;
-        }        
-        
-        void seed(result_type val) noexcept
-        {
-            mState = val;
-        }
-
-        uint32_t getSeed() const noexcept
-        {
-            return mState;
-        }
-    };
+    using Generator = std::minstd_rand;
 
     Generator& getGenerator();
+
+    std::string serialize(const Generator& prng);
+    void deserialize(std::string_view data, Generator& prng);
 
     /// returns default seed for RNG
     unsigned int generateDefaultSeed();

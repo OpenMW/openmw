@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <random>
+#include <sstream>
 
 #include <components/debug/debuglog.hpp>
 
@@ -12,6 +13,23 @@ namespace Misc::Rng
     Generator& getGenerator()
     {
         return sGenerator;
+    }
+
+    std::string serialize(const Generator& prng)
+    {
+        std::stringstream ss;
+        ss << prng;
+
+        return ss.str();
+    }
+
+    void deserialize(std::string_view data, Generator& prng)
+    {
+        std::stringstream ss;
+        ss << data;
+
+        ss.seekg(0);
+        ss >> prng;
     }
 
     unsigned int generateDefaultSeed()
@@ -65,4 +83,5 @@ namespace Misc::Rng
     {
         return std::uniform_real_distribution<float>(mean - deviation, mean + deviation)(prng);
     }
+
 }

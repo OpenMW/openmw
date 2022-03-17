@@ -342,7 +342,7 @@ namespace MWWorld
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         writer.startRecord(ESM::REC_RAND);
-        writer.writeHNT("RAND", mPrng.getSeed());
+        writer.writeHNOString("RAND", Misc::Rng::serialize(mPrng));
         writer.endRecord(ESM::REC_RAND);
 
         // Active cells could have a dirty fog of war, sync it to the CellStore first
@@ -385,11 +385,8 @@ namespace MWWorld
                 return;
             case ESM::REC_RAND:
                 {
-                    Misc::Rng::Generator::result_type seed{};
-                    reader.getHNT(seed, "RAND");
-                    Log(Debug::Info) << "---- World random state: " << seed << " ----";
-                    mPrng.seed(seed);
-                    Misc::Rng::getGenerator().seed(seed);
+                    auto data = reader.getHNOString("RAND");
+                    Misc::Rng::deserialize(data, mPrng);
                 }
                 break;
             case ESM::REC_PLAY:
