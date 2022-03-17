@@ -112,6 +112,9 @@ namespace MWBase
 
             virtual ~World() {}
 
+            virtual void setRandomSeed(uint32_t seed) = 0;
+            ///< \param seed The seed used when starting a new game.
+
             virtual void startNewGame (bool bypass) = 0;
             ///< \param bypass Bypass regular game start.
 

@@ -283,6 +283,9 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
         mCurrentDate->setup(mGlobalVariables);
+
+        // Initial seed.
+        mPrng.seed(mRandomSeed);
     }
 
     void World::clear()
@@ -557,7 +560,12 @@ namespace MWWorld
         mProjectileManager->clear();
     }
 
-    const ESM::Cell *World::getExterior (const std::string& cellName) const
+    void World::setRandomSeed(uint32_t seed)
+    {
+        mRandomSeed = seed;
+    }
+
+    const ESM::Cell* World::getExterior(const std::string& cellName) const
     {
         // first try named cells
         const ESM::Cell *cell = mStore.get<ESM::Cell>().searchExtByName (cellName);

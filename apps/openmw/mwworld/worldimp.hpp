@@ -130,6 +130,8 @@ namespace MWWorld
             std::map<MWWorld::Ptr, MWWorld::DoorState> mDoorStates;
             ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
+            uint32_t mRandomSeed{};
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
@@ -193,6 +195,8 @@ namespace MWWorld
                 const std::string& resourcePath, const std::string& userDataPath);
 
             virtual ~World();
+
+            void setRandomSeed(uint32_t seed) override;
 
             void startNewGame (bool bypass) override;
             ///< \param bypass Bypass regular game start.
