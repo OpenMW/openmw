@@ -1,7 +1,6 @@
 #include "luabindings.hpp"
 
 #include <components/lua/luastate.hpp>
-#include <components/queries/luabindings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -98,24 +97,6 @@ namespace MWLua
         api["containers"] = LObjectList{worldView->getContainersInScene()};
         api["doors"] = LObjectList{worldView->getDoorsInScene()};
         api["items"] = LObjectList{worldView->getItemsInScene()};
-        api["selectObjects"] = [context](const Queries::Query& query)
-        {
-            ObjectIdList list;
-            WorldView* worldView = context.mWorldView;
-            if (query.mQueryType == "activators")
-                list = worldView->getActivatorsInScene();
-            else if (query.mQueryType == "actors")
-                list = worldView->getActorsInScene();
-            else if (query.mQueryType == "containers")
-                list = worldView->getContainersInScene();
-            else if (query.mQueryType == "doors")
-                list = worldView->getDoorsInScene();
-            else if (query.mQueryType == "items")
-                list = worldView->getItemsInScene();
-            return LObjectList{selectObjectsFromList(query, list, context)};
-            // TODO: Maybe use sqlite
-            // return LObjectList{worldView->selectObjects(query, true)};
-        };
         return LuaUtil::makeReadOnly(api);
     }
 }

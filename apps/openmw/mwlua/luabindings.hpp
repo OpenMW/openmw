@@ -9,7 +9,6 @@
 #include "context.hpp"
 #include "eventqueue.hpp"
 #include "object.hpp"
-#include "query.hpp"
 #include "worldview.hpp"
 
 namespace MWWorld
@@ -22,9 +21,6 @@ namespace MWLua
 
     sol::table initCorePackage(const Context&);
     sol::table initWorldPackage(const Context&);
-    sol::table initQueryPackage(const Context&);
-
-    sol::table initFieldGroup(const Context&, const QueryFieldGroup&);
 
     sol::table initGlobalStoragePackage(const Context&, LuaUtil::LuaStorage* globalStorage);
     sol::table initLocalStoragePackage(const Context&, LuaUtil::LuaStorage* globalStorage);
@@ -38,14 +34,6 @@ namespace MWLua
     void initObjectBindingsForGlobalScripts(const Context&);
 
     // Implemented in cellbindings.cpp
-    struct LCell  // for local scripts
-    {
-        MWWorld::CellStore* mStore;
-    };
-    struct GCell  // for global scripts
-    {
-        MWWorld::CellStore* mStore;
-    };
     void initCellBindingsForLocalScripts(const Context&);
     void initCellBindingsForGlobalScripts(const Context&);
 

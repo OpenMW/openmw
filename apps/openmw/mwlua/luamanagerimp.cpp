@@ -22,6 +22,7 @@
 
 #include "luabindings.hpp"
 #include "userdataserializer.hpp"
+#include "types/types.hpp"
 
 namespace MWLua
 {
@@ -81,10 +82,11 @@ namespace MWLua
         mLua.addCommonPackage("openmw.async", getAsyncPackageInitializer(context));
         mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
         mLua.addCommonPackage("openmw.core", initCorePackage(context));
-        mLua.addCommonPackage("openmw.query", initQueryPackage(context));
+        mLua.addCommonPackage("openmw.types", initTypesPackage(context));
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
         mGlobalScripts.addPackage("openmw.settings", initGlobalSettingsPackage(context));
         mGlobalScripts.addPackage("openmw.storage", initGlobalStoragePackage(context, &mGlobalStorage));
+
         mCameraPackage = initCameraPackage(localContext);
         mUserInterfacePackage = initUserInterfacePackage(localContext);
         mInputPackage = initInputPackage(localContext);
@@ -388,6 +390,7 @@ namespace MWLua
     {
         assert(mInitialized);
         assert(flag != ESM::LuaScriptCfg::sGlobal);
+        assert(ptr.getType() != ESM::REC_STAT);
         std::shared_ptr<LocalScripts> scripts;
         if (flag == ESM::LuaScriptCfg::sPlayer)
         {

@@ -253,10 +253,6 @@ add_component_dir (fallback
     fallback validate
     )
 
-add_component_dir (queries
-    query luabindings
-    )
-    
 add_component_dir (lua_ui
     registerscriptsettings scriptsettings
     properties widget element util layers content alignment resources

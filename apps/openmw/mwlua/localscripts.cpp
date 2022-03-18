@@ -43,31 +43,12 @@ namespace MWLua
 #undef CONTROL
 
         sol::usertype<SelfObject> selfAPI =
-            context.mLua->sol().new_usertype<SelfObject>("SelfObject", sol::base_classes, sol::bases<LObject>());
+            context.mLua->sol().new_usertype<SelfObject>("SelfObject", sol::base_classes, sol::bases<LObject, Object>());
         selfAPI[sol::meta_function::to_string] = [](SelfObject& self) { return "openmw.self[" + self.toString() + "]"; };
         selfAPI["object"] = sol::readonly_property([](SelfObject& self) -> LObject { return LObject(self); });
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
         selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
-        selfAPI["setEquipment"] = [context](const SelfObject& obj, sol::table equipment)
-        {
-            if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
-            {
-                if (!equipment.empty())
-                    throw std::runtime_error(ptrToString(obj.ptr()) + " has no equipment slots");
-                return;
-            }
-            SetEquipmentAction::Equipment eqp;
-            for (auto& [key, value] : equipment)
-            {
-                int slot = key.as<int>();
-                if (value.is<LObject>())
-                    eqp[slot] = value.as<LObject>().id();
-                else
-                    eqp[slot] = value.as<std::string>();
-            }
-            context.mLuaManager->addAction(std::make_unique<SetEquipmentAction>(context.mLua, obj.id(), std::move(eqp)));
-        };
 
         using AiPackage = MWMechanics::AiPackage;
         sol::usertype<AiPackage> aiPackage = context.mLua->sol().new_usertype<AiPackage>("AiPackage");

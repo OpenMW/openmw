@@ -353,9 +353,9 @@ Player scripts are local scripts that are attached to a player.
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.core <Package openmw.core>`                 | everywhere         | | Functions that are common for both global and local scripts |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.async <Package openmw.async>`               | everywhere         | | Timers (implemented) and coroutine utils (not implemented)  |
+|:ref:`openmw.types <Package openmw.types>`               | everywhere         | | Functions for specific types of game objects.               |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.query <Package openmw.query>`               | everywhere         | | Tools for constructing queries: base queries and fields.    |
+|:ref:`openmw.async <Package openmw.async>`               | everywhere         | | Timers (implemented) and coroutine utils (not implemented)  |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.world <Package openmw.world>`               | by global scripts  | | Read-write access to the game world.                        |
 +---------------------------------------------------------+--------------------+---------------------------------------------------------------+
@@ -628,98 +628,6 @@ Also in `openmw_aux`_ is the helper function ``runRepeatedly``, it is implemente
         initialDelay = timeBeforeMidnight,
         type = time.GameTime,
     })
-
-
-Queries
-=======
-
-`openmw.query` contains base queries of each type (e.g. `query.doors`, `query.containers`...), which return all of the objects of given type in no particular order. You can then modify that query to filter the results, sort them, group them, etc. Queries are immutable, so any operations on them return a new copy, leaving the original unchanged.
-
-`openmw.world.selectObjects` and `openmw.nearby.selectObjects` both accept a query and return objects that match it. However, `nearby.selectObjects` is only available in local scripts, and returns only objects from currently active cells, while `world.selectObjects` is only available in global scripts, and returns objects regardless of them being in active cells.
-**TODO:** describe how to filter out inactive objects from world queries
-
-An example of an object query:
-
-.. code-block:: Lua
-
-    local query = require('openmw.query')
-    local nearby = require('openmw.nearby')
-    local ui = require('openmw.ui')
-
-    local function selectDoors(namePattern)
-        local query = query.doors:where(query.DOOR.destCell.name:like(namePattern))
-        return nearby.selectObjects(query)
-    end
-
-    local function showGuildDoors()
-        ui.showMessage('Here are all the entrances to guilds!')
-        for _, door in selectDoors("%Guild%"):ipairs() do
-            local pos = door.position
-            local message = string.format("%.0f;%.0f;%.0f", pos.x, pos.y, pos.z)
-            ui.showMessage(message)
-        end
-    end
-
-    return {
-        engineHandlers = {
-            onKeyPress = function(key)
-                if key.symbol == 'e' then
-                    showGuildDoors()
-                end
-            end
-        }
-    }
-
-.. warning::
-    The example above uses operation `like` that is not implemented yet.
-
-**TODO:** add non-object queries, explain how relations work, and define what a field is
-
-Queries are constructed through the following method calls: (if you've used SQL before, you will find them familiar)
-
-- `:where(filter)` - filters the results to match the combination of conditions passed as the argument
-- `:orderBy(field)` and `:orderByDesc(field)` sort the result by the `field` argument. Sorts in descending order in case of `:orderByDesc`. Multiple calls can be chained, with the first call having priority. (i. e. if the first field is equal, objects are sorted by the second one...) **(not implemented yet)**
-- `:groupBy(field)` returns only one result for each value of the `field` argument. The choice of the result is arbitrary. Useful for counting only unique objects, or checking if certain objects exist. **(not implemented yet)**
-- `:limit(number)` will only return `number` of results (or fewer)
-- `:offset(number)` skips the first `number` results. Particularly useful in combination with `:limit` **(not implemented yet)**
-
-Filters consist of conditions, which are combined with "and" (operator `*`), "or" (operator `+`), "not" (operator `-`) and braces `()`.
-
-To make a condition, take a field from the `openmw.query` package and call any of the following methods:
-
-- `:eq` equal to
-- `:neq` not equal to
-- `:gt` greater than
-- `:gte` greater or equal to
-- `:lt` less than
-- `:lte` less or equal to
-- `:like` matches a pattern. Only applicable to text (strings) **(not implemented yet)**
-
-**TODO:** describe the pattern format
-
-All the condition methods are type sensitive, and will throw an error if you pass a value of the wrong type into them.
-
-A few examples of filters:
-
-.. warning::
-    `openmw.query.ACTOR` is not implemented yet
-
-.. code-block:: Lua
-
-    local query = require('openmw.query')
-    local ACTOR = query.ACTOR
-
-    local strong_guys_from_capital = (ACTOR.stats.level:gt(10) + ACTOR.stats.strength:gt(70))
-        * ACTOR.cell.name:eq("Default city")
-
-    -- could also write like this:
-    local strong_guys = ACTOR.stats.level:gt(10) + ACTOR.stats.strength:gt(70)
-    local guys_from_capital = ACTOR.cell.name:eq("Default city")
-    local strong_guys_from_capital_2 = strong_guys * guys_from_capital
-
-    local DOOR = query.DOOR
-
-    local interestingDoors = -DOOR.name:eq("") * DOOR.isTeleport:eq(true) * Door.destCell.isExterior:eq(false)
 
 
 Using IDE for Lua scripting

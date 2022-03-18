@@ -8,11 +8,11 @@ set(LUA_API_FILES
     openmw/async.lua
     openmw/core.lua
     openmw/nearby.lua
-    openmw/query.lua
     openmw/self.lua
     openmw/ui.lua
     openmw/util.lua
     openmw/world.lua
+    openmw/types.lua
 )
 
 foreach (f ${LUA_API_FILES})

@@ -3,6 +3,7 @@
 #include <components/esm3/loadcell.hpp>
 
 #include "../mwworld/cellstore.hpp"
+#include "types/types.hpp"
 
 namespace sol
 {
@@ -50,9 +51,64 @@ namespace MWLua
         
         if constexpr (std::is_same_v<CellT, GCell>)
         {  // only for global scripts
-            cellT["selectObjects"] = [context](const CellT& cell, const Queries::Query& query)
+            cellT["getAll"] = [worldView=context.mWorldView, ids=getPackageToTypeTable(context.mLua->sol())](
+                const CellT& cell, sol::optional<sol::table> type)
             {
-                return GObjectList{selectObjectsFromCellStore(query, cell.mStore, context)};
+                ObjectIdList res = std::make_shared<std::vector<ObjectId>>();
+                auto visitor = [&](const MWWorld::Ptr& ptr)
+                {
+                    worldView->getObjectRegistry()->registerPtr(ptr);
+                    if (ptr.getLuaType() == ptr.getType())
+                        res->push_back(getId(ptr));
+                    return true;
+                };
+
+                bool ok = false;
+                sol::optional<uint32_t> typeId = sol::nullopt;
+                if (type.has_value())
+                    typeId = ids[*type];
+                else
+                {
+                    ok = true;
+                    cell.mStore->forEach(std::move(visitor));
+                }
+                if (typeId.has_value())
+                {
+                    ok = true;
+                    switch (*typeId)
+                    {
+                        case ESM::REC_INTERNAL_PLAYER:
+                            {
+                                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                                if (player.getCell() == cell.mStore)
+                                    res->push_back(getId(player));
+                            }
+                            break;
+
+                        case ESM::REC_CREA: cell.mStore->template forEachType<ESM::Creature>(visitor); break;
+                        case ESM::REC_NPC_: cell.mStore->template forEachType<ESM::NPC>(visitor); break;
+                        case ESM::REC_ACTI: cell.mStore->template forEachType<ESM::Activator>(visitor); break;
+                        case ESM::REC_DOOR: cell.mStore->template forEachType<ESM::Door>(visitor); break;
+                        case ESM::REC_CONT: cell.mStore->template forEachType<ESM::Container>(visitor); break;
+
+                        case ESM::REC_ALCH: cell.mStore->template forEachType<ESM::Potion>(visitor); break;
+                        case ESM::REC_ARMO: cell.mStore->template forEachType<ESM::Armor>(visitor); break;
+                        case ESM::REC_BOOK: cell.mStore->template forEachType<ESM::Book>(visitor); break;
+                        case ESM::REC_CLOT: cell.mStore->template forEachType<ESM::Clothing>(visitor); break;
+                        case ESM::REC_INGR: cell.mStore->template forEachType<ESM::Ingredient>(visitor); break;
+                        case ESM::REC_LIGH: cell.mStore->template forEachType<ESM::Light>(visitor); break;
+                        case ESM::REC_MISC: cell.mStore->template forEachType<ESM::Miscellaneous>(visitor); break;
+                        case ESM::REC_WEAP: cell.mStore->template forEachType<ESM::Weapon>(visitor); break;
+                        case ESM::REC_APPA: cell.mStore->template forEachType<ESM::Apparatus>(visitor); break;
+                        case ESM::REC_LOCK: cell.mStore->template forEachType<ESM::Lockpick>(visitor); break;
+                        case ESM::REC_PROB: cell.mStore->template forEachType<ESM::Probe>(visitor); break;
+                        case ESM::REC_REPA: cell.mStore->template forEachType<ESM::Repair>(visitor); break;
+                        default: ok = false;
+                    }
+                }
+                if (!ok)
+                    throw std::runtime_error(std::string("Incorrect type argument in cell:getAll: " + LuaUtil::toString(*type)));
+                return GObjectList{res};
             };
         }
     }

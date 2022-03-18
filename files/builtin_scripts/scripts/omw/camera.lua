@@ -5,6 +5,8 @@ local settings = require('openmw.settings')
 local util = require('openmw.util')
 local self = require('openmw.self')
 
+local Actor = require('openmw.types').Actor
+
 local head_bobbing = require('scripts.omw.head_bobbing')
 local third_person = require('scripts.omw.third_person')
 
@@ -77,7 +79,7 @@ local function updateVanity(dt)
 end
 
 local function updateSmoothedSpeed(dt)
-    local speed = self:getCurrentSpeed()
+    local speed = Actor.currentSpeed(self)
     speed = speed / (1 + speed / 500)
     local maxDelta = 300 * dt
     smoothedSpeed = smoothedSpeed + util.clamp(speed - smoothedSpeed, -maxDelta, maxDelta)
@@ -126,7 +128,7 @@ local function updateStandingPreview()
         third_person.standingPreview = false
         return
     end
-    local standingStill = self:getCurrentSpeed() == 0 and not self:isInWeaponStance() and not self:isInMagicStance()
+    local standingStill = Actor.currentSpeed(self) == 0 and Actor.stance(self) == Actor.STANCE.Nothing
     if standingStill and mode == MODE.ThirdPerson then
         third_person.standingPreview = true
         camera.setMode(MODE.Preview)
