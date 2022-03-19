@@ -39,6 +39,11 @@
 -- @param #string msg
 
 ---
+-- Returns the size of the OpenMW window in pixels as a 2D vector.
+-- @function [parent=#ui] screenSize
+-- @return openmw.util#Vector2
+
+---
 -- Converts a given table of tables into an @{openmw.ui#Content}
 -- @function [parent=#ui] content
 -- @param #table table
