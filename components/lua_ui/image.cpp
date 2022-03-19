@@ -35,6 +35,7 @@ namespace LuaUi
 
     void LuaImage::updateProperties()
     {
+        deleteAllItems();
         TextureResource* resource = propertyValue<TextureResource*>("resource", nullptr);
         MyGUI::IntCoord atlasCoord;
         if (resource)
@@ -59,6 +60,7 @@ namespace LuaUi
             tileH ? textureSize.width : 0,
             tileV ? textureSize.height : 0
         ));
+        setImageTile(textureSize);
 
         if (atlasCoord.width == 0)
             atlasCoord.width = textureSize.width;
