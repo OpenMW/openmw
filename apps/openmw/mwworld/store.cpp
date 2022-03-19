@@ -1072,6 +1072,13 @@ namespace MWWorld
         return true;
     }
 
+    void Store<ESM::Dialogue>::listIdentifier(std::vector<std::string>& list) const
+    {
+        list.reserve(list.size() + getSize());
+        for (const auto& dialogue : mShared)
+            list.push_back(dialogue->mId);
+    }
+
     const MWDialogue::KeywordSearch<std::string, int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch() const
     {
         if (mKeywordSearchModFlag)

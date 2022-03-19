@@ -474,6 +474,8 @@ namespace MWWorld
 
         RecordId load(ESM::ESMReader &esm) override;
 
+        void listIdentifier(std::vector<std::string> &list) const override;
+
         const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() const;
     };
 
