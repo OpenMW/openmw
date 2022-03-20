@@ -166,7 +166,7 @@ namespace MWLua
         addType(ObjectTypeName::Light, {ESM::REC_LIGH}, ObjectTypeName::Item);
         addType(ObjectTypeName::MiscItem, {ESM::REC_MISC}, ObjectTypeName::Item);
         addType(ObjectTypeName::Potion, {ESM::REC_ALCH}, ObjectTypeName::Item);
-        addType(ObjectTypeName::Weapon, {ESM::REC_WEAP}, ObjectTypeName::Item);
+        addWeaponBindings(addType(ObjectTypeName::Weapon, {ESM::REC_WEAP}, ObjectTypeName::Item), context);
         addType(ObjectTypeName::Apparatus, {ESM::REC_APPA}, ObjectTypeName::Item);
         addType(ObjectTypeName::Lockpick, {ESM::REC_LOCK}, ObjectTypeName::Item);
         addType(ObjectTypeName::Probe, {ESM::REC_PROB}, ObjectTypeName::Item);

@@ -318,6 +318,58 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+--- Weapon.TYPE
+-- @type WeaponTYPE
+-- @field #number ShortBladeOneHand
+-- @field #number LongBladeOneHand
+-- @field #number LongBladeTwoHand
+-- @field #number BluntOneHand
+-- @field #number BluntTwoClose
+-- @field #number BluntTwoWide
+-- @field #number SpearTwoWide
+-- @field #number AxeOneHand
+-- @field #number AxeTwoHand
+-- @field #number MarksmanBow
+-- @field #number MarksmanCrossbow
+-- @field #number MarksmanThrown
+-- @field #number Arrow
+-- @field #number Bolt
+
+--- @{#WeaponTYPE}
+-- @field [parent=#Weapon] #WeaponTYPE TYPE
+
+---
+-- Returns the read-only @{#WeaponRecord} of a weapon
+-- @function [parent=#Weapon] record
+-- @param #any objectOrRecordId
+-- @return #WeaponRecord
+
+---
+-- @type WeaponRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this door (can be empty)
+-- @field #string icon
+-- @field #string enchant
+-- @field #boolean isMagical
+-- @field #boolean isSilver
+-- @field #number weight
+-- @field #number value
+-- @field #number type See @{#Weapon.TYPE}
+-- @field #number health
+-- @field #number speed
+-- @field #number reach
+-- @field #number enchant
+-- @field #number chopMinDamage
+-- @field #number chopMaxDamage
+-- @field #number slashMinDamage
+-- @field #number slashMaxDamage
+-- @field #number thrustMinDamage
+-- @field #number thrustMaxDamage
+
+
+
 --- @{#Apparatus} functions
 -- @field [parent=#types] #Apparatus Apparatus
 
@@ -404,6 +456,8 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+
+
 --- @{#Door} functions
 -- @field [parent=#types] #Door Door
 
@@ -439,6 +493,23 @@
 -- @function [parent=#Door] destCell
 -- @param openmw.core#GameObject object
 -- @return openmw.core#Cell
+
+---
+-- Returns the read-only @{#DoorRecord} of a door
+-- @function [parent=#Door] record
+-- @param #any objectOrRecordId
+-- @return #DoorRecord
+
+---
+-- @type DoorRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this door (can be empty)
+-- @field #string openSound VFS path to the sound of opening
+-- @field #string closeSound VFS path to the sound of closing
+
+
 
 --- Functions for @{#Static} objects
 -- @field [parent=#types] #Static Static
