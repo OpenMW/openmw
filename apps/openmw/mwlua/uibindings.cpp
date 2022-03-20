@@ -6,6 +6,8 @@
 #include <components/lua_ui/alignment.hpp>
 #include <components/lua_ui/resources.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "context.hpp"
 #include "actions.hpp"
 #include "luamanagerimp.hpp"
@@ -294,6 +296,14 @@ namespace MWLua
             if (size.is<osg::Vec2f>())
                 data.mSize = size.as<osg::Vec2f>();
             return luaManager->uiResourceManager()->registerTexture(data);
+        };
+
+        api["screenSize"] = []()
+        {
+            return osg::Vec2f(
+                Settings::Manager::getInt("resolution x", "Video"),
+                Settings::Manager::getInt("resolution y", "Video")
+            );
         };
 
         return LuaUtil::makeReadOnly(api);
