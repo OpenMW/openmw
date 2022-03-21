@@ -35,7 +35,6 @@ namespace Misc::Rng
     unsigned int generateDefaultSeed()
     {
         auto res = static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-        Log(Debug::Info) << __FUNCTION__ << ": " << res;
         return res;
     }
 
