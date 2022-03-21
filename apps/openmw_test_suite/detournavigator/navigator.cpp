@@ -820,12 +820,12 @@ namespace
 
         const auto result = findRandomPointAroundCircle(*mNavigator, mAgentHalfExtents, mStart, 100.0, Flag_walk);
 
-        ASSERT_THAT(result, Optional(Vec3fEq(69.6253509521484375, 531.29852294921875, -2.6667339801788330078125)))
+        ASSERT_THAT(result, Optional(Vec3fEq(70.35845947265625, 335.592041015625, -2.6667339801788330078125)))
             << (result ? *result : osg::Vec3f());
 
         const auto distance = (*result - mStart).length();
 
-        EXPECT_FLOAT_EQ(distance, 73.536231994628906) << distance;
+        EXPECT_FLOAT_EQ(distance, 125.80865478515625) << distance;
     }
 
     TEST_F(DetourNavigatorNavigatorTest, multiple_threads_should_lock_tiles)
