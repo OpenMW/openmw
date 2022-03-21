@@ -107,6 +107,7 @@ namespace MWMechanics
     }
 
     AiWanderStorage::AiWanderStorage() :
+        mReaction(MWBase::Environment::get().getWorld()->getPrng()),
         mState(Wander_ChooseAction),
         mIsWanderingManually(false),
         mCanWanderAlongPathGrid(true),
@@ -116,8 +117,7 @@ namespace MWMechanics
         mAllowedNodes(),
         mTrimCurrentNode(false),
         mCheckIdlePositionTimer(0),
-        mStuckCount(0),
-        mReaction(MWBase::Environment::get().getWorld()->getPrng())
+        mStuckCount(0)
     {
     }
 
