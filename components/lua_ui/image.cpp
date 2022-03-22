@@ -68,6 +68,8 @@ namespace LuaUi
             atlasCoord.height = textureSize.height;
         setImageCoord(atlasCoord);
 
+        setColour(propertyValue("color", MyGUI::Colour(1,1,1,1)));
+
         WidgetExtension::updateProperties();
     }
 }

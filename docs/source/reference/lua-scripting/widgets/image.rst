@@ -20,3 +20,6 @@ Properties
   * - tileV
     - boolean (false)
     - Tile the texture vertically
+  * - color
+    - util.color (1, 1, 1)
+    - Modulate constant color with the color of the image texture.

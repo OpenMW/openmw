@@ -259,6 +259,8 @@ namespace LuaUi
         mAnchor = propertyValue("anchor", MyGUI::FloatSize());
         mWidget->setVisible(propertyValue("visible", true));
         mWidget->setPointer(propertyValue("pointer", std::string("arrow")));
+        mWidget->setAlpha(propertyValue("alpha", 1.f));
+        mWidget->setInheritsAlpha(propertyValue("inheritAlpha", true));
     }
 
     void WidgetExtension::updateChildrenCoord()
