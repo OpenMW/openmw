@@ -10,6 +10,7 @@
 */
 namespace Misc::Rng
 {
+    /// The use of a rather minimalistic prng is preferred to avoid saving a lot of state in the save game.
     using Generator = std::minstd_rand;
 
     Generator& getGenerator();
