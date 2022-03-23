@@ -19,7 +19,7 @@ namespace MWMechanics
 {
 
     /// @return ID of resulting item, or empty if none
-    inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng = Misc::Rng::getGenerator())
+    inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng)
     {
         const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
 

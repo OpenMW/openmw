@@ -57,7 +57,8 @@ namespace MWMechanics
             + gmst.find("fBargainOfferBase")->mValue.getFloat()
             + int(pcTerm - npcTerm);
 
-        int roll = Misc::Rng::rollDice(100) + 1;
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        int roll = Misc::Rng::rollDice(100, prng) + 1;
 
         // reject if roll fails
         // (or if player tries to buy things and get money)

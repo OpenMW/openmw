@@ -9,6 +9,7 @@
 #include <deque>
 
 #include <components/esm3/cellid.hpp>
+#include <components/misc/rng.hpp>
 
 #include <osg/Timer>
 
@@ -110,6 +111,9 @@ namespace MWBase
             World() {}
 
             virtual ~World() {}
+
+            virtual void setRandomSeed(uint32_t seed) = 0;
+            ///< \param seed The seed used when starting a new game.
 
             virtual void startNewGame (bool bypass) = 0;
             ///< \param bypass Bypass regular game start.
@@ -658,6 +662,8 @@ namespace MWBase
             virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
 
             virtual std::vector<MWWorld::Ptr> getAll(const std::string& id) = 0;
+
+            virtual Misc::Rng::Generator& getPrng() = 0;
     };
 }
 

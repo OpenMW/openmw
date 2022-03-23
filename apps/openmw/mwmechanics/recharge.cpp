@@ -49,7 +49,8 @@ bool rechargeItem(const MWWorld::Ptr &item, const MWWorld::Ptr &gem)
         intelligenceTerm = 1;
 
     float x = (player.getClass().getSkill(player, ESM::Skill::Enchant) + intelligenceTerm + luckTerm) * stats.getFatigueTerm();
-    int roll = Misc::Rng::roll0to99();
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    int roll = Misc::Rng::roll0to99(prng);
     if (roll < x)
     {
         std::string soul = gem.getCellRef().getSoul();

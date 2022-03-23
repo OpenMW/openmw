@@ -44,6 +44,7 @@ namespace
 MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options) :
     mTypeId(typeId),
     mOptions(options),
+    mReaction(MWBase::Environment::get().getWorld()->getPrng()),
     mTargetActorRefId(""),
     mTargetActorId(-1),
     mRotateOnTheRunChecks(0),

@@ -221,7 +221,7 @@ namespace MWWorld
             virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Generator& seed = Misc::Rng::getGenerator());
+            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Generator& seed);
             ///< Insert items into *this.
 
             void fillNonRandom (const ESM::InventoryList& items, const std::string& owner, unsigned int seed);

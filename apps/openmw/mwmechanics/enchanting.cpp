@@ -76,7 +76,8 @@ namespace MWMechanics
 
         if(mSelfEnchanting)
         {
-            if(getEnchantChance() <= (Misc::Rng::roll0to99()))
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            if(getEnchantChance() <= (Misc::Rng::roll0to99(prng)))
                 return false;
 
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);

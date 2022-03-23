@@ -55,18 +55,7 @@ namespace MWMechanics
         float mCheckIdlePositionTimer;
         int mStuckCount;
 
-        AiWanderStorage():
-            mState(Wander_ChooseAction),
-            mIsWanderingManually(false),
-            mCanWanderAlongPathGrid(true),
-            mIdleAnimation(0),
-            mBadIdles(),
-            mPopulateAvailableNodes(true),
-            mAllowedNodes(),
-            mTrimCurrentNode(false),
-            mCheckIdlePositionTimer(0),
-            mStuckCount(0)
-            {};
+        AiWanderStorage();
 
         void setState(const WanderState wanderState, const bool isManualWander = false)
         {

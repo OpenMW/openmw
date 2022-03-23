@@ -651,7 +651,8 @@ namespace MWMechanics
         float x = 0;
         float y = 0;
 
-        int roll = Misc::Rng::roll0to99();
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        int roll = Misc::Rng::roll0to99(prng);
 
         if (type == PT_Admire)
         {
@@ -1570,8 +1571,8 @@ namespace MWMechanics
         }
 
         float target = x - y;
-
-        return (Misc::Rng::roll0to99() >= target);
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        return (Misc::Rng::roll0to99(prng) >= target);
     }
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)

@@ -394,7 +394,8 @@ namespace MWClass
 
             // inventory
             // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
-            getInventoryStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            getInventoryStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId(), prng);
 
             getInventoryStore(ptr).autoEquip(ptr);
         }
@@ -584,7 +585,7 @@ namespace MWClass
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, getSkill(ptr, weapskill));
 
-        if (Misc::Rng::roll0to99() >= hitchance)
+        if (Misc::Rng::roll0to99(world->getPrng()) >= hitchance)
         {
             othercls.onHit(victim, 0.0f, false, weapon, ptr, osg::Vec3f(), false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -726,15 +727,16 @@ namespace MWClass
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const GMST& gmst = getGmst();
 
-            int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->mValue.getInteger();
-            if (Misc::Rng::roll0to99() < chance)
+            int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->mValue.getInteger(); 
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            if (Misc::Rng::roll0to99(prng) < chance)
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
 
             // Check for knockdown
             float agilityTerm = stats.getAttribute(ESM::Attribute::Agility).getModified() * gmst.fKnockDownMult->mValue.getFloat();
             float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
                     * gmst.iKnockDownOddsMult->mValue.getInteger() * 0.01f + gmst.iKnockDownOddsBase->mValue.getInteger();
-            if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
+            if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99(prng))
                 stats.setKnockedDown(true);
             else
                 stats.setHitRecovery(true); // Is this supposed to always occur?
@@ -757,7 +759,7 @@ namespace MWClass
                     MWWorld::InventoryStore::Slot_RightPauldron, MWWorld::InventoryStore::Slot_RightPauldron,
                     MWWorld::InventoryStore::Slot_LeftGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet
                 };
-                int hitslot = hitslots[Misc::Rng::rollDice(20)];
+                int hitslot = hitslots[Misc::Rng::rollDice(20, prng)];
 
                 float unmitigatedDamage = damage;
                 float x = damage / (damage + getArmorRating(ptr));
@@ -773,7 +775,7 @@ namespace MWClass
                 // If there's no item in the carried left slot or if it is not a shield redistribute the hit.
                 if (!hasArmor && hitslot == MWWorld::InventoryStore::Slot_CarriedLeft)
                 {
-                    if (Misc::Rng::rollDice(2) == 0)
+                    if (Misc::Rng::rollDice(2, prng) == 0)
                         hitslot = MWWorld::InventoryStore::Slot_Cuirass;
                     else
                         hitslot = MWWorld::InventoryStore::Slot_LeftPauldron;
@@ -865,7 +867,8 @@ namespace MWClass
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfNPC");
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfNPC", prng);
 
             std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);

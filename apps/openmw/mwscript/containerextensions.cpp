@@ -61,7 +61,8 @@ namespace
             }
             else
             {
-                std::string itemId = MWMechanics::getLevelledItem(itemPtr.get<ESM::ItemLevList>()->mBase, false);
+                auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+                std::string itemId = MWMechanics::getLevelledItem(itemPtr.get<ESM::ItemLevList>()->mBase, false, prng);
                 if (itemId.empty())
                     return;
                 MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), itemId, 1);

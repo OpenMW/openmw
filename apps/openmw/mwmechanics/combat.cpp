@@ -117,7 +117,8 @@ namespace MWMechanics
         const int iBlockMinChance = gmst.find("iBlockMinChance")->mValue.getInteger();
         int x = std::clamp<int>(blockerTerm - attackerTerm, iBlockMinChance, iBlockMaxChance);
 
-        if (Misc::Rng::roll0to99() < x)
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        if (Misc::Rng::roll0to99(prng) < x)
         {
             // Reduce shield durability by incoming damage
             int shieldhealth = shield->getClass().getItemHealth(*shield);
@@ -212,7 +213,7 @@ namespace MWMechanics
 
             int skillValue = attacker.getClass().getSkill(attacker, weaponSkill);
 
-            if (Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
+            if (Misc::Rng::roll0to99(world->getPrng()) >= getHitChance(attacker, victim, skillValue))
             {
                 victim.getClass().onHit(victim, damage, false, projectile, attacker, osg::Vec3f(), false);
                 MWMechanics::reduceWeaponCondition(damage, false, weapon, attacker);
@@ -262,7 +263,7 @@ namespace MWMechanics
             if (victim != getPlayer() && !appliedEnchantment)
             {
                 float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->mValue.getFloat();
-                if (Misc::Rng::rollProbability() < fProjectileThrownStoreChance / 100.f)
+                if (Misc::Rng::rollProbability(world->getPrng()) < fProjectileThrownStoreChance / 100.f)
                     victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
             }
 
@@ -315,6 +316,7 @@ namespace MWMechanics
         bool godmode = attacker == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
         if (godmode)
             return;
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         for (int i=0; i<3; ++i)
         {
             float magnitude = victim.getClass().getCreatureStats(victim).getMagicEffects().get(ESM::MagicEffect::FireShield+i).getMagnitude();
@@ -334,7 +336,7 @@ namespace MWMechanics
 
             saveTerm *= 1.25f * normalisedFatigue;
 
-            float x = std::max(0.f, saveTerm - Misc::Rng::roll0to99());
+            float x = std::max(0.f, saveTerm - Misc::Rng::roll0to99(prng));
 
             int element = ESM::MagicEffect::FireDamage;
             if (i == 1)
@@ -444,7 +446,8 @@ namespace MWMechanics
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         if(isWerewolf)
         {
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfHit");
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfHit", prng);
             if(sound)
                 sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
         }

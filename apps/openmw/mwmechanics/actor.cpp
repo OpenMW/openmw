@@ -60,6 +60,11 @@ namespace MWMechanics
         mIsTurningToPlayer = turning;
     }
 
+    Misc::TimerStatus Actor::updateEngageCombatTimer(float duration)
+    {
+        return mEngageCombat.update(duration, MWBase::Environment::get().getWorld()->getPrng());
+    }
+
     void Actor::setPositionAdjusted(bool adjusted)
     {
         mPositionAdjusted = adjusted;

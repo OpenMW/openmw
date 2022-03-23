@@ -111,7 +111,8 @@ namespace MWScript
                         throw std::runtime_error (
                             "random: argument out of range (Don't be so negative!)");
 
-                    runtime.push (static_cast<Interpreter::Type_Float>(::Misc::Rng::rollDice(limit))); // [o, limit)
+                    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+                    runtime.push (static_cast<Interpreter::Type_Float>(::Misc::Rng::rollDice(limit, prng))); // [o, limit)
                 }
         };
 

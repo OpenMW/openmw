@@ -13,13 +13,20 @@ namespace MWMechanics
         public:
             static constexpr float sDeviation = 0.1f;
 
-            Misc::TimerStatus update(float duration) { return mImpl.update(duration); }
+            AiReactionTimer(Misc::Rng::Generator& prng)
+                : mPrng{ prng }
+                , mImpl{ AI_REACTION_TIME, sDeviation, Misc::Rng::deviate(0, sDeviation, prng) }
+            {
+            }
 
-            void reset() { mImpl.reset(Misc::Rng::deviate(0, sDeviation)); }
+            Misc::TimerStatus update(float duration) { return mImpl.update(duration, mPrng); }
+
+            void reset() { mImpl.reset(Misc::Rng::deviate(0, sDeviation, mPrng)); }
 
         private:
-            Misc::DeviatingPeriodicTimer mImpl {AI_REACTION_TIME, sDeviation,
-                                                Misc::Rng::deviate(0, sDeviation)};
+            Misc::Rng::Generator& mPrng;
+            Misc::DeviatingPeriodicTimer mImpl;
+
     };
 }
 

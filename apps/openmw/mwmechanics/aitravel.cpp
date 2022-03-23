@@ -36,11 +36,13 @@ namespace MWMechanics
 {
     AiTravel::AiTravel(float x, float y, float z, bool repeat, AiTravel*)
         : TypedAiPackage<AiTravel>(repeat), mX(x), mY(y), mZ(z), mHidden(false)
+        , mDestinationCheck(MWBase::Environment::get().getWorld()->getPrng())
     {
     }
 
     AiTravel::AiTravel(float x, float y, float z, AiInternalTravel* derived)
         : TypedAiPackage<AiTravel>(derived), mX(x), mY(y), mZ(z), mHidden(true)
+        , mDestinationCheck(MWBase::Environment::get().getWorld()->getPrng())
     {
     }
 
@@ -51,6 +53,7 @@ namespace MWMechanics
 
     AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
         : TypedAiPackage<AiTravel>(travel->mRepeat), mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
+        , mDestinationCheck(MWBase::Environment::get().getWorld()->getPrng())
     {
         // Hidden ESM::AiSequence::AiTravel package should be converted into MWMechanics::AiInternalTravel type
         assert(!travel->mHidden);

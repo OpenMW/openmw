@@ -18,7 +18,7 @@ namespace Misc
                 : mPeriod(period), mDeviation(deviation), mTimeLeft(timeLeft)
             {}
 
-            TimerStatus update(float duration)
+            TimerStatus update(float duration, Rng::Generator& prng)
             {
                 if (mTimeLeft > 0)
                 {
@@ -26,7 +26,7 @@ namespace Misc
                     return TimerStatus::Waiting;
                 }
 
-                mTimeLeft = Rng::deviate(mPeriod, mDeviation);
+                mTimeLeft = Rng::deviate(mPeriod, mDeviation, prng);
                 return TimerStatus::Elapsed;
             }
 

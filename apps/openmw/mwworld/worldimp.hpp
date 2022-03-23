@@ -4,6 +4,7 @@
 #include <osg/ref_ptr>
 
 #include <components/settings/settings.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/world.hpp"
 
@@ -84,7 +85,7 @@ namespace MWWorld
             GroundcoverStore mGroundcoverStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
-
+            Misc::Rng::Generator mPrng;
             Cells mCells;
 
             std::string mCurrentWorldSpace;
@@ -128,6 +129,8 @@ namespace MWWorld
 
             std::map<MWWorld::Ptr, MWWorld::DoorState> mDoorStates;
             ///< only holds doors that are currently moving. 1 = opening, 2 = closing
+
+            uint32_t mRandomSeed{};
 
             // not implemented
             World (const World&);
@@ -192,6 +195,8 @@ namespace MWWorld
                 const std::string& resourcePath, const std::string& userDataPath);
 
             virtual ~World();
+
+            void setRandomSeed(uint32_t seed) override;
 
             void startNewGame (bool bypass) override;
             ///< \param bypass Bypass regular game start.
@@ -736,6 +741,8 @@ namespace MWWorld
             void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
 
             std::vector<MWWorld::Ptr> getAll(const std::string& id) override;
+
+            Misc::Rng::Generator& getPrng() override;
     };
 }
 

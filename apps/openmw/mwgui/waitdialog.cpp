@@ -191,7 +191,7 @@ namespace MWGui
                 if (!region->mSleepList.empty())
                 {
                     // figure out if player will be woken while sleeping
-                    int x = Misc::Rng::rollDice(hoursToWait);
+                    int x = Misc::Rng::rollDice(hoursToWait, world->getPrng());
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->mValue.getFloat();
                     if (x < fSleepRandMod * hoursToWait)
                     {

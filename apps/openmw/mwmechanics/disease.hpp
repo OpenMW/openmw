@@ -52,7 +52,8 @@ namespace MWMechanics
                 continue;
 
             int x = static_cast<int>(fDiseaseXferChance * 100 * resist);
-            if (Misc::Rng::rollDice(10000) < x)
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            if (Misc::Rng::rollDice(10000, prng) < x)
             {
                 // Contracted disease!
                 actor.getClass().getCreatureStats(actor).getSpells().add(spell);

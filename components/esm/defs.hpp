@@ -178,6 +178,9 @@ enum RecNameInts : unsigned int
 
     // format 16 - Lua scripts in saved games
     REC_LUAM = fourCC("LUAM"),  // LuaManager data
+
+    // format 21 - Random state in saved games.
+    REC_RAND = fourCC("RAND"),  // Random state.
 };
 
 /// Common subrecords
