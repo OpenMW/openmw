@@ -47,6 +47,10 @@ varying vec2 bumpMapUV;
 varying vec2 specularMapUV;
 #endif
 
+#if @glossMap
+varying vec2 glossMapUV;
+#endif
+
 varying float euclideanDepth;
 varying float linearDepth;
 
@@ -118,6 +122,10 @@ void main(void)
 
 #if @specularMap
     specularMapUV = (gl_TextureMatrix[@specularMapUV] * gl_MultiTexCoord@specularMapUV).xy;
+#endif
+
+#if @glossMap
+    glossMapUV = (gl_TextureMatrix[@glossMapUV] * gl_MultiTexCoord@glossMapUV).xy;
 #endif
 
     passColor = gl_Color;

@@ -244,7 +244,7 @@ namespace Shader
         addedState->setName("addedState");
     }
 
-    const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap", "decalMap", "bumpMap" };
+    const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap", "decalMap", "bumpMap", "glossMap" };
     bool isTextureNameRecognized(const std::string& name)
     {
         for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
@@ -324,6 +324,14 @@ namespace Shader
                             else if (texName == "envMap" && mApplyLightingToEnvMaps)
                             {
                                 mRequirements.back().mShaderRequired = true;
+                            }
+                            else if (texName == "glossMap")
+                            {
+                                mRequirements.back().mShaderRequired = true;
+                                if (!writableStateSet)
+                                    writableStateSet = getWritableStateSet(node);
+                                // As well as gloss maps
+                                writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
                             }
                         }
                         else
