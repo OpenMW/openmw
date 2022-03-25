@@ -112,25 +112,23 @@ namespace MWMechanics
         return mSelectedSpell;
     }
 
-    bool Spells::hasDisease(const ESM::Spell::SpellType type) const
+    bool Spells::hasSpellType(const ESM::Spell::SpellType type) const
     {
-        for (const auto spell : mSpells)
-        {
-            if (spell->mData.mType == type)
-                return true;
-        }
-
-        return false;
+        auto it = std::find_if(std::begin(mSpells), std::end(mSpells), [=](const ESM::Spell* spell)
+            {
+                return spell->mData.mType == type;
+            });
+        return it != std::end(mSpells);
     }
 
     bool Spells::hasCommonDisease() const
     {
-        return hasDisease(ESM::Spell::ST_Disease);
+        return hasSpellType(ESM::Spell::ST_Disease);
     }
 
     bool Spells::hasBlightDisease() const
     {
-        return hasDisease(ESM::Spell::ST_Blight);
+        return hasSpellType(ESM::Spell::ST_Blight);
     }
 
     void Spells::purge(const SpellFilter& filter)

@@ -36,7 +36,7 @@ namespace MWMechanics
 
             std::vector<std::pair<const ESM::Spell*, MWWorld::TimeStamp>> mUsedPowers;
 
-            bool hasDisease(const ESM::Spell::SpellType type) const;
+            bool hasSpellType(const ESM::Spell::SpellType type) const;
 
             using SpellFilter = bool (*)(const ESM::Spell*);
             void purge(const SpellFilter& filter);
