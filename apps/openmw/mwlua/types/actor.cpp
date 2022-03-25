@@ -10,6 +10,7 @@
 #include "../luabindings.hpp"
 #include "../localscripts.hpp"
 #include "../luamanagerimp.hpp"
+#include "../stats.hpp"
 
 namespace MWLua
 {
@@ -132,6 +133,8 @@ namespace MWLua
             }
             context.mLuaManager->addAction(std::make_unique<SetEquipmentAction>(context.mLua, obj.id(), std::move(eqp)));
         };
+
+        addActorStatsBindings(actor, context);
     }
 
 }

@@ -128,6 +128,287 @@
 -- local Actor = require('openmw.types').Actor
 -- Actor.setEquipment(self, {}) -- unequip all
 
+---
+-- @type LevelStat
+-- @field #number current The actor's current level.
+-- @field #number progress The NPC's level progress (read-only.)
+
+---
+-- @type DynamicStat
+-- @field #number base
+-- @field #number current
+-- @field #number modifier
+
+---
+-- @type AttributeStat
+-- @field #number base The actor's base attribute value.
+-- @field #number damage The amount the attribute has been damaged.
+-- @field #number modified The actor's current attribute value (read-only.)
+-- @field #number modifier The attribute's modifier.
+
+---
+-- @type SkillStat
+-- @field #number base The NPC's base skill value.
+-- @field #number damage The amount the skill has been damaged.
+-- @field #number modified The NPC's current skill value (read-only.)
+-- @field #number modifier The skill's modifier.
+-- @field #number progress [0-1] The NPC's skill progress.
+
+---
+-- @type DynamicStats
+
+---
+-- Health (returns @{#DynamicStat})
+-- @function [parent=#DynamicStats] health
+-- @param openmw.core#GameObject actor
+-- @return #DynamicStat
+
+---
+-- Magicka (returns @{#DynamicStat})
+-- @function [parent=#DynamicStats] magicka
+-- @param openmw.core#GameObject actor
+-- @return #DynamicStat
+
+---
+-- Fatigue (returns @{#DynamicStat})
+-- @function [parent=#DynamicStats] fatigue
+-- @param openmw.core#GameObject actor
+-- @return #DynamicStat
+
+---
+-- @type AttributeStats
+
+---
+-- Strength (returns @{#AttributeStat})
+-- @function [parent=#AttributeStats] strength
+-- @param openmw.core#GameObject actor
+-- @return #AttributeStat
+
+---
+-- Intelligence (returns @{#AttributeStat})
+-- @function [parent=#AttributeStats] intelligence
+-- @param openmw.core#GameObject actor
+-- @return #AttributeStat
+
+---
+-- Willpower (returns @{#AttributeStat})
+-- @function [parent=#AttributeStats] willpower
+-- @param openmw.core#GameObject actor
+-- @return #AttributeStat
+
+---
+-- Agility (returns @{#AttributeStat})
+-- @function [parent=#AttributeStats] agility
+-- @param openmw.core#GameObject actor
+-- @return #AttributeStat
+
+---
+-- Speed (returns @{#AttributeStat})
+-- @function [parent=#AttributeStats] speed
+-- @param openmw.core#GameObject actor
+-- @return #AttributeStat
+
+---
+-- Endurance (returns @{#AttributeStat})
+-- @function [parent=#AttributeStats] endurance
+-- @param openmw.core#GameObject actor
+-- @return #AttributeStat
+
+---
+-- Personality (returns @{#AttributeStat})
+-- @function [parent=#AttributeStats] personality
+-- @param openmw.core#GameObject actor
+-- @return #AttributeStat
+
+---
+-- Luck (returns @{#AttributeStat})
+-- @function [parent=#AttributeStats] luck
+-- @param openmw.core#GameObject actor
+-- @return #AttributeStat
+
+---
+-- @type SkillStats
+
+---
+-- Block (returns @{#SkillStat})
+-- @function [parent=#SkillStats] block
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Armorer (returns @{#SkillStat})
+-- @function [parent=#SkillStats] armorer
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Medium Armor (returns @{#SkillStat})
+-- @function [parent=#SkillStats] mediumarmor
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Heavy Armor (returns @{#SkillStat})
+-- @function [parent=#SkillStats] heavyarmor
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Blunt Weapon (returns @{#SkillStat})
+-- @function [parent=#SkillStats] bluntweapon
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Long Blade (returns @{#SkillStat})
+-- @function [parent=#SkillStats] longblade
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Axe (returns @{#SkillStat})
+-- @function [parent=#SkillStats] axe
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Spear (returns @{#SkillStat})
+-- @function [parent=#SkillStats] spear
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Athletics (returns @{#SkillStat})
+-- @function [parent=#SkillStats] athletics
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Enchant (returns @{#SkillStat})
+-- @function [parent=#SkillStats] enchant
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Destruction (returns @{#SkillStat})
+-- @function [parent=#SkillStats] destruction
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Alteration (returns @{#SkillStat})
+-- @function [parent=#SkillStats] alteration
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Illusion (returns @{#SkillStat})
+-- @function [parent=#SkillStats] illusion
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Conjuration (returns @{#SkillStat})
+-- @function [parent=#SkillStats] conjuration
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Mysticism (returns @{#SkillStat})
+-- @function [parent=#SkillStats] mysticism
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Restoration (returns @{#SkillStat})
+-- @function [parent=#SkillStats] restoration
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Alchemy (returns @{#SkillStat})
+-- @function [parent=#SkillStats] alchemy
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Unarmored (returns @{#SkillStat})
+-- @function [parent=#SkillStats] unarmored
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Security (returns @{#SkillStat})
+-- @function [parent=#SkillStats] security
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Sneak (returns @{#SkillStat})
+-- @function [parent=#SkillStats] sneak
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Acrobatics (returns @{#SkillStat})
+-- @function [parent=#SkillStats] acrobatics
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Light Armor (returns @{#SkillStat})
+-- @function [parent=#SkillStats] lightarmor
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Short Blade (returns @{#SkillStat})
+-- @function [parent=#SkillStats] shortblade
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Marksman (returns @{#SkillStat})
+-- @function [parent=#SkillStats] marksman
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Mercantile (returns @{#SkillStat})
+-- @function [parent=#SkillStats] mercantile
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Speechcraft (returns @{#SkillStat})
+-- @function [parent=#SkillStats] speechcraft
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- Hand To Hand (returns @{#SkillStat})
+-- @function [parent=#SkillStats] handtohand
+-- @param openmw.core#GameObject actor
+-- @return #SkillStat
+
+---
+-- @type ActorStats
+-- @field #DynamicStats dynamic
+-- @field #AttributeStats attributes
+
+---
+-- Level (returns @{#LevelStat})
+-- @function [parent=#ActorStats] level
+-- @param openmw.core#GameObject actor
+-- @return #LevelStat
+
+--- The actor's stats.
+-- @field [parent=#Actor] #ActorStats stats
+
+---
+-- @type NpcStats
+-- @extends ActorStats
+-- @field #SkillStats skills
 
 
 --- @{#Item} functions (all pickable items that can be placed to an inventory or container)
@@ -167,6 +448,7 @@
 -- @type NPC
 -- @extends #Actor
 -- @field #Actor baseType @{#Actor}
+-- @field [parent=#NPC] #NpcStats stats
 
 ---
 -- Whether the object is an NPC or a Player.

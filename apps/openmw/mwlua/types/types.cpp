@@ -156,7 +156,7 @@ namespace MWLua
                                        ESM::REC_APPA, ESM::REC_LOCK, ESM::REC_PROB, ESM::REC_REPA});
 
         addType(ObjectTypeName::Creature, {ESM::REC_CREA}, ObjectTypeName::Actor);
-        addType(ObjectTypeName::NPC, {ESM::REC_INTERNAL_PLAYER, ESM::REC_NPC_}, ObjectTypeName::Actor);
+        addNpcBindings(addType(ObjectTypeName::NPC, {ESM::REC_INTERNAL_PLAYER, ESM::REC_NPC_}, ObjectTypeName::Actor), context);
         addType(ObjectTypeName::Player, {ESM::REC_INTERNAL_PLAYER}, ObjectTypeName::NPC);
 
         addType(ObjectTypeName::Armor, {ESM::REC_ARMO}, ObjectTypeName::Item);
