@@ -1,5 +1,7 @@
 #include "actions.hpp"
 
+#include "localscripts.hpp"
+
 #include <cstring>
 
 #include <components/debug/debuglog.hpp>
@@ -168,4 +170,11 @@ namespace MWLua
                std::string(" actor=") + idToString(mActor);
     }
 
+    void StatUpdateAction::apply(WorldView& worldView) const
+    {
+        LObject obj(mId, worldView.getObjectRegistry());
+        LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
+        if (scripts)
+            scripts->applyStatsCache();
+    }
 }

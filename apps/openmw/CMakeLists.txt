@@ -59,8 +59,8 @@ add_openmw_dir (mwscript
 add_openmw_dir (mwlua
     luamanagerimp actions object worldview userdataserializer eventqueue
     luabindings localscripts playerscripts objectbindings cellbindings asyncbindings settingsbindings
-    camerabindings uibindings inputbindings nearbybindings
-    types/types types/door types/actor types/container types/weapon
+    camerabindings uibindings inputbindings nearbybindings stats
+    types/types types/door types/actor types/container types/weapon types/npc
     )
 
 add_openmw_dir (mwsound

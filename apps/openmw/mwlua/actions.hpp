@@ -79,6 +79,16 @@ namespace MWLua
         ObjectId mActor;
     };
 
+    class StatUpdateAction final : public Action
+    {
+        ObjectId mId;
+    public:
+        StatUpdateAction(LuaUtil::LuaState* state, ObjectId id) : Action(state), mId(id) {}
+
+        void apply(WorldView& worldView) const override;
+
+        std::string toString() const override { return "StatUpdateAction"; }
+    };
 }
 
 #endif // MWLUA_ACTIONS_H

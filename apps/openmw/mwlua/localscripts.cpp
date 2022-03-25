@@ -182,4 +182,11 @@ namespace MWLua
         }, event);
     }
 
+    void LocalScripts::applyStatsCache()
+    {
+        const auto& ptr = mData.ptr();
+        for (auto& [stat, value] : mData.mStatsCache)
+            stat(ptr, value);
+        mData.mStatsCache.clear();
+    }
 }
