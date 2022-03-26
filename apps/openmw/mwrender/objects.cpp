@@ -164,7 +164,7 @@ void Objects::removeCell(const MWWorld::CellStore* store)
 
 void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
-    osg::Node* objectNode = cur.getRefData().getBaseNode();
+    osg::ref_ptr<osg::Node> objectNode = cur.getRefData().getBaseNode();
     if (!objectNode)
         return;
 
