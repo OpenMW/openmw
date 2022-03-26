@@ -107,6 +107,7 @@
     Bug #6606: Quests with multiple IDs cannot always be restarted
     Bug #6655: Constant effect absorb attribute causes the game to break
     Bug #6670: Dialogue order is incorrect
+    Bug #6680: object.cpp handles nodetree unsafely, memory access with dangling pointer
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
