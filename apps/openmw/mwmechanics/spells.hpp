@@ -34,9 +34,9 @@ namespace MWMechanics
             // Note: this is the spell that's about to be cast, *not* the spell selected in the GUI (which may be different)
             std::string mSelectedSpell;
 
-            std::map<const ESM::Spell*, MWWorld::TimeStamp> mUsedPowers;
+            std::vector<std::pair<const ESM::Spell*, MWWorld::TimeStamp>> mUsedPowers;
 
-            bool hasDisease(const ESM::Spell::SpellType type) const;
+            bool hasSpellType(const ESM::Spell::SpellType type) const;
 
             using SpellFilter = bool (*)(const ESM::Spell*);
             void purge(const SpellFilter& filter);

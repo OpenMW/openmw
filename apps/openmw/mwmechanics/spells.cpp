@@ -112,25 +112,23 @@ namespace MWMechanics
         return mSelectedSpell;
     }
 
-    bool Spells::hasDisease(const ESM::Spell::SpellType type) const
+    bool Spells::hasSpellType(const ESM::Spell::SpellType type) const
     {
-        for (const auto spell : mSpells)
-        {
-            if (spell->mData.mType == type)
-                return true;
-        }
-
-        return false;
+        auto it = std::find_if(std::begin(mSpells), std::end(mSpells), [=](const ESM::Spell* spell)
+            {
+                return spell->mData.mType == type;
+            });
+        return it != std::end(mSpells);
     }
 
     bool Spells::hasCommonDisease() const
     {
-        return hasDisease(ESM::Spell::ST_Disease);
+        return hasSpellType(ESM::Spell::ST_Disease);
     }
 
     bool Spells::hasBlightDisease() const
     {
-        return hasDisease(ESM::Spell::ST_Blight);
+        return hasSpellType(ESM::Spell::ST_Blight);
     }
 
     void Spells::purge(const SpellFilter& filter)
@@ -185,13 +183,19 @@ namespace MWMechanics
 
     bool Spells::canUsePower(const ESM::Spell* spell) const
     {
-        const auto it = mUsedPowers.find(spell);
+        const auto it = std::find_if(std::begin(mUsedPowers), std::end(mUsedPowers), [&](auto& pair) { return pair.first == spell; });
         return it == mUsedPowers.end() || it->second + 24 <= MWBase::Environment::get().getWorld()->getTimeStamp();
     }
 
     void Spells::usePower(const ESM::Spell* spell)
     {
-        mUsedPowers[spell] = MWBase::Environment::get().getWorld()->getTimeStamp();
+        // Updates or inserts a new entry with the current timestamp.
+        const auto it = std::find_if(std::begin(mUsedPowers), std::end(mUsedPowers), [&](auto& pair) { return pair.first == spell; });
+        const auto timestamp = MWBase::Environment::get().getWorld()->getTimeStamp();
+        if (it == mUsedPowers.end())
+            mUsedPowers.emplace_back(spell, timestamp);
+        else
+            it->second = timestamp;
     }
 
     void Spells::readState(const ESM::SpellState &state, CreatureStats* creatureStats)
@@ -223,7 +227,7 @@ namespace MWMechanics
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
             if (!spell)
                 continue;
-            mUsedPowers[spell] = MWWorld::TimeStamp(it->second);
+            mUsedPowers.emplace_back(spell, MWWorld::TimeStamp(it->second));
         }
 
         // Permanent effects are used only to keep the custom magnitude of corprus spells effects (after cure too), and only in old saves. Convert data to the new approach.
