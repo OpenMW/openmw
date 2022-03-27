@@ -12,10 +12,18 @@ namespace Sqlite3
         void operator()(sqlite3* handle) const;
     };
 
+    enum class TransactionMode
+    {
+        Default,
+        Deferred,
+        Immediate,
+        Exclusive,
+    };
+
     class Transaction
     {
     public:
-        Transaction(sqlite3& db);
+        explicit Transaction(sqlite3& db, TransactionMode mode = TransactionMode::Default);
 
         void commit();
 

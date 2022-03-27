@@ -70,9 +70,18 @@ write to navmeshdb
 
 :Type:		boolean
 :Range:		True/False
-:Default:	False
+:Default:	True
 
 If true generated navmesh tiles will be stored into disk cache while game is running.
+
+max navmeshdb file size
+-----------------------
+
+:Type:		integer
+:Range:		> 0
+:Default:	2147483648
+
+Approximate maximum file size of navigation mesh cache stored on disk in bytes (value > 0).
 
 Advanced settings
 *****************

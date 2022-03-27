@@ -10,6 +10,7 @@
 
 #include <numeric>
 #include <random>
+#include <limits>
 
 namespace
 {
@@ -27,7 +28,7 @@ namespace
 
     struct DetourNavigatorNavMeshDbTest : Test
     {
-        NavMeshDb mDb {":memory:"};
+        NavMeshDb mDb {":memory:", std::numeric_limits<std::uint64_t>::max()};
         std::minstd_rand mRandom;
 
         std::vector<std::byte> generateData()
@@ -165,5 +166,16 @@ namespace
             for (int y = -2; y <= 2; ++y)
                 ASSERT_EQ(mDb.findTile(worldspace, TilePosition {x, y}, input).has_value(),
                           -1 <= x && x <= 1 && -1 <= y && y <= 1) << "x=" << x << " y=" << y;
+    }
+
+    TEST_F(DetourNavigatorNavMeshDbTest, should_support_file_size_limit)
+    {
+        mDb = NavMeshDb(":memory:", 4096);
+        const auto f = [&]
+        {
+            for (std::int64_t i = 1; i <= 100; ++i)
+                insertTile(TileId {i}, TileVersion {1});
+        };
+        EXPECT_THROW(f(), std::runtime_error);
     }
 }

@@ -67,7 +67,7 @@ namespace NavMeshTool
             explicit NavMeshTileConsumer(NavMeshDb&& db, bool removeUnusedTiles)
                 : mDb(std::move(db))
                 , mRemoveUnusedTiles(removeUnusedTiles)
-                , mTransaction(mDb.startTransaction())
+                , mTransaction(mDb.startTransaction(Sqlite3::TransactionMode::Immediate))
                 , mNextTileId(mDb.getMaxTileId() + 1)
                 , mNextShapeId(mDb.getMaxShapeId() + 1)
             {}
@@ -128,14 +128,11 @@ namespace NavMeshTool
             void insert(std::string_view worldspace, const TilePosition& tilePosition,
                 std::int64_t version, const std::vector<std::byte>& input, PreparedNavMeshData& data) override
             {
-                if (mRemoveUnusedTiles)
                 {
                     std::lock_guard lock(mMutex);
-                    mDeleted += static_cast<std::size_t>(mDb.deleteTilesAt(worldspace, tilePosition));
-                }
-                data.mUserId = static_cast<unsigned>(mNextTileId);
-                {
-                    std::lock_guard lock(mMutex);
+                    if (mRemoveUnusedTiles)
+                        mDeleted += static_cast<std::size_t>(mDb.deleteTilesAt(worldspace, tilePosition));
+                    data.mUserId = static_cast<unsigned>(mNextTileId);
                     mDb.insertTile(mNextTileId, worldspace, tilePosition, TileVersion {version}, input, serialize(data));
                     ++mNextTileId;
                 }
@@ -157,25 +154,44 @@ namespace NavMeshTool
                 report();
             }
 
-            void wait()
+            void cancel() override
             {
-                constexpr std::size_t tilesPerTransaction = 3000;
                 std::unique_lock lock(mMutex);
-                while (mProvided < mExpected)
+                mCancelled = true;
+                mHasTile.notify_one();
+            }
+
+            bool wait()
+            {
+                constexpr std::chrono::seconds transactionInterval(1);
+                std::unique_lock lock(mMutex);
+                auto start = std::chrono::steady_clock::now();
+                while (mProvided < mExpected && !mCancelled)
                 {
                     mHasTile.wait(lock);
-                    if (mProvided % tilesPerTransaction == 0)
+                    const auto now = std::chrono::steady_clock::now();
+                    if (now - start > transactionInterval)
                     {
                         mTransaction.commit();
-                        mTransaction = mDb.startTransaction();
+                        mTransaction = mDb.startTransaction(Sqlite3::TransactionMode::Immediate);
+                        start = now;
                     }
                 }
                 logGeneratedTiles(mProvided, mExpected);
+                return !mCancelled;
             }
 
-            void commit() { mTransaction.commit(); }
+            void commit()
+            {
+                const std::lock_guard lock(mMutex);
+                mTransaction.commit();
+            }
 
-            void vacuum() { mDb.vacuum(); }
+            void vacuum()
+            {
+                const std::lock_guard lock(mMutex);
+                mDb.vacuum();
+            }
 
             void removeTilesOutsideRange(std::string_view worldspace, const TilesPositionsRange& range)
             {
@@ -183,7 +199,7 @@ namespace NavMeshTool
                 mTransaction.commit();
                 Log(Debug::Info) << "Removing tiles outside processed range for worldspace \"" << worldspace << "\"...";
                 mDeleted += static_cast<std::size_t>(mDb.deleteTilesOutsideRange(worldspace, range));
-                mTransaction = mDb.startTransaction();
+                mTransaction = mDb.startTransaction(Sqlite3::TransactionMode::Immediate);
             }
 
         private:
@@ -191,6 +207,7 @@ namespace NavMeshTool
             std::atomic_size_t mInserted {0};
             std::atomic_size_t mUpdated {0};
             std::size_t mDeleted = 0;
+            bool mCancelled = false;
             mutable std::mutex mMutex;
             NavMeshDb mDb;
             const bool mRemoveUnusedTiles;
@@ -211,7 +228,8 @@ namespace NavMeshTool
     }
 
     void generateAllNavMeshTiles(const osg::Vec3f& agentHalfExtents, const Settings& settings,
-        std::size_t threadsNumber, bool removeUnusedTiles, WorldspaceData& data, NavMeshDb&& db)
+        std::size_t threadsNumber, bool removeUnusedTiles, WorldspaceData& data,
+        NavMeshDb&& db)
     {
         Log(Debug::Info) << "Generating navmesh tiles by " << threadsNumber << " parallel workers...";
 
@@ -253,8 +271,8 @@ namespace NavMeshTool
                 ));
         }
 
-        navMeshTileConsumer->wait();
-        navMeshTileConsumer->commit();
+        if (navMeshTileConsumer->wait())
+            navMeshTileConsumer->commit();
 
         const auto inserted = navMeshTileConsumer->getInserted();
         const auto updated = navMeshTileConsumer->getUpdated();

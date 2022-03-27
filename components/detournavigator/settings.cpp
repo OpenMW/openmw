@@ -64,6 +64,7 @@ namespace DetourNavigator
         result.mNavMeshVersion = ::Settings::Manager::getInt("nav mesh version", "Navigator");
         result.mEnableNavMeshDiskCache = ::Settings::Manager::getBool("enable nav mesh disk cache", "Navigator");
         result.mWriteToNavMeshDb = ::Settings::Manager::getBool("write to navmeshdb", "Navigator");
+        result.mMaxDbFileSize = static_cast<std::uint64_t>(::Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
 
         return result;
     }

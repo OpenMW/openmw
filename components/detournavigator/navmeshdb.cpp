@@ -4,6 +4,7 @@
 #include <components/misc/compression.hpp>
 #include <components/sqlite3/db.hpp>
 #include <components/sqlite3/request.hpp>
+#include <components/misc/stringops.hpp>
 
 #include <DetourAlloc.h>
 
@@ -130,6 +131,27 @@ namespace DetourNavigator
         constexpr std::string_view vacuumQuery = R"(
             VACUUM;
         )";
+
+        struct GetPageSize
+        {
+            static std::string_view text() noexcept { return "pragma page_size;"; }
+            static void bind(sqlite3&, sqlite3_stmt&) {}
+        };
+
+        std::uint64_t getPageSize(sqlite3& db)
+        {
+            Sqlite3::Statement<GetPageSize> statement(db);
+            std::uint64_t value = 0;
+            request(db, statement, &value, 1);
+            return value;
+        }
+
+        void setMaxPageCount(sqlite3& db, std::uint64_t value)
+        {
+            const auto query = Misc::StringUtils::format("pragma max_page_count = %lu;", value);
+            if (const int ec = sqlite3_exec(&db, query.c_str(), nullptr, nullptr, nullptr); ec != SQLITE_OK)
+                throw std::runtime_error("Failed set max page count: " + std::string(sqlite3_errmsg(&db)));
+        }
     }
 
     std::ostream& operator<<(std::ostream& stream, ShapeType value)
@@ -142,7 +164,7 @@ namespace DetourNavigator
         return stream << "unknown shape type (" << static_cast<std::underlying_type_t<ShapeType>>(value) << ")";
     }
 
-    NavMeshDb::NavMeshDb(std::string_view path)
+    NavMeshDb::NavMeshDb(std::string_view path, std::uint64_t maxFileSize)
         : mDb(Sqlite3::makeDb(path, schema))
         , mGetMaxTileId(*mDb, DbQueries::GetMaxTileId {})
         , mFindTile(*mDb, DbQueries::FindTile {})
@@ -157,11 +179,13 @@ namespace DetourNavigator
         , mInsertShape(*mDb, DbQueries::InsertShape {})
         , mVacuum(*mDb, DbQueries::Vacuum {})
     {
+        const auto dbPageSize = getPageSize(*mDb);
+        setMaxPageCount(*mDb, maxFileSize / dbPageSize + static_cast<std::uint64_t>((maxFileSize % dbPageSize) != 0));
     }
 
-    Sqlite3::Transaction NavMeshDb::startTransaction()
+    Sqlite3::Transaction NavMeshDb::startTransaction(Sqlite3::TransactionMode mode)
     {
-        return Sqlite3::Transaction(*mDb);
+        return Sqlite3::Transaction(*mDb, mode);
     }
 
     TileId NavMeshDb::getMaxTileId()

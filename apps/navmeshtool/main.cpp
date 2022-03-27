@@ -156,8 +156,9 @@ namespace NavMeshTool
             settings.load(config);
 
             const osg::Vec3f agentHalfExtents = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
+            const std::uint64_t maxDbFileSize = static_cast<std::uint64_t>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
 
-            DetourNavigator::NavMeshDb db((config.getUserDataPath() / "navmesh.db").string());
+            DetourNavigator::NavMeshDb db((config.getUserDataPath() / "navmesh.db").string(), maxDbFileSize);
 
             std::vector<ESM::ESMReader> readers(contentFiles.size());
             EsmLoader::Query query;
