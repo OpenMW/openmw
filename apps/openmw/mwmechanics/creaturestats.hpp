@@ -255,6 +255,7 @@ namespace MWMechanics
         bool getStance (Stance flag) const;
 
         void setLastHitObject(const std::string &objectid);
+        void clearLastHitObject();
         const std::string &getLastHitObject() const;
         void setLastHitAttemptObject(const std::string &objectid);
         const std::string &getLastHitAttemptObject() const;
