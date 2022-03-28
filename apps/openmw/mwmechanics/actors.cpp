@@ -432,7 +432,7 @@ namespace MWMechanics
 
     void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor& actorState, const osg::Vec3f& dir)
     {
-        auto& movementSettings = actor.getClass().getMovementSettings();
+        auto& movementSettings = actor.getClass().getMovementSettings(actor);
         movementSettings.mPosition[1] = 0;
         movementSettings.mPosition[0] = 0;
 
@@ -855,34 +855,30 @@ namespace MWMechanics
             stats.setTimeToStartDrowning(fHoldBreathTime);
     }
 
-    void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip)
+    void Actors::updateEquippedLight(const MWWorld::Ptr& ptr, float duration, bool mayEquip)
     {
-        bool isPlayer = (ptr == getPlayer());
+        const bool isPlayer = (ptr == getPlayer());
 
-        MWWorld::InventoryStore &inventoryStore = ptr.getClass().getInventoryStore(ptr);
-        MWWorld::ContainerStoreIterator heldIter =
-                inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        auto& actorClass = ptr.getClass();
+        auto& inventoryStore = actorClass.getInventoryStore(ptr);
+
+        auto heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+
         /**
          * Automatically equip NPCs torches at night and unequip them at day
          */
         if (!isPlayer)
         {
-            MWWorld::ContainerStoreIterator torch = inventoryStore.end();
-            for (MWWorld::ContainerStoreIterator it = inventoryStore.begin(); it != inventoryStore.end(); ++it)
-            {
-                if (it->getType() == ESM::Light::sRecordId &&
-                    it->getClass().canBeEquipped(*it, ptr).first)
+            auto torchIter = std::find_if(std::begin(inventoryStore), std::end(inventoryStore), [&](auto entry)
                 {
-                    torch = it;
-                    break;
-                }
-            }
-
+                    return entry.getType() == ESM::Light::sRecordId &&
+                        entry.getClass().canBeEquipped(entry, ptr).first;
+                });
             if (mayEquip)
             {
-                if (torch != inventoryStore.end())
+                if (torchIter != inventoryStore.end())
                 {
-                    if (!ptr.getClass().getCreatureStats (ptr).getAiSequence().isInCombat())
+                    if (!actorClass.getCreatureStats(ptr).getAiSequence().isInCombat())
                     {
                         // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
                         if (heldIter != inventoryStore.end() && heldIter->getType() != ESM::Light::sRecordId)
@@ -892,7 +888,7 @@ namespace MWMechanics
                     {
                         // For hostile NPCs, see if they have anything better to equip first
                         auto shield = inventoryStore.getPreferredShield(ptr);
-                        if(shield != inventoryStore.end())
+                        if (shield != inventoryStore.end())
                             inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, shield, ptr);
                     }
 
@@ -901,7 +897,7 @@ namespace MWMechanics
                     // If we have a torch and can equip it, then equip it now.
                     if (heldIter == inventoryStore.end())
                     {
-                        inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, torch, ptr);
+                        inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, torchIter, ptr);
                     }
                 }
             }
@@ -921,11 +917,12 @@ namespace MWMechanics
         //If holding a light...
         if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)
         {
+            auto* world = MWBase::Environment::get().getWorld();
             // Use time from the player's light
             if(isPlayer)
             {
                 // But avoid using it up if the light source is hidden
-                MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+                MWRender::Animation *anim = world->getAnimation(ptr);
                 if (anim && anim->getCarriedLeftShown())
                 {
                     float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
@@ -946,7 +943,7 @@ namespace MWMechanics
             }
 
             // Both NPC and player lights extinguish in water.
-            if(MWBase::Environment::get().getWorld()->isSwimming(ptr))
+            if(world->isSwimming(ptr))
             {
                 inventoryStore.remove(*heldIter, 1, ptr); // remove it
 
