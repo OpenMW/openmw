@@ -597,28 +597,6 @@ namespace MWMechanics
         mAiSequence.readState(state.mAiSequence);
         mMagicEffects.readState(state.mMagicEffects);
 
-        // Rebuild the bound item cache
-        for(int effectId = ESM::MagicEffect::BoundDagger; effectId <= ESM::MagicEffect::BoundGloves; effectId++)
-        {
-            if(mMagicEffects.get(effectId).getMagnitude() > 0)
-                mBoundItems.insert(effectId);
-            else
-            {
-                // Check active spell effects
-                // We can't use mActiveSpells::getMagicEffects here because it doesn't include expired effects
-                auto spell = std::find_if(mActiveSpells.begin(), mActiveSpells.end(), [&] (const auto& spell)
-                {
-                    const auto& effects = spell.getEffects();
-                    return std::find_if(effects.begin(), effects.end(), [&] (const auto& effect)
-                    {
-                        return effect.mEffectId == effectId;
-                    }) != effects.end();
-                });
-                if(spell != mActiveSpells.end())
-                    mBoundItems.insert(effectId);
-            }
-        }
-
         mSummonedCreatures = state.mSummonedCreatures;
         mSummonGraveyard = state.mSummonGraveyard;
 
