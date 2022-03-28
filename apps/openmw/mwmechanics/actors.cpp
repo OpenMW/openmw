@@ -801,7 +801,8 @@ namespace MWMechanics
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer)
     {
-        NpcStats &stats = ptr.getClass().getNpcStats(ptr);
+        auto& actorClass = ptr.getClass();
+        NpcStats& stats = actorClass.getNpcStats(ptr);
 
         // When npc stats are just initialized, mTimeToStartDrowning == -1 and we should get value from GMST
         static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->mValue.getFloat();
@@ -810,43 +811,43 @@ namespace MWMechanics
 
         if (!isPlayer && stats.getTimeToStartDrowning() < fHoldBreathTime / 2)
         {
-            AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            AiSequence& seq = actorClass.getCreatureStats(ptr).getAiSequence();
             if (seq.getTypeId() != AiPackageTypeId::Breathe) //Only add it once
                 seq.stack(AiBreathe(), ptr);
         }
 
-        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
         bool knockedOutUnderwater = (isKnockedOut && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
-        if((world->isSubmerged(ptr) || knockedOutUnderwater)
-           && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
+        if ((world->isSubmerged(ptr) || knockedOutUnderwater)
+            && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
             float timeLeft = 0.0f;
-            if(knockedOutUnderwater)
+            if (knockedOutUnderwater)
                 stats.setTimeToStartDrowning(0);
             else
             {
                 timeLeft = stats.getTimeToStartDrowning() - duration;
-                if(timeLeft < 0.0f)
+                if (timeLeft < 0.0f)
                     timeLeft = 0.0f;
                 stats.setTimeToStartDrowning(timeLeft);
             }
 
-            bool godmode = isPlayer && MWBase::Environment::get().getWorld()->getGodModeState();
+            bool godmode = isPlayer && world->getGodModeState();
 
-            if(timeLeft == 0.0f && !godmode)
+            if (timeLeft == 0.0f && !godmode)
             {
                 // If drowning, apply 3 points of damage per second
                 static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->mValue.getFloat();
                 DynamicStat<float> health = stats.getHealth();
-                health.setCurrent(health.getCurrent() - fSuffocationDamage*duration);
+                health.setCurrent(health.getCurrent() - fSuffocationDamage * duration);
                 stats.setHealth(health);
 
                 // Play a drowning sound
-                MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
-                if(!sndmgr->getSoundPlaying(ptr, "drown"))
+                MWBase::SoundManager* sndmgr = MWBase::Environment::get().getSoundManager();
+                if (!sndmgr->getSoundPlaying(ptr, "drown"))
                     sndmgr->playSound3D(ptr, "drown", 1.0f, 1.0f);
 
-                if(isPlayer)
+                if (isPlayer)
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
             }
         }
