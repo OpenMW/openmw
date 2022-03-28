@@ -432,8 +432,9 @@ namespace MWMechanics
 
     void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor& actorState, const osg::Vec3f& dir)
     {
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-        actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
+        auto& movementSettings = actor.getClass().getMovementSettings();
+        movementSettings.mPosition[1] = 0;
+        movementSettings.mPosition[0] = 0;
 
         if (!actorState.isTurningToPlayer())
         {
@@ -464,7 +465,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer)
+    void Actors::engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer)
     {
         // No combat for totally static creatures
         if (!actor1.getClass().isMobile(actor1))
@@ -480,9 +481,9 @@ namespace MWMechanics
 
         const osg::Vec3f actor1Pos(actor1.getRefData().getPosition().asVec3());
         const osg::Vec3f actor2Pos(actor2.getRefData().getPosition().asVec3());
-        float sqrDist = (actor1Pos - actor2Pos).length2();
+        const float sqrDist = (actor1Pos - actor2Pos).length2();
 
-        if (sqrDist > mActorsProcessingRange*mActorsProcessingRange)
+        if (sqrDist > mActorsProcessingRange * mActorsProcessingRange)
             return;
 
         // If this is set to true, actor1 will start combat with actor2 if the awareness check at the end of the method returns true
@@ -494,15 +495,16 @@ namespace MWMechanics
 
         getActorsSidingWith(actor1, allies1, cachedAllies);
 
+        auto* mechanicsManager = MWBase::Environment::get().getMechanicsManager();
         // If an ally of actor1 has been attacked by actor2 or has attacked actor2, start combat between actor1 and actor2
-        for (const MWWorld::Ptr &ally : allies1)
+        for (const MWWorld::Ptr& ally : allies1)
         {
             if (creatureStats1.getAiSequence().isInCombat(ally))
                 continue;
 
             if (creatureStats2.matchesActorId(ally.getClass().getCreatureStats(ally).getHitAttemptActorId()))
             {
-                MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                mechanicsManager->startCombat(actor1, actor2);
                 // Also set the same hit attempt actor. Otherwise, if fighting the player, they may stop combat
                 // if the player gets out of reach, while the ally would continue combat with the player
                 creatureStats1.setHitAttemptActorId(ally.getClass().getCreatureStats(ally).getHitAttemptActorId());
@@ -524,21 +526,21 @@ namespace MWMechanics
         if (!aggressive && !isPlayerFollowerOrEscorter)
         {
             // Check that actor2 is in combat with actor1
-            if (actor2.getClass().getCreatureStats(actor2).getAiSequence().isInCombat(actor1))
+            if (creatureStats2.getAiSequence().isInCombat(actor1))
             {
                 std::set<MWWorld::Ptr> allies2;
 
                 getActorsSidingWith(actor2, allies2, cachedAllies);
 
                 // Check that an ally of actor2 is also in combat with actor1
-                for (const MWWorld::Ptr &ally2 : allies2)
+                for (const MWWorld::Ptr& ally2 : allies2)
                 {
                     if (ally2.getClass().getCreatureStats(ally2).getAiSequence().isInCombat(actor1))
                     {
-                        MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                        mechanicsManager->startCombat(actor1, actor2);
                         // Also have actor1's allies start combat
                         for (const MWWorld::Ptr& ally1 : allies1)
-                            MWBase::Environment::get().getMechanicsManager()->startCombat(ally1, actor2);
+                            mechanicsManager->startCombat(ally1, actor2);
                         return;
                     }
                 }
@@ -553,13 +555,13 @@ namespace MWMechanics
         static const bool followersAttackOnSight = Settings::Manager::getBool("followers attack on sight", "Game");
         if (!aggressive && isPlayerFollowerOrEscorter && followersAttackOnSight)
         {
-            if (actor2.getClass().getCreatureStats(actor2).getAiSequence().isInCombat(actor1))
+            if (creatureStats2.getAiSequence().isInCombat(actor1))
                 aggressive = true;
             else
             {
-                for (const MWWorld::Ptr &ally : allies1)
+                for (const MWWorld::Ptr& ally : allies1)
                 {
-                    if (actor2.getClass().getCreatureStats(actor2).getAiSequence().isInCombat(ally))
+                    if (creatureStats2.getAiSequence().isInCombat(ally))
                     {
                         aggressive = true;
                         break;
@@ -576,15 +578,16 @@ namespace MWMechanics
                 // Player followers and escorters with high fight should not initiate combat with the player or with
                 // other player followers or escorters
                 if (!isPlayerFollowerOrEscorter)
-                    aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
+                    aggressive = mechanicsManager->isAggressive(actor1, actor2);
             }
         }
 
         // Make guards go aggressive with creatures that are in combat, unless the creature is a follower or escorter
+        auto* world = MWBase::Environment::get().getWorld();
         if (!aggressive && actor1.getClass().isClass(actor1, "Guard") && !actor2.getClass().isNpc() && creatureStats2.getAiSequence().isInCombat())
         {
             // Check if the creature is too far
-            static const float fAlarmRadius = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->mValue.getFloat();
+            static const float fAlarmRadius = world->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->mValue.getFloat();
             if (sqrDist > fAlarmRadius * fAlarmRadius)
                 return;
 
@@ -607,11 +610,11 @@ namespace MWMechanics
         // If any of the above conditions turned actor1 aggressive towards actor2, do an awareness check. If it passes, start combat with actor2.
         if (aggressive)
         {
-            bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2)
-                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
+            bool LOS = world->getLOS(actor1, actor2) &&
+                mechanicsManager->awarenessCheck(actor2, actor1);
 
             if (LOS)
-                MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                mechanicsManager->startCombat(actor1, actor2);
         }
     }
 
