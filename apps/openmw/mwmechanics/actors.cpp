@@ -340,11 +340,12 @@ namespace MWMechanics
 
     void Actors::updateGreetingState(const MWWorld::Ptr& actor, Actor& actorState, bool turnOnly)
     {
-        if (!actor.getClass().isActor() || actor == getPlayer())
+        const auto& actorClass = actor.getClass();
+        if (!actorClass.isActor() || actor == getPlayer())
             return;
 
-        CreatureStats &stats = actor.getClass().getCreatureStats(actor);
-        const MWMechanics::AiSequence& seq = stats.getAiSequence();
+        const CreatureStats& actorStats = actorClass.getCreatureStats(actor);
+        const MWMechanics::AiSequence& seq = actorStats.getAiSequence();
         const auto packageId = seq.getTypeId();
 
         if (seq.isInCombat() ||
@@ -371,7 +372,7 @@ namespace MWMechanics
             {
                 actorState.setTurningToPlayer(false);
                 // An original engine launches an endless idle2 when an actor greets player.
-                playAnimationGroup (actor, "idle2", 0, std::numeric_limits<int>::max(), false);
+                playAnimationGroup(actor, "idle2", 0, std::numeric_limits<int>::max(), false);
             }
         }
 
@@ -382,14 +383,15 @@ namespace MWMechanics
         static int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
             .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->mValue.getInteger();
 
-        float helloDistance = static_cast<float>(stats.getAiSetting(CreatureStats::AI_Hello).getModified() * iGreetDistanceMultiplier);
+        float helloDistance = static_cast<float>(actorStats.getAiSetting(CreatureStats::AI_Hello).getModified() * iGreetDistanceMultiplier);
+        const auto& playerStats = player.getClass().getCreatureStats(player);
 
         int greetingTimer = actorState.getGreetingTimer();
         GreetingState greetingState = actorState.getGreetingState();
         if (greetingState == Greet_None)
         {
-            if ((playerPos - actorPos).length2() <= helloDistance*helloDistance &&
-                !player.getClass().getCreatureStats(player).isDead() && !actor.getClass().getCreatureStats(actor).isParalyzed()
+            if ((playerPos - actorPos).length2() <= helloDistance * helloDistance &&
+                !playerStats.isDead() && !actorStats.isParalyzed()
                 && MWBase::Environment::get().getWorld()->getLOS(player, actor)
                 && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
                 greetingTimer++;
@@ -406,7 +408,7 @@ namespace MWMechanics
         {
             greetingTimer++;
 
-            if (!stats.getMovementFlag(CreatureStats::Flag_ForceJump) && !stats.getMovementFlag(CreatureStats::Flag_ForceSneak)
+            if (!actorStats.getMovementFlag(CreatureStats::Flag_ForceJump) && !actorStats.getMovementFlag(CreatureStats::Flag_ForceSneak)
                 && (greetingTimer <= GREETING_SHOULD_END || MWBase::Environment::get().getSoundManager()->sayActive(actor)))
                 turnActorToFacePlayer(actor, actorState, dir);
 
@@ -420,7 +422,7 @@ namespace MWMechanics
         if (greetingState == Greet_Done)
         {
             float resetDist = 2 * helloDistance;
-            if ((playerPos - actorPos).length2() >= resetDist*resetDist)
+            if ((playerPos - actorPos).length2() >= resetDist * resetDist)
                 greetingState = Greet_None;
         }
 
