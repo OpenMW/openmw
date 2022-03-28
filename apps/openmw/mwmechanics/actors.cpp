@@ -958,59 +958,68 @@ namespace MWMechanics
     void Actors::updateCrimePursuit(const MWWorld::Ptr& ptr, float duration)
     {
         MWWorld::Ptr player = getPlayer();
-        if (ptr != player && ptr.getClass().isNpc())
+        if (ptr == player)
+            return;
+
+        auto& actorClass = ptr.getClass();
+        if (!actorClass.isNpc())
+            return;
+
+        // get stats of witness
+        CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+        NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
+
+        const auto& playerClass = player.getClass();
+        const auto& playerStats = playerClass.getNpcStats(player);
+        if (playerStats.isWerewolf())
+            return;
+
+        auto* mechanicsManager = MWBase::Environment::get().getMechanicsManager();
+        auto* world = MWBase::Environment::get().getWorld();
+
+        if (actorClass.isClass(ptr, "Guard") && creatureStats.getAiSequence().isInPursuit() && !creatureStats.getAiSequence().isInCombat()
+            && creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)
         {
-            // get stats of witness
-            CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
-            NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
-
-            if (player.getClass().getNpcStats(player).isWerewolf())
-                return;
-
-            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackageTypeId::Pursue && !creatureStats.getAiSequence().isInCombat()
-                && creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)
+            const MWWorld::ESMStore& esmStore = world->getStore();
+            static const int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->mValue.getInteger();
+            // Force dialogue on sight if bounty is greater than the cutoff
+            // In vanilla morrowind, the greeting dialogue is scripted to either arrest the player (< 5000 bounty) or attack (>= 5000 bounty)
+            if (playerStats.getBounty() >= cutoff
+                // TODO: do not run these two every frame. keep an Aware state for each actor and update it every 0.2 s or so?
+                && world->getLOS(ptr, player)
+                && mechanicsManager->awarenessCheck(player, ptr))
             {
-                const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-                static const int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->mValue.getInteger();
-                // Force dialogue on sight if bounty is greater than the cutoff
-                // In vanilla morrowind, the greeting dialogue is scripted to either arrest the player (< 5000 bounty) or attack (>= 5000 bounty)
-                if (   player.getClass().getNpcStats(player).getBounty() >= cutoff
-                       // TODO: do not run these two every frame. keep an Aware state for each actor and update it every 0.2 s or so?
-                    && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
-                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
+                static const int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->mValue.getInteger();
+                if (playerStats.getBounty() >= cutoff * iCrimeThresholdMultiplier)
                 {
-                    static const int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->mValue.getInteger();
-                    if (player.getClass().getNpcStats(player).getBounty() >= cutoff * iCrimeThresholdMultiplier)
-                    {
-                        MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
-                        creatureStats.setHitAttemptActorId(player.getClass().getCreatureStats(player).getActorId()); // Stops the guard from quitting combat if player is unreachable
-                    }
-                    else
-                        creatureStats.getAiSequence().stack(AiPursue(player), ptr);
-                    creatureStats.setAlarmed(true);
-                    npcStats.setCrimeId(MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId());
+                    mechanicsManager->startCombat(ptr, player);
+                    creatureStats.setHitAttemptActorId(playerClass.getCreatureStats(player).getActorId()); // Stops the guard from quitting combat if player is unreachable
                 }
+                else
+                    creatureStats.getAiSequence().stack(AiPursue(player), ptr);
+                creatureStats.setAlarmed(true);
+                npcStats.setCrimeId(world->getPlayer().getNewCrimeId());
             }
+        }
 
-            // if I was a witness to a crime
-            if (npcStats.getCrimeId() != -1)
+        // if I was a witness to a crime
+        if (npcStats.getCrimeId() != -1)
+        {
+            // if you've paid for your crimes and I havent noticed
+            if (npcStats.getCrimeId() <= world->getPlayer().getCrimeId())
             {
-                // if you've paid for your crimes and I havent noticed
-                if( npcStats.getCrimeId() <= MWBase::Environment::get().getWorld()->getPlayer().getCrimeId() )
-                {
-                    // Calm witness down
-                    if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stopPursuit();
-                    stopCombat(ptr);
+                // Calm witness down
+                if (ptr.getClass().isClass(ptr, "Guard"))
+                    creatureStats.getAiSequence().stopPursuit();
+                stopCombat(ptr);
 
-                    // Reset factors to attack
-                    creatureStats.setAttacked(false);
-                    creatureStats.setAlarmed(false);
-                    creatureStats.setAiSetting(CreatureStats::AI_Fight, ptr.getClass().getBaseFightRating(ptr));
+                // Reset factors to attack
+                creatureStats.setAttacked(false);
+                creatureStats.setAlarmed(false);
+                creatureStats.setAiSetting(CreatureStats::AI_Fight, ptr.getClass().getBaseFightRating(ptr));
 
-                    // Update witness crime id
-                    npcStats.setCrimeId(-1);
-                }
+                // Update witness crime id
+                npcStats.setCrimeId(-1);
             }
         }
     }
