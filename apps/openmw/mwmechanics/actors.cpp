@@ -318,8 +318,9 @@ namespace MWMechanics
         if (mSmoothMovement)
             return;
 
-        CreatureStats &stats = actor.getClass().getCreatureStats(actor);
-        MWMechanics::AiSequence& seq = stats.getAiSequence();
+        const auto& actorClass = actor.getClass();
+        const CreatureStats &stats = actorClass.getCreatureStats(actor);
+        const MWMechanics::AiSequence& seq = stats.getAiSequence();
 
         if (!seq.isEmpty() && seq.getActivePackage().useVariableSpeed())
         {
@@ -330,7 +331,7 @@ namespace MWMechanics
             if (distance < DECELERATE_DISTANCE)
             {
                 float speedCoef = std::max(0.7f, 0.2f + 0.8f * distance / DECELERATE_DISTANCE);
-                auto& movement = actor.getClass().getMovementSettings(actor);
+                auto& movement = actorClass.getMovementSettings(actor);
                 movement.mPosition[0] *= speedCoef;
                 movement.mPosition[1] *= speedCoef;
             }
