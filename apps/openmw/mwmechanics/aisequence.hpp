@@ -163,7 +163,7 @@ namespace MWMechanics
 
             /// Return the current active package.
             /** If there is no active package, it will throw an exception **/
-            const AiPackage& getActivePackage();
+            const AiPackage& getActivePackage() const;
 
             /// Fills the AiSequence with packages
             /** Typically used for loading from the ESM
