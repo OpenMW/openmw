@@ -56,14 +56,17 @@ bool isConscious(const MWWorld::Ptr& ptr)
 
 bool isCommanded(const MWWorld::Ptr& actor)
 {
-    const auto& stats = actor.getClass().getCreatureStats(actor);
-    for(const auto& params : stats.getActiveSpells())
+    const auto& actorClass = actor.getClass();
+    const auto& stats = actorClass.getCreatureStats(actor);
+    const bool isActorNpc = actorClass.isNpc();
+    const auto level = stats.getLevel();
+    for (const auto& params : stats.getActiveSpells())
     {
-        for(const auto& effect : params.getEffects())
+        for (const auto& effect : params.getEffects())
         {
-            if(((effect.mEffectId == ESM::MagicEffect::CommandHumanoid && actor.getClass().isNpc())
-                || (effect.mEffectId == ESM::MagicEffect::CommandCreature && !actor.getClass().isNpc()))
-                && effect.mMagnitude >= stats.getLevel())
+            if (((effect.mEffectId == ESM::MagicEffect::CommandHumanoid && isActorNpc)
+                || (effect.mEffectId == ESM::MagicEffect::CommandCreature && !isActorNpc))
+                && effect.mMagnitude >= level)
                 return true;
         }
     }
