@@ -249,7 +249,8 @@ namespace MWMechanics
                                     MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance,
                                     bool inCombatOrPursue)
     {
-        if (!actor.getRefData().getBaseNode())
+        const auto& actorRefData = actor.getRefData();
+        if (!actorRefData.getBaseNode())
             return;
 
         if (targetActor.getClass().getCreatureStats(targetActor).isDead())
@@ -264,7 +265,7 @@ namespace MWMechanics
         if (!currentCell->isExterior() && !(currentCell->mData.mFlags & ESM::Cell::QuasiEx))
             maxDistance *= fInteriorHeadTrackMult;
 
-        const osg::Vec3f actor1Pos(actor.getRefData().getPosition().asVec3());
+        const osg::Vec3f actor1Pos(actorRefData.getPosition().asVec3());
         const osg::Vec3f actor2Pos(targetActor.getRefData().getPosition().asVec3());
         float sqrDist = (actor1Pos - actor2Pos).length2();
 
@@ -272,7 +273,7 @@ namespace MWMechanics
             return;
 
         // stop tracking when target is behind the actor
-        osg::Vec3f actorDirection = actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
+        osg::Vec3f actorDirection = actorRefData.getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
         osg::Vec3f targetDirection(actor2Pos - actor1Pos);
         actorDirection.z() = 0;
         targetDirection.z() = 0;
