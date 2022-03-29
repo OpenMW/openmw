@@ -44,11 +44,10 @@ namespace LuaUi
 
     void Content::insert(size_t index, const sol::table& table)
     {
-        size_t size = mOrdered.size();
-        if (size < index)
+        if (mOrdered.size() < index)
             throw std::logic_error("Can't have gaps in UI Content.");
         mOrdered.insert(mOrdered.begin() + index, table);
-        for (size_t i = index; i < size; ++i)
+        for (size_t i = index; i < mOrdered.size(); ++i)
         {
             sol::optional<std::string> name = mOrdered[i]["name"];
             if (name.has_value())
