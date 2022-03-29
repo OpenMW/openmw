@@ -430,7 +430,7 @@ bool MWMechanics::AiSequence::isEmpty() const
     return mPackages.empty();
 }
 
-const AiPackage& MWMechanics::AiSequence::getActivePackage()
+const AiPackage& MWMechanics::AiSequence::getActivePackage() const
 {
     if(mPackages.empty())
         throw std::runtime_error(std::string("No AI Package!"));
