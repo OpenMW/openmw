@@ -88,8 +88,9 @@ namespace MWMechanics
 
         void stopMovement(const MWWorld::Ptr& actor)
         {
-            actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+            auto& movementSettings = actor.getClass().getMovementSettings(actor);
+            movementSettings.mPosition[0] = 0;
+            movementSettings.mPosition[1] = 0;
         }
 
         std::vector<unsigned char> getInitialIdle(const std::vector<unsigned char>& idle)
