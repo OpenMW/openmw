@@ -7,6 +7,7 @@
 #include <components/lua_ui/resources.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "context.hpp"
 #include "actions.hpp"
@@ -83,36 +84,33 @@ namespace MWLua
         class InsertLayerAction final : public Action
         {
             public:
-                InsertLayerAction(std::string_view name, std::string_view afterName,
-                    LuaUi::Layers::Options options, LuaUtil::LuaState* state)
+                InsertLayerAction(std::string_view name, size_t index,
+                    LuaUi::Layer::Options options, LuaUtil::LuaState* state)
                     : Action(state)
                     , mName(name)
-                    , mAfterName(afterName)
+                    , mIndex(index)
                     , mOptions(options)
                 {}
 
                 void apply(WorldView&) const override
                 {
-                    size_t index = LuaUi::Layers::indexOf(mAfterName);
-                    if (index == LuaUi::Layers::size())
-                        throw std::logic_error(std::string("Layer not found"));
-                    LuaUi::Layers::insert(index, mName, mOptions);
+                    LuaUi::Layer::insert(mIndex, mName, mOptions);
                 }
 
                 std::string toString() const override
                 {
                     std::string result("Insert UI layer \"");
                     result += mName;
-                    result += "\" after \"";
-                    result += mAfterName;
+                    result += "\" at \"";
+                    result += mIndex;
                     result += "\"";
                     return result;
                 }
 
             private:
                 std::string mName;
-                std::string mAfterName;
-                LuaUi::Layers::Options mOptions;
+                size_t mIndex;
+                LuaUi::Layer::Options mOptions;
         };
 
         // Lua arrays index from 1
@@ -227,37 +225,58 @@ namespace MWLua
             return element;
         };
 
+        auto uiLayer = context.mLua->sol().new_usertype<LuaUi::Layer>("UiLayer");
+        uiLayer["name"] = sol::property([](LuaUi::Layer& self) { return self.name(); });
+        uiLayer["size"] = sol::property([](LuaUi::Layer& self) { return self.size(); });
+        uiLayer[sol::meta_function::to_string] = [](LuaUi::Layer& self)
+        {
+            return Misc::StringUtils::format("UiLayer(%s)", self.name());
+        };
+
         sol::table layers = context.mLua->newTable();
         layers[sol::meta_function::length] = []()
         {
-            return LuaUi::Layers::size();
+            return LuaUi::Layer::count();
         };
         layers[sol::meta_function::index] = [](size_t index)
         {
             index = fromLuaIndex(index);
-            return LuaUi::Layers::at(index);
+            return LuaUi::Layer(index);
         };
         layers["indexOf"] = [](std::string_view name) -> sol::optional<size_t>
         {
-            size_t index = LuaUi::Layers::indexOf(name);
-            if (index == LuaUi::Layers::size())
+            size_t index = LuaUi::Layer::indexOf(name);
+            if (index == LuaUi::Layer::count())
                 return sol::nullopt;
             else
                 return toLuaIndex(index);
         };
         layers["insertAfter"] = [context](std::string_view afterName, std::string_view name, const sol::object& opt)
         {
-            LuaUi::Layers::Options options;
+            LuaUi::Layer::Options options;
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
-            context.mLuaManager->addAction(std::make_unique<InsertLayerAction>(name, afterName, options, context.mLua));
+            size_t index = LuaUi::Layer::indexOf(afterName);
+            if (index == LuaUi::Layer::count())
+                throw std::logic_error(std::string("Layer not found"));
+            index++;
+            context.mLuaManager->addAction(std::make_unique<InsertLayerAction>(name, index, options, context.mLua));
+        };
+        layers["insertBefore"] = [context](std::string_view beforename, std::string_view name, const sol::object& opt)
+        {
+            LuaUi::Layer::Options options;
+            options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
+            size_t index = LuaUi::Layer::indexOf(beforename);
+            if (index == LuaUi::Layer::count())
+                throw std::logic_error(std::string("Layer not found"));
+            context.mLuaManager->addAction(std::make_unique<InsertLayerAction>(name, index, options, context.mLua));
         };
         {
             auto pairs = [layers](const sol::object&)
             {
-                auto next = [](const sol::table& l, size_t i) -> sol::optional<std::tuple<size_t, std::string>>
+                auto next = [](const sol::table& l, size_t i) -> sol::optional<std::tuple<size_t, LuaUi::Layer>>
                 {
-                    if (i < LuaUi::Layers::size())
-                        return std::make_tuple(i + 1, LuaUi::Layers::at(i));
+                    if (i < LuaUi::Layer::count())
+                        return std::make_tuple(i + 1, LuaUi::Layer(i));
                     else
                         return sol::nullopt;
                 };

@@ -77,15 +77,20 @@
 -- @field #Content content Optional @{openmw.ui#Content} of children layouts
 
 ---
--- Layers. Implements [iterables#List](iterables.html#List) of #string.
+-- @type Layer
+-- @field #string name Name of the layer
+-- @field openmw.util#vector2 size Size of the layer in pixels
+
+---
+-- Layers. Implements [iterables#List](iterables.html#List) of #Layer.
 -- @type Layers
--- @list <#string>
+-- @list <#Layer>
 -- @usage
 -- ui.layers.insertAfter('HUD', 'NewLayer', { interactive = true })
--- local fourthLayerName = ui.layers[4]
+-- local fourthLayer = ui.layers[4]
 -- local windowsIndex = ui.layers.indexOf('Windows')
--- for i, name in ipairs(ui.layers) do
---   print('layer', i, name)
+-- for i, layer in ipairs(ui.layers) do
+--   print('layer', i, layer.name, layer.size)
 -- end
 
 ---
@@ -98,6 +103,13 @@
 -- Creates a layer and inserts it after another layer (shifts indexes of some other layers).
 -- @function [parent=#Layers] insertAfter
 -- @param #string afterName Name of the layer after which the new layer will be inserted
+-- @param #string name Name of the new layer
+-- @param #table options Table with a boolean `interactive` field (default is true). Layers with interactive = false will ignore all mouse interactions.
+
+---
+-- Creates a layer and inserts it before another layer (shifts indexes of some other layers).
+-- @function [parent=#Layers] insertBefore
+-- @param #string beforeName Name of the layer before which the new layer will be inserted
 -- @param #string name Name of the new layer
 -- @param #table options Table with a boolean `interactive` field (default is true). Layers with interactive = false will ignore all mouse interactions.
 
