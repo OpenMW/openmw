@@ -431,6 +431,17 @@ struct NiLODNode : public NiSwitchNode
     }
 };
 
+struct NiFltAnimationNode : public NiSwitchNode
+{
+    float Interval;
+
+    void read(NIFStream *nif) override
+    {
+        NiSwitchNode::read(nif);
+        Interval = nif->getFloat();
+    }
+};
+
 // Abstract
 struct NiAccumulator : Record
 {

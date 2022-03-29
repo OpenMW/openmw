@@ -8,6 +8,7 @@
 #include <osg/Array>
 #include <osg/LOD>
 #include <osg/Switch>
+#include <osg/Sequence>
 #include <osg/TexGen>
 #include <osg/ValueObject>
 
@@ -416,6 +417,17 @@ namespace NifOsg
             return switchNode;
         }
 
+        static osg::ref_ptr<osg::Sequence> handleSequenceNode(const Nif::NiFltAnimationNode* niFltAnimationNode)
+        {
+            osg::ref_ptr<osg::Sequence> sequenceNode (new osg::Sequence);
+            sequenceNode->setName(niFltAnimationNode->name);
+            sequenceNode->setDefaultTime(niFltAnimationNode->Interval);
+            sequenceNode->setInterval(osg::Sequence::LOOP, 0,-1);
+            sequenceNode->setDuration( -1.0f, -1);
+            sequenceNode->setMode(osg::Sequence::START);
+            return sequenceNode;
+        }
+
         osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st, Resource::ImageManager* imageManager)
         {
             if (!st)
@@ -710,6 +722,13 @@ namespace NifOsg
                 osg::ref_ptr<osg::LOD> lodNode = handleLodNode(niLodNode);
                 node->addChild(lodNode);
                 currentNode = lodNode;
+            }
+            else if (nifNode->recType == Nif::RC_NiFltAnimationNode)
+            {
+                const Nif::NiFltAnimationNode* niFltAnimationNode = static_cast<const Nif::NiFltAnimationNode*>(nifNode);
+                osg::ref_ptr<osg::Sequence> sequenceNode = handleSequenceNode(niFltAnimationNode);
+                node->addChild(sequenceNode);
+                currentNode = sequenceNode;
             }
 
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
