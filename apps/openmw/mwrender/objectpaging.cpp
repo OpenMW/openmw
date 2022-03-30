@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 
-#include <osg/Version>
 #include <osg/LOD>
 #include <osg/Switch>
 #include <osg/Sequence>
@@ -66,7 +65,7 @@ namespace MWRender
           case ESM::REC_CONT:
             return store.get<ESM::Container>().searchStatic(id)->mModel;
           default:
-            return std::string();
+            return {};
         }
     }
 

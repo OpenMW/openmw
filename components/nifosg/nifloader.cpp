@@ -421,10 +421,12 @@ namespace NifOsg
         {
             osg::ref_ptr<osg::Sequence> sequenceNode (new osg::Sequence);
             sequenceNode->setName(niFltAnimationNode->name);
-            sequenceNode->setDefaultTime(niFltAnimationNode->Interval);
-            sequenceNode->setInterval(osg::Sequence::LOOP, 0,-1);
-            sequenceNode->setDuration( -1.0f, -1);
+            sequenceNode->setDefaultTime(niFltAnimationNode->mInterval);
             sequenceNode->setMode(osg::Sequence::START);
+            if (!niFltAnimationNode->flags & Nif::NiFltAnimationNode::Flag_Reverse)
+                sequenceNode->setDuration(-1.0f, -1);
+            else
+                sequenceNode->setDuration(1.0f, -1);
             return sequenceNode;
         }
 

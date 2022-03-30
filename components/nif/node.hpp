@@ -433,12 +433,17 @@ struct NiLODNode : public NiSwitchNode
 
 struct NiFltAnimationNode : public NiSwitchNode
 {
-    float Interval;
+    float mInterval;
+    enum Flags
+    {
+        Flag_Reverse = 0x40
+    };
+
 
     void read(NIFStream *nif) override
     {
         NiSwitchNode::read(nif);
-        Interval = nif->getFloat();
+        mInterval = nif->getFloat();
     }
 };
 
