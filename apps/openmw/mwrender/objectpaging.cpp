@@ -155,7 +155,7 @@ namespace MWRender
             if (const osg::Sequence* sq = dynamic_cast<const osg::Sequence*>(node))
             {
                 osg::Group* n = new osg::Group;
-                n->addChild(operator()(sq->getChild(sq->getValue())));
+                n->addChild(operator()(sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0)));
                 n->setDataVariance(osg::Object::STATIC);
                 return n;
             }
@@ -310,7 +310,7 @@ namespace MWRender
             }
             if (osg::Sequence* sq = dynamic_cast<osg::Sequence*>(&node))
             {
-                traverse(*sq->getChild(sq->getValue()));
+                traverse(*sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0));
                 return;
             }
 
