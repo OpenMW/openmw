@@ -12,6 +12,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 #include <components/misc/constants.hpp>
 
@@ -74,6 +75,12 @@ namespace MWWorld
             using CellStoreCollection = std::set<CellStore *>;
 
         private:
+            struct ChangeCellGridRequest
+            {
+                osg::Vec3f mPosition;
+                osg::Vec2i mCell;
+                bool mChangeEvent;
+            };
 
             CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
@@ -99,11 +106,15 @@ namespace MWWorld
 
             std::vector<osg::ref_ptr<SceneUtil::WorkItem>> mWorkItems;
 
+            std::optional<ChangeCellGridRequest> mChangeCellGridRequest;
+
             void insertCell(CellStore &cell, Loading::Listener* loadingListener);
             osg::Vec2i mCurrentGridCenter;
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
             void changeCellGrid (const osg::Vec3f &pos, int playerCellX, int playerCellY, bool changeEvent = true);
+
+            void requestChangeCellGrid(const osg::Vec3f &position, const osg::Vec2i& cell, bool changeEvent = true);
 
             typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
 
@@ -131,7 +142,7 @@ namespace MWWorld
 
             void playerMoved (const osg::Vec3f& pos);
 
-            void changePlayerCell (CellStore* newCell, const ESM::Position& position, bool adjustPlayerPos);
+            void changePlayerCell(CellStore* newCell, const ESM::Position& position, bool adjustPlayerPos);
 
             CellStore *getCurrentCell();
 
