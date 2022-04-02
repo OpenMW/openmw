@@ -1,6 +1,10 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
 # Note: We set `needs` on each job to control the job DAG.
 # See https://docs.gitlab.com/ee/ci/yaml/#needs
 stages:
+  - test
   - build
 
 # https://blog.nimbleways.com/let-s-make-faster-gitlab-ci-cd-pipelines/
@@ -10,6 +14,8 @@ variables:
   # These can be specified per job or per pipeline
   ARTIFACT_COMPRESSION_LEVEL: "fast"
   CACHE_COMPRESSION_LEVEL: "fast"
+  SAST_EXCLUDED_ANALYZERS: bandit,eslint
+  SAST_EXCLUDED_PATHS: spec,test,tests,tmp,extern
 
 .Ubuntu_Image:
   tags:
