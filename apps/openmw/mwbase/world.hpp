@@ -64,6 +64,7 @@ namespace MWRender
 {
     class Animation;
     class Camera;
+    class RenderingManager;
 }
 
 namespace MWMechanics
@@ -664,6 +665,8 @@ namespace MWBase
             virtual std::vector<MWWorld::Ptr> getAll(const std::string& id) = 0;
 
             virtual Misc::Rng::Generator& getPrng() = 0;
+
+            virtual MWRender::RenderingManager* getRenderingManager() = 0;
     };
 }
 

@@ -214,6 +214,8 @@ namespace MWRender
 
         /// temporarily override the field of view with given value.
         void overrideFieldOfView(float val);
+        void setFieldOfView(float val);
+        float getFieldOfView() const;
         /// reset a previous overrideFieldOfView() call, i.e. revert to field of view specified in the settings file.
         void resetFieldOfView();
 
@@ -301,6 +303,7 @@ namespace MWRender
         float mFieldOfViewOverride;
         float mFieldOfView;
         float mFirstPersonFieldOfView;
+        bool mUpdateProjectionMatrix = false;
 
         void operator = (const RenderingManager&);
         RenderingManager(const RenderingManager&);

@@ -743,6 +743,8 @@ namespace MWWorld
             std::vector<MWWorld::Ptr> getAll(const std::string& id) override;
 
             Misc::Rng::Generator& getPrng() override;
+
+            MWRender::RenderingManager* getRenderingManager() override { return mRendering.get(); }
     };
 }
 

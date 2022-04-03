@@ -4,6 +4,7 @@ local input = require('openmw.input')
 local settings = require('openmw.settings')
 local util = require('openmw.util')
 local self = require('openmw.self')
+local nearby = require('openmw.nearby')
 
 local Actor = require('openmw.types').Actor
 
@@ -23,6 +24,8 @@ local noHeadBobbing = 0
 local noZoom = 0
 
 local function init()
+    camera.setCollisionType(util.bitAnd(nearby.COLLISION_TYPE.Default, util.bitNot(nearby.COLLISION_TYPE.Actor)))
+    camera.setFieldOfView(camera.getBaseFieldOfView())
     camera.allowCharacterDeferredRotation(settings._getBoolFromSettingsCfg('Camera', 'deferred preview rotation'))
     if camera.getMode() == MODE.FirstPerson then
         primaryMode = MODE.FirstPerson
