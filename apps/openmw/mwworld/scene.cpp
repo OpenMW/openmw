@@ -125,7 +125,8 @@ namespace
         // Restore effect particles
         MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
 
-        ptr.getClass().insertObject (ptr, model, rotation, physics);
+        if (!model.empty())
+            ptr.getClass().insertObject(ptr, model, rotation, physics);
 
         MWBase::Environment::get().getLuaManager()->objectAddedToScene(ptr);
     }
@@ -584,10 +585,14 @@ namespace MWWorld
                 if(ptr.mRef->mData.mPhysicsPostponed)
                 {
                     ptr.mRef->mData.mPhysicsPostponed = false;
-                    if(ptr.mRef->mData.isEnabled() && ptr.mRef->mData.getCount() > 0) {
+                    if (ptr.mRef->mData.isEnabled() && ptr.mRef->mData.getCount() > 0)
+                    {
                         std::string model = getModel(ptr, MWBase::Environment::get().getResourceSystem()->getVFS());
-                        const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
-                        ptr.getClass().insertObjectPhysics(ptr, model, rotation, *mPhysics);
+                        if (!model.empty())
+                        {
+                            const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
+                            ptr.getClass().insertObjectPhysics(ptr, model, rotation, *mPhysics);
+                        }
                     }
                 }
                 return true;
