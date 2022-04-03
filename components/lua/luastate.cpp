@@ -51,7 +51,7 @@ namespace LuaUtil
 
     LuaState::LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf) : mConf(conf), mVFS(vfs)
     {
-        mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math,
+        mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::bit32,
                             sol::lib::string, sol::lib::table, sol::lib::os, sol::lib::debug);
 
         mLua["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));

@@ -216,6 +216,37 @@ namespace LuaUtil
         util["normalizeAngle"] = &Misc::normalizeAngle;
         util["makeReadOnly"] = &makeReadOnly;
 
+        if (lua["bit32"] != sol::nil)
+        {
+            sol::table bit = lua["bit32"];
+            util["bitOr"] = bit["bor"];
+            util["bitAnd"] = bit["band"];
+            util["bitXor"] = bit["bxor"];
+            util["bitNot"] = bit["bnot"];
+        }
+        else
+        {
+            util["bitOr"] = [](unsigned a, sol::variadic_args va)
+            {
+                for (auto v : va)
+                    a |= v.as<unsigned>();
+                return a;
+            };
+            util["bitAnd"] = [](unsigned a, sol::variadic_args va)
+            {
+                for (auto v : va)
+                    a &= v.as<unsigned>();
+                return a;
+            };
+            util["bitXor"] = [](unsigned a, sol::variadic_args va)
+            {
+                for (auto v : va)
+                    a ^= v.as<unsigned>();
+                return a;
+            };
+            util["bitNot"] = [](unsigned a) { return ~a; };
+        }
+
         return util;
     }
     
