@@ -594,9 +594,10 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
 
                 if (mDragMode == DragMode_Move_Snap) 
                 {
-                    position.pos[0] = CSVRender::InstanceMode::roundFloatToMult(position.pos[0], CSMPrefs::get()["3D Scene Editing"]["gridsnap-movement"].toDouble());
-                    position.pos[1] = CSVRender::InstanceMode::roundFloatToMult(position.pos[1], CSMPrefs::get()["3D Scene Editing"]["gridsnap-movement"].toDouble());
-                    position.pos[2] = CSVRender::InstanceMode::roundFloatToMult(position.pos[2], CSMPrefs::get()["3D Scene Editing"]["gridsnap-movement"].toDouble());
+                    double snap = CSMPrefs::get()["3D Scene Editing"]["gridsnap-movement"].toDouble();
+                    position.pos[0] = CSVRender::InstanceMode::roundFloatToMult(position.pos[0], snap);
+                    position.pos[1] = CSVRender::InstanceMode::roundFloatToMult(position.pos[1], snap);
+                    position.pos[2] = CSVRender::InstanceMode::roundFloatToMult(position.pos[2], snap);
                 }
 
                 // XYZ-locking
@@ -629,9 +630,10 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
 
                 if (mDragMode == DragMode_Rotate_Snap)
                 {
-                    position.rot[0] = CSVRender::InstanceMode::roundFloatToMult(position.rot[0], osg::DegreesToRadians(CSMPrefs::get()["3D Scene Editing"]["gridsnap-rotation"].toDouble()));
-                    position.rot[1] = CSVRender::InstanceMode::roundFloatToMult(position.rot[1], osg::DegreesToRadians(CSMPrefs::get()["3D Scene Editing"]["gridsnap-rotation"].toDouble()));
-                    position.rot[2] = CSVRender::InstanceMode::roundFloatToMult(position.rot[2], osg::DegreesToRadians(CSMPrefs::get()["3D Scene Editing"]["gridsnap-rotation"].toDouble()));
+                    double snap = CSMPrefs::get()["3D Scene Editing"]["gridsnap-rotation"].toDouble();
+                    position.rot[0] = CSVRender::InstanceMode::roundFloatToMult(position.rot[0], osg::DegreesToRadians(snap));
+                    position.rot[1] = CSVRender::InstanceMode::roundFloatToMult(position.rot[1], osg::DegreesToRadians(snap));
+                    position.rot[2] = CSVRender::InstanceMode::roundFloatToMult(position.rot[2], osg::DegreesToRadians(snap));
                 }
 
                 objectTag->mObject->setRotation(position.rot);
@@ -741,6 +743,15 @@ void CSVRender::InstanceMode::dragWheel (int diff, double speedFactor)
                 ESM::Position position = objectTag->mObject->getPosition();
                 for (int i=0; i<3; ++i)
                     position.pos[i] += offset[i];
+
+                if (mDragMode == DragMode_Move_Snap)
+                {
+                    double snap = CSMPrefs::get()["3D Scene Editing"]["gridsnap-movement"].toDouble();
+                    position.pos[0] = CSVRender::InstanceMode::roundFloatToMult(position.pos[0], snap);
+                    position.pos[1] = CSVRender::InstanceMode::roundFloatToMult(position.pos[1], snap);
+                    position.pos[2] = CSVRender::InstanceMode::roundFloatToMult(position.pos[2], snap);
+                }
+
                 objectTag->mObject->setPosition (position.pos);
                 osg::Vec3f thisPoint(position.pos[0], position.pos[1], position.pos[2]);
                 mDragStart = getMousePlaneCoords(getWorldspaceWidget().mapFromGlobal(QCursor::pos()), getProjectionSpaceCoords(thisPoint));
