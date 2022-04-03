@@ -260,11 +260,11 @@ std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty, b
             {
                 case Token::Type_Keyword_True:
 
-                    return std::shared_ptr<CSMFilter::Node> (new BooleanNode (true));
+                    return std::make_shared<BooleanNode>(true);
 
                 case Token::Type_Keyword_False:
 
-                    return std::shared_ptr<CSMFilter::Node> (new BooleanNode (false));
+                    return std::make_shared<BooleanNode>(false);
 
                 case Token::Type_Keyword_And:
                 case Token::Type_Keyword_Or:
@@ -278,7 +278,7 @@ std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty, b
                     if (mError)
                         return std::shared_ptr<Node>();
 
-                    return std::shared_ptr<CSMFilter::Node> (new NotNode (node));
+                    return std::make_shared<NotNode>(node);
                 }
 
                 case Token::Type_Keyword_Text:
@@ -340,8 +340,8 @@ std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& keyw
 
     switch (keyword.mType)
     {
-        case Token::Type_Keyword_And: return std::shared_ptr<CSMFilter::Node> (new AndNode (nodes));
-        case Token::Type_Keyword_Or: return std::shared_ptr<CSMFilter::Node> (new OrNode (nodes));
+        case Token::Type_Keyword_And: return std::make_shared<AndNode>(nodes);
+        case Token::Type_Keyword_Or: return std::make_shared<OrNode>(nodes);
         default: error(); return std::shared_ptr<Node>();
     }
 }
@@ -407,7 +407,7 @@ std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseText()
         return std::shared_ptr<Node>();
     }
 
-    return std::shared_ptr<Node> (new TextNode (columnId, text));
+    return std::make_shared<TextNode>(columnId, text);
 }
 
 std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
@@ -532,7 +532,7 @@ std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
         return std::shared_ptr<Node>();
     }
 
-    return std::shared_ptr<Node> (new ValueNode (columnId, lowerType, upperType, lower, upper));
+    return std::make_shared<ValueNode>(columnId, lowerType, upperType, lower, upper);
 }
 
 void CSMFilter::Parser::error()

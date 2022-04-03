@@ -275,8 +275,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
-    mHeadAnimationTime = std::shared_ptr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
-    mWeaponAnimationTime = std::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
+    mHeadAnimationTime = std::make_shared<HeadAnimationTime>(mPtr);
+    mWeaponAnimationTime = std::make_shared<WeaponAnimationTime>(this);
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
@@ -846,7 +846,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             if (type == ESM::PRT_Weapon)
                 src = mWeaponAnimationTime;
             else
-                src.reset(new NullAnimationTime);
+                src = std::make_shared<NullAnimationTime>();
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
             node->accept(assignVisitor);
         }
