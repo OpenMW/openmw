@@ -243,6 +243,9 @@ void CSMPrefs::State::declare()
     secondarySelectAction.add (SelectOnly).add (SelectAdd).add (SelectRemove).add (selectInvert);
 
     declareCategory ("3D Scene Editing");
+    declareDouble("gridsnap-movement", "Grid snap size", 16);
+    declareDouble("gridsnap-rotation", "Angle snap size", 15);
+    declareDouble("gridsnap-scale", "Scale snap size", 0.25);
     declareInt ("distance", "Drop Distance", 50).
         setTooltip ("If an instance drop can not be placed against another object at the "
             "insert point, it will be placed by this distance from the insert point instead");
