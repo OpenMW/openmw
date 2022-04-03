@@ -50,7 +50,7 @@ namespace MWClass
     void Light::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const
     {
         // TODO: add option somewhere to enable collision for placeable objects
-        if (!model.empty() && (ptr.get<ESM::Light>()->mBase->mData.mFlags & ESM::Light::Carry) == 0)
+        if ((ptr.get<ESM::Light>()->mBase->mData.mFlags & ESM::Light::Carry) == 0)
             physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
     }
 
