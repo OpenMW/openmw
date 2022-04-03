@@ -1556,7 +1556,7 @@ namespace MWMechanics
                             mov.mRotation[2] = luaControls->mYawChange;
                             mov.mSpeedFactor = osg::Vec2(luaControls->mMovement, luaControls->mSideMovement).length();
                             stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, luaControls->mRun);
-                            stats.setAttackingOrSpell(luaControls->mUse == 1);
+                            stats.setAttackingOrSpell((luaControls->mUse & 1) == 1);
                             luaControls->mChanged = false;
                         }
                         luaControls->mSideMovement = movement.x();
