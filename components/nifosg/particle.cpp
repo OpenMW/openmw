@@ -468,18 +468,24 @@ void FindGroupByRecIndex::applyNode(osg::Node &searchNode)
 
 PlanarCollider::PlanarCollider(const Nif::NiPlanarCollider *collider)
     : mBounceFactor(collider->mBounceFactor)
+    , mExtents(collider->mExtents)
+    , mPosition(collider->mPosition)
+    , mXVector(collider->mXVector)
+    , mYVector(collider->mYVector)
     , mPlane(-collider->mPlaneNormal, collider->mPlaneDistance)
-{
-}
-
-PlanarCollider::PlanarCollider()
-    : mBounceFactor(0.f)
 {
 }
 
 PlanarCollider::PlanarCollider(const PlanarCollider &copy, const osg::CopyOp &copyop)
     : osgParticle::Operator(copy, copyop)
     , mBounceFactor(copy.mBounceFactor)
+    , mExtents(copy.mExtents)
+    , mPosition(copy.mPosition)
+    , mPositionInParticleSpace(copy.mPositionInParticleSpace)
+    , mXVector(copy.mXVector)
+    , mXVectorInParticleSpace(copy.mXVectorInParticleSpace)
+    , mYVector(copy.mYVector)
+    , mYVectorInParticleSpace(copy.mYVectorInParticleSpace)
     , mPlane(copy.mPlane)
     , mPlaneInParticleSpace(copy.mPlaneInParticleSpace)
 {
@@ -487,25 +493,44 @@ PlanarCollider::PlanarCollider(const PlanarCollider &copy, const osg::CopyOp &co
 
 void PlanarCollider::beginOperate(osgParticle::Program *program)
 {
+    mPositionInParticleSpace = mPosition;
     mPlaneInParticleSpace = mPlane;
+    mXVectorInParticleSpace = mXVector;
+    mYVectorInParticleSpace = mYVector;
     if (program->getReferenceFrame() == osgParticle::ParticleProcessor::ABSOLUTE_RF)
+    {
+        mPositionInParticleSpace = program->transformLocalToWorld(mPosition);
         mPlaneInParticleSpace.transform(program->getLocalToWorldMatrix());
+        mXVectorInParticleSpace = program->rotateLocalToWorld(mXVector);
+        mYVectorInParticleSpace = program->rotateLocalToWorld(mYVector);
+    }
 }
 
 void PlanarCollider::operate(osgParticle::Particle *particle, double dt)
 {
-    float dotproduct = particle->getVelocity() * mPlaneInParticleSpace.getNormal();
+    // Does the particle in question move towards the collider?
+    float velDotProduct = particle->getVelocity() * mPlaneInParticleSpace.getNormal();
+    if (velDotProduct <= 0)
+        return;
 
-    if (dotproduct > 0)
-    {
-        osg::BoundingSphere bs(particle->getPosition(), 0.f);
-        if (mPlaneInParticleSpace.intersect(bs) == 1)
-        {
-            osg::Vec3 reflectedVelocity = particle->getVelocity() - mPlaneInParticleSpace.getNormal() * (2 * dotproduct);
-            reflectedVelocity *= mBounceFactor;
-            particle->setVelocity(reflectedVelocity);
-        }
-    }
+    // Does it intersect the collider's plane?
+    osg::BoundingSphere bs(particle->getPosition(), 0.f);
+    if (mPlaneInParticleSpace.intersect(bs) != 1)
+        return;
+
+    // Is it inside the collider's bounds?
+    osg::Vec3f relativePos = particle->getPosition() - mPositionInParticleSpace;
+    float xDotProduct = relativePos * mXVectorInParticleSpace;
+    float yDotProduct = relativePos * mYVectorInParticleSpace;
+    if (-mExtents.x() * 0.5f > xDotProduct || mExtents.x() * 0.5f < xDotProduct)
+        return;
+    if (-mExtents.y() * 0.5f > yDotProduct || mExtents.y() * 0.5f < yDotProduct)
+        return;
+
+    // Deflect the particle
+    osg::Vec3 reflectedVelocity = particle->getVelocity() - mPlaneInParticleSpace.getNormal() * (2 * velDotProduct);
+    reflectedVelocity *= mBounceFactor;
+    particle->setVelocity(reflectedVelocity);
 }
 
 SphericalCollider::SphericalCollider(const Nif::NiSphericalCollider* collider)

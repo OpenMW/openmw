@@ -111,11 +111,11 @@ namespace Nif
     void NiPlanarCollider::read(NIFStream *nif)
     {
         NiParticleCollider::read(nif);
-        /* osg::Vec2f mExtents = */nif->getVector2();
-        /* osg::Vec3f mPosition = */nif->getVector3();
-        /* osg::Vec3f mXVector = */nif->getVector3();
-        /* osg::Vec3f mYVector = */nif->getVector3();
 
+        mExtents = nif->getVector2();
+        mPosition = nif->getVector3();
+        mXVector = nif->getVector3();
+        mYVector = nif->getVector3();
         mPlaneNormal = nif->getVector3();
         mPlaneDistance = nif->getFloat();
     }

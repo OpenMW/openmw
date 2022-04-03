@@ -131,10 +131,13 @@ struct NiParticleCollider : public NiParticleModifier
 // NiPinaColada
 struct NiPlanarCollider : public NiParticleCollider
 {
-    void read(NIFStream *nif) override;
-
+    osg::Vec2f mExtents;
+    osg::Vec3f mPosition;
+    osg::Vec3f mXVector, mYVector;
     osg::Vec3f mPlaneNormal;
     float mPlaneDistance;
+
+    void read(NIFStream *nif) override;
 };
 
 struct NiSphericalCollider : public NiParticleCollider

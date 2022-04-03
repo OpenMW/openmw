@@ -104,7 +104,7 @@ namespace NifOsg
     {
     public:
         PlanarCollider(const Nif::NiPlanarCollider* collider);
-        PlanarCollider();
+        PlanarCollider() = default;
         PlanarCollider(const PlanarCollider& copy, const osg::CopyOp& copyop);
 
         META_Object(NifOsg, PlanarCollider)
@@ -113,9 +113,12 @@ namespace NifOsg
         void operate(osgParticle::Particle* particle, double dt) override;
 
     private:
-        float mBounceFactor;
-        osg::Plane mPlane;
-        osg::Plane mPlaneInParticleSpace;
+        float mBounceFactor{0.f};
+        osg::Vec2f mExtents;
+        osg::Vec3f mPosition, mPositionInParticleSpace;
+        osg::Vec3f mXVector, mXVectorInParticleSpace;
+        osg::Vec3f mYVector, mYVectorInParticleSpace;
+        osg::Plane mPlane, mPlaneInParticleSpace;
     };
 
     class SphericalCollider : public osgParticle::Operator
