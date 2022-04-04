@@ -1,12 +1,16 @@
 #ifndef GAME_MWCLASS_BOOK_H
 #define GAME_MWCLASS_BOOK_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Book : public MWWorld::Class
+    class Book : public MWWorld::RegisteredClass<Book>
     {
+            friend MWWorld::RegisteredClass<Book>;
+
+            Book();
+
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
         public:
@@ -29,8 +33,6 @@ namespace MWClass
 
             int getValue (const MWWorld::ConstPtr& ptr) const override;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
-
-            static void registerSelf();
 
             std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id

@@ -20,6 +20,10 @@
 
 namespace MWClass
 {
+    Ingredient::Ingredient()
+        : MWWorld::RegisteredClass<Ingredient>(ESM::Ingredient::sRecordId)
+    {
+    }
 
     void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -75,13 +79,6 @@ namespace MWClass
         action->setSound ("Swallow");
 
         return action;
-    }
-
-    void Ingredient::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Ingredient);
-
-        registerClass (ESM::Ingredient::sRecordId, instance);
     }
 
     std::string Ingredient::getUpSoundId (const MWWorld::ConstPtr& ptr) const

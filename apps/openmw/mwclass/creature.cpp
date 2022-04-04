@@ -78,6 +78,11 @@ namespace MWClass
     {
     }
 
+    Creature::Creature()
+        : MWWorld::RegisteredClass<Creature, Actor>(ESM::Creature::sRecordId)
+    {
+    }
+
     const Creature::GMST& Creature::getGmst()
     {
         static const GMST staticGmst = []
@@ -494,13 +499,6 @@ namespace MWClass
     bool Creature::isEssential (const MWWorld::ConstPtr& ptr) const
     {
         return isFlagBitSet(ptr, ESM::Creature::Essential);
-    }
-
-    void Creature::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Creature);
-
-        registerClass (ESM::Creature::sRecordId, instance);
     }
 
     float Creature::getMaxSpeed(const MWWorld::Ptr &ptr) const

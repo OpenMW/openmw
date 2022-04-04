@@ -1,6 +1,8 @@
 #ifndef GAME_MWCLASS_CREATURE_H
 #define GAME_MWCLASS_CREATURE_H
 
+#include "../mwworld/registeredclass.hpp"
+
 #include "actor.hpp"
 
 namespace ESM
@@ -10,8 +12,12 @@ namespace ESM
 
 namespace MWClass
 {
-    class Creature : public Actor
+    class Creature : public MWWorld::RegisteredClass<Creature, Actor>
     {
+            friend MWWorld::RegisteredClass<Creature, Actor>;
+
+            Creature();
+
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
@@ -95,8 +101,6 @@ namespace MWClass
             ///< Return desired movement.
 
             float getMaxSpeed (const MWWorld::Ptr& ptr) const override;
-
-            static void registerSelf();
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 

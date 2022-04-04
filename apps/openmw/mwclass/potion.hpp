@@ -1,12 +1,16 @@
 #ifndef GAME_MWCLASS_POTION_H
 #define GAME_MWCLASS_POTION_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Potion : public MWWorld::Class
+    class Potion : public MWWorld::RegisteredClass<Potion>
     {
+            friend MWWorld::RegisteredClass<Potion>;
+
+            Potion();
+
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
         public:
@@ -32,8 +36,6 @@ namespace MWClass
 
             std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
             ///< Generate action for using via inventory menu
-
-            static void registerSelf();
 
             std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id

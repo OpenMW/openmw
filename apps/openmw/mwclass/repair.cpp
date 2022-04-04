@@ -17,6 +17,10 @@
 
 namespace MWClass
 {
+    Repair::Repair()
+        : MWWorld::RegisteredClass<Repair>(ESM::Repair::sRecordId)
+    {
+    }
 
     void Repair::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -63,13 +67,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Repair::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Repair);
-
-        registerClass (ESM::Repair::sRecordId, instance);
     }
 
     std::string Repair::getUpSoundId (const MWWorld::ConstPtr& ptr) const

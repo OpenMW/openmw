@@ -20,6 +20,10 @@
 
 namespace MWClass
 {
+    Lockpick::Lockpick()
+        : MWWorld::RegisteredClass<Lockpick>(ESM::Lockpick::sRecordId)
+    {
+    }
 
     void Lockpick::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -74,13 +78,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Lockpick::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Lockpick);
-
-        registerClass (ESM::Lockpick::sRecordId, instance);
     }
 
     std::string Lockpick::getUpSoundId (const MWWorld::ConstPtr& ptr) const

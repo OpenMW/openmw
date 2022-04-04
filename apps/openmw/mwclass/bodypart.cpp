@@ -7,6 +7,10 @@
 
 namespace MWClass
 {
+    BodyPart::BodyPart()
+        : MWWorld::RegisteredClass<BodyPart>(ESM::BodyPart::sRecordId)
+    {
+    }
 
     MWWorld::Ptr BodyPart::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
@@ -30,13 +34,6 @@ namespace MWClass
     bool BodyPart::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
         return false;
-    }
-
-    void BodyPart::registerSelf()
-    {
-        std::shared_ptr<MWWorld::Class> instance (new BodyPart);
-
-        registerClass (ESM::BodyPart::sRecordId, instance);
     }
 
     std::string BodyPart::getModel(const MWWorld::ConstPtr &ptr) const

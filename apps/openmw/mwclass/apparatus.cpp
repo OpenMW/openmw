@@ -18,6 +18,10 @@
 
 namespace MWClass
 {
+    Apparatus::Apparatus()
+        : MWWorld::RegisteredClass<Apparatus>(ESM::Apparatus::sRecordId)
+    {
+    }
 
     void Apparatus::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -63,13 +67,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Apparatus::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Apparatus);
-
-        registerClass (ESM::Apparatus::sRecordId, instance);
     }
 
     std::string Apparatus::getUpSoundId (const MWWorld::ConstPtr& ptr) const

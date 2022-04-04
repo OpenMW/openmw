@@ -46,6 +46,11 @@ namespace MWClass
         }
     };
 
+    Door::Door()
+        : MWWorld::RegisteredClass<Door>(ESM::Door::sRecordId)
+    {
+    }
+
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         if (!model.empty())
@@ -257,13 +262,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         return ref->mBase->mScript;
-    }
-
-    void Door::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Door);
-
-        registerClass (ESM::Door::sRecordId, instance);
     }
 
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const

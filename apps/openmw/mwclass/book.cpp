@@ -23,6 +23,10 @@
 
 namespace MWClass
 {
+    Book::Book()
+        : MWWorld::RegisteredClass<Book>(ESM::Book::sRecordId)
+    {
+    }
 
     void Book::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -80,13 +84,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Book::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Book);
-
-        registerClass (ESM::Book::sRecordId, instance);
     }
 
     std::string Book::getUpSoundId (const MWWorld::ConstPtr& ptr) const

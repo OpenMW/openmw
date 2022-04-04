@@ -1,12 +1,16 @@
 #ifndef GAME_MWCLASS_LOCKPICK_H
 #define GAME_MWCLASS_LOCKPICK_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Lockpick : public MWWorld::Class
+    class Lockpick : public MWWorld::RegisteredClass<Lockpick>
     {
+            friend MWWorld::RegisteredClass<Lockpick>;
+
+            Lockpick();
+
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
         public:
@@ -33,8 +37,6 @@ namespace MWClass
 
             int getValue (const MWWorld::ConstPtr& ptr) const override;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
-
-            static void registerSelf();
 
             std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id

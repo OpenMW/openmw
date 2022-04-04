@@ -1,13 +1,17 @@
 #ifndef GAME_MWCLASS_BODYPART_H
 #define GAME_MWCLASS_BODYPART_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
 
-    class BodyPart : public MWWorld::Class
+    class BodyPart : public MWWorld::RegisteredClass<BodyPart>
     {
+        friend MWWorld::RegisteredClass<BodyPart>;
+
+        BodyPart();
+
         MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
     public:
@@ -20,8 +24,6 @@ namespace MWClass
 
         bool hasToolTip (const MWWorld::ConstPtr& ptr) const override;
         ///< @return true if this object has a tooltip when focused (default implementation: true)
-
-        static void registerSelf();
 
         std::string getModel(const MWWorld::ConstPtr &ptr) const override;
     };

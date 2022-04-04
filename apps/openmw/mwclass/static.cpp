@@ -13,6 +13,10 @@
 
 namespace MWClass
 {
+    Static::Static()
+        : MWWorld::RegisteredClass<Static>(ESM::Static::sRecordId)
+    {
+    }
 
     void Static::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -52,13 +56,6 @@ namespace MWClass
     bool Static::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
         return false;
-    }
-
-    void Static::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Static);
-
-        registerClass (ESM::Static::sRecordId, instance);
     }
 
     MWWorld::Ptr Static::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

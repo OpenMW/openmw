@@ -245,6 +245,10 @@ namespace
 
 namespace MWClass
 {
+    Npc::Npc()
+        : MWWorld::RegisteredClass<Npc, Actor>(ESM::NPC::sRecordId)
+    {
+    }
 
     class NpcCustomData : public MWWorld::TypedCustomData<NpcCustomData>
     {
@@ -1037,12 +1041,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
         return (ref->mBase->mFlags & ESM::NPC::Essential) != 0;
-    }
-
-    void Npc::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Npc);
-        registerClass (ESM::NPC::sRecordId, instance);
     }
 
     bool Npc::hasToolTip(const MWWorld::ConstPtr& ptr) const

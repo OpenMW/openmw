@@ -17,7 +17,7 @@ namespace MWClass
     {
     protected:
 
-        Actor() = default;
+        explicit Actor(unsigned type) : Class(type) {}
 
         template <class GMST>
         float getSwimSpeedImpl(const MWWorld::Ptr& ptr, const GMST& gmst, const MWMechanics::MagicEffects& mageffects, float baseSpeed) const

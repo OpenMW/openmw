@@ -1,19 +1,21 @@
 #ifndef GAME_MWCLASS_ACTIVATOR_H
 #define GAME_MWCLASS_ACTIVATOR_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Activator : public MWWorld::Class
+    class Activator final : public MWWorld::RegisteredClass<Activator>
     {
+            friend MWWorld::RegisteredClass<Activator>;
+
+            Activator();
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
             static int getSndGenTypeFromName(const std::string &name);
 
         public:
-
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
@@ -35,8 +37,6 @@ namespace MWClass
 
             std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
-
-            static void registerSelf();
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 
