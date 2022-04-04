@@ -30,7 +30,6 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         misc/test_stringops.cpp
         misc/test_endianness.cpp
         misc/test_resourcehelpers.cpp
-        misc/test_indexedvector.cpp
         misc/progressreporter.cpp
         misc/compression.cpp
 
