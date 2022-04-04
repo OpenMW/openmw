@@ -6,7 +6,6 @@
 #include <string>
 #include <string_view>
 #include <sstream>
-#include <functional>
 
 #include "livecellref.hpp"
 
@@ -160,20 +159,6 @@ namespace MWWorld
     public:
         ConstPtr(const Ptr& ptr) : PtrBase(ptr.mRef, ptr.mCell, ptr.mContainerStore) {}
         ConstPtr(const LiveCellRefBase *liveCellRef=nullptr, const CellStoreType *cell=nullptr) : PtrBase(liveCellRef, cell, nullptr) {}
-    };
-
-    struct PtrHash
-    {
-        size_t operator()(const Ptr& ptr) const noexcept
-        {
-            const void* p = ptr;
-            return std::hash<const void*>{}(p);
-        }
-        size_t operator()(const ConstPtr& ptr) const noexcept
-        {
-            const void* p = ptr;
-            return std::hash<const void*>{}(p);
-        }
     };
 
 }

@@ -6,7 +6,6 @@
 #include <string>
 #include <list>
 #include <map>
-#include <components/misc/indexedvector.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -63,7 +62,7 @@ namespace MWMechanics
             Actors();
             ~Actors();
 
-            using PtrActorMap = Misc::IndexedVector<MWWorld::Ptr, Actor*, MWWorld::PtrHash>;
+            typedef std::map<MWWorld::Ptr,Actor*> PtrActorMap;
 
             PtrActorMap::const_iterator begin() { return mActors.begin(); }
             PtrActorMap::const_iterator end() { return mActors.end(); }

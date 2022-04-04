@@ -11,8 +11,6 @@
 #include <optional>
 #include <functional>
 
-#include <components/misc/indexedvector.hpp>
-
 #include <osg/Quat>
 #include <osg/BoundingBox>
 #include <osg/ref_ptr>
@@ -57,7 +55,7 @@ namespace MWPhysics
     class PhysicsTaskScheduler;
     class Projectile;
 
-    using ActorMap = Misc::IndexedVector<const MWWorld::LiveCellRefBase*, std::shared_ptr<Actor>>;
+    using ActorMap = std::unordered_map<const MWWorld::LiveCellRefBase*, std::shared_ptr<Actor>>;
 
     struct ContactPoint
     {
@@ -301,9 +299,8 @@ namespace MWPhysics
 
             using ObjectMap = std::unordered_map<const MWWorld::LiveCellRefBase*, std::shared_ptr<Object>>;
             ObjectMap mObjects;
-            
-            using AnimatedObjectMap = Misc::IndexedVector<Object*, bool>;
-            AnimatedObjectMap mAnimatedObjects; // stores pointers to elements in mObjects
+
+            std::map<Object*, bool> mAnimatedObjects; // stores pointers to elements in mObjects
 
             ActorMap mActors;
 
