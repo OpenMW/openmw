@@ -93,7 +93,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
     file(DOWNLOAD
         https://gitlab.com/OpenMW/example-suite/-/raw/8966dab24692555eec720c854fb0f73d108070cd/data/template.omwgame
         ${CMAKE_CURRENT_BINARY_DIR}/data/template.omwgame
-        EXPECTED_MD5 bf3691034a38611534c74c3b89a7d2c3
+        EXPECTED_HASH SHA512=6e38642bcf013c5f496a9cb0bf3ec7c9553b6e86b836e7844824c5a05f556c9391167214469b6318401684b702d7569896bf743c85aee4198612b3315ba778d6
     )
 
     target_compile_definitions(openmw_test_suite
