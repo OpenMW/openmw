@@ -39,6 +39,11 @@ namespace MWLua
     class LuaManager;
 }
 
+namespace Stereo
+{
+    class Manager;
+}
+
 namespace Files
 {
     struct ConfigurationManager;
@@ -47,6 +52,16 @@ namespace Files
 namespace osgViewer
 {
     class ScreenCaptureHandler;
+}
+
+namespace SceneUtil
+{
+    class SelectDepthFormatOperation;
+
+    namespace Color
+    {
+        class SelectColorFormatOperation;
+    }
 }
 
 struct SDL_Window;
@@ -69,9 +84,14 @@ namespace OMW
             osg::ref_ptr<osgViewer::Viewer> mViewer;
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
             osg::ref_ptr<SceneUtil::AsyncScreenCaptureOperation> mScreenCaptureOperation;
+            osg::ref_ptr<SceneUtil::SelectDepthFormatOperation> mSelectDepthFormatOperation;
+            osg::ref_ptr<SceneUtil::Color::SelectColorFormatOperation> mSelectColorFormatOperation;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
             std::vector<std::string> mGroundcoverFiles;
+
+            std::unique_ptr<Stereo::Manager> mStereoManager;
+
             bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;

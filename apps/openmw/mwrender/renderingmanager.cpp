@@ -21,6 +21,9 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/stereo/stereomanager.hpp>
+#include <components/stereo/multiview.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
@@ -31,6 +34,7 @@
 #include <components/settings/settings.hpp>
 
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -45,6 +49,7 @@
 
 #include <components/detournavigator/navigator.hpp>
 
+#include "../mwbase/windowmanager.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/groundcoverstore.hpp"
@@ -70,6 +75,54 @@
 
 namespace MWRender
 {
+    class PerViewUniformStateUpdater final : public SceneUtil::StateSetUpdater
+    {
+    public:
+    public:
+        PerViewUniformStateUpdater()
+        {
+        }
+
+        void setDefaults(osg::StateSet* stateset) override
+        {
+            stateset->addUniform(new osg::Uniform("projectionMatrix", osg::Matrixf{}));
+        }
+
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
+        {
+            auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
+            if (uProjectionMatrix)
+                uProjectionMatrix->set(mProjectionMatrix);
+        }
+
+        void applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
+        {
+            auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
+            if (uProjectionMatrix)
+                uProjectionMatrix->set(Stereo::Manager::instance().computeEyeProjection(0, SceneUtil::AutoDepth::isReversed()));
+        }
+
+        void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
+        {
+            auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
+            if (uProjectionMatrix)
+                uProjectionMatrix->set(Stereo::Manager::instance().computeEyeProjection(1, SceneUtil::AutoDepth::isReversed()));
+        }
+
+        void setProjectionMatrix(const osg::Matrixf& projectionMatrix)
+        {
+            mProjectionMatrix = projectionMatrix;
+        }
+
+        const osg::Matrixf& projectionMatrix() const
+        {
+            return mProjectionMatrix;
+        }
+
+    private:
+        osg::Matrixf mProjectionMatrix;
+    };
+
     class SharedUniformStateUpdater : public SceneUtil::StateSetUpdater
     {
     public:
@@ -82,9 +135,8 @@ namespace MWRender
         {
         }
 
-        void setDefaults(osg::StateSet *stateset) override
+        void setDefaults(osg::StateSet* stateset) override
         {
-            stateset->addUniform(new osg::Uniform("projectionMatrix", osg::Matrixf{}));
             stateset->addUniform(new osg::Uniform("linearFac", 0.f));
             stateset->addUniform(new osg::Uniform("near", 0.f));
             stateset->addUniform(new osg::Uniform("far", 0.f));
@@ -98,10 +150,6 @@ namespace MWRender
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
         {
-            auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
-            if (uProjectionMatrix)
-                uProjectionMatrix->set(mProjectionMatrix);
-
             auto* uLinearFac = stateset->getUniform("linearFac");
             if (uLinearFac)
                 uLinearFac->set(mLinearFac);
@@ -128,11 +176,6 @@ namespace MWRender
                 if (playerPos)
                     playerPos->set(mPlayerPos);
             }
-        }
-
-        void setProjectionMatrix(const osg::Matrixf& projectionMatrix)
-        {
-            mProjectionMatrix = projectionMatrix;
         }
 
         void setLinearFac(float linearFac)
@@ -167,7 +210,6 @@ namespace MWRender
 
 
     private:
-        osg::Matrixf mProjectionMatrix;
         float mLinearFac;
         float mNear;
         float mFar;
@@ -312,14 +354,16 @@ namespace MWRender
         auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(Settings::Manager::getString("lighting method", "Shaders"));
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
-        // Shadows and radial fog have problems with fixed-function mode
+        // Shadows and radial fog have problems with fixed-function mode.
         bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders")
                             || Settings::Manager::getBool("soft particles", "Shaders")
                             || Settings::Manager::getBool("force shaders", "Shaders")
                             || Settings::Manager::getBool("enable shadows", "Shadows")
                             || lightingMethod != SceneUtil::LightingMethod::FFP
-                            || reverseZ;
+                            || reverseZ
+                            || Stereo::getMultiview();
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
+         
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
         resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
@@ -368,6 +412,9 @@ namespace MWRender
         globalDefines["preLightEnv"] = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
         globalDefines["radialFog"] = Settings::Manager::getBool("radial fog", "Shaders") ? "1" : "0";
         globalDefines["useGPUShader4"] = "0";
+        globalDefines["GLSLVersion"] = "120";
+        globalDefines["useOVR_multiview"] = "0";
+        globalDefines["numViews"] = "1";
 
         for (auto itr = lightDefines.begin(); itr != lightDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
@@ -453,16 +500,19 @@ namespace MWRender
         mSharedUniformStateUpdater = new SharedUniformStateUpdater(groundcover);
         rootNode->addUpdateCallback(mSharedUniformStateUpdater);
 
+        mPerViewUniformStateUpdater = new PerViewUniformStateUpdater();
+        rootNode->addCullCallback(mPerViewUniformStateUpdater);
+
         mPostProcessor = new PostProcessor(viewer, mRootNode);
-        resourceSystem->getSceneManager()->setDepthFormat(mPostProcessor->getDepthFormat());
+        resourceSystem->getSceneManager()->setDepthFormat(SceneUtil::AutoDepth::depthInternalFormat());
         resourceSystem->getSceneManager()->setOpaqueDepthTex(mPostProcessor->getOpaqueDepthTex());
 
-        if (reverseZ && !SceneUtil::isFloatingPointDepthFormat(mPostProcessor->getDepthFormat()))
+        if (reverseZ && !SceneUtil::isFloatingPointDepthFormat(SceneUtil::AutoDepth::depthInternalFormat()))
             Log(Debug::Warning) << "Floating point depth format not in use but reverse-z buffer is enabled, consider disabling it.";
 
         // water goes after terrain for correct waterculling order
         mWater.reset(new Water(sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
-
+        
         mCamera.reset(new Camera(mViewer->getCamera()));
 
         mScreenshotManager.reset(new ScreenshotManager(viewer, mRootNode, sceneRoot, mResourceSystem, mWater.get()));
@@ -514,7 +564,8 @@ namespace MWRender
         mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mViewer->getCamera()->setCullingMode(cullingMode);
 
-        mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
+        auto mask = ~(Mask_UpdateVisitor | Mask_SimpleWater);
+        MWBase::Environment::get().getWindowManager()->setCullMask(mask);
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
         Nif::NIFFile::setLoadUnsupportedFiles(Settings::Manager::getBool("load unsupported nif files", "Models"));
@@ -536,6 +587,7 @@ namespace MWRender
         }
 
         SceneUtil::setCameraClearDepth(mViewer->getCamera());
+
 
         updateProjectionMatrix();
 
@@ -753,14 +805,15 @@ namespace MWRender
         }
         else if (mode == Render_Scene)
         {
-            unsigned int mask = mViewer->getCamera()->getCullMask();
+            auto* wm = MWBase::Environment::get().getWindowManager();
+            unsigned int mask = wm->getCullMask();
             bool enabled = !(mask&sToggleWorldMask);
             if (enabled)
                 mask |= sToggleWorldMask;
             else
                 mask &= ~sToggleWorldMask;
             mWater->showWorld(enabled);
-            mViewer->getCamera()->setCullMask(mask);
+            wm->setCullMask(mask);
             return enabled;
         }
         else if (mode == Render_NavMesh)
@@ -1155,14 +1208,23 @@ namespace MWRender
         if (SceneUtil::AutoDepth::isReversed())
         {
             mSharedUniformStateUpdater->setLinearFac(-mNearClip / (mViewDistance - mNearClip) - 1.f);
-            mSharedUniformStateUpdater->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance));
+            mPerViewUniformStateUpdater->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance));
         }
         else
-            mSharedUniformStateUpdater->setProjectionMatrix(mViewer->getCamera()->getProjectionMatrix());
+            mPerViewUniformStateUpdater->setProjectionMatrix(mViewer->getCamera()->getProjectionMatrix());
 
         mSharedUniformStateUpdater->setNear(mNearClip);
         mSharedUniformStateUpdater->setFar(mViewDistance);
-        mSharedUniformStateUpdater->setScreenRes(width, height);
+        if (Stereo::getStereo())
+        {
+            auto res = Stereo::Manager::instance().eyeResolution();
+            mSharedUniformStateUpdater->setScreenRes(res.x(), res.y());
+            Stereo::Manager::instance().setMasterProjectionMatrix(mPerViewUniformStateUpdater->projectionMatrix());
+        }
+        else
+        {
+            mSharedUniformStateUpdater->setScreenRes(width, height);
+        }
 
         // Since our fog is not radial yet, we should take FOV in account, otherwise terrain near viewing distance may disappear.
         // Limit FOV here just for sure, otherwise viewing distance can be too high.

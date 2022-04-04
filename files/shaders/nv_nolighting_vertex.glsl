@@ -1,4 +1,4 @@
-#version 120
+#version @GLSLVersion
 
 #include "openmw_vertex.h.glsl"
 

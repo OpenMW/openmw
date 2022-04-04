@@ -30,6 +30,8 @@ namespace osg
 
 namespace MWRender
 {
+    class LocalMapRenderToTexture;
+
     ///
     /// \brief Local map rendering
     ///
@@ -57,13 +59,6 @@ namespace MWRender
         osg::ref_ptr<osg::Texture2D> getMapTexture (int x, int y);
 
         osg::ref_ptr<osg::Texture2D> getFogOfWarTexture (int x, int y);
-
-        void removeCamera(osg::Camera* cam);
-
-        /**
-         * Indicates a camera has been queued for rendering and can be cleaned up in the next frame. For internal use only.
-         */
-        void markForRemoval(osg::Camera* cam);
 
         /**
          * Removes cameras that have already been rendered. Should be called every frame to ensure that
@@ -104,11 +99,8 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mRoot;
         osg::ref_ptr<osg::Node> mSceneRoot;
 
-        typedef std::vector< osg::ref_ptr<osg::Camera> > CameraVector;
-
-        CameraVector mActiveCameras;
-
-        CameraVector mCamerasPendingRemoval;
+        typedef std::vector< osg::ref_ptr<LocalMapRenderToTexture> > RTTVector;
+        RTTVector mLocalMapRTTs;
 
         typedef std::set<std::pair<int, int> > Grid;
         Grid mCurrentGrid;
@@ -152,8 +144,7 @@ namespace MWRender
         void requestExteriorMap(const MWWorld::CellStore* cell);
         void requestInteriorMap(const MWWorld::CellStore* cell);
 
-        osg::ref_ptr<osg::Camera> createOrthographicCamera(float left, float top, float width, float height, const osg::Vec3d& upVector, float zmin, float zmax);
-        void setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int y);
+        void setupRenderToTexture(int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax);
 
         bool mInterior;
         osg::BoundingBox mBounds;

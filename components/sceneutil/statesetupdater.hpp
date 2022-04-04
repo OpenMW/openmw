@@ -41,6 +41,11 @@ namespace SceneUtil
         /// even if it has not changed since the last frame.
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) {}
 
+        /// Apply any state specific to the Left view. Default implementation does nothing. Called after apply() \note requires the updater be a cull callback
+        virtual void applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* nv) {}
+        /// Apply any state specific to the Right view. Default implementation does nothing. Called after apply() \note requires the updater be a cull callback
+        virtual void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* nv) {}
+
         /// Set default state - optionally override in derived classes
         /// @par May be used e.g. to allocate StateAttributes.
         virtual void setDefaults(osg::StateSet* stateset) {}

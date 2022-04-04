@@ -1,4 +1,4 @@
-#version 120
+#version @GLSLVersion
 
 uniform sampler2D diffuseMap;
 

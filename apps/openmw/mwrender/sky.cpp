@@ -23,6 +23,7 @@
 
 #include <components/misc/rng.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include <components/nifosg/particle.hpp>
 
@@ -332,8 +333,10 @@ namespace MWRender
 
         if (mSceneManager->getForceShaders())
         {
-            auto vertex = mSceneManager->getShaderManager().getShader("sky_vertex.glsl", {}, osg::Shader::VERTEX);
-            auto fragment = mSceneManager->getShaderManager().getShader("sky_fragment.glsl", {}, osg::Shader::FRAGMENT);
+            Shader::ShaderManager::DefineMap defines = {};
+            Stereo::Manager::instance().shaderStereoDefines(defines);
+            auto vertex = mSceneManager->getShaderManager().getShader("sky_vertex.glsl", defines, osg::Shader::VERTEX);
+            auto fragment = mSceneManager->getShaderManager().getShader("sky_fragment.glsl", defines, osg::Shader::FRAGMENT);
             auto program = mSceneManager->getShaderManager().getProgram(vertex, fragment);
             mEarlyRenderBinRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", -1));
             mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);

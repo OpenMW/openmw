@@ -13,6 +13,8 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/stereo/stereomanager.hpp>
+#include <components/stereo/multiview.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -85,6 +87,12 @@ namespace MWRender
         {
             int screenW = renderInfo.getCurrentCamera()->getViewport()->width();
             int screenH = renderInfo.getCurrentCamera()->getViewport()->height();
+            if (Stereo::getStereo())
+            {
+                auto eyeRes = Stereo::Manager::instance().eyeResolution();
+                screenW = eyeRes.x();
+                screenH = eyeRes.y();
+            }
             double imageaspect = (double)mWidth/(double)mHeight;
             int leftPadding = std::max(0, static_cast<int>(screenW - screenH * imageaspect) / 2);
             int topPadding = std::max(0, static_cast<int>(screenH - screenW / imageaspect) / 2);
@@ -94,13 +102,19 @@ namespace MWRender
             // Ensure we are reading from the resolved framebuffer and not the multisampled render buffer. Also ensure that the readbuffer is set correctly with rendeirng to FBO.
             // glReadPixel() cannot read from multisampled targets
             PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
+            osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getContextID(), false);
 
-            if (postProcessor && postProcessor->getFbo())
+            if (ext)
             {
-                osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getContextID(), false);
-                if (ext)
+                osg::FrameBufferObject* fbo = nullptr;
+                if (Stereo::getStereo())
+                    fbo = Stereo::Manager::instance().multiviewFramebuffer()->layerFbo(0);
+                else if (postProcessor)
+                    fbo = postProcessor->getFbo();
+
+                if (fbo)
                 {
-                    ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, postProcessor->getFbo()->getHandle(renderInfo.getContextID()));
+                    ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo->getHandle(renderInfo.getContextID()));
                     renderInfo.getState()->glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
                 }
             }
@@ -346,7 +360,7 @@ namespace MWRender
         rttCamera->addChild(mWater->getReflectionNode());
         rttCamera->addChild(mWater->getRefractionNode());
 
-        rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & ~(Mask_GUI|Mask_FirstPerson));
+        rttCamera->setCullMask(MWBase::Environment::get().getWindowManager()->getCullMask() & ~(Mask_GUI|Mask_FirstPerson));
 
         rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 

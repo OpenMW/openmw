@@ -119,9 +119,14 @@ namespace SceneUtil {
         struct Frustum
         {
             Frustum(osgUtil::CullVisitor* cv, double minZNear, double maxZFar);
+            void setCustomClipSpace(const osg::BoundingBoxd& clipCornersOverride);
+            void init();
 
             osg::Matrixd projectionMatrix;
             osg::Matrixd modelViewMatrix;
+
+            bool useCustomClipSpace;
+            osg::BoundingBoxd customClipSpace;
 
             typedef std::vector<osg::Vec3d> Vertices;
             Vertices corners;
@@ -138,6 +143,18 @@ namespace SceneUtil {
             osg::Vec3d centerFarPlane;
             osg::Vec3d center;
             osg::Vec3d frustumCenterLine;
+        };
+
+        /** Custom frustum callback allowing the application to request shadow maps covering a
+        * different furstum than the camera normally would cover, by customizing the corners of the clip space. */
+        struct CustomFrustumCallback : osg::Referenced
+        {
+            /** The callback operator.
+            * Output the custum frustum to the boundingBox variable.
+            * If sharedFrustumHint is set to a valid cull visitor, the shadow maps of that cull visitor will be re-used instead of recomputing new shadow maps 
+            * Note that the customClipSpace bounding box will be uninitialized when this operator is called. If it is not initalized, or a valid shared frustum hint set,
+            * the resulting shadow map may be invalid. */
+            virtual void operator()(osgUtil::CullVisitor& cv, osg::BoundingBoxd& customClipSpace, osgUtil::CullVisitor*& sharedFrustumHint) = 0;
         };
 
         // forward declare
@@ -197,7 +214,12 @@ namespace SceneUtil {
 
             virtual void releaseGLObjects(osg::State* = 0) const;
 
+            unsigned int numValidShadows(void) const { return _numValidShadows; }
+
+            void setNumValidShadows(unsigned int numValidShadows) { _numValidShadows = numValidShadows; }
+
         protected:
+            friend class MWShadowTechnique;
             virtual ~ViewDependentData() {}
 
             MWShadowTechnique*          _viewDependentShadowMap;
@@ -206,13 +228,19 @@ namespace SceneUtil {
 
             LightDataList               _lightDataList;
             ShadowDataList              _shadowDataList;
+
+            unsigned int _numValidShadows;
         };
 
         virtual ViewDependentData* createViewDependentData(osgUtil::CullVisitor* cv);
 
         ViewDependentData* getViewDependentData(osgUtil::CullVisitor* cv);
 
+        void copyShadowMap(osgUtil::CullVisitor& cv, ViewDependentData* lhs, ViewDependentData* rhs);
 
+        void setCustomFrustumCallback(CustomFrustumCallback* cfc);
+
+        void assignTexGenSettings(osgUtil::CullVisitor& cv, ViewDependentData* vdd);
 
         virtual void createShaders();
 
@@ -246,6 +274,8 @@ namespace SceneUtil {
         typedef std::map< osgUtil::CullVisitor*, osg::ref_ptr<ViewDependentData> >  ViewDependentDataMap;
         mutable std::mutex                      _viewDependentDataMapMutex;
         ViewDependentDataMap                    _viewDependentDataMap;
+        osg::ref_ptr<CustomFrustumCallback>     _customFrustumCallback;
+        osg::BoundingBoxd                       _customClipSpace;
 
         osg::ref_ptr<osg::StateSet>             _shadowRecievingPlaceholderStateSet;
 

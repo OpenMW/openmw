@@ -582,6 +582,9 @@ namespace MWGui
     void handleScheduledMessageBoxes();
 
     void pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg, bool force);
+
+    void setCullMask(uint32_t mask) override;
+    uint32_t getCullMask() override;
   };
 }
 

@@ -1,4 +1,4 @@
-#version 120
+#version @GLSLVersion
 #pragma import_defines(FORCE_OPAQUE)
 
 #if @useGPUShader4

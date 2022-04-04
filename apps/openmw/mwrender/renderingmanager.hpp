@@ -76,6 +76,7 @@ namespace MWRender
 {
     class StateUpdater;
     class SharedUniformStateUpdater;
+    class PerViewUniformStateUpdater;
 
     class EffectManager;
     class ScreenshotManager;
@@ -97,7 +98,7 @@ namespace MWRender
     class RenderingManager : public MWRender::RenderingInterface
     {
     public:
-        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
+        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, 
                          Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                          const std::string& resourcePath, DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore);
         ~RenderingManager();
@@ -255,6 +256,7 @@ namespace MWRender
 
         void updateRecastMesh();
 
+
         osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
 
         osg::ref_ptr<osgUtil::IntersectionVisitor> mIntersectionVisitor;
@@ -292,6 +294,7 @@ namespace MWRender
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
         osg::ref_ptr<SharedUniformStateUpdater> mSharedUniformStateUpdater;
+        osg::ref_ptr<PerViewUniformStateUpdater> mPerViewUniformStateUpdater;
 
         osg::Vec4f mAmbientColor;
         float mMinimumAmbientLuminance;

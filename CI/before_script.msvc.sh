@@ -75,6 +75,7 @@ TEST_FRAMEWORK=""
 GOOGLE_INSTALL_ROOT=""
 INSTALL_PREFIX="."
 BUILD_BENCHMARKS=""
+OSG_MULTIVIEW_BUILD=""
 
 ACTIVATE_MSVC=""
 SINGLE_CONFIG=""
@@ -139,7 +140,10 @@ while [ $# -gt 0 ]; do
 
 			b )
 				BUILD_BENCHMARKS=true ;;
-
+            
+            M )
+                OSG_MULTIVIEW_BUILD=true ;;
+                
 			h )
 				cat <<EOF
 Usage: $0 [-cdehkpuvVi]
@@ -178,6 +182,8 @@ Options:
 		CMake install prefix
 	-b
 		Build benchmarks
+    -M
+        Use a multiview build of OSG
 EOF
 				wrappedExit 0
 				;;
@@ -514,6 +520,16 @@ fi
 
 ICU_VER="70_1"
 
+OSG_ARCHIVE_NAME="OSGoS 3.6.5"
+OSG_ARCHIVE="OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}"
+OSG_ARCHIVE_REPO_URL="https://gitlab.com/OpenMW/openmw-deps/-/raw/main"
+if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
+    OSG_ARCHIVE_NAME="OSG-3.6-multiview"
+    OSG_ARCHIVE="OSG-3.6-multiview-ee297dce0-msvc${MSVC_REAL_YEAR}-win${BITS}"
+    OSG_ARCHIVE_REPO_URL="https://gitlab.com/madsbuvi/openmw-deps/-/raw/openmw-vr-ovr_multiview"
+fi
+
+
 echo
 echo "==================================="
 echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
@@ -565,15 +581,15 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-1.20.1.zip" \
 		"OpenAL-Soft-1.20.1.zip"
 
-	# OSGoS
-	download "OSGoS 3.6.5" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
-		"OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
+	# OSGoS https://gitlab.com/madsbuvi/openmw-deps/-/raw/openmw-vr-ovr_multiview/windows/OSG-3.6-multiview-ee297dce0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z
+	download "${OSG_ARCHIVE_NAME}" \
+		"${OSG_ARCHIVE_REPO_URL}/windows/${OSG_ARCHIVE}.7z" \
+		"${OSG_ARCHIVE}.7z"
 
 	if [ -n "$PDBS" ]; then
-		download "OSGoS symbols" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
-			"OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
+		download "${OSG_ARCHIVE_NAME} symbols" \
+			"${OSG_ARCHIVE_REPO_URL}/windows/${OSG_ARCHIVE}-sym.7z" \
+			"${OSG_ARCHIVE}-sym.7z"
 	fi
 
 	# SDL2
@@ -781,7 +797,7 @@ printf "OpenAL-Soft 1.20.1... "
 cd $DEPS
 echo
 # OSGoS
-printf "OSGoS 3.6.5... "
+printf "${OSG_ARCHIVE_NAME}... "
 {
 	cd $DEPS_INSTALL
 	if [ -d OSG ] && \
@@ -792,9 +808,9 @@ printf "OSGoS 3.6.5... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf OSG
-		eval 7z x -y "${DEPS}/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
-		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
-		mv "OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}" OSG
+		eval 7z x -y "${DEPS}/${OSG_ARCHIVE}.7z" $STRIP
+		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/${OSG_ARCHIVE}-sym.7z" $STRIP
+		mv "${OSG_ARCHIVE}" OSG
 	fi
 	OSG_SDK="$(real_pwd)/OSG"
 	add_cmake_opts -DOSG_DIR="$OSG_SDK"
@@ -804,8 +820,13 @@ printf "OSGoS 3.6.5... "
 		else
 			SUFFIX=""
 		fi
-		add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng}${SUFFIX}.dll \
-			"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
+        if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
+            add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{ot21-OpenThreads,zlib,libpng16}${SUFFIX}.dll \
+                "$(pwd)/OSG/bin/osg162-osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
+        else
+            add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng}${SUFFIX}.dll \
+                "$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
+        fi
 		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_"{bmp,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll
 		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer,shadow}${SUFFIX}.dll
 	done

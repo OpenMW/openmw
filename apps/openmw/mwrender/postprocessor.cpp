@@ -6,14 +6,19 @@
 #include <osg/Camera>
 #include <osg/Callback>
 #include <osg/Texture2D>
+#include <osg/Texture2DArray>
 #include <osg/FrameBufferObject>
 
 #include <osgViewer/Viewer>
 
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/color.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/debug/debuglog.hpp>
+
+#include <components/stereo/multiview.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include "vismask.hpp"
 
@@ -38,8 +43,8 @@ namespace
     class CullCallback : public SceneUtil::NodeCallback<CullCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
-        CullCallback()
-            : mLastFrameNumber(0)
+        CullCallback(MWRender::PostProcessor* pp)
+            : mPostProcessor(pp)
         {
         }
 
@@ -47,36 +52,21 @@ namespace
         {
             osgUtil::RenderStage* renderStage = cv->getCurrentRenderStage();
 
-            unsigned int frame = cv->getTraversalNumber();
-            if (frame != mLastFrameNumber)
+            if (!mPostProcessor->getMsaaFbo())
             {
-                mLastFrameNumber = frame;
-
-                MWRender::PostProcessor* postProcessor = dynamic_cast<MWRender::PostProcessor*>(cv->getCurrentCamera()->getUserData());
-
-                if (!postProcessor)
-                {
-                    Log(Debug::Error) << "Failed retrieving user data for master camera: FBO setup failed";
-                    traverse(node, cv);
-                    return;
-                }
-
-                if (!postProcessor->getMsaaFbo())
-                {
-                    renderStage->setFrameBufferObject(postProcessor->getFbo());
-                }
-                else
-                {
-                    renderStage->setMultisampleResolveFramebufferObject(postProcessor->getFbo());
-                    renderStage->setFrameBufferObject(postProcessor->getMsaaFbo());
-                }
+                renderStage->setFrameBufferObject(mPostProcessor->getFbo());
+            }
+            else
+            {
+                renderStage->setMultisampleResolveFramebufferObject(mPostProcessor->getFbo());
+                renderStage->setFrameBufferObject(mPostProcessor->getMsaaFbo());
             }
 
             traverse(node, cv);
         }
 
     private:
-        unsigned int mLastFrameNumber;
+        MWRender::PostProcessor* mPostProcessor;
     };
 
     struct ResizedCallback : osg::GraphicsContext::ResizedCallback
@@ -157,15 +147,13 @@ namespace MWRender
     PostProcessor::PostProcessor(osgViewer::Viewer* viewer, osg::Group* rootNode)
         : mViewer(viewer)
         , mRootNode(new osg::Group)
-        , mDepthFormat(GL_DEPTH24_STENCIL8_EXT)
     {
         bool softParticles = Settings::Manager::getBool("soft particles", "Shaders");
 
-        if (!SceneUtil::AutoDepth::isReversed() && !softParticles)
+        if (!SceneUtil::AutoDepth::isReversed() && !softParticles && !Stereo::getStereo())
             return;
 
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
-        unsigned int contextID = gc->getState()->getContextID();
         osg::GLExtensions* ext = gc->getState()->get<osg::GLExtensions>();
 
         constexpr char errPreamble[] = "Postprocessing and floating point depth buffers disabled: ";
@@ -184,24 +172,19 @@ namespace MWRender
 
         if (SceneUtil::AutoDepth::isReversed())
         {
-            if (osg::isGLExtensionSupported(contextID, "GL_ARB_depth_buffer_float"))
-                mDepthFormat = GL_DEPTH32F_STENCIL8;
-            else if (osg::isGLExtensionSupported(contextID, "GL_NV_depth_buffer_float"))
-                mDepthFormat = GL_DEPTH32F_STENCIL8_NV;
-            else
+            if(SceneUtil::AutoDepth::depthSourceType() != GL_FLOAT_32_UNSIGNED_INT_24_8_REV)
             {
                 // TODO: Once we have post-processing implemented we want to skip this return and continue with setup.
                 // Rendering to a FBO to fullscreen geometry has overhead (especially when MSAA is enabled) and there are no
                 // benefits if no floating point depth formats are supported.
-                Log(Debug::Warning) << errPreamble << "'GL_ARB_depth_buffer_float' and 'GL_NV_depth_buffer_float' unsupported.";
-
-                if (!softParticles)
+                if (!softParticles && !Stereo::getStereo())
                     return;
             }
         }
 
-        int width = viewer->getCamera()->getViewport()->width();
-        int height = viewer->getCamera()->getViewport()->height();
+        auto* traits = gc->getTraits();
+        int width = traits->width;
+        int height = traits->height;
 
         createTexturesAndCamera(width, height);
         resize(width, height);
@@ -210,15 +193,17 @@ namespace MWRender
         mRootNode->addChild(rootNode);
         mViewer->setSceneData(mRootNode);
 
-        // We need to manually set the FBO and resolve FBO during the cull callback. If we were using a separate
-        // RTT camera this would not be needed.
-        mViewer->getCamera()->addCullCallback(new CullCallback);
-        mViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-        mViewer->getCamera()->attach(osg::Camera::COLOR_BUFFER0, mSceneTex);
+        if (!Stereo::getStereo())
+        {
+            // We need to manually set the FBO and resolve FBO during the cull callback. If we were using a separate
+            // RTT camera this would not be needed.
+            mViewer->getCamera()->addCullCallback(new CullCallback(this));
+            mViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+            mViewer->getCamera()->attach(osg::Camera::COLOR_BUFFER0, mSceneTex);
         mViewer->getCamera()->attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, mDepthTex);
+        }
 
         mViewer->getCamera()->getGraphicsContext()->setResizedCallback(new ResizedCallback(this));
-        mViewer->getCamera()->setUserData(this);
     }
 
     void PostProcessor::resize(int width, int height)
@@ -260,15 +245,89 @@ namespace MWRender
 
         mViewer->getCamera()->resize(width, height);
         mHUDCamera->resize(width, height);
+
+        if (Stereo::getStereo())
+            Stereo::Manager::instance().screenResolutionChanged();
     }
+
+    class HUDCameraStatesetUpdater final : public SceneUtil::StateSetUpdater
+    {
+    public:
+    public:
+        HUDCameraStatesetUpdater(osg::ref_ptr<osg::Camera> HUDCamera, osg::ref_ptr<osg::Program> program, osg::ref_ptr<osg::Texture2D> sceneTex)
+            : mHUDCamera(HUDCamera)
+            , mProgram(program)
+            , mSceneTex(sceneTex)
+        {
+        }
+
+        void setDefaults(osg::StateSet* stateset) override
+        {
+            stateset->setTextureAttributeAndModes(0, mSceneTex, osg::StateAttribute::ON);
+            stateset->setAttributeAndModes(mProgram, osg::StateAttribute::ON);
+            stateset->addUniform(new osg::Uniform("sceneTex", 0));
+            stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+            if (osg::DisplaySettings::instance()->getStereo())
+            {
+                stateset->setAttribute(new osg::Viewport);
+                stateset->addUniform(new osg::Uniform("viewportIndex", 0));
+            }
+        }
+
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
+        {
+            if (Stereo::getMultiview())
+            {
+                auto& multiviewFbo = Stereo::Manager::instance().multiviewFramebuffer();
+                stateset->setTextureAttributeAndModes(0, multiviewFbo->multiviewColorBuffer(), osg::StateAttribute::ON);
+            }
+        }
+
+        void applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* cv) override
+        {
+            auto& multiviewFbo = Stereo::Manager::instance().multiviewFramebuffer();
+            stateset->setTextureAttributeAndModes(0, multiviewFbo->layerColorBuffer(0), osg::StateAttribute::ON);
+
+            auto viewport = static_cast<osg::Viewport*>(stateset->getAttribute(osg::StateAttribute::VIEWPORT));
+            auto fullViewport = mHUDCamera->getViewport();
+            viewport->setViewport(
+                0,
+                0,
+                fullViewport->width() / 2,
+                fullViewport->height()
+            );
+        }
+
+        void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* cv) override
+        {
+            auto& multiviewFbo = Stereo::Manager::instance().multiviewFramebuffer();
+            stateset->setTextureAttributeAndModes(0, multiviewFbo->layerColorBuffer(1), osg::StateAttribute::ON);
+
+            auto viewport = static_cast<osg::Viewport*>(stateset->getAttribute(osg::StateAttribute::VIEWPORT));
+            auto fullViewport = mHUDCamera->getViewport();
+            viewport->setViewport(
+                fullViewport->width() / 2,
+                0,
+                fullViewport->width() / 2,
+                fullViewport->height()
+            );
+        }
+
+    private:
+        osg::ref_ptr<osg::Camera> mHUDCamera;
+        osg::ref_ptr<osg::Program> mProgram;
+        osg::ref_ptr<osg::Texture2D> mSceneTex;
+    };
 
     void PostProcessor::createTexturesAndCamera(int width, int height)
     {
         mDepthTex = new osg::Texture2D;
         mDepthTex->setTextureSize(width, height);
-        mDepthTex->setSourceFormat(GL_DEPTH_STENCIL_EXT);
-        mDepthTex->setSourceType(SceneUtil::isFloatingPointDepthFormat(getDepthFormat()) ? GL_FLOAT_32_UNSIGNED_INT_24_8_REV : GL_UNSIGNED_INT_24_8_EXT);
-        mDepthTex->setInternalFormat(mDepthFormat);
+        mDepthTex->setSourceFormat(SceneUtil::AutoDepth::depthSourceFormat());
+        mDepthTex->setSourceType(SceneUtil::AutoDepth::depthSourceType());
+        mDepthTex->setInternalFormat(SceneUtil::AutoDepth::depthInternalFormat());
         mDepthTex->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::NEAREST);
         mDepthTex->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::NEAREST);
         mDepthTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -283,9 +342,9 @@ namespace MWRender
 
         mSceneTex = new osg::Texture2D;
         mSceneTex->setTextureSize(width, height);
-        mSceneTex->setSourceFormat(GL_RGB);
-        mSceneTex->setSourceType(GL_UNSIGNED_BYTE);
-        mSceneTex->setInternalFormat(GL_RGB);
+        mSceneTex->setSourceFormat(SceneUtil::Color::colorSourceFormat());
+        mSceneTex->setSourceType(SceneUtil::Color::colorSourceType());
+        mSceneTex->setInternalFormat(SceneUtil::Color::colorInternalFormat());
         mSceneTex->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::NEAREST);
         mSceneTex->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::NEAREST);
         mSceneTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -296,6 +355,7 @@ namespace MWRender
         mHUDCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         mHUDCamera->setRenderOrder(osg::Camera::POST_RENDER);
         mHUDCamera->setClearColor(osg::Vec4(0.45, 0.45, 0.14, 1.0));
+        mHUDCamera->setClearMask(0);
         mHUDCamera->setProjectionMatrix(osg::Matrix::ortho2D(0, 1, 0, 1));
         mHUDCamera->setAllowEventFocus(false);
         mHUDCamera->setViewport(0, 0, width, height);
@@ -325,8 +385,28 @@ namespace MWRender
             }
         )GLSL";
 
+        constexpr char fragSrcMultiview[] = R"GLSL(
+            #version 330 compatibility
+
+            #extension GL_EXT_texture_array : require
+
+            varying vec2 uv;
+            uniform sampler2DArray sceneTex;
+
+            void main()
+            {
+                vec3 array_uv = vec3(uv.x * 2, uv.y, 0);
+                if(array_uv.x >= 1.0)
+                {
+                    array_uv.x -= 1.0;
+                    array_uv.z = 1;
+                }
+                gl_FragData[0] = texture2DArray(sceneTex, array_uv);
+            }
+        )GLSL";
+
         osg::ref_ptr<osg::Shader> vertShader = new osg::Shader(osg::Shader::VERTEX, vertSrc);
-        osg::ref_ptr<osg::Shader> fragShader = new osg::Shader(osg::Shader::FRAGMENT, fragSrc);
+        osg::ref_ptr<osg::Shader> fragShader = new osg::Shader(osg::Shader::FRAGMENT, Stereo::getMultiview() ? fragSrcMultiview : fragSrc);
 
         osg::ref_ptr<osg::Program> program = new osg::Program;
         program->addShader(vertShader);
@@ -334,13 +414,8 @@ namespace MWRender
 
         mHUDCamera->addChild(createFullScreenTri());
         mHUDCamera->setNodeMask(Mask_RenderToTexture);
-
-        auto* stateset = mHUDCamera->getOrCreateStateSet();
-        stateset->setTextureAttributeAndModes(0, mSceneTex, osg::StateAttribute::ON);
-        stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
-        stateset->addUniform(new osg::Uniform("sceneTex", 0));
-        stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-        stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+        mHUDCamera->setCullCallback(new HUDCameraStatesetUpdater(mHUDCamera, program, mSceneTex));
     }
 
 }
+

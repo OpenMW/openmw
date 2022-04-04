@@ -5,6 +5,7 @@
 
 #include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include "mwshadowtechnique.hpp"
 
@@ -101,6 +102,7 @@ namespace SceneUtil
         mIndoorShadowCastingMask(indoorShadowCastingMask)
     {
         mShadowedScene->setShadowTechnique(mShadowTechnique);
+        Stereo::Manager::instance().setShadowTechnique(mShadowTechnique);
 
         mShadowedScene->addChild(sceneRoot);
         rootNode->addChild(mShadowedScene);
@@ -117,6 +119,7 @@ namespace SceneUtil
 
     ShadowManager::~ShadowManager()
     {
+        Stereo::Manager::instance().setShadowTechnique(nullptr);
     }
 
     Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines()

@@ -1,4 +1,4 @@
-#version 120
+#version @GLSLVersion
 
 varying vec2 uv;
 

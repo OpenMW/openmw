@@ -1,5 +1,7 @@
 #include "statesetupdater.hpp"
 
+#include <components/stereo/stereomanager.hpp>
+
 #include <osg/Node>
 #include <osg/NodeVisitor>
 #include <osgUtil/CullVisitor>
@@ -38,6 +40,12 @@ namespace SceneUtil
     {
         auto stateset = getCvDependentStateset(cv);
         apply(stateset, cv);
+        auto& sm = Stereo::Manager::instance();
+        if (sm.getEye(cv) == Stereo::Eye::Left)
+            applyLeft(stateset, cv);
+        if (sm.getEye(cv) == Stereo::Eye::Right)
+            applyRight(stateset, cv);
+
         cv->pushStateSet(stateset);
         traverse(node, cv);
         cv->popStateSet();

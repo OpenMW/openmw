@@ -30,6 +30,9 @@
 
 #include <components/compiler/extensions0.hpp>
 
+#include <components/stereo/stereomanager.hpp>
+#include <components/stereo/multiview.hpp>
+
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/files/configurationmanager.hpp>
@@ -40,6 +43,7 @@
 
 #include <components/sceneutil/screencapture.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/color.hpp>
 #include <components/sceneutil/util.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
@@ -251,6 +255,18 @@ namespace
             Log(Debug::Info) << "OpenGL Version: " << glGetString(GL_VERSION);
         }
     };
+
+    class InitializeStereoOperation final : public osg::GraphicsOperation
+    {
+    public:
+        InitializeStereoOperation() : GraphicsOperation("InitializeStereoOperation", false)
+        {}
+
+        void operator()(osg::GraphicsContext* graphicsContext) override
+        {
+            Stereo::Manager::instance().initializeStereo(graphicsContext);
+        }
+    };
 }
 
 void OMW::Engine::executeLocalScripts()
@@ -413,6 +429,9 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mEncoding(ToUTF8::WINDOWS_1252)
   , mEncoder(nullptr)
   , mScreenCaptureOperation(nullptr)
+  , mSelectDepthFormatOperation(new SceneUtil::SelectDepthFormatOperation())
+  , mSelectColorFormatOperation(new SceneUtil::Color::SelectColorFormatOperation())
+  , mStereoManager(nullptr)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
@@ -447,6 +466,8 @@ OMW::Engine::~Engine()
 {
     if (mScreenCaptureOperation != nullptr)
         mScreenCaptureOperation->stop();
+
+    mStereoManager = nullptr;
 
     mEnvironment.cleanup();
 
@@ -640,6 +661,15 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     if (Debug::shouldDebugOpenGL())
         realizeOperations->add(new Debug::EnableGLDebugOperation());
 
+    realizeOperations->add(mSelectDepthFormatOperation);
+    realizeOperations->add(mSelectColorFormatOperation);
+
+    if (Stereo::getStereo())
+    {
+        realizeOperations->add(new InitializeStereoOperation());
+        Stereo::setVertexBufferHint();
+    }
+
     mViewer->realize();
 
     mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, graphicsWindow->getTraits()->width, graphicsWindow->getTraits()->height);
@@ -674,10 +704,12 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setStateManager (
         std::make_unique<MWState::StateManager> (mCfgMgr.getUserDataPath() / "saves", mContentFiles));
 
-    createWindow(settings);
+    mStereoManager = std::make_unique<Stereo::Manager>(mViewer);
 
-    osg::ref_ptr<osg::Group> rootNode (new osg::Group);
+    osg::ref_ptr<osg::Group> rootNode(new osg::Group);
     mViewer->setSceneData(rootNode);
+
+    createWindow(settings);
 
     mVFS = std::make_unique<VFS::Manager>(mFSStrict);
 
@@ -757,22 +789,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
     bool shadersSupported = exts && (exts->glslLanguageVersion >= 1.2f);
-    bool enableReverseZ = false;
-
-    if (Settings::Manager::getBool("reverse z", "Camera"))
-    {
-        if (exts && exts->isClipControlSupported)
-        {
-            enableReverseZ = true;
-            Log(Debug::Info) << "Using reverse-z depth buffer";
-        }
-        else
-            Log(Debug::Warning) << "GL_ARB_clip_control not supported: disabling reverse-z depth buffer";
-    }
-    else
-        Log(Debug::Info) << "Using standard depth buffer";
-
-    SceneUtil::AutoDepth::setReversed(enableReverseZ);
 
 #if OSG_VERSION_LESS_THAN(3, 6, 6)
     // hack fix for https://github.com/openscenegraph/OpenSceneGraph/issues/1028
@@ -784,6 +800,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
     guiRoot->setName("GUI Root");
     guiRoot->setNodeMask(MWRender::Mask_GUI);
+    mStereoManager->disableStereoForNode(guiRoot);
     rootNode->addChild(guiRoot);
 
     auto windowMgr = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
@@ -794,7 +811,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setWindowManager (std::move(windowMgr));
 
     auto inputMgr = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
-    mEnvironment.setInputManager (std::move(inputMgr));
+    mEnvironment.setInputManager(std::move(inputMgr));
 
     // Create sound system
     mEnvironment.setSoundManager (std::make_unique<MWSound::SoundManager>(mVFS.get(), mUseSound));

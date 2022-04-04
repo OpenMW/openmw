@@ -1,4 +1,6 @@
-#version 120
+#version @GLSLVersion
+
+#include "multiview_vertex.glsl"
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -9,7 +11,6 @@
 #endif
 
 #include "openmw_vertex.h.glsl"
-
 #if @diffuseMap
 varying vec2 diffuseMapUV;
 #endif
