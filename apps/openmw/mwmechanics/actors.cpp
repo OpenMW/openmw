@@ -1057,9 +1057,11 @@ namespace MWMechanics
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if (!anim)
             return;
-        mActors.emplace(ptr, new Actor(ptr, anim));
 
-        CharacterController* ctrl = mActors[ptr]->getCharacterController();
+        auto* newActor = new Actor(ptr, anim);
+        mActors.emplace(ptr, newActor);
+
+        CharacterController* ctrl = newActor->getCharacterController();
         if (updateImmediately)
             ctrl->update(0);
 
@@ -1160,7 +1162,7 @@ namespace MWMechanics
             mActors.erase(iter);
 
             actor->updatePtr(ptr);
-            mActors.insert(std::make_pair(ptr, actor));
+            mActors.emplace(ptr, actor);
         }
     }
 
@@ -1173,7 +1175,7 @@ namespace MWMechanics
             {
                 removeTemporaryEffects(iter->first);
                 delete iter->second;
-                mActors.erase(iter++);
+                iter = mActors.erase(iter);
             }
             else
                 ++iter;
