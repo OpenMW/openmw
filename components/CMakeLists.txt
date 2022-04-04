@@ -189,7 +189,7 @@ add_component_dir (esm4
 
 add_component_dir (misc
     constants utf8stream stringops resourcehelpers rng messageformatparser weakcache thread
-    compression osguservalues errorMarker color
+    compression osguservalues errorMarker color indexedvector
     )
 
 add_component_dir (debug
