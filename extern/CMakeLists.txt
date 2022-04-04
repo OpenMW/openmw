@@ -50,7 +50,7 @@ if(NOT OPENMW_USE_SYSTEM_BULLET)
     include(FetchContent)
     FetchContent_Declare(bullet
         URL https://github.com/bulletphysics/bullet3/archive/refs/tags/3.17.tar.gz
-        URL_HASH MD5=7711bce9a49c289a08ecda34eaa0f32e
+        URL_HASH SHA512=a5105bf5f1dd365a64a350755c7d2c97942f74897a18dcdb3651e6732fd55cc1030a096f5808cf50575281f05e3ac09aa50a48d271a47b94cd61f5167a72b7cc
         SOURCE_DIR fetched/bullet
     )
     FetchContent_MakeAvailableExcludeFromAll(bullet)
@@ -85,7 +85,7 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
     include(FetchContent)
     FetchContent_Declare(mygui
         URL https://github.com/MyGUI/mygui/archive/59c1388b942721887d18743ada15f1906ff11a1f.zip
-        URL_HASH MD5=0a64c9cccc8f96dc8c08172175e68e1c
+        URL_HASH SHA512=56b112b261fdc4c9b782de8ef8a9d239af3a75b8cfaa617daecc77c38ecd6521624cf5c17e6ac839b0870be5c31608d4f2a1574165d9d049f14f9e6ae03a8f98
         SOURCE_DIR fetched/mygui
     )
     FetchContent_MakeAvailableExcludeFromAll(mygui)
@@ -151,7 +151,7 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
     include(FetchContent)
     FetchContent_Declare(osg
         URL https://github.com/OpenMW/osg/archive/01cc2b585c8456a4ff843066b7e1a8715558289f.zip
-        URL_HASH MD5=f1496c5ce32f733581e84568cf2712af
+        URL_HASH SHA512=9b0a94c1c1d99c767f1857629d43c7a53bfcb74ef760993a121567831e168a1ebbfc10b0c67d7f2241c7b6c6dab2d0e6b876d9f17aca0fabe1a8c86b2279f956
         SOURCE_DIR fetched/osg
     )
     FetchContent_MakeAvailableExcludeFromAll(osg)
@@ -183,7 +183,7 @@ if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
     include(FetchContent)
     FetchContent_Declare(recastnavigation
         URL https://github.com/recastnavigation/recastnavigation/archive/e75adf86f91eb3082220085e42dda62679f9a3ea.zip
-        URL_HASH MD5=af905d121ef9d1cdfa979b0495cba059
+        URL_HASH SHA512=93a19490cdfa55e98a6af9cc050e94af88fdb95fae2059ceeff28b62f3b48515f5fdd2c806c910550933b6861a4f6a91173ee0ed1b61c1396f7b34d4c78f0793
         SOURCE_DIR fetched/recastnavigation
     )
     FetchContent_MakeAvailableExcludeFromAll(recastnavigation)
@@ -193,7 +193,7 @@ if (NOT OPENMW_USE_SYSTEM_SQLITE3)
     include(FetchContent)
     FetchContent_Declare(sqlite3
         URL https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip
-        URL_HASH MD5=c5d360c74111bafae1b704721ff18fe6
+        URL_HASH SHA512=5c18f158a599b1e91d95c91de3aa5c5de52f986845ad0cb49dfd56b650587e55e24d469571b5b864229b870d0eaf85d78893f61ef950b95389cb41692be37f58
         SOURCE_DIR fetched/sqlite3
     )
     FetchContent_MakeAvailableExcludeFromAll(sqlite3)
@@ -221,7 +221,7 @@ if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
     include(FetchContent)
     FetchContent_Declare(benchmark
         URL https://github.com/google/benchmark/archive/refs/tags/v1.5.2.zip
-        URL_HASH MD5=49395b757a7c4656d70f1328d93efd00
+        URL_HASH SHA512=1146deca3b424703800933012ef75805d4657309d58b3484498bb51a99025bd405a69855a75af59c23fc3684bfa027224513999b8d7beaab3320c96fb6d6c540
         SOURCE_DIR fetched/benchmark
     )
     FetchContent_MakeAvailableExcludeFromAll(benchmark)
