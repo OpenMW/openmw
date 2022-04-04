@@ -256,7 +256,7 @@ add_component_dir (fallback
 add_component_dir (lua_ui
     registerscriptsettings scriptsettings
     properties widget element util layers content alignment resources
-    adapter text textedit window image container
+    adapter text textedit window image container flex
     )
 
 

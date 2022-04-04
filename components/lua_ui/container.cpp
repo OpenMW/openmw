@@ -29,7 +29,7 @@ namespace LuaUi
             size.width = std::max(size.width, coord.left + coord.width);
             size.height = std::max(size.height, coord.top + coord.height);
         }
-        setForcedSize(size);
+        forceSize(size);
         updateCoord();
     }
 }

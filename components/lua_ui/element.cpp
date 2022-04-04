@@ -136,8 +136,8 @@ namespace LuaUi
         setTemplate(ext, layout.get<sol::object>(LayoutKeys::templateLayout));
         ext->setProperties(layout.get<sol::object>(LayoutKeys::props));
         setEventCallbacks(ext, layout.get<sol::object>(LayoutKeys::events));
-
         ext->setChildren(updateContent(ext->children(), layout.get<sol::object>(LayoutKeys::content)));
+        ext->updateCoord();
     }
 
     std::string setLayer(WidgetExtension* ext, const sol::table& layout)

@@ -10,7 +10,9 @@
 namespace LuaUi
 {
     WidgetExtension::WidgetExtension()
-        : mPropagateEvents(true)
+        : mForcePosition(false)
+        , mForceSize(false)
+        , mPropagateEvents(true)
         , mLua(nullptr)
         , mWidget(nullptr)
         , mSlot(this)
@@ -85,7 +87,6 @@ namespace LuaUi
         ext->mParent = this;
         ext->mTemplateChild = false;
         ext->widget()->attachToWidget(mSlot->widget());
-        ext->updateCoord();
     }
 
     void WidgetExtension::attachTemplate(WidgetExtension* ext)
@@ -93,7 +94,6 @@ namespace LuaUi
         ext->mParent = this;
         ext->mTemplateChild = true;
         ext->widget()->attachToWidget(widget());
-        ext->updateCoord();
     }
 
     WidgetExtension* WidgetExtension::findDeep(std::string_view flagName)
@@ -219,14 +219,28 @@ namespace LuaUi
         return mForcedCoord;
     }
 
-    void WidgetExtension::setForcedCoord(const MyGUI::IntCoord& offset)
+    void WidgetExtension::forceCoord(const MyGUI::IntCoord& offset)
     {
+        mForcePosition = true;
+        mForceSize = true;
         mForcedCoord = offset;
     }
 
-    void WidgetExtension::setForcedSize(const MyGUI::IntSize& size)
+    void WidgetExtension::forcePosition(const MyGUI::IntPoint& pos)
     {
+        mForcePosition = true;
+        mForcedCoord = pos;
+    }
+
+    void WidgetExtension::forceSize(const MyGUI::IntSize& size)
+    {
+        mForceSize = true;
         mForcedCoord = size;
+    }
+
+    void WidgetExtension::clearForced() {
+        mForcePosition = false;
+        mForceSize = false;
     }
 
     void WidgetExtension::updateCoord()
@@ -246,7 +260,6 @@ namespace LuaUi
     {
         mProperties = props;
         updateProperties();
-        updateCoord();
     }
 
     void WidgetExtension::updateProperties()
@@ -281,9 +294,12 @@ namespace LuaUi
 
     MyGUI::IntSize WidgetExtension::calculateSize()
     {
+        if (mForceSize)
+            return mForcedCoord.size();
+
         MyGUI::IntSize pSize = parentSize();
         MyGUI::IntSize newSize;
-        newSize = mAbsoluteCoord.size() + mForcedCoord.size();
+        newSize = mAbsoluteCoord.size();
         newSize.width += mRelativeCoord.width * pSize.width;
         newSize.height += mRelativeCoord.height * pSize.height;
         return newSize;
@@ -291,9 +307,11 @@ namespace LuaUi
 
     MyGUI::IntPoint WidgetExtension::calculatePosition(const MyGUI::IntSize& size)
     {
+        if (mForcePosition)
+            return mForcedCoord.point();
         MyGUI::IntSize pSize = parentSize();
         MyGUI::IntPoint newPosition;
-        newPosition = mAbsoluteCoord.point() + mForcedCoord.point();
+        newPosition = mAbsoluteCoord.point();
         newPosition.left += mRelativeCoord.left * pSize.width - mAnchor.width * size.width;
         newPosition.top += mRelativeCoord.top * pSize.height - mAnchor.height * size.height;
         return newPosition;
