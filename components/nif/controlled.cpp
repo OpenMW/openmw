@@ -34,11 +34,12 @@ namespace Nif
         mipmap = nif->getUInt();
         alpha = nif->getUInt();
 
-        nif->getChar(); // always 1
+        // Renderer hints, typically of no use for us
+        /* bool mIsStatic = */nif->getChar();
         if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,103))
-            nif->getBoolean(); // Direct rendering
+            /* bool mDirectRendering = */nif->getBoolean();
         if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,4))
-            nif->getBoolean(); // NiPersistentSrcTextureRendererData is used instead of NiPixelData
+            /* bool mPersistRenderData = */nif->getBoolean();
     }
 
     void NiSourceTexture::post(NIFFile *nif)
@@ -99,11 +100,11 @@ namespace Nif
         NiParticleModifier::read(nif);
 
         mBounceFactor = nif->getFloat();
-        if (nif->getVersion() >= NIFStream::generateVersion(4,2,2,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(4,2,0,2))
         {
             // Unused in NifSkope. Need to figure out what these do.
-            /*bool spawnOnCollision = */nif->getBoolean();
-            /*bool dieOnCollision = */nif->getBoolean();
+            /*bool mSpawnOnCollision = */nif->getBoolean();
+            /*bool mDieOnCollision = */nif->getBoolean();
         }
     }
 
@@ -111,11 +112,10 @@ namespace Nif
     {
         NiParticleCollider::read(nif);
 
-        /*unknown*/nif->getFloat();
-
-        for (int i=0;i<10;++i)
-            /*unknown*/nif->getFloat();
-
+        mExtents = nif->getVector2();
+        mPosition = nif->getVector3();
+        mXVector = nif->getVector3();
+        mYVector = nif->getVector3();
         mPlaneNormal = nif->getVector3();
         mPlaneDistance = nif->getFloat();
     }
@@ -124,12 +124,9 @@ namespace Nif
     {
         NiParticleModifier::read(nif);
 
-        /*
-           byte (0 or 1)
-           float (1)
-           float*3
-        */
-        nif->skip(17);
+        /* bool mRandomInitialAxis = */nif->getChar();
+        /* osg::Vec3f mInitialAxis = */nif->getVector3();
+        /* float mRotationSpeed = */nif->getFloat();
     }
 
     void NiSphericalCollider::read(NIFStream* nif)
