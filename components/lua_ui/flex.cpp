@@ -13,23 +13,20 @@ namespace LuaUi
 
     namespace
     {
-        MyGUI::IntPoint alignSize(const MyGUI::IntSize& container, const MyGUI::IntSize& content, Alignment alignment)
+        int alignSize(int container, int content, Alignment alignment)
         {
-            MyGUI::IntPoint alignedPosition;
+            int alignedPosition = 0;
             {
-                MyGUI::IntSize alignSize = container;
                 switch (alignment)
                 {
                 case Alignment::Start:
-                    alignedPosition = MyGUI::IntPoint(0, 0);
+                    alignedPosition = 0;
                     break;
                 case Alignment::Center:
-                    alignSize -= content;
-                    alignedPosition = { alignSize.width / 2, alignSize.height / 2 };
+                    alignedPosition = (container - content) / 2;
                     break;
                 case Alignment::End:
-                    alignSize -= content;
-                    alignedPosition = { alignSize.width, alignSize.height };
+                    alignedPosition = container - content;
                     break;
                 }
             }
@@ -44,50 +41,34 @@ namespace LuaUi
         for (auto* w: children())
         {
             w->clearForced();
-            childrenSize += w->calculateSize();
-            totalGrow += w->externalValue("grow", 0.0f);
+            MyGUI::IntSize size = w->calculateSize();
+            setPrimary(childrenSize, getPrimary(childrenSize) + getPrimary(size));
+            setSecondary(childrenSize, std::max(getSecondary(childrenSize), getSecondary(size)));
+            totalGrow += std::max(0.0f, w->externalValue("grow", 0.0f));
         }
         mChildrenSize = childrenSize;
 
         MyGUI::IntSize flexSize = calculateSize();
-        MyGUI::IntSize growSize;
-        MyGUI::FloatSize growFactor;
+        int growSize = 0;
+        float growFactor = 0;
         if (totalGrow > 0)
         {
-            growSize = flexSize - childrenSize;
-            growFactor = { growSize.width / totalGrow, growSize.height / totalGrow };
+            growSize = getPrimary(flexSize) - getPrimary(childrenSize);
+            growFactor = growSize / totalGrow;
         }
-        if (mHorizontal)
-            flexSize.width -= growSize.width;
-        else
-            flexSize.height-= growSize.height;
+        setPrimary(flexSize, getPrimary(flexSize) - growSize);
 
-        MyGUI::IntPoint alignedPosition = alignSize(flexSize, childrenSize, mAlign);
-        MyGUI::IntPoint arrangedPosition = alignSize(flexSize, childrenSize, mArrange);
         MyGUI::IntPoint childPosition;
-        if (mHorizontal)
-            childPosition = { alignedPosition.left, arrangedPosition.top };
-        else
-            childPosition = { arrangedPosition.left, alignedPosition.top };
+        setPrimary(childPosition, alignSize(getPrimary(flexSize), getPrimary(childrenSize), mAlign));
+        setSecondary(childPosition, alignSize(getSecondary(flexSize), getSecondary(childrenSize), mArrange));
         for (auto* w : children())
         {
             w->forcePosition(childPosition);
-            float grow = w->externalValue("grow", 0);
-            MyGUI::IntSize growth(growFactor.width * grow, growFactor.height * grow);
-            if (mHorizontal)
-            {
-                int width = w->widget()->getWidth();
-                width += growth.width;
-                w->forceSize({width, w->widget()->getHeight()});
-                childPosition.left += width;
-            }
-            else
-            {
-                int height = w->widget()->getHeight();
-                height += growth.height;
-                w->forceSize({ w->widget()->getWidth(), height });
-                childPosition.top += height;
-            }
+            MyGUI::IntSize size = w->widget()->getSize();
+            float grow = std::max(0.0f, w->externalValue("grow", 0.0f));
+            setPrimary(size, getPrimary(size) + static_cast<int>(growFactor * grow));
+            w->forceSize(size);
+            setPrimary(childPosition, getPrimary(childPosition) + getPrimary(size));
         }
         WidgetExtension::updateProperties();
     }
@@ -96,10 +77,8 @@ namespace LuaUi
     {
         MyGUI::IntSize size = WidgetExtension::calculateSize();
         if (mAutoSized) {
-            if (mHorizontal)
-                size.width = mChildrenSize.width;
-            else
-                size.height = mChildrenSize.height;
+            setPrimary(size, getPrimary(mChildrenSize));
+            setSecondary(size, std::max(getSecondary(size), getSecondary(mChildrenSize)));
         }
         return size;
     }
