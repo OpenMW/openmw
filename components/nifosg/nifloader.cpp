@@ -417,17 +417,31 @@ namespace NifOsg
             return switchNode;
         }
 
-        static osg::ref_ptr<osg::Sequence> handleSequenceNode(const Nif::NiFltAnimationNode* niFltAnimationNode)
+        static osg::ref_ptr<osg::Sequence> prepareSequenceNode(const Nif::Node* nifNode)
         {
+            const Nif::NiFltAnimationNode* niFltAnimationNode = static_cast<const Nif::NiFltAnimationNode*>(nifNode);
             osg::ref_ptr<osg::Sequence> sequenceNode (new osg::Sequence);
             sequenceNode->setName(niFltAnimationNode->name);
-            sequenceNode->setDefaultTime(niFltAnimationNode->mInterval);
-            sequenceNode->setMode(osg::Sequence::START);
-            if (niFltAnimationNode->flags & Nif::NiFltAnimationNode::Flag_Reverse)
-                sequenceNode->setDuration(0.2f, -1);
-            else
-                sequenceNode->setDuration(-0.2f, -1);
+            if (niFltAnimationNode->children.length()!=0)
+            {
+                if (niFltAnimationNode->flags & Nif::NiFltAnimationNode::Flag_Swing)
+                    sequenceNode->setDefaultTime(niFltAnimationNode->mDuration/(niFltAnimationNode->children.length()*2));
+                else
+                    sequenceNode->setDefaultTime(niFltAnimationNode->mDuration/niFltAnimationNode->children.length());
+            }
             return sequenceNode;
+        }
+
+        static void activateSequenceNode(osg::Group* osgNode, const Nif::Node* nifNode)
+        {
+            const Nif::NiFltAnimationNode* niFltAnimationNode = static_cast<const Nif::NiFltAnimationNode*>(nifNode);
+            osg::Sequence* sequenceNode = static_cast<osg::Sequence*>(osgNode);
+            if (niFltAnimationNode->flags & Nif::NiFltAnimationNode::Flag_Swing)
+                sequenceNode->setInterval(osg::Sequence::SWING, 0,-1);
+            else
+                sequenceNode->setInterval(osg::Sequence::LOOP, 0,-1);
+            sequenceNode->setDuration(1.0f, -1);
+            sequenceNode->setMode(osg::Sequence::START);
         }
 
         osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st, Resource::ImageManager* imageManager)
@@ -727,8 +741,7 @@ namespace NifOsg
             }
             else if (nifNode->recType == Nif::RC_NiFltAnimationNode)
             {
-                const Nif::NiFltAnimationNode* niFltAnimationNode = static_cast<const Nif::NiFltAnimationNode*>(nifNode);
-                osg::ref_ptr<osg::Sequence> sequenceNode = handleSequenceNode(niFltAnimationNode);
+                osg::ref_ptr<osg::Sequence> sequenceNode = prepareSequenceNode(nifNode);
                 node->addChild(sequenceNode);
                 currentNode = sequenceNode;
             }
@@ -751,6 +764,9 @@ namespace NifOsg
                         handleNode(children[i].getPtr(), &currentParent, currentNode, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
                 }
             }
+
+            if (nifNode->recType == Nif::RC_NiFltAnimationNode)
+                activateSequenceNode(currentNode,nifNode);
 
             return node;
         }
