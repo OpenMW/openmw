@@ -32,6 +32,11 @@ namespace LuaUi
             }
             return alignedPosition;
         }
+
+        float getGrow(WidgetExtension* w)
+        {
+            return std::max(0.0f, w->externalValue("grow", 0.0f));
+        }
     }
 
     void LuaFlex::updateChildren()
@@ -42,9 +47,9 @@ namespace LuaUi
         {
             w->clearForced();
             MyGUI::IntSize size = w->calculateSize();
-            setPrimary(childrenSize, getPrimary(childrenSize) + getPrimary(size));
-            setSecondary(childrenSize, std::max(getSecondary(childrenSize), getSecondary(size)));
-            totalGrow += std::max(0.0f, w->externalValue("grow", 0.0f));
+            primary(childrenSize) += primary(size);
+            secondary(childrenSize) = std::max(secondary(childrenSize), secondary(size));
+            totalGrow += getGrow(w);
         }
         mChildrenSize = childrenSize;
 
@@ -53,22 +58,20 @@ namespace LuaUi
         float growFactor = 0;
         if (totalGrow > 0)
         {
-            growSize = getPrimary(flexSize) - getPrimary(childrenSize);
+            growSize = primary(flexSize) - primary(childrenSize);
             growFactor = growSize / totalGrow;
-        }
-        setPrimary(flexSize, getPrimary(flexSize) - growSize);
+        }   
 
         MyGUI::IntPoint childPosition;
-        setPrimary(childPosition, alignSize(getPrimary(flexSize), getPrimary(childrenSize), mAlign));
-        setSecondary(childPosition, alignSize(getSecondary(flexSize), getSecondary(childrenSize), mArrange));
+        primary(childPosition) = alignSize(primary(flexSize) - growSize, primary(childrenSize), mAlign);
+        secondary(childPosition) = alignSize(secondary(flexSize), secondary(childrenSize), mArrange);
         for (auto* w : children())
         {
             w->forcePosition(childPosition);
             MyGUI::IntSize size = w->widget()->getSize();
-            float grow = std::max(0.0f, w->externalValue("grow", 0.0f));
-            setPrimary(size, getPrimary(size) + static_cast<int>(growFactor * grow));
+            primary(size) += static_cast<int>(growFactor * getGrow(w));
             w->forceSize(size);
-            setPrimary(childPosition, getPrimary(childPosition) + getPrimary(size));
+            primary(childPosition) += primary(size);
         }
         WidgetExtension::updateProperties();
     }
@@ -77,8 +80,8 @@ namespace LuaUi
     {
         MyGUI::IntSize size = WidgetExtension::calculateSize();
         if (mAutoSized) {
-            setPrimary(size, getPrimary(mChildrenSize));
-            setSecondary(size, std::max(getSecondary(size), getSecondary(mChildrenSize)));
+            primary(size) = primary(mChildrenSize);
+            secondary(size) = std::max(secondary(size), secondary(mChildrenSize));
         }
         return size;
     }

@@ -27,63 +27,27 @@ namespace LuaUi
             Alignment mArrange;
 
             template<typename T>
-            inline T getPrimary(const MyGUI::types::TPoint<T>& point)
+            T& primary(MyGUI::types::TPoint<T>& point)
             {
                 return mHorizontal ? point.left : point.top;
             }
 
             template<typename T>
-            inline T getSecondary(const MyGUI::types::TPoint<T>& point)
+            T& secondary(MyGUI::types::TPoint<T>& point)
             {
                 return mHorizontal ? point.top : point.left;
             }
 
             template<typename T>
-            inline void setPrimary(MyGUI::types::TPoint<T>& point, T value)
+            T& primary(MyGUI::types::TSize<T>& size)
             {
-                if (mHorizontal)
-                    point.left = value;
-                else
-                    point.top = value;
+                return mHorizontal ? size.width : size.height;
             }
 
             template<typename T>
-            inline void setSecondary(MyGUI::types::TPoint<T>& point, T value)
+            T& secondary(MyGUI::types::TSize<T>& size)
             {
-                if (mHorizontal)
-                    point.top = value;
-                else
-                    point.left = value;
-            }
-
-            template<typename T>
-            inline T getPrimary(const MyGUI::types::TSize<T>& point)
-            {
-                return mHorizontal ? point.width : point.height;
-            }
-
-            template<typename T>
-            inline T getSecondary(const MyGUI::types::TSize<T>& point)
-            {
-                return mHorizontal ? point.height : point.width;
-            }
-
-            template<typename T>
-            inline void setPrimary(MyGUI::types::TSize<T>& point, T value)
-            {
-                if (mHorizontal)
-                    point.width = value;
-                else
-                    point.height = value;
-            }
-
-            template<typename T>
-            inline void setSecondary(MyGUI::types::TSize<T>& point, T value)
-            {
-                if (mHorizontal)
-                    point.height = value;
-                else
-                    point.width = value;
+                return mHorizontal ? size.height : size.width;
             }
     };
 }
