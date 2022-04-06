@@ -1,12 +1,11 @@
 #ifndef GAME_SCRIPT_GLOBALSCRIPTS_H
 #define GAME_SCRIPT_GLOBALSCRIPTS_H
 
-#include <boost/variant/variant.hpp>
-
 #include <string>
 #include <map>
 #include <memory>
 #include <utility>
+#include <variant>
 
 #include <cstdint>
 
@@ -37,7 +36,7 @@ namespace MWScript
     {
         bool mRunning;
         Locals mLocals;
-        boost::variant<MWWorld::Ptr, std::pair<ESM::RefNum, std::string> > mTarget; // Used to start targeted script
+        std::variant<MWWorld::Ptr, std::pair<ESM::RefNum, std::string>> mTarget; // Used to start targeted script
 
         GlobalScriptDesc();
 
