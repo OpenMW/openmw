@@ -16,7 +16,7 @@
 
 namespace
 {
-    struct ScriptCreatingVisitor : public boost::static_visitor<ESM::GlobalScript>
+    struct ScriptCreatingVisitor
     {
         ESM::GlobalScript operator()(const MWWorld::Ptr &ptr) const
         {
@@ -46,7 +46,7 @@ namespace
         }
     };
 
-    struct PtrGettingVisitor : public boost::static_visitor<const MWWorld::Ptr*>
+    struct PtrGettingVisitor
     {
         const MWWorld::Ptr* operator()(const MWWorld::Ptr &ptr) const
         {
@@ -59,7 +59,7 @@ namespace
         }
     };
 
-    struct PtrResolvingVisitor : public boost::static_visitor<MWWorld::Ptr>
+    struct PtrResolvingVisitor
     {
         MWWorld::Ptr operator()(const MWWorld::Ptr &ptr) const
         {
@@ -76,7 +76,7 @@ namespace
         }
     };
 
-    class MatchPtrVisitor : public boost::static_visitor<bool>
+    class MatchPtrVisitor
     {
         const MWWorld::Ptr& mPtr;
     public:
@@ -93,7 +93,7 @@ namespace
         }
     };
 
-    struct IdGettingVisitor : public boost::static_visitor<std::string>
+    struct IdGettingVisitor
     {
         std::string operator()(const MWWorld::Ptr& ptr) const
         {
@@ -115,19 +115,19 @@ namespace MWScript
 
     const MWWorld::Ptr* GlobalScriptDesc::getPtrIfPresent() const
     {
-        return boost::apply_visitor(PtrGettingVisitor(), mTarget);
+        return std::visit(PtrGettingVisitor(), mTarget);
     }
 
     MWWorld::Ptr GlobalScriptDesc::getPtr()
     {
-        MWWorld::Ptr ptr = boost::apply_visitor(PtrResolvingVisitor(), mTarget);
+        MWWorld::Ptr ptr = std::visit(PtrResolvingVisitor {}, mTarget);
         mTarget = ptr;
         return ptr;
     }
 
     std::string GlobalScriptDesc::getId() const
     {
-        return boost::apply_visitor(IdGettingVisitor(), mTarget);
+        return std::visit(IdGettingVisitor {}, mTarget);
     }
 
 
@@ -239,7 +239,7 @@ namespace MWScript
     {
         for (const auto& iter : mScripts)
         {
-            ESM::GlobalScript script = boost::apply_visitor (ScriptCreatingVisitor(), iter.second->mTarget);
+            ESM::GlobalScript script = std::visit (ScriptCreatingVisitor {}, iter.second->mTarget);
 
             script.mId = iter.first;
 
@@ -338,7 +338,7 @@ namespace MWScript
         MatchPtrVisitor visitor(base);
         for (const auto& script : mScripts)
         {
-            if (boost::apply_visitor (visitor, script.second->mTarget))
+            if (std::visit (visitor, script.second->mTarget))
                 script.second->mTarget = updated;
         }
     }
