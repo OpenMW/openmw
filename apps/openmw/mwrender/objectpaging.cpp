@@ -2,9 +2,9 @@
 
 #include <unordered_map>
 
-#include <osg/Version>
 #include <osg/LOD>
 #include <osg/Switch>
+#include <osg/Sequence>
 #include <osg/MatrixTransform>
 #include <osg/Material>
 #include <osgUtil/IncrementalCompileOperation>
@@ -65,7 +65,7 @@ namespace MWRender
           case ESM::REC_CONT:
             return store.get<ESM::Container>().searchStatic(id)->mModel;
           default:
-            return std::string();
+            return {};
         }
     }
 
@@ -149,6 +149,13 @@ namespace MWRender
                 for (unsigned int i=0; i<lod->getNumChildren(); ++i)
                     if (lod->getMinRange(i) * lod->getMinRange(i) <= mSqrDistance && mSqrDistance < lod->getMaxRange(i) * lod->getMaxRange(i))
                         n->addChild(operator()(lod->getChild(i)));
+                n->setDataVariance(osg::Object::STATIC);
+                return n;
+            }
+            if (const osg::Sequence* sq = dynamic_cast<const osg::Sequence*>(node))
+            {
+                osg::Group* n = new osg::Group;
+                n->addChild(operator()(sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0)));
                 n->setDataVariance(osg::Object::STATIC);
                 return n;
             }
@@ -299,6 +306,11 @@ namespace MWRender
                 for (unsigned int i=0; i<lod->getNumChildren(); ++i)
                     if (lod->getMinRange(i) * lod->getMinRange(i) <= mCurrentDistance && mCurrentDistance < lod->getMaxRange(i) * lod->getMaxRange(i))
                         traverse(*lod->getChild(i));
+                return;
+            }
+            if (osg::Sequence* sq = dynamic_cast<osg::Sequence*>(&node))
+            {
+                traverse(*sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0));
                 return;
             }
 

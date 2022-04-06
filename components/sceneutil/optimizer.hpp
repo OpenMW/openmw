@@ -362,6 +362,7 @@ class Optimizer
                 void apply(osg::Transform& transform) override;
                 void apply(osg::LOD& lod) override;
                 void apply(osg::Switch& switchNode) override;
+                void apply(osg::Sequence& sequenceNode) override;
                 void apply(osg::Geometry&) override { }
 
                 bool isOperationPermissible(osg::Node& node);
@@ -385,6 +386,7 @@ class Optimizer
             void apply(osg::Group& group) override;
             void apply(osg::LOD& lod) override;
             void apply(osg::Switch& switchNode) override;
+            void apply(osg::Sequence& sequenceNode) override;
         };
 
         class MergeGeometryVisitor : public BaseOptimizerVisitor

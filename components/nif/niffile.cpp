@@ -36,6 +36,7 @@ static std::map<std::string, CreateRecord> makeFactory()
         {"NiNode"                       , &construct <NiNode                      , RC_NiNode                     >},
         {"NiSwitchNode"                 , &construct <NiSwitchNode                , RC_NiSwitchNode               >},
         {"NiLODNode"                    , &construct <NiLODNode                   , RC_NiLODNode                  >},
+        {"NiFltAnimationNode"           , &construct <NiFltAnimationNode          , RC_NiFltAnimationNode         >},
         {"AvoidNode"                    , &construct <NiNode                      , RC_AvoidNode                  >},
         {"NiCollisionSwitch"            , &construct <NiNode                      , RC_NiCollisionSwitch          >},
         {"NiBSParticleNode"             , &construct <NiNode                      , RC_NiBSParticleNode           >},

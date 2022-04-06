@@ -38,6 +38,7 @@ enum RecordType
   RC_NiNode,
   RC_NiSwitchNode,
   RC_NiLODNode,
+  RC_NiFltAnimationNode,
   RC_NiBillboardNode,
   RC_AvoidNode,
   RC_NiCollisionSwitch,

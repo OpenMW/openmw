@@ -23,6 +23,7 @@
 #include <osg/MatrixTransform>
 #include <osg/PositionAttitudeTransform>
 #include <osg/LOD>
+#include <osg/Sequence>
 #include <osg/Billboard>
 #include <osg/Geometry>
 #include <osg/Notify>
@@ -845,7 +846,7 @@ void Optimizer::RemoveEmptyNodesVisitor::removeEmptyNodes()
                 ++pitr)
             {
                 osg::Group* parent = *pitr;
-                if (!parent->asSwitch() && !dynamic_cast<osg::LOD*>(parent))
+                if (!parent->asSwitch() && !dynamic_cast<osg::LOD*>(parent) && !dynamic_cast<osg::Sequence*>(parent))
                 {
                     parent->removeChild(nodeToRemove.get());
                     if (parent->getNumChildren()==0 && isOperationPermissibleForObject(parent)) newEmptyGroups.insert(parent);
@@ -885,6 +886,13 @@ void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Switch& switchNode)
     // We should keep all switch child nodes since they reflect different switch states.
     for (unsigned int i=0; i<switchNode.getNumChildren(); ++i)
         traverse(*switchNode.getChild(i));
+}
+
+void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Sequence& sequenceNode)
+{
+    // We should keep all sequence child nodes since they reflect different sequence states.
+    for (unsigned int i=0; i<sequenceNode.getNumChildren(); ++i)
+        traverse(*sequenceNode.getChild(i));
 }
 
 void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Group& group)
@@ -1949,6 +1957,12 @@ void Optimizer::MergeGroupsVisitor::apply(osg::Switch &switchNode)
 {
     // We should keep all switch child nodes since they reflect different switch states.
     traverse(switchNode);
+}
+
+void Optimizer::MergeGroupsVisitor::apply(osg::Sequence &sequenceNode)
+{
+    // We should keep all sequence child nodes since they reflect different sequence states.
+    traverse(sequenceNode);
 }
 
 void Optimizer::MergeGroupsVisitor::apply(osg::Group &group)
