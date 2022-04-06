@@ -20,10 +20,72 @@
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 
+#include <components/navmeshtool/protocol.hpp>
+
 #include "utils/textinputdialog.hpp"
 
-
 const char *Launcher::DataFilesPage::mDefaultContentListName = "Default";
+
+namespace Launcher
+{
+    namespace
+    {
+        struct HandleNavMeshToolMessage
+        {
+            int mCellsCount;
+            int mExpectedMaxProgress;
+            int mMaxProgress;
+            int mProgress;
+
+            HandleNavMeshToolMessage operator()(NavMeshTool::ExpectedCells&& message) const
+            {
+                return HandleNavMeshToolMessage {
+                    static_cast<int>(message.mCount),
+                    mExpectedMaxProgress,
+                    static_cast<int>(message.mCount) * 100,
+                    mProgress
+                };
+            }
+
+            HandleNavMeshToolMessage operator()(NavMeshTool::ProcessedCells&& message) const
+            {
+                return HandleNavMeshToolMessage {
+                    mCellsCount,
+                    mExpectedMaxProgress,
+                    mMaxProgress,
+                    std::max(mProgress, static_cast<int>(message.mCount))
+                };
+            }
+
+            HandleNavMeshToolMessage operator()(NavMeshTool::ExpectedTiles&& message) const
+            {
+                const int expectedMaxProgress = mCellsCount + static_cast<int>(message.mCount);
+                return HandleNavMeshToolMessage {
+                    mCellsCount,
+                    expectedMaxProgress,
+                    std::max(mMaxProgress, expectedMaxProgress),
+                    mProgress
+                };
+            }
+
+            HandleNavMeshToolMessage operator()(NavMeshTool::GeneratedTiles&& message) const
+            {
+                int progress = mCellsCount + static_cast<int>(message.mCount);
+                if (mExpectedMaxProgress < mMaxProgress)
+                    progress += static_cast<int>(std::round(
+                        (mMaxProgress - mExpectedMaxProgress)
+                        * (static_cast<float>(progress) / static_cast<float>(mExpectedMaxProgress))
+                    ));
+                return HandleNavMeshToolMessage {
+                    mCellsCount,
+                    mExpectedMaxProgress,
+                    mMaxProgress,
+                    std::max(mProgress, progress)
+                };
+            }
+        };
+    }
+}
 
 Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
                                        Config::LauncherSettings &launcherSettings, MainDialog *parent)
@@ -95,8 +157,8 @@ void Launcher::DataFilesPage::buildView()
     connect(ui.updateNavMeshButton, SIGNAL(clicked()), this, SLOT(startNavMeshTool()));
     connect(ui.cancelNavMeshButton, SIGNAL(clicked()), this, SLOT(killNavMeshTool()));
 
-    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(readyReadStandardOutput()), this, SLOT(updateNavMeshProgress()));
-    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(readyReadStandardError()), this, SLOT(updateNavMeshProgress()));
+    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(readyReadStandardOutput()), this, SLOT(readNavMeshToolStdout()));
+    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(readyReadStandardError()), this, SLOT(readNavMeshToolStderr()));
     connect(mNavMeshToolInvoker->getProcess(), SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(navMeshToolFinished(int, QProcess::ExitStatus)));
 }
 
@@ -429,7 +491,9 @@ void Launcher::DataFilesPage::startNavMeshTool()
     ui.navMeshProgressBar->setValue(0);
     ui.navMeshProgressBar->setMaximum(1);
 
-    if (!mNavMeshToolInvoker->startProcess(QLatin1String("openmw-navmeshtool")))
+    mNavMeshToolProgress = NavMeshToolProgress {};
+
+    if (!mNavMeshToolInvoker->startProcess(QLatin1String("openmw-navmeshtool"), QStringList({"--write-binary-log"})))
         return;
 
     ui.cancelNavMeshButton->setEnabled(true);
@@ -441,39 +505,60 @@ void Launcher::DataFilesPage::killNavMeshTool()
     mNavMeshToolInvoker->killProcess();
 }
 
-void Launcher::DataFilesPage::updateNavMeshProgress()
+void Launcher::DataFilesPage::readNavMeshToolStderr()
+{
+    updateNavMeshProgress(4096);
+}
+
+void Launcher::DataFilesPage::updateNavMeshProgress(int minDataSize)
 {
     QProcess& process = *mNavMeshToolInvoker->getProcess();
-    QString text;
-    while (process.canReadLine())
-    {
-        const QByteArray line = process.readLine();
-        const auto end = std::find_if(line.rbegin(), line.rend(), [] (auto v) { return v != '\n' && v != '\r'; });
-        text = QString::fromUtf8(line.mid(0, line.size() - (end - line.rbegin())));
-        ui.navMeshLogPlainTextEdit->appendPlainText(text);
-    }
-    const QRegularExpression pattern(R"([\( ](\d+)/(\d+)[\) ])");
-    QRegularExpressionMatch match = pattern.match(text);
-    if (!match.hasMatch())
+    mNavMeshToolProgress.mMessagesData.append(process.readAllStandardError());
+    if (mNavMeshToolProgress.mMessagesData.size() < minDataSize)
         return;
-    int value = match.captured(1).toInt();
-    const int maximum = match.captured(2).toInt();
-    if (text.contains("cell"))
-        ui.navMeshProgressBar->setMaximum(maximum * 100);
-    else if (maximum > ui.navMeshProgressBar->maximum())
-        ui.navMeshProgressBar->setMaximum(maximum);
-    else
-        value += static_cast<int>(std::round(
-            (ui.navMeshProgressBar->maximum() - maximum)
-            * (static_cast<float>(value) / static_cast<float>(maximum))
-        ));
-    ui.navMeshProgressBar->setValue(value);
+    const std::byte* const begin = reinterpret_cast<const std::byte*>(mNavMeshToolProgress.mMessagesData.constData());
+    const std::byte* const end = begin + mNavMeshToolProgress.mMessagesData.size();
+    const std::byte* position = begin;
+    HandleNavMeshToolMessage handle {
+        mNavMeshToolProgress.mCellsCount,
+        mNavMeshToolProgress.mExpectedMaxProgress,
+        ui.navMeshProgressBar->maximum(),
+        ui.navMeshProgressBar->value(),
+    };
+    while (true)
+    {
+        NavMeshTool::Message message;
+        const std::byte* const nextPosition = NavMeshTool::deserialize(position, end, message);
+        if (nextPosition == position)
+            break;
+        position = nextPosition;
+        handle = std::visit(handle, NavMeshTool::decode(message));
+    }
+    if (position != begin)
+        mNavMeshToolProgress.mMessagesData = mNavMeshToolProgress.mMessagesData.mid(position - begin);
+    mNavMeshToolProgress.mCellsCount = handle.mCellsCount;
+    mNavMeshToolProgress.mExpectedMaxProgress = handle.mExpectedMaxProgress;
+    ui.navMeshProgressBar->setMaximum(handle.mMaxProgress);
+    ui.navMeshProgressBar->setValue(handle.mProgress);
+}
+
+void Launcher::DataFilesPage::readNavMeshToolStdout()
+{
+    QProcess& process = *mNavMeshToolInvoker->getProcess();
+    QByteArray& logData = mNavMeshToolProgress.mLogData;
+    logData.append(process.readAllStandardOutput());
+    const int lineEnd = logData.lastIndexOf('\n');
+    if (lineEnd == -1)
+        return;
+    const int size = logData.size() >= lineEnd && logData[lineEnd - 1] == '\r' ? lineEnd - 1 : lineEnd;
+    ui.navMeshLogPlainTextEdit->appendPlainText(QString::fromUtf8(logData.data(), size));
+    logData = logData.mid(lineEnd + 1);
 }
 
 void Launcher::DataFilesPage::navMeshToolFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    updateNavMeshProgress();
-    ui.navMeshLogPlainTextEdit->appendPlainText(QString::fromUtf8(mNavMeshToolInvoker->getProcess()->readAll()));
+    updateNavMeshProgress(0);
+    ui.navMeshLogPlainTextEdit->appendPlainText(QString::fromUtf8(mNavMeshToolInvoker->getProcess()->readAllStandardOutput()));
     if (exitCode == 0 && exitStatus == QProcess::ExitStatus::NormalExit)
         ui.navMeshProgressBar->setValue(ui.navMeshProgressBar->maximum());
     ui.cancelNavMeshButton->setEnabled(false);

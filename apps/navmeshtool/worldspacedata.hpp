@@ -91,7 +91,7 @@ namespace NavMeshTool
 
     WorldspaceData gatherWorldspaceData(const DetourNavigator::Settings& settings, std::vector<ESM::ESMReader>& readers,
         const VFS::Manager& vfs, Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
-        bool processInteriorCells);
+        bool processInteriorCells, bool writeBinaryLog);
 }
 
 #endif

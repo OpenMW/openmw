@@ -15,6 +15,8 @@
 #include <components/misc/progressreporter.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sqlite3/transaction.hpp>
+#include <components/debug/debugging.hpp>
+#include <components/navmeshtool/protocol.hpp>
 
 #include <osg/Vec3f>
 
@@ -51,6 +53,18 @@ namespace NavMeshTool
                 << "%) navmesh tiles are generated";
         }
 
+        template <class T>
+        void serializeToStderr(const T& value)
+        {
+            const std::vector<std::byte> data = serialize(value);
+            getLockedRawStderr()->write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
+        }
+
+        void logGeneratedTilesMessage(std::size_t number)
+        {
+            serializeToStderr(GeneratedTiles {static_cast<std::uint64_t>(number)});
+        }
+
         struct LogGeneratedTiles
         {
             void operator()(std::size_t provided, std::size_t expected) const
@@ -64,9 +78,10 @@ namespace NavMeshTool
         public:
             std::atomic_size_t mExpected {0};
 
-            explicit NavMeshTileConsumer(NavMeshDb&& db, bool removeUnusedTiles)
+            explicit NavMeshTileConsumer(NavMeshDb&& db, bool removeUnusedTiles, bool writeBinaryLog)
                 : mDb(std::move(db))
                 , mRemoveUnusedTiles(removeUnusedTiles)
+                , mWriteBinaryLog(writeBinaryLog)
                 , mTransaction(mDb.startTransaction(Sqlite3::TransactionMode::Immediate))
                 , mNextTileId(mDb.getMaxTileId() + 1)
                 , mNextShapeId(mDb.getMaxShapeId() + 1)
@@ -178,6 +193,8 @@ namespace NavMeshTool
                     }
                 }
                 logGeneratedTiles(mProvided, mExpected);
+                if (mWriteBinaryLog)
+                    logGeneratedTilesMessage(mProvided);
                 return !mCancelled;
             }
 
@@ -211,6 +228,7 @@ namespace NavMeshTool
             mutable std::mutex mMutex;
             NavMeshDb mDb;
             const bool mRemoveUnusedTiles;
+            const bool mWriteBinaryLog;
             Transaction mTransaction;
             TileId mNextTileId;
             std::condition_variable mHasTile;
@@ -223,18 +241,20 @@ namespace NavMeshTool
                 const std::size_t provided = mProvided.fetch_add(1, std::memory_order_relaxed) + 1;
                 mReporter(provided, mExpected);
                 mHasTile.notify_one();
+                if (mWriteBinaryLog)
+                    logGeneratedTilesMessage(provided);
             }
         };
     }
 
     void generateAllNavMeshTiles(const osg::Vec3f& agentHalfExtents, const Settings& settings,
-        std::size_t threadsNumber, bool removeUnusedTiles, WorldspaceData& data,
+        std::size_t threadsNumber, bool removeUnusedTiles, bool writeBinaryLog, WorldspaceData& data,
         NavMeshDb&& db)
     {
         Log(Debug::Info) << "Generating navmesh tiles by " << threadsNumber << " parallel workers...";
 
         SceneUtil::WorkQueue workQueue(threadsNumber);
-        auto navMeshTileConsumer = std::make_shared<NavMeshTileConsumer>(std::move(db), removeUnusedTiles);
+        auto navMeshTileConsumer = std::make_shared<NavMeshTileConsumer>(std::move(db), removeUnusedTiles, writeBinaryLog);
         std::size_t tiles = 0;
         std::mt19937_64 random;
 
@@ -255,6 +275,9 @@ namespace NavMeshTool
                 [&] (const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); });
 
             tiles += worldspaceTiles.size();
+
+            if (writeBinaryLog)
+                serializeToStderr(ExpectedTiles {static_cast<std::uint64_t>(tiles)});
 
             navMeshTileConsumer->mExpected = tiles;
 
