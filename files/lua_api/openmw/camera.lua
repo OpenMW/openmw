@@ -166,6 +166,36 @@
 -- Make instant the current transition of camera focal point and the current deferred rotation (see `allowCharacterDeferredRotation`).
 -- @function [parent=#camera] instantTransition
 
+--- Get current camera collision type (see @{openmw.nearby#COLLISION_TYPE}).
+-- @function [parent=#camera] getCollisionType
+-- @return #number
+
+--- Set camera collision type (see @{openmw.nearby#COLLISION_TYPE}).
+-- @function [parent=#camera] setCollisionType
+-- @param #number collisionType
+
+--- Return base field of view vertical angle in radians
+-- @function [parent=#camera] getBaseFieldOfView
+-- @return #number
+
+--- Return current field of view vertical angle in radians
+-- @function [parent=#camera] getFieldOfView
+-- @return #number
+
+--- Set field of view
+-- @function [parent=#camera] setFieldOfView
+-- @param #number fov Field of view vertical angle in radians
+
+--- Get world to local transform for the camera.
+-- @function [parent=#camera] getViewTransform
+-- @return openmw.util#Transform
+
+--- Get vector from the camera to the world for the given point in viewport.
+-- (0, 0) is the top left corner of the screen.
+-- @function [parent=#camera] viewportToWorldVector
+-- @param openmw.util#Vector2 normalizedScreenPos
+-- @return openmw.util#Vector3
+
 
 return nil
 

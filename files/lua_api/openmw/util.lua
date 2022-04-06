@@ -25,6 +25,33 @@
 -- @param #table table Any table.
 -- @return #table The same table wrapped with read only userdata.
 
+---
+-- Bitwise And (supports any number of arguments).
+-- @function [parent=#util] bitAnd
+-- @param #number A First argument (integer).
+-- @param #number B Second argument (integer).
+-- @return #number Bitwise And of A and B.
+
+---
+-- Bitwise Or (supports any number of arguments).
+-- @function [parent=#util] bitOr
+-- @param #number A First argument (integer).
+-- @param #number B Second argument (integer).
+-- @return #number Bitwise Or of A and B.
+
+---
+-- Bitwise Xor (supports any number of arguments).
+-- @function [parent=#util] bitXor
+-- @param #number A First argument (integer).
+-- @param #number B Second argument (integer).
+-- @return #number Bitwise Xor of A and B.
+
+---
+-- Bitwise inversion.
+-- @function [parent=#util] bitNot
+-- @param #number A Argument (integer).
+-- @return #number Bitwise Not of A.
+
 
 ---
 -- Immutable 2D vector

@@ -78,6 +78,8 @@ local function updateState()
         state = STATE.Swimming
     elseif oldState == STATE.Combat or oldState == STATE.Swimming then
         state = defaultShoulder
+    elseif not state then
+        state = defaultShoulder
     end
     if autoSwitchShoulder and (mode == MODE.ThirdPerson or state ~= oldState or noThirdPersonLastFrame)
        and (state == STATE.LeftShoulder or state == STATE.RightShoulder) then

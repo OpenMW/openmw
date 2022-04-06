@@ -5,6 +5,7 @@
 #include <string>
 
 #include <osg/ref_ptr>
+#include <osg/Matrix>
 #include <osg/Vec3>
 #include <osg/Vec3d>
 
@@ -95,11 +96,17 @@ namespace MWRender
         void setFirstPersonOffset(const osg::Vec3f& v) { mFirstPersonOffset = v; }
         osg::Vec3f getFirstPersonOffset() const { return mFirstPersonOffset; }
 
+        int getCollisionType() const { return mCollisionType; }
+        void setCollisionType(int collisionType) { mCollisionType = collisionType; }
+
+        const osg::Matrixf& getViewMatrix() const { return mViewMatrix; }
+
     private:
         MWWorld::Ptr mTrackingPtr;
         osg::ref_ptr<const osg::Node> mTrackingNode;
         osg::Vec3d mTrackedPosition;
         float mHeightScale;
+        int mCollisionType;
 
         osg::ref_ptr<osg::Camera> mCamera;
 
@@ -121,6 +128,7 @@ namespace MWRender
         float mExtraPitch = 0, mExtraYaw = 0;
         bool mLockPitch = false, mLockYaw = false;
         osg::Vec3d mPosition;
+        osg::Matrixf mViewMatrix;
 
         float mCameraDistance, mPreferredCameraDistance;
 

@@ -88,7 +88,7 @@ namespace MWLua
             [](const LObject& o) { return Inventory<LObject>{o}; },
             [](const GObject& o) { return Inventory<GObject>{o}; }
         );
-        actor["equipment"] = [context](const Object& o)
+        auto getAllEquipment = [context](const Object& o)
         {
             const MWWorld::Ptr& ptr = o.ptr();
             sol::table equipment(context.mLua->sol(), sol::create);
@@ -106,6 +106,20 @@ namespace MWLua
             }
             return equipment;
         };
+        auto getEquipmentFromSlot = [context](const Object& o, int slot) -> sol::object
+        {
+            const MWWorld::Ptr& ptr = o.ptr();
+            sol::table equipment(context.mLua->sol(), sol::create);
+            if (!ptr.getClass().hasInventoryStore(ptr))
+                return sol::nil;
+            MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+            auto it = store.getSlot(slot);
+            if (it == store.end())
+                return sol::nil;
+            context.mWorldView->getObjectRegistry()->registerPtr(*it);
+            return o.getObject(context.mLua->sol(), getId(*it));
+        };
+        actor["equipment"] = sol::overload(getAllEquipment, getEquipmentFromSlot);
         actor["hasEquipped"] = [](const Object& o, const Object& item)
         {
             const MWWorld::Ptr& ptr = o.ptr();
