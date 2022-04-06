@@ -47,8 +47,11 @@ namespace LuaUi
         void setExternal(sol::object external) { mExternal = external; }
 
         MyGUI::IntCoord forcedCoord();
-        void setForcedCoord(const MyGUI::IntCoord& offset);
-        void setForcedSize(const MyGUI::IntSize& size);
+        void forceCoord(const MyGUI::IntCoord& offset);
+        void forceSize(const MyGUI::IntSize& size);
+        void forcePosition(const MyGUI::IntPoint& pos);
+        void clearForced();
+
         void updateCoord();
 
         const sol::table& getLayout() { return mLayout; }
@@ -65,6 +68,9 @@ namespace LuaUi
             mOnCoordChange = callback;
         }
 
+        virtual MyGUI::IntSize calculateSize();
+        virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size);
+
     protected:
         virtual void initialize();
         sol::table makeTable() const;
@@ -72,8 +78,6 @@ namespace LuaUi
         sol::object mouseEvent(int left, int top, MyGUI::MouseButton button) const;
 
         MyGUI::IntSize parentSize();
-        virtual MyGUI::IntSize calculateSize();
-        virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size);
         MyGUI::IntCoord calculateCoord();
         virtual MyGUI::IntSize childScalingSize();
 
@@ -113,6 +117,8 @@ namespace LuaUi
             }
         }
 
+        bool mForcePosition;
+        bool mForceSize;
         // offsets the position and size, used only in C++ widget code
         MyGUI::IntCoord mForcedCoord;
         // position and size in pixels

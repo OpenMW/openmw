@@ -9,9 +9,9 @@ namespace LuaUi
             align |= MyGUI::Align::Left;
         if (horizontal == Alignment::End)
             align |= MyGUI::Align::Right;
-        if (horizontal == Alignment::Start)
+        if (vertical == Alignment::Start)
             align |= MyGUI::Align::Top;
-        if (horizontal == Alignment::End)
+        if (vertical == Alignment::End)
             align |= MyGUI::Align::Bottom;
         return align;
     }

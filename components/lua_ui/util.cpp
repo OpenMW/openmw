@@ -9,6 +9,7 @@
 #include "window.hpp"
 #include "image.hpp"
 #include "container.hpp"
+#include "flex.hpp"
 
 #include "element.hpp"
 #include "registerscriptsettings.hpp"
@@ -24,8 +25,9 @@ namespace LuaUi
         MyGUI::FactoryManager::getInstance().registerFactory<LuaTextEdit>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaImage>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<LuaContainer>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<LuaTileRect>("BasisSkin");
+        MyGUI::FactoryManager::getInstance().registerFactory<LuaContainer>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<LuaFlex>("Widget");
     }
 
     const std::unordered_map<std::string, std::string>& widgetTypeToName()
@@ -36,6 +38,7 @@ namespace LuaUi
             { "LuaTextEdit", "TextEdit" },
             { "LuaWindow", "Window" },
             { "LuaImage", "Image" },
+            { "LuaFlex", "Flex" },
         };
         return types;
     }
