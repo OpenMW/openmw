@@ -16,8 +16,8 @@ For example, to configure the alchemy window, the actual settings would be::
 
 	alchemy x = 0.25
 	alchemy y = 0.25
-	alchemy h = 0.5
 	alchemy w = 0.5
+	alchemy h = 0.5
 
 Each window in the GUI mode remembers it's previous location when exiting the game.
 By far the easiest way to configure these settings is to simply move the windows around in game.
@@ -49,9 +49,9 @@ stats
 
 	y = 0.015
 
-	h = 0.45
+	w = 0.45
 
-	w = 0.4275
+	h = 0.4275
 
 	pin = false
 
@@ -66,9 +66,9 @@ spells
 
 	y = 0.39
 
-	h = 0.36
+	w = 0.36
 
-	w = 0.51
+	h = 0.51
 
 	pin = false
 
@@ -83,9 +83,9 @@ map
 
 	y = 0.015
 
-	h = 0.36
+	w = 0.36
 
-	w = 0.37
+	h = 0.37
 
 	pin = false
 
@@ -100,9 +100,9 @@ inventory
 
 	y = 0.54
 
-	h = 0.45
+	w = 0.45
 
-	w = 0.38
+	h = 0.38
 
 	pin = false
 
@@ -117,9 +117,9 @@ inventory container
 
 	y = 0.54
 
-	h = 0.45
+	w = 0.45
 
-	w = 0.38
+	h = 0.38
 
 The player's inventory window while searching a container, showing the contents of the character's inventory.
 Activated by clicking on a container. The same window is used for searching dead bodies, and pickpocketing people.
@@ -132,9 +132,9 @@ inventory barter
 
 	y = 0.54
 
-	h = 0.45
+	w = 0.45
 
-	w = 0.38
+	h = 0.38
 
 The player's inventory window while bartering. It displays goods owned by the character while bartering.
 Activated by clicking on the Barter choice in the dialog window for an NPC.
@@ -147,9 +147,9 @@ inventory companion
 
 	y = 0.54
 
-	h = 0.45
+	w = 0.45
 
-	w = 0.38
+	h = 0.38
 
 The player's inventory window while interacting with a companion.
 The companion windows were added in the Tribunal expansion, but are available everywhere in the OpenMW engine.
@@ -162,9 +162,9 @@ container
 
 	y = 0.54
 
-	h = 0.39
+	w = 0.39
 
-	w = 0.38
+	h = 0.38
 
 The container window, showing the contents of the container. Activated by clicking on a container.
 The same window is used for searching dead bodies, and pickpocketing people.
@@ -177,9 +177,9 @@ barter
 
 	y = 0.27
 
-	h = 0.38
+	w = 0.38
 
-	w = 0.63
+	h = 0.63
 
 The NPC bartering window, displaying goods owned by the shopkeeper while bartering.
 Activated by clicking on the Barter choice in the dialog window for an NPC.
@@ -192,9 +192,9 @@ companion
 
 	y = 0.27
 
-	h = 0.38
+	w = 0.38
 
-	w = 0.63
+	h = 0.63
 
 The NPC's inventory window while interacting with a companion.
 The companion windows were added in the Tribunal expansion, but are available everywhere in the OpenMW engine.
@@ -207,9 +207,9 @@ dialogue
 
 	y = 0.5
 
-	h = 0.7
+	w = 0.7
 
-	w = 0.45
+	h = 0.45
 
 The dialogue window, for talking with NPCs.
 Activated by clicking on a NPC.
@@ -222,9 +222,9 @@ alchemy
 
 	y = 0.25
 
-	h = 0.5
-
 	w = 0.5
+
+	h = 0.5
 
 The alchemy window, for crafting potions.
 Activated by dragging an alchemy tool on to the rag doll.
@@ -234,13 +234,13 @@ console
 -------
 
 :Default:
-	x = 0.015
+	x = 0.255
 
-	y = 0.015
+	y = 0.215
 
-	h = 1.0
+	w = 0.49
 
-	w = 0.5
+	h = 0.3125
 
 The console command window.
 Activated by pressing the tilde (~) key.

@@ -105,6 +105,7 @@
     Bug #6559: Weapon condition inconsistency between melee and ranged critical / sneak / KO attacks
     Bug #6579: OpenMW compilation error when using OSG doubles for BoundingSphere
     Bug #6606: Quests with multiple IDs cannot always be restarted
+    Bug #6653: With default settings the in-game console doesn't fit into screen
     Bug #6655: Constant effect absorb attribute causes the game to break
     Bug #6670: Dialogue order is incorrect
     Bug #6680: object.cpp handles nodetree unsafely, memory access with dangling pointer
