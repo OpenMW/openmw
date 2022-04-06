@@ -1935,8 +1935,8 @@ bool Optimizer::MergeGroupsVisitor::isOperationPermissible(osg::Group& node)
     return !node.getCullCallback() &&
            !node.getEventCallback() &&
            !node.getUpdateCallback() &&
-            isOperationPermissibleForObject(&node) &&
-           typeid(node)==typeid(osg::Group);
+           typeid(node)==typeid(osg::Group) &&
+            isOperationPermissibleForObject(&node);
 }
 
 void Optimizer::MergeGroupsVisitor::apply(osg::LOD &lod)
