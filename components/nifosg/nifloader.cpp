@@ -517,13 +517,6 @@ namespace NifOsg
             if (!node)
                 node = new NifOsg::MatrixTransform(nifNode->trafo);
 
-            if (nifNode->recType == Nif::RC_NiCollisionSwitch && !(nifNode->flags & Nif::NiNode::Flag_ActiveCollision))
-            {
-                node->setNodeMask(Loader::getIntersectionDisabledNodeMask());
-                // This node must not be combined with another node.
-                dataVariance = osg::Object::DYNAMIC;
-            }
-
             node->setDataVariance(dataVariance);
 
             return node;
@@ -638,6 +631,9 @@ namespace NifOsg
 
                 node->setNodeMask(Loader::getHiddenNodeMask());
             }
+
+            if (nifNode->recType == Nif::RC_NiCollisionSwitch && !(nifNode->flags & Nif::NiNode::Flag_ActiveCollision))
+                node->setNodeMask(Loader::getIntersectionDisabledNodeMask());
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
