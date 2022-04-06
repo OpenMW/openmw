@@ -54,7 +54,7 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
@@ -63,13 +63,13 @@ namespace MWClass
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
 
-            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+        return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }
 
     std::string Book::getScript (const MWWorld::ConstPtr& ptr) const
@@ -149,9 +149,9 @@ namespace MWClass
         return record->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+        return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }
 
     MWWorld::Ptr Book::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

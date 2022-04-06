@@ -141,14 +141,14 @@ namespace MWMechanics
         return mWeapon.get<ESM::Weapon>()->mBase;
     }
 
-    std::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
+    std::unique_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
     {
         Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
 
         float bestActionRating = 0.f;
         float antiFleeRating = 0.f;
         // Default to hand-to-hand combat
-        std::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
+        std::unique_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             bestAction->prepare(actor);

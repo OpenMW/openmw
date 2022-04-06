@@ -185,7 +185,7 @@ namespace MWMechanics
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
         float& actionCooldown = storage.mActionCooldown;
-        std::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+        std::unique_ptr<Action>& currentAction = storage.mCurrentAction;
 
         if (!forceFlee)
         {

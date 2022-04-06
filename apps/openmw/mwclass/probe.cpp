@@ -50,7 +50,7 @@ namespace MWClass
 
         return !name.empty() ? name : ref->mBase->mId;
     }
-    std::shared_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -124,9 +124,9 @@ namespace MWClass
         return info;
     }
 
-    std::shared_ptr<MWWorld::Action> Probe::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Probe::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
+        std::unique_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
 
         action->setSound(getUpSoundId(ptr));
 

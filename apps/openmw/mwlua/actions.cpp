@@ -160,7 +160,7 @@ namespace MWLua
             throw std::runtime_error(std::string("Actor not found: " + idToString(mActor)));
 
         MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
-        std::shared_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
+        std::unique_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
         action->execute(actor);
     }
 

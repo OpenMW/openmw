@@ -36,7 +36,7 @@ namespace MWMechanics
         bool mRotateMove;
         osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
-        std::shared_ptr<Action> mCurrentAction;
+        std::unique_ptr<Action> mCurrentAction;
         float mActionCooldown;
         float mStrength;
         bool mForceNoShortcut;

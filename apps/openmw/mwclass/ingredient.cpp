@@ -51,7 +51,7 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -72,9 +72,9 @@ namespace MWClass
     }
 
 
-    std::shared_ptr<MWWorld::Action> Ingredient::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Ingredient::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action (new MWWorld::ActionEat (ptr));
+        std::unique_ptr<MWWorld::Action> action (new MWWorld::ActionEat (ptr));
 
         action->setSound ("Swallow");
 

@@ -53,7 +53,7 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Potion::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Potion::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -123,12 +123,12 @@ namespace MWClass
         return info;
     }
 
-    std::shared_ptr<MWWorld::Action> Potion::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Potion::use (const MWWorld::Ptr& ptr, bool force) const
     {
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        std::shared_ptr<MWWorld::Action> action (
+        std::unique_ptr<MWWorld::Action> action (
             new MWWorld::ActionApply (ptr, ref->mBase->mId));
 
         action->setSound ("Drink");

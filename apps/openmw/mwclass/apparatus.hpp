@@ -23,7 +23,7 @@ namespace MWClass
             std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
@@ -45,7 +45,7 @@ namespace MWClass
             std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of inventory icon.
 
-            std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
+            std::unique_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
             ///< Generate action for using via inventory menu
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;

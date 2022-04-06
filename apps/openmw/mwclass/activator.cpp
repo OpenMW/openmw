@@ -111,7 +111,7 @@ namespace MWClass
         return info;
     }
 
-    std::shared_ptr<MWWorld::Action> Activator::activate(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
+    std::unique_ptr<MWWorld::Action> Activator::activate(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
     {
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
@@ -119,12 +119,12 @@ namespace MWClass
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfActivator", prng);
 
-            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction);
+        return std::unique_ptr<MWWorld::Action>(new MWWorld::NullAction);
     }
 
 

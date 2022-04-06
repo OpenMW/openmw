@@ -320,7 +320,7 @@ namespace MWScript
                         MWBase::Environment::get().getWindowManager()->useItem(*it, true);
                     else
                     {
-                        std::shared_ptr<MWWorld::Action> action = it->getClass().use(*it, true);
+                        std::unique_ptr<MWWorld::Action> action = it->getClass().use(*it, true);
                         action->execute(ptr, true);
                     }
                 }

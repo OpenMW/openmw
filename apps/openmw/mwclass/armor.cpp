@@ -57,7 +57,7 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Armor::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Armor::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -332,9 +332,9 @@ namespace MWClass
         return std::make_pair(1,"");
     }
 
-    std::shared_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
+        std::unique_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
 
         action->setSound(getUpSoundId(ptr));
 

@@ -256,7 +256,7 @@ namespace MWGui
 
         if ((mFilter & Filter_OnlyUsableItems) && base.getClass().getScript(base).empty())
         {
-            std::shared_ptr<MWWorld::Action> actionOnUse = base.getClass().use(base);
+            std::unique_ptr<MWWorld::Action> actionOnUse = base.getClass().use(base);
             if (!actionOnUse || actionOnUse->isNullAction())
                 return false;
         }

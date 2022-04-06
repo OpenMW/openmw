@@ -50,7 +50,7 @@ namespace MWClass
             std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
