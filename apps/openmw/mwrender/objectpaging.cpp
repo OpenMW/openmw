@@ -440,7 +440,10 @@ namespace MWRender
                             if (moved)
                                 continue;
 
-                            if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
+                            if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end())
+                                continue;
+
+                            Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                             int type = store.findStatic(ref.mRefID);
                             if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
@@ -454,7 +457,12 @@ namespace MWRender
                 }
                 for (auto [ref, deleted] : cell->mLeasedRefs)
                 {
-                    if (deleted) { refs.erase(ref.mRefNum); continue; }
+                    if (deleted)
+                    {
+                        refs.erase(ref.mRefNum);
+                        continue;
+                    }
+                    Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                     int type = store.findStatic(ref.mRefID);
                     if (!typeFilter(type,size>=2)) continue;
                     refs[ref.mRefNum] = std::move(ref);
