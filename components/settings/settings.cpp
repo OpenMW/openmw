@@ -116,7 +116,7 @@ std::int64_t Manager::getInt64 (const std::string& setting, const std::string& c
 {
     const std::string& value = getString(setting, category);
     std::stringstream stream(value);
-    std::size_t number = 0;
+    std::int64_t number = 0;
     stream >> number;
     return number;
 }
@@ -166,6 +166,13 @@ void Manager::setString(const std::string &setting, const std::string &category,
 }
 
 void Manager::setInt (const std::string& setting, const std::string& category, const int value)
+{
+    std::ostringstream stream;
+    stream << value;
+    setString(setting, category, stream.str());
+}
+
+void Manager::setInt64 (const std::string& setting, const std::string& category, const std::int64_t value)
 {
     std::ostringstream stream;
     stream << value;

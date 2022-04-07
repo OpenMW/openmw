@@ -75,6 +75,40 @@
         </layout>
        </item>
        <item>
+        <widget class="QCheckBox" name="navMeshRemoveUnusedTilesCheckBox">
+         <property name="text">
+          <string>Remove unused tiles</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Max size</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="navMeshMaxSizeSpinBox">
+           <property name="suffix">
+            <string> MiB</string>
+           </property>
+           <property name="maximum">
+            <number>2147483647</number>
+           </property>
+           <property name="value">
+            <number>2048</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QPlainTextEdit" name="navMeshLogPlainTextEdit">
          <property name="enabled">
           <bool>true</bool>
