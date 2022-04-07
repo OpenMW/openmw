@@ -84,6 +84,11 @@ namespace Launcher
                 };
             }
         };
+
+        int getMaxNavMeshDbFileSizeMiB()
+        {
+            return static_cast<int>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator") / (1024 * 1024));
+        }
     }
 }
 
@@ -164,6 +169,8 @@ void Launcher::DataFilesPage::buildView()
 
 bool Launcher::DataFilesPage::loadSettings()
 {
+    ui.navMeshMaxSizeSpinBox->setValue(getMaxNavMeshDbFileSizeMiB());
+
     QStringList profiles = mLauncherSettings.getContentLists();
     QString currentProfile = mLauncherSettings.getCurrentContentListName();
 
@@ -217,13 +224,16 @@ QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, 
 
 void Launcher::DataFilesPage::saveSettings(const QString &profile)
 {
-   QString profileName = profile;
+    if (const int value = ui.navMeshMaxSizeSpinBox->value(); value != getMaxNavMeshDbFileSizeMiB())
+        Settings::Manager::setInt64("max navmeshdb file size", "Navigator", static_cast<std::int64_t>(value) * 1024 * 1024);
 
-   if (profileName.isEmpty())
-       profileName = ui.profilesComboBox->currentText();
+    QString profileName = profile;
 
-   //retrieve the files selected for the profile
-   ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
+    if (profileName.isEmpty())
+        profileName = ui.profilesComboBox->currentText();
+
+    //retrieve the files selected for the profile
+    ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
 
     //set the value of the current profile (not necessarily the profile being saved!)
     mLauncherSettings.setCurrentContentListName(ui.profilesComboBox->currentText());

@@ -62,6 +62,7 @@ namespace Settings
         static osg::Vec3f getVector3 (const std::string& setting, const std::string& category);
 
         static void setInt (const std::string& setting, const std::string& category, int value);
+        static void setInt64 (const std::string& setting, const std::string& category, std::int64_t value);
         static void setFloat (const std::string& setting, const std::string& category, float value);
         static void setDouble (const std::string& setting, const std::string& category, double value);
         static void setString (const std::string& setting, const std::string& category, const std::string& value);
