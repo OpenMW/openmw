@@ -75,6 +75,16 @@
         </layout>
        </item>
        <item>
+        <widget class="QCheckBox" name="navMeshRemoveUnusedTilesCheckBox">
+         <property name="text">
+          <string>Remove unused tiles</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPlainTextEdit" name="navMeshLogPlainTextEdit">
          <property name="enabled">
           <bool>true</bool>

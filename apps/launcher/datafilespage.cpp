@@ -493,7 +493,11 @@ void Launcher::DataFilesPage::startNavMeshTool()
 
     mNavMeshToolProgress = NavMeshToolProgress {};
 
-    if (!mNavMeshToolInvoker->startProcess(QLatin1String("openmw-navmeshtool"), QStringList({"--write-binary-log"})))
+    QStringList arguments({"--write-binary-log"});
+    if (ui.navMeshRemoveUnusedTilesCheckBox->checkState() == Qt::Checked)
+        arguments.append("--remove-unused-tiles");
+
+    if (!mNavMeshToolInvoker->startProcess(QLatin1String("openmw-navmeshtool"), arguments))
         return;
 
     ui.cancelNavMeshButton->setEnabled(true);
