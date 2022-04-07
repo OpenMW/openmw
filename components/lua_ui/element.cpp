@@ -55,8 +55,7 @@ namespace LuaUi
         {
             WidgetExtension* ext = children[i];
             sol::table newLayout = content.at(i);
-            if (ext->widget()->getTypeName() == widgetType(newLayout)
-                && ext->getLayout() == newLayout)
+            if (ext->widget()->getTypeName() == widgetType(newLayout))
             {
                 updateWidget(ext, newLayout);
             }

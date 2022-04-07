@@ -19,32 +19,30 @@ local function renderSetting(groupName, setting, value, index)
         local group = common.getGroup(groupName)
         group:set(setting.name, value)
         local element = groupOptions[groupName].element
-        element.layout.content[setting.name] = renderSetting(groupName, setting, value, index)
+        local settingLayout = renderSetting(groupName, setting, value, index)
+        settingLayout.name = setting.name
+        element.layout.content[setting.name] = settingLayout
         element:update()
     end)
     layout.name = setting.name
-    -- temporary hacky position and size
-    layout.props = layout.props or {}
-    layout.props.position = util.vector2(0, 100 * (index - 1))
-    layout.props.size = util.vector2(400, 100)
     return layout
 end
 
 local function onGroupRegistered(groupName)
     local group = common.groups:get(groupName)
     local layout = {
+        type = ui.TYPE.Flex,
         content = ui.content{},
     }
     local searchHints = { groupName }
     local count = 0
     for _, setting in pairs(group) do
         count = count + 1
-        layout.content:add(renderSetting(groupName, setting, setting.default, count))
+        local settingLayout = renderSetting(groupName, setting, setting.default, count)
+        settingLayout.name = setting.name
+        layout.content:add(settingLayout)
         table.insert(searchHints, setting.name)
     end
-    layout.props = {
-        size = util.vector2(400, 100 * count)
-    }
     local options = {
         name = groupName,
         element = ui.create(layout),
