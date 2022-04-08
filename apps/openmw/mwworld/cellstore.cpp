@@ -1029,9 +1029,9 @@ namespace MWWorld
         return !(left==right);
     }
 
-    void CellStore::setFog(ESM::FogState *fog)
+    void CellStore::setFog(std::unique_ptr<ESM::FogState>&& fog)
     {
-        mFogState.reset(fog);
+        mFogState = std::move(fog);
     }
 
     ESM::FogState* CellStore::getFog() const

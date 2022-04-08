@@ -6,6 +6,8 @@
 
 #include <osg/Vec2f>
 
+#include <MyGUI_ITexture.h>
+
 #include "windowpinnablebase.hpp"
 
 #include <components/esm3/cellid.hpp>
@@ -142,8 +144,8 @@ namespace MWGui
 
             MyGUI::ImageBox* mMapWidget;
             MyGUI::ImageBox* mFogWidget;
-            std::shared_ptr<MyGUI::ITexture> mMapTexture;
-            std::shared_ptr<MyGUI::ITexture> mFogTexture;
+            std::unique_ptr<MyGUI::ITexture> mMapTexture;
+            std::unique_ptr<MyGUI::ITexture> mFogTexture;
             int mCellX;
             int mCellY;
         };

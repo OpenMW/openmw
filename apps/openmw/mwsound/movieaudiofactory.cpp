@@ -153,9 +153,9 @@ namespace MWSound
 
 
 
-    std::shared_ptr<Video::MovieAudioDecoder> MovieAudioFactory::createDecoder(Video::VideoState* videoState)
+    std::unique_ptr<Video::MovieAudioDecoder> MovieAudioFactory::createDecoder(Video::VideoState* videoState)
     {
-        std::shared_ptr<MWSound::MovieAudioDecoder> decoder(new MWSound::MovieAudioDecoder(videoState));
+        std::unique_ptr<MWSound::MovieAudioDecoder> decoder(new MWSound::MovieAudioDecoder(videoState));
         decoder->setupFormat();
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();

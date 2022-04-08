@@ -135,7 +135,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 
             segment.saveFogOfWar(fog->mFogTextures.back());
 
-            cell->setFog(fog.release());
+            cell->setFog(std::move(fog));
         }
     }
     else
@@ -169,7 +169,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
             }
         }
 
-        cell->setFog(fog.release());
+        cell->setFog(std::move(fog));
     }
 }
 

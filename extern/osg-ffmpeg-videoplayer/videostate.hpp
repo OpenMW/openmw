@@ -161,7 +161,7 @@ struct VideoState {
     osg::ref_ptr<osg::Texture2D> mTexture;
 
     MovieAudioFactory* mAudioFactory;
-    std::shared_ptr<MovieAudioDecoder> mAudioDecoder;
+    std::unique_ptr<MovieAudioDecoder> mAudioDecoder;
 
     ExternalClock mExternalClock;
 
