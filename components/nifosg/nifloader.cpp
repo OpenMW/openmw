@@ -388,9 +388,9 @@ namespace NifOsg
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             if (autoPlay)
-                toSetup->setSource(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+                toSetup->setSource(std::make_shared<SceneUtil::FrameTimeSource>());
 
-            toSetup->setFunction(std::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
+            toSetup->setFunction(std::make_shared<ControllerFunction>(ctrl));
         }
 
         static osg::ref_ptr<osg::LOD> handleLodNode(const Nif::NiLODNode* niLodNode)

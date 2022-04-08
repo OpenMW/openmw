@@ -32,7 +32,7 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
     node->setNodeMask(Mask_Effect);
 
     Effect effect;
-    effect.mAnimTime.reset(new EffectAnimationTime);
+    effect.mAnimTime = std::make_shared<EffectAnimationTime>();
 
     SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
     node->accept(findMaxLengthVisitor);

@@ -521,7 +521,7 @@ namespace MWRender
         , mAlpha(1.f)
     {
         for(size_t i = 0;i < sNumBlendMasks;i++)
-            mAnimationTimePtr[i].reset(new AnimationTime);
+            mAnimationTimePtr[i] = std::make_shared<AnimationTime>();
 
         mLightListCallback = new SceneUtil::LightListCallback;
     }
@@ -630,8 +630,7 @@ namespace MWRender
         if(!mResourceSystem->getVFS()->exists(kfname))
             return;
 
-        std::shared_ptr<AnimSource> animsrc;
-        animsrc.reset(new AnimSource);
+        auto animsrc = std::make_shared<AnimSource>();
         animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
 
         if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty() || animsrc->mKeyframes->mKeyframeControllers.empty())
@@ -660,7 +659,7 @@ namespace MWRender
             animsrc->mControllerMap[blendMask].insert(std::make_pair(bonename, cloned));
         }
 
-        mAnimSources.push_back(animsrc);
+        mAnimSources.push_back(std::move(animsrc));
 
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(mAnimationTimePtr[0]);
         mObjectRoot->accept(assignVisitor);
@@ -1574,7 +1573,7 @@ namespace MWRender
         params.mLoop = loop;
         params.mEffectId = effectId;
         params.mBoneName = bonename;
-        params.mAnimTime = std::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
+        params.mAnimTime = std::make_shared<EffectAnimationTime>();
         trans->addUpdateCallback(new UpdateVfxCallback(params));
 
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));

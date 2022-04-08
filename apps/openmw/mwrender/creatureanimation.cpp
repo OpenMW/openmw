@@ -63,7 +63,7 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
         updateParts();
     }
 
-    mWeaponAnimationTime = std::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
+    mWeaponAnimationTime = std::make_shared<WeaponAnimationTime>(this);
 }
 
 void CreatureWeaponAnimation::showWeapons(bool showWeapon)

@@ -38,8 +38,8 @@ namespace MWSound
     public:
         MovieAudioDecoder(Video::VideoState *videoState)
             : Video::MovieAudioDecoder(videoState), mAudioTrack(nullptr)
+            , mDecoderBridge(std::make_shared<MWSoundDecoderBridge>(this))
         {
-            mDecoderBridge.reset(new MWSoundDecoderBridge(this));
         }
 
         size_t getSampleOffset()

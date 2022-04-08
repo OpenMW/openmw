@@ -642,7 +642,7 @@ namespace MWRender
 
                 mParticleEffect = mSceneManager->getInstance(mCurrentParticleEffect, mParticleNode);
 
-                SceneUtil::AssignControllerSourcesVisitor assignVisitor = std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource);
+                SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::make_shared<SceneUtil::FrameTimeSource>());
                 mParticleEffect->accept(assignVisitor);
 
                 SetupVisitor alphaFaderSetupVisitor(mPrecipitationAlpha);
