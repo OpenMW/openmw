@@ -1139,7 +1139,9 @@ bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
 
 bool CharacterController::updateState(CharacterState idle)
 {
-    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    auto* world = MWBase::Environment::get().getWorld();
+    auto& prng = world->getPrng();
+    MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
 
     const MWWorld::Class &cls = mPtr.getClass();
     CreatureStats &stats = cls.getCreatureStats(mPtr);
@@ -1154,7 +1156,7 @@ bool CharacterController::updateState(CharacterState idle)
     std::string upSoundId;
     std::string downSoundId;
     bool weaponChanged = false;
-    if (mPtr.getClass().hasInventoryStore(mPtr))
+    if (cls.hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
         MWWorld::ContainerStoreIterator weapon = getActiveWeapon(mPtr, &weaptype);
@@ -1182,13 +1184,13 @@ bool CharacterController::updateState(CharacterState idle)
 
     // For biped actors, blend weapon animations with lower body animations with higher priority
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
-    if (mPtr.getClass().isBipedal(mPtr))
+    if (cls.isBipedal(mPtr))
         priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
     bool forcestateupdate = false;
 
     // We should not play equipping animation and sound during weapon->weapon transition
-    bool isStillWeapon = weaptype != ESM::Weapon::HandToHand && weaptype != ESM::Weapon::Spell && weaptype != ESM::Weapon::None &&
+    const bool isStillWeapon = weaptype != ESM::Weapon::HandToHand && weaptype != ESM::Weapon::Spell && weaptype != ESM::Weapon::None &&
                             mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::None;
 
     // If the current weapon type was changed in the middle of attack (e.g. by Equip console command or when bound spell expires),
@@ -1241,7 +1243,6 @@ bool CharacterController::updateState(CharacterState idle)
 
             if(!downSoundId.empty())
             {
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
                 sndMgr->playSound3D(mPtr, downSoundId, 1.0f, 1.0f);
             }
         }
@@ -1297,11 +1298,10 @@ bool CharacterController::updateState(CharacterState idle)
 
                 if(isWerewolf)
                 {
-                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    const MWWorld::ESMStore &store = world->getStore();
                     const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfEquip", prng);
                     if(sound)
                     {
-                        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
                         sndMgr->playSound3D(mPtr, sound->mId, 1.0f, 1.0f);
                     }
                 }
@@ -1311,7 +1311,6 @@ bool CharacterController::updateState(CharacterState idle)
 
                 if(!upSoundId.empty() && !isStillWeapon)
                 {
-                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
                     sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
                 }
             }
@@ -1329,10 +1328,9 @@ bool CharacterController::updateState(CharacterState idle)
 
     if(isWerewolf)
     {
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        if(cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run)
+        if(stats.getStance(MWMechanics::CreatureStats::Stance_Run)
             && mHasMovedInXY
-            && !MWBase::Environment::get().getWorld()->isSwimming(mPtr)
+            && !world->isSwimming(mPtr)
             && mWeaponType == ESM::Weapon::None)
         {
             if(!sndMgr->getSoundPlaying(mPtr, "WolfRun"))
@@ -1347,7 +1345,7 @@ bool CharacterController::updateState(CharacterState idle)
     bool ammunition = true;
     bool isWeapon = false;
     float weapSpeed = 1.f;
-    if (mPtr.getClass().hasInventoryStore(mPtr))
+    if (cls.hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
         MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(mPtr, &weaptype);
@@ -1380,12 +1378,12 @@ bool CharacterController::updateState(CharacterState idle)
         bool resetIdle = ammunition;
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
-            MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
+            world->breakInvisibility(mPtr);
             mAttackStrength = 0;
 
             // Randomize attacks for non-bipedal creatures
-            if (mPtr.getClass().getType() == ESM::Creature::sRecordId &&
-                !mPtr.getClass().isBipedal(mPtr) &&
+            if (cls.getType() == ESM::Creature::sRecordId &&
+                !cls.isBipedal(mPtr) &&
                 (!mAnimation->hasAnimation(mCurrentWeapon) || isRandomAttackAnimation(mCurrentWeapon)))
             {
                 mCurrentWeapon = chooseRandomAttackAnimation();
@@ -1406,13 +1404,13 @@ bool CharacterController::updateState(CharacterState idle)
                 }
                 std::string spellid = stats.getSpells().getSelectedSpell();
                 bool isMagicItem = false;
-                bool canCast = mCastingManualSpell || MWBase::Environment::get().getWorld()->startSpellCast(mPtr);
+                bool canCast = mCastingManualSpell || world->startSpellCast(mPtr);
 
                 if (spellid.empty())
                 {
-                    if (mPtr.getClass().hasInventoryStore(mPtr))
+                    if (cls.hasInventoryStore(mPtr))
                     {
-                        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+                        MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
                         if (inv.getSelectedEnchantItem() != inv.end())
                         {
                             const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
@@ -1426,7 +1424,7 @@ bool CharacterController::updateState(CharacterState idle)
                 if (isMagicItem && !useCastingAnimations)
                 {
                     // Enchanted items by default do not use casting animations
-                    MWBase::Environment::get().getWorld()->castSpell(mPtr);
+                    world->castSpell(mPtr);
                     resetIdle = false;
                 }
                 else if(!spellid.empty() && canCast)
@@ -1435,7 +1433,7 @@ bool CharacterController::updateState(CharacterState idle)
                     cast.playSpellCastingEffects(spellid, isMagicItem);
 
                     std::vector<ESM::ENAMstruct> effects;
-                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    const MWWorld::ESMStore &store = world->getStore();
                     if (isMagicItem)
                     {
                         const ESM::Enchantment *enchantment = store.get<ESM::Enchantment>().find(spellid);
@@ -1449,7 +1447,7 @@ bool CharacterController::updateState(CharacterState idle)
 
                     const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(effects.back().mEffectID); // use last effect of list for color of VFX_Hands
 
-                    const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
+                    const ESM::Static* castStatic = world->getStore().get<ESM::Static>().find ("VFX_Hands");
 
                     for (size_t iter = 0; iter < effects.size(); ++iter) // play hands vfx for each effect
                     {
@@ -1468,7 +1466,7 @@ bool CharacterController::updateState(CharacterState idle)
                     {
                         startKey = "start";
                         stopKey = "stop";
-                        MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
+                        world->castSpell(mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
                         mCastingManualSpell = false;
                     }
                     else
@@ -1497,10 +1495,10 @@ bool CharacterController::updateState(CharacterState idle)
             }
             else if(mWeaponType == ESM::Weapon::PickProbe)
             {
-                MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                MWWorld::ContainerStoreIterator weapon = cls.getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 MWWorld::Ptr item = *weapon;
                 // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use lockpicks/probes.
-                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getFacedObject();
+                MWWorld::Ptr target = world->getFacedObject();
                 std::string resultMessage, resultSound;
 
                 if(!target.isEmpty())
@@ -1518,8 +1516,7 @@ bool CharacterController::updateState(CharacterState idle)
                 if(!resultMessage.empty())
                     MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
                 if(!resultSound.empty())
-                    MWBase::Environment::get().getSoundManager()->playSound3D(target, resultSound,
-                                                                              1.0f, 1.0f);
+                    sndMgr->playSound3D(target, resultSound, 1.0f, 1.0f);
             }
             else if (ammunition)
             {
@@ -1545,7 +1542,7 @@ bool CharacterController::updateState(CharacterState idle)
                         {
                             if (isWeapon)
                             {
-                                MWWorld::ConstContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                                MWWorld::ConstContainerStoreIterator weapon = cls.getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                                 mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
                             }
                             else
@@ -1611,11 +1608,9 @@ bool CharacterController::updateState(CharacterState idle)
 
             if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
             {
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-
                 if(isWerewolf)
                 {
-                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    const MWWorld::ESMStore &store = world->getStore();
                     const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfSwing", prng);
                     if(sound)
                         sndMgr->playSound3D(mPtr, sound->mId, 1.0f, 1.0f);
@@ -1785,9 +1780,9 @@ bool CharacterController::updateState(CharacterState idle)
         mUpperBodyState = UpperCharState_WeapEquiped;
     }
 
-    if (mPtr.getClass().hasInventoryStore(mPtr))
+    if (cls.hasInventoryStore(mPtr))
     {
-        const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+        const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if(torch != inv.end() && torch->getType() == ESM::Light::sRecordId
                 && updateCarriedLeftVisible(mWeaponType))
