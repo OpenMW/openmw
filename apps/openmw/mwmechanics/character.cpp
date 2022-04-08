@@ -207,15 +207,17 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
 
 void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
 {
-    bool recovery = mPtr.getClass().getCreatureStats(mPtr).getHitRecovery();
-    bool knockdown = mPtr.getClass().getCreatureStats(mPtr).getKnockedDown();
-    bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
-    bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
-    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    auto* world = MWBase::Environment::get().getWorld();
+    auto& charClass = mPtr.getClass();
+    auto& stats = charClass.getCreatureStats(mPtr);
+    bool recovery = stats.getHitRecovery();
+    bool knockdown = stats.getKnockedDown();
+    bool block = stats.getBlock();
+    bool isSwimming = world->isSwimming(mPtr);
+    auto& prng = world->getPrng();
     if(mHitState == CharState_None)
     {
-        if ((mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0
-                || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0))
+        if (stats.getFatigue().getCurrent() < 0 || stats.getFatigue().getBase() == 0)
         {
             mTimeUntilWake = Misc::Rng::rollClosedProbability(prng) * 2 + 1; // Wake up after 1 to 3 seconds
             if (isSwimming && mAnimation->hasAnimation("swimknockout"))
@@ -236,7 +238,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
                 mCurrentHit.erase();
             }
 
-            mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(true);
+            stats.setKnockedDown(true);
         }
         else if (knockdown)
         {
@@ -255,7 +257,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
             else
             {
                 // Knockdown animation is missing. Cancel knockdown state.
-                mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(false);
+                stats.setKnockedDown(false);
             }
         }
         else if (recovery)
@@ -311,15 +313,14 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
     {
         mCurrentHit.erase();
         if (knockdown)
-            mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(false);
+            stats.setKnockedDown(false);
         if (recovery)
-            mPtr.getClass().getCreatureStats(mPtr).setHitRecovery(false);
+            stats.setHitRecovery(false);
         if (block)
-            mPtr.getClass().getCreatureStats(mPtr).setBlock(false);
+            stats.setBlock(false);
         mHitState = CharState_None;
     }
-    else if (isKnockedOut() && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0 
-            && mTimeUntilWake <= 0)
+    else if (isKnockedOut() && stats.getFatigue().getCurrent() > 0 && mTimeUntilWake <= 0)
     {
         mHitState = isSwimming ? CharState_SwimKnockDown : CharState_KnockDown;
         mAnimation->disable(mCurrentHit);
