@@ -561,7 +561,7 @@ namespace MWGui
                 ptr.getRefData().getLocals().setVarByInt(script, "pcskipequip", 1);
         }
 
-        std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
+        std::unique_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
         action->execute(player);
 
         if (isVisible())

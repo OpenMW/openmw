@@ -61,7 +61,7 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Miscellaneous::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Miscellaneous::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -203,12 +203,12 @@ namespace MWClass
         return newPtr;
     }
 
-    std::shared_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
     {
         if (ptr.getCellRef().getSoul().empty() || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ptr.getCellRef().getSoul()))
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
+            return std::unique_ptr<MWWorld::Action>(new MWWorld::NullAction());
         else
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
+            return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
     }
 
     bool Miscellaneous::canSell (const MWWorld::ConstPtr& item, int npcServices) const

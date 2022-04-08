@@ -83,7 +83,7 @@ namespace MWClass
             void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
             ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 

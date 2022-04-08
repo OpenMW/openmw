@@ -97,7 +97,7 @@ namespace MWWorld
             std::unique_ptr<MWWorld::Scene> mWorldScene;
             std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
             std::unique_ptr<MWWorld::DateTimeManager> mCurrentDate;
-            std::shared_ptr<ProjectileManager> mProjectileManager;
+            std::unique_ptr<ProjectileManager> mProjectileManager;
 
             bool mSky;
             bool mGodMode;

@@ -35,7 +35,7 @@ namespace MWClass
             std::string getScript (const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of the script attached to ptr
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;

@@ -62,7 +62,7 @@ namespace MWWorld
 
             explicit Class(unsigned type) : mType(type) {}
 
-            std::shared_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
+            std::unique_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
             ///< Generate default action for activating inventory items
 
             virtual Ptr copyToCellImpl(const ConstPtr &ptr, CellStore &cell) const;
@@ -139,10 +139,10 @@ namespace MWWorld
             ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
             /// (default implementation: throw an exception)
 
-            virtual std::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
+            virtual std::unique_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 
-            virtual std::shared_ptr<Action> use (const Ptr& ptr, bool force=false)
+            virtual std::unique_ptr<Action> use (const Ptr& ptr, bool force=false)
                 const;
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).

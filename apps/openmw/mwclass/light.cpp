@@ -85,15 +85,15 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if(!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
+            return std::unique_ptr<MWWorld::Action>(new MWWorld::NullAction());
 
         MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
         if(!(ref->mBase->mData.mFlags&ESM::Light::Carry))
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction());
+            return std::unique_ptr<MWWorld::Action>(new MWWorld::FailedAction());
 
         return defaultItemActivate(ptr, actor);
     }
@@ -184,9 +184,9 @@ namespace MWClass
         return Class::showsInInventory(ptr);
     }
 
-    std::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
+        std::unique_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
 
         action->setSound(getUpSoundId(ptr));
 
