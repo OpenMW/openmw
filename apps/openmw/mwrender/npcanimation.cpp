@@ -425,8 +425,8 @@ int NpcAnimation::getSlot(const osg::NodePath &path) const
 {
     for (int i=0; i<ESM::PRT_Count; ++i)
     {
-        PartHolderPtr part = mObjectParts[i];
-        if (!part.get())
+        const PartHolder* const part = mObjectParts[i].get();
+        if (part == nullptr)
             continue;
         if (std::find(path.begin(), path.end(), part->getNode().get()) != path.end())
         {
@@ -1023,8 +1023,8 @@ void NpcAnimation::releaseArrow(float attackStrength)
 
 osg::Group* NpcAnimation::getArrowBone()
 {
-    PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
-    if (!part)
+    const PartHolder* const part = mObjectParts[ESM::PRT_Weapon].get();
+    if (part == nullptr)
         return nullptr;
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
@@ -1048,8 +1048,8 @@ osg::Group* NpcAnimation::getArrowBone()
 
 osg::Node* NpcAnimation::getWeaponNode()
 {
-    PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
-    if (!part)
+    const PartHolder* const part = mObjectParts[ESM::PRT_Weapon].get();
+    if (part == nullptr)
         return nullptr;
     return part->getNode();
 }

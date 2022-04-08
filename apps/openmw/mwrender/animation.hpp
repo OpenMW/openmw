@@ -61,7 +61,7 @@ public:
 
     ~PartHolder();
 
-    osg::ref_ptr<osg::Node> getNode()
+    const osg::ref_ptr<osg::Node>& getNode() const
     {
         return mNode;
     }
@@ -72,7 +72,7 @@ private:
     void operator= (const PartHolder&);
     PartHolder(const PartHolder&);
 };
-typedef std::shared_ptr<PartHolder> PartHolderPtr;
+using PartHolderPtr = std::unique_ptr<PartHolder>;
 
 struct EffectParams
 {
