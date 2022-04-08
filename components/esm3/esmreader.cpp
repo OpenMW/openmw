@@ -120,6 +120,12 @@ std::string ESMReader::getHNOString(NAME name)
     return "";
 }
 
+void ESMReader::skipHNOString(NAME name)
+{
+    if (isNextSub(name))
+        skipHString();
+}
+
 std::string ESMReader::getHNString(NAME name)
 {
     getSubNameIs(name);
@@ -145,6 +151,26 @@ std::string ESMReader::getHString()
     }
 
     return getString(mCtx.leftSub);
+}
+
+void ESMReader::skipHString()
+{
+    getSubHeader();
+
+    // Hack to make MultiMark.esp load. Zero-length strings do not
+    // occur in any of the official mods, but MultiMark makes use of
+    // them. For some reason, they break the rules, and contain a byte
+    // (value 0) even if the header says there is no data. If
+    // Morrowind accepts it, so should we.
+    if (mCtx.leftSub == 0 && hasMoreSubs() && !mEsm->peek())
+    {
+        // Skip the following zero byte
+        mCtx.leftRec--;
+        skipT<char>();
+        return;
+    }
+
+    skip(mCtx.leftSub);
 }
 
 void ESMReader::getHExact(void*p, int size)

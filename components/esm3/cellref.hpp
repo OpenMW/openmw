@@ -116,6 +116,8 @@ namespace ESM
             void blank();
     };
 
+    void skipLoadCellRef(ESMReader& esm, bool wideRefNum = false);
+
     inline bool operator== (const RefNum& left, const RefNum& right)
     {
         return left.mIndex==right.mIndex && left.mContentFile==right.mContentFile;

@@ -435,7 +435,7 @@ namespace MWRender
                         cMRef.mRefNum.mIndex = 0;
                         bool deleted = false;
                         bool moved = false;
-                        while(cell->getNextRef(esm[index], ref, deleted, cMRef, moved))
+                        while (ESM::Cell::getNextRef(esm[index], ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
                         {
                             if (moved)
                                 continue;

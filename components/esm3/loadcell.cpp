@@ -17,7 +17,7 @@
 namespace
 {
     ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
-    void adjustRefNum (ESM::RefNum& refNum, ESM::ESMReader& reader)
+    void adjustRefNum (ESM::RefNum& refNum, const ESM::ESMReader& reader)
     {
         unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
 
@@ -271,7 +271,8 @@ namespace ESM
         return false;
     }
 
-    bool Cell::getNextRef(ESMReader& esm, CellRef& cellRef, bool& deleted, MovedCellRef& movedCellRef, bool& moved)
+    bool Cell::getNextRef(ESMReader& esm, CellRef& cellRef, bool& deleted, MovedCellRef& movedCellRef, bool& moved,
+        GetNextRefMode mode)
     {
         deleted = false;
         moved = false;
@@ -287,6 +288,13 @@ namespace ESM
 
         if (!esm.peekNextSub("FRMR"))
             return false;
+
+        if ((!moved && mode == GetNextRefMode::LoadOnlyMoved)
+                || (moved && mode == GetNextRefMode::LoadOnlyNotMoved))
+        {
+            skipLoadCellRef(esm);
+            return true;
+        }
 
         cellRef.load(esm, deleted);
         adjustRefNum(cellRef.mRefNum, esm);

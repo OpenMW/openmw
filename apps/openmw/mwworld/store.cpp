@@ -448,7 +448,7 @@ namespace MWWorld
         //
         // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
         //  implementation when the oher implementation works as well.
-        while (cell->getNextRef(esm, ref, deleted, cMRef, moved))
+        while (ESM::Cell::getNextRef(esm, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyMoved))
         {
             if (!moved)
                 continue;

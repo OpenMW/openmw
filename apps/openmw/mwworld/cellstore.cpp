@@ -568,7 +568,7 @@ namespace MWWorld
                 cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
                 bool moved = false;
-                while(mCell->getNextRef(esm[index], ref, deleted, cMRef, moved))
+                while (ESM::Cell::getNextRef(esm[index], ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
                 {
                     if (deleted || moved)
                         continue;
@@ -628,7 +628,7 @@ namespace MWWorld
                 cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
                 bool moved = false;
-                while(mCell->getNextRef(esm[index], ref, deleted, cMRef, moved))
+                while (ESM::Cell::getNextRef(esm[index], ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
                 {
                     if (moved)
                         continue;
