@@ -54,12 +54,13 @@ namespace MWWorld
     /// \brief Base class for referenceable esm records
     class Class
     {
-            static std::map<unsigned int, std::shared_ptr<Class> > sClasses;
-            unsigned int mType;
+            const unsigned mType;
+
+            static std::map<unsigned, Class*>& getClasses();
 
         protected:
 
-            Class() = default;
+            explicit Class(unsigned type) : mType(type) {}
 
             std::shared_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
             ///< Generate default action for activating inventory items
@@ -340,7 +341,7 @@ namespace MWWorld
             static const Class& get (unsigned int key);
             ///< If there is no class for this \a key, an exception is thrown.
 
-            static void registerClass (unsigned int key,  std::shared_ptr<Class> instance);
+            static void registerClass(Class& instance);
 
             virtual int getBaseGold(const MWWorld::ConstPtr& ptr) const;
 

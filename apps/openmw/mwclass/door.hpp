@@ -3,12 +3,16 @@
 
 #include <components/esm3/loaddoor.hpp>
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Door : public MWWorld::Class
+    class Door : public MWWorld::RegisteredClass<Door>
     {
+            friend MWWorld::RegisteredClass<Door>;
+
+            Door();
+
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
@@ -45,8 +49,6 @@ namespace MWClass
 
             std::string getScript (const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of the script attached to ptr
-
-            static void registerSelf();
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 

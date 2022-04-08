@@ -23,6 +23,10 @@
 
 namespace MWClass
 {
+    Light::Light()
+        : MWWorld::RegisteredClass<Light>(ESM::Light::sRecordId)
+    {
+    }
 
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -118,13 +122,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Light::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Light);
-
-        registerClass (ESM::Light::sRecordId, instance);
     }
 
     std::string Light::getUpSoundId (const MWWorld::ConstPtr& ptr) const

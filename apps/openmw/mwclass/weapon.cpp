@@ -26,6 +26,10 @@
 
 namespace MWClass
 {
+    Weapon::Weapon()
+        : MWWorld::RegisteredClass<Weapon>(ESM::Weapon::sRecordId)
+    {
+    }
 
     void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -119,13 +123,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Weapon::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Weapon);
-
-        registerClass (ESM::Weapon::sRecordId, instance);
     }
 
     std::string Weapon::getUpSoundId (const MWWorld::ConstPtr& ptr) const

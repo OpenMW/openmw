@@ -4,6 +4,10 @@
 
 namespace MWClass
 {
+    ItemLevList::ItemLevList()
+        : MWWorld::RegisteredClass<ItemLevList>(ESM::ItemLevList::sRecordId)
+    {
+    }
 
     std::string ItemLevList::getName (const MWWorld::ConstPtr& ptr) const
     {
@@ -13,12 +17,5 @@ namespace MWClass
     bool ItemLevList::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
         return false;
-    }
-
-    void ItemLevList::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new ItemLevList);
-
-        registerClass (ESM::ItemLevList::sRecordId, instance);
     }
 }

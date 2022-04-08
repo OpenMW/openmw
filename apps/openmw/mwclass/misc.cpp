@@ -21,6 +21,11 @@
 
 namespace MWClass
 {
+    Miscellaneous::Miscellaneous()
+        : MWWorld::RegisteredClass<Miscellaneous>(ESM::Miscellaneous::sRecordId)
+    {
+    }
+
     bool Miscellaneous::isGold (const MWWorld::ConstPtr& ptr) const
     {
         return Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
@@ -100,13 +105,6 @@ namespace MWClass
         }
 
         return value;
-    }
-
-    void Miscellaneous::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Miscellaneous);
-
-        registerClass (ESM::Miscellaneous::sRecordId, instance);
     }
 
     std::string Miscellaneous::getUpSoundId (const MWWorld::ConstPtr& ptr) const

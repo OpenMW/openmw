@@ -28,6 +28,10 @@
 
 namespace MWClass
 {
+    Activator::Activator()
+        : MWWorld::RegisteredClass<Activator>(ESM::Activator::sRecordId)
+    {
+    }
 
     void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -82,13 +86,6 @@ namespace MWClass
             ptr.get<ESM::Activator>();
 
         return ref->mBase->mScript;
-    }
-
-    void Activator::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Activator);
-
-        registerClass (ESM::Activator::sRecordId, instance);
     }
 
     bool Activator::hasToolTip (const MWWorld::ConstPtr& ptr) const

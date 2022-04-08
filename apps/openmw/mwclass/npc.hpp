@@ -1,6 +1,8 @@
 #ifndef GAME_MWCLASS_NPC_H
 #define GAME_MWCLASS_NPC_H
 
+#include "../mwworld/registeredclass.hpp"
+
 #include "actor.hpp"
 
 namespace ESM
@@ -10,8 +12,12 @@ namespace ESM
 
 namespace MWClass
 {
-    class Npc : public Actor
+    class Npc : public MWWorld::RegisteredClass<Npc, Actor>
     {
+            friend MWWorld::RegisteredClass<Npc, Actor>;
+
+            Npc();
+
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
@@ -124,8 +130,6 @@ namespace MWClass
             bool isPersistent (const MWWorld::ConstPtr& ptr) const override;
 
             std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const override;
-
-            static void registerSelf();
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 

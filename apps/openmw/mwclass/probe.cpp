@@ -20,6 +20,10 @@
 
 namespace MWClass
 {
+    Probe::Probe()
+        : MWWorld::RegisteredClass<Probe>(ESM::Probe::sRecordId)
+    {
+    }
 
     void Probe::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -74,13 +78,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Probe::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Probe);
-
-        registerClass (ESM::Probe::sRecordId, instance);
     }
 
     std::string Probe::getUpSoundId (const MWWorld::ConstPtr& ptr) const

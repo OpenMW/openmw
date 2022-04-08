@@ -1,12 +1,16 @@
 #ifndef GAME_MWCLASS_MISC_H
 #define GAME_MWCLASS_MISC_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Miscellaneous : public MWWorld::Class
+    class Miscellaneous : public MWWorld::RegisteredClass<Miscellaneous>
     {
+            friend MWWorld::RegisteredClass<Miscellaneous>;
+
+            Miscellaneous();
+
         public:
 
             MWWorld::Ptr copyToCell(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell, int count) const override;
@@ -29,8 +33,6 @@ namespace MWClass
 
             int getValue (const MWWorld::ConstPtr& ptr) const override;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
-
-            static void registerSelf();
 
             std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id

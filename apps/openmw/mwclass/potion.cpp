@@ -22,6 +22,10 @@
 
 namespace MWClass
 {
+    Potion::Potion()
+        : MWWorld::RegisteredClass<Potion>(ESM::Potion::sRecordId)
+    {
+    }
 
     void Potion::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -68,13 +72,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Potion::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Potion);
-
-        registerClass (ESM::Potion::sRecordId, instance);
     }
 
     std::string Potion::getUpSoundId (const MWWorld::ConstPtr& ptr) const

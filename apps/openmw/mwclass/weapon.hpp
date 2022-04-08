@@ -1,16 +1,19 @@
 #ifndef GAME_MWCLASS_WEAPON_H
 #define GAME_MWCLASS_WEAPON_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Weapon : public MWWorld::Class
+    class Weapon : public MWWorld::RegisteredClass<Weapon>
     {
+            friend MWWorld::RegisteredClass<Weapon>;
+
             MWWorld::Ptr
             copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
         public:
+            Weapon();
 
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
@@ -44,8 +47,6 @@ namespace MWClass
 
             int getValue (const MWWorld::ConstPtr& ptr) const override;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
-
-            static void registerSelf();
 
             std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id

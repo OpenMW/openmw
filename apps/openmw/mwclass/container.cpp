@@ -54,8 +54,9 @@ namespace MWClass
     }
 
     Container::Container()
+        : MWWorld::RegisteredClass<Container>(ESM::Container::sRecordId)
+        , mHarvestEnabled(Settings::Manager::getBool("graphic herbalism", "Game"))
     {
-        mHarvestEnabled = Settings::Manager::getBool("graphic herbalism", "Game");
     }
 
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
@@ -234,13 +235,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return ref->mBase->mScript;
-    }
-
-    void Container::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Container);
-
-        registerClass (ESM::Container::sRecordId, instance);
     }
 
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const

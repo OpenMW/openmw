@@ -1,12 +1,16 @@
 #ifndef GAME_MWCLASS_ARMOR_H
 #define GAME_MWCLASS_ARMOR_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Armor : public MWWorld::Class
+    class Armor : public MWWorld::RegisteredClass<Armor>
     {
+            friend MWWorld::RegisteredClass<Armor>;
+
+            Armor();
+
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
         public:
@@ -45,8 +49,6 @@ namespace MWClass
 
             int getValue (const MWWorld::ConstPtr& ptr) const override;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
-
-            static void registerSelf();
 
             std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id

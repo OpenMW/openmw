@@ -21,7 +21,11 @@
 
 namespace MWWorld
 {
-    std::map<unsigned int, std::shared_ptr<Class> > Class::sClasses;
+    std::map<unsigned, Class*>& Class::getClasses()
+    {
+        static std::map<unsigned, Class*> values;
+        return values;
+    }
 
     void Class::insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -228,9 +232,10 @@ namespace MWWorld
 
     const Class& Class::get (unsigned int key)
     {
-        auto iter = sClasses.find (key);
+        const auto& classes = getClasses();
+        auto iter = classes.find(key);
 
-        if (iter==sClasses.end())
+        if (iter == classes.end())
             throw std::logic_error ("Class::get(): unknown class key: " + std::to_string(key));
 
         return *iter->second;
@@ -241,10 +246,9 @@ namespace MWWorld
         throw std::runtime_error ("class does not support persistence");
     }
 
-    void Class::registerClass(unsigned int key, std::shared_ptr<Class> instance)
+    void Class::registerClass(Class& instance)
     {
-        instance->mType = key;
-        sClasses.insert(std::make_pair(key, instance));
+        getClasses().emplace(instance.getType(), &instance);
     }
 
     std::string Class::getUpSoundId (const ConstPtr& ptr) const
