@@ -959,6 +959,8 @@ void CharacterController::handleTextKey(const std::string &groupname, SceneUtil:
         sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
         return;
     }
+
+    auto& charClass = mPtr.getClass();
     if(evt.compare(0, 10, "soundgen: ") == 0)
     {
         std::string soundgen = evt.substr(10);
@@ -984,7 +986,7 @@ void CharacterController::handleTextKey(const std::string &groupname, SceneUtil:
             }
         }
 
-        std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
+        std::string sound = charClass.getSoundIdFromSndGen(mPtr, soundgen);
         if(!sound.empty())
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -1007,8 +1009,8 @@ void CharacterController::handleTextKey(const std::string &groupname, SceneUtil:
         // Not ours, skip it
         return;
     }
-    size_t off = groupname.size()+2;
-    size_t len = evt.size() - off;
+    const size_t off = groupname.size()+2;
+    const size_t len = evt.size() - off;
 
     if(groupname == "shield" && evt.compare(off, len, "equip attach") == 0)
         mAnimation->showCarriedLeft(true);
@@ -1019,21 +1021,21 @@ void CharacterController::handleTextKey(const std::string &groupname, SceneUtil:
     else if(evt.compare(off, len, "unequip detach") == 0)
         mAnimation->showWeapons(false);
     else if(evt.compare(off, len, "chop hit") == 0)
-        mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
+        charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
     else if(evt.compare(off, len, "slash hit") == 0)
-        mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
+        charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
     else if(evt.compare(off, len, "thrust hit") == 0)
-        mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
+        charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
     {
         if (groupname == "attack1" || groupname == "swimattack1")
-            mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
+            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
         else if (groupname == "attack2" || groupname == "swimattack2")
-            mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
+            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
         else if (groupname == "attack3" || groupname == "swimattack3")
-            mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
+            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         else
-            mPtr.getClass().hit(mPtr, mAttackStrength);
+            charClass.hit(mPtr, mAttackStrength);
     }
     else if (!groupname.empty()
              && (groupname.compare(0, groupname.size()-1, "attack") == 0 || groupname.compare(0, groupname.size()-1, "swimattack") == 0)
@@ -1057,11 +1059,11 @@ void CharacterController::handleTextKey(const std::string &groupname, SceneUtil:
         if (!hasHitKey)
         {
             if (groupname == "attack1" || groupname == "swimattack1")
-                mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
+                charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
             else if (groupname == "attack2" || groupname == "swimattack2")
-                mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
+                charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
             else if (groupname == "attack3" || groupname == "swimattack3")
-                mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
+                charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         }
     }
     else if (evt.compare(off, len, "shoot attach") == 0)
@@ -1081,7 +1083,7 @@ void CharacterController::handleTextKey(const std::string &groupname, SceneUtil:
     }
 
     else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
-        mPtr.getClass().block(mPtr);
+        charClass.block(mPtr);
     else if (groupname == "containeropen" && evt.compare(off, len, "loot") == 0)
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container, mPtr);
 }
