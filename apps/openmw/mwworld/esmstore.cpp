@@ -257,7 +257,8 @@ void ESMStore::setUp(bool validateRecords)
     }
 
     if (mStaticIds.empty())
-        mStaticIds = mIds;
+        for (const auto& [k, v] : mIds)
+            mStaticIds.emplace(Misc::StringUtils::lowerCase(k), v);
 
     mSkills.setUp();
     mMagicEffects.setUp();

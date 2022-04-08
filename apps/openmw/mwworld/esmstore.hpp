@@ -77,7 +77,7 @@ namespace MWWorld
         // maps the id name to the record type.
         using IDMap = std::unordered_map<std::string, int, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>;
         IDMap mIds;
-        IDMap mStaticIds;
+        std::unordered_map<std::string, int> mStaticIds;
 
         std::unordered_map<std::string, int> mRefCount;
 
