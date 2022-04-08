@@ -67,6 +67,13 @@ struct Cell
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Cell"; }
 
+    enum class GetNextRefMode
+    {
+        LoadAll,
+        LoadOnlyMoved,
+        LoadOnlyNotMoved,
+    };
+
   enum Flags
     {
       Interior  = 0x01, // Interior cell
@@ -183,7 +190,8 @@ struct Cell
   */
     static bool getNextRef(ESMReader& esm, CellRef& ref, bool& deleted);
 
-    static bool getNextRef(ESMReader& esm, CellRef& cellRef, bool& deleted, MovedCellRef& movedCellRef, bool& moved);
+    static bool getNextRef(ESMReader& esm, CellRef& cellRef, bool& deleted, MovedCellRef& movedCellRef, bool& moved,
+        GetNextRefMode mode = GetNextRefMode::LoadAll);
 
   /* This fetches an MVRF record, which is used to track moved references.
    * Since they are comparably rare, we use a separate method for this.
