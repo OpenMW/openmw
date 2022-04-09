@@ -46,7 +46,7 @@ namespace LuaUtil
 
     static const std::string safeFunctions[] = {
         "assert", "error", "ipairs", "next", "pairs", "pcall", "select", "tonumber", "tostring",
-        "type", "unpack", "xpcall", "rawequal", "rawget", "rawset", "getmetatable", "setmetatable"};
+        "type", "unpack", "xpcall", "rawequal", "rawget", "rawset", "setmetatable"};
     static const std::string safePackages[] = {"coroutine", "math", "string", "table"};
 
     LuaState::LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf) : mConf(conf), mVFS(vfs)
@@ -58,7 +58,6 @@ namespace LuaUtil
         mLua["math"]["randomseed"] = []{};
 
         mLua["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };
-        mLua["cmetatable"] = [](const sol::table& v) -> sol::object { return v[sol::metatable_key]; };
 
         // Some fixes for compatibility between different Lua versions
         if (mLua["unpack"] == sol::nil)
@@ -70,29 +69,35 @@ namespace LuaUtil
             mLua.script(R"(
                 local _pairs = pairs
                 local _ipairs = ipairs
-                local _cmeta = cmetatable
-                pairs = function(v) return ((_cmeta(v) or v).__pairs or _pairs)(v) end
-                ipairs = function(v) return ((_cmeta(v) or v).__ipairs or _ipairs)(v) end
+                pairs = function(v) return (rawget(getmetatable(v) or {}, '__pairs') or _pairs)(v) end
+                ipairs = function(v) return (rawget(getmetatable(v) or {}, '__ipairs') or _ipairs)(v) end
             )");
         }
 
         mLua.script(R"(
-            local _pairs = pairs
-            local _ipairs = ipairs
-            local _tostring = tostring
-            local _write = writeToLog
-            local printToLog = function(name, ...)
-                local msg = name
-                for _, v in _ipairs({...}) do
-                    msg = msg .. '\t' .. _tostring(v)
+            local printToLog = function(...)
+                local strs = {}
+                for i = 1, select('#', ...) do
+                    strs[i] = tostring(select(i, ...))
                 end
-                return _write(msg)
+                return writeToLog(table.concat(strs, '\t'))
             end
             printGen = function(name) return function(...) return printToLog(name, ...) end end
 
-            local _cmeta = cmetatable
-            function pairsForReadOnly(v) return _pairs(_cmeta(v).__index) end
-            function ipairsForReadOnly(v) return _ipairs(_cmeta(v).__index) end
+            function pairsForReadOnly(v)
+                local nextFn, t, firstKey = pairs(getmetatable(v).__index)
+                return function(_, k) return nextFn(t, k) end, v, firstKey
+            end
+            function ipairsForReadOnly(v)
+                local nextFn, t, firstKey = ipairs(getmetatable(v).__index)
+                return function(_, k) return nextFn(t, k) end, v, firstKey
+            end
+
+            getmetatable('').__metatable = false
+            getSafeMetatable = function(v)
+                if type(v) ~= 'table' then error('getmetatable is allowed only for tables', 2) end
+                return getmetatable(v)
+            end
         )");
 
         mSandboxEnv = sol::table(mLua, sol::create);
@@ -107,6 +112,7 @@ namespace LuaUtil
             if (mLua[s] == sol::nil) throw std::logic_error("Lua package not found: " + s);
             mCommonPackages[s] = mSandboxEnv[s] = makeReadOnly(mLua[s]);
         }
+        mSandboxEnv["getmetatable"] = mLua["getSafeMetatable"];
         mCommonPackages["os"] = mSandboxEnv["os"] = makeReadOnly(tableFromPairs<std::string_view, sol::function>({
             {"date", mLua["os"]["date"]},
             {"difftime", mLua["os"]["difftime"]},
@@ -162,6 +168,8 @@ namespace LuaUtil
         sol::environment env(mLua, sol::create, mSandboxEnv);
         std::string envName = namePrefix + "[" + path + "]:";
         env["print"] = mLua["printGen"](envName);
+        env["_G"] = env;
+        env[sol::metatable_key]["__metatable"] = false;
 
         auto maybeRunLoader = [&hiddenData](const sol::object& package) -> sol::object
         {

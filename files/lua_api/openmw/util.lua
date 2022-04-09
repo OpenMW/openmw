@@ -26,6 +26,13 @@
 -- @return #table The same table wrapped with read only userdata.
 
 ---
+-- Parses Lua code from string and returns as a function.
+-- @function [parent=#util] loadCode
+-- @param #string code Lua code.
+-- @param #table table Environment to run the code in.
+-- @return #function The loaded code.
+
+---
 -- Bitwise And (supports any number of arguments).
 -- @function [parent=#util] bitAnd
 -- @param #number A First argument (integer).
