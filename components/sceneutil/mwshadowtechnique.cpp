@@ -26,6 +26,8 @@
 #include <osg/ClipControl>
 
 #include <sstream>
+#include <deque>
+#include <vector>
 
 #include "shadowsbin.hpp"
 
@@ -1945,8 +1947,9 @@ bool MWShadowTechnique::computeShadowCameraSettings(Frustum& frustum, LightData&
 struct ConvexHull
 {
     typedef std::vector<osg::Vec3d> Vertices;
-    typedef std::pair< osg::Vec3d, osg::Vec3d > Edge;
-    typedef std::list< Edge > Edges;
+    typedef std::pair<osg::Vec3d, osg::Vec3d> Edge;
+    typedef std::vector<Edge> Edges;
+    typedef std::vector<osg::Vec3d> VertexSet;
 
     Edges _edges;
 
@@ -1954,20 +1957,20 @@ struct ConvexHull
 
     void setToFrustum(MWShadowTechnique::Frustum& frustum)
     {
-        _edges.push_back( Edge(frustum.corners[0],frustum.corners[1]) );
-        _edges.push_back( Edge(frustum.corners[1],frustum.corners[2]) );
-        _edges.push_back( Edge(frustum.corners[2],frustum.corners[3]) );
-        _edges.push_back( Edge(frustum.corners[3],frustum.corners[0]) );
+        _edges.emplace_back(frustum.corners[0], frustum.corners[1]);
+        _edges.emplace_back(frustum.corners[1], frustum.corners[2]);
+        _edges.emplace_back(frustum.corners[2], frustum.corners[3]);
+        _edges.emplace_back(frustum.corners[3], frustum.corners[0]);
 
-        _edges.push_back( Edge(frustum.corners[4],frustum.corners[5]) );
-        _edges.push_back( Edge(frustum.corners[5],frustum.corners[6]) );
-        _edges.push_back( Edge(frustum.corners[6],frustum.corners[7]) );
-        _edges.push_back( Edge(frustum.corners[7],frustum.corners[4]) );
+        _edges.emplace_back(frustum.corners[4], frustum.corners[5]);
+        _edges.emplace_back(frustum.corners[5], frustum.corners[6]);
+        _edges.emplace_back(frustum.corners[6], frustum.corners[7]);
+        _edges.emplace_back(frustum.corners[7], frustum.corners[4]);
 
-        _edges.push_back( Edge(frustum.corners[0],frustum.corners[4]) );
-        _edges.push_back( Edge(frustum.corners[1],frustum.corners[5]) );
-        _edges.push_back( Edge(frustum.corners[2],frustum.corners[6]) );
-        _edges.push_back( Edge(frustum.corners[3],frustum.corners[7]) );
+        _edges.emplace_back(frustum.corners[0], frustum.corners[4]);
+        _edges.emplace_back(frustum.corners[1], frustum.corners[5]);
+        _edges.emplace_back(frustum.corners[2], frustum.corners[6]);
+        _edges.emplace_back(frustum.corners[3], frustum.corners[7]);
     }
 
     struct ConvexHull2D
@@ -1981,22 +1984,22 @@ struct ConvexHull
         }
 
         // Calculates the 2D convex hull and returns it as a vector containing the points in CCW order with the first and last point being the same.
-        static std::vector<Point> convexHull(std::set<Point> &P)
+        static Vertices convexHull(const VertexSet &P)
         {
             size_t n = P.size(), k = 0;
             if (n <= 3)
-                return std::vector<Point>(P.cbegin(), P.cend());
+                return Vertices(P.cbegin(), P.cend());
 
-            std::vector<Point> H(2 * n);
+            Vertices H(2 * n);
 
             // Points are already sorted in a std::set
 
             // Build lower hull
-            for (auto pItr = P.cbegin(); pItr != P.cend(); ++pItr)
+            for(const auto& vert : P)
             {
-                while (k >= 2 && cross(H[k - 2], H[k - 1], *pItr) <= 0)
+                while (k >= 2 && cross(H[k - 2], H[k - 1], vert) <= 0)
                     k--;
-                H[k++] = *pItr;
+                H[k++] = vert;
             }
 
             // Build upper hull
@@ -2053,38 +2056,39 @@ struct ConvexHull
 
     void extendTowardsNegativeZ()
     {
-        typedef std::set<osg::Vec3d> VertexSet;
-
         // Collect the set of vertices
         VertexSet vertices;
         for (const Edge& edge : _edges)
         {
-            vertices.insert(edge.first);
-            vertices.insert(edge.second);
+            vertices.emplace_back(edge.first);
+            vertices.emplace_back(edge.second);
         }
+
+        // Sort and make unique.
+        std::sort(vertices.begin(), vertices.end());
+        vertices.erase(std::unique(vertices.begin(), vertices.end()), vertices.end());
 
         if (vertices.size() == 0)
             return;
 
         // Get the vertices contributing to the 2D convex hull
         Vertices extremeVertices = ConvexHull2D::convexHull(vertices);
-        VertexSet extremeVerticesSet(extremeVertices.cbegin(), extremeVertices.cend());
 
         // Add their extrusions to the final edge collection
         // We extrude as far as -1.5 as the coordinate space shouldn't ever put any shadow casters further than -1.0
         Edges finalEdges;
         // Add edges towards -Z
-        for (auto vertex : extremeVertices)
-            finalEdges.push_back(Edge(vertex, osg::Vec3d(vertex.x(), vertex.y(), -1.5)));
+        for (const auto& vertex : extremeVertices)
+            finalEdges.emplace_back(vertex, osg::Vec3d(vertex.x(), vertex.y(), -1.5));
         // Add edge loop to 'seal' the hull
         for (auto itr = extremeVertices.cbegin(); itr != extremeVertices.cend() - 1; ++itr)
-            finalEdges.push_back(Edge(osg::Vec3d(itr->x(), itr->y(), -1.5), osg::Vec3d((itr + 1)->x(), (itr + 1)->y(), -1.5)));
+            finalEdges.emplace_back(osg::Vec3d(itr->x(), itr->y(), -1.5), osg::Vec3d((itr + 1)->x(), (itr + 1)->y(), -1.5));
         // The convex hull algorithm we are using sometimes places a point at both ends of the vector, so we don't always need to add the last edge separately.
         if (extremeVertices.front() != extremeVertices.back())
-            finalEdges.push_back(Edge(osg::Vec3d(extremeVertices.front().x(), extremeVertices.front().y(), -1.5), osg::Vec3d(extremeVertices.back().x(), extremeVertices.back().y(), -1.5)));
+            finalEdges.emplace_back(osg::Vec3d(extremeVertices.front().x(), extremeVertices.front().y(), -1.5), osg::Vec3d(extremeVertices.back().x(), extremeVertices.back().y(), -1.5));
 
         // Remove internal edges connected to extreme vertices
-        for (auto vertex : extremeVertices)
+        for (const auto& vertex : extremeVertices)
         {
             Vertices connectedVertices;
             for (const Edge& edge : _edges)
@@ -2094,37 +2098,35 @@ struct ConvexHull
                 else if (edge.second == vertex)
                     connectedVertices.push_back(edge.first);
             }
-            connectedVertices.push_back(osg::Vec3d(vertex.x(), vertex.y(), -1.5));
+            connectedVertices.emplace_back(vertex.x(), vertex.y(), -1.5);
 
             Vertices unwantedEdgeEnds = findInternalEdges(vertex, connectedVertices);
-            for (auto edgeEnd : unwantedEdgeEnds)
+            for (const auto& edgeEnd : unwantedEdgeEnds)
             {
-                for (auto itr = _edges.begin(); itr != _edges.end();)
-                {
-                    if (*itr == Edge(vertex, edgeEnd))
+                const auto edgeA = Edge(vertex, edgeEnd);
+                const auto edgeB = Edge(edgeEnd, vertex);
+                _edges.erase(std::remove_if(_edges.begin(), _edges.end(), [&](const auto& elem)
                     {
-                        itr = _edges.erase(itr);
-                        break;
-                    }
-                    else if (*itr == Edge(edgeEnd, vertex))
-                    {
-                        itr = _edges.erase(itr);
-                        break;
-                    }
-                    else
-                        ++itr;
-                }
+                        return elem == edgeA || elem == edgeB;
+                    }), _edges.end());
             }
         }
 
         // Gather connected vertices
-        VertexSet unprocessedConnectedVertices(extremeVertices.begin(), extremeVertices.end());
+        std::deque<osg::Vec3d> unprocessedConnectedVertices(extremeVertices.begin(), extremeVertices.end());
+
         VertexSet connectedVertices;
+        const auto containsVertex = [&](const auto& vert)
+        {
+            return std::find(connectedVertices.begin(), connectedVertices.end(), vert) != connectedVertices.end();
+        };
+
         while (unprocessedConnectedVertices.size() > 0)
         {
-            osg::Vec3d vertex = *unprocessedConnectedVertices.begin();
-            unprocessedConnectedVertices.erase(unprocessedConnectedVertices.begin());
-            connectedVertices.insert(vertex);
+            osg::Vec3d vertex = unprocessedConnectedVertices.front();
+            unprocessedConnectedVertices.pop_front();
+
+            connectedVertices.emplace_back(vertex);
             for (const Edge& edge : _edges)
             {
                 osg::Vec3d otherEnd;
@@ -2135,16 +2137,16 @@ struct ConvexHull
                 else
                     continue;
 
-                if (connectedVertices.count(otherEnd))
+                if (containsVertex(otherEnd))
                     continue;
 
-                unprocessedConnectedVertices.insert(otherEnd);
+                unprocessedConnectedVertices.emplace_back(otherEnd);
             }
         }
 
         for (const Edge& edge : _edges)
         {
-            if (connectedVertices.count(edge.first) || connectedVertices.count(edge.second))
+            if (containsVertex(edge.first) || containsVertex(edge.second))
                 finalEdges.push_back(edge);
         }
 
@@ -2153,12 +2155,10 @@ struct ConvexHull
 
     void transform(const osg::Matrixd& m)
     {
-        for(Edges::iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for (auto& edge : _edges)
         {
-            itr->first = itr->first * m;
-            itr->second = itr->second * m;
+            edge.first = edge.first * m;
+            edge.second = edge.second * m;
         }
     }
 
@@ -2167,18 +2167,14 @@ struct ConvexHull
         Vertices intersections;
 
         // OSG_NOTICE<<"clip("<<plane<<") edges.size()="<<_edges.size()<<std::endl;
-        for(Edges::iterator itr = _edges.begin();
-            itr != _edges.end();
-            )
+        for(auto itr = _edges.begin(); itr != _edges.end();)
         {
             double d0 = plane.distance(itr->first);
             double d1 = plane.distance(itr->second);
             if (d0<0.0 && d1<0.0)
             {
                 // OSG_NOTICE<<"  Edge completely outside, removing"<<std::endl;
-                Edges::iterator to_delete_itr = itr;
-                ++itr;
-                _edges.erase(to_delete_itr);
+                itr = _edges.erase(itr);
             }
             else if (d0>=0.0 && d1>=0.0)
             {
@@ -2215,15 +2211,15 @@ struct ConvexHull
 
         if (intersections.size() == 2)
         {
-            _edges.push_back( Edge(intersections[0], intersections[1]) );
+            _edges.emplace_back(intersections[0], intersections[1]);
             return;
         }
 
         if (intersections.size() == 3)
         {
-            _edges.push_back( Edge(intersections[0], intersections[1]) );
-            _edges.push_back( Edge(intersections[1], intersections[2]) );
-            _edges.push_back( Edge(intersections[2], intersections[0]) );
+            _edges.emplace_back(intersections[0], intersections[1]);
+            _edges.emplace_back(intersections[1], intersections[2]);
+            _edges.emplace_back(intersections[2], intersections[0]);
             return;
         }
 
@@ -2241,11 +2237,9 @@ struct ConvexHull
         up.normalize();
 
         osg::Vec3d center;
-        for(Vertices::iterator itr = intersections.begin();
-            itr != intersections.end();
-            ++itr)
+        for(auto& vertex : intersections)
         {
-            center += *itr;
+            center += vertex;
 
             center.x() = osg::maximum(center.x(), -dbl_max);
             center.y() = osg::maximum(center.y(), -dbl_max);
@@ -2260,11 +2254,9 @@ struct ConvexHull
 
         typedef std::map<double, std::list<std::pair<osg::Vec3d, double>>> VertexMap;
         VertexMap vertexMap;
-        for(Vertices::iterator itr = intersections.begin();
-            itr != intersections.end();
-            ++itr)
+        for (const auto& vertex : intersections)
         {
-            osg::Vec3d dv = (*itr-center);
+            osg::Vec3d dv = vertex - center;
             double h = dv * side;
             double v = dv * up;
             double angle = atan2(h,v);
@@ -2285,20 +2277,18 @@ struct ConvexHull
                 auto listItr = vertexMap[angle].begin();
                 while (listItr != vertexMap[angle].end() && listItr->second < sortValue)
                     ++listItr;
-                vertexMap[angle].insert(listItr, std::make_pair(*itr, sortValue));
+                vertexMap[angle].emplace(listItr, std::make_pair(vertex, sortValue));
             }
             else
-                vertexMap[angle].push_back(std::make_pair(*itr, sortValue));
+                vertexMap[angle].emplace_back(vertex, sortValue);
         }
 
         osg::Vec3d previous_v = vertexMap.rbegin()->second.back().first;
-        for(VertexMap::iterator itr = vertexMap.begin();
-            itr != vertexMap.end();
-            ++itr)
+        for (auto itr = vertexMap.begin(); itr != vertexMap.end(); ++itr)
         {
-            for (auto vertex : itr->second)
+            for (const auto& vertex : itr->second)
             {
-                _edges.push_back(Edge(previous_v, vertex.first));
+                _edges.emplace_back(previous_v, vertex.first);
                 previous_v = vertex.first;
             }
         }
@@ -2309,24 +2299,19 @@ struct ConvexHull
     void clip(const osg::Polytope& polytope)
     {
         const osg::Polytope::PlaneList& planes = polytope.getPlaneList();
-        for(osg::Polytope::PlaneList::const_iterator itr = planes.begin();
-            itr != planes.end();
-            ++itr)
+        for(const auto& plane : planes)
         {
-            clip(*itr);
+            clip(plane);
         }
     }
 
     double min(unsigned int index) const
     {
         double m = dbl_max;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for(const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
-            if (edge.first[index]<m) m = edge.first[index];
-            if (edge.second[index]<m) m = edge.second[index];
+            if (edge.first[index] < m) m = edge.first[index];
+            if (edge.second[index] < m) m = edge.second[index];
         }
         return m;
     }
@@ -2334,13 +2319,10 @@ struct ConvexHull
     double max(unsigned int index) const
     {
         double m = -dbl_max;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for (const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
-            if (edge.first[index]>m) m = edge.first[index];
-            if (edge.second[index]>m) m = edge.second[index];
+            if (edge.first[index] > m) m = edge.first[index];
+            if (edge.second[index] > m) m = edge.second[index];
         }
         return m;
     }
@@ -2350,19 +2332,15 @@ struct ConvexHull
         double m = dbl_max;
         osg::Vec3d delta;
         double ratio;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for (const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
+            delta = edge.first - eye;
+            ratio = delta[index] / delta[1];
+            if (ratio < m) m = ratio;
 
-            delta = edge.first-eye;
-            ratio = delta[index]/delta[1];
-            if (ratio<m) m = ratio;
-
-            delta = edge.second-eye;
-            ratio = delta[index]/delta[1];
-            if (ratio<m) m = ratio;
+            delta = edge.second - eye;
+            ratio = delta[index] / delta[1];
+            if (ratio < m) m = ratio;
         }
         return m;
     }
@@ -2372,32 +2350,25 @@ struct ConvexHull
         double m = -dbl_max;
         osg::Vec3d delta;
         double ratio;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for (const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
+            delta = edge.first - eye;
+            ratio = delta[index] / delta[1];
+            if (ratio > m) m = ratio;
 
-            delta = edge.first-eye;
-            ratio = delta[index]/delta[1];
-            if (ratio>m) m = ratio;
-
-            delta = edge.second-eye;
-            ratio = delta[index]/delta[1];
-            if (ratio>m) m = ratio;
+            delta = edge.second - eye;
+            ratio = delta[index] / delta[1];
+            if (ratio > m) m = ratio;
         }
         return m;
     }
 
     void output(std::ostream& out)
     {
-        out<<"ConvexHull"<<std::endl;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        out << "ConvexHull" << std::endl;
+        for (const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
-            out<<"   edge ("<<edge.first<<") ("<<edge.second<<")"<<std::endl;
+            out << "   edge (" << edge.first << ") (" << edge.second << ")" << std::endl;
         }
     }
 };
