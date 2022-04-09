@@ -242,6 +242,9 @@ namespace MWLua
         for (const std::string& message : mUIMessages)
             windowManager->messageBox(message);
         mUIMessages.clear();
+        for (auto& [msg, color] : mInGameConsoleMessages)
+            windowManager->printToConsole(msg, "#" + color.toHex());
+        mInGameConsoleMessages.clear();
 
         for (std::unique_ptr<Action>& action : mActionQueue)
             action->safeApply(mWorldView);
@@ -256,6 +259,7 @@ namespace MWLua
     {
         LuaUi::clearUserInterface();
         mUiResourceManager.clear();
+        MWBase::Environment::get().getWindowManager()->setConsoleMode("");
         mActiveLocalScripts.clear();
         mLocalEvents.clear();
         mGlobalEvents.clear();
@@ -480,6 +484,7 @@ namespace MWLua
         Log(Debug::Info) << "Reload Lua";
 
         LuaUi::clearUserInterface();
+        MWBase::Environment::get().getWindowManager()->setConsoleMode("");
         mUiResourceManager.clear();
         mLua.dropScriptCache();
         initConfiguration();
@@ -501,6 +506,25 @@ namespace MWLua
         }
         for (LocalScripts* scripts : mActiveLocalScripts)
             scripts->receiveEngineEvent(LocalScripts::OnActive());
+    }
+
+    void LuaManager::handleConsoleCommand(const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr)
+    {
+        PlayerScripts* playerScripts = nullptr;
+        if (!mPlayer.isEmpty())
+            playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+        if (!playerScripts)
+        {
+            MWBase::Environment::get().getWindowManager()->printToConsole("You must enter a game session to run Lua commands\n",
+                                                                          MWBase::WindowManager::sConsoleColor_Error);
+            return;
+        }
+        sol::object selected = sol::nil;
+        if (!selectedPtr.isEmpty())
+            selected = sol::make_object(mLua.sol(), LObject(getId(selectedPtr), mWorldView.getObjectRegistry()));
+        if (!playerScripts->consoleCommand(consoleMode, command, selected))
+            MWBase::Environment::get().getWindowManager()->printToConsole("No Lua handlers for console\n",
+                                                                          MWBase::WindowManager::sConsoleColor_Error);
     }
 
     LuaManager::Action::Action(LuaUtil::LuaState* state)

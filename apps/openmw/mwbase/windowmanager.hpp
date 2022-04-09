@@ -154,6 +154,13 @@ namespace MWBase
             virtual void updateSpellWindow() = 0;
 
             virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
+            virtual void setConsoleMode(const std::string& mode) = 0;
+
+            static constexpr std::string_view sConsoleColor_Default = "#FFFFFF";
+            static constexpr std::string_view sConsoleColor_Error = "#FF2222";
+            static constexpr std::string_view sConsoleColor_Success = "#FF00FF";
+            static constexpr std::string_view sConsoleColor_Info = "#AAAAAA";
+            virtual void printToConsole(const std::string& msg, std::string_view color) = 0;
 
             /// Set time left for the player to start drowning (update the drowning bar)
             /// @param time time left to start drowning

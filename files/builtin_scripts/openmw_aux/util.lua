@@ -1,10 +1,31 @@
--------------------------------------------------------------------------------
+---
 -- `openmw_aux.util` defines utility functions that are implemented in Lua rather than in C++.
 -- Implementation can be found in `resources/vfs/openmw_aux/util.lua`.
 -- @module util
 -- @usage local aux_util = require('openmw_aux.util')
 
 local aux_util = {}
+
+---
+-- Works like `tostring` but shows also content of tables.
+-- @function [parent=#util] deepToString
+-- @param #any value The value to conver to string
+-- @param #number maxDepth Max depth of tables unpacking (optional, 2 by default)
+function aux_util.deepToString(val, level, prefix)
+    level = (level or 1) - 1
+    local ok, iter, t = pcall(function() return pairs(val) end)
+    if level < 0 or not ok then
+        return tostring(val)
+    end
+    local prefix = prefix or ''
+    local newPrefix = prefix .. '  '
+    local strs = {tostring(val) .. ' {\n'}
+    for k, v in iter, t do
+        strs[#strs + 1] = newPrefix .. tostring(k) .. ' = ' .. aux_util.deepToString(v, level, newPrefix) .. ',\n'
+    end
+    strs[#strs + 1] = prefix .. '}'
+    return table.concat(strs)
+end
 
 -------------------------------------------------------------------------------
 -- Finds the nearest object to the given point in the given list.

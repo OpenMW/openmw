@@ -92,6 +92,8 @@ namespace MWBase
 
         // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
         virtual void reloadAllScripts() = 0;
+
+        virtual void handleConsoleCommand(const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr) = 0;
     };
 
 }

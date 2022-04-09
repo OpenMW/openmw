@@ -10,6 +10,8 @@
 
 #include <components/lua_ui/resources.hpp>
 
+#include <components/misc/color.hpp>
+
 #include "../mwbase/luamanager.hpp"
 
 #include "object.hpp"
@@ -60,6 +62,10 @@ namespace MWLua
         // Used only in Lua bindings
         void addCustomLocalScript(const MWWorld::Ptr&, int scriptId);
         void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
+        void addInGameConsoleMessage(const std::string& msg, const Misc::Color& color)
+        {
+            mInGameConsoleMessages.push_back({msg, color});
+        }
         
         // Some changes to the game world can not be done from the scripting thread (because it runs in parallel with OSG Cull),
         // so we need to queue it and apply from the main thread. All such changes should be implemented as classes inherited
@@ -93,6 +99,8 @@ namespace MWLua
 
         // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
         void reloadAllScripts() override;
+
+        void handleConsoleCommand(const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr) override;
 
         // Used to call Lua callbacks from C++
         void queueCallback(LuaUtil::Callback callback, sol::object arg)
@@ -172,6 +180,7 @@ namespace MWLua
         std::vector<std::unique_ptr<Action>> mActionQueue;
         std::unique_ptr<Action> mTeleportPlayerAction;
         std::vector<std::string> mUIMessages;
+        std::vector<std::pair<std::string, Misc::Color>> mInGameConsoleMessages;
 
         LuaUtil::LuaStorage mGlobalStorage{mLua.sol()};
         LuaUtil::LuaStorage mPlayerStorage{mLua.sol()};

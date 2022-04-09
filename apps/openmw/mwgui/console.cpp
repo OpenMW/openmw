@@ -162,25 +162,34 @@ namespace MWGui
         MyGUI::LayerManager::getInstance().upLayerItem(mMainWidget);
     }
 
-    void Console::print(const std::string &msg, const std::string& color)
+    void Console::print(const std::string &msg, std::string_view color)
     {
-        mHistory->addText(color + MyGUI::TextIterator::toTagsString(msg));
+        mHistory->addText(std::string(color) + MyGUI::TextIterator::toTagsString(msg));
     }
 
     void Console::printOK(const std::string &msg)
     {
-        print(msg + "\n", "#FF00FF");
+        print(msg + "\n", MWBase::WindowManager::sConsoleColor_Success);
     }
 
     void Console::printError(const std::string &msg)
     {
-        print(msg + "\n", "#FF2222");
+        print(msg + "\n", MWBase::WindowManager::sConsoleColor_Error);
     }
 
     void Console::execute (const std::string& command)
     {
         // Log the command
-        print("> " + command + "\n");
+        if (mConsoleMode.empty())
+            print("> " + command + "\n");
+        else
+            print(mConsoleMode + " " + command + "\n");
+
+        if (!mConsoleMode.empty() || (command.size() >= 3 && std::string_view(command).substr(0, 3) == "lua"))
+        {
+            MWBase::Environment::get().getLuaManager()->handleConsoleCommand(mConsoleMode, command, mPtr);
+            return;
+        }
 
         Compiler::Locals locals;
         if (!mPtr.isEmpty())
@@ -271,7 +280,7 @@ namespace MWGui
                 }
             }
         }
-        else if(key == MyGUI::KeyCode::Tab)
+        else if(key == MyGUI::KeyCode::Tab && mConsoleMode.empty())
         {
             std::vector<std::string> matches;
             listNames();
@@ -475,7 +484,7 @@ namespace MWGui
 
     void Console::onResChange(int width, int height)
     {
-        setCoord(10,10, width-10, height/2);
+        setCoord(10, 10, width-10, height/2);
     }
 
     void Console::updateSelectedObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr)
@@ -489,23 +498,31 @@ namespace MWGui
         if (!object.isEmpty())
         {
             if (object == mPtr)
-            {
-                setTitle("#{sConsoleTitle}");
-                mPtr=MWWorld::Ptr();
-            }
+                mPtr = MWWorld::Ptr();
             else
-            {
-                setTitle("#{sConsoleTitle} (" + object.getCellRef().getRefId() + ")");
                 mPtr = object;
-            }
             // User clicked on an object. Restore focus to the console command line.
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
         }
         else
-        {
-            setTitle("#{sConsoleTitle}");
             mPtr = MWWorld::Ptr();
-        }
+        updateConsoleTitle();
+    }
+
+    void Console::updateConsoleTitle()
+    {
+        std::string title = "#{sConsoleTitle}";
+        if (!mConsoleMode.empty())
+            title = mConsoleMode + " " + title;
+        if (!mPtr.isEmpty())
+            title.append(" (" + mPtr.getCellRef().getRefId() + ")");
+        setTitle(title);
+    }
+
+    void Console::setConsoleMode(std::string_view mode)
+    {
+        mConsoleMode = std::string(mode);
+        updateConsoleTitle();
     }
 
     void Console::onReferenceUnavailable()
