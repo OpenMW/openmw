@@ -17,14 +17,8 @@ local function validScope(scope)
 end
 
 local function validateSettingOptions(options)
-    if type(options.name) ~= 'string' then
-        error('Setting must have a name')
-    end
-    if options.default == nil then
-        error('Setting must have a default value')
-    end
-    if type(options.description) ~= 'string' then
-        error('Setting must have a description')
+    if type(options.key) ~= 'string' then
+        error('Setting must have a key')
     end
     if not validScope(options.scope) then
         error(('Invalid setting scope %s'):format(options.scope))
@@ -36,14 +30,13 @@ end
 
 local function addSetting(group, options)
     validateSettingOptions(options)
-    if group[options.name] then
-        error(('Duplicate setting name %s'):format(options.name))
+    if group[options.key] then
+        error(('Duplicate setting key %s'):format(options.key))
     end
-    group[options.name] = {
-        name = options.name,
+    group[options.key] = {
+        key = options.key,
         scope = options.scope or SCOPE.Global,
         default = options.default,
-        description = options.description,
         renderer = options.renderer,
     }
 end

@@ -52,28 +52,28 @@ local function isGlobalScope(scope)
     return scope == SCOPE.Global or scope == SCOPE.SaveGlobal
 end
 
-local function getSetting(groupName, settingName)
-    local group = groups:get(groupName)
+local function getSetting(groupKey, settingKey)
+    local group = groups:get(groupKey)
     if not group then
         error('Unknown group')
     end
-    local setting = group[settingName]
+    local setting = group[settingKey]
     if not setting then
         error('Unknown setting')
     end
     return setting
 end
 
-local function getSettingValue(groupName, settingName)
-    local setting = getSetting(groupName, settingName)
+local function getSettingValue(groupKey, settingKey)
+    local setting = getSetting(groupKey, settingKey)
     local scopeSection = scopes[setting.scope]
     if not scopeSection then
-        error(('Setting %s is not available in this context'):format(setting.name))
+        error(('Setting %s is not available in this context'):format(setting.key))
     end
-    if not scopeSection:get(groupName) then
-        scopeSection:set(groupName, {})
+    if not scopeSection:get(groupKey) then
+        scopeSection:set(groupKey, {})
     end
-    return scopeSection:get(groupName)[setting.name] or setting.default
+    return scopeSection:get(groupKey)[setting.key] or setting.default
 end
 
 local function notifySettingChange(scope, event)
@@ -89,11 +89,11 @@ local function notifySettingChange(scope, event)
     end
 end
 
-local function setSettingValue(groupName, settingName, value)
-    local setting = getSetting(groupName, settingName)
+local function setSettingValue(groupKey, settingKey, value)
+    local setting = getSetting(groupKey, settingKey)
     local event = {
-        groupName = groupName,
-        settingName = setting.name,
+        groupName = groupKey,
+        settingName = setting.key,
         value = value,
     }
     if isPlayerScript and isGlobalScope(setting.scope) then
@@ -102,43 +102,43 @@ local function setSettingValue(groupName, settingName, value)
     end
 
     local scopeSection = scopes[setting.scope]
-    if not scopeSection:get(groupName) then
-        scopeSection:set(groupName, {})
+    if not scopeSection:get(groupKey) then
+        scopeSection:set(groupKey, {})
     end
-    local copy = scopeSection:getCopy(groupName)
-    copy[setting.name] = value
-    scopeSection:set(groupName, copy)
+    local copy = scopeSection:getCopy(groupKey)
+    copy[setting.key] = value
+    scopeSection:set(groupKey, copy)
 
     notifySettingChange(setting.scope, event)
 end
 
 local groupMeta = {
     __index = {
-        get = function(self, settingName)
-            return getSettingValue(self.name, settingName)
+        get = function(self, settingKey)
+            return getSettingValue(self.key, settingKey)
         end,
-        set = function(self, settingName, value)
-            setSettingValue(self.name, settingName, value)
+        set = function(self, settingKey, value)
+            setSettingValue(self.key, settingKey, value)
         end,
         onChange = function(self, callback)
             table.insert(self.__callbacks, callback)
         end,
-        __changed = function(self, settingName, value)
+        __changed = function(self, settingKey, value)
             for _, callback in ipairs(self.__callbacks) do
-                callback(settingName, value)
+                callback(settingKey, value)
             end
         end,
     },
 }
 local cachedGroups = {}
-local function getGroup(groupName)
-    if not cachedGroups[groupName] then
-        cachedGroups[groupName] = setmetatable({
-            name = groupName,
+local function getGroup(groupKey)
+    if not cachedGroups[groupKey] then
+        cachedGroups[groupKey] = setmetatable({
+            key = groupKey,
             __callbacks = {},
         }, groupMeta)
     end
-    return cachedGroups[groupName]
+    return cachedGroups[groupKey]
 end
 
 return {

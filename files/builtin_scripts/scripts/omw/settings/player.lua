@@ -8,6 +8,7 @@ return {
         SCOPE = common.SCOPE,
         getGroup = common.getGroup,
         registerRenderer = render.registerRenderer,
+        localizeGroup = render.localizeGroup,
     },
     engineHandlers = {
         onLoad = function(saved)
