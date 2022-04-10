@@ -12,7 +12,6 @@
 
 #include "../mwbase/luamanager.hpp"
 
-#include "actions.hpp"
 #include "object.hpp"
 #include "eventqueue.hpp"
 #include "globalscripts.hpp"
@@ -60,9 +59,28 @@ namespace MWLua
 
         // Used only in Lua bindings
         void addCustomLocalScript(const MWWorld::Ptr&, int scriptId);
-        void addAction(std::unique_ptr<Action>&& action) { mActionQueue.push_back(std::move(action)); }
-        void addTeleportPlayerAction(std::unique_ptr<TeleportAction>&& action) { mTeleportPlayerAction = std::move(action); }
         void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
+        
+        // Some changes to the game world can not be done from the scripting thread (because it runs in parallel with OSG Cull),
+        // so we need to queue it and apply from the main thread. All such changes should be implemented as classes inherited
+        // from MWLua::Action.
+        class Action
+        {
+        public:
+            Action(LuaUtil::LuaState* state);
+            virtual ~Action() {}
+
+            void safeApply(WorldView&) const;
+            virtual void apply(WorldView&) const = 0;
+            virtual std::string toString() const = 0;
+
+        private:
+            std::string mCallerTraceback;
+        };
+
+        void addAction(std::function<void()> action, std::string_view name = "");
+        void addAction(std::unique_ptr<Action>&& action) { mActionQueue.push_back(std::move(action)); }
+        void addTeleportPlayerAction(std::unique_ptr<Action>&& action) { mTeleportPlayerAction = std::move(action); }
 
         // Saving
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;
@@ -149,7 +167,7 @@ namespace MWLua
 
         // Queued actions that should be done in main thread. Processed by applyQueuedChanges().
         std::vector<std::unique_ptr<Action>> mActionQueue;
-        std::unique_ptr<TeleportAction> mTeleportPlayerAction;
+        std::unique_ptr<Action> mTeleportPlayerAction;
         std::vector<std::string> mUIMessages;
 
         LuaUtil::LuaStorage mGlobalStorage{mLua.sol()};

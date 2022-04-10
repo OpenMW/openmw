@@ -2,9 +2,12 @@
 
 #include <components/lua/luastate.hpp>
 
+#include "../mwworld/action.hpp"
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "eventqueue.hpp"
 #include "luamanagerimp.hpp"
@@ -31,6 +34,83 @@ namespace MWLua
 
     namespace {
 
+        class TeleportAction final : public LuaManager::Action
+        {
+        public:
+            TeleportAction(LuaUtil::LuaState* state, ObjectId object, std::string cell, const osg::Vec3f& pos, const osg::Vec3f& rot)
+                : Action(state), mObject(object), mCell(std::move(cell)), mPos(pos), mRot(rot) {}
+
+            void apply(WorldView& worldView) const override
+            {
+                MWWorld::CellStore* cell = worldView.findCell(mCell, mPos);
+                if (!cell)
+                    throw std::runtime_error(std::string("cell not found: '") + mCell + "'");
+
+                MWBase::World* world = MWBase::Environment::get().getWorld();
+                MWWorld::Ptr obj = worldView.getObjectRegistry()->getPtr(mObject, false);
+                const MWWorld::Class& cls = obj.getClass();
+                bool isPlayer = obj == world->getPlayerPtr();
+                if (cls.isActor())
+                    cls.getCreatureStats(obj).land(isPlayer);
+                if (isPlayer)
+                {
+                    ESM::Position esmPos;
+                    static_assert(sizeof(esmPos) == sizeof(osg::Vec3f) * 2);
+                    std::memcpy(esmPos.pos, &mPos, sizeof(osg::Vec3f));
+                    std::memcpy(esmPos.rot, &mRot, sizeof(osg::Vec3f));
+                    world->getPlayer().setTeleported(true);
+                    if (cell->isExterior())
+                        world->changeToExteriorCell(esmPos, true);
+                    else
+                        world->changeToInteriorCell(mCell, esmPos, true);
+                }
+                else
+                {
+                    MWWorld::Ptr newObj = world->moveObject(obj, cell, mPos);
+                    world->rotateObject(newObj, mRot);
+                }
+            }
+
+            std::string toString() const override { return "TeleportAction"; }
+
+        private:
+            ObjectId mObject;
+            std::string mCell;
+            osg::Vec3f mPos;
+            osg::Vec3f mRot;
+        };
+
+        class ActivateAction final : public LuaManager::Action
+        {
+        public:
+            ActivateAction(LuaUtil::LuaState* state, ObjectId object, ObjectId actor)
+                : Action(state), mObject(object), mActor(actor) {}
+
+            void apply(WorldView& worldView) const override
+            {
+                MWWorld::Ptr object = worldView.getObjectRegistry()->getPtr(mObject, true);
+                if (object.isEmpty())
+                    throw std::runtime_error(std::string("Object not found: " + idToString(mObject)));
+                MWWorld::Ptr actor = worldView.getObjectRegistry()->getPtr(mActor, true);
+                if (actor.isEmpty())
+                    throw std::runtime_error(std::string("Actor not found: " + idToString(mActor)));
+
+                MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
+                std::unique_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
+                action->execute(actor);
+            }
+
+            std::string toString() const override
+            {
+                return std::string("ActivateAction object=") + idToString(mObject) +
+                       std::string(" actor=") + idToString(mActor);
+            }
+
+        private:
+            ObjectId mObject;
+            ObjectId mActor;
+        };
+    
         template <typename ObjT>
         using Cell = std::conditional_t<std::is_same_v<ObjT, LObject>, LCell, GCell>;
 

@@ -10,14 +10,13 @@
 #include <components/misc/stringops.hpp>
 
 #include "context.hpp"
-#include "actions.hpp"
 #include "luamanagerimp.hpp"
 
 namespace MWLua
 {
     namespace
     {
-        class UiAction final : public Action
+        class UiAction final : public LuaManager::Action
         {
             public:
                 enum Type
@@ -81,7 +80,7 @@ namespace MWLua
                 std::shared_ptr<LuaUi::Element> mElement;
         };
 
-        class InsertLayerAction final : public Action
+        class InsertLayerAction final : public LuaManager::Action
         {
             public:
                 InsertLayerAction(std::string_view name, size_t index,

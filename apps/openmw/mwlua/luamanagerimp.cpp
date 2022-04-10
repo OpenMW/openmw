@@ -501,4 +501,50 @@ namespace MWLua
             scripts->receiveEngineEvent(LocalScripts::OnActive());
     }
 
+    LuaManager::Action::Action(LuaUtil::LuaState* state)
+    {
+        static const bool luaDebug = Settings::Manager::getBool("lua debug", "Lua");
+        if (luaDebug)
+            mCallerTraceback = state->debugTraceback();
+    }
+
+    void LuaManager::Action::safeApply(WorldView& w) const
+    {
+        try
+        {
+            apply(w);
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Error) << "Error in " << this->toString() << ": " << e.what();
+
+            if (mCallerTraceback.empty())
+                Log(Debug::Error) << "Set 'lua_debug=true' in settings.cfg to enable action tracebacks";
+            else
+                Log(Debug::Error) << "Caller " << mCallerTraceback;
+        }
+    }
+
+    namespace
+    {
+        class FunctionAction final : public LuaManager::Action
+        {
+        public:
+            FunctionAction(LuaUtil::LuaState* state, std::function<void()> fn, std::string_view name)
+                : Action(state), mFn(std::move(fn)), mName(name) {}
+
+            void apply(WorldView&) const override { mFn(); }
+            std::string toString() const override { return "FunctionAction " + mName; }
+
+        private:
+            std::function<void()> mFn;
+            std::string mName;
+        };
+    }
+
+    void LuaManager::addAction(std::function<void()> action, std::string_view name)
+    {
+        mActionQueue.push_back(std::make_unique<FunctionAction>(&mLua, std::move(action), name));
+    }
+
 }
