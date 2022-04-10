@@ -1,5 +1,7 @@
 #include "savingstages.hpp"
 
+#include <sstream>
+
 #include <boost/filesystem.hpp>
 
 #include <components/esm3/loaddial.hpp>

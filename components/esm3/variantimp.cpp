@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <cmath>
+#include <sstream>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
