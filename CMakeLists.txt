@@ -251,7 +251,7 @@ set(USED_OSG_PLUGINS
 
 option(OPENMW_USE_SYSTEM_ICU "Use system ICU library instead of internal. If disabled, requires autotools" ON)
 if(OPENMW_USE_SYSTEM_ICU)
-    find_package(ICU COMPONENTS uc i18n)
+    find_package(ICU REQUIRED COMPONENTS uc i18n)
 endif()
 
 option(OPENMW_USE_SYSTEM_YAML_CPP "Use system yaml-cpp library instead of internal." ON)
@@ -262,7 +262,7 @@ else()
 endif()
 option(YAML_CPP_STATIC "Link static build of yaml-cpp into the binaries" ${_yaml_cpp_static_default})
 if (OPENMW_USE_SYSTEM_YAML_CPP)
-    find_package(yaml-cpp)
+    find_package(yaml-cpp REQUIRED)
 endif()
 
 add_subdirectory(extern)
