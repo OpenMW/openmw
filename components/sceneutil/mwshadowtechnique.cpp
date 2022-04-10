@@ -2113,7 +2113,7 @@ struct ConvexHull
         }
 
         // Gather connected vertices
-        std::deque<osg::Vec3d> unprocessedConnectedVertices(extremeVertices.begin(), extremeVertices.end());
+        VertexSet unprocessedConnectedVertices = extremeVertices;
 
         VertexSet connectedVertices;
         const auto containsVertex = [&](const auto& vert)
@@ -2121,10 +2121,10 @@ struct ConvexHull
             return std::find(connectedVertices.begin(), connectedVertices.end(), vert) != connectedVertices.end();
         };
 
-        while (unprocessedConnectedVertices.size() > 0)
+        while (!unprocessedConnectedVertices.empty())
         {
-            osg::Vec3d vertex = unprocessedConnectedVertices.front();
-            unprocessedConnectedVertices.pop_front();
+            osg::Vec3d vertex = unprocessedConnectedVertices.back();
+            unprocessedConnectedVertices.pop_back();
 
             connectedVertices.emplace_back(vertex);
             for (const Edge& edge : _edges)
