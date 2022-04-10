@@ -125,7 +125,7 @@ public:
     */
     Files::IStreamPtr getFile(const FileStruct *file)
     {
-        return Files::openConstrainedFileStream (mFilename.c_str (), file->offset, file->fileSize);
+        return Files::openConstrainedFileStream(mFilename, file->offset, file->fileSize);
     }
 
     void addFile(const std::string& filename, std::istream& file);

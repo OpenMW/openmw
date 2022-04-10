@@ -27,7 +27,7 @@ namespace Files
         ConstrainedFileStreamBuf(const std::string &fname, size_t start, size_t length)
         {
             mFile.open (fname.c_str ());
-            mSize  = length != 0xFFFFFFFF ? length : mFile.size () - start;
+            mSize  = length != std::numeric_limits<std::size_t>::max() ? length : mFile.size () - start;
 
             if (start != 0)
                 mFile.seek(start);
@@ -109,10 +109,8 @@ namespace Files
     {
     }
 
-    IStreamPtr openConstrainedFileStream(const char *filename,
-                                                       size_t start, size_t length)
+    IStreamPtr openConstrainedFileStream(const std::string& filename, std::size_t start, std::size_t length)
     {
-        auto buf = std::unique_ptr<std::streambuf>(new ConstrainedFileStreamBuf(filename, start, length));
-        return IStreamPtr(new ConstrainedFileStream(std::move(buf)));
+        return std::make_shared<ConstrainedFileStream>(std::make_unique<ConstrainedFileStreamBuf>(filename, start, length));
     }
 }

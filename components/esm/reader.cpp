@@ -16,7 +16,7 @@ namespace ESM
 {
     Reader* Reader::getReader(const std::string &filename)
     {
-        Files::IStreamPtr esmStream(Files::openConstrainedFileStream (filename.c_str ()));
+        Files::IStreamPtr esmStream(Files::openConstrainedFileStream(filename));
 
         std::uint32_t modVer = 0; // get the first 4 bytes of the record header only
         esmStream->read((char*)&modVer, sizeof(modVer));

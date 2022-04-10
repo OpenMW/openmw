@@ -210,7 +210,7 @@ void Reader::buildLStringIndex(const std::string& stringFile, LocalizedStringTyp
     sp.type = stringType;
 
     // TODO: possibly check if the resource exists?
-    Files::IStreamPtr filestream = Files::IStreamPtr(Files::openConstrainedFileStream(stringFile.c_str()));
+    Files::IStreamPtr filestream = Files::IStreamPtr(Files::openConstrainedFileStream(stringFile));
 
     filestream->seekg(0, std::ios::end);
     std::size_t fileSize = filestream->tellg();

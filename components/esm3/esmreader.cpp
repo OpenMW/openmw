@@ -93,7 +93,7 @@ void ESMReader::openRaw(Files::IStreamPtr _esm, const std::string& name)
 
 void ESMReader::openRaw(const std::string& filename)
 {
-    openRaw(Files::openConstrainedFileStream(filename.c_str()), filename);
+    openRaw(Files::openConstrainedFileStream(filename), filename);
 }
 
 void ESMReader::open(Files::IStreamPtr _esm, const std::string &name)
@@ -110,7 +110,7 @@ void ESMReader::open(Files::IStreamPtr _esm, const std::string &name)
 
 void ESMReader::open(const std::string &file)
 {
-    open (Files::openConstrainedFileStream (file.c_str ()), file);
+    open (Files::openConstrainedFileStream(file), file);
 }
 
 std::string ESMReader::getHNOString(NAME name)

@@ -128,12 +128,14 @@ namespace ESM4 {
         ~Reader();
 
         // FIXME: should be private but ESMTool uses it
-        void openRaw(const std::string& filename) {
-            openRaw(Files::openConstrainedFileStream(filename.c_str()), filename);
+        void openRaw(const std::string& filename)
+        {
+            openRaw(Files::openConstrainedFileStream(filename), filename);
         }
 
-        void open(const std::string& filename) {
-            open(Files::openConstrainedFileStream (filename.c_str ()), filename);
+        void open(const std::string& filename)
+        {
+            open(Files::openConstrainedFileStream(filename), filename);
         }
 
         void close() final;
