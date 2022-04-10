@@ -28,7 +28,7 @@ namespace ESM
                     mSound = esm.getHString();
                     break;
                 case ESM::fourCC("DATA"):
-                    esm.getHT(mData, 3);
+                    esm.getHTSized<3>(mData);
                     hasData = true;
                     break;
                 case ESM::SREC_DELE:

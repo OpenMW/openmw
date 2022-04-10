@@ -195,7 +195,7 @@ void MagicEffect::load(ESMReader &esm, bool &isDeleted)
 
     mId = indexToId (mIndex);
 
-    esm.getHNT(mData, "MEDT", 36);
+    esm.getHNTSized<36>(mData, "MEDT");
     if (esm.getFormat() == 0)
     {
         // don't allow mods to change fixed flags in the legacy format

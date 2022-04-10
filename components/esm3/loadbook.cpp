@@ -31,7 +31,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case ESM::fourCC("BKDT"):
-                    esm.getHT(mData, 20);
+                    esm.getHTSized<20>(mData);
                     hasData = true;
                     break;
                 case ESM::fourCC("SCRI"):

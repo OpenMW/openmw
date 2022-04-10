@@ -34,7 +34,7 @@ namespace ESM
                     mIcon = esm.getHString();
                     break;
                 case ESM::fourCC("LHDT"):
-                    esm.getHT(mData, 24);
+                    esm.getHTSized<24>(mData);
                     hasData = true;
                     break;
                 case ESM::fourCC("SCRI"):

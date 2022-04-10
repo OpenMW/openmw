@@ -39,7 +39,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case ESM::fourCC("ALDT"):
-                    esm.getHT(mData, 12);
+                    esm.getHTSized<12>(mData);
                     hasData = true;
                     break;
                 case ESM::fourCC("ENAM"):

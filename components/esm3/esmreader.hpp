@@ -2,7 +2,6 @@
 #define OPENMW_ESM_READER_H
 
 #include <cstdint>
-#include <cassert>
 #include <vector>
 #include <sstream>
 
@@ -114,20 +113,18 @@ public:
 
   // Version with extra size checking, to make sure the compiler
   // doesn't mess up our struct padding.
-  template <typename X>
-  void getHNT(X &x, NAME name, int size)
+  template <std::size_t size, typename X>
+  void getHNTSized(X &x, NAME name)
   {
-      assert(sizeof(X) == size);
-      getSubNameIs(name);
-      getHT(x);
+      static_assert(sizeof(X) == size);
+      getHNT(x, name);
   }
 
-  template <typename X>
-  void getHNOT(X &x, NAME name, int size)
+  template <std::size_t size, typename X>
+  void getHNOTSized(X &x, NAME name)
   {
-      assert(sizeof(X) == size);
-      if(isNextSub(name))
-          getHT(x);
+      static_assert(sizeof(X) == size);
+      getHNOT(x, name);
   }
 
   // Get data of a given type/size, including subrecord header
@@ -151,10 +148,10 @@ public:
 
   // Version with extra size checking, to make sure the compiler
   // doesn't mess up our struct padding.
-  template <typename X>
-  void getHT(X &x, int size)
+  template <std::size_t size, typename X>
+  void getHTSized(X &x)
   {
-      assert(sizeof(X) == size);
+      static_assert(sizeof(X) == size);
       getHT(x);
   }
 

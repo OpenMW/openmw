@@ -144,7 +144,7 @@ namespace ESM
                     hasIndex = true;
                     break;
                 case ESM::fourCC("SKDT"):
-                    esm.getHT(mData, 24);
+                    esm.getHTSized<24>(mData);
                     hasData = true;
                     break;
                 case ESM::fourCC("DESC"):

@@ -26,7 +26,7 @@ namespace ESM
                     hasName = true;
                     break;
                 case ESM::fourCC("ENDT"):
-                    esm.getHT(mData, 16);
+                    esm.getHTSized<16>(mData);
                     hasData = true;
                     break;
                 case ESM::fourCC("ENAM"):

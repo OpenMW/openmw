@@ -114,7 +114,7 @@ namespace ESM
                         break;
                     case ESM::fourCC("DATA"):
                         if constexpr (load)
-                            esm.getHT(cellRef.mPos, 24);
+                            esm.getHTSized<24>(cellRef.mPos);
                         else
                             esm.skip(24);
                         break;
@@ -150,7 +150,7 @@ namespace ESM
 void ESM::RefNum::load(ESMReader& esm, bool wide, ESM::NAME tag)
 {
     if (wide)
-        esm.getHNT(*this, tag, 8);
+        esm.getHNTSized<8>(*this, tag);
     else
         esm.getHNT(mIndex, tag);
 }

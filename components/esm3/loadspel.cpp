@@ -30,12 +30,12 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case ESM::fourCC("SPDT"):
-                    esm.getHT(mData, 12);
+                    esm.getHTSized<12>(mData);
                     hasData = true;
                     break;
                 case ESM::fourCC("ENAM"):
                     ENAMstruct s;
-                    esm.getHT(s, 24);
+                    esm.getHTSized<24>(s);
                     mEffects.mList.push_back(s);
                     break;
                 case ESM::SREC_DELE:

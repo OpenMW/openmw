@@ -56,7 +56,7 @@ namespace ESM
                     mRanks[rankCounter++] = esm.getHString();
                     break;
                 case ESM::fourCC("FADT"):
-                    esm.getHT(mData, 240);
+                    esm.getHTSized<240>(mData);
                     if (mData.mIsHidden > 1)
                         esm.fail("Unknown flag!");
                     hasData = true;

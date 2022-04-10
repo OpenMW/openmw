@@ -15,7 +15,7 @@ void ESM::SavedGame::load (ESMReader &esm)
     mPlayerClassName = esm.getHNOString("PLCN");
 
     mPlayerCell = esm.getHNString("PLCE");
-    esm.getHNT (mInGameTime, "TSTM", 16);
+    esm.getHNTSized<16>(mInGameTime, "TSTM");
     esm.getHNT (mTimePlayed, "TIME");
     mDescription = esm.getHNString ("DESC");
 

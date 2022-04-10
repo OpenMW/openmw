@@ -35,8 +35,8 @@ namespace ESSImport
         // DATA should occur for all references, except levelled creature spawners
         // I've seen DATA *twice* on a creature record, and with the exact same content too! weird
         // alarmvoi0000.ess
-        esm.getHNOT(mPos, "DATA", 24);
-        esm.getHNOT(mPos, "DATA", 24);
+        esm.getHNOTSized<24>(mPos, "DATA");
+        esm.getHNOTSized<24>(mPos, "DATA");
 
         mDeleted = 0;
         if (esm.isNextSub("DELE"))

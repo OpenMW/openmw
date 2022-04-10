@@ -31,7 +31,7 @@ namespace ESM
                     mRace = esm.getHString();
                     break;
                 case ESM::fourCC("BYDT"):
-                    esm.getHT(mData, 4);
+                    esm.getHTSized<4>(mData);
                     hasData = true;
                     break;
                 case ESM::SREC_DELE:

@@ -58,7 +58,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case ESM::fourCC("CLDT"):
-                    esm.getHT(mData, 60);
+                    esm.getHTSized<60>(mData);
                     if (mData.mIsPlayable > 1)
                         esm.fail("Unknown bool value");
                     hasData = true;
