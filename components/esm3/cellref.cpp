@@ -116,7 +116,7 @@ namespace ESM
                         if constexpr (load)
                             esm.getHTSized<24>(cellRef.mPos);
                         else
-                            esm.skip(24);
+                            esm.skipHTSized<24, decltype(cellRef.mPos)>();
                         break;
                     case ESM::fourCC("NAM0"):
                     {

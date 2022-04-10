@@ -155,6 +155,13 @@ public:
       getHT(x);
   }
 
+  template <std::size_t size, typename T>
+  void skipHTSized()
+  {
+      static_assert(sizeof(T) == size);
+      skipHT<T>();
+  }
+
   // Read a string by the given name if it is the next record.
   std::string getHNOString(NAME name);
 
