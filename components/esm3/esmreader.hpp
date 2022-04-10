@@ -265,7 +265,14 @@ public:
   // them from native encoding to UTF8 in the process.
   std::string getString(int size);
 
-  void skip(int bytes) { mEsm->seekg(getFileOffset()+bytes); };
+    void skip(std::size_t bytes)
+    {
+        char buffer[4096];
+        if (bytes > std::size(buffer))
+            mEsm->seekg(getFileOffset() + bytes);
+        else
+            mEsm->read(buffer, bytes);
+    }
 
   /// Used for error handling
   [[noreturn]] void fail(const std::string &msg);
