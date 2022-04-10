@@ -13,7 +13,7 @@ namespace ESSImport
 
         mActorData.load(esm);
 
-        esm.getHNOT(mPos, "DATA", 24);
+        esm.getHNOTSized<24>(mPos, "DATA");
     }
 
     void PCDT::load(ESM::ESMReader &esm)

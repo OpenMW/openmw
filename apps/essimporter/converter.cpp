@@ -278,7 +278,7 @@ namespace ESSImport
         while (esm.isNextSub("MPCD"))
         {
             float notepos[3];
-            esm.getHT(notepos, 3*sizeof(float));
+            esm.getHTSized<3 * sizeof(float)>(notepos);
 
             // Markers seem to be arranged in a 32*32 grid, notepos has grid-indices.
             // This seems to be the reason markers can't be placed everywhere in interior cells,

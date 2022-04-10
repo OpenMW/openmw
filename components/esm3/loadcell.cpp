@@ -76,7 +76,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case ESM::fourCC("DATA"):
-                    esm.getHT(mData, 12);
+                    esm.getHTSized<12>(mData);
                     hasData = true;
                     break;
                 case ESM::SREC_DELE:

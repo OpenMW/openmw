@@ -40,7 +40,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case ESM::fourCC("RADT"):
-                    esm.getHT(mData, 140);
+                    esm.getHTSized<140>(mData);
                     hasData = true;
                     break;
                 case ESM::fourCC("DESC"):

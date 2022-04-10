@@ -10,12 +10,12 @@ void ESM::Player::load (ESMReader &esm)
 
     mCellId.load (esm);
 
-    esm.getHNT (mLastKnownExteriorPosition, "LKEP", 12);
+    esm.getHNTSized<12>(mLastKnownExteriorPosition, "LKEP");
 
     if (esm.isNextSub ("MARK"))
     {
         mHasMark = true;
-        esm.getHT (mMarkedPosition, 24);
+        esm.getHTSized<24>(mMarkedPosition);
         mMarkedCell.load (esm);
     }
     else

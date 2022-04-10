@@ -52,7 +52,7 @@ namespace ESM
                     mCell = esm.getHString();
                     break;
                 case ESM::fourCC("DATA"):
-                    esm.getHT(mData, 12);
+                    esm.getHTSized<12>(mData);
                     hasData = true;
                     break;
                 case ESM::fourCC("PGRP"):

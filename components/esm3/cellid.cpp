@@ -11,7 +11,7 @@ void ESM::CellId::load (ESMReader &esm)
 
     if (esm.isNextSub ("CIDX"))
     {
-        esm.getHT (mIndex, 8);
+        esm.getHTSized<8>(mIndex);
         mPaged = true;
     }
     else

@@ -50,7 +50,7 @@ namespace ESM {
                     mScript = esm.getHString();
                     break;
                 case ESM::fourCC("NPDT"):
-                    esm.getHT(mData, 96);
+                    esm.getHTSized<96>(mData);
                     hasNpdt = true;
                     break;
                 case ESM::fourCC("FLAG"):

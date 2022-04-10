@@ -26,7 +26,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case ESM::fourCC("DATA"):
-                    esm.getHT(mData, 12);
+                    esm.getHTSized<12>(mData);
                     break;
                 case ESM::fourCC("ONAM"):
                     mActor = esm.getHString();
