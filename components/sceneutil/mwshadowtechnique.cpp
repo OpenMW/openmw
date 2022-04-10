@@ -2113,7 +2113,7 @@ struct ConvexHull
         }
 
         // Gather connected vertices
-        VertexSet unprocessedConnectedVertices = extremeVertices;
+        VertexSet unprocessedConnectedVertices = std::move(extremeVertices);
 
         VertexSet connectedVertices;
         const auto containsVertex = [&](const auto& vert)
