@@ -26,5 +26,6 @@ cmake \
 -D BUILD_BSATOOL=TRUE \
 -D BUILD_ESSIMPORTER=TRUE \
 -D BUILD_NIFTEST=TRUE \
+-D ICU_ROOT="/usr/local/opt/icu4c"
 -G"Unix Makefiles" \
 ..
