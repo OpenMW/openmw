@@ -55,6 +55,9 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
                    <p>Please make sure you have the right permissions \
                    and try again.</p></body></html>");
 
+    boost::filesystem::create_directories(mCfgMgr.getUserConfigPath());
+    boost::filesystem::create_directories(mCfgMgr.getUserDataPath());
+
     setupLog();
     setupGameSettings();
     setupLauncherSettings();
