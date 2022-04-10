@@ -30,7 +30,7 @@ namespace MWLua
     LuaManager::LuaManager(const VFS::Manager* vfs, const std::string& libsDir)
         : mLua(vfs, &mConfiguration)
         , mUiResourceManager(vfs)
-        , mI18n(vfs, &mLua)
+        , mL10n(vfs, &mLua)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
         mLua.addInternalLibSearchPath(libsDir);
@@ -57,7 +57,7 @@ namespace MWLua
         context.mIsGlobal = true;
         context.mLuaManager = this;
         context.mLua = &mLua;
-        context.mI18n = &mI18n;
+        context.mL10n = &mL10n;
         context.mWorldView = &mWorldView;
         context.mLocalEventQueue = &mLocalEvents;
         context.mGlobalEventQueue = &mGlobalEvents;
@@ -67,10 +67,10 @@ namespace MWLua
         localContext.mIsGlobal = false;
         localContext.mSerializer = mLocalSerializer.get();
 
-        mI18n.init();
-        std::vector<std::string> preferredLanguages;
-        Misc::StringUtils::split(Settings::Manager::getString("i18n preferred languages", "Lua"), preferredLanguages, ", ");
-        mI18n.setPreferredLanguages(preferredLanguages);
+        mL10n.init();
+        std::vector<std::string> preferredLocales;
+        Misc::StringUtils::split(Settings::Manager::getString("preferred locales", "General"), preferredLocales, ", ");
+        mL10n.setPreferredLocales(preferredLocales);
 
         initObjectBindingsForGlobalScripts(context);
         initCellBindingsForGlobalScripts(context);

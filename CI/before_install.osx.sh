@@ -13,6 +13,8 @@ brew update --quiet
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
 command -v qmake >/dev/null 2>&1 || brew install qt@5
+command -v pkgdata >/dev/null 2>&1 || brew install icu4c
+brew install yaml-cpp
 export PATH="/usr/local/opt/qt@5/bin:$PATH"  # needed to use qmake in none default path as qt now points to qt6
 
 ccache --version

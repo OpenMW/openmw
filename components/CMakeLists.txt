@@ -29,7 +29,11 @@ endif (GIT_CHECKOUT)
 # source files
 
 add_component_dir (lua
-    luastate scriptscontainer utilpackage serialization configuration i18n storage
+    luastate scriptscontainer utilpackage serialization configuration l10n storage
+    )
+
+add_component_dir (l10n
+    messagebundles
     )
 
 add_component_dir (settings
@@ -395,6 +399,8 @@ target_link_libraries(components
     Base64
     SQLite::SQLite3
     smhasher
+    ${ICU_LIBRARIES}
+    yaml-cpp
     )
 
 target_link_libraries(components ${BULLET_LIBRARIES})

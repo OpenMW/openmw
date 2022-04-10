@@ -226,3 +226,66 @@ if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
     )
     FetchContent_MakeAvailableExcludeFromAll(benchmark)
 endif()
+
+if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
+    if(YAML_CPP_STATIC)
+        set(YAML_BUILD_SHARED_LIBS OFF)
+    else()
+        set(YAML_BUILD_SHARED_LIBS ON)
+    endif()
+
+    include(FetchContent)
+    FetchContent_Declare(yaml-cpp
+        URL https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.zip
+        URL_HASH MD5=1e8ca0d6ccf99f3ed9506c1f6937d0ec
+        SOURCE_DIR fetched/yaml-cpp
+    )
+    FetchContent_MakeAvailableExcludeFromAll(yaml-cpp)
+endif()
+
+if (NOT OPENMW_USE_SYSTEM_ICU)
+    if (ANDROID)
+        # Note: Must be a build directory, not an install root, since the configure script
+        # looks for a configuration file which does not get installed.
+        set(OPENMW_ICU_HOST_BUILD_DIR "" CACHE STRING "A pre-built ICU build directory for the host system if cross-compiling")
+        # We need a host version of ICU so that the tools can be run when building the data library.
+        set(NDK_STANDARD_ROOT ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64)
+        string(REPLACE "android-" "" ANDROIDVER ${ANDROID_PLATFORM})
+        set(ICU_ENV
+            "CC=ccache ${NDK_STANDARD_ROOT}/bin/aarch64-linux-android${ANDROIDVER}-clang"
+            "CXX=ccache ${NDK_STANDARD_ROOT}/bin/aarch64-linux-android${ANDROIDVER}-clang"
+            "RANLIB=${NDK_STANDARD_ROOT}/bin/aarch64-linux-android-ranlib"
+            "AR=${NDK_STANDARD_ROOT}/bin/aarch64-linux-android-ar"
+            "CPPFLAGS=${ANDROID_COMPILER_FLAGS}"
+            "LDFLAGS=${ANDROID_LINKER_FLAGS} -lc -lstdc++"
+            )
+        # Wants a triple such as aarch64-linux-android, excluding a trailing
+        # -clang etc.
+        string(REGEX MATCH "^[^-]\+-[^-]+-[^-]+" ICU_TOOLCHAIN_NAME ${ANDROID_TOOLCHAIN_NAME})
+        set(ICU_ADDITIONAL_OPTS --host=${ICU_TOOLCHAIN_NAME}${ANDROIDVER} --with-cross-build=${OPENMW_ICU_HOST_BUILD_DIR})
+    endif()
+    include(ExternalProject)
+    ExternalProject_Add(icu
+        URL https://github.com/unicode-org/icu/archive/refs/tags/release-70-1.zip
+        URL_HASH MD5=49d5e2e5bab93ae1a4b56e916150544c
+        SOURCE_DIR fetched/icu
+        CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env ${ICU_ENV}
+            <SOURCE_DIR>/icu4c/source/configure --enable-static --disable-shared
+            --disable-tests --disable-samples --disable-icuio --disable-extras ${ICU_ADDITIONAL_OPTS}
+        BUILD_COMMAND make
+        INSTALL_COMMAND ""
+    )
+    ExternalProject_Get_Property(icu SOURCE_DIR BINARY_DIR)
+    set(ICU_INCLUDE_DIRS
+        ${SOURCE_DIR}/icu4c/source/common
+        ${SOURCE_DIR}/icu4c/source/i18n
+        PARENT_SCOPE
+    )
+    foreach(ICULIB data uc i18n)
+        add_library(ICU::${ICULIB} STATIC IMPORTED GLOBAL)
+        set_target_properties(ICU::${ICULIB} PROPERTIES IMPORTED_LOCATION
+            ${BINARY_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}icu${ICULIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+        add_dependencies(ICU::${ICULIB} icu)
+    endforeach()
+    set(ICU_LIBRARIES ICU::i18n ICU::uc ICU::data PARENT_SCOPE)
+endif()

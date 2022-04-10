@@ -6,7 +6,7 @@
 
 local core = require('openmw.core')
 local time = require('openmw_aux.time')
-local i18n = core.i18n('Calendar')
+local l10n = core.l10n('Calendar')
 
 local monthsDuration = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 local daysInWeek = 7
@@ -31,10 +31,10 @@ local function gameTime(t)
 end
 
 local function defaultDateFormat(t)
-    return i18n('dateFormat', {
+    return l10n('dateFormat', {
         day = t.day,
-        month = i18n('month' .. t.month),
-        monthInGenitive = i18n('monthInGenitive' .. t.month),
+        month = l10n('month' .. t.month),
+        monthInGenitive = l10n('monthInGenitive' .. t.month),
         year = t.year,
     })
 end
@@ -63,8 +63,8 @@ local function formatGameTime(formatStr, timestamp)
     if formatStr == '*t' then return t end
 
     local replFn = function(tag)
-        if tag == '%a' or tag == '%A' then return i18n('weekday' .. t.wday) end
-        if tag == '%b' or tag == '%B' then return i18n('monthInGenitive' .. t.month) end
+        if tag == '%a' or tag == '%A' then return l10n('weekday' .. t.wday) end
+        if tag == '%b' or tag == '%B' then return l10n('monthInGenitive' .. t.month) end
         if tag == '%c' then
             return string.format('%02d:%02d %s', t.hour, t.min, defaultDateFormat(t))
         end
@@ -137,7 +137,7 @@ return {
     -- @param monthIndex
     -- @return #string
     monthName = function(m)
-        return i18n('month' .. ((m-1) % #monthsDuration + 1))
+        return l10n('month' .. ((m-1) % #monthsDuration + 1))
     end,
 
     --- The name of a month in genitive (for English is the same as `monthName`, but in some languages the form can differ).
@@ -145,7 +145,7 @@ return {
     -- @param monthIndex
     -- @return #string
     monthNameInGenitive = function(m)
-        return i18n('monthInGenitive' .. ((m-1) % #monthsDuration + 1))
+        return l10n('monthInGenitive' .. ((m-1) % #monthsDuration + 1))
     end,
 
     --- The name of a weekday
@@ -153,7 +153,7 @@ return {
     -- @param dayIndex
     -- @return #string
     weekdayName = function(d)
-        return i18n('weekday' .. ((d-1) % daysInWeek + 1))
+        return l10n('weekday' .. ((d-1) % daysInWeek + 1))
     end,
 }
 

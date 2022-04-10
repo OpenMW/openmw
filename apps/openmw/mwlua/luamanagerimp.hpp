@@ -4,7 +4,7 @@
 #include <map>
 #include <set>
 
-#include <components/lua/i18n.hpp>
+#include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/storage.hpp>
 
@@ -102,7 +102,7 @@ namespace MWLua
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         LuaUi::ResourceManager mUiResourceManager;
-        LuaUtil::I18nManager mI18n;
+        LuaUtil::L10nManager mL10n;
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;
         sol::table mCameraPackage;
