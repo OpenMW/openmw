@@ -512,6 +512,8 @@ if ! [ -z $USE_CCACHE ]; then
 	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 fi
 
+ICU_VER="70_1"
+
 echo
 echo "==================================="
 echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
@@ -598,6 +600,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 			git clone -b release-1.10.0 https://github.com/google/googletest.git
 		fi
 	fi
+
+    # ICU
+    download "ICU ${ICU_VER/_/.}"\
+        "https://github.com/unicode-org/icu/releases/download/release-${ICU_VER/_/-}/icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip" \
+        "icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip"
 fi
 
 cd .. #/..
@@ -1027,6 +1034,24 @@ if [ ! -z $TEST_FRAMEWORK ]; then
 
 fi
 
+cd $DEPS
+echo
+# ICU
+printf "ICU ${ICU_VER/_/.}... "
+{
+	if [ -d ICU ]; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf ICU
+		eval 7z x -y icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip -o$(real_pwd)/ICU $STRIP
+	fi
+	export ICU_ROOT="$(real_pwd)/ICU"
+	add_cmake_opts -DICU_INCLUDE_DIR="${ICU_ROOT}/include" \
+		-DICU_LIBRARY="${ICU_ROOT}/lib${BITS}/icuuc.lib " \
+        -DICU_DEBUG=ON
+	echo Done.
+}
+
 echo
 cd $DEPS_INSTALL/..
 echo
@@ -1034,6 +1059,7 @@ echo "Setting up OpenMW build..."
 add_cmake_opts -DOPENMW_MP_BUILD=on
 add_cmake_opts -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}"
 add_cmake_opts -DOPENMW_USE_SYSTEM_SQLITE3=OFF
+add_cmake_opts -DOPENMW_USE_SYSTEM_YAML_CPP=OFF
 if [ ! -z $CI ]; then
 	case $STEP in
 		components )

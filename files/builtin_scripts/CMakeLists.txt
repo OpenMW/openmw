@@ -14,7 +14,7 @@ set(LUA_BUILTIN_FILES
     scripts/omw/head_bobbing.lua
     scripts/omw/third_person.lua
 
-    i18n/Calendar/en.lua
+    l10n/Calendar/en.yaml
 )
 
 foreach (f ${LUA_BUILTIN_FILES})

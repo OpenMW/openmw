@@ -1,7 +1,7 @@
 #include "luabindings.hpp"
 
 #include <components/lua/luastate.hpp>
-#include <components/lua/i18n.hpp>
+#include <components/lua/l10n.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -52,7 +52,12 @@ namespace MWLua
             context.mGlobalEventQueue->push_back({std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
         };
         addTimeBindings(api, context, false);
-        api["i18n"] = [i18n=context.mI18n](const std::string& context) { return i18n->getContext(context); };
+        api["l10n"] = [l10n=context.mL10n](const std::string& context, const sol::object &fallbackLocale) {
+            if (fallbackLocale == sol::nil)
+                return l10n->getContext(context);
+            else
+                return l10n->getContext(context, fallbackLocale.as<std::string>());
+        };
         const MWWorld::Store<ESM::GameSetting>* gmst = &MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         api["getGMST"] = [lua=context.mLua, gmst](const std::string& setting) -> sol::object
         {

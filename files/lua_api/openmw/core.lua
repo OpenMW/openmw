@@ -53,37 +53,71 @@
 -- @return #any
 
 ---
--- Return i18n formatting function for the given context.
--- It is based on `i18n.lua` library.
--- Language files should be stored in VFS as `i18n/<ContextName>/<Lang>.lua`.
--- See https://github.com/kikito/i18n.lua for format details.
--- @function [parent=#core] i18n
--- @param #string context I18n context; recommended to use the name of the mod.
+-- Return l10n formatting function for the given context.
+-- Language files should be stored in VFS as `l10n/<ContextName>/<Locale>.yaml`.
+--
+-- Locales usually have the form {lang}_{COUNTRY},
+-- where {lang} is a lowercase two-letter language code and {COUNTRY} is an uppercase
+-- two-letter country code. Capitalization and the separator must have exactly
+-- this format for language files to be recognized, but when users request a
+-- locale they do not need to match capitalization and can use hyphens instead of
+-- underscores.
+--
+-- Locales may also contain variants and keywords. See https://unicode-org.github.io/icu/userguide/locale/#language-code
+-- for full details.
+--
+-- Messages have the form of ICU MessageFormat strings.
+-- See https://unicode-org.github.io/icu/userguide/format_parse/messages/
+-- for a guide to MessageFormat, and see 
+-- https://unicode-org.github.io/icu-docs/apidoc/released/icu4c/classicu_1_1MessageFormat.html
+-- for full details of the MessageFormat syntax.
+-- @function [parent=#core] l10n
+-- @param #string context l10n context; recommended to use the name of the mod.
+-- @param #string fallbackLocale The source locale containing the default messages
+--                               If omitted defaults to "en"
 -- @return #function
 -- @usage
--- -- DataFiles/i18n/MyMod/en.lua
--- return {
---     good_morning = 'Good morning.',
---     you_have_arrows = {
---       one = 'You have one arrow.',
---       other = 'You have %{count} arrows.',
---     },
--- }
+-- # DataFiles/l10n/MyMod/en.yaml
+-- good_morning: 'Good morning.'
+--
+-- you_have_arrows: |- {count, plural,
+--     one {You have one arrow.}
+--     other {You have {count} arrows.}
+--   }
 -- @usage
--- -- DataFiles/i18n/MyMod/de.lua
--- return {
---     good_morning = "Guten Morgen.",
---     you_have_arrows = {
---       one = "Du hast ein Pfeil.",
---       other = "Du hast %{count} Pfeile.",
---     },
---     ["Hello %{name}!"] = "Hallo %{name}!",
--- }
+-- # DataFiles/l10n/MyMod/de.yaml
+-- good_morning: "Guten Morgen."
+-- you_have_arrows: |- {count, plural,
+--     one {Du hast ein Pfeil.}
+--     other {Du hast {count} Pfeile.}
+--   }
+-- "Hello {name}!": "Hallo {name}!"
 -- @usage
--- local myMsg = core.i18n('MyMod')
+-- # DataFiles/l10n/AdvancedExample/en.yaml
+-- # More complicated patterns
+-- # select rules can be used to match arbitrary string arguments
+-- # The default keyword other must always be provided
+-- pc_must_come: {PCGender, select,
+--     male {He is}
+--     female {She is}
+--     other {They are}
+--   } coming with us.
+-- # Numbers have various formatting options
+-- quest_completion: "The quest is {done, number, percent} complete.",
+-- # E.g. "You came in 4th place"
+-- ordinal: "You came in {num, ordinal} place."
+-- # E.g. "There is one thing", "There are one hundred things"
+-- spellout: "There {num, plural, one{is {num, spellout} thing} other{are {num, spellout} things}}."
+-- numbers: "{int} and {double, number, integer} are integers, but {double} is a double"
+-- # Numbers can be formatted with custom patterns
+-- # See https://unicode-org.github.io/icu/userguide/format_parse/numbers/skeletons.html#syntax
+-- rounding: "{value, number, :: .00}"
+-- @usage
+-- -- Usage in Lua
+-- local myMsg = core.l10n('MyMod', 'en')
 -- print( myMsg('good_morning') )
 -- print( myMsg('you_have_arrows', {count=5}) )
--- print( myMsg('Hello %{name}!', {name='World'}) )
+-- print( myMsg('Hello {name}!', {name='World'}) )
 
 
 ---

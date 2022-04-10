@@ -248,6 +248,23 @@ set(USED_OSG_PLUGINS
     osgdb_serializers_osg
     osgdb_tga)
 
+
+option(OPENMW_USE_SYSTEM_ICU "Use system ICU library instead of internal. If disabled, requires autotools" ON)
+if(OPENMW_USE_SYSTEM_ICU)
+    find_package(ICU COMPONENTS uc i18n)
+endif()
+
+option(OPENMW_USE_SYSTEM_YAML_CPP "Use system yaml-cpp library instead of internal." ON)
+if(OPENMW_USE_SYSTEM_YAML_CPP)
+    set(_yaml_cpp_static_default OFF)
+else()
+    set(_yaml_cpp_static_default ON)
+endif()
+option(YAML_CPP_STATIC "Link static build of yaml-cpp into the binaries" ${_yaml_cpp_static_default})
+if (OPENMW_USE_SYSTEM_YAML_CPP)
+    find_package(yaml-cpp)
+endif()
+
 add_subdirectory(extern)
 
 # Sound setup
@@ -442,6 +459,7 @@ include_directories(
     ${LUA_INCLUDE_DIR}
     ${SOL_INCLUDE_DIR}
     ${SOL_CONFIG_DIR}
+    ${ICU_INCLUDE_DIRS}
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
