@@ -226,6 +226,7 @@ Programmers
     unelsson
     uramer
     viadanna
+    Vidi_Aquam
     Vincent Heuken
     Vladimir Panteleev (CyberShadow)
     Wang Ryu (bzzt)

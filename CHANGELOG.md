@@ -114,6 +114,7 @@
     Feature #2491: Ability to make OpenMW "portable"
     Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
     Feature #2780: A way to see current OpenMW version in the console
+    Feature #3245: Grid and angle snapping for the OpenMW-CS
     Feature #3616: Allow Zoom levels on the World Map
     Feature #4297: Implement APPLIED_ONCE flag for magic effects
     Feature #4414: Handle duration of EXTRA SPELL magic effect
