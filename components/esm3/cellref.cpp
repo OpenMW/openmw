@@ -63,67 +63,67 @@ namespace ESM
                 esm.getSubName();
                 switch (esm.retSubName().toInt())
                 {
-                    case ESM::fourCC("UNAM"):
+                    case fourCC("UNAM"):
                         getHTOrSkip(cellRef.mReferenceBlocked);
                         break;
-                    case ESM::fourCC("XSCL"):
+                    case fourCC("XSCL"):
                         getHTOrSkip(cellRef.mScale);
                         if constexpr (load)
                             cellRef.mScale = std::clamp(cellRef.mScale, 0.5f, 2.0f);
                         break;
-                    case ESM::fourCC("ANAM"):
+                    case fourCC("ANAM"):
                         getHStringOrSkip(cellRef.mOwner);
                         break;
-                    case ESM::fourCC("BNAM"):
+                    case fourCC("BNAM"):
                         getHStringOrSkip(cellRef.mGlobalVariable);
                         break;
-                    case ESM::fourCC("XSOL"):
+                    case fourCC("XSOL"):
                         getHStringOrSkip(cellRef.mSoul);
                         break;
-                    case ESM::fourCC("CNAM"):
+                    case fourCC("CNAM"):
                         getHStringOrSkip(cellRef.mFaction);
                         break;
-                    case ESM::fourCC("INDX"):
+                    case fourCC("INDX"):
                         getHTOrSkip(cellRef.mFactionRank);
                         break;
-                    case ESM::fourCC("XCHG"):
+                    case fourCC("XCHG"):
                         getHTOrSkip(cellRef.mEnchantmentCharge);
                         break;
-                    case ESM::fourCC("INTV"):
+                    case fourCC("INTV"):
                         getHTOrSkip(cellRef.mChargeInt);
                         break;
-                    case ESM::fourCC("NAM9"):
+                    case fourCC("NAM9"):
                         getHTOrSkip(cellRef.mGoldValue);
                         break;
-                    case ESM::fourCC("DODT"):
+                    case fourCC("DODT"):
                         getHTOrSkip(cellRef.mDoorDest);
                         if constexpr (load)
                             cellRef.mTeleport = true;
                         break;
-                    case ESM::fourCC("DNAM"):
+                    case fourCC("DNAM"):
                         getHStringOrSkip(cellRef.mDestCell);
                         break;
-                    case ESM::fourCC("FLTV"):
+                    case fourCC("FLTV"):
                         getHTOrSkip(cellRef.mLockLevel);
                         break;
-                    case ESM::fourCC("KNAM"):
+                    case fourCC("KNAM"):
                         getHStringOrSkip(cellRef.mKey);
                         break;
-                    case ESM::fourCC("TNAM"):
+                    case fourCC("TNAM"):
                         getHStringOrSkip(cellRef.mTrap);
                         break;
-                    case ESM::fourCC("DATA"):
+                    case fourCC("DATA"):
                         if constexpr (load)
                             esm.getHTSized<24>(cellRef.mPos);
                         else
                             esm.skipHTSized<24, decltype(cellRef.mPos)>();
                         break;
-                    case ESM::fourCC("NAM0"):
+                    case fourCC("NAM0"):
                     {
                         esm.skipHSub();
                         break;
                     }
-                    case ESM::SREC_DELE:
+                    case SREC_DELE:
                         esm.skipHSub();
                         if constexpr (load)
                             isDeleted = true;
@@ -145,9 +145,8 @@ namespace ESM
             }
         }
     }
-}
 
-void ESM::RefNum::load(ESMReader& esm, bool wide, ESM::NAME tag)
+void RefNum::load(ESMReader& esm, bool wide, NAME tag)
 {
     if (wide)
         esm.getHNTSized<8>(*this, tag);
@@ -155,7 +154,7 @@ void ESM::RefNum::load(ESMReader& esm, bool wide, ESM::NAME tag)
         esm.getHNT(mIndex, tag);
 }
 
-void ESM::RefNum::save(ESMWriter &esm, bool wide, ESM::NAME tag) const
+void RefNum::save(ESMWriter &esm, bool wide, NAME tag) const
 {
     if (wide)
         esm.writeHNT (tag, *this, 8);
@@ -168,23 +167,23 @@ void ESM::RefNum::save(ESMWriter &esm, bool wide, ESM::NAME tag) const
     }
 }
 
-void ESM::CellRef::load (ESMReader& esm, bool &isDeleted, bool wideRefNum)
+void CellRef::load (ESMReader& esm, bool &isDeleted, bool wideRefNum)
 {
     loadId(esm, wideRefNum);
     loadData(esm, isDeleted);
 }
 
-void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
+void CellRef::loadId (ESMReader& esm, bool wideRefNum)
 {
     loadIdImpl<true>(esm, wideRefNum, *this);
 }
 
-void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
+void CellRef::loadData(ESMReader &esm, bool &isDeleted)
 {
     loadDataImpl<true>(esm, isDeleted, *this);
 }
 
-void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool isDeleted) const
+void CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool isDeleted) const
 {
     mRefNum.save (esm, wideRefNum);
 
@@ -246,7 +245,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
         esm.writeHNT("DATA", mPos, 24);
 }
 
-void ESM::CellRef::blank()
+void CellRef::blank()
 {
     mRefNum.unset();
     mRefID.clear();
@@ -276,10 +275,12 @@ void ESM::CellRef::blank()
     }
 }
 
-void ESM::skipLoadCellRef(ESMReader& esm, bool wideRefNum)
+void skipLoadCellRef(ESMReader& esm, bool wideRefNum)
 {
     CellRef cellRef;
     loadIdImpl<false>(esm, wideRefNum, cellRef);
     bool isDeleted;
     loadDataImpl<false>(esm, isDeleted, cellRef);
+}
+
 }

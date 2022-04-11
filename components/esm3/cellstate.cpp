@@ -3,7 +3,10 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-void ESM::CellState::load (ESMReader &esm)
+namespace ESM
+{
+
+void CellState::load (ESMReader &esm)
 {
     mWaterLevel = 0;
     esm.getHNOT (mWaterLevel, "WLVL");
@@ -16,7 +19,7 @@ void ESM::CellState::load (ESMReader &esm)
     esm.getHNOT (mLastRespawn, "RESP");
 }
 
-void ESM::CellState::save (ESMWriter &esm) const
+void CellState::save (ESMWriter &esm) const
 {
     if (!mId.mPaged)
         esm.writeHNT ("WLVL", mWaterLevel);
@@ -24,4 +27,6 @@ void ESM::CellState::save (ESMWriter &esm) const
     esm.writeHNT ("HFOW", mHasFogOfWar);
 
     esm.writeHNT ("RESP", mLastRespawn);
+}
+
 }

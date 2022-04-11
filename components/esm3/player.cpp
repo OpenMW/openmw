@@ -3,7 +3,10 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-void ESM::Player::load (ESMReader &esm)
+namespace ESM
+{
+
+void Player::load (ESMReader &esm)
 {
     mObject.mRef.loadId(esm, true);
     mObject.load (esm);
@@ -50,7 +53,7 @@ void ESM::Player::load (ESMReader &esm)
         bool clearModified = esm.getFormat() < 17 && !mObject.mNpcStats.mIsWerewolf;
         if (esm.hasMoreSubs())
         {
-            for (int i=0; i<ESM::Attribute::Length; ++i)
+            for (int i=0; i<Attribute::Length; ++i)
             {
                 StatState<float> attribute;
                 attribute.load(esm, intFallback);
@@ -60,7 +63,7 @@ void ESM::Player::load (ESMReader &esm)
                 if (mObject.mNpcStats.mIsWerewolf)
                     mObject.mCreatureStats.mAttributes[i] = attribute;
             }
-            for (int i=0; i<ESM::Skill::Length; ++i)
+            for (int i=0; i<Skill::Length; ++i)
             {
                 StatState<float> skill;
                 skill.load(esm, intFallback);
@@ -69,7 +72,7 @@ void ESM::Player::load (ESMReader &esm)
                 mSaveSkills[i] = skill.mBase + skill.mMod - skill.mDamage;
                 if (mObject.mNpcStats.mIsWerewolf)
                 {
-                    if(i == ESM::Skill::Acrobatics)
+                    if(i == Skill::Acrobatics)
                         mSetWerewolfAcrobatics = mObject.mNpcStats.mSkills[i].mBase != skill.mBase;
                     mObject.mNpcStats.mSkills[i] = skill;
                 }
@@ -84,7 +87,7 @@ void ESM::Player::load (ESMReader &esm)
     }
 }
 
-void ESM::Player::save (ESMWriter &esm) const
+void Player::save (ESMWriter &esm) const
 {
     mObject.save (esm);
 
@@ -111,4 +114,6 @@ void ESM::Player::save (ESMWriter &esm) const
 
     esm.writeHNT("WWAT", mSaveAttributes);
     esm.writeHNT("WWSK", mSaveSkills);
+}
+
 }

@@ -3,9 +3,11 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+namespace ESM
+{
 namespace
 {
-    void save(ESM::ESMWriter& esm, const std::vector<ESM::ActiveSpells::ActiveSpellParams>& spells, ESM::NAME tag)
+    void saveImpl(ESMWriter& esm, const std::vector<ActiveSpells::ActiveSpellParams>& spells, NAME tag)
     {
         for (const auto& params : spells)
         {
@@ -38,19 +40,19 @@ namespace
         }
     }
 
-    void load(ESM::ESMReader& esm, std::vector<ESM::ActiveSpells::ActiveSpellParams>& spells, ESM::NAME tag)
+    void loadImpl(ESMReader& esm, std::vector<ActiveSpells::ActiveSpellParams>& spells, NAME tag)
     {
         int format = esm.getFormat();
 
         while (esm.isNextSub(tag))
         {
-            ESM::ActiveSpells::ActiveSpellParams params;
+            ActiveSpells::ActiveSpellParams params;
             params.mId = esm.getHString();
             esm.getHNT (params.mCasterActorId, "CAST");
             params.mDisplayName = esm.getHNString ("DISP");
             params.mItem.unset();
             if (format < 17)
-                params.mType = ESM::ActiveSpells::Type_Temporary;
+                params.mType = ActiveSpells::Type_Temporary;
             else
             {
                 esm.getHNT (params.mType, "TYPE");
@@ -71,7 +73,7 @@ namespace
 
             while (esm.isNextSub("MGEF"))
             {
-                ESM::ActiveEffect effect;
+                ActiveEffect effect;
                 esm.getHT(effect.mEffectId);
                 effect.mArg = -1;
                 esm.getHNOT(effect.mArg, "ARG_");
@@ -94,7 +96,7 @@ namespace
                 else
                     esm.getHNT (effect.mTimeLeft, "LEFT");
                 if (format < 17)
-                    effect.mFlags = ESM::ActiveEffect::Flag_None;
+                    effect.mFlags = ActiveEffect::Flag_None;
                 else
                     esm.getHNT (effect.mFlags, "FLAG");
 
@@ -104,19 +106,19 @@ namespace
         }
     }
 }
+}
 
 namespace ESM
 {
-
     void ActiveSpells::save(ESMWriter &esm) const
     {
-        ::save(esm, mSpells, "ID__");
-        ::save(esm, mQueue, "QID_");
+        saveImpl(esm, mSpells, "ID__");
+        saveImpl(esm, mQueue, "QID_");
     }
 
     void ActiveSpells::load(ESMReader &esm)
     {
-        ::load(esm, mSpells, "ID__");
-        ::load(esm, mQueue, "QID_");
+        loadImpl(esm, mSpells, "ID__");
+        loadImpl(esm, mQueue, "QID_");
     }
 }

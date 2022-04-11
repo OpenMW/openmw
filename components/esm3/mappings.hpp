@@ -8,9 +8,9 @@
 
 namespace ESM
 {
-    ESM::BodyPart::MeshPart getMeshPart(ESM::PartReferenceType type);
-    std::string getBoneName(ESM::PartReferenceType type);
-    std::string getMeshFilter(ESM::PartReferenceType type);
+    BodyPart::MeshPart getMeshPart(PartReferenceType type);
+    std::string getBoneName(PartReferenceType type);
+    std::string getMeshFilter(PartReferenceType type);
 }
 
 #endif

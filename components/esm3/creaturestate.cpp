@@ -1,6 +1,9 @@
 #include "creaturestate.hpp"
 
-void ESM::CreatureState::load (ESMReader &esm)
+namespace ESM
+{
+
+void CreatureState::load (ESMReader &esm)
 {
     ObjectState::load (esm);
 
@@ -12,7 +15,7 @@ void ESM::CreatureState::load (ESMReader &esm)
     }
 }
 
-void ESM::CreatureState::save (ESMWriter &esm, bool inInventory) const
+void CreatureState::save (ESMWriter &esm, bool inInventory) const
 {
     ObjectState::save (esm, inInventory);
 
@@ -24,8 +27,10 @@ void ESM::CreatureState::save (ESMWriter &esm, bool inInventory) const
     }
 }
 
-void ESM::CreatureState::blank()
+void CreatureState::blank()
 {
     ObjectState::blank();
     mCreatureStats.blank();
+}
+
 }

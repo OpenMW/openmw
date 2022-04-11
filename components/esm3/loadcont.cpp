@@ -44,21 +44,21 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::SREC_NAME:
+                case SREC_NAME:
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::fourCC("MODL"):
+                case fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
-                case ESM::fourCC("FNAM"):
+                case fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::fourCC("CNDT"):
+                case fourCC("CNDT"):
                     esm.getHTSized<4>(mWeight);
                     hasWeight = true;
                     break;
-                case ESM::fourCC("FLAG"):
+                case fourCC("FLAG"):
                     esm.getHTSized<4>(mFlags);
                     if (mFlags & 0xf4)
                         esm.fail("Unknown flags");
@@ -66,13 +66,13 @@ namespace ESM
                         esm.fail("Flag 8 not set");
                     hasFlags = true;
                     break;
-                case ESM::fourCC("SCRI"):
+                case fourCC("SCRI"):
                     mScript = esm.getHString();
                     break;
-                case ESM::fourCC("NPCO"):
+                case fourCC("NPCO"):
                     mInventory.add(esm);
                     break;
-                case ESM::SREC_DELE:
+                case SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

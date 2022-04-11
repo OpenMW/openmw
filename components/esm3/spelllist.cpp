@@ -3,7 +3,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 void SpellList::add(ESMReader &esm)
 {

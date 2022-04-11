@@ -10,6 +10,10 @@
 
 #include "savedgame.hpp"
 
+namespace ESM
+{
+namespace
+{
 void convertFogOfWar(std::vector<char>& imageData)
 {
     if (imageData.empty())
@@ -52,7 +56,9 @@ void convertFogOfWar(std::vector<char>& imageData)
     imageData = std::vector<char>(str.begin(), str.end());
 }
 
-void ESM::FogState::load (ESMReader &esm)
+}
+
+void FogState::load (ESMReader &esm)
 {
     esm.getHNOT(mBounds, "BOUN");
     esm.getHNOT(mNorthMarkerAngle, "ANGL");
@@ -76,7 +82,7 @@ void ESM::FogState::load (ESMReader &esm)
     }
 }
 
-void ESM::FogState::save (ESMWriter &esm, bool interiorCell) const
+void FogState::save (ESMWriter &esm, bool interiorCell) const
 {
     if (interiorCell)
     {
@@ -91,4 +97,6 @@ void ESM::FogState::save (ESMWriter &esm, bool interiorCell) const
         esm.write(&it->mImageData[0], it->mImageData.size());
         esm.endRecord("FTEX");
     }
+}
+
 }

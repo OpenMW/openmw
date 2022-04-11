@@ -13,7 +13,8 @@
 #include "components/esm/esmcommon.hpp"
 #include "loadtes3.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 class ESMReader
 {

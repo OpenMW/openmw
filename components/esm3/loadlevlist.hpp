@@ -36,8 +36,8 @@ struct LevelledListBase
 
     std::vector<LevelItem> mList;
 
-    void load(ESMReader& esm, ESM::NAME recName, bool& isDeleted);
-    void save(ESMWriter& esm, ESM::NAME recName, bool isDeleted) const;
+    void load(ESMReader& esm, NAME recName, bool& isDeleted);
+    void save(ESMWriter& esm, NAME recName, bool isDeleted) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).
@@ -53,7 +53,7 @@ struct CustomLevelledListBase : LevelledListBase
 struct CreatureLevList : CustomLevelledListBase<CreatureLevList>
 {
     /// Record name used to read references.
-    static constexpr ESM::NAME sRecName {"CNAM"};
+    static constexpr NAME sRecName {"CNAM"};
     static constexpr RecNameInts sRecordId = RecNameInts::REC_LEVC;
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "CreatureLevList"; }
@@ -70,7 +70,7 @@ struct CreatureLevList : CustomLevelledListBase<CreatureLevList>
 struct ItemLevList : CustomLevelledListBase<ItemLevList>
 {
     /// Record name used to read references.
-    static constexpr ESM::NAME sRecName {"INAM"};
+    static constexpr NAME sRecName {"INAM"};
     static constexpr RecNameInts sRecordId = RecNameInts::REC_LEVI;
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "ItemLevList"; }

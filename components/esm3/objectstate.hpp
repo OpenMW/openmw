@@ -31,7 +31,7 @@ namespace ESM
         LuaScripts mLuaScripts;
         unsigned char mEnabled;
         int mCount;
-        ESM::Position mPosition;
+        Position mPosition;
         unsigned int mFlags;
 
         // Is there any class-specific state following the ObjectState
@@ -39,7 +39,7 @@ namespace ESM
 
         unsigned int mVersion;
 
-        ESM::AnimationState mAnimationState;
+        AnimationState mAnimationState;
 
         ObjectState()
         : mHasLocals(0), mEnabled(0), mCount(0)

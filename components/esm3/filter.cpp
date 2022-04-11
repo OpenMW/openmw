@@ -4,9 +4,12 @@
 #include "esmwriter.hpp"
 #include "components/esm/defs.hpp"
 
-unsigned int ESM::Filter::sRecordId = REC_FILT;
+namespace ESM
+{
 
-void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
+unsigned int Filter::sRecordId = REC_FILT;
+
+void Filter::load (ESMReader& esm, bool &isDeleted)
 {
     isDeleted = false;
     mRecordFlags = esm.getRecordFlags();
@@ -17,16 +20,16 @@ void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
         uint32_t name = esm.retSubName().toInt();
         switch (name)
         {
-            case ESM::SREC_NAME:
+            case SREC_NAME:
                 mId = esm.getHString();
                 break;
-            case ESM::fourCC("FILT"):
+            case fourCC("FILT"):
                 mFilter = esm.getHString();
                 break;
-            case ESM::fourCC("DESC"):
+            case fourCC("DESC"):
                 mDescription = esm.getHString();
                 break;
-            case ESM::SREC_DELE:
+            case SREC_DELE:
                 esm.skipHSub();
                 isDeleted = true;
                 break;
@@ -37,7 +40,7 @@ void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
     }
 }
 
-void ESM::Filter::save (ESMWriter& esm, bool isDeleted) const
+void Filter::save (ESMWriter& esm, bool isDeleted) const
 {
     esm.writeHNCString ("NAME", mId);
 
@@ -51,8 +54,10 @@ void ESM::Filter::save (ESMWriter& esm, bool isDeleted) const
     esm.writeHNCString ("DESC", mDescription);
 }
 
-void ESM::Filter::blank()
+void Filter::blank()
 {
     mFilter.clear();
     mDescription.clear();
+}
+
 }

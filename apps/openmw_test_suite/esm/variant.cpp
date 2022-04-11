@@ -425,7 +425,7 @@ namespace
     std::string write(const Variant& variant, const Variant::Format format)
     {
         std::ostringstream out;
-        ESM::ESMWriter writer;
+        ESMWriter writer;
         writer.save(out);
         variant.write(writer, format);
         writer.close();
@@ -435,7 +435,7 @@ namespace
     Variant read(const Variant::Format format, const std::string& data)
     {
         Variant result;
-        ESM::ESMReader reader;
+        ESMReader reader;
         reader.open(std::make_shared<std::istringstream>(data), "");
         result.read(reader, format);
         return result;
@@ -490,7 +490,7 @@ namespace
     {
         const auto param = GetParam();
         std::ostringstream out;
-        ESM::ESMWriter writer;
+        ESMWriter writer;
         writer.save(out);
         ASSERT_THROW(param.mVariant.write(writer, param.mFormat), std::runtime_error);
     }

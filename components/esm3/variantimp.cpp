@@ -7,7 +7,10 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, std::string& out)
+namespace ESM
+{
+
+void readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, std::string& out)
 {
     if (type!=VT_String)
         throw std::logic_error ("not a string type");
@@ -25,7 +28,7 @@ void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType ty
     out = esm.getHString();
 }
 
-void ESM::writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, const std::string& in)
+void writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, const std::string& in)
 {
     if (type!=VT_String)
         throw std::logic_error ("not a string type");
@@ -43,7 +46,7 @@ void ESM::writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType t
     esm.writeHNString("STRV", in);
 }
 
-void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, int& out)
+void readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, int& out)
 {
     if (type!=VT_Short && type!=VT_Long && type!=VT_Int)
         throw std::logic_error ("not an integer type");
@@ -93,7 +96,7 @@ void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType ty
     }
 }
 
-void ESM::writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, int in)
+void writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, int in)
 {
     if (type!=VT_Short && type!=VT_Long && type!=VT_Int)
         throw std::logic_error ("not an integer type");
@@ -133,7 +136,7 @@ void ESM::writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType t
     }
 }
 
-void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, float& out)
+void readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, float& out)
 {
     if (type!=VT_Float)
         throw std::logic_error ("not a float type");
@@ -148,7 +151,7 @@ void ESM::readESMVariantValue(ESMReader& esm, Variant::Format format, VarType ty
     }
 }
 
-void ESM::writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, float in)
+void writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, float in)
 {
     if (type!=VT_Float)
         throw std::logic_error ("not a float type");
@@ -162,4 +165,6 @@ void ESM::writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType t
     {
         esm.writeHNT("FLTV", in);
     }
+}
+
 }

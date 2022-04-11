@@ -70,7 +70,7 @@ namespace ESM
         if (mProgress)
             esm.writeHNT("STPR", mProgress);
     }
-}
 
-template struct ESM::StatState<int>;
-template struct ESM::StatState<float>;
+    template struct StatState<int>;
+    template struct StatState<float>;
+}

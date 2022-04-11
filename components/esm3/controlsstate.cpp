@@ -3,7 +3,10 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-ESM::ControlsState::ControlsState()
+namespace ESM
+{
+
+ControlsState::ControlsState()
     : mViewSwitchDisabled(false),
       mControlsDisabled(false),
       mJumpingDisabled(false),
@@ -14,7 +17,7 @@ ESM::ControlsState::ControlsState()
 {
 }
 
-void ESM::ControlsState::load(ESM::ESMReader& esm)
+void ControlsState::load(ESMReader& esm)
 {
     int flags;
     esm.getHNT(flags, "CFLG");
@@ -28,7 +31,7 @@ void ESM::ControlsState::load(ESM::ESMReader& esm)
     mSpellDrawingDisabled = flags & SpellDrawingDisabled;
 }
 
-void ESM::ControlsState::save(ESM::ESMWriter& esm) const
+void ControlsState::save(ESMWriter& esm) const
 {
     int flags = 0;
     if (mViewSwitchDisabled) flags |= ViewSwitchDisabled;
@@ -40,4 +43,6 @@ void ESM::ControlsState::save(ESM::ESMWriter& esm) const
     if (mSpellDrawingDisabled) flags |= SpellDrawingDisabled;
 
     esm.writeHNT("CFLG", flags);
+}
+
 }

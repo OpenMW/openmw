@@ -13,13 +13,14 @@ namespace ToUTF8
     class Utf8Encoder;
 }
 
-namespace ESM {
+namespace ESM
+{
 
 class ESMWriter
 {
         struct RecordData
         {
-            ESM::NAME name;
+            NAME name;
             std::streampos position;
             uint32_t size;
         };
@@ -30,7 +31,7 @@ class ESMWriter
 
         unsigned int getVersion() const;
 
-        // Set various header data (ESM::Header::Data). All of the below functions must be called before writing,
+        // Set various header data (Header::Data). All of the below functions must be called before writing,
         // otherwise this data will be left uninitialized.
         void setVersion(unsigned int ver = 0x3fa66666);
         void setType(int type);
@@ -56,27 +57,27 @@ class ESMWriter
         void close();
         ///< \note Does not close the stream.
 
-        void writeHNString(ESM::NAME name, const std::string& data);
-        void writeHNString(ESM::NAME name, const std::string& data, size_t size);
-        void writeHNCString(ESM::NAME name, const std::string& data)
+        void writeHNString(NAME name, const std::string& data);
+        void writeHNString(NAME name, const std::string& data, size_t size);
+        void writeHNCString(NAME name, const std::string& data)
         {
             startSubRecord(name);
             writeHCString(data);
             endRecord(name);
         }
-        void writeHNOString(ESM::NAME name, const std::string& data)
+        void writeHNOString(NAME name, const std::string& data)
         {
             if (!data.empty())
                 writeHNString(name, data);
         }
-        void writeHNOCString(ESM::NAME name, const std::string& data)
+        void writeHNOCString(NAME name, const std::string& data)
         {
             if (!data.empty())
                 writeHNCString(name, data);
         }
 
         template<typename T>
-        void writeHNT(ESM::NAME name, const T& data)
+        void writeHNT(NAME name, const T& data)
         {
             startSubRecord(name);
             writeT(data);
@@ -84,7 +85,7 @@ class ESMWriter
         }
 
         template<typename T, std::size_t size>
-        void writeHNT(ESM::NAME name, const T (&data)[size])
+        void writeHNT(NAME name, const T (&data)[size])
         {
             startSubRecord(name);
             writeT(data);
@@ -94,15 +95,15 @@ class ESMWriter
         // Prevent using writeHNT with strings. This already happened by accident and results in
         // state being discarded without any error on writing or reading it. :(
         // writeHNString and friends must be used instead.
-        void writeHNT(ESM::NAME name, const std::string& data) = delete;
+        void writeHNT(NAME name, const std::string& data) = delete;
 
-        void writeT(ESM::NAME data) = delete;
+        void writeT(NAME data) = delete;
 
         template<typename T, std::size_t size>
-        void writeHNT(ESM::NAME name, const T (&data)[size], int) = delete;
+        void writeHNT(NAME name, const T (&data)[size], int) = delete;
 
         template<typename T>
-        void writeHNT(ESM::NAME name, const T& data, int size)
+        void writeHNT(NAME name, const T& data, int size)
         {
             startSubRecord(name);
             writeT(data, size);
@@ -129,16 +130,16 @@ class ESMWriter
             write((char*)&data, size);
         }
 
-        void startRecord(ESM::NAME name, uint32_t flags = 0);
+        void startRecord(NAME name, uint32_t flags = 0);
         void startRecord(uint32_t name, uint32_t flags = 0);
         /// @note Sub-record hierarchies are not properly supported in ESMReader. This should be fixed later.
-        void startSubRecord(ESM::NAME name);
-        void endRecord(ESM::NAME name);
+        void startSubRecord(NAME name);
+        void endRecord(NAME name);
         void endRecord(uint32_t name);
         void writeFixedSizeString(const std::string& data, int size);
         void writeHString(const std::string& data);
         void writeHCString(const std::string& data);
-        void writeName(ESM::NAME data);
+        void writeName(NAME data);
         void write(const char* data, size_t size);
 
     private:

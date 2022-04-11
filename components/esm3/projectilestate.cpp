@@ -38,7 +38,7 @@ namespace ESM
         mSpellId = esm.getHNString("SPEL");
         if (esm.isNextSub("SRCN")) // for backwards compatibility
             esm.skipHSub();
-        ESM::EffectList().load(esm); // for backwards compatibility
+        EffectList().load(esm); // for backwards compatibility
         esm.getHNT (mSpeed, "SPED");
         if(esm.getFormat() < 17)
             mSlot = 0;

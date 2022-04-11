@@ -48,14 +48,14 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::SREC_NAME:
+                case SREC_NAME:
                     mCell = esm.getHString();
                     break;
-                case ESM::fourCC("DATA"):
+                case fourCC("DATA"):
                     esm.getHTSized<12>(mData);
                     hasData = true;
                     break;
-                case ESM::fourCC("PGRP"):
+                case fourCC("PGRP"):
                 {
                     esm.getSubHeader();
                     int size = esm.getSubSize();
@@ -76,7 +76,7 @@ namespace ESM
                     }
                     break;
                 }
-                case ESM::fourCC("PGRC"):
+                case fourCC("PGRC"):
                 {
                     esm.getSubHeader();
                     int size = esm.getSubSize();
@@ -113,7 +113,7 @@ namespace ESM
                     }
                     break;
                 }
-                case ESM::SREC_DELE:
+                case SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

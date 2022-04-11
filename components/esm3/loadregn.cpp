@@ -19,14 +19,14 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::SREC_NAME:
+                case SREC_NAME:
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::fourCC("FNAM"):
+                case fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::fourCC("WEAT"):
+                case fourCC("WEAT"):
                 {
                     esm.getSubHeader();
                     if (esm.getVer() == VER_12)
@@ -55,13 +55,13 @@ namespace ESM
                     }
                     break;
                 }
-                case ESM::fourCC("BNAM"):
+                case fourCC("BNAM"):
                     mSleepList = esm.getHString();
                     break;
-                case ESM::fourCC("CNAM"):
+                case fourCC("CNAM"):
                     esm.getHT(mMapColor);
                     break;
-                case ESM::fourCC("SNAM"):
+                case fourCC("SNAM"):
                 {
                     esm.getSubHeader();
                     SoundRef sr;
@@ -70,7 +70,7 @@ namespace ESM
                     mSoundList.push_back(sr);
                     break;
                 }
-                case ESM::SREC_DELE:
+                case SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

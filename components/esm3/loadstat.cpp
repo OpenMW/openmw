@@ -12,8 +12,8 @@ namespace ESM
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
-        //bool isBlocked = (mRecordFlags & ESM::FLAG_Blocked) != 0;
-        //bool isPersistent = (mRecordFlags & ESM::FLAG_Persistent) != 0;
+        //bool isBlocked = (mRecordFlags & FLAG_Blocked) != 0;
+        //bool isPersistent = (mRecordFlags & FLAG_Persistent) != 0;
 
         bool hasName = false;
         while (esm.hasMoreSubs())
@@ -21,14 +21,14 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::SREC_NAME:
+                case SREC_NAME:
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::fourCC("MODL"):
+                case fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
-                case ESM::SREC_DELE:
+                case SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

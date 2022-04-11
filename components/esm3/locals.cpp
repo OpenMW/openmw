@@ -3,7 +3,10 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-void ESM::Locals::load (ESMReader &esm)
+namespace ESM
+{
+
+void Locals::load (ESMReader &esm)
 {
     while (esm.isNextSub ("LOCA"))
     {
@@ -16,7 +19,7 @@ void ESM::Locals::load (ESMReader &esm)
     }
 }
 
-void ESM::Locals::save (ESMWriter &esm) const
+void Locals::save (ESMWriter &esm) const
 {
     for (std::vector<std::pair<std::string, Variant> >::const_iterator iter (mVariables.begin());
         iter!=mVariables.end(); ++iter)
@@ -24,4 +27,6 @@ void ESM::Locals::save (ESMWriter &esm) const
         esm.writeHNString ("LOCA", iter->first);
         iter->second.write (esm, Variant::Format_Local);
     }
+}
+
 }

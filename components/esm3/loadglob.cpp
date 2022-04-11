@@ -22,7 +22,7 @@ namespace ESM
         }
         else
         {
-            mValue.read (esm, ESM::Variant::Format_Global);
+            mValue.read (esm, Variant::Format_Global);
         }
     }
 
@@ -36,13 +36,13 @@ namespace ESM
         }
         else
         {
-            mValue.write (esm, ESM::Variant::Format_Global);
+            mValue.write (esm, Variant::Format_Global);
         }
     }
 
     void Global::blank()
     {
-        mValue.setType (ESM::VT_None);
+        mValue.setType (VT_None);
     }
 
     bool operator== (const Global& left, const Global& right)

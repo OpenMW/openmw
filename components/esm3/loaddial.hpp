@@ -61,7 +61,7 @@ struct Dialogue
 
     /// Read the next info record
     /// @param merge Merge with existing list, or just push each record to the end of the list?
-    void readInfo (ESM::ESMReader& esm, bool merge);
+    void readInfo (ESMReader& esm, bool merge);
 
     void blank();
     ///< Set record to default state (does not touch the ID and does not change the type).

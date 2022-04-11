@@ -45,7 +45,7 @@ struct Faction
         RankData mRankData[10];
 
         int mSkills[7]; // IDs of skills this faction require
-                        // Each element will either contain an ESM::Skill index, or -1.
+                        // Each element will either contain an Skill index, or -1.
 
         int mIsHidden; // 1 - hidden from player
 

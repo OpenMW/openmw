@@ -6,7 +6,8 @@
 
 #include "components/esm/defs.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 class ESMReader;
 class ESMWriter;
