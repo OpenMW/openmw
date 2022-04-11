@@ -6,7 +6,6 @@ CSVRender::InstanceMoveMode::InstanceMoveMode (QWidget *parent)
   "Move selected instances"
   "<ul><li>Use {scene-edit-primary} to move instances around freely</li>"
   "<li>Use {scene-edit-secondary} to move instances around within the grid</li>"
-  "</ul>"
-  "<font color=Red>Grid move not implemented yet</font color>",
+  "</ul>",
   parent)
 {}

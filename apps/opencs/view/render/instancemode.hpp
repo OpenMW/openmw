@@ -53,6 +53,8 @@ namespace CSVRender
             osg::Vec3f quatToEuler(const osg::Quat& quat) const;
             osg::Quat eulerToQuat(const osg::Vec3f& euler) const;
 
+            float roundFloatToMult(const float val, const double mult) const;
+
             osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const;
             osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
             osg::Vec3f getProjectionSpaceCoords(const osg::Vec3f& pos);
