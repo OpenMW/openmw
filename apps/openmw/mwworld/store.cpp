@@ -10,6 +10,7 @@
 
 #include <iterator>
 #include <stdexcept>
+#include <sstream>
 
 namespace MWWorld
 {

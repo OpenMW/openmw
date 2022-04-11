@@ -4,6 +4,7 @@
 #include <components/misc/stringops.hpp>
 
 #include <stdexcept>
+#include <sstream>
 
 namespace ESM
 {

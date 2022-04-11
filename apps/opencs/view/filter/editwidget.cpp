@@ -1,5 +1,7 @@
 #include "editwidget.hpp"
 
+#include <sstream>
+
 #include <QAbstractItemModel>
 #include <QAction>
 #include <QContextMenuEvent>

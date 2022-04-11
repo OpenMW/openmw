@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <vector>
-#include <sstream>
 
 #include <components/files/constrainedfilestream.hpp>
 
