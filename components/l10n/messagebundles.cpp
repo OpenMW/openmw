@@ -73,8 +73,8 @@ namespace l10n
             std::string localeName = lang.getName();
             for (const auto& it: data)
             {
-                auto key = it.first.as<std::string>();
-                auto value = it.second.as<std::string>();
+                const auto key = it.first.as<std::string>();
+                const auto value = it.second.as<std::string>();
                 icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(value);
                 icu::ErrorCode status;
                 UParseError parseError;
