@@ -38,7 +38,7 @@ namespace l10n
         void setPreferredLocales(const std::vector<icu::Locale> &preferredLocales);
         const std::vector<icu::Locale> & getPreferredLocales() const { return mPreferredLocales; }
         void load(std::istream &input, const icu::Locale &lang, const std::string &path);
-        bool isLoaded(icu::Locale loc) const { return mBundles.find(loc.getName()) != mBundles.end(); }
+        bool isLoaded(const icu::Locale& loc) const { return mBundles.find(loc.getName()) != mBundles.end(); }
         const icu::Locale & getFallbackLocale() const { return mFallbackLocale; }
 
     private:

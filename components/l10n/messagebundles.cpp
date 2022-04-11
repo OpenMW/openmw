@@ -22,19 +22,19 @@ namespace l10n
         for (const icu::Locale &loc: preferredLocales)
         {
             mPreferredLocales.push_back(loc);
-            mPreferredLocaleStrings.push_back(loc.getName());
+            mPreferredLocaleStrings.emplace_back(loc.getName());
             // Try without variant or country if they are specified, starting with the most specific
             if (strcmp(loc.getVariant(), "") != 0)
             {
                 icu::Locale withoutVariant(loc.getLanguage(), loc.getCountry());
                 mPreferredLocales.push_back(withoutVariant);
-                mPreferredLocaleStrings.push_back(withoutVariant.getName());
+                mPreferredLocaleStrings.emplace_back(withoutVariant.getName());
             }
             if (strcmp(loc.getCountry(), "") != 0)
             {
                 icu::Locale withoutCountry(loc.getLanguage());
                 mPreferredLocales.push_back(withoutCountry);
-                mPreferredLocaleStrings.push_back(withoutCountry.getName());
+                mPreferredLocaleStrings.emplace_back(withoutCountry.getName());
             }
         }
     }
@@ -53,7 +53,7 @@ namespace l10n
         if (status.isFailure())
         {
             std::string errorText = getErrorText(parseError);
-            if (errorText.size())
+            if (!errorText.empty())
             {
                 Log(Debug::Error) << message << ": " << status.errorName() << " in \"" << errorText << "\"";
             }
@@ -73,8 +73,8 @@ namespace l10n
             std::string localeName = lang.getName();
             for (const auto& it: data)
             {
-                std::string key = it.first.as<std::string>();
-                std::string value = it.second.as<std::string>();
+                const auto key = it.first.as<std::string>();
+                const auto value = it.second.as<std::string>();
                 icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(value);
                 icu::ErrorCode status;
                 UParseError parseError;
@@ -110,10 +110,10 @@ namespace l10n
     {
         std::vector<icu::UnicodeString> argNames;
         std::vector<icu::Formattable> argValues;
-        for (auto& [key, value] : args)
+        for (auto& [k, v] : args)
         {
-            argNames.push_back(icu::UnicodeString::fromUTF8(key));
-            argValues.push_back(value);
+            argNames.push_back(icu::UnicodeString::fromUTF8(k));
+            argValues.push_back(v);
         }
         return formatMessage(key, argNames, argValues);
     }
@@ -137,7 +137,7 @@ namespace l10n
 
         if (message)
         {
-            if (args.size() > 0 && argNames.size() > 0)
+            if (!args.empty() && !argNames.empty())
                 message->format(&argNames[0], &args[0], args.size(), result, success);
             else
                 message->format(nullptr, nullptr, args.size(), result, success);
@@ -145,8 +145,8 @@ namespace l10n
             result.toUTF8String(resultString);
             return resultString;
         }
-        icu::Locale defaultLocale(NULL);
-        if (mPreferredLocales.size() > 0)
+        icu::Locale defaultLocale(nullptr);
+        if (!mPreferredLocales.empty())
         {
              defaultLocale = mPreferredLocales[0];
         }
@@ -156,7 +156,7 @@ namespace l10n
             // If we can't parse the key as a pattern, just return the key
             return std::string(key);
 
-        if (args.size() > 0 && argNames.size() > 0)
+        if (!args.empty() && !argNames.empty())
             defaultMessage.format(&argNames[0], &args[0], args.size(), result, success);
         else
             defaultMessage.format(nullptr, nullptr, args.size(), result, success);
