@@ -2,7 +2,11 @@
 
 #include <LinearMath/btIDebugDraw.h>
 #include <LinearMath/btVector3.h>
+
 #include <memory>
+#include <algorithm>
+#include <vector>
+
 #include <osg/Group>
 #include <osg/Stats>
 #include <osg/Timer>
@@ -884,12 +888,19 @@ namespace MWPhysics
     }
 
     bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-        const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr>* occupyingActors) const
+        const Misc::Span<const MWWorld::ConstPtr>& ignore, std::vector<MWWorld::Ptr>* occupyingActors) const
     {
-        btCollisionObject* object = nullptr;
-        const auto it = mActors.find(ignore.mRef);
-        if (it != mActors.end())
-            object = it->second->getCollisionObject();
+        std::vector<const btCollisionObject*> ignoredObjects;
+        ignoredObjects.reserve(ignore.size());
+        for (const auto& v : ignore)
+            if (const auto it = mActors.find(v.mRef); it != mActors.end())
+                ignoredObjects.push_back(it->second->getCollisionObject());
+        std::sort(ignoredObjects.begin(), ignoredObjects.end());
+        ignoredObjects.erase(std::unique(ignoredObjects.begin(), ignoredObjects.end()), ignoredObjects.end());
+        const auto ignoreFilter = [&] (const btCollisionObject* v)
+        {
+            return std::binary_search(ignoredObjects.begin(), ignoredObjects.end(), v);
+        };
         const auto bulletPosition = Misc::Convert::toBullet(position);
         const auto aabbMin = bulletPosition - btVector3(radius, radius, radius);
         const auto aabbMax = bulletPosition + btVector3(radius, radius, radius);
@@ -897,7 +908,7 @@ namespace MWPhysics
         const int group = 0xff;
         if (occupyingActors == nullptr)
         {
-            HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group,
+            HasSphereCollisionCallback callback(bulletPosition, radius, mask, group, ignoreFilter,
                                                 static_cast<void (*)(const btCollisionObject*)>(nullptr));
             mTaskScheduler->aabbTest(aabbMin, aabbMax, callback);
             return callback.getResult();
@@ -907,7 +918,7 @@ namespace MWPhysics
             if (PtrHolder* holder = static_cast<PtrHolder*>(object->getUserPointer()))
                 occupyingActors->push_back(holder->getPtr());
         };
-        HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group, &onCollision);
+        HasSphereCollisionCallback callback(bulletPosition, radius, mask, group, ignoreFilter, &onCollision);
         mTaskScheduler->aabbTest(aabbMin, aabbMax, callback);
         return callback.getResult();
     }

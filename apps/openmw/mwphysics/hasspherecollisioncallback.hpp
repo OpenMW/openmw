@@ -22,15 +22,15 @@ namespace MWPhysics
         return nearest.distance(position) < radius;
     }
 
-    template <class OnCollision>
+    template <class Ignore, class OnCollision>
     class HasSphereCollisionCallback final : public btBroadphaseAabbCallback
     {
     public:
-        HasSphereCollisionCallback(const btVector3& position, const btScalar radius, btCollisionObject* object,
-                const int mask, const int group, OnCollision* onCollision)
+        HasSphereCollisionCallback(const btVector3& position, const btScalar radius, const int mask, const int group,
+                                   const Ignore& ignore, OnCollision* onCollision)
             : mPosition(position),
               mRadius(radius),
-              mCollisionObject(object),
+              mIgnore(ignore),
               mCollisionFilterMask(mask),
               mCollisionFilterGroup(group),
               mOnCollision(onCollision)
@@ -42,7 +42,7 @@ namespace MWPhysics
             if (mResult && mOnCollision == nullptr)
                 return false;
             const auto collisionObject = static_cast<btCollisionObject*>(proxy->m_clientObject);
-            if (collisionObject == mCollisionObject
+            if (mIgnore(collisionObject)
                 || !needsCollision(*proxy)
                 || !testAabbAgainstSphere(proxy->m_aabbMin, proxy->m_aabbMax, mPosition, mRadius))
                 return true;
@@ -63,7 +63,7 @@ namespace MWPhysics
     private:
         btVector3 mPosition;
         btScalar mRadius;
-        btCollisionObject* mCollisionObject;
+        Ignore mIgnore;
         int mCollisionFilterMask;
         int mCollisionFilterGroup;
         OnCollision* mOnCollision;
