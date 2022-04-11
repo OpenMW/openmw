@@ -355,7 +355,7 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
     size_t size = fileRecord.getSizeWithoutCompressionFlag();
     size_t uncompressedSize = size;
     bool compressed = fileRecord.isCompressed(mCompressedByDefault);
-    Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilename.c_str(), fileRecord.offset, size);
+    Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilename, fileRecord.offset, size);
     std::istream* fileStream = streamPtr.get();
     if (mEmbeddedFileNames)
     {
@@ -458,7 +458,7 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
             continue;
         }
 
-        Files::IStreamPtr dataBegin = Files::openConstrainedFileStream(mFilename.c_str(), fileRecord.offset, fileRecord.getSizeWithoutCompressionFlag());
+        Files::IStreamPtr dataBegin = Files::openConstrainedFileStream(mFilename, fileRecord.offset, fileRecord.getSizeWithoutCompressionFlag());
 
         if (mEmbeddedFileNames)
         {

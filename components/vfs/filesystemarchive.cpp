@@ -78,7 +78,7 @@ namespace VFS
 
     Files::IStreamPtr FileSystemArchiveFile::open()
     {
-        return Files::openConstrainedFileStream(mPath.c_str());
+        return Files::openConstrainedFileStream(mPath);
     }
 
 }

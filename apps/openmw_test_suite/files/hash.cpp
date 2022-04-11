@@ -39,7 +39,7 @@ namespace
         std::fill_n(std::back_inserter(content), GetParam().mSize, 'a');
         std::fstream(fileName, std::ios_base::out | std::ios_base::binary)
             .write(content.data(), static_cast<std::streamsize>(content.size()));
-        const auto stream = Files::openConstrainedFileStream(fileName.data(), 0, content.size());
+        const auto stream = Files::openConstrainedFileStream(fileName, 0, content.size());
         EXPECT_EQ(getHash(fileName, *stream), GetParam().mHash);
     }
 

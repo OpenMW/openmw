@@ -3,6 +3,8 @@
 
 #include <istream>
 #include <memory>
+#include <limits>
+#include <string>
 
 namespace Files
 {
@@ -20,7 +22,8 @@ private:
 
 typedef std::shared_ptr<std::istream> IStreamPtr;
 
-IStreamPtr openConstrainedFileStream(const char *filename, size_t start=0, size_t length=0xFFFFFFFF);
+IStreamPtr openConstrainedFileStream(const std::string& filename, std::size_t start = 0,
+    std::size_t length = std::numeric_limits<std::size_t>::max());
 
 }
 

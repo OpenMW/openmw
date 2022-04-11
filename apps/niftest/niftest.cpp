@@ -131,7 +131,7 @@ int main(int argc, char **argv)
             if(isNIF(name))
             {
                 //std::cout << "Decoding: " << name << std::endl;
-                Nif::NIFFile temp_nif(Files::openConstrainedFileStream(name.c_str()),name);
+                Nif::NIFFile temp_nif(Files::openConstrainedFileStream(name), name);
              }
              else if(isBSA(name))
              {
