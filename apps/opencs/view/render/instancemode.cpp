@@ -628,14 +628,6 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
                     position.rot[2] = euler.z();
                 }
 
-                if (mDragMode == DragMode_Rotate_Snap)
-                {
-                    double snap = CSMPrefs::get()["3D Scene Editing"]["gridsnap-rotation"].toDouble();
-                    position.rot[0] = CSVRender::InstanceMode::roundFloatToMult(position.rot[0], osg::DegreesToRadians(snap));
-                    position.rot[1] = CSVRender::InstanceMode::roundFloatToMult(position.rot[1], osg::DegreesToRadians(snap));
-                    position.rot[2] = CSVRender::InstanceMode::roundFloatToMult(position.rot[2], osg::DegreesToRadians(snap));
-                }
-
                 objectTag->mObject->setRotation(position.rot);
             }
             else if (mDragMode == DragMode_Scale || mDragMode == DragMode_Scale_Snap)
@@ -702,6 +694,17 @@ void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
     {
         if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))
         {
+            if (mDragMode == DragMode_Rotate_Snap)
+            {
+                ESM::Position position = objectTag->mObject->getPosition();
+                double snap = CSMPrefs::get()["3D Scene Editing"]["gridsnap-rotation"].toDouble();
+                position.rot[0] = CSVRender::InstanceMode::roundFloatToMult(position.rot[0], osg::DegreesToRadians(snap));
+                position.rot[1] = CSVRender::InstanceMode::roundFloatToMult(position.rot[1], osg::DegreesToRadians(snap));
+                position.rot[2] = CSVRender::InstanceMode::roundFloatToMult(position.rot[2], osg::DegreesToRadians(snap));
+
+                objectTag->mObject->setRotation(position.rot);
+            }
+
             objectTag->mObject->apply (macro);
         }
     }
