@@ -83,7 +83,7 @@ namespace MWMechanics
         if (mDestinationCheck.update(duration) == Misc::TimerStatus::Elapsed)
         {
             std::vector<MWWorld::Ptr> occupyingActors;
-            if (isAreaOccupiedByOtherActor(actor, targetPos, &occupyingActors))
+            if (isAreaOccupiedByOtherActor(actor, targetPos, true, &occupyingActors))
             {
                 const float actorRadius = getActorRadius(actor);
                 const float distanceToTarget = distance(actorPos, targetPos);
