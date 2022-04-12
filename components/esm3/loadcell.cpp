@@ -14,10 +14,12 @@
 #include "components/esm/defs.hpp"
 #include "cellid.hpp"
 
+namespace ESM
+{
 namespace
 {
     ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
-    void adjustRefNum (ESM::RefNum& refNum, const ESM::ESMReader& reader)
+    void adjustRefNum (RefNum& refNum, const ESMReader& reader)
     {
         unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
 
@@ -36,6 +38,7 @@ namespace
             refNum.mContentFile = reader.getIndex();
         }
     }
+}
 }
 
 namespace ESM
@@ -72,14 +75,14 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::SREC_NAME:
+                case SREC_NAME:
                     mName = esm.getHString();
                     break;
-                case ESM::fourCC("DATA"):
+                case fourCC("DATA"):
                     esm.getHTSized<12>(mData);
                     hasData = true;
                     break;
-                case ESM::SREC_DELE:
+                case SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;
@@ -97,7 +100,7 @@ namespace ESM
 
         if (mCellId.mPaged)
         {
-            mCellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
+            mCellId.mWorldspace = CellId::sDefaultWorldspace;
             mCellId.mIndex.mX = mData.mX;
             mCellId.mIndex.mY = mData.mY;
         }
@@ -119,13 +122,13 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::fourCC("INTV"):
+                case fourCC("INTV"):
                     int waterl;
                     esm.getHT(waterl);
                     mWater = static_cast<float>(waterl);
                     mWaterInt = true;
                     break;
-                case ESM::fourCC("WHGT"):
+                case fourCC("WHGT"):
                     float waterLevel;
                     esm.getHT(waterLevel);
                     mWaterInt = false;
@@ -138,17 +141,17 @@ namespace ESM
                     else
                         mWater = waterLevel;
                     break;
-                case ESM::fourCC("AMBI"):
+                case fourCC("AMBI"):
                     esm.getHT(mAmbi);
                     mHasAmbi = true;
                     break;
-                case ESM::fourCC("RGNN"):
+                case fourCC("RGNN"):
                     mRegion = esm.getHString();
                     break;
-                case ESM::fourCC("NAM5"):
+                case fourCC("NAM5"):
                     esm.getHT(mMapColor);
                     break;
-                case ESM::fourCC("NAM0"):
+                case fourCC("NAM0"):
                     esm.getHT(mRefNumCounter);
                     break;
                 default:

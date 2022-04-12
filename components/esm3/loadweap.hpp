@@ -105,7 +105,7 @@ struct WeaponType
     std::string mSoundId;
     std::string mAttachBone;
     std::string mSheathingBone;
-    ESM::Skill::SkillEnum mSkill;
+    Skill::SkillEnum mSkill;
     Class mWeaponClass;
     int mAmmoType;
     int mFlags;

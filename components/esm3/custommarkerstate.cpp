@@ -6,7 +6,7 @@
 namespace ESM
 {
 
-void CustomMarker::save(ESM::ESMWriter &esm) const
+void CustomMarker::save(ESMWriter &esm) const
 {
     esm.writeHNT("POSX", mWorldX);
     esm.writeHNT("POSY", mWorldY);
@@ -15,7 +15,7 @@ void CustomMarker::save(ESM::ESMWriter &esm) const
         esm.writeHNString("NOTE", mNote);
 }
 
-void CustomMarker::load(ESM::ESMReader &esm)
+void CustomMarker::load(ESMReader &esm)
 {
     esm.getHNT(mWorldX, "POSX");
     esm.getHNT(mWorldY, "POSY");

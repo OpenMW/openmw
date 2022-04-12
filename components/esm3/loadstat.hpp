@@ -3,7 +3,8 @@
 
 #include <string>
 
-namespace ESM {
+namespace ESM
+{
 
 class ESMReader;
 class ESMWriter;

@@ -3,9 +3,12 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-const std::string ESM::CellId::sDefaultWorldspace = "sys::default";
+namespace ESM
+{
 
-void ESM::CellId::load (ESMReader &esm)
+const std::string CellId::sDefaultWorldspace = "sys::default";
+
+void CellId::load (ESMReader &esm)
 {
     mWorldspace = esm.getHNString ("SPAC");
 
@@ -18,7 +21,7 @@ void ESM::CellId::load (ESMReader &esm)
         mPaged = false;
 }
 
-void ESM::CellId::save (ESMWriter &esm) const
+void CellId::save (ESMWriter &esm) const
 {
     esm.writeHNString ("SPAC", mWorldspace);
 
@@ -26,18 +29,18 @@ void ESM::CellId::save (ESMWriter &esm) const
         esm.writeHNT ("CIDX", mIndex, 8);
 }
 
-bool ESM::operator== (const CellId& left, const CellId& right)
+bool operator== (const CellId& left, const CellId& right)
 {
     return left.mWorldspace==right.mWorldspace && left.mPaged==right.mPaged &&
         (!left.mPaged || (left.mIndex.mX==right.mIndex.mX && left.mIndex.mY==right.mIndex.mY));
 }
 
-bool ESM::operator!= (const CellId& left, const CellId& right)
+bool operator!= (const CellId& left, const CellId& right)
 {
     return !(left==right);
 }
 
-bool ESM::operator < (const CellId& left, const CellId& right)
+bool operator < (const CellId& left, const CellId& right)
 {
     if (left.mPaged < right.mPaged)
         return true;
@@ -58,4 +61,6 @@ bool ESM::operator < (const CellId& left, const CellId& right)
     }
 
     return left.mWorldspace < right.mWorldspace;
+}
+
 }

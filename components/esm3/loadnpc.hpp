@@ -11,7 +11,8 @@
 #include "loadskil.hpp"
 #include "transport.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 class ESMReader;
 class ESMWriter;

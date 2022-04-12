@@ -3,19 +3,22 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+namespace ESM
+{
 namespace
 {
-    constexpr ESM::NAME currentRegionRecord     = "CREG";
-    constexpr ESM::NAME timePassedRecord        = "TMPS";
-    constexpr ESM::NAME fastForwardRecord       = "FAST";
-    constexpr ESM::NAME weatherUpdateTimeRecord = "WUPD";
-    constexpr ESM::NAME transitionFactorRecord  = "TRFC";
-    constexpr ESM::NAME currentWeatherRecord    = "CWTH";
-    constexpr ESM::NAME nextWeatherRecord       = "NWTH";
-    constexpr ESM::NAME queuedWeatherRecord     = "QWTH";
-    constexpr ESM::NAME regionNameRecord        = "RGNN";
-    constexpr ESM::NAME regionWeatherRecord     = "RGNW";
-    constexpr ESM::NAME regionChanceRecord      = "RGNC";
+    constexpr NAME currentRegionRecord     = "CREG";
+    constexpr NAME timePassedRecord        = "TMPS";
+    constexpr NAME fastForwardRecord       = "FAST";
+    constexpr NAME weatherUpdateTimeRecord = "WUPD";
+    constexpr NAME transitionFactorRecord  = "TRFC";
+    constexpr NAME currentWeatherRecord    = "CWTH";
+    constexpr NAME nextWeatherRecord       = "NWTH";
+    constexpr NAME queuedWeatherRecord     = "QWTH";
+    constexpr NAME regionNameRecord        = "RGNN";
+    constexpr NAME regionWeatherRecord     = "RGNW";
+    constexpr NAME regionChanceRecord      = "RGNC";
+}
 }
 
 namespace ESM

@@ -20,18 +20,18 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::SREC_NAME:
+                case SREC_NAME:
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::fourCC("FNAM"):
+                case fourCC("FNAM"):
                     mSound = esm.getHString();
                     break;
-                case ESM::fourCC("DATA"):
+                case fourCC("DATA"):
                     esm.getHTSized<3>(mData);
                     hasData = true;
                     break;
-                case ESM::SREC_DELE:
+                case SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

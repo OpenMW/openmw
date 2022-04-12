@@ -12,7 +12,7 @@ struct CustomMarker
     float mWorldX;
     float mWorldY;
 
-    ESM::CellId mCell;
+    CellId mCell;
 
     std::string mNote;
 
@@ -21,8 +21,8 @@ struct CustomMarker
         return mNote == other.mNote && mCell == other.mCell && mWorldX == other.mWorldX && mWorldY == other.mWorldY;
     }
 
-    void load (ESM::ESMReader& reader);
-    void save (ESM::ESMWriter& writer) const;
+    void load (ESMReader& reader);
+    void save (ESMWriter& writer) const;
 };
 
 }

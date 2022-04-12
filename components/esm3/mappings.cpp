@@ -4,128 +4,128 @@
 
 namespace ESM
 {
-    ESM::BodyPart::MeshPart getMeshPart(ESM::PartReferenceType type)
+    BodyPart::MeshPart getMeshPart(PartReferenceType type)
     {
         switch(type)
         {
-            case ESM::PRT_Head:
-                return ESM::BodyPart::MP_Head;
-            case ESM::PRT_Hair:
-                return ESM::BodyPart::MP_Hair;
-            case ESM::PRT_Neck:
-                return ESM::BodyPart::MP_Neck;
-            case ESM::PRT_Cuirass:
-                return ESM::BodyPart::MP_Chest;
-            case ESM::PRT_Groin:
-                return ESM::BodyPart::MP_Groin;
-            case ESM::PRT_RHand:
-                return ESM::BodyPart::MP_Hand;
-            case ESM::PRT_LHand:
-                return ESM::BodyPart::MP_Hand;
-            case ESM::PRT_RWrist:
-                return ESM::BodyPart::MP_Wrist;
-            case ESM::PRT_LWrist:
-                return ESM::BodyPart::MP_Wrist;
-            case ESM::PRT_RForearm:
-                return ESM::BodyPart::MP_Forearm;
-            case ESM::PRT_LForearm:
-                return ESM::BodyPart::MP_Forearm;
-            case ESM::PRT_RUpperarm:
-                return ESM::BodyPart::MP_Upperarm;
-            case ESM::PRT_LUpperarm:
-                return ESM::BodyPart::MP_Upperarm;
-            case ESM::PRT_RFoot:
-                return ESM::BodyPart::MP_Foot;
-            case ESM::PRT_LFoot:
-                return ESM::BodyPart::MP_Foot;
-            case ESM::PRT_RAnkle:
-                return ESM::BodyPart::MP_Ankle;
-            case ESM::PRT_LAnkle:
-                return ESM::BodyPart::MP_Ankle;
-            case ESM::PRT_RKnee:
-                return ESM::BodyPart::MP_Knee;
-            case ESM::PRT_LKnee:
-                return ESM::BodyPart::MP_Knee;
-            case ESM::PRT_RLeg:
-                return ESM::BodyPart::MP_Upperleg;
-            case ESM::PRT_LLeg:
-                return ESM::BodyPart::MP_Upperleg;
-            case ESM::PRT_Tail:
-                return ESM::BodyPart::MP_Tail;
+            case PRT_Head:
+                return BodyPart::MP_Head;
+            case PRT_Hair:
+                return BodyPart::MP_Hair;
+            case PRT_Neck:
+                return BodyPart::MP_Neck;
+            case PRT_Cuirass:
+                return BodyPart::MP_Chest;
+            case PRT_Groin:
+                return BodyPart::MP_Groin;
+            case PRT_RHand:
+                return BodyPart::MP_Hand;
+            case PRT_LHand:
+                return BodyPart::MP_Hand;
+            case PRT_RWrist:
+                return BodyPart::MP_Wrist;
+            case PRT_LWrist:
+                return BodyPart::MP_Wrist;
+            case PRT_RForearm:
+                return BodyPart::MP_Forearm;
+            case PRT_LForearm:
+                return BodyPart::MP_Forearm;
+            case PRT_RUpperarm:
+                return BodyPart::MP_Upperarm;
+            case PRT_LUpperarm:
+                return BodyPart::MP_Upperarm;
+            case PRT_RFoot:
+                return BodyPart::MP_Foot;
+            case PRT_LFoot:
+                return BodyPart::MP_Foot;
+            case PRT_RAnkle:
+                return BodyPart::MP_Ankle;
+            case PRT_LAnkle:
+                return BodyPart::MP_Ankle;
+            case PRT_RKnee:
+                return BodyPart::MP_Knee;
+            case PRT_LKnee:
+                return BodyPart::MP_Knee;
+            case PRT_RLeg:
+                return BodyPart::MP_Upperleg;
+            case PRT_LLeg:
+                return BodyPart::MP_Upperleg;
+            case PRT_Tail:
+                return BodyPart::MP_Tail;
             default:
                 throw std::runtime_error("PartReferenceType " +
                     std::to_string(type) + " not associated with a mesh part");
         }
     }
 
-    std::string getBoneName(ESM::PartReferenceType type)
+    std::string getBoneName(PartReferenceType type)
     {
         switch(type)
         {
-            case ESM::PRT_Head:
+            case PRT_Head:
                 return "head";
-            case ESM::PRT_Hair:
+            case PRT_Hair:
                 return "head"; // This is purposeful.
-            case ESM::PRT_Neck:
+            case PRT_Neck:
                 return "neck";
-            case ESM::PRT_Cuirass:
+            case PRT_Cuirass:
                 return "chest";
-            case ESM::PRT_Groin:
+            case PRT_Groin:
                 return "groin";
-            case ESM::PRT_Skirt:
+            case PRT_Skirt:
                 return "groin";
-            case ESM::PRT_RHand:
+            case PRT_RHand:
                 return "right hand";
-            case ESM::PRT_LHand:
+            case PRT_LHand:
                 return "left hand";
-            case ESM::PRT_RWrist:
+            case PRT_RWrist:
                 return "right wrist";
-            case ESM::PRT_LWrist:
+            case PRT_LWrist:
                 return "left wrist";
-            case ESM::PRT_Shield:
+            case PRT_Shield:
                 return "shield bone";
-            case ESM::PRT_RForearm:
+            case PRT_RForearm:
                 return "right forearm";
-            case ESM::PRT_LForearm:
+            case PRT_LForearm:
                 return "left forearm";
-            case ESM::PRT_RUpperarm:
+            case PRT_RUpperarm:
                 return "right upper arm";
-            case ESM::PRT_LUpperarm:
+            case PRT_LUpperarm:
                 return "left upper arm";
-            case ESM::PRT_RFoot:
+            case PRT_RFoot:
                 return "right foot";
-            case ESM::PRT_LFoot:
+            case PRT_LFoot:
                 return "left foot";
-            case ESM::PRT_RAnkle:
+            case PRT_RAnkle:
                 return "right ankle";
-            case ESM::PRT_LAnkle:
+            case PRT_LAnkle:
                 return "left ankle";
-            case ESM::PRT_RKnee:
+            case PRT_RKnee:
                 return "right knee";
-            case ESM::PRT_LKnee:
+            case PRT_LKnee:
                 return "left knee";
-            case ESM::PRT_RLeg:
+            case PRT_RLeg:
                 return "right upper leg";
-            case ESM::PRT_LLeg:
+            case PRT_LLeg:
                 return "left upper leg";
-            case ESM::PRT_RPauldron:
+            case PRT_RPauldron:
                 return "right clavicle";
-            case ESM::PRT_LPauldron:
+            case PRT_LPauldron:
                 return "left clavicle";
-            case ESM::PRT_Weapon:
+            case PRT_Weapon:
                 return "weapon bone";
-            case ESM::PRT_Tail:
+            case PRT_Tail:
                 return "tail";
             default:
                 throw std::runtime_error("unknown PartReferenceType");
         }
     }
 
-    std::string getMeshFilter(ESM::PartReferenceType type)
+    std::string getMeshFilter(PartReferenceType type)
     {
         switch(type)
         {
-            case ESM::PRT_Hair:
+            case PRT_Hair:
                 return "hair";
             default:
                 return getBoneName(type);

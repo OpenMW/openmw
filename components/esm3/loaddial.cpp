@@ -30,7 +30,7 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::fourCC("DATA"):
+                case fourCC("DATA"):
                 {
                     esm.getSubHeader();
                     int size = esm.getSubSize();
@@ -44,7 +44,7 @@ namespace ESM
                     }
                     break;
                 }
-                case ESM::SREC_DELE:
+                case SREC_DELE:
                     esm.skipHSub();
                     mType = Unknown;
                     isDeleted = true;
@@ -76,7 +76,7 @@ namespace ESM
 
     void Dialogue::readInfo(ESMReader &esm, bool merge)
     {
-        ESM::DialInfo info;
+        DialInfo info;
         bool isDeleted = false;
         info.load(esm, isDeleted);
 

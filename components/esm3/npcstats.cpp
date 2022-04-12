@@ -5,9 +5,12 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-ESM::NpcStats::Faction::Faction() : mExpelled (false), mRank (-1), mReputation (0) {}
+namespace ESM
+{
 
-void ESM::NpcStats::load (ESMReader &esm)
+NpcStats::Faction::Faction() : mExpelled (false), mRank (-1), mReputation (0) {}
+
+void NpcStats::load (ESMReader &esm)
 {
     while (esm.isNextSub ("FACT"))
     {
@@ -41,17 +44,17 @@ void ESM::NpcStats::load (ESMReader &esm)
         // we have deprecated werewolf skills, stored interleaved
         // Load into one big vector, then remove every 2nd value
         mWerewolfDeprecatedData = true;
-        std::vector<ESM::StatState<float> > skills(mSkills, mSkills + sizeof(mSkills)/sizeof(mSkills[0]));
+        std::vector<StatState<float> > skills(mSkills, mSkills + sizeof(mSkills)/sizeof(mSkills[0]));
 
         for (int i=0; i<27; ++i)
         {
-            ESM::StatState<float> skill;
+            StatState<float> skill;
             skill.load(esm, intFallback);
             skills.push_back(skill);
         }
 
         int i=0;
-        for (std::vector<ESM::StatState<float> >::iterator it = skills.begin(); it != skills.end(); ++i)
+        for (std::vector<StatState<float> >::iterator it = skills.begin(); it != skills.end(); ++i)
         {
             if (i%2 == 1)
                 it = skills.erase(it);
@@ -67,7 +70,7 @@ void ESM::NpcStats::load (ESMReader &esm)
     esm.getHNOT (hasWerewolfAttributes, "HWAT");
     if (hasWerewolfAttributes)
     {
-        ESM::StatState<int> dummy;
+        StatState<int> dummy;
         for (int i=0; i<8; ++i)
             dummy.load(esm, intFallback);
         mWerewolfDeprecatedData = true;
@@ -122,7 +125,7 @@ void ESM::NpcStats::load (ESMReader &esm)
     esm.getHNOT (mCrimeId, "CRID");
 }
 
-void ESM::NpcStats::save (ESMWriter &esm) const
+void NpcStats::save (ESMWriter &esm) const
 {
     for (std::map<std::string, Faction>::const_iterator iter (mFactions.begin());
         iter!=mFactions.end(); ++iter)
@@ -191,7 +194,7 @@ void ESM::NpcStats::save (ESMWriter &esm) const
         esm.writeHNT ("CRID", mCrimeId);
 }
 
-void ESM::NpcStats::blank()
+void NpcStats::blank()
 {
     mWerewolfDeprecatedData = false;
     mIsWerewolf = false;
@@ -206,4 +209,6 @@ void ESM::NpcStats::blank()
         mSpecIncreases[i] = 0;
     mTimeToStartDrowning = 20;
     mCrimeId = -1;
+}
+
 }

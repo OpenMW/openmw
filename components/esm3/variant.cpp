@@ -8,12 +8,14 @@
 
 #include "components/esm/defs.hpp"
 
+namespace ESM
+{
 namespace
 {
-    constexpr uint32_t STRV = ESM::fourCC("STRV");
-    constexpr uint32_t INTV = ESM::fourCC("INTV");
-    constexpr uint32_t FLTV = ESM::fourCC("FLTV");
-    constexpr uint32_t STTV = ESM::fourCC("STTV");
+    constexpr uint32_t STRV = fourCC("STRV");
+    constexpr uint32_t INTV = fourCC("INTV");
+    constexpr uint32_t FLTV = fourCC("FLTV");
+    constexpr uint32_t STTV = fourCC("STTV");
 
     template <typename T, bool orDefault = false>
     struct GetValue
@@ -48,22 +50,22 @@ namespace
     };
 }
 
-const std::string& ESM::Variant::getString() const
+const std::string& Variant::getString() const
 {
     return std::get<std::string>(mData);
 }
 
-int ESM::Variant::getInteger() const
+int Variant::getInteger() const
 {
     return std::visit(GetValue<int>{}, mData);
 }
 
-float ESM::Variant::getFloat() const
+float Variant::getFloat() const
 {
     return std::visit(GetValue<float>{}, mData);
 }
 
-void ESM::Variant::read (ESMReader& esm, Format format)
+void Variant::read (ESMReader& esm, Format format)
 {
     // type
     VarType type = VT_Unknown;
@@ -152,7 +154,7 @@ void ESM::Variant::read (ESMReader& esm, Format format)
     std::visit(ReadESMVariantValue {esm, format, mType}, mData);
 }
 
-void ESM::Variant::write (ESMWriter& esm, Format format) const
+void Variant::write (ESMWriter& esm, Format format) const
 {
     if (mType==VT_Unknown)
     {
@@ -175,7 +177,7 @@ void ESM::Variant::write (ESMWriter& esm, Format format) const
         std::visit(WriteESMVariantValue {esm, format, mType}, mData);
 }
 
-void ESM::Variant::write (std::ostream& stream) const
+void Variant::write (std::ostream& stream) const
 {
     switch (mType)
     {
@@ -216,7 +218,7 @@ void ESM::Variant::write (std::ostream& stream) const
     }
 }
 
-void ESM::Variant::setType (VarType type)
+void Variant::setType (VarType type)
 {
     if (type!=mType)
     {
@@ -246,28 +248,30 @@ void ESM::Variant::setType (VarType type)
     }
 }
 
-void ESM::Variant::setString (const std::string& value)
+void Variant::setString (const std::string& value)
 {
     std::get<std::string>(mData) = value;
 }
 
-void ESM::Variant::setString (std::string&& value)
+void Variant::setString (std::string&& value)
 {
     std::get<std::string>(mData) = std::move(value);
 }
 
-void ESM::Variant::setInteger (int value)
+void Variant::setInteger (int value)
 {
     std::visit(SetValue(value), mData);
 }
 
-void ESM::Variant::setFloat (float value)
+void Variant::setFloat (float value)
 {
     std::visit(SetValue(value), mData);
 }
 
-std::ostream& ESM::operator<< (std::ostream& stream, const Variant& value)
+std::ostream& operator<< (std::ostream& stream, const Variant& value)
 {
     value.write (stream);
     return stream;
+}
+
 }

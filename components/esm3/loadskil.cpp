@@ -139,15 +139,15 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::fourCC("INDX"):
+                case fourCC("INDX"):
                     esm.getHT(mIndex);
                     hasIndex = true;
                     break;
-                case ESM::fourCC("SKDT"):
+                case fourCC("SKDT"):
                     esm.getHTSized<24>(mData);
                     hasData = true;
                     break;
-                case ESM::fourCC("DESC"):
+                case fourCC("DESC"):
                     mDescription = esm.getHString();
                     break;
                 default:

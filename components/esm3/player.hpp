@@ -24,15 +24,15 @@ namespace ESM
         float mLastKnownExteriorPosition[3];
         unsigned char mHasMark;
         bool mSetWerewolfAcrobatics;
-        ESM::Position mMarkedPosition;
+        Position mMarkedPosition;
         CellId mMarkedCell;
         std::string mBirthsign;
 
         int mCurrentCrimeId;
         int mPaidCrimeId;
 
-        float mSaveAttributes[ESM::Attribute::Length];
-        float mSaveSkills[ESM::Skill::Length];
+        float mSaveAttributes[Attribute::Length];
+        float mSaveSkills[Skill::Length];
 
         typedef std::map<std::string, std::string> PreviousItems; // previous equipped items, needed for bound spells
         PreviousItems mPreviousItems;

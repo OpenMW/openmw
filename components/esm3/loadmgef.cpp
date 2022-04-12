@@ -6,9 +6,11 @@
 #include "esmwriter.hpp"
 #include "components/esm/defs.hpp"
 
+namespace ESM
+{
 namespace
 {
-    static const char *sIds[ESM::MagicEffect::Length] =
+    static const char *sIds[MagicEffect::Length] =
     {
         "WaterBreathing",
         "SwiftSwim",
@@ -181,6 +183,7 @@ namespace
         0x11c8, 0x1048, 0x1048, 0x1048, 0x1048, 0x1048, 0x1048
     };
 }
+}
 
 namespace ESM
 {
@@ -211,37 +214,37 @@ void MagicEffect::load(ESMReader &esm, bool &isDeleted)
         esm.getSubName();
         switch (esm.retSubName().toInt())
         {
-            case ESM::fourCC("ITEX"):
+            case fourCC("ITEX"):
                 mIcon = esm.getHString();
                 break;
-            case ESM::fourCC("PTEX"):
+            case fourCC("PTEX"):
                 mParticle = esm.getHString();
                 break;
-            case ESM::fourCC("BSND"):
+            case fourCC("BSND"):
                 mBoltSound = esm.getHString();
                 break;
-            case ESM::fourCC("CSND"):
+            case fourCC("CSND"):
                 mCastSound = esm.getHString();
                 break;
-            case ESM::fourCC("HSND"):
+            case fourCC("HSND"):
                 mHitSound = esm.getHString();
                 break;
-            case ESM::fourCC("ASND"):
+            case fourCC("ASND"):
                 mAreaSound = esm.getHString();
                 break;
-            case ESM::fourCC("CVFX"):
+            case fourCC("CVFX"):
                 mCasting = esm.getHString();
                 break;
-            case ESM::fourCC("BVFX"):
+            case fourCC("BVFX"):
                 mBolt = esm.getHString();
                 break;
-            case ESM::fourCC("HVFX"):
+            case fourCC("HVFX"):
                 mHit = esm.getHString();
                 break;
-            case ESM::fourCC("AVFX"):
+            case fourCC("AVFX"):
                 mArea = esm.getHString();
                 break;
-            case ESM::fourCC("DESC"):
+            case fourCC("DESC"):
                 mDescription = esm.getHString();
                 break;
             default:

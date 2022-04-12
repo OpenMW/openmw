@@ -3,7 +3,10 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-void ESM::JournalEntry::load (ESMReader &esm)
+namespace ESM
+{
+
+void JournalEntry::load (ESMReader &esm)
 {
     esm.getHNOT (mType, "JETY");
     mTopic = esm.getHNString ("YETO");
@@ -20,7 +23,7 @@ void ESM::JournalEntry::load (ESMReader &esm)
         mActorName = esm.getHNOString("ACT_");
 }
 
-void ESM::JournalEntry::save (ESMWriter &esm) const
+void JournalEntry::save (ESMWriter &esm) const
 {
     esm.writeHNT ("JETY", mType);
     esm.writeHNString ("YETO", mTopic);
@@ -35,4 +38,6 @@ void ESM::JournalEntry::save (ESMWriter &esm) const
     }
     else if (mType==Type_Topic)
         esm.writeHNString ("ACT_", mActorName);
+}
+
 }

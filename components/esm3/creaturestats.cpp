@@ -4,7 +4,10 @@
 
 #include <limits>
 
-void ESM::CreatureStats::load (ESMReader &esm)
+namespace ESM
+{
+
+void CreatureStats::load (ESMReader &esm)
 {
     bool intFallback = esm.getFormat() < 11;
     for (int i=0; i<8; ++i)
@@ -174,7 +177,7 @@ void ESM::CreatureStats::load (ESMReader &esm)
     }
 }
 
-void ESM::CreatureStats::save (ESMWriter &esm) const
+void CreatureStats::save (ESMWriter &esm) const
 {
     for (int i=0; i<8; ++i)
         mAttributes[i].save (esm);
@@ -259,7 +262,7 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
         esm.writeHNT("NOAC", mMissingACDT);
 }
 
-void ESM::CreatureStats::blank()
+void CreatureStats::blank()
 {
     mTradeTime.mHour = 0;
     mTradeTime.mDay = 0;
@@ -286,4 +289,6 @@ void ESM::CreatureStats::blank()
     mLevel = 1;
     mCorprusSpells.clear();
     mMissingACDT = false;
+}
+
 }

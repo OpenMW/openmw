@@ -15,8 +15,8 @@ namespace ESM
         typedef std::map<std::string, std::map<std::pair<std::string, bool>, int> > StolenItemsMap;
         StolenItemsMap mStolenItems;
 
-        void load(ESM::ESMReader& esm);
-        void write(ESM::ESMWriter& esm) const;
+        void load(ESMReader& esm);
+        void write(ESMWriter& esm) const;
     };
 
 }

@@ -5,9 +5,12 @@
 #include "esmwriter.hpp"
 #include "components/esm/defs.hpp"
 
-void ESM::Header::blank()
+namespace ESM
 {
-    mData.version = ESM::VER_13;
+
+void Header::blank()
+{
+    mData.version = VER_13;
     mData.type = 0;
     mData.author.clear();
     mData.desc.clear();
@@ -16,7 +19,7 @@ void ESM::Header::blank()
     mMaster.clear();
 }
 
-void ESM::Header::load (ESMReader &esm)
+void Header::load (ESMReader &esm)
 {
     if (esm.isNextSub ("FORM"))
     {
@@ -65,7 +68,7 @@ void ESM::Header::load (ESMReader &esm)
     }
 }
 
-void ESM::Header::save (ESMWriter &esm)
+void Header::save (ESMWriter &esm)
 {
     if (mFormat>0)
         esm.writeHNT ("FORM", mFormat);
@@ -83,4 +86,6 @@ void ESM::Header::save (ESMWriter &esm)
         esm.writeHNCString ("MAST", data.name);
         esm.writeHNT ("DATA", data.size);
     }
+}
+
 }

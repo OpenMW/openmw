@@ -43,25 +43,25 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::SREC_NAME:
+                case SREC_NAME:
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::fourCC("FNAM"):
+                case fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::fourCC("RNAM"):
+                case fourCC("RNAM"):
                     if (rankCounter >= 10)
                         esm.fail("Rank out of range");
                     mRanks[rankCounter++] = esm.getHString();
                     break;
-                case ESM::fourCC("FADT"):
+                case fourCC("FADT"):
                     esm.getHTSized<240>(mData);
                     if (mData.mIsHidden > 1)
                         esm.fail("Unknown flag!");
                     hasData = true;
                     break;
-                case ESM::fourCC("ANAM"):
+                case fourCC("ANAM"):
                 {
                     std::string faction = esm.getHString();
                     int reaction;
@@ -69,7 +69,7 @@ namespace ESM
                     mReactions[faction] = reaction;
                     break;
                 }
-                case ESM::SREC_DELE:
+                case SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

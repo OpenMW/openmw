@@ -3,10 +3,13 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-unsigned int ESM::SavedGame::sRecordId = ESM::REC_SAVE;
-int ESM::SavedGame::sCurrentFormat = 21;
+namespace ESM
+{
 
-void ESM::SavedGame::load (ESMReader &esm)
+unsigned int SavedGame::sRecordId = REC_SAVE;
+int SavedGame::sCurrentFormat = 21;
+
+void SavedGame::load (ESMReader &esm)
 {
     mPlayerName = esm.getHNString("PLNA");
     esm.getHNOT (mPlayerLevel, "PLLE");
@@ -28,7 +31,7 @@ void ESM::SavedGame::load (ESMReader &esm)
     esm.getExact(mScreenshot.data(), mScreenshot.size());
 }
 
-void ESM::SavedGame::save (ESMWriter &esm) const
+void SavedGame::save (ESMWriter &esm) const
 {
     esm.writeHNString ("PLNA", mPlayerName);
     esm.writeHNT ("PLLE", mPlayerLevel);
@@ -50,4 +53,6 @@ void ESM::SavedGame::save (ESMWriter &esm) const
     esm.startSubRecord("SCRN");
     esm.write(&mScreenshot[0], mScreenshot.size());
     esm.endRecord("SCRN");
+}
+
 }

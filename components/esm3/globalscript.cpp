@@ -3,7 +3,10 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-void ESM::GlobalScript::load (ESMReader &esm)
+namespace ESM
+{
+
+void GlobalScript::load (ESMReader &esm)
 {
     mId = esm.getHNString ("NAME");
 
@@ -18,7 +21,7 @@ void ESM::GlobalScript::load (ESMReader &esm)
         mTargetRef.load(esm, true, "FRMR");
 }
 
-void ESM::GlobalScript::save (ESMWriter &esm) const
+void GlobalScript::save (ESMWriter &esm) const
 {
     esm.writeHNString ("NAME", mId);
 
@@ -33,4 +36,6 @@ void ESM::GlobalScript::save (ESMWriter &esm) const
         if (mTargetRef.isSet())
             mTargetRef.save (esm, true, "FRMR");
     }
+}
+
 }

@@ -28,35 +28,35 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
-                case ESM::SREC_NAME:
+                case SREC_NAME:
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::fourCC("MODL"):
+                case fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
-                case ESM::fourCC("FNAM"):
+                case fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
-                case ESM::fourCC("RNAM"):
+                case fourCC("RNAM"):
                     mRace = esm.getHString();
                     break;
-                case ESM::fourCC("CNAM"):
+                case fourCC("CNAM"):
                     mClass = esm.getHString();
                     break;
-                case ESM::fourCC("ANAM"):
+                case fourCC("ANAM"):
                     mFaction = esm.getHString();
                     break;
-                case ESM::fourCC("BNAM"):
+                case fourCC("BNAM"):
                     mHead = esm.getHString();
                     break;
-                case ESM::fourCC("KNAM"):
+                case fourCC("KNAM"):
                     mHair = esm.getHString();
                     break;
-                case ESM::fourCC("SCRI"):
+                case fourCC("SCRI"):
                     mScript = esm.getHString();
                     break;
-                case ESM::fourCC("NPDT"):
+                case fourCC("NPDT"):
                     hasNpdt = true;
                     esm.getSubHeader();
                     if (esm.getSubSize() == 52)
@@ -83,24 +83,24 @@ namespace ESM
                     else
                         esm.fail("NPC_NPDT must be 12 or 52 bytes long");
                     break;
-                case ESM::fourCC("FLAG"):
+                case fourCC("FLAG"):
                     hasFlags = true;
                     int flags;
                     esm.getHT(flags);
                     mFlags = flags & 0xFF;
                     mBloodType = ((flags >> 8) & 0xFF) >> 2;
                     break;
-                case ESM::fourCC("NPCS"):
+                case fourCC("NPCS"):
                     mSpells.add(esm);
                     break;
-                case ESM::fourCC("NPCO"):
+                case fourCC("NPCO"):
                     mInventory.add(esm);
                     break;
-                case ESM::fourCC("AIDT"):
+                case fourCC("AIDT"):
                     esm.getHExact(&mAiData, sizeof(mAiData));
                     break;
-                case ESM::fourCC("DODT"):
-                case ESM::fourCC("DNAM"):
+                case fourCC("DODT"):
+                case fourCC("DNAM"):
                     mTransport.add(esm);
                     break;
                 case AI_Wander:
@@ -111,7 +111,7 @@ namespace ESM
                 case AI_CNDT:
                     mAiPackage.add(esm);
                     break;
-                case ESM::SREC_DELE:
+                case SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

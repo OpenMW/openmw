@@ -4,9 +4,12 @@
 #include "esmwriter.hpp"
 #include "components/esm/defs.hpp"
 
-unsigned int ESM::GlobalMap::sRecordId = ESM::REC_GMAP;
+namespace ESM
+{
 
-void ESM::GlobalMap::load (ESMReader &esm)
+unsigned int GlobalMap::sRecordId = REC_GMAP;
+
+void GlobalMap::load (ESMReader &esm)
 {
     esm.getHNT(mBounds, "BNDS");
 
@@ -25,7 +28,7 @@ void ESM::GlobalMap::load (ESMReader &esm)
     }
 }
 
-void ESM::GlobalMap::save (ESMWriter &esm) const
+void GlobalMap::save (ESMWriter &esm) const
 {
     esm.writeHNT("BNDS", mBounds);
 
@@ -40,4 +43,6 @@ void ESM::GlobalMap::save (ESMWriter &esm) const
         esm.writeT(it->second);
         esm.endRecord("MRK_");
     }
+}
+
 }

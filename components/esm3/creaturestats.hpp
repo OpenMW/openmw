@@ -43,7 +43,7 @@ namespace ESM
         std::multimap<int, int> mSummonedCreatures;
         std::vector<int> mSummonGraveyard;
 
-        ESM::TimeStamp mTradeTime;
+        TimeStamp mTradeTime;
         int mGoldPool;
         int mActorId;
         //int mHitAttemptActorId;
@@ -83,7 +83,7 @@ namespace ESM
         bool mRecalcDynamicStats;
         int mDrawState;
         signed char mDeathAnimation;
-        ESM::TimeStamp mTimeOfDeath;
+        TimeStamp mTimeOfDeath;
         int mLevel;
         bool mMissingACDT;
 

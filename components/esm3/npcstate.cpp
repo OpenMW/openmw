@@ -1,6 +1,9 @@
 #include "npcstate.hpp"
 
-void ESM::NpcState::load (ESMReader &esm)
+namespace ESM
+{
+
+void NpcState::load (ESMReader &esm)
 {
     ObjectState::load (esm);
 
@@ -14,7 +17,7 @@ void ESM::NpcState::load (ESMReader &esm)
     }
 }
 
-void ESM::NpcState::save (ESMWriter &esm, bool inInventory) const
+void NpcState::save (ESMWriter &esm, bool inInventory) const
 {
     ObjectState::save (esm, inInventory);
 
@@ -28,10 +31,12 @@ void ESM::NpcState::save (ESMWriter &esm, bool inInventory) const
     }
 }
 
-void ESM::NpcState::blank()
+void NpcState::blank()
 {
     ObjectState::blank();
     mNpcStats.blank();
     mCreatureStats.blank();
     mHasCustomState = true;
+}
+
 }

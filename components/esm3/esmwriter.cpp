@@ -86,7 +86,7 @@ namespace ESM
             throw std::runtime_error ("Unclosed record remaining");
     }
 
-    void ESMWriter::startRecord(ESM::NAME name, uint32_t flags)
+    void ESMWriter::startRecord(NAME name, uint32_t flags)
     {
         mRecordCount++;
 
@@ -105,10 +105,10 @@ namespace ESM
 
     void ESMWriter::startRecord (uint32_t name, uint32_t flags)
     {
-        startRecord(ESM::NAME(name), flags);
+        startRecord(NAME(name), flags);
     }
 
-    void ESMWriter::startSubRecord(ESM::NAME name)
+    void ESMWriter::startSubRecord(NAME name)
     {
         // Sub-record hierarchies are not properly supported in ESMReader. This should be fixed later.
         assert (mRecords.size() <= 1);
@@ -124,7 +124,7 @@ namespace ESM
         assert(mRecords.back().size == 0);
     }
 
-    void ESMWriter::endRecord(ESM::NAME name)
+    void ESMWriter::endRecord(NAME name)
     {
         RecordData rec = mRecords.back();
         assert(rec.name == name);
@@ -142,17 +142,17 @@ namespace ESM
 
     void ESMWriter::endRecord (uint32_t name)
     {
-        endRecord(ESM::NAME(name));
+        endRecord(NAME(name));
     }
 
-    void ESMWriter::writeHNString(ESM::NAME name, const std::string& data)
+    void ESMWriter::writeHNString(NAME name, const std::string& data)
     {
         startSubRecord(name);
         writeHString(data);
         endRecord(name);
     }
 
-    void ESMWriter::writeHNString(ESM::NAME name, const std::string& data, size_t size)
+    void ESMWriter::writeHNString(NAME name, const std::string& data, size_t size)
     {
         assert(data.size() <= size);
         startSubRecord(name);
@@ -196,9 +196,9 @@ namespace ESM
             write("\0", 1);
     }
 
-    void ESMWriter::writeName(ESM::NAME name)
+    void ESMWriter::writeName(NAME name)
     {
-        write(name.mData, ESM::NAME::sCapacity);
+        write(name.mData, NAME::sCapacity);
     }
 
     void ESMWriter::write(const char* data, size_t size)

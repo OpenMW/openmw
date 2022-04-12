@@ -14,18 +14,18 @@ namespace ESM
         mRecordFlags = esm.getRecordFlags();
 
         mId = esm.getHNString("NAME");
-        mValue.read (esm, ESM::Variant::Format_Gmst);
+        mValue.read (esm, Variant::Format_Gmst);
     }
 
     void GameSetting::save (ESMWriter &esm, bool /*isDeleted*/) const
     {
         esm.writeHNCString("NAME", mId);
-        mValue.write (esm, ESM::Variant::Format_Gmst);
+        mValue.write (esm, Variant::Format_Gmst);
     }
 
     void GameSetting::blank()
     {
-        mValue.setType (ESM::VT_None);
+        mValue.setType (VT_None);
     }
 
     bool operator== (const GameSetting& left, const GameSetting& right)
