@@ -9,12 +9,13 @@
 
 namespace MWPhysics
 {
-    struct RayCastingResult
+    class RayCastingResult
     {
-        bool mHit;
-        osg::Vec3f mHitPos;
-        osg::Vec3f mHitNormal;
-        MWWorld::Ptr mHitObject;
+        public:
+            bool mHit;
+            osg::Vec3f mHitPos;
+            osg::Vec3f mHitNormal;
+            MWWorld::Ptr mHitObject;
     };
 
     class RayCastingInterface

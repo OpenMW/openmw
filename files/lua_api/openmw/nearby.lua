@@ -68,5 +68,22 @@
 --     radius = 10,
 -- })
 
+---
+-- Cast ray from one point to another and find the first visual intersection with anything in the scene.
+-- As opposite to `castRay` can find an intersection with an object without collisions.
+-- In order to avoid threading issues can be used only in player scripts only in `onInputUpdate` or
+-- in engine handlers for user input. In other cases use `asyncCastRenderingRay` instead.
+-- @function [parent=#nearby] castRenderingRay
+-- @param openmw.util#Vector3 from Start point of the ray.
+-- @param openmw.util#Vector3 to End point of the ray.
+-- @return #RayCastingResult
+
+---
+-- Asynchronously cast ray from one point to another and find the first visual intersection with anything in the scene.
+-- @function [parent=#nearby] asyncCastRenderingRay
+-- @param openmw.async#Callback callback The callback to pass the result to (should accept a single argument @{openmw.nearby#RayCastingResult}).
+-- @param openmw.util#Vector3 from Start point of the ray.
+-- @param openmw.util#Vector3 to End point of the ray.
+
 return nil
 

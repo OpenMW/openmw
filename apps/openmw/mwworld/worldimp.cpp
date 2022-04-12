@@ -2042,6 +2042,25 @@ namespace MWWorld
         return facedObject;
     }
 
+    bool World::castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
+                                 bool ignorePlayer, bool ignoreActors)
+    {
+        MWRender::RenderingManager::RayResult rayRes = mRendering->castRay(from, to, ignorePlayer, ignoreActors);
+        res.mHit = rayRes.mHit;
+        res.mHitPos = rayRes.mHitPointWorld;
+        res.mHitNormal = rayRes.mHitNormalWorld;
+        res.mHitObject = rayRes.mHitObject;
+        if (res.mHitObject.isEmpty() && rayRes.mHitRefnum.isSet())
+        {
+            for (CellStore* cellstore : mWorldScene->getActiveCells())
+            {
+                res.mHitObject = cellstore->searchViaRefNum(rayRes.mHitRefnum);
+                if (!res.mHitObject.isEmpty()) break;
+            }
+        }
+        return res.mHit;
+    }
+
     bool World::isCellExterior() const
     {
         const CellStore *currentCell = mWorldScene->getCurrentCell();

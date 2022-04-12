@@ -79,6 +79,26 @@ namespace
 
 namespace MWLua
 {
+    namespace
+    {
+        class StatUpdateAction final : public LuaManager::Action
+        {
+            ObjectId mId;
+        public:
+            StatUpdateAction(LuaUtil::LuaState* state, ObjectId id) : Action(state), mId(id) {}
+
+            void apply(WorldView& worldView) const override
+            {
+                LObject obj(mId, worldView.getObjectRegistry());
+                LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
+                if (scripts)
+                    scripts->applyStatsCache();
+            }
+
+            std::string toString() const override { return "StatUpdateAction"; }
+        };
+    }
+
     class LevelStat
     {
         StatObject mObject;
