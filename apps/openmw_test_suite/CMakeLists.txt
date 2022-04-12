@@ -67,6 +67,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
 
         esmloader/load.cpp
         esmloader/esmdata.cpp
+        esmloader/record.cpp
 
         files/hash.cpp
 
