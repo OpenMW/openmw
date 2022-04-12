@@ -1039,16 +1039,22 @@ echo
 # ICU
 printf "ICU ${ICU_VER/_/.}... "
 {
-	if [ -d ICU ]; then
+	if [ -d ICU-${ICU_VER} ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf ICU
-		eval 7z x -y icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip -o$(real_pwd)/ICU $STRIP
+		rm -rf ICU-${ICU_VER}
+		eval 7z x -y icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip -o$(real_pwd)/ICU-${ICU_VER} $STRIP
 	fi
-	export ICU_ROOT="$(real_pwd)/ICU"
+	export ICU_ROOT="$(real_pwd)/ICU-${ICU_VER}"
 	add_cmake_opts -DICU_INCLUDE_DIR="${ICU_ROOT}/include" \
 		-DICU_LIBRARY="${ICU_ROOT}/lib${BITS}/icuuc.lib " \
         -DICU_DEBUG=ON
+
+	for config in ${CONFIGURATIONS[@]}; do
+		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icudt${ICU_VER/_*/}.dll"
+		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icuin${ICU_VER/_*/}.dll"
+		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icuuc${ICU_VER/_*/}.dll"
+	done
 	echo Done.
 }
 
