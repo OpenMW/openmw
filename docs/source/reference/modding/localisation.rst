@@ -19,6 +19,17 @@ and can also use hyphens instead of underscores. The locale will be normalised t
 Locales may also contain variants and keywords, though these usually will not be necessary.
 See `The Locale chapter of the ICU Guide <https://unicode-org.github.io/icu/userguide/locale/#language-code>`_ for full details.
 
+Fallbacks
+---------
+
+When OpenMW looks up messages at runtime, it starts with the first requested locale, and then looks at that locale's more generic ancestors before looking at the next requested locale. E.g. ``en_GB_OED`` will fall back to ``en_GB``, which will fall back to ``en``.
+
+When including localisations with specific country variants (or more specific variants/keywords), you should always include the more generic version as well.
+
+E.g. if you include ``en_US.yaml`` and ``en_GB.yaml`` localisation files, you should also include ``en.yaml``, since other English locales will fall back to that (e.g. ``en_CA``, ``en_AU``, ``en_NZ``). You can put an arbitrary ``en`` locale of your choice in ``en.yaml``, and then leave the file for that variant empty (since all lookups for the variant will fall back to ``en`` anyway).
+
+Note that because of the fallbacks only messages which differ between variants need to be included in the country-specific localisation files.
+
 Localisation Files
 --------------------------
 

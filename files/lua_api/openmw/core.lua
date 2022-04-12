@@ -59,11 +59,18 @@
 --
 -- See [Localisation](../modding/localisation.html) for details of the localisation file structure.
 --
+-- When calling the l10n formatting function, if no localisation can be found for any of the requested locales then
+-- the message key will be returned instead (and formatted, if possible).
+-- This makes it possible to use the source strings as message identifiers.
+--
+-- If you do not use the source string as a message identifier you should instead make certain to include
+-- a fallback locale with a complete set of messages.
+--
 -- @function [parent=#core] l10n
 -- @param #string context l10n context; recommended to use the name of the mod.
 --                This must match the <ContextName> directory in the VFS which stores the localisation files.
 -- @param #string fallbackLocale The source locale containing the default messages
---                               If omitted defaults to "en"
+--                               If omitted defaults to "en".
 -- @return #function
 -- @usage
 -- # DataFiles/l10n/MyMod/en.yaml
