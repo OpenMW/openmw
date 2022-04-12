@@ -38,7 +38,8 @@ namespace ESM4 {
     //                                                     v
     typedef std::vector<std::pair<ESM4::GroupTypeHeader, std::uint32_t> > GroupStack;
 
-    struct ReaderContext {
+    struct ReaderContext
+    {
         std::string filename;         // in case we need to reopen to restore the context
         std::uint32_t modIndex;         // the sequential position of this file in the load order:
         //  0x00 reserved, 0xFF in-game (see notes below)
