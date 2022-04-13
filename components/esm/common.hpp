@@ -40,17 +40,6 @@ namespace ESM
         std::uint64_t size;
     };
 
-    enum VarType
-    {
-        VT_Unknown = 0,
-        VT_None,
-        VT_Short, // stored as a float, kinda
-        VT_Int,
-        VT_Long, // stored as a float
-        VT_Float,
-        VT_String
-    };
-
     std::string printName(const std::uint32_t typeId);
 }
 
