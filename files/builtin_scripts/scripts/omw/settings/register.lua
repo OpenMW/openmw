@@ -38,6 +38,7 @@ local function addSetting(group, options)
         scope = options.scope or SCOPE.Global,
         default = options.default,
         renderer = options.renderer,
+        argument = options.argument,
     }
 end
 

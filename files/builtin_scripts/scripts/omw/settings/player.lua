@@ -1,5 +1,23 @@
 local common = require('scripts.omw.settings.common')
 local render = require('scripts.omw.settings.render')
+local ui = require('openmw.ui')
+local async = require('openmw.async')
+local util = require('openmw.util')
+
+render.registerRenderer('text', function(value, set, arg)
+    return {
+        type = ui.TYPE.TextEdit,
+        props = {
+            size = util.vector2(arg and arg.size or 300, 100),
+            text = value,
+            textColor = util.color.rgb(1, 1, 1),
+            textSize = 30,
+        },
+        events = {
+            textChanged = async:callback(function(s) set(s) end),
+        },
+    }
+end)
 
 local saveScope = common.scopes[common.SCOPE.SavePlayer]
 return {

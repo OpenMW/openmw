@@ -1,5 +1,6 @@
 local ui = require('openmw.ui')
 local util = require('openmw.util')
+local async = require('openmw.async')
 
 local common = require('scripts.omw.settings.common')
 
@@ -11,26 +12,55 @@ end
 local groupOptions = {}
 local localization = {}
 
-local function renderSetting(groupKey, setting, value, index)
+local function renderSetting(groupKey, setting, value)
     local renderFunction = renderers[setting.renderer]
     if not renderFunction then
         error(('Setting %s of %s has unknown renderer %s'):format(setting.key, groupKey, setting.renderer))
     end
-    local loc = localization[groupKey] and localization[groupKey].settings[setting.key] or {
-        name = setting.key,
-        description = '',
-    }
-    local layout = renderFunction(loc, value or setting.default, function(value)
+    local settingName = localization[groupKey]
+        and localization[groupKey].settings[setting.key].name
+        or setting.key
+    local set = function(value)
         local group = common.getGroup(groupKey)
         group:set(setting.key, value)
-        local element = groupOptions[groupKey].element
-        local settingLayout = renderSetting(groupKey, setting, value, index)
-        settingLayout.name = setting.key
-        element.layout.content.settings.content[setting.key] = settingLayout
-        element:update()
-    end)
-    layout.name = setting.key
-    return layout
+        renderSetting(groupKey, setting, value)
+    end
+    local element = groupOptions[groupKey].element
+    local settingsLayout = element.layout.content.settings
+    settingsLayout.content[setting.key] = {
+        name = setting.key,
+        type = ui.TYPE.Flex,
+        props = {
+            horizontal = true,
+            align = ui.ALIGNMENT.Start,
+            arrange = ui.ALIGNMENT.Center,
+        },
+        content = ui.content {
+            {
+                type = ui.TYPE.Text,
+                props = {
+                    text = settingName .. ':',
+                    textColor = util.color.rgb(1, 1, 1),
+                    textSize = 30,
+                },
+            },
+            renderFunction(value or setting.default, set, setting.argument),
+            {
+                type = ui.TYPE.Text,
+                props = {
+                    text = 'Reset',
+                    textColor = util.color.rgb(1, 1, 1),
+                    textSize = 30,
+                },
+                events = {
+                    mouseClick = async:callback(function()
+                        set(setting.default)
+                    end),
+                },
+            },
+        },
+    }
+    element:update()
 end
 
 local function updateLocalization(groupKey)
@@ -46,18 +76,6 @@ end
 
 local function onGroupRegistered(groupKey)
     local group = common.groups:get(groupKey)
-    local settingsLayout = {
-        name = 'settings',
-        type = ui.TYPE.Flex,
-        content = ui.content{},
-    }
-    local count = 0
-    for _, setting in pairs(group) do
-        count = count + 1
-        local settingLayout = renderSetting(groupKey, setting, setting.default, count)
-        settingLayout.key = setting.key
-        settingsLayout.content:add(settingLayout)
-    end
     local layout = {
         type = ui.TYPE.Flex,
         content = ui.content {
@@ -70,7 +88,11 @@ local function onGroupRegistered(groupKey)
                     textColor = util.color.rgb(1, 1, 1),
                 },
             },
-            settingsLayout,
+            {
+                name = 'settings',
+                type = ui.TYPE.Flex,
+                content = ui.content{},
+            },
         },
     }
     local options = {
@@ -79,6 +101,10 @@ local function onGroupRegistered(groupKey)
         searchHints = '',
     }
     groupOptions[groupKey] = options
+    for _, setting in pairs(group) do
+        layout.content.settings.content:add({ name = setting.key })
+        renderSetting(groupKey, setting, setting.default)
+    end
     updateLocalization(groupKey)
     print(('registering group %s'):format(groupKey))
     ui.registerSettingsPage(options)
