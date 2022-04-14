@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_ESMLOADER_RECORD_H
 
 #include <components/esm3/loadcell.hpp>
+#include <components/misc/algorithm.hpp>
 
 #include <algorithm>
 #include <utility>
@@ -31,12 +32,12 @@ namespace EsmLoader
         const auto greaterByKey = [&] (const auto& l, const auto& r) { return getKey(r) < getKey(l); };
         const auto equalByKey = [&] (const auto& l, const auto& r) { return getKey(l) == getKey(r); };
         std::stable_sort(records.begin(), records.end(), greaterByKey);
-        records.erase(std::unique(records.begin(), records.end(), equalByKey), records.end());
-        std::reverse(records.begin(), records.end());
         std::vector<T> result;
-        for (Record<T>& v : records)
+        Misc::forEachUnique(records.rbegin(), records.rend(), equalByKey, [&] (const auto& v)
+        {
             if (!v.mDeleted)
                 result.emplace_back(std::move(v.mValue));
+        });
         return result;
     }
 }
