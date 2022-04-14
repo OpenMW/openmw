@@ -51,10 +51,6 @@ struct Arguments
 
     std::vector<std::string> types;
     std::string name;
-
-    ESMData data;
-    ESM::ESMReader reader;
-    ESM::ESMWriter writer;
 };
 
 bool parseOptions (int argc, char** argv, Arguments &info)
@@ -186,11 +182,11 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 }
 
 void printRaw(ESM::ESMReader &esm);
-void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info);
+void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMData* data);
 
-int load(Arguments& info);
-int clone(Arguments& info);
-int comp(Arguments& info);
+int load(const Arguments& info, ESMData* data);
+int clone(const Arguments& info);
+int comp(const Arguments& info);
 
 int main(int argc, char**argv)
 {
@@ -201,7 +197,7 @@ int main(int argc, char**argv)
             return 1;
 
         if (info.mode == "dump")
-            return load(info);
+            return load(info, nullptr);
         else if (info.mode == "clone")
             return clone(info);
         else if (info.mode == "comp")
@@ -221,7 +217,7 @@ int main(int argc, char**argv)
     return 0;
 }
 
-void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
+void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMData* data)
 {
     bool quiet = (info.quiet_given || info.mode == "clone");
     bool save = (info.mode == "clone");
@@ -241,9 +237,8 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     bool moved = false;
     while(cell.getNextRef(esm, ref, deleted, movedCellRef, moved))
     {
-        if (save) {
-            info.data.mCellRefs[&cell].push_back(std::make_pair(ref, deleted));
-        }
+        if (data != nullptr && save)
+            data->mCellRefs[&cell].push_back(std::make_pair(ref, deleted));
 
         if(quiet) continue;
 
@@ -310,9 +305,9 @@ void printRaw(ESM::ESMReader &esm)
     }
 }
 
-int load(Arguments& info)
+int load(const Arguments& info, ESMData* data)
 {
-    ESM::ESMReader& esm = info.reader;
+    ESM::ESMReader esm;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
     esm.setEncoder(&encoder);
 
@@ -340,9 +335,12 @@ int load(Arguments& info)
 
         esm.open(filename);
 
-        info.data.author = esm.getAuthor();
-        info.data.description = esm.getDesc();
-        info.data.masters = esm.getGameFiles();
+        if (data != nullptr)
+        {
+            data->author = esm.getAuthor();
+            data->description = esm.getDesc();
+            data->masters = esm.getGameFiles();
+        }
 
         if (!quiet)
         {
@@ -387,12 +385,8 @@ int load(Arguments& info)
 
             // Is the user interested in this record type?
             bool interested = true;
-            if (!info.types.empty())
-            {
-                std::vector<std::string>::iterator match;
-                match = std::find(info.types.begin(), info.types.end(), n.toStringView());
-                if (match == info.types.end()) interested = false;
-            }
+            if (!info.types.empty() && std::find(info.types.begin(), info.types.end(), n.toStringView()) == info.types.end())
+                interested = false;
 
             if (!info.name.empty() && !Misc::StringUtils::ciEqual(info.name, record->getId()))
                 interested = false;
@@ -406,20 +400,22 @@ int load(Arguments& info)
 
             if (record->getType().toInt() == ESM::REC_CELL && loadCells && interested)
             {
-                loadCell(record->cast<ESM::Cell>()->get(), esm, info);
+                loadCell(info, record->cast<ESM::Cell>()->get(), esm, data);
             }
 
-            if (save)
+            if (data != nullptr)
             {
-                info.data.mRecords.push_back(std::move(record));
+                if (save)
+                    data->mRecords.push_back(std::move(record));
+                ++data->mRecordStats[n.toInt()];
             }
-            ++info.data.mRecordStats[n.toInt()];
         }
-
-    } catch(std::exception &e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cout << "\nERROR:\n\n  " << e.what() << std::endl;
-
-        info.data.mRecords.clear();
+        if (data != nullptr)
+            data->mRecords.clear();
         return 1;
     }
 
@@ -428,7 +424,7 @@ int load(Arguments& info)
 
 #include <iomanip>
 
-int clone(Arguments& info)
+int clone(const Arguments& info)
 {
     if (info.outname.empty())
     {
@@ -436,13 +432,14 @@ int clone(Arguments& info)
         return 1;
     }
 
-    if (load(info) != 0)
+    ESMData data;
+    if (load(info, &data) != 0)
     {
         std::cout << "Failed to load, aborting." << std::endl;
         return 1;
     }
 
-    size_t recordCount = info.data.mRecords.size();
+    size_t recordCount = data.mRecords.size();
 
     int digitCount = 1; // For a nicer output
     if (recordCount > 0)
@@ -451,7 +448,7 @@ int clone(Arguments& info)
     std::cout << "Loaded " << recordCount << " records:\n\n";
 
     int i = 0;
-    for (std::pair<int, int> stat : info.data.mRecordStats)
+    for (std::pair<int, int> stat : data.mRecordStats)
     {
         ESM::NAME name;
         name = stat.first;
@@ -466,22 +463,22 @@ int clone(Arguments& info)
 
     std::cout << "\nSaving records to: " << info.outname << "...\n";
 
-    ESM::ESMWriter& esm = info.writer;
+    ESM::ESMWriter esm;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
     esm.setEncoder(&encoder);
-    esm.setAuthor(info.data.author);
-    esm.setDescription(info.data.description);
-    esm.setVersion(info.data.version);
+    esm.setAuthor(data.author);
+    esm.setDescription(data.description);
+    esm.setVersion(data.version);
     esm.setRecordCount (recordCount);
 
-    for (const ESM::Header::MasterData &master : info.data.masters)
+    for (const ESM::Header::MasterData &master : data.masters)
         esm.addMaster(master.name, master.size);
 
     std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
     esm.save(save);
 
     int saved = 0;
-    for (auto& record : info.data.mRecords)
+    for (auto& record : data.mRecords)
     {
         if (i <= 0)
             break;
@@ -493,9 +490,9 @@ int clone(Arguments& info)
         record->save(esm);
         if (typeName.toInt() == ESM::REC_CELL) {
             ESM::Cell *ptr = &record->cast<ESM::Cell>()->get();
-            if (!info.data.mCellRefs[ptr].empty()) 
+            if (!data.mCellRefs[ptr].empty())
             {
-                for (std::pair<ESM::CellRef, bool> &ref : info.data.mCellRefs[ptr])
+                for (std::pair<ESM::CellRef, bool> &ref : data.mCellRefs[ptr])
                     ref.first.save(esm, ref.second);
             }
         }
@@ -518,7 +515,7 @@ int clone(Arguments& info)
     return 0;
 }
 
-int comp(Arguments& info)
+int comp(const Arguments& info)
 {
     if (info.filename.empty() || info.outname.empty())
     {
@@ -541,19 +538,21 @@ int comp(Arguments& info)
     fileOne.filename = info.filename;
     fileTwo.filename = info.outname;
 
-    if (load(fileOne) != 0)
+    ESMData dataOne;
+    if (load(fileOne, &dataOne) != 0)
     {
         std::cout << "Failed to load " << info.filename << ", aborting comparison." << std::endl;
         return 1;
     }
 
-    if (load(fileTwo) != 0)
+    ESMData dataTwo;
+    if (load(fileTwo, &dataTwo) != 0)
     {
         std::cout << "Failed to load " << info.outname << ", aborting comparison." << std::endl;
         return 1;
     }
 
-    if (fileOne.data.mRecords.size() != fileTwo.data.mRecords.size())
+    if (dataOne.mRecords.size() != dataTwo.mRecords.size())
     {
         std::cout << "Not equal, different amount of records." << std::endl;
         return 1;
