@@ -2,6 +2,7 @@
 #define OPENMW_CONSTRAINEDFILESTREAM_H
 
 #include "constrainedfilestreambuf.hpp"
+#include "streamwithbuffer.hpp"
 
 #include <istream>
 #include <memory>
@@ -12,14 +13,7 @@ namespace Files
 {
 
 /// A file stream constrained to a specific region in the file, specified by the 'start' and 'length' parameters.
-class ConstrainedFileStream final : public std::istream
-{
-public:
-    explicit ConstrainedFileStream(std::unique_ptr<ConstrainedFileStreamBuf> buf);
-
-private:
-    std::unique_ptr<ConstrainedFileStreamBuf> mBuf;
-};
+using ConstrainedFileStream = StreamWithBuffer<ConstrainedFileStreamBuf>;
 
 typedef std::shared_ptr<std::istream> IStreamPtr;
 
