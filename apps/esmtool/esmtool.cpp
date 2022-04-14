@@ -7,17 +7,29 @@
 #include <fstream>
 #include <cmath>
 #include <memory>
+#include <optional>
+#include <iomanip>
 
 #include <boost/program_options.hpp>
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm/records.hpp>
+#include <components/esm/format.hpp>
+#include <components/files/openfile.hpp>
 
 #include "record.hpp"
 #include "labels.hpp"
+#include "arguments.hpp"
+#include "tes4.hpp"
 
-#define ESMTOOL_VERSION 1.2
+namespace
+{
+
+using namespace EsmTool;
+
+constexpr unsigned majorVersion = 1;
+constexpr unsigned minorVersion = 3;
 
 // Create a local alias for brevity
 namespace bpo = boost::program_options;
@@ -36,23 +48,6 @@ struct ESMData
 
 };
 
-// Based on the legacy struct
-struct Arguments
-{
-    bool raw_given;
-    bool quiet_given;
-    bool loadcells_given;
-    bool plain_given;
-
-    std::string mode;
-    std::string encoding;
-    std::string filename;
-    std::string outname;
-
-    std::vector<std::string> types;
-    std::string name;
-};
-
 bool parseOptions (int argc, char** argv, Arguments &info)
 {
     bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] mode infile [outfile]\nAllowed modes:\n  dump\t Dumps all readable data from the input file.\n  clone\t Clones the input file to the output file.\n  comp\t Compares the given files.\n\nAllowed options");
@@ -60,7 +55,10 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     desc.add_options()
         ("help,h", "print help message.")
         ("version,v", "print version information and quit.")
-        ("raw,r", "Show an unformatted list of all records and subrecords.")
+        ("raw,r", bpo::value<std::string>(),
+         "Show an unformatted list of all records and subrecords of given format:\n"
+         "\n\tTES3"
+         "\n\tTES4")
         // The intention is that this option would interact better
         // with other modes including clone, dump, and raw.
         ("type,t", bpo::value< std::vector<std::string> >(),
@@ -122,7 +120,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     }
     if (variables.count ("version"))
     {
-        std::cout << "ESMTool version " << ESMTOOL_VERSION << std::endl;
+        std::cout << "ESMTool version " << majorVersion << '.' << minorVersion << std::endl;
         return false;
     }
     if (!variables.count("mode"))
@@ -164,7 +162,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
         info.outname = variables["input-file"].as< std::vector<std::string> >()[1];
 
-    info.raw_given = variables.count ("raw") != 0;
+    if (const auto it = variables.find("raw"); it != variables.end())
+        info.mRawFormat = ESM::parseFormat(it->second.as<std::string>());
+
     info.quiet_given = variables.count ("quiet") != 0;
     info.loadcells_given = variables.count ("loadcells") != 0;
     info.plain_given = variables.count("plain") != 0;
@@ -181,12 +181,13 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     return true;
 }
 
-void printRaw(ESM::ESMReader &esm);
 void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMData* data);
 
 int load(const Arguments& info, ESMData* data);
 int clone(const Arguments& info);
 int comp(const Arguments& info);
+
+}
 
 int main(int argc, char**argv)
 {
@@ -216,6 +217,9 @@ int main(int argc, char**argv)
 
     return 0;
 }
+
+namespace
+{
 
 void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMData* data)
 {
@@ -284,8 +288,11 @@ void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMDa
     }
 }
 
-void printRaw(ESM::ESMReader &esm)
+void printRawTes3(const std::string& path)
 {
+    std::cout << "TES3 RAW file listing: " << path << '\n';
+    ESM::ESMReader esm;
+    esm.openRaw(path);
     while(esm.hasMoreRecs())
     {
         ESM::NAME n = esm.getRecName();
@@ -305,35 +312,23 @@ void printRaw(ESM::ESMReader &esm)
     }
 }
 
-int load(const Arguments& info, ESMData* data)
+int loadTes3(const Arguments& info, std::unique_ptr<std::ifstream>&& stream, ESMData* data)
 {
+    std::cout << "Loading TES3 file: " << info.filename << '\n';
+
     ESM::ESMReader esm;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
     esm.setEncoder(&encoder);
 
-    std::string filename = info.filename;
-    std::cout << "Loading file: " << filename << '\n';
-
     std::unordered_set<uint32_t> skipped;
 
-    try {
-
-        if(info.raw_given && info.mode == "dump")
-        {
-            std::cout << "RAW file listing:\n";
-
-            esm.openRaw(filename);
-
-            printRaw(esm);
-
-            return 0;
-        }
-
+    try
+    {
         bool quiet = (info.quiet_given || info.mode == "clone");
         bool loadCells = (info.loadcells_given || info.mode == "clone");
         bool save = (info.mode == "clone");
 
-        esm.open(filename);
+        esm.open(std::move(stream), info.filename);
 
         if (data != nullptr)
         {
@@ -422,7 +417,49 @@ int load(const Arguments& info, ESMData* data)
     return 0;
 }
 
-#include <iomanip>
+int load(const Arguments& info, ESMData* data)
+{
+    if (info.mRawFormat.has_value() && info.mode == "dump")
+    {
+        switch (*info.mRawFormat)
+        {
+            case ESM::Format::Tes3:
+                printRawTes3(info.filename);
+                break;
+            case ESM::Format::Tes4:
+                std::cout << "Printing raw TES4 file is not supported: " << info.filename << "\n";
+                break;
+        }
+        return 0;
+    }
+
+    auto stream = Files::openBinaryInputFileStream(info.filename);
+    if (!stream->is_open())
+    {
+        std::cout << "Failed to open file: " << std::strerror(errno) << '\n';
+        return -1;
+    }
+
+    const ESM::Format format = ESM::readFormat(*stream);
+    stream->seekg(0);
+
+    switch (format)
+    {
+        case ESM::Format::Tes3:
+            return loadTes3(info, std::move(stream), data);
+        case ESM::Format::Tes4:
+            if (data != nullptr)
+            {
+                std::cout << "Collecting data from esm file is not supported for TES4\n";
+                return -1;
+            }
+            return loadTes4(info, std::move(stream));
+    }
+
+    std::cout << "Unsupported ESM format: " << ESM::NAME(format).toStringView() << '\n';
+
+    return -1;
+}
 
 int clone(const Arguments& info)
 {
@@ -526,9 +563,6 @@ int comp(const Arguments& info)
     Arguments fileOne;
     Arguments fileTwo;
 
-    fileOne.raw_given = false;
-    fileTwo.raw_given = false;
-
     fileOne.mode = "clone";
     fileTwo.mode = "clone";
 
@@ -559,4 +593,6 @@ int comp(const Arguments& info)
     }
 
     return 0;
+}
+
 }
