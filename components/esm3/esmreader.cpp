@@ -2,9 +2,11 @@
 
 #include <boost/filesystem/path.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/files/openfile.hpp>
 
 #include <stdexcept>
 #include <sstream>
+#include <fstream>
 
 namespace ESM
 {
@@ -82,10 +84,10 @@ void ESMReader::resolveParentFileIndices(const std::vector<ESMReader>& allPlugin
     }
 }
 
-void ESMReader::openRaw(Files::IStreamPtr _esm, const std::string& name)
+void ESMReader::openRaw(std::unique_ptr<std::istream>&& stream, const std::string& name)
 {
     close();
-    mEsm = _esm;
+    mEsm = std::move(stream);
     mCtx.filename = name;
     mEsm->seekg(0, mEsm->end);
     mCtx.leftFile = mFileSize = mEsm->tellg();
@@ -94,12 +96,12 @@ void ESMReader::openRaw(Files::IStreamPtr _esm, const std::string& name)
 
 void ESMReader::openRaw(const std::string& filename)
 {
-    openRaw(Files::openConstrainedFileStream(filename), filename);
+    openRaw(Files::openBinaryInputFileStream(filename), filename);
 }
 
-void ESMReader::open(Files::IStreamPtr _esm, const std::string &name)
+void ESMReader::open(std::unique_ptr<std::istream>&& stream, const std::string &name)
 {
-    openRaw(_esm, name);
+    openRaw(std::move(stream), name);
 
     if (getRecName() != "TES3")
         fail("Not a valid Morrowind file");
@@ -111,7 +113,7 @@ void ESMReader::open(Files::IStreamPtr _esm, const std::string &name)
 
 void ESMReader::open(const std::string &file)
 {
-    open (Files::openConstrainedFileStream(file), file);
+    open(Files::openBinaryInputFileStream(file), file);
 }
 
 std::string ESMReader::getHNOString(NAME name)

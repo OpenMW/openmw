@@ -3,8 +3,8 @@
 
 #include <cstdint>
 #include <vector>
-
-#include <components/files/constrainedfilestream.hpp>
+#include <istream>
+#include <memory>
 
 #include <components/misc/stringops.hpp>
 
@@ -61,11 +61,11 @@ public:
 
   /// Raw opening. Opens the file and sets everything up but doesn't
   /// parse the header.
-  void openRaw(Files::IStreamPtr _esm, const std::string &name);
+  void openRaw(std::unique_ptr<std::istream>&& stream, const std::string &name);
 
   /// Load ES file from a new stream, parses the header. Closes the
   /// currently open file first, if any.
-  void open(Files::IStreamPtr _esm, const std::string &name);
+  void open(std::unique_ptr<std::istream>&& stream, const std::string &name);
 
   void open(const std::string &file);
 
@@ -295,7 +295,7 @@ private:
 
   void clearCtx();
 
-  Files::IStreamPtr mEsm;
+  std::unique_ptr<std::istream> mEsm;
 
   ESM_Context mCtx;
 

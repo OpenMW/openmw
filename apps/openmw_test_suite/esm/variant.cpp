@@ -436,7 +436,7 @@ namespace
     {
         Variant result;
         ESMReader reader;
-        reader.open(std::make_shared<std::istringstream>(data), "");
+        reader.open(std::make_unique<std::istringstream>(data), "");
         result.read(reader, format);
         return result;
     }
