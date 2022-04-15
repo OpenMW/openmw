@@ -137,12 +137,12 @@ namespace
         }
     }
 
-    [[noreturn]] void fail (Files::IStreamPtr file, const std::string& fileName, const std::string& message)
+    [[noreturn]] void fail(std::istream& stream, const std::string& fileName, const std::string& message)
     {
         std::stringstream error;
         error << "Font loading error: " << message;
         error << "\n  File: " << fileName;
-        error << "\n  Offset: 0x" << std::hex << file->tellg();
+        error << "\n  Offset: 0x" << std::hex << stream.tellg();
         throw std::runtime_error(error.str());
     }
 
@@ -252,33 +252,33 @@ namespace Gui
         float fontSize;
         file->read((char*)&fontSize, sizeof(fontSize));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
 
         int one;
         file->read((char*)&one, sizeof(one));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
 
         if (one != 1)
-            fail(file, fileName, "Unexpected value");
+            fail(*file, fileName, "Unexpected value");
 
         file->read((char*)&one, sizeof(one));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
 
         if (one != 1)
-            fail(file, fileName, "Unexpected value");
+            fail(*file, fileName, "Unexpected value");
 
         char name_[284];
         file->read(name_, sizeof(name_));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
         std::string name(name_);
 
         GlyphInfo data[256];
         file->read((char*)data, sizeof(data));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
 
         file.reset();
 
@@ -292,16 +292,16 @@ namespace Gui
         bitmapFile->read((char*)&height, sizeof(int));
 
         if (!bitmapFile->good())
-            fail(bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+            fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
 
         if (width <= 0 || height <= 0)
-            fail(bitmapFile, bitmapFilename, "Width and height must be positive");
+            fail(*bitmapFile, bitmapFilename, "Width and height must be positive");
 
         std::vector<char> textureData;
         textureData.resize(width*height*4);
         bitmapFile->read(&textureData[0], width*height*4);
         if (!bitmapFile->good())
-            fail(bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+            fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
         bitmapFile.reset();
 
         std::string resourceName;

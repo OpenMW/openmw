@@ -23,7 +23,7 @@ namespace
 
         Files::IStreamPtr open() override
         {
-            return std::make_shared<std::stringstream>(mContent, std::ios_base::in);
+            return std::make_unique<std::stringstream>(mContent, std::ios_base::in);
         }
 
     private:

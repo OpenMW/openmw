@@ -114,17 +114,17 @@ namespace ESM4 {
         //void close();
 
         // Raw opening. Opens the file and sets everything up but doesn't parse the header.
-        void openRaw(Files::IStreamPtr esmStream, const std::string& filename);
+        void openRaw(Files::IStreamPtr&& stream, const std::string& filename);
 
         // Load ES file from a new stream, parses the header.
         // Closes the currently open file first, if any.
-        void open(Files::IStreamPtr esmStream, const std::string& filename);
+        void open(Files::IStreamPtr&& stream, const std::string& filename);
 
         Reader() = default;
 
     public:
 
-        Reader(Files::IStreamPtr esmStream, const std::string& filename);
+        Reader(Files::IStreamPtr&& esmStream, const std::string& filename);
         ~Reader();
 
         // FIXME: should be private but ESMTool uses it
@@ -280,10 +280,10 @@ namespace ESM4 {
 
         // Note: uses the string size from the subrecord header rather than checking null termination
         bool getZString(std::string& str) {
-            return getStringImpl(str, mCtx.subRecordHeader.dataSize, mStream, mEncoder, true);
+            return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, mEncoder, true);
         }
         bool getString(std::string& str) {
-            return getStringImpl(str, mCtx.subRecordHeader.dataSize, mStream, mEncoder);
+            return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, mEncoder);
         }
 
         void enterGroup();

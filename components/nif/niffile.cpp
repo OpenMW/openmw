@@ -12,10 +12,10 @@ namespace Nif
 {
 
 /// Open a NIF stream. The name is used for error messages.
-NIFFile::NIFFile(Files::IStreamPtr stream, const std::string &name)
+NIFFile::NIFFile(Files::IStreamPtr&& stream, const std::string &name)
     : filename(name)
 {
-    parse(stream);
+    parse(std::move(stream));
 }
 
 template <typename NodeType, RecordType recordType>
@@ -170,12 +170,12 @@ std::string NIFFile::printVersion(unsigned int version)
     return stream.str();
 }
 
-void NIFFile::parse(Files::IStreamPtr stream)
+void NIFFile::parse(Files::IStreamPtr&& stream)
 {
     const std::array<std::uint64_t, 2> fileHash = Files::getHash(filename, *stream);
     hash.append(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t));
 
-    NIFStream nif (this, stream);
+    NIFStream nif (this, std::move(stream));
 
     // Check the header string
     std::string head = nif.getVersionString();

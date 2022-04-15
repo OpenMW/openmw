@@ -370,7 +370,7 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
         fileStream->read(reinterpret_cast<char*>(&uncompressedSize), sizeof(uint32_t));
         size -= sizeof(uint32_t);
     }
-    std::shared_ptr<Bsa::MemoryInputStream> memoryStreamPtr = std::make_shared<MemoryInputStream>(uncompressedSize);
+    auto memoryStreamPtr = std::make_unique<MemoryInputStream>(uncompressedSize);
 
     if (compressed)
     {
@@ -403,7 +403,7 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
         fileStream->read(memoryStreamPtr->getRawData(), size);
     }
 
-    return std::shared_ptr<std::istream>(memoryStreamPtr, (std::istream*)memoryStreamPtr.get());
+    return std::make_unique<Files::StreamWithBuffer<MemoryInputStream>>(std::move(memoryStreamPtr));
 }
 
 BsaVersion CompressedBSAFile::detectVersion(const std::string& filePath)
