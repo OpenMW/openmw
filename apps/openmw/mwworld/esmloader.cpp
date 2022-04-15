@@ -21,7 +21,7 @@ void EsmLoader::load(const boost::filesystem::path& filepath, int& index, Loadin
     lEsm.setIndex(index);
     lEsm.open(filepath.string());
     lEsm.resolveParentFileIndices(mEsm);
-    mEsm[index] = lEsm;
+    mEsm[index] = std::move(lEsm);
     mStore.load(mEsm[index], listener);
 }
 

@@ -188,7 +188,7 @@ namespace EsmLoader
             reader.skipRecord();
         }
 
-        ESM::ESMReader loadEsm(const Query& query, ESM::ESMReader& reader, ShallowContent& content)
+        void loadEsm(const Query& query, ESM::ESMReader& reader, ShallowContent& content)
         {
             Log(Debug::Info) << "Loading ESM file " << reader.getName();
 
@@ -198,8 +198,6 @@ namespace EsmLoader
                 reader.getRecHeader();
                 loadRecord(query, recName, reader, content);
             }
-
-            return reader;
         }
 
         ShallowContent shallowLoad(const Query& query, const std::vector<std::string>& contentFiles,
