@@ -28,8 +28,8 @@ namespace Files
                 MurmurHash3_x64_128(value.data(), static_cast<int>(read), hash.data(), blockHash.data());
                 hash = blockHash;
             }
-            stream.exceptions(exceptions);
             stream.clear();
+            stream.exceptions(exceptions);
             stream.seekg(start);
         }
         catch (const std::exception& e)
