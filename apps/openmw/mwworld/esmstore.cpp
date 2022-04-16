@@ -143,11 +143,9 @@ static bool isCacheableRecord(int id)
     return false;
 }
 
-void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
+void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue)
 {
     listener->setProgressRange(1000);
-
-    ESM::Dialogue *dialogue = nullptr;
 
     // Land texture loading needs to use a separate internal store for each plugin.
     // We set the number of plugins here so we can properly verify if valid plugin
@@ -159,6 +157,11 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     {
         ESM::NAME n = esm.getRecName();
         esm.getRecHeader();
+        if (esm.getRecordFlags() & ESM::FLAG_Ignored)
+        {
+            esm.skipRecord();
+            continue;
+        }
 
         // Look up the record type.
         std::map<int, StoreBase *>::iterator it = mStores.find(n.toInt());

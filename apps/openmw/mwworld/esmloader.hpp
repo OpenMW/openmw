@@ -13,6 +13,7 @@ namespace ToUTF8
 namespace ESM
 {
     class ESMReader;
+    struct Dialogue;
 }
 
 namespace MWWorld
@@ -31,6 +32,7 @@ struct EsmLoader : public ContentLoader
         std::vector<ESM::ESMReader>& mEsm;
         MWWorld::ESMStore& mStore;
         ToUTF8::Utf8Encoder* mEncoder;
+        ESM::Dialogue* mDialogue;
 };
 
 } /* namespace MWWorld */
