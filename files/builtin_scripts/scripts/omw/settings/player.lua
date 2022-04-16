@@ -8,10 +8,11 @@ render.registerRenderer('text', function(value, set, arg)
     return {
         type = ui.TYPE.TextEdit,
         props = {
-            size = util.vector2(arg and arg.size or 300, 100),
+            size = util.vector2(arg and arg.size or 300, 30),
             text = value,
             textColor = util.color.rgb(1, 1, 1),
-            textSize = 30,
+            textSize = 15,
+            textAlignV = ui.ALIGNMENT.Center,
         },
         events = {
             textChanged = async:callback(function(s) set(s) end),
@@ -26,7 +27,6 @@ return {
         SCOPE = common.SCOPE,
         getGroup = common.getGroup,
         registerRenderer = render.registerRenderer,
-        localizeGroup = render.localizeGroup,
     },
     engineHandlers = {
         onLoad = function(saved)

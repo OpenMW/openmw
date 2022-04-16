@@ -57,7 +57,7 @@ local function getSetting(groupKey, settingKey)
     if not group then
         error('Unknown group')
     end
-    local setting = group[settingKey]
+    local setting = group.settings[settingKey]
     if not setting then
         error('Unknown setting')
     end

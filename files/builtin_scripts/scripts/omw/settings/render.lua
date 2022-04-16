@@ -1,6 +1,7 @@
 local ui = require('openmw.ui')
 local util = require('openmw.util')
 local async = require('openmw.async')
+local core = require('openmw.core')
 
 local common = require('scripts.omw.settings.common')
 
@@ -10,84 +11,122 @@ local function registerRenderer(name, renderFunction)
 end
 
 local groupOptions = {}
-local localization = {}
+
+
+local padding = function(size)
+    return {
+        props = {
+            size = util.vector2(size, size),
+        }
+    }
+end
+
+local header = {
+    props = {
+        textColor = util.color.rgb(1, 1, 1),
+        textSize = 30,
+    },
+}
+
+local normal = {
+    props = {
+        textColor = util.color.rgb(1, 1, 1),
+        textSize = 25,
+    },
+}
 
 local function renderSetting(groupKey, setting, value)
     local renderFunction = renderers[setting.renderer]
     if not renderFunction then
         error(('Setting %s of %s has unknown renderer %s'):format(setting.key, groupKey, setting.renderer))
     end
-    local settingName = localization[groupKey]
-        and localization[groupKey].settings[setting.key].name
-        or setting.key
+    local group = common.getGroup(groupKey)
+    value = value or group:get(setting.key)
     local set = function(value)
-        local group = common.getGroup(groupKey)
         group:set(setting.key, value)
         renderSetting(groupKey, setting, value)
     end
     local element = groupOptions[groupKey].element
+    local localization = groupOptions[groupKey].localization
     local settingsLayout = element.layout.content.settings
     settingsLayout.content[setting.key] = {
         name = setting.key,
         type = ui.TYPE.Flex,
-        props = {
-            horizontal = true,
-            align = ui.ALIGNMENT.Start,
-            arrange = ui.ALIGNMENT.Center,
-        },
         content = ui.content {
             {
-                type = ui.TYPE.Text,
+                type = ui.TYPE.Flex,
                 props = {
-                    text = settingName .. ':',
-                    textColor = util.color.rgb(1, 1, 1),
-                    textSize = 30,
+                    horizontal = true,
+                    align = ui.ALIGNMENT.Start,
+                    arrange = ui.ALIGNMENT.End,
+                },
+                content = ui.content {
+                    {
+                        type = ui.TYPE.Text,
+                        template = normal,
+                        props = {
+                            text = localization(setting.name),
+                        },
+                    },
+                    padding(10),
+                    renderFunction(value, set, setting.argument),
+                    padding(10),
+                    {
+                        type = ui.TYPE.Text,
+                        template = normal,
+                        props = {
+                            text = 'Reset',
+                        },
+                        events = {
+                            mouseClick = async:callback(function()
+                                set(setting.default)
+                            end),
+                        },
+                    },
                 },
             },
-            renderFunction(value or setting.default, set, setting.argument),
-            {
-                type = ui.TYPE.Text,
-                props = {
-                    text = 'Reset',
-                    textColor = util.color.rgb(1, 1, 1),
-                    textSize = 30,
-                },
-                events = {
-                    mouseClick = async:callback(function()
-                        set(setting.default)
-                    end),
-                },
-            },
+            padding(20),
         },
     }
     element:update()
 end
 
-local function updateLocalization(groupKey)
-    local loc = localization[groupKey]
-    local options = groupOptions[groupKey]
-    if not options or not loc then return end
-    local searchHints = { loc.name, loc.description }
-    options.name = loc.name
-    options.searchHints = table.concat(searchHints, ' ')
-    local layout = options.element.layout
-    layout.content.header.props.text = loc.description
-end
-
-local function onGroupRegistered(groupKey)
+local function renderGroup(groupKey)
     local group = common.groups:get(groupKey)
-    local layout = {
+    local element = groupOptions[groupKey].element
+    local localization = groupOptions[groupKey].localization
+    element.layout = {
         type = ui.TYPE.Flex,
         content = ui.content {
+            padding(10),
             {
-                name = 'header',
-                type = ui.TYPE.Text,
+                type = ui.TYPE.Flex,
                 props = {
-                    text = '',
-                    textSize = 30,
-                    textColor = util.color.rgb(1, 1, 1),
+                    horizontal = true,
+                    align = ui.ALIGNMENT.Start,
+                    arrange = ui.ALIGNMENT.Center,
+                },
+                content = ui.content {
+                    {
+                        name = 'name',
+                        type = ui.TYPE.Text,
+                        template = header,
+                        props = {
+                            text = localization(group.name),
+                        },
+                    },
+                    padding(10),
+                    {
+                        name = 'description',
+                        type = ui.TYPE.Text,
+                        template = normal,
+                        props = {
+                            text = localization(group.description),
+                        },
+                    },
                 },
             },
+            padding(50),
             {
                 name = 'settings',
                 type = ui.TYPE.Flex,
@@ -95,28 +134,28 @@ local function onGroupRegistered(groupKey)
             },
         },
     }
-    local options = {
-        name = groupKey,
-        element = ui.create(layout),
-        searchHints = '',
-    }
-    groupOptions[groupKey] = options
-    for _, setting in pairs(group) do
-        layout.content.settings.content:add({ name = setting.key })
-        renderSetting(groupKey, setting, setting.default)
+    local settingsContent = element.layout.content.settings.content
+    for _, setting in pairs(group.settings) do
+        settingsContent:add({ name = setting.key })
+        renderSetting(groupKey, setting)
     end
-    updateLocalization(groupKey)
-    print(('registering group %s'):format(groupKey))
-    ui.registerSettingsPage(options)
+    element:update()
 end
 
-local function localizeGroup(groupKey, loc)
-    localization[groupKey] = loc
-    updateLocalization(groupKey)
+local function onGroupRegistered(groupKey)
+    local group = common.groups:get(groupKey)
+    local options = {
+        name = groupKey,
+        element = ui.create{},
+        searchHints = '',
+        localization = core.l10n(group.localization),
+    }
+    groupOptions[groupKey] = options
+    renderGroup(groupKey)
+    ui.registerSettingsPage(options)
 end
 
 return {
     onGroupRegistered = onGroupRegistered,
     registerRenderer = registerRenderer,
-    localizeGroup = localizeGroup,
 }
