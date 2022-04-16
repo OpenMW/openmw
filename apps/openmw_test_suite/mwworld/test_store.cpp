@@ -29,13 +29,14 @@ struct ContentFileTest : public ::testing::Test
 
         // load the content files
         int index=0;
+        ESM::Dialogue* dialogue = nullptr;
         for (const auto & mContentFile : mContentFiles)
         {
             ESM::ESMReader lEsm;
             lEsm.setEncoder(nullptr);
             lEsm.setIndex(index);
             lEsm.open(mContentFile.string());
-            mEsmStore.load(lEsm, &dummyListener);
+            mEsmStore.load(lEsm, &dummyListener, dialogue);
 
             ++index;
         }
@@ -249,17 +250,18 @@ TEST_F(StoreTest, delete_test)
     record.mId = recordId;
 
     ESM::ESMReader reader;
+    ESM::Dialogue* dialogue = nullptr;
 
     // master file inserts a record
     reader.open(getEsmFile(record, false), "filename");
-    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.load(reader, &dummyListener, dialogue);
     mEsmStore.setUp();
 
     ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 1);
 
     // now a plugin deletes it
     reader.open(getEsmFile(record, true), "filename");
-    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.load(reader, &dummyListener, dialogue);
     mEsmStore.setUp();
 
     ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 0);
@@ -267,7 +269,7 @@ TEST_F(StoreTest, delete_test)
     // now another plugin inserts it again
     // expected behaviour is the record to reappear rather than staying deleted
     reader.open(getEsmFile(record, false), "filename");
-    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.load(reader, &dummyListener, dialogue);
     mEsmStore.setUp();
 
     ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 1);
@@ -286,17 +288,18 @@ TEST_F(StoreTest, overwrite_test)
     record.mId = recordId;
 
     ESM::ESMReader reader;
+    ESM::Dialogue* dialogue = nullptr;
 
     // master file inserts a record
     reader.open(getEsmFile(record, false), "filename");
-    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.load(reader, &dummyListener, dialogue);
     mEsmStore.setUp();
 
     // now a plugin overwrites it with changed data
     record.mId = recordIdUpper; // change id to uppercase, to test case smashing while we're at it
     record.mModel = "the_new_model";
     reader.open(getEsmFile(record, false), "filename");
-    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.load(reader, &dummyListener, dialogue);
     mEsmStore.setUp();
 
     // verify that changes were actually applied
