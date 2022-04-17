@@ -60,6 +60,8 @@ std::string raceFlags(int flags);
 std::string spellFlags(int flags);
 std::string weaponFlags(int flags);
 
+std::string recordFlags(uint32_t flags);
+
 // Missing flags functions:
 // aiServicesFlags, possibly more
 

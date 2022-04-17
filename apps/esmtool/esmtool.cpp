@@ -15,6 +15,7 @@
 #include <components/esm/records.hpp>
 
 #include "record.hpp"
+#include "labels.hpp"
 
 #define ESMTOOL_VERSION 1.2
 
@@ -398,7 +399,8 @@ int load(Arguments& info)
 
             if(!quiet && interested)
             {
-                std::cout << "\nRecord: " << n.toStringView() << " '" << record->getId() << "'\n";
+                std::cout << "\nRecord: " << n.toStringView() << " '" << record->getId() << "'\n"
+                    << "Record flags: " << recordFlags(record->getFlags()) << '\n';
                 record->print();
             }
 
