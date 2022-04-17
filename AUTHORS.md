@@ -76,6 +76,7 @@ Programmers
     Eduard Cot (trombonecot)
     Eli2
     Emanuel Guével (potatoesmaster)
+    Eris Caffee (eris)
     eroen
     escondida
     Evgeniy Mineev (sandstranger)
