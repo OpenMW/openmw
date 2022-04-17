@@ -4,6 +4,7 @@
 #include <components/misc/helpviewer.hpp>
 
 #include <QDate>
+#include <QDir>
 #include <QMessageBox>
 #include <QFontDatabase>
 #include <QFileDialog>
@@ -152,6 +153,20 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
 {
     if (!setupLauncherSettings())
         return FirstRunDialogResultFailure;
+
+    // Dialog wizard and setup will fail if the config directory does not already exist
+    QDir userConfigDir = QDir(QString::fromStdString(mCfgMgr.getUserConfigPath().string()));
+    if ( ! userConfigDir.exists() ) {
+        if ( ! userConfigDir.mkpath(".") )
+        {
+            cfgError(tr("Error opening OpenMW configuration file"),
+                     tr("<br><b>Could not create directory %0</b><br><br> \
+                        Please make sure you have the right permissions \
+                        and try again.<br>").arg(userConfigDir.canonicalPath())
+            );
+            return FirstRunDialogResultFailure;
+        }
+    }
 
     if (mLauncherSettings.value(QString("General/firstrun"), QString("true")) == QLatin1String("true"))
     {
