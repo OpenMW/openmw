@@ -196,6 +196,11 @@ namespace EsmLoader
             {
                 const ESM::NAME recName = reader.getRecName();
                 reader.getRecHeader();
+                if (reader.getRecordFlags() & ESM::FLAG_Ignored)
+                {
+                    reader.skipRecord();
+                    continue;
+                }
                 loadRecord(query, recName, reader, content);
             }
         }
