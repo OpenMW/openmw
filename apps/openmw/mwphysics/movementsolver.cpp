@@ -101,7 +101,7 @@ namespace MWPhysics
         btVector3 to = from - btVector3(0,0,maxHeight);
 
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
-        resultCallback1.m_collisionFilterGroup = 0xff;
+        resultCallback1.m_collisionFilterGroup = CollisionType_AnyPhysical;
         resultCallback1.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap;
 
         collisionWorld->rayTest(from, to, resultCallback1);
@@ -426,7 +426,7 @@ namespace MWPhysics
             return;
 
         ProjectileConvexCallback resultCallback(projectile.mCaster, projectile.mCollisionObject, btFrom, btTo, projectile.mProjectile);
-        resultCallback.m_collisionFilterMask = 0xff;
+        resultCallback.m_collisionFilterMask = CollisionType_AnyPhysical;
         resultCallback.m_collisionFilterGroup = CollisionType_Projectile;
 
         const btQuaternion btrot = btQuaternion::getIdentity();

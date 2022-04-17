@@ -34,7 +34,10 @@
 -- @field [parent=#COLLISION_TYPE] #number HeightMap
 -- @field [parent=#COLLISION_TYPE] #number Projectile
 -- @field [parent=#COLLISION_TYPE] #number Water
--- @field [parent=#COLLISION_TYPE] #number Default Used by deafult: World+Door+Actor+HeightMap
+-- @field [parent=#COLLISION_TYPE] #number Default Used by default: World+Door+Actor+HeightMap
+-- @field [parent=#COLLISION_TYPE] #number AnyPhysical : World+Door+Actor+HeightMap+Projectile+Water
+-- @field [parent=#COLLISION_TYPE] #number Camera Objects that should collide only with camera
+-- @field [parent=#COLLISION_TYPE] #number VisualOnly Objects that were not intended to be part of the physics world
 
 ---
 -- Collision types that are used in `castRay`.

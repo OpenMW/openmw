@@ -490,6 +490,17 @@ namespace MWPhysics
 
         assert(!getObject(ptr));
 
+        // Override collision type based on shape content.
+        switch (shapeInstance->mCollisionType)
+        {
+            case Resource::BulletShape::CollisionType::Camera:
+                collisionType = CollisionType_CameraOnly;
+                break;
+            case Resource::BulletShape::CollisionType::None:
+                collisionType = CollisionType_VisualOnly;
+                break;
+        }
+
         auto obj = std::make_shared<Object>(ptr, shapeInstance, rotation, collisionType, mTaskScheduler.get());
         mObjects.emplace(ptr.mRef, obj);
 
@@ -905,7 +916,7 @@ namespace MWPhysics
         const auto aabbMin = bulletPosition - btVector3(radius, radius, radius);
         const auto aabbMax = bulletPosition + btVector3(radius, radius, radius);
         const int mask = MWPhysics::CollisionType_Actor;
-        const int group = 0xff;
+        const int group = MWPhysics::CollisionType_AnyPhysical;
         if (occupyingActors == nullptr)
         {
             HasSphereCollisionCallback callback(bulletPosition, radius, mask, group, ignoreFilter,
