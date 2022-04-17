@@ -71,7 +71,15 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
 
 MWWorld::Ptr AiPursue::getTarget() const
 {
-    return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+    if (!mCachedTarget.isEmpty())
+    {
+        if (mCachedTarget.getRefData().isDeleted() || !mCachedTarget.getRefData().isEnabled())
+            mCachedTarget = MWWorld::Ptr();
+        else
+            return mCachedTarget;
+    }
+    mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+    return mCachedTarget;
 }
 
 void AiPursue::writeState(ESM::AiSequence::AiSequence &sequence) const
