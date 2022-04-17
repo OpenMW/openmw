@@ -98,12 +98,22 @@ namespace MWGui
 
     bool WaitDialog::exit()
     {
-        return (!mTimeAdvancer.isRunning()); //Only exit if not currently waiting
+        bool canExit = !mTimeAdvancer.isRunning(); // Only exit if not currently waiting
+        if (canExit)
+        {
+            clear();
+            stopWaiting();
+        }
+        return canExit;
     }
 
     void WaitDialog::clear()
     {
         mSleeping = false;
+        mHours = 1;
+        mManualHours = 1;
+        mFadeTimeRemaining = 0;
+        mInterruptAt = -1;
         mTimeAdvancer.stop();
     }
 
