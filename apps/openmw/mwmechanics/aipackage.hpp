@@ -4,17 +4,13 @@
 #include <memory>
 
 #include <components/detournavigator/areatype.hpp>
-
+ 
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
 #include "aistate.hpp"
 #include "aipackagetypeid.hpp"
 #include "aitimer.hpp"
-
-namespace MWWorld
-{
-    class Ptr;
-}
+#include "../mwworld/ptr.hpp"
 
 namespace ESM
 {
@@ -165,6 +161,7 @@ namespace MWMechanics
 
             std::string mTargetActorRefId;
             mutable int mTargetActorId;
+            mutable MWWorld::Ptr mCachedTarget;
 
             short mRotateOnTheRunChecks; // attempts to check rotation to the pathpoint on the run possibility
 

@@ -451,7 +451,11 @@ namespace MWMechanics
 
     MWWorld::Ptr AiCombat::getTarget() const
     {
-        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+        if (mCachedTarget.isEmpty() || mCachedTarget.getRefData().isDeleted() || !mCachedTarget.getRefData().isEnabled())
+        {
+            mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+        }
+        return mCachedTarget;
     }
 
     void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const

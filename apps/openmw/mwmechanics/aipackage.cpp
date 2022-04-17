@@ -47,6 +47,7 @@ MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options
     mReaction(MWBase::Environment::get().getWorld()->getPrng()),
     mTargetActorRefId(""),
     mTargetActorId(-1),
+    mCachedTarget(),
     mRotateOnTheRunChecks(0),
     mIsShortcutting(false),
     mShortcutProhibited(false),
@@ -56,6 +57,14 @@ MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options
 
 MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
 {
+    if (!mCachedTarget.isEmpty())
+    {
+        if (mCachedTarget.getRefData().isDeleted() || !mCachedTarget.getRefData().isEnabled())
+            mCachedTarget = MWWorld::Ptr();
+        else
+            return mCachedTarget;
+    }
+
     if (mTargetActorId == -2)
         return MWWorld::Ptr();
 
@@ -66,20 +75,22 @@ MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
             mTargetActorId = -2;
             return MWWorld::Ptr();
         }
-        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mTargetActorRefId, false);
-        if (target.isEmpty())
+        mCachedTarget = MWBase::Environment::get().getWorld()->searchPtr(mTargetActorRefId, false);
+        if (mCachedTarget.isEmpty())
         {
             mTargetActorId = -2;
-            return target;
+            return mCachedTarget;
         }
         else
-            mTargetActorId = target.getClass().getCreatureStats(target).getActorId();
+            mTargetActorId = mCachedTarget.getClass().getCreatureStats(mCachedTarget).getActorId();
     }
 
     if (mTargetActorId != -1)
-        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+        mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
     else
         return MWWorld::Ptr();
+
+    return mCachedTarget;
 }
 
 void MWMechanics::AiPackage::reset()
@@ -89,6 +100,7 @@ void MWMechanics::AiPackage::reset()
     mIsShortcutting = false;
     mShortcutProhibited = false;
     mShortcutFailPos = osg::Vec3f();
+    mCachedTarget = MWWorld::Ptr();
 
     mPathFinder.clearPath();
     mObstacleCheck.clear();
