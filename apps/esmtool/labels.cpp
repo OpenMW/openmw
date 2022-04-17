@@ -902,3 +902,17 @@ std::string weaponFlags(int flags)
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
+
+std::string recordFlags(uint32_t flags)
+{
+    std::string properties;
+    if (flags == 0) properties += "[None] ";
+    if (flags & ESM::FLAG_Deleted) properties += "Deleted ";
+    if (flags & ESM::FLAG_Persistent) properties += "Persistent ";
+    if (flags & ESM::FLAG_Ignored) properties += "Ignored ";
+    if (flags & ESM::FLAG_Blocked) properties += "Blocked ";
+    int unused = ~(ESM::FLAG_Deleted | ESM::FLAG_Persistent | ESM::FLAG_Ignored | ESM::FLAG_Blocked);
+    if (flags & unused) properties += "Invalid ";
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
+    return properties;
+}
