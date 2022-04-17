@@ -325,7 +325,7 @@ void Wizard::MainWizard::setupPages()
     setPage(Page_InstallationTarget, new InstallationTargetPage(this, mCfgMgr));
     setPage(Page_ComponentSelection, new ComponentSelectionPage(this));
 #ifdef OPENMW_USE_UNSHIELD
-    setPage(Page_Installation, new InstallationPage(this));
+    setPage(Page_Installation, new InstallationPage(this, mGameSettings));
 #endif
     setPage(Page_Import, new ImportPage(this));
     setPage(Page_Conclusion, new ConclusionPage(this));

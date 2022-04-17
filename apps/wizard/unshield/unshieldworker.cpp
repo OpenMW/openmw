@@ -12,8 +12,9 @@
 #include <QDir>
 #include <QDirIterator>
 
-Wizard::UnshieldWorker::UnshieldWorker(QObject *parent) :
+Wizard::UnshieldWorker::UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject *parent) :
     QObject(parent),
+    mExpectedMorrowindBsaSize(expectedMorrowindBsaSize),
     mIniSettings()
 {
     unshield_set_log_level(0);
@@ -157,6 +158,11 @@ void Wizard::UnshieldWorker::setIniCodec(QTextCodec *codec)
 {
     QWriteLocker writeLock(&mLock);
     mIniCodec = codec;
+}
+
+void Wizard::UnshieldWorker::wakeAll()
+{
+    mWait.wakeAll();
 }
 
 bool Wizard::UnshieldWorker::setupSettings()
@@ -478,6 +484,18 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
                     // Check if we have correct archive, other archives have Morrowind.bsa too
                     if (tribunalFound == bloodmoonFound)
                     {
+                        qint64 actualFileSize = getMorrowindBsaFileSize(file);
+                        if (actualFileSize != mExpectedMorrowindBsaSize)
+                        {
+                            QReadLocker readLock(&mLock);
+                            emit requestOldVersionDialog();
+                            mWait.wait(&mLock);
+                            if (mStopped)
+                            {
+                                qDebug() << "We are asked to stop !!";
+                                break;
+                            }
+                        }
                         cabFile = file;
                         found = true; // We have a GoTY disk or a Morrowind-only disk
                     }
@@ -490,6 +508,11 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
                 }
             }
 
+        }
+
+        if (cabFile.isEmpty())
+        {
+            break;
         }
 
         if (!found)
@@ -938,4 +961,43 @@ bool Wizard::UnshieldWorker::findInCab(const QString &fileName, const QString &c
 
     unshield_close(unshield);
     return false;
+}
+
+size_t Wizard::UnshieldWorker::getMorrowindBsaFileSize(const QString &cabFile)
+{
+    QString fileName = QString("Morrowind.bsa");
+    QByteArray array(cabFile.toUtf8());
+
+    Unshield *unshield;
+    unshield = unshield_open(array.constData());
+
+    if (!unshield)
+    {
+        emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
+        unshield_close(unshield);
+        return false;
+    }
+
+    for (int i = 0; i < unshield_file_group_count(unshield); ++i)
+    {
+        UnshieldFileGroup *group = unshield_file_group_get(unshield, i);
+
+        for (size_t j = group->first_file; j <= group->last_file; ++j)
+        {
+
+            if (unshield_file_is_valid(unshield, j))
+            {
+                QString current(QString::fromUtf8(unshield_file_name(unshield, j)));
+                if (current.toLower() == fileName.toLower())
+                {
+                    size_t fileSize = unshield_file_size(unshield, j);
+                    unshield_close(unshield);
+                    return fileSize; // File is found!
+                }
+            }
+        }
+    }
+
+    unshield_close(unshield);
+    return 0;
 }

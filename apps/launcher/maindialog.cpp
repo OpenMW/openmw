@@ -570,7 +570,7 @@ void Launcher::MainDialog::play()
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>You do not have a game file selected.</b><br><br> \
                           OpenMW will not start without a game file selected.<br>"));
-                          msgBox.exec();
+        msgBox.exec();
         return;
     }
 

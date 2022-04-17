@@ -3,6 +3,8 @@
 
 #include "ui_existinginstallationpage.h"
 
+#include <components/config/gamesettings.hpp>
+
 namespace Wizard
 {
     class MainWizard;
@@ -25,9 +27,10 @@ namespace Wizard
     private:
         MainWizard *mWizard;
 
+        bool versionIsOK(QString directory_name);
+
     protected:
         void initializePage() override;
-
     };
 
 }

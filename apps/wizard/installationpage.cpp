@@ -8,8 +8,9 @@
 
 #include "mainwizard.hpp"
 
-Wizard::InstallationPage::InstallationPage(QWidget *parent) :
-    QWizardPage(parent)
+Wizard::InstallationPage::InstallationPage(QWidget *parent, Config::GameSettings &gameSettings) :
+    QWizardPage(parent),
+    mGameSettings(gameSettings)
 {
     mWizard = qobject_cast<MainWizard*>(parent);
 
@@ -18,7 +19,7 @@ Wizard::InstallationPage::InstallationPage(QWidget *parent) :
     mFinished = false;
 
     mThread = new QThread();
-    mUnshield = new UnshieldWorker();
+    mUnshield = new UnshieldWorker(mGameSettings.value("morrowind-bsa-filesize").toLongLong());
     mUnshield->moveToThread(mThread);
 
     connect(mThread, SIGNAL(started()),
@@ -47,6 +48,10 @@ Wizard::InstallationPage::InstallationPage(QWidget *parent) :
 
     connect(mUnshield, SIGNAL(requestFileDialog(Wizard::Component)),
             this, SLOT(showFileDialog(Wizard::Component)), Qt::QueuedConnection);
+
+    connect(mUnshield, SIGNAL(requestOldVersionDialog()),
+            this, SLOT(showOldVersionDialog())
+            , Qt::QueuedConnection);
 }
 
 Wizard::InstallationPage::~InstallationPage()
@@ -179,6 +184,34 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
     }
 
     mUnshield->setDiskPath(path);
+}
+
+void Wizard::InstallationPage::showOldVersionDialog()
+{
+    logTextEdit->appendHtml(tr("<p>Detected old version of component Morrowind.</p>"));
+    mWizard->addLogText(tr("Detected old version of component Morrowind."));
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("Morrowind Installation"));
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setText(QObject::tr("There may be a more recent version of Morrowind available.<br><br>Do you wish to continue anyway?"));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::No)
+    {
+        logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"> \
+                                    <b>Error: The installation was aborted by the user</b></span></p>"));
+
+        mWizard->addLogText(QLatin1String("Error: The installation was aborted by the user"));
+        mWizard->mError = true;
+
+        emit completeChanged();
+        return;
+    }
+
+    mUnshield->wakeAll();
 }
 
 void Wizard::InstallationPage::installationFinished()
