@@ -3,11 +3,9 @@ local types = require('openmw.types')
 
 local common = require('scripts.omw.settings.common')
 
-local groups, SCOPE = common.groups, common.SCOPE
-
 local function validScope(scope)
     local valid = false
-    for _, v in pairs(SCOPE) do
+    for _, v in pairs(common.SCOPE) do
         if v == scope then
             valid = true
             break
@@ -41,7 +39,7 @@ local function addSetting(settings, options)
     end
     settings[options.key] = {
         key = options.key,
-        scope = options.scope or SCOPE.Global,
+        scope = options.scope,
         default = options.default,
         renderer = options.renderer,
         argument = options.argument,
@@ -70,14 +68,14 @@ local function validateGroupOptions(options)
 end
 
 local function registerGroup(options)
+    local groups = common.groups()
     validateGroupOptions(options)
     if groups:get(options.key) then
-        print(('Overwriting group %s'):format(options.key))
-    end
+        error(('Duplicate group %s'):format(options.key))
+    end             
     local group = {
         key = options.key,
         localization = options.localization,
-
         name = options.name,
         description = options.description,
 
@@ -95,7 +93,7 @@ local function registerGroup(options)
 end
 
 local function onPlayerAdded(player)
-    for groupName in pairs(groups:asTable()) do
+    for groupName in pairs(common.groups():asTable()) do
         player:sendEvent(common.EVENTS.GroupRegistered, groupName)
     end
 end

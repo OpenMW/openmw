@@ -1,23 +1,20 @@
-local prequire = function(path)
-    local status, result = pcall(function()
-        return require(path)
-    end)
-    return status and result or nil
-end
-
+local storage = require('openmw.storage')
 local core = require('openmw.core')
 local types = require('openmw.types')
-local storage = require('openmw.storage')
-local self = prequire('openmw.self')
-local world = prequire('openmw.world')
+local selfObject
+do
+    local success, result = pcall(function() return require('openmw.self') end)
+    selfObject = success and result or nil
+end
+local playerObject = selfObject and selfObject.type == types.Player and selfObject or nil
 
-local isPlayerScript = self and true or false
-local isGlobalScript = world and true or false
-
+local eventPrefix = 'omwSettings'
 local EVENTS = {
-    SettingChanged = 'omwSettingsChanged',
-    SettingSet = 'omwSettingsGlobalSet',
-    GroupRegistered = 'omwSettingsGroupRegistered',
+    SettingChanged = eventPrefix .. 'Changed',
+    SetValue = eventPrefix .. 'GlobalSetValue',
+    GroupRegistered = eventPrefix .. 'GroupRegistered',
+    RegisterGroup = eventPrefix .. 'RegisterGroup',
+    Subscribe = eventPrefix .. 'Subscribe',
 }
 
 local SCOPE = {
@@ -27,124 +24,160 @@ local SCOPE = {
     SavePlayer = 'SavePlayer',
 }
 
-local groups = storage.globalSection('OMW_Settings_Groups')
-local saveGlobalSection = storage.globalSection('OMW_Settings_SaveGlobal')
-
-if isGlobalScript then
-    groups:removeOnExit()
-    saveGlobalSection:removeOnExit()
+local function isPlayerScope(scope)
+    return scope == SCOPE.Player or scope == SCOPE.SavePlayer
 end
 
-local savePlayerSection = nil
-if isPlayerScript then
-    savePlayerSection = storage.playerSection('OMW_Setting_SavePlayer')
-    savePlayerSection:removeOnExit()
+local function isSaveScope(scope)
+    return scope == SCOPE.SaveGlobal or scope == SCOPE.SavePlayer
 end
 
-local scopes = {
-    [SCOPE.Global] = storage.globalSection('OMW_Setting_Global'),
-    [SCOPE.Player] = isPlayerScript and storage.playerSection('OMW_Setting_Player'),
-    [SCOPE.SaveGlobal] = saveGlobalSection,
-    [SCOPE.SavePlayer] = savePlayerSection,
-}
+local prefix = 'omw_settings_'
+local settingsPattern = prefix .. 'settings_%s%s'
 
-local function isGlobalScope(scope)
-    return scope == SCOPE.Global or scope == SCOPE.SaveGlobal
+local groupsSection = storage.globalSection(prefix .. 'groups')
+if groupsSection.removeOnExit then
+    groupsSection:removeOnExit()
 end
 
-local function getSetting(groupKey, settingKey)
-    local group = groups:get(groupKey)
-    if not group then
-        error('Unknown group')
-    end
-    local setting = group.settings[settingKey]
-    if not setting then
-        error('Unknown setting')
-    end
-    return setting
-end
-
-local function getSettingValue(groupKey, settingKey)
-    local setting = getSetting(groupKey, settingKey)
-    local scopeSection = scopes[setting.scope]
-    if not scopeSection then
-        error(('Setting %s is not available in this context'):format(setting.key))
-    end
-    if not scopeSection:get(groupKey) then
-        scopeSection:set(groupKey, {})
-    end
-    return scopeSection:get(groupKey)[setting.key] or setting.default
-end
-
-local function notifySettingChange(scope, event)
-    if isGlobalScope(scope) then
-        core.sendGlobalEvent(EVENTS.SettingChanged, event)
-        for _, a in ipairs(world.activeActors) do
-            if a.type == types.Player then
-                a:sendEvent(EVENTS.SettingChanged, event)
-            end
-        end
+local function values(groupKey, scope)
+    local player = isPlayerScope(scope)
+    local save = isSaveScope(scope)
+    local sectionKey = settingsPattern:format(groupKey, save and '_save' or '')
+    local section
+    if player then
+        section = storage.playerSection and storage.playerSection(sectionKey) or nil
     else
-        self:sendEvent(EVENTS.SettingChanged, event)
+        section = storage.globalSection(sectionKey)
+    end
+    if save and section and section.removeOnExit then
+        section:removeOnExit()
+    end
+    return section
+end
+
+local function saveScope(scope)
+    local saved = {}
+    for _, group in pairs(groupsSection:asTable()) do
+        saved[group.key] = values(group.key, scope):asTable()
+    end
+    return saved
+end
+
+local function loadScope(scope, saved)
+    if not saved then return end
+    for _, group in pairs(saved) do
+        values(group.key, scope):reset(saved[group.key])
     end
 end
 
-local function setSettingValue(groupKey, settingKey, value)
-    local setting = getSetting(groupKey, settingKey)
+local function groupSubscribeEvent(groupKey)
+    return ('%sSubscribe%s'):format(eventPrefix, groupKey)
+end
+
+local subscriptions = {}
+local function handleSubscription(event)
+    if not subscriptions[event.groupKey] then
+        subscriptions[event.groupKey] = {}
+    end
+    table.insert(subscriptions[event.groupKey], event.object or false)
+end
+
+local function subscribe(self)
+    local groupKey = rawget(self, 'groupKey')
     local event = {
-        groupName = groupKey,
-        settingName = setting.key,
-        value = value,
+        groupKey = groupKey,
+        object = selfObject,
     }
-    if isPlayerScript and isGlobalScope(setting.scope) then
-        core.sendGlobalEvent(EVENTS.SettingSet, event)
-        return
+    core.sendGlobalEvent(EVENTS.Subscribe, event)
+    if playerObject then
+        playerObject:sendEvent(EVENTS.Subscribe, event)
     end
-
-    local scopeSection = scopes[setting.scope]
-    if not scopeSection:get(groupKey) then
-        scopeSection:set(groupKey, {})
-    end
-    local copy = scopeSection:getCopy(groupKey)
-    copy[setting.key] = value
-    scopeSection:set(groupKey, copy)
-
-    notifySettingChange(setting.scope, event)
+    return groupSubscribeEvent(groupKey)
 end
 
 local groupMeta = {
-    __index = {
-        get = function(self, settingKey)
-            return getSettingValue(self.key, settingKey)
-        end,
-        set = function(self, settingKey, value)
-            setSettingValue(self.key, settingKey, value)
-        end,
-        onChange = function(self, callback)
-            table.insert(self.__callbacks, callback)
-        end,
-        __changed = function(self, settingKey, value)
-            for _, callback in ipairs(self.__callbacks) do
-                callback(settingKey, value)
+    __newindex = function(self, settingKey, value)
+        local group = groupsSection:get(rawget(self, 'groupKey'))
+        local setting = group.settings[settingKey]
+        if not setting then
+            error(('Setting %s does not exist'):format(settingKey))
+        end
+        local section = values(group.key, setting.scope)
+        local event = {
+            groupKey = group.key,
+            settingKey = settingKey,
+            value = value,
+        }
+        if section.set then
+            section:set(settingKey, value)
+            if playerObject then
+                playerObject:sendEvent(EVENTS.SettingChanged, event)
+            else
+                core.sendGlobalEvent(EVENTS.SettingChanged, event)
             end
-        end,
-    },
+            if subscriptions[group.key] then
+                local eventKey = groupSubscribeEvent(group.key)
+                for _, object in ipairs(subscriptions[group.key]) do
+                    if object then
+                        object:sendEvent(eventKey, event)
+                    else
+                        core.sendGlobalEvent(eventKey, event)
+                    end
+                end
+            end
+        else
+            if isPlayerScope(setting.scope) then
+                error(("Can't change player scope setting %s from global scope"):format(settingKey))
+            else
+                core.sendGlobalEvent(EVENTS.SetValue, event)
+            end
+        end
+    end,
+    __index = function(self, key)
+        if key == "subscribe" then return subscribe end
+        local settingKey = key
+        local group = groupsSection:get(rawget(self, 'groupKey'))
+        local setting = group.settings[settingKey]
+        if not setting then
+            error(('Unknown setting %s'):format(settingKey))
+        end
+        local section = rawget(self, 'sections')[setting.scope]
+        if not section then
+            error(("Can't access setting %s from scope %s"):format(settingKey, setting.scope))
+        end
+        return section:get(setting.key) or setting.default
+    end,
 }
-local cachedGroups = {}
-local function getGroup(groupKey)
-    if not cachedGroups[groupKey] then
-        cachedGroups[groupKey] = setmetatable({
-            key = groupKey,
-            __callbacks = {},
-        }, groupMeta)
+
+local function group(groupKey)
+    if not groupsSection:get(groupKey) then
+        print(("Settings group %s wasn't registered yet"):format(groupKey))
     end
-    return cachedGroups[groupKey]
+    local s = {}
+    for _, scope in pairs(SCOPE) do
+        local section = values(groupKey, scope)
+        if section then
+            s[scope] = section
+        end
+    end
+    return setmetatable({
+        groupKey = groupKey,
+        sections = s,
+    }, groupMeta)
 end
 
 return {
-    EVENTS = EVENTS,
     SCOPE = SCOPE,
-    scopes = scopes,
-    groups = groups,
-    getGroup = getGroup,
+    EVENTS = EVENTS,
+    isPlayerScope = isPlayerScope,
+    isSaveScope = isSaveScope,
+    values = values,
+    groups = function()
+        return groupsSection
+    end,
+    saveScope = saveScope,
+    loadScope = loadScope,
+    group = group,
+    handleSubscription = handleSubscription,
 }

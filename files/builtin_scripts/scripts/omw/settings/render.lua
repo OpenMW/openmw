@@ -40,10 +40,10 @@ local function renderSetting(groupKey, setting, value)
     if not renderFunction then
         error(('Setting %s of %s has unknown renderer %s'):format(setting.key, groupKey, setting.renderer))
     end
-    local group = common.getGroup(groupKey)
-    value = value or group:get(setting.key)
+    local group = common.group(groupKey)
+    value = value or group[setting.key]
     local set = function(value)
-        group:set(setting.key, value)
+        group[setting.key] = value
         renderSetting(groupKey, setting, value)
     end
     local element = groupOptions[groupKey].element
@@ -92,7 +92,7 @@ local function renderSetting(groupKey, setting, value)
 end
 
 local function renderGroup(groupKey)
-    local group = common.groups:get(groupKey)
+    local group = common.groups():get(groupKey)
     local element = groupOptions[groupKey].element
     local localization = groupOptions[groupKey].localization
     element.layout = {
@@ -143,19 +143,27 @@ local function renderGroup(groupKey)
 end
 
 local function onGroupRegistered(groupKey)
-    local group = common.groups:get(groupKey)
+    local group = common.groups():get(groupKey)
+    local loc = core.l10n(group.localization)
     local options = {
-        name = groupKey,
+        name = loc(group.name),
         element = ui.create{},
         searchHints = '',
-        localization = core.l10n(group.localization),
+        localization = loc,
     }
     groupOptions[groupKey] = options
     renderGroup(groupKey)
     ui.registerSettingsPage(options)
 end
 
+local function onSettingChanged(event)
+    local group = common.groups():get(event.groupKey)
+    local setting = group.settings[event.settingKey]
+    renderSetting(event.groupKey, setting, event.value)
+end
+
 return {
     onGroupRegistered = onGroupRegistered,
+    onSettingChanged = onSettingChanged,
     registerRenderer = registerRenderer,
 }
