@@ -271,7 +271,7 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
         SOURCE_DIR fetched/icu
         CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env ${ICU_ENV}
             <SOURCE_DIR>/icu4c/source/configure --enable-static --disable-shared
-            --disable-tests --disable-samples --disable-icuio --disable-extras ${ICU_ADDITIONAL_OPTS}
+            --disable-tests --disable-samples --disable-icuio --disable-extras --disable-tools ${ICU_ADDITIONAL_OPTS}
         BUILD_COMMAND make
         INSTALL_COMMAND ""
     )
