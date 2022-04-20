@@ -257,17 +257,17 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
         # We need a host version of ICU so that the tools can be run when building the data library.
         set(NDK_STANDARD_ROOT ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64)
         string(REPLACE "android-" "" ANDROIDVER ${ANDROID_PLATFORM})
-        set(ICU_ENV
-            "CC=ccache ${NDK_STANDARD_ROOT}/bin/aarch64-linux-android${ANDROIDVER}-clang"
-            "CXX=ccache ${NDK_STANDARD_ROOT}/bin/aarch64-linux-android${ANDROIDVER}-clang"
-            "RANLIB=${NDK_STANDARD_ROOT}/bin/aarch64-linux-android-ranlib"
-            "AR=${NDK_STANDARD_ROOT}/bin/aarch64-linux-android-ar"
-            "CPPFLAGS=${ANDROID_COMPILER_FLAGS}"
-            "LDFLAGS=${ANDROID_LINKER_FLAGS} -lc -lstdc++"
-            )
         # Wants a triple such as aarch64-linux-android, excluding a trailing
         # -clang etc.
         string(REGEX MATCH "^[^-]\+-[^-]+-[^-]+" ICU_TOOLCHAIN_NAME ${ANDROID_TOOLCHAIN_NAME})
+        set(ICU_ENV
+            "CC=${CMAKE_C_COMPILER_LAUNCHER} ${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}${ANDROIDVER}-clang"
+            "CXX=${CMAKE_CXX_COMPILER_LAUNCHER} ${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}${ANDROIDVER}-clang"
+            "RANLIB=${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}-ranlib"
+            "AR=${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}-ar"
+            "CPPFLAGS=${ANDROID_COMPILER_FLAGS}"
+            "LDFLAGS=${ANDROID_LINKER_FLAGS} -lc -lstdc++"
+            )
         set(ICU_ADDITIONAL_OPTS --host=${ICU_TOOLCHAIN_NAME}${ANDROIDVER} --with-cross-build=${OPENMW_ICU_HOST_BUILD_DIR})
     endif()
     include(ExternalProject)
