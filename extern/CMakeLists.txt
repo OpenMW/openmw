@@ -268,7 +268,7 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
             "CPPFLAGS=${ANDROID_COMPILER_FLAGS}"
             "LDFLAGS=${ANDROID_LINKER_FLAGS} -lc -lstdc++"
             )
-        set(ICU_ADDITIONAL_OPTS --host=${ICU_TOOLCHAIN_NAME}${ANDROIDVER} --with-cross-build=${OPENMW_ICU_HOST_BUILD_DIR})
+        set(ICU_ADDITIONAL_OPTS --disable-tools --host=${ICU_TOOLCHAIN_NAME}${ANDROIDVER} --with-cross-build=${OPENMW_ICU_HOST_BUILD_DIR})
     endif()
     include(ExternalProject)
     ExternalProject_Add(icu
@@ -277,7 +277,7 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
         SOURCE_DIR fetched/icu
         CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env ${ICU_ENV}
             <SOURCE_DIR>/icu4c/source/configure --enable-static --disable-shared
-            --disable-tests --disable-samples --disable-icuio --disable-extras --disable-tools ${ICU_ADDITIONAL_OPTS}
+            --disable-tests --disable-samples --disable-icuio --disable-extras ${ICU_ADDITIONAL_OPTS}
         BUILD_COMMAND make
         INSTALL_COMMAND ""
     )
