@@ -248,6 +248,12 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
         # Note: Must be a build directory, not an install root, since the configure script
         # looks for a configuration file which does not get installed.
         set(OPENMW_ICU_HOST_BUILD_DIR "" CACHE STRING "A pre-built ICU build directory for the host system if cross-compiling")
+        if (OPENMW_ICU_HOST_BUILD_DIR STREQUAL "")
+            message(FATAL_ERROR "If cross-compiling on android you must set the \
+            OPENMW_ICU_HOST_BUILD_DIR to the path of a pre-compiled build of \
+            ICU 70.1 for the system doing the build, as ICU needs to be able \
+            to run its own executables as part of the build process.")
+        endif()
         # We need a host version of ICU so that the tools can be run when building the data library.
         set(NDK_STANDARD_ROOT ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64)
         string(REPLACE "android-" "" ANDROIDVER ${ANDROID_PLATFORM})
