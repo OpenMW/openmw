@@ -244,6 +244,7 @@ if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
 endif()
 
 if (NOT OPENMW_USE_SYSTEM_ICU)
+    set(ICU_ENV "ICU_DATA_FILTER_FILE=${CMAKE_CURRENT_SOURCE_DIR}/icufilters.json")
     if (ANDROID)
         # Note: Must be a build directory, not an install root, since the configure script
         # looks for a configuration file which does not get installed.
@@ -261,6 +262,7 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
         # -clang etc.
         string(REGEX MATCH "^[^-]\+-[^-]+-[^-]+" ICU_TOOLCHAIN_NAME ${ANDROID_TOOLCHAIN_NAME})
         set(ICU_ENV
+            ${ICU_ENV}
             "CC=${CMAKE_C_COMPILER_LAUNCHER} ${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}${ANDROIDVER}-clang"
             "CXX=${CMAKE_CXX_COMPILER_LAUNCHER} ${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}${ANDROIDVER}-clang"
             "RANLIB=${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}-ranlib"
