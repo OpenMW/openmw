@@ -54,64 +54,42 @@
 
 ---
 -- Return l10n formatting function for the given context.
--- Language files should be stored in VFS as `l10n/<ContextName>/<Locale>.yaml`.
+-- Localisation files (containing the message names and translations) should be stored in
+-- VFS as files of the form `l10n/<ContextName>/<Locale>.yaml`.
 --
--- Locales usually have the form {lang}_{COUNTRY},
--- where {lang} is a lowercase two-letter language code and {COUNTRY} is an uppercase
--- two-letter country code. Capitalization and the separator must have exactly
--- this format for language files to be recognized, but when users request a
--- locale they do not need to match capitalization and can use hyphens instead of
--- underscores.
+-- See [Localisation](../modding/localisation.html) for details of the localisation file structure.
 --
--- Locales may also contain variants and keywords. See https://unicode-org.github.io/icu/userguide/locale/#language-code
--- for full details.
+-- When calling the l10n formatting function, if no localisation can be found for any of the requested locales then
+-- the message key will be returned instead (and formatted, if possible).
+-- This makes it possible to use the source strings as message identifiers.
 --
--- Messages have the form of ICU MessageFormat strings.
--- See https://unicode-org.github.io/icu/userguide/format_parse/messages/
--- for a guide to MessageFormat, and see 
--- https://unicode-org.github.io/icu-docs/apidoc/released/icu4c/classicu_1_1MessageFormat.html
--- for full details of the MessageFormat syntax.
+-- If you do not use the source string as a message identifier you should instead make certain to include
+-- a fallback locale with a complete set of messages.
+--
 -- @function [parent=#core] l10n
 -- @param #string context l10n context; recommended to use the name of the mod.
+--                This must match the <ContextName> directory in the VFS which stores the localisation files.
 -- @param #string fallbackLocale The source locale containing the default messages
---                               If omitted defaults to "en"
+--                               If omitted defaults to "en".
 -- @return #function
 -- @usage
 -- # DataFiles/l10n/MyMod/en.yaml
 -- good_morning: 'Good morning.'
 --
--- you_have_arrows: |- {count, plural,
+-- you_have_arrows: |-
+--   {count, plural,
 --     one {You have one arrow.}
 --     other {You have {count} arrows.}
 --   }
 -- @usage
 -- # DataFiles/l10n/MyMod/de.yaml
 -- good_morning: "Guten Morgen."
--- you_have_arrows: |- {count, plural,
+-- you_have_arrows: |-
+--   {count, plural,
 --     one {Du hast ein Pfeil.}
 --     other {Du hast {count} Pfeile.}
 --   }
 -- "Hello {name}!": "Hallo {name}!"
--- @usage
--- # DataFiles/l10n/AdvancedExample/en.yaml
--- # More complicated patterns
--- # select rules can be used to match arbitrary string arguments
--- # The default keyword other must always be provided
--- pc_must_come: {PCGender, select,
---     male {He is}
---     female {She is}
---     other {They are}
---   } coming with us.
--- # Numbers have various formatting options
--- quest_completion: "The quest is {done, number, percent} complete.",
--- # E.g. "You came in 4th place"
--- ordinal: "You came in {num, ordinal} place."
--- # E.g. "There is one thing", "There are one hundred things"
--- spellout: "There {num, plural, one{is {num, spellout} thing} other{are {num, spellout} things}}."
--- numbers: "{int} and {double, number, integer} are integers, but {double} is a double"
--- # Numbers can be formatted with custom patterns
--- # See https://unicode-org.github.io/icu/userguide/format_parse/numbers/skeletons.html#syntax
--- rounding: "{value, number, :: .00}"
 -- @usage
 -- -- Usage in Lua
 -- local myMsg = core.l10n('MyMod', 'en')

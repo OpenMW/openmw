@@ -28,3 +28,4 @@ about creating new content for OpenMW, please refer to
 	sky-system
 	extended
 	paths
+	localisation
