@@ -331,7 +331,8 @@ namespace MWWorld
             +1 // weather record
             +1 // actorId counter
             +1 // levitation/teleport enabled state
-            +1; // camera
+            +1 // camera
+            +1; // random state.
     }
 
     int World::countSavedGameCells() const
