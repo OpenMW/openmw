@@ -384,7 +384,7 @@ namespace MWRender
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
-        mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
+        mNavMesh.reset(new NavMesh(mRootNode, mWorkQueue, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
         mRecastMesh.reset(new RecastMesh(mRootNode, Settings::Manager::getBool("enable recast mesh render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
@@ -1395,7 +1395,7 @@ namespace MWRender
         {
             try
             {
-                mNavMesh->update(*it->second->lockConst(), mNavMeshNumber, mNavigator.getSettings());
+                mNavMesh->update(it->second, mNavMeshNumber, mNavigator.getSettings());
             }
             catch (const std::exception& e)
             {
