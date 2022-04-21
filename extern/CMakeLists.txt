@@ -244,25 +244,33 @@ if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
 endif()
 
 if (NOT OPENMW_USE_SYSTEM_ICU)
+    set(ICU_ENV "ICU_DATA_FILTER_FILE=${CMAKE_CURRENT_SOURCE_DIR}/icufilters.json")
     if (ANDROID)
         # Note: Must be a build directory, not an install root, since the configure script
         # looks for a configuration file which does not get installed.
         set(OPENMW_ICU_HOST_BUILD_DIR "" CACHE STRING "A pre-built ICU build directory for the host system if cross-compiling")
+        if (OPENMW_ICU_HOST_BUILD_DIR STREQUAL "")
+            message(FATAL_ERROR "If cross-compiling on android you must set the \
+            OPENMW_ICU_HOST_BUILD_DIR to the path of a pre-compiled build of \
+            ICU 70.1 for the system doing the build, as ICU needs to be able \
+            to run its own executables as part of the build process.")
+        endif()
         # We need a host version of ICU so that the tools can be run when building the data library.
         set(NDK_STANDARD_ROOT ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64)
         string(REPLACE "android-" "" ANDROIDVER ${ANDROID_PLATFORM})
-        set(ICU_ENV
-            "CC=ccache ${NDK_STANDARD_ROOT}/bin/aarch64-linux-android${ANDROIDVER}-clang"
-            "CXX=ccache ${NDK_STANDARD_ROOT}/bin/aarch64-linux-android${ANDROIDVER}-clang"
-            "RANLIB=${NDK_STANDARD_ROOT}/bin/aarch64-linux-android-ranlib"
-            "AR=${NDK_STANDARD_ROOT}/bin/aarch64-linux-android-ar"
-            "CPPFLAGS=${ANDROID_COMPILER_FLAGS}"
-            "LDFLAGS=${ANDROID_LINKER_FLAGS} -lc -lstdc++"
-            )
         # Wants a triple such as aarch64-linux-android, excluding a trailing
         # -clang etc.
         string(REGEX MATCH "^[^-]\+-[^-]+-[^-]+" ICU_TOOLCHAIN_NAME ${ANDROID_TOOLCHAIN_NAME})
-        set(ICU_ADDITIONAL_OPTS --host=${ICU_TOOLCHAIN_NAME}${ANDROIDVER} --with-cross-build=${OPENMW_ICU_HOST_BUILD_DIR})
+        set(ICU_ENV
+            ${ICU_ENV}
+            "CC=${CMAKE_C_COMPILER_LAUNCHER} ${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}${ANDROIDVER}-clang"
+            "CXX=${CMAKE_CXX_COMPILER_LAUNCHER} ${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}${ANDROIDVER}-clang"
+            "RANLIB=${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}-ranlib"
+            "AR=${NDK_STANDARD_ROOT}/bin/${ICU_TOOLCHAIN_NAME}-ar"
+            "CPPFLAGS=${ANDROID_COMPILER_FLAGS}"
+            "LDFLAGS=${ANDROID_LINKER_FLAGS} -lc -lstdc++"
+            )
+        set(ICU_ADDITIONAL_OPTS --disable-tools --host=${ICU_TOOLCHAIN_NAME}${ANDROIDVER} --with-cross-build=${OPENMW_ICU_HOST_BUILD_DIR})
     endif()
     include(ExternalProject)
     ExternalProject_Add(icu
@@ -271,7 +279,7 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
         SOURCE_DIR fetched/icu
         CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env ${ICU_ENV}
             <SOURCE_DIR>/icu4c/source/configure --enable-static --disable-shared
-            --disable-tests --disable-samples --disable-icuio --disable-extras --disable-tools ${ICU_ADDITIONAL_OPTS}
+            --disable-tests --disable-samples --disable-icuio --disable-extras ${ICU_ADDITIONAL_OPTS}
         BUILD_COMMAND make
         INSTALL_COMMAND ""
     )
