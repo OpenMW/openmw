@@ -78,11 +78,11 @@ namespace Debug
         int prefixSize;
         {
             prefix[0] = '[';
-            uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-            std::time_t t = ms / 1000;
-            prefixSize = std::strftime(prefix + 1, sizeof(prefix) - 1, "%T", std::localtime(&t)) + 1;
+            const auto now = std::chrono::system_clock::now();
+            const auto time = std::chrono::system_clock::to_time_t(now);
+            prefixSize = std::strftime(prefix + 1, sizeof(prefix) - 1, "%T", std::localtime(&time)) + 1;
             char levelLetter = " EWIVD*"[int(level)];
+            const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
             prefixSize += snprintf(prefix + prefixSize, sizeof(prefix) - prefixSize,
                                    ".%03u %c] ", static_cast<unsigned>(ms % 1000), levelLetter);
         }
