@@ -1,4 +1,3 @@
-#include <components/esm4/acti.hpp>
 #include <components/esm4/actor.hpp>
 #include <components/esm4/common.hpp>
 #include <components/esm4/dialogue.hpp>
@@ -8,6 +7,7 @@
 #include <components/esm4/lighting.hpp>
 #include <components/esm4/loadachr.hpp>
 #include <components/esm4/loadacre.hpp>
+#include <components/esm4/loadacti.hpp>
 #include <components/esm4/loadalch.hpp>
 #include <components/esm4/loadaloc.hpp>
 #include <components/esm4/loadammo.hpp>
