@@ -75,7 +75,6 @@ namespace ESM4
         Data mData;
         EnchantedItem mItem;
 
-        Potion();
         virtual ~Potion();
 
         virtual void load(ESM4::Reader& reader);

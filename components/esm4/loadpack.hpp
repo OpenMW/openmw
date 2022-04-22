@@ -97,7 +97,6 @@ namespace ESM4
         PTDT mTarget;
         std::vector<CTDA> mConditions;
 
-        AIPackage();
         virtual ~AIPackage();
 
         virtual void load(ESM4::Reader& reader);
