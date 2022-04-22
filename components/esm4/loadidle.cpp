@@ -64,8 +64,15 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
                 reader.skipSubRecordData();
                 break;
             }
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
             default:
-                throw std::runtime_error("ESM4::IDLE::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
+                throw std::runtime_error("ESM4::IDLE::load - Unknown subrecord " + std::to_string(subHdr.typeId) + " "
+                    + ESM::printName(subHdr.typeId));
         }
     }
 }
