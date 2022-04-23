@@ -4,6 +4,7 @@
 #include <map>
 #include <sol/sol.hpp>
 
+#include "scriptscontainer.hpp"
 #include "serialization.hpp"
 
 namespace LuaUtil
@@ -16,18 +17,28 @@ namespace LuaUtil
 
         explicit LuaStorage(lua_State* lua) : mLua(lua) {}
 
-        void clearTemporary();
+        void clearTemporaryAndRemoveCallbacks();
         void load(const std::string& path);
         void save(const std::string& path) const;
 
-        sol::object getReadOnlySection(std::string_view sectionName);
-        sol::object getMutableSection(std::string_view sectionName);
-        sol::table getAllSections();
+        sol::object getSection(std::string_view sectionName, bool readOnly);
+        sol::object getMutableSection(std::string_view sectionName) { return getSection(sectionName, false); }
+        sol::object getReadOnlySection(std::string_view sectionName) { return getSection(sectionName, true); }
+        sol::table getAllSections(bool readOnly = false);
 
-        void set(std::string_view section, std::string_view key, const sol::object& value) { getSection(section)->set(key, value); }
+        void setSingleValue(std::string_view section, std::string_view key, const sol::object& value)
+            { getSection(section)->set(key, value); }
 
-        using ListenerFn = std::function<void(std::string_view, std::string_view, const sol::object&)>;
-        void setListener(ListenerFn fn) { mListener = std::move(fn); }
+        void setSectionValues(std::string_view section, const sol::optional<sol::table>& values)
+            { getSection(section)->setAll(values); }
+
+        class Listener
+        {
+        public:
+            virtual void valueChanged(std::string_view section, std::string_view key, const sol::object& value) const = 0;
+            virtual void sectionReplaced(std::string_view section, const sol::optional<sol::table>& values) const = 0;
+        };
+        void setListener(const Listener* listener) { mListener = listener; }
 
     private:
         class Value
@@ -48,32 +59,29 @@ namespace LuaUtil
             explicit Section(LuaStorage* storage, std::string name) : mStorage(storage), mSectionName(std::move(name)) {}
             const Value& get(std::string_view key) const;
             void set(std::string_view key, const sol::object& value);
-            bool wasChanged(int64_t& lastCheck);
+            void setAll(const sol::optional<sol::table>& values);
             sol::table asTable();
+            void runCallbacks(sol::optional<std::string_view> changedKey);
 
             LuaStorage* mStorage;
             std::string mSectionName;
             std::map<std::string, Value, std::less<>> mValues;
+            std::vector<Callback> mCallbacks;
             bool mPermanent = true;
-            int64_t mChangeCounter = 0;
             static Value sEmpty;
         };
-        struct SectionMutableView
+        struct SectionView
         {
-            std::shared_ptr<Section> mSection = nullptr;
-            int64_t mLastCheck = 0;
-        };
-        struct SectionReadOnlyView
-        {
-            std::shared_ptr<Section> mSection = nullptr;
-            int64_t mLastCheck = 0;
+            std::shared_ptr<Section> mSection;
+            bool mReadOnly;
         };
 
         const std::shared_ptr<Section>& getSection(std::string_view sectionName);
 
         lua_State* mLua;
         std::map<std::string_view, std::shared_ptr<Section>> mData;
-        std::optional<ListenerFn> mListener;
+        const Listener* mListener = nullptr;
+        bool mRunningCallbacks = false;
     };
 
 }

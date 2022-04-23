@@ -277,8 +277,8 @@ namespace MWLua
             mPlayer.getRefData().setLuaScripts(nullptr);
             mPlayer = MWWorld::Ptr();
         }
-        mGlobalStorage.clearTemporary();
-        mPlayerStorage.clearTemporary();
+        mGlobalStorage.clearTemporaryAndRemoveCallbacks();
+        mPlayerStorage.clearTemporaryAndRemoveCallbacks();
     }
 
     void LuaManager::setupPlayer(const MWWorld::Ptr& ptr)

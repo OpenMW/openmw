@@ -8,9 +8,7 @@
 namespace sol
 {
     template <>
-    struct is_automagical<LuaUtil::LuaStorage::SectionMutableView> : std::false_type {};
-    template <>
-    struct is_automagical<LuaUtil::LuaStorage::SectionReadOnlyView> : std::false_type {};
+    struct is_automagical<LuaUtil::LuaStorage::SectionView> : std::false_type {};
 }
 
 namespace LuaUtil
@@ -38,19 +36,49 @@ namespace LuaUtil
             return sEmpty;
     }
 
-    void LuaStorage::Section::set(std::string_view key, const sol::object& value)
+    void LuaStorage::Section::runCallbacks(sol::optional<std::string_view> changedKey)
     {
-        mValues[std::string(key)] = Value(value);
-        mChangeCounter++;
-        if (mStorage->mListener)
-            (*mStorage->mListener)(mSectionName, key, value);
+        mStorage->mRunningCallbacks = true;
+        mCallbacks.erase(std::remove_if(mCallbacks.begin(), mCallbacks.end(), [&](const Callback& callback)
+        {
+            bool valid = callback.isValid();
+            if (valid)
+                callback.tryCall(mSectionName, changedKey);
+            return !valid;
+        }), mCallbacks.end());
+        mStorage->mRunningCallbacks = false;
     }
 
-    bool LuaStorage::Section::wasChanged(int64_t& lastCheck)
+    void LuaStorage::Section::set(std::string_view key, const sol::object& value)
     {
-        bool res = lastCheck < mChangeCounter;
-        lastCheck = mChangeCounter;
-        return res;
+        if (mStorage->mRunningCallbacks)
+            throw std::runtime_error("Not allowed to change storage in storage handlers because it can lead to an infinite recursion");
+        if (value != sol::nil)
+            mValues[std::string(key)] = Value(value);
+        else
+        {
+            auto it = mValues.find(key);
+            if (it != mValues.end())
+                mValues.erase(it);
+        }
+        if (mStorage->mListener)
+            mStorage->mListener->valueChanged(mSectionName, key, value);
+        runCallbacks(key);
+    }
+
+    void LuaStorage::Section::setAll(const sol::optional<sol::table>& values)
+    {
+        if (mStorage->mRunningCallbacks)
+            throw std::runtime_error("Not allowed to change storage in storage handlers because it can lead to an infinite recursion");
+        mValues.clear();
+        if (values)
+        {
+            for (const auto& [k, v] : *values)
+                mValues[k.as<std::string>()] = Value(v);
+        }
+        if (mStorage->mListener)
+            mStorage->mListener->sectionReplaced(mSectionName, values);
+        runCallbacks(sol::nullopt);
     }
 
     sol::table LuaStorage::Section::asTable()
@@ -64,62 +92,53 @@ namespace LuaUtil
     void LuaStorage::initLuaBindings(lua_State* L)
     {
         sol::state_view lua(L);
-        sol::usertype<SectionReadOnlyView> roView = lua.new_usertype<SectionReadOnlyView>("ReadOnlySection");
-        sol::usertype<SectionMutableView> mutableView = lua.new_usertype<SectionMutableView>("MutableSection");
-        roView["get"] = [](sol::this_state s, SectionReadOnlyView& section, std::string_view key)
+        sol::usertype<SectionView> sview = lua.new_usertype<SectionView>("Section");
+        sview["get"] = [](sol::this_state s, const SectionView& section, std::string_view key)
         {
             return section.mSection->get(key).getReadOnly(s);
         };
-        roView["getCopy"] = [](sol::this_state s, SectionReadOnlyView& section, std::string_view key)
+        sview["getCopy"] = [](sol::this_state s, const SectionView& section, std::string_view key)
         {
             return section.mSection->get(key).getCopy(s);
         };
-        roView["wasChanged"] = [](SectionReadOnlyView& section) { return section.mSection->wasChanged(section.mLastCheck); };
-        roView["asTable"] = [](SectionReadOnlyView& section) { return section.mSection->asTable(); };
-        mutableView["get"] = [](sol::this_state s, SectionMutableView& section, std::string_view key)
+        sview["asTable"] = [](const SectionView& section) { return section.mSection->asTable(); };
+        sview["subscribe"] = [](const SectionView& section, const Callback& callback)
         {
-            return section.mSection->get(key).getReadOnly(s);
-        };
-        mutableView["getCopy"] = [](sol::this_state s, SectionMutableView& section, std::string_view key)
-        {
-            return section.mSection->get(key).getCopy(s);
-        };
-        mutableView["wasChanged"] = [](SectionMutableView& section) { return section.mSection->wasChanged(section.mLastCheck); };
-        mutableView["asTable"] = [](SectionMutableView& section) { return section.mSection->asTable(); };
-        mutableView["reset"] = [](SectionMutableView& section, sol::optional<sol::table> newValues)
-        {
-            section.mSection->mValues.clear();
-            if (newValues)
+            std::vector<Callback>& callbacks = section.mSection->mCallbacks;
+            if (!callbacks.empty() && callbacks.size() == callbacks.capacity())
             {
-                for (const auto& [k, v] : *newValues)
-                {
-                    try
-                    {
-                        section.mSection->set(k.as<std::string_view>(), v);
-                    }
-                    catch (std::exception& e)
-                    {
-                        Log(Debug::Error) << "LuaUtil::LuaStorage::Section::reset(table): " << e.what();
-                    }
-                }
+                callbacks.erase(std::remove_if(callbacks.begin(), callbacks.end(),
+                                               [&](const Callback& c) { return !c.isValid(); }),
+                                callbacks.end());
             }
-            section.mSection->mChangeCounter++;
-            section.mLastCheck = section.mSection->mChangeCounter;
+            callbacks.push_back(callback);
         };
-        mutableView["removeOnExit"] = [](SectionMutableView& section) { section.mSection->mPermanent = false; };
-        mutableView["set"] = [](SectionMutableView& section, std::string_view key, const sol::object& value)
+        sview["reset"] = [](const SectionView& section, const sol::optional<sol::table>& newValues)
         {
-            if (section.mLastCheck == section.mSection->mChangeCounter)
-                section.mLastCheck++;
+            if (section.mReadOnly)
+                throw std::runtime_error("Access to storage is read only");
+            section.mSection->setAll(newValues);
+        };
+        sview["removeOnExit"] = [](const SectionView& section)
+        {
+            if (section.mReadOnly)
+                throw std::runtime_error("Access to storage is read only");
+            section.mSection->mPermanent = false;
+        };
+        sview["set"] = [](const SectionView& section, std::string_view key, const sol::object& value)
+        {
+            if (section.mReadOnly)
+                throw std::runtime_error("Access to storage is read only");
             section.mSection->set(key, value);
         };
     }
 
-    void LuaStorage::clearTemporary()
+    void LuaStorage::clearTemporaryAndRemoveCallbacks()
     {
         auto it = mData.begin();
         while (it != mData.end())
         {
+            it->second->mCallbacks.clear();
             if (!it->second->mPermanent)
             {
                 it->second->mValues.clear();
@@ -157,7 +176,7 @@ namespace LuaUtil
         sol::table data(mLua, sol::create);
         for (const auto& [sectionName, section] : mData)
         {
-            if (section->mPermanent)
+            if (section->mPermanent && !section->mValues.empty())
                 data[sectionName] = section->asTable();
         }
         std::string serializedData = serialize(data);
@@ -178,23 +197,17 @@ namespace LuaUtil
         return newIt->second;
     }
 
-    sol::object LuaStorage::getReadOnlySection(std::string_view sectionName)
+    sol::object LuaStorage::getSection(std::string_view sectionName, bool readOnly)
     {
         const std::shared_ptr<Section>& section = getSection(sectionName);
-        return sol::make_object<SectionReadOnlyView>(mLua, SectionReadOnlyView{section, section->mChangeCounter});
+        return sol::make_object<SectionView>(mLua, SectionView{section, readOnly});
     }
 
-    sol::object LuaStorage::getMutableSection(std::string_view sectionName)
-    {
-        const std::shared_ptr<Section>& section = getSection(sectionName);
-        return sol::make_object<SectionMutableView>(mLua, SectionMutableView{section, section->mChangeCounter});
-    }
-
-    sol::table LuaStorage::getAllSections()
+    sol::table LuaStorage::getAllSections(bool readOnly)
     {
         sol::table res(mLua, sol::create);
         for (const auto& [sectionName, _] : mData)
-            res[sectionName] = getMutableSection(sectionName);
+            res[sectionName] = getSection(sectionName, readOnly);
         return res;
     }
 
