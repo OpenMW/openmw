@@ -24,7 +24,7 @@
   trial & error.  See http://en.uesp.net/wiki for details.
 
 */
-#include "acti.hpp"
+#include "loadacti.hpp"
 
 #include <stdexcept>
 #include <iostream> // FIXME
