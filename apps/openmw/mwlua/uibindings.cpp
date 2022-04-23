@@ -12,6 +12,8 @@
 #include "context.hpp"
 #include "luamanagerimp.hpp"
 
+#include "../mwbase/windowmanager.hpp"
+
 namespace MWLua
 {
     namespace
@@ -212,6 +214,33 @@ namespace MWLua
         api["showMessage"] = [luaManager=context.mLuaManager](std::string_view message)
         {
             luaManager->addUIMessage(message);
+        };
+        api["CONSOLE_COLOR"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string, Misc::Color>({
+            {"Default", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Default.substr(1))},
+            {"Error", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Error.substr(1))},
+            {"Success", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Success.substr(1))},
+            {"Info", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Info.substr(1))},
+        }));
+        api["printToConsole"] = [luaManager=context.mLuaManager](const std::string& message, const Misc::Color& color)
+        {
+            luaManager->addInGameConsoleMessage(message + "\n", color);
+        };
+        api["setConsoleMode"] = [luaManager=context.mLuaManager](std::string_view mode)
+        {
+            luaManager->addAction(
+                [mode = std::string(mode)]{ MWBase::Environment::get().getWindowManager()->setConsoleMode(mode); });
+        };
+        api["setConsoleSelectedObject"] = [luaManager=context.mLuaManager](const sol::object& obj)
+        {
+            auto* wm = MWBase::Environment::get().getWindowManager();
+            if (obj == sol::nil)
+                luaManager->addAction([wm]{ wm->setConsoleSelectedObject(MWWorld::Ptr()); });
+            else
+            {
+                if (!obj.is<LObject>())
+                    throw std::runtime_error("Game object expected");
+                luaManager->addAction([wm, obj=obj.as<LObject>()]{ wm->setConsoleSelectedObject(obj.ptr()); });
+            }
         };
         api["content"] = [](const sol::table& table)
         {

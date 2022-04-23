@@ -13,6 +13,9 @@ set(LUA_BUILTIN_FILES
     scripts/omw/camera.lua
     scripts/omw/head_bobbing.lua
     scripts/omw/third_person.lua
+    scripts/omw/console/player.lua
+    scripts/omw/console/global.lua
+    scripts/omw/console/local.lua
 
     l10n/Calendar/en.yaml
 )

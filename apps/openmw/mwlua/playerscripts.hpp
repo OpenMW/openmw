@@ -18,7 +18,7 @@ namespace MWLua
         PlayerScripts(LuaUtil::LuaState* lua, const LObject& obj) : LocalScripts(lua, obj, ESM::LuaScriptCfg::sPlayer)
         {
             registerEngineHandlers({
-                &mKeyPressHandlers, &mKeyReleaseHandlers,
+                &mConsoleCommandHandlers, &mKeyPressHandlers, &mKeyReleaseHandlers,
                 &mControllerButtonPressHandlers, &mControllerButtonReleaseHandlers,
                 &mActionHandlers, &mInputUpdateHandlers,
                 &mTouchpadPressed, &mTouchpadReleased, &mTouchpadMoved
@@ -59,7 +59,14 @@ namespace MWLua
 
         void inputUpdate(float dt) { callEngineHandlers(mInputUpdateHandlers, dt); }
 
+        bool consoleCommand(const std::string& consoleMode, const std::string& command, const sol::object& selectedObject)
+        {
+            callEngineHandlers(mConsoleCommandHandlers, consoleMode, command, selectedObject);
+            return !mConsoleCommandHandlers.mList.empty();
+        }
+
     private:
+        EngineHandlerList mConsoleCommandHandlers{"onConsoleCommand"};
         EngineHandlerList mKeyPressHandlers{"onKeyPress"};
         EngineHandlerList mKeyReleaseHandlers{"onKeyRelease"};
         EngineHandlerList mControllerButtonPressHandlers{"onControllerButtonPress"};

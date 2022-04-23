@@ -39,6 +39,37 @@
 -- @param #string msg
 
 ---
+-- Predefined colors for console output
+-- @field [parent=#ui] #CONSOLE_COLOR CONSOLE_COLOR
+
+---
+-- Predefined colors for console output
+-- @type CONSOLE_COLOR
+-- @field openmw.util#Color Default
+-- @field openmw.util#Color Error
+-- @field openmw.util#Color Success
+-- @field openmw.util#Color Info
+
+---
+-- Print to the in-game console.
+-- @function [parent=#ui] printToConsole
+-- @param #string msg
+-- @param openmw.util#Color color
+
+---
+-- Set mode of the in-game console.
+-- The mode can be any string, by default is empty.
+-- If not empty, then the console doesn't handle mwscript commands and
+-- instead passes user input to Lua scripts via `onConsoleCommand` engine handler.
+-- @function [parent=#ui] setConsoleMode
+-- @param #string mode
+
+---
+-- Set selected object for console.
+-- @function [parent=#ui] setConsoleSelectedObject
+-- @param openmw.core#GameObject obj
+
+---
 -- Returns the size of the OpenMW window in pixels as a 2D vector.
 -- @function [parent=#ui] screenSize
 -- @return openmw.util#Vector2

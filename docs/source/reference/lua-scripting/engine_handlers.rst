@@ -70,23 +70,28 @@ Engine handler is a function defined by a script, that can be called by the engi
   :widths: 20 80
 
   * - onInputUpdate(dt)
-    - | Called every frame (if the game is not paused) right after processing
-      | user input. Use it only for latency-critical stuff.
+    - | Called every frame (if the game is not paused) right after
+      | processing user input. Use it only for latency-critical stuff.
   * - onKeyPress(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
-      | Usage example: ``if key.symbol == 'z' and key.withShift then ...``
+      | Usage example:
+      | ``if key.symbol == 'z' and key.withShift then ...``
   * - onKeyRelease(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is released.
-      | Usage example: ``if key.symbol == 'z' and key.withShift then ...``
+      | Usage example:
+      | ``if key.symbol == 'z' and key.withShift then ...``
   * - onControllerButtonPress(id)
     - | A `button <openmw_input.html##(CONTROLLER_BUTTON)>`_ on a game controller is pressed.
-      | Usage example: ``if id == input.CONTROLLER_BUTTON.LeftStick then ...``
+      | Usage example:
+      | ``if id == input.CONTROLLER_BUTTON.LeftStick then ...``
   * - onControllerButtonRelease(id)
     - | A `button <openmw_input.html##(CONTROLLER_BUTTON)>`_ on a game controller is released.
-      | Usage example: ``if id == input.CONTROLLER_BUTTON.LeftStick then ...``
+      | Usage example:
+      | ``if id == input.CONTROLLER_BUTTON.LeftStick then ...``
   * - onInputAction(id)
     - | `Game control <openmw_input.html##(ACTION)>`_ is pressed.
-      | Usage example: ``if id == input.ACTION.ToggleWeapon then ...``
+      | Usage example:
+      | ``if id == input.ACTION.ToggleWeapon then ...``
   * - onTouchPress(touchEvent)
     - | A finger pressed on a touch device.
       | `Touch event <openmw_input.html##(TouchEvent)>`_.
@@ -96,3 +101,8 @@ Engine handler is a function defined by a script, that can be called by the engi
   * - onTouchMove(touchEvent)
     - | A finger moved on a touch device.
       | `Touch event <openmw_input.html##(TouchEvent)>`_.
+  * - | onConsoleCommand(
+      |     mode, command, selectedObject)
+    - | User entered `command` in in-game console. Called if either
+      | `mode` is not default or `command` starts with prefix `lua`.
+

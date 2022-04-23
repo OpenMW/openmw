@@ -2069,6 +2069,16 @@ namespace MWGui
         mConsole->setSelectedObject(object);
     }
 
+    void WindowManager::printToConsole(const std::string& msg, std::string_view color)
+    {
+        mConsole->print(msg, color);
+    }
+
+    void WindowManager::setConsoleMode(const std::string& mode)
+    {
+        mConsole->setConsoleMode(mode);
+    }
+
     std::string WindowManager::correctIconPath(const std::string& path)
     {
         return Misc::ResourceHelpers::correctIconPath(path, mResourceSystem->getVFS());
