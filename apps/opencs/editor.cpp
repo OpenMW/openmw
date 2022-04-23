@@ -15,7 +15,7 @@
 #include "model/world/data.hpp"
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <components/windows.hpp>
 #endif
 
 using namespace Fallback;

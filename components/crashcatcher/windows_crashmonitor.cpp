@@ -1,8 +1,6 @@
 #include "windows_crashmonitor.hpp"
 
-#undef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include <components/windows.hpp>
 #include <Psapi.h>
 
 #include <DbgHelp.h>
