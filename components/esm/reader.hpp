@@ -53,7 +53,7 @@ namespace ESM
 
     protected:
         bool getStringImpl(std::string& str, std::size_t size,
-                Files::IStreamPtr filestream, ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull = false);
+                std::istream& stream, ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull = false);
     };
 }
 

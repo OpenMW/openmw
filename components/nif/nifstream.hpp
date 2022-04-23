@@ -62,7 +62,7 @@ public:
 
     NIFFile * const file;
 
-    NIFStream (NIFFile * file, Files::IStreamPtr inp): inp (inp), file (file) {}
+    NIFStream (NIFFile * file, Files::IStreamPtr&& inp): inp (std::move(inp)), file (file) {}
 
     void skip(size_t size) { inp->ignore(size); }
 

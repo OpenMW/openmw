@@ -26,7 +26,7 @@ namespace ESM
 
             if (modVer == ESM4::REC_TES4)
             {
-                return new ESM4::Reader(esmStream, filename);
+                return new ESM4::Reader(std::move(esmStream), filename);
             }
             else
             {
@@ -38,15 +38,15 @@ namespace ESM
     }
 
     bool Reader::getStringImpl(std::string& str, std::size_t size,
-            Files::IStreamPtr filestream, ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull)
+            std::istream& stream, ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull)
     {
         std::size_t newSize = size;
 
         if (encoder)
         {
             std::string input(size, '\0');
-            filestream->read(input.data(), size);
-            if (filestream->gcount() == static_cast<std::streamsize>(size))
+            stream.read(input.data(), size);
+            if (stream.gcount() == static_cast<std::streamsize>(size))
             {
                 encoder->getUtf8(input, ToUTF8::BufferAllocationPolicy::FitToRequiredSize, str);
                 return true;
@@ -58,13 +58,13 @@ namespace ESM
                 newSize -= 1; // don't read the null terminator yet
 
             str.resize(newSize); // assumed C++11
-            filestream->read(&str[0], newSize);
-            if ((std::size_t)filestream->gcount() == newSize)
+            stream.read(&str[0], newSize);
+            if (static_cast<std::size_t>(stream.gcount()) == newSize)
             {
                 if (hasNull)
                 {
                     char ch;
-                    filestream->read(&ch, 1); // read the null terminator
+                    stream.read(&ch, 1); // read the null terminator
                     assert (ch == '\0'
                             && "ESM4::Reader::getString string is not terminated with a null");
                 }

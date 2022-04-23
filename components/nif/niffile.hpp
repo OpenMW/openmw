@@ -69,7 +69,7 @@ class NIFFile final : public File
     static std::atomic_bool sLoadUnsupportedFiles;
 
     /// Parse the file
-    void parse(Files::IStreamPtr stream);
+    void parse(Files::IStreamPtr&& stream);
 
     /// Get the file's version in a human readable form
     ///\returns A string containing a human readable NIF version number
@@ -107,7 +107,7 @@ public:
     }
 
     /// Open a NIF stream. The name is used for error messages.
-    NIFFile(Files::IStreamPtr stream, const std::string &name);
+    NIFFile(Files::IStreamPtr&& stream, const std::string &name);
 
     /// Get a given record
     Record *getRecord(size_t index) const override

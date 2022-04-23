@@ -27,7 +27,7 @@ void VideoPlayer::setAudioFactory(MovieAudioFactory *factory)
     mAudioFactory.reset(factory);
 }
 
-void VideoPlayer::playVideo(std::shared_ptr<std::istream> inputstream, const std::string& name)
+void VideoPlayer::playVideo(std::unique_ptr<std::istream>&& inputstream, const std::string& name)
 {
     if(mState)
         close();
@@ -35,7 +35,7 @@ void VideoPlayer::playVideo(std::shared_ptr<std::istream> inputstream, const std
     try {
         mState = new VideoState;
         mState->setAudioFactory(mAudioFactory.get());
-        mState->init(inputstream, name);
+        mState->init(std::move(inputstream), name);
 
         // wait until we have the first picture
         while (mState->video_st && !mState->mTexture.get())

@@ -44,7 +44,7 @@ void VideoWidget::playVideo(const std::string &video)
         return;
     }
 
-    mPlayer->playVideo(videoStream, video);
+    mPlayer->playVideo(std::move(videoStream), video);
 
     osg::ref_ptr<osg::Texture2D> texture = mPlayer->getVideoTexture();
     if (!texture)
