@@ -86,8 +86,6 @@ namespace ESM4
         FormId mRoad;
 
         std::vector<FormId> mCells; // FIXME should this be CellGroup* instead?
-
-        WorldGroup() : mWorld(0), mRoad(0) {}
     };
 
     // http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format/CELL
@@ -150,8 +148,6 @@ namespace ESM4
 
         // need to keep modindex and context for lazy loading (of all the files that contribute
         // to this group)
-
-        CellGroup() : mCell(0), mLand(0), mPgrd(0) {}
     };
 }
 

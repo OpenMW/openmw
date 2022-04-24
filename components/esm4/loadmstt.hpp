@@ -47,7 +47,6 @@ namespace ESM4
         std::int8_t mData;
         FormId mLoopingSound;
 
-        MovableStatic();
         virtual ~MovableStatic();
 
         virtual void load(ESM4::Reader& reader);

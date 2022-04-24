@@ -83,7 +83,6 @@ namespace ESM4
         std::vector<PGRI> mForeign;
         std::vector<PGRL> mObjects;
 
-        Pathgrid();
         virtual ~Pathgrid();
 
         virtual void load(ESM4::Reader& reader);

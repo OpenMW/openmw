@@ -46,7 +46,6 @@ namespace ESM4
 
         std::string mEditorId;
 
-        PlacedGrenade();
         virtual ~PlacedGrenade();
 
         virtual void load(ESM4::Reader& reader);
