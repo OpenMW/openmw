@@ -530,12 +530,10 @@ namespace MWGui
             markerTexture = "textures\\detect_enchantment_icon.dds";
         }
 
-        int counter = 0;
         for (const MWWorld::Ptr& ptr : markers)
         {
             const ESM::Position& worldPos = ptr.getRefData().getPosition();
             MarkerUserData markerPos (mLocalMapRender);
-            ++counter;
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
                 getMarkerCoordinates(worldPos.pos[0], worldPos.pos[1], markerPos, 8), MyGUI::Align::Default);
             markerWidget->setDepth(Local_MarkerAboveFogLayer);

@@ -160,13 +160,11 @@ namespace MWGui
 
                 // try to go 1 level up until there is a widget that has tooltip
                 // this is necessary because some skin elements are actually separate widgets
-                int i=0;
                 while (!focus->isUserString("ToolTipType"))
                 {
                     focus = focus->getParent();
                     if (!focus)
                         return;
-                    ++i;
                 }
 
                 std::string type = focus->getUserString("ToolTipType");
