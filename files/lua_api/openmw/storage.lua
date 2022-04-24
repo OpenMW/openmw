@@ -6,14 +6,14 @@
 -- local myModData = storage.globalSection('MyModExample')
 -- myModData:set("someVariable", 1.0)
 -- myModData:set("anotherVariable", { exampleStr='abc', exampleBool=true })
--- local function update()
---     if myModCfg:checkChanged() then
---         print('Data was changes by another script:')
---         print('MyModExample.someVariable =', myModData:get('someVariable'))
---         print('MyModExample.anotherVariable.exampleStr =',
---               myModData:get('anotherVariable').exampleStr)
+-- local async = require('openmw.async')
+-- myModData:subscribe(async:callback(function(section, key)
+--     if key then
+--         print('Value is changed:', key, '=', myModData:get(key))
+--     else
+--         print('All values are changed')
 --     end
--- end
+-- end))
 
 ---
 -- Get a section of the global storage; can be used by any script, but only global scripts can change values.
@@ -58,10 +58,12 @@
 -- @param #string key
 
 ---
--- Return `True` if any value in this section was changed by another script since the last `wasChanged`.
--- @function [parent=#StorageSection] wasChanged
+-- Subscribe to changes in this section.
+-- First argument of the callback is the name of the section (so one callback can be used for different sections).
+-- The second argument is the changed key (or `nil` if `reset` was used and all values were changed at the same time)
+-- @function [parent=#StorageSection] subscribe
 -- @param self
--- @return #boolean
+-- @param openmw.async#Callback callback
 
 ---
 -- Copy all values and return them as a table.
@@ -71,14 +73,14 @@
 
 ---
 -- Remove all existing values and assign values from given (the arg is optional) table.
--- Note: `section:reset()` removes all values, but not the section itself. Use `section:removeOnExit()` to remove the section completely.
+-- This function can not be used for a global storage section from a local script.
+-- Note: `section:reset()` removes the section.
 -- @function [parent=#StorageSection] reset
 -- @param self
 -- @param #table values (optional) New values
 
 ---
 -- Make the whole section temporary: will be removed on exit or when load a save.
--- No section can be removed immediately because other scripts may use it at the moment.
 -- Temporary sections have the same interface to get/set values, the only difference is they will not
 -- be saved to the permanent storage on exit.
 -- This function can not be used for a global storage section from a local script.

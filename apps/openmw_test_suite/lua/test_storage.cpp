@@ -2,6 +2,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <components/lua/scriptscontainer.hpp>
 #include <components/lua/storage.hpp>
 
 namespace
@@ -19,15 +20,27 @@ namespace
         sol::state mLua;
         LuaUtil::LuaStorage::initLuaBindings(mLua);
         LuaUtil::LuaStorage storage(mLua);
+
+        std::vector<std::string> callbackCalls;
+        LuaUtil::Callback callback{
+            sol::make_object(mLua, [&](const std::string& section, const sol::optional<std::string>& key)
+            {
+                if (key)
+                    callbackCalls.push_back(section + "_" + *key);
+                else
+                    callbackCalls.push_back(section + "_*");
+            }),
+            sol::table(mLua, sol::create)
+        };
+        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = "fakeId";
+
         mLua["mutable"] = storage.getMutableSection("test");
         mLua["ro"] = storage.getReadOnlySection("test");
+        mLua["ro"]["subscribe"](mLua["ro"], callback);
 
         mLua.safe_script("mutable:set('x', 5)");
         EXPECT_EQ(get<int>(mLua, "mutable:get('x')"), 5);
         EXPECT_EQ(get<int>(mLua, "ro:get('x')"), 5);
-        EXPECT_FALSE(get<bool>(mLua, "mutable:wasChanged()"));
-        EXPECT_TRUE(get<bool>(mLua, "ro:wasChanged()"));
-        EXPECT_FALSE(get<bool>(mLua, "ro:wasChanged()"));
 
         EXPECT_THROW(mLua.safe_script("ro:set('y', 3)"), std::exception);
 
@@ -42,9 +55,8 @@ namespace
         mLua.safe_script("mutable:reset({x=4, y=7})");
         EXPECT_EQ(get<int>(mLua, "ro:get('x')"), 4);
         EXPECT_EQ(get<int>(mLua, "ro:get('y')"), 7);
-        EXPECT_FALSE(get<bool>(mLua, "mutable:wasChanged()"));
-        EXPECT_TRUE(get<bool>(mLua, "ro:wasChanged()"));
-        EXPECT_FALSE(get<bool>(mLua, "ro:wasChanged()"));
+
+        EXPECT_THAT(callbackCalls, ::testing::ElementsAre("test_x", "test_*", "test_*"));
     }
 
     TEST(LuaUtilStorageTest, Table)
@@ -81,7 +93,7 @@ namespace
         EXPECT_EQ(get<int>(mLua, "permanent:get('x')"), 1);
         EXPECT_EQ(get<int>(mLua, "temporary:get('y')"), 2);
 
-        storage.clearTemporary();
+        storage.clearTemporaryAndRemoveCallbacks();
         mLua["permanent"] = storage.getMutableSection("permanent");
         mLua["temporary"] = storage.getMutableSection("temporary");
         EXPECT_EQ(get<int>(mLua, "permanent:get('x')"), 1);
