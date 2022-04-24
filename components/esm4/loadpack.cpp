@@ -33,10 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::AIPackage::~AIPackage()
-{
-}
-
 void ESM4::AIPackage::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

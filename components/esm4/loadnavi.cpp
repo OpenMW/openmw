@@ -38,10 +38,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Navigation::~Navigation()
-{
-}
-
 void ESM4::Navigation::IslandInfo::load(ESM4::Reader& reader)
 {
     reader.get(minX);

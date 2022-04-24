@@ -43,10 +43,6 @@ void ESM4::BodyPartData::BodyPart::clear()
     mGoreEffectsTarget.clear();
 }
 
-ESM4::BodyPartData::~BodyPartData()
-{
-}
-
 void ESM4::BodyPartData::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

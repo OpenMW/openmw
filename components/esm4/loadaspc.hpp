@@ -53,10 +53,8 @@ namespace ESM4
 
         std::uint32_t mIsInterior; // if true only use mAmbientLoopSounds[0]
 
-        virtual ~AcousticSpace();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

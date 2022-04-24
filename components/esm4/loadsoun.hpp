@@ -88,10 +88,8 @@ namespace ESM4
         SNDX mData;
         SoundData mExtra;
 
-        virtual ~Sound();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

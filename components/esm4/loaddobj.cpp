@@ -37,10 +37,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::DefaultObj::~DefaultObj()
-{
-}
-
 void ESM4::DefaultObj::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

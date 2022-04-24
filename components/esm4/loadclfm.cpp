@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Colour::~Colour()
-{
-}
-
 void ESM4::Colour::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

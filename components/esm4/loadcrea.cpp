@@ -40,10 +40,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Creature::~Creature()
-{
-}
-
 void ESM4::Creature::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

@@ -33,10 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Dialogue::~Dialogue()
-{
-}
-
 void ESM4::Dialogue::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

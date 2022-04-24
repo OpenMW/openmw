@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::MovableStatic::~MovableStatic()
-{
-}
-
 void ESM4::MovableStatic::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

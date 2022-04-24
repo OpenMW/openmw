@@ -85,10 +85,8 @@ namespace ESM4
         RegionData mData;
         std::vector<RegionSound> mSounds;
 
-        virtual ~Region();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         void blank();
     };

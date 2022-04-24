@@ -38,10 +38,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::MediaLocationController::~MediaLocationController()
-{
-}
-
 void ESM4::MediaLocationController::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

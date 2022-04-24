@@ -39,10 +39,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Cell::~Cell()
-{
-}
-
 // TODO: Try loading only EDID and XCLC (along with mFormId, mFlags and mParent)
 //
 // But, for external cells we may be scanning the whole record since we don't know if there is

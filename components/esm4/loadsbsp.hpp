@@ -51,8 +51,6 @@ namespace ESM4
         std::string mEditorId;
         Dimension mDimension;
 
-        virtual ~SubSpace();
-
         virtual void load(Reader& reader);
         //virtual void save(Writer& writer) const;
 

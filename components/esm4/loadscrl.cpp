@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Scroll::~Scroll()
-{
-}
-
 void ESM4::Scroll::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

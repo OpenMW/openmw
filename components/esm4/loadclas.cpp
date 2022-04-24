@@ -36,10 +36,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Class::~Class()
-{
-}
-
 void ESM4::Class::load(ESM4::Reader& reader)
 {
     //mFormId = reader.adjustFormId(reader.hdr().record.id); // FIXME: use master adjusted?

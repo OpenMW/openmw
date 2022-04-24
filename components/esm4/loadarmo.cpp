@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Armor::~Armor()
-{
-}
-
 void ESM4::Armor::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

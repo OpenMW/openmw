@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::LevelledItem::~LevelledItem()
-{
-}
-
 void ESM4::LevelledItem::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

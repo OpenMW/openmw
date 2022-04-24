@@ -50,10 +50,8 @@ namespace ESM4
         FormId mIdleAnim;         // only in TES4
         std::string mUnloadEvent; // only in TES5
 
-        virtual ~AnimObject();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

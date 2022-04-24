@@ -33,10 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Road::~Road()
-{
-}
-
 void ESM4::Road::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

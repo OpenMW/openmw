@@ -75,10 +75,8 @@ namespace ESM4
         std::uint32_t mDayStart;
         std::uint32_t mNightStart;
 
-        virtual ~MediaLocationController();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

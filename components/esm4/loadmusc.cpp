@@ -36,10 +36,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Music::~Music()
-{
-}
-
 void ESM4::Music::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

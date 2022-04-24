@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::TextureSet::~TextureSet()
-{
-}
-
 void ESM4::TextureSet::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

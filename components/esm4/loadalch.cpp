@@ -33,10 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Potion::~Potion()
-{
-}
-
 void ESM4::Potion::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

@@ -34,10 +34,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::PlaceableWater::~PlaceableWater()
-{
-}
-
 void ESM4::PlaceableWater::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

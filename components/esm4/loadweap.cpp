@@ -31,10 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Weapon::~Weapon()
-{
-}
-
 void ESM4::Weapon::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

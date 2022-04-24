@@ -31,10 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::MiscItem::~MiscItem()
-{
-}
-
 void ESM4::MiscItem::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::MediaSet::~MediaSet()
-{
-}
-
 void ESM4::MediaSet::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

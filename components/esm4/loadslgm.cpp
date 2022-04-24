@@ -31,10 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::SoulGem::~SoulGem()
-{
-}
-
 void ESM4::SoulGem::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
