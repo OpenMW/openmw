@@ -182,7 +182,6 @@ namespace Stereo
     {
         if (getMultiview())
         {
-            defines["GLSLVersion"] = "330 compatibility";
             defines["useOVR_multiview"] = "1";
             defines["numViews"] = "2";
         }

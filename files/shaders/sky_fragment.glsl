@@ -1,4 +1,4 @@
-#version @GLSLVersion
+#version 120
 
 #include "skypasses.glsl"
 

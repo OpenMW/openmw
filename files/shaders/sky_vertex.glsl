@@ -1,6 +1,6 @@
-#version @GLSLVersion
+#version 120
 
-#include "multiview_vertex.glsl"
+#include "openmw_vertex.h.glsl"
 
 #include "openmw_vertex.h.glsl"
 
@@ -14,12 +14,12 @@ varying vec2 diffuseMapUV;
 mat4 selectModelViewMatrix()
 {
 #if @useOVR_multiview
-    mat4 viewOffsetMatrix = viewMatrixMultiView[gl_ViewID_OVR];
+    mat4 viewOffsetMatrix = mw_viewMatrix();
     // Sky geometries aren't actually all that distant. So delete view translation to keep them looking distant.
     viewOffsetMatrix[3][0] = 0;
     viewOffsetMatrix[3][1] = 0;
     viewOffsetMatrix[3][2] = 0;
-    return viewOffsetMatrix * gl_ModelViewMatrix;
+    return viewOffsetMatrix;
 #else
     return gl_ModelViewMatrix;
 #endif
@@ -27,7 +27,7 @@ mat4 selectModelViewMatrix()
 
 void main()
 {
-    gl_Position = mw_modelToClip(gl_Vertex);
+    gl_Position = mw_viewToClip(selectModelViewMatrix() * gl_Vertex);
     passColor = gl_Color;
 
     if (pass == PASS_CLOUDS)

@@ -1,4 +1,4 @@
-#version @GLSLVersion
+#version 120
 
 varying vec2 diffuseMapUV;
 varying vec4 passColor;

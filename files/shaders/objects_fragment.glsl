@@ -1,4 +1,4 @@
-#version @GLSLVersion
+#version 120
 #pragma import_defines(FORCE_OPAQUE)
 
 #if @useUBO

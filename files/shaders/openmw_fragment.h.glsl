@@ -1,4 +1,5 @@
-@link "openmw_fragment.glsl"
+@link "openmw_fragment.glsl" if !@useOVR_multiview
+@link "openmw_fragment_multiview.glsl" if @useOVR_multiview
 
 vec4 mw_sampleReflectionMap(vec2 uv);
 

@@ -412,7 +412,6 @@ namespace MWRender
         globalDefines["preLightEnv"] = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
         globalDefines["radialFog"] = Settings::Manager::getBool("radial fog", "Shaders") ? "1" : "0";
         globalDefines["useGPUShader4"] = "0";
-        globalDefines["GLSLVersion"] = "120";
         globalDefines["useOVR_multiview"] = "0";
         globalDefines["numViews"] = "1";
 
