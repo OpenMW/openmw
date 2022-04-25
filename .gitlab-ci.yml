@@ -414,7 +414,9 @@ variables: &tests-targets
     - MSVC2019_64_Ninja/*/*/*/*/*/*.log
     - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
     - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
-
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 2h
+  
 Windows_Ninja_Engine_Release:
   extends:
     - .Windows_Ninja_Base
@@ -539,6 +541,8 @@ Windows_Ninja_Tests_RelWithDebInfo:
     - MSVC2019_64/*/*/*/*/*/*.log
     - MSVC2019_64/*/*/*/*/*/*/*.log
     - MSVC2019_64/*/*/*/*/*/*/*/*.log
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 2h
 
 Windows_MSBuild_Engine_Release:
   extends:
