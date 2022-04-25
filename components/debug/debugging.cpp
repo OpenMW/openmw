@@ -7,10 +7,8 @@
 #include <components/crashcatcher/crashcatcher.hpp>
 
 #ifdef _WIN32
-#   include <components/crashcatcher/windows_crashcatcher.hpp>
-#   undef WIN32_LEAN_AND_MEAN
-#   define WIN32_LEAN_AND_MEAN
-#   include <windows.h>
+#include <components/crashcatcher/windows_crashcatcher.hpp>
+#include <components/windows.hpp>
 #endif
 
 namespace Debug

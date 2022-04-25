@@ -19,7 +19,7 @@
 #include <cstdio>
 #elif FILE_API == FILE_API_POSIX
 #elif FILE_API == FILE_API_WIN32
-#include <windows.h>
+#include <components/windows.hpp>
 #else
 #error Unsupported File API
 #endif

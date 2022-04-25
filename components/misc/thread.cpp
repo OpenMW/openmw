@@ -25,10 +25,7 @@ namespace Misc
 
 #elif defined(WIN32)
 
-#undef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-
-#include <windows.h>
+#include <components/windows.hpp>
 
 namespace Misc
 {
