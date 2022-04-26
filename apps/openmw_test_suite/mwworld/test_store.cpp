@@ -71,12 +71,14 @@ struct ContentFileTest : public ::testing::Test
         }
 
         Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
-        if (!local.empty()) {
+        if (!local.empty())
+        {
+            boost::filesystem::create_directories(local);
             dataLocal.push_back(local);
         }
 
-        mConfigurationManager.processPaths (dataDirs);
-        mConfigurationManager.processPaths (dataLocal, true);
+        mConfigurationManager.filterOutNonExistingPaths(dataDirs);
+        mConfigurationManager.filterOutNonExistingPaths(dataLocal);
 
         if (!dataLocal.empty())
             dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());

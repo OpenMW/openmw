@@ -28,7 +28,7 @@ void Config::GameSettings::validatePaths()
     }
 
     // Parse the data dirs to convert the tokenized paths
-    mCfgMgr.processPaths(dataDirs);
+    mCfgMgr.processPaths(dataDirs, /*basePath=*/"");
     mDataDirs.clear();
 
     for (auto & dataDir : dataDirs) {
@@ -54,7 +54,7 @@ void Config::GameSettings::validatePaths()
     QByteArray bytes = local.toUtf8();
     dataDirs.push_back(Files::PathContainer::value_type(std::string(bytes.constData(), bytes.length())));
 
-    mCfgMgr.processPaths(dataDirs);
+    mCfgMgr.processPaths(dataDirs, /*basePath=*/"");
 
     if (!dataDirs.empty()) {
         QString path = QString::fromUtf8(dataDirs.front().string().c_str());
