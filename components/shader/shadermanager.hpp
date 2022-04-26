@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <mutex>
+#include <vector>
 
 #include <osg/ref_ptr>
 
@@ -51,7 +52,12 @@ namespace Shader
 
         void releaseGLObjects(osg::State* state);
 
+        bool createSourceFromTemplate(std::string& source, std::vector<std::string>& linkedShaderTemplateNames, const std::string& templateName, const ShaderManager::DefineMap& defines);
+
     private:
+        void getLinkedShaders(osg::ref_ptr<osg::Shader> shader, const std::vector<std::string>& linkedShaderNames, const DefineMap& defines);
+        void addLinkedShaders(osg::ref_ptr<osg::Shader> shader, osg::ref_ptr<osg::Program> program);
+
         std::string mPath;
 
         DefineMap mGlobalDefines;
@@ -67,14 +73,22 @@ namespace Shader
         typedef std::map<std::pair<osg::ref_ptr<osg::Shader>, osg::ref_ptr<osg::Shader> >, osg::ref_ptr<osg::Program> > ProgramMap;
         ProgramMap mPrograms;
 
+        typedef std::vector<osg::ref_ptr<osg::Shader> > ShaderList;
+        typedef std::map<osg::ref_ptr<osg::Shader>, ShaderList> LinkedShadersMap;
+        LinkedShadersMap mLinkedShaders;
+
         std::mutex mMutex;
 
         osg::ref_ptr<const osg::Program> mProgramTemplate;
     };
 
-    bool parseFors(std::string& source, const std::string& templateName);
+    bool parseForeachDirective(std::string& source, const std::string& templateName, size_t foundPos);
+    bool parseLinkDirective(std::string& source, std::string& linkTarget, const std::string& templateName, size_t foundPos);
 
     bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines,
+        const ShaderManager::DefineMap& globalDefines, const std::string& templateName);
+
+    bool parseDirectives(std::string& source, std::vector<std::string>& linkedShaderTemplateNames, const ShaderManager::DefineMap& defines,
         const ShaderManager::DefineMap& globalDefines, const std::string& templateName);
 }
 
