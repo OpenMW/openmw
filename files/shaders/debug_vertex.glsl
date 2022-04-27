@@ -1,6 +1,6 @@
 #version 120
 
-#include "openmw_vertex.glsl"
+#include "openmw_vertex.h.glsl"
 
 centroid varying vec4 passColor;
 
