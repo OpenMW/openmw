@@ -17,8 +17,25 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
+     <widget class="QWidget" name="dataTab">
+      <attribute name="title">
+       <string>Content Files</string>
+      </attribute>
+      <layout class="QGridLayout" name="dataTabLayout">
+       <item row="0" column="0">
+        <widget class="QWidget" name="contentSelectorWidget" native="true"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: content files that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="dirTab">
       <attribute name="title">
        <string>Data Directories</string>
@@ -137,23 +154,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="dataTab">
-      <attribute name="title">
-       <string>Content Files</string>
-      </attribute>
-      <layout class="QGridLayout" name="dataTabLayout">
-       <item row="0" column="0">
-        <widget class="QWidget" name="contentSelectorWidget" native="true"/>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: content files that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
        <string>Navigation mesh cache</string>
@@ -212,7 +212,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="label_4">
            <property name="text">
             <string>Max size</string>
            </property>
@@ -261,7 +261,7 @@
      <property name="flat">
       <bool>false</bool>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <property name="spacing">
        <number>6</number>
       </property>

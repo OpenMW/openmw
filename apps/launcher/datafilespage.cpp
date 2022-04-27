@@ -44,10 +44,10 @@ namespace
         QDir currentDir(path);
         if (!currentDir.entryInfoList(fileFilter, QDir::Files).empty()
                 || !currentDir.entryInfoList(dirFilter, QDir::Dirs | QDir::NoDotAndDotDot).empty())
-            dirs.push_back(currentDir.absolutePath());
+            dirs.push_back(currentDir.canonicalPath());
 
         for (const auto& subdir : currentDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
-            contentSubdirs(subdir.absoluteFilePath(), dirs);
+            contentSubdirs(subdir.canonicalFilePath(), dirs);
     }
 }
 
@@ -236,6 +236,10 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     if (!globalDataDir.isEmpty())
         directories.insert(0, globalDataDir);
 
+    // normalize user supplied directories: resolve symlink, convert to native separator, make absolute
+    for (auto& currentDir : directories)
+        currentDir = QDir(QDir::cleanPath(currentDir)).canonicalPath();
+
     // add directories, archives and content files
     directories.removeDuplicates();
     for (const auto& currentDir : directories)
@@ -361,7 +365,7 @@ QStringList Launcher::DataFilesPage::selectedDirectoriesPaths() const
    QStringList dirList;
    for (int i = 0; i < ui.directoryListWidget->count(); ++i)
    {
-       if (ui.directoryListWidget->item(i)->background() != Qt::gray)
+       if (ui.directoryListWidget->item(i)->flags() & Qt::ItemIsEnabled)
            dirList.append(ui.directoryListWidget->item(i)->text());
    }
    return dirList;
@@ -581,7 +585,7 @@ QString Launcher::DataFilesPage::selectDirectory()
     if (fileDialog.exec() == QDialog::Rejected)
         return {};
 
-    return fileDialog.selectedFiles()[0];
+    return QDir(fileDialog.selectedFiles()[0]).canonicalPath();
 
 }
 
