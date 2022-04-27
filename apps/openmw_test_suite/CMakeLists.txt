@@ -55,6 +55,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
 
         shader/parsedefines.cpp
         shader/parsefors.cpp
+        shader/parselinks.cpp
         shader/shadermanager.cpp
 
         ../openmw/options.cpp

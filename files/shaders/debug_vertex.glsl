@@ -1,12 +1,12 @@
 #version 120
 
-uniform mat4 projectionMatrix;
+#include "openmw_vertex.h.glsl"
 
 centroid varying vec4 passColor;
 
 void main()
 {
-    gl_Position = projectionMatrix * (gl_ModelViewMatrix * gl_Vertex);
+    gl_Position = mw_modelToClip(gl_Vertex);
 
     passColor = gl_Color;
 }

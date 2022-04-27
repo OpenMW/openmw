@@ -8,6 +8,8 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
+#include "openmw_vertex.h.glsl"
+
 #define GROUNDCOVER
 
 attribute vec4 aOffset;
@@ -46,7 +48,6 @@ uniform mat4 osg_ViewMatrixInverse;
 uniform mat4 osg_ViewMatrix;
 uniform float windSpeed;
 uniform vec3 playerPos;
-uniform mat4 projectionMatrix;
 
 #if @groundcoverStompMode == 0
 #else
@@ -143,7 +144,7 @@ void main(void)
     if (length(gl_ModelViewMatrix * vec4(position, 1.0)) > @groundcoverFadeEnd)
         gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
     else
-        gl_Position = projectionMatrix * viewPos;
+        gl_Position = mw_viewToClip(mw_viewStereoAdjust(viewPos));
 
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 

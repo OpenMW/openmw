@@ -8,6 +8,8 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
+#include "openmw_fragment.h.glsl"
+
 #define REFRACTION @refraction_enabled
 #define RAIN_RIPPLE_DETAIL @rain_ripple_detail
 
@@ -207,12 +209,6 @@ varying float linearDepth;
 
 uniform sampler2D normalMap;
 
-uniform sampler2D reflectionMap;
-#if REFRACTION
-uniform sampler2D refractionMap;
-uniform sampler2D refractionDepthMap;
-#endif
-
 uniform float osg_SimulationTime;
 
 uniform float near;
@@ -299,14 +295,14 @@ void main(void)
 
     vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
 #if REFRACTION
-    float depthSample = linearizeDepth(texture2D(refractionDepthMap,screenCoords).x) * radialise;
-    float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-screenCoordsOffset).x) * radialise;
+    float depthSample = linearizeDepth(mw_sampleRefractionDepthMap(screenCoords)) * radialise;
+    float depthSampleDistorted = linearizeDepth(mw_sampleRefractionDepthMap(screenCoords-screenCoordsOffset)) * radialise;
     float surfaceDepth = linearizeDepth(gl_FragCoord.z) * radialise;
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
     screenCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #endif
     // reflection
-    vec3 reflection = texture2D(reflectionMap, screenCoords + screenCoordsOffset).rgb;
+    vec3 reflection = mw_sampleReflectionMap(screenCoords + screenCoordsOffset).rgb;
 
     // specular
     float specular = pow(max(dot(reflect(vVec, normal), lVec), 0.0),SPEC_HARDNESS) * shadow;
@@ -324,7 +320,7 @@ void main(void)
     rainSpecular *= clamp(fresnel*6.0 + specular * sunSpec.w, 0.0, 1.0);
 
     // refraction
-    vec3 refraction = texture2D(refractionMap, screenCoords - screenCoordsOffset).rgb;
+    vec3 refraction = mw_sampleRefractionMap(screenCoords - screenCoordsOffset).rgb;
     vec3 rawRefraction = refraction;
 
     // brighten up the refraction underwater

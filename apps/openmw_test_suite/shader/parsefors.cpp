@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <vector>
 
 namespace
 {
@@ -15,6 +16,12 @@ namespace
         std::string mSource;
         const std::string mName = "shader";
     };
+
+    static bool parseFors(std::string& source, const std::string& templateName)
+    {
+        std::vector<std::string> dummy;
+        return parseDirectives(source, dummy, {}, {}, templateName);
+    }
 
     TEST_F(ShaderParseForsTest, empty_should_succeed)
     {

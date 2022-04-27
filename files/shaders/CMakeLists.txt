@@ -16,6 +16,10 @@ set(SHADER_FILES
     depth.glsl
     objects_vertex.glsl
     objects_fragment.glsl
+    openmw_fragment.glsl
+    openmw_fragment.h.glsl
+    openmw_vertex.glsl
+    openmw_vertex.h.glsl
     terrain_vertex.glsl
     terrain_fragment.glsl
     lighting.glsl
