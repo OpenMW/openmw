@@ -17,15 +17,140 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="dirTab">
       <attribute name="title">
-       <string>Data Files</string>
+       <string>Data Directories</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
+      <layout class="QGridLayout" name="dirTabLayout">
+       <item row="0" column="0" rowspan="26">
+        <widget class="QListWidget" name="directoryListWidget">
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::InternalMove</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="directoryAddSubdirsButton">
+         <property name="toolTip">
+          <string>Scan directories for likely data directories and append them at the end of the list.</string>
+         </property>
+         <property name="text">
+          <string>Append</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="directoryInsertButton">
+         <property name="toolTip">
+          <string>Scan directories for likely data directories and insert them above the selected position</string>
+         </property>
+         <property name="text">
+          <string>Insert Above</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="directoryUpButton">
+         <property name="toolTip">
+          <string>Move selected directory one position up</string>
+         </property>
+         <property name="text">
+          <string>Move Up</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="directoryDownButton">
+         <property name="toolTip">
+          <string>Move selected directory one position down</string>
+         </property>
+         <property name="text">
+          <string>Move Down</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QPushButton" name="directoryRemoveButton">
+         <property name="toolTip">
+          <string>Remove selected directory</string>
+         </property>
+         <property name="text">
+          <string>Remove</string>
+         </property>
+        </widget>
+       </item>
+       <item row="27" column="0" colspan="2">
+        <widget class="QLabel" name="label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: directories that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="archiveTab">
+      <attribute name="title">
+       <string>Archive Files</string>
+      </attribute>
+      <layout class="QGridLayout" name="archiveTabLayout">
+       <item row="0" column="0" rowspan="26">
+        <widget class="QListWidget" name="archiveListWidget">
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::InternalMove</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="archiveUpButton">
+         <property name="toolTip">
+          <string>Move selected archive one position up</string>
+         </property>
+         <property name="text">
+          <string>Move Up</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="archiveDownButton">
+         <property name="toolTip">
+          <string>Move selected archive one position down</string>
+         </property>
+         <property name="text">
+          <string>Move Down</string>
+         </property>
+        </widget>
+       </item>
+       <item row="27" column="0" colspan="2">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: archives that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="dataTab">
+      <attribute name="title">
+       <string>Content Files</string>
+      </attribute>
+      <layout class="QGridLayout" name="dataTabLayout">
+       <item row="0" column="0">
         <widget class="QWidget" name="contentSelectorWidget" native="true"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: content files that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

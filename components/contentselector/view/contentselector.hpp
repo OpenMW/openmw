@@ -27,8 +27,9 @@ namespace ContentSelectorView
 
         QString currentFile() const;
 
-        void addFiles(const QString &path);
+        void addFiles(const QString &path, bool newfiles = false);
         void sortFiles();
+        bool containsDataFiles(const QString &path);
         void clearFiles();
         void setProfileContent (const QStringList &fileList);
 

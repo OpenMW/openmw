@@ -43,8 +43,9 @@ namespace ContentSelectorModel
         QMimeData *mimeData(const QModelIndexList &indexes) const override;
         bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
 
-        void addFiles(const QString &path);
+        void addFiles(const QString &path, bool newfiles);
         void sortFiles();
+        bool containsDataFiles(const QString &path);
         void clearFiles();
 
         QModelIndex indexFromItem(const EsmFile *item) const;
@@ -56,6 +57,8 @@ namespace ContentSelectorModel
         bool isEnabled (const QModelIndex& index) const;
         bool isChecked(const QString &filepath) const;
         bool setCheckState(const QString &filepath, bool isChecked);
+        bool isNew(const QString &filepath) const;
+        void setNew(const QString &filepath, bool isChecked);
         void setContentList(const QStringList &fileList);
         ContentFileList checkedItems() const;
         void uncheckAll();
@@ -79,7 +82,9 @@ namespace ContentSelectorModel
         QString toolTip(const EsmFile *file) const;
 
         ContentFileList mFiles;
+        QStringList mArchives;
         QHash<QString, Qt::CheckState> mCheckStates;
+        QHash<QString, bool> mNewFiles;
         QSet<QString> mPluginsWithLoadOrderError;
         QString mEncoding;
         QIcon mWarningIcon;

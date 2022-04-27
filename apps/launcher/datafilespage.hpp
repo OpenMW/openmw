@@ -43,12 +43,6 @@ namespace Launcher
         void saveSettings(const QString &profile = "");
         bool loadSettings();
 
-        /**
-         * Returns the file paths of all selected content files
-         * @return the file paths of all selected content files
-         */
-        QStringList selectedFilePaths();
-
     signals:
         void signalProfileChanged (int index);
         void signalLoadedCellsChanged(QStringList selectedFiles);
@@ -66,6 +60,11 @@ namespace Launcher
 
         void updateNewProfileOkButton(const QString &text);
         void updateCloneProfileOkButton(const QString &text);
+        void addSubdirectories(bool append);
+        void sortDirectories();
+        void removeDirectory();
+        void moveArchive(int step);
+        void moveDirectory(int step);
 
         void on_newProfileAction_triggered();
         void on_cloneProfileAction_triggered();
@@ -103,10 +102,14 @@ namespace Launcher
         QString mPreviousProfile;
         QStringList previousSelectedFiles;
         QString mDataLocal;
+        QStringList mKnownArchives;
+        QStringList mNewDataDirs;
 
         Process::ProcessInvoker* mNavMeshToolInvoker;
         NavMeshToolProgress mNavMeshToolProgress;
 
+        void addArchive(const QString& name, Qt::CheckState selected, int row = -1);
+        void addArchivesFromDir(const QString& dir);
         void buildView();
         void setProfile (int index, bool savePrevious);
         void setProfile (const QString &previous, const QString &current, bool savePrevious);
@@ -118,6 +121,15 @@ namespace Launcher
         void reloadCells(QStringList selectedFiles);
         void refreshDataFilesView ();
         void updateNavMeshProgress(int minDataSize);
+        QString selectDirectory();
+
+        /**
+         * Returns the file paths of all selected content files
+         * @return the file paths of all selected content files
+         */
+        QStringList selectedFilePaths() const;
+        QStringList selectedArchivePaths(bool all=false) const;
+        QStringList selectedDirectoriesPaths() const;
 
         class PathIterator
         {

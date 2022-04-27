@@ -153,9 +153,9 @@ ContentSelectorModel::ContentFileList
     return mContentModel->checkedItems();
 }
 
-void ContentSelectorView::ContentSelector::addFiles(const QString &path)
+void ContentSelectorView::ContentSelector::addFiles(const QString &path, bool newfiles)
 {
-    mContentModel->addFiles(path);
+    mContentModel->addFiles(path, newfiles);
 
     // add any game files to the combo box
     for (const QString& gameFileName : mContentModel->gameFiles())
@@ -176,6 +176,11 @@ void ContentSelectorView::ContentSelector::addFiles(const QString &path)
 void ContentSelectorView::ContentSelector::sortFiles()
 {
     mContentModel->sortFiles();
+}
+
+bool ContentSelectorView::ContentSelector::containsDataFiles(const QString &path)
+{
+    return mContentModel->containsDataFiles(path);
 }
 
 void ContentSelectorView::ContentSelector::clearFiles()

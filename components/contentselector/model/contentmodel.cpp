@@ -160,6 +160,15 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
         return isLoadOrderError(file) ? mWarningIcon : QVariant();
     }
 
+    case Qt::BackgroundRole:
+    {
+        if (isNew(file->fileName()))
+        {
+            return QVariant(QColor(Qt::green));
+        }
+        return QVariant();
+    }
+
     case Qt::EditRole:
     case Qt::DisplayRole:
     {
@@ -413,7 +422,7 @@ void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
     emit dataChanged (idx, idx);
 }
 
-void ContentSelectorModel::ContentModel::addFiles(const QString &path)
+void ContentSelectorModel::ContentModel::addFiles(const QString &path, bool newfiles)
 {
     QDir dir(path);
     QStringList filters;
@@ -471,6 +480,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
 
             // Put the file in the table
             addFile(file);
+            setNew(file->fileName(), newfiles);
 
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
@@ -479,6 +489,16 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
         }
 
     }
+}
+
+bool ContentSelectorModel::ContentModel::containsDataFiles(const QString &path)
+{
+    QDir dir(path);
+    QStringList filters;
+    filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
+    dir.setNameFilters(filters);
+
+    return dir.entryList().count() != 0;
 }
 
 void ContentSelectorModel::ContentModel::clearFiles()
@@ -552,6 +572,28 @@ bool ContentSelectorModel::ContentModel::isEnabled (const QModelIndex& index) co
 {
     return (flags(index) & Qt::ItemIsEnabled);
 }
+
+bool ContentSelectorModel::ContentModel::isNew(const QString& filepath) const
+{
+    if (mNewFiles.contains(filepath))
+        return mNewFiles[filepath];
+
+    return false;
+}
+
+void ContentSelectorModel::ContentModel::setNew(const QString &filepath, bool isNew)
+{
+    if (filepath.isEmpty())
+        return;
+
+    const EsmFile *file = item(filepath);
+
+    if (!file)
+        return;
+
+    mNewFiles[filepath] = isNew;
+}
+
 
 bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile *file) const
 {

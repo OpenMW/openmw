@@ -18,7 +18,7 @@ namespace Config
         void setContentList(const GameSettings& gameSettings);
 
         /// Create a Content List (or replace if it already exists)
-        void setContentList(const QString& contentListName, const QStringList& fileNames);
+        void setContentList(const QString& contentListName, const QStringList& dirNames, const QStringList& archiveNames, const QStringList& fileNames);
 
         void removeContentList(const QString &contentListName);
 
@@ -26,14 +26,22 @@ namespace Config
 
         QString getCurrentContentListName() const;
 
+        QStringList getDataDirectoryList(const QString& contentListName) const;
+        QStringList getArchiveList(const QString& contentListName) const;
         QStringList getContentListFiles(const QString& contentListName) const;
 
         /// \return new list that is reversed order of input
         static QStringList reverse(const QStringList& toReverse);
 
         static const char sLauncherConfigFileName[];
-    
+
     private:
+
+        /// \return key to use to get/set the files in the specified data Directory List
+        static QString makeDirectoryListKey(const QString& contentListName);
+
+        /// \return key to use to get/set the files in the specified Archive List
+        static QString makeArchiveListKey(const QString& contentListName);
 
         /// \return key to use to get/set the files in the specified Content List
         static QString makeContentListKey(const QString& contentListName);
@@ -51,6 +59,8 @@ namespace Config
         /// section of launcher.cfg holding the Content Lists
         static const char sContentListsSectionPrefix[];
 
+        static const char sDirectoryListSuffix[];
+        static const char sArchiveListSuffix[];
         static const char sContentListSuffix[];
     };
 }
