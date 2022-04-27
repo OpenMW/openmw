@@ -25,6 +25,8 @@
 #include "../world/subviews.hpp"
 #include "../world/scenesubview.hpp"
 #include "../world/tablesubview.hpp"
+#include "../world/dialoguesubview.hpp"
+#include "../world/scriptsubview.hpp"
 
 #include "../tools/subviews.hpp"
 
@@ -609,7 +611,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
         view = mSubViewFactory.makeSubView (id, *mDocument);
     }
     assert(view);
-    view->setParent(this);
+    view->setParent(this); // unfloats view
     view->setEditLock (mDocument->getState() & CSMDoc::State_Locked);
     mSubViews.append(view); // only after assert
 
@@ -659,6 +661,21 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     {
         connect(sceneView, SIGNAL(requestFocus(const std::string&)),
                 this, SLOT(onRequestFocus(const std::string&)));
+    }
+
+    if (CSMPrefs::State::get()["ID Tables"]["subview-new-window"].isTrue())
+    {
+        CSVWorld::DialogueSubView* dialogueView = dynamic_cast<CSVWorld::DialogueSubView*>(view);
+        if (dialogueView)
+        {
+            dialogueView->setFloating(true);
+        }
+
+        CSVWorld::ScriptSubView* scriptView = dynamic_cast<CSVWorld::ScriptSubView*>(view);
+        if (scriptView)
+        {
+            scriptView->setFloating(true);
+        }
     }
 
     view->show();
