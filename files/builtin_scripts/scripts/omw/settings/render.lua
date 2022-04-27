@@ -115,7 +115,7 @@ local function renderGroup(group, global)
                 props = {
                     horizontal = true,
                     align = ui.ALIGNMENT.Start,
-                    arrange = ui.ALIGNMENT.Center,
+                    arrange = ui.ALIGNMENT.End,
                 },
                 content = ui.content {
                     {
@@ -166,7 +166,7 @@ local function renderPage(page)
                 props = {
                     horizontal = true,
                     align = ui.ALIGNMENT.Start,
-                    arrange = ui.ALIGNMENT.Center,
+                    arrange = ui.ALIGNMENT.End,
                 },
                 content = ui.content {
                     {

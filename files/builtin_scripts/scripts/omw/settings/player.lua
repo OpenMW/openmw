@@ -13,7 +13,7 @@ render.registerRenderer('text', function(value, set, arg)
             text = value,
             textColor = util.color.rgb(1, 1, 1),
             textSize = 15,
-            textAlignV = ui.ALIGNMENT.Center,
+            textAlignV = ui.ALIGNMENT.End,
         },
         events = {
             textChanged = async:callback(function(s) set(s) end),
