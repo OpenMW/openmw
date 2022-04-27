@@ -49,10 +49,8 @@ namespace ESM4
         float mBoundRadius;
         std::vector<std::uint8_t> mMODT; // FIXME texture hash
 
-        virtual ~Static();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

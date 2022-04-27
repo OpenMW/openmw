@@ -37,10 +37,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::LandTexture::~LandTexture()
-{
-}
-
 void ESM4::LandTexture::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

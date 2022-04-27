@@ -91,15 +91,8 @@ namespace ESM4
 
         CellGroup *mCellGroup;
 
-        virtual ~Cell();
-
-        void init(ESM4::Reader& reader); // common setup for both preload() and load()
-
-        bool mPreloaded;
-        bool preload(ESM4::Reader& reader);
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         void blank();
     };

@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::FormIdList::~FormIdList()
-{
-}
-
 void ESM4::FormIdList::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

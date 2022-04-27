@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::AcousticSpace::~AcousticSpace()
-{
-}
-
 void ESM4::AcousticSpace::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

@@ -52,14 +52,12 @@ namespace ESM4
         std::uint8_t mListCount;
         std::vector<LVLO> mLvlObject;
 
-        virtual ~LevelledNpc();
-
         inline bool calcAllLvlLessThanPlayer() const { return (mLvlActorFlags & 0x01) != 0; }
         inline bool calcEachItemInCount() const { return (mLvlActorFlags & 0x02) != 0; }
         inline std::int8_t chanceNone() const { return mChanceNone; }
 
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

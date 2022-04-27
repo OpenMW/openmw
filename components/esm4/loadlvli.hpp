@@ -54,15 +54,13 @@ namespace ESM4
 
         std::vector<LVLO> mLvlObject;
 
-        virtual ~LevelledItem();
-
         bool calcAllLvlLessThanPlayer() const;
         bool calcEachItemInCount() const;
         bool useAll() const;
         std::int8_t chanceNone() const;
 
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

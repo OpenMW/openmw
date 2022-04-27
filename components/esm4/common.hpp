@@ -76,7 +76,7 @@ namespace ESM4
         REC_DOBJ = fourCC("DOBJ"), // Default Object Manager
         REC_DOOR = fourCC("DOOR"), // Door
         REC_DUAL = fourCC("DUAL"), // Dual Cast Data (possibly unused)
-      //REC_ECZN = fourCC("ECZN"), // Encounter Zone
+        REC_ECZN = fourCC("ECZN"), // Encounter Zone
         REC_EFSH = fourCC("EFSH"), // Effect Shader
         REC_ENCH = fourCC("ENCH"), // Enchantment
         REC_EQUP = fourCC("EQUP"), // Equip Slot (flag-type values)
@@ -93,7 +93,7 @@ namespace ESM4
         REC_GRAS = fourCC("GRAS"), // Grass
         REC_GRUP = fourCC("GRUP"), // Form Group
         REC_HAIR = fourCC("HAIR"), // Hair
-      //REC_HAZD = fourCC("HAZD"), // Hazard
+        REC_HAZD = fourCC("HAZD"), // Hazard
         REC_HDPT = fourCC("HDPT"), // Head Part
         REC_IDLE = fourCC("IDLE"), // Idle Animation
         REC_IDLM = fourCC("IDLM"), // Idle Marker

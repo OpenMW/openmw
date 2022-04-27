@@ -39,10 +39,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Region::~Region()
-{
-}
-
 void ESM4::Region::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

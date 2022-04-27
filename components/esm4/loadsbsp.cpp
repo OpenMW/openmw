@@ -31,10 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::SubSpace::~SubSpace()
-{
-}
-
 void ESM4::SubSpace::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

@@ -35,10 +35,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::NavMesh::~NavMesh()
-{
-}
-
 void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
 {
     //std::cout << "start: divisor " << std::dec << divisor << ", segments " << triSegments.size() << //std::endl;

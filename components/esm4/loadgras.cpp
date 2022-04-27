@@ -31,10 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Grass::~Grass()
-{
-}
-
 void ESM4::Grass::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

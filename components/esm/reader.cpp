@@ -38,7 +38,7 @@ namespace ESM
     }
 
     bool Reader::getStringImpl(std::string& str, std::size_t size,
-            std::istream& stream, ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull)
+            std::istream& stream, const ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull)
     {
         std::size_t newSize = size;
 

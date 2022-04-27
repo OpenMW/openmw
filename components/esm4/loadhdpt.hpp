@@ -53,11 +53,8 @@ namespace ESM4
         std::array<std::string, 3> mTriFile;
         FormId mBaseTexture;
 
-        HeadPart();
-        virtual ~HeadPart();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

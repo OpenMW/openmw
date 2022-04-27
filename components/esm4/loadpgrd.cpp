@@ -36,10 +36,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Pathgrid::~Pathgrid()
-{
-}
-
 void ESM4::Pathgrid::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

@@ -123,8 +123,6 @@ namespace ESM4
         Texture       mTextures[4]; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
         std::vector<FormId> mIds;   // land texture (LTEX) formids
 
-        virtual ~Land();
-
         virtual void load(Reader& reader);
         //virtual void save(Writer& writer) const;
 

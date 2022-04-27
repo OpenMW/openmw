@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::SigilStone::~SigilStone()
-{
-}
-
 void ESM4::SigilStone::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

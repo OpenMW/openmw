@@ -183,10 +183,8 @@ namespace ESM4
         std::vector<FormId> mAddOns; // TES5 ARMA
         Data mData;
 
-        virtual ~Armor();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

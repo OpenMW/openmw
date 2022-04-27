@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::IdleMarker::~IdleMarker()
-{
-}
-
 void ESM4::IdleMarker::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

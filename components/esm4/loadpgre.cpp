@@ -34,10 +34,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::PlacedGrenade::~PlacedGrenade()
-{
-}
-
 void ESM4::PlacedGrenade::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

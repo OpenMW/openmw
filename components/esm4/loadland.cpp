@@ -38,10 +38,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Land::~Land()
-{
-}
-
 //             overlap north
 //
 //         32

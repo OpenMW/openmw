@@ -45,10 +45,8 @@ namespace ESM4
         std::string mEditorId;
         std::string mModel;
 
-        virtual ~Material();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

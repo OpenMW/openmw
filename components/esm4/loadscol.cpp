@@ -34,10 +34,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::StaticCollection::~StaticCollection()
-{
-}
-
 void ESM4::StaticCollection::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

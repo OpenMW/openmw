@@ -53,8 +53,6 @@ namespace ESM4
         std::string mIcon;
         Data mData;
 
-        ~Class();
-
         void load(ESM4::Reader& reader);
         //void save(ESM4::Writer& reader) const;
 

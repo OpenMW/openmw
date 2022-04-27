@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Hair::~Hair()
-{
-}
-
 void ESM4::Hair::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

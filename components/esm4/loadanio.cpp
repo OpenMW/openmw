@@ -31,10 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::AnimObject::~AnimObject()
-{
-}
-
 void ESM4::AnimObject::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

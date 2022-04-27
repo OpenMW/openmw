@@ -39,11 +39,14 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Cell::~Cell()
-{
-}
-
-void ESM4::Cell::init(ESM4::Reader& reader)
+// TODO: Try loading only EDID and XCLC (along with mFormId, mFlags and mParent)
+//
+// But, for external cells we may be scanning the whole record since we don't know if there is
+// going to be an EDID subrecord. And the vast majority of cells are these kinds.
+//
+// So perhaps some testing needs to be done to see if scanning and skipping takes
+// longer/shorter/same as loading the subrecords.
+void ESM4::Cell::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
@@ -64,33 +67,10 @@ void ESM4::Cell::init(ESM4::Reader& reader)
         currCellGrid.grid.y = 0;
         reader.setCurrCellGrid(currCellGrid);  // side effect: sets mCellGridValid  true
     }
-}
-
-// TODO: Try loading only EDID and XCLC (along with mFormId, mFlags and mParent)
-//
-// But, for external cells we may be scanning the whole record since we don't know if there is
-// going to be an EDID subrecord. And the vast majority of cells are these kinds.
-//
-// So perhaps some testing needs to be done to see if scanning and skipping takes
-// longer/shorter/same as loading the subrecords.
-bool ESM4::Cell::preload(ESM4::Reader& reader)
-{
-    if (!mPreloaded)
-        load(reader);
-
-    mPreloaded = true;
-    return true;
-}
-
-void ESM4::Cell::load(ESM4::Reader& reader)
-{
-    if (mPreloaded)
-        return;
 
     // WARN: we need to call setCurrCell (and maybe setCurrCellGrid?) again before loading
     // cell child groups if we are loading them after restoring the context
     // (may be easier to update the context before saving?)
-    init(reader);
     reader.setCurrCell(mFormId); // save for LAND (and other children) to access later
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;

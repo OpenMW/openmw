@@ -31,10 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Tree::~Tree()
-{
-}
-
 void ESM4::Tree::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

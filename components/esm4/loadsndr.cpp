@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::SoundReference::~SoundReference()
-{
-}
-
 void ESM4::SoundReference::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Clothing::~Clothing()
-{
-}
-
 void ESM4::Clothing::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

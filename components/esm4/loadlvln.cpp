@@ -32,10 +32,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::LevelledNpc::~LevelledNpc()
-{
-}
-
 void ESM4::LevelledNpc::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

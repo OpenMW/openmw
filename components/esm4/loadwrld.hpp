@@ -126,10 +126,8 @@ namespace ESM4
         std::vector<FormId> mCells;
         std::vector<FormId> mRoads;
 
-        virtual ~World();
-
-        virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        void load(ESM4::Reader& reader);
+        //void save(ESM4::Writer& writer) const;
     };
 }
 

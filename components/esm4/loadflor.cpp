@@ -31,10 +31,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Flora::~Flora()
-{
-}
-
 void ESM4::Flora::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;

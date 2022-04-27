@@ -33,10 +33,6 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Quest::~Quest()
-{
-}
-
 void ESM4::Quest::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
