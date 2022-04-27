@@ -1,183 +1,126 @@
 local storage = require('openmw.storage')
-local core = require('openmw.core')
-local types = require('openmw.types')
-local selfObject
-do
-    local success, result = pcall(function() return require('openmw.self') end)
-    selfObject = success and result or nil
-end
-local playerObject = selfObject and selfObject.type == types.Player and selfObject or nil
 
-local eventPrefix = 'omwSettings'
-local EVENTS = {
-    SettingChanged = eventPrefix .. 'Changed',
-    SetValue = eventPrefix .. 'GlobalSetValue',
-    GroupRegistered = eventPrefix .. 'GroupRegistered',
-    RegisterGroup = eventPrefix .. 'RegisterGroup',
-    Subscribe = eventPrefix .. 'Subscribe',
-}
+local contextSection = storage.playerSection or storage.globalSection
+local groupSectionKey = 'OmwSettingGroups'
+local groupSection = contextSection(groupSectionKey)
+groupSection:removeOnExit()
 
-local SCOPE = {
-    Global = 'Global',
-    Player = 'Player',
-    SaveGlobal = 'SaveGlobal',
-    SavePlayer = 'SavePlayer',
-}
-
-local function isPlayerScope(scope)
-    return scope == SCOPE.Player or scope == SCOPE.SavePlayer
-end
-
-local function isSaveScope(scope)
-    return scope == SCOPE.SaveGlobal or scope == SCOPE.SavePlayer
-end
-
-local prefix = 'omw_settings_'
-local settingsPattern = prefix .. 'settings_%s%s'
-
-local groupsSection = storage.globalSection(prefix .. 'groups')
-if groupsSection.removeOnExit then
-    groupsSection:removeOnExit()
-end
-
-local function values(groupKey, scope)
-    local player = isPlayerScope(scope)
-    local save = isSaveScope(scope)
-    local sectionKey = settingsPattern:format(groupKey, save and '_save' or '')
-    local section
-    if player then
-        section = storage.playerSection and storage.playerSection(sectionKey) or nil
-    else
-        section = storage.globalSection(sectionKey)
+local function validateSettingOptions(options)
+    if type(options.key) ~= 'string' then
+        error('Setting must have a key')
     end
-    if save and section and section.removeOnExit then
-        section:removeOnExit()
+    if type(options.saveOnly) ~= 'boolean' then
+        error('Setting must be save only or not')
     end
-    return section
-end
-
-local function saveScope(scope)
-    local saved = {}
-    for _, group in pairs(groupsSection:asTable()) do
-        saved[group.key] = values(group.key, scope):asTable()
+    if type(options.renderer) ~= 'string' then
+        error('Setting must have a renderer')
     end
-    return saved
-end
-
-local function loadScope(scope, saved)
-    if not saved then return end
-    for _, group in pairs(saved) do
-        values(group.key, scope):reset(saved[group.key])
+    if type(options.name) ~= 'string' then
+        error('Setting must have a name localization key')
+    end
+    if type(options.description) ~= 'string' then
+        error('Setting must have a descripiton localization key')
     end
 end
 
-local function groupSubscribeEvent(groupKey)
-    return ('%sSubscribe%s'):format(eventPrefix, groupKey)
-end
-
-local subscriptions = {}
-local function handleSubscription(event)
-    if not subscriptions[event.groupKey] then
-        subscriptions[event.groupKey] = {}
+local function validateGroupOptions(options)
+    if type(options.key) ~= 'string' then
+        error('Group must have a key')
     end
-    table.insert(subscriptions[event.groupKey], event.object or false)
+    local conventionPrefix = "Settings"
+    if options.key:sub(1, conventionPrefix:len()) ~= conventionPrefix then
+        print(("Group key %s doesn't start with %s"):format(options.key, conventionPrefix))
+    end
+    if type(options.page) ~= 'string' then
+        error('Group must belong to a page')
+    end
+    if type(options.l10n) ~= 'string' then
+        error('Group must have a localization context')
+    end
+    if type(options.name) ~= 'string' then
+        error('Group must have a name localization key')
+    end
+    if type(options.description) ~= 'string' then
+        error('Group must have a description localization key')
+    end
+    if type(options.settings) ~= 'table' then
+        error('Group must have a table of settings')
+    end
+    for _, opt in ipairs(options.settings) do
+        validateSettingOptions(opt)
+    end
 end
 
-local function subscribe(self)
-    local groupKey = rawget(self, 'groupKey')
-    local event = {
-        groupKey = groupKey,
-        object = selfObject,
+local function registerSetting(options)
+    return {
+        key = options.key,
+        saveOnly = options.saveOnly,
+        default = options.default,
+        renderer = options.renderer,
+        argument = options.argument,
+
+        name = options.name,
+        description = options.description,
     }
-    core.sendGlobalEvent(EVENTS.Subscribe, event)
-    if playerObject then
-        playerObject:sendEvent(EVENTS.Subscribe, event)
-    end
-    return groupSubscribeEvent(groupKey)
 end
 
-local groupMeta = {
-    __newindex = function(self, settingKey, value)
-        local group = groupsSection:get(rawget(self, 'groupKey'))
-        local setting = group.settings[settingKey]
-        if not setting then
-            error(('Setting %s does not exist'):format(settingKey))
-        end
-        local section = values(group.key, setting.scope)
-        local event = {
-            groupKey = group.key,
-            settingKey = settingKey,
-            value = value,
-        }
-        if section.set then
-            section:set(settingKey, value)
-            if playerObject then
-                playerObject:sendEvent(EVENTS.SettingChanged, event)
-            else
-                core.sendGlobalEvent(EVENTS.SettingChanged, event)
-            end
-            if subscriptions[group.key] then
-                local eventKey = groupSubscribeEvent(group.key)
-                for _, object in ipairs(subscriptions[group.key]) do
-                    if object then
-                        object:sendEvent(eventKey, event)
-                    else
-                        core.sendGlobalEvent(eventKey, event)
-                    end
-                end
-            end
-        else
-            if isPlayerScope(setting.scope) then
-                error(("Can't change player scope setting %s from global scope"):format(settingKey))
-            else
-                core.sendGlobalEvent(EVENTS.SetValue, event)
-            end
-        end
-    end,
-    __index = function(self, key)
-        if key == "subscribe" then return subscribe end
-        local settingKey = key
-        local group = groupsSection:get(rawget(self, 'groupKey'))
-        local setting = group.settings[settingKey]
-        if not setting then
-            error(('Unknown setting %s'):format(settingKey))
-        end
-        local section = rawget(self, 'sections')[setting.scope]
-        if not section then
-            error(("Can't access setting %s from scope %s"):format(settingKey, setting.scope))
-        end
-        return section:get(setting.key) or setting.default
-    end,
-}
+local function registerGroup(options)
+    validateGroupOptions(options)
+    if groupSection:get(options.key) then
+        error(('Group with key %s was already registered'):format(options.key))
+    end
+    local group = {
+        key = options.key,
+        page = options.page,
+        l10n = options.l10n,
+        name = options.name,
+        description = options.description,
 
-local function group(groupKey)
-    if not groupsSection:get(groupKey) then
-        print(("Settings group %s wasn't registered yet"):format(groupKey))
-    end
-    local s = {}
-    for _, scope in pairs(SCOPE) do
-        local section = values(groupKey, scope)
-        if section then
-            s[scope] = section
+        settings = {},
+    }
+    local valueSection = contextSection(options.key)
+    for _, opt in ipairs(options.settings) do
+        local setting = registerSetting(opt)
+        if group.settings[setting.key] then
+            error(('Duplicate setting key %s'):format(options.key))
+        end
+        group.settings[setting.key] = setting
+        if not valueSection:get(setting.key) then
+            valueSection:set(setting.key, setting.default)
         end
     end
-    return setmetatable({
-        groupKey = groupKey,
-        sections = s,
-    }, groupMeta)
+    groupSection:set(group.key, group)
 end
 
 return {
-    SCOPE = SCOPE,
-    EVENTS = EVENTS,
-    isPlayerScope = isPlayerScope,
-    isSaveScope = isSaveScope,
-    values = values,
-    groups = function()
-        return groupsSection
+    getSection = function(global, key)
+        return (global and storage.globalSection or storage.playerSection)(key)
     end,
-    saveScope = saveScope,
-    loadScope = loadScope,
-    group = group,
-    handleSubscription = handleSubscription,
+    setGlobalEvent = 'OMWSettingsGlobalSet',
+    groupSectionKey = groupSectionKey,
+    onLoad = function(saved)
+        if not saved then return end
+        for groupKey, settings in pairs(saved) do
+            local section = contextSection(groupKey)
+            for key, value in pairs(settings) do
+                section:set(key, value)
+            end
+        end
+    end,
+    onSave = function()
+        local saved = {}
+        for groupKey, group in pairs(groupSection:asTable()) do
+            local section = contextSection(groupKey)
+            saved[groupKey] = {}
+            for key, value in pairs(section:asTable()) do
+                if group.settings[key].saveOnly then
+                    saved[groupKey][key] = value
+                end
+            end
+        end
+        groupSection:reset()
+        return saved
+    end,
+    registerGroup = registerGroup,
+    validateGroupOptions = validateGroupOptions,
 }

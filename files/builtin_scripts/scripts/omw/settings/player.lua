@@ -1,16 +1,15 @@
-local common = require('scripts.omw.settings.common')
-local render = require('scripts.omw.settings.render')
-
 local ui = require('openmw.ui')
 local async = require('openmw.async')
 local util = require('openmw.util')
-local core = require('openmw.core')
+
+local common = require('scripts.omw.settings.common')
+local render = require('scripts.omw.settings.render')
 
 render.registerRenderer('text', function(value, set, arg)
     return {
         type = ui.TYPE.TextEdit,
         props = {
-            size = util.vector2(arg and arg.size or 300, 30),
+            size = util.vector2(arg and arg.size or 150, 30),
             text = value,
             textColor = util.color.rgb(1, 1, 1),
             textSize = 15,
@@ -25,24 +24,12 @@ end)
 return {
     interfaceName = 'Settings',
     interface = {
-        SCOPE = common.SCOPE,
-        group = common.group,
+        registerPage = render.registerPage,
         registerRenderer = render.registerRenderer,
-        registerGroup = function(options)
-            core.sendGlobalEvent(common.EVENTS.RegisterGroup, options)
-        end,
+        registerGroup = common.registerGroup,
     },
     engineHandlers = {
-        onLoad = function(saved)
-            common.loadScope(common.SCOPE.SavePlayer, saved)
-        end,
-        onSave = function()
-            common.saveScope(common.SCOPE.SavePlayer)
-        end,
+        onLoad = common.onLoad,
+        onSave = common.onSave,
     },
-    eventHandlers = {
-        [common.EVENTS.GroupRegistered] = render.onGroupRegistered,
-        [common.EVENTS.SettingChanged] = render.onSettingChanged,
-        [common.EVENTS.Subscribe] = common.handleSubscription,
-    }
 }
