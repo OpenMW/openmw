@@ -247,16 +247,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         // add new achives files presents in current directory
         addArchivesFromDir(currentDir);
 
-        // Display new content with green background
-        QColor background;
         QString tooltip;
-        if (mNewDataDirs.contains(currentDir))
-        {
-            tooltip += "Will be added to the current profile\n";
-            background = Qt::green;
-        }
-        else
-            background = Qt::white;
 
         // add content files presents in current directory
         mSelector->addFiles(currentDir, mNewDataDirs.contains(currentDir));
@@ -265,7 +256,14 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         ui.directoryListWidget->addItem(currentDir);
         auto row = ui.directoryListWidget->count() - 1;
         auto* item = ui.directoryListWidget->item(row);
-        item->setBackground(background);
+
+        // Display new content with green background
+        if (mNewDataDirs.contains(currentDir))
+        {
+            tooltip += "Will be added to the current profile\n";
+            item->setBackground(Qt::green);
+            item->setForeground(Qt::black);
+        }
 
         // deactivate data-local and global data directory: they are always included
         if (currentDir == mDataLocal || currentDir == globalDataDir)
@@ -284,7 +282,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         {
             // Pad to correct vertical alignment
             QPixmap pixmap(QSize(200, 200)); // Arbitrary big number, will be scaled down to widget size
-            pixmap.fill(background);
+            pixmap.fill(ui.directoryListWidget->palette().base().color());
             auto emptyIcon = QIcon(pixmap);
             item->setIcon(emptyIcon);
         }
@@ -447,7 +445,6 @@ void Launcher::DataFilesPage::setProfile (const QString &previous, const QString
     {
         auto* item = ui.archiveListWidget->item(i);
         mKnownArchives.push_back(item->text());
-        item->setBackground(Qt::white);
     }
 
     checkForDefaultProfile();
@@ -704,7 +701,10 @@ void Launcher::DataFilesPage::addArchive(const QString& name, Qt::CheckState sel
     ui.archiveListWidget->insertItem(row, name);
     ui.archiveListWidget->item(row)->setCheckState(selected);
     if (mKnownArchives.filter(name).isEmpty()) // XXX why contains doesn't work here ???
+    {
         ui.archiveListWidget->item(row)->setBackground(Qt::green);
+        ui.archiveListWidget->item(row)->setForeground(Qt::black);
+    }
 }
 
 void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)

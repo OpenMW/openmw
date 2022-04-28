@@ -169,6 +169,15 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
         return QVariant();
     }
 
+    case Qt::ForegroundRole:
+    {
+        if (isNew(file->fileName()))
+        {
+            return QVariant(QColor(Qt::black));
+        }
+        return QVariant();
+    }
+
     case Qt::EditRole:
     case Qt::DisplayRole:
     {
