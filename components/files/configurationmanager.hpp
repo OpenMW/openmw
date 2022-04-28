@@ -25,11 +25,14 @@ struct ConfigurationManager
     virtual ~ConfigurationManager();
 
     void readConfiguration(boost::program_options::variables_map& variables,
-        boost::program_options::options_description& description, bool quiet=false);
+        const boost::program_options::options_description& description, bool quiet=false);
 
-    void processPath(boost::filesystem::path& path, bool create = false) const;
-    void processPaths(Files::PathContainer& dataDirs, bool create = false) const;
-    ///< \param create Try creating the directory, if it does not exist.
+    void filterOutNonExistingPaths(Files::PathContainer& dataDirs) const;
+
+    // Replaces tokens (`?local?`, `?global?`, etc.) in paths. Adds `basePath` prefix for relative paths.
+    void processPath(boost::filesystem::path& path, const boost::filesystem::path& basePath) const;
+    void processPaths(Files::PathContainer& dataDirs, const boost::filesystem::path& basePath) const;
+    void processPaths(boost::program_options::variables_map& variables, const boost::filesystem::path& basePath) const;
 
     /**< Fixed paths */
     const boost::filesystem::path& getGlobalPath() const;
@@ -44,7 +47,7 @@ struct ConfigurationManager
 
     const boost::filesystem::path& getCachePath() const;
 
-    const boost::filesystem::path& getLogPath() const;
+    const boost::filesystem::path& getLogPath() const { return getUserConfigPath(); }
     const boost::filesystem::path& getScreenshotPath() const;
 
     static void addCommonOptions(boost::program_options::options_description& description);
@@ -55,14 +58,12 @@ struct ConfigurationManager
         typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
         typedef std::map<std::string, path_type_f> TokensMappingContainer;
 
-        std::optional<boost::program_options::basic_parsed_options<char>> loadConfig(
+        std::optional<boost::program_options::variables_map> loadConfig(
             const boost::filesystem::path& path,
-            boost::program_options::options_description& description);
+            const boost::program_options::options_description& description) const;
 
         void addExtraConfigDirs(std::stack<boost::filesystem::path>& dirs,
             const boost::program_options::variables_map& variables) const;
-        void addExtraConfigDirs(std::stack<boost::filesystem::path>& dirs,
-            const boost::program_options::basic_parsed_options<char>& options) const;
 
         void setupTokensMapping();
 
@@ -70,7 +71,6 @@ struct ConfigurationManager
 
         FixedPathType mFixedPath;
 
-        boost::filesystem::path mLogPath;
         boost::filesystem::path mUserDataPath;
         boost::filesystem::path mScreenshotPath;
 
@@ -80,16 +80,16 @@ struct ConfigurationManager
 };
 
 boost::program_options::variables_map separateComposingVariables(boost::program_options::variables_map& variables,
-    boost::program_options::options_description& description);
+    const boost::program_options::options_description& description);
 
 void mergeComposingVariables(boost::program_options::variables_map& first, boost::program_options::variables_map& second,
-    boost::program_options::options_description& description);
+    const boost::program_options::options_description& description);
 
 void parseArgs(int argc, const char* const argv[], boost::program_options::variables_map& variables,
-    boost::program_options::options_description& description);
+    const boost::program_options::options_description& description);
 
 void parseConfig(std::istream& stream, boost::program_options::variables_map& variables,
-    boost::program_options::options_description& description);
+    const boost::program_options::options_description& description);
 
 class MaybeQuotedPath : public boost::filesystem::path
 {
@@ -101,6 +101,6 @@ typedef std::vector<MaybeQuotedPath> MaybeQuotedPathContainer;
 
 PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathContainer);
 
-} /* namespace Cfg */
+} /* namespace Files */
 
 #endif /* COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP */
