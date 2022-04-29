@@ -406,6 +406,11 @@ namespace Stereo
         return mViewMatrix[view];
     }
 
+    osg::Matrixd Manager::computeEyeViewOffset(int view) const
+    {
+        return mViewOffsetMatrix[view];
+    }
+
     Eye Manager::getEye(const osgUtil::CullVisitor* cv) const
     {
         if (cv->getIdentifier() == mIdentifierMain)

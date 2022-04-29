@@ -23,13 +23,3 @@ vec4 mw_viewStereoAdjust(vec4 pos)
 {
     return pos;
 }
-
-mat4 mw_viewMatrix()
-{
-    return gl_ModelViewMatrix;
-}
-
-mat4 mw_projectionMatrix()
-{
-    return projectionMatrix;
-}

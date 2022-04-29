@@ -22,20 +22,10 @@ vec4 mw_modelToView(vec4 pos)
 
 vec4 mw_viewToClip(vec4 pos)
 {
-    return projectionMatrixMultiView[gl_ViewID_OVR] * pos;
+    return projectionMatrixMultiView[gl_ViewID_OVR] * viewMatrixMultiView[gl_ViewID_OVR] * pos;
 }
 
 vec4 mw_viewStereoAdjust(vec4 pos)
 {
     return viewMatrixMultiView[gl_ViewID_OVR] * pos;
-}
-
-mat4 mw_viewMatrix()
-{
-    return viewMatrixMultiView[gl_ViewID_OVR] * gl_ModelViewMatrix;
-}
-
-mat4 mw_projectionMatrix()
-{
-    return projectionMatrixMultiView[gl_ViewID_OVR];
 }

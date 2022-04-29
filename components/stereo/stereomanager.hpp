@@ -70,6 +70,7 @@ namespace Stereo
 
         osg::Matrixd computeEyeProjection(int view, bool reverseZ) const;
         osg::Matrixd computeEyeView(int view) const;
+        osg::Matrixd computeEyeViewOffset(int view) const;
 
         //! Sets up any definitions necessary for stereo rendering
         void shaderStereoDefines(Shader::ShaderManager::DefineMap& defines) const;

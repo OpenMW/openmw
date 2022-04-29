@@ -1,7 +1,5 @@
 #version 120
 
-#include "openmw_vertex.h.glsl"
-
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
 #endif
@@ -146,7 +144,7 @@ void main(void)
     if (length(gl_ModelViewMatrix * vec4(position, 1.0)) > @groundcoverFadeEnd)
         gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
     else
-        gl_Position = mw_viewToClip(mw_viewStereoAdjust(viewPos));
+        gl_Position = mw_viewToClip(viewPos);
 
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 

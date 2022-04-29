@@ -1,7 +1,5 @@
 #version 120
 
-#include "openmw_vertex.h.glsl"
-
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
 #endif
