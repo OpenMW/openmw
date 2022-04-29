@@ -244,3 +244,19 @@ console
 
 The console command window.
 Activated by pressing the tilde (~) key.
+
+settings
+--------
+
+:Default:
+	x = 0.33
+
+	y = 0.18
+
+	w = 0.33
+
+	h = 0.66
+The settings window.
+Activated by clicking Options in the main menu.
+
+

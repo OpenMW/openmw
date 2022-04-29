@@ -388,6 +388,7 @@ namespace MWGui
 
         mSettingsWindow = new SettingsWindow();
         mWindows.push_back(mSettingsWindow);
+        trackWindow(mSettingsWindow, "settings");
         mGuiModeStates[GM_Settings] = GuiModeState(mSettingsWindow);
 
         mConfirmationDialog = new ConfirmationDialog();
