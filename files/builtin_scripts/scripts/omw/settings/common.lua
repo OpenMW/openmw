@@ -40,6 +40,9 @@ local function validateGroupOptions(options)
     if type(options.page) ~= 'string' then
         error('Group must belong to a page')
     end
+    if type(options.order) ~= 'number' and type(options.order) ~= 'nil' then
+        error('Group order must be a number')
+    end
     if type(options.l10n) ~= 'string' then
         error('Group must have a localization context')
     end
@@ -78,6 +81,7 @@ local function registerGroup(options)
     local group = {
         key = options.key,
         page = options.page,
+        order = options.order or 0,
         l10n = options.l10n,
         name = options.name,
         description = options.description,

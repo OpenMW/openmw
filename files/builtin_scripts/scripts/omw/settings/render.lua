@@ -154,6 +154,12 @@ local function renderGroup(group, global)
     return layout
 end
 
+local function pageGroupComparator(a, b)
+    return a.order < b.order or (
+        a.order == b.order and a.key < b.key
+    )
+end
+
 local function renderPage(page)
     local l10n = core.l10n(page.l10n)
     local layout = {
@@ -197,7 +203,11 @@ local function renderPage(page)
         },
     }
     local groupsContent = layout.content.groups.content
-    for _, pageGroup in ipairs(groups[page.key]) do
+    local pageGroups = groups[page.key]
+    local sortedGroups = {}
+    for i, v in ipairs(pageGroups) do sortedGroups[i] = v end
+    table.sort(sortedGroups, pageGroupComparator)
+    for _, pageGroup in ipairs(sortedGroups) do
         local group = common.getSection(pageGroup.global, common.groupSectionKey):get(pageGroup.key)
         groupsContent:add(renderGroup(group, pageGroup.global))
     end
@@ -224,17 +234,25 @@ end
 local function onGroupRegistered(global, key)
     local group = common.getSection(global, common.groupSectionKey):get(key)
     groups[group.page] = groups[group.page] or {}
-    table.insert(groups[group.page], {
+    local pageGroup =  {
         key = group.key,
         global = global,
-    })
+        order = group.order,
+    }
+    table.insert(groups[group.page], pageGroup)
     common.getSection(global, group.key):subscribe(onSettingChanged(global))
+
+    local index = 1
+    for _, g in ipairs(groups[group.page]) do
+        if pageGroupComparator(pageGroup, g) then
+            index = index + 1
+        end
+    end
 
     if not pageOptions[group.page] then return end
     local element = pageOptions[group.page].element
     local groupsLayout = element.layout.content.groups
-    -- TODO: make group order deterministic
-    groupsLayout.content:add(renderGroup(group, global))
+    groupsLayout.content:insert(index, renderGroup(group, global))
     element:update()
 end
 local globalGroups = storage.globalSection(common.groupSectionKey)
