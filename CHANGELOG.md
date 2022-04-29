@@ -152,6 +152,7 @@
     Feature #6600: Support NiSortAdjustNode
     Feature #6684: Support NiFltAnimationNode
     Feature #6699: Ignored flag
+    Feature #6706: Save the size of the Options window
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
     Task #6553: Simplify interpreter instruction registration
