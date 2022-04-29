@@ -6,6 +6,9 @@ local groupSection = contextSection(groupSectionKey)
 groupSection:removeOnExit()
 
 local function validateSettingOptions(options)
+    if type(options) ~= 'table' then
+        error('Setting options must be a table')
+    end
     if type(options.key) ~= 'string' then
         error('Setting must have a key')
     end
@@ -24,6 +27,9 @@ local function validateSettingOptions(options)
 end
 
 local function validateGroupOptions(options)
+    if type(options) ~= 'table' then
+        error('Group options must be a table')
+    end
     if type(options.key) ~= 'string' then
         error('Group must have a key')
     end

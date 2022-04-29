@@ -249,6 +249,9 @@ storage.playerSection(common.groupSectionKey):subscribe(async:callback(function(
 end))
 
 local function registerPage(options)
+    if type(options) ~= 'table' then
+        error('Page options must be a table')
+    end
     if type(options.key) ~= 'string' then
         error('Page must have a key')
     end
