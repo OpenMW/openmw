@@ -11,6 +11,7 @@ local function registerRenderer(name, renderFunction)
     renderers[name] = renderFunction
 end
 
+local pages = {}
 local groups = {}
 local pageOptions = {}
 
@@ -160,6 +161,25 @@ local function pageGroupComparator(a, b)
     )
 end
 
+local function generateSearchHints(page)
+    local hints = {}
+    local l10n = core.l10n(page.l10n)
+    table.insert(hints, l10n(page.name))
+    table.insert(hints, l10n(page.description))
+    local pageGroups = groups[page.key]
+    for _, pageGroup in pairs(pageGroups) do
+        local group = common.getSection(pageGroup.global, common.groupSectionKey):get(pageGroup.key)
+        local l10n = core.l10n(group.l10n)
+        table.insert(hints, l10n(group.name))
+        table.insert(hints, l10n(group.description))
+        for _, setting in pairs(group.settings) do
+            table.insert(hints, l10n(setting.name))
+            table.insert(hints, l10n(setting.description))
+        end
+    end
+    return table.concat(hints, ' ')
+end
+
 local function renderPage(page)
     local l10n = core.l10n(page.l10n)
     local layout = {
@@ -214,7 +234,7 @@ local function renderPage(page)
     return {
         name = l10n(page.name),
         element = ui.create(layout),
-        searchHints = '',
+        searchHints = generateSearchHints(page),
     }
 end
 
@@ -242,18 +262,12 @@ local function onGroupRegistered(global, key)
     table.insert(groups[group.page], pageGroup)
     common.getSection(global, group.key):subscribe(onSettingChanged(global))
 
-    local index = 1
-    for _, g in ipairs(groups[group.page]) do
-        if pageGroupComparator(pageGroup, g) then
-            index = index + 1
-        end
+    if not pages[group.page] then return end
+    local options = renderPage(pages[group.page])
+    pageOptions[group.page].element:destroy()
+    for k, v in pairs(options) do
+        pageOptions[group.page][k] = v
     end
-
-    if not pageOptions[group.page] then return end
-    local element = pageOptions[group.page].element
-    local groupsLayout = element.layout.content.groups
-    groupsLayout.content:insert(index, renderGroup(group, global))
-    element:update()
 end
 local globalGroups = storage.globalSection(common.groupSectionKey)
 for groupKey in pairs(globalGroups:asTable()) do
@@ -288,6 +302,7 @@ local function registerPage(options)
         name = options.name,
         description = options.description,
     }
+    pages[page.key] = page
     groups[page.key] = groups[page.key] or {}
     pageOptions[page.key] = renderPage(page)
     ui.registerSettingsPage(pageOptions[page.key])
