@@ -73,8 +73,9 @@ void main()
     vec3 diffuseLight, ambientLight;
     doLighting(passViewPos, normalize(viewNormal), shadowing, diffuseLight, ambientLight);
     lighting = diffuseLight + ambientLight;
-    clampLightingResult(lighting);
 #endif
+
+    clampLightingResult(lighting);
 
     gl_FragData[0].xyz *= lighting;
 
