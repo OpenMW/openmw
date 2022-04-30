@@ -10,6 +10,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/ClipNode>
 #include <osg/FrontFace>
+#include <osg/ViewportIndexed>
 
 #include <osgDB/ReadFile>
 
@@ -33,6 +34,7 @@
 
 #include <components/misc/constants.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include <components/nifosg/controller.hpp>
 
@@ -43,6 +45,8 @@
 #include <components/fallback/fallback.hpp>
 
 #include "../mwworld/cellstore.hpp"
+
+#include "../mwbase/environment.hpp"
 
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
@@ -166,7 +170,7 @@ private:
 class InheritViewPointCallback : public SceneUtil::NodeCallback<InheritViewPointCallback, osg::Node*, osgUtil::CullVisitor*>
 {
 public:
-    InheritViewPointCallback() {}
+        InheritViewPointCallback() {}
 
     void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
     {
@@ -260,7 +264,7 @@ class Refraction : public SceneUtil::RTTNode
 {
 public:
     Refraction(uint32_t rttSize)
-        : RTTNode(rttSize, rttSize, 1, false)
+        : RTTNode(rttSize, rttSize, 0, false, 1, StereoAwareness::Aware)
         , mNodeMask(Refraction::sDefaultCullMask)
     {
         mClipCullNode = new ClipCullNode;
@@ -335,7 +339,7 @@ class Reflection : public SceneUtil::RTTNode
 {
 public:
     Reflection(uint32_t rttSize, bool isInterior)
-        : RTTNode(rttSize, rttSize, 0, false)
+        : RTTNode(rttSize, rttSize, 0, false, 0, StereoAwareness::Aware)
     {
         setInterior(isInterior);
         mClipCullNode = new ClipCullNode;
@@ -458,6 +462,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     mWaterGeom->setDrawCallback(new DepthClampCallback);
     mWaterGeom->setNodeMask(Mask_Water);
     mWaterGeom->setDataVariance(osg::Object::STATIC);
+    mWaterGeom->setName("Water Geometry");
 
     mWaterNode = new osg::PositionAttitudeTransform;
     mWaterNode->setName("Water Root");
@@ -468,6 +473,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     osg::ref_ptr<osg::Geometry> geom2 (osg::clone(mWaterGeom.get(), osg::CopyOp::DEEP_COPY_NODES));
     createSimpleWaterStateSet(geom2, Fallback::Map::getFloat("Water_Map_Alpha"));
     geom2->setNodeMask(Mask_SimpleWater);
+    geom2->setName("Simple Water Geometry");
     mWaterNode->addChild(geom2);
  
     mSceneRoot->addChild(mWaterNode);
@@ -679,6 +685,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     const auto rippleDetail = std::clamp(Settings::Manager::getInt("rain ripple detail", "Water"), 0, 2);
     defineMap["rain_ripple_detail"] = std::to_string(rippleDetail);
 
+    Stereo::Manager::instance().shaderStereoDefines(defineMap);
 
     Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
     osg::ref_ptr<osg::Shader> vertexShader(shaderMgr.getShader("water_vertex.glsl", defineMap, osg::Shader::VERTEX));
@@ -694,6 +701,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     normalMap->setMaxAnisotropy(16);
     normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
     normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+    
 
     mRainIntensityUpdater = new RainIntensityUpdater();
     node->setUpdateCallback(mRainIntensityUpdater);

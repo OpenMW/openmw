@@ -18,8 +18,10 @@ set(SHADER_FILES
     objects_fragment.glsl
     openmw_fragment.glsl
     openmw_fragment.h.glsl
+    openmw_fragment_multiview.glsl
     openmw_vertex.glsl
     openmw_vertex.h.glsl
+    openmw_vertex_multiview.glsl
     terrain_vertex.glsl
     terrain_fragment.glsl
     lighting.glsl

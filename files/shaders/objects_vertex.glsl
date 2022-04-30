@@ -9,7 +9,6 @@
 #endif
 
 #include "openmw_vertex.h.glsl"
-
 #if @diffuseMap
 varying vec2 diffuseMapUV;
 #endif

@@ -573,17 +573,17 @@ namespace MWGui
     void WindowManager::enableScene(bool enable)
     {
         unsigned int disablemask = MWRender::Mask_GUI|MWRender::Mask_PreCompile;
-        if (!enable && mViewer->getCamera()->getCullMask() != disablemask)
+        if (!enable && getCullMask() != disablemask)
         {
             mOldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
-            mOldCullMask = mViewer->getCamera()->getCullMask();
+            mOldCullMask = getCullMask();
             mViewer->getUpdateVisitor()->setTraversalMask(disablemask);
-            mViewer->getCamera()->setCullMask(disablemask);
+            setCullMask(disablemask);
         }
-        else if (enable && mViewer->getCamera()->getCullMask() == disablemask)
+        else if (enable && getCullMask() == disablemask)
         {
             mViewer->getUpdateVisitor()->setTraversalMask(mOldUpdateMask);
-            mViewer->getCamera()->setCullMask(mOldCullMask);
+            setCullMask(mOldCullMask);
         }
     }
 
@@ -1225,6 +1225,21 @@ namespace MWGui
         mKeyboardNavigation->restoreFocus(mode);
 
         updateVisible();
+    }
+
+    void WindowManager::setCullMask(uint32_t mask)
+    {
+        mViewer->getCamera()->setCullMask(mask);
+
+        // We could check whether stereo is enabled here, but these methods are 
+        // trivial and have no effect in mono or multiview so just call them regardless.
+        mViewer->getCamera()->setCullMaskLeft(mask);
+        mViewer->getCamera()->setCullMaskRight(mask);
+    }
+
+    uint32_t WindowManager::getCullMask()
+    {
+        return mViewer->getCamera()->getCullMask();
     }
 
     void WindowManager::popGuiMode(bool noSound)

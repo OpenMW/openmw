@@ -18,6 +18,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/stereo/stereomanager.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
@@ -646,6 +647,8 @@ namespace Shader
         }
 
         defineMap["softParticles"] = reqs.mSoftParticles ? "1" : "0";
+
+        Stereo::Manager::instance().shaderStereoDefines(defineMap);
 
         std::string shaderPrefix;
         if (!node.getUserValue("shaderPrefix", shaderPrefix))

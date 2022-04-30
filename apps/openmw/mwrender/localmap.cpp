@@ -15,12 +15,14 @@
 #include <components/esm3/fogstate.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/misc/constants.hpp>
+#include <components/stereo/multiview.hpp>
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/sceneutil/rtt.hpp>
 #include <components/files/memorystream.hpp>
 #include <components/resource/scenemanager.hpp>
 
@@ -34,36 +36,6 @@
 
 namespace
 {
-
-    class CameraLocalUpdateCallback : public SceneUtil::NodeCallback<CameraLocalUpdateCallback, osg::Camera*>
-    {
-    public:
-        CameraLocalUpdateCallback(MWRender::LocalMap* parent)
-            : mRendered(false)
-            , mParent(parent)
-        {
-        }
-
-        void operator()(osg::Camera* node, osg::NodeVisitor*)
-        {
-            if (mRendered)
-                node->setNodeMask(0);
-
-            if (!mRendered)
-            {
-                mRendered = true;
-                mParent->markForRemoval(node);
-            }
-
-            // Note, we intentionally do not traverse children here. The map camera's scene data is the same as the master camera's,
-            // so it has been updated already.
-        }
-
-    private:
-        bool mRendered;
-        MWRender::LocalMap* mParent;
-    };
-
     float square(float val)
     {
         return val*val;
@@ -82,6 +54,28 @@ namespace
 
 namespace MWRender
 {
+    class LocalMapRenderToTexture: public SceneUtil::RTTNode
+    {
+    public:
+        LocalMapRenderToTexture(osg::Node* sceneRoot, int res, int mapWorldSize,
+            float x, float y, const osg::Vec3d& upVector, float zmin, float zmax);
+
+        void setDefaults(osg::Camera* camera) override;
+
+        bool isActive() { return mActive; }
+        void setIsActive(bool active) { mActive = active; }
+
+        osg::Node* mSceneRoot;
+        osg::Matrix mProjectionMatrix;
+        osg::Matrix mViewMatrix;
+        bool mActive;
+    };
+
+    class CameraLocalUpdateCallback : public SceneUtil::NodeCallback<CameraLocalUpdateCallback, LocalMapRenderToTexture*>
+    {
+    public:
+        void operator()(LocalMapRenderToTexture* node, osg::NodeVisitor* nv);
+    };
 
 LocalMap::LocalMap(osg::Group* root)
     : mRoot(root)
@@ -104,10 +98,8 @@ LocalMap::LocalMap(osg::Group* root)
 
 LocalMap::~LocalMap()
 {
-    for (auto& camera : mActiveCameras)
-        removeCamera(camera);
-    for (auto& camera : mCamerasPendingRemoval)
-        removeCamera(camera);
+    for (auto& rtt : mLocalMapRTTs)
+        mRoot->removeChild(rtt);
 }
 
 const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle)
@@ -173,93 +165,14 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
     }
 }
 
-osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, float width, float height, const osg::Vec3d& upVector, float zmin, float zmax)
+void LocalMap::setupRenderToTexture(int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax)
 {
-    osg::ref_ptr<osg::Camera> camera (new osg::Camera);
+    mLocalMapRTTs.emplace_back(new LocalMapRenderToTexture(mSceneRoot, mMapResolution, mMapWorldSize, left, top, upVector, zmin, zmax));
 
-    if (SceneUtil::AutoDepth::isReversed())
-        camera->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10));
-    else
-        camera->setProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10);
+    mRoot->addChild(mLocalMapRTTs.back());
 
-    camera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
-    camera->setViewMatrixAsLookAt(osg::Vec3d(x, y, zmax + 5), osg::Vec3d(x, y, zmin), upVector);
-    camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT);
-    camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
-    camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 1.f));
-    camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    camera->setRenderOrder(osg::Camera::PRE_RENDER);
-
-    camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
-    camera->setNodeMask(Mask_RenderToTexture);
-
-    // Disable small feature culling, it's not going to be reliable for this camera
-    osg::Camera::CullingMode cullingMode = (osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING) & ~(osg::Camera::SMALL_FEATURE_CULLING);
-    camera->setCullingMode(cullingMode);
-
-    SceneUtil::setCameraClearDepth(camera);
-
-    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-    stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
-    stateset->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(camera->getProjectionMatrix())), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
-    // assign large value to effectively turn off fog
-    // shaders don't respect glDisable(GL_FOG)
-    osg::ref_ptr<osg::Fog> fog (new osg::Fog);
-    fog->setStart(10000000);
-    fog->setEnd(10000000);
-    stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
-
-    osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
-    lightmodel->setAmbientIntensity(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
-    stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
-    osg::ref_ptr<osg::Light> light = new osg::Light;
-    light->setPosition(osg::Vec4(-0.3f, -0.3f, 0.7f, 0.f));
-    light->setDiffuse(osg::Vec4(0.7f, 0.7f, 0.7f, 1.f));
-    light->setAmbient(osg::Vec4(0,0,0,1));
-    light->setSpecular(osg::Vec4(0,0,0,0));
-    light->setLightNum(0);
-    light->setConstantAttenuation(1.f);
-    light->setLinearAttenuation(0.f);
-    light->setQuadraticAttenuation(0.f);
-
-    osg::ref_ptr<osg::LightSource> lightSource = new osg::LightSource;
-    lightSource->setLight(light);
-
-    lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
-    SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
-
-    // override sun for local map 
-    SceneUtil::configureStateSetSunOverride(static_cast<SceneUtil::LightManager*>(mSceneRoot.get()), light, stateset);
-
-    camera->addChild(lightSource);
-    camera->setStateSet(stateset);
-    camera->setViewport(0, 0, mMapResolution, mMapResolution);
-    camera->setUpdateCallback(new CameraLocalUpdateCallback(this));
-
-    return camera;
-}
-
-void LocalMap::setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int y)
-{
-    osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
-    texture->setTextureSize(mMapResolution, mMapResolution);
-    texture->setInternalFormat(GL_RGB);
-    texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-    texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-    texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-    texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-
-    SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER, texture);
-
-    camera->addChild(mSceneRoot);
-    mRoot->addChild(camera);
-    mActiveCameras.push_back(camera);
-
-    MapSegment& segment = mInterior? mInteriorSegments[std::make_pair(x, y)] : mExteriorSegments[std::make_pair(x, y)];
-    segment.mMapTexture = texture;
+    MapSegment& segment = mInterior? mInteriorSegments[std::make_pair(segment_x, segment_y)] : mExteriorSegments[std::make_pair(segment_x, segment_y)];
+    segment.mMapTexture = static_cast<osg::Texture2D*>(mLocalMapRTTs.back()->getColorTexture(nullptr));
 }
 
 void LocalMap::requestMap(const MWWorld::CellStore* cell)
@@ -321,33 +234,19 @@ osg::ref_ptr<osg::Texture2D> LocalMap::getFogOfWarTexture(int x, int y)
         return found->second.mFogOfWarTexture;
 }
 
-void LocalMap::removeCamera(osg::Camera *cam)
-{
-    cam->removeChildren(0, cam->getNumChildren());
-    mRoot->removeChild(cam);
-}
-
-void LocalMap::markForRemoval(osg::Camera *cam)
-{
-    CameraVector::iterator found = std::find(mActiveCameras.begin(), mActiveCameras.end(), cam);
-    if (found == mActiveCameras.end())
-    {
-        Log(Debug::Error) << "Error: trying to remove an inactive camera";
-        return;
-    }
-    mActiveCameras.erase(found);
-    mCamerasPendingRemoval.push_back(cam);
-}
-
 void LocalMap::cleanupCameras()
 {
-    if (mCamerasPendingRemoval.empty())
-        return;
-
-    for (auto& camera : mCamerasPendingRemoval)
-        removeCamera(camera);
-
-    mCamerasPendingRemoval.clear();
+    auto it = mLocalMapRTTs.begin();
+    while (it != mLocalMapRTTs.end())
+    {
+        if (!(*it)->isActive())
+        {
+            mRoot->removeChild(*it);
+            it = mLocalMapRTTs.erase(it);
+        }
+        else
+            it++;
+    }
 }
 
 void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
@@ -361,9 +260,9 @@ void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
     float zmin = bound.center().z() - bound.radius();
     float zmax = bound.center().z() + bound.radius();
 
-    osg::ref_ptr<osg::Camera> camera = createOrthographicCamera(x*mMapWorldSize + mMapWorldSize/2.f, y*mMapWorldSize + mMapWorldSize/2.f, mMapWorldSize, mMapWorldSize,
-                                                                osg::Vec3d(0,1,0), zmin, zmax);
-    setupRenderToTexture(camera, cell->getCell()->getGridX(), cell->getCell()->getGridY());
+    setupRenderToTexture(cell->getCell()->getGridX(), cell->getCell()->getGridY(), 
+        x * mMapWorldSize + mMapWorldSize / 2.f, y * mMapWorldSize + mMapWorldSize / 2.f,
+        osg::Vec3d(0, 1, 0), zmin, zmax);
 
     MapSegment& segment = mExteriorSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
     if (!segment.mFogOfWarImage)
@@ -501,11 +400,8 @@ void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
 
             osg::Vec2f pos = osg::Vec2f(rotatedCenter.x(), rotatedCenter.y()) + center;
 
-            osg::ref_ptr<osg::Camera> camera = createOrthographicCamera(pos.x(), pos.y(),
-                                                                        mMapWorldSize, mMapWorldSize,
-                                                                        osg::Vec3f(north.x(), north.y(), 0.f), zMin, zMax);
-
-            setupRenderToTexture(camera, x, y);
+            setupRenderToTexture(x, y, pos.x(), pos.y(),
+                osg::Vec3f(north.x(), north.y(), 0.f), zMin, zMax);
 
             auto coords = std::make_pair(x,y);
             MapSegment& segment = mInteriorSegments[coords];
@@ -682,6 +578,7 @@ void LocalMap::MapSegment::createFogOfWarTexture()
     mFogOfWarTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     mFogOfWarTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
     mFogOfWarTexture->setUnRefImageDataAfterApply(false);
+    mFogOfWarTexture->setImage(mFogOfWarImage);
 }
 
 void LocalMap::MapSegment::initFogOfWar()
@@ -697,7 +594,6 @@ void LocalMap::MapSegment::initFogOfWar()
     memcpy(mFogOfWarImage->data(), &data[0], data.size()*4);
 
     createFogOfWarTexture();
-    mFogOfWarTexture->setImage(mFogOfWarImage);
 }
 
 void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
@@ -730,7 +626,6 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
     mFogOfWarImage->dirty();
 
     createFogOfWarTexture();
-    mFogOfWarTexture->setImage(mFogOfWarImage);
     mHasFogState = true;
 }
 
@@ -760,6 +655,109 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
 
     std::string data = ostream.str();
     fog.mImageData = std::vector<char>(data.begin(), data.end());
+}
+
+LocalMapRenderToTexture::LocalMapRenderToTexture(osg::Node* sceneRoot, int res, int mapWorldSize, float x, float y, const osg::Vec3d& upVector, float zmin, float zmax)
+    : RTTNode(res, res, 0, false, 0, StereoAwareness::Unaware_MultiViewShaders)
+    , mSceneRoot(sceneRoot)
+    , mActive(true)
+{
+    if (SceneUtil::AutoDepth::isReversed())
+        mProjectionMatrix = SceneUtil::getReversedZProjectionMatrixAsOrtho(-mapWorldSize / 2, mapWorldSize / 2, -mapWorldSize / 2, mapWorldSize / 2, 5, (zmax - zmin) + 10);
+    else
+        mProjectionMatrix.makeOrtho(-mapWorldSize / 2, mapWorldSize / 2, -mapWorldSize / 2, mapWorldSize / 2, 5, (zmax - zmin) + 10);
+
+    mViewMatrix.makeLookAt(osg::Vec3d(x, y, zmax + 5), osg::Vec3d(x, y, zmin), upVector);
+
+    setUpdateCallback(new CameraLocalUpdateCallback);
+}
+
+void LocalMapRenderToTexture::setDefaults(osg::Camera* camera)
+{
+    // Disable small feature culling, it's not going to be reliable for this camera
+    osg::Camera::CullingMode cullingMode = (osg::Camera::DEFAULT_CULLING | osg::Camera::FAR_PLANE_CULLING) & ~(osg::Camera::SMALL_FEATURE_CULLING);
+    camera->setCullingMode(cullingMode);
+
+    SceneUtil::setCameraClearDepth(camera);
+    camera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
+    camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT);
+    camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
+    camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 1.f));
+    camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    camera->setRenderOrder(osg::Camera::PRE_RENDER);
+
+    camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
+    camera->setCullMaskLeft(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
+    camera->setCullMaskRight(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
+    camera->setNodeMask(Mask_RenderToTexture);
+    camera->setProjectionMatrix(mProjectionMatrix);
+    camera->setViewMatrix(mViewMatrix);
+
+    auto* stateset = camera->getOrCreateStateSet();
+
+    stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
+    stateset->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(mProjectionMatrix)), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
+    if (Stereo::getMultiview())
+    {
+        auto* viewUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "viewMatrixMultiView", 2);
+        auto* projUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrixMultiView", 2);
+        viewUniform->setElement(0, osg::Matrix::identity());
+        viewUniform->setElement(1, osg::Matrix::identity());
+        projUniform->setElement(0, mProjectionMatrix);
+        projUniform->setElement(1, mProjectionMatrix);
+        stateset->addUniform(viewUniform, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        stateset->addUniform(projUniform, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+    }
+
+    // assign large value to effectively turn off fog
+    // shaders don't respect glDisable(GL_FOG)
+    osg::ref_ptr<osg::Fog> fog(new osg::Fog);
+    fog->setStart(10000000);
+    fog->setEnd(10000000);
+    stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+
+    osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
+    lightmodel->setAmbientIntensity(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
+    stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
+    osg::ref_ptr<osg::Light> light = new osg::Light;
+    light->setPosition(osg::Vec4(-0.3f, -0.3f, 0.7f, 0.f));
+    light->setDiffuse(osg::Vec4(0.7f, 0.7f, 0.7f, 1.f));
+    light->setAmbient(osg::Vec4(0, 0, 0, 1));
+    light->setSpecular(osg::Vec4(0, 0, 0, 0));
+    light->setLightNum(0);
+    light->setConstantAttenuation(1.f);
+    light->setLinearAttenuation(0.f);
+    light->setQuadraticAttenuation(0.f);
+
+    osg::ref_ptr<osg::LightSource> lightSource = new osg::LightSource;
+    lightSource->setLight(light);
+
+    lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
+    SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
+
+    // override sun for local map 
+    SceneUtil::configureStateSetSunOverride(static_cast<SceneUtil::LightManager*>(mSceneRoot), light, stateset);
+
+    camera->addChild(lightSource);
+    camera->addChild(mSceneRoot);
+}
+
+void CameraLocalUpdateCallback::operator()(LocalMapRenderToTexture* node, osg::NodeVisitor* nv)
+{
+    if (!node->isActive())
+        node->setNodeMask(0);
+
+    if (node->isActive())
+    {
+        node->setIsActive(false);
+    }
+
+    // Rtt-nodes do not forward update traversal to their cameras so we can traverse safely.
+    // Traverse in case there are nested callbacks.
+    traverse(node, nv);
 }
 
 }

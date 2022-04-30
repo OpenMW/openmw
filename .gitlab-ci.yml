@@ -378,7 +378,7 @@ variables: &tests-targets
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
     - cmake --build . --config $config --target ($targets.Split(','))
@@ -422,6 +422,14 @@ Windows_Ninja_Engine_Release:
     - .Windows_Ninja_Base
   variables:
     <<: *engine-targets
+    config: "Release"
+
+Windows_Ninja_Engine_Release_MultiView:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *engine-targets
+    multiview: "-M"
     config: "Release"
 
 Windows_Ninja_Engine_Debug:
@@ -506,7 +514,7 @@ Windows_Ninja_Tests_RelWithDebInfo:
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C $multiview
     - cd MSVC2019_64
     - cmake --build . --config $config --target ($targets.Split(','))
     - ccache --show-stats

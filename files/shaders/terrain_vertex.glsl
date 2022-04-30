@@ -9,7 +9,6 @@
 #endif
 
 #include "openmw_vertex.h.glsl"
-
 varying vec2 uv;
 varying float euclideanDepth;
 varying float linearDepth;

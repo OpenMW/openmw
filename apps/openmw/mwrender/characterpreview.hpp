@@ -26,6 +26,7 @@ namespace MWRender
 
     class NpcAnimation;
     class DrawOnceCallback;
+    class CharacterPreviewRTTNode;
 
     class CharacterPreview
     {
@@ -56,10 +57,9 @@ namespace MWRender
 
         osg::ref_ptr<osg::Group> mParent;
         Resource::ResourceSystem* mResourceSystem;
-        osg::ref_ptr<osg::Texture2D> mTexture;
         osg::ref_ptr<osg::StateSet> mTextureStateSet;
-        osg::ref_ptr<osg::Camera> mCamera;
         osg::ref_ptr<DrawOnceCallback> mDrawOnceCallback;
+        osg::ref_ptr<CharacterPreviewRTTNode> mRTTNode;
 
         osg::Vec3f mPosition;
         osg::Vec3f mLookAt;

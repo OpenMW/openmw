@@ -61,7 +61,7 @@ add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue pathgridutil waterutil writescene serialize optimizer
     actorutil detourdebugdraw navmesh agentpath shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
-    screencapture depth
+    screencapture depth color
     )
 
 add_component_dir (nif
@@ -194,6 +194,10 @@ add_component_dir (esm4
 add_component_dir (misc
     constants utf8stream stringops resourcehelpers rng messageformatparser weakcache thread
     compression osguservalues errorMarker color
+    )
+
+add_component_dir (stereo
+    frustum multiview stereomanager types
     )
 
 add_component_dir (debug

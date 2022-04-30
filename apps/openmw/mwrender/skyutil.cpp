@@ -21,6 +21,7 @@
 #include <osgParticle/Particle>
 
 #include <components/misc/rng.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -602,6 +603,38 @@ namespace MWRender
         }
     }
 
+
+    class SkyMultiviewStatesetUpdater: public SceneUtil::StateSetUpdater
+    {
+    public:
+        SkyMultiviewStatesetUpdater()
+        {
+        }
+
+    protected:
+        virtual void setDefaults(osg::StateSet* stateset)
+        {
+            stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "viewMatrixMultiView", 2), osg::StateAttribute::OVERRIDE);
+        }
+
+        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
+        {
+            auto* viewMatrixMultiViewUniform = stateset->getUniform("viewMatrixMultiView");
+            auto& sm = Stereo::Manager::instance();
+
+            for (int view : {0, 1})
+            {
+                auto viewOffsetMatrix = sm.computeEyeViewOffset(view);
+                for (int col : {0, 1, 2})
+                    viewOffsetMatrix(3, col) = 0;
+
+                viewMatrixMultiViewUniform->setElement(view, viewOffsetMatrix);
+            }
+        }
+
+    private:
+    };
+
     CameraRelativeTransform::CameraRelativeTransform()
     {
         // Culling works in node-local space, not in camera space, so we can't cull this node correctly
@@ -610,6 +643,7 @@ namespace MWRender
         setCullingActive(false);
 
         addCullCallback(new CameraRelativeTransformCullCallback);
+        addCullCallback(new SkyMultiviewStatesetUpdater);
     }
 
     CameraRelativeTransform::CameraRelativeTransform(const CameraRelativeTransform& copy, const osg::CopyOp& copyop)

@@ -9,6 +9,26 @@
 #define GL_DEPTH32F_STENCIL8_NV 0x8DAC
 #endif
 
+#ifndef GL_DEPTH32F_STENCIL8
+#define GL_DEPTH32F_STENCIL8 0x8CAD
+#endif
+
+#ifndef GL_FLOAT_32_UNSIGNED_INT_24_8_REV
+#define GL_FLOAT_32_UNSIGNED_INT_24_8_REV 0x8DAD
+#endif
+
+#ifndef GL_DEPTH24_STENCIL8
+#define GL_DEPTH24_STENCIL8 0x88F0
+#endif
+
+#ifndef GL_DEPTH_STENCIL_EXT
+#define GL_DEPTH_STENCIL_EXT 0x84F9
+#endif
+
+#ifndef GL_UNSIGNED_INT_24_8_EXT
+#define GL_UNSIGNED_INT_24_8_EXT 0x84FA
+#endif
+
 namespace SceneUtil
 {
     // Sets camera clear depth to 0 if reversed depth buffer is in use, 1 otherwise.
@@ -27,6 +47,18 @@ namespace SceneUtil
 
     // Returns true if the GL format is a floating point depth format.
     bool isFloatingPointDepthFormat(GLenum format);
+
+    // Returns true if the GL format is a depth format
+    bool isDepthFormat(GLenum format);
+
+    // Returns true if the GL format is a depth+stencil format
+    bool isDepthStencilFormat(GLenum format);
+
+    // Returns the corresponding source format and type for the given internal format
+    void getDepthFormatSourceFormatAndType(GLenum internalFormat, GLenum& sourceFormat, GLenum& sourceType);
+
+    // Converts depth-stencil formats to their corresponding depth formats.
+    GLenum getDepthFormatOfDepthStencilFormat(GLenum internalFormat);
 
     // Brief wrapper around an osg::Depth that applies the reversed depth function when a reversed depth buffer is in use
     class AutoDepth : public osg::Depth
@@ -72,9 +104,29 @@ namespace SceneUtil
             return AutoDepth::sReversed;
         }
 
+        static void setDepthFormat(GLenum format);
+
+        static GLenum depthInternalFormat()
+        {
+            return AutoDepth::sDepthInternalFormat;
+        }
+
+        static GLenum depthSourceFormat()
+        {
+            return AutoDepth::sDepthSourceFormat;
+        }
+
+        static GLenum depthSourceType()
+        {
+            return AutoDepth::sDepthSourceType;
+        }
+
     private:
 
         static inline bool sReversed = false;
+        static inline GLenum sDepthSourceFormat = GL_DEPTH_COMPONENT;
+        static inline GLenum sDepthInternalFormat = GL_DEPTH_COMPONENT24;
+        static inline GLenum sDepthSourceType = GL_UNSIGNED_INT;
 
         osg::Depth::Function getReversedDepthFunction() const
         {
@@ -115,6 +167,23 @@ namespace SceneUtil
 
             traverse(node);
         }
+    };
+
+    class SelectDepthFormatOperation : public osg::GraphicsOperation
+    {
+    public:
+        SelectDepthFormatOperation() : GraphicsOperation("SelectDepthFormatOperation", false)
+        {}
+
+        void operator()(osg::GraphicsContext* graphicsContext) override;
+
+        void setSupportedFormats(const std::vector<GLenum>& supportedFormats)
+        {
+            mSupportedFormats = supportedFormats;
+        }
+
+    private:
+        std::vector<GLenum> mSupportedFormats;
     };
 }
 
