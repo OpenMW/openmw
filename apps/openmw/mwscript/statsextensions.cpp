@@ -1208,6 +1208,7 @@ namespace MWScript
             void execute (Interpreter::Runtime& runtime) override
             {
                 // dummy
+                runtime.pop();
                 runtime.push(0);
             }
         };

@@ -193,18 +193,23 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if (axis == "x")
+                    float ret = 0.f;
+                    if (!axis.empty())
                     {
-                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[0]));
+                        if (axis[0] == 'x')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[0]);
+                        }
+                        else if (axis[0] == 'y')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[1]);
+                        }
+                        else if (axis[0] == 'z')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[2]);
+                        }
                     }
-                    else if (axis == "y")
-                    {
-                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[1]));
-                    }
-                    else if (axis == "z")
-                    {
-                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[2]));
-                    }
+                    runtime.push(ret);
                 }
         };
 
@@ -220,18 +225,23 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if (axis=="x")
+                    float ret = 0.f;
+                    if (!axis.empty())
                     {
-                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]));
+                        if (axis[0] == 'x')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
+                        }
+                        else if (axis[0] == 'y')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
+                        }
+                        else if (axis[0] == 'z')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]);
+                        }
                     }
-                    else if (axis=="y")
-                    {
-                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]));
-                    }
-                    else if (axis=="z")
-                    {
-                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]));
-                    }
+                    runtime.push(ret);
                 }
         };
 
@@ -247,18 +257,23 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "x")
+                    float ret = 0.f;
+                    if (!axis.empty())
                     {
-                        runtime.push(ptr.getRefData().getPosition().pos[0]);
+                        if (axis[0] == 'x')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().pos[0]);
+                        }
+                        else if (axis[0] == 'y')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().pos[1]);
+                        }
+                        else if (axis[0] == 'z')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().pos[2]);
+                        }
                     }
-                    else if(axis == "y")
-                    {
-                        runtime.push(ptr.getRefData().getPosition().pos[1]);
-                    }
-                    else if(axis == "z")
-                    {
-                        runtime.push(ptr.getRefData().getPosition().pos[2]);
-                    }
+                    runtime.push(ret);
                 }
         };
 
@@ -271,13 +286,13 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (!ptr.isInCell())
-                        return;
-
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float pos = runtime[0].mFloat;
                     runtime.pop();
+
+                    if (!ptr.isInCell())
+                        return;
 
                     // Note: SetPos does not skip weather transitions in vanilla engine, so we do not call setTeleported(true) here.
 
@@ -328,18 +343,23 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "x")
+                    float ret = 0.f;
+                    if (!axis.empty())
                     {
-                        runtime.push(ptr.getCellRef().getPosition().pos[0]);
+                        if (axis[0] == 'x')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().pos[0]);
+                        }
+                        else if (axis[0] == 'y')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().pos[1]);
+                        }
+                        else if (axis[0] == 'z')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().pos[2]);
+                        }
                     }
-                    else if(axis == "y")
-                    {
-                        runtime.push(ptr.getCellRef().getPosition().pos[1]);
-                    }
-                    else if(axis == "z")
-                    {
-                        runtime.push(ptr.getCellRef().getPosition().pos[2]);
-                    }
+                    runtime.push(ret);
                 }
         };
 
@@ -352,15 +372,6 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (ptr.getContainerStore())
-                        return;
-
-                    bool isPlayer = ptr == MWMechanics::getPlayer();
-                    if (isPlayer)
-                    {
-                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
-                    }
-
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
                     Interpreter::Type_Float y = runtime[0].mFloat;
@@ -371,6 +382,15 @@ namespace MWScript
                     runtime.pop();
                     std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
+
+                    if (ptr.getContainerStore())
+                        return;
+
+                    bool isPlayer = ptr == MWMechanics::getPlayer();
+                    if (isPlayer)
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
 
                     MWWorld::CellStore* store = nullptr;
                     try
@@ -424,14 +444,6 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (!ptr.isInCell())
-                        return;
-
-                    if (ptr == MWMechanics::getPlayer())
-                    {
-                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
-                    }
-
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
                     Interpreter::Type_Float y = runtime[0].mFloat;
@@ -440,6 +452,14 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
+
+                    if (!ptr.isInCell())
+                        return;
+
+                    if (ptr == MWMechanics::getPlayer())
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
                     int cx,cy;
                     MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
 
