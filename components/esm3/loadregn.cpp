@@ -29,25 +29,16 @@ namespace ESM
                 case fourCC("WEAT"):
                 {
                     esm.getSubHeader();
-                    if (esm.getVer() == VER_12)
+                    // May include the additional two bytes (but not necessarily)
+                    if (esm.getSubSize() == sizeof(mData))
+                    {
+                        esm.getT(mData);
+                    }
+                    else if (esm.getSubSize() == sizeof(mData) - 2)
                     {
                         mData.mA = 0;
                         mData.mB = 0;
                         esm.getExact(&mData, sizeof(mData) - 2);
-                    }
-                    else if (esm.getVer() == VER_13)
-                    {
-                        // May include the additional two bytes (but not necessarily)
-                        if (esm.getSubSize() == sizeof(mData))
-                        {
-                            esm.getT(mData);
-                        }
-                        else
-                        {
-                            mData.mA = 0;
-                            mData.mB = 0;
-                            esm.getExact(&mData, sizeof(mData)-2);
-                        }
                     }
                     else
                     {
