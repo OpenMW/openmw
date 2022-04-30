@@ -590,6 +590,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
         osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(mResourceSystem->getImageManager()->getImage(texname.str())));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+        mResourceSystem->getSceneManager()->applyFilterSettings(tex);
         textures.push_back(tex);
     }
 
