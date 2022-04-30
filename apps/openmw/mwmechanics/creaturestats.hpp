@@ -258,6 +258,7 @@ namespace MWMechanics
         void clearLastHitObject();
         const std::string &getLastHitObject() const;
         void setLastHitAttemptObject(const std::string &objectid);
+        void clearLastHitAttemptObject();
         const std::string &getLastHitAttemptObject() const;
         void setHitAttemptActorId(const int actorId);
         int getHitAttemptActorId() const;

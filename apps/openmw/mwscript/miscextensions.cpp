@@ -997,9 +997,10 @@ namespace MWScript
                     runtime.pop();
 
                     MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-                    runtime.push(::Misc::StringUtils::ciEqual(objectID, stats.getLastHitAttemptObject()));
-
-                    stats.setLastHitAttemptObject(std::string());
+                    bool hit = ::Misc::StringUtils::ciEqual(objectID, stats.getLastHitAttemptObject());
+                    runtime.push(hit);
+                    if(hit)
+                        stats.clearLastHitAttemptObject();
                 }
         };
 
