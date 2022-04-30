@@ -1243,6 +1243,7 @@ namespace MWRender
         );
 
         mTerrain->updateTextureFiltering();
+        mWater->processChangedSettings({});
 
         mViewer->startThreading();
     }
