@@ -362,6 +362,11 @@ namespace MWMechanics
         mLastHitAttemptObject = objectid;
     }
 
+    void CreatureStats::clearLastHitAttemptObject()
+    {
+        mLastHitAttemptObject.clear();
+    }
+
     const std::string &CreatureStats::getLastHitAttemptObject() const
     {
         return mLastHitAttemptObject;
