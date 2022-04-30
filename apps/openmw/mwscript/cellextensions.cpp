@@ -208,6 +208,7 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
+                    runtime.pop();
 
                     if (!MWMechanics::getPlayer().isInCell())
                     {
@@ -231,6 +232,7 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
+                    runtime.pop();
 
                     if (!MWMechanics::getPlayer().isInCell())
                     {
