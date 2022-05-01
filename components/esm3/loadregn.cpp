@@ -100,7 +100,7 @@ namespace ESM
             esm.startSubRecord("SNAM");
             esm.writeFixedSizeString(it->mSound, 32);
             esm.writeT(it->mChance);
-            esm.endRecord("NPCO");
+            esm.endRecord("SNAM");
         }
     }
 
