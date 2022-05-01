@@ -93,6 +93,9 @@ void CSMPrefs::State::declare()
         "If this option is enabled, types of affected records are selected "
         "manually before a command execution.\nOtherwise, all associated "
         "records are deleted/reverted immediately.");
+    declareBool ("subview-new-window", "Open Record in new window", false)
+        .setTooltip("When editing a record, open the view in a new window,"
+        " rather than docked in the main view.");
 
     declareCategory ("ID Dialogues");
     declareBool ("toolbar", "Show toolbar", true);
