@@ -12,8 +12,8 @@ local function validateSettingOptions(options)
     if type(options.key) ~= 'string' then
         error('Setting must have a key')
     end
-    if type(options.saveOnly) ~= 'boolean' then
-        error('Setting must be save only or not')
+    if type(options.permanentStorage) ~= 'boolean' then
+        error('Setting must have a permanentStorage flag')
     end
     if type(options.renderer) ~= 'string' then
         error('Setting must have a renderer')
@@ -63,7 +63,7 @@ end
 local function registerSetting(options)
     return {
         key = options.key,
-        saveOnly = options.saveOnly,
+        permanentStorage = options.permanentStorage,
         default = options.default,
         renderer = options.renderer,
         argument = options.argument,
@@ -123,7 +123,7 @@ return {
             local section = contextSection(groupKey)
             saved[groupKey] = {}
             for key, value in pairs(section:asTable()) do
-                if group.settings[key].saveOnly then
+                if not group.settings[key].permanentStorage then
                     saved[groupKey][key] = value
                 end
             end
@@ -132,5 +132,4 @@ return {
         return saved
     end,
     registerGroup = registerGroup,
-    validateGroupOptions = validateGroupOptions,
 }
