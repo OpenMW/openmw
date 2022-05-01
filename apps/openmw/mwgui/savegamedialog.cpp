@@ -369,10 +369,22 @@ namespace MWGui
         int seconds = timePlayed % 60;
 
         std::stringstream stream;
-        stream << std::setfill('0') << std::setw(2) << days << ":";
-        stream << std::setfill('0') << std::setw(2) << hours << ":";
-        stream << std::setfill('0') << std::setw(2) << minutes << ":";
-        stream << std::setfill('0') << std::setw(2) << seconds;
+        if (days > 0)
+        {
+            stream << days << "d ";
+        }
+        if (hours > 0)
+        {
+            stream << hours << "h ";
+        }
+        if (minutes > 0)
+        {
+            stream << std::setfill('0') << std::setw(2) << minutes << "m ";
+        }
+        if (seconds > 0)
+        {
+            stream << std::setfill('0') << std::setw(2) << seconds << "s";
+        }
         return stream.str();
     }
 
