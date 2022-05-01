@@ -360,7 +360,7 @@ namespace MWGui
             onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
     }
 
-    std::string formatTimeplayed(const double timeInSeconds)
+    std::string formatTimePlayed(const double timeInSeconds)
     {
         int timePlayed = (int)floor(timeInSeconds);
         int days = timePlayed / 60 / 60 / 24;
@@ -402,6 +402,7 @@ namespace MWGui
         if (!mCurrentSlot)
             throw std::runtime_error("Can't find selected slot");
 
+        // Add real world datetime of last played.
         std::stringstream text;
         time_t time = mCurrentSlot->mTimeStamp;
         struct tm* timeinfo;
@@ -409,6 +410,7 @@ namespace MWGui
 
         text << std::put_time(timeinfo, "%Y.%m.%d %T") << "\n";
 
+        // Add ingame location.
         text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";
 
@@ -417,6 +419,7 @@ namespace MWGui
         if (hour >= 13) hour -= 12;
         if (hour == 0) hour = 12;
 
+        // Add ingame datetime info, like time, month, etc.
         text
             << mCurrentSlot->mProfile.mInGameTime.mDay << " "
             << MWBase::Environment::get().getWorld()->getMonthName(mCurrentSlot->mProfile.mInGameTime.mMonth)
@@ -424,7 +427,7 @@ namespace MWGui
 
         if (Settings::Manager::getBool("timeplayed","Saves"))
         {
-            text << "\n" << "Time played: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
+            text << "\n" << "Time played: " << formatTimePlayed(mCurrentSlot->mProfile.mTimePlayed);
         }
 
         mInfoText->setCaptionWithReplacing(text.str());
