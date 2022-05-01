@@ -38,6 +38,7 @@ class ESMWriter
         void setEncoder(ToUTF8::Utf8Encoder *encoding);
         void setAuthor(const std::string& author);
         void setDescription(const std::string& desc);
+        void setHeader(const Header& value) { mHeader = value; }
 
         // Set the record count for writing it in the file header
         void setRecordCount (int count);

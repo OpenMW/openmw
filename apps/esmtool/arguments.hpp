@@ -11,9 +11,9 @@ namespace EsmTool
     struct Arguments
     {
         std::optional<ESM::Format> mRawFormat;
-        bool quiet_given;
-        bool loadcells_given;
-        bool plain_given;
+        bool quiet_given = false;
+        bool loadcells_given = false;
+        bool plain_given = false;
 
         std::string mode;
         std::string encoding;

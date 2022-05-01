@@ -36,11 +36,7 @@ namespace bpo = boost::program_options;
 
 struct ESMData
 {
-    std::string author;
-    std::string description;
-    unsigned int version;
-    std::vector<ESM::Header::MasterData> masters;
-
+    ESM::Header mHeader;
     std::deque<std::unique_ptr<EsmTool::RecordBase>> mRecords;
     // Value: (Reference, Deleted flag)
     std::map<ESM::Cell *, std::deque<std::pair<ESM::CellRef, bool> > > mCellRefs;
@@ -331,11 +327,7 @@ int loadTes3(const Arguments& info, std::unique_ptr<std::ifstream>&& stream, ESM
         esm.open(std::move(stream), info.filename);
 
         if (data != nullptr)
-        {
-            data->author = esm.getAuthor();
-            data->description = esm.getDesc();
-            data->masters = esm.getGameFiles();
-        }
+            data->mHeader = esm.getHeader();
 
         if (!quiet)
         {
@@ -503,13 +495,9 @@ int clone(const Arguments& info)
     ESM::ESMWriter esm;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
     esm.setEncoder(&encoder);
-    esm.setAuthor(data.author);
-    esm.setDescription(data.description);
-    esm.setVersion(data.version);
+    esm.setHeader(data.mHeader);
+    esm.setVersion(ESM::VER_13);
     esm.setRecordCount (recordCount);
-
-    for (const ESM::Header::MasterData &master : data.masters)
-        esm.addMaster(master.name, master.size);
 
     std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
     esm.save(save);

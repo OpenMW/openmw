@@ -65,18 +65,20 @@ void ESM4::Quest::load(ESM4::Reader& reader)
             case ESM4::SUB_SCRI: reader.get(mQuestScript); break;
             case ESM4::SUB_CTDA: // FIXME: how to detect if 1st/2nd param is a formid?
             {
-                TargetCondition cond;
-
                 if (subHdr.dataSize == 24) // TES4
                 {
+                    TargetCondition cond;
                     reader.get(&cond, 24);
                     cond.reference = 0; // unused in TES4 but keep it clean
+                    mTargetConditions.push_back(cond);
                 }
                 else if (subHdr.dataSize == 28)
                 {
+                    TargetCondition cond;
                     reader.get(cond); // FO3/FONV
                     if (cond.reference)
                         reader.adjustFormId(cond.reference);
+                    mTargetConditions.push_back(cond);
                 }
                 else
                 {
@@ -84,8 +86,6 @@ void ESM4::Quest::load(ESM4::Reader& reader)
                     reader.skipSubRecordData(); // FIXME
                 }
                 // FIXME: support TES5
-
-                mTargetConditions.push_back(cond);
 
                 break;
             }

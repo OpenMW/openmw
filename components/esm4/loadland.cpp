@@ -58,6 +58,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
     mFlags  = reader.hdr().record.flags;
+    mDataTypes = 0;
 
     TxtLayer layer;
     std::int8_t currentAddQuad = -1; // for VTXT following ATXT
