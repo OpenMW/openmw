@@ -402,17 +402,18 @@ namespace MWGui
         if (!mCurrentSlot)
             throw std::runtime_error("Can't find selected slot");
 
-        // Add real world datetime of last played.
-        std::stringstream text;
+        std::stringstream savegameMetadata;
+
+        // Add real world datetime for last played.
         time_t time = mCurrentSlot->mTimeStamp;
         struct tm* timeinfo;
         timeinfo = localtime(&time);
 
-        text << std::put_time(timeinfo, "%Y.%m.%d %T") << "\n";
+        savegameMetadata << std::put_time(timeinfo, "%b%e, %Y %r %p") << "\n";
 
         // Add ingame location.
-        text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
-        text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";
+        savegameMetadata << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
+        savegameMetadata << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";
 
         int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);
         bool pm = hour >= 12;
@@ -420,17 +421,17 @@ namespace MWGui
         if (hour == 0) hour = 12;
 
         // Add ingame datetime info, like time, month, etc.
-        text
+        savegameMetadata
             << mCurrentSlot->mProfile.mInGameTime.mDay << " "
             << MWBase::Environment::get().getWorld()->getMonthName(mCurrentSlot->mProfile.mInGameTime.mMonth)
             <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         if (Settings::Manager::getBool("timeplayed","Saves"))
         {
-            text << "\n" << "Time played: " << formatTimePlayed(mCurrentSlot->mProfile.mTimePlayed);
+            savegameMetadata << "\n" << "Time played: " << formatTimePlayed(mCurrentSlot->mProfile.mTimePlayed);
         }
 
-        mInfoText->setCaptionWithReplacing(text.str());
+        mInfoText->setCaptionWithReplacing(savegameMetadata.str());
 
 
         // Decode screenshot
