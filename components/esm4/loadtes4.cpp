@@ -53,9 +53,8 @@ void ESM4::Header::load(ESM4::Reader& reader)
             {
                 if (!reader.getExact(mData.version) || !reader.getExact(mData.records) || !reader.getExact(mData.nextObjectId))
                     throw std::runtime_error("TES4 HEDR data read error");
-
-                assert((size_t)subHdr.dataSize == sizeof(mData.version)+sizeof(mData.records)+sizeof(mData.nextObjectId)
-                        && "TES4 HEDR data size mismatch");
+                if ((size_t)subHdr.dataSize != sizeof(mData.version)+sizeof(mData.records)+sizeof(mData.nextObjectId))
+                    throw std::runtime_error("TES4 HEDR data size mismatch");
                 break;
             }
             case ESM4::SUB_CNAM: reader.getZString(mAuthor); break;
