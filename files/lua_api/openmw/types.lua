@@ -441,6 +441,19 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Returns the read-only @{#CreatureRecord} of a creature
+-- @function [parent=#Creature] record
+-- @param #any objectOrRecordId
+-- @return #CreatureRecord
+
+---
+-- @type CreatureRecord
+-- @field #string name
+-- @field #string baseCreature Record id of a base creature, which was modified to create this one
+-- @field #string model VFS path to the creature's model
+-- @field #string mwscript
+
 
 
 --- @{#NPC} functions
@@ -458,7 +471,20 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Returns the read-only @{#NpcRecord} of an NPC
+-- @function [parent=#NPC] record
+-- @param #any objectOrRecordId
+-- @return #NpcRecord
 
+---
+-- @type NpcRecord
+-- @field #string name
+-- @field #string race
+-- @field #string class Name of the NPC's class (e. g. Acrobat)
+-- @field #string mwscript MWScript that is attached to this NPC
+-- @field #string hair Path to the hair body part model
+-- @field #string head Path to the head body part model
 
 --- @{#Player} functions
 -- @field [parent=#types] #Player Player
