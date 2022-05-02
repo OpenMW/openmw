@@ -232,6 +232,8 @@ osg::Group *CreatureWeaponAnimation::getArrowBone()
 
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
     int ammoType = MWMechanics::getWeaponType(type)->mAmmoType;
+    if (ammoType == ESM::Weapon::None)
+        return nullptr;
 
     // Try to find and attachment bone in actor's skeleton, otherwise fall back to the ArrowBone in weapon's mesh
     osg::Group* bone = getBoneByName(MWMechanics::getWeaponType(ammoType)->mAttachBone);
