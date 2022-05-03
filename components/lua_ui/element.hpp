@@ -9,6 +9,13 @@ namespace LuaUi
     {
         static std::shared_ptr<Element> make(sol::table layout);
 
+        template<class Callback>
+        static void forEach(Callback callback)
+        {
+            for(auto& [e, _] : sAllElements)
+                callback(e);
+        }
+
         WidgetExtension* mRoot;
         WidgetExtension* mAttachedTo;
         sol::table mLayout;

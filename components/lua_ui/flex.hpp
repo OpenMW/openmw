@@ -18,6 +18,7 @@ namespace LuaUi
             {
                 return MyGUI::IntSize();
             }
+            void updateCoord() override;
 
         private:
             bool mHorizontal;

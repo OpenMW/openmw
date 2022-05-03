@@ -20,9 +20,11 @@ namespace LuaUi
         constexpr std::string_view external = "external";
     }
 
+    const std::string defaultWidgetType = "LuaWidget";
+
     std::string widgetType(const sol::table& layout)
     {
-        return layout.get_or(LayoutKeys::type, std::string("LuaWidget"));
+        return layout.get_or(LayoutKeys::type, defaultWidgetType);
     }
 
     void destroyWidget(LuaUi::WidgetExtension* ext)
@@ -74,11 +76,6 @@ namespace LuaUi
 
     void setTemplate(WidgetExtension* ext, const sol::object& templateLayout)
     {
-        // \todo remove when none of the widgets require this workaround
-        sol::object skin = LuaUtil::getFieldOrNil(templateLayout, "skin");
-        if (skin.is<std::string>())
-            ext->widget()->changeWidgetSkin(skin.as<std::string>());
-
         sol::object props = LuaUtil::getFieldOrNil(templateLayout, LayoutKeys::props);
         ext->setTemplateProperties(props);
         sol::object content = LuaUtil::getFieldOrNil(templateLayout, LayoutKeys::content);
@@ -107,13 +104,22 @@ namespace LuaUi
 
     WidgetExtension* createWidget(const sol::table& layout)
     {
-        std::string type = widgetType(layout);
-        std::string name = layout.get_or(LayoutKeys::name, std::string());
-
+        sol::object typeField = LuaUtil::getFieldOrNil(layout, LayoutKeys::type);
+        std::string type = LuaUtil::getValueOrDefault(typeField, defaultWidgetType);
+        sol::object templateTypeField = LuaUtil::getFieldOrNil(layout, LayoutKeys::templateLayout, LayoutKeys::type);
+        if (templateTypeField != sol::nil)
+        {
+            std::string templateType = LuaUtil::getValueOrDefault(templateTypeField, defaultWidgetType);
+            if (typeField != sol::nil && templateType != type)
+                throw std::logic_error(std::string("Template layout type ") + type
+                    + std::string(" doesn't match template type ") + templateType);
+            type = templateType;
+        }
         static auto widgetTypeMap = widgetTypeToName();
         if (widgetTypeMap.find(type) == widgetTypeMap.end())
             throw std::logic_error(std::string("Invalid widget type ") += type);
 
+        std::string name = layout.get_or(LayoutKeys::name, std::string());
         MyGUI::Widget* widget = MyGUI::Gui::getInstancePtr()->createWidgetT(
             type, "",
             MyGUI::IntCoord(), MyGUI::Align::Default,

@@ -82,38 +82,6 @@ namespace MWLua
                 std::shared_ptr<LuaUi::Element> mElement;
         };
 
-        class InsertLayerAction final : public LuaManager::Action
-        {
-            public:
-                InsertLayerAction(std::string_view name, size_t index,
-                    LuaUi::Layer::Options options, LuaUtil::LuaState* state)
-                    : Action(state)
-                    , mName(name)
-                    , mIndex(index)
-                    , mOptions(options)
-                {}
-
-                void apply(WorldView&) const override
-                {
-                    LuaUi::Layer::insert(mIndex, mName, mOptions);
-                }
-
-                std::string toString() const override
-                {
-                    std::string result("Insert UI layer \"");
-                    result += mName;
-                    result += "\" at \"";
-                    result += mIndex;
-                    result += "\"";
-                    return result;
-                }
-
-            private:
-                std::string mName;
-                size_t mIndex;
-                LuaUi::Layer::Options mOptions;
-        };
-
         // Lua arrays index from 1
         inline size_t fromLuaIndex(size_t i) { return i - 1; }
         inline size_t toLuaIndex(size_t i) { return i + 1; }
@@ -252,6 +220,18 @@ namespace MWLua
             context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::CREATE, element, context.mLua));
             return element;
         };
+        api["updateAll"] = [context]()
+        {
+            LuaUi::Element::forEach([](LuaUi::Element* e) { e->mUpdate = true; });
+            context.mLuaManager->addAction([]()
+            {
+                LuaUi::Element::forEach([](LuaUi::Element* e) { e->update(); });
+            }, "Update all UI elements");
+        };
+        api["_getMenuTransparency"] = []()
+        {
+            return Settings::Manager::getFloat("menu transparency", "GUI");
+        };
 
         auto uiLayer = context.mLua->sol().new_usertype<LuaUi::Layer>("UiLayer");
         uiLayer["name"] = sol::property([](LuaUi::Layer& self) { return self.name(); });
@@ -287,7 +267,7 @@ namespace MWLua
             if (index == LuaUi::Layer::count())
                 throw std::logic_error(std::string("Layer not found"));
             index++;
-            context.mLuaManager->addAction(std::make_unique<InsertLayerAction>(name, index, options, context.mLua));
+            context.mLuaManager->addAction([=]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
         };
         layers["insertBefore"] = [context](std::string_view beforename, std::string_view name, const sol::object& opt)
         {
@@ -296,7 +276,7 @@ namespace MWLua
             size_t index = LuaUi::Layer::indexOf(beforename);
             if (index == LuaUi::Layer::count())
                 throw std::logic_error(std::string("Layer not found"));
-            context.mLuaManager->addAction(std::make_unique<InsertLayerAction>(name, index, options, context.mLua));
+            context.mLuaManager->addAction([=]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
         };
         {
             auto pairs = [layers](const sol::object&)

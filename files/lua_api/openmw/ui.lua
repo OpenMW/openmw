@@ -10,6 +10,13 @@
 -- @field [parent=#ui] #TYPE TYPE
 
 ---
+-- Alignment values (details depend on the specific property). For horizontal alignment the order is left to right, for vertical alignment the order is top to bottom.
+-- @type ALIGNMENT
+-- @field Start
+-- @field Center
+-- @field End
+
+---
 -- Alignment values (left to right, top to bottom)
 -- @field [parent=#ui] #ALIGNMENT ALIGNMENT
 
@@ -24,14 +31,6 @@
 -- @field Text Display text
 -- @field TextEdit Accepts user text input
 -- @field Window Can be moved and resized by the user
-
----
--- Alignment values (details depend on the specific property).
--- For horizontal alignment the order is left to right, for vertical alignment the order is top to bottom.
--- @type ALIGNMENT
--- @field Start
--- @field Center
--- @field End
 
 ---
 -- Shows given message at the bottom of the screen.
@@ -98,6 +97,9 @@
 -- @field #string searchHints Additional keywords used in search, not displayed anywhere
 -- @field #Element element The page's UI, which will be attached to the settings tab. The root widget has to have a fixed size. Set the `size` field in `props`, `relativeSize` is ignored.
 
+---
+-- Update all existing UI elements. Potentially extremely slow, so only call this when necessary, e. g. after overriding a template.
+-- @function [parent=#ui] updateAll
 
 ---
 -- Layout
