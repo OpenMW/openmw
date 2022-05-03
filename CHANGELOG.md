@@ -116,6 +116,7 @@
     Bug #6697: Shaders vertex lighting incorrectly clamped
     Bug #6711: Log time differs from real time
     Bug #6717: Broken script causes interpreter stack corruption
+    Bug #6718: Throwable weapons cause arrow enchantment effect to be applied to the whole body
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
