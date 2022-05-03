@@ -52,7 +52,7 @@ namespace LuaUi
         void forcePosition(const MyGUI::IntPoint& pos);
         void clearForced();
 
-        void updateCoord();
+        virtual void updateCoord();
 
         const sol::table& getLayout() { return mLayout; }
         void setLayout(const sol::table& layout) { mLayout = layout; }

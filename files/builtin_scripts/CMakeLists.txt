@@ -8,6 +8,7 @@ set(LUA_BUILTIN_FILES
     openmw_aux/util.lua
     openmw_aux/time.lua
     openmw_aux/calendar.lua
+    openmw_aux/ui.lua
 
     scripts/omw/ai.lua
     scripts/omw/camera.lua
@@ -18,9 +19,15 @@ set(LUA_BUILTIN_FILES
     scripts/omw/console/local.lua
 
     l10n/Calendar/en.yaml
+
+    scripts/omw/mwui/constants.lua
+    scripts/omw/mwui/borders.lua
+    scripts/omw/mwui/box.lua
+    scripts/omw/mwui/text.lua
+    scripts/omw/mwui/textEdit.lua
+    scripts/omw/mwui/init.lua
 )
 
 foreach (f ${LUA_BUILTIN_FILES})
     copy_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${OPENMW_RESOURCES_ROOT}" "resources/vfs/${f}")
 endforeach (f)
-

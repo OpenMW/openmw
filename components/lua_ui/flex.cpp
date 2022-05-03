@@ -56,24 +56,25 @@ namespace LuaUi
         MyGUI::IntSize flexSize = calculateSize();
         int growSize = 0;
         float growFactor = 0;
-        if (totalGrow > 0)
+        if (totalGrow > 0 && !mAutoSized)
         {
             growSize = primary(flexSize) - primary(childrenSize);
             growFactor = growSize / totalGrow;
-        }   
+        }
 
         MyGUI::IntPoint childPosition;
         primary(childPosition) = alignSize(primary(flexSize) - growSize, primary(childrenSize), mAlign);
-        secondary(childPosition) = alignSize(secondary(flexSize), secondary(childrenSize), mArrange);
         for (auto* w : children())
         {
+            MyGUI::IntSize size = w->calculateSize();
+            secondary(childPosition) = alignSize(secondary(flexSize), secondary(size), mArrange);
             w->forcePosition(childPosition);
-            MyGUI::IntSize size = w->widget()->getSize();
             primary(size) += static_cast<int>(growFactor * getGrow(w));
             w->forceSize(size);
             primary(childPosition) += primary(size);
+            w->updateCoord();
         }
-        WidgetExtension::updateProperties();
+        WidgetExtension::updateChildren();
     }
 
     MyGUI::IntSize LuaFlex::calculateSize()
@@ -84,5 +85,11 @@ namespace LuaUi
             secondary(size) = std::max(secondary(size), secondary(mChildrenSize));
         }
         return size;
+    }
+
+    void LuaFlex::updateCoord()
+    {
+        updateChildren();
+        WidgetExtension::updateCoord();
     }
 }

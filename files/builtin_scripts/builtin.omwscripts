@@ -3,3 +3,4 @@ NPC,CREATURE: scripts/omw/ai.lua
 PLAYER: scripts/omw/console/player.lua
 GLOBAL: scripts/omw/console/global.lua
 CUSTOM: scripts/omw/console/local.lua
+PLAYER: scripts/omw/mwui/init.lua

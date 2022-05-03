@@ -197,10 +197,13 @@ namespace LuaUi
             MyGUI::IntSize slotSize = mSlot->widget()->getSize();
             MyGUI::IntPoint slotPosition = mSlot->widget()->getAbsolutePosition() - widget()->getAbsolutePosition();
             MyGUI::IntCoord slotCoord(slotPosition, slotSize);
-            if (mWidget->getSubWidgetMain())
-                mWidget->getSubWidgetMain()->setCoord(slotCoord);
-            if (mWidget->getSubWidgetText())
-                mWidget->getSubWidgetText()->setCoord(slotCoord);
+            MyGUI::Widget* clientWidget = mWidget->getClientWidget();
+            if (!clientWidget)
+                clientWidget = mWidget;
+            if (clientWidget->getSubWidgetMain())
+                clientWidget->getSubWidgetMain()->setCoord(slotCoord);
+            if (clientWidget->getSubWidgetText())
+                clientWidget->getSubWidgetText()->setCoord(slotCoord);
         }
     }
 
@@ -250,8 +253,7 @@ namespace LuaUi
 
         if (oldCoord != newCoord)
             mWidget->setCoord(newCoord);
-        if (oldCoord.size() != newCoord.size())
-            updateChildrenCoord();
+        updateChildrenCoord();
         if (oldCoord != newCoord && mOnCoordChange.has_value())
             mOnCoordChange.value()(this, newCoord);
     }
