@@ -759,19 +759,19 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
     // However, they could still trigger text keys, such as Hit events, or sounds.
     mMovementState = CharState_None;
     mAnimation->disable(mCurrentMovement);
-    mCurrentMovement = "";
+    mCurrentMovement.clear();
     mUpperBodyState = UpperCharState_Nothing;
     mAnimation->disable(mCurrentWeapon);
-    mCurrentWeapon = "";
+    mCurrentWeapon.clear();
     mHitState = CharState_None;
     mAnimation->disable(mCurrentHit);
-    mCurrentHit = "";
+    mCurrentHit.clear();
     mIdleState = CharState_None;
     mAnimation->disable(mCurrentIdle);
-    mCurrentIdle = "";
+    mCurrentIdle.clear();
     mJumpState = JumpState_None;
     mAnimation->disable(mCurrentJump);
-    mCurrentJump = "";
+    mCurrentJump.clear();
     mMovementAnimationControlled = true;
 
     mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::BlendMask_All,

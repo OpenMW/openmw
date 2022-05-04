@@ -1313,7 +1313,7 @@ namespace MWGui
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
         mSelectedEnchantItem = item;
-        mSelectedSpell = "";
+        mSelectedSpell.clear();
         const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
@@ -1346,7 +1346,7 @@ namespace MWGui
 
     void WindowManager::unsetSelectedSpell()
     {
-        mSelectedSpell = "";
+        mSelectedSpell.clear();
         mSelectedEnchantItem = MWWorld::Ptr();
         mHud->unsetSelectedSpell();
 

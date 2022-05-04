@@ -142,8 +142,8 @@ namespace MWGui
         else
         {
             key->type = Type_Unassigned;
-            key->id = "";
-            key->name = "";
+            key->id.clear();
+            key->name.clear();
 
             MyGUI::TextBox* textBox = key->button->createWidgetReal<MyGUI::TextBox>("SandText",
                 MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Default);

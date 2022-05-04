@@ -146,7 +146,7 @@ namespace MWGui
         if (state == None)
         {
             if (!isMagic)
-                backgroundTex = "";
+                backgroundTex.clear();
         }
         else if (state == Equip)
         {

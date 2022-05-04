@@ -122,7 +122,7 @@ namespace MWGui
                     info.caption = mFocusObject.getClass().getName(mFocusObject);
                     if (info.caption.empty())
                         info.caption=mFocusObject.getCellRef().getRefId();
-                    info.icon="";
+                    info.icon.clear();
                     tooltipSize = createToolTip(info, checkOwned());
                 }
                 else
@@ -371,7 +371,7 @@ namespace MWGui
 
             ToolTipInfo info = object.getToolTipInfo(mFocusObject, count);
             if (!image)
-                info.icon = "";
+                info.icon.clear();
             tooltipSize = createToolTip(info, isOwned);
         }
 

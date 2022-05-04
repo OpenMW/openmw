@@ -770,19 +770,15 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.txt";
 
     std::string userGameControllerdb;
-    if (boost::filesystem::exists(userdefault)){
+    if (boost::filesystem::exists(userdefault))
         userGameControllerdb = userdefault;
-    }
-    else
-        userGameControllerdb = "";
 
     std::string gameControllerdb;
     if (boost::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
     else if (boost::filesystem::exists(globaldefault))
         gameControllerdb = globaldefault;
-    else
-        gameControllerdb = ""; //if it doesn't exist, pass in an empty string
+    //else if it doesn't exist, pass in an empty string
 
     // gui needs our shaders path before everything else
     mResourceSystem->getSceneManager()->setShaderPath((mResDir / "shaders").string());

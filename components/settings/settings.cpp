@@ -28,8 +28,8 @@ std::string Manager::load(const Files::ConfigurationManager& cfgMgr, bool loadEd
         throw std::runtime_error("No config dirs! ConfigurationManager::readConfiguration must be called first.");
 
     // Create file name strings for either the engine or the editor.
-    std::string defaultSettingsFile = "";
-    std::string userSettingsFile = "";
+    std::string defaultSettingsFile;
+    std::string userSettingsFile;
 
     if (!loadEditorSettings)
     {

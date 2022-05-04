@@ -553,7 +553,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr actor = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
 
                     if(arg0==0)
                     {
@@ -585,7 +585,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr actor = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
 
                     if(arg0==0)
                     {
@@ -624,7 +624,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr actor = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
 
                     if(arg0==0)
                     {
@@ -656,7 +656,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
                     if(arg0 >0)
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -922,7 +922,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
                     if(arg0 >0 )
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -954,7 +954,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
                     if(arg0 >0 )
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -981,7 +981,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
                     if(arg0 >0 )
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);

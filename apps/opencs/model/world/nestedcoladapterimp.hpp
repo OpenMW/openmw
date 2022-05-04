@@ -163,7 +163,7 @@ namespace CSMWorld
             std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
 
             // blank row
-            std::string spell = "";
+            std::string spell;
 
             spells.insert(spells.begin()+position, spell);
 

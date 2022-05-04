@@ -189,7 +189,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         ESM::Clothing newItem = *ref->mBase;
-        newItem.mId="";
+        newItem.mId.clear();
         newItem.mName=newName;
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;

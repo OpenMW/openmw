@@ -135,7 +135,7 @@ namespace MWDialogue
         if (actor.getClass().getCreatureStats(actor).isDead())
             return false;
 
-        mLastTopic = "";
+        mLastTopic.clear();
         // Note that we intentionally don't reset mPermanentDispositionChange
 
         mChoice = -1;

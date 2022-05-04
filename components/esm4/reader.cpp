@@ -423,7 +423,7 @@ void Reader::skipSubRecordData(std::uint32_t size)
 void Reader::enterGroup()
 {
 #ifdef DEBUG_GROUPSTACK
-    std::string padding = ""; // FIXME: debugging only
+    std::string padding; // FIXME: debugging only
     padding.insert(0, mCtx.groupStack.size()*2, ' ');
     std::cout << padding << "Starting record group "
               << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << std::endl;
@@ -473,7 +473,7 @@ void Reader::exitGroupCheck()
 
         mCtx.groupStack.pop_back();
 #ifdef DEBUG_GROUPSTACK
-        std::string padding = ""; // FIXME: debugging only
+        std::string padding; // FIXME: debugging only
         padding.insert(0, mCtx.groupStack.size()*2, ' ');
         std::cout << padding << "Finished record group " << printLabel(grp.label, grp.type) << std::endl;
 #endif
@@ -521,7 +521,7 @@ void Reader::skipGroupData()
 void Reader::skipGroup()
 {
 #ifdef DEBUG_GROUPSTACK
-    std::string padding = ""; // FIXME: debugging only
+    std::string padding; // FIXME: debugging only
     padding.insert(0, mCtx.groupStack.size()*2, ' ');
     std::cout << padding << "Skipping record group "
               << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << std::endl;

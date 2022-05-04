@@ -69,7 +69,7 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
         reader.get(cellGrid.grid.x);
 // FIXME: debugging only
 #if 0
-        std::string padding = "";
+        std::string padding;
         padding.insert(0, reader.stackSize()*2, ' ');
         if (worldSpaceId == ESM4::FLG_Morrowind)
             std::cout << padding << "NVNM MW: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y << std::endl;
@@ -82,7 +82,7 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
         reader.get(cellGrid.cellId);
 
 #if 0
-        std::string padding = ""; // FIXME
+        std::string padding; // FIXME
         padding.insert(0, reader.stackSize()*2, ' ');
         if (worldSpaceId == 0) // interior
             std::cout << padding << "NVNM Interior: cellId " << std::hex << cellGrid.cellId << std::endl;
@@ -194,7 +194,7 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
 
 // FIXME: debugging only
 #if 0
-    std::string padding = "";
+    std::string padding;
     padding.insert(0, reader.stackSize()*2, ' ');
     std::cout << padding << "NAVM flags 0x" << std::hex << reader.hdr().record.flags << std::endl;
     std::cout << padding << "NAVM id 0x" << std::hex << reader.hdr().record.id << std::endl;

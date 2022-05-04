@@ -59,7 +59,7 @@ void InventoryState::load (ESMReader &esm)
         //Get its name
         std::string id = esm.getHString();
         int count;
-        std::string parentGroup = "";
+        std::string parentGroup;
         //Then get its count
         esm.getHNT (count, "COUN");
         //Old save formats don't have information about parent group; check for that

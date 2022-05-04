@@ -185,7 +185,7 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
         mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(rowInNew, landTextureFilename).value<QString>());
     } else
     {
-        newBrushTextureId = "";
+        newBrushTextureId.clear();
         mBrushTextureLabel = "No selected texture or invalid texture";
         mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel));
     }
