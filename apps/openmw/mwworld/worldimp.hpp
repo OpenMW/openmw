@@ -141,7 +141,6 @@ namespace MWWorld
             Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
 
             void updateSoundListener();
-            void updatePlayer();
 
             void preloadSpells();
 
