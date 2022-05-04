@@ -2457,7 +2457,7 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
 
     // We should not interrupt persistent animations by non-persistent ones
     if (isPersistentAnimPlaying() && !persist)
-        return false;
+        return true;
 
     // If this animation is a looped animation (has a "loop start" key) that is already playing
     // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
