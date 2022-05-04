@@ -224,7 +224,7 @@ namespace MWGui
         getWidget(mSettingsTab, "SettingsTab");
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
-        getWidget(mFullscreenButton, "FullscreenButton");
+        getWidget(mWindowModeList, "WindowModeList");
         getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
         getWidget(mAnisotropyBox, "AnisotropyBox");
@@ -273,6 +273,8 @@ namespace MWGui
         mLightingMethodButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onLightingMethodButtonChanged);
         mLightsResetButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onLightsResetButtonClicked);
         mMaxLights->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onMaxLightsChanged);
+
+        mWindowModeList->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWindowModeChanged);
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
@@ -325,7 +327,8 @@ namespace MWGui
 
         updateMaxLightsComboBox(mMaxLights);
 
-        mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
+        Settings::WindowMode windowMode = static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video"));
+        mWindowBorderButton->setEnabled(windowMode != Settings::WindowMode::Fullscreen && windowMode != Settings::WindowMode::BorderlessFullscreen);
 
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);
@@ -433,6 +436,15 @@ namespace MWGui
         apply();
     }
 
+    void SettingsWindow::onWindowModeChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        if (pos == MyGUI::ITEM_NONE)
+            return;
+
+        Settings::Manager::setInt("window mode", "Video", static_cast<int>(_sender->getIndexSelected()));
+        apply();
+    }
+
     void SettingsWindow::onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
         int count = 8 * (pos + 1);
@@ -483,49 +495,6 @@ namespace MWGui
         {
             _sender->castType<MyGUI::Button>()->setCaption(on);
             newState = true;
-        }
-
-        if (_sender == mFullscreenButton)
-        {
-            // check if this resolution is supported in fullscreen
-            if (mResolutionList->getIndexSelected() != MyGUI::ITEM_NONE)
-            {
-                std::string resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
-                int resX, resY;
-                parseResolution (resX, resY, resStr);
-                Settings::Manager::setInt("resolution x", "Video", resX);
-                Settings::Manager::setInt("resolution y", "Video", resY);
-            }
-
-            bool supported = false;
-            int fallbackX = 0, fallbackY = 0;
-            for (unsigned int i=0; i<mResolutionList->getItemCount(); ++i)
-            {
-                std::string resStr = mResolutionList->getItemNameAt(i);
-                int resX, resY;
-                parseResolution (resX, resY, resStr);
-
-                if (i == 0)
-                {
-                    fallbackX = resX;
-                    fallbackY = resY;
-                }
-
-                if (resX == Settings::Manager::getInt("resolution x", "Video")
-                    && resY  == Settings::Manager::getInt("resolution y", "Video"))
-                    supported = true;
-            }
-
-            if (!supported && mResolutionList->getItemCount())
-            {
-                if (fallbackX != 0 && fallbackY != 0)
-                {
-                    Settings::Manager::setInt("resolution x", "Video", fallbackX);
-                    Settings::Manager::setInt("resolution y", "Video", fallbackY);
-                }
-            }
-
-            mWindowBorderButton->setEnabled(!newState);
         }
 
         if (getSettingType(_sender) == checkButtonType)
@@ -689,6 +658,59 @@ namespace MWGui
         }
 
         mLightingMethodButton->setIndexSelected(mLightingMethodButton->findItemIndexWith(lightingMethodStr));
+    }
+
+    void SettingsWindow::updateWindowModeSettings()
+    {
+        size_t index = static_cast<size_t>(Settings::Manager::getInt("window mode", "Video"));
+
+        if (index > static_cast<size_t>(Settings::WindowMode::Windowed))
+            index = MyGUI::ITEM_NONE;
+
+        mWindowModeList->setIndexSelected(index);
+
+        if (index != static_cast<size_t>(Settings::WindowMode::Windowed) && index != MyGUI::ITEM_NONE)
+        {
+            // check if this resolution is supported in fullscreen
+            if (mResolutionList->getIndexSelected() != MyGUI::ITEM_NONE)
+            {
+                std::string resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
+                int resX, resY;
+                parseResolution (resX, resY, resStr);
+                Settings::Manager::setInt("resolution x", "Video", resX);
+                Settings::Manager::setInt("resolution y", "Video", resY);
+            }
+
+            bool supported = false;
+            int fallbackX = 0, fallbackY = 0;
+            for (unsigned int i=0; i<mResolutionList->getItemCount(); ++i)
+            {
+                std::string resStr = mResolutionList->getItemNameAt(i);
+                int resX, resY;
+                parseResolution (resX, resY, resStr);
+
+                if (i == 0)
+                {
+                    fallbackX = resX;
+                    fallbackY = resY;
+                }
+
+                if (resX == Settings::Manager::getInt("resolution x", "Video")
+                    && resY  == Settings::Manager::getInt("resolution y", "Video"))
+                    supported = true;
+            }
+
+            if (!supported && mResolutionList->getItemCount())
+            {
+                if (fallbackX != 0 && fallbackY != 0)
+                {
+                    Settings::Manager::setInt("resolution x", "Video", fallbackX);
+                    Settings::Manager::setInt("resolution y", "Video", fallbackY);
+                }
+            }
+
+            mWindowBorderButton->setEnabled(false);
+        }
     }
 
     void SettingsWindow::layoutControlsBox()
@@ -866,6 +888,7 @@ namespace MWGui
         highlightCurrentResolution();
         updateControlsBox();
         updateLightSettings();
+        updateWindowModeSettings();
         resetScrollbars();
         renderScriptSettings();
         resizeScriptSettings();
