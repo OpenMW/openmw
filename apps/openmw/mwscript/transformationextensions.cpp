@@ -262,15 +262,15 @@ namespace MWScript
                     {
                         if (axis[0] == 'x')
                         {
-                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().pos[0]);
+                            ret = ptr.getRefData().getPosition().pos[0];
                         }
                         else if (axis[0] == 'y')
                         {
-                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().pos[1]);
+                            ret = ptr.getRefData().getPosition().pos[1];
                         }
                         else if (axis[0] == 'z')
                         {
-                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().pos[2]);
+                            ret = ptr.getRefData().getPosition().pos[2];
                         }
                     }
                     runtime.push(ret);
@@ -348,15 +348,15 @@ namespace MWScript
                     {
                         if (axis[0] == 'x')
                         {
-                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().pos[0]);
+                            ret = ptr.getCellRef().getPosition().pos[0];
                         }
                         else if (axis[0] == 'y')
                         {
-                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().pos[1]);
+                            ret = ptr.getCellRef().getPosition().pos[1];
                         }
                         else if (axis[0] == 'z')
                         {
-                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().pos[2]);
+                            ret = ptr.getCellRef().getPosition().pos[2];
                         }
                     }
                     runtime.push(ret);
