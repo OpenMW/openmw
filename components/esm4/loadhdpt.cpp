@@ -27,6 +27,7 @@
 #include "loadhdpt.hpp"
 
 #include <stdexcept>
+#include <optional>
 //#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
@@ -38,7 +39,7 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
     reader.adjustFormId(mFormId);
     mFlags  = reader.hdr().record.flags;
 
-    std::uint32_t type;
+    std::optional<std::uint32_t> type;
 
     while (reader.getSubRecordHeader())
     {
@@ -52,7 +53,9 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
             case ESM4::SUB_HNAM: reader.getFormId(mAdditionalPart); break;
             case ESM4::SUB_NAM0: // TES5
             {
-                reader.get(type);
+                std::uint32_t value;
+                reader.get(value);
+                type = value;
 
                 break;
             }
@@ -61,8 +64,13 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
                 std::string file;
                 reader.getZString(file);
 
-                // FIXME: check type >= 0 && type < 3
-                mTriFile[type] = std::move(file);
+                if (!type.has_value())
+                    throw std::runtime_error("Failed to read ESM4 HDPT record: subrecord NAM0 does not precede subrecord NAM1: file type is unknown");
+
+                if (*type >= mTriFile.size())
+                    throw std::runtime_error("Failed to read ESM4 HDPT record: invalid file type: " + std::to_string(*type));
+
+                mTriFile[*type] = std::move(file);
 
                 break;
             }

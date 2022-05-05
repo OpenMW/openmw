@@ -158,6 +158,9 @@ namespace ESM
             npdt12.mDisposition = mNpdt.mDisposition;
             npdt12.mReputation = mNpdt.mReputation;
             npdt12.mRank = mNpdt.mRank;
+            npdt12.mUnknown1 = 0;
+            npdt12.mUnknown2 = 0;
+            npdt12.mUnknown3 = 0;
             npdt12.mGold = mNpdt.mGold;
             esm.writeHNT("NPDT", npdt12, 12);
         }

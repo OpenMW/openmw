@@ -66,7 +66,7 @@ void ESM4::Header::load(ESM4::Reader& reader)
                     throw std::runtime_error("TES4 MAST data read error");
 
                 // NOTE: some mods do not have DATA following MAST so can't read DATA here
-
+                m.size = 0;
                 mMaster.push_back (m);
                 break;
             }
