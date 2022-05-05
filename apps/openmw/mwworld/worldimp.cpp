@@ -1845,7 +1845,7 @@ namespace MWWorld
             updateNavigator();
         }
 
-        updatePlayer();
+        mPlayer->update();
 
         mPhysics->debugDraw();
 
@@ -1874,54 +1874,6 @@ namespace MWWorld
             stats.setAttribute(frameNumber, "physicsworker_time_taken", 0);
             stats.setAttribute(frameNumber, "physicsworker_time_end", 0);
         }
-    }
-
-    void World::updatePlayer()
-    {
-        MWWorld::Ptr player = getPlayerPtr();
-
-        // TODO: move to MWWorld::Player
-
-        if (player.getCell()->isExterior())
-        {
-            ESM::Position pos = player.getRefData().getPosition();
-            mPlayer->setLastKnownExteriorPosition(pos.asVec3());
-        }
-
-        bool isWerewolf = player.getClass().getNpcStats(player).isWerewolf();
-        bool isFirstPerson = this->isFirstPerson();
-        if (isWerewolf && isFirstPerson)
-        {
-            float werewolfFov = Fallback::Map::getFloat("General_Werewolf_FOV");
-            if (werewolfFov != 0)
-                mRendering->overrideFieldOfView(werewolfFov);
-            MWBase::Environment::get().getWindowManager()->setWerewolfOverlay(true);
-        }
-        else
-        {
-            mRendering->resetFieldOfView();
-            MWBase::Environment::get().getWindowManager()->setWerewolfOverlay(false);
-        }
-
-        // Sink the camera while sneaking
-        bool sneaking = player.getClass().getCreatureStats(getPlayerPtr()).getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool swimming = isSwimming(player);
-        bool flying = isFlying(player);
-
-        static const float i1stPersonSneakDelta = mStore.get<ESM::GameSetting>().find("i1stPersonSneakDelta")->mValue.getFloat();
-        if (sneaking && !swimming && !flying)
-            mRendering->getCamera()->setSneakOffset(i1stPersonSneakDelta);
-        else
-            mRendering->getCamera()->setSneakOffset(0.f);
-
-        int blind = 0;
-        const auto& magicEffects = player.getClass().getCreatureStats(player).getMagicEffects();
-        if (!mGodMode)
-            blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getMagnitude());
-        MWBase::Environment::get().getWindowManager()->setBlindness(std::clamp(blind, 0, 100));
-
-        int nightEye = static_cast<int>(magicEffects.get(ESM::MagicEffect::NightEye).getMagnitude());
-        mRendering->setNightEyeFactor(std::min(1.f, (nightEye/100.f)));
     }
 
     void World::preloadSpells()

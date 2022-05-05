@@ -9,6 +9,7 @@
 #include <components/esm3/player.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/loadbsgn.hpp>
+#include <components/fallback/fallback.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -22,6 +23,9 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellutil.hpp"
+
+#include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/camera.hpp"
 
 #include "cellstore.hpp"
 #include "class.hpp"
@@ -514,4 +518,56 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, castChance);
         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
+
+    void Player::update()
+    {
+        auto player = getPlayer();
+        auto* world = MWBase::Environment::get().getWorld();
+        auto* rendering = world->getRenderingManager();
+        auto& store = world->getStore();
+        auto& playerClass = player.getClass();
+        auto* windowMgr = MWBase::Environment::get().getWindowManager();
+
+        if (player.getCell()->isExterior())
+        {
+            ESM::Position pos = player.getRefData().getPosition();
+            setLastKnownExteriorPosition(pos.asVec3());
+        }
+
+        bool isWerewolf = playerClass.getNpcStats(player).isWerewolf();
+        bool isFirstPerson = world->isFirstPerson();
+        if (isWerewolf && isFirstPerson)
+        {
+            float werewolfFov = Fallback::Map::getFloat("General_Werewolf_FOV");
+            if (werewolfFov != 0)
+                rendering->overrideFieldOfView(werewolfFov);
+            windowMgr->setWerewolfOverlay(true);
+        }
+        else
+        {
+            rendering->resetFieldOfView();
+            windowMgr->setWerewolfOverlay(false);
+        }
+
+        // Sink the camera while sneaking
+        bool sneaking = playerClass.getCreatureStats(player).getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool swimming = world->isSwimming(player);
+        bool flying = world->isFlying(player);
+
+        static const float i1stPersonSneakDelta = store.get<ESM::GameSetting>().find("i1stPersonSneakDelta")->mValue.getFloat();
+        if (sneaking && !swimming && !flying)
+            rendering->getCamera()->setSneakOffset(i1stPersonSneakDelta);
+        else
+            rendering->getCamera()->setSneakOffset(0.f);
+
+        int blind = 0;
+        const auto& magicEffects = playerClass.getCreatureStats(player).getMagicEffects();
+        if (!world->getGodModeState())
+            blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getMagnitude());
+        windowMgr->setBlindness(std::clamp(blind, 0, 100));
+
+        int nightEye = static_cast<int>(magicEffects.get(ESM::MagicEffect::NightEye).getMagnitude());
+        rendering->setNightEyeFactor(std::min(1.f, (nightEye / 100.f)));
+    }
+
 }
