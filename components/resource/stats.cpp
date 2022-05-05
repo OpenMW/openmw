@@ -106,7 +106,7 @@ Profiler::Profiler(bool offlineCollect):
     if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf"))
         _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
     else
-        _font = "";
+        _font.clear();
 
     _characterSize = 18;
 

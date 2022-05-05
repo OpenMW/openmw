@@ -205,7 +205,9 @@ namespace MWClass
         // get armor type string (light/medium/heavy)
         std::string typeText;
         if (ref->mBase->mData.mWeight == 0)
-            typeText = "";
+        {
+            // no type
+        }
         else
         {
             int armorType = getEquipmentSkill(ptr);       
@@ -255,7 +257,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         ESM::Armor newItem = *ref->mBase;
-        newItem.mId="";
+        newItem.mId.clear();
         newItem.mName=newName;
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;

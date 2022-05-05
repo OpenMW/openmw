@@ -68,7 +68,7 @@ void ESM4::Navigation::IslandInfo::load(ESM4::Reader& reader)
             reader.get(*it);
 // FIXME: debugging only
 #if 0
-            std::string padding = "";
+            std::string padding;
             padding.insert(0, reader.stackSize()*2, ' ');
             std::cout << padding << "NVMI vert " << std::dec << (*it).x << ", " << (*it).y << ", " << (*it).z << std::endl;
 #endif
@@ -88,7 +88,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
 
 // FIXME: for debugging only
 #if 0
-    std::string padding = "";
+    std::string padding;
     if (flags == ESM4::FLG_Modified)
         padding.insert(0, 2, '-');
     else if (flags == ESM4::FLG_Unmodified)
@@ -157,7 +157,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
         reader.get(cellGrid.grid.x);
 // FIXME: debugging only
 #if 0
-    std::string padding = "";
+    std::string padding;
     padding.insert(0, reader.stackSize()*2, ' ');
     if (worldSpaceId == ESM4::FLG_Morrowind)
         std::cout << padding << "NVMI MW: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y << std::endl;

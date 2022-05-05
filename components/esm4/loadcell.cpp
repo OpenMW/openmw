@@ -85,7 +85,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 if (!reader.getZString(mEditorId))
                     throw std::runtime_error ("CELL EDID data read error");
 #if 0
-                std::string padding = "";
+                std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
                 std::cout << padding << "CELL Editor ID: " << mEditorId << std::endl;
 #endif
@@ -108,7 +108,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 reader.get(mX);
                 reader.get(mY);
 #if 0
-                std::string padding = "";
+                std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
                 std::cout << padding << "CELL group " << ESM4::printLabel(reader.grp().label, reader.grp().type) << std::endl;
                 std::cout << padding << "CELL formId " << std::hex << reader.hdr().record.id << std::endl;
@@ -143,7 +143,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                     reader.get((std::uint8_t&)mCellFlags); // 8 bits in Obvlivion
                 }
 #if 0
-                std::string padding = "";
+                std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
                 std::cout << padding  << "flags: " << std::hex << mCellFlags << std::endl;
 #endif
@@ -156,7 +156,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 {
                     reader.getFormId(*it);
 #if 0
-                    std::string padding = "";
+                    std::string padding;
                     padding.insert(0, reader.stackSize()*2, ' ');
                     std::cout << padding  << "region: " << std::hex << *it << std::endl;
 #endif

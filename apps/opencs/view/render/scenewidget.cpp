@@ -44,7 +44,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     //ds->setNumMultiSamples(8);
 
     osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
-    traits->windowName = "";
+    traits->windowName.clear();
     traits->windowDecoration = true;
     traits->x = 0;
     traits->y = 0;

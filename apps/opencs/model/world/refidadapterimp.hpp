@@ -1527,7 +1527,7 @@ namespace CSMWorld
 
             ESM::Transport::Dest newRow;
             newRow.mPos = newPos;
-            newRow.mCellName = "";
+            newRow.mCellName.clear();
 
             if (position >= (int)list.size())
                 list.push_back(newRow);
@@ -1679,7 +1679,7 @@ namespace CSMWorld
             for (int i = 0; i < 8; ++i)
                 newRow.mWander.mIdle[i] = 0;
             newRow.mWander.mShouldRepeat = 1;
-            newRow.mCellName = "";
+            newRow.mCellName.clear();
 
             if (position >= (int)list.size())
                 list.push_back(newRow);
@@ -2013,8 +2013,8 @@ namespace CSMWorld
 
             ESM::PartReference newPart;
             newPart.mPart = 0; // 0 == head
-            newPart.mMale = "";
-            newPart.mFemale = "";
+            newPart.mMale.clear();
+            newPart.mFemale.clear();
 
             if (position >= (int)list.size())
                 list.push_back(newPart);
@@ -2362,7 +2362,7 @@ namespace CSMWorld
             std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
 
             ESM::LevelledListBase::LevelItem newItem;
-            newItem.mId = "";
+            newItem.mId.clear();
             newItem.mLevel = 0;
 
             if (position >= (int)list.size())

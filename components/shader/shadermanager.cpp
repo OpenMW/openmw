@@ -193,7 +193,7 @@ namespace Shader
         }
         lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + overallEnd, '\n');
 
-        std::string replacement = "";
+        std::string replacement;
         for (std::vector<std::string>::const_iterator element = listElements.cbegin(); element != listElements.cend(); element++)
         {
             std::string contentInstance = content;
@@ -247,7 +247,7 @@ namespace Shader
                 condition = !condition;
             
             if (!condition)
-                linkTarget = "";
+                linkTarget.clear();
         }
 
         source.replace(foundPos, lineEnd - foundPos, "");

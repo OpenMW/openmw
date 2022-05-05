@@ -145,7 +145,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
                 ESM::DialInfo info = (*iter)->get();
                 info.mId = info.mId.substr (info.mId.find_last_of ('#')+1);
 
-                info.mPrev = "";
+                info.mPrev.clear();
                 if (iter!=range.first)
                 {
                     CSMWorld::InfoCollection::RecordConstIterator prev = iter;
@@ -157,7 +157,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
                 CSMWorld::InfoCollection::RecordConstIterator next = iter;
                 ++next;
 
-                info.mNext = "";
+                info.mNext.clear();
                 if (next!=range.second)
                 {
                     info.mNext = (*next)->get().mId.substr ((*next)->get().mId.find_last_of ('#')+1);
