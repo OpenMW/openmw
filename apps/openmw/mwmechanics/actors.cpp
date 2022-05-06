@@ -251,9 +251,8 @@ namespace MWMechanics
         calculateRestoration(ptr, duration);
     }
 
-    void Actors::updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
-                                    MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance,
-                                    bool inCombatOrPursue)
+    static void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
+        MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance, bool inCombatOrPursue)
     {
         const auto& actorRefData = actor.getRefData();
         if (!actorRefData.getBaseNode())
