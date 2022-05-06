@@ -46,7 +46,7 @@ namespace MWState
             ///
             /// \param bypass Skip new game mechanics.
 
-            void endGame() override;
+            void endGame();
 
             void resumeGame() override;
 

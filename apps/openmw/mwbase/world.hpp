@@ -623,7 +623,6 @@ namespace MWBase
             virtual bool isPlayerInJail() const = 0;
 
             virtual void rest(double hours) = 0;
-            virtual void rechargeItems(double duration, bool activeOnly) = 0;
 
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;

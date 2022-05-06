@@ -53,8 +53,6 @@ namespace MWBase
             ///
             /// \param bypass Skip new game mechanics.
 
-            virtual void endGame() = 0;
-
             virtual void resumeGame() = 0;
 
             virtual void deleteGame (const MWState::Character *character, const MWState::Slot *slot) = 0;

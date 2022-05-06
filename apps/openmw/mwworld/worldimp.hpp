@@ -587,7 +587,7 @@ namespace MWWorld
             ///< check if the player is allowed to rest
 
             void rest(double hours) override;
-            void rechargeItems(double duration, bool activeOnly) override;
+            void rechargeItems(double duration, bool activeOnly);
 
             /// \todo Probably shouldn't be here
             MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;
