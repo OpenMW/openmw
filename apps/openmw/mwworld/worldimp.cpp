@@ -1849,7 +1849,9 @@ namespace MWWorld
 
         mPhysics->debugDraw();
 
-        mWorldScene->update (duration, paused);
+        mWorldScene->update(duration);
+
+        mRendering->update(duration, paused);
 
         updateSoundListener();
 

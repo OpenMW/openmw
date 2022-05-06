@@ -295,7 +295,7 @@ namespace MWWorld
         mPhysics->updateScale(ptr);
     }
 
-    void Scene::update (float duration, bool paused)
+    void Scene::update(float duration)
     {
         if (mChangeCellGridRequest.has_value())
         {
@@ -306,8 +306,6 @@ namespace MWWorld
 
         mPreloader->updateCache(mRendering.getReferenceTime());
         preloadCells(duration);
-
-        mRendering.update (duration, paused);
     }
 
     void Scene::unloadCell(CellStore* cell)
