@@ -176,8 +176,6 @@ namespace MWBase
             virtual void pausePlayback() = 0;
             virtual void resumePlayback() = 0;
 
-            virtual void update(float duration) = 0;
-
             virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up, bool underwater) = 0;
 
             virtual void updatePtr(const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated) = 0;
