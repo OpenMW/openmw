@@ -150,8 +150,6 @@ namespace MWBase
             virtual bool toggleWorld() = 0;
             virtual bool toggleBorders() = 0;
 
-            virtual void adjustSky() = 0;
-
             virtual MWWorld::Player& getPlayer() = 0;
             virtual MWWorld::Ptr getPlayerPtr() = 0;
             virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;

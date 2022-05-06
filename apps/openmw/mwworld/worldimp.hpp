@@ -232,7 +232,7 @@ namespace MWWorld
             bool toggleWorld() override;
             bool toggleBorders() override;
 
-            void adjustSky() override;
+            void adjustSky();
 
             Player& getPlayer() override;
             MWWorld::Ptr getPlayerPtr() override;
