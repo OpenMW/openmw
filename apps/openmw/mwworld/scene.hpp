@@ -62,6 +62,7 @@ namespace MWWorld
     class Player;
     class CellStore;
     class CellPreloader;
+    class World;
 
     enum class RotationOrder
     {
@@ -85,6 +86,7 @@ namespace MWWorld
             CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
+            MWWorld::World& mWorld;
             MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
             DetourNavigator::Navigator& mNavigator;
@@ -131,7 +133,7 @@ namespace MWWorld
 
         public:
 
-            Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics,
+            Scene(MWWorld::World& world, MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics,
                    DetourNavigator::Navigator& navigator);
 
             ~Scene();

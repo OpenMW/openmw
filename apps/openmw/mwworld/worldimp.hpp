@@ -396,7 +396,7 @@ namespace MWWorld
             ///< Place an object in a safe place next to \a referenceObject. \a direction and \a distance specify the wanted placement
             /// relative to \a referenceObject (but the object may be placed somewhere else if the wanted location is obstructed).
 
-            float getMaxActivationDistance() override;
+            float getMaxActivationDistance() const override;
 
             void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const override;
@@ -643,7 +643,7 @@ namespace MWWorld
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) override;
             void updateProjectilesCasters() override;
 
-            void applyLoopingParticles(const MWWorld::Ptr& ptr) override;
+            void applyLoopingParticles(const MWWorld::Ptr& ptr) const override;
 
             const std::vector<std::string>& getContentFiles() const override;
             void breakInvisibility (const MWWorld::Ptr& actor) override;

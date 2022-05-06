@@ -201,7 +201,7 @@ namespace MWWorld
 
         mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering, mStore));
 
-        mWorldScene.reset(new Scene(*mRendering.get(), mPhysics.get(), *mNavigator));
+        mWorldScene.reset(new Scene(*this, *mRendering.get(), mPhysics.get(), *mNavigator));
     }
 
     void World::fillGlobalVariables()
@@ -1035,7 +1035,7 @@ namespace MWWorld
         return mWorldScene->markCellAsUnchanged();
     }
 
-    float World::getMaxActivationDistance ()
+    float World::getMaxActivationDistance() const
     {
         if (mActivationDistanceOverride >= 0)
             return static_cast<float>(mActivationDistanceOverride);
@@ -3175,7 +3175,7 @@ namespace MWWorld
         mProjectileManager->updateCasters();
     }
 
-    void World::applyLoopingParticles(const MWWorld::Ptr& ptr)
+    void World::applyLoopingParticles(const MWWorld::Ptr& ptr) const
     {
         const MWWorld::Class &cls = ptr.getClass();
         if (cls.isActor())

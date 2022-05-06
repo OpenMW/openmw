@@ -273,7 +273,7 @@ namespace MWBase
 
             virtual float getDistanceToFacedObject() = 0;
 
-            virtual float getMaxActivationDistance() = 0;
+            virtual float getMaxActivationDistance() const = 0;
 
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
@@ -548,7 +548,7 @@ namespace MWBase
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) = 0;
             virtual void updateProjectilesCasters() = 0;
 
-            virtual void applyLoopingParticles(const MWWorld::Ptr& ptr) = 0;
+            virtual void applyLoopingParticles(const MWWorld::Ptr& ptr) const = 0;
 
             virtual const std::vector<std::string>& getContentFiles() const = 0;
 
