@@ -92,6 +92,15 @@ namespace LuaUtil
                 local nextFn, t, firstKey = ipairs(getmetatable(v).__index)
                 return function(_, k) return nextFn(t, k) end, v, firstKey
             end
+            local function nextForArray(array, index)
+                index = (index or 0) + 1
+                if index < #array then
+                    return index, array[index]
+                end
+            end
+            function ipairsForArray(array)
+                return nextForArray, array, 0
+            end
 
             getmetatable('').__metatable = false
             getSafeMetatable = function(v)
