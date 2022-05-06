@@ -183,11 +183,23 @@ namespace MWMechanics
             bool isTurningToPlayer(const MWWorld::Ptr& ptr) const;
 
         private:
+            enum class MusicType
+            {
+                Explore,
+                Battle
+            };
+
             std::map<std::string, int> mDeathCount;
             PtrActorMap mActors;
             float mTimerDisposeSummonsCorpses;
+            float mTimerUpdateHeadTrack = 0;
+            float mTimerUpdateEquippedLight = 0;
+            float mTimerUpdateHello = 0;
+            float mSneakTimer = 0; // Times update of sneak icon
+            float mSneakSkillTimer = 0; // Times sneak skill progress from "avoid notice"
             float mActorsProcessingRange;
             bool mSmoothMovement;
+            MusicType mCurrentMusic = MusicType::Explore;
 
             void updateVisibility (const MWWorld::Ptr& ptr, CharacterController* ctrl);
 

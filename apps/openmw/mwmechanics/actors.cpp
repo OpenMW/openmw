@@ -1207,18 +1207,17 @@ namespace MWMechanics
         }
 
         // check if we still have any player enemies to switch music
-        static int currentMusic = 0;
-
-        if (currentMusic != 1 && !hasHostiles && !(player.getClass().getCreatureStats(player).isDead() &&
-        MWBase::Environment::get().getSoundManager()->isMusicPlaying()))
+        if (mCurrentMusic != MusicType::Explore && !hasHostiles
+                && !(player.getClass().getCreatureStats(player).isDead()
+                     && MWBase::Environment::get().getSoundManager()->isMusicPlaying()))
         {
             MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
-            currentMusic = 1;
+            mCurrentMusic = MusicType::Explore;
         }
-        else if (currentMusic != 2 && hasHostiles)
+        else if (mCurrentMusic != MusicType::Battle && hasHostiles)
         {
             MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
-            currentMusic = 2;
+            mCurrentMusic = MusicType::Battle;
         }
 
     }
@@ -1374,15 +1373,19 @@ namespace MWMechanics
     {
         if(!paused)
         {
-            static float timerUpdateHeadTrack = 0;
-            static float timerUpdateEquippedLight = 0;
-            static float timerUpdateHello = 0;
             const float updateEquippedLightInterval = 1.0f;
 
-            if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
-            if (timerUpdateHello >= 0.25f) timerUpdateHello = 0;
-            if (mTimerDisposeSummonsCorpses >= 0.2f) mTimerDisposeSummonsCorpses = 0;
-            if (timerUpdateEquippedLight >= updateEquippedLightInterval) timerUpdateEquippedLight = 0;
+            if (mTimerUpdateHeadTrack >= 0.3f)
+                mTimerUpdateHeadTrack = 0;
+
+            if (mTimerUpdateHello >= 0.25f)
+                mTimerUpdateHello = 0;
+
+            if (mTimerDisposeSummonsCorpses >= 0.2f)
+                mTimerDisposeSummonsCorpses = 0;
+
+            if (mTimerUpdateEquippedLight >= updateEquippedLightInterval)
+                mTimerUpdateEquippedLight = 0;
 
             // show torches only when there are darkness and no precipitations
             MWBase::World* world = MWBase::Environment::get().getWorld();
@@ -1470,7 +1473,7 @@ namespace MWMechanics
                                 engageCombat(iter->first, it->first, cachedAllies, it->first == player);
                             }
                         }
-                        if (timerUpdateHeadTrack == 0)
+                        if (mTimerUpdateHeadTrack == 0)
                         {
                             float sqrHeadTrackDistance = std::numeric_limits<float>::max();
                             MWWorld::Ptr headTrackTarget;
@@ -1518,7 +1521,7 @@ namespace MWMechanics
                             if (isConscious(iter->first) && !(luaControls && luaControls->mDisableAI))
                             {
                                 stats.getAiSequence().execute(iter->first, *ctrl, duration);
-                                updateGreetingState(iter->first, *iter->second, timerUpdateHello > 0);
+                                updateGreetingState(iter->first, *iter->second, mTimerUpdateHello > 0);
                                 playIdleDialogue(iter->first);
                                 updateMovementSpeed(iter->first);
                             }
@@ -1535,7 +1538,7 @@ namespace MWMechanics
                         // We can not update drowning state for actors outside of AI distance - they can not resurface to breathe
                         updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
                     }
-                    if(timerUpdateEquippedLight == 0 && iter->first.getClass().hasInventoryStore(iter->first))
+                    if(mTimerUpdateEquippedLight == 0 && iter->first.getClass().hasInventoryStore(iter->first))
                         updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
 
                     if (luaControls && isConscious(iter->first))
@@ -1577,9 +1580,9 @@ namespace MWMechanics
             if (avoidCollisions)
                 predictAndAvoidCollisions(duration);
 
-            timerUpdateHeadTrack += duration;
-            timerUpdateEquippedLight += duration;
-            timerUpdateHello += duration;
+            mTimerUpdateHeadTrack += duration;
+            mTimerUpdateEquippedLight += duration;
+            mTimerUpdateHello += duration;
             mTimerDisposeSummonsCorpses += duration;
 
             // Animation/movement update
@@ -1829,8 +1832,6 @@ namespace MWMechanics
 
     void Actors::updateSneaking(CharacterController* ctrl, float duration)
     {
-        static float sneakTimer = 0.f; // Times update of sneak icon
-
         if (!ctrl)
         {
             MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
@@ -1845,17 +1846,15 @@ namespace MWMechanics
             return;
         }
 
-        static float sneakSkillTimer = 0.f; // Times sneak skill progress from "avoid notice"
-
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
         static const float fSneakUseDist = gmst.find("fSneakUseDist")->mValue.getFloat();
         static const float fSneakUseDelay = gmst.find("fSneakUseDelay")->mValue.getFloat();
 
-        if (sneakTimer >= fSneakUseDelay)
-            sneakTimer = 0.f;
+        if (mSneakTimer >= fSneakUseDelay)
+            mSneakTimer = 0.f;
 
-        if (sneakTimer == 0.f)
+        if (mSneakTimer == 0.f)
         {
             // Set when an NPC is within line of sight and distance, but is still unaware. Used for skill progress.
             bool avoidedNotice = false;
@@ -1893,18 +1892,18 @@ namespace MWMechanics
                 }
             }
 
-            if (sneakSkillTimer >= fSneakUseDelay)
-                sneakSkillTimer = 0.f;
+            if (mSneakSkillTimer >= fSneakUseDelay)
+                mSneakSkillTimer = 0.f;
 
-            if (avoidedNotice && sneakSkillTimer == 0.f)
+            if (avoidedNotice && mSneakSkillTimer == 0.f)
                 player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 0);
 
             if (!detected)
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
         }
 
-        sneakTimer += duration;
-        sneakSkillTimer += duration;
+        mSneakTimer += duration;
+        mSneakSkillTimer += duration;
     }
 
     int Actors::getHoursToRest(const MWWorld::Ptr &ptr) const
