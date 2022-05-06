@@ -39,24 +39,6 @@ namespace MWMechanics
 
     class Actors
     {
-            std::map<std::string, int> mDeathCount;
-
-            void adjustMagicEffects (const MWWorld::Ptr& creature, float duration);
-
-            void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
-
-            void updateDrowning (const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer);
-
-            void updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip);
-
-            void updateCrimePursuit (const MWWorld::Ptr& ptr, float duration);
-
-            void killDeadActors ();
-
-            void purgeSpellEffects (int casterActorId);
-
-            void predictAndAvoidCollisions(float duration);
-
         public:
 
             Actors();
@@ -200,14 +182,30 @@ namespace MWMechanics
             GreetingState getGreetingState(const MWWorld::Ptr& ptr) const;
             bool isTurningToPlayer(const MWWorld::Ptr& ptr) const;
 
-    private:
-        void updateVisibility (const MWWorld::Ptr& ptr, CharacterController* ctrl);
+        private:
+            std::map<std::string, int> mDeathCount;
+            PtrActorMap mActors;
+            float mTimerDisposeSummonsCorpses;
+            float mActorsProcessingRange;
+            bool mSmoothMovement;
 
-        PtrActorMap mActors;
-        float mTimerDisposeSummonsCorpses;
-        float mActorsProcessingRange;
+            void updateVisibility (const MWWorld::Ptr& ptr, CharacterController* ctrl);
 
-        bool mSmoothMovement;
+            void adjustMagicEffects (const MWWorld::Ptr& creature, float duration);
+
+            void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
+
+            void updateDrowning (const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer);
+
+            void updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip);
+
+            void updateCrimePursuit (const MWWorld::Ptr& ptr, float duration);
+
+            void killDeadActors ();
+
+            void purgeSpellEffects (int casterActorId);
+
+            void predictAndAvoidCollisions(float duration);
     };
 }
 
