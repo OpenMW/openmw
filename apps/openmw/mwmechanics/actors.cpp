@@ -495,7 +495,7 @@ namespace MWMechanics
 
         getActorsSidingWith(actor1, allies1, cachedAllies);
 
-        auto* mechanicsManager = MWBase::Environment::get().getMechanicsManager();
+        const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
         // If an ally of actor1 has been attacked by actor2 or has attacked actor2, start combat between actor1 and actor2
         for (const MWWorld::Ptr& ally : allies1)
         {
@@ -583,7 +583,7 @@ namespace MWMechanics
         }
 
         // Make guards go aggressive with creatures that are in combat, unless the creature is a follower or escorter
-        auto* world = MWBase::Environment::get().getWorld();
+        const auto world = MWBase::Environment::get().getWorld();
         if (!aggressive && actor1.getClass().isClass(actor1, "Guard") && !actor2.getClass().isNpc() && creatureStats2.getAiSequence().isInCombat())
         {
             // Check if the creature is too far
@@ -917,7 +917,7 @@ namespace MWMechanics
         //If holding a light...
         if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)
         {
-            auto* world = MWBase::Environment::get().getWorld();
+            const auto world = MWBase::Environment::get().getWorld();
             // Use time from the player's light
             if(isPlayer)
             {
@@ -974,8 +974,8 @@ namespace MWMechanics
         if (playerStats.isWerewolf())
             return;
 
-        auto* mechanicsManager = MWBase::Environment::get().getMechanicsManager();
-        auto* world = MWBase::Environment::get().getWorld();
+        const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
+        const auto world = MWBase::Environment::get().getWorld();
 
         if (actorClass.isClass(ptr, "Guard") && creatureStats.getAiSequence().isInPursuit() && !creatureStats.getAiSequence().isInCombat()
             && creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)

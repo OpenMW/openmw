@@ -271,7 +271,7 @@ namespace
 
 void OMW::Engine::executeLocalScripts()
 {
-    MWWorld::LocalScripts& localScripts = mEnvironment.getWorld()->getLocalScripts();
+    MWWorld::LocalScripts& localScripts = mWorld->getLocalScripts();
 
     localScripts.startIteration();
     std::pair<std::string, MWWorld::Ptr> script;
@@ -279,7 +279,7 @@ void OMW::Engine::executeLocalScripts()
     {
         MWScript::InterpreterContext interpreterContext (
             &script.second.getRefData().getLocals(), script.second);
-        mEnvironment.getScriptManager()->run (script.first, interpreterContext);
+        mScriptManager->run (script.first, interpreterContext);
     }
 }
 
@@ -297,7 +297,7 @@ bool OMW::Engine::frame(float frametime)
         // update input
         {
             ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
-            mEnvironment.getInputManager()->update(frametime, false);
+            mInputManager->update(frametime, false);
         }
 
         // When the window is minimized, pause the game. Currently this *has* to be here to work around a MyGUI bug.
@@ -306,21 +306,21 @@ bool OMW::Engine::frame(float frametime)
         {
             ScopedProfile<UserStatsType::Sound> profile(frameStart, frameNumber, *timer, *stats);
 
-            if (!mEnvironment.getWindowManager()->isWindowVisible())
+            if (!mWindowManager->isWindowVisible())
             {
-                mEnvironment.getSoundManager()->pausePlayback();
+                mSoundManager->pausePlayback();
                 return false;
             }
             else
-                mEnvironment.getSoundManager()->resumePlayback();
+                mSoundManager->resumePlayback();
 
             // sound
             if (mUseSound)
-                mEnvironment.getSoundManager()->update(frametime);
+                mSoundManager->update(frametime);
         }
 
         // Main menu opened? Then scripts are also paused.
-        bool paused = mEnvironment.getWindowManager()->containsMode(MWGui::GM_MainMenu);
+        bool paused = mWindowManager->containsMode(MWGui::GM_MainMenu);
 
         // Should be called after input manager update and before any change to the game world.
         // It applies to the game world queued changes from the previous frame.
@@ -329,35 +329,35 @@ bool OMW::Engine::frame(float frametime)
         // update game state
         {
             ScopedProfile<UserStatsType::State> profile(frameStart, frameNumber, *timer, *stats);
-            mEnvironment.getStateManager()->update (frametime);
+            mStateManager->update (frametime);
         }
 
-        bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
+        bool guiActive = mWindowManager->isGuiMode();
 
         {
             ScopedProfile<UserStatsType::Script> profile(frameStart, frameNumber, *timer, *stats);
 
-            if (mEnvironment.getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+            if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
                 if (!paused)
                 {
-                    if (mEnvironment.getWorld()->getScriptsEnabled())
+                    if (mWorld->getScriptsEnabled())
                     {
                         // local scripts
                         executeLocalScripts();
 
                         // global scripts
-                        mEnvironment.getScriptManager()->getGlobalScripts().run();
+                        mScriptManager->getGlobalScripts().run();
                     }
 
-                    mEnvironment.getWorld()->markCellAsUnchanged();
+                    mWorld->markCellAsUnchanged();
                 }
 
                 if (!guiActive)
                 {
-                    double hours = (frametime * mEnvironment.getWorld()->getTimeScaleFactor()) / 3600.0;
-                    mEnvironment.getWorld()->advanceTime(hours, true);
-                    mEnvironment.getWorld()->rechargeItems(frametime, true);
+                    double hours = (frametime * mWorld->getTimeScaleFactor()) / 3600.0;
+                    mWorld->advanceTime(hours, true);
+                    mWorld->rechargeItems(frametime, true);
                 }
             }
         }
@@ -366,16 +366,16 @@ bool OMW::Engine::frame(float frametime)
         {
             ScopedProfile<UserStatsType::Mechanics> profile(frameStart, frameNumber, *timer, *stats);
 
-            if (mEnvironment.getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+            if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                mEnvironment.getMechanicsManager()->update(frametime, guiActive);
+                mMechanicsManager->update(frametime, guiActive);
             }
 
-            if (mEnvironment.getStateManager()->getState() == MWBase::StateManager::State_Running)
+            if (mStateManager->getState() == MWBase::StateManager::State_Running)
             {
-                MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
+                MWWorld::Ptr player = mWorld->getPlayerPtr();
                 if(!guiActive && player.getClass().getCreatureStats(player).isDead())
-                    mEnvironment.getStateManager()->endGame();
+                    mStateManager->endGame();
             }
         }
 
@@ -383,9 +383,9 @@ bool OMW::Engine::frame(float frametime)
         {
             ScopedProfile<UserStatsType::Physics> profile(frameStart, frameNumber, *timer, *stats);
 
-            if (mEnvironment.getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+            if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                mEnvironment.getWorld()->updatePhysics(frametime, guiActive, frameStart, frameNumber, *stats);
+                mWorld->updatePhysics(frametime, guiActive, frameStart, frameNumber, *stats);
             }
         }
 
@@ -393,16 +393,16 @@ bool OMW::Engine::frame(float frametime)
         {
             ScopedProfile<UserStatsType::World> profile(frameStart, frameNumber, *timer, *stats);
 
-            if (mEnvironment.getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+            if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                mEnvironment.getWorld()->update(frametime, guiActive);
+                mWorld->update(frametime, guiActive);
             }
         }
 
         // update GUI
         {
             ScopedProfile<UserStatsType::Gui> profile(frameStart, frameNumber, *timer, *stats);
-            mEnvironment.getWindowManager()->update(frametime);
+            mWindowManager->update(frametime);
         }
 
         if (stats->collectStats("resource"))
@@ -443,7 +443,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mExportFonts(false)
   , mRandomSeed(0)
   , mScriptContext (nullptr)
-  , mLuaManager (nullptr)
   , mFSStrict (false)
   , mScriptBlacklistUse (true)
   , mNewGame (false)
@@ -470,6 +469,17 @@ OMW::Engine::~Engine()
     mStereoManager = nullptr;
 
     mEnvironment.cleanup();
+
+    mMechanicsManager = nullptr;
+    mDialogueManager = nullptr;
+    mJournal = nullptr;
+    mScriptManager = nullptr;
+    mWindowManager = nullptr;
+    mWorld = nullptr;
+    mSoundManager = nullptr;
+    mInputManager = nullptr;
+    mStateManager = nullptr;
+    mLuaManager = nullptr;
 
     delete mScriptContext;
     mScriptContext = nullptr;
@@ -701,8 +711,8 @@ void OMW::Engine::setWindowIcon()
 
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
-    mEnvironment.setStateManager (
-        std::make_unique<MWState::StateManager> (mCfgMgr.getUserDataPath() / "saves", mContentFiles));
+    mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
+    mEnvironment.setStateManager(*mStateManager);
 
     mStereoManager = std::make_unique<Stereo::Manager>(mViewer);
 
@@ -723,6 +733,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         Settings::Manager::getString("texture mipmap", "General"),
         Settings::Manager::getInt("anisotropy", "General")
     );
+    mEnvironment.setResourceSystem(*mResourceSystem);
 
     int numThreads = Settings::Manager::getInt("preload num threads", "Cells");
     if (numThreads <= 0)
@@ -744,9 +755,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mViewer->addEventHandler(mScreenCaptureHandler);
 
-    auto luaMgr = std::make_unique<MWLua::LuaManager>(mVFS.get(), (mResDir / "lua_libs").string());
-    mLuaManager = luaMgr.get();
-    mEnvironment.setLuaManager(std::move(luaMgr));
+    mLuaManager = std::make_unique<MWLua::LuaManager>(mVFS.get(), (mResDir / "lua_libs").string());
+    mEnvironment.setLuaManager(*mLuaManager);
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
@@ -799,34 +809,36 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mStereoManager->disableStereoForNode(guiRoot);
     rootNode->addChild(guiRoot);
 
-    auto windowMgr = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
+    mWindowManager = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
                 Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string(), shadersSupported);
-    auto* windowMgrInternal = windowMgr.get();
-    mEnvironment.setWindowManager (std::move(windowMgr));
+    mEnvironment.setWindowManager(*mWindowManager);
 
-    auto inputMgr = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
-    mEnvironment.setInputManager(std::move(inputMgr));
+    mInputManager = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler,
+        mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
+    mEnvironment.setInputManager(*mInputManager);
 
     // Create sound system
-    mEnvironment.setSoundManager (std::make_unique<MWSound::SoundManager>(mVFS.get(), mUseSound));
+    mSoundManager = std::make_unique<MWSound::SoundManager>(mVFS.get(), mUseSound);
+    mEnvironment.setSoundManager(*mSoundManager);
 
     if (!mSkipMenu)
     {
         const std::string& logo = Fallback::Map::getString("Movies_Company_Logo");
         if (!logo.empty())
-            mEnvironment.getWindowManager()->playVideo(logo, true);
+            mWindowManager->playVideo(logo, true);
     }
 
     // Create the world
-    mEnvironment.setWorld(std::make_unique<MWWorld::World>(mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(),
+    mWorld = std::make_unique<MWWorld::World>(mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(),
         mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder, mActivationDistanceOverride, mCellName,
-        mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string()));
-    mEnvironment.getWorld()->setupPlayer();
+        mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string());
+    mWorld->setupPlayer();
+    mEnvironment.setWorld(*mWorld);
 
-    windowMgrInternal->setStore(mEnvironment.getWorld()->getStore());
-    windowMgrInternal->initUI();
+    mWindowManager->setStore(mWorld->getStore());
+    mWindowManager->initUI();
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);
@@ -839,21 +851,25 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
     mScriptContext->setExtensions (&mExtensions);
 
-    mEnvironment.setScriptManager (std::make_unique<MWScript::ScriptManager>(mEnvironment.getWorld()->getStore(), *mScriptContext, mWarningsMode,
-        mScriptBlacklistUse ? mScriptBlacklist : std::vector<std::string>()));
+    mScriptManager = std::make_unique<MWScript::ScriptManager>(mWorld->getStore(), *mScriptContext, mWarningsMode,
+        mScriptBlacklistUse ? mScriptBlacklist : std::vector<std::string>());
+    mEnvironment.setScriptManager(*mScriptManager);
 
     // Create game mechanics system
-    mEnvironment.setMechanicsManager (std::make_unique<MWMechanics::MechanicsManager>());
+    mMechanicsManager = std::make_unique<MWMechanics::MechanicsManager>();
+    mEnvironment.setMechanicsManager(*mMechanicsManager);
 
     // Create dialog system
-    mEnvironment.setJournal (std::make_unique<MWDialogue::Journal>());
-    mEnvironment.setDialogueManager (std::make_unique<MWDialogue::DialogueManager>(mExtensions, mTranslationDataStorage));
-    mEnvironment.setResourceSystem(mResourceSystem.get());
+    mJournal = std::make_unique<MWDialogue::Journal>();
+    mEnvironment.setJournal(*mJournal);
+
+    mDialogueManager = std::make_unique<MWDialogue::DialogueManager>(mExtensions, mTranslationDataStorage);
+    mEnvironment.setDialogueManager(*mDialogueManager);
 
     // scripts
     if (mCompileAll)
     {
-        std::pair<int, int> result = mEnvironment.getScriptManager()->compileAll();
+        std::pair<int, int> result = mScriptManager->compileAll();
         if (result.first)
             Log(Debug::Info)
                 << "compiled " << result.second << " of " << result.first << " scripts ("
@@ -1014,25 +1030,25 @@ void OMW::Engine::go()
     // Start the game
     if (!mSaveGameFile.empty())
     {
-        mEnvironment.getStateManager()->loadGame(mSaveGameFile);
+        mStateManager->loadGame(mSaveGameFile);
     }
     else if (!mSkipMenu)
     {
         // start in main menu
-        mEnvironment.getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-        mEnvironment.getSoundManager()->playTitleMusic();
+        mWindowManager->pushGuiMode (MWGui::GM_MainMenu);
+        mSoundManager->playTitleMusic();
         const std::string& logo = Fallback::Map::getString("Movies_Morrowind_Logo");
         if (!logo.empty())
-            mEnvironment.getWindowManager()->playVideo(logo, true);
+            mWindowManager->playVideo(logo, true);
     }
     else
     {
-        mEnvironment.getStateManager()->newGame (!mNewGame);
+        mStateManager->newGame (!mNewGame);
     }
 
-    if (!mStartupScript.empty() && mEnvironment.getStateManager()->getState() == MWState::StateManager::State_Running)
+    if (!mStartupScript.empty() && mStateManager->getState() == MWState::StateManager::State_Running)
     {
-        mEnvironment.getWindowManager()->executeInConsole(mStartupScript);
+        mWindowManager->executeInConsole(mStartupScript);
     }
 
     LuaWorker luaWorker(this);  // starts a separate lua thread if "lua num threads" > 0
@@ -1041,7 +1057,7 @@ void OMW::Engine::go()
     double simulationTime = 0.0;
     Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(mEnvironment.getFrameRateLimit());
     const std::chrono::steady_clock::duration maxSimulationInterval(std::chrono::milliseconds(200));
-    while (!mViewer->done() && !mEnvironment.getStateManager()->hasQuitRequest())
+    while (!mViewer->done() && !mStateManager->hasQuitRequest())
     {
         const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(std::min(
             frameRateLimiter.getLastFrameDuration(),
@@ -1060,7 +1076,7 @@ void OMW::Engine::go()
             mViewer->eventTraversal();
             mViewer->updateTraversal();
 
-            mEnvironment.getWorld()->updateWindowManager();
+            mWorld->updateWindowManager();
 
             luaWorker.allowUpdate();  // if there is a separate Lua thread, it starts the update now
 
@@ -1068,7 +1084,7 @@ void OMW::Engine::go()
 
             luaWorker.finishUpdate();
 
-            bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
+            bool guiActive = mWindowManager->isGuiMode();
             if (!guiActive)
                 simulationTime += dt;
         }

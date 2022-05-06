@@ -200,7 +200,7 @@ namespace MWLua
         };
         api["setConsoleSelectedObject"] = [luaManager=context.mLuaManager](const sol::object& obj)
         {
-            auto* wm = MWBase::Environment::get().getWindowManager();
+            const auto wm = MWBase::Environment::get().getWindowManager();
             if (obj == sol::nil)
                 luaManager->addAction([wm]{ wm->setConsoleSelectedObject(MWWorld::Ptr()); });
             else

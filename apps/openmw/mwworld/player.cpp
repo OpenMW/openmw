@@ -522,11 +522,11 @@ namespace MWWorld
     void Player::update()
     {
         auto player = getPlayer();
-        auto* world = MWBase::Environment::get().getWorld();
-        auto* rendering = world->getRenderingManager();
+        const auto world = MWBase::Environment::get().getWorld();
+        const auto rendering = world->getRenderingManager();
         auto& store = world->getStore();
         auto& playerClass = player.getClass();
-        auto* windowMgr = MWBase::Environment::get().getWindowManager();
+        const auto windowMgr = MWBase::Environment::get().getWindowManager();
 
         if (player.getCell()->isExterior())
         {
