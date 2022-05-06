@@ -151,7 +151,8 @@ namespace l10n
              defaultLocale = mPreferredLocales[0];
         }
         UParseError parseError;
-        icu::MessageFormat defaultMessage(icu::UnicodeString::fromUTF8(key), defaultLocale, parseError, success);
+        icu::MessageFormat defaultMessage(icu::UnicodeString::fromUTF8(icu::StringPiece(key.data(), key.size())),
+                                          defaultLocale, parseError, success);
         if (!checkSuccess(success, std::string("Failed to create message ") + key.data(), parseError))
             // If we can't parse the key as a pattern, just return the key
             return std::string(key);
