@@ -131,30 +131,8 @@ namespace MWLua
                 else
                     throw std::runtime_error("Index out of range");
             };
-            if constexpr (std::is_same_v<ObjectT, GObject>)
-            {
-                // GObject and LObject iterators are in separate branches because if they share source code
-                // there is a collision in sol and only one iterator can be mapped to Lua.
-                auto iter = sol::make_object(lua, [registry](const GObjectList& l, int64_t i) -> sol::optional<std::tuple<int64_t, GObject>>
-                {
-                    if (i >= 0 && i < static_cast<int64_t>(l.mIds->size()))
-                        return std::make_tuple(i + 1, GObject((*l.mIds)[i], registry));
-                    else
-                        return sol::nullopt;
-                });
-                listT[sol::meta_function::ipairs] = [iter](const GObjectList& list) { return std::make_tuple(iter, list, 0); };
-            }
-            else
-            {
-                auto iter = sol::make_object(lua, [registry](const LObjectList& l, int64_t i) -> sol::optional<std::tuple<int64_t, LObject>>
-                {
-                    if (i >= 0 && i < static_cast<int64_t>(l.mIds->size()))
-                        return std::make_tuple(i + 1, LObject((*l.mIds)[i], registry));
-                    else
-                        return sol::nullopt;
-                });
-                listT[sol::meta_function::ipairs] = [iter](const LObjectList& list) { return std::make_tuple(iter, list, 0); };
-            }
+            listT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
+            listT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         }
 
         template <class ObjectT>
