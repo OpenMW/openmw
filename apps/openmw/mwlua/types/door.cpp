@@ -45,8 +45,7 @@ namespace MWLua
             [](const Object& obj) -> const ESM::Door* { return obj.ptr().get<ESM::Door>()->mBase; },
             [store](const std::string& recordId) -> const ESM::Door* { return store->find(recordId); });
         sol::usertype<ESM::Door> record = context.mLua->sol().new_usertype<ESM::Door>("ESM3_Door");
-        record[sol::meta_function::to_string] = sol::readonly_property(
-            [](const ESM::Door& rec) -> std::string { return "ESM3_Door[" + rec.mId + "]"; });
+        record[sol::meta_function::to_string] = [](const ESM::Door& rec) -> std::string { return "ESM3_Door[" + rec.mId + "]"; };
         record["id"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mId; });
         record["name"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mModel; });
