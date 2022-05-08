@@ -95,9 +95,12 @@ namespace MWLua
                 if (actor.isEmpty())
                     throw std::runtime_error(std::string("Actor not found: " + idToString(mActor)));
 
-                MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
-                std::unique_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
-                action->execute(actor);
+                if (object.getRefData().activate())
+                {
+                    MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
+                    std::unique_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
+                    action->execute(actor);
+                }
             }
 
             std::string toString() const override
