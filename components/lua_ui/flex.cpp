@@ -71,6 +71,7 @@ namespace LuaUi
             w->forcePosition(childPosition);
             primary(size) += static_cast<int>(growFactor * getGrow(w));
             w->forceSize(size);
+            w->updateCoord();
             primary(childPosition) += primary(size);
             w->updateCoord();
         }

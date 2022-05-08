@@ -24,7 +24,7 @@ Properties
     - ui.ALIGNMENT (Start)
     - Where to align the children in the main axis.
   * - arrange
-    - ui.ALIGNMETN (Start)
+    - ui.ALIGNMENT (Start)
     - How to arrange the children in the cross axis.
 
 External

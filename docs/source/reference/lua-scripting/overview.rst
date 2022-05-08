@@ -460,15 +460,22 @@ The order in which the scripts are started is important. So if one mod should ov
 
 **Interfaces of built-in scripts**
 
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-| Interface                                               | Can be used        | Description                                                   |
-+=========================================================+====================+===============================================================+
-|:ref:`AI <Interface AI>`                                 | by local scripts   | | Control basic AI of NPCs and creatures.                     |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`Camera <Interface Camera>`                         | by player scripts  | | Allows to alter behavior of the built-in camera script      |
-|                                                         |                    | | without overriding the script completely.                   |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+.. list-table::
+  :widths: 20 20 60
 
+  * - Interface
+    - Can be used
+    - Description
+  * - :ref:`AI <Interface AI>`
+    - by local scripts
+    - Control basic AI of NPCs and creatures.
+  * - :ref:`Camera <Interface Camera>`
+    - by player scripts
+    - | Allows to alter behavior of the built-in camera script
+      | without overriding the script completely.
+  * - :ref:`Settings <Interface Settings>`
+    - by player and global scripts
+    - Save, display and track changes of setting values.
 
 Event system
 ============
