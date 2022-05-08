@@ -1066,10 +1066,12 @@ printf "ICU ${ICU_VER/_/.}... "
 		rm -rf ICU-${ICU_VER}
 		eval 7z x -y icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip -o$(real_pwd)/ICU-${ICU_VER} $STRIP
 	fi
-	export ICU_ROOT="$(real_pwd)/ICU-${ICU_VER}"
-	add_cmake_opts -DICU_INCLUDE_DIR="${ICU_ROOT}/include" \
-		-DICU_LIBRARY="${ICU_ROOT}/lib${BITS}/icuuc.lib " \
-        -DICU_DEBUG=ON
+	ICU_ROOT="$(real_pwd)/ICU-${ICU_VER}"
+	add_cmake_opts -DICU_ROOT="${ICU_ROOT}" \
+		-DICU_INCLUDE_DIR="${ICU_ROOT}/include" \
+		-DICU_I18N_LIBRARY="${ICU_ROOT}/lib${BITS}/icuin.lib " \
+		-DICU_UC_LIBRARY="${ICU_ROOT}/lib${BITS}/icuuc.lib " \
+		-DICU_DEBUG=ON
 
 	for config in ${CONFIGURATIONS[@]}; do
 		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icudt${ICU_VER/_*/}.dll"
