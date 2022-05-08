@@ -150,8 +150,6 @@ namespace MWBase
             virtual bool toggleWorld() = 0;
             virtual bool toggleBorders() = 0;
 
-            virtual void adjustSky() = 0;
-
             virtual MWWorld::Player& getPlayer() = 0;
             virtual MWWorld::Ptr getPlayerPtr() = 0;
             virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;
@@ -273,7 +271,7 @@ namespace MWBase
 
             virtual float getDistanceToFacedObject() = 0;
 
-            virtual float getMaxActivationDistance() = 0;
+            virtual float getMaxActivationDistance() const = 0;
 
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
@@ -548,7 +546,7 @@ namespace MWBase
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) = 0;
             virtual void updateProjectilesCasters() = 0;
 
-            virtual void applyLoopingParticles(const MWWorld::Ptr& ptr) = 0;
+            virtual void applyLoopingParticles(const MWWorld::Ptr& ptr) const = 0;
 
             virtual const std::vector<std::string>& getContentFiles() const = 0;
 
@@ -623,7 +621,6 @@ namespace MWBase
             virtual bool isPlayerInJail() const = 0;
 
             virtual void rest(double hours) = 0;
-            virtual void rechargeItems(double duration, bool activeOnly) = 0;
 
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;

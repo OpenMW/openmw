@@ -142,7 +142,7 @@ namespace MWGui
     void setStore (const MWWorld::ESMStore& store);
 
     void initUI();
-    void loadUserFonts() override;
+    void loadUserFonts();
 
     Loading::Listener* getLoadingScreen() override;
 
