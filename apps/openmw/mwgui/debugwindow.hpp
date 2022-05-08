@@ -14,7 +14,16 @@ namespace MWGui
         void onFrame(float dt) override;
 
     private:
+        void initLogView();
+        void updateLogView();
+        void updateBulletProfile();
+
         MyGUI::TabControl* mTabControl;
+
+        MyGUI::EditBox* mLogView;
+        std::vector<char> mLogCircularBuffer;
+        int64_t mLogStartIndex = 0;
+        int64_t mLogEndIndex = 0;
 
         MyGUI::EditBox* mBulletProfilerEdit;
     };

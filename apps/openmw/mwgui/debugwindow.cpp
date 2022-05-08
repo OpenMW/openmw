@@ -5,6 +5,8 @@
 #include <MyGUI_EditBox.h>
 
 #include <LinearMath/btQuickprof.h>
+#include <components/debug/debugging.hpp>
+#include <components/settings/settings.hpp>
 
 #ifndef BT_NO_PROFILE
 
@@ -84,28 +86,105 @@ namespace MWGui
 
         // Ideas for other tabs:
         // - Texture / compositor texture viewer
-        // - Log viewer
         // - Material editor
         // - Shader editor
 
+        initLogView();
+
+#ifndef BT_NO_PROFILE
         MyGUI::TabItem* item = mTabControl->addItem("Physics Profiler");
         mBulletProfilerEdit = item->createWidgetReal<MyGUI::EditBox>
                 ("LogEdit", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Stretch);
+#else
+        mBulletProfilerEdit = nullptr;
+#endif
     }
 
-    void DebugWindow::onFrame(float dt)
+    void DebugWindow::initLogView()
+    {
+        MyGUI::TabItem* itemLV = mTabControl->addItem("Log Viewer");
+        mLogView = itemLV->createWidgetReal<MyGUI::EditBox>
+                ("LogEdit", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Stretch);
+        mLogView->setEditReadOnly(true);
+
+        mLogCircularBuffer.resize(std::max<int64_t>(0, Settings::Manager::getInt64("log buffer size", "General")));
+        Debug::setLogListener([this](Debug::Level level, std::string_view prefix, std::string_view msg)
+        {
+            if (mLogCircularBuffer.empty())
+                return;  // Log viewer is disabled.
+            std::string_view color;
+            switch (level)
+            {
+                case Debug::Error: color = "#FF0000"; break;
+                case Debug::Warning: color = "#FFFF00"; break;
+                case Debug::Info: color = "#FFFFFF"; break;
+                case Debug::Verbose:
+                case Debug::Debug: color = "#666666"; break;
+                default: color = "#FFFFFF";
+            }
+            bool bufferOverflow = false;
+            const int64_t bufSize = mLogCircularBuffer.size();
+            auto addChar = [&](char c)
+            {
+                mLogCircularBuffer[mLogEndIndex++] = c;
+                if (mLogEndIndex == bufSize)
+                    mLogEndIndex = 0;
+                bufferOverflow = bufferOverflow || mLogEndIndex == mLogStartIndex;
+            };
+            auto addShieldedStr = [&](std::string_view s)
+            {
+                for (char c : s)
+                {
+                    addChar(c);
+                    if (c == '#')
+                        addChar(c);
+                }
+            };
+            for (char c : color)
+                addChar(c);
+            addShieldedStr(prefix);
+            addShieldedStr(msg);
+            if (bufferOverflow)
+                mLogStartIndex = (mLogEndIndex + 1) % bufSize;
+        });
+    }
+
+    void DebugWindow::updateLogView()
+    {
+        if (!mLogView || mLogCircularBuffer.empty() || mLogStartIndex == mLogEndIndex)
+            return;
+        if (mLogView->isTextSelection())
+            return;  // Don't change text while player is trying to copy something
+
+        std::string addition;
+        const int64_t bufSize = mLogCircularBuffer.size();
+        {
+            std::unique_lock<std::mutex> lock = Log::lock();
+            if (mLogStartIndex < mLogEndIndex)
+                addition = std::string(mLogCircularBuffer.data() + mLogStartIndex, mLogEndIndex - mLogStartIndex);
+            else
+            {
+                addition = std::string(mLogCircularBuffer.data() + mLogStartIndex, bufSize - mLogStartIndex);
+                addition.append(mLogCircularBuffer.data(), mLogEndIndex);
+            }
+            mLogStartIndex = mLogEndIndex;
+        }
+
+        size_t scrollPos = mLogView->getVScrollPosition();
+        bool scrolledToTheEnd = scrollPos+1 >= mLogView->getVScrollRange();
+        int64_t newSizeEstimation = mLogView->getTextLength() + addition.size();
+        if (newSizeEstimation > bufSize)
+            mLogView->eraseText(0, newSizeEstimation - bufSize);
+        mLogView->addText(addition);
+        if (scrolledToTheEnd && mLogView->getVScrollRange() > 0)
+            mLogView->setVScrollPosition(mLogView->getVScrollRange() - 1);
+        else
+            mLogView->setVScrollPosition(scrollPos);
+    }
+
+    void DebugWindow::updateBulletProfile()
     {
 #ifndef BT_NO_PROFILE
-        if (!isVisible())
-            return;
-
-        static float timer = 0;
-        timer -= dt;
-
-        if (timer > 0)
-            return;
-        timer = 1;
-
         std::stringstream stream;
         bulletDumpAll(stream);
 
@@ -118,4 +197,17 @@ namespace MWGui
 #endif
     }
 
+    void DebugWindow::onFrame(float dt)
+    {
+        static float timer = 0;
+        timer -= dt;
+        if (timer > 0 || !isVisible())
+            return;
+        timer = 0.25;
+
+        if (mTabControl->getIndexSelected() == 0)
+            updateLogView();
+        else
+            updateBulletProfile();
+    }
 }

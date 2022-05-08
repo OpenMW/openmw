@@ -86,3 +86,17 @@ since if the country code isn't specified the generic language-code only locale 
 refer to any of the country-specific variants.
 
 This setting can only be configured by editing the settings configuration file.
+
+log buffer size
+---------------
+
+:Type:		integer
+:Range:		>= 0
+:Default:	65536
+
+Buffer size for the in-game log viewer (press F10 to toggle the log viewer).
+When the log doesn't fit into the buffer, only the end of the log is visible in the log viewer.
+Zero disables the log viewer.
+
+This setting can only be configured by editing the settings configuration file.
+

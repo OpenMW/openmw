@@ -35,7 +35,7 @@ public:
             return;
 
         // Locks a global lock while the object is alive
-        mLock = std::unique_lock<std::mutex>(sLock);
+        mLock = lock();
 
         // If the app has no logging system enabled, log level is not specified.
         // Show all messages without marker - we just use the plain cout in this case.
@@ -60,6 +60,8 @@ public:
         if (mShouldLog)
             std::cout << std::endl;
     }
+
+    static std::unique_lock<std::mutex> lock() { return std::unique_lock<std::mutex>(sLock); }
 
 private:
     const bool mShouldLog;

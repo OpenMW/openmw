@@ -884,6 +884,8 @@ namespace MWGui
         if (mLocalMapRender)
             mLocalMapRender->cleanupCameras();
 
+        mDebugWindow->onFrame(frameDuration);
+
         if (!gameRunning)
             return;
 
@@ -902,8 +904,6 @@ namespace MWGui
         mDragAndDrop->onFrame();
 
         mHud->onFrame(frameDuration);
-
-        mDebugWindow->onFrame(frameDuration);
 
         mPostProcessorHud->onFrame(frameDuration);
 
@@ -2061,9 +2061,7 @@ namespace MWGui
 
     void WindowManager::toggleDebugWindow()
     {
-#ifndef BT_NO_PROFILE
         mDebugWindow->setVisible(!mDebugWindow->isVisible());
-#endif
     }
 
     void WindowManager::togglePostProcessorHud()
