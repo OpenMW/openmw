@@ -789,7 +789,7 @@ namespace MWPhysics
     void PhysicsSystem::moveActors()
     {
         auto* player = getActor(MWMechanics::getPlayer());
-        auto* world = MWBase::Environment::get().getWorld();
+        const auto world = MWBase::Environment::get().getWorld();
 
         // copy new ptr position in temporary vector. player is handled separately as its movement might change active cell.
         std::vector<std::pair<MWWorld::Ptr, osg::Vec3f>> newPositions;

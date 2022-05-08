@@ -25,7 +25,7 @@ osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y)
         return static_cast<ESMTerrain::LandObject*>(obj.get());
     else
     {
-        const auto* world = MWBase::Environment::get().getWorld();
+        const auto world = MWBase::Environment::get().getWorld();
         if (!world)
             return nullptr;
         const ESM::Land* land = world->getStore().get<ESM::Land>().search(x,y);

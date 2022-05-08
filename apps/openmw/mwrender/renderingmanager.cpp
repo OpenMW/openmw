@@ -804,7 +804,7 @@ namespace MWRender
         }
         else if (mode == Render_Scene)
         {
-            auto* wm = MWBase::Environment::get().getWindowManager();
+            const auto wm = MWBase::Environment::get().getWindowManager();
             unsigned int mask = wm->getCullMask();
             bool enabled = !(mask&sToggleWorldMask);
             if (enabled)

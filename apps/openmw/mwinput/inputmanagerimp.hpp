@@ -61,7 +61,7 @@ namespace MWInput
         /// Clear all savegame-specific data
         void clear() override;
 
-        void update(float dt, bool disableControls=false, bool disableEvents=false) override;
+        void update(float dt, bool disableControls, bool disableEvents=false) override;
 
         void changeInputMode(bool guiMode) override;
 

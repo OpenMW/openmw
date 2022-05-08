@@ -247,8 +247,6 @@ namespace MWBase
             /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
 
-            virtual void update (float duration) = 0;
-
             virtual void updateConsoleObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr) = 0;
 
             /**

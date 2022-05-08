@@ -84,7 +84,7 @@ namespace MWState
 
             CharacterIterator characterEnd() override;
 
-            void update (float duration) override;
+            void update(float duration);
     };
 }
 

@@ -64,6 +64,51 @@ namespace SceneUtil
     }
 }
 
+namespace MWState
+{
+    class StateManager;
+}
+
+namespace MWGui
+{
+    class WindowManager;
+}
+
+namespace MWInput
+{
+    class InputManager;
+}
+
+namespace MWSound
+{
+    class SoundManager;
+}
+
+namespace MWWorld
+{
+    class World;
+}
+
+namespace MWScript
+{
+    class ScriptManager;
+}
+
+namespace MWMechanics
+{
+    class MechanicsManager;
+}
+
+namespace MWDialogue
+{
+    class DialogueManager;
+}
+
+namespace MWDialogue
+{
+    class Journal;
+}
+
 struct SDL_Window;
 
 namespace OMW
@@ -75,6 +120,16 @@ namespace OMW
             std::unique_ptr<VFS::Manager> mVFS;
             std::unique_ptr<Resource::ResourceSystem> mResourceSystem;
             osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+            std::unique_ptr<MWWorld::World> mWorld;
+            std::unique_ptr<MWSound::SoundManager> mSoundManager;
+            std::unique_ptr<MWScript::ScriptManager> mScriptManager;
+            std::unique_ptr<MWGui::WindowManager> mWindowManager;
+            std::unique_ptr<MWMechanics::MechanicsManager> mMechanicsManager;
+            std::unique_ptr<MWDialogue::DialogueManager> mDialogueManager;
+            std::unique_ptr<MWDialogue::Journal> mJournal;
+            std::unique_ptr<MWInput::InputManager> mInputManager;
+            std::unique_ptr<MWState::StateManager> mStateManager;
+            std::unique_ptr<MWLua::LuaManager> mLuaManager;
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
             ToUTF8::Utf8Encoder* mEncoder;
@@ -110,8 +165,6 @@ namespace OMW
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
-
-            MWLua::LuaManager* mLuaManager;
 
             Files::Collections mFileCollections;
             bool mFSStrict;

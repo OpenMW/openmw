@@ -66,12 +66,6 @@ namespace MWBase
             virtual void drop (const MWWorld::CellStore *cellStore) = 0;
             ///< Deregister all objects in the given cell.
 
-            virtual void update (float duration, bool paused) = 0;
-            ///< Update objects
-            ///
-            /// \param paused In game type does not currently advance (this usually means some GUI
-            /// component is up).
-
             virtual void setPlayerName (const std::string& name) = 0;
             ///< Set player name.
 
