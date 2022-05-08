@@ -29,6 +29,7 @@ namespace MWLua
     void addActorBindings(sol::table actor, const Context& context);
     void addWeaponBindings(sol::table weapon, const Context& context);
     void addNpcBindings(sol::table npc, const Context& context);
+    void addCreatureBindings(sol::table creature, const Context& context);
 }
 
 #endif // MWLUA_TYPES_H
