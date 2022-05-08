@@ -678,10 +678,10 @@ namespace DetourNavigator
         mHasJob.notify_all();
     }
 
-    std::optional<JobIt> DbJobQueue::pop(std::chrono::steady_clock::duration timeout)
+    std::optional<JobIt> DbJobQueue::pop()
     {
         std::unique_lock lock(mMutex);
-        mHasJob.wait_for(lock, timeout, [&] { return mShouldStop || !mJobs.empty(); });
+        mHasJob.wait(lock, [&] { return mShouldStop || !mJobs.empty(); });
         if (mJobs.empty())
             return std::nullopt;
         const JobIt job = mJobs.front();
@@ -752,45 +752,18 @@ namespace DetourNavigator
 
     void DbWorker::run() noexcept
     {
-        constexpr std::chrono::seconds transactionInterval(1);
-        auto transaction = mDb->startTransaction(Sqlite3::TransactionMode::Immediate);
-        auto start = std::chrono::steady_clock::now();
         while (!mShouldStop)
         {
             try
             {
-                if (const auto job = mQueue.pop(transactionInterval))
+                if (const auto job = mQueue.pop())
                     processJob(*job);
-                const auto now = std::chrono::steady_clock::now();
-                if (mHasChanges && now - start > transactionInterval)
-                {
-                    mHasChanges = false;
-                    try
-                    {
-                        transaction.commit();
-                    }
-                    catch (const std::exception& e)
-                    {
-                        Log(Debug::Error) << "DbWorker exception on commit: " << e.what();
-                    }
-                    transaction = mDb->startTransaction(Sqlite3::TransactionMode::Immediate);
-                    start = now;
-                }
             }
             catch (const std::exception& e)
             {
                 Log(Debug::Error) << "DbWorker exception: " << e.what();
             }
         }
-        if (mHasChanges)
-            try
-            {
-                transaction.commit();
-            }
-            catch (const std::exception& e)
-            {
-                Log(Debug::Error) << "DbWorker exception on final commit: " << e.what();
-            }
     }
 
     void DbWorker::processJob(JobIt job)
@@ -804,10 +777,19 @@ namespace DetourNavigator
             catch (const std::exception& e)
             {
                 Log(Debug::Error) << "DbWorker exception while processing job " << job->mId << ": " << e.what();
-                if (std::string_view(e.what()).find("database or disk is full") != std::string_view::npos)
+                if (mWriteToDb)
                 {
-                    mWriteToDb = false;
-                    Log(Debug::Warning) << "Writes to navmeshdb are disabled because file size limit is reached or disk is full";
+                    const std::string_view message(e.what());
+                    if (message.find("database or disk is full") != std::string_view::npos)
+                    {
+                        mWriteToDb = false;
+                        Log(Debug::Warning) << "Writes to navmeshdb are disabled because file size limit is reached or disk is full";
+                    }
+                    else if (message.find("database is locked") != std::string_view::npos)
+                    {
+                        mWriteToDb = false;
+                        Log(Debug::Warning) << "Writes to navmeshdb are disabled to avoid concurrent writes from multiple processes";
+                    }
                 }
             }
         };
@@ -833,11 +815,8 @@ namespace DetourNavigator
             Log(Debug::Debug) << "Serializing input for job " << job->mId;
             if (mWriteToDb)
             {
-                const ShapeId shapeId = mNextShapeId;
                 const auto objects = makeDbRefGeometryObjects(job->mRecastMesh->getMeshSources(),
                     [&] (const MeshSource& v) { return resolveMeshSource(*mDb, v, mNextShapeId); });
-                if (shapeId != mNextShapeId)
-                    mHasChanges = true;
                 job->mInput = serialize(mRecastSettings, *job->mRecastMesh, objects);
             }
             else
@@ -877,7 +856,6 @@ namespace DetourNavigator
             Log(Debug::Debug) << "Update db tile by job " << job->mId;
             job->mGeneratedNavMeshData->mUserId = cachedTileData->mTileId;
             mDb->updateTile(cachedTileData->mTileId, mVersion, serialize(*job->mGeneratedNavMeshData));
-            mHasChanges = true;
             return;
         }
 
@@ -893,6 +871,5 @@ namespace DetourNavigator
         mDb->insertTile(mNextTileId, job->mWorldspace, job->mChangedTile,
                         mVersion, job->mInput, serialize(*job->mGeneratedNavMeshData));
         ++mNextTileId;
-        mHasChanges = true;
     }
 }
