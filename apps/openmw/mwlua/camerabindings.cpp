@@ -92,6 +92,13 @@ namespace MWLua
         api["getFieldOfView"] = [renderingManager]() { return osg::DegreesToRadians(renderingManager->getFieldOfView()); };
         api["setFieldOfView"] = [renderingManager](float v) { renderingManager->setFieldOfView(osg::RadiansToDegrees(v)); };
 
+        api["getBaseViewDistance"] = []()
+        {
+            return std::max(0.f, Settings::Manager::getFloat("viewing distance", "Camera"));
+        };
+        api["getViewDistance"] = [renderingManager]() { return renderingManager->getViewDistance(); };
+        api["setViewDistance"] = [renderingManager](float d) { renderingManager->setViewDistance(d, true); };
+
         api["getViewTransform"] = [camera]() { return LuaUtil::TransformM{camera->getViewMatrix()}; };
 
         api["viewportToWorldVector"] = [camera, renderingManager](osg::Vec2f pos) -> osg::Vec3f

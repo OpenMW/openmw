@@ -186,6 +186,19 @@
 -- @function [parent=#camera] setFieldOfView
 -- @param #number fov Field of view vertical angle in radians
 
+--- Return base view distance.
+-- @function [parent=#camera] getBaseViewDistance
+-- @return #number
+
+--- Return current view distance.
+-- @function [parent=#camera] getViewDistance
+-- @return #number
+
+--- Set view distance.
+--- Takes effect on the next frame.
+-- @function [parent=#camera] setViewDistance
+-- @param #number distance View distance in game units
+
 --- Get world to local transform for the camera.
 -- @function [parent=#camera] getViewTransform
 -- @return openmw.util#Transform
