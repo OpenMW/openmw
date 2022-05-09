@@ -206,7 +206,10 @@ namespace MWRender
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);
 
-        float getNearClipDistance() const;
+        float getNearClipDistance() const { return mNearClip; }
+        float getViewDistance() const { return mViewDistance; }
+
+        void setViewDistance(float distance, bool delay = false);
 
         float getTerrainHeightAt(const osg::Vec3f& pos);
 
