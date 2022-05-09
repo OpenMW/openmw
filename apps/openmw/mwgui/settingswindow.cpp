@@ -328,7 +328,7 @@ namespace MWGui
         updateMaxLightsComboBox(mMaxLights);
 
         Settings::WindowMode windowMode = static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video"));
-        mWindowBorderButton->setEnabled(windowMode != Settings::WindowMode::Fullscreen && windowMode != Settings::WindowMode::BorderlessFullscreen);
+        mWindowBorderButton->setEnabled(windowMode != Settings::WindowMode::Fullscreen && windowMode != Settings::WindowMode::WindowedFullscreen);
 
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);

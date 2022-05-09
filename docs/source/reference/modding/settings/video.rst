@@ -40,11 +40,12 @@ window mode
 
 This setting determines the window mode.
 
-0: Fullscreen
+0: Exclusive fullscreen
 
-1: Borderless Fullscreen
+1: Windowed fullscreen, borderless window that matches screen resolution
 
 2: Windowed
+
 
 This setting can be toggled in game using the dropdown list in the Video tab of the Video panel in the Options menu.
 It can also be toggled with the window mode dropdown in the Graphics tab of the OpenMW Launcher.

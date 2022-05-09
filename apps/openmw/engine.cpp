@@ -562,7 +562,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen),
         pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
 
-    if(windowMode == Settings::WindowMode::Fullscreen || windowMode == Settings::WindowMode::BorderlessFullscreen)
+    if(windowMode == Settings::WindowMode::Fullscreen || windowMode == Settings::WindowMode::WindowedFullscreen)
     {
         pos_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
         pos_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
@@ -571,7 +571,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     Uint32 flags = SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE;
     if(windowMode == Settings::WindowMode::Fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
-    else if (windowMode == Settings::WindowMode::BorderlessFullscreen)
+    else if (windowMode == Settings::WindowMode::WindowedFullscreen)
         flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
     // Allows for Windows snapping features to properly work in borderless window

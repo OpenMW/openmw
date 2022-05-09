@@ -19,7 +19,7 @@ namespace Settings
     enum class WindowMode
     {
         Fullscreen = 0,
-        BorderlessFullscreen,
+        WindowedFullscreen,
         Windowed
     };
 

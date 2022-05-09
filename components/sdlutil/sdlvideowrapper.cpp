@@ -76,7 +76,7 @@ namespace SDLUtil
         if (SDL_GetWindowFlags(mWindow) & SDL_WINDOW_MAXIMIZED)
             SDL_RestoreWindow(mWindow);
 
-        if (windowMode == Settings::WindowMode::Fullscreen || windowMode == Settings::WindowMode::BorderlessFullscreen)
+        if (windowMode == Settings::WindowMode::Fullscreen || windowMode == Settings::WindowMode::WindowedFullscreen)
         {
             SDL_DisplayMode mode;
             SDL_GetWindowDisplayMode(mWindow, &mode);

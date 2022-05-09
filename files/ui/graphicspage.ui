@@ -131,7 +131,7 @@
             </item>
             <item>
                 <property name="text">
-                <string>Borderless Fullscreen</string>
+                <string>Windowed Fullscreen</string>
                 </property>
             </item>
             <item>

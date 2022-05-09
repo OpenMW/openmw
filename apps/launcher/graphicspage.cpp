@@ -359,7 +359,7 @@ void Launcher::GraphicsPage::screenChanged(int screen)
 
 void Launcher::GraphicsPage::slotFullScreenChanged(int mode)
 {
-    if (mode == static_cast<int>(Settings::WindowMode::Fullscreen) || mode == static_cast<int>(Settings::WindowMode::BorderlessFullscreen)) {
+    if (mode == static_cast<int>(Settings::WindowMode::Fullscreen) || mode == static_cast<int>(Settings::WindowMode::WindowedFullscreen)) {
         standardRadioButton->toggle();
         customRadioButton->setEnabled(false);
         customWidthSpinBox->setEnabled(false);

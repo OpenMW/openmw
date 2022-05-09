@@ -276,7 +276,7 @@
                         <Widget type="HBox" skin="" position="182 28 300 24">
                             <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" align="Left Top" name="WindowModeList">
                                 <Property key="AddItem" value="Fullscreen"/>
-                                <Property key="AddItem" value="Borderless Fullscreen"/>
+                                <Property key="AddItem" value="Windowed Fullscreen"/>
                                 <Property key="AddItem" value="Windowed"/>
                             </Widget>
                         </Widget>
