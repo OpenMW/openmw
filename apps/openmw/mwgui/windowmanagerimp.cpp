@@ -1086,7 +1086,7 @@ namespace MWGui
             else if (setting.first == "Video" && (
                     setting.second == "resolution x"
                     || setting.second == "resolution y"
-                    || setting.second == "fullscreen"
+                    || setting.second == "window mode"
                     || setting.second == "window border"))
                 changeRes = true;
 
@@ -1101,7 +1101,7 @@ namespace MWGui
         {
             mVideoWrapper->setVideoMode(Settings::Manager::getInt("resolution x", "Video"),
                                         Settings::Manager::getInt("resolution y", "Video"),
-                                        Settings::Manager::getBool("fullscreen", "Video"),
+                                        static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video")),
                                         Settings::Manager::getBool("window border", "Video"));
         }
     }

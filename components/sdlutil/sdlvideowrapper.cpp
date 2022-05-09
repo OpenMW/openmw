@@ -1,6 +1,7 @@
 #include "sdlvideowrapper.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/settings/settings.hpp>
 
 #include <osgViewer/Viewer>
 
@@ -68,21 +69,21 @@ namespace SDLUtil
             Log(Debug::Warning) << "Couldn't set gamma: " << SDL_GetError();
     }
 
-    void VideoWrapper::setVideoMode(int width, int height, bool fullscreen, bool windowBorder)
+    void VideoWrapper::setVideoMode(int width, int height, Settings::WindowMode windowMode, bool windowBorder)
     {
         SDL_SetWindowFullscreen(mWindow, 0);
 
         if (SDL_GetWindowFlags(mWindow) & SDL_WINDOW_MAXIMIZED)
             SDL_RestoreWindow(mWindow);
 
-        if (fullscreen)
+        if (windowMode == Settings::WindowMode::Fullscreen || windowMode == Settings::WindowMode::WindowedFullscreen)
         {
             SDL_DisplayMode mode;
             SDL_GetWindowDisplayMode(mWindow, &mode);
             mode.w = width;
             mode.h = height;
             SDL_SetWindowDisplayMode(mWindow, &mode);
-            SDL_SetWindowFullscreen(mWindow, fullscreen);
+            SDL_SetWindowFullscreen(mWindow, windowMode == Settings::WindowMode::Fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_FULLSCREEN_DESKTOP);
         }
         else
         {

@@ -31,17 +31,24 @@ The window resolution can be selected from a menu of common screen sizes
 in the Video tab of the Video Panel of the Options menu, or in the Graphics tab of the OpenMW Launcher.
 The vertical resolution can also be set to a custom value in the Graphics tab of the OpenMW Launcher.
 
-fullscreen
-----------
+window mode
+-----------
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+:Type:		integer
+:Range:		0, 1, 2
+:Default:	2 (Windowed)
 
-This setting determines whether the entire screen is used for the specified resolution.
+This setting determines the window mode.
 
-This setting can be toggled in game using the Fullscreen button in the Video tab of the Video panel in the Options menu.
-It can also be toggled with the Full Screen check box in the Graphics tab of the OpenMW Launcher.
+0: Exclusive fullscreen
+
+1: Windowed fullscreen, borderless window that matches screen resolution
+
+2: Windowed
+
+
+This setting can be toggled in game using the dropdown list in the Video tab of the Video panel in the Options menu.
+It can also be toggled with the window mode dropdown in the Graphics tab of the OpenMW Launcher.
 
 screen
 ------

@@ -554,7 +554,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     int screen = settings.getInt("screen", "Video");
     int width = settings.getInt("resolution x", "Video");
     int height = settings.getInt("resolution y", "Video");
-    bool fullscreen = settings.getBool("fullscreen", "Video");
+    Settings::WindowMode windowMode = static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video"));
     bool windowBorder = settings.getBool("window border", "Video");
     bool vsync = settings.getBool("vsync", "Video");
     unsigned int antialiasing = std::max(0, settings.getInt("antialiasing", "Video"));
@@ -562,15 +562,17 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen),
         pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
 
-    if(fullscreen)
+    if(windowMode == Settings::WindowMode::Fullscreen || windowMode == Settings::WindowMode::WindowedFullscreen)
     {
         pos_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
         pos_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
     }
 
     Uint32 flags = SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE;
-    if(fullscreen)
+    if(windowMode == Settings::WindowMode::Fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
+    else if (windowMode == Settings::WindowMode::WindowedFullscreen)
+        flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
     // Allows for Windows snapping features to properly work in borderless window
     SDL_SetHint("SDL_BORDERLESS_WINDOWED_STYLE", "1");

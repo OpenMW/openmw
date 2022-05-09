@@ -16,6 +16,13 @@ namespace Files
 
 namespace Settings
 {
+    enum class WindowMode
+    {
+        Fullscreen = 0,
+        WindowedFullscreen,
+        Windowed
+    };
+
     ///
     /// \brief Settings management (can change during runtime)
     ///

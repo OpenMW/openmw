@@ -270,17 +270,17 @@
                     <Widget type="TabItem" skin="" position="0 28 352 268" align="Stretch">
                         <Property key="Caption" value="  Video  "/>
                         <Widget type="ListBox" skin="MW_List" position="0 4 170 170" align="Left Top" name="ResolutionList"/>
-                        <Widget type="HBox" skin="" position="182 4 300 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="FullscreenButton">
-                                <UserString key="SettingCategory" value="Video"/>
-                                <UserString key="SettingName" value="fullscreen"/>
-                                <UserString key="SettingType" value="CheckButton"/>
-                            </Widget>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 70 16" align="Left Top">
-                                <Property key="Caption" value="Fullscreen"/>
+                        <Widget type="TextBox" skin="NormalText" position="182 4 170 18" align="Left Top">
+                            <Property key="Caption" value="Window Mode:"/>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="182 28 300 24">
+                            <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" align="Left Top" name="WindowModeList">
+                                <Property key="AddItem" value="Fullscreen"/>
+                                <Property key="AddItem" value="Windowed Fullscreen"/>
+                                <Property key="AddItem" value="Windowed"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="182 34 300 24">
+                        <Widget type="HBox" skin="" position="182 64 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="VSyncButton">
                                 <UserString key="SettingCategory" value="Video"/>
                                 <UserString key="SettingName" value="vsync"/>
@@ -290,7 +290,7 @@
                                 <Property key="Caption" value="VSync"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="182 64 300 24">
+                        <Widget type="HBox" skin="" position="182 94 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
                                 <UserString key="SettingCategory" value="Video"/>
                                 <UserString key="SettingName" value="window border"/>
@@ -301,7 +301,7 @@
                             </Widget>
                         </Widget>
 
-                        <Widget type="TextBox" skin="SandText" position="182 94 300 32" align="Left Top">
+                        <Widget type="TextBox" skin="SandText" position="182 124 300 32" align="Left Top">
                             <Property key="Caption" value="Hint: press F3 to show \nthe current frame rate."/>
                         </Widget>
 

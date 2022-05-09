@@ -18,6 +18,8 @@ namespace MWGui
 
             void updateLightSettings();
 
+            void updateWindowModeSettings();
+
             void onResChange(int, int) override { center(); }
 
     protected:
@@ -26,7 +28,7 @@ namespace MWGui
 
             // graphics
             MyGUI::ListBox* mResolutionList;
-            MyGUI::Button* mFullscreenButton;
+            MyGUI::ComboBox* mWindowModeList;
             MyGUI::Button* mWindowBorderButton;
             MyGUI::ComboBox* mTextureFilteringButton;
             MyGUI::Widget* mAnisotropyBox;
@@ -72,6 +74,8 @@ namespace MWGui
             void onLightsResetButtonClicked(MyGUI::Widget* _sender);
             void onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos);
 
+            void onWindowModeChanged(MyGUI::ComboBox* _sender, size_t pos);
+
             void onRebindAction(MyGUI::Widget* _sender);
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);
             void onResetDefaultBindings(MyGUI::Widget* _sender);
@@ -94,7 +98,7 @@ namespace MWGui
             void renderScriptSettings();
 
             void computeMinimumWindowSize();
-        
+
         private:
             void resetScrollbars();
     };
