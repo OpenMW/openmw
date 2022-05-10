@@ -217,7 +217,8 @@
 -- @type MouseEvent
 -- @field openmw.util#Vector2 position Absolute position of the mouse cursor
 -- @field openmw.util#Vector2 offset Position of the mouse cursor relative to the widget
--- @field #number button Mouse button which triggered the event (could be nil)
+-- @field #number button Mouse button which triggered the event.
+--   Matches the arguments of @{openmw_input#input.isMouseButtonPressed} (`nil` for none, 1 for left, 3 for right).
 
 ---
 -- Register a new texture resource. Can be used to manually atlas UI textures.

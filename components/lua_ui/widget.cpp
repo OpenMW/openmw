@@ -156,9 +156,11 @@ namespace LuaUi
         MyGUI::IntPoint absolutePosition = mWidget->getAbsolutePosition();
         osg::Vec2f offset = position - osg::Vec2f(absolutePosition.left, absolutePosition.top);
         sol::table table = makeTable();
+        int sdlButton = SDLUtil::myGuiMouseButtonToSdl(button);
         table["position"] = position;
         table["offset"] = offset;
-        table["button"] = SDLUtil::myGuiMouseButtonToSdl(button);
+        if (sdlButton == 0) // nil if no button was pressed
+            table["button"] = sdlButton;
         return table;
     }
 
