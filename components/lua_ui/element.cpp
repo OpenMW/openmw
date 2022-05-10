@@ -22,6 +22,8 @@ namespace LuaUi
 
     const std::string defaultWidgetType = "LuaWidget";
 
+    const uint64_t maxDepth = 250;
+
     std::string widgetType(const sol::table& layout)
     {
         sol::object typeField = LuaUtil::getFieldOrNil(layout, LayoutKeys::type);
@@ -44,12 +46,13 @@ namespace LuaUi
         MyGUI::Gui::getInstancePtr()->destroyWidget(ext->widget());
     }
 
-    WidgetExtension* createWidget(const sol::table& layout);
-    void updateWidget(WidgetExtension* ext, const sol::table& layout);
+    WidgetExtension* createWidget(const sol::table& layout, uint64_t depth);
+    void updateWidget(WidgetExtension* ext, const sol::table& layout, uint64_t depth);
 
     std::vector<WidgetExtension*> updateContent(
-        const std::vector<WidgetExtension*>& children, const sol::object& contentObj)
+        const std::vector<WidgetExtension*>& children, const sol::object& contentObj, uint64_t depth)
     {
+        ++depth;
         std::vector<WidgetExtension*> result;
         if (contentObj == sol::nil)
         {
@@ -68,28 +71,29 @@ namespace LuaUi
             sol::table newLayout = content.at(i);
             if (ext->widget()->getTypeName() == widgetType(newLayout))
             {
-                updateWidget(ext, newLayout);
+                updateWidget(ext, newLayout, depth);
             }
             else
             {
                 destroyWidget(ext);
-                ext = createWidget(newLayout);
+                ext = createWidget(newLayout, depth);
             }
             result[i] = ext;
         }
         for (size_t i = minSize; i < children.size(); i++)
             destroyWidget(children[i]);
         for (size_t i = minSize; i < content.size(); i++)
-            result[i] = createWidget(content.at(i));
+            result[i] = createWidget(content.at(i), depth);
         return result;
     }
 
-    void setTemplate(WidgetExtension* ext, const sol::object& templateLayout)
+    void setTemplate(WidgetExtension* ext, const sol::object& templateLayout, uint64_t depth)
     {
+        ++depth;
         sol::object props = LuaUtil::getFieldOrNil(templateLayout, LayoutKeys::props);
         ext->setTemplateProperties(props);
         sol::object content = LuaUtil::getFieldOrNil(templateLayout, LayoutKeys::content);
-        ext->setTemplateChildren(updateContent(ext->templateChildren(), content));
+        ext->setTemplateChildren(updateContent(ext->templateChildren(), content, depth));
     }
 
     void setEventCallbacks(LuaUi::WidgetExtension* ext, const sol::object& eventsObj)
@@ -112,7 +116,7 @@ namespace LuaUi
         });
     }
 
-    WidgetExtension* createWidget(const sol::table& layout)
+    WidgetExtension* createWidget(const sol::table& layout, uint64_t depth)
     {
         static auto widgetTypeMap = widgetTypeToName();
         std::string type = widgetType(layout);
@@ -130,19 +134,21 @@ namespace LuaUi
             throw std::runtime_error("Invalid widget!");
         ext->initialize(layout.lua_state(), widget);
 
-        updateWidget(ext, layout);
+        updateWidget(ext, layout, depth);
         return ext;
     }
 
-    void updateWidget(WidgetExtension* ext, const sol::table& layout)
+    void updateWidget(WidgetExtension* ext, const sol::table& layout, uint64_t depth)
     {
+        if (depth >= maxDepth)
+            throw std::runtime_error("Maximum layout depth exceeded, probably caused by a circular reference");
         ext->reset();
         ext->setLayout(layout);
         ext->setExternal(layout.get<sol::object>(LayoutKeys::external));
-        setTemplate(ext, layout.get<sol::object>(LayoutKeys::templateLayout));
+        setTemplate(ext, layout.get<sol::object>(LayoutKeys::templateLayout), depth);
         ext->setProperties(layout.get<sol::object>(LayoutKeys::props));
         setEventCallbacks(ext, layout.get<sol::object>(LayoutKeys::events));
-        ext->setChildren(updateContent(ext->children(), layout.get<sol::object>(LayoutKeys::content)));
+        ext->setChildren(updateContent(ext->children(), layout.get<sol::object>(LayoutKeys::content), depth));
         ext->updateCoord();
     }
 
@@ -184,7 +190,7 @@ namespace LuaUi
         assert(!mRoot);
         if (!mRoot)
         {
-            mRoot = createWidget(mLayout);
+            mRoot = createWidget(mLayout, 0);
             mLayer = setLayer(mRoot, mLayout);
             updateAttachment();
         }
@@ -197,11 +203,11 @@ namespace LuaUi
             if (mRoot->widget()->getTypeName() != widgetType(mLayout))
             {
                 destroyWidget(mRoot);
-                mRoot = createWidget(mLayout);
+                mRoot = createWidget(mLayout, 0);
             }
             else
             {
-                updateWidget(mRoot, mLayout);
+                updateWidget(mRoot, mLayout, 0);
             }
             mLayer = setLayer(mRoot, mLayout);
             updateAttachment();
