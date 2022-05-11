@@ -837,6 +837,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder, mActivationDistanceOverride, mCellName,
         mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string());
     mWorld->setupPlayer();
+    mWorld->setRandomSeed(mRandomSeed);
     mEnvironment.setWorld(*mWorld);
 
     mWindowManager->setStore(mWorld->getStore());
