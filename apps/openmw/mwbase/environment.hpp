@@ -112,8 +112,6 @@ namespace MWBase
 
             void setFrameDuration(float value) { mFrameDuration = value; }
 
-            void cleanup();
-
             /// Return instance of this class.
             static const Environment& get()
             {

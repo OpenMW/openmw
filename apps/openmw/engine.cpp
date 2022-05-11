@@ -468,8 +468,6 @@ OMW::Engine::~Engine()
 
     mStereoManager = nullptr;
 
-    mEnvironment.cleanup();
-
     mMechanicsManager = nullptr;
     mDialogueManager = nullptr;
     mJournal = nullptr;
