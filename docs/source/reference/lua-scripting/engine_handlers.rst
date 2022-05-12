@@ -66,8 +66,10 @@ Engine handler is a function defined by a script, that can be called by the engi
       | the item is placed to the actor's inventory, (2) count of
       | the original item is set to zero, (3) and only then onActivated is
       | called on the original item, so self.count is already zero.
-  * - onConsume(recordId)
-    - Called if `recordId` (e.g. a potion) is consumed.
+  * - onConsume(item)
+    - | Called on an actor when they consume an item (e.g. a potion).
+      | Similarly to onActivated, the item has already been removed
+      | from the actor's inventory, and the count was set to zero.
 
 **Only for local scripts attached to a player**
 
