@@ -112,6 +112,18 @@
 -- @param #number value
 
 ---
+-- Additional summand for the roll angle that is not affected by player input.
+-- Full yaw is `getRoll()+getExtraRoll()`.
+-- @function [parent=#camera] getExtraRoll
+-- @return #number
+
+---
+-- Additional summand for the roll angle; useful for camera shaking effects.
+-- Full yaw is `getRoll()+getExtraRoll()`.
+-- @function [parent=#camera] setExtraRoll
+-- @param #number value
+
+---
 -- Set camera position; can be used only if camera is in Static mode.
 -- @function [parent=#camera] setStaticPosition
 -- @param openmw.util#Vector3 pos

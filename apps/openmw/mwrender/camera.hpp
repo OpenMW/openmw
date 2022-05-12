@@ -60,8 +60,10 @@ namespace MWRender
 
         float getExtraPitch() const { return mExtraPitch; }
         float getExtraYaw() const { return mExtraYaw; }
+        float getExtraRoll() const { return mExtraRoll; }
         void setExtraPitch(float angle) { mExtraPitch = angle; }
         void setExtraYaw(float angle) { mExtraYaw = angle; }
+        void setExtraRoll(float angle) { mExtraRoll = angle; }
 
         /// @param Force view mode switch, even if currently not allowed by the animation.
         void toggleViewMode(bool force=false);
@@ -125,7 +127,7 @@ namespace MWRender
 
         float mHeight;
         float mPitch, mYaw, mRoll;
-        float mExtraPitch = 0, mExtraYaw = 0;
+        float mExtraPitch = 0, mExtraYaw = 0, mExtraRoll = 0;
         bool mLockPitch = false, mLockYaw = false;
         osg::Vec3d mPosition;
         osg::Matrixf mViewMatrix;

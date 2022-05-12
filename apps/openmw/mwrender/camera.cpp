@@ -110,7 +110,7 @@ namespace MWRender
 
     void Camera::updateCamera(osg::Camera *cam)
     {
-        osg::Quat orient = osg::Quat(mRoll, osg::Vec3d(0, 1, 0)) *
+        osg::Quat orient = osg::Quat(mRoll + mExtraRoll, osg::Vec3d(0, 1, 0)) *
                            osg::Quat(mPitch + mExtraPitch, osg::Vec3d(1, 0, 0)) *
                            osg::Quat(mYaw + mExtraYaw, osg::Vec3d(0, 0, 1));
         osg::Vec3d forward = orient * osg::Vec3d(0,1,0);

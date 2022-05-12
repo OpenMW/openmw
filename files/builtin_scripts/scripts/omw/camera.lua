@@ -150,7 +150,7 @@ end
 local function onUpdate(dt)
     camera.setExtraPitch(0)
     camera.setExtraYaw(0)
-    camera.setRoll(0)
+    camera.setExtraRoll(0)
     camera.setFirstPersonOffset(util.vector3(0, 0, 0))
     updateSmoothedSpeed(dt)
 end
