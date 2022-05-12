@@ -17,11 +17,7 @@ namespace MWWorld
 
     void ActionApply::executeImp (const Ptr& actor)
     {
-        MWBase::Environment::get().getWorld()->breakInvisibility(actor);
-
-        actor.getClass().apply (actor, mId, actor);
-
-        actor.getClass().getContainerStore(actor).remove(getTarget(), 1, actor);
+        actor.getClass().consume(getTarget(), actor);
     }
 
 
@@ -32,11 +28,8 @@ namespace MWWorld
 
     void ActionApplyWithSkill::executeImp (const Ptr& actor)
     {
-        MWBase::Environment::get().getWorld()->breakInvisibility(actor);
-
-        if (actor.getClass().apply (actor, mId, actor) && mUsageType!=-1 && actor == MWMechanics::getPlayer())
+        bool consumed = actor.getClass().consume(getTarget(), actor);
+        if (consumed && mUsageType != -1 && actor == MWMechanics::getPlayer())
             actor.getClass().skillUsageSucceeded (actor, mSkillIndex, mUsageType);
-
-        actor.getClass().getContainerStore(actor).remove(getTarget(), 1, actor);
     }
 }

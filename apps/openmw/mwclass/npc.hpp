@@ -110,11 +110,7 @@ namespace MWClass
             float getArmorRating (const MWWorld::Ptr& ptr) const override;
             ///< @return combined armor rating of this actor
 
-            bool apply (const MWWorld::Ptr& ptr, const std::string& id,
-                const MWWorld::Ptr& actor) const override;
-            ///< Apply \a id on \a ptr.
-            /// \param actor Actor that is resposible for the ID being applied to \a ptr.
-            /// \return Any effect?
+            bool consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const override;
 
             void adjustScale (const MWWorld::ConstPtr &ptr, osg::Vec3f &scale, bool rendering) const override;
             /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
