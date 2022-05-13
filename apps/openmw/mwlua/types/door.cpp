@@ -3,6 +3,7 @@
 #include <components/esm3/loaddoor.hpp>
 
 #include <apps/openmw/mwworld/esmstore.hpp>
+#include <apps/openmw/mwbase/windowmanager.hpp>
 
 #include "../luabindings.hpp"
 
@@ -48,7 +49,10 @@ namespace MWLua
         record[sol::meta_function::to_string] = [](const ESM::Door& rec) -> std::string { return "ESM3_Door[" + rec.mId + "]"; };
         record["id"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mId; });
         record["name"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mModel; });
+        record["model"] = sol::readonly_property([](const ESM::Door& rec) -> std::string
+        {
+            return MWBase::Environment::get().getWindowManager()->correctMeshPath(rec.mModel);
+        });
         record["mwscript"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mScript; });
         record["openSound"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mOpenSound; });
         record["closeSound"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mCloseSound; });

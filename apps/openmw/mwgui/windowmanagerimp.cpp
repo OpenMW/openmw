@@ -2140,6 +2140,11 @@ namespace MWGui
         return Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
     }
 
+    std::string WindowManager::correctMeshPath(const std::string& path)
+    {
+        return Misc::ResourceHelpers::correctMeshPath(path, mResourceSystem->getVFS());
+    }
+
     bool WindowManager::textureExists(const std::string &path)
     {
         std::string corrected = Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());

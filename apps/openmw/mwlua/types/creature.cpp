@@ -3,6 +3,7 @@
 #include <components/esm3/loadcrea.hpp>
 
 #include <apps/openmw/mwworld/esmstore.hpp>
+#include <apps/openmw/mwbase/windowmanager.hpp>
 
 #include "../stats.hpp"
 #include "../luabindings.hpp"
@@ -24,7 +25,10 @@ namespace MWLua
         sol::usertype<ESM::Creature> record = context.mLua->sol().new_usertype<ESM::Creature>("ESM3_Creature");
         record[sol::meta_function::to_string] = [](const ESM::Creature& rec) { return "ESM3_Creature[" + rec.mId + "]"; };
         record["name"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mModel; });
+        record["model"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string
+        {
+            return MWBase::Environment::get().getWindowManager()->correctMeshPath(rec.mModel);
+        });
         record["mwscript"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mScript; });
         record["baseCreature"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mOriginal; });
     }

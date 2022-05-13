@@ -3,6 +3,7 @@
 #include <components/esm3/loadweap.hpp>
 
 #include <apps/openmw/mwworld/esmstore.hpp>
+#include <apps/openmw/mwbase/windowmanager.hpp>
 
 #include "../luabindings.hpp"
 
@@ -41,8 +42,14 @@ namespace MWLua
         record[sol::meta_function::to_string] = [](const ESM::Weapon& rec) -> std::string { return "ESM3_Weapon[" + rec.mId + "]"; };
         record["id"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mId; });
         record["name"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mModel; });
-        record["icon"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mIcon; });
+        record["model"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string
+        {
+            return MWBase::Environment::get().getWindowManager()->correctMeshPath(rec.mModel);
+        });
+        record["icon"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string
+        {
+            return MWBase::Environment::get().getWindowManager()->correctIconPath(rec.mIcon);
+        });
         record["enchant"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mEnchant; });
         record["mwscript"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mScript; });
         record["isMagical"] = sol::readonly_property(
