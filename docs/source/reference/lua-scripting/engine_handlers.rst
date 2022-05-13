@@ -15,8 +15,8 @@ Engine handler is a function defined by a script, that can be called by the engi
       | `assigned to a script in openmw-cs (not yet implemented).`
       | ``onInterfaceOverride`` can be called before ``onInit``.
   * - onUpdate(dt)
-    - | Called every frame if the game is not paused. `dt` is the time
-      | from the last update in seconds.
+    - | Called every frame if the game is not paused. `dt` is
+      | the simulation time from the last update in seconds.
   * - onSave() -> savedData
     - | Called when the game is saving. May be called in inactive state,
       | so it shouldn't use `openmw.nearby`.
@@ -69,9 +69,11 @@ Engine handler is a function defined by a script, that can be called by the engi
 .. list-table::
   :widths: 20 80
 
-  * - onInputUpdate(dt)
-    - | Called every frame (if the game is not paused) right after
-      | processing user input. Use it only for latency-critical stuff.
+  * - onFrame(dt)
+    - | Called every frame (even if the game is paused) right after
+      | processing user input. Use it only for latency-critical stuff
+      | and for UI that should work on pause.
+      | `dt` is simulation time delta (0 when on pause).
   * - onKeyPress(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
       | Usage example:

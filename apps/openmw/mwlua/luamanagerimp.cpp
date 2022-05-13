@@ -234,8 +234,8 @@ namespace MWLua
                 playerScripts->processInputEvent(event);
         }
         mInputEvents.clear();
-        if (playerScripts && !mWorldView.isPaused())
-            playerScripts->inputUpdate(MWBase::Environment::get().getFrameDuration());
+        if (playerScripts)
+            playerScripts->onFrame(mWorldView.isPaused() ? 0.0 : MWBase::Environment::get().getFrameDuration());
         mProcessingInputEvents = false;
 
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
