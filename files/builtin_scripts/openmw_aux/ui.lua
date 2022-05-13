@@ -16,7 +16,7 @@ local function deepContentCopy(content)
 end
 
 ---
--- @function [parent=#ui] templates
+-- @function [parent=#ui] deepLayoutCopy
 -- @param #table layout
 -- @return #table copied layout
 function aux_ui.deepLayoutCopy(layout)
