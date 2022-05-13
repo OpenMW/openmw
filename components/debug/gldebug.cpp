@@ -42,7 +42,7 @@ either expressed or implied, of the FreeBSD Project.
 namespace Debug
 {
 
-    void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+    void GL_APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
     {
 #ifdef GL_DEBUG_OUTPUT
         std::string srcStr;
