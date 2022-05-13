@@ -46,7 +46,7 @@ function M.update(dt, smoothedSpeed)
     local zOffset = (0.5 - effect) * coef * stepHeight  -- range from -stepHeight/2 to stepHeight/2
     local roll = ((stepState > 0 and 1) or -1) * effect * coef * maxRoll  -- range from -maxRoll to maxRoll
     camera.setFirstPersonOffset(camera.getFirstPersonOffset() + util.vector3(0, 0, zOffset))
-    camera.setRoll(camera.getRoll() + roll)
+    camera.setExtraRoll(camera.getExtraRoll() + roll)
 end
 
 return M

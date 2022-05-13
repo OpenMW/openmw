@@ -67,8 +67,10 @@ namespace MWLua
         api["setRoll"] = [camera](float v) { camera->setRoll(-v); };
         api["setExtraPitch"] = [camera](float v) { camera->setExtraPitch(-v); };
         api["setExtraYaw"] = [camera](float v) { camera->setExtraYaw(-v); };
+        api["setExtraRoll"] = [camera](float v) { camera->setExtraRoll(-v); };
         api["getExtraPitch"] = [camera]() { return -camera->getExtraPitch(); };
         api["getExtraYaw"] = [camera]() { return -camera->getExtraYaw(); };
+        api["getExtraRoll"] = [camera]() { return -camera->getExtraRoll(); };
 
         api["getThirdPersonDistance"] = [camera]() { return camera->getCameraDistance(); };
         api["setPreferredThirdPersonDistance"] = [camera](float v) { camera->setPreferredCameraDistance(v); };
