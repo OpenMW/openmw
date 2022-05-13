@@ -476,13 +476,17 @@ namespace MWMechanics
                 castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
 
             // check if the effect was already added
-            if (std::find(addedEffects.begin(), addedEffects.end(), "meshes\\" + castStatic->mModel) != addedEffects.end())
+            if (std::find(addedEffects.begin(), addedEffects.end(),
+                MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel))
+                != addedEffects.end())
                 continue;
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
             if (animation)
             {
-                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", effect->mParticle);
+                animation->addEffect(
+                    MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                    effect->mIndex, false, "", effect->mParticle);
             }
             else
             {
@@ -511,7 +515,9 @@ namespace MWMechanics
                     scale *= npcScaleVec.z();
                 }
                 scale = std::max(scale, 1.f);
-                MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + castStatic->mModel, effect->mParticle, pos, scale);
+                MWBase::Environment::get().getWorld()->spawnEffect(
+                    MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                    effect->mParticle, pos, scale);
             }
 
             if (animation && !mCaster.getClass().isActor())
@@ -521,7 +527,7 @@ namespace MWMechanics
                 "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
             };
 
-            addedEffects.push_back("meshes\\" + castStatic->mModel);
+            addedEffects.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel));
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             if(!effect->mCastSound.empty())
@@ -559,7 +565,9 @@ namespace MWMechanics
         {
             // Don't play particle VFX unless the effect is new or it should be looping.
             if (playNonLooping || loop)
-                anim->addEffect("meshes\\" + castStatic->mModel, magicEffect.mIndex, loop, "", magicEffect.mParticle);
+                anim->addEffect(
+                    MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                    magicEffect.mIndex, loop, "", magicEffect.mParticle);
         }
     }
 }

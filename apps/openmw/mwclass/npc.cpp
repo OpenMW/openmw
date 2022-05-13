@@ -443,19 +443,19 @@ namespace MWClass
         models.emplace_back(Settings::Manager::getString("xbaseanim", "Models"));
 
         if (!npc->mBase->mModel.empty())
-            models.push_back("meshes/"+npc->mBase->mModel);
+            models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(npc->mBase->mModel));
 
         if (!npc->mBase->mHead.empty())
         {
             const ESM::BodyPart* head = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(npc->mBase->mHead);
             if (head)
-                models.push_back("meshes/"+head->mModel);
+                models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(head->mModel));
         }
         if (!npc->mBase->mHair.empty())
         {
             const ESM::BodyPart* hair = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(npc->mBase->mHair);
             if (hair)
-                models.push_back("meshes/"+hair->mModel);
+                models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(hair->mModel));
         }
 
         bool female = (npc->mBase->mFlags & ESM::NPC::Female);
@@ -493,7 +493,7 @@ namespace MWClass
                         partname = female ? it->mMale : it->mFemale;
                     const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
                     if (part && !part->mModel.empty())
-                        models.push_back("meshes/"+part->mModel);
+                        models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(part->mModel));
                 }
             }
         }
@@ -506,7 +506,7 @@ namespace MWClass
             {
                 const ESM::BodyPart* part = *it;
                 if (part && !part->mModel.empty())
-                    models.push_back("meshes/"+part->mModel);
+                    models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(part->mModel));
             }
         }
 

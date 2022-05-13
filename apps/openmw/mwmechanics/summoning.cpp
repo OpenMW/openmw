@@ -5,6 +5,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -85,7 +86,7 @@ namespace MWMechanics
                 {
                     const ESM::Static* fx = world->getStore().get<ESM::Static>().search("VFX_Summon_Start");
                     if (fx)
-                        anim->addEffect("meshes\\" + fx->mModel, -1, false);
+                        anim->addEffect(MWBase::Environment::get().getWindowManager()->correctMeshPath(fx->mModel), -1, false);
                 }
             }
             catch (std::exception& e)

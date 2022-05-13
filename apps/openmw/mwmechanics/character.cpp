@@ -1433,10 +1433,14 @@ bool CharacterController::updateState(CharacterState idle)
                     for (size_t iter = 0; iter < effects.size(); ++iter) // play hands vfx for each effect
                     {
                         if (mAnimation->getNode("Bip01 L Hand"))
-                            mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
+                            mAnimation->addEffect(
+                                MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                                -1, false, "Bip01 L Hand", effect->mParticle);
 
                         if (mAnimation->getNode("Bip01 R Hand"))
-                            mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
+                            mAnimation->addEffect(
+                                MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                                -1, false, "Bip01 R Hand", effect->mParticle);
                     }
 
                     const ESM::ENAMstruct &firstEffect = effects.at(0); // first effect used for casting animation

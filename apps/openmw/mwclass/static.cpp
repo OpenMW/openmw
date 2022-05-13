@@ -11,6 +11,9 @@
 #include "../mwrender/renderinginterface.hpp"
 #include "../mwrender/vismask.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 namespace MWClass
 {
     Static::Static()
@@ -43,7 +46,7 @@ namespace MWClass
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
-            return "meshes\\" + model;
+            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
         }
         return "";
     }

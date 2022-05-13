@@ -60,7 +60,7 @@ namespace MWClass
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
-            return "meshes\\" + model;
+            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
         }
         return "";
     }
@@ -145,7 +145,8 @@ namespace MWClass
 
         for (const ESM::Creature &iter : store.get<ESM::Creature>())
         {
-            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, "meshes\\" + iter.mModel))
+            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model,
+                MWBase::Environment::get().getWindowManager()->correctMeshPath(iter.mModel)))
             {
                 creatureId = !iter.mOriginal.empty() ? iter.mOriginal : iter.mId;
                 break;
