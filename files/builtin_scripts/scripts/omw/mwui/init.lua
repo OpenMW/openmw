@@ -58,20 +58,26 @@ end
 local templates = {}
 
 ---
--- Standard rectangular border
--- @field [parent=#Templates] openmw.ui#Layout border
-require('scripts.omw.mwui.borders')(templates)
+-- Container that adds padding around its content.
+-- @field [parent=#MWUI] #table padding
+---
+-- Standard spacing interval
+-- @field [parent=#MWUI] #number interval
+require('scripts.omw.mwui.space')(templates)
 
 ---
--- Border combined with a transparent background
+-- Standard rectangular border
+-- @field [parent=#Templates] openmw.ui#Layout border
+---
+-- Container wrapping the content with borders
 -- @field [parent=#Templates] openmw.ui#Layout box
 ---
--- A transparent background
--- @field [parent=#Templates] openmw.ui#Layout backgroundTransparent
+-- Same as box, but with a semi-transparent background
+-- @field [parent=#Templates] openmw.ui#Layout boxTransparent
 ---
--- A solid, non-transparent background
--- @field [parent=#Templates] openmw.ui#Layout backgroundSolid
-require('scripts.omw.mwui.box')(templates)
+-- Same as box, but with a solid background
+-- @field [parent=#Templates] openmw.ui#Layout boxSolid
+require('scripts.omw.mwui.borders')(templates)
 
 ---
 -- Standard "sand" colored text

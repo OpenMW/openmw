@@ -3,6 +3,8 @@ local ui = require('openmw.ui')
 
 local constants = require('scripts.omw.mwui.constants')
 
+local borderOffset = util.vector2(1, 1) * constants.border
+
 return function(templates)
     local borderContent = ui.content {
         {
@@ -12,10 +14,14 @@ return function(templates)
             },
             content = ui.content {
                 {
+                    props = {
+                        position = borderOffset,
+                        relativeSize = util.vector2(1, 1),
+                    },
                     external = {
                         slot = true,
                     },
-                },
+                }
             }
         },
     }
@@ -23,10 +29,9 @@ return function(templates)
     templates.textEditLine = {
         type = ui.TYPE.TextEdit,
         props = {
+            size = util.vector2(150, constants.textNormalSize) + borderOffset * 4,
             textSize = constants.textNormalSize,
-            textColor = constants.sandColor,
-            textAlignH = ui.ALIGNMENT.Start,
-            textAlignV = ui.ALIGNMENT.Center,
+            textColor = constants.normalColor,
             multiline = false,
         },
         content = borderContent,
@@ -35,10 +40,9 @@ return function(templates)
     templates.textEditBox = {
         type = ui.TYPE.TextEdit,
         props = {
+            size = util.vector2(150, 5 * constants.textNormalSize) + borderOffset * 4,
             textSize = constants.textNormalSize,
-            textColor = constants.sandColor,
-            textAlignH = ui.ALIGNMENT.Start,
-            textAlignV = ui.ALIGNMENT.Start,
+            textColor = constants.normalColor,
             multiline = true,
             wordWrap = true,
         },

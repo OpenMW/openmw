@@ -6,10 +6,19 @@ local textNormal = {
     type = ui.TYPE.Text,
     props = {
         textSize = constants.textNormalSize,
-        textColor = constants.sandColor,
+        textColor = constants.normalColor,
+    },
+}
+
+local textHeader = {
+    type = ui.TYPE.Text,
+    props = {
+        textSize = constants.textHeaderSize,
+        textColor = constants.headerColor,
     },
 }
 
 return function(templates)
     templates.textNormal = textNormal
+    templates.textHeader = textHeader
 end

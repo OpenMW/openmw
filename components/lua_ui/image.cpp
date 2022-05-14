@@ -31,6 +31,7 @@ namespace LuaUi
     {
         changeWidgetSkin("LuaImage");
         mTileRect = dynamic_cast<LuaTileRect*>(getSubWidgetMain());
+        WidgetExtension::initialize();
     }
 
     void LuaImage::updateProperties()

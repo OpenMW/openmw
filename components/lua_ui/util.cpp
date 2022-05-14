@@ -39,6 +39,7 @@ namespace LuaUi
             { "LuaWindow", "Window" },
             { "LuaImage", "Image" },
             { "LuaFlex", "Flex" },
+            { "LuaContainer", "Container" },
         };
         return types;
     }

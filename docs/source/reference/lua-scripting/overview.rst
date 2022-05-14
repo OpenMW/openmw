@@ -476,6 +476,9 @@ The order in which the scripts are started is important. So if one mod should ov
   * - :ref:`Settings <Interface Settings>`
     - by player and global scripts
     - Save, display and track changes of setting values.
+  * - :ref:`MWUI <Interface MWUI>`
+    - by player scripts
+    - Morrowind-style UI templates.
 
 Event system
 ============
