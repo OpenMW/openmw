@@ -21,6 +21,7 @@ namespace MWLua
 
     sol::table initCorePackage(const Context&);
     sol::table initWorldPackage(const Context&);
+    sol::table initPostprocessingPackage(const Context&);
 
     sol::table initGlobalStoragePackage(const Context&, LuaUtil::LuaStorage* globalStorage);
     sol::table initLocalStoragePackage(const Context&, LuaUtil::LuaStorage* globalStorage);

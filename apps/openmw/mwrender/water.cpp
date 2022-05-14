@@ -267,6 +267,7 @@ public:
         : RTTNode(rttSize, rttSize, 0, false, 1, StereoAwareness::Aware)
         , mNodeMask(Refraction::sDefaultCullMask)
     {
+        setDepthBufferInternalFormat(GL_DEPTH24_STENCIL8);
         mClipCullNode = new ClipCullNode;
     }
 
@@ -342,6 +343,7 @@ public:
         : RTTNode(rttSize, rttSize, 0, false, 0, StereoAwareness::Aware)
     {
         setInterior(isInterior);
+        setDepthBufferInternalFormat(GL_DEPTH24_STENCIL8);
         mClipCullNode = new ClipCullNode;
     }
 

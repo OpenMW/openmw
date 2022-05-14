@@ -248,6 +248,7 @@ namespace MWRender
 
         void setDirection(const osg::Vec3f& direction);
         void setGlareTimeOfDayFade(float val);
+        void setSunglare(bool enabled);
 
     private:
         /// @param queryVisible If true, queries the amount of visible pixels. If false, queries the total amount of pixels.

@@ -8,6 +8,7 @@
 #include <osg/Material>
 #include <osg/Switch>
 #include <osg/LightModel>
+#include <osg/ColorMaski>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
@@ -1563,7 +1564,8 @@ namespace MWRender
 
         // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
         node->getOrCreateStateSet()->setAttributeAndModes(getVFXLightModelInstance(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-
+        if (mResourceSystem->getSceneManager()->getSupportsNormalsRT())
+            node->getOrCreateStateSet()->setAttribute(new osg::ColorMaski(1, false, false, false, false));
         SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
         node->accept(findMaxLengthVisitor);
 

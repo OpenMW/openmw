@@ -128,6 +128,7 @@
     Feature #2858: Add a tab to the launcher for handling datafolders
     Feature #3245: Grid and angle snapping for the OpenMW-CS
     Feature #3616: Allow Zoom levels on the World Map
+    Feature #4067: Post Processing
     Feature #4297: Implement APPLIED_ONCE flag for magic effects
     Feature #4414: Handle duration of EXTRA SPELL magic effect
     Feature #4595: Unique object identifier

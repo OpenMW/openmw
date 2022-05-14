@@ -136,6 +136,7 @@ namespace MWLua
 
             {"ToggleHUD", MWInput::A_ToggleHUD},
             {"ToggleDebug", MWInput::A_ToggleDebug},
+            {"TogglePostProcessorHUD", MWInput::A_TogglePostProcessorHUD},
 
             {"ZoomIn", MWInput::A_ZoomIn},
             {"ZoomOut", MWInput::A_ZoomOut}

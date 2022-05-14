@@ -20,6 +20,7 @@ Lua API reference
     openmw_input
     openmw_ui
     openmw_camera
+    openmw_postprocessing
     openmw_aux_calendar
     openmw_aux_util
     openmw_aux_time
@@ -46,35 +47,37 @@ It can not be overloaded even if there is a lua file with the same name.
 The list of available packages is different for global and for local scripts.
 Player scripts are local scripts that are attached to a player.
 
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-| Package                                                 | Can be used        | Description                                                   |
-+=========================================================+====================+===============================================================+
-|:ref:`openmw.interfaces <Script interfaces>`             | everywhere         | | Public interfaces of other scripts.                         |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.util <Package openmw.util>`                 | everywhere         | | Defines utility functions and classes like 3D vectors,      |
-|                                                         |                    | | that don't depend on the game world.                        |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.storage <Package openmw.storage>`           | everywhere         | | Storage API. In particular can be used to store data        |
-|                                                         |                    | | between game sessions.                                      |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.core <Package openmw.core>`                 | everywhere         | | Functions that are common for both global and local scripts |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.types <Package openmw.types>`               | everywhere         | | Functions for specific types of game objects.               |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.async <Package openmw.async>`               | everywhere         | | Timers (implemented) and coroutine utils (not implemented)  |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.world <Package openmw.world>`               | by global scripts  | | Read-write access to the game world.                        |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.self <Package openmw.self>`                 | by local scripts   | | Full access to the object the script is attached to.        |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.nearby <Package openmw.nearby>`             | by local scripts   | | Read-only access to the nearest area of the game world.     |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.input <Package openmw.input>`               | by player scripts  | | User input.                                                 |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.ui <Package openmw.ui>`                     | by player scripts  | | Controls :ref:`user interface <User interface reference>`.  |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.camera <Package openmw.camera>`             | by player scripts  | | Controls camera.                                            |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+| Package                                                    | Can be used        | Description                                                   |
++============================================================+====================+===============================================================+
+|:ref:`openmw.interfaces <Script interfaces>`                | everywhere         | | Public interfaces of other scripts.                         |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.util <Package openmw.util>`                    | everywhere         | | Defines utility functions and classes like 3D vectors,      |
+|                                                            |                    | | that don't depend on the game world.                        |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.storage <Package openmw.storage>`              | everywhere         | | Storage API. In particular can be used to store data        |
+|                                                            |                    | | between game sessions.                                      |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.core <Package openmw.core>`                    | everywhere         | | Functions that are common for both global and local scripts |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.types <Package openmw.types>`                  | everywhere         | | Functions for specific types of game objects.               |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.async <Package openmw.async>`                  | everywhere         | | Timers (implemented) and coroutine utils (not implemented)  |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.world <Package openmw.world>`                  | by global scripts  | | Read-write access to the game world.                        |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.self <Package openmw.self>`                    | by local scripts   | | Full access to the object the script is attached to.        |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.nearby <Package openmw.nearby>`                | by local scripts   | | Read-only access to the nearest area of the game world.     |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.input <Package openmw.input>`                  | by player scripts  | | User input.                                                 |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.ui <Package openmw.ui>`                        | by player scripts  | | Controls :ref:`user interface <User interface reference>`.  |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.camera <Package openmw.camera>`                | by player scripts  | | Controls camera.                                            |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.postprocessing <Package openmw.postprocessing>`| by player scripts  | | Controls post-process shaders.                              |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 
 **openmw_aux**
 

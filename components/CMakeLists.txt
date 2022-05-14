@@ -82,6 +82,10 @@ add_component_dir (to_utf8
 
 add_component_dir(esm attr common defs esmcommon reader records util luascripts format)
 
+add_component_dir(fx pass technique lexer widgets stateupdater)
+
+add_component_dir(std140 ubo)
+
 add_component_dir (esm3
     esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loaddial loaddoor loadench loadfact loadglob loadgmst

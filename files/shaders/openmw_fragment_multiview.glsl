@@ -29,3 +29,10 @@ float mw_sampleRefractionDepthMap(vec2 uv)
 }
 
 #endif
+
+uniform sampler2DArray omw_SamplerLastShader;
+
+vec4 mw_samplerLastShader(vec2 uv)
+{
+    return texture2DArray(omw_SamplerLastShader, vec3((uv), gl_ViewID_OVR));
+}

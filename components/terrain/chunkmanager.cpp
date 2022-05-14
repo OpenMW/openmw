@@ -180,7 +180,7 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
 
     float blendmapScale = mStorage->getBlendmapScale(chunkSize);
 
-    return ::Terrain::createPasses(useShaders, &mSceneManager->getShaderManager(), layers, blendmapTextures, blendmapScale, blendmapScale);
+    return ::Terrain::createPasses(useShaders, mSceneManager, layers, blendmapTextures, blendmapScale, blendmapScale);
 }
 
 osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, unsigned char lod, unsigned int lodFlags, bool compile, TerrainDrawable* templateGeometry)
@@ -268,7 +268,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
             layer.mDiffuseMap = compositeMap->mTexture;
             layer.mParallax = false;
             layer.mSpecular = false;
-            geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
+            geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), mSceneManager, std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
         }
         else
         {

@@ -7,4 +7,5 @@ Reference Material
 
 	modding/index
 	lua-scripting/index
+	postprocessing/index
 	documentationHowTo

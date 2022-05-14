@@ -786,6 +786,7 @@ namespace MWWorld
                 -0.268f, // approx tan( -15 degrees )
                 static_cast<float>(sin(theta)));
             mRendering.setSunDirection( final * -1 );
+            mRendering.setNight(is_night);
         }
 
         float underwaterFog = mUnderwaterFog.getValue(time.getHour(), mTimeSettings, "Fog");
@@ -807,7 +808,7 @@ namespace MWWorld
         mRendering.configureFog(mResult.mFogDepth, underwaterFog, mResult.mDLFogFactor,
                                 mResult.mDLFogOffset/100.0f, mResult.mFogColor);
         mRendering.setAmbientColour(mResult.mAmbientColor);
-        mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor * mResult.mGlareView * glareFade);
+        mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor * mResult.mGlareView * glareFade, mResult.mGlareView * glareFade);
 
         mRendering.getSkyManager()->setWeather(mResult);
 
@@ -855,11 +856,6 @@ namespace MWWorld
         // immediately applied, regardless of whatever transition time might have been remaining.
         mTimePassed += hours;
         mFastForward = !incremental ? true : mFastForward;
-    }
-
-    unsigned int WeatherManager::getWeatherID() const
-    {
-        return mCurrentWeather;
     }
 
     NightDayMode WeatherManager::getNightDayMode() const

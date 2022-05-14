@@ -363,5 +363,9 @@ void main(void)
 #endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 
+#if !@disableNormals
+    gl_FragData[1].rgb = normal * 0.5 + 0.5;
+#endif
+
     applyShadowDebugOverlay();
 }

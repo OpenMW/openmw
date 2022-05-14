@@ -17,7 +17,6 @@ namespace osg
 {
     class FrameBufferObject;
     class Texture2D;
-    class Texture2DMultisample;
     class Texture2DArray;
 }
 

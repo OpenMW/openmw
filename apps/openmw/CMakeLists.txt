@@ -22,7 +22,8 @@ add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky skyutil npcanimation vismask
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation screenshotmanager
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
-    renderbin actoranimation landmanager navmesh actorspaths recastmesh fogmanager objectpaging groundcover postprocessor
+    renderbin actoranimation landmanager navmesh actorspaths recastmesh fogmanager objectpaging groundcover
+    postprocessor pingpongcull hdr pingpongcanvas transparentpass
     )
 
 add_openmw_dir (mwinput
@@ -43,6 +44,7 @@ add_openmw_dir (mwgui
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow spellmodel spellview
     draganddrop timeadvancer jailscreen itemchargeview keyboardnavigation textcolours statswatcher
+    postprocessorhud
     )
 
 add_openmw_dir (mwdialogue
@@ -59,7 +61,7 @@ add_openmw_dir (mwscript
 add_openmw_dir (mwlua
     luamanagerimp object worldview userdataserializer eventqueue
     luabindings localscripts playerscripts objectbindings cellbindings asyncbindings settingsbindings
-    camerabindings uibindings inputbindings nearbybindings stats
+    camerabindings uibindings inputbindings nearbybindings postprocessingbindings stats
     types/types types/door types/actor types/container types/weapon types/npc types/creature
     )
 

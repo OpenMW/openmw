@@ -90,6 +90,11 @@ namespace VFS
         /// @note May be called from any thread once the index has been built.
         RecursiveDirectoryRange getRecursiveDirectoryIterator(const std::string& path) const;
 
+        /// Retrieve the absolute path to the file
+        /// @note Throws an exception if the file can not be found.
+        /// @note May be called from any thread once the index has been built.
+        std::string getAbsoluteFileName(const std::string& name) const;
+
     private:
         bool mStrict;
 

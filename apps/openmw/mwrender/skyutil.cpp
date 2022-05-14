@@ -812,6 +812,12 @@ namespace MWRender
             mSunGlareCallback->setTimeOfDayFade(val);
     }
 
+    void Sun::setSunglare(bool enabled)
+    {
+        mSunGlareNode->setNodeMask(enabled ? ~0u : 0);
+        mSunFlashNode->setNodeMask(enabled ? ~0u : 0);
+    }
+
     osg::ref_ptr<osg::OcclusionQueryNode> Sun::createOcclusionQueryNode(osg::Group* parent, bool queryVisible)
     {
         osg::ref_ptr<osg::OcclusionQueryNode> oqn = new osg::OcclusionQueryNode;

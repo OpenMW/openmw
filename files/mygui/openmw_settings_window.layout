@@ -269,7 +269,7 @@
                     <Property key="ButtonAutoWidth" value="true"/>
                     <Widget type="TabItem" skin="" position="0 28 352 268" align="Stretch">
                         <Property key="Caption" value="  Video  "/>
-                        <Widget type="ListBox" skin="MW_List" position="0 4 170 170" align="Left Top" name="ResolutionList"/>
+                        <Widget type="ListBox" skin="MW_List" position="0 4 170 215" align="Left Top" name="ResolutionList"/>
                         <Widget type="TextBox" skin="NormalText" position="182 4 170 18" align="Left Top">
                             <Property key="Caption" value="Window Mode:"/>
                         </Widget>
@@ -305,9 +305,24 @@
                             <Property key="Caption" value="Hint: press F3 to show \nthe current frame rate."/>
                         </Widget>
 
-                        <Widget type="TextBox" skin="NormalText" position="0 198 352 18" align="Left Top" name="FovText">
+                        <Widget type="HBox" skin="" position="182 160 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
+                                <UserString key="SettingCategory" value="Post Processing"/>
+                                <UserString key="SettingName" value="enabled"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 48 16" align="Left Top">
+                                <Property key="Caption" value="Post Processing"/>
+                            </Widget>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 222 352 18" align="HStretch Top">
+
+                        <Widget type="TextBox" skin="SandText" position="182 190 300 32" align="Left Top">
+                            <Property key="Caption" value="Hint: press F2 to show \nthe config HUD."/>
+                        </Widget>
+
+                        <Widget type="TextBox" skin="NormalText" position="0 228 352 18" align="Left Top" name="FovText">
+                        </Widget>
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 252 352 18" align="HStretch Top">
                             <Property key="Range" value="81"/>
                             <Property key="Page" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -319,18 +334,18 @@
                             <UserString key="SettingLabelWidget" value="FovText"/>
                             <UserString key="SettingLabelCaption" value="Field of View (%s)"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 246 352 18" align="Left Top">
+                        <Widget type="TextBox" skin="SandText" position="0 276 352 18" align="Left Top">
                             <Property key="Caption" value="#{sLow}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 246 352 18" align="Right Top">
+                        <Widget type="TextBox" skin="SandText" position="0 276 352 18" align="Right Top">
                             <Property key="Caption" value="#{sHigh}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
-                        <Widget type="TextBox" skin="NormalText" position="0 268 352 18" align="Left Top" name="GammaText">
+                        <Widget type="TextBox" skin="NormalText" position="0 298 352 18" align="Left Top" name="GammaText">
                             <Property key="Caption" value="#{sGamma_Correction}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 292 352 18" align="HStretch Top" name="GammaSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 322 352 18" align="HStretch Top" name="GammaSlider">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -340,11 +355,11 @@
                             <UserString key="SettingMin" value="0.1"/>
                             <UserString key="SettingMax" value="3.0"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 316 352 18" align="Left Top" name="GammaTextDark">
+                        <Widget type="TextBox" skin="SandText" position="0 346 352 18" align="Left Top" name="GammaTextDark">
                             <Property key="Caption" value="#{sDark_Gamma}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 316 352 18" align="Right Top" name="GammaTextLight">
+                        <Widget type="TextBox" skin="SandText" position="0 346 352 18" align="Right Top" name="GammaTextLight">
                             <Property key="Caption" value="#{sLight_Gamma}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>

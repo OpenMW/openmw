@@ -95,6 +95,7 @@ namespace MWLua
         mPlayerSettingsPackage = initPlayerSettingsPackage(localContext);
         mLocalStoragePackage = initLocalStoragePackage(localContext, &mGlobalStorage);
         mPlayerStoragePackage = initPlayerStoragePackage(localContext, &mGlobalStorage, &mPlayerStorage);
+        mPostprocessingPackage = initPostprocessingPackage(localContext);
 
         initConfiguration();
         mInitialized = true;
@@ -407,6 +408,7 @@ namespace MWLua
             scripts->addPackage("openmw.input", mInputPackage);
             scripts->addPackage("openmw.settings", mPlayerSettingsPackage);
             scripts->addPackage("openmw.storage", mPlayerStoragePackage);
+            scripts->addPackage("openmw.postprocessing", mPostprocessingPackage);
         }
         else
         {

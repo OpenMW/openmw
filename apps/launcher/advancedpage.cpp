@@ -145,6 +145,12 @@ bool Launcher::AdvancedPage::loadSettings()
         objectPagingMinSizeComboBox->setValue(Settings::Manager::getDouble("object paging min size", "Terrain"));
 
         loadSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
+
+        connect(postprocessEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotPostProcessToggled(bool)));
+        loadSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
+        loadSettingBool(postprocessLiveReloadCheckBox, "live reload", "Post Processing");
+        loadSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
+        postprocessHDRTimeComboBox->setValue(Settings::Manager::getDouble("hdr exposure time", "Post Processing"));
     }
 
     // Audio
@@ -302,6 +308,11 @@ void Launcher::AdvancedPage::saveSettings()
             Settings::Manager::setDouble("object paging min size", "Terrain", objectPagingMinSize);
 
         saveSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
+
+        saveSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
+        saveSettingBool(postprocessLiveReloadCheckBox, "live reload", "Post Processing");
+        saveSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
+        Settings::Manager::setDouble("hdr exposure time", "Post Processing", postprocessHDRTimeComboBox->value());
     }
     
     // Audio
@@ -463,4 +474,12 @@ void Launcher::AdvancedPage::slotAnimSourcesToggled(bool checked)
 void Launcher::AdvancedPage::slotViewOverShoulderToggled(bool checked)
 {
     viewOverShoulderVerticalLayout->setEnabled(viewOverShoulderCheckBox->checkState());
+}
+
+void Launcher::AdvancedPage::slotPostProcessToggled(bool checked)
+{
+    postprocessLiveReloadCheckBox->setEnabled(checked);
+    postprocessTransparentPostpassCheckBox->setEnabled(checked);
+    postprocessHDRTimeComboBox->setEnabled(checked);
+    postprocessHDRTimeLabel->setEnabled(checked);
 }

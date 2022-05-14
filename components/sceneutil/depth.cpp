@@ -44,18 +44,6 @@ namespace SceneUtil
         );
     }
 
-    bool isFloatingPointDepthFormat(GLenum format)
-    {
-        constexpr std::array<GLenum, 4> formats = {
-            GL_DEPTH_COMPONENT32F,
-            GL_DEPTH_COMPONENT32F_NV,
-            GL_DEPTH32F_STENCIL8,
-            GL_DEPTH32F_STENCIL8_NV,
-        };
-
-        return std::find(formats.cbegin(), formats.cend(), format) != formats.cend();
-    }
-
     bool isDepthFormat(GLenum format)
     {
         constexpr std::array<GLenum, 8> formats = {

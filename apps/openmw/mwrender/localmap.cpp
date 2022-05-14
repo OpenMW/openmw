@@ -670,6 +670,7 @@ LocalMapRenderToTexture::LocalMapRenderToTexture(osg::Node* sceneRoot, int res, 
     mViewMatrix.makeLookAt(osg::Vec3d(x, y, zmax + 5), osg::Vec3d(x, y, zmin), upVector);
 
     setUpdateCallback(new CameraLocalUpdateCallback);
+    setDepthBufferInternalFormat(GL_DEPTH24_STENCIL8);
 }
 
 void LocalMapRenderToTexture::setDefaults(osg::Camera* camera)

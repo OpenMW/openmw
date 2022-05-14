@@ -256,7 +256,21 @@ settings
 	w = 0.33
 
 	h = 0.66
+
 The settings window.
 Activated by clicking Options in the main menu.
 
+postprocessor
+-------------
 
+:Default:
+	x = 0.01
+
+	y = 0.02
+
+	w = 0.44
+
+	h = 0.95
+
+The postprocessor window used to configure shaders.
+Activated by pressing the F2 key.

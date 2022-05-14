@@ -15,6 +15,8 @@ namespace VFS
 
         Files::IStreamPtr open() override;
 
+        std::string getPath() override { return mInfo->name(); }
+
         const Bsa::BSAFile::FileStruct* mInfo;
         Bsa::BSAFile* mFile;
     };
@@ -25,6 +27,8 @@ namespace VFS
         CompressedBsaArchiveFile(const Bsa::BSAFile::FileStruct* info, Bsa::CompressedBSAFile* bsa);
 
         Files::IStreamPtr open() override;
+
+        std::string getPath() override { return mInfo->name(); }
 
         const Bsa::BSAFile::FileStruct* mInfo;
         Bsa::CompressedBSAFile* mCompressedFile;
