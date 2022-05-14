@@ -168,7 +168,7 @@ namespace LuaUi
         int sdlButton = SDLUtil::myGuiMouseButtonToSdl(button);
         table["position"] = position;
         table["offset"] = offset;
-        if (sdlButton == 0) // nil if no button was pressed
+        if (sdlButton != 0) // nil if no button was pressed
             table["button"] = sdlButton;
         return table;
     }
