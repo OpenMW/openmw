@@ -14,10 +14,8 @@ namespace LuaUi
             MyGUI::IntSize calculateSize() override;
             void updateProperties() override;
             void updateChildren() override;
-            MyGUI::IntSize childScalingSize() override
-            {
-                return MyGUI::IntSize();
-            }
+            MyGUI::IntSize childScalingSize() override;
+
             void updateCoord() override;
 
         private:

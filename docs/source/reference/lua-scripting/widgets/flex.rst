@@ -15,7 +15,8 @@ Properties
     - description
   * - horizontal
     - bool (false)
-    - Flex aligns its children in a row if true, otherwise in a column.
+    - | Flex aligns its children in a row (main axis is horizontal) if true,
+      | otherwise in a column (main axis is vertical).
   * - autoSize
     - bool (true)
     - | If true, Flex will automatically resize to fit its contents.
@@ -41,3 +42,6 @@ External
     - | Grow factor for the child. If there is unused space in the Flex,
       | it will be split between widgets according to this value.
       | Has no effect if `autoSize` is `true`.
+  * - stretch
+    - float (0)
+    - | Stretches the child to a percentage of the Flex's cross axis size.

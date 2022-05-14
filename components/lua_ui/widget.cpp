@@ -35,37 +35,13 @@ namespace LuaUi
     void WidgetExtension::initialize()
     {
         // \todo might be more efficient to only register these if there are Lua callbacks
-        mWidget->eventKeyButtonPressed += MyGUI::newDelegate(this, &WidgetExtension::keyPress);
-        mWidget->eventKeyButtonReleased += MyGUI::newDelegate(this, &WidgetExtension::keyRelease);
-        mWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &WidgetExtension::mouseClick);
-        mWidget->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &WidgetExtension::mouseDoubleClick);
-        mWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &WidgetExtension::mousePress);
-        mWidget->eventMouseButtonReleased += MyGUI::newDelegate(this, &WidgetExtension::mouseRelease);
-        mWidget->eventMouseMove += MyGUI::newDelegate(this, &WidgetExtension::mouseMove);
-        mWidget->eventMouseDrag += MyGUI::newDelegate(this, &WidgetExtension::mouseDrag);
-
-        mWidget->eventMouseSetFocus += MyGUI::newDelegate(this, &WidgetExtension::focusGain);
-        mWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &WidgetExtension::focusLoss);
-        mWidget->eventKeySetFocus += MyGUI::newDelegate(this, &WidgetExtension::focusGain);
-        mWidget->eventKeyLostFocus += MyGUI::newDelegate(this, &WidgetExtension::focusLoss);
+        registerEvents(mWidget);
     }
 
     void WidgetExtension::deinitialize()
     {
         clearCallbacks();
-        mWidget->eventKeyButtonPressed.clear();
-        mWidget->eventKeyButtonReleased.clear();
-        mWidget->eventMouseButtonClick.clear();
-        mWidget->eventMouseButtonDoubleClick.clear();
-        mWidget->eventMouseButtonPressed.clear();
-        mWidget->eventMouseButtonReleased.clear();
-        mWidget->eventMouseMove.clear();
-        mWidget->eventMouseDrag.m_event.clear();
-
-        mWidget->eventMouseSetFocus.clear();
-        mWidget->eventMouseLostFocus.clear();
-        mWidget->eventKeySetFocus.clear();
-        mWidget->eventKeyLostFocus.clear();
+        clearEvents(mWidget);
 
         mOnCoordChange.reset();
 
@@ -73,6 +49,39 @@ namespace LuaUi
             w->deinitialize();
         for (WidgetExtension* w : mTemplateChildren)
             w->deinitialize();
+    }
+
+    void WidgetExtension::registerEvents(MyGUI::Widget* w)
+    {
+        w->eventKeyButtonPressed += MyGUI::newDelegate(this, &WidgetExtension::keyPress);
+        w->eventKeyButtonReleased += MyGUI::newDelegate(this, &WidgetExtension::keyRelease);
+        w->eventMouseButtonClick += MyGUI::newDelegate(this, &WidgetExtension::mouseClick);
+        w->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &WidgetExtension::mouseDoubleClick);
+        w->eventMouseButtonPressed += MyGUI::newDelegate(this, &WidgetExtension::mousePress);
+        w->eventMouseButtonReleased += MyGUI::newDelegate(this, &WidgetExtension::mouseRelease);
+        w->eventMouseMove += MyGUI::newDelegate(this, &WidgetExtension::mouseMove);
+        w->eventMouseDrag += MyGUI::newDelegate(this, &WidgetExtension::mouseDrag);
+
+        w->eventMouseSetFocus += MyGUI::newDelegate(this, &WidgetExtension::focusGain);
+        w->eventMouseLostFocus += MyGUI::newDelegate(this, &WidgetExtension::focusLoss);
+        w->eventKeySetFocus += MyGUI::newDelegate(this, &WidgetExtension::focusGain);
+        w->eventKeyLostFocus += MyGUI::newDelegate(this, &WidgetExtension::focusLoss);
+    }
+    void WidgetExtension::clearEvents(MyGUI::Widget* w)
+    {
+        w->eventKeyButtonPressed.clear();
+        w->eventKeyButtonReleased.clear();
+        w->eventMouseButtonClick.clear();
+        w->eventMouseButtonDoubleClick.clear();
+        w->eventMouseButtonPressed.clear();
+        w->eventMouseButtonReleased.clear();
+        w->eventMouseMove.clear();
+        w->eventMouseDrag.m_event.clear();
+
+        w->eventMouseSetFocus.clear();
+        w->eventMouseLostFocus.clear();
+        w->eventKeySetFocus.clear();
+        w->eventKeyLostFocus.clear();
     }
 
     void WidgetExtension::reset()
@@ -188,25 +197,11 @@ namespace LuaUi
 
     void WidgetExtension::updateTemplate()
     {
-        WidgetExtension* oldSlot = mSlot;
         WidgetExtension* slot = findDeepInTemplates("slot");
         if (slot == nullptr)
             mSlot = this;
         else
             mSlot = slot->mSlot;
-        if (mSlot != oldSlot)
-        {
-            MyGUI::IntSize slotSize = mSlot->widget()->getSize();
-            MyGUI::IntPoint slotPosition = mSlot->widget()->getAbsolutePosition() - widget()->getAbsolutePosition();
-            MyGUI::IntCoord slotCoord(slotPosition, slotSize);
-            MyGUI::Widget* clientWidget = mWidget->getClientWidget();
-            if (!clientWidget)
-                clientWidget = mWidget;
-            if (clientWidget->getSubWidgetMain())
-                clientWidget->getSubWidgetMain()->setCoord(slotCoord);
-            if (clientWidget->getSubWidgetText())
-                clientWidget->getSubWidgetText()->setCoord(slotCoord);
-        }
     }
 
     void WidgetExtension::setCallback(const std::string& name, const LuaUtil::Callback& callback)
@@ -290,10 +285,12 @@ namespace LuaUi
 
     MyGUI::IntSize WidgetExtension::parentSize()
     {
-        if (mParent && !mTemplateChild)
-            return mParent->childScalingSize();
+        if (!mParent)
+            return widget()->getParentSize(); // size of the layer
+        if (mTemplateChild)
+            return mParent->templateScalingSize();
         else
-            return widget()->getParentSize();
+            return mParent->childScalingSize();
     }
 
     MyGUI::IntSize WidgetExtension::calculateSize()
@@ -332,6 +329,11 @@ namespace LuaUi
     MyGUI::IntSize WidgetExtension::childScalingSize()
     {
         return mSlot->widget()->getSize();
+    }
+
+    MyGUI::IntSize WidgetExtension::templateScalingSize()
+    {
+        return widget()->getSize();
     }
 
     void WidgetExtension::triggerEvent(std::string_view name, sol::object argument) const

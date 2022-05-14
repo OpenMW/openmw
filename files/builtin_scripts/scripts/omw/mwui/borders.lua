@@ -1,120 +1,203 @@
 local ui = require('openmw.ui')
 local util = require('openmw.util')
 
+local auxUi = require('openmw_aux.ui')
+
 local constants = require('scripts.omw.mwui.constants')
 
 local v2 = util.vector2
+local whiteTexture = ui.texture{ path = 'white' }
+local menuTransparency = ui._getMenuTransparency()
 
 local sideParts = {
-    left = util.vector2(0, 0.5),
-    right = util.vector2(1, 0.5),
-    top = util.vector2(0.5, 0),
-    bottom = util.vector2(0.5, 1),
+    left = v2(0, 0),
+    right = v2(1, 0),
+    top = v2(0, 0),
+    bottom = v2(0, 1),
 }
 local cornerParts = {
-    top_left_corner = util.vector2(0, 0),
-    top_right_corner = util.vector2(1, 0),
-    bottom_left_corner = util.vector2(0, 1),
-    bottom_right_corner = util.vector2(1, 1),
+    top_left = v2(0, 0),
+    top_right = v2(1, 0),
+    bottom_left = v2(0, 1),
+    bottom_right = v2(1, 1),
 }
 
-local resources = {}
+local borderSidePattern = 'textures/menu_thin_border_%s.dds'
+local borderCornerPattern = 'textures/menu_thin_border_%s_corner.dds'
+
+local borderResources = {}
 do
-    local boxBorderPattern = 'textures/menu_thin_border_%s.dds'
-    for k, _ in pairs(sideParts) do
-        resources[k] = ui.texture{ path = boxBorderPattern:format(k) }
+    for k in pairs(sideParts) do
+        borderResources[k] = ui.texture{ path = borderSidePattern:format(k) }
     end
-    for k, _ in pairs(cornerParts) do
-        resources[k] = ui.texture{ path = boxBorderPattern:format(k) }
+    for k in pairs(cornerParts) do
+        borderResources[k] = ui.texture{ path = borderCornerPattern:format(k) }
     end
 end
 
 local borderPieces = {}
-for k, align in pairs(sideParts) do
-    local resource = resources[k]
-    local horizontal = align.x ~= 0.5
-    borderPieces[#borderPieces + 1] = {
+for k in pairs(sideParts) do
+    local horizontal = k == 'top' or k == 'bottom'
+    borderPieces[k] = {
         type = ui.TYPE.Image,
         props = {
-            resource = resource,
-            relativePosition = align,
-            anchor = align,
-            relativeSize = horizontal and v2(0, 1) or v2(1, 0),
-            size = (horizontal and v2(1, -2) or v2(-2, 1)) * constants.borderSize,
-            tileH = not horizontal,
-            tileV = horizontal,
+            resource = borderResources[k],
+            tileH = horizontal,
+            tileV = not horizontal,
+        },
+    }
+end
+for k in pairs(cornerParts) do
+    borderPieces[k] = {
+        type = ui.TYPE.Image,
+        props = {
+            resource = borderResources[k],
         },
     }
 end
 
-for k, align in pairs(cornerParts) do
-    local resource = resources[k]
-    borderPieces[#borderPieces + 1] = {
+
+
+local function borderTemplates(borderSize)
+    local borderV = v2(1, 1) * borderSize
+    local result = {}
+    result.horizontalLine = {
         type = ui.TYPE.Image,
         props = {
-            resource = resource,
-            relativePosition = align,
-            anchor = align,
-            size = v2(1, 1) * constants.borderSize,
+            resource = borderResources.top,
+            tileH = true,
+            tileV = false,
+            size = v2(0, borderSize),
+            relativeSize = v2(1, 0),
         },
     }
+
+    result.verticalLine = {
+        type = ui.TYPE.Image,
+        props = {
+            resource = borderResources.left,
+            tileH = false,
+            tileV = true,
+            size = v2(borderSize, 0),
+            relativeSize = v2(0, 1),
+        },
+    }
+
+    result.borders = {
+        content = ui.content {},
+    }
+    for k, v in pairs(sideParts) do
+        local horizontal = k == 'top' or k == 'bottom'
+        local direction = horizontal and v2(1, 0) or v2(0, 1)
+        result.borders.content:add {
+            template = borderPieces[k],
+            props = {
+                position = (direction - v) * borderSize,
+                relativePosition = v,
+                size = (v2(1, 1) - direction * 3) * borderSize,
+                relativeSize = direction,
+            }
+        }
+    end
+    for k, v in pairs(cornerParts) do
+        result.borders.content:add {
+            template = borderPieces[k],
+            props = {
+                position = -v * borderSize,
+                relativePosition = v,
+                size = borderV,
+            },
+        }
+    end
+    result.borders.content:add {
+        external = { slot = true },
+        props = {
+            position = borderV,
+            size = borderV * -2,
+            relativeSize = v2(1, 1),
+        }
+    }
+
+    result.box = {
+        type = ui.TYPE.Container,
+        content = ui.content{},
+    }
+    for k, v in pairs(sideParts) do
+        local horizontal = k == 'top' or k == 'bottom'
+        local direction = horizontal and v2(1, 0) or v2(0, 1)
+        result.box.content:add {
+            template = borderPieces[k],
+            props = {
+                position = (direction + v) * borderSize,
+                relativePosition = v,
+                size = (v2(1, 1) - direction) * borderSize,
+                relativeSize = direction,
+            }
+        }
+    end
+    for k, v in pairs(cornerParts) do
+        result.box.content:add {
+            template = borderPieces[k],
+            props = {
+                position = v * borderSize,
+                relativePosition = v,
+                size = borderV,
+            },
+        }
+    end
+    result.box.content:add {
+        external = { slot = true },
+        props = {
+            position = borderV,
+            relativeSize = v2(1, 1),
+        }
+    }
+
+    local backgroundTransparent = {
+        type = ui.TYPE.Image,
+        props = {
+            resource = whiteTexture,
+            color = util.color.rgb(0, 0, 0),
+            alpha = menuTransparency,
+        },
+    }
+    local backgroundSolid = {
+        type = ui.TYPE.Image,
+        props = {
+            resource = whiteTexture,
+            color = util.color.rgb(0, 0, 0),
+        },
+    }
+
+    result.boxTransparent = auxUi.deepLayoutCopy(result.box)
+    result.boxTransparent.content:insert(1, {
+        template = backgroundTransparent,
+        props = {
+            relativeSize = v2(1, 1),
+            size = borderV * 2,
+        },
+    })
+
+    result.boxSolid = auxUi.deepLayoutCopy(result.box)
+    result.boxSolid.content:insert(1, {
+        template = backgroundSolid,
+        props = {
+            relativeSize = v2(1, 1),
+            size = borderV * 2,
+        },
+    })
+
+    return result
 end
 
-borderPieces[#borderPieces + 1] = {
-    external = {
-        slot = true,
-    },
-    props = {
-        position = v2(1, 1) * (constants.borderSize + constants.padding),
-        size = v2(-2, -2) * (constants.borderSize + constants.padding),
-        relativeSize = v2(1, 1),
-    },
-}
-
-local borders = {
-    content = ui.content(borderPieces)
-}
-borders.content:add({
-    external = {
-        slot = true,
-    },
-    props = {
-        size = v2(-2, -2) * constants.borderSize,
-    },
-})
-
-local horizontalLine = {
-    content = ui.content {
-        {
-            type = ui.TYPE.Image,
-            props = {
-                resource = resources.top,
-                tileH = true,
-                tileV = false,
-                size = v2(0, constants.borderSize),
-                relativeSize = v2(1, 0),
-            },
-        },
-    },
-}
-
-local verticalLine = {
-    content = ui.content {
-        {
-            type = ui.TYPE.Image,
-            props = {
-                resource = resources.left,
-                tileH = false,
-                tileV = true,
-                size = v2(constants.borderSize, 0),
-                relativeSize = v2(0, 1),
-            },
-        },
-    },
-}
+local thinBorders = borderTemplates(constants.border)
+local thickBorders = borderTemplates(constants.thickBorder)
 
 return function(templates)
-    templates.borders = borders
-    templates.horizontalLine = horizontalLine
-    templates.verticalLine = verticalLine
+    for k, t in pairs(thinBorders) do
+        templates[k] = t
+    end
+    for k, t in pairs(thickBorders) do
+        templates[k .. 'Thick'] = t
+    end
 end

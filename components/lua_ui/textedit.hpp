@@ -7,7 +7,7 @@
 
 namespace LuaUi
 {
-    class LuaTextEdit : public MyGUI::EditBox, public WidgetExtension
+    class LuaTextEdit : public MyGUI::Widget, public WidgetExtension
     {
         MYGUI_RTTI_DERIVED(LuaTextEdit)
 
@@ -15,9 +15,13 @@ namespace LuaUi
             void initialize() override;
             void deinitialize() override;
             void updateProperties() override;
+            void updateCoord() override;
+            void updateChildren() override;
 
         private:
             void textChange(MyGUI::EditBox*);
+
+        MyGUI::EditBox* mEditBox;
     };
 }
 

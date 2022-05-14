@@ -7,11 +7,6 @@ namespace LuaUi
     void LuaContainer::updateChildren()
     {
         WidgetExtension::updateChildren();
-        for (auto w : children())
-        {
-            w->onCoordChange([this](WidgetExtension* child, MyGUI::IntCoord coord)
-                { updateSizeToFit(); });
-        }
         updateSizeToFit();
     }
 
@@ -20,16 +15,39 @@ namespace LuaUi
         return MyGUI::IntSize();
     }
 
+    MyGUI::IntSize LuaContainer::templateScalingSize()
+    {
+        return mInnerSize;
+    }
+
     void LuaContainer::updateSizeToFit()
     {
-        MyGUI::IntSize size;
+        MyGUI::IntSize innerSize = MyGUI::IntSize();
         for (auto w : children())
         {
-            MyGUI::IntCoord coord = w->widget()->getCoord();
-            size.width = std::max(size.width, coord.left + coord.width);
-            size.height = std::max(size.height, coord.top + coord.height);
+            MyGUI::IntCoord coord = w->calculateCoord();
+            innerSize.width = std::max(innerSize.width, coord.left + coord.width);
+            innerSize.height = std::max(innerSize.height, coord.top + coord.height);
         }
-        forceSize(size);
-        updateCoord();
+        MyGUI::IntSize outerSize = innerSize;
+        for (auto w : templateChildren())
+        {
+            MyGUI::IntCoord coord = w->calculateCoord();
+            outerSize.width = std::max(outerSize.width, coord.left + coord.width);
+            outerSize.height = std::max(outerSize.height, coord.top + coord.height);
+        }
+        mInnerSize = innerSize;
+        mOuterSize = outerSize;
+    }
+
+    MyGUI::IntSize LuaContainer::calculateSize()
+    {
+        return mOuterSize;
+    }
+
+    void LuaContainer::updateCoord()
+    {
+        updateSizeToFit();
+        WidgetExtension::updateCoord();
     }
 }

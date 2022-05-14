@@ -111,3 +111,6 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
   * - :ref:`Settings <Interface Settings>`
     - by player and global scripts
     - Save, display and track changes of setting values.
+  * - :ref:`MWUI <Interface MWUI>`
+    - by player scripts
+    - Morrowind-style UI templates.

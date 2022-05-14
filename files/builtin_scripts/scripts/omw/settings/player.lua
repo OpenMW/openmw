@@ -1,39 +1,21 @@
-local ui = require('openmw.ui')
-local async = require('openmw.async')
-local util = require('openmw.util')
-
 local common = require('scripts.omw.settings.common')
 local render = require('scripts.omw.settings.render')
 
-render.registerRenderer('text', function(value, set, arg)
-    return {
-        type = ui.TYPE.TextEdit,
-        props = {
-            size = util.vector2(arg and arg.size or 150, 30),
-            text = value,
-            textColor = util.color.rgb(1, 1, 1),
-            textSize = 15,
-            textAlignV = ui.ALIGNMENT.End,
-        },
-        events = {
-            textChanged = async:callback(function(s) set(s) end),
-        },
-    }
-end)
+require('scripts.omw.settings.renderers')(render.registerRenderer)
 
 ---
 -- @type PageOptions
 -- @field #string key A unique key
 -- @field #string l10n A localization context (an argument of core.l10n)
 -- @field #string name A key from the localization context
--- @field #string description A key from the localization context
+-- @field #string description A key from the localization context (optional, can be `nil`)
 
 ---
 -- @type GroupOptions
 -- @field #string key A unique key, starts with "Settings" by convention
 -- @field #string l10n A localization context (an argument of core.l10n)
 -- @field #string name A key from the localization context
--- @field #string description A key from the localization context
+-- @field #string description A key from the localization context (optional, can be `nil`)
 -- @field #string page Key of a page which will contain this group
 -- @field #number order Groups within the same page are sorted by this number, or their key for equal values.
 --   Defaults to 0.
@@ -43,7 +25,7 @@ end)
 -- @type SettingOptions
 -- @field #string key A unique key
 -- @field #string name A key from the localization context
--- @field #string description A key from the localization context
+-- @field #string description A key from the localization context (optional, can be `nil`)
 -- @field default A default value
 -- @field #string renderer A renderer key
 -- @field argument An argument for the renderer
@@ -57,26 +39,33 @@ return {
     -- -- In a player script
     -- local storage = require('openmw.storage')
     -- local I = require('openmw.interfaces')
-    -- I.Settings.registerGroup({
+    -- I.Settings.registerPage {
+    --     key = 'MyModPage',
+    --     l10n = 'MyMod',
+    --     name = 'My Mod Name',
+    --     description = 'My Mod Description',
+    -- }
+    -- I.Settings.registerGroup {
     --     key = 'SettingsPlayerMyMod',
-    --     page = 'MyPage',
-    --     l10n = 'mymod',
-    --     name = 'modName',
-    --     description = 'modDescription',
+    --     page = 'MyModPage',
+    --     l10n = 'MyMod',
+    --     name = 'My Group Name',
+    --     description = 'My Group Description',
     --     settings = {
     --         {
     --             key = 'Greeting',
-    --             renderer = 'text',
-    --             name = 'greetingName',
-    --             description = 'greetingDescription',
+    --             renderer = 'textLine',
+    --             name = 'Greeting',
+    --             description = 'Text to display when the game starts',
     --             default = 'Hello, world!',
-    --             argument = {
-    --                 size = 200,
-    --             },
+    --             permanentStorage = false,
     --         },
     --     },
-    -- })
+    -- }
     -- local playerSettings = storage.playerSection('SettingsPlayerMyMod')
+    -- ...
+    -- ui.showMessage(playerSettings:get('Greeting'))
+    -- -- ...
     -- -- access a setting page registered by a global script
     -- local globalSettings = storage.globalSection('SettingsGlobalMyMod')
     interface = {
@@ -132,22 +121,19 @@ return {
         --     settings = {
         --         {
         --             key = 'Greeting',
-        --             saveOnly = true,
+        --             permanentStorage = true,
         --             default = 'Hi',
-        --             renderer = 'text',
-        --             argument = {
-        --                 size = 200,
-        --             },
+        --             renderer = 'textLine',
         --             name = 'Text Input',
         --             description = 'Short text input',
         --         },
         --         {
-        --             key = 'Key',
-        --             saveOnly = false,
-        --             default = input.KEY.LeftAlt,
-        --             renderer = 'keybind',
-        --             name = 'Key',
-        --             description = 'Bind Key',
+        --             key = 'Flag',
+        --             permanentStorage = false,
+        --             default = false,
+        --             renderer = 'yeNo',
+        --             name = 'Flag',
+        --             description = 'Flag toggle',
         --         },
         --     }
         -- }

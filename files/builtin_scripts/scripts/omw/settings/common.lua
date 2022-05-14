@@ -21,8 +21,8 @@ local function validateSettingOptions(options)
     if type(options.name) ~= 'string' then
         error('Setting must have a name localization key')
     end
-    if type(options.description) ~= 'string' then
-        error('Setting must have a descripiton localization key')
+    if options.description ~= nil and type(options.description) ~= 'string' then
+        error('Setting description key must be a string')
     end
 end
 
@@ -49,8 +49,8 @@ local function validateGroupOptions(options)
     if type(options.name) ~= 'string' then
         error('Group must have a name localization key')
     end
-    if type(options.description) ~= 'string' then
-        error('Group must have a description localization key')
+    if options.description ~= nil and type(options.description) ~= 'string' then
+        error('Group description key must be a string')
     end
     if type(options.settings) ~= 'table' then
         error('Group must have a table of settings')
@@ -89,8 +89,9 @@ local function registerGroup(options)
         settings = {},
     }
     local valueSection = contextSection(options.key)
-    for _, opt in ipairs(options.settings) do
+    for i, opt in ipairs(options.settings) do
         local setting = registerSetting(opt)
+        setting.order = i
         if group.settings[setting.key] then
             error(('Duplicate setting key %s'):format(options.key))
         end
@@ -123,7 +124,7 @@ return {
             local section = contextSection(groupKey)
             saved[groupKey] = {}
             for key, value in pairs(section:asTable()) do
-                if not group.settings[key].permanentStorage then
+                if group.settings[key] and not group.settings[key].permanentStorage then
                     saved[groupKey][key] = value
                 end
             end

@@ -12,7 +12,7 @@
     </Resource>
 
     <Resource type="ResourceSkin" name="LuaTextEditClient" size="16 16">
-        <BasisSkin type="EditText" offset="0 0 16 16" align="Stretch" name="Client" />
+        <BasisSkin type="EditText" offset="0 0 16 16" align="Stretch" />
     </Resource>
 
     <Resource type="ResourceSkin" name="LuaTextEdit" size="16 16">

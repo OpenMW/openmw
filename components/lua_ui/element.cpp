@@ -24,7 +24,18 @@ namespace LuaUi
 
     std::string widgetType(const sol::table& layout)
     {
-        return layout.get_or(LayoutKeys::type, defaultWidgetType);
+        sol::object typeField = LuaUtil::getFieldOrNil(layout, LayoutKeys::type);
+        std::string type = LuaUtil::getValueOrDefault(typeField, defaultWidgetType);
+        sol::object templateTypeField = LuaUtil::getFieldOrNil(layout, LayoutKeys::templateLayout, LayoutKeys::type);
+        if (templateTypeField != sol::nil)
+        {
+            std::string templateType = LuaUtil::getValueOrDefault(templateTypeField, defaultWidgetType);
+            if (typeField != sol::nil && templateType != type)
+                throw std::logic_error(std::string("Template layout type ") + type
+                    + std::string(" doesn't match template type ") + templateType);
+            type = templateType;
+        }
+        return type;
     }
 
     void destroyWidget(LuaUi::WidgetExtension* ext)
@@ -103,18 +114,8 @@ namespace LuaUi
 
     WidgetExtension* createWidget(const sol::table& layout)
     {
-        sol::object typeField = LuaUtil::getFieldOrNil(layout, LayoutKeys::type);
-        std::string type = LuaUtil::getValueOrDefault(typeField, defaultWidgetType);
-        sol::object templateTypeField = LuaUtil::getFieldOrNil(layout, LayoutKeys::templateLayout, LayoutKeys::type);
-        if (templateTypeField != sol::nil)
-        {
-            std::string templateType = LuaUtil::getValueOrDefault(templateTypeField, defaultWidgetType);
-            if (typeField != sol::nil && templateType != type)
-                throw std::logic_error(std::string("Template layout type ") + type
-                    + std::string(" doesn't match template type ") + templateType);
-            type = templateType;
-        }
         static auto widgetTypeMap = widgetTypeToName();
+        std::string type = widgetType(layout);
         if (widgetTypeMap.find(type) == widgetTypeMap.end())
             throw std::logic_error(std::string("Invalid widget type ") += type);
 
@@ -242,7 +243,7 @@ namespace LuaUi
             if (!mLayer.empty())
                 Log(Debug::Warning) << "Ignoring element's layer " << mLayer << " because it's attached to a widget";
             mAttachedTo->setChildren({ mRoot });
-            mRoot->updateCoord();
+            mAttachedTo->updateCoord();
         }
     }
 }

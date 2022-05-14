@@ -70,16 +70,20 @@ namespace LuaUi
 
         virtual MyGUI::IntSize calculateSize();
         virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size);
+        MyGUI::IntCoord calculateCoord();
 
     protected:
         virtual void initialize();
+        void registerEvents(MyGUI::Widget* w);
+        void clearEvents(MyGUI::Widget* w);
+
         sol::table makeTable() const;
         sol::object keyEvent(MyGUI::KeyCode) const;
         sol::object mouseEvent(int left, int top, MyGUI::MouseButton button) const;
 
         MyGUI::IntSize parentSize();
-        MyGUI::IntCoord calculateCoord();
         virtual MyGUI::IntSize childScalingSize();
+        virtual MyGUI::IntSize templateScalingSize();
 
         template<typename T>
         T propertyValue(std::string_view name, const T& defaultValue)

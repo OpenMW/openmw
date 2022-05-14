@@ -82,6 +82,7 @@ Widget types
    TextEdit: Accepts text input from the user. <widgets/textedit>
    Image: Renders a texture. <widgets/image>
    Flex: Aligns children in a column/row <widgets/flex>
+   Container: Wraps around its children <widgets/container>
 
 Example
 -------
