@@ -1,20 +1,33 @@
 local camera = require('openmw.camera')
 local core = require('openmw.core')
 local input = require('openmw.input')
-local settings = require('openmw.settings')
 local util = require('openmw.util')
 local self = require('openmw.self')
 local nearby = require('openmw.nearby')
+local async = require('openmw.async')
 
 local Actor = require('openmw.types').Actor
 
-local head_bobbing = require('scripts.omw.head_bobbing')
-local third_person = require('scripts.omw.third_person')
+local settings = require('scripts.omw.camera.settings').thirdPerson
+local head_bobbing = require('scripts.omw.camera.head_bobbing')
+local third_person = require('scripts.omw.camera.third_person')
 
 local MODE = camera.MODE
 
-local previewIfStandSill = settings._getBoolFromSettingsCfg('Camera', 'preview if stand still')
-local showCrosshairInThirdPerson = settings._getBoolFromSettingsCfg('Camera', 'view over shoulder')
+local previewIfStandStill = false
+local showCrosshairInThirdPerson = false
+
+local function updateSettings()
+    previewIfStandStill = settings:get('previewIfStandStill')
+    showCrosshairInThirdPerson = settings:get('viewOverShoulder')
+    camera.allowCharacterDeferredRotation(settings:get('deferredPreviewRotation'))
+    local collisionType = util.bitAnd(nearby.COLLISION_TYPE.Default, util.bitNot(nearby.COLLISION_TYPE.Actor))
+    collisionType = util.bitOr(collisionType, nearby.COLLISION_TYPE.Camera)
+    if settings:get('ignoreNC') then
+        collisionType = util.bitOr(collisionType, nearby.COLLISION_TYPE.VisualOnly)
+    end
+    camera.setCollisionType(collisionType)
+end
 
 local primaryMode
 
@@ -24,16 +37,17 @@ local noHeadBobbing = 0
 local noZoom = 0
 
 local function init()
-    camera.setCollisionType(util.bitOr(util.bitAnd(nearby.COLLISION_TYPE.Default, util.bitNot(nearby.COLLISION_TYPE.Actor)), nearby.COLLISION_TYPE.Camera))
     camera.setFieldOfView(camera.getBaseFieldOfView())
-    camera.allowCharacterDeferredRotation(settings._getBoolFromSettingsCfg('Camera', 'deferred preview rotation'))
     if camera.getMode() == MODE.FirstPerson then
         primaryMode = MODE.FirstPerson
     else
         primaryMode = MODE.ThirdPerson
         camera.setMode(MODE.ThirdPerson)
     end
+    updateSettings()
 end
+
+settings:subscribe(async:callback(updateSettings))
 
 local smoothedSpeed = 0
 local previewTimer = 0
@@ -60,7 +74,7 @@ local function updatePOV(dt)
 end
 
 local idleTimer = 0
-local vanityDelay = settings.getGMST('fVanityDelay')
+local vanityDelay = core.getGMST('fVanityDelay')
 
 local function updateVanity(dt)
     if input.isIdle() then
@@ -126,7 +140,7 @@ end
 
 local function updateStandingPreview()
     local mode = camera.getMode()
-    if not previewIfStandSill or noStandingPreview > 0
+    if not previewIfStandStill or noStandingPreview > 0
        or mode == MODE.FirstPerson or mode == MODE.Static or mode == MODE.Vanity then
         third_person.standingPreview = false
         return
@@ -204,7 +218,7 @@ return {
         enableModeControl = function() noModeControl = math.max(0, noModeControl - 1) end,
 
         --- @function [parent=#Camera] isStandingPreviewEnabled
-        isStandingPreviewEnabled = function() return previewIfStandSill and noStandingPreview == 0 end,
+        isStandingPreviewEnabled = function() return previewIfStandStill and noStandingPreview == 0 end,
         --- @function [parent=#Camera] disableStandingPreview
         disableStandingPreview = function() noStandingPreview = noStandingPreview + 1 end,
         --- @function [parent=#Camera] enableStandingPreview

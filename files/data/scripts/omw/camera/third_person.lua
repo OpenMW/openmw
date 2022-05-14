@@ -1,30 +1,46 @@
 local camera = require('openmw.camera')
-local settings = require('openmw.settings')
 local util = require('openmw.util')
 local self = require('openmw.self')
 local nearby = require('openmw.nearby')
+local async = require('openmw.async')
 
 local Actor = require('openmw.types').Actor
+
+local settings = require('scripts.omw.camera.settings').thirdPerson
 
 local MODE = camera.MODE
 local STATE = { RightShoulder = 0, LeftShoulder = 1, Combat = 2, Swimming = 3 }
 
 local M = {
-    baseDistance = settings._getFloatFromSettingsCfg('Camera', 'third person camera distance'),
+    baseDistance = 192,
     preferredDistance = 0,
     standingPreview = false,
     noOffsetControl = 0,
 }
 
-local viewOverShoulder = settings._getBoolFromSettingsCfg('Camera', 'view over shoulder')
-local autoSwitchShoulder = settings._getBoolFromSettingsCfg('Camera', 'auto switch shoulder')
-local shoulderOffset = settings._getVector2FromSettingsCfg('Camera', 'view over shoulder offset')
-local zoomOutWhenMoveCoef = settings._getFloatFromSettingsCfg('Camera', 'zoom out when move coef')
+local viewOverShoulder, autoSwitchShoulder
+local shoulderOffset
+local zoomOutWhenMoveCoef
 
-local defaultShoulder = (shoulderOffset.x > 0 and STATE.RightShoulder) or STATE.LeftShoulder
-local rightShoulderOffset = util.vector2(math.abs(shoulderOffset.x), shoulderOffset.y)
-local leftShoulderOffset = util.vector2(-math.abs(shoulderOffset.x), shoulderOffset.y)
+local defaultShoulder, rightShoulderOffset, leftShoulderOffset
 local combatOffset = util.vector2(0, 15)
+
+local noThirdPersonLastFrame = true
+
+local function updateSettings()
+    viewOverShoulder = settings:get('viewOverShoulder')
+    autoSwitchShoulder = settings:get('autoSwitchShoulder')
+    shoulderOffset = util.vector2(settings:get('shoulderOffsetX'),
+                                  settings:get('shoulderOffsetY'))
+    zoomOutWhenMoveCoef = settings:get('zoomOutWhenMoveCoef')
+
+    defaultShoulder = (shoulderOffset.x > 0 and STATE.RightShoulder) or STATE.LeftShoulder
+    rightShoulderOffset = util.vector2(math.abs(shoulderOffset.x), shoulderOffset.y)
+    leftShoulderOffset = util.vector2(-math.abs(shoulderOffset.x), shoulderOffset.y)
+    noThirdPersonLastFrame = true
+end
+updateSettings()
+settings:subscribe(async:callback(updateSettings))
 
 local state = defaultShoulder
 
@@ -66,8 +82,6 @@ local function calculateDistance(smoothedSpeed)
             + smoothedSpeedSqr / (smoothedSpeedSqr + 300*300) * zoomOutWhenMoveCoef)
 end
 
-local noThirdPersonLastFrame = true
-
 local function updateState()
     local mode = camera.getMode()
     local oldState = state
@@ -80,9 +94,13 @@ local function updateState()
     elseif not state then
         state = defaultShoulder
     end
-    if autoSwitchShoulder and (mode == MODE.ThirdPerson or state ~= oldState or noThirdPersonLastFrame)
+    if (mode == MODE.ThirdPerson or Actor.currentSpeed(self) > 0 or state ~= oldState or noThirdPersonLastFrame)
        and (state == STATE.LeftShoulder or state == STATE.RightShoulder) then
-        trySwitchShoulder()
+        if autoSwitchShoulder then
+            trySwitchShoulder()
+        else
+            state = defaultShoulder
+        end
     end
     if oldState ~= state or noThirdPersonLastFrame then
         -- State was changed, start focal point transition.
@@ -116,7 +134,11 @@ function M.update(dt, smoothedSpeed)
     if not viewOverShoulder then
         M.preferredDistance = M.baseDistance
         camera.setPreferredThirdPersonDistance(M.baseDistance)
-        noThirdPersonLastFrame = false
+        if noThirdPersonLastFrame then
+            camera.setFocalPreferredOffset(util.vector2(0, 0))
+            camera.instantTransition()
+            noThirdPersonLastFrame = false
+        end
         return
     end
 

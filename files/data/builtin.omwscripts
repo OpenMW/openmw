@@ -1,8 +1,8 @@
-PLAYER: scripts/omw/camera.lua
+PLAYER: scripts/omw/mwui/init.lua
+GLOBAL: scripts/omw/settings/global.lua
+PLAYER: scripts/omw/settings/player.lua
+PLAYER: scripts/omw/camera/camera.lua
 NPC,CREATURE: scripts/omw/ai.lua
 PLAYER: scripts/omw/console/player.lua
 GLOBAL: scripts/omw/console/global.lua
 CUSTOM: scripts/omw/console/local.lua
-PLAYER: scripts/omw/mwui/init.lua
-GLOBAL: scripts/omw/settings/global.lua
-PLAYER: scripts/omw/settings/player.lua
