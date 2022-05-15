@@ -3,6 +3,7 @@
 
 #include <osg/BufferTemplate>
 
+#include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/std140/ubo.hpp>
 
@@ -86,11 +87,20 @@ namespace fx
 
         void setWeatherTransition(float transition) { mData.get<WeatherTransition>() = transition; }
 
+        void bindPointLights(std::shared_ptr<SceneUtil::PPLightBuffer> buffer)
+        {
+            mPointLightBuffer = buffer;
+        }
+
         static std::string getStructDefinition()
         {
             static std::string definition = UniformData::getDefinition("_omw_data");
             return definition;
         }
+
+        void setDefaults(osg::StateSet* stateset) override;
+
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override;
 
     private:
         struct ProjectionMatrix : std140::Mat4 { static constexpr std::string_view sName = "projectionMatrix"; };
@@ -180,12 +190,10 @@ namespace fx
             IsInterior
         >;
 
-    private:
-        void setDefaults(osg::StateSet* stateset) override;
-        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override;
-
         UniformData mData;
         bool mUseUBO;
+
+        std::shared_ptr<SceneUtil::PPLightBuffer> mPointLightBuffer;
     };
 }
 

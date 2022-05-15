@@ -13,6 +13,7 @@
 
 #include <components/misc/stringops.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/clearcolor.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/stereo/multiview.hpp>
@@ -76,6 +77,34 @@ uniform @builtinSampler omw_SamplerLastShader;
 uniform @builtinSampler omw_SamplerLastPass;
 uniform @builtinSampler omw_SamplerDepth;
 uniform @builtinSampler omw_SamplerNormals;
+
+uniform vec4 omw_PointLights[@pointLightCount];
+uniform int omw_PointLightsCount;
+
+int omw_GetPointLightCount()
+{
+    return omw_PointLightsCount;
+}
+
+vec3 omw_GetPointLightViewPos(int index)
+{
+    return omw_PointLights[(index * 3)].xyz;
+}
+
+vec3 omw_GetPointLightDiffuse(int index)
+{
+    return omw_PointLights[(index * 3) + 1].xyz;
+}
+
+vec3 omw_GetPointLightAttenuation(int index)
+{
+    return omw_PointLights[(index * 3) + 2].xyz;
+}
+
+float omw_GetPointLightRadius(int index)
+{
+    return omw_PointLights[(index * 3) + 2].w;
+}
 
 #if @ubo
     layout(std140) uniform _data { _omw_data omw; };
@@ -143,6 +172,7 @@ uniform @builtinSampler omw_SamplerNormals;
             extBlock << "#ifdef " << extension << '\n' << "\t#extension " << extension << ": enable" << '\n' << "#endif" << '\n';
 
         const std::vector<std::pair<std::string,std::string>> defines = {
+            {"@pointLightCount", std::to_string(SceneUtil::PPLightBuffer::sMaxPPLightsArraySize)},
             {"@version", std::to_string(technique.getGLSLVersion())},
             {"@multiview", Stereo::getMultiview() ? "1" : "0"},
             {"@builtinSampler", Stereo::getMultiview() ? "sampler2DArray" : "sampler2D"},

@@ -56,5 +56,8 @@ namespace fx
 
             std::apply([&] (const auto& ... v) { (setUniform(v) , ...); }, mData.getData());
         }
+
+        if (mPointLightBuffer)
+            mPointLightBuffer->applyUniforms(nv->getTraversalNumber(), stateset);
     }
 }

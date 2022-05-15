@@ -28,6 +28,7 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/settings.hpp>
@@ -197,7 +198,7 @@ namespace MWWorld
         }
 
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator, mGroundcoverStore));
-        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
+        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot()->asGroup(), resourceSystem, mRendering.get(), mPhysics.get()));
         mRendering->preloadCommonAssets();
 
         mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering, mStore));
