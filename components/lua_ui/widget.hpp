@@ -111,7 +111,7 @@ namespace LuaUi
                 auto it = w->mCallbacks.find(name);
                 if (it != w->mCallbacks.end())
                 {
-                    sol::object res = it->second(argumentFactory(w), w->mLayout);
+                    sol::object res = it->second.call(argumentFactory(w), w->mLayout);
                     shouldPropagate = res.is<bool>() && res.as<bool>();
                 }
                 if (w->mParent && w->mPropagateEvents && shouldPropagate)

@@ -6,6 +6,9 @@ namespace sol
 {
     template <>
     struct is_automagical<MWLua::AsyncPackageId> : std::false_type {};
+
+    template <>
+    struct is_automagical<LuaUtil::Callback> : std::false_type {};
 }
 
 namespace MWLua
@@ -50,10 +53,14 @@ namespace MWLua
             asyncId.mContainer->setupUnsavableTimer(
                 TimerType::GAME_TIME, world->getGameTime() + delay, asyncId.mScriptId, std::move(callback));
         };
-        api["callback"] = [](const AsyncPackageId& asyncId, sol::function fn)
+        api["callback"] = [](const AsyncPackageId& asyncId, sol::function fn) -> LuaUtil::Callback
         {
             return LuaUtil::Callback{std::move(fn), asyncId.mHiddenData};
         };
+
+        sol::usertype<LuaUtil::Callback> callbackType = context.mLua->sol().new_usertype<LuaUtil::Callback>("Callback");
+        callbackType[sol::meta_function::call] =
+            [](const LuaUtil::Callback& callback, sol::variadic_args va) { return callback.call(sol::as_args(va)); };
 
         auto initializer = [](sol::table hiddenData)
         {

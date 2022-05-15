@@ -447,16 +447,16 @@ return {
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptsContainer::ScriptId{nullptr, 0};
 
         testing::internal::CaptureStdout();
-        callback(1.5);
+        callback.call(1.5);
         EXPECT_EQ(internal::GetCapturedStdout(), "1.5\n");
 
         testing::internal::CaptureStdout();
-        callback(1.5, 2.5);
+        callback.call(1.5, 2.5);
         EXPECT_EQ(internal::GetCapturedStdout(), "1.5\t2.5\n");
 
         testing::internal::CaptureStdout();
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = sol::nil;
-        callback(1.5, 2.5);
+        callback.call(1.5, 2.5);
         EXPECT_EQ(internal::GetCapturedStdout(), "Ignored callback to the removed script some_script.lua\n");
     }
 

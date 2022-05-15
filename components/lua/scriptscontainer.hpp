@@ -252,7 +252,7 @@ namespace LuaUtil
         bool isValid() const { return mHiddenData[ScriptsContainer::sScriptIdKey] != sol::nil; }
 
         template <typename... Args>
-        sol::object operator()(Args&&... args) const
+        sol::object call(Args&&... args) const
         {
             if (isValid())
                 return LuaUtil::call(mFunc, std::forward<Args>(args)...);
@@ -265,7 +265,7 @@ namespace LuaUtil
         template <typename... Args>
         void tryCall(Args&&... args) const
         {
-            try { (*this)(std::forward<Args>(args)...); }
+            try { this->call(std::forward<Args>(args)...); }
             catch (std::exception& e)
             {
                 Log(Debug::Error) << "Error in callback: " << e.what();
