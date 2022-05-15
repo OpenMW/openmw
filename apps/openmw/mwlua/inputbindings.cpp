@@ -87,7 +87,7 @@ namespace MWLua
             return SDL_GetKeyName(SDL_GetKeyFromScancode(code));
         };
 
-        api["ACTION"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, MWInput::Actions>({
+        api["ACTION"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWInput::Actions>({
             {"GameMenu", MWInput::A_GameMenu},
             {"Screenshot", MWInput::A_Screenshot},
             {"Inventory", MWInput::A_Inventory},
@@ -141,7 +141,7 @@ namespace MWLua
             {"ZoomOut", MWInput::A_ZoomOut}
         }));
 
-        api["CONTROL_SWITCH"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, std::string_view>({
+        api["CONTROL_SWITCH"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, std::string_view>({
             {"Controls", "playercontrols"},
             {"Fighting", "playerfighting"},
             {"Jumping", "playerjumping"},
@@ -151,7 +151,7 @@ namespace MWLua
             {"VanityMode", "vanitymode"}
         }));
 
-        api["CONTROLLER_BUTTON"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, SDL_GameControllerButton>({
+        api["CONTROLLER_BUTTON"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, SDL_GameControllerButton>({
             {"A", SDL_CONTROLLER_BUTTON_A},
             {"B", SDL_CONTROLLER_BUTTON_B},
             {"X", SDL_CONTROLLER_BUTTON_X},
@@ -169,7 +169,7 @@ namespace MWLua
             {"DPadRight", SDL_CONTROLLER_BUTTON_DPAD_RIGHT}
         }));
 
-        api["CONTROLLER_AXIS"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
+        api["CONTROLLER_AXIS"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
             {"LeftX", SDL_CONTROLLER_AXIS_LEFTX},
             {"LeftY", SDL_CONTROLLER_AXIS_LEFTY},
             {"RightX", SDL_CONTROLLER_AXIS_RIGHTX},
@@ -183,7 +183,7 @@ namespace MWLua
             {"MoveLeftRight", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_MoveLeftRight)}
         }));
 
-        api["KEY"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, SDL_Scancode>({
+        api["KEY"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, SDL_Scancode>({
             {"_0", SDL_SCANCODE_0},
             {"_1", SDL_SCANCODE_1},
             {"_2", SDL_SCANCODE_2},

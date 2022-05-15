@@ -84,12 +84,22 @@ namespace LuaUtil
             end
             printGen = function(name) return function(...) return printToLog(name, ...) end end
 
+            function createStrictIndexFn(tbl)
+                return function(_, key)
+                    local res = tbl[key]
+                    if res ~= nil then
+                        return res
+                    else
+                        error('Key not found: '..tostring(key), 2)
+                    end
+                end
+            end
             function pairsForReadOnly(v)
-                local nextFn, t, firstKey = pairs(getmetatable(v).__index)
+                local nextFn, t, firstKey = pairs(getmetatable(v).t)
                 return function(_, k) return nextFn(t, k) end, v, firstKey
             end
             function ipairsForReadOnly(v)
-                local nextFn, t, firstKey = ipairs(getmetatable(v).__index)
+                local nextFn, t, firstKey = ipairs(getmetatable(v).t)
                 return function(_, k) return nextFn(t, k) end, v, firstKey
             end
             local function nextForArray(array, index)
@@ -136,7 +146,7 @@ namespace LuaUtil
         mSandboxEnv = sol::nil;
     }
 
-    sol::table makeReadOnly(sol::table table)
+    sol::table makeReadOnly(const sol::table& table, bool strictIndex)
     {
         if (table == sol::nil)
             return table;
@@ -146,7 +156,11 @@ namespace LuaUtil
         lua_State* luaState = table.lua_state();
         sol::state_view lua(luaState);
         sol::table meta(lua, sol::create);
-        meta["__index"] = table;
+        meta["t"] = table;
+        if (strictIndex)
+            meta["__index"] = lua["createStrictIndexFn"](table);
+        else
+            meta["__index"] = table;
         meta["__pairs"] = lua["pairsForReadOnly"];
         meta["__ipairs"] = lua["ipairsForReadOnly"];
 
@@ -158,7 +172,7 @@ namespace LuaUtil
 
     sol::table getMutableFromReadOnly(const sol::userdata& ro)
     {
-        return ro[sol::metatable_key].get<sol::table>()["__index"];
+        return ro[sol::metatable_key].get<sol::table>()["t"];
     }
 
     void LuaState::addCommonPackage(std::string packageName, sol::object package)

@@ -16,7 +16,7 @@ namespace MWLua
 {
     void addWeaponBindings(sol::table weapon, const Context& context)
     {
-        weapon["TYPE"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
+        weapon["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
             {"ShortBladeOneHand", ESM::Weapon::ShortBladeOneHand},
             {"LongBladeOneHand", ESM::Weapon::LongBladeOneHand},
             {"LongBladeTwoHand", ESM::Weapon::LongBladeTwoHand},

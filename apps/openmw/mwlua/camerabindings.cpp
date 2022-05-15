@@ -17,7 +17,7 @@ namespace MWLua
         MWRender::RenderingManager* renderingManager = MWBase::Environment::get().getWorld()->getRenderingManager();
 
         sol::table api(context.mLua->sol(), sol::create);
-        api["MODE"] = LuaUtil::makeReadOnly(context.mLua->sol().create_table_with(
+        api["MODE"] = LuaUtil::makeStrictReadOnly(context.mLua->sol().create_table_with(
             "Static", CameraMode::Static,
             "FirstPerson", CameraMode::FirstPerson,
             "ThirdPerson", CameraMode::ThirdPerson,

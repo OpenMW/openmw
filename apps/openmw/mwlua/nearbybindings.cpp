@@ -47,7 +47,7 @@ namespace MWLua
                 return LObject(getId(r.mHitObject), worldView->getObjectRegistry());
         });
 
-        api["COLLISION_TYPE"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, MWPhysics::CollisionType>({
+        api["COLLISION_TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWPhysics::CollisionType>({
             {"World", MWPhysics::CollisionType_World},
             {"Door", MWPhysics::CollisionType_Door},
             {"Actor", MWPhysics::CollisionType_Actor},
