@@ -133,12 +133,7 @@ namespace ESM
 
     void DialInfo::blank()
     {
-        mData.mUnknown1 = 0;
-        mData.mDisposition = 0;
-        mData.mRank = 0;
-        mData.mGender = 0;
-        mData.mPCrank = 0;
-        mData.mUnknown2 = 0;
+        mData = {};
 
         mSelects.clear();
         mPrev.clear();
