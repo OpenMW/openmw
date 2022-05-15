@@ -1,6 +1,7 @@
 #include "particle.hpp"
 
 #include <limits>
+#include <optional>
 
 #include <osg/Version>
 #include <osg/MatrixTransform>
@@ -11,6 +12,7 @@
 #include <components/misc/rng.hpp>
 #include <components/nif/controlled.hpp>
 #include <components/nif/data.hpp>
+#include <components/nif/node.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 
@@ -55,6 +57,44 @@ namespace
         }
 
         osg::Geometry* mGeometry;
+    };
+
+    class LocalToWorldAccumulator : public osg::NodeVisitor
+    {
+    public:
+        LocalToWorldAccumulator(osg::Matrix& matrix) : osg::NodeVisitor(), mMatrix(matrix) {}
+
+        virtual void apply(osg::Transform& transform)
+        {
+            if (&transform != mLastAppliedTransform)
+            {
+                mLastAppliedTransform = &transform;
+                mLastMatrix = mMatrix;
+            }
+            transform.computeLocalToWorldMatrix(mMatrix, this);
+        }
+
+        void accumulate(const osg::NodePath& path)
+        {
+            if (path.empty())
+                return;
+
+            size_t i = path.size();
+
+            for (auto rit = path.rbegin(); rit != path.rend(); rit++, --i)
+            {
+                const osg::Camera* camera = (*rit)->asCamera();
+                if (camera && (camera->getReferenceFrame() != osg::Transform::RELATIVE_RF || camera->getParents().empty()))
+                    break;
+            }
+
+            for(; i < path.size(); ++i)
+                path[i]->accept(*this);
+        }
+
+        osg::Matrix& mMatrix;
+        std::optional<osg::Matrix> mLastMatrix;
+        osg::Transform* mLastAppliedTransform = nullptr;
     };
 }
 
@@ -310,7 +350,7 @@ void GravityAffector::operate(osgParticle::Particle *particle, double dt)
 
 Emitter::Emitter()
     : osgParticle::Emitter()
-    , mUseGeometryEmitter(false)
+    , mFlags(0)
     , mGeometryEmitterTarget(std::nullopt)
 {
 }
@@ -322,7 +362,7 @@ Emitter::Emitter(const Emitter &copy, const osg::CopyOp &copyop)
     , mShooter(copy.mShooter)
     // need a deep copy because the remainder is stored in the object
     , mCounter(static_cast<osgParticle::Counter*>(copy.mCounter->clone(osg::CopyOp::DEEP_COPY_ALL)))
-    , mUseGeometryEmitter(copy.mUseGeometryEmitter)
+    , mFlags(copy.mFlags)
     , mGeometryEmitterTarget(copy.mGeometryEmitterTarget)
     , mCachedGeometryEmitter(copy.mCachedGeometryEmitter)
 {
@@ -330,7 +370,7 @@ Emitter::Emitter(const Emitter &copy, const osg::CopyOp &copyop)
 
 Emitter::Emitter(const std::vector<int> &targets)
     : mTargets(targets)
-    , mUseGeometryEmitter(false)
+    , mFlags(0)
     , mGeometryEmitterTarget(std::nullopt)
 {
 }
@@ -356,11 +396,13 @@ void Emitter::emitParticles(double dt)
 
     osg::ref_ptr<osg::Vec3Array> geometryVertices = nullptr;
 
-    if (mUseGeometryEmitter || !mTargets.empty())
+    const bool useGeometryEmitter = mFlags & Nif::NiNode::BSPArrayController_AtVertex;
+
+    if (useGeometryEmitter || !mTargets.empty())
     {
         int recIndex;
 
-        if (mUseGeometryEmitter)
+        if (useGeometryEmitter)
         {
             if (!mGeometryEmitterTarget.has_value())
                 return;
@@ -383,7 +425,7 @@ void Emitter::emitParticles(double dt)
             return;
         }
 
-        if (mUseGeometryEmitter)
+        if (useGeometryEmitter)
         {
             if (!mCachedGeometryEmitter.lock(geometryVertices))
             {
@@ -403,12 +445,30 @@ void Emitter::emitParticles(double dt)
 
         osg::NodePath path = visitor.mFoundPath;
         path.erase(path.begin());
-        emitterToPs = osg::computeLocalToWorld(path) * emitterToPs;
+        if (!useGeometryEmitter && (mFlags & Nif::NiNode::BSPArrayController_AtNode) && path.size())
+        {
+            osg::Matrix current;
+
+            LocalToWorldAccumulator accum(current);
+            accum.accumulate(path);
+
+            osg::Matrix parent = accum.mLastMatrix.value_or(current);
+
+            auto p1 = parent.getTrans();
+            auto p2 = current.getTrans();
+            current.setTrans((p2 - p1) * Misc::Rng::rollClosedProbability() + p1);
+
+            emitterToPs = current * emitterToPs;
+        }
+        else
+        {
+            emitterToPs = osg::computeLocalToWorld(path) * emitterToPs;
+        }
     }
 
     emitterToPs.orthoNormalize(emitterToPs);
 
-    if (mUseGeometryEmitter && (!geometryVertices.valid() || geometryVertices->empty()))
+    if (useGeometryEmitter && (!geometryVertices.valid() || geometryVertices->empty()))
         return;
 
     for (int i=0; i<n; ++i)
@@ -416,7 +476,7 @@ void Emitter::emitParticles(double dt)
         osgParticle::Particle* P = getParticleSystem()->createParticle(nullptr);
         if (P)
         {
-            if (mUseGeometryEmitter)
+            if (useGeometryEmitter)
                 P->setPosition((*geometryVertices)[Misc::Rng::rollDice(geometryVertices->getNumElements())]);
             else if (mPlacer)
                 mPlacer->place(P);
