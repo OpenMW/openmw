@@ -43,6 +43,8 @@ struct DialInfo
         signed char mGender; // See Gender enum
         signed char mPCrank; // Player rank
         signed char mUnknown2;
+
+        DATAstruct() : mDisposition(0), mRank(-1), mGender(Gender::NA), mPCrank(-1) {}
     }; // 12 bytes
     DATAstruct mData;
 
