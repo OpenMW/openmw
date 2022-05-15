@@ -9,3 +9,4 @@ OpenMW Post Processing
 
     overview
     omwfx
+    lua

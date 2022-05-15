@@ -350,6 +350,10 @@ OpenMW currently supports ``1D``, ``2D``, and ``3D`` texture samplers, cubemaps 
 | sampler_3d  |
 +-------------+
 
+.. warning::
+    OpenMW vertically flips all DDS textures when loading them, with the exception of ``3D`` textures.
+
+
 The properites for a ``sampler_*`` block are as following.
 The only required property for a texture is its ``source``.
 
