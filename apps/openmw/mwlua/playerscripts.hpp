@@ -20,7 +20,7 @@ namespace MWLua
             registerEngineHandlers({
                 &mConsoleCommandHandlers, &mKeyPressHandlers, &mKeyReleaseHandlers,
                 &mControllerButtonPressHandlers, &mControllerButtonReleaseHandlers,
-                &mActionHandlers, &mInputUpdateHandlers,
+                &mActionHandlers, &mOnFrameHandlers,
                 &mTouchpadPressed, &mTouchpadReleased, &mTouchpadMoved
             });
         }
@@ -57,7 +57,7 @@ namespace MWLua
             }
         }
 
-        void inputUpdate(float dt) { callEngineHandlers(mInputUpdateHandlers, dt); }
+        void onFrame(float dt) { callEngineHandlers(mOnFrameHandlers, dt); }
 
         bool consoleCommand(const std::string& consoleMode, const std::string& command, const sol::object& selectedObject)
         {
@@ -72,7 +72,7 @@ namespace MWLua
         EngineHandlerList mControllerButtonPressHandlers{"onControllerButtonPress"};
         EngineHandlerList mControllerButtonReleaseHandlers{"onControllerButtonRelease"};
         EngineHandlerList mActionHandlers{"onInputAction"};
-        EngineHandlerList mInputUpdateHandlers{"onInputUpdate"};
+        EngineHandlerList mOnFrameHandlers{"onFrame"};
         EngineHandlerList mTouchpadPressed{ "onTouchPress" };
         EngineHandlerList mTouchpadReleased{ "onTouchRelease" };
         EngineHandlerList mTouchpadMoved{ "onTouchMove" };

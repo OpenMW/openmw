@@ -155,7 +155,8 @@ local function onUpdate(dt)
     updateSmoothedSpeed(dt)
 end
 
-local function onInputUpdate(dt)
+local function onFrame(dt)
+    if core.isWorldPaused() then return end
     local mode = camera.getMode()
     if mode == MODE.FirstPerson or mode == MODE.ThirdPerson then
         primaryMode = mode
@@ -232,7 +233,7 @@ return {
     },
     engineHandlers = {
         onUpdate = onUpdate,
-        onInputUpdate = onInputUpdate,
+        onFrame = onFrame,
         onInputAction = function(action)
             if core.isWorldPaused() then return end
             if action == input.ACTION.ZoomIn then
