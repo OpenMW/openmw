@@ -28,7 +28,7 @@ namespace Resource
 
         /// Create or retrieve an Image
         /// Returns the dummy image if the given image is not found.
-        osg::ref_ptr<osg::Image> getImage(const std::string& filename);
+        osg::ref_ptr<osg::Image> getImage(const std::string& filename, bool disableFlip = false);
 
         osg::Image* getWarningImage();
 
@@ -37,6 +37,7 @@ namespace Resource
     private:
         osg::ref_ptr<osg::Image> mWarningImage;
         osg::ref_ptr<osgDB::Options> mOptions;
+        osg::ref_ptr<osgDB::Options> mOptionsNoFlip;
 
         ImageManager(const ImageManager&);
         void operator = (const ImageManager&);

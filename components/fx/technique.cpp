@@ -470,7 +470,7 @@ namespace fx
             else if (key == "source")
             {
                 expect<Lexer::String>();
-                auto image = mImageManager.getImage(std::string{std::get<Lexer::String>(mToken).value});
+                auto image = mImageManager.getImage(std::string{std::get<Lexer::String>(mToken).value}, is3D);
                 if constexpr (is1D)
                 {
                     type = Types::SamplerType::Texture_1D;
