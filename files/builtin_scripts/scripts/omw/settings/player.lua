@@ -19,6 +19,7 @@ require('scripts.omw.settings.renderers')(render.registerRenderer)
 -- @field #string page Key of a page which will contain this group
 -- @field #number order Groups within the same page are sorted by this number, or their key for equal values.
 --   Defaults to 0.
+-- @field #boolean permanentStorage Whether the group should be stored in permanent storage, or in the save file
 -- @field #list<#SettingOptions> settings A [iterables#List](iterables.html#List) of #SettingOptions
 
 ---
@@ -29,7 +30,6 @@ require('scripts.omw.settings.renderers')(render.registerRenderer)
 -- @field default A default value
 -- @field #string renderer A renderer key
 -- @field argument An argument for the renderer
--- @field #boolean permanentStorage Whether the setting should is stored in permanent storage, or in the save file
 
 return {
     interfaceName = 'Settings',
@@ -51,6 +51,7 @@ return {
     --     l10n = 'MyMod',
     --     name = 'My Group Name',
     --     description = 'My Group Description',
+    --     permanentStorage = false,
     --     settings = {
     --         {
     --             key = 'Greeting',
@@ -58,7 +59,6 @@ return {
     --             name = 'Greeting',
     --             description = 'Text to display when the game starts',
     --             default = 'Hello, world!',
-    --             permanentStorage = false,
     --         },
     --     },
     -- }
@@ -118,10 +118,10 @@ return {
         --     l10n = 'test',
         --     name = 'Player',
         --     description = 'Player settings group',
+        --     permanentStorage = false,
         --     settings = {
         --         {
         --             key = 'Greeting',
-        --             permanentStorage = true,
         --             default = 'Hi',
         --             renderer = 'textLine',
         --             name = 'Text Input',
@@ -129,7 +129,6 @@ return {
         --         },
         --         {
         --             key = 'Flag',
-        --             permanentStorage = false,
         --             default = false,
         --             renderer = 'yeNo',
         --             name = 'Flag',
