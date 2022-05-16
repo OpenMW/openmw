@@ -104,7 +104,7 @@ namespace LuaUtil
             end
             local function nextForArray(array, index)
                 index = (index or 0) + 1
-                if index < #array then
+                if index <= #array then
                     return index, array[index]
                 end
             end
