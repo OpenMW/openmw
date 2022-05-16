@@ -212,6 +212,7 @@ struct NiNode : Node
         ControllerFlag_Active = 0x8
     };
     enum BSPArrayController {
+        BSPArrayController_AtNode = 0x8,
         BSPArrayController_AtVertex = 0x10
     };
 

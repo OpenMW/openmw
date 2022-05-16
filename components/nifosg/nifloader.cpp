@@ -50,6 +50,21 @@
 
 namespace
 {
+    struct DisableOptimizer : osg::NodeVisitor
+    {
+        DisableOptimizer(osg::NodeVisitor::TraversalMode mode = TRAVERSE_ALL_CHILDREN) : osg::NodeVisitor(mode) {}
+
+        void apply(osg::Node &node) override
+        {
+            node.setDataVariance(osg::Object::DYNAMIC);
+            traverse(node);
+        }
+
+        void apply(osg::Drawable &node) override
+        {
+            traverse(node);
+        }
+    };
 
     void getAllNiNodes(const Nif::Node* node, std::vector<int>& outIndices)
     {
@@ -1072,10 +1087,10 @@ namespace NifOsg
                                                            partctrl->verticalDir, partctrl->verticalAngle,
                                                            partctrl->lifetime, partctrl->lifetimeRandom);
             emitter->setShooter(shooter);
+            emitter->setFlags(partctrl->flags);
 
-            if (atVertex && (partctrl->recType == Nif::RC_NiBSPArrayController))
+            if (partctrl->recType == Nif::RC_NiBSPArrayController && atVertex)
             {
-                emitter->setUseGeometryEmitter(true);
                 emitter->setGeometryEmitterTarget(partctrl->emitter->recIndex);
             }
             else
@@ -1107,6 +1122,9 @@ namespace NifOsg
                 // Emitter attached to the emitter node. Note one side effect of the emitter using the CullVisitor is that hiding its node
                 // actually causes the emitter to stop firing. Convenient, because MW behaves this way too!
                 emitterNode->addChild(emitterPair.second);
+
+                DisableOptimizer disableOptimizer;
+                emitterNode->accept(disableOptimizer);
             }
             mEmitterQueue.clear();
         }
