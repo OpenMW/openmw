@@ -98,13 +98,13 @@ namespace CSMWorld
             NestedIdCollection<ESM::Enchantment> mEnchantments;
             IdCollection<ESM::BodyPart> mBodyParts;
             IdCollection<ESM::MagicEffect> mMagicEffects;
-            SubCellCollection<Pathgrid> mPathgrids;
             IdCollection<ESM::DebugProfile> mDebugProfiles;
             IdCollection<ESM::SoundGenerator> mSoundGens;
             IdCollection<ESM::StartScript> mStartScripts;
             NestedInfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             NestedIdCollection<Cell> mCells;
+            SubCellCollection<Pathgrid> mPathgrids;
             IdCollection<LandTexture> mLandTextures;
             IdCollection<Land> mLand;
             RefIdCollection mReferenceables;
