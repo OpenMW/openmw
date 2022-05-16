@@ -12,9 +12,6 @@ local function validateSettingOptions(options)
     if type(options.key) ~= 'string' then
         error('Setting must have a key')
     end
-    if type(options.permanentStorage) ~= 'boolean' then
-        error('Setting must have a permanentStorage flag')
-    end
     if type(options.renderer) ~= 'string' then
         error('Setting must have a renderer')
     end
@@ -52,6 +49,9 @@ local function validateGroupOptions(options)
     if options.description ~= nil and type(options.description) ~= 'string' then
         error('Group description key must be a string')
     end
+    if type(options.permanentStorage) ~= 'boolean' then
+        error('Group must have a permanentStorage flag')
+    end
     if type(options.settings) ~= 'table' then
         error('Group must have a table of settings')
     end
@@ -63,7 +63,6 @@ end
 local function registerSetting(options)
     return {
         key = options.key,
-        permanentStorage = options.permanentStorage,
         default = options.default,
         renderer = options.renderer,
         argument = options.argument,
@@ -85,7 +84,7 @@ local function registerGroup(options)
         l10n = options.l10n,
         name = options.name,
         description = options.description,
-
+        permanentStorage = options.permanentStorage,
         settings = {},
     }
     local valueSection = contextSection(options.key)
@@ -121,12 +120,8 @@ return {
     onSave = function()
         local saved = {}
         for groupKey, group in pairs(groupSection:asTable()) do
-            local section = contextSection(groupKey)
-            saved[groupKey] = {}
-            for key, value in pairs(section:asTable()) do
-                if group.settings[key] and not group.settings[key].permanentStorage then
-                    saved[groupKey][key] = value
-                end
+            if not group.permanentStorage then
+                saved[groupKey] = contextSection(groupKey):asTable()
             end
         end
         groupSection:reset()
