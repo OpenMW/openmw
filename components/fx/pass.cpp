@@ -75,7 +75,7 @@ namespace fx
 
 uniform @builtinSampler omw_SamplerLastShader;
 uniform @builtinSampler omw_SamplerLastPass;
-uniform highp @builtinSampler omw_SamplerDepth;
+uniform @builtinSampler omw_SamplerDepth;
 uniform @builtinSampler omw_SamplerNormals;
 
 uniform vec4 omw_PointLights[@pointLightCount];
