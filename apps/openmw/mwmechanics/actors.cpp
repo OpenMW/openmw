@@ -76,7 +76,7 @@ bool isCommanded(const MWWorld::Ptr& actor)
 // Check for command effects having ended and remove package if necessary
 void adjustCommandedActor (const MWWorld::Ptr& actor)
 {
-    if (!isCommanded(actor))
+    if (isCommanded(actor))
         return;
 
     MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
