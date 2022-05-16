@@ -183,7 +183,7 @@ namespace MWLua
         {
             luaManager->addUIMessage(message);
         };
-        api["CONSOLE_COLOR"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string, Misc::Color>({
+        api["CONSOLE_COLOR"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string, Misc::Color>({
             {"Default", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Default.substr(1))},
             {"Error", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Error.substr(1))},
             {"Success", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Success.substr(1))},
@@ -298,9 +298,9 @@ namespace MWLua
         sol::table typeTable = context.mLua->newTable();
         for (const auto& it : LuaUi::widgetTypeToName())
             typeTable.set(it.second, it.first);
-        api["TYPE"] = LuaUtil::makeReadOnly(typeTable);
+        api["TYPE"] = LuaUtil::makeStrictReadOnly(typeTable);
 
-        api["ALIGNMENT"] = LuaUtil::makeReadOnly(context.mLua->tableFromPairs<std::string_view, LuaUi::Alignment>({
+        api["ALIGNMENT"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, LuaUi::Alignment>({
             { "Start", LuaUi::Alignment::Start },
             { "Center", LuaUi::Alignment::Center },
             { "End", LuaUi::Alignment::End }

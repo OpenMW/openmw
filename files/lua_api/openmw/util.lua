@@ -26,6 +26,12 @@
 -- @return #table The same table wrapped with read only userdata.
 
 ---
+-- Makes a table read only and overrides `__index` with the strict version that throws an error if the key is not found.
+-- @function [parent=#util] makeStrictReadOnly
+-- @param #table table Any table.
+-- @return #table The same table wrapped with read only userdata.
+
+---
 -- Parses Lua code from string and returns as a function.
 -- @function [parent=#util] loadCode
 -- @param #string code Lua code.
