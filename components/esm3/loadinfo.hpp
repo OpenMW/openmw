@@ -33,18 +33,16 @@ struct DialInfo
 
     struct DATAstruct
     {
-        int mUnknown1;
+        int mUnknown1 = 0;
         union
         {
-            int mDisposition; // Used for dialogue responses
+            int mDisposition = 0; // Used for dialogue responses
             int mJournalIndex;  // Used for journal entries
         };
-        signed char mRank; // Rank of NPC
-        signed char mGender; // See Gender enum
-        signed char mPCrank; // Player rank
-        signed char mUnknown2;
-
-        DATAstruct() : mDisposition(0), mRank(-1), mGender(Gender::NA), mPCrank(-1) {}
+        signed char mRank = -1; // Rank of NPC
+        signed char mGender = Gender::NA; // See Gender enum
+        signed char mPCrank = -1; // Player rank
+        signed char mUnknown2 = 0;
     }; // 12 bytes
     DATAstruct mData;
 
