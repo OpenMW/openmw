@@ -147,7 +147,7 @@ namespace MWRender
     class CharacterPreviewRTTNode : public SceneUtil::RTTNode
     {
         static constexpr float fovYDegrees = 12.3f;
-        static constexpr float znear = 0.1f;
+        static constexpr float znear = 4.0f;
         static constexpr float zfar = 10000.f;
 
     public:
@@ -162,31 +162,23 @@ namespace MWRender
             mGroup->getOrCreateStateSet()->addUniform(new osg::Uniform("projectionMatrix", mPerspectiveMatrix));
             mViewMatrix = osg::Matrixf::identity();
             setColorBufferInternalFormat(GL_RGBA);
+            setDepthBufferInternalFormat(GL_DEPTH24_STENCIL8);
         } 
 
         void setDefaults(osg::Camera* camera) override 
         {
-
-            // hints that the camera is not relative to the master camera
-            camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
-            camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
-            camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 0.f));
-            camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            camera->setViewport(0, 0, width(), height());
-            camera->setRenderOrder(osg::Camera::PRE_RENDER);
             camera->setName("CharacterPreview");
-            camera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
-            camera->setCullMask(~(Mask_UpdateVisitor));
-            SceneUtil::setCameraClearDepth(camera);
-
-            // hints that the camera is not relative to the master camera
             camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
             camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
             camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 0.f));
-            camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             camera->setProjectionMatrixAsPerspective(fovYDegrees, mAspectRatio, znear, zfar);
             camera->setViewport(0, 0, width(), height());
             camera->setRenderOrder(osg::Camera::PRE_RENDER);
+            camera->setCullMask(~(Mask_UpdateVisitor));
+            camera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
+            SceneUtil::setCameraClearDepth(camera);
+
 #ifdef OSG_HAS_MULTIVIEW
             if (shouldDoTextureArray())
             {

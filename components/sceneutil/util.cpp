@@ -152,42 +152,6 @@ void GlowUpdater::setDuration(float duration)
     mDuration = duration;
 }
 
-// Allows camera to render to a color and floating point depth texture with a multisampled framebuffer.
-class AttachMultisampledDepthColorCallback : public SceneUtil::NodeCallback<AttachMultisampledDepthColorCallback, osg::Node*, osgUtil::CullVisitor*>
-{
-public:
-    AttachMultisampledDepthColorCallback(osg::Texture2D* colorTex, osg::Texture2D* depthTex, int samples, int colorSamples)
-    {
-        int width = colorTex->getTextureWidth();
-        int height = colorTex->getTextureHeight();
-
-        osg::ref_ptr<osg::RenderBuffer> rbColor = new osg::RenderBuffer(width, height, colorTex->getInternalFormat(), samples, colorSamples);
-        osg::ref_ptr<osg::RenderBuffer> rbDepth = new osg::RenderBuffer(width, height, depthTex->getInternalFormat(), samples, colorSamples);
-
-        mMsaaFbo = new osg::FrameBufferObject;
-        mMsaaFbo->setAttachment(osg::Camera::COLOR_BUFFER0, osg::FrameBufferAttachment(rbColor));
-        mMsaaFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(rbDepth));
-
-        mFbo = new osg::FrameBufferObject;
-        mFbo->setAttachment(osg::Camera::COLOR_BUFFER0, osg::FrameBufferAttachment(colorTex));
-        mFbo->setAttachment(osg::Camera::DEPTH_BUFFER, osg::FrameBufferAttachment(depthTex));
-    }
-
-    void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
-    {
-        osgUtil::RenderStage* renderStage = cv->getCurrentRenderStage();
-
-        renderStage->setMultisampleResolveFramebufferObject(mFbo);
-        renderStage->setFrameBufferObject(mMsaaFbo);
-
-        traverse(node, cv);
-    }
-
-private:
-    osg::ref_ptr<osg::FrameBufferObject> mFbo;
-    osg::ref_ptr<osg::FrameBufferObject> mMsaaFbo;
-};
-
 osg::Vec4f colourFromRGB(unsigned int clr)
 {
     osg::Vec4f colour(((clr >> 0) & 0xFF) / 255.0f,

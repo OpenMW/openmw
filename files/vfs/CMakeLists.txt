@@ -5,6 +5,7 @@ endif()
 # Copy resource files into the build directory
 set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(DDIRRELATIVE resources/vfs/textures)
+set(DDIRRELATIVE_SHADERS resources/vfs/shaders)
 
 set(TEXTURE_FILES
     textures/omw_menu_scroll_down.dds
@@ -15,4 +16,10 @@ set(TEXTURE_FILES
     textures/omw_menu_scroll_center_v.dds
 )
 
+set(SHADER_FILES
+    shaders/main.omwfx
+    shaders/displaydepth.omwfx
+)
+
 copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${TEXTURE_FILES}")
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE_SHADERS} "${SHADER_FILES}")

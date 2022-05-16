@@ -59,6 +59,17 @@
         </Widget>
     </Resource>
 
+    <Resource type="ResourceLayout" name="TabControl_NoBorder" version="3.2.0">
+        <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
+            <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>
+            <Widget type="Widget" skin="" position="0 28 89 32" align="Left Top Stretch" name="TabItem"/>
+            <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
+                <Widget type="Widget" skin="" position="52 0 37 23" name="Controls">
+                </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
     <Resource type="ResourceLayout" name="TabControlInner" version="3.2.0">
         <Widget type="Widget" skin="" position="0 5 89 60" name="Root">
             <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>

@@ -30,6 +30,7 @@ namespace Launcher
         void on_runScriptAfterStartupBrowseButton_clicked();
         void slotAnimSourcesToggled(bool checked);
         void slotViewOverShoulderToggled(bool checked);
+        void slotPostProcessToggled(bool checked);
 
     private:
         Config::GameSettings &mGameSettings;

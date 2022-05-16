@@ -10,9 +10,9 @@ namespace osg
     class Texture2D;
 }
 
-namespace Shader
+namespace Resource
 {
-    class ShaderManager;
+    class SceneManager;
 }
 
 namespace Terrain
@@ -26,7 +26,7 @@ namespace Terrain
         bool mSpecular;
     };
 
-    std::vector<osg::ref_ptr<osg::StateSet> > createPasses(bool useShaders, Shader::ShaderManager* shaderManager,
+    std::vector<osg::ref_ptr<osg::StateSet> > createPasses(bool useShaders, Resource::SceneManager* sceneManager,
                                                            const std::vector<TextureLayer>& layers,
                                                            const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize);
 

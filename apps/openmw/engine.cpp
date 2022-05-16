@@ -46,6 +46,8 @@
 #include <components/sceneutil/color.hpp>
 #include <components/sceneutil/util.hpp>
 
+#include <components/settings/shadermanager.hpp>
+
 #include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/windowmanagerimp.hpp"
@@ -987,6 +989,8 @@ void OMW::Engine::go()
     Settings::Manager settings;
     std::string settingspath = settings.load(mCfgMgr);
 
+    Settings::ShaderManager::get().load((mCfgMgr.getUserConfigPath() / "shaders.yaml").string());
+
     MWClass::registerClasses();
 
     // Create encoder
@@ -1110,6 +1114,7 @@ void OMW::Engine::go()
 
     // Save user settings
     settings.saveUser(settingspath);
+    Settings::ShaderManager::get().save();
     mLuaManager->savePermanentStorage(mCfgMgr.getUserConfigPath().string());
 
     Log(Debug::Info) << "Quitting peacefully.";

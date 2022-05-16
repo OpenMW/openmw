@@ -1,0 +1,26 @@
+uniform_float uFactor {
+    step = 0.1;
+    min = 0.01;
+    max = 20.0;
+    default = 1.0;
+}
+
+fragment main {
+
+    omw_In vec2 omw_TexCoord;
+
+    void main()
+    {
+        float depth = omw_GetDepth(omw_TexCoord);
+        float zNear = omw.near;
+        float zFar = omw.far;
+        omw_FragColor = vec4(vec3((2.0 * zNear) / (zFar + zNear - depth * (zFar - zNear))) * uFactor, 1.0);
+    }
+}
+
+technique {
+    passes = main;
+    description = "Visualizes the depth buffer.";
+    author = "OpenMW";
+    version = "1.0";
+}

@@ -149,6 +149,7 @@
 -- @field [parent=#ACTION] #number ToggleDebug
 -- @field [parent=#ACTION] #number ZoomIn
 -- @field [parent=#ACTION] #number ZoomOut
+-- @field [parent=#ACTION] #number TogglePostProcessorHUD
 
 ---
 -- Values that can be used with isActionPressed.

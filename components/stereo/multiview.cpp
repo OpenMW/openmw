@@ -3,7 +3,6 @@
 #include <osg/FrameBufferObject>
 #include <osg/GLExtensions>
 #include <osg/Texture2D>
-#include <osg/Texture2DMultisample>
 #include <osg/Texture2DArray>
 #include <osgUtil/RenderStage>
 #include <osgUtil/CullVisitor>
@@ -322,10 +321,7 @@ namespace Stereo
             for (unsigned i = 0; i < 2; i++)
             {
                 if (mSamples > 1)
-                {
-                    mMsaaColorTexture[i] = createTextureMsaa(sourceFormat, sourceType, internalFormat);
-                    mLayerMsaaFbo[i]->setAttachment(osg::Camera::COLOR_BUFFER, osg::FrameBufferAttachment(mMsaaColorTexture[i]));
-                }
+                    mLayerMsaaFbo[i]->setAttachment(osg::Camera::COLOR_BUFFER, osg::FrameBufferAttachment(new osg::RenderBuffer(mWidth, mHeight, internalFormat, mSamples)));
                 mColorTexture[i] = createTexture(sourceFormat, sourceType, internalFormat);
                 mLayerFbo[i]->setAttachment(osg::Camera::COLOR_BUFFER, osg::FrameBufferAttachment(mColorTexture[i]));
             }
@@ -351,10 +347,7 @@ namespace Stereo
             for (unsigned i = 0; i < 2; i++)
             {
                 if (mSamples > 1)
-                {
-                    mMsaaDepthTexture[i] = createTextureMsaa(sourceFormat, sourceType, internalFormat);
-                    mLayerMsaaFbo[i]->setAttachment(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, osg::FrameBufferAttachment(mMsaaDepthTexture[i]));
-                }
+                    mLayerMsaaFbo[i]->setAttachment(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, osg::FrameBufferAttachment(new osg::RenderBuffer(mWidth, mHeight, internalFormat, mSamples)));
                 mDepthTexture[i] = createTexture(sourceFormat, sourceType, internalFormat);
                 mLayerFbo[i]->setAttachment(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, osg::FrameBufferAttachment(mDepthTexture[i]));
             }
@@ -379,6 +372,11 @@ namespace Stereo
     osg::Texture2DArray* MultiviewFramebuffer::multiviewColorBuffer()
     {
         return mMultiviewColorTexture;
+    }
+
+    osg::Texture2DArray* MultiviewFramebuffer::multiviewDepthBuffer()
+    {
+        return mMultiviewDepthTexture;
     }
 
     osg::Texture2D* MultiviewFramebuffer::layerColorBuffer(int i)
@@ -440,22 +438,6 @@ namespace Stereo
     {
         osg::Texture2D* texture = new osg::Texture2D;
         texture->setTextureSize(mWidth, mHeight);
-        texture->setSourceFormat(sourceFormat);
-        texture->setSourceType(sourceType);
-        texture->setInternalFormat(internalFormat);
-        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        texture->setWrap(osg::Texture::WRAP_R, osg::Texture::CLAMP_TO_EDGE);
-        return texture;
-    }
-
-    osg::Texture2DMultisample* MultiviewFramebuffer::createTextureMsaa(GLint sourceFormat, GLint sourceType, GLint internalFormat)
-    {
-        osg::Texture2DMultisample* texture = new osg::Texture2DMultisample;
-        texture->setTextureSize(mWidth, mHeight);
-        texture->setNumSamples(mSamples);
         texture->setSourceFormat(sourceFormat);
         texture->setSourceType(sourceType);
         texture->setInternalFormat(internalFormat);

@@ -52,6 +52,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         serialization/integration.cpp
 
         settings/parser.cpp
+        settings/shadermanager.cpp
 
         shader/parsedefines.cpp
         shader/parsefors.cpp
@@ -75,6 +76,9 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         toutf8/toutf8.cpp
 
         esm4/includes.cpp
+
+        fx/lexer.cpp
+        fx/technique.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})

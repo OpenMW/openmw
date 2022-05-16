@@ -577,6 +577,94 @@
             </widget>
            </item>
            <item>
+            <widget class="QGroupBox" name="postprocessGroup">
+             <property name="title">
+              <string>Post Processing</string>
+             </property>
+             <layout class="QGridLayout" name="postprocessLayout">
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="postprocessEnabledCheckBox">
+                <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, post processing will be enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Enable post processing</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+                <layout class="QVBoxLayout">
+                  <property name="leftMargin">
+                    <number>20</number>
+                  </property>
+                  <item>
+                    <widget class="QCheckBox" name="postprocessLiveReloadCheckBox">
+                      <property name="enabled">
+                        <bool>false</bool>
+                      </property>
+                      <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Debug Mode. Automatically reload active shaders when they are modified on filesystem.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                        <string>Live reload</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QCheckBox" name="postprocessTransparentPostpassCheckBox">
+                      <property name="enabled">
+                        <bool>false</bool>
+                      </property>
+                      <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Re-render transparent objects with forced alpha clipping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                        <string>Transparent postpass</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item row="1" column="0">
+                    <layout class="QHBoxLayout">
+                      <item>
+                      <widget class="QLabel" name="postprocessHDRTimeLabel">
+                        <property name="enabled">
+                          <bool>false</bool>
+                        </property>
+                        <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls how much eye adaptation can change from frame to frame. Smaller values makes for slower transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        </property>
+                        <property name="text">
+                        <string>HDR exposure time</string>
+                        </property>
+                      </widget>
+                      </item>
+                      <item>
+                      <widget class="QDoubleSpinBox" name="postprocessHDRTimeComboBox">
+                        <property name="enabled">
+                          <bool>false</bool>
+                        </property>
+                        <property name="decimals">
+                        <number>3</number>
+                        </property>
+                        <property name="minimum">
+                        <double>0.000000000000000</double>
+                        </property>
+                        <property name="maximum">
+                        <double>1.000000000000000</double>
+                        </property>
+                        <property name="singleStep">
+                        <double>0.001000000000000</double>
+                        </property>
+                      </widget>
+                      </item>
+                    </layout>
+                  </item>
+                </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
             <spacer name="verticalSpacer">
              <property name="orientation">
               <enum>Qt::Vertical</enum>

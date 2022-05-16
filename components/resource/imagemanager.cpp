@@ -49,6 +49,7 @@ namespace Resource
         : ResourceManager(vfs)
         , mWarningImage(createWarningImage())
         , mOptions(new osgDB::Options("dds_flip dds_dxt1_detect_rgba ignoreTga2Fields"))
+        , mOptionsNoFlip(new osgDB::Options("dds_dxt1_detect_rgba ignoreTga2Fields"))
     {
     }
 
@@ -82,7 +83,7 @@ namespace Resource
         return true;
     }
 
-    osg::ref_ptr<osg::Image> ImageManager::getImage(const std::string &filename)
+    osg::ref_ptr<osg::Image> ImageManager::getImage(const std::string &filename, bool disableFlip)
     {
         const std::string normalized = mVFS->normalizeFilename(filename);
 
@@ -135,7 +136,7 @@ namespace Resource
                 stream->seekg(0);
             }
 
-            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, mOptions);
+            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, disableFlip ? mOptionsNoFlip : mOptions);
             if (!result.success())
             {
                 Log(Debug::Error) << "Error loading " << filename << ": " << result.message() << " code " << result.status();

@@ -1,0 +1,45 @@
+main_pass {
+    wrap_s = clamp_to_edge;
+    wrap_t = clamp_to_edge;
+    internal_format = rgba;
+    source_type = unsigned_int;
+    source_format = rgba;
+}
+
+uniform_float uGamma {
+    default = 1.0;
+    step = 0.01;
+    min = 0.0;
+    max = 5.0;
+    description = "gamma level";
+}
+
+uniform_float uContrast {
+    default = 1.0;
+    step = 0.01;
+    min = 0.0;
+    max = 5.0;
+    description = "constrast level";
+}
+
+fragment main {
+
+    omw_In vec2 omw_TexCoord;
+
+    void main()
+    {
+        vec4 color = omw_GetLastShader(omw_TexCoord);
+        color.rgb = (color.rgb - vec3(0.5)) * uContrast + 0.5;
+        color.rgb = pow(color.rgb, vec3(1.0 / uGamma));
+
+        omw_FragColor = color;
+    }
+}
+
+technique {
+    description = "Main pass.";
+    version = "1.0";
+    author = "OpenMW";
+    passes = main;
+    hdr = false;
+}

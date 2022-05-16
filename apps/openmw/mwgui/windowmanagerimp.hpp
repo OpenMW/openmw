@@ -123,6 +123,7 @@ namespace MWGui
   class WindowModal;
   class ScreenFader;
   class DebugWindow;
+  class PostProcessorHud;
   class JailScreen;
   class KeyboardNavigation;
 
@@ -188,6 +189,7 @@ namespace MWGui
     MWGui::ConfirmationDialog* getConfirmationDialog() override;
     MWGui::TradeWindow* getTradeWindow() override;
     const std::vector<MWGui::MessageBox*> getActiveMessageBoxes() override;
+    MWGui::PostProcessorHud* getPostProcessorHud() override;
 
     /// Make the player use an item, while updating GUI state accordingly
     void useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions=false) override;
@@ -366,6 +368,7 @@ namespace MWGui
 
     void toggleConsole() override;
     void toggleDebugWindow() override;
+    void togglePostProcessorHud() override;
 
     /// Cycle to next or previous spell
     void cycleSpell(bool next) override;
@@ -452,6 +455,7 @@ namespace MWGui
     ScreenFader* mHitFader;
     ScreenFader* mScreenFader;
     DebugWindow* mDebugWindow;
+    PostProcessorHud* mPostProcessorHud;
     JailScreen* mJailScreen;
     ContainerWindow* mContainerWindow;
 

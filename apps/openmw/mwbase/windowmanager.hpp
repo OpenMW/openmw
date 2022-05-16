@@ -70,6 +70,7 @@ namespace MWGui
     class WindowModal;
     class JailScreen;
     class MessageBox;
+    class PostProcessorHud;
 
     enum ShowInDialogueMode {
         ShowInDialogueMode_IfPossible,
@@ -147,6 +148,7 @@ namespace MWBase
             virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
             virtual const std::vector<MWGui::MessageBox*> getActiveMessageBoxes() = 0;
+            virtual MWGui::PostProcessorHud* getPostProcessorHud() = 0;
 
             /// Make the player use an item, while updating GUI state accordingly
             virtual void useItem(const MWWorld::Ptr& item, bool force=false) = 0;
@@ -326,6 +328,7 @@ namespace MWBase
 
             virtual void toggleConsole() = 0;
             virtual void toggleDebugWindow() = 0;
+            virtual void togglePostProcessorHud() = 0;
 
             /// Cycle to next or previous spell
             virtual void cycleSpell(bool next) = 0;

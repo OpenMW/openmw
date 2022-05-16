@@ -27,6 +27,7 @@
 
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/landmanager.hpp"
+#include "../mwrender/postprocessor.hpp"
 
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/actor.hpp"
@@ -860,6 +861,8 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
         mNavigator.wait(*loadingListener, DetourNavigator::WaitConditionType::requiredTilesPresent);
+
+        MWBase::Environment::get().getWorld()->getPostProcessor()->setExteriorFlag(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx);
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
@@ -879,6 +882,8 @@ namespace MWWorld
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
+
+        MWBase::Environment::get().getWorld()->getPostProcessor()->setExteriorFlag(true);
     }
 
     CellStore* Scene::getCurrentCell ()

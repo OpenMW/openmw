@@ -71,6 +71,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwrender/localmap.hpp"
+#include "../mwrender/postprocessor.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
@@ -113,6 +114,7 @@
 #include "itemwidget.hpp"
 #include "screenfader.hpp"
 #include "debugwindow.hpp"
+#include "postprocessorhud.hpp"
 #include "spellview.hpp"
 #include "draganddrop.hpp"
 #include "container.hpp"
@@ -164,6 +166,7 @@ namespace MWGui
       , mHitFader(nullptr)
       , mScreenFader(nullptr)
       , mDebugWindow(nullptr)
+      , mPostProcessorHud(nullptr)
       , mJailScreen(nullptr)
       , mContainerWindow(nullptr)
       , mTranslationDataStorage (translationDataStorage)
@@ -217,7 +220,8 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::AdditiveLayer>("Layer");
         MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::ScalingLayer>("Layer");
-        BookPage::registerMyGUIComponents ();
+        BookPage::registerMyGUIComponents();
+        PostProcessorHud::registerMyGUIComponents();
         ItemView::registerComponents();
         ItemChargeView::registerComponents();
         ItemWidget::registerComponents();
@@ -468,6 +472,10 @@ namespace MWGui
 
         mDebugWindow = new DebugWindow();
         mWindows.push_back(mDebugWindow);
+
+        mPostProcessorHud = new PostProcessorHud();
+        mWindows.push_back(mPostProcessorHud);
+        trackWindow(mPostProcessorHud, "postprocessor");
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"InputBlocker");
 
@@ -896,6 +904,8 @@ namespace MWGui
         mHud->onFrame(frameDuration);
 
         mDebugWindow->onFrame(frameDuration);
+
+        mPostProcessorHud->onFrame(frameDuration);
 
         if (mCharGen)
             mCharGen->onFrame(frameDuration);
@@ -1400,6 +1410,7 @@ namespace MWGui
     MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
     MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
+    MWGui::PostProcessorHud* WindowManager::getPostProcessorHud() { return mPostProcessorHud; }
 
     void WindowManager::useItem(const MWWorld::Ptr &item, bool bypassBeastRestrictions)
     {
@@ -1488,6 +1499,7 @@ namespace MWGui
         return
             !mGuiModes.empty() ||
             isConsoleMode() ||
+            (mPostProcessorHud && mPostProcessorHud->isVisible()) ||
             (mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox());
     }
 
@@ -2052,6 +2064,24 @@ namespace MWGui
 #ifndef BT_NO_PROFILE
         mDebugWindow->setVisible(!mDebugWindow->isVisible());
 #endif
+    }
+
+    void WindowManager::togglePostProcessorHud()
+    {
+        if (!MWBase::Environment::get().getWorld()->getPostProcessor()->isEnabled())
+            return;
+
+        bool visible = mPostProcessorHud->isVisible();
+
+        if (!visible && !mGuiModes.empty())
+            mKeyboardNavigation->saveFocus(mGuiModes.back());
+
+        mPostProcessorHud->setVisible(!visible);
+
+        if (visible && !mGuiModes.empty())
+            mKeyboardNavigation->restoreFocus(mGuiModes.back());
+
+        updateVisible();
     }
 
     void WindowManager::cycleSpell(bool next)

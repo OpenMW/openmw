@@ -327,24 +327,31 @@ public:
 
         state->applyAttribute(mDepth);
 
-        if (postProcessor && postProcessor->getFirstPersonRBProxy())
-        {
-            osg::GLExtensions* ext = state->get<osg::GLExtensions>();
+        unsigned int frameId = state->getFrameStamp()->getFrameNumber() % 2;
 
-            osg::FrameBufferAttachment(postProcessor->getFirstPersonRBProxy()).attach(*state, GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, ext);
+        if (postProcessor && postProcessor->getFbo(PostProcessor::FBO_FirstPerson, frameId))
+        {
+            postProcessor->getFbo(PostProcessor::FBO_FirstPerson, frameId)->apply(*state);
 
             glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             // color accumulation pass
             bin->drawImplementation(renderInfo, previous);
 
-            auto primaryFBO = postProcessor->getMsaaFbo() ? postProcessor->getMsaaFbo() : postProcessor->getFbo();
-            primaryFBO->getAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER).attach(*state, GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, ext);
+            auto primaryFBO = postProcessor->getPrimaryFbo(frameId);
 
-            state->pushStateSet(mStateSet);
-            state->apply();
+            if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
+                postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
+            else
+                primaryFBO->apply(*state);
+
             // depth accumulation pass
+            osg::ref_ptr<osg::StateSet> restore = bin->getStateSet();
+            bin->setStateSet(mStateSet);
             bin->drawImplementation(renderInfo, previous);
-            state->popStateSet();
+            bin->setStateSet(restore);
+
+            if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
+                primaryFBO->apply(*state);
         }
         else
         {
