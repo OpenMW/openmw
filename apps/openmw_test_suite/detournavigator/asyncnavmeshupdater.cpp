@@ -262,6 +262,20 @@ namespace
         updater.post(mAgentHalfExtents, navMeshCacheItem, mPlayerTile, mWorldspace, changedTiles);
         updater.wait(mListener, WaitConditionType::allJobsDone);
         updater.stop();
+        const std::set<TilePosition> present {
+            TilePosition(-2, 0),
+            TilePosition(-1, -1),
+            TilePosition(-1, 0),
+            TilePosition(-1, 1),
+            TilePosition(0, -2),
+            TilePosition(0, -1),
+            TilePosition(0, 0),
+            TilePosition(0, 1),
+            TilePosition(0, 2),
+            TilePosition(1, -1),
+            TilePosition(1, 0),
+            TilePosition(1, 1),
+        };
         for (int x = -5; x <= 5; ++x)
             for (int y = -5; y <= 5; ++y)
             {
@@ -272,8 +286,9 @@ namespace
                     [&] (const MeshSource& v) { return resolveMeshSource(*dbPtr, v); });
                 if (!objects.has_value())
                     continue;
-                EXPECT_FALSE(dbPtr->findTile(mWorldspace, tilePosition, serialize(mSettings.mRecast, *recastMesh, *objects)).has_value())
-                    << tilePosition.x() << " " << tilePosition.y();
+                EXPECT_EQ(dbPtr->findTile(mWorldspace, tilePosition, serialize(mSettings.mRecast, *recastMesh, *objects)).has_value(),
+                          present.find(tilePosition) != present.end())
+                    << tilePosition.x() << " " << tilePosition.y() << " present=" << (present.find(tilePosition) != present.end());
             }
     }
 }

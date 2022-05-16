@@ -87,7 +87,7 @@ namespace DetourNavigator
     public:
         void push(JobIt job);
 
-        std::optional<JobIt> pop(std::chrono::steady_clock::duration timeout);
+        std::optional<JobIt> pop();
 
         void update(TilePosition playerTile, int maxTiles);
 
@@ -137,7 +137,6 @@ namespace DetourNavigator
         DbJobQueue mQueue;
         std::atomic_bool mShouldStop {false};
         std::atomic_size_t mGetTileCount {0};
-        bool mHasChanges = false;
         std::thread mThread;
 
         inline void run() noexcept;
