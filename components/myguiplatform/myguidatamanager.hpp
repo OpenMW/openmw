@@ -3,6 +3,8 @@
 
 #include <MyGUI_DataManager.h>
 
+#include <string>
+
 namespace osgMyGUI
 {
 
