@@ -3,6 +3,7 @@
 
 #include <mutex>
 #include <memory>
+#include <utility>
 
 #include <osg/Vec3d>
 
