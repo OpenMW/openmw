@@ -15,7 +15,7 @@ variables:
   ARTIFACT_COMPRESSION_LEVEL: "fast"
   CACHE_COMPRESSION_LEVEL: "fast"
   SAST_EXCLUDED_ANALYZERS: "bandit"
-  SAST_EXCLUDED_PATHS: spec,test,tests,tmp,extern
+  SAST_EXCLUDED_PATHS: "extern"
 
 .Ubuntu_Image:
   tags:
