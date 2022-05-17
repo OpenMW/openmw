@@ -1,8 +1,11 @@
 #include "myguidatamanager.hpp"
 
+#include <memory>
+#include <string>
+
 #include <MyGUI_DataFileStream.h>
 
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #include <components/debug/debuglog.hpp>
