@@ -6,7 +6,7 @@
 namespace DetourNavigator
 {
     std::optional<osg::Vec3f> findRandomPointAroundCircle(const Navigator& navigator, const osg::Vec3f& agentHalfExtents,
-        const osg::Vec3f& start, const float maxRadius, const Flags includeFlags)
+        const osg::Vec3f& start, const float maxRadius, const Flags includeFlags, float(*prng)())
     {
         const auto navMesh = navigator.getNavMesh(agentHalfExtents);
         if (!navMesh)
@@ -14,7 +14,7 @@ namespace DetourNavigator
         const auto& settings = navigator.getSettings();
         const auto result = DetourNavigator::findRandomPointAroundCircle(navMesh->lockConst()->getImpl(),
             toNavMeshCoordinates(settings.mRecast, agentHalfExtents), toNavMeshCoordinates(settings.mRecast, start),
-            toNavMeshCoordinates(settings.mRecast, maxRadius), includeFlags, settings.mDetour);
+            toNavMeshCoordinates(settings.mRecast, maxRadius), includeFlags, settings.mDetour, prng);
         if (!result)
             return std::nullopt;
         return std::optional<osg::Vec3f>(fromNavMeshCoordinates(settings.mRecast, *result));
