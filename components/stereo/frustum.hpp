@@ -64,6 +64,7 @@ namespace Stereo
         osg::ref_ptr<osg::Camera> mCamera;
         osg::ref_ptr<SceneUtil::MWShadowTechnique> mShadowTechnique;
         osg::ref_ptr<ShadowFrustumCallback> mShadowFrustumCallback;
+        bool mMultiview;
         std::map< osgUtil::CullVisitor*, osgUtil::CullVisitor*> mSharedFrustums;
         osg::BoundingBoxd mBoundingBox;
 
