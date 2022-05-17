@@ -167,8 +167,8 @@ namespace Stereo
             return;
         }
 
-        auto targetTextureObject = texture.getTextureObject(contextId);
-        if (!sourceTextureObject)
+        osg::Texture::TextureObject* const targetTextureObject = texture.getTextureObject(contextId);
+        if (targetTextureObject == nullptr)
         {
             Log(Debug::Error) << "Texture2DViewSubloadCallback: Texture2D did not have a texture object";
             return;
