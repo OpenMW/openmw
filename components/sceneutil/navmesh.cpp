@@ -10,6 +10,8 @@
 #include <osg/Material>
 #include <osg/PolygonOffset>
 
+#include <algorithm>
+
 namespace
 {
     // Copied from https://github.com/recastnavigation/recastnavigation/blob/c5cbd53024c8a9d8d097a4371215e3342d2fdc87/DebugUtils/Source/DetourDebugDraw.cpp#L26-L38
@@ -107,15 +109,46 @@ namespace
         dd->end();
     }
 
+    float getHeat(unsigned salt, unsigned minSalt, unsigned maxSalt)
+    {
+        if (salt < minSalt)
+            return 0;
+        if (salt > maxSalt)
+            return 1;
+        if (maxSalt <= minSalt)
+            return 0.5;
+        return static_cast<float>(salt - minSalt) / static_cast<float>(maxSalt - minSalt);
+    }
+
+    int getRgbaComponent(float v, int base)
+    {
+        return static_cast<int>(std::round(v * base));
+    }
+
+    unsigned heatToColor(float heat, int alpha)
+    {
+        constexpr int min = 100;
+        constexpr int max = 200;
+        if (heat < 0.25f)
+            return duRGBA(min, min + getRgbaComponent(4 * heat, max - min), max, alpha);
+        if (heat < 0.5f)
+            return duRGBA(min, max, min + getRgbaComponent(1 - 4 * (heat - 0.5f), max - min), alpha);
+        if (heat < 0.75f)
+            return duRGBA(min + getRgbaComponent(4 * (heat - 0.5f), max - min), max, min, alpha);
+        return duRGBA(max, min + getRgbaComponent(1 - 4 * (heat - 0.75f), max - min), min, alpha);
+    }
+
     // Based on https://github.com/recastnavigation/recastnavigation/blob/c5cbd53024c8a9d8d097a4371215e3342d2fdc87/DebugUtils/Source/DetourDebugDraw.cpp#L120-L235
     void drawMeshTile(duDebugDraw* dd, const dtNavMesh& mesh, const dtNavMeshQuery* query,
-        const dtMeshTile* tile, unsigned char flags)
+        const dtMeshTile* tile, unsigned char flags, float heat)
     {
+        using namespace SceneUtil;
+
         dtPolyRef base = mesh.getPolyRefBase(tile);
 
         int tileNum = mesh.decodePolyIdTile(base);
-        const unsigned int tileNumColor = duIntToCol(tileNum, 128);
         const unsigned alpha = tile->header->userId == 0 ? 64 : 128;
+        const unsigned int tileNumColor = duIntToCol(tileNum, alpha);
 
         dd->depthMask(false);
 
@@ -133,8 +166,10 @@ namespace
                 col = duRGBA(255, 196, 0, alpha);
             else
             {
-                if (flags & DU_DRAWNAVMESH_COLOR_TILES)
+                if (flags & NavMeshTileDrawFlagsColorTiles)
                     col = duTransCol(tileNumColor, alpha);
+                else if (flags & NavMeshTileDrawFlagsHeat)
+                    col = heatToColor(heat, alpha);
                 else
                     col = duTransCol(dd->areaToCol(p->getArea()), alpha);
             }
@@ -159,7 +194,7 @@ namespace
         // Draw outer poly boundaries
         drawPolyBoundaries(dd, tile, duRGBA(0,48,64,220), 2.5f, false);
 
-        if (flags & DU_DRAWNAVMESH_OFFMESHCONS)
+        if (flags & NavMeshTileDrawFlagsOffMeshConnections)
         {
             dd->begin(DU_DRAW_LINES, 2.0f);
             for (int i = 0; i < tile->header->polyCount; ++i)
@@ -246,7 +281,7 @@ namespace SceneUtil
 
     osg::ref_ptr<osg::Group> createNavMeshTileGroup(const dtNavMesh& navMesh, const dtMeshTile& meshTile,
         const DetourNavigator::Settings& settings, const osg::ref_ptr<osg::StateSet>& groupStateSet,
-        const osg::ref_ptr<osg::StateSet>& debugDrawStateSet)
+        const osg::ref_ptr<osg::StateSet>& debugDrawStateSet, unsigned char flags, unsigned minSalt, unsigned maxSalt)
     {
         if (meshTile.header == nullptr)
             return nullptr;
@@ -257,7 +292,7 @@ namespace SceneUtil
         DebugDraw debugDraw(*group, debugDrawStateSet, osg::Vec3f(0, 0, shift), 1.0f / settings.mRecast.mRecastScaleFactor);
         dtNavMeshQuery navMeshQuery;
         navMeshQuery.init(&navMesh, settings.mDetour.mMaxNavMeshQueryNodes);
-        drawMeshTile(&debugDraw, navMesh, &navMeshQuery, &meshTile, DU_DRAWNAVMESH_OFFMESHCONS | DU_DRAWNAVMESH_CLOSEDLIST);
+        drawMeshTile(&debugDraw, navMesh, &navMeshQuery, &meshTile, flags, getHeat(meshTile.salt, minSalt, maxSalt));
 
         return group;
     }

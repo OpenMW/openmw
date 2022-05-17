@@ -1,7 +1,5 @@
 #include "object.hpp"
 
-#include <unordered_map>
-
 #include "types/types.hpp"
 
 namespace MWLua

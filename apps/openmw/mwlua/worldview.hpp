@@ -3,6 +3,11 @@
 
 #include "object.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include <set>
+
 namespace ESM
 {
     class ESMWriter;

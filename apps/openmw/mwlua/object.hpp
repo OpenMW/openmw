@@ -2,15 +2,11 @@
 #define MWLUA_OBJECT_H
 
 #include <typeindex>
+#include <map>
 
 #include <sol/sol.hpp>
 
 #include <components/esm3/cellref.hpp>
-#include <components/esm/defs.hpp>
-#include <components/esm/luascripts.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 

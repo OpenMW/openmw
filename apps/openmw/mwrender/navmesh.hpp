@@ -1,6 +1,8 @@
 #ifndef OPENMW_MWRENDER_NAVMESH_H
 #define OPENMW_MWRENDER_NAVMESH_H
 
+#include "navmeshmode.hpp"
+
 #include <components/detournavigator/version.hpp>
 #include <components/detournavigator/tileposition.hpp>
 #include <components/misc/guarded.hpp>
@@ -11,6 +13,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <string_view>
 
 class dtNavMesh;
 
@@ -38,7 +41,7 @@ namespace MWRender
     {
     public:
         explicit NavMesh(const osg::ref_ptr<osg::Group>& root, const osg::ref_ptr<SceneUtil::WorkQueue>& workQueue,
-                         bool enabled);
+                         bool enabled, NavMeshMode mode);
         ~NavMesh();
 
         bool toggle();
@@ -57,6 +60,8 @@ namespace MWRender
             return mEnabled;
         }
 
+        void setMode(NavMeshMode value);
+
     private:
         struct Tile
         {
@@ -73,6 +78,7 @@ namespace MWRender
         osg::ref_ptr<osg::StateSet> mGroupStateSet;
         osg::ref_ptr<osg::StateSet> mDebugDrawStateSet;
         bool mEnabled;
+        NavMeshMode mMode;
         std::size_t mId;
         DetourNavigator::Version mVersion;
         std::map<DetourNavigator::TilePosition, Tile> mTiles;

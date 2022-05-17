@@ -435,7 +435,8 @@ namespace MWRender
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
-        mNavMesh.reset(new NavMesh(mRootNode, mWorkQueue, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
+        mNavMesh.reset(new NavMesh(mRootNode, mWorkQueue, Settings::Manager::getBool("enable nav mesh render", "Navigator"),
+                                   parseNavMeshMode(Settings::Manager::getString("nav mesh render mode", "Navigator"))));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
         mRecastMesh.reset(new RecastMesh(mRootNode, Settings::Manager::getBool("enable recast mesh render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
@@ -1572,5 +1573,10 @@ namespace MWRender
     {
         if (mObjectPaging)
             mObjectPaging->getPagedRefnums(activeGrid, out);
+    }
+
+    void RenderingManager::setNavMeshMode(NavMeshMode value)
+    {
+        mNavMesh->setMode(value);
     }
 }
