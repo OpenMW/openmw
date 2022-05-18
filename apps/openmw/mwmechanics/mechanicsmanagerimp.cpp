@@ -30,6 +30,7 @@
 #include "npcstats.hpp"
 #include "actorutil.hpp"
 #include "combat.hpp"
+#include "actor.hpp"
 
 namespace
 {
@@ -1599,16 +1600,16 @@ namespace MWMechanics
             if (ptr.getClass().isClass(ptr, "Guard"))
             {
                 stats.setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId()); // Stops guard from ending combat if player is unreachable
-                for (Actors::PtrActorMap::const_iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
+                for (const Actor& actor : mActors)
                 {
-                    if (iter->first.getClass().isClass(iter->first, "Guard"))
+                    if (actor.getPtr().getClass().isClass(actor.getPtr(), "Guard"))
                     {
-                        MWMechanics::AiSequence& aiSeq = iter->first.getClass().getCreatureStats(iter->first).getAiSequence();
+                        MWMechanics::AiSequence& aiSeq = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).getAiSequence();
                         if (aiSeq.getTypeId() == MWMechanics::AiPackageTypeId::Pursue)
                         {
                             aiSeq.stopPursuit();
                             aiSeq.stack(MWMechanics::AiCombat(target), ptr);
-                            iter->first.getClass().getCreatureStats(iter->first).setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId()); // Stops guard from ending combat if player is unreachable
+                            actor.getPtr().getClass().getCreatureStats(actor.getPtr()).setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId()); // Stops guard from ending combat if player is unreachable
                         }
                     }
                 }

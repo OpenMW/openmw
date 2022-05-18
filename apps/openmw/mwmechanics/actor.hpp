@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "../mwmechanics/actorutil.hpp"
+#include "actorutil.hpp"
 
 #include <components/misc/timer.hpp>
 
@@ -25,6 +25,8 @@ namespace MWMechanics
     {
     public:
         Actor(const MWWorld::Ptr& ptr, MWRender::Animation* animation);
+
+        const MWWorld::Ptr& getPtr() const;
 
         /// Notify this actor of its new base object Ptr, use when the object changed cells
         void updatePtr(const MWWorld::Ptr& newPtr);

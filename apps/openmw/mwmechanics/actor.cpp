@@ -10,6 +10,11 @@ namespace MWMechanics
         mCharacterController.reset(new CharacterController(ptr, animation));
     }
 
+    const MWWorld::Ptr& Actor::getPtr() const
+    {
+        return mCharacterController->getPtr();
+    }
+
     void Actor::updatePtr(const MWWorld::Ptr &newPtr)
     {
         mCharacterController->updatePtr(newPtr);

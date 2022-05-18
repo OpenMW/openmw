@@ -105,12 +105,12 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
 }
 
 template<class T>
-void forEachFollowingPackage(MWMechanics::Actors::PtrActorMap& actors, const MWWorld::Ptr& actor, const MWWorld::Ptr& player, T&& func)
+void forEachFollowingPackage(std::list<MWMechanics::Actor>& actors, const MWWorld::Ptr& actorPtr, const MWWorld::Ptr& player, T&& func)
 {
-    for(auto& iter : actors)
+    for (const MWMechanics::Actor& actor : actors)
     {
-        const MWWorld::Ptr &iteratedActor = iter.first;
-        if (iteratedActor == player || iteratedActor == actor)
+        const MWWorld::Ptr &iteratedActor = actor.getPtr();
+        if (iteratedActor == player || iteratedActor == actorPtr)
             continue;
 
         const MWMechanics::CreatureStats &stats = iteratedActor.getClass().getCreatureStats(iteratedActor);
@@ -121,7 +121,7 @@ void forEachFollowingPackage(MWMechanics::Actors::PtrActorMap& actors, const MWW
         // or there are only Combat and Wander packages before the AiFollow package
         for (const auto& package : stats.getAiSequence())
         {
-            if(!func(iter, package))
+            if (!func(actor, package))
                 break;
         }
     }
@@ -771,8 +771,8 @@ namespace MWMechanics
 
     bool Actors::isAttackPreparing(const MWWorld::Ptr& ptr)
     {
-        PtrActorMap::iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return false;
         CharacterController* ctrl = it->second->getCharacterController();
 
@@ -781,8 +781,8 @@ namespace MWMechanics
 
     bool Actors::isRunning(const MWWorld::Ptr& ptr)
     {
-        PtrActorMap::iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return false;
         CharacterController* ctrl = it->second->getCharacterController();
 
@@ -791,8 +791,8 @@ namespace MWMechanics
 
     bool Actors::isSneaking(const MWWorld::Ptr& ptr)
     {
-        PtrActorMap::iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return false;
         CharacterController* ctrl = it->second->getCharacterController();
 
@@ -1031,11 +1031,6 @@ namespace MWMechanics
         updateProcessingRange();
     }
 
-    Actors::~Actors()
-    {
-        clear();
-    }
-
     float Actors::getProcessingRange() const
     {
         return mActorsProcessingRange;
@@ -1057,9 +1052,10 @@ namespace MWMechanics
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if (!anim)
             return;
-        mActors.emplace(ptr, new Actor(ptr, anim));
+        const auto it = mActors.emplace(mActors.end(), ptr, anim);
+        mIndex.emplace(ptr.mRef, it);
 
-        CharacterController* ctrl = mActors[ptr]->getCharacterController();
+        CharacterController* ctrl = it->getCharacterController();
         if (updateImmediately)
             ctrl->update(0);
 
@@ -1102,20 +1098,20 @@ namespace MWMechanics
 
     void Actors::removeActor (const MWWorld::Ptr& ptr, bool keepActive)
     {
-        PtrActorMap::iterator iter = mActors.find(ptr);
-        if(iter != mActors.end())
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
         {
             if(!keepActive)
-                removeTemporaryEffects(iter->first);
-            delete iter->second;
-            mActors.erase(iter);
+                removeTemporaryEffects(iter->second->getPtr());
+            mActors.erase(iter->second);
+            mIndex.erase(iter);
         }
     }
 
     void Actors::castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell)
     {
-        PtrActorMap::iterator iter = mActors.find(ptr);
-        if(iter != mActors.end())
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
             iter->second->getCharacterController()->castSpell(spellId, manualSpell);
     }
 
@@ -1153,27 +1149,20 @@ namespace MWMechanics
 
     void Actors::updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
-        PtrActorMap::iterator iter = mActors.find(old);
-        if(iter != mActors.end())
-        {
-            Actor *actor = iter->second;
-            mActors.erase(iter);
-
-            actor->updatePtr(ptr);
-            mActors.insert(std::make_pair(ptr, actor));
-        }
+        const auto iter = mIndex.find(old.mRef);
+        if (iter != mIndex.end())
+            iter->second->updatePtr(ptr);
     }
 
     void Actors::dropActors (const MWWorld::CellStore *cellStore, const MWWorld::Ptr& ignore)
     {
-        PtrActorMap::iterator iter = mActors.begin();
-        while(iter != mActors.end())
+        for (auto iter = mActors.begin(); iter != mActors.end();)
         {
-            if((iter->first.isInCell() && iter->first.getCell()==cellStore) && iter->first != ignore)
+            if ((iter->getPtr().isInCell() && iter->getPtr().getCell() == cellStore) && iter->getPtr() != ignore)
             {
-                removeTemporaryEffects(iter->first);
-                delete iter->second;
-                mActors.erase(iter++);
+                removeTemporaryEffects(iter->getPtr());
+                mIndex.erase(iter->getPtr().mRef);
+                iter = mActors.erase(iter);
             }
             else
                 ++iter;
@@ -1189,14 +1178,14 @@ namespace MWMechanics
 
         if (aiActive)
         {
-            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+            for (const Actor& actor : mActors)
             {
-                if (iter->first == player) continue;
+                if (actor.getPtr() == player) continue;
 
-                bool inProcessingRange = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() <= mActorsProcessingRange*mActorsProcessingRange;
+                bool inProcessingRange = (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length2() <= mActorsProcessingRange*mActorsProcessingRange;
                 if (inProcessingRange)
                 {
-                    MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+                    MWMechanics::CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
                     if (!stats.isDead() && stats.getAiSequence().isInCombat())
                     {
                         hasHostiles = true;
@@ -1235,9 +1224,9 @@ namespace MWMechanics
 
         const MWWorld::Ptr player = getPlayer();
         const MWBase::World* world = MWBase::Environment::get().getWorld();
-        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        for (const Actor& actor : mActors)
         {
-            const MWWorld::Ptr& ptr = iter->first;
+            const MWWorld::Ptr& ptr = actor.getPtr();
             if (ptr == player)
                 continue; // Don't interfere with player controls.
 
@@ -1297,9 +1286,9 @@ namespace MWMechanics
             float angleToApproachingActor = 0;
 
             // Iterate through all other actors and predict collisions.
-            for(PtrActorMap::iterator otherIter(mActors.begin()); otherIter != mActors.end(); ++otherIter)
+            for (const Actor& otherActor : mActors)
             {
-                const MWWorld::Ptr& otherPtr = otherIter->first;
+                const MWWorld::Ptr& otherPtr = otherActor.getPtr();
                 if (otherPtr == ptr || otherPtr == currentTarget)
                     continue;
 
@@ -1410,42 +1399,42 @@ namespace MWMechanics
             bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
 
              // AI and magic effects update
-            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+            for (Actor& actor : mActors)
             {
-                bool isPlayer = iter->first == player;
-                CharacterController* ctrl = iter->second->getCharacterController();
+                const bool isPlayer = actor.getPtr() == player;
+                CharacterController* const  ctrl = actor.getCharacterController();
                 MWBase::LuaManager::ActorControls* luaControls =
-                    MWBase::Environment::get().getLuaManager()->getActorControls(iter->first);
+                    MWBase::Environment::get().getLuaManager()->getActorControls(actor.getPtr());
 
-                float distSqr = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2();
+                const float distSqr = (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length2();
                 // AI processing is only done within given distance to the player.
                 bool inProcessingRange = distSqr <= mActorsProcessingRange*mActorsProcessingRange;
 
                 // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for the player.
-                if (iter->first != player && (iter->first.getClass().getCreatureStats(iter->first).isDead()
-                    || !iter->first.getClass().getCreatureStats(iter->first).getAiSequence().isInCombat()
+                if (actor.getPtr() != player && (actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead()
+                    || !actor.getPtr().getClass().getCreatureStats(actor.getPtr()).getAiSequence().isInCombat()
                     || !inProcessingRange))
                 {
-                    iter->first.getClass().getCreatureStats(iter->first).setHitAttemptActorId(-1);
-                    if (player.getClass().getCreatureStats(player).getHitAttemptActorId() == iter->first.getClass().getCreatureStats(iter->first).getActorId())
+                    actor.getPtr().getClass().getCreatureStats(actor.getPtr()).setHitAttemptActorId(-1);
+                    if (player.getClass().getCreatureStats(player).getHitAttemptActorId() == actor.getPtr().getClass().getCreatureStats(actor.getPtr()).getActorId())
                         player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
                 }
 
-                const Misc::TimerStatus engageCombatTimerStatus = iter->second->updateEngageCombatTimer(duration);
+                const Misc::TimerStatus engageCombatTimerStatus = actor.updateEngageCombatTimer(duration);
 
                 // For dead actors we need to update looping spell particles
-                if (iter->first.getClass().getCreatureStats(iter->first).isDead())
+                if (actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead())
                 {
                     // They can be added during the death animation
-                    if (!iter->first.getClass().getCreatureStats(iter->first).isDeathAnimationFinished())
-                        adjustMagicEffects(iter->first, duration);
+                    if (!actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDeathAnimationFinished())
+                        adjustMagicEffects(actor.getPtr(), duration);
                     ctrl->updateContinuousVfx();
                 }
                 else
                 {
                     bool cellChanged = world->hasCellChanged();
-                    MWWorld::Ptr actor = iter->first; // make a copy of the map key to avoid it being invalidated when the player teleports
-                    updateActor(actor, duration);
+                    const MWWorld::Ptr actorPtr = actor.getPtr(); // make a copy of the map key to avoid it being invalidated when the player teleports
+                    updateActor(actorPtr, duration);
 
                     // Looping magic VFX update
                     // Note: we need to do this before any of the animations are updated.
@@ -1464,13 +1453,13 @@ namespace MWMechanics
                         if (engageCombatTimerStatus == Misc::TimerStatus::Elapsed)
                         {
                             if (!isPlayer)
-                                adjustCommandedActor(iter->first);
+                                adjustCommandedActor(actor.getPtr());
 
-                            for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                            for (const Actor& otherActor : mActors)
                             {
-                                if (it->first == iter->first || isPlayer) // player is not AI-controlled
+                                if (otherActor.getPtr() == actor.getPtr() || isPlayer) // player is not AI-controlled
                                     continue;
-                                engageCombat(iter->first, it->first, cachedAllies, it->first == player);
+                                engageCombat(actor.getPtr(), otherActor.getPtr(), cachedAllies, otherActor.getPtr() == player);
                             }
                         }
                         if (mTimerUpdateHeadTrack == 0)
@@ -1478,7 +1467,7 @@ namespace MWMechanics
                             float sqrHeadTrackDistance = std::numeric_limits<float>::max();
                             MWWorld::Ptr headTrackTarget;
 
-                            MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+                            MWMechanics::CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
                             bool firstPersonPlayer = isPlayer && world->isFirstPerson();
   
                             // 1. Unconsious actor can not track target
@@ -1493,18 +1482,18 @@ namespace MWMechanics
                                     if (!activePackageTarget.isEmpty())
                                     {
                                         // Track the specified target of package.
-                                        updateHeadTracking(iter->first, activePackageTarget, headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
+                                        updateHeadTracking(actor.getPtr(), activePackageTarget, headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
                                     }
                                 }
                                 else
                                 {
                                     // Find something nearby.
-                                    for (auto& [ptr, _] : mActors)
+                                    for (const Actor& otherActor : mActors)
                                     {
-                                        if (ptr == iter->first)
+                                        if (otherActor.getPtr() == actor.getPtr())
                                             continue;
 
-                                        updateHeadTracking(iter->first, ptr, headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
+                                        updateHeadTracking(actor.getPtr(), otherActor.getPtr(), headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
                                     }
                                 }
                             }
@@ -1512,39 +1501,39 @@ namespace MWMechanics
                             ctrl->setHeadTrackTarget(headTrackTarget);
                         }
 
-                        if (iter->first.getClass().isNpc() && iter->first != player)
-                            updateCrimePursuit(iter->first, duration);
+                        if (actor.getPtr().getClass().isNpc() && actor.getPtr() != player)
+                            updateCrimePursuit(actor.getPtr(), duration);
 
-                        if (iter->first != player)
+                        if (actor.getPtr() != player)
                         {
-                            CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
-                            if (isConscious(iter->first) && !(luaControls && luaControls->mDisableAI))
+                            CreatureStats &stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
+                            if (isConscious(actor.getPtr()) && !(luaControls && luaControls->mDisableAI))
                             {
-                                stats.getAiSequence().execute(iter->first, *ctrl, duration);
-                                updateGreetingState(iter->first, *iter->second, mTimerUpdateHello > 0);
-                                playIdleDialogue(iter->first);
-                                updateMovementSpeed(iter->first);
+                                stats.getAiSequence().execute(actor.getPtr(), *ctrl, duration);
+                                updateGreetingState(actor.getPtr(), actor, mTimerUpdateHello > 0);
+                                playIdleDialogue(actor.getPtr());
+                                updateMovementSpeed(actor.getPtr());
                             }
                         }
                     }
-                    else if (aiActive && iter->first != player && isConscious(iter->first) && !(luaControls && luaControls->mDisableAI))
+                    else if (aiActive && actor.getPtr() != player && isConscious(actor.getPtr()) && !(luaControls && luaControls->mDisableAI))
                     {
-                        CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
-                        stats.getAiSequence().execute(iter->first, *ctrl, duration, /*outOfRange*/true);
+                        CreatureStats &stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
+                        stats.getAiSequence().execute(actor.getPtr(), *ctrl, duration, /*outOfRange*/true);
                     }
 
-                    if(inProcessingRange && iter->first.getClass().isNpc())
+                    if (inProcessingRange && actor.getPtr().getClass().isNpc())
                     {
                         // We can not update drowning state for actors outside of AI distance - they can not resurface to breathe
-                        updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
+                        updateDrowning(actor.getPtr(), duration, ctrl->isKnockedOut(), isPlayer);
                     }
-                    if(mTimerUpdateEquippedLight == 0 && iter->first.getClass().hasInventoryStore(iter->first))
-                        updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
+                    if (mTimerUpdateEquippedLight == 0 && actor.getPtr().getClass().hasInventoryStore(actor.getPtr()))
+                        updateEquippedLight(actor.getPtr(), updateEquippedLightInterval, showTorches);
 
-                    if (luaControls && isConscious(iter->first))
+                    if (luaControls && isConscious(actor.getPtr()))
                     {
-                        Movement& mov = iter->first.getClass().getMovementSettings(iter->first);
-                        CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+                        Movement& mov = actor.getPtr().getClass().getMovementSettings(actor.getPtr());
+                        CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
                         float speedFactor = isPlayer ? 1.f : mov.mSpeedFactor;
                         osg::Vec2f movement = osg::Vec2f(mov.mPosition[0], mov.mPosition[1]) * speedFactor;
                         float rotationX = mov.mRotation[0];
@@ -1587,14 +1576,14 @@ namespace MWMechanics
 
             // Animation/movement update
             CharacterController* playerCharacter = nullptr;
-            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+            for (Actor& actor : mActors)
             {
-                const float dist = (playerPos - iter->first.getRefData().getPosition().asVec3()).length();
-                bool isPlayer = iter->first == player;
-                CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
+                const float dist = (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length();
+                const bool isPlayer = actor.getPtr() == player;
+                CreatureStats &stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
                 // Actors with active AI should be able to move.
                 bool alwaysActive = false;
-                if (!isPlayer && isConscious(iter->first) && !stats.isParalyzed())
+                if (!isPlayer && isConscious(actor.getPtr()) && !stats.isParalyzed())
                 {
                     MWMechanics::AiSequence& seq = stats.getAiSequence();
                     alwaysActive = !seq.isEmpty() && seq.getActivePackage().alwaysActive();
@@ -1605,41 +1594,41 @@ namespace MWMechanics
                     activeFlag = 2;
                 int active = inRange ? activeFlag : 0;
 
-                CharacterController* ctrl = iter->second->getCharacterController();
+                CharacterController* const ctrl = actor.getCharacterController();
                 ctrl->setActive(active);
 
                 if (!inRange)
                 {
-                    iter->first.getRefData().getBaseNode()->setNodeMask(0);
-                    world->setActorCollisionMode(iter->first, false, false);
+                    actor.getPtr().getRefData().getBaseNode()->setNodeMask(0);
+                    world->setActorCollisionMode(actor.getPtr(), false, false);
                     continue;
                 }
                 else if (!isPlayer)
                 {
-                    iter->first.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
-                    if (!iter->second->getPositionAdjusted())
+                    actor.getPtr().getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
+                    if (!actor.getPositionAdjusted())
                     {
-                        iter->first.getClass().adjustPosition(iter->first, false);
-                        iter->second->setPositionAdjusted(true);
+                        actor.getPtr().getClass().adjustPosition(actor.getPtr(), false);
+                        actor.setPositionAdjusted(true);
                     }
                 }
 
-                const bool isDead = iter->first.getClass().getCreatureStats(iter->first).isDead();
-                if (!isDead && (!godmode || !isPlayer) && iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
+                const bool isDead = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead();
+                if (!isDead && (!godmode || !isPlayer) && actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isParalyzed())
                     ctrl->skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
-                if (iter->first == getPlayer())
+                if (actor.getPtr() == getPlayer())
                 {
                     playerCharacter = ctrl;
                     continue;
                 }
 
-                world->setActorCollisionMode(iter->first, true, !iter->first.getClass().getCreatureStats(iter->first).isDeathAnimationFinished());
+                world->setActorCollisionMode(actor.getPtr(), true, !actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDeathAnimationFinished());
                 ctrl->update(duration);
 
-                updateVisibility(iter->first, ctrl);
+                updateVisibility(actor.getPtr(), ctrl);
             }
 
             if (playerCharacter)
@@ -1649,10 +1638,10 @@ namespace MWMechanics
                 playerCharacter->setVisibility(1.f);
             }
 
-            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+            for (const Actor& actor : mActors)
             {
-                const MWWorld::Class &cls = iter->first.getClass();
-                CreatureStats &stats = cls.getCreatureStats(iter->first);
+                const MWWorld::Class &cls = actor.getPtr().getClass();
+                CreatureStats &stats = cls.getCreatureStats(actor.getPtr());
 
                 //KnockedOutOneFrameLogic
                 //Used for "OnKnockedOut" command
@@ -1684,13 +1673,13 @@ namespace MWMechanics
 
     void Actors::resurrect(const MWWorld::Ptr &ptr)
     {
-        PtrActorMap::iterator iter = mActors.find(ptr);
-        if(iter != mActors.end())
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
         {
-            if(iter->second->getCharacterController()->isDead())
+            if (iter->second->getCharacterController()->isDead())
             {
                 // Actor has been resurrected. Notify the CharacterController and re-enable collision.
-                MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, true);
+                MWBase::Environment::get().getWorld()->enableActorCollision(iter->second->getPtr(), true);
                 iter->second->getCharacterController()->resurrect();
             }
         }
@@ -1698,39 +1687,39 @@ namespace MWMechanics
 
     void Actors::killDeadActors()
     {
-        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        for (Actor& actor : mActors)
         {
-            const MWWorld::Class &cls = iter->first.getClass();
-            CreatureStats &stats = cls.getCreatureStats(iter->first);
+            const MWWorld::Class &cls = actor.getPtr().getClass();
+            CreatureStats &stats = cls.getCreatureStats(actor.getPtr());
 
             if(!stats.isDead())
                 continue;
 
-            MWBase::Environment::get().getWorld()->removeActorPath(iter->first);
-            CharacterController::KillResult killResult = iter->second->getCharacterController()->kill();
+            MWBase::Environment::get().getWorld()->removeActorPath(actor.getPtr());
+            CharacterController::KillResult killResult = actor.getCharacterController()->kill();
             if (killResult == CharacterController::Result_DeathAnimStarted)
             {
                 // Play dying words
                 // Note: It's not known whether the soundgen tags scream, roar, and moan are reliable
                 // for NPCs since some of the npc death animation files are missing them.
-                MWBase::Environment::get().getDialogueManager()->say(iter->first, "hit");
+                MWBase::Environment::get().getDialogueManager()->say(actor.getPtr(), "hit");
 
                 // Apply soultrap
-                if (iter->first.getType() == ESM::Creature::sRecordId)
-                    soulTrap(iter->first);
+                if (actor.getPtr().getType() == ESM::Creature::sRecordId)
+                    soulTrap(actor.getPtr());
 
-                if (cls.isEssential(iter->first))
+                if (cls.isEssential(actor.getPtr()))
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
             }
             else if (killResult == CharacterController::Result_DeathAnimJustFinished)
             {
-                bool isPlayer = iter->first == getPlayer();
-                notifyDied(iter->first);
+                const bool isPlayer = actor.getPtr() == getPlayer();
+                notifyDied(actor.getPtr());
 
                 // Reset magic effects and recalculate derived effects
                 // One case where we need this is to make sure bound items are removed upon death
                 float vampirism = stats.getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude();
-                stats.getActiveSpells().clear(iter->first);
+                stats.getActiveSpells().clear(actor.getPtr());
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
 
@@ -1746,7 +1735,7 @@ namespace MWMechanics
                 else
                 {
                     // NPC death animation is over, disable actor collision
-                    MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
+                    MWBase::Environment::get().getWorld()->enableActorCollision(actor.getPtr(), false);
                 }
             }
         }
@@ -1785,10 +1774,10 @@ namespace MWMechanics
 
     void Actors::purgeSpellEffects(int casterActorId)
     {
-        for (PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        for (const Actor& actor : mActors)
         {
-            MWMechanics::ActiveSpells& spells = iter->first.getClass().getCreatureStats(iter->first).getActiveSpells();
-            spells.purge(iter->first, casterActorId);
+            MWMechanics::ActiveSpells& spells = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).getActiveSpells();
+            spells.purge(actor.getPtr(), casterActorId);
         }
     }
 
@@ -1802,28 +1791,28 @@ namespace MWMechanics
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
-        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        for (const Actor& actor : mActors)
         {
-            if (iter->first.getClass().getCreatureStats(iter->first).isDead())
+            if (actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead())
             {
-                adjustMagicEffects (iter->first, duration);
+                adjustMagicEffects(actor.getPtr(), duration);
                 continue;
             }
 
-            if (!sleep || iter->first == player)
-                restoreDynamicStats(iter->first, hours, sleep);
+            if (!sleep || actor.getPtr() == player)
+                restoreDynamicStats(actor.getPtr(), hours, sleep);
 
-            if ((!iter->first.getRefData().getBaseNode()) ||
-                    (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() > mActorsProcessingRange*mActorsProcessingRange)
+            if ((!actor.getPtr().getRefData().getBaseNode()) ||
+                    (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length2() > mActorsProcessingRange*mActorsProcessingRange)
                 continue;
 
-            adjustMagicEffects (iter->first, duration);
+            adjustMagicEffects (actor.getPtr(), duration);
 
-            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(actor.getPtr());
             if (animation)
             {
                 animation->removeEffects();
-                MWBase::Environment::get().getWorld()->applyLoopingParticles(iter->first);
+                MWBase::Environment::get().getWorld()->applyLoopingParticles(actor.getPtr());
             }
         }
 
@@ -1935,15 +1924,15 @@ namespace MWMechanics
 
     void Actors::forceStateUpdate(const MWWorld::Ptr & ptr)
     {
-        PtrActorMap::iterator iter = mActors.find(ptr);
-        if(iter != mActors.end())
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
             iter->second->getCharacterController()->forceStateUpdate();
     }
 
     bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist)
     {
-        PtrActorMap::iterator iter = mActors.find(ptr);
-        if(iter != mActors.end())
+        const auto iter = mIndex.find(ptr.mRef);
+        if(iter != mIndex.end())
         {
             return iter->second->getCharacterController()->playGroup(groupName, mode, number, persist);
         }
@@ -1955,55 +1944,55 @@ namespace MWMechanics
     }
     void Actors::skipAnimation(const MWWorld::Ptr& ptr)
     {
-        PtrActorMap::iterator iter = mActors.find(ptr);
-        if(iter != mActors.end())
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
             iter->second->getCharacterController()->skipAnim();
     }
 
     bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName)
     {
-        PtrActorMap::iterator iter = mActors.find(ptr);
-        if(iter != mActors.end())
+        const auto iter = mIndex.find(ptr.mRef);
+        if(iter != mIndex.end())
             return iter->second->getCharacterController()->isAnimPlaying(groupName);
         return false;
     }
 
     void Actors::persistAnimationStates()
     {
-        for (PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
-            iter->second->getCharacterController()->persistAnimationState();
+        for (Actor& actor : mActors)
+            actor.getCharacterController()->persistAnimationState();
     }
 
     void Actors::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out)
     {
-        for (PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
+        for (const Actor& actor : mActors)
         {
-            if ((iter->first.getRefData().getPosition().asVec3() - position).length2() <= radius*radius)
-                out.push_back(iter->first);
+            if ((actor.getPtr().getRefData().getPosition().asVec3() - position).length2() <= radius*radius)
+                out.push_back(actor.getPtr());
         }
     }
 
     bool Actors::isAnyObjectInRange(const osg::Vec3f& position, float radius)
     {
-        for (PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
+        for (const Actor& actor : mActors)
         {
-            if ((iter->first.getRefData().getPosition().asVec3() - position).length2() <= radius*radius)
+            if ((actor.getPtr().getRefData().getPosition().asVec3() - position).length2() <= radius*radius)
                 return true;
         }
 
         return false;
     }
 
-    std::vector<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actor)
+    std::vector<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actorPtr)
     {
         std::vector<MWWorld::Ptr> list;
-        for(PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
+        for (const Actor& actor : mActors)
         {
-            const MWWorld::Ptr &iteratedActor = iter->first;
+            const MWWorld::Ptr& iteratedActor = actor.getPtr();
             if (iteratedActor == getPlayer())
                 continue;
 
-            const bool sameActor = (iteratedActor == actor);
+            const bool sameActor = (iteratedActor == actorPtr);
 
             const CreatureStats &stats = iteratedActor.getClass().getCreatureStats(iteratedActor);
             if (stats.isDead())
@@ -2019,7 +2008,7 @@ namespace MWMechanics
                     {
                         list.push_back(package->getTarget());
                     }
-                    else if (package->getTarget() == actor)
+                    else if (package->getTarget() == actorPtr)
                     {
                         list.push_back(iteratedActor);
                     }
@@ -2032,13 +2021,13 @@ namespace MWMechanics
         return list;
     }
 
-    std::vector<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
+    std::vector<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actorPtr)
     {
         std::vector<MWWorld::Ptr> list;
-        forEachFollowingPackage(mActors, actor, getPlayer(), [&] (auto& iter, const std::shared_ptr<AiPackage>& package)
+        forEachFollowingPackage(mActors, actorPtr, getPlayer(), [&] (const Actor& actor, const std::shared_ptr<AiPackage>& package)
         {
-            if (package->followTargetThroughDoors() && package->getTarget() == actor)
-                list.push_back(iter.first);
+            if (package->followTargetThroughDoors() && package->getTarget() == actorPtr)
+                list.push_back(actor.getPtr());
             else if (package->getTypeId() != AiPackageTypeId::Combat && package->getTypeId() != AiPackageTypeId::Wander)
                 return false;
             return true;
@@ -2086,7 +2075,7 @@ namespace MWMechanics
     std::vector<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
     {
         std::vector<int> list;
-        forEachFollowingPackage(mActors, actor, getPlayer(), [&] (auto& iter, const std::shared_ptr<AiPackage>& package)
+        forEachFollowingPackage(mActors, actor, getPlayer(), [&] (const Actor&, const std::shared_ptr<AiPackage>& package)
         {
             if (package->followTargetThroughDoors() && package->getTarget() == actor)
             {
@@ -2103,12 +2092,12 @@ namespace MWMechanics
     std::map<int, MWWorld::Ptr> Actors::getActorsFollowingByIndex(const MWWorld::Ptr &actor)
     {
         std::map<int, MWWorld::Ptr> map;
-        forEachFollowingPackage(mActors, actor, getPlayer(), [&] (auto& iter, const std::shared_ptr<AiPackage>& package)
+        forEachFollowingPackage(mActors, actor, getPlayer(), [&] (const Actor& otherActor, const std::shared_ptr<AiPackage>& package)
         {
             if (package->followTargetThroughDoors() && package->getTarget() == actor)
             {
                 int index = static_cast<const AiFollow*>(package.get())->getFollowIndex();
-                map[index] = iter.first;
+                map[index] = otherActor.getPtr();
                 return false;
             }
             else if (package->getTypeId() != AiPackageTypeId::Combat && package->getTypeId() != AiPackageTypeId::Wander)
@@ -2190,12 +2179,7 @@ namespace MWMechanics
 
     void Actors::clear()
     {
-        PtrActorMap::iterator it(mActors.begin());
-        for (; it != mActors.end(); ++it)
-        {
-            delete it->second;
-            it->second = nullptr;
-        }
+        mIndex.clear();
         mActors.clear();
         mDeathCount.clear();
     }
@@ -2207,8 +2191,8 @@ namespace MWMechanics
 
     bool Actors::isReadyToBlock(const MWWorld::Ptr &ptr) const
     {
-        PtrActorMap::const_iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return false;
 
         return it->second->getCharacterController()->isReadyToBlock();
@@ -2216,8 +2200,8 @@ namespace MWMechanics
 
     bool Actors::isCastingSpell(const MWWorld::Ptr &ptr) const
     {
-        PtrActorMap::const_iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return false;
 
         return it->second->getCharacterController()->isCastingSpell();
@@ -2225,8 +2209,8 @@ namespace MWMechanics
 
     bool Actors::isAttackingOrSpell(const MWWorld::Ptr& ptr) const
     {
-        PtrActorMap::const_iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return false;
         CharacterController* ctrl = it->second->getCharacterController();
 
@@ -2235,8 +2219,8 @@ namespace MWMechanics
 
     int Actors::getGreetingTimer(const MWWorld::Ptr& ptr) const
     {
-        PtrActorMap::const_iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return 0;
 
         return it->second->getGreetingTimer();
@@ -2244,8 +2228,8 @@ namespace MWMechanics
 
     float Actors::getAngleToPlayer(const MWWorld::Ptr& ptr) const
     {
-        PtrActorMap::const_iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return 0.f;
 
         return it->second->getAngleToPlayer();
@@ -2253,8 +2237,8 @@ namespace MWMechanics
 
     GreetingState Actors::getGreetingState(const MWWorld::Ptr& ptr) const
     {
-        PtrActorMap::const_iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return Greet_None;
 
         return it->second->getGreetingState();
@@ -2262,8 +2246,8 @@ namespace MWMechanics
 
     bool Actors::isTurningToPlayer(const MWWorld::Ptr& ptr) const
     {
-        PtrActorMap::const_iterator it = mActors.find(ptr);
-        if (it == mActors.end())
+        const auto it = mIndex.find(ptr.mRef);
+        if (it == mIndex.end())
             return false;
 
         return it->second->isTurningToPlayer();
@@ -2274,11 +2258,9 @@ namespace MWMechanics
         if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
             return;
 
-        // making a copy since fast-forward could move actor to a different cell and invalidate the mActors iterator
-        PtrActorMap map = mActors;
-        for (PtrActorMap::iterator it = map.begin(); it != map.end(); ++it)
+        for (const Actor& actor : mActors)
         {
-            MWWorld::Ptr ptr = it->first;
+            const MWWorld::Ptr ptr = actor.getPtr();
             if (ptr == getPlayer()
                     || !isConscious(ptr)
                     || ptr.getClass().getCreatureStats(ptr).isParalyzed())

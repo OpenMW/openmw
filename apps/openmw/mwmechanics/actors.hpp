@@ -7,7 +7,8 @@
 #include <list>
 #include <map>
 
-#include "../mwmechanics/actorutil.hpp"
+#include "actorutil.hpp"
+#include "actor.hpp"
 
 namespace ESM
 {
@@ -42,12 +43,9 @@ namespace MWMechanics
         public:
 
             Actors();
-            ~Actors();
 
-            typedef std::map<MWWorld::Ptr,Actor*> PtrActorMap;
-
-            PtrActorMap::const_iterator begin() { return mActors.begin(); }
-            PtrActorMap::const_iterator end() { return mActors.end(); }
+            std::list<Actor>::const_iterator begin() const { return mActors.begin(); }
+            std::list<Actor>::const_iterator end() const { return mActors.end(); }
             std::size_t size() const { return mActors.size(); }
 
             void notifyDied(const MWWorld::Ptr &actor);
@@ -190,7 +188,8 @@ namespace MWMechanics
             };
 
             std::map<std::string, int> mDeathCount;
-            PtrActorMap mActors;
+            std::list<Actor> mActors;
+            std::map<const MWWorld::LiveCellRefBase*, std::list<Actor>::iterator> mIndex;
             float mTimerDisposeSummonsCorpses;
             float mTimerUpdateHeadTrack = 0;
             float mTimerUpdateEquippedLight = 0;
