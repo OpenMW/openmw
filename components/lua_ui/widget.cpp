@@ -340,7 +340,7 @@ namespace LuaUi
     {
         auto it = mCallbacks.find(name);
         if (it != mCallbacks.end())
-            it->second(argument, mLayout);
+            it->second.call(argument, mLayout);
     }
 
     void WidgetExtension::keyPress(MyGUI::Widget*, MyGUI::KeyCode code, MyGUI::Char ch)

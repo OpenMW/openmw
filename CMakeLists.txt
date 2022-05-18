@@ -449,7 +449,7 @@ else(USE_LUAJIT)
 endif(USE_LUAJIT)
 
 # C++ library binding to Lua
-set(SOL_INCLUDE_DIR ${OpenMW_SOURCE_DIR}/extern/sol3.2.2)
+set(SOL_INCLUDE_DIR ${OpenMW_SOURCE_DIR}/extern/sol3)
 set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 
 include_directories(
