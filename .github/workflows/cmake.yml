@@ -7,6 +7,9 @@ on:
 env:
   BUILD_TYPE: RelWithDebInfo
 
+permissions:
+  contents: read
+
 jobs:
   Ubuntu:
     runs-on: ubuntu-latest
