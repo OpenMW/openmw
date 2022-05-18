@@ -127,7 +127,7 @@
 -- end
 
 ---
--- Index of the layer with the givent name. Returns nil if the layer doesn't exist
+-- Index of the layer with the given name. Returns nil if the layer doesn't exist
 -- @function [parent=#Layers] indexOf
 -- @param #string name Name of the layer
 -- @return #number, #nil index

@@ -659,7 +659,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this door (can be empty)
+-- @field #string mwscript MWScript on this weapon (can be empty)
 -- @field #string icon
 -- @field #string enchant
 -- @field #boolean isMagical
