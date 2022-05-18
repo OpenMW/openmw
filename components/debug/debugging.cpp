@@ -61,6 +61,9 @@ namespace Debug
     }
 #endif
 
+    static LogListener logListener;
+    void setLogListener(LogListener listener) { logListener = std::move(listener); }
+
     std::streamsize DebugOutputBase::write(const char *str, std::streamsize size)
     {
         if (size <= 0)
@@ -94,6 +97,8 @@ namespace Debug
                 lineSize++;
             writeImpl(prefix, prefixSize, level);
             writeImpl(msg.data(), lineSize, level);
+            if (logListener)
+                logListener(level, std::string_view(prefix, prefixSize), std::string_view(msg.data(), lineSize));
             msg = msg.substr(lineSize);
         }
 
