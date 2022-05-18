@@ -5,24 +5,24 @@
 namespace MWMechanics
 {
     Actor::Actor(const MWWorld::Ptr &ptr, MWRender::Animation *animation)
-     : mPositionAdjusted(false)
+        : mCharacterController(ptr, animation)
+        , mPositionAdjusted(false)
     {
-        mCharacterController.reset(new CharacterController(ptr, animation));
     }
 
     const MWWorld::Ptr& Actor::getPtr() const
     {
-        return mCharacterController->getPtr();
+        return mCharacterController.getPtr();
     }
 
     void Actor::updatePtr(const MWWorld::Ptr &newPtr)
     {
-        mCharacterController->updatePtr(newPtr);
+        mCharacterController.updatePtr(newPtr);
     }
 
-    CharacterController* Actor::getCharacterController()
+    CharacterController& Actor::getCharacterController()
     {
-        return mCharacterController.get();
+        return mCharacterController;
     }
 
     int Actor::getGreetingTimer() const

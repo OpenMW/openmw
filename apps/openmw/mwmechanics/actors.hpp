@@ -200,7 +200,7 @@ namespace MWMechanics
             bool mSmoothMovement;
             MusicType mCurrentMusic = MusicType::Explore;
 
-            void updateVisibility (const MWWorld::Ptr& ptr, CharacterController* ctrl);
+            void updateVisibility (const MWWorld::Ptr& ptr, CharacterController& ctrl);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature, float duration);
 

@@ -241,7 +241,10 @@ public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
 
-    const MWWorld::Ptr& getPtr() const { return mPtr; };
+    CharacterController(const CharacterController&) = delete;
+    CharacterController(CharacterController&&) = delete;
+
+    const MWWorld::Ptr& getPtr() const { return mPtr; }
 
     void handleTextKey(const std::string &groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map) override;
 

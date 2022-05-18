@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "actorutil.hpp"
+#include "character.hpp"
 
 #include <components/misc/timer.hpp>
 
@@ -18,8 +19,6 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    class CharacterController;
-
     /// @brief Holds temporary state for an actor that will be discarded when the actor leaves the scene.
     class Actor
     {
@@ -31,7 +30,7 @@ namespace MWMechanics
         /// Notify this actor of its new base object Ptr, use when the object changed cells
         void updatePtr(const MWWorld::Ptr& newPtr);
 
-        CharacterController* getCharacterController();
+        CharacterController& getCharacterController();
 
         int getGreetingTimer() const;
         void setGreetingTimer(int timer);
@@ -51,7 +50,7 @@ namespace MWMechanics
         bool getPositionAdjusted() const;
 
     private:
-        std::unique_ptr<CharacterController> mCharacterController;
+        CharacterController mCharacterController;
         int mGreetingTimer{0};
         float mTargetAngleRadians{0.f};
         GreetingState mGreetingState{Greet_None};

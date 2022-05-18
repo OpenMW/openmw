@@ -774,9 +774,7 @@ namespace MWMechanics
         const auto it = mIndex.find(ptr.mRef);
         if (it == mIndex.end())
             return false;
-        CharacterController* ctrl = it->second->getCharacterController();
-
-        return ctrl->isAttackPreparing();
+        return it->second->getCharacterController().isAttackPreparing();
     }
 
     bool Actors::isRunning(const MWWorld::Ptr& ptr)
@@ -784,9 +782,7 @@ namespace MWMechanics
         const auto it = mIndex.find(ptr.mRef);
         if (it == mIndex.end())
             return false;
-        CharacterController* ctrl = it->second->getCharacterController();
-
-        return ctrl->isRunning();
+        return it->second->getCharacterController().isRunning();
     }
 
     bool Actors::isSneaking(const MWWorld::Ptr& ptr)
@@ -794,9 +790,7 @@ namespace MWMechanics
         const auto it = mIndex.find(ptr.mRef);
         if (it == mIndex.end())
             return false;
-        CharacterController* ctrl = it->second->getCharacterController();
-
-        return ctrl->isSneaking();
+        return it->second->getCharacterController().isSneaking();
     }
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer)
@@ -1055,9 +1049,8 @@ namespace MWMechanics
         const auto it = mActors.emplace(mActors.end(), ptr, anim);
         mIndex.emplace(ptr.mRef, it);
 
-        CharacterController* ctrl = it->getCharacterController();
         if (updateImmediately)
-            ctrl->update(0);
+            it->getCharacterController().update(0);
 
         // We should initially hide actors outside of processing range.
         // Note: since we update player after other actors, distance will be incorrect during teleportation.
@@ -1065,10 +1058,10 @@ namespace MWMechanics
         if (MWBase::Environment::get().getWorld()->getPlayer().wasTeleported())
             return;
 
-        updateVisibility(ptr, ctrl);
+        updateVisibility(ptr, it->getCharacterController());
     }
 
-    void Actors::updateVisibility (const MWWorld::Ptr& ptr, CharacterController* ctrl)
+    void Actors::updateVisibility (const MWWorld::Ptr& ptr, CharacterController& ctrl)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         if (ptr == player)
@@ -1093,7 +1086,7 @@ namespace MWMechanics
 
         visibilityRatio = std::min(1.f, visibilityRatio);
 
-        ctrl->setVisibility(visibilityRatio);
+        ctrl.setVisibility(visibilityRatio);
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr, bool keepActive)
@@ -1112,7 +1105,7 @@ namespace MWMechanics
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
-            iter->second->getCharacterController()->castSpell(spellId, manualSpell);
+            iter->second->getCharacterController().castSpell(spellId, manualSpell);
     }
 
     bool Actors::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)
@@ -1402,7 +1395,7 @@ namespace MWMechanics
             for (Actor& actor : mActors)
             {
                 const bool isPlayer = actor.getPtr() == player;
-                CharacterController* const  ctrl = actor.getCharacterController();
+                CharacterController& ctrl = actor.getCharacterController();
                 MWBase::LuaManager::ActorControls* luaControls =
                     MWBase::Environment::get().getLuaManager()->getActorControls(actor.getPtr());
 
@@ -1428,7 +1421,7 @@ namespace MWMechanics
                     // They can be added during the death animation
                     if (!actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDeathAnimationFinished())
                         adjustMagicEffects(actor.getPtr(), duration);
-                    ctrl->updateContinuousVfx();
+                    ctrl.updateContinuousVfx();
                 }
                 else
                 {
@@ -1441,7 +1434,7 @@ namespace MWMechanics
                     // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
                     // so updating VFX immediately after that would just remove the particle effects instantly.
                     // There needs to be a magic effect update in between.
-                    ctrl->updateContinuousVfx();
+                    ctrl.updateContinuousVfx();
 
                     if (!cellChanged && world->hasCellChanged())
                     {
@@ -1498,7 +1491,7 @@ namespace MWMechanics
                                 }
                             }
 
-                            ctrl->setHeadTrackTarget(headTrackTarget);
+                            ctrl.setHeadTrackTarget(headTrackTarget);
                         }
 
                         if (actor.getPtr().getClass().isNpc() && actor.getPtr() != player)
@@ -1509,7 +1502,7 @@ namespace MWMechanics
                             CreatureStats &stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
                             if (isConscious(actor.getPtr()) && !(luaControls && luaControls->mDisableAI))
                             {
-                                stats.getAiSequence().execute(actor.getPtr(), *ctrl, duration);
+                                stats.getAiSequence().execute(actor.getPtr(), ctrl, duration);
                                 updateGreetingState(actor.getPtr(), actor, mTimerUpdateHello > 0);
                                 playIdleDialogue(actor.getPtr());
                                 updateMovementSpeed(actor.getPtr());
@@ -1519,13 +1512,13 @@ namespace MWMechanics
                     else if (aiActive && actor.getPtr() != player && isConscious(actor.getPtr()) && !(luaControls && luaControls->mDisableAI))
                     {
                         CreatureStats &stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
-                        stats.getAiSequence().execute(actor.getPtr(), *ctrl, duration, /*outOfRange*/true);
+                        stats.getAiSequence().execute(actor.getPtr(), ctrl, duration, /*outOfRange*/true);
                     }
 
                     if (inProcessingRange && actor.getPtr().getClass().isNpc())
                     {
                         // We can not update drowning state for actors outside of AI distance - they can not resurface to breathe
-                        updateDrowning(actor.getPtr(), duration, ctrl->isKnockedOut(), isPlayer);
+                        updateDrowning(actor.getPtr(), duration, ctrl.isKnockedOut(), isPlayer);
                     }
                     if (mTimerUpdateEquippedLight == 0 && actor.getPtr().getClass().hasInventoryStore(actor.getPtr()))
                         updateEquippedLight(actor.getPtr(), updateEquippedLightInterval, showTorches);
@@ -1594,8 +1587,8 @@ namespace MWMechanics
                     activeFlag = 2;
                 int active = inRange ? activeFlag : 0;
 
-                CharacterController* const ctrl = actor.getCharacterController();
-                ctrl->setActive(active);
+                CharacterController& ctrl = actor.getCharacterController();
+                ctrl.setActive(active);
 
                 if (!inRange)
                 {
@@ -1615,18 +1608,18 @@ namespace MWMechanics
 
                 const bool isDead = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead();
                 if (!isDead && (!godmode || !isPlayer) && actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isParalyzed())
-                    ctrl->skipAnim();
+                    ctrl.skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
                 if (actor.getPtr() == getPlayer())
                 {
-                    playerCharacter = ctrl;
+                    playerCharacter = &ctrl;
                     continue;
                 }
 
                 world->setActorCollisionMode(actor.getPtr(), true, !actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDeathAnimationFinished());
-                ctrl->update(duration);
+                ctrl.update(duration);
 
                 updateVisibility(actor.getPtr(), ctrl);
             }
@@ -1676,11 +1669,11 @@ namespace MWMechanics
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
         {
-            if (iter->second->getCharacterController()->isDead())
+            if (iter->second->getCharacterController().isDead())
             {
                 // Actor has been resurrected. Notify the CharacterController and re-enable collision.
                 MWBase::Environment::get().getWorld()->enableActorCollision(iter->second->getPtr(), true);
-                iter->second->getCharacterController()->resurrect();
+                iter->second->getCharacterController().resurrect();
             }
         }
     }
@@ -1696,7 +1689,7 @@ namespace MWMechanics
                 continue;
 
             MWBase::Environment::get().getWorld()->removeActorPath(actor.getPtr());
-            CharacterController::KillResult killResult = actor.getCharacterController()->kill();
+            CharacterController::KillResult killResult = actor.getCharacterController().kill();
             if (killResult == CharacterController::Result_DeathAnimStarted)
             {
                 // Play dying words
@@ -1926,7 +1919,7 @@ namespace MWMechanics
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
-            iter->second->getCharacterController()->forceStateUpdate();
+            iter->second->getCharacterController().forceStateUpdate();
     }
 
     bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist)
@@ -1934,7 +1927,7 @@ namespace MWMechanics
         const auto iter = mIndex.find(ptr.mRef);
         if(iter != mIndex.end())
         {
-            return iter->second->getCharacterController()->playGroup(groupName, mode, number, persist);
+            return iter->second->getCharacterController().playGroup(groupName, mode, number, persist);
         }
         else
         {
@@ -1946,21 +1939,21 @@ namespace MWMechanics
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
-            iter->second->getCharacterController()->skipAnim();
+            iter->second->getCharacterController().skipAnim();
     }
 
     bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName)
     {
         const auto iter = mIndex.find(ptr.mRef);
         if(iter != mIndex.end())
-            return iter->second->getCharacterController()->isAnimPlaying(groupName);
+            return iter->second->getCharacterController().isAnimPlaying(groupName);
         return false;
     }
 
     void Actors::persistAnimationStates()
     {
         for (Actor& actor : mActors)
-            actor.getCharacterController()->persistAnimationState();
+            actor.getCharacterController().persistAnimationState();
     }
 
     void Actors::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out)
@@ -2195,7 +2188,7 @@ namespace MWMechanics
         if (it == mIndex.end())
             return false;
 
-        return it->second->getCharacterController()->isReadyToBlock();
+        return it->second->getCharacterController().isReadyToBlock();
     }
 
     bool Actors::isCastingSpell(const MWWorld::Ptr &ptr) const
@@ -2204,7 +2197,7 @@ namespace MWMechanics
         if (it == mIndex.end())
             return false;
 
-        return it->second->getCharacterController()->isCastingSpell();
+        return it->second->getCharacterController().isCastingSpell();
     }
 
     bool Actors::isAttackingOrSpell(const MWWorld::Ptr& ptr) const
@@ -2212,9 +2205,8 @@ namespace MWMechanics
         const auto it = mIndex.find(ptr.mRef);
         if (it == mIndex.end())
             return false;
-        CharacterController* ctrl = it->second->getCharacterController();
 
-        return ctrl->isAttackingOrSpell();
+        return it->second->getCharacterController().isAttackingOrSpell();
     }
 
     int Actors::getGreetingTimer(const MWWorld::Ptr& ptr) const
