@@ -69,3 +69,8 @@
 		[flawfinder.ruleset.identifier]
 			type = "flawfinder_func_name"
 			value = "printf"  # only false positives, sigh
+	[[flawfinder.ruleset]]
+		disable = true
+		[flawfinder.ruleset.identifier]
+			type = "flawfinder_func_name"
+			value = "system"  # only false positives, sigh
