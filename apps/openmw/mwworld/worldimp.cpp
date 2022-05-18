@@ -3697,7 +3697,7 @@ namespace MWWorld
         const ESM::CreatureLevList* list = mStore.get<ESM::CreatureLevList>().find(creatureList);
 
         static int iNumberCreatures = mStore.get<ESM::GameSetting>().find("iNumberCreatures")->mValue.getInteger();
-        int numCreatures = 1 + Misc::Rng::rollDice(iNumberCreatures); // [1, iNumberCreatures]
+        int numCreatures = 1 + Misc::Rng::rollDice(iNumberCreatures, mPrng); // [1, iNumberCreatures]
 
         for (int i=0; i<numCreatures; ++i)
         {

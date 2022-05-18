@@ -819,7 +819,8 @@ namespace
 
         Misc::Rng::init(42);
 
-        const auto result = findRandomPointAroundCircle(*mNavigator, mAgentHalfExtents, mStart, 100.0, Flag_walk);
+        const auto result = findRandomPointAroundCircle(*mNavigator, mAgentHalfExtents, mStart, 100.0, Flag_walk, 
+            []() { return Misc::Rng::rollClosedProbability(); });
 
         ASSERT_THAT(result, Optional(Vec3fEq(70.35845947265625, 335.592041015625, -2.6667339801788330078125)))
             << (result ? *result : osg::Vec3f());

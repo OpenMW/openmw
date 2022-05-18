@@ -142,7 +142,8 @@ void HeadAnimationTime::setEnabled(bool enabled)
 
 void HeadAnimationTime::resetBlinkTimer()
 {
-    mBlinkTimer = -(2.0f + Misc::Rng::rollDice(6));
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    mBlinkTimer = -(2.0f + Misc::Rng::rollDice(6, prng));
 }
 
 void HeadAnimationTime::update(float dt)
