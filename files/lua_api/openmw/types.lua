@@ -748,6 +748,19 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Returns the read-only @{#ActivatorRecord} of an activator
+-- @function [parent=#Activator] record
+-- @param #any objectOrRecordId
+-- @return #ActivatorRecord
+
+---
+-- @type ActivatorRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this activator (can be empty)
+
 --- @{#Container} functions
 -- @field [parent=#types] #Container Container
 
