@@ -160,7 +160,6 @@ namespace MWLua
         addType(ObjectTypeName::Player, {ESM::REC_INTERNAL_PLAYER}, ObjectTypeName::NPC);
 
         addType(ObjectTypeName::Armor, {ESM::REC_ARMO}, ObjectTypeName::Item);
-        addType(ObjectTypeName::Book, {ESM::REC_BOOK}, ObjectTypeName::Item);
         addType(ObjectTypeName::Clothing, {ESM::REC_CLOT}, ObjectTypeName::Item);
         addType(ObjectTypeName::Ingredient, {ESM::REC_INGR}, ObjectTypeName::Item);
         addType(ObjectTypeName::Light, {ESM::REC_LIGH}, ObjectTypeName::Item);
