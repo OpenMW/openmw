@@ -500,7 +500,8 @@ is not wanted and you want a custom render target.
 
 To use the render target you must assign passes to it, along with any optional clear modes or custom blend modes.
 
-In the code snippet below a rendertarget is used to draw the red cannel of a scene at half resolution.
+In the code snippet below a rendertarget is used to draw the red cannel of a scene at half resolution, then a quarter. As a restriction,
+only three render targets can be bound per pass with ``rt1``, ``rt2``, ``rt3``, respectively.
 
 .. code-block:: none
 
@@ -512,6 +513,11 @@ In the code snippet below a rendertarget is used to draw the red cannel of a sce
         source_format = red;
     }
 
+    render_target RT_Downsample4 {
+        width_ratio = 0.25;
+        height_ratio = 0.25;
+    }
+
     fragment downsample2x(target=RT_Downsample) {
 
         omw_In vec2 omw_TexCoord;
@@ -519,6 +525,16 @@ In the code snippet below a rendertarget is used to draw the red cannel of a sce
         void main()
         {
             omw_FragColor.r = omw_GetLastShader(omw_TexCoord).r;
+        }
+    }
+
+    fragment downsample4x(target=RT_Downsample4, rt1=RT_Downsample) {
+
+        omw_In vec2 omw_TexCoord;
+
+        void main()
+        {
+            omw_FragColor = omw_Texture2D(RT_Downsample, omw_TexCoord);
         }
     }
 

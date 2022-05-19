@@ -822,6 +822,21 @@ namespace fx
                 expect<Lexer::Literal>();
                 pass->mTarget = std::get<Lexer::Literal>(mToken).value;
             }
+            else if (key == "rt1")
+            {
+                expect<Lexer::Literal>();
+                pass->mRenderTargets[0] = std::get<Lexer::Literal>(mToken).value;
+            }
+            else if (key == "rt2")
+            {
+                expect<Lexer::Literal>();
+                pass->mRenderTargets[1] = std::get<Lexer::Literal>(mToken).value;
+            }
+            else if (key == "rt3")
+            {
+                expect<Lexer::Literal>();
+                pass->mRenderTargets[2] =std::get<Lexer::Literal>(mToken).value;
+            }
             else if (key == "blend")
             {
                 expect<Lexer::Open_Parenthesis>();
