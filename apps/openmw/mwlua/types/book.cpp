@@ -19,7 +19,7 @@ namespace MWLua
         sol::table skill(context.mLua->sol(), sol::create);
         book["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
         for (int id = ESM::Skill::Block; id < ESM::Skill::Length; ++id)
-            skill[(ESM::Skill::sSkillNames[id])] = id;
+            skill[Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id])] = Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id]);
 
         const MWWorld::Store<ESM::Book>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Book>();
         book["record"] = sol::overload(
@@ -35,9 +35,15 @@ namespace MWLua
         record["text"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mText; });
         record["enchant"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mEnchant; });
         record["isScroll"] = sol::readonly_property([](const ESM::Book& rec) -> bool { return rec.mData.mIsScroll; });
-        record["skill"] = sol::readonly_property([](const ESM::Book& rec) -> int { return rec.mData.mSkillId; });
         record["value"] = sol::readonly_property([](const ESM::Book& rec) -> int { return rec.mData.mValue; });
         record["weight"] = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mWeight; });
         record["enchantCapacity"] = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mEnchant * 0.1f; });
+        record["skill"] = sol::readonly_property([](const ESM::Book& rec) -> sol::optional<std::string>
+        { 
+            if (rec.mData.mSkillId >= 0)
+                return Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[rec.mData.mSkillId]);
+            else
+                return sol::nullopt;
+        });
     }
 }

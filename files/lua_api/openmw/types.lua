@@ -534,33 +534,33 @@
 
 --- Book.SKILL
 -- @type BookSKILL
--- @field #number Acrobatics
--- @field #number Alchemy
--- @field #number Alteration
--- @field #number Armorer
--- @field #number Athletics
--- @field #number Axe
--- @field #number Block
--- @field #number BluntWeapon
--- @field #number Conjuration
--- @field #number Destruction
--- @field #number Enchant
--- @field #number HandToHand
--- @field #number HeavyArmor
--- @field #number Illusion
--- @field #number LightArmor
--- @field #number LongBlade
--- @field #number Marksman
--- @field #number MediumArmor
--- @field #number Mercantile
--- @field #number Mysticism
--- @field #number Restoration
--- @field #number Security
--- @field #number ShortBlade
--- @field #number Sneak
--- @field #number Spear
--- @field #number Speechcraft
--- @field #number Unarmored
+-- @field #string acrobatics "acrobatics"
+-- @field #string alchemy "alchemy"
+-- @field #string alteration "alteration"
+-- @field #string armorer "armorer"
+-- @field #string athletics "athletics"
+-- @field #string axe "axe"
+-- @field #string block "block"
+-- @field #string bluntWeapon "bluntweapon"
+-- @field #string conjuration "conjuration"
+-- @field #string destruction "destruction"
+-- @field #string enchant "enchant"
+-- @field #string handToHand "handtohand"
+-- @field #string heavyArmor "heavyarmor"
+-- @field #string illusion "illusion"
+-- @field #string lightArmor "lightarmor"
+-- @field #string longBlade "longblade"
+-- @field #string marksman "marksman"
+-- @field #string mediumArmor "mediumarmor"
+-- @field #string mercantile "mercantile"
+-- @field #string mysticism "mysticism"
+-- @field #string restoration "restoration"
+-- @field #string security "security"
+-- @field #string shortBlade "shortblade"
+-- @field #string sneak "sneak"
+-- @field #string spear "spear"
+-- @field #string speechcraft "speechcraft"
+-- @field #string unarmored "unarmored"
 
 --- @{#BookSKILL}
 -- @field [parent=#Book] #BookSKILL SKILL
@@ -582,7 +582,7 @@
 -- @field #string text The text content of the book
 -- @field #number weight
 -- @field #number value
--- @field #number skill See @{#Book.SKILL} The skill that this book teaches
+-- @field #string skill The skill that this book teaches. See @{#Book.SKILL} 
 -- @field #boolean isScroll 
 -- @field #number enchantCapacity
 
