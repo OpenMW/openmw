@@ -6,7 +6,7 @@ local auxUi = require('openmw_aux.ui')
 local constants = require('scripts.omw.mwui.constants')
 
 local v2 = util.vector2
-local whiteTexture = ui.texture{ path = 'white' }
+local whiteTexture = constants.whiteTexture
 local menuTransparency = ui._getMenuTransparency()
 
 local sideParts = {
