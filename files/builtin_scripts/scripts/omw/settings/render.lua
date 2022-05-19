@@ -110,6 +110,7 @@ local function renderSetting(group, setting, value, global)
             },
         }
     end
+    local argument = common.getArgumentSection(global, group.key):get(setting.key)
     return {
         name = setting.key,
         type = ui.TYPE.Flex,
@@ -123,7 +124,7 @@ local function renderSetting(group, setting, value, global)
         content = ui.content {
             titleLayout,
             growingIntreval,
-            renderFunction(value, set, setting.argument),
+            renderFunction(value, set, argument),
         },
     }
 end
@@ -350,6 +351,20 @@ local function onGroupRegistered(global, key)
     }
     table.insert(groups[group.page], pageGroup)
     common.getSection(global, group.key):subscribe(onSettingChanged(global))
+    common.getArgumentSection(global, group.key):subscribe(async:callback(function(_, settingKey)
+        local groupKey = group.key
+        local group = common.getSection(global, common.groupSectionKey):get(groupKey)
+        if not group or not pageOptions[group.page] then return end
+
+        local value = common.getSection(global, group.key):get(settingKey)
+
+        local element = pageOptions[group.page].element
+        local groupsLayout = element.layout.content.groups
+        local groupLayout = groupsLayout.content[groupLayoutName(group.key, global)]
+        local settingsContent = groupLayout.content.settings.content
+        settingsContent[settingKey] = renderSetting(group, group.settings[settingKey], value, global)
+        element:update()
+    end))
 
     if not pages[group.page] then return end
     local options = renderPage(pages[group.page])

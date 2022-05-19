@@ -38,7 +38,7 @@ namespace LuaUtil
 
     void LuaStorage::Section::runCallbacks(sol::optional<std::string_view> changedKey)
     {
-        mStorage->mRunningCallbacks = true;
+        mStorage->mRunningCallbacks.insert(this);
         mCallbacks.erase(std::remove_if(mCallbacks.begin(), mCallbacks.end(), [&](const Callback& callback)
         {
             bool valid = callback.isValid();
@@ -46,13 +46,20 @@ namespace LuaUtil
                 callback.tryCall(mSectionName, changedKey);
             return !valid;
         }), mCallbacks.end());
-        mStorage->mRunningCallbacks = false;
+        mStorage->mRunningCallbacks.erase(this);
+    }
+
+    void LuaStorage::Section::throwIfCallbackRecursionIsTooDeep()
+    {
+        if (mStorage->mRunningCallbacks.count(this) > 0)
+            throw std::runtime_error("Storage handler shouldn't change the storage section it handles (leads to an infinite recursion)");
+        if (mStorage->mRunningCallbacks.size() > 10)
+            throw std::runtime_error("Too many subscribe callbacks triggering in a chain, likely an infinite recursion");
     }
 
     void LuaStorage::Section::set(std::string_view key, const sol::object& value)
     {
-        if (mStorage->mRunningCallbacks)
-            throw std::runtime_error("Not allowed to change storage in storage handlers because it can lead to an infinite recursion");
+        throwIfCallbackRecursionIsTooDeep();
         if (value != sol::nil)
             mValues[std::string(key)] = Value(value);
         else
@@ -68,8 +75,7 @@ namespace LuaUtil
 
     void LuaStorage::Section::setAll(const sol::optional<sol::table>& values)
     {
-        if (mStorage->mRunningCallbacks)
-            throw std::runtime_error("Not allowed to change storage in storage handlers because it can lead to an infinite recursion");
+        throwIfCallbackRecursionIsTooDeep();
         mValues.clear();
         if (values)
         {

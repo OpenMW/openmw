@@ -62,6 +62,7 @@ namespace LuaUtil
             void setAll(const sol::optional<sol::table>& values);
             sol::table asTable();
             void runCallbacks(sol::optional<std::string_view> changedKey);
+            void throwIfCallbackRecursionIsTooDeep();
 
             LuaStorage* mStorage;
             std::string mSectionName;
@@ -81,7 +82,7 @@ namespace LuaUtil
         lua_State* mLua;
         std::map<std::string_view, std::shared_ptr<Section>> mData;
         const Listener* mListener = nullptr;
-        bool mRunningCallbacks = false;
+        std::set<const Section*> mRunningCallbacks;
     };
 
 }

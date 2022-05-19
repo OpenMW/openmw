@@ -94,6 +94,11 @@ require('scripts.omw.mwui.text')(templates)
 require('scripts.omw.mwui.textEdit')(templates)
 
 ---
+-- Shades its children and makes them uninteractible
+-- @field [parent=#Templates] openmw.ui#Layout disabled
+require('scripts.omw.mwui.filters')(templates)
+
+---
 -- Interface version
 -- @field [parent=#MWUI] #number version
 local interface = {

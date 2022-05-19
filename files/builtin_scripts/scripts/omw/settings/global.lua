@@ -6,6 +6,7 @@ return {
     interfaceName = 'Settings',
     interface = {
         registerGroup = common.registerGroup,
+        updateRendererArgument = common.updateRendererArgument,
     },
     engineHandlers = {
         onLoad = common.onLoad,

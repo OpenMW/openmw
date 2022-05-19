@@ -137,6 +137,13 @@ return {
         --     }
         -- }
         registerGroup = common.registerGroup,
+        ---
+        -- @function [parent=#Settings] updateRendererArgument Change the renderer argument of a setting
+        --   available both in player and global scripts
+        -- @param #string groupKey A settings group key
+        -- @param #string settingKey A setting key
+        -- @param argument A renderer argument
+        updateRendererArgument = common.updateRendererArgument,
     },
     engineHandlers = {
         onLoad = common.onLoad,

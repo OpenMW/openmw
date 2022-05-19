@@ -1,7 +1,10 @@
 local storage = require('openmw.storage')
 
-local contextSection = storage.playerSection or storage.globalSection
 local groupSectionKey = 'OmwSettingGroups'
+local conventionPrefix = 'Settings'
+local argumentSectionPostfix = 'Arguments'
+
+local contextSection = storage.playerSection or storage.globalSection
 local groupSection = contextSection(groupSectionKey)
 groupSection:removeOnExit()
 
@@ -30,7 +33,6 @@ local function validateGroupOptions(options)
     if type(options.key) ~= 'string' then
         error('Group must have a key')
     end
-    local conventionPrefix = "Settings"
     if options.key:sub(1, conventionPrefix:len()) ~= conventionPrefix then
         print(("Group key %s doesn't start with %s"):format(options.key, conventionPrefix))
     end
@@ -88,6 +90,8 @@ local function registerGroup(options)
         settings = {},
     }
     local valueSection = contextSection(options.key)
+    local argumentSection = contextSection(options.key .. argumentSectionPostfix)
+    argumentSection:removeOnExit()
     for i, opt in ipairs(options.settings) do
         local setting = registerSetting(opt)
         setting.order = i
@@ -95,9 +99,10 @@ local function registerGroup(options)
             error(('Duplicate setting key %s'):format(options.key))
         end
         group.settings[setting.key] = setting
-        if not valueSection:get(setting.key) then
+        if valueSection:get(setting.key) == nil then
             valueSection:set(setting.key, setting.default)
         end
+        argumentSection:set(setting.key, setting.argument)
     end
     groupSection:set(group.key, group)
 end
@@ -105,6 +110,13 @@ end
 return {
     getSection = function(global, key)
         return (global and storage.globalSection or storage.playerSection)(key)
+    end,
+    getArgumentSection = function(global, key)
+        return (global and storage.globalSection or storage.playerSection)(key .. argumentSectionPostfix)
+    end,
+    updateRendererArgument = function(groupKey, settingKey, argument)
+        local argumentSection = contextSection(groupKey .. argumentSectionPostfix)
+        argumentSection:set(settingKey, argument)
     end,
     setGlobalEvent = 'OMWSettingsGlobalSet',
     groupSectionKey = groupSectionKey,

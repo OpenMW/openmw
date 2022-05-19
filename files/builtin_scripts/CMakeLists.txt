@@ -27,7 +27,7 @@ set(LUA_BUILTIN_FILES
 
     scripts/omw/mwui/constants.lua
     scripts/omw/mwui/borders.lua
-    scripts/omw/mwui/box.lua
+    scripts/omw/mwui/filters.lua
     scripts/omw/mwui/text.lua
     scripts/omw/mwui/textEdit.lua
     scripts/omw/mwui/space.lua

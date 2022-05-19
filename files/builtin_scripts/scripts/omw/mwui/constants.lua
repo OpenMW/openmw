@@ -1,3 +1,4 @@
+local ui = require('openmw.ui')
 local util = require('openmw.util')
 
 return {
@@ -8,4 +9,5 @@ return {
     border = 2,
     thickBorder = 4,
     padding = 2,
+    whiteTexture = ui.texture { path = 'white' },
 }
