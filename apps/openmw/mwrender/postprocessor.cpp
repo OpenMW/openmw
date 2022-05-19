@@ -574,10 +574,11 @@ namespace MWRender
                     uniform->setUniform(node.mRootStateSet->getOrCreateUniform(uniform->mName, type.value()));
             }
 
-            int subTexUnit = texUnit;
+            std::unordered_map<osg::Texture2D*, osg::Texture2D*> renderTargetCache;
 
             for (const auto& pass : technique->getPasses())
             {
+                int subTexUnit = texUnit;
                 fx::DispatchNode::SubPass subPass;
 
                 pass->prepareStateSet(subPass.mStateSet, technique->getName());
@@ -591,6 +592,7 @@ namespace MWRender
                     const auto [w, h] = rt.mSize.get(mWidth, mHeight);
 
                     subPass.mRenderTexture = new osg::Texture2D(*rt.mTarget);
+                    renderTargetCache[rt.mTarget] = subPass.mRenderTexture;
                     subPass.mRenderTexture->setTextureSize(w, h);
                     subPass.mRenderTexture->setName(std::string(pass->getTarget()));
 
@@ -600,10 +602,18 @@ namespace MWRender
                     subPass.mRenderTarget = new osg::FrameBufferObject;
                     subPass.mRenderTarget->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(subPass.mRenderTexture));
                     subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
-
-                    node.mRootStateSet->setTextureAttributeAndModes(subTexUnit, subPass.mRenderTexture);
-                    node.mRootStateSet->addUniform(new osg::Uniform(subPass.mRenderTexture->getName().c_str(), subTexUnit++));
                 }
+
+                for (const auto& whitelist : pass->getRenderTargets())
+                {
+                    auto it = technique->getRenderTargetsMap().find(whitelist);
+                    if (it != technique->getRenderTargetsMap().end() && renderTargetCache[it->second.mTarget])
+                    {
+                        subPass.mStateSet->setTextureAttributeAndModes(subTexUnit, renderTargetCache[it->second.mTarget]);
+                        subPass.mStateSet->addUniform(new osg::Uniform(std::string(it->first).c_str(), subTexUnit++));
+                    }
+                }
+
                 node.mPasses.emplace_back(std::move(subPass));
             }
 

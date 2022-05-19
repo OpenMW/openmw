@@ -43,7 +43,9 @@ namespace fx
 
         void compile(Technique& technique, std::string_view preamble);
 
-        std::string_view getTarget() const { return mTarget; }
+        std::string getTarget() const { return mTarget; }
+
+        const std::array<std::string, 3>& getRenderTargets() const { return mRenderTargets; }
 
         void prepareStateSet(osg::StateSet* stateSet, const std::string& name) const;
 
@@ -67,7 +69,9 @@ namespace fx
         bool mUBO;
         bool mSupportsNormals;
 
-        std::string_view mTarget;
+        std::array<std::string, 3> mRenderTargets;
+
+        std::string mTarget;
         std::optional<osg::Vec4f> mClearColor;
 
         std::optional<osg::BlendFunc::BlendFuncMode> mBlendSource;

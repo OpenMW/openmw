@@ -200,6 +200,9 @@ float omw_GetPointLightRadius(int index)
             for (size_t pos = header.find(define); pos != std::string::npos; pos = header.find(define))
                 header.replace(pos, define.size(), value);
 
+        for (const auto& target : mRenderTargets)
+            header.append("uniform sampler2D " + std::string(target) + ";");
+
         for (auto& uniform : technique.getUniformMap())
             if (auto glsl = uniform->getGLSL())
                 header.append(glsl.value());

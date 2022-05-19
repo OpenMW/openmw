@@ -79,7 +79,7 @@ namespace MWLua
                 shader.mQueuedAction = true;
 
             context.mLuaManager->addAction(
-                [&] { MWBase::Environment::get().getWorld()->getPostProcessor()->enableTechnique(shader.mShader, pos); },
+                [=] { MWBase::Environment::get().getWorld()->getPostProcessor()->enableTechnique(shader.mShader, pos); },
                 "Enable shader " + (shader.mShader ? shader.mShader->getName() : "nil")
             );
         };
