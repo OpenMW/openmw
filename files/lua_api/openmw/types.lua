@@ -532,6 +532,60 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+--- Book.SKILL
+-- @type BookSKILL
+-- @field #number Acrobatics
+-- @field #number Alchemy
+-- @field #number Alteration
+-- @field #number Armorer
+-- @field #number Athletics
+-- @field #number Axe
+-- @field #number Block
+-- @field #number BluntWeapon
+-- @field #number Conjuration
+-- @field #number Destruction
+-- @field #number Enchant
+-- @field #number HandToHand
+-- @field #number HeavyArmor
+-- @field #number Illusion
+-- @field #number LightArmor
+-- @field #number LongBlade
+-- @field #number Marksman
+-- @field #number MediumArmor
+-- @field #number Mercantile
+-- @field #number Mysticism
+-- @field #number Restoration
+-- @field #number Security
+-- @field #number ShortBlade
+-- @field #number Sneak
+-- @field #number Spear
+-- @field #number Speechcraft
+-- @field #number Unarmored
+
+--- @{#BookSKILL}
+-- @field [parent=#Book] #BookSKILL SKILL
+
+---
+-- Returns the read-only @{#BookRecord} of a book
+-- @function [parent=#Book] record
+-- @param #any objectOrRecordId
+-- @return #BookRecord
+
+---
+-- @type BookRecord
+-- @field #string id The record ID of the book
+-- @field #string name Name of the book
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this book (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #string enchant The enchantment ID of this book (can be empty)
+-- @field #string text The text content of the book
+-- @field #number weight
+-- @field #number value
+-- @field #number skill See @{#Book.SKILL}
+-- @field #boolean isScroll 
+-- @field #number enchantCapacity
+
 --- @{#Clothing} functions
 
 
