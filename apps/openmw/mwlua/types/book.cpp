@@ -16,35 +16,10 @@ namespace MWLua
 {
     void addBookBindings(sol::table book, const Context& context)
     {   
-        book["SKILL"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            {"Acrobatics", ESM::Skill::Acrobatics},
-            {"Alchemy", ESM::Skill::Alchemy},
-            {"Alteration", ESM::Skill::Alteration},
-            {"Armorer", ESM::Skill::Armorer},
-            {"Athletics", ESM::Skill::Athletics},
-            {"Axe", ESM::Skill::Axe},
-            {"Block", ESM::Skill::Block},
-            {"BluntWeapon", ESM::Skill::BluntWeapon},
-            {"Conjuration", ESM::Skill::Conjuration},
-            {"Destruction", ESM::Skill::Destruction},
-            {"Enchant", ESM::Skill::Enchant},
-            {"HandToHand", ESM::Skill::HandToHand},
-            {"HeavyArmor", ESM::Skill::HeavyArmor},
-            {"Illusion", ESM::Skill::Illusion},
-            {"LightArmor", ESM::Skill::LightArmor},
-            {"LongBlade", ESM::Skill::LongBlade},
-            {"Marksman", ESM::Skill::Marksman},
-            {"MediumArmor", ESM::Skill::MediumArmor},
-            {"Mercantile", ESM::Skill::Mercantile},
-            {"Mysticism", ESM::Skill::Mysticism},
-            {"Restoration", ESM::Skill::Restoration},
-            {"Security", ESM::Skill::Security},
-            {"ShortBlade", ESM::Skill::ShortBlade},
-            {"Sneak", ESM::Skill::Sneak},
-            {"Spear", ESM::Skill::Spear},
-            {"Speechcraft", ESM::Skill::Speechcraft},
-            {"Unarmored", ESM::Skill::Unarmored},
-            }));
+        sol::table skill(context.mLua->sol(), sol::create);
+        book["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
+        for (int id = ESM::Skill::Block; id < ESM::Skill::Length; ++id)
+            skill[(ESM::Skill::sSkillNames[id])] = id;
 
         const MWWorld::Store<ESM::Book>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Book>();
         book["record"] = sol::overload(

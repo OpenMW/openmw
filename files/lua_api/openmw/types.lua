@@ -582,7 +582,7 @@
 -- @field #string text The text content of the book
 -- @field #number weight
 -- @field #number value
--- @field #number skill See @{#Book.SKILL}
+-- @field #number skill See @{#Book.SKILL} The skill that this book teaches
 -- @field #boolean isScroll 
 -- @field #number enchantCapacity
 
@@ -724,7 +724,7 @@
 -- @field #number health
 -- @field #number speed
 -- @field #number reach
--- @field #number enchant
+-- @field #number enchantCapacity
 -- @field #number chopMinDamage
 -- @field #number chopMaxDamage
 -- @field #number slashMinDamage

@@ -55,7 +55,7 @@ namespace MWLua
         record["health"] = sol::readonly_property([](const ESM::Weapon& rec) -> int { return rec.mData.mHealth; });
         record["speed"] = sol::readonly_property([](const ESM::Weapon& rec) -> float { return rec.mData.mSpeed; });
         record["reach"] = sol::readonly_property([](const ESM::Weapon& rec) -> float { return rec.mData.mReach; });
-        record["enchant"] = sol::readonly_property([](const ESM::Weapon& rec) -> float { return rec.mData.mEnchant * 0.1f; });
+        record["enchantCapacity"] = sol::readonly_property([](const ESM::Weapon& rec) -> float { return rec.mData.mEnchant * 0.1f; });
         record["chopMinDamage"] = sol::readonly_property([](const ESM::Weapon& rec) -> int { return rec.mData.mChop[0]; });
         record["chopMaxDamage"] = sol::readonly_property([](const ESM::Weapon& rec) -> int { return rec.mData.mChop[1]; });
         record["slashMinDamage"] = sol::readonly_property([](const ESM::Weapon& rec) -> int { return rec.mData.mSlash[0]; });
