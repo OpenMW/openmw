@@ -176,6 +176,17 @@ It is possible to modify a script without restarting OpenMW. To apply changes, o
 This will restart all Lua scripts using the `onSave and onLoad`_ handlers the same way as if the game was saved or loaded.
 It reloads all ``.omwscripts`` files and ``.lua`` files that are not packed to any archives. ``.omwaddon`` files and scripts packed to BSA can not be changed without restarting the game.
 
+Lua console
+===========
+
+It is also possible to run Lua commands directly from the in-game console.
+
+To enter the Lua mode run one of the commands:
+
+- ``lua player`` or ``luap`` - enter player context
+- ``lua global`` or ``luag`` - enter global context
+- ``lua selected`` or ``luas`` - enter local context on the selected object
+
 Script structure
 ================
 
