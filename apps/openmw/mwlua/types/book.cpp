@@ -19,7 +19,10 @@ namespace MWLua
         sol::table skill(context.mLua->sol(), sol::create);
         book["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
         for (int id = ESM::Skill::Block; id < ESM::Skill::Length; ++id)
-            skill[Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id])] = Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id]);
+        {
+            std::string skillName = Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id]);
+            skill[skillName] = skillName;
+        }
 
         const MWWorld::Store<ESM::Book>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Book>();
         book["record"] = sol::overload(
