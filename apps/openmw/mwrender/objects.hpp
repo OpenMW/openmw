@@ -50,8 +50,9 @@ public:
     MWWorld::Ptr mPtr;
 };
 
-class Objects{
-    typedef std::map<MWWorld::ConstPtr,osg::ref_ptr<Animation> > PtrAnimationMap;
+class Objects
+{
+    using PtrAnimationMap = std::map<const MWWorld::LiveCellRefBase*, osg::ref_ptr<Animation>>;
 
     typedef std::map<const MWWorld::CellStore*, osg::ref_ptr<osg::Group> > CellMap;
     CellMap mCellSceneNodes;
