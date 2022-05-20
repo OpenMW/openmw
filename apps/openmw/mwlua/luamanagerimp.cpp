@@ -209,15 +209,23 @@ namespace MWLua
             mGlobalScripts.newGameStarted();
         }
 
-        for (ObjectId id : mActorAddedEvents)
+        for (ObjectId id : mObjectAddedEvents)
         {
             GObject obj(id, objectRegistry);
             if (obj.isValid())
-                mGlobalScripts.actorActive(obj);
+            {
+                mGlobalScripts.objectActive(obj);
+                const MWWorld::Class& objClass = obj.ptr().getClass();
+                if (objClass.isActor())
+                    mGlobalScripts.actorActive(obj);
+                if (mWorldView.isItem(obj.ptr()))
+                    mGlobalScripts.itemActive(obj);
+            }
             else if (luaDebug)
-                Log(Debug::Verbose) << "Can not call onActorActive engine handler: object" << idToString(id) << " is already removed";
+                Log(Debug::Verbose) << "Could not resolve a Lua object added event: object" << idToString(id)
+                    << " is already removed";
         }
-        mActorAddedEvents.clear();
+        mObjectAddedEvents.clear();
 
         if (!mWorldView.isPaused())
             mGlobalScripts.update(frameDuration);
@@ -267,7 +275,7 @@ namespace MWLua
         mLocalEvents.clear();
         mGlobalEvents.clear();
         mInputEvents.clear();
-        mActorAddedEvents.clear();
+        mObjectAddedEvents.clear();
         mLocalEngineEvents.clear();
         mNewGameStarted = false;
         mPlayerChanged = false;
@@ -338,8 +346,8 @@ namespace MWLua
             mLocalEngineEvents.push_back({getId(ptr), LocalScripts::OnActive{}});
         }
 
-        if (ptr.getClass().isActor() && ptr != mPlayer)
-            mActorAddedEvents.push_back(getId(ptr));
+        if (ptr != mPlayer)
+            mObjectAddedEvents.push_back(getId(ptr));
     }
 
     void LuaManager::objectRemovedFromScene(const MWWorld::Ptr& ptr)
