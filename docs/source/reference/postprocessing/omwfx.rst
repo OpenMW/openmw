@@ -330,7 +330,7 @@ In the code snippet below, a shader is defined that requires GLSL `330`, HDR cap
         passes = dummy;
         glsl_version = 330;
         hdr = true;
-        flags = disable_interiors | disable_abovewater;
+        flags = disable_interiors, disable_abovewater;
     }
 
 
