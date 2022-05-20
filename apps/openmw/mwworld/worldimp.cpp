@@ -656,7 +656,7 @@ namespace MWWorld
         return mWorldScene->hasCellChanged();
     }
 
-    void World::setGlobalInt (const std::string& name, int value)
+    void World::setGlobalInt(std::string_view name, int value)
     {
         bool dateUpdated = mCurrentDate->updateGlobalInt(name, value);
         if (dateUpdated)
@@ -665,7 +665,7 @@ namespace MWWorld
         mGlobalVariables[name].setInteger (value);
     }
 
-    void World::setGlobalFloat (const std::string& name, float value)
+    void World::setGlobalFloat(std::string_view name, float value)
     {
         bool dateUpdated = mCurrentDate->updateGlobalFloat(name, value);
         if (dateUpdated)
@@ -674,17 +674,17 @@ namespace MWWorld
         mGlobalVariables[name].setFloat(value);
     }
 
-    int World::getGlobalInt (const std::string& name) const
+    int World::getGlobalInt(std::string_view name) const
     {
         return mGlobalVariables[name].getInteger();
     }
 
-    float World::getGlobalFloat (const std::string& name) const
+    float World::getGlobalFloat(std::string_view name) const
     {
         return mGlobalVariables[name].getFloat();
     }
 
-    char World::getGlobalVariableType (const std::string& name) const
+    char World::getGlobalVariableType (std::string_view name) const
     {
         return mGlobalVariables.getType (name);
     }
@@ -719,7 +719,7 @@ namespace MWWorld
         mLocalScripts.remove (ref);
     }
 
-    Ptr World::searchPtr (const std::string& name, bool activeOnly, bool searchInContainers)
+    Ptr World::searchPtr (std::string_view name, bool activeOnly, bool searchInContainers)
     {
         Ptr ret;
         // the player is always in an active cell.
@@ -762,12 +762,13 @@ namespace MWWorld
         return ptr;
     }
 
-    Ptr World::getPtr (const std::string& name, bool activeOnly)
+    Ptr World::getPtr (std::string_view name, bool activeOnly)
     {
         Ptr ret = searchPtr(name, activeOnly);
         if (!ret.isEmpty())
             return ret;
-        std::string error = "failed to find an instance of object '" + name + "'";
+        std::string error = "failed to find an instance of object '";
+        error += name; error += "'";
         if (activeOnly)
             error += " in active cells";
         throw std::runtime_error(error);

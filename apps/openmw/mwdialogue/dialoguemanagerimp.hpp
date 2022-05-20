@@ -87,9 +87,9 @@ namespace MWDialogue
 
             bool inJournal (const std::string& topicId, const std::string& infoId) override;
 
-            void addTopic (const std::string& topic) override;
+            void addTopic(std::string_view topic) override;
 
-            void addChoice (const std::string& text,int choice) override;
+            void addChoice(std::string_view text,int choice) override;
             const std::vector<std::pair<std::string, int> >& getChoices() override;
 
             bool isGoodbye() override;
@@ -117,12 +117,12 @@ namespace MWDialogue
             void readRecord (ESM::ESMReader& reader, uint32_t type) override;
 
             /// Changes faction1's opinion of faction2 by \a diff.
-            void modFactionReaction (const std::string& faction1, const std::string& faction2, int diff) override;
+            void modFactionReaction (std::string_view faction1, std::string_view faction2, int diff) override;
 
-            void setFactionReaction (const std::string& faction1, const std::string& faction2, int absolute) override;
+            void setFactionReaction (std::string_view faction1, std::string_view faction2, int absolute) override;
 
             /// @return faction1's opinion of faction2
-            int getFactionReaction (const std::string& faction1, const std::string& faction2) const override;
+            int getFactionReaction (std::string_view faction1, std::string_view faction2) const override;
 
             /// Removes the last added topic response for the given actor from the journal
             void clearInfoActor (const MWWorld::Ptr& actor) const override;

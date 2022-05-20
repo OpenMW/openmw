@@ -174,19 +174,19 @@ namespace MWBase
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
-            virtual void setGlobalInt (const std::string& name, int value) = 0;
+            virtual void setGlobalInt(std::string_view name, int value) = 0;
             ///< Set value independently from real type.
 
-            virtual void setGlobalFloat (const std::string& name, float value) = 0;
+            virtual void setGlobalFloat(std::string_view name, float value) = 0;
             ///< Set value independently from real type.
 
-            virtual int getGlobalInt (const std::string& name) const = 0;
+            virtual int getGlobalInt(std::string_view name) const = 0;
             ///< Get value independently from real type.
 
-            virtual float getGlobalFloat (const std::string& name) const = 0;
+            virtual float getGlobalFloat(std::string_view name) const = 0;
             ///< Get value independently from real type.
 
-            virtual char getGlobalVariableType (const std::string& name) const = 0;
+            virtual char getGlobalVariableType(std::string_view name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
 
             virtual std::string getCellName (const MWWorld::CellStore *cell = nullptr) const = 0;
@@ -199,11 +199,11 @@ namespace MWBase
             virtual void removeRefScript (MWWorld::RefData *ref) = 0;
             //< Remove the script attached to ref from mLocalScripts
 
-            virtual MWWorld::Ptr getPtr (const std::string& name, bool activeOnly) = 0;
+            virtual MWWorld::Ptr getPtr (std::string_view name, bool activeOnly) = 0;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
-            virtual MWWorld::Ptr searchPtr (const std::string& name, bool activeOnly, bool searchInContainers = true) = 0;
+            virtual MWWorld::Ptr searchPtr (std::string_view name, bool activeOnly, bool searchInContainers = true) = 0;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 

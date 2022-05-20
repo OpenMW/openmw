@@ -135,20 +135,21 @@ namespace MWScript
     : mStore (store)
     {}
 
-    void GlobalScripts::addScript (const std::string& name, const MWWorld::Ptr& target)
+    void GlobalScripts::addScript(std::string_view name, const MWWorld::Ptr& target)
     {
-        const auto iter = mScripts.find (::Misc::StringUtils::lowerCase (name));
+        std::string lowerName = ::Misc::StringUtils::lowerCase(name);
+        const auto iter = mScripts.find(lowerName);
 
         if (iter==mScripts.end())
         {
-            if (const ESM::Script *script = mStore.get<ESM::Script>().search(name))
+            if (const ESM::Script *script = mStore.get<ESM::Script>().search(lowerName))
             {
                 auto desc = std::make_shared<GlobalScriptDesc>();
                 MWWorld::Ptr ptr = target;
                 desc->mTarget = ptr;
                 desc->mRunning = true;
                 desc->mLocals.configure (*script);
-                mScripts.insert (std::make_pair(name, desc));
+                mScripts.insert (std::make_pair(lowerName, desc));
             }
             else
             {
@@ -163,7 +164,7 @@ namespace MWScript
         }
     }
 
-    void GlobalScripts::removeScript (const std::string& name)
+    void GlobalScripts::removeScript (std::string_view name)
     {
         const auto iter = mScripts.find (::Misc::StringUtils::lowerCase (name));
 
@@ -171,7 +172,7 @@ namespace MWScript
             iter->second->mRunning = false;
     }
 
-    bool GlobalScripts::isRunning (const std::string& name) const
+    bool GlobalScripts::isRunning (std::string_view name) const
     {
         const auto iter = mScripts.find (::Misc::StringUtils::lowerCase (name));
 
@@ -306,14 +307,14 @@ namespace MWScript
         return false;
     }
 
-    Locals& GlobalScripts::getLocals (const std::string& name)
+    Locals& GlobalScripts::getLocals(std::string_view name)
     {
         std::string name2 = ::Misc::StringUtils::lowerCase (name);
         auto iter = mScripts.find (name2);
 
         if (iter==mScripts.end())
         {
-            const ESM::Script *script = mStore.get<ESM::Script>().find (name);
+            const ESM::Script *script = mStore.get<ESM::Script>().find(name2);
 
             auto desc = std::make_shared<GlobalScriptDesc>();
             desc->mLocals.configure (*script);
@@ -324,7 +325,7 @@ namespace MWScript
         return iter->second->mLocals;
     }
 
-    const Locals* GlobalScripts::getLocalsIfPresent (const std::string& name) const
+    const Locals* GlobalScripts::getLocalsIfPresent(std::string_view name) const
     {
         std::string name2 = ::Misc::StringUtils::lowerCase (name);
         auto iter = mScripts.find (name2);

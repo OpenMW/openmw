@@ -114,8 +114,7 @@ namespace MWScript
 
             void execute (Interpreter::Runtime& runtime) override
             {
-                std::string cell = (runtime.getStringLiteral (runtime[0].mInteger));
-                ::Misc::StringUtils::lowerCaseInPlace(cell);
+                std::string cell = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."

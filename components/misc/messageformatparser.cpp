@@ -4,7 +4,7 @@ namespace Misc
 {
     MessageFormatParser::~MessageFormatParser() {}
 
-    void MessageFormatParser::process(const std::string& m)
+    void MessageFormatParser::process(std::string_view m)
     {
         for (unsigned int i = 0; i < m.size(); ++i)
         {

@@ -333,7 +333,7 @@ namespace MWMechanics
         return mSpells.end();
     }
 
-    bool ActiveSpells::isSpellActive(const std::string& id) const
+    bool ActiveSpells::isSpellActive(std::string_view id) const
     {
         return std::find_if(mSpells.begin(), mSpells.end(), [&] (const auto& spell)
         {
@@ -434,7 +434,7 @@ namespace MWMechanics
         return removedCurrentSpell;
     }
 
-    void ActiveSpells::removeEffects(const MWWorld::Ptr& ptr, const std::string &id)
+    void ActiveSpells::removeEffects(const MWWorld::Ptr& ptr, std::string_view id)
     {
         purge([=] (const ActiveSpellParams& params)
         {

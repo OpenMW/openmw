@@ -38,7 +38,7 @@ namespace MWScript
             ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
 
             /// Throws an exception if local variable can't be found.
-            int findLocalVariableIndex (const std::string& scriptId, const std::string& name,
+            int findLocalVariableIndex (const std::string& scriptId, std::string_view name,
                 char type) const;
 
         public:
@@ -69,23 +69,23 @@ namespace MWScript
             void report (const std::string& message) override;
             ///< By default, do nothing.
 
-            int getGlobalShort (const std::string& name) const override;
+            int getGlobalShort(std::string_view name) const override;
 
-            int getGlobalLong (const std::string& name) const override;
+            int getGlobalLong(std::string_view name) const override;
 
-            float getGlobalFloat (const std::string& name) const override;
+            float getGlobalFloat(std::string_view name) const override;
 
-            void setGlobalShort (const std::string& name, int value) override;
+            void setGlobalShort(std::string_view name, int value) override;
 
-            void setGlobalLong (const std::string& name, int value) override;
+            void setGlobalLong(std::string_view name, int value) override;
 
-            void setGlobalFloat (const std::string& name, float value) override;
+            void setGlobalFloat(std::string_view name, float value) override;
 
             std::vector<std::string> getGlobals () const override;
 
-            char getGlobalType (const std::string& name) const override;
+            char getGlobalType(std::string_view name) const override;
 
-            std::string getActionBinding(const std::string& action) const override;
+            std::string getActionBinding(std::string_view action) const override;
 
             std::string getActorName() const override;
 
@@ -114,17 +114,17 @@ namespace MWScript
             void executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor);
             ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.
 
-            int getMemberShort (const std::string& id, const std::string& name, bool global) const override;
+            int getMemberShort(std::string_view id, std::string_view name, bool global) const override;
 
-            int getMemberLong (const std::string& id, const std::string& name, bool global) const override;
+            int getMemberLong(std::string_view id, std::string_view name, bool global) const override;
 
-            float getMemberFloat (const std::string& id, const std::string& name, bool global) const override;
+            float getMemberFloat(std::string_view id, std::string_view name, bool global) const override;
 
-            void setMemberShort (const std::string& id, const std::string& name, int value, bool global) override;
+            void setMemberShort(std::string_view id, std::string_view name, int value, bool global) override;
 
-            void setMemberLong (const std::string& id, const std::string& name, int value, bool global) override;
+            void setMemberLong(std::string_view id, std::string_view name, int value, bool global) override;
 
-            void setMemberFloat (const std::string& id, const std::string& name, float value, bool global) override;
+            void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) override;
 
             MWWorld::Ptr getReference(bool required=true) const;
             ///< Reference, that the script is running from (can be empty)

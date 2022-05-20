@@ -17,7 +17,7 @@ namespace MWWorld
             ManualRef& operator= (const ManualRef&);
 
         public:
-            ManualRef(const MWWorld::ESMStore& store, const std::string& name, const int count = 1);
+            ManualRef(const MWWorld::ESMStore& store, std::string_view name, const int count = 1);
 
             const Ptr& getPtr() const
             {

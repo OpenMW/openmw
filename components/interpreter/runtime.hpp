@@ -31,7 +31,7 @@ namespace Interpreter
 
             float getFloatLiteral (int index) const;
 
-            std::string getStringLiteral (int index) const;
+            std::string_view getStringLiteral(int index) const;
 
             void configure (const Type_Code *code, int codeSize, Context& context);
             ///< \a context and \a code must exist as least until either configure, clear or

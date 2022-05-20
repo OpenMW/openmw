@@ -34,7 +34,8 @@ namespace MWScript
                     if (ptr.isEmpty())
                         ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-                    std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view questView = runtime.getStringLiteral(runtime[0].mInteger);
+                    std::string quest{questView.begin(), questView.end()};
                     runtime.pop();
 
                     Interpreter::Type_Integer index = runtime[0].mInteger;
@@ -59,13 +60,13 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view quest = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer index = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWBase::Environment::get().getJournal()->setJournalIndex (quest, index);
+                    MWBase::Environment::get().getJournal()->setJournalIndex({quest.begin(), quest.end()}, index);
                 }
         };
 
@@ -75,10 +76,10 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view quest = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    int index = MWBase::Environment::get().getJournal()->getJournalIndex (quest);
+                    int index = MWBase::Environment::get().getJournal()->getJournalIndex({quest.begin(), quest.end()});
 
                     runtime.push (index);
 
@@ -91,7 +92,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string topic = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view topic = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWBase::Environment::get().getDialogueManager()->addTopic(topic);
@@ -107,7 +108,7 @@ namespace MWScript
                     MWBase::DialogueManager* dialogue = MWBase::Environment::get().getDialogueManager();
                     while(arg0>0)
                     {
-                        std::string question = runtime.getStringLiteral (runtime[0].mInteger);
+                        std::string_view question = runtime.getStringLiteral(runtime[0].mInteger);
                         runtime.pop();
                         arg0 = arg0 -1;
                         Interpreter::Type_Integer choice = 1;
@@ -220,10 +221,10 @@ namespace MWScript
 
             void execute (Interpreter::Runtime& runtime) override
             {
-                std::string faction1 = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string_view faction1 = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
-                std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string_view faction2 = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 int modReaction = runtime[0].mInteger;
@@ -239,10 +240,10 @@ namespace MWScript
 
             void execute (Interpreter::Runtime& runtime) override
             {
-                std::string faction1 = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string_view faction1 = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
-                std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string_view faction2 = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 runtime.push(MWBase::Environment::get().getDialogueManager()
@@ -256,10 +257,10 @@ namespace MWScript
 
             void execute (Interpreter::Runtime& runtime) override
             {
-                std::string faction1 = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string_view faction1 = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
-                std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string_view faction2 = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 int newValue = runtime[0].mInteger;

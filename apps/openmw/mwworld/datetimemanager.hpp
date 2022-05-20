@@ -35,8 +35,8 @@ namespace MWWorld
         void advanceTime(double hours, Globals& globalVariables);
 
         void setup(Globals& globalVariables);
-        bool updateGlobalInt(const std::string& name, int value);
-        bool updateGlobalFloat(const std::string& name, float value);
+        bool updateGlobalInt(std::string_view name, int value);
+        bool updateGlobalFloat(std::string_view name, float value);
     };
 }
 

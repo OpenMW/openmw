@@ -56,11 +56,11 @@ namespace MWScript
 
             GlobalScripts (const MWWorld::ESMStore& store);
 
-            void addScript (const std::string& name, const MWWorld::Ptr& target = MWWorld::Ptr());
+            void addScript(std::string_view name, const MWWorld::Ptr& target = MWWorld::Ptr());
 
-            void removeScript (const std::string& name);
+            void removeScript (std::string_view name);
 
-            bool isRunning (const std::string& name) const;
+            bool isRunning (std::string_view name) const;
 
             void run();
             ///< run all active global scripts
@@ -79,11 +79,11 @@ namespace MWScript
             ///
             /// \return Known type?
 
-            Locals& getLocals (const std::string& name);
+            Locals& getLocals(std::string_view name);
             ///< If the script \a name has not been added as a global script yet, it is added
             /// automatically, but is not set to running state.
 
-            const Locals* getLocalsIfPresent (const std::string& name) const;
+            const Locals* getLocalsIfPresent(std::string_view name) const;
 
             void updatePtrs(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);
             ///< Update the Ptrs stored in mTarget. Should be called after the reference has been moved to a new cell.

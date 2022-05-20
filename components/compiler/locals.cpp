@@ -21,7 +21,7 @@ namespace Compiler
         throw std::logic_error ("Unknown variable type");
     }
 
-    int Locals::searchIndex (char type, const std::string& name) const
+    int Locals::searchIndex (char type, std::string_view name) const
     {
         const std::vector<std::string>& collection = get (type);
 
@@ -33,7 +33,7 @@ namespace Compiler
         return static_cast<int>(iter-collection.begin());
     }
 
-    bool Locals::search (char type, const std::string& name) const
+    bool Locals::search (char type, std::string_view name) const
     {
         return searchIndex (type, name)!=-1;
     }
@@ -50,7 +50,7 @@ namespace Compiler
         throw std::logic_error ("Unknown variable type");
     }
 
-    char Locals::getType (const std::string& name) const
+    char Locals::getType (std::string_view name) const
     {
         if (search ('s', name))
             return 's';
@@ -64,7 +64,7 @@ namespace Compiler
         return ' ';
     }
 
-    int Locals::getIndex (const std::string& name) const
+    int Locals::getIndex (std::string_view name) const
     {
         int index = searchIndex ('s', name);
 
@@ -94,7 +94,7 @@ namespace Compiler
             std::ostream_iterator<std::string> (localFile, " "));
     }
 
-    void Locals::declare (char type, const std::string& name)
+    void Locals::declare (char type, std::string_view name)
     {
         get (type).push_back (Misc::StringUtils::lowerCase (name));
     }

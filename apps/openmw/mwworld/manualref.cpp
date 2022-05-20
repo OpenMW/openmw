@@ -30,7 +30,7 @@ namespace
     }
 }
 
-MWWorld::ManualRef::ManualRef(const MWWorld::ESMStore& store, const std::string& name, const int count)
+MWWorld::ManualRef::ManualRef(const MWWorld::ESMStore& store, std::string_view name, const int count)
 {
     std::string lowerName = Misc::StringUtils::lowerCase(name);
     switch (store.find(lowerName))

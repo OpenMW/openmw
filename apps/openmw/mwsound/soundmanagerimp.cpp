@@ -489,7 +489,7 @@ namespace MWSound
     }
 
 
-    Sound* SoundManager::playSound(const std::string& soundId, float volume, float pitch, Type type, PlayMode mode, float offset)
+    Sound* SoundManager::playSound(std::string_view soundId, float volume, float pitch, Type type, PlayMode mode, float offset)
     {
         if(!mOutput->isInitialized())
             return nullptr;
@@ -518,7 +518,7 @@ namespace MWSound
         return result;
     }
 
-    Sound *SoundManager::playSound3D(const MWWorld::ConstPtr &ptr, const std::string& soundId,
+    Sound *SoundManager::playSound3D(const MWWorld::ConstPtr &ptr, std::string_view soundId,
                                      float volume, float pitch, Type type, PlayMode mode,
                                      float offset)
     {
@@ -576,7 +576,7 @@ namespace MWSound
         return result;
     }
 
-    Sound *SoundManager::playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
+    Sound *SoundManager::playSound3D(const osg::Vec3f& initialPos, std::string_view soundId,
                                      float volume, float pitch, Type type, PlayMode mode,
                                      float offset)
     {
@@ -630,7 +630,7 @@ namespace MWSound
         }
     }
 
-    void SoundManager::stopSound3D(const MWWorld::ConstPtr &ptr, const std::string& soundId)
+    void SoundManager::stopSound3D(const MWWorld::ConstPtr &ptr, std::string_view soundId)
     {
         if(!mOutput->isInitialized())
             return;
@@ -682,7 +682,7 @@ namespace MWSound
     }
 
     void SoundManager::fadeOutSound3D(const MWWorld::ConstPtr &ptr,
-            const std::string& soundId, float duration)
+            std::string_view soundId, float duration)
     {
         SoundMap::iterator snditer = mActiveSounds.find(ptr);
         if(snditer != mActiveSounds.end())
@@ -698,7 +698,7 @@ namespace MWSound
         }
     }
 
-    bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr &ptr, const std::string& soundId) const
+    bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr &ptr, std::string_view soundId) const
     {
         SoundMap::const_iterator snditer = mActiveSounds.find(ptr);
         if(snditer != mActiveSounds.end())
