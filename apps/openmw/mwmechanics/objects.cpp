@@ -13,55 +13,43 @@
 namespace MWMechanics
 {
 
-Objects::~Objects()
-{
-  for(auto& object : mObjects)
-  {
-    delete object.second;
-    object.second = nullptr;
-  }
-}
-
 void Objects::addObject(const MWWorld::Ptr& ptr)
 {
     removeObject(ptr);
 
     MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-    if(anim) mObjects.insert(std::make_pair(ptr, new CharacterController(ptr, anim)));
+    if (anim == nullptr)
+        return;
+
+    const auto it = mObjects.emplace(mObjects.end(), ptr, anim);
+    mIndex.emplace(ptr.getBase(), it);
 }
 
 void Objects::removeObject(const MWWorld::Ptr& ptr)
 {
-    PtrControllerMap::iterator iter = mObjects.find(ptr);
-    if(iter != mObjects.end())
+    const auto iter = mIndex.find(ptr.getBase());
+    if (iter != mIndex.end())
     {
-        delete iter->second;
-        mObjects.erase(iter);
+        mObjects.erase(iter->second);
+        mIndex.erase(iter);
     }
 }
 
 void Objects::updateObject(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
 {
-    PtrControllerMap::iterator iter = mObjects.find(old);
-    if(iter != mObjects.end())
-    {
-        CharacterController *ctrl = iter->second;
-        mObjects.erase(iter);
-
-        ctrl->updatePtr(ptr);
-        mObjects.insert(std::make_pair(ptr, ctrl));
-    }
+    const auto iter = mIndex.find(old.getBase());
+    if (iter != mIndex.end())
+        iter->second->updatePtr(ptr);
 }
 
 void Objects::dropObjects (const MWWorld::CellStore *cellStore)
 {
-    PtrControllerMap::iterator iter = mObjects.begin();
-    while(iter != mObjects.end())
+    for (auto iter = mObjects.begin(); iter != mObjects.end();)
     {
-        if(iter->first.getCell()==cellStore)
+        if (iter->getPtr().getCell() == cellStore)
         {
-            delete iter->second;
-            mObjects.erase(iter++);
+            mIndex.erase(iter->getPtr().getBase());
+            iter = mObjects.erase(iter);
         }
         else
             ++iter;
@@ -72,8 +60,8 @@ void Objects::update(float duration, bool paused)
 {
     if(!paused)
     {
-        for(auto& object : mObjects)
-            object.second->update(duration);
+        for (CharacterController& object : mObjects)
+            object.update(duration);
     }
     else
     {
@@ -82,15 +70,15 @@ void Objects::update(float duration, bool paused)
         if(mode != MWGui::GM_Container)
             return;
 
-        for(auto& object : mObjects)
+        for (CharacterController& object : mObjects)
         {
-            if (object.first.getType() != ESM::Container::sRecordId)
+            if (object.getPtr().getType() != ESM::Container::sRecordId)
                 continue;
 
-            if (object.second->isAnimPlaying("containeropen"))
+            if (object.isAnimPlaying("containeropen"))
             {
-                object.second->update(duration);
-                MWBase::Environment::get().getWorld()->updateAnimatedCollisionShape(object.first);
+                object.update(duration);
+                MWBase::Environment::get().getWorld()->updateAnimatedCollisionShape(object.getPtr());
             }
         }
     }
@@ -98,23 +86,23 @@ void Objects::update(float duration, bool paused)
 
 bool Objects::onOpen(const MWWorld::Ptr& ptr)
 {
-    PtrControllerMap::iterator iter = mObjects.find(ptr);
-    if(iter != mObjects.end())
+    const auto iter = mIndex.find(ptr.getBase());
+    if (iter != mIndex.end())
         return iter->second->onOpen();
     return true;
 }
 
 void Objects::onClose(const MWWorld::Ptr& ptr)
 {
-    PtrControllerMap::iterator iter = mObjects.find(ptr);
-    if(iter != mObjects.end())
+    const auto iter = mIndex.find(ptr.getBase());
+    if (iter != mIndex.end())
         iter->second->onClose();
 }
 
 bool Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist)
 {
-    PtrControllerMap::iterator iter = mObjects.find(ptr);
-    if(iter != mObjects.end())
+    const auto iter = mIndex.find(ptr.getBase());
+    if (iter != mIndex.end())
     {
         return iter->second->playGroup(groupName, mode, number, persist);
     }
@@ -126,24 +114,22 @@ bool Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& gro
 }
 void Objects::skipAnimation(const MWWorld::Ptr& ptr)
 {
-    PtrControllerMap::iterator iter = mObjects.find(ptr);
-    if(iter != mObjects.end())
+    const auto iter = mIndex.find(ptr.getBase());
+    if (iter != mIndex.end())
         iter->second->skipAnim();
 }
 
 void Objects::persistAnimationStates()
 {
-    for (PtrControllerMap::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
-        iter->second->persistAnimationState();
+    for (CharacterController& object : mObjects)
+        object.persistAnimationState();
 }
 
-void Objects::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out)
+void Objects::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const
 {
-    for (PtrControllerMap::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
-    {
-        if ((position - iter->first.getRefData().getPosition().asVec3()).length2() <= radius*radius)
-            out.push_back(iter->first);
-    }
+    for (const CharacterController& object : mObjects)
+        if ((position - object.getPtr().getRefData().getPosition().asVec3()).length2() <= radius * radius)
+            out.push_back(object.getPtr());
 }
 
 }

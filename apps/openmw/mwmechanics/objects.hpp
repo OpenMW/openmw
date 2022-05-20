@@ -1,9 +1,12 @@
 #ifndef GAME_MWMECHANICS_ACTIVATORS_H
 #define GAME_MWMECHANICS_ACTIVATORS_H
 
+#include "character.hpp"
+
 #include <string>
 #include <map>
 #include <vector>
+#include <list>
 
 namespace osg
 {
@@ -18,17 +21,12 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    class CharacterController;
-
     class Objects
     {
-        typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
-        PtrControllerMap mObjects;
+        std::list<CharacterController> mObjects;
+        std::map<const MWWorld::LiveCellRefBase*, std::list<CharacterController>::iterator> mIndex;
 
     public:
-        Objects() = default;
-        ~Objects();
-
         void addObject (const MWWorld::Ptr& ptr);
         ///< Register an animated object
 
@@ -51,7 +49,7 @@ namespace MWMechanics
         void skipAnimation(const MWWorld::Ptr& ptr);
         void persistAnimationStates();
 
-        void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out);
+        void getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const;
 
         std::size_t size() const
         {
