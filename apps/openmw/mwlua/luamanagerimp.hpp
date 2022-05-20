@@ -162,7 +162,7 @@ namespace MWLua
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalLoader;
 
         std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
-        std::vector<ObjectId> mActorAddedEvents;
+        std::vector<ObjectId> mObjectAddedEvents;
 
         struct CallbackWithData
         {

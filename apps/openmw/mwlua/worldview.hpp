@@ -62,6 +62,9 @@ namespace MWLua
         void load(ESM::ESMReader& esm);
         void save(ESM::ESMWriter& esm) const;
 
+        // TODO: move this functionality to MWClass
+        bool isItem(const MWWorld::Ptr& ptr) { return chooseGroup(ptr) == &mItemsInScene; }
+
     private:
         struct ObjectGroup
         {
