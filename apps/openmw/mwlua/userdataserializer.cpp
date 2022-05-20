@@ -21,11 +21,7 @@ namespace MWLua
         {
             if (data.is<GObject>() || data.is<LObject>())
             {
-                ObjectId id = data.as<Object>().id();
-                static_assert(sizeof(ObjectId) == 8);
-                id.mIndex = Misc::toLittleEndian(id.mIndex);
-                id.mContentFile = Misc::toLittleEndian(id.mContentFile);
-                append(out, "o", &id, sizeof(ObjectId));
+                appendRefNum(out, data.as<Object>().id());
                 return true;
             }
             return false;
@@ -35,14 +31,9 @@ namespace MWLua
         // Returns false if this type is not supported by this serializer.
         bool deserialize(std::string_view typeName, std::string_view binaryData, lua_State* lua) const override
         {
-            if (typeName == "o")
+            if (typeName == sRefNumTypeName)
             {
-                if (binaryData.size() != sizeof(ObjectId))
-                    throw std::runtime_error("Incorrect serialization format. Size of ObjectId doesn't match.");
-                ObjectId id;
-                std::memcpy(&id, binaryData.data(), sizeof(ObjectId));
-                id.mIndex = Misc::fromLittleEndian(id.mIndex);
-                id.mContentFile = Misc::fromLittleEndian(id.mContentFile);
+                ObjectId id = loadRefNum(binaryData);
                 if (id.hasContentFile() && mContentFileMapping)
                 {
                     auto iter = mContentFileMapping->find(id.mContentFile);

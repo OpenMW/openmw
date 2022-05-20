@@ -222,8 +222,7 @@ namespace MWLua
                     LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
                     if (!localScripts || !localScripts->hasScript(*scriptId))
                         throw std::runtime_error("There is no script " + std::string(path) + " on " + ptrToString(ptr));
-                    ESM::LuaScriptCfg::Flags flags = cfg[*scriptId].mFlags;
-                    if ((flags & (localScripts->getAutoStartMode() | ESM::LuaScriptCfg::sCustom)) != ESM::LuaScriptCfg::sCustom)
+                    if (localScripts->getAutoStartConf().count(*scriptId) > 0)
                         throw std::runtime_error("Autostarted script can not be removed: " + std::string(path));
                     localScripts->removeScript(*scriptId);
                 };

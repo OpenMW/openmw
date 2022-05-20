@@ -20,7 +20,7 @@ namespace MWLua
     {
     public:
         static void initializeSelfPackage(const Context&);
-        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj, ESM::LuaScriptCfg::Flags autoStartMode);
+        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
 
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
 

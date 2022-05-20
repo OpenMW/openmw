@@ -174,7 +174,7 @@ enum RecNameInts : unsigned int
     // format 1
     REC_FILT = fourCC("FILT"),
     REC_DBGP = fourCC("DBGP"), ///< only used in project files
-    REC_LUAL = fourCC("LUAL"),  // LuaScriptsCfg
+    REC_LUAL = fourCC("LUAL"),  // LuaScriptsCfg (only in omwgame or omwaddon)
 
     // format 16 - Lua scripts in saved games
     REC_LUAM = fourCC("LUAM"),  // LuaManager data

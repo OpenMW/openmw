@@ -135,17 +135,19 @@ return {
         LuaScriptsContainerTest()
         {
             ESM::LuaScriptsCfg cfg;
-            cfg.mScripts.push_back({"invalid.lua", "", ESM::LuaScriptCfg::sCustom});
-            cfg.mScripts.push_back({"incorrect.lua", "", ESM::LuaScriptCfg::sCustom});
-            cfg.mScripts.push_back({"empty.lua", "", ESM::LuaScriptCfg::sCustom});
-            cfg.mScripts.push_back({"test1.lua", "", ESM::LuaScriptCfg::sCustom});
-            cfg.mScripts.push_back({"stopEvent.lua", "", ESM::LuaScriptCfg::sCustom});
-            cfg.mScripts.push_back({"test2.lua", "", ESM::LuaScriptCfg::sCustom});
-            cfg.mScripts.push_back({"loadSave1.lua", "", ESM::LuaScriptCfg::sNPC});
-            cfg.mScripts.push_back({"loadSave2.lua", "", ESM::LuaScriptCfg::sCustom | ESM::LuaScriptCfg::sNPC});
-            cfg.mScripts.push_back({"testInterface.lua", "", ESM::LuaScriptCfg::sCustom | ESM::LuaScriptCfg::sPlayer});
-            cfg.mScripts.push_back({"overrideInterface.lua", "", ESM::LuaScriptCfg::sCustom | ESM::LuaScriptCfg::sPlayer});
-            cfg.mScripts.push_back({"useInterface.lua", "", ESM::LuaScriptCfg::sCustom | ESM::LuaScriptCfg::sPlayer});
+            LuaUtil::parseOMWScripts(cfg, R"X(
+CUSTOM: invalid.lua
+CUSTOM: incorrect.lua
+CUSTOM: empty.lua
+CUSTOM: test1.lua
+CUSTOM: stopEvent.lua
+CUSTOM: test2.lua
+NPC: loadSave1.lua
+CUSTOM, NPC: loadSave2.lua
+CUSTOM, PLAYER: testInterface.lua
+CUSTOM, PLAYER: overrideInterface.lua
+CUSTOM, PLAYER: useInterface.lua
+)X");
             mCfg.init(std::move(cfg));
         }
     };
@@ -278,7 +280,8 @@ return {
 
     TEST_F(LuaScriptsContainerTest, AutoStart)
     {
-        LuaUtil::ScriptsContainer scripts(&mLua, "Test", ESM::LuaScriptCfg::sPlayer);
+        LuaUtil::ScriptsContainer scripts(&mLua, "Test");
+        scripts.setAutoStartConf(mCfg.getPlayerConf());
         testing::internal::CaptureStdout();
         scripts.addAutoStartedScripts();
         scripts.update(1.5f);
@@ -291,7 +294,8 @@ return {
 
     TEST_F(LuaScriptsContainerTest, Interface)
     {
-        LuaUtil::ScriptsContainer scripts(&mLua, "Test", ESM::LuaScriptCfg::sCreature);
+        LuaUtil::ScriptsContainer scripts(&mLua, "Test");
+        scripts.setAutoStartConf(mCfg.getLocalConf(ESM::REC_CREA, "", ESM::RefNum()));
         int addIfaceId = *mCfg.findId("testInterface.lua");
         int overrideIfaceId = *mCfg.findId("overrideInterface.lua");
         int useIfaceId = *mCfg.findId("useInterface.lua");
@@ -318,9 +322,12 @@ return {
 
     TEST_F(LuaScriptsContainerTest, LoadSave)
     {
-        LuaUtil::ScriptsContainer scripts1(&mLua, "Test", ESM::LuaScriptCfg::sNPC);
-        LuaUtil::ScriptsContainer scripts2(&mLua, "Test", ESM::LuaScriptCfg::sNPC);
-        LuaUtil::ScriptsContainer scripts3(&mLua, "Test", ESM::LuaScriptCfg::sPlayer);
+        LuaUtil::ScriptsContainer scripts1(&mLua, "Test");
+        LuaUtil::ScriptsContainer scripts2(&mLua, "Test");
+        LuaUtil::ScriptsContainer scripts3(&mLua, "Test");
+        scripts1.setAutoStartConf(mCfg.getLocalConf(ESM::REC_NPC_, "", ESM::RefNum()));
+        scripts2.setAutoStartConf(mCfg.getLocalConf(ESM::REC_NPC_, "", ESM::RefNum()));
+        scripts3.setAutoStartConf(mCfg.getPlayerConf());
 
         scripts1.addAutoStartedScripts();
         EXPECT_TRUE(scripts1.addCustomScript(*mCfg.findId("test1.lua")));

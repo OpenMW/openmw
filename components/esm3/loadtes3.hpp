@@ -42,7 +42,7 @@ namespace ESM
     /// \brief File header record
     struct Header
     {
-        static const int CurrentFormat = 0; // most recent known format
+        static constexpr int CurrentFormat = 1; // most recent known format
 
         // Defines another files (esm or esp) that this file depends upon.
         struct MasterData

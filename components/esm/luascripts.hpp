@@ -13,28 +13,41 @@ namespace ESM
 
     struct LuaScriptCfg
     {
-        using Flags = uint64_t;
-        static constexpr Flags sGlobal = 1ull << 0;
+        using Flags = uint32_t;
+        static constexpr Flags sGlobal = 1ull << 0;  // start as a global script
         static constexpr Flags sCustom = 1ull << 1;  // local; can be attached/detached by a global script
         static constexpr Flags sPlayer = 1ull << 2;  // auto attach to players
-        // auto attach for other classes:
-        static constexpr Flags sActivator = 1ull << 3;
-        static constexpr Flags sArmor = 1ull << 4;
-        static constexpr Flags sBook = 1ull << 5;
-        static constexpr Flags sClothing = 1ull << 6;
-        static constexpr Flags sContainer = 1ull << 7;
-        static constexpr Flags sCreature = 1ull << 8;
-        static constexpr Flags sDoor = 1ull << 9;
-        static constexpr Flags sIngredient = 1ull << 10;
-        static constexpr Flags sLight = 1ull << 11;
-        static constexpr Flags sMiscItem = 1ull << 12;
-        static constexpr Flags sNPC = 1ull << 13;
-        static constexpr Flags sPotion = 1ull << 14;
-        static constexpr Flags sWeapon = 1ull << 15;
 
-        std::string mScriptPath;
+        static constexpr Flags sMerge = 1ull << 3;  // merge with configuration for this script from previous content files.
+
+        std::string mScriptPath;  // VFS path to the script.
         std::string mInitializationData;  // Serialized Lua table. It is a binary data. Can contain '\0'.
         Flags mFlags;  // bitwise OR of Flags.
+
+        // Auto attach as a local script to objects of specific types (i.e. Container, Door, Activator, etc.)
+        std::vector<uint32_t> mTypes;  // values are ESM::RecNameInts
+
+        // Auto attach as a local script to objects with specific recordIds (i.e. specific door type, or an unique NPC)
+        struct PerRecordCfg
+        {
+            bool mAttach;  // true - attach, false - don't attach (overrides previous attach)
+            std::string mRecordId;
+            // Initialization data for this specific record. If empty than LuaScriptCfg::mInitializationData is used.
+            std::string mInitializationData;
+        };
+        std::vector<PerRecordCfg> mRecords;
+
+        // Auto attach as a local script to specific objects by their Refnums. The reference must be defined in the same
+        // content file as this LuaScriptCfg or in one of its deps.
+        struct PerRefCfg
+        {
+            bool mAttach;  // true - attach, false - don't attach (overrides previous attach)
+            uint32_t mRefnumIndex;
+            int32_t mRefnumContentFile;
+            // Initialization data for this specific refnum. If empty than LuaScriptCfg::mInitializationData is used.
+            std::string mInitializationData;
+        };
+        std::vector<PerRefCfg> mRefs;
     };
 
     struct LuaScriptsCfg
@@ -42,6 +55,8 @@ namespace ESM
         std::vector<LuaScriptCfg> mScripts;
 
         void load(ESMReader &esm);
+        void adjustRefNums(const ESMReader &esm);
+
         void save(ESMWriter &esm) const;
     };
 
