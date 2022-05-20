@@ -532,6 +532,60 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+--- Book.SKILL
+-- @type BookSKILL
+-- @field #string acrobatics "acrobatics"
+-- @field #string alchemy "alchemy"
+-- @field #string alteration "alteration"
+-- @field #string armorer "armorer"
+-- @field #string athletics "athletics"
+-- @field #string axe "axe"
+-- @field #string block "block"
+-- @field #string bluntWeapon "bluntweapon"
+-- @field #string conjuration "conjuration"
+-- @field #string destruction "destruction"
+-- @field #string enchant "enchant"
+-- @field #string handToHand "handtohand"
+-- @field #string heavyArmor "heavyarmor"
+-- @field #string illusion "illusion"
+-- @field #string lightArmor "lightarmor"
+-- @field #string longBlade "longblade"
+-- @field #string marksman "marksman"
+-- @field #string mediumArmor "mediumarmor"
+-- @field #string mercantile "mercantile"
+-- @field #string mysticism "mysticism"
+-- @field #string restoration "restoration"
+-- @field #string security "security"
+-- @field #string shortBlade "shortblade"
+-- @field #string sneak "sneak"
+-- @field #string spear "spear"
+-- @field #string speechcraft "speechcraft"
+-- @field #string unarmored "unarmored"
+
+--- @{#BookSKILL}
+-- @field [parent=#Book] #BookSKILL SKILL
+
+---
+-- Returns the read-only @{#BookRecord} of a book
+-- @function [parent=#Book] record
+-- @param #any objectOrRecordId
+-- @return #BookRecord
+
+---
+-- @type BookRecord
+-- @field #string id The record ID of the book
+-- @field #string name Name of the book
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this book (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #string enchant The enchantment ID of this book (can be empty)
+-- @field #string text The text content of the book
+-- @field #number weight
+-- @field #number value
+-- @field #string skill The skill that this book teaches. See @{#Book.SKILL} 
+-- @field #boolean isScroll 
+-- @field #number enchantCapacity
+
 --- @{#Clothing} functions
 
 
@@ -670,7 +724,7 @@
 -- @field #number health
 -- @field #number speed
 -- @field #number reach
--- @field #number enchant
+-- @field #number enchantCapacity
 -- @field #number chopMinDamage
 -- @field #number chopMaxDamage
 -- @field #number slashMinDamage
