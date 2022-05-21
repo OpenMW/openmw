@@ -132,7 +132,7 @@ namespace OMW
             std::unique_ptr<MWLua::LuaManager> mLuaManager;
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
-            ToUTF8::Utf8Encoder* mEncoder;
+            std::unique_ptr<ToUTF8::Utf8Encoder> mEncoder;
             Files::PathContainer mDataDirs;
             std::vector<std::string> mArchives;
             boost::filesystem::path mResDir;
@@ -164,7 +164,7 @@ namespace OMW
             unsigned int mRandomSeed;
 
             Compiler::Extensions mExtensions;
-            Compiler::Context *mScriptContext;
+            std::unique_ptr<Compiler::Context> mScriptContext;
 
             Files::Collections mFileCollections;
             bool mFSStrict;
