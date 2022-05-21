@@ -468,14 +468,13 @@ OMW::Engine::~Engine()
     if (mScreenCaptureOperation != nullptr)
         mScreenCaptureOperation->stop();
 
-    mStereoManager = nullptr;
-
     mMechanicsManager = nullptr;
     mDialogueManager = nullptr;
     mJournal = nullptr;
     mScriptManager = nullptr;
     mWindowManager = nullptr;
     mWorld = nullptr;
+    mStereoManager = nullptr;
     mSoundManager = nullptr;
     mInputManager = nullptr;
     mStateManager = nullptr;
