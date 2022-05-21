@@ -24,8 +24,8 @@ namespace ToUTF8
         UseGrowFactor,
     };
 
-    FromType calculateEncoding(const std::string& encodingName);
-    std::string encodingUsingMessage(const std::string& encodingName);
+    FromType calculateEncoding(std::string_view encodingName);
+    std::string encodingUsingMessage(std::string_view encodingName);
 
     class StatelessUtf8Encoder
     {
