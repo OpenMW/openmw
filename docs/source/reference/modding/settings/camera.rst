@@ -1,6 +1,9 @@
 Camera Settings
 ###############
 
+.. note::
+    Some camera settings are available only in the in-game settings menu. See the tab "Scripts/OpenMW Camera".
+
 near clip
 ---------
 
@@ -100,138 +103,6 @@ This setting controls the field of view for first person meshes such as the play
 It is not recommended to change this value from its default value
 because the Bethesda provided Morrowind assets do not adapt well to large values,
 while small values can result in the hands not being visible.
-
-This setting can only be configured by editing the settings configuration file.
-
-third person camera distance
-----------------------------
-
-:Type:		floating point
-:Range:		30-800
-:Default:	192.0
-
-Distance from the camera to the character in third person mode.
-
-This setting can be changed in game using "Zoom In" / "Zoom Out" controls.
-
-view over shoulder
-------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-This setting controls third person view mode.
-False: View is centered on the character's head. Crosshair is hidden.
-True: In non-combat mode camera is positioned behind the character's shoulder. Crosshair is visible in third person mode as well.
-
-This setting can be controlled in Advanced tab of the launcher.
-
-view over shoulder offset
--------------------------
-
-:Type:		2D vector floating point
-:Range:		Any
-:Default:	30 -10
-
-This setting makes sense only if 'view over shoulder' is enabled. Controls horizontal (first number) and vertical (second number) offset of the camera in third person mode.
-Recommened values: 30 -10 for the right shoulder, -30 -10 for the left shoulder.
-
-This setting can only be configured by editing the settings configuration file.
-
-auto switch shoulder
---------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	True
-
-This setting makes difference only in third person mode if 'view over shoulder' is enabled.
-When player is close to an obstacle, automatically switches camera to the shoulder that is farther away from the obstacle.
-
-This setting can be controlled in Advanced tab of the launcher.
-
-zoom out when move coef
------------------------
-
-:Type:		floating point
-:Range:		Any
-:Default:	20
-
-This setting makes difference only in third person mode if 'view over shoulder' is enabled.
-Slightly pulls camera away (or closer in case of negative value) when the character moves. To disable set it to zero.
-
-This setting can only be configured by editing the settings configuration file.
-
-preview if stand still
-----------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Makes difference only in third person mode.
-If enabled then the character rotation is not synchonized with the camera rotation while the character doesn't move and not in combat mode.
-
-This setting can be controlled in Advanced tab of the launcher.
-
-deferred preview rotation
--------------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	True
-
-Makes difference only in third person mode.
-If enabled then the character smoothly rotates to the view direction after exiting preview or vanity mode.
-If disabled then the camera rotates rather than the character.
-
-This setting can be controlled in Advanced tab of the launcher.
-
-head bobbing
-------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Enables head bobbing when move in first person mode.
-
-This setting can be controlled in Advanced tab of the launcher.
-
-head bobbing step
------------------
-
-:Type:		floating point
-:Range:		>0
-:Default:	90.0
-
-Makes diffence only in first person mode if 'head bobbing' is enabled.
-Length of each step.
-
-This setting can only be configured by editing the settings configuration file.
-
-head bobbing height
--------------------
-
-:Type:		floating point
-:Range:		Any
-:Default:	3.0
-
-Makes diffence only in first person mode if 'head bobbing' is enabled.
-Amplitude of the head bobbing.
-
-This setting can only be configured by editing the settings configuration file.
-
-head bobbing roll
------------------
-
-:Type:		floating point
-:Range:		0-90
-:Default:	0.2
-
-Makes diffence only in first person mode if 'head bobbing' is enabled.
-Maximum roll angle in degrees.
 
 This setting can only be configured by editing the settings configuration file.
 
