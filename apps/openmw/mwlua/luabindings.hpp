@@ -56,10 +56,6 @@ namespace MWLua
     // Implemented in inputbindings.cpp
     sol::table initInputPackage(const Context&);
 
-    // Implemented in settingsbindings.cpp
-    sol::table initGlobalSettingsPackage(const Context&);
-    sol::table initPlayerSettingsPackage(const Context&);
-
     // openmw.self package is implemented in localscripts.cpp
 }
 
