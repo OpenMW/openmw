@@ -36,7 +36,8 @@ config:
         vec3_uniform: [1.0, 2.0]
 )YAML";
 
-        withSettingsFile(content, [this] (const auto& path) {
+        withSettingsFile(content, [] (const auto& path)
+        {
             EXPECT_TRUE(ShaderManager::get().load(path));
             EXPECT_FALSE(ShaderManager::get().getValue<osg::Vec3f>("shader", "vec3_uniform").has_value());
             EXPECT_TRUE(ShaderManager::get().setValue<osg::Vec3f>("shader", "vec3_uniform", osg::Vec3f(1, 2, 3)));
@@ -56,7 +57,8 @@ config:
  >Defeated by a sideways carrot
 )YAML";
 
-        withSettingsFile(content, [this] (const auto& path) {
+        withSettingsFile(content, [] (const auto& path)
+        {
             EXPECT_FALSE(ShaderManager::get().load(path));
             EXPECT_FALSE(ShaderManager::get().setValue("shader", "uniform", 12.0));
             EXPECT_FALSE(ShaderManager::get().getValue<float>("shader", "uniform").has_value());
