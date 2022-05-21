@@ -1,6 +1,8 @@
 #ifndef GAME_SCRIPT_LOCALS_H
 #define GAME_SCRIPT_LOCALS_H
 
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include <components/interpreter/types.hpp>
