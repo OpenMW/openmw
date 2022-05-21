@@ -1,6 +1,9 @@
 #!/bin/sh -ex
 
 export HOMEBREW_NO_EMOJI=1
+export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+export HOMEBREW_NO_ENV_HINTS=1
+
 brew update --quiet
 
 # workaround python issue on travis
