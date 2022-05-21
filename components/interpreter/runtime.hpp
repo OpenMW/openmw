@@ -2,7 +2,7 @@
 #define INTERPRETER_RUNTIME_H_INCLUDED
 
 #include <vector>
-#include <string>
+#include <string_view>
 
 #include "types.hpp"
 

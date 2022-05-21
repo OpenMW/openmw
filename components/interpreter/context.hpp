@@ -2,6 +2,7 @@
 #define INTERPRETER_CONTEXT_H_INCLUDED
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Interpreter

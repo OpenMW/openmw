@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <set>
 
 #include "../mwworld/ptr.hpp"

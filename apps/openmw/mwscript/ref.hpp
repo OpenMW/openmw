@@ -1,8 +1,6 @@
 #ifndef GAME_MWSCRIPT_REF_H
 #define GAME_MWSCRIPT_REF_H
 
-#include <string>
-
 #include "../mwworld/ptr.hpp"
 
 namespace Interpreter

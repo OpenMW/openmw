@@ -2,6 +2,7 @@
 #define GAME_MWBASE_DIALOGUEMANAGER_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <list>
 

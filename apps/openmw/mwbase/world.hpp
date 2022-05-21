@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <string_view>
 #include <deque>
 
 #include <components/esm3/cellid.hpp>

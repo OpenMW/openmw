@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_MISC_MESSAGEFORMATPARSER_H
 #define OPENMW_COMPONENTS_MISC_MESSAGEFORMATPARSER_H
 
-#include <string>
+#include <string_view>
 
 namespace Misc
 {
