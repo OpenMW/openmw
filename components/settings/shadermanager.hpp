@@ -95,7 +95,7 @@ namespace Settings
 
                 return value.as<T>();
             }
-            catch(const YAML::BadConversion& e)
+            catch(const YAML::BadConversion&)
             {
                 Log(Debug::Warning) << "Failed retrieving " << tname << ", " << uname << " : mismatched types in config file.";
             }

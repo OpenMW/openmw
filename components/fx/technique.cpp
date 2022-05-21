@@ -55,7 +55,6 @@ namespace fx
     {
         mTextures.clear();
         mStatus = Status::Uncompiled;
-        mDirty = false;
         mValid = false;
         mHDR = false;
         mNormals = false;
@@ -180,12 +179,11 @@ namespace fx
         return mFileName;
     }
 
-    void Technique::setLastModificationTime(std::filesystem::file_time_type timeStamp, bool dirty)
+    bool Technique::setLastModificationTime(std::filesystem::file_time_type timeStamp)
     {
-        if (dirty && mLastModificationTime != timeStamp)
-            mDirty = true;
-
+        const bool isDirty = timeStamp != mLastModificationTime;
         mLastModificationTime = timeStamp;
+        return isDirty;
     }
 
     [[noreturn]] void Technique::error(const std::string& msg)
@@ -541,6 +539,9 @@ namespace fx
             constexpr bool isVec = std::is_same_v<osg::Vec2f, SrcT> || std::is_same_v<osg::Vec3f, SrcT> || std::is_same_v<osg::Vec4f, SrcT>;
             constexpr bool isFloat = std::is_same_v<float, SrcT>;
             constexpr bool isInt = std::is_same_v<int, SrcT>;
+            constexpr bool isBool = std::is_same_v<bool, SrcT>;
+
+            static_assert(isVec || isFloat || isInt || isBool, "Unsupported type");
 
             std::optional<double> step;
 
@@ -555,7 +556,7 @@ namespace fx
                     data.mDefault = parseFloat();
                 else if constexpr (isInt)
                     data.mDefault = parseInteger();
-                else
+                else if constexpr (isBool)
                     data.mDefault = parseBool();
             }
             else if (key == "min")
@@ -566,7 +567,7 @@ namespace fx
                     data.mMin = parseFloat();
                 else if constexpr (isInt)
                     data.mMin = parseInteger();
-                else
+                else if constexpr (isBool)
                     data.mMin = parseBool();
             }
             else if (key == "max")
@@ -577,7 +578,7 @@ namespace fx
                     data.mMax = parseFloat();
                 else if constexpr (isInt)
                     data.mMax = parseInteger();
-                else
+                else if constexpr (isBool)
                     data.mMax = parseBool();
             }
             else if (key == "step")

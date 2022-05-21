@@ -117,11 +117,7 @@ namespace fx
 
         std::string getFileName() const;
 
-        void setLastModificationTime(std::filesystem::file_time_type timeStamp, bool dirty = true);
-
-        bool isDirty() const { return mDirty; }
-
-        void setDirty(bool dirty) { mDirty = dirty; }
+        bool setLastModificationTime(std::filesystem::file_time_type timeStamp);
 
         bool isValid() const { return mValid; }
 
@@ -251,7 +247,6 @@ namespace fx
         bool mEnabled;
 
         std::filesystem::file_time_type mLastModificationTime;
-        bool mDirty;
         bool mValid;
         bool mHDR;
         bool mNormals;

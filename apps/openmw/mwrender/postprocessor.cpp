@@ -1,5 +1,6 @@
 #include "postprocessor.hpp"
 
+#include <algorithm>
 #include <SDL_opengl_glext.h>
 
 #include <osg/Texture1D>
@@ -172,6 +173,21 @@ namespace MWRender
             Stereo::Manager::instance().screenResolutionChanged();
     }
 
+    void PostProcessor::populateTechniqueFiles()
+    {
+        for (const auto& name : mVFS->getRecursiveDirectoryIterator(fx::Technique::sSubdir))
+        {
+            std::filesystem::path path = name;
+            std::string fileExt = Misc::StringUtils::lowerCase(path.extension().string());
+            if (!path.parent_path().has_parent_path() && fileExt == fx::Technique::sExt)
+            {
+                auto absolutePath = std::filesystem::path(mVFS->getAbsoluteFileName(name));
+
+                mTechniqueFileMap[absolutePath.stem().string()] = absolutePath;
+            }
+        }
+    }
+
     void PostProcessor::enable(bool usePostProcessing)
     {
         mReload = true;
@@ -193,17 +209,8 @@ namespace MWRender
 
         if (mUsePostProcessing && mTechniqueFileMap.empty())
         {
-            for (const auto& name : mVFS->getRecursiveDirectoryIterator(fx::Technique::sSubdir))
-            {
-                std::filesystem::path path = name;
-                std::string fileExt = Misc::StringUtils::lowerCase(path.extension().string());
-                if (!path.parent_path().has_parent_path() && fileExt == fx::Technique::sExt)
-                {
-                    auto absolutePath = std::filesystem::path(mVFS->getAbsoluteFileName(name));
+            populateTechniqueFiles();
 
-                    mTechniqueFileMap[absolutePath.stem().string()] = absolutePath;
-                }
-            }
         }
 
         mMainTemplate->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
@@ -357,47 +364,51 @@ namespace MWRender
         }
     }
 
-    void PostProcessor::update(size_t frameId)
+    void PostProcessor::updateLiveReload()
     {
         static const bool liveReload = Settings::Manager::getBool("live reload", "Post Processing");
+        if (!liveReload)
+            return;
 
-        if (liveReload)
+        for (auto& technique : mTechniques)
         {
-            for (auto& technique : mTechniques)
-            {
-                if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
-                    continue;
+            if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
+                continue;
 
-                technique->setLastModificationTime(std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]));
+            const auto lastWriteTime = std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]);
+            const bool isDirty = technique->setLastModificationTime(lastWriteTime);
 
-                if(technique->isValid() && !technique->isDirty())
-                    continue;
+            if (technique->isValid() && !isDirty)
+                continue;
 
-                if (technique->isDirty())
-                {
-                    technique->compile();
+            if (technique->compile())
+                Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()].string();
 
-                    if (technique->isValid())
-                        Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()].string();
-
-                    if (!mReload)
-                        mReload = technique->isValid();
-                }
-            }
+            mReload = technique->isValid();
         }
+    }
 
-        if (mReload)
-        {
-            mReload = false;
+    void PostProcessor::reloadIfRequired()
+    {
+        if (!mReload)
+            return;
 
-            if (!mTechniques.empty())
-                reloadMainPass(*mTechniques[0]);
+        mReload = false;
 
-            reloadTechniques();
+        if (!mTechniques.empty())
+            reloadMainPass(*mTechniques[0]);
 
-            if (!mUsePostProcessing)
-                resize();
-        }
+        reloadTechniques();
+
+        if (!mUsePostProcessing)
+            resize();
+    }
+
+    void PostProcessor::update(size_t frameId)
+    {
+        updateLiveReload();
+
+        reloadIfRequired();
 
         if (mDirty && mDirtyFrameId == frameId)
         {
@@ -647,29 +658,23 @@ namespace MWRender
 
     bool PostProcessor::disableTechnique(std::shared_ptr<fx::Technique> technique, bool dirty)
     {
-        for (size_t i = 1; i < mTechniques.size(); ++i)
-        {
-            if (technique.get() == mTechniques[i].get())
-            {
-                mTechniques.erase(mTechniques.begin() + i);
-                if (dirty)
-                    dirtyTechniques();
-                return true;
-            }
-        }
+        auto it = std::find(mTechniques.begin(), mTechniques.end(), technique);
+        if (it == std::end(mTechniques))
+            return false;
 
-        return false;
+        mTechniques.erase(it);
+        if (dirty)
+            dirtyTechniques();
+
+        return true;
     }
 
     bool PostProcessor::isTechniqueEnabled(const std::shared_ptr<fx::Technique>& technique) const
     {
-        for (const auto& t : mTechniques)
-        {
-            if (technique.get() == t.get())
-                return technique->isValid();
-        }
+        if (auto it = std::find(mTechniques.begin(), mTechniques.end(), technique); it == mTechniques.end())
+            return false;
 
-        return false;
+        return technique->isValid();
     }
 
     void PostProcessor::createTexturesAndCamera(size_t frameId)
@@ -762,7 +767,7 @@ namespace MWRender
         technique->compile();
 
         if (technique->getStatus() != fx::Technique::Status::File_Not_exists)
-            technique->setLastModificationTime(std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]), false);
+            technique->setLastModificationTime(std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]));
 
         if (!insert)
             return technique;

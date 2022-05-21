@@ -161,6 +161,9 @@ namespace MWRender
         void setRenderTargetSize(int width, int height) { mWidth = width; mHeight = height; }
 
     private:
+
+        void populateTechniqueFiles();
+
         size_t frame() const { return mViewer->getFrameStamp()->getFrameNumber(); }
 
         void createObjectsForFrame(size_t frameId);
@@ -174,6 +177,10 @@ namespace MWRender
         void dirtyTechniques();
 
         void update(size_t frameId);
+
+        void reloadIfRequired();
+
+        void updateLiveReload();
 
         void cull(size_t frameId, osgUtil::CullVisitor* cv);
 
