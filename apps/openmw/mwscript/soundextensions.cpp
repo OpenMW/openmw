@@ -33,10 +33,10 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-                    std::string file = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string file{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
-                    std::string text = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string text{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->say (ptr, file);
@@ -65,7 +65,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string sound{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->streamMusic (sound);
@@ -78,7 +78,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->playSound(sound, 1.0, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
@@ -91,7 +91,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float volume = runtime[0].mFloat;
@@ -113,7 +113,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, 1.0, 1.0,
@@ -132,7 +132,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float volume = runtime[0].mFloat;
@@ -158,7 +158,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->stopSound3D (ptr, sound);

@@ -179,7 +179,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
     return ContainerStoreIterator (this);
 }
 
-int MWWorld::ContainerStore::count(const std::string &id) const
+int MWWorld::ContainerStore::count(std::string_view id) const
 {
     int total=0;
     for (const auto&& iter : *this)
@@ -278,7 +278,7 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
             && cls2.getItemHealth(ptr2) == cls2.getItemMaxHealth(ptr2)));
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(std::string_view id, int count, const Ptr &actorPtr)
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
     return add(ref.getPtr(), count, actorPtr);
@@ -457,7 +457,7 @@ void MWWorld::ContainerStore::updateRechargingItems()
     }
 }
 
-int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement, bool resolveFirst)
+int MWWorld::ContainerStore::remove(std::string_view itemId, int count, const Ptr& actor, bool equipReplacement, bool resolveFirst)
 {
     if(resolveFirst)
         resolve();

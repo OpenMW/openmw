@@ -533,10 +533,10 @@ const std::string &MagicEffect::effectIdToString(short effectID)
 }
 
 class FindSecond {
-    const std::string &mName;
+    std::string_view mName;
 
 public:
-    FindSecond(const std::string &name) : mName(name) { }
+    FindSecond(std::string_view name) : mName(name) { }
 
     bool operator()(const std::pair<short,std::string> &item) const
     {
@@ -546,13 +546,13 @@ public:
     }
 };
 
-short MagicEffect::effectStringToId(const std::string &effect)
+short MagicEffect::effectStringToId(std::string_view effect)
 {
     std::map<short,std::string>::const_iterator name;
 
     name = std::find_if(sNames.begin(), sNames.end(), FindSecond(effect));
     if(name == sNames.end())
-        throw std::runtime_error(std::string("Unimplemented effect ")+effect);
+        throw std::runtime_error("Unimplemented effect " + std::string(effect));
 
     return name->first;
 }

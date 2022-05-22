@@ -44,7 +44,7 @@ namespace MWScript
                     if (!ptr.getRefData().isEnabled())
                         return;
 
-                    std::string group = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view group = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer mode = 0;
@@ -58,7 +58,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, std::numeric_limits<int>::max(), true);
+                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(ptr, std::string{group}, mode, std::numeric_limits<int>::max(), true);
                }
         };
 
@@ -74,7 +74,7 @@ namespace MWScript
                     if (!ptr.getRefData().isEnabled())
                         return;
 
-                    std::string group = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view group = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer loops = runtime[0].mInteger;
@@ -94,7 +94,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, loops + 1, true);
+                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(ptr, std::string{group}, mode, loops + 1, true);
                }
         };
         

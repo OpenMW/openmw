@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <string>
 
 #include "opcodes.hpp"
 

@@ -127,7 +127,7 @@ namespace MWMechanics
             void addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor);
 
             /// Removes the active effects from this spell/potion/.. with \a id
-            void removeEffects (const MWWorld::Ptr& ptr, const std::string& id);
+            void removeEffects (const MWWorld::Ptr& ptr, std::string_view id);
 
             /// Remove all active effects with this effect id
             void purgeEffect (const MWWorld::Ptr& ptr, short effectId);
@@ -141,7 +141,7 @@ namespace MWMechanics
             /// Remove all spells
             void clear(const MWWorld::Ptr& ptr);
 
-            bool isSpellActive (const std::string& id) const;
+            bool isSpellActive (std::string_view id) const;
             ///< case insensitive
 
             void skipWorsenings(double hours);

@@ -2,6 +2,7 @@
 #define OPENMW_ESM_MGEF_H
 
 #include <string>
+#include <string_view>
 #include <map>
 
 namespace ESM
@@ -70,7 +71,7 @@ struct MagicEffect
     static const std::map<short,std::string> sNames;
 
     static const std::string &effectIdToString(short effectID);
-    static short effectStringToId(const std::string &effect);
+    static short effectStringToId(std::string_view effect);
 
     /// Returns the effect that provides resistance against \a effect (or -1 if there's none)
     static short getResistanceEffect(short effect);

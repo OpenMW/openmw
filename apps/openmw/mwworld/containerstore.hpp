@@ -175,10 +175,10 @@ namespace MWWorld
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
-            ContainerStoreIterator add(const std::string& id, int count, const Ptr& actorPtr);
+            ContainerStoreIterator add(std::string_view id, int count, const Ptr& actorPtr);
             ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
-            int remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
+            int remove(std::string_view itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
             ///< Remove \a count item(s) designated by \a itemId from this container.
             ///
             /// @return the number of items actually removed
@@ -201,7 +201,7 @@ namespace MWWorld
             /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
             /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
 
-            int count (const std::string& id) const;
+            int count(std::string_view id) const;
             ///< @return How many items with refID \a id are in this container?
 
             ContainerStoreListener* getContListener() const;

@@ -102,12 +102,12 @@ namespace
 
     class GlobalVariables
     {
-        std::map<std::string, int> mShorts;
-        std::map<std::string, int> mLongs;
-        std::map<std::string, float> mFloats;
+        std::map<std::string, int, std::less<>> mShorts;
+        std::map<std::string, int, std::less<>> mLongs;
+        std::map<std::string, float, std::less<>> mFloats;
 
         template<class T>
-        T getGlobal(const std::string& name, const std::map<std::string, T>& map) const
+        T getGlobal(std::string_view name, const std::map<std::string, T, std::less<>>& map) const
         {
             auto it = map.find(name);
             if(it != map.end())
@@ -122,23 +122,23 @@ namespace
             mFloats.clear();
         }
 
-        int getShort(const std::string& name) const { return getGlobal(name, mShorts); };
+        int getShort(std::string_view name) const { return getGlobal(name, mShorts); };
 
-        int getLong(const std::string& name) const { return getGlobal(name, mLongs); };
+        int getLong(std::string_view name) const { return getGlobal(name, mLongs); };
 
-        float getFloat(const std::string& name) const { return getGlobal(name, mFloats); };
+        float getFloat(std::string_view name) const { return getGlobal(name, mFloats); };
 
-        void setShort(const std::string& name, int value) { mShorts[name] = value; };
+        void setShort(std::string_view name, int value) { mShorts[std::string(name)] = value; };
 
-        void setLong(const std::string& name, int value) { mLongs[name] = value; };
+        void setLong(std::string_view name, int value) { mLongs[std::string(name)] = value; };
 
-        void setFloat(const std::string& name, float value) { mFloats[name] = value; };
+        void setFloat(std::string_view name, float value) { mFloats[std::string(name)] = value; };
     };
 
     class TestInterpreterContext : public Interpreter::Context
     {
         LocalVariables mLocals;
-        std::map<std::string, GlobalVariables> mMembers;
+        std::map<std::string, GlobalVariables, std::less<>> mMembers;
     public:
         std::string getTarget() const override { return {}; };
 
@@ -158,23 +158,23 @@ namespace
 
         void report(const std::string& message) override {};
 
-        int getGlobalShort(const std::string& name) const override { return {}; };
+        int getGlobalShort(std::string_view name) const override { return {}; };
 
-        int getGlobalLong(const std::string& name) const override { return {}; };
+        int getGlobalLong(std::string_view name) const override { return {}; };
 
-        float getGlobalFloat(const std::string& name) const override { return {}; };
+        float getGlobalFloat(std::string_view name) const override { return {}; };
 
-        void setGlobalShort(const std::string& name, int value) override {};
+        void setGlobalShort(std::string_view name, int value) override {};
 
-        void setGlobalLong(const std::string& name, int value) override {};
+        void setGlobalLong(std::string_view name, int value) override {};
 
-        void setGlobalFloat(const std::string& name, float value) override {};
+        void setGlobalFloat(std::string_view name, float value) override {};
 
         std::vector<std::string> getGlobals() const override { return {}; };
 
-        char getGlobalType(const std::string& name) const override { return ' '; };
+        char getGlobalType(std::string_view name) const override { return ' '; };
 
-        std::string getActionBinding(const std::string& action) const override { return {}; };
+        std::string getActionBinding(std::string_view action) const override { return {}; };
 
         std::string getActorName() const override { return {}; };
 
@@ -200,7 +200,7 @@ namespace
 
         std::string getCurrentCellName() const override { return {}; };
 
-        int getMemberShort(const std::string& id, const std::string& name, bool global) const override
+        int getMemberShort(std::string_view id, std::string_view name, bool global) const override
         {
             auto it = mMembers.find(id);
             if(it != mMembers.end())
@@ -208,7 +208,7 @@ namespace
             return {};
         };
 
-        int getMemberLong(const std::string& id, const std::string& name, bool global) const override
+        int getMemberLong(std::string_view id, std::string_view name, bool global) const override
         {
             auto it = mMembers.find(id);
             if(it != mMembers.end())
@@ -216,7 +216,7 @@ namespace
             return {};
         };
 
-        float getMemberFloat(const std::string& id, const std::string& name, bool global) const override
+        float getMemberFloat(std::string_view id, std::string_view name, bool global) const override
         {
             auto it = mMembers.find(id);
             if(it != mMembers.end())
@@ -224,11 +224,11 @@ namespace
             return {};
         };
 
-        void setMemberShort(const std::string& id, const std::string& name, int value, bool global) override { mMembers[id].setShort(name, value); };
+        void setMemberShort(std::string_view id, std::string_view name, int value, bool global) override { mMembers[std::string(id)].setShort(name, value); };
 
-        void setMemberLong(const std::string& id, const std::string& name, int value, bool global) override { mMembers[id].setLong(name, value); };
+        void setMemberLong(std::string_view id, std::string_view name, int value, bool global) override { mMembers[std::string(id)].setLong(name, value); };
 
-        void setMemberFloat(const std::string& id, const std::string& name, float value, bool global) override { mMembers[id].setFloat(name, value); };
+        void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) override { mMembers[std::string(id)].setFloat(name, value); };
     };
 
     struct CompiledScript

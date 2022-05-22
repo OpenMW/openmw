@@ -45,7 +45,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view objectID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     // The value of the reset argument doesn't actually matter
@@ -102,7 +102,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -140,10 +140,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -168,7 +168,7 @@ namespace MWScript
                     if (cellID.empty())
                         return;
 
-                    if (!MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(cellID))
+                    if (!MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(std::string{cellID}))
                         return;
 
                     MWMechanics::AiEscort escortPackage(actorID, cellID, static_cast<int>(duration), x, y, z, repeat);
@@ -320,7 +320,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -358,10 +358,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -421,7 +421,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr observer = R()(runtime, false); // required=false
 
-                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->searchPtr(actorID, true, false);
@@ -444,7 +444,7 @@ namespace MWScript
 
                     MWWorld::Ptr source = R()(runtime);
 
-                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
 
@@ -465,7 +465,7 @@ namespace MWScript
                 void execute (Interpreter::Runtime &runtime) override
                 {
                     MWWorld::Ptr actor = R()(runtime);
-                    std::string testedTargetId = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view testedTargetId = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     bool targetsAreEqual = false;
@@ -497,7 +497,7 @@ namespace MWScript
                 void execute (Interpreter::Runtime &runtime) override
                 {
                     MWWorld::Ptr actor = R()(runtime);
-                    std::string targetID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view targetID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(targetID, true, false);

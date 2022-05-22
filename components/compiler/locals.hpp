@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <string_view>
 #include <iosfwd>
 
 namespace Compiler
@@ -19,24 +20,24 @@ namespace Compiler
 
         public:
 
-            char getType (const std::string& name) const;
+            char getType (std::string_view name) const;
             ///< 's': short, 'l': long, 'f': float, ' ': does not exist.
 
-            int getIndex (const std::string& name) const;
+            int getIndex (std::string_view name) const;
             ///< return index for local variable \a name (-1: does not exist).
 
-            bool search (char type, const std::string& name) const;
+            bool search (char type, std::string_view name) const;
 
             /// Return index for local variable \a name of type \a type (-1: variable does not
             /// exit).
-            int searchIndex (char type, const std::string& name) const;
+            int searchIndex (char type, std::string_view name) const;
 
             const std::vector<std::string>& get (char type) const;
 
             void write (std::ostream& localFile) const;
             ///< write declarations to file.
 
-            void declare (char type, const std::string& name);
+            void declare (char type, std::string_view name);
             ///< declares a variable.
 
             void clear();

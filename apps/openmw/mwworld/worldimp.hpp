@@ -258,19 +258,19 @@ namespace MWWorld
             void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) override;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
-            void setGlobalInt (const std::string& name, int value) override;
+            void setGlobalInt(std::string_view name, int value) override;
             ///< Set value independently from real type.
 
-            void setGlobalFloat (const std::string& name, float value) override;
+            void setGlobalFloat(std::string_view name, float value) override;
             ///< Set value independently from real type.
 
-            int getGlobalInt (const std::string& name) const override;
+            int getGlobalInt(std::string_view name) const override;
             ///< Get value independently from real type.
 
-            float getGlobalFloat (const std::string& name) const override;
+            float getGlobalFloat(std::string_view name) const override;
             ///< Get value independently from real type.
 
-            char getGlobalVariableType (const std::string& name) const override;
+            char getGlobalVariableType(std::string_view name) const override;
             ///< Return ' ', if there is no global variable with this name.
 
             std::string getCellName (const MWWorld::CellStore *cell = nullptr) const override;
@@ -283,11 +283,11 @@ namespace MWWorld
             void removeRefScript (MWWorld::RefData *ref) override;
             //< Remove the script attached to ref from mLocalScripts
 
-            Ptr getPtr (const std::string& name, bool activeOnly) override;
+            Ptr getPtr (std::string_view name, bool activeOnly) override;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
-            Ptr searchPtr (const std::string& name, bool activeOnly, bool searchInContainers = false) override;
+            Ptr searchPtr (std::string_view name, bool activeOnly, bool searchInContainers = false) override;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do not search inactive cells.
 

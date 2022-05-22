@@ -122,7 +122,7 @@ namespace Interpreter
                 Type_Integer data = runtime[0].mInteger;
                 int index = runtime[1].mInteger;
 
-                std::string name = runtime.getStringLiteral (index);
+                std::string_view name = runtime.getStringLiteral (index);
 
                 runtime.getContext().setGlobalShort (name, data);
 
@@ -140,7 +140,7 @@ namespace Interpreter
                 Type_Integer data = runtime[0].mInteger;
                 int index = runtime[1].mInteger;
 
-                std::string name = runtime.getStringLiteral (index);
+                std::string_view name = runtime.getStringLiteral (index);
 
                 runtime.getContext().setGlobalLong (name, data);
 
@@ -158,7 +158,7 @@ namespace Interpreter
                 Type_Float data = runtime[0].mFloat;
                 int index = runtime[1].mInteger;
 
-                std::string name = runtime.getStringLiteral (index);
+                std::string_view name = runtime.getStringLiteral (index);
 
                 runtime.getContext().setGlobalFloat (name, data);
 
@@ -174,7 +174,7 @@ namespace Interpreter
             void execute (Runtime& runtime) override
             {
                 int index = runtime[0].mInteger;
-                std::string name = runtime.getStringLiteral (index);
+                std::string_view name = runtime.getStringLiteral (index);
                 Type_Integer value = runtime.getContext().getGlobalShort (name);
                 runtime[0].mInteger = value;
             }
@@ -187,7 +187,7 @@ namespace Interpreter
             void execute (Runtime& runtime) override
             {
                 int index = runtime[0].mInteger;
-                std::string name = runtime.getStringLiteral (index);
+                std::string_view name = runtime.getStringLiteral (index);
                 Type_Integer value = runtime.getContext().getGlobalLong (name);
                 runtime[0].mInteger = value;
             }
@@ -200,7 +200,7 @@ namespace Interpreter
             void execute (Runtime& runtime) override
             {
                 int index = runtime[0].mInteger;
-                std::string name = runtime.getStringLiteral (index);
+                std::string_view name = runtime.getStringLiteral (index);
                 Type_Float value = runtime.getContext().getGlobalFloat (name);
                 runtime[0].mFloat = value;
             }
@@ -215,9 +215,9 @@ namespace Interpreter
             {
                 Type_Integer data = runtime[0].mInteger;
                 Type_Integer index = runtime[1].mInteger;
-                std::string id = runtime.getStringLiteral (index);
+                std::string_view id = runtime.getStringLiteral (index);
                 index = runtime[2].mInteger;
-                std::string variable = runtime.getStringLiteral (index);
+                std::string_view variable = runtime.getStringLiteral (index);
 
                 runtime.getContext().setMemberShort (id, variable, data, TGlobal);
 
@@ -236,9 +236,9 @@ namespace Interpreter
             {
                 Type_Integer data = runtime[0].mInteger;
                 Type_Integer index = runtime[1].mInteger;
-                std::string id = runtime.getStringLiteral (index);
+                std::string_view id = runtime.getStringLiteral (index);
                 index = runtime[2].mInteger;
-                std::string variable = runtime.getStringLiteral (index);
+                std::string_view variable = runtime.getStringLiteral (index);
 
                 runtime.getContext().setMemberLong (id, variable, data, TGlobal);
 
@@ -257,9 +257,9 @@ namespace Interpreter
             {
                 Type_Float data = runtime[0].mFloat;
                 Type_Integer index = runtime[1].mInteger;
-                std::string id = runtime.getStringLiteral (index);
+                std::string_view id = runtime.getStringLiteral (index);
                 index = runtime[2].mInteger;
-                std::string variable = runtime.getStringLiteral (index);
+                std::string_view variable = runtime.getStringLiteral (index);
 
                 runtime.getContext().setMemberFloat (id, variable, data, TGlobal);
 
@@ -277,9 +277,9 @@ namespace Interpreter
             void execute (Runtime& runtime) override
             {
                 Type_Integer index = runtime[0].mInteger;
-                std::string id = runtime.getStringLiteral (index);
+                std::string_view id = runtime.getStringLiteral (index);
                 index = runtime[1].mInteger;
-                std::string variable = runtime.getStringLiteral (index);
+                std::string_view variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
                 int value = runtime.getContext().getMemberShort (id, variable, TGlobal);
@@ -295,9 +295,9 @@ namespace Interpreter
             void execute (Runtime& runtime) override
             {
                 Type_Integer index = runtime[0].mInteger;
-                std::string id = runtime.getStringLiteral (index);
+                std::string_view id = runtime.getStringLiteral (index);
                 index = runtime[1].mInteger;
-                std::string variable = runtime.getStringLiteral (index);
+                std::string_view variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
                 int value = runtime.getContext().getMemberLong (id, variable, TGlobal);
@@ -313,9 +313,9 @@ namespace Interpreter
             void execute (Runtime& runtime) override
             {
                 Type_Integer index = runtime[0].mInteger;
-                std::string id = runtime.getStringLiteral (index);
+                std::string_view id = runtime.getStringLiteral (index);
                 index = runtime[1].mInteger;
-                std::string variable = runtime.getStringLiteral (index);
+                std::string_view variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
                 float value = runtime.getContext().getMemberFloat (id, variable, TGlobal);

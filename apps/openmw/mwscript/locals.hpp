@@ -1,6 +1,8 @@
 #ifndef GAME_SCRIPT_LOCALS_H
 #define GAME_SCRIPT_LOCALS_H
 
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include <components/interpreter/types.hpp>
@@ -37,25 +39,25 @@ namespace MWScript
             /// @note var needs to be in lowercase
             ///
             /// \note Locals will be automatically configured first, if necessary
-            bool setVarByInt(const std::string& script, const std::string& var, int val);
+            bool setVarByInt(const std::string& script, std::string_view var, int val);
 
             /// \note Locals will be automatically configured first, if necessary
             //
             // \note If it can not be determined if the variable exists, the error will be
             // ignored and false will be returned.
-            bool hasVar(const std::string& script, const std::string& var);
+            bool hasVar(const std::string& script, std::string_view var);
 
             /// if var does not exist, returns 0
             /// @note var needs to be in lowercase
             ///
             /// \note Locals will be automatically configured first, if necessary
-            int getIntVar (const std::string& script, const std::string& var);
+            int getIntVar (const std::string& script, std::string_view var);
 
             /// if var does not exist, returns 0
             /// @note var needs to be in lowercase
             ///
             /// \note Locals will be automatically configured first, if necessary
-            float getFloatVar (const std::string& script, const std::string& var);
+            float getFloatVar (const std::string& script, std::string_view var);
 
             /// \note If locals have not been configured yet, no data is written.
             ///

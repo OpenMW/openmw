@@ -71,7 +71,7 @@ namespace MWDialogue
         mPermanentDispositionChange = 0;
     }
 
-    void DialogueManager::addTopic (const std::string& topic)
+    void DialogueManager::addTopic(std::string_view topic)
     {
         mKnownTopics.insert( Misc::StringUtils::lowerCase(topic) );
     }
@@ -516,7 +516,7 @@ namespace MWDialogue
         updateActorKnownTopics();
     }
 
-    void DialogueManager::addChoice (const std::string& text, int choice)
+    void DialogueManager::addChoice(std::string_view text, int choice)
     {
         mIsInChoice = true;
         mChoices.emplace_back(text, choice);
@@ -704,7 +704,7 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::modFactionReaction(const std::string &faction1, const std::string &faction2, int diff)
+    void DialogueManager::modFactionReaction(std::string_view faction1, std::string_view faction2, int diff)
     {
         std::string fact1 = Misc::StringUtils::lowerCase(faction1);
         std::string fact2 = Misc::StringUtils::lowerCase(faction2);
@@ -719,7 +719,7 @@ namespace MWDialogue
         map[fact2] = newValue;
     }
 
-    void DialogueManager::setFactionReaction(const std::string &faction1, const std::string &faction2, int absolute)
+    void DialogueManager::setFactionReaction(std::string_view faction1, std::string_view faction2, int absolute)
     {
         std::string fact1 = Misc::StringUtils::lowerCase(faction1);
         std::string fact2 = Misc::StringUtils::lowerCase(faction2);
@@ -732,7 +732,7 @@ namespace MWDialogue
         map[fact2] = absolute;
     }
 
-    int DialogueManager::getFactionReaction(const std::string &faction1, const std::string &faction2) const
+    int DialogueManager::getFactionReaction(std::string_view faction1, std::string_view faction2) const
     {
         std::string fact1 = Misc::StringUtils::lowerCase(faction1);
         std::string fact2 = Misc::StringUtils::lowerCase(faction2);

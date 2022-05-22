@@ -10,22 +10,22 @@
 
 namespace MWWorld
 {
-    Globals::Collection::const_iterator Globals::find (const std::string& name) const
+    Globals::Collection::const_iterator Globals::find (std::string_view name) const
     {
         Collection::const_iterator iter = mVariables.find (Misc::StringUtils::lowerCase (name));
 
         if (iter==mVariables.end())
-            throw std::runtime_error ("unknown global variable: " + name);
+            throw std::runtime_error ("unknown global variable: " + std::string{name});
 
         return iter;
     }
 
-    Globals::Collection::iterator Globals::find (const std::string& name)
+    Globals::Collection::iterator Globals::find (std::string_view name)
     {
         Collection::iterator iter = mVariables.find (Misc::StringUtils::lowerCase (name));
 
         if (iter==mVariables.end())
-            throw std::runtime_error ("unknown global variable: " + name);
+            throw std::runtime_error ("unknown global variable: " + std::string{name});
 
         return iter;
     }
@@ -42,17 +42,17 @@ namespace MWWorld
         }
     }
 
-    const ESM::Variant& Globals::operator[] (const std::string& name) const
+    const ESM::Variant& Globals::operator[] (std::string_view name) const
     {
         return find (Misc::StringUtils::lowerCase (name))->second.mValue;
     }
 
-    ESM::Variant& Globals::operator[] (const std::string& name)
+    ESM::Variant& Globals::operator[] (std::string_view name)
     {
         return find (Misc::StringUtils::lowerCase (name))->second.mValue;
     }
 
-    char Globals::getType (const std::string& name) const
+    char Globals::getType (std::string_view name) const
     {
         Collection::const_iterator iter = mVariables.find (Misc::StringUtils::lowerCase (name));
 

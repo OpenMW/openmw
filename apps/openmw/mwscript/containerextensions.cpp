@@ -87,7 +87,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
@@ -116,7 +116,7 @@ namespace MWScript
                     // Explicit calls to non-unique actors affect the base record
                     if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, count);
                         return;
                     }
 
@@ -124,7 +124,7 @@ namespace MWScript
                     if(ptr.getClass().getType() == ESM::Container::sRecordId && (!ptr.getRefData().getCustomData() ||
                     !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, count);
                         const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
                         const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                         for(const auto& container : ptrs)
@@ -183,7 +183,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     if(::Misc::StringUtils::ciEqual(item, "gold_005")
@@ -207,7 +207,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
@@ -229,14 +229,14 @@ namespace MWScript
                     // Explicit calls to non-unique actors affect the base record
                     if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, -count);
                         return;
                     }
                     // Calls to unresolved containers affect the base record instead
                     else if(ptr.getClass().getType() == ESM::Container::sRecordId &&
                         (!ptr.getRefData().getCustomData() || !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, -count);
                         const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
                         const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                         for(const auto& container : ptrs)
@@ -297,7 +297,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
@@ -408,7 +408,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
@@ -434,7 +434,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     int count = 0;

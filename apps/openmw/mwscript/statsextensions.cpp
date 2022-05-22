@@ -447,13 +447,13 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
 
                     MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
-                    creatureStats.getSpells().add(id);
+                    creatureStats.getSpells().add(spell);
                     ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
                     if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Power)
                     {
@@ -474,7 +474,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
@@ -499,7 +499,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string spellid = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view spellid = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     ptr.getClass().getCreatureStats (ptr).getActiveSpells().removeEffects(ptr, spellid);
@@ -532,7 +532,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     Interpreter::Type_Integer value = 0;
@@ -748,7 +748,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime[0].mInteger = MWBase::Environment::get().getMechanicsManager()->countDeaths (id);
                 }
         };
@@ -890,14 +890,12 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime);
 
-                    std::string race = runtime.getStringLiteral(runtime[0].mInteger);
-                    ::Misc::StringUtils::lowerCaseInPlace(race);
+                    std::string_view race = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
-                    ::Misc::StringUtils::lowerCaseInPlace(npcRace);
+                    const std::string& npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
 
-                    runtime.push (npcRace == race);
+                    runtime.push(::Misc::StringUtils::ciEqual(race, npcRace));
             }
         };
 

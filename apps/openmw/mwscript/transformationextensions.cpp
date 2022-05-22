@@ -43,7 +43,7 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr from = R()(runtime, !R::implicit);
-                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     if (from.isEmpty())
@@ -74,7 +74,7 @@ namespace MWScript
                     const MWWorld::Ptr to = MWBase::Environment::get().getWorld()->searchPtr(name, false);
                     if (to.isEmpty())
                     {
-                        std::string error = "Failed to find an instance of object '" + name + "'";
+                        std::string error = "Failed to find an instance of object '" + std::string(name) + "'";
                         runtime.getContext().report(error);
                         Log(Debug::Error) << error;
                         runtime.push(0.f);
@@ -155,7 +155,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float angle = osg::DegreesToRadians(runtime[0].mFloat);
                     runtime.pop();
@@ -190,7 +190,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     float ret = 0.f;
@@ -222,7 +222,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     float ret = 0.f;
@@ -254,7 +254,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     float ret = 0.f;
@@ -286,7 +286,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float pos = runtime[0].mFloat;
                     runtime.pop();
@@ -340,7 +340,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     float ret = 0.f;
@@ -380,7 +380,7 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
-                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string cellID{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     if (ptr.getContainerStore())
@@ -495,9 +495,9 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
-                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string cellID{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     Interpreter::Type_Float x = runtime[0].mFloat;
@@ -549,7 +549,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float x = runtime[0].mFloat;
@@ -601,7 +601,7 @@ namespace MWScript
                         ? MWMechanics::getPlayer()
                         : R()(runtime);
 
-                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
@@ -641,7 +641,7 @@ namespace MWScript
                 {
                     const MWWorld::Ptr& ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float rotation = osg::DegreesToRadians(runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
@@ -667,7 +667,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float rotation = osg::DegreesToRadians(runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
@@ -726,7 +726,7 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
@@ -773,7 +773,7 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();

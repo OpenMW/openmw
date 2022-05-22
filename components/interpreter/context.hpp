@@ -2,6 +2,7 @@
 #define INTERPRETER_CONTEXT_H_INCLUDED
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Interpreter
@@ -37,23 +38,23 @@ namespace Interpreter
 
             virtual void report (const std::string& message) = 0;
 
-            virtual int getGlobalShort (const std::string& name) const = 0;
+            virtual int getGlobalShort(std::string_view name) const = 0;
 
-            virtual int getGlobalLong (const std::string& name) const = 0;
+            virtual int getGlobalLong(std::string_view name) const = 0;
 
-            virtual float getGlobalFloat (const std::string& name) const = 0;
+            virtual float getGlobalFloat(std::string_view name) const = 0;
 
-            virtual void setGlobalShort (const std::string& name, int value) = 0;
+            virtual void setGlobalShort(std::string_view name, int value) = 0;
 
-            virtual void setGlobalLong (const std::string& name, int value) = 0;
+            virtual void setGlobalLong(std::string_view name, int value) = 0;
 
-            virtual void setGlobalFloat (const std::string& name, float value) = 0;
+            virtual void setGlobalFloat(std::string_view name, float value) = 0;
 
             virtual std::vector<std::string> getGlobals () const = 0;
 
-            virtual char getGlobalType (const std::string& name) const = 0;
+            virtual char getGlobalType(std::string_view name) const = 0;
 
-            virtual std::string getActionBinding(const std::string& action) const = 0;
+            virtual std::string getActionBinding(std::string_view action) const = 0;
 
             virtual std::string getActorName() const = 0;
 
@@ -79,17 +80,17 @@ namespace Interpreter
 
             virtual std::string getCurrentCellName() const = 0;
 
-            virtual int getMemberShort (const std::string& id, const std::string& name, bool global) const = 0;
+            virtual int getMemberShort(std::string_view id, std::string_view name, bool global) const = 0;
 
-            virtual int getMemberLong (const std::string& id, const std::string& name, bool global) const = 0;
+            virtual int getMemberLong(std::string_view id, std::string_view name, bool global) const = 0;
 
-            virtual float getMemberFloat (const std::string& id, const std::string& name, bool global) const = 0;
+            virtual float getMemberFloat(std::string_view id, std::string_view name, bool global) const = 0;
 
-            virtual void setMemberShort (const std::string& id, const std::string& name, int value, bool global) = 0;
+            virtual void setMemberShort(std::string_view id, std::string_view name, int value, bool global) = 0;
 
-            virtual void setMemberLong (const std::string& id, const std::string& name, int value, bool global) = 0;
+            virtual void setMemberLong(std::string_view id, std::string_view name, int value, bool global) = 0;
 
-            virtual void setMemberFloat (const std::string& id, const std::string& name, float value, bool global)
+            virtual void setMemberFloat(std::string_view id, std::string_view name, float value, bool global)
                 = 0;
     };
 }

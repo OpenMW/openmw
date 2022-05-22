@@ -62,7 +62,7 @@ namespace MWScript
         return (mShorts.empty() && mLongs.empty() && mFloats.empty());
     }
 
-    bool Locals::hasVar(const std::string &script, const std::string &var)
+    bool Locals::hasVar(const std::string &script, std::string_view var)
     {
         ensure (script);
 
@@ -72,7 +72,7 @@ namespace MWScript
         return (index != -1);
     }
 
-    int Locals::getIntVar(const std::string &script, const std::string &var)
+    int Locals::getIntVar(const std::string &script, std::string_view var)
     {
         ensure (script);
 
@@ -98,7 +98,7 @@ namespace MWScript
         return 0;
     }
 
-    float Locals::getFloatVar(const std::string &script, const std::string &var)
+    float Locals::getFloatVar(const std::string &script, std::string_view var)
     {
         ensure (script);
 
@@ -124,7 +124,7 @@ namespace MWScript
         return 0;
     }
 
-    bool Locals::setVarByInt(const std::string& script, const std::string& var, int val)
+    bool Locals::setVarByInt(const std::string& script, std::string_view var, int val)
     {
         ensure (script);
 

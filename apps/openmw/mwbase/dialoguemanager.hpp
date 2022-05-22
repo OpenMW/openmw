@@ -2,6 +2,7 @@
 #define GAME_MWBASE_DIALOGUEMANAGER_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <list>
 
@@ -55,9 +56,9 @@ namespace MWBase
 
             virtual bool inJournal (const std::string& topicId, const std::string& infoId) = 0;
 
-            virtual void addTopic (const std::string& topic) = 0;
+            virtual void addTopic(std::string_view topic) = 0;
 
-            virtual void addChoice (const std::string& text,int choice) = 0;
+            virtual void addChoice(std::string_view text,int choice) = 0;
             virtual const std::vector<std::pair<std::string, int> >& getChoices() = 0;
 
             virtual bool isGoodbye() = 0;
@@ -105,12 +106,12 @@ namespace MWBase
             virtual void readRecord (ESM::ESMReader& reader, uint32_t type) = 0;
 
             /// Changes faction1's opinion of faction2 by \a diff.
-            virtual void modFactionReaction (const std::string& faction1, const std::string& faction2, int diff) = 0;
+            virtual void modFactionReaction (std::string_view faction1, std::string_view faction2, int diff) = 0;
 
-            virtual void setFactionReaction (const std::string& faction1, const std::string& faction2, int absolute) = 0;
+            virtual void setFactionReaction (std::string_view faction1, std::string_view faction2, int absolute) = 0;
 
             /// @return faction1's opinion of faction2
-            virtual int getFactionReaction (const std::string& faction1, const std::string& faction2) const = 0;
+            virtual int getFactionReaction (std::string_view faction1, std::string_view faction2) const = 0;
 
             /// Removes the last added topic response for the given actor from the journal
             virtual void clearInfoActor (const MWWorld::Ptr& actor) const = 0;
