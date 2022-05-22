@@ -22,12 +22,12 @@ void Objects::addObject(const MWWorld::Ptr& ptr)
         return;
 
     const auto it = mObjects.emplace(mObjects.end(), ptr, anim);
-    mIndex.emplace(ptr.getBase(), it);
+    mIndex.emplace(ptr.mRef, it);
 }
 
 void Objects::removeObject(const MWWorld::Ptr& ptr)
 {
-    const auto iter = mIndex.find(ptr.getBase());
+    const auto iter = mIndex.find(ptr.mRef);
     if (iter != mIndex.end())
     {
         mObjects.erase(iter->second);
@@ -37,7 +37,7 @@ void Objects::removeObject(const MWWorld::Ptr& ptr)
 
 void Objects::updateObject(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
 {
-    const auto iter = mIndex.find(old.getBase());
+    const auto iter = mIndex.find(old.mRef);
     if (iter != mIndex.end())
         iter->second->updatePtr(ptr);
 }
@@ -48,7 +48,7 @@ void Objects::dropObjects (const MWWorld::CellStore *cellStore)
     {
         if (iter->getPtr().getCell() == cellStore)
         {
-            mIndex.erase(iter->getPtr().getBase());
+            mIndex.erase(iter->getPtr().mRef);
             iter = mObjects.erase(iter);
         }
         else
@@ -86,7 +86,7 @@ void Objects::update(float duration, bool paused)
 
 bool Objects::onOpen(const MWWorld::Ptr& ptr)
 {
-    const auto iter = mIndex.find(ptr.getBase());
+    const auto iter = mIndex.find(ptr.mRef);
     if (iter != mIndex.end())
         return iter->second->onOpen();
     return true;
@@ -94,14 +94,14 @@ bool Objects::onOpen(const MWWorld::Ptr& ptr)
 
 void Objects::onClose(const MWWorld::Ptr& ptr)
 {
-    const auto iter = mIndex.find(ptr.getBase());
+    const auto iter = mIndex.find(ptr.mRef);
     if (iter != mIndex.end())
         iter->second->onClose();
 }
 
 bool Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist)
 {
-    const auto iter = mIndex.find(ptr.getBase());
+    const auto iter = mIndex.find(ptr.mRef);
     if (iter != mIndex.end())
     {
         return iter->second->playGroup(groupName, mode, number, persist);
@@ -114,7 +114,7 @@ bool Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& gro
 }
 void Objects::skipAnimation(const MWWorld::Ptr& ptr)
 {
-    const auto iter = mIndex.find(ptr.getBase());
+    const auto iter = mIndex.find(ptr.mRef);
     if (iter != mIndex.end())
         iter->second->skipAnim();
 }

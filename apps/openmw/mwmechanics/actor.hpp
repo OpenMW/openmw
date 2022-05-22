@@ -3,7 +3,8 @@
 
 #include <memory>
 
-#include "../mwmechanics/actorutil.hpp"
+#include "actorutil.hpp"
+#include "character.hpp"
 
 #include <components/misc/timer.hpp>
 
@@ -18,38 +19,44 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    class CharacterController;
-
     /// @brief Holds temporary state for an actor that will be discarded when the actor leaves the scene.
     class Actor
     {
     public:
-        Actor(const MWWorld::Ptr& ptr, MWRender::Animation* animation);
+        Actor(const MWWorld::Ptr& ptr, MWRender::Animation* animation)
+            : mCharacterController(ptr, animation)
+            , mPositionAdjusted(false)
+        {}
+
+        const MWWorld::Ptr& getPtr() const { return mCharacterController.getPtr(); }
 
         /// Notify this actor of its new base object Ptr, use when the object changed cells
-        void updatePtr(const MWWorld::Ptr& newPtr);
+        void updatePtr(const MWWorld::Ptr& newPtr) { mCharacterController.updatePtr(newPtr); }
 
-        CharacterController* getCharacterController();
+        CharacterController& getCharacterController() { return mCharacterController; }
 
-        int getGreetingTimer() const;
-        void setGreetingTimer(int timer);
+        int getGreetingTimer() const { return mGreetingTimer; }
+        void setGreetingTimer(int timer) { mGreetingTimer = timer; }
 
-        float getAngleToPlayer() const;
-        void setAngleToPlayer(float angle);
+        float getAngleToPlayer() const { return mTargetAngleRadians; }
+        void setAngleToPlayer(float angle) { mTargetAngleRadians = angle; }
 
-        GreetingState getGreetingState() const;
-        void setGreetingState(GreetingState state);
+        GreetingState getGreetingState() const { return mGreetingState; }
+        void setGreetingState(GreetingState state) { mGreetingState = state; }
 
-        bool isTurningToPlayer() const;
-        void setTurningToPlayer(bool turning);
+        bool isTurningToPlayer() const { return mIsTurningToPlayer; }
+        void setTurningToPlayer(bool turning) { mIsTurningToPlayer = turning; }
 
-        Misc::TimerStatus updateEngageCombatTimer(float duration);
+        Misc::TimerStatus updateEngageCombatTimer(float duration)
+        {
+            return mEngageCombat.update(duration, MWBase::Environment::get().getWorld()->getPrng());
+        }
 
-        void setPositionAdjusted(bool adjusted);
-        bool getPositionAdjusted() const;
+        void setPositionAdjusted(bool adjusted) { mPositionAdjusted = adjusted; }
+        bool getPositionAdjusted() const { return mPositionAdjusted; }
 
     private:
-        std::unique_ptr<CharacterController> mCharacterController;
+        CharacterController mCharacterController;
         int mGreetingTimer{0};
         float mTargetAngleRadians{0.f};
         GreetingState mGreetingState{Greet_None};
