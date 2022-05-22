@@ -64,10 +64,23 @@ namespace MWSound
 
         typedef std::pair<SoundPtr, Sound_Buffer*> SoundBufferRefPair;
         typedef std::vector<SoundBufferRefPair> SoundBufferRefPairList;
-        typedef std::map<MWWorld::ConstPtr,SoundBufferRefPairList> SoundMap;
+
+        struct ActiveSound
+        {
+            const MWWorld::CellStore* mCell = nullptr;
+            SoundBufferRefPairList mList;
+        };
+
+        typedef std::map<const MWWorld::LiveCellRefBase*, ActiveSound> SoundMap;
         SoundMap mActiveSounds;
 
-        typedef std::map<MWWorld::ConstPtr, StreamPtr> SaySoundMap;
+        struct SaySound
+        {
+            const MWWorld::CellStore* mCell;
+            StreamPtr mStream;
+        };
+
+        typedef std::map<const MWWorld::LiveCellRefBase*, SaySound> SaySoundMap;
         SaySoundMap mSaySoundsQueue;
         SaySoundMap mActiveSaySounds;
 

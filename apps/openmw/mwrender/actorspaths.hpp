@@ -44,7 +44,13 @@ namespace MWRender
         void disable();
 
     private:
-        using Groups = std::map<MWWorld::ConstPtr, osg::ref_ptr<osg::Group>>;
+        struct Group
+        {
+            const MWWorld::CellStore* mCell;
+            osg::ref_ptr<osg::Group> mNode;
+        };
+
+        using Groups = std::map<const MWWorld::LiveCellRefBase*, Group>;
 
         osg::ref_ptr<osg::Group> mRootNode;
         Groups mGroups;
