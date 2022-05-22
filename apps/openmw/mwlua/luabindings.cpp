@@ -1,5 +1,7 @@
 #include "luabindings.hpp"
 
+#include <chrono>
+
 #include <components/lua/luastate.hpp>
 #include <components/lua/l10n.hpp>
 
@@ -23,6 +25,10 @@ namespace MWLua
         api["getGameTime"] = [world=context.mWorldView]() { return world->getGameTime(); };
         api["getGameTimeScale"] = [world=context.mWorldView]() { return world->getGameTimeScale(); };
         api["isWorldPaused"] = [world=context.mWorldView]() { return world->isPaused(); };
+        api["getRealTime"] = []()
+        {
+            return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+        };
 
         if (!global)
             return;

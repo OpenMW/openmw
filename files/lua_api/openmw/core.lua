@@ -47,6 +47,11 @@
 -- @return #boolean
 
 ---
+-- Real time in seconds; starting point is not fixed (can be time since last reboot), use only for measuring intervals. For Unix time use `os.time()`.
+-- @function [parent=#core] getRealTime
+-- @return #number
+
+---
 -- Get a GMST setting from content files.
 -- @function [parent=#core] getGMST
 -- @param #string setting Setting name
