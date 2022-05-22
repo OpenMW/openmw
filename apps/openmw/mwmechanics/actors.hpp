@@ -183,6 +183,7 @@ namespace MWMechanics
         private:
             enum class MusicType
             {
+                Title,
                 Explore,
                 Battle
             };
@@ -198,7 +199,7 @@ namespace MWMechanics
             float mSneakSkillTimer = 0; // Times sneak skill progress from "avoid notice"
             float mActorsProcessingRange;
             bool mSmoothMovement;
-            MusicType mCurrentMusic = MusicType::Explore;
+            MusicType mCurrentMusic = MusicType::Title;
 
             void updateVisibility (const MWWorld::Ptr& ptr, CharacterController& ctrl);
 
