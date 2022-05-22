@@ -767,7 +767,7 @@ namespace MWWorld
         Ptr ret = searchPtr(name, activeOnly);
         if (!ret.isEmpty())
             return ret;
-        std::string error = "failed to find an instance of object '" + std::string(name) + error;
+        std::string error = "failed to find an instance of object '" + std::string(name) + "'";
         if (activeOnly)
             error += " in active cells";
         throw std::runtime_error(error);
