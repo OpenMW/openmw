@@ -89,7 +89,10 @@ namespace MWGui
         // - Material editor
         // - Shader editor
 
-        initLogView();
+        MyGUI::TabItem* itemLV = mTabControl->addItem("Log Viewer");
+        mLogView = itemLV->createWidgetReal<MyGUI::EditBox>
+                ("LogEdit", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Stretch);
+        mLogView->setEditReadOnly(true);
 
 #ifndef BT_NO_PROFILE
         MyGUI::TabItem* item = mTabControl->addItem("Physics Profiler");
@@ -100,17 +103,16 @@ namespace MWGui
 #endif
     }
 
-    void DebugWindow::initLogView()
-    {
-        MyGUI::TabItem* itemLV = mTabControl->addItem("Log Viewer");
-        mLogView = itemLV->createWidgetReal<MyGUI::EditBox>
-                ("LogEdit", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Stretch);
-        mLogView->setEditReadOnly(true);
+    std::vector<char> DebugWindow::sLogCircularBuffer;
+    int64_t DebugWindow::sLogStartIndex = 0;
+    int64_t DebugWindow::sLogEndIndex = 0;
 
-        mLogCircularBuffer.resize(std::max<int64_t>(0, Settings::Manager::getInt64("log buffer size", "General")));
-        Debug::setLogListener([this](Debug::Level level, std::string_view prefix, std::string_view msg)
+    void DebugWindow::startLogRecording()
+    {
+        sLogCircularBuffer.resize(std::max<int64_t>(0, Settings::Manager::getInt64("log buffer size", "General")));
+        Debug::setLogListener([](Debug::Level level, std::string_view prefix, std::string_view msg)
         {
-            if (mLogCircularBuffer.empty())
+            if (sLogCircularBuffer.empty())
                 return;  // Log viewer is disabled.
             std::string_view color;
             switch (level)
@@ -123,13 +125,13 @@ namespace MWGui
                 default: color = "#FFFFFF";
             }
             bool bufferOverflow = false;
-            const int64_t bufSize = mLogCircularBuffer.size();
+            const int64_t bufSize = sLogCircularBuffer.size();
             auto addChar = [&](char c)
             {
-                mLogCircularBuffer[mLogEndIndex++] = c;
-                if (mLogEndIndex == bufSize)
-                    mLogEndIndex = 0;
-                bufferOverflow = bufferOverflow || mLogEndIndex == mLogStartIndex;
+                sLogCircularBuffer[sLogEndIndex++] = c;
+                if (sLogEndIndex == bufSize)
+                    sLogEndIndex = 0;
+                bufferOverflow = bufferOverflow || sLogEndIndex == sLogStartIndex;
             };
             auto addShieldedStr = [&](std::string_view s)
             {
@@ -145,29 +147,29 @@ namespace MWGui
             addShieldedStr(prefix);
             addShieldedStr(msg);
             if (bufferOverflow)
-                mLogStartIndex = (mLogEndIndex + 1) % bufSize;
+                sLogStartIndex = (sLogEndIndex + 1) % bufSize;
         });
     }
 
     void DebugWindow::updateLogView()
     {
-        if (!mLogView || mLogCircularBuffer.empty() || mLogStartIndex == mLogEndIndex)
+        if (!mLogView || sLogCircularBuffer.empty() || sLogStartIndex == sLogEndIndex)
             return;
         if (mLogView->isTextSelection())
             return;  // Don't change text while player is trying to copy something
 
         std::string addition;
-        const int64_t bufSize = mLogCircularBuffer.size();
+        const int64_t bufSize = sLogCircularBuffer.size();
         {
             std::unique_lock<std::mutex> lock = Log::lock();
-            if (mLogStartIndex < mLogEndIndex)
-                addition = std::string(mLogCircularBuffer.data() + mLogStartIndex, mLogEndIndex - mLogStartIndex);
+            if (sLogStartIndex < sLogEndIndex)
+                addition = std::string(sLogCircularBuffer.data() + sLogStartIndex, sLogEndIndex - sLogStartIndex);
             else
             {
-                addition = std::string(mLogCircularBuffer.data() + mLogStartIndex, bufSize - mLogStartIndex);
-                addition.append(mLogCircularBuffer.data(), mLogEndIndex);
+                addition = std::string(sLogCircularBuffer.data() + sLogStartIndex, bufSize - sLogStartIndex);
+                addition.append(sLogCircularBuffer.data(), sLogEndIndex);
             }
-            mLogStartIndex = mLogEndIndex;
+            sLogStartIndex = sLogEndIndex;
         }
 
         size_t scrollPos = mLogView->getVScrollPosition();

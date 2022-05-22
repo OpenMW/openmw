@@ -181,13 +181,10 @@ namespace OMW
 
             bool frame (float dt);
 
-            /// Load settings from various files, returns the path to the user settings file
-            std::string loadSettings (Settings::Manager & settings);
-
             /// Prepare engine for game play
-            void prepareEngine (Settings::Manager & settings);
+            void prepareEngine();
 
-            void createWindow(Settings::Manager& settings);
+            void createWindow();
             void setWindowIcon();
 
         public:

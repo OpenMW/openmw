@@ -35,13 +35,13 @@ namespace Settings
         static CategorySettingVector mChangedSettings;
         ///< tracks all the settings that were changed since the last apply() call
 
-        void clear();
+        static void clear();
         ///< clears all settings and default settings
 
-        std::string load(const Files::ConfigurationManager& cfgMgr, bool loadEditorSettings = false);
+        static std::string load(const Files::ConfigurationManager& cfgMgr, bool loadEditorSettings = false);
         ///< load settings from all active config dirs. Returns the path of the last loaded file.
 
-        void saveUser (const std::string& file);
+        static void saveUser (const std::string& file);
         ///< save user settings to file
 
         static void resetPendingChange(const std::string &setting, const std::string &category);

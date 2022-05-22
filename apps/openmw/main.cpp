@@ -5,6 +5,8 @@
 #include <components/debug/debugging.hpp>
 #include <components/misc/rng.hpp>
 
+#include "mwgui/debugwindow.hpp"
+
 #include "engine.hpp"
 #include "options.hpp"
 
@@ -58,8 +60,10 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     }
 
     cfgMgr.readConfiguration(variables, desc);
+    Settings::Manager::load(cfgMgr);
 
     setupLogging(cfgMgr.getLogPath().string(), "OpenMW");
+    MWGui::DebugWindow::startLogRecording();
 
     Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
     Log(Debug::Info) << v.describe();
