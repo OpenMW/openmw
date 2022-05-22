@@ -4,8 +4,6 @@
 #include <limits>
 #include <list>
 
-#include <boost/concept_check.hpp>
-
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
