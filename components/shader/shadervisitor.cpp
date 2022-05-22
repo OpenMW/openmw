@@ -292,12 +292,9 @@ namespace Shader
     }
 
     const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap", "decalMap", "bumpMap", "glossMap" };
-    bool isTextureNameRecognized(const std::string& name)
+    bool isTextureNameRecognized(std::string_view name)
     {
-        for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
-            if (name == defaultTextures[i])
-                return true;
-        return false;
+        return std::find(std::begin(defaultTextures), std::end(defaultTextures), name) != std::end(defaultTextures);
     }
 
     void ShaderVisitor::applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node)

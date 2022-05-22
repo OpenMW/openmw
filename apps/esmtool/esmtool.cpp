@@ -284,7 +284,7 @@ void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMDa
     }
 }
 
-void printRawTes3(const std::string& path)
+void printRawTes3(std::string_view path)
 {
     std::cout << "TES3 RAW file listing: " << path << '\n';
     ESM::ESMReader esm;

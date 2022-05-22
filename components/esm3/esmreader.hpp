@@ -61,7 +61,7 @@ public:
 
   /// Raw opening. Opens the file and sets everything up but doesn't
   /// parse the header.
-  void openRaw(std::unique_ptr<std::istream>&& stream, const std::string &name);
+  void openRaw(std::unique_ptr<std::istream>&& stream, std::string_view name);
 
   /// Load ES file from a new stream, parses the header. Closes the
   /// currently open file first, if any.
@@ -69,7 +69,7 @@ public:
 
   void open(const std::string &file);
 
-  void openRaw(const std::string &filename);
+  void openRaw(std::string_view filename);
 
   /// Get the current position in the file. Make sure that the file has been opened!
   size_t getFileOffset() const { return mEsm->tellg(); };

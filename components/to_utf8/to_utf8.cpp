@@ -348,7 +348,7 @@ std::string_view Utf8Encoder::getLegacyEnc(std::string_view input)
     return mImpl.getLegacyEnc(input, BufferAllocationPolicy::UseGrowFactor, mBuffer);
 }
 
-ToUTF8::FromType ToUTF8::calculateEncoding(const std::string& encodingName)
+ToUTF8::FromType ToUTF8::calculateEncoding(std::string_view encodingName)
 {
     if (encodingName == "win1250")
         return ToUTF8::WINDOWS_1250;
@@ -357,10 +357,10 @@ ToUTF8::FromType ToUTF8::calculateEncoding(const std::string& encodingName)
     else if (encodingName == "win1252")
         return ToUTF8::WINDOWS_1252;
     else
-        throw std::runtime_error(std::string("Unknown encoding '") + encodingName + std::string("', see openmw --help for available options."));
+        throw std::runtime_error("Unknown encoding '" + std::string(encodingName) + "', see openmw --help for available options.");
 }
 
-std::string ToUTF8::encodingUsingMessage(const std::string& encodingName)
+std::string ToUTF8::encodingUsingMessage(std::string_view encodingName)
 {
     if (encodingName == "win1250")
         return "Using Central and Eastern European font encoding.";
@@ -369,5 +369,5 @@ std::string ToUTF8::encodingUsingMessage(const std::string& encodingName)
     else if (encodingName == "win1252")
         return "Using default (English) font encoding.";
     else
-        throw std::runtime_error(std::string("Unknown encoding '") + encodingName + std::string("', see openmw --help for available options."));
+        throw std::runtime_error("Unknown encoding '" + std::string(encodingName) + "', see openmw --help for available options.");
 }
