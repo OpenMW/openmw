@@ -544,15 +544,15 @@ void OMW::Engine::setSkipMenu (bool skipMenu, bool newGame)
     mNewGame = newGame;
 }
 
-void OMW::Engine::createWindow(Settings::Manager& settings)
+void OMW::Engine::createWindow()
 {
-    int screen = settings.getInt("screen", "Video");
-    int width = settings.getInt("resolution x", "Video");
-    int height = settings.getInt("resolution y", "Video");
+    int screen = Settings::Manager::getInt("screen", "Video");
+    int width = Settings::Manager::getInt("resolution x", "Video");
+    int height = Settings::Manager::getInt("resolution y", "Video");
     Settings::WindowMode windowMode = static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video"));
-    bool windowBorder = settings.getBool("window border", "Video");
-    bool vsync = settings.getBool("vsync", "Video");
-    unsigned int antialiasing = std::max(0, settings.getInt("antialiasing", "Video"));
+    bool windowBorder = Settings::Manager::getBool("window border", "Video");
+    bool vsync = Settings::Manager::getBool("vsync", "Video");
+    unsigned int antialiasing = std::max(0, Settings::Manager::getInt("antialiasing", "Video"));
 
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen),
         pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
@@ -577,7 +577,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
         flags |= SDL_WINDOW_BORDERLESS;
 
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
-                settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
+                Settings::Manager::getBool("minimize on focus loss", "Video") ? "1" : "0");
 
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8));
@@ -706,7 +706,7 @@ void OMW::Engine::setWindowIcon()
     }
 }
 
-void OMW::Engine::prepareEngine (Settings::Manager & settings)
+void OMW::Engine::prepareEngine()
 {
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);
@@ -716,7 +716,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     osg::ref_ptr<osg::Group> rootNode(new osg::Group);
     mViewer->setSceneData(rootNode);
 
-    createWindow(settings);
+    createWindow();
 
     mVFS = std::make_unique<VFS::Manager>(mFSStrict);
 
@@ -980,10 +980,6 @@ void OMW::Engine::go()
 
     Misc::Rng::init(mRandomSeed);
 
-    // Load settings
-    Settings::Manager settings;
-    std::string settingspath = settings.load(mCfgMgr);
-
     Settings::ShaderManager::get().load((mCfgMgr.getUserConfigPath() / "shaders.yaml").string());
 
     MWClass::registerClasses();
@@ -1002,7 +998,7 @@ void OMW::Engine::go()
 
     mEnvironment.setFrameRateLimit(Settings::Manager::getFloat("framerate limit", "Video"));
 
-    prepareEngine (settings);
+    prepareEngine();
 
     std::ofstream stats;
     if (const auto path = std::getenv("OPENMW_OSG_STATS_FILE"))
@@ -1108,7 +1104,7 @@ void OMW::Engine::go()
     luaWorker.join();
 
     // Save user settings
-    settings.saveUser(settingspath);
+    Settings::Manager::saveUser((mCfgMgr.getUserConfigPath() / "settings.cfg").string());
     Settings::ShaderManager::get().save();
     mLuaManager->savePermanentStorage(mCfgMgr.getUserConfigPath().string());
 
