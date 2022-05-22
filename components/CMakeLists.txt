@@ -411,6 +411,10 @@ target_link_libraries(components
     yaml-cpp
     )
 
+if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.77.0)
+    target_link_libraries(components ${Boost_ATOMIC_LIBRARY})
+endif()
+
 target_link_libraries(components ${BULLET_LIBRARIES})
 
 if (WIN32)

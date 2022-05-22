@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_MANUALREF_H
 #define GAME_MWWORLD_MANUALREF_H
 
-#include <boost/any.hpp>
+#include <any>
 
 #include "ptr.hpp"
 
@@ -10,7 +10,7 @@ namespace MWWorld
     /// \brief Manually constructed live cell ref
     class ManualRef
     {
-            boost::any mRef;
+            std::any mRef;
             Ptr mPtr;
 
             ManualRef (const ManualRef&);
