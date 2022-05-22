@@ -168,7 +168,7 @@ namespace MWScript
                     if (cellID.empty())
                         return;
 
-                    if (!MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search({cellID.begin(), cellID.end()}))
+                    if (!MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(std::string{cellID}))
                         return;
 
                     MWMechanics::AiEscort escortPackage(actorID, cellID, static_cast<int>(duration), x, y, z, repeat);

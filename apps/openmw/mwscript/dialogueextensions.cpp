@@ -34,8 +34,7 @@ namespace MWScript
                     if (ptr.isEmpty())
                         ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-                    std::string_view questView = runtime.getStringLiteral(runtime[0].mInteger);
-                    std::string quest{questView.begin(), questView.end()};
+                    std::string quest{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     Interpreter::Type_Integer index = runtime[0].mInteger;
@@ -60,13 +59,13 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string_view quest = runtime.getStringLiteral(runtime[0].mInteger);
+                    std::string quest{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     Interpreter::Type_Integer index = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWBase::Environment::get().getJournal()->setJournalIndex({quest.begin(), quest.end()}, index);
+                    MWBase::Environment::get().getJournal()->setJournalIndex (quest, index);
                 }
         };
 
@@ -76,10 +75,10 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string_view quest = runtime.getStringLiteral(runtime[0].mInteger);
+                    std::string quest{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
-                    int index = MWBase::Environment::get().getJournal()->getJournalIndex({quest.begin(), quest.end()});
+                    int index = MWBase::Environment::get().getJournal()->getJournalIndex (quest);
 
                     runtime.push (index);
 

@@ -74,8 +74,7 @@ namespace MWScript
                     const MWWorld::Ptr to = MWBase::Environment::get().getWorld()->searchPtr(name, false);
                     if (to.isEmpty())
                     {
-                        std::string error = "Failed to find an instance of object '";
-                        error += name; error += "'";
+                        std::string error = "Failed to find an instance of object '" + std::string(name) + "'";
                         runtime.getContext().report(error);
                         Log(Debug::Error) << error;
                         runtime.push(0.f);
@@ -381,8 +380,7 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
-                    std::string_view cellIDView = runtime.getStringLiteral(runtime[0].mInteger);
-                    std::string cellID{cellIDView.begin(), cellIDView.end()};
+                    std::string cellID{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     if (ptr.getContainerStore())
@@ -499,8 +497,7 @@ namespace MWScript
                 {
                     std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
-                    std::string_view cellIDView = runtime.getStringLiteral(runtime[0].mInteger);
-                    std::string cellID{cellIDView.begin(), cellIDView.end()};
+                    std::string cellID{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     Interpreter::Type_Float x = runtime[0].mFloat;

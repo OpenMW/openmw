@@ -87,8 +87,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string_view regionView = runtime.getStringLiteral(runtime[0].mInteger);
-                    std::string region{regionView.begin(), regionView.end()};
+                    std::string region{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     Interpreter::Type_Integer id = runtime[0].mInteger;
@@ -108,8 +107,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime, unsigned int arg0) override
                 {
-                    std::string_view regionView = runtime.getStringLiteral(runtime[0].mInteger);
-                    std::string region{regionView.begin(), regionView.end()};
+                    std::string region{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     std::vector<char> chances;

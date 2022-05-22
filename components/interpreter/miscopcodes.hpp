@@ -137,8 +137,7 @@ namespace Interpreter
                 {
                     index = runtime[0].mInteger;
                     runtime.pop();
-                    std::string_view button = runtime.getStringLiteral(index);
-                    buttons.emplace_back(button.begin(), button.end());
+                    buttons.emplace_back(runtime.getStringLiteral(index));
                 }
 
                 std::reverse (buttons.begin(), buttons.end());

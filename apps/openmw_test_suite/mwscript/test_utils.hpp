@@ -128,11 +128,11 @@ namespace
 
         float getFloat(std::string_view name) const { return getGlobal(name, mFloats); };
 
-        void setShort(std::string_view name, int value) { mShorts[{name.begin(), name.end()}] = value; };
+        void setShort(std::string_view name, int value) { mShorts[std::string(name)] = value; };
 
-        void setLong(std::string_view name, int value) { mLongs[{name.begin(), name.end()}] = value; };
+        void setLong(std::string_view name, int value) { mLongs[std::string(name)] = value; };
 
-        void setFloat(std::string_view name, float value) { mFloats[{name.begin(), name.end()}] = value; };
+        void setFloat(std::string_view name, float value) { mFloats[std::string(name)] = value; };
     };
 
     class TestInterpreterContext : public Interpreter::Context
@@ -224,11 +224,11 @@ namespace
             return {};
         };
 
-        void setMemberShort(std::string_view id, std::string_view name, int value, bool global) override { mMembers[{id.begin(), id.end()}].setShort(name, value); };
+        void setMemberShort(std::string_view id, std::string_view name, int value, bool global) override { mMembers[std::string(id)].setShort(name, value); };
 
-        void setMemberLong(std::string_view id, std::string_view name, int value, bool global) override { mMembers[{id.begin(), id.end()}].setLong(name, value); };
+        void setMemberLong(std::string_view id, std::string_view name, int value, bool global) override { mMembers[std::string(id)].setLong(name, value); };
 
-        void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) override { mMembers[{id.begin(), id.end()}].setFloat(name, value); };
+        void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) override { mMembers[std::string(id)].setFloat(name, value); };
     };
 
     struct CompiledScript

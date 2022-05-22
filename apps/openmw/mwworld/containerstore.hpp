@@ -175,7 +175,7 @@ namespace MWWorld
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
-            ContainerStoreIterator add(const std::string& id, int count, const Ptr& actorPtr);
+            ContainerStoreIterator add(std::string_view id, int count, const Ptr& actorPtr);
             ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
             int remove(std::string_view itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);

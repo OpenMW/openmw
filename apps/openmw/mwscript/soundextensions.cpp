@@ -33,16 +33,16 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-                    std::string_view file = runtime.getStringLiteral(runtime[0].mInteger);
+                    std::string file{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
-                    std::string_view text = runtime.getStringLiteral(runtime[0].mInteger);
+                    std::string text{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->say(ptr, {file.begin(), file.end()});
+                    MWBase::Environment::get().getSoundManager()->say (ptr, file);
 
                     if (MWBase::Environment::get().getWindowManager ()->getSubtitlesEnabled())
-                        context.messageBox({text.begin(), text.end()});
+                        context.messageBox (text);
                 }
         };
 
@@ -65,10 +65,10 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
+                    std::string sound{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->streamMusic({sound.begin(), sound.end()});
+                    MWBase::Environment::get().getSoundManager()->streamMusic (sound);
                 }
         };
 
