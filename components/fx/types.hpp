@@ -60,11 +60,23 @@ namespace fx
         struct Uniform
         {
             std::optional<T> mValue;
-            T mDefault;
+            std::optional<std::vector<T>> mArray;
+
+            T mDefault = {};
             T mMin = std::numeric_limits<T>::lowest();
             T mMax = std::numeric_limits<T>::max();
 
             using value_type = T;
+
+            bool isArray() const
+            {
+                return mArray.has_value();
+            }
+
+            const std::vector<T>& getArray() const
+            {
+                return *mArray;
+            }
 
             T getValue() const
             {
@@ -97,7 +109,7 @@ namespace fx
 
             bool mStatic = true;
             std::optional<SamplerType> mSamplerType = std::nullopt;
-            double mStep;
+            double mStep = 1.0;
 
             Uniform_t mData;
 
@@ -107,6 +119,11 @@ namespace fx
                 auto value = Settings::ShaderManager::get().getValue<T>(mTechniqueName, mName);
 
                 return value.value_or(std::get<Uniform<T>>(mData).getValue());
+            }
+
+            size_t getNumElements() const
+            {
+                return std::visit([&](auto&& arg) { ;return arg.isArray() ? arg.getArray().size() : 1; }, mData);
             }
 
             template <class T>
@@ -137,13 +154,34 @@ namespace fx
                     {
                         arg.mValue = value;
 
-                        if (mStatic)
-                            Settings::ShaderManager::get().setValue<T>(mTechniqueName, mName, value);
+                        Settings::ShaderManager::get().setValue(mTechniqueName, mName, value);
                     }
                     else
                     {
                         Log(Debug::Warning) << "Attempting to set uniform '" << mName << "' with wrong type";
                     }
+                }, mData);
+            }
+
+            template <class T, class A>
+            void setValue(const std::vector<T, A>& value)
+            {
+                std::visit([&, value](auto&& arg) {
+                    using U = typename std::decay_t<decltype(arg)>::value_type;
+
+                    if (!arg.isArray() || arg.getArray().size() != value.size())
+                    {
+                        Log(Debug::Error) << "Attempting to set uniform array '" << mName << "' with mismatching array sizes";
+                        return;
+                    }
+
+                    if constexpr (std::is_same_v<T, U>)
+                    {
+                        arg.mArray = value;
+                        Settings::ShaderManager::get().setValue(mTechniqueName, mName, value);
+                    }
+                    else
+                        Log(Debug::Warning) << "Attempting to set uniform array '" << mName << "' with wrong type";
                 }, mData);
             }
 
@@ -155,8 +193,14 @@ namespace fx
 
                 std::visit([&](auto&& arg)
                 {
-                    const auto value = arg.getValue();
-                    uniform->set(value);
+                    if (arg.isArray())
+                    {
+                        for (size_t i = 0; i < arg.getArray().size(); ++i)
+                            uniform->setElement(i, arg.getArray()[i]);
+                        uniform->dirty();
+                    }
+                    else
+                        uniform->set(arg.getValue());
                 }, mData);
             }
 
@@ -197,52 +241,53 @@ namespace fx
                     }
                 }
 
-                bool useUniform = (Settings::ShaderManager::get().getMode() == Settings::ShaderManager::Mode::Debug || mStatic == false);
-
                 return std::visit([&](auto&& arg) -> std::optional<std::string> {
                     using T = typename std::decay_t<decltype(arg)>::value_type;
 
                     auto value = arg.getValue();
 
+                    const bool useUniform = arg.isArray() || (Settings::ShaderManager::get().getMode() == Settings::ShaderManager::Mode::Debug || mStatic == false);
+                    const std::string uname = arg.isArray() ? Misc::StringUtils::format("%s[%zu]", mName, arg.getArray().size()) : mName;
+
                     if constexpr (std::is_same_v<T, osg::Vec2f>)
                     {
                         if (useUniform)
-                            return Misc::StringUtils::format("uniform vec2 %s;", mName);
+                            return Misc::StringUtils::format("uniform vec2 %s;", uname);
 
                         return Misc::StringUtils::format("const vec2 %s=vec2(%f,%f);", mName, value[0], value[1]);
                     }
                     else if constexpr (std::is_same_v<T, osg::Vec3f>)
                     {
                         if (useUniform)
-                            return Misc::StringUtils::format("uniform vec3 %s;", mName);
+                            return Misc::StringUtils::format("uniform vec3 %s;", uname);
 
                         return Misc::StringUtils::format("const vec3 %s=vec3(%f,%f,%f);", mName, value[0], value[1], value[2]);
                     }
                     else if constexpr (std::is_same_v<T, osg::Vec4f>)
                     {
                         if (useUniform)
-                            return Misc::StringUtils::format("uniform vec4 %s;", mName);
+                            return Misc::StringUtils::format("uniform vec4 %s;", uname);
 
                         return Misc::StringUtils::format("const vec4 %s=vec4(%f,%f,%f,%f);", mName, value[0], value[1], value[2], value[3]);
                     }
                     else if constexpr (std::is_same_v<T, float>)
                     {
                         if (useUniform)
-                            return Misc::StringUtils::format("uniform float %s;",  mName);
+                            return Misc::StringUtils::format("uniform float %s;", uname);
 
                         return Misc::StringUtils::format("const float %s=%f;", mName, value);
                     }
                     else if constexpr (std::is_same_v<T, int>)
                     {
                         if (useUniform)
-                            return Misc::StringUtils::format("uniform int %s;",  mName);
+                            return Misc::StringUtils::format("uniform int %s;", uname);
 
                         return Misc::StringUtils::format("const int %s=%i;", mName, value);
                     }
                     else if constexpr (std::is_same_v<T, bool>)
                     {
                         if (useUniform)
-                            return Misc::StringUtils::format("uniform bool %s;", mName);
+                            return Misc::StringUtils::format("uniform bool %s;", uname);
 
                         return Misc::StringUtils::format("const bool %s=%s;", mName, value ? "true" : "false");
                     }

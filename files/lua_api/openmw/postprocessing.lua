@@ -1,9 +1,8 @@
 ---
 -- `openmw.postprocessing` is an interface to postprocessing shaders.
 -- Can be used only by local scripts, that are attached to a player.
--- @module shader
+-- @module postprocessing
 -- @usage local postprocessing = require('openmw.postprocessing')
-
 
 
 ---
@@ -12,8 +11,8 @@
 -- @param #string name Name of the shader without its extension
 -- @return #Shader
 -- @usage
--- If the shader exists and compiles, the shader will still be off by default.
--- It must be enabled to see its effect.
+-- -- If the shader exists and compiles, the shader will still be off by default.
+-- -- It must be enabled to see its effect.
 -- local vignetteShader = postprocessing.load('vignette')
 
 ---
@@ -72,21 +71,62 @@
 -- @function [parent=#Shader] setVector2
 -- @param self
 -- @param #string name Name of uniform
--- @param #Vector2 value Value of uniform.
+-- @param openmw.util#Vector2 value Value of uniform.
 
 ---
 -- Set a non static Vector3 shader variable.
 -- @function [parent=#Shader] setVector3
 -- @param self
 -- @param #string name Name of uniform
--- @param #Vector3 value Value of uniform.
+-- @param openmw.util#Vector3 value Value of uniform.
 
 ---
 -- Set a non static Vector4 shader variable.
 -- @function [parent=#Shader] setVector4
 -- @param self
 -- @param #string name Name of uniform
--- @param #Vector4 value Value of uniform.
+-- @param openmw.util#Vector4 value Value of uniform.
 
+---
+-- Set a non static integer array shader variable.
+-- @function [parent=#Shader] setIntArray
+-- @param self
+-- @param #string name Name of uniform
+-- @param #table array Contains equal number of #number elements as the uniform array.
+
+---
+-- Set a non static float array shader variable.
+-- @function [parent=#Shader] setFloatArray
+-- @param self
+-- @param #string name Name of uniform
+-- @param #table array Contains equal number of #number elements as the uniform array.
+
+---
+-- Set a non static Vector2 array shader variable.
+-- @function [parent=#Shader] setVector2Array
+-- @param self
+-- @param #string name Name of uniform
+-- @param #table array Contains equal number of @{openmw.util#Vector2} elements as the uniform array.
+
+---
+-- Set a non static Vector3 array shader variable.
+-- @function [parent=#Shader] setVector3Array
+-- @param self
+-- @param #string name Name of uniform
+-- @param #table array Contains equal number of @{openmw.util#Vector3} elements as the uniform array.
+
+---
+-- Set a non static Vector4 array shader variable.
+-- @function [parent=#Shader] setVector4Array
+-- @param self
+-- @param #string name Name of uniform
+-- @param #table array Contains equal number of @{openmw.util#Vector4} elements as the uniform array.
+-- @usage
+-- -- Setting an array
+-- local shader = postprocessing.load('godrays')
+-- -- Toggle shader on
+-- shader:enable()
+-- -- Set new array uniform which was defined with length 2
+-- shader:setVector4Array('myArray', { util.vector4(1,0,0,1), util.vector4(1,0,1,1) })
 
 return nil

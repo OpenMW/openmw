@@ -171,7 +171,7 @@ TestFile repeated_shared_block{R"(
         const auto& uniform = mTechnique->getUniformMap().front();
 
         EXPECT_TRUE(uniform->mStatic);
-        EXPECT_FLOAT_EQ(uniform->mStep, 0.5f);
+        EXPECT_DOUBLE_EQ(uniform->mStep, 0.5);
         EXPECT_EQ(uniform->getDefault<osg::Vec4f>(), osg::Vec4f(0,0,0,0));
         EXPECT_EQ(uniform->getMin<osg::Vec4f>(), osg::Vec4f(0,1,0,0));
         EXPECT_EQ(uniform->getMax<osg::Vec4f>(), osg::Vec4f(0,0,1,0));
