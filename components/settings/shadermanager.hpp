@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <optional>
 #include <fstream>
+#include <vector>
 
 #include <yaml-cpp/yaml.h>
 

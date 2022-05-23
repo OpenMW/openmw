@@ -406,6 +406,13 @@ namespace MWRender
 
     void PostProcessor::update(size_t frameId)
     {
+        while (!mQueuedTemplates.empty())
+        {
+            mTemplates.push_back(std::move(mQueuedTemplates.back()));
+
+            mQueuedTemplates.pop_back();
+        }
+
         updateLiveReload();
 
         reloadIfRequired();
@@ -582,7 +589,7 @@ namespace MWRender
                 if (uniform->mSamplerType) continue;
 
                 if (auto type = uniform->getType())
-                    uniform->setUniform(node.mRootStateSet->getOrCreateUniform(uniform->mName, type.value()));
+                    uniform->setUniform(node.mRootStateSet->getOrCreateUniform(uniform->mName.c_str(), *type, uniform->getNumElements()));
             }
 
             std::unordered_map<osg::Texture2D*, osg::Texture2D*> renderTargetCache;
@@ -643,7 +650,13 @@ namespace MWRender
 
     bool PostProcessor::enableTechnique(std::shared_ptr<fx::Technique> technique, std::optional<int> location)
     {
-        if (!technique || technique->getName() == "main" || (location.has_value() && location.value() <= 0))
+        if (!isEnabled())
+        {
+            Log(Debug::Warning) << "PostProcessing disabled, cannot load technique '" << technique->getName() << "'";
+            return false;
+        }
+
+        if (!technique || Misc::StringUtils::ciEqual(technique->getName(), "main") || (location.has_value() && location.value() <= 0))
             return false;
 
         disableTechnique(technique, false);
@@ -753,14 +766,21 @@ namespace MWRender
         mHUDCamera->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
     }
 
-    std::shared_ptr<fx::Technique> PostProcessor::loadTechnique(const std::string& name, bool insert)
+    std::shared_ptr<fx::Technique> PostProcessor::loadTechnique(const std::string& name, bool loadNextFrame)
     {
         if (!isEnabled())
+        {
+            Log(Debug::Warning) << "PostProcessing disabled, cannot load technique '" << name << "'";
             return nullptr;
+        }
 
-        for (size_t i = 0; i < mTemplates.size(); ++i)
-            if (name == mTemplates[i]->getName())
-                return mTemplates[i];
+        for (const auto& technique : mTemplates)
+            if (Misc::StringUtils::ciEqual(technique->getName(), name))
+                return technique;
+
+        for (const auto& technique : mQueuedTemplates)
+            if (Misc::StringUtils::ciEqual(technique->getName(), name))
+                return technique;
 
         auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(), name, mWidth, mHeight, mUBO, mNormalsSupported);
 
@@ -769,26 +789,17 @@ namespace MWRender
         if (technique->getStatus() != fx::Technique::Status::File_Not_exists)
             technique->setLastModificationTime(std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]));
 
-        if (!insert)
+        if (!loadNextFrame)
+        {
+            mQueuedTemplates.push_back(technique);
             return technique;
+        }
 
         reloadMainPass(*technique);
 
         mTemplates.push_back(std::move(technique));
 
         return mTemplates.back();
-    }
-
-    void PostProcessor::addTemplate(std::shared_ptr<fx::Technique> technique)
-    {
-        if (!isEnabled())
-            return;
-
-        for (size_t i = 0; i < mTemplates.size(); ++i)
-            if (technique.get() == mTemplates[i].get())
-                return;
-
-        mTemplates.push_back(technique);
     }
 
     void PostProcessor::reloadTechniques()
@@ -810,7 +821,7 @@ namespace MWRender
             if (techniqueName.empty())
                 continue;
 
-            if ((&techniqueName != &techniqueStrings.front()) && Misc::StringUtils::ciEqual(techniqueName, "main"))
+            if ((&techniqueName != &techniqueStrings.front()) && techniqueName == "main")
             {
                 Log(Debug::Warning) << "main.omwfx techniqued specified in chain, this is not allowed. technique file will be ignored if it exists.";
                 continue;

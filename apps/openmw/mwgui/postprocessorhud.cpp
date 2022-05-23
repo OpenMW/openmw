@@ -296,16 +296,13 @@ namespace MWGui
 
         auto technique = processor->loadTechnique(name);
 
-        if (!technique)
+        if (!technique || technique->getStatus() == fx::Technique::Status::File_Not_exists)
             return;
 
         while (mConfigArea->getChildCount() > 0)
             MyGUI::Gui::getInstance().destroyWidget(mConfigArea->getChildAt(0));
 
         mShaderInfo->setCaption("");
-
-        if (!technique)
-            return;
 
         std::ostringstream ss;
 
@@ -322,8 +319,8 @@ namespace MWGui
 
         const auto flags = technique->getFlags();
 
-        const auto flag_interior = serializeBool (!(flags & fx::Technique::Flag_Disable_Interiors));
-        const auto flag_exterior = serializeBool (!(flags & fx::Technique::Flag_Disable_Exteriors));
+        const auto flag_interior = serializeBool(!(flags & fx::Technique::Flag_Disable_Interiors));
+        const auto flag_exterior = serializeBool(!(flags & fx::Technique::Flag_Disable_Exteriors));
         const auto flag_underwater = serializeBool(!(flags & fx::Technique::Flag_Disable_Underwater));
         const auto flag_abovewater = serializeBool(!(flags & fx::Technique::Flag_Disable_Abovewater));
 
@@ -339,13 +336,11 @@ namespace MWGui
                     << "#{fontcolourhtml=header}   Underwater: #{fontcolourhtml=normal} " << flag_underwater
                     << "#{fontcolourhtml=header}   Abovewater: #{fontcolourhtml=normal} " << flag_abovewater;
                 break;
-            case fx::Technique::Status::File_Not_exists:
-                ss  << "#{fontcolourhtml=negative}Shader Error: #{fontcolourhtml=header} <" << std::string(technique->getFileName()) << ">#{fontcolourhtml=normal} not found." << endl << endl
-                    << "Ensure the shader file is in a 'Shaders/' sub directory in a data files directory";
-                break;
             case fx::Technique::Status::Parse_Error:
                 ss  << "#{fontcolourhtml=negative}Shader Compile Error: #{fontcolourhtml=normal} <" << std::string(technique->getName()) << "> failed to compile." << endl << endl
                     << technique->getLastError();
+                break;
+            case fx::Technique::Status::File_Not_exists:
                 break;
         }
 

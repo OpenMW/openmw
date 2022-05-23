@@ -136,6 +136,16 @@ namespace MWRender
             (*it)->setValue(value);
         }
 
+        std::optional<size_t> getUniformSize(std::shared_ptr<fx::Technique> technique, const std::string& name)
+        {
+            auto it = technique->findUniform(name);
+
+            if (it == technique->getUniformMap().end())
+                return std::nullopt;
+
+            return (*it)->getNumElements();
+        }
+
         bool isTechniqueEnabled(const std::shared_ptr<fx::Technique>& technique) const;
 
         void setExteriorFlag(bool exterior) { mExteriorFlag = exterior; }
@@ -144,9 +154,7 @@ namespace MWRender
 
         void toggleMode();
 
-        std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool insert=true);
-
-        void addTemplate(std::shared_ptr<fx::Technique> technique);
+        std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool loadNextFrame=true);
 
         bool isEnabled() const { return mUsePostProcessing && mEnabled; }
 
@@ -192,6 +200,7 @@ namespace MWRender
 
         TechniqueList mTechniques;
         TechniqueList mTemplates;
+        TechniqueList mQueuedTemplates;
 
         std::unordered_map<std::string, std::filesystem::path> mTechniqueFileMap;
 

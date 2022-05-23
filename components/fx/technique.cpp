@@ -526,7 +526,7 @@ namespace fx
             error(Misc::StringUtils::format("redeclaration of uniform '%s'", std::string(mBlockName)));
 
         std::shared_ptr<Types::UniformBase> uniform = std::make_shared<Types::UniformBase>();
-        Types::Uniform<SrcT> data;
+        Types::Uniform<SrcT> data = Types::Uniform<SrcT>();
 
         while (!isNext<Lexer::Close_bracket>() && !isNext<Lexer::Eof>())
         {
@@ -543,11 +543,6 @@ namespace fx
 
             static_assert(isVec || isFloat || isInt || isBool, "Unsupported type");
 
-            std::optional<double> step;
-
-            if constexpr (isInt)
-                step = 1.0;
-
             if (key == "default")
             {
                 if constexpr (isVec)
@@ -558,6 +553,15 @@ namespace fx
                     data.mDefault = parseInteger();
                 else if constexpr (isBool)
                     data.mDefault = parseBool();
+            }
+            else if (key == "size")
+            {
+                if constexpr (isBool)
+                    error("bool arrays currently unsupported");
+
+                int size = parseInteger();
+                if (size > 1)
+                    data.mArray = std::vector<SrcT>(size);
             }
             else if (key == "min")
             {
@@ -582,7 +586,7 @@ namespace fx
                     data.mMax = parseBool();
             }
             else if (key == "step")
-                step = parseFloat();
+                uniform->mStep = parseFloat();
             else if (key == "static")
                 uniform->mStatic = parseBool();
             else if (key == "description")
@@ -598,18 +602,28 @@ namespace fx
             else
                 error(Misc::StringUtils::format("unexpected key '%s'", std::string{key}));
 
-            if (step)
-                uniform->mStep = step.value();
-
             expect<Lexer::SemiColon>();
         }
+
+        if (data.isArray())
+            uniform->mStatic = false;
 
         uniform->mName = std::string(mBlockName);
         uniform->mData = data;
         uniform->mTechniqueName = mName;
 
-        if (auto cached = Settings::ShaderManager::get().getValue<SrcT>(mName, uniform->mName))
-            uniform->setValue<SrcT>(cached.value());
+        if (data.mArray)
+        {
+            if constexpr (!std::is_same_v<bool, SrcT>)
+            {
+                if (auto cached = Settings::ShaderManager::get().getValue<std::vector<SrcT>>(mName, uniform->mName))
+                    uniform->setValue(cached.value());
+            }
+        }
+        else if (auto cached = Settings::ShaderManager::get().getValue<SrcT>(mName, uniform->mName))
+        {
+            uniform->setValue(cached.value());
+        }
 
         mDefinedUniforms.emplace_back(std::move(uniform));
     }

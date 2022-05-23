@@ -271,10 +271,10 @@ Below is an example of passing a value through a custom vertex shader to the fra
     }
 
     fragment pass {
-        omw_Out vec2 omw_TexCoord;
+        omw_In vec2 omw_TexCoord;
 
         // our custom output from the vertex shader is available
-        omw_Out float noise;
+        omw_In float noise;
 
         void main()
         {
@@ -461,6 +461,14 @@ To use the uniform you can reference it in any pass, it should **not** be declar
         }
     }
 
+You can use uniform arrays as well, but they are restricted to the `Lua API <../lua-scripting/openmw_postprocessing.html>`_ scripts.
+These uniform blocks must be defined with the new ``size`` parameter.
+
+.. code-block:: none
+
+    uniform_vec3 uArray {
+        size = 10;
+    }
 
 ``render_target``
 *****************
