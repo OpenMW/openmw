@@ -122,6 +122,16 @@ namespace LuaUtil
         auto it = mContexts.find(contextName);
         if (it != mContexts.end())
             return sol::make_object(mLua->sol(), it->second);
+        auto allowedChar = [](char c)
+        {
+            return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+                   (c >= '0' && c <= '9') || c == '_';
+        };
+        bool valid = !contextName.empty();
+        for (char c : contextName)
+            valid = valid && allowedChar(c);
+        if (!valid)
+            throw std::runtime_error(std::string("Invalid l10n context name: ") + contextName);
         icu::Locale fallbackLocale(fallbackLocaleName.c_str());
         Context ctx{contextName, std::make_shared<l10n::MessageBundles>(mPreferredLocales, fallbackLocale)};
         {
