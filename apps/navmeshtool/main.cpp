@@ -23,7 +23,6 @@
 
 #include <osg/Vec3f>
 
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include <cstddef>
