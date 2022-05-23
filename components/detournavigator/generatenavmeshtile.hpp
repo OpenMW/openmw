@@ -50,7 +50,7 @@ namespace DetourNavigator
         virtual void update(std::string_view worldspace, const TilePosition& tilePosition,
                             std::int64_t tileId, std::int64_t version, PreparedNavMeshData& data) = 0;
 
-        virtual void cancel() = 0;
+        virtual void cancel(std::string_view reason) = 0;
     };
 
     class GenerateNavMeshTile final : public SceneUtil::WorkItem
