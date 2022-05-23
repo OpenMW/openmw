@@ -9,7 +9,6 @@ openmw_add_executable(niftest
 )
 
 target_link_libraries(niftest
-  ${Boost_FILESYSTEM_LIBRARY}
   components
 )
 
