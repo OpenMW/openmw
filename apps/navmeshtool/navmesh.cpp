@@ -169,19 +169,22 @@ namespace NavMeshTool
                 report();
             }
 
-            void cancel() override
+            void cancel(std::string_view reason) override
             {
                 std::unique_lock lock(mMutex);
-                mCancelled = true;
+                if (reason.find("database or disk is full") != std::string_view::npos)
+                    mStatus = Status::NotEnoughSpace;
+                else
+                    mStatus = Status::Cancelled;
                 mHasTile.notify_one();
             }
 
-            bool wait()
+            Status wait()
             {
                 constexpr std::chrono::seconds transactionInterval(1);
                 std::unique_lock lock(mMutex);
                 auto start = std::chrono::steady_clock::now();
-                while (mProvided < mExpected && !mCancelled)
+                while (mProvided < mExpected && mStatus == Status::Ok)
                 {
                     mHasTile.wait(lock);
                     const auto now = std::chrono::steady_clock::now();
@@ -195,7 +198,7 @@ namespace NavMeshTool
                 logGeneratedTiles(mProvided, mExpected);
                 if (mWriteBinaryLog)
                     logGeneratedTilesMessage(mProvided);
-                return !mCancelled;
+                return mStatus;
             }
 
             void commit()
@@ -224,7 +227,7 @@ namespace NavMeshTool
             std::atomic_size_t mInserted {0};
             std::atomic_size_t mUpdated {0};
             std::size_t mDeleted = 0;
-            bool mCancelled = false;
+            Status mStatus = Status::Ok;
             mutable std::mutex mMutex;
             NavMeshDb mDb;
             const bool mRemoveUnusedTiles;
@@ -247,7 +250,7 @@ namespace NavMeshTool
         };
     }
 
-    void generateAllNavMeshTiles(const osg::Vec3f& agentHalfExtents, const Settings& settings,
+    Status generateAllNavMeshTiles(const osg::Vec3f& agentHalfExtents, const Settings& settings,
         std::size_t threadsNumber, bool removeUnusedTiles, bool writeBinaryLog, WorldspaceData& data,
         NavMeshDb&& db)
     {
@@ -294,7 +297,8 @@ namespace NavMeshTool
                 ));
         }
 
-        if (navMeshTileConsumer->wait())
+        const Status status = navMeshTileConsumer->wait();
+        if (status == Status::Ok)
             navMeshTileConsumer->commit();
 
         const auto inserted = navMeshTileConsumer->getInserted();
@@ -311,5 +315,7 @@ namespace NavMeshTool
             Log(Debug::Info) << "Vacuuming the database...";
             navMeshTileConsumer->vacuum();
         }
+
+        return status;
     }
 }

@@ -171,8 +171,9 @@ namespace NavMeshTool
 
             const osg::Vec3f agentHalfExtents = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
             const std::uint64_t maxDbFileSize = static_cast<std::uint64_t>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
+            const std::string dbPath = (config.getUserDataPath() / "navmesh.db").string();
 
-            DetourNavigator::NavMeshDb db((config.getUserDataPath() / "navmesh.db").string(), maxDbFileSize);
+            DetourNavigator::NavMeshDb db(dbPath, maxDbFileSize);
 
             std::vector<ESM::ESMReader> readers(contentFiles.size());
             EsmLoader::Query query;
@@ -196,10 +197,24 @@ namespace NavMeshTool
             WorldspaceData cellsData = gatherWorldspaceData(navigatorSettings, readers, vfs, bulletShapeManager,
                                                             esmData, processInteriorCells, writeBinaryLog);
 
-            generateAllNavMeshTiles(agentHalfExtents, navigatorSettings, threadsNumber, removeUnusedTiles,
-                                    writeBinaryLog, cellsData, std::move(db));
+            const Status status = generateAllNavMeshTiles(agentHalfExtents, navigatorSettings, threadsNumber,
+                removeUnusedTiles, writeBinaryLog, cellsData, std::move(db));
 
-            Log(Debug::Info) << "Done";
+            switch (status)
+            {
+                case Status::Ok:
+                    Log(Debug::Info) << "Done";
+                    break;
+                case Status::Cancelled:
+                    Log(Debug::Warning) << "Cancelled";
+                    break;
+                case Status::NotEnoughSpace:
+                    Log(Debug::Warning) << "Navmesh genration is cancelled due to running out of disk space or limits "
+                        << "for navmesh db. Check disk space at the db location \"" << dbPath
+                        << "\". If there is enough space, adjust \"max navmeshdb file size\" setting (see "
+                        << "https://openmw.readthedocs.io/en/latest/reference/modding/settings/navigator.html?highlight=navmesh#max-navmeshdb-file-size).";
+                    break;
+            }
 
             return 0;
         }
