@@ -1279,10 +1279,10 @@ namespace MWWorld
 
     MWWorld::Ptr World::moveObject(const Ptr& ptr, const osg::Vec3f& position, bool movePhysics, bool moveToActive)
     {
-        const auto index = MWWorld::positionToIndex(position.x(), position.y());
+        const osg::Vec2i index = positionToCellIndex(position.x(), position.y());
 
         CellStore* cell = ptr.getCell();
-        CellStore* newCell = getExterior(index.mX, index.mY);
+        CellStore* newCell = getExterior(index.x(), index.y());
         bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior() && mWorldScene->isCellActive(*newCell);
 
         if (cell->isExterior() || (moveToActive && isCellActive && ptr.getClass().isActor()))
@@ -1516,13 +1516,6 @@ namespace MWWorld
             x += cellSize/2;
             y += cellSize/2;
         }
-    }
-
-    void World::positionToIndex (float x, float y, int &cellX, int &cellY) const
-    {
-        const auto index = MWWorld::positionToIndex(x, y);
-        cellX = index.mX;
-        cellY = index.mY;
     }
 
     void World::queueMovement(const Ptr &ptr, const osg::Vec3f &velocity)
@@ -2112,7 +2105,9 @@ namespace MWWorld
                 else
                 {
                     cellid.mPaged = true;
-                    cellid.mIndex = MWWorld::positionToIndex(ref.mRef.getDoorDest().pos[0], ref.mRef.getDoorDest().pos[1]);
+                    const osg::Vec2i index = positionToCellIndex(ref.mRef.getDoorDest().pos[0], ref.mRef.getDoorDest().pos[1]);
+                    cellid.mIndex.mX = index.x();
+                    cellid.mIndex.mY = index.y();
                 }
                 newMarker.dest = cellid;
 
@@ -2214,8 +2209,8 @@ namespace MWWorld
             throw std::runtime_error("copyObjectToCell(): cannot copy object to null cell");
         if (cell->isExterior())
         {
-            const auto index = MWWorld::positionToIndex(pos.pos[0], pos.pos[1]);
-            cell = mCells.getExterior(index.mX, index.mY);
+            const osg::Vec2i index = positionToCellIndex(pos.pos[0], pos.pos[1]);
+            cell = mCells.getExterior(index.x(), index.y());
         }
 
         MWWorld::Ptr dropped =
@@ -2823,8 +2818,8 @@ namespace MWWorld
             if (door->getDestCell().empty())
             {
                 ESM::Position doorDest = door->getDoorDest();
-                const auto index = MWWorld::positionToIndex(doorDest.pos[0], doorDest.pos[1]);
-                source = getExterior(index.mX, index.mY);
+                const osg::Vec2i index = positionToCellIndex(doorDest.pos[0], doorDest.pos[1]);
+                source = getExterior(index.x(), index.y());
             }
             // door to interior
             else

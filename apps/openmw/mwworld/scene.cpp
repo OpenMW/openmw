@@ -42,6 +42,7 @@
 #include "cellstore.hpp"
 #include "cellpreloader.hpp"
 #include "worldimp.hpp"
+#include "cellutils.hpp"
 
 namespace
 {
@@ -504,9 +505,7 @@ namespace MWWorld
             if (distance <= maxDistance)
                 return *currentGridCenter;
         }
-        osg::Vec2i newCenter;
-        mWorld.positionToIndex(pos.x(), pos.y(), newCenter.x(), newCenter.y());
-        return newCenter;
+        return positionToCellIndex(pos.x(), pos.y());
     }
 
     void Scene::playerMoved(const osg::Vec3f &pos)
@@ -867,17 +866,14 @@ namespace MWWorld
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
-        int x = 0;
-        int y = 0;
-
-        mWorld.positionToIndex (position.pos[0], position.pos[1], x, y);
+        const osg::Vec2i cellIndex = positionToCellIndex(position.pos[0], position.pos[1]);
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
-        changeCellGrid(position.asVec3(), x, y, changeEvent);
+        changeCellGrid(position.asVec3(), cellIndex.x(), cellIndex.y(), changeEvent);
 
-        CellStore* current = mWorld.getExterior(x, y);
+        CellStore* current = mWorld.getExterior(cellIndex.x(), cellIndex.y());
         changePlayerCell(current, position, adjustPlayerPos);
 
         if (changeEvent)
@@ -1078,9 +1074,8 @@ namespace MWWorld
                     else
                     {
                         osg::Vec3f pos = door.getCellRef().getDoorDest().asVec3();
-                        int x,y;
-                        mWorld.positionToIndex (pos.x(), pos.y(), x, y);
-                        preloadCell(mWorld.getExterior(x,y), true);
+                        const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
+                        preloadCell(mWorld.getExterior(cellIndex.x(), cellIndex.y()), true);
                         exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
                     }
                 }
@@ -1216,9 +1211,8 @@ namespace MWWorld
             else
             {
                 osg::Vec3f pos = dest.mPos.asVec3();
-                int x,y;
-                mWorld.positionToIndex( pos.x(), pos.y(), x, y);
-                preloadCell(mWorld.getExterior(x,y), true);
+                const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
+                preloadCell(mWorld.getExterior(cellIndex.x(), cellIndex.y()), true);
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }
         }

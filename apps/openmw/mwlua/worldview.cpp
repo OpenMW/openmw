@@ -10,6 +10,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
+#include "../mwworld/cellutils.hpp"
 
 namespace MWLua
 {
@@ -128,9 +129,8 @@ namespace MWLua
         bool exterior = name.empty() || world->getExterior(name);
         if (exterior)
         {
-            int cellX, cellY;
-            world->positionToIndex(position.x(), position.y(), cellX, cellY);
-            return world->getExterior(cellX, cellY);
+            const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(position.x(), position.y());
+            return world->getExterior(cellIndex.x(), cellIndex.y());
         }
         else
             return world->getInterior(name);

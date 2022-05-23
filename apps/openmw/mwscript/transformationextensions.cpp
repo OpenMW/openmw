@@ -17,6 +17,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/cellutils.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -411,9 +412,8 @@ namespace MWScript
                             if(!isPlayer)
                                 return;
                         }
-                        int cx,cy;
-                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
                     }
                     if(store)
                     {
@@ -460,15 +460,14 @@ namespace MWScript
                     {
                         MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
                     }
-                    int cx,cy;
-                    MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
+                    const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
 
                     // another morrowind oddity: player will be moved to the exterior cell at this location,
                     // non-player actors will move within the cell they are in.
                     MWWorld::Ptr base = ptr;
                     if (ptr == MWMechanics::getPlayer())
                     {
-                        MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
                         ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, cell, osg::Vec3(x, y, z));
                     }
                     else
@@ -517,9 +516,8 @@ namespace MWScript
                     catch(std::exception&)
                     {
                         const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
-                        int cx,cy;
-                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
                         if(!cell)
                         {
                             runtime.getContext().report ("unknown cell (" + cellID + ")");
@@ -569,9 +567,8 @@ namespace MWScript
                     MWWorld::CellStore* store = nullptr;
                     if (player.getCell()->isExterior())
                     {
-                        int cx,cy;
-                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
                     }
                     else
                         store = player.getCell();
