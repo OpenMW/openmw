@@ -27,7 +27,7 @@
 
 MATCHER_P3(Vec3fEq, x, y, z, "")
 {
-    return std::abs(arg.x() - x) < 1e-4 && std::abs(arg.y() - y) < 1e-4 && std::abs(arg.z() - z) < 1e-4;
+    return std::abs(arg.x() - x) < 1e-3 && std::abs(arg.y() - y) < 1e-3 && std::abs(arg.z() - z) < 1e-3;
 }
 
 namespace
