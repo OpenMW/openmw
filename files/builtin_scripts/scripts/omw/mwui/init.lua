@@ -60,6 +60,7 @@ local templates = {}
 ---
 -- Container that adds padding around its content.
 -- @field [parent=#MWUI] #table padding
+
 ---
 -- Standard spacing interval
 -- @field [parent=#MWUI] #number interval
@@ -68,9 +69,11 @@ require('scripts.omw.mwui.space')(templates)
 ---
 -- Standard rectangular border
 -- @field [parent=#Templates] openmw.ui#Layout border
+
 ---
 -- Container wrapping the content with borders
 -- @field [parent=#Templates] openmw.ui#Layout box
+
 ---
 -- Same as box, but with a semi-transparent background
 -- @field [parent=#Templates] openmw.ui#Layout boxTransparent
