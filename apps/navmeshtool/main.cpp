@@ -208,7 +208,7 @@ namespace NavMeshTool
                     Log(Debug::Warning) << "Cancelled";
                     break;
                 case Status::NotEnoughSpace:
-                    Log(Debug::Warning) << "Navmesh genration is cancelled due to running out of disk space or limits "
+                    Log(Debug::Warning) << "Navmesh generation is cancelled due to running out of disk space or limits "
                         << "for navmesh db. Check disk space at the db location \"" << dbPath
                         << "\". If there is enough space, adjust \"max navmeshdb file size\" setting (see "
                         << "https://openmw.readthedocs.io/en/latest/reference/modding/settings/navigator.html?highlight=navmesh#max-navmeshdb-file-size).";
