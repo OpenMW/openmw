@@ -93,8 +93,8 @@ namespace
 
     using RawValue = const char[4];
 
-    constexpr RawValue foo = "foo";
-    constexpr RawValue fooUpper = "FOO";
+    constexpr RawValue foo = "f0#";
+    constexpr RawValue fooUpper = "F0#";
     constexpr RawValue bar = "bar";
 
     template <typename T>
