@@ -166,13 +166,13 @@ namespace MWLua
         addType(ObjectTypeName::MiscItem, {ESM::REC_MISC}, ObjectTypeName::Item);
         addType(ObjectTypeName::Potion, {ESM::REC_ALCH}, ObjectTypeName::Item);
         addWeaponBindings(addType(ObjectTypeName::Weapon, {ESM::REC_WEAP}, ObjectTypeName::Item), context);
+        addBookBindings(addType(ObjectTypeName::Book, {ESM::REC_BOOK}, ObjectTypeName::Item), context);
+        addLockpickBindings(addType(ObjectTypeName::Lockpick, {ESM::REC_LOCK}, ObjectTypeName::Item), context);
+        addProbeBindings(addType(ObjectTypeName::Probe, {ESM::REC_PROB}, ObjectTypeName::Item), context);
         addType(ObjectTypeName::Apparatus, {ESM::REC_APPA}, ObjectTypeName::Item);
-        addType(ObjectTypeName::Lockpick, {ESM::REC_LOCK}, ObjectTypeName::Item);
-        addType(ObjectTypeName::Probe, {ESM::REC_PROB}, ObjectTypeName::Item);
         addType(ObjectTypeName::Repair, {ESM::REC_REPA}, ObjectTypeName::Item);
 
         addActivatorBindings(addType(ObjectTypeName::Activator, {ESM::REC_ACTI}), context);
-        addBookBindings(addType(ObjectTypeName::Book, {ESM::REC_BOOK}), context);
         addContainerBindings(addType(ObjectTypeName::Container, {ESM::REC_CONT}), context);
         addDoorBindings(addType(ObjectTypeName::Door, {ESM::REC_DOOR}), context);
         addType(ObjectTypeName::Static, {ESM::REC_STAT});
