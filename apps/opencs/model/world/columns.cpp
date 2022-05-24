@@ -269,7 +269,7 @@ namespace CSMWorld
             { ColumnId_LevelledItemId,"Levelled Item" },
             { ColumnId_LevelledItemLevel,"Item Level" },
             { ColumnId_LevelledItemType, "Calculate all levels <= player" },
-            { ColumnId_LevelledItemTypeEach, "Select a new item each instance" },
+            { ColumnId_LevelledItemTypeEach, "Select a new item for each instance" },
             { ColumnId_LevelledItemChanceNone, "Chance None" },
 
             { ColumnId_PowerList, "Powers" },
