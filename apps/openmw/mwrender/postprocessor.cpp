@@ -378,7 +378,7 @@ namespace MWRender
             const auto lastWriteTime = std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]);
             const bool isDirty = technique->setLastModificationTime(lastWriteTime);
 
-            if (technique->isValid() && !isDirty)
+            if (!isDirty)
                 continue;
 
             if (technique->compile())
@@ -671,6 +671,9 @@ namespace MWRender
 
     bool PostProcessor::disableTechnique(std::shared_ptr<fx::Technique> technique, bool dirty)
     {
+        if (Misc::StringUtils::ciEqual(technique->getName(), "main"))
+            return false;
+
         auto it = std::find(mTechniques.begin(), mTechniques.end(), technique);
         if (it == std::end(mTechniques))
             return false;

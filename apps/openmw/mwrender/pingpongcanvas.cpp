@@ -103,7 +103,15 @@ namespace MWRender
         if (filtered.empty() || !bufferData.postprocessing)
         {
             if (bufferData.postprocessing)
-                Log(Debug::Error) << "Critical error, postprocess shaders failed to compile. Using default shader.";
+            {
+                if (!mLoggedLastError)
+                {
+                    Log(Debug::Error) << "Critical error, postprocess shaders failed to compile. Using default shader.";
+                    mLoggedLastError = true;
+                }
+            }
+            else
+                mLoggedLastError = false;
 
             mFallbackStateSet->setTextureAttributeAndModes(0, bufferData.sceneTex);
 

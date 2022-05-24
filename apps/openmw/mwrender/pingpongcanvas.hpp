@@ -82,6 +82,8 @@ namespace MWRender
 
         mutable std::optional<fx::DispatchArray> mQueuedDispatchArray;
         mutable size_t mQueuedDispatchFrameId;
+
+        mutable bool mLoggedLastError = false;
     };
 }
 
