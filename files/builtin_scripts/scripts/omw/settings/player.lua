@@ -28,7 +28,7 @@ require('scripts.omw.settings.renderers')(render.registerRenderer)
 -- @field #string name A key from the localization context
 -- @field #string description A key from the localization context (optional, can be `nil`)
 -- @field default A default value
--- @field #string renderer A renderer key
+-- @field #string renderer A renderer key (see the "Built-in Setting Renderers" page)
 -- @field argument An argument for the renderer
 
 return {

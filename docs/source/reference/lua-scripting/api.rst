@@ -8,6 +8,7 @@ Lua API reference
     engine_handlers
     user_interface
     aipackages
+    setting_renderers
     events
     openmw_util
     openmw_storage

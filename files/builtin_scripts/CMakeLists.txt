@@ -24,6 +24,7 @@ set(LUA_BUILTIN_FILES
     scripts/omw/settings/renderers.lua
 
     l10n/Calendar/en.yaml
+    l10n/Interface/en.yaml
 
     scripts/omw/mwui/constants.lua
     scripts/omw/mwui/borders.lua

@@ -12,6 +12,8 @@ local function registerRenderer(name, renderFunction)
     renderers[name] = renderFunction
 end
 
+local interfaceL10n = core.l10n('Interface')
+
 local pages = {}
 local groups = {}
 local pageOptions = {}
@@ -156,7 +158,7 @@ local function renderGroup(group, global)
                     {
                         template = I.MWUI.templates.textNormal,
                         props = {
-                            text = 'Reset',
+                            text = interfaceL10n('Reset')
                         },
                         events = {
                             mouseClick = async:callback(function()
@@ -368,7 +370,11 @@ local function onGroupRegistered(global, key)
 
     if not pages[group.page] then return end
     local options = renderPage(pages[group.page])
-    pageOptions[group.page].element:destroy()
+    if pageOptions[group.page] then
+        pageOptions[group.page].element:destroy()
+    else
+        pageOptions[group.page] = {}
+    end
     for k, v in pairs(options) do
         pageOptions[group.page][k] = v
     end
