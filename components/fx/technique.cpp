@@ -510,6 +510,7 @@ namespace fx
         if (proxy.internal_format.has_value())
             sampler->setSourceFormat(proxy.internal_format.value());
         sampler->setName(std::string{mBlockName});
+        sampler->setResizeNonPowerOfTwoHint(false);
 
         mTextures.emplace_back(sampler);
 
