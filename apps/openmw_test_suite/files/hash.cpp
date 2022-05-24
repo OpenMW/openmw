@@ -9,9 +9,12 @@
 #include <sstream>
 #include <string>
 
+#include "../testing_util.hpp"
+
 namespace
 {
     using namespace testing;
+    using namespace TestingOpenMW;
     using namespace Files;
 
     struct Params
@@ -24,7 +27,7 @@ namespace
 
     TEST(FilesGetHash, shouldClearErrors)
     {
-        const std::string fileName = "fileName";
+        const std::string fileName = temporaryFilePath("fileName");
         std::string content;
         std::fill_n(std::back_inserter(content), 1, 'a');
         std::istringstream stream(content);
@@ -34,7 +37,7 @@ namespace
 
     TEST_P(FilesGetHash, shouldReturnHashForStringStream)
     {
-        const std::string fileName = "fileName";
+        const std::string fileName = temporaryFilePath("fileName");
         std::string content;
         std::fill_n(std::back_inserter(content), GetParam().mSize, 'a');
         std::istringstream stream(content);
@@ -47,6 +50,7 @@ namespace
         std::replace(fileName.begin(), fileName.end(), '/', '_');
         std::string content;
         std::fill_n(std::back_inserter(content), GetParam().mSize, 'a');
+        fileName = outputFilePath(fileName);
         std::fstream(fileName, std::ios_base::out | std::ios_base::binary)
             .write(content.data(), static_cast<std::streamsize>(content.size()));
         const auto stream = Files::openConstrainedFileStream(fileName, 0, content.size());

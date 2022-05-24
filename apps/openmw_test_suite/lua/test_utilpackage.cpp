@@ -4,11 +4,17 @@
 #include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
 
-#include "testing_util.hpp"
+#include "../testing_util.hpp"
 
 namespace
 {
     using namespace testing;
+
+    template <typename T>
+    T get(sol::state& lua, const std::string& luaCode)
+    {
+        return lua.safe_script("return " + luaCode).get<T>();
+    }
 
     std::string getAsString(sol::state& lua, std::string luaCode)
     {

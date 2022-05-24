@@ -6,17 +6,18 @@
 #include <components/lua/luastate.hpp>
 #include <components/lua/scriptscontainer.hpp>
 
-#include "testing_util.hpp"
+#include "../testing_util.hpp"
 
 namespace
 {
     using namespace testing;
+    using namespace TestingOpenMW;
 
-    TestFile invalidScript("not a script");
-    TestFile incorrectScript("return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
-    TestFile emptyScript("");
+    VFSTestFile invalidScript("not a script");
+    VFSTestFile incorrectScript("return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
+    VFSTestFile emptyScript("");
     
-    TestFile testScript(R"X(
+    VFSTestFile testScript(R"X(
 return {
     engineHandlers = {
         onUpdate = function(dt) print(' update ' .. tostring(dt)) end,
@@ -30,7 +31,7 @@ return {
 }
 )X");
 
-    TestFile stopEventScript(R"X(
+    VFSTestFile stopEventScript(R"X(
 return {
     eventHandlers = {
         Event1 = function(eventData)
@@ -41,7 +42,7 @@ return {
 }
 )X");
 
-    TestFile loadSaveScript(R"X(
+    VFSTestFile loadSaveScript(R"X(
 x = 0
 y = 0
 return {
@@ -67,7 +68,7 @@ return {
 }
 )X");
 
-    TestFile interfaceScript(R"X(
+    VFSTestFile interfaceScript(R"X(
 return {
     interfaceName = "TestInterface",
     interface = {
@@ -77,7 +78,7 @@ return {
 }
 )X");
 
-    TestFile overrideInterfaceScript(R"X(
+    VFSTestFile overrideInterfaceScript(R"X(
 local old = nil
 local interface = {
     fn = function(x)
@@ -101,7 +102,7 @@ return {
 }
 )X");
 
-    TestFile useInterfaceScript(R"X(
+    VFSTestFile useInterfaceScript(R"X(
 local interfaces = require('openmw.interfaces')
 return {
     engineHandlers = {

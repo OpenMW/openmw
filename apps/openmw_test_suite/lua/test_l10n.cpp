@@ -6,17 +6,24 @@
 #include <components/lua/luastate.hpp>
 #include <components/lua/l10n.hpp>
 
-#include "testing_util.hpp"
+#include "../testing_util.hpp"
 
 namespace
 {
     using namespace testing;
+    using namespace TestingOpenMW;
 
-    TestFile invalidScript("not a script");
-    TestFile incorrectScript("return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
-    TestFile emptyScript("");
+    template <typename T>
+    T get(sol::state& lua, const std::string& luaCode)
+    {
+        return lua.safe_script("return " + luaCode).get<T>();
+    }
+
+    VFSTestFile invalidScript("not a script");
+    VFSTestFile incorrectScript("return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
+    VFSTestFile emptyScript("");
     
-    TestFile test1En(R"X(
+    VFSTestFile test1En(R"X(
 good_morning: "Good morning."
 you_have_arrows: |-
   {count, plural,
@@ -38,7 +45,7 @@ numbers: "{int} and {double, number, integer} are integers, but {double} is a do
 rounding: "{value, number, :: .00}"
 )X");
 
-    TestFile test1De(R"X(
+    VFSTestFile test1De(R"X(
 good_morning: "Guten Morgen."
 you_have_arrows: |-
   {count, plural,
@@ -48,11 +55,11 @@ you_have_arrows: |-
 "Hello {name}!": "Hallo {name}!"
 )X");
 
-     TestFile test1EnUS(R"X(
+     VFSTestFile test1EnUS(R"X(
 currency: "You have {money, number, currency}"
 )X");
 
-TestFile test2En(R"X(
+VFSTestFile test2En(R"X(
 good_morning: "Morning!"
 you_have_arrows: "Arrows count: {count}"
 )X");

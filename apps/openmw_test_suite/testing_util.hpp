@@ -1,25 +1,31 @@
-#ifndef LUA_TESTING_UTIL_H
-#define LUA_TESTING_UTIL_H
+#ifndef TESTING_UTIL_H
+#define TESTING_UTIL_H
 
+#include <filesystem>
 #include <sstream>
-#include <sol/sol.hpp>
 
 #include <components/vfs/archive.hpp>
 #include <components/vfs/manager.hpp>
 
-namespace
+namespace TestingOpenMW
 {
 
-    template <typename T>
-    T get(sol::state& lua, const std::string& luaCode)
+    inline std::string outputFilePath(const std::string name)
     {
-        return lua.safe_script("return " + luaCode).get<T>();
+        std::filesystem::path dir("tests_output");
+        std::filesystem::create_directory(dir);
+        return (dir / name).string();
     }
 
-    class TestFile : public VFS::File
+    inline std::string temporaryFilePath(const std::string name)
+    {
+        return (std::filesystem::temp_directory_path() / name).string();
+    }
+
+    class VFSTestFile : public VFS::File
     {
     public:
-        explicit TestFile(std::string content) : mContent(std::move(content)) {}
+        explicit VFSTestFile(std::string content) : mContent(std::move(content)) {}
 
         Files::IStreamPtr open() override
         {
@@ -35,11 +41,11 @@ namespace
         const std::string mContent;
     };
 
-    struct TestData : public VFS::Archive
+    struct VFSTestData : public VFS::Archive
     {
         std::map<std::string, VFS::File*> mFiles;
 
-        TestData(std::map<std::string, VFS::File*> files) : mFiles(std::move(files)) {}
+        VFSTestData(std::map<std::string, VFS::File*> files) : mFiles(std::move(files)) {}
 
         void listResources(std::map<std::string, VFS::File*>& out, char (*normalize_function) (char)) override
         {
@@ -58,7 +64,7 @@ namespace
     inline std::unique_ptr<VFS::Manager> createTestVFS(std::map<std::string, VFS::File*> files)
     {
         auto vfs = std::make_unique<VFS::Manager>(true);
-        vfs->addArchive(new TestData(std::move(files)));
+        vfs->addArchive(new VFSTestData(std::move(files)));
         vfs->buildIndex();
         return vfs;
     }
@@ -68,4 +74,4 @@ namespace
 
 }
 
-#endif // LUA_TESTING_UTIL_H
+#endif // TESTING_UTIL_H

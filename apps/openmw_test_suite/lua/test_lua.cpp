@@ -3,13 +3,13 @@
 
 #include <components/lua/luastate.hpp>
 
-#include "testing_util.hpp"
+#include "../testing_util.hpp"
 
 namespace
 {
     using namespace testing;
 
-    TestFile counterFile(R"X(
+    TestingOpenMW::VFSTestFile counterFile(R"X(
 x = 42
 return {
     get = function() return x end,
@@ -17,9 +17,9 @@ return {
 }
 )X");
 
-    TestFile invalidScriptFile("Invalid script");
+    TestingOpenMW::VFSTestFile invalidScriptFile("Invalid script");
 
-    TestFile testsFile(R"X(
+    TestingOpenMW::VFSTestFile testsFile(R"X(
 return {
     -- should work
     sin = function(x) return math.sin(x) end,
@@ -53,7 +53,7 @@ return {
 
     struct LuaStateTest : Test
     {
-        std::unique_ptr<VFS::Manager> mVFS = createTestVFS({
+        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({
             {"aaa/counter.lua", &counterFile},
             {"bbb/tests.lua", &testsFile},
             {"invalid.lua", &invalidScriptFile}

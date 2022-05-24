@@ -1,8 +1,11 @@
 #include <components/settings/shadermanager.hpp>
 
+#include <filesystem>
 #include <fstream>
 
 #include <gtest/gtest.h>
+
+#include "../testing_util.hpp"
 
 namespace
 {
@@ -14,7 +17,8 @@ namespace
         template <typename F>
         void withSettingsFile( const std::string& content, F&& f)
         {
-            const auto path = std::string(UnitTest::GetInstance()->current_test_info()->name()) + ".yaml";
+            std::string path = TestingOpenMW::outputFilePath(
+                std::string(UnitTest::GetInstance()->current_test_info()->name()) + ".yaml");
 
             {
                 std::ofstream stream;
