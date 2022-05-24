@@ -762,6 +762,24 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Returns the read-only @{#LockpickRecord} of a lockpick
+-- @function [parent=#Lockpick] record
+-- @param #any objectOrRecordId
+-- @return #LockpickRecord
+
+---
+-- @type LockpickRecord
+-- @field #string id The record ID of the lockpick
+-- @field #string name The name of the lockpick
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this lockpick (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #number maxCondition The maximum number of uses of this lockpick
+-- @field #number weight
+-- @field #number value
+-- @field #number quality The quality of the lockpick
+
 --- @{#Probe} functions
 -- @field [parent=#types] #Probe Probe
 
@@ -775,6 +793,24 @@
 -- @function [parent=#Probe] objectIsInstance
 -- @param openmw.core#GameObject object
 -- @return #boolean
+
+---
+-- Returns the read-only @{#ProbeRecord} of a probe
+-- @function [parent=#Probe] record
+-- @param #any objectOrRecordId
+-- @return #ProbeRecord
+
+---
+-- @type ProbeRecord
+-- @field #string id The record ID of the probe
+-- @field #string name The name of the probe
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this probe (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #number maxCondition The maximum number of uses of this probe
+-- @field #number weight
+-- @field #number value
+-- @field #number quality The quality of the probe
 
 --- @{#Repair} functions
 -- @field [parent=#types] #Repair Repair
