@@ -23,11 +23,11 @@
 
 #include "bsa_file.hpp"
 
+#include <algorithm>
 #include <cassert>
-
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
 
 using namespace Bsa;
 
@@ -98,8 +98,7 @@ void BSAFile::readHeader()
      */
     assert(!mIsLoaded);
 
-    namespace bfs = boost::filesystem;
-    bfs::ifstream input(bfs::path(mFilename), std::ios_base::binary);
+    std::ifstream input(std::filesystem::path(mFilename), std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -195,8 +194,7 @@ void BSAFile::readHeader()
 /// Write header information to the output sink
 void Bsa::BSAFile::writeHeader()
 {
-    namespace bfs = boost::filesystem;
-    bfs::fstream output(mFilename, std::ios::binary | std::ios::in | std::ios::out);
+    std::fstream output(mFilename, std::ios::binary | std::ios::in | std::ios::out);
 
     uint32_t head[3];
     head[0] = 0x100;
@@ -237,11 +235,11 @@ void BSAFile::open(const std::string &file)
         close();
 
     mFilename = file;
-    if(boost::filesystem::exists(file))
+    if(std::filesystem::exists(file))
         readHeader();
     else
     {
-        { boost::filesystem::fstream(mFilename, std::ios::binary | std::ios::out); }
+        { std::fstream(mFilename, std::ios::binary | std::ios::out); }
         writeHeader();
         mIsLoaded = true;
     }
@@ -262,13 +260,12 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
 {
     if (!mIsLoaded)
         fail("Unable to add file " + filename + " the archive is not opened");
-    namespace bfs = boost::filesystem;
 
     auto newStartOfDataBuffer = 12 + (12 + 8) * (mFiles.size() + 1) + mStringBuf.size() + filename.size() + 1;
     if (mFiles.empty())
-        bfs::resize_file(mFilename, newStartOfDataBuffer);
+        std::filesystem::resize_file(mFilename, newStartOfDataBuffer);
 
-    bfs::fstream stream(mFilename, std::ios::binary | std::ios::in | std::ios::out);
+    std::fstream stream(mFilename, std::ios::binary | std::ios::in | std::ios::out);
 
     FileStruct newFile;
     file.seekg(0, std::ios::end);

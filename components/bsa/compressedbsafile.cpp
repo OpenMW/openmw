@@ -26,12 +26,12 @@
 
 #include <stdexcept>
 #include <cassert>
+#include <filesystem>
+#include <fstream>
 
 #include <lz4frame.h>
 
 #include <boost/scoped_array.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
@@ -119,8 +119,7 @@ void CompressedBSAFile::readHeader()
 {
     assert(!mIsLoaded);
 
-    namespace bfs = boost::filesystem;
-    bfs::ifstream input(bfs::path(mFilename), std::ios_base::binary);
+    std::ifstream input(std::filesystem::path(mFilename), std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -306,7 +305,7 @@ CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string
     std::string path = str;
     std::replace(path.begin(), path.end(), '\\', '/');
 
-    boost::filesystem::path p(path);
+    std::filesystem::path p(path);
     std::string stem = p.stem().string();
     std::string ext = p.extension().string();
     p.remove_filename();
@@ -408,8 +407,7 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
 
 BsaVersion CompressedBSAFile::detectVersion(const std::string& filePath)
 {
-    namespace bfs = boost::filesystem;
-    bfs::ifstream input(bfs::path(filePath), std::ios_base::binary);
+    std::ifstream input(std::filesystem::path(filePath), std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;

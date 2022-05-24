@@ -7,8 +7,6 @@
 
 #include <QDebug>
 
-#include <boost/filesystem/operations.hpp>
-
 #include <components/files/configurationmanager.hpp>
 
 const char Config::LauncherSettings::sCurrentContentListKey[] = "Profiles/currentprofile";

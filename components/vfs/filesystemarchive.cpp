@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <components/debug/debuglog.hpp>
 
@@ -20,7 +20,7 @@ namespace VFS
     {
         if (!mBuiltIndex)
         {
-            typedef boost::filesystem::recursive_directory_iterator directory_iterator;
+            typedef std::filesystem::recursive_directory_iterator directory_iterator;
 
             directory_iterator end;
 
@@ -31,7 +31,7 @@ namespace VFS
 
             for (directory_iterator i (mPath); i != end; ++i)
             {
-                if(boost::filesystem::is_directory (*i))
+                if(std::filesystem::is_directory (*i))
                     continue;
 
                 std::string proper = i->path ().string ();

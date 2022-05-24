@@ -1,8 +1,6 @@
 #ifndef OPENMW_COMPONENTS_FONTLOADER_H
 #define OPENMW_COMPONENTS_FONTLOADER_H
 
-#include "boost/filesystem/operations.hpp"
-
 #include <MyGUI_XmlDocument.h>
 #include <MyGUI_Version.h>
 
