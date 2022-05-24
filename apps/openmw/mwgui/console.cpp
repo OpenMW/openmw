@@ -4,8 +4,8 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LayerManager.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
@@ -220,8 +220,7 @@ namespace MWGui
 
     void Console::executeFile (const std::string& path)
     {
-        namespace bfs = boost::filesystem;
-        bfs::ifstream stream ((bfs::path(path)));
+        std::ifstream stream ((std::filesystem::path(path)));
 
         if (!stream.is_open())
             printError ("failed to open file: " + path);

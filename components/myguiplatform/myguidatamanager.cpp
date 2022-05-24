@@ -5,8 +5,8 @@
 
 #include <MyGUI_DataFileStream.h>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 #include <components/debug/debuglog.hpp>
 
@@ -21,8 +21,8 @@ void DataManager::setResourcePath(const std::string &path)
 MyGUI::IDataStream *DataManager::getData(const std::string &name) const
 {
     std::string fullpath = getDataPath(name);
-    std::unique_ptr<boost::filesystem::ifstream> stream;
-    stream.reset(new boost::filesystem::ifstream);
+    std::unique_ptr<std::ifstream> stream;
+    stream.reset(new std::ifstream);
     stream->open(fullpath, std::ios::binary);
     if (stream->fail())
     {
@@ -40,7 +40,7 @@ void DataManager::freeData(MyGUI::IDataStream *data)
 bool DataManager::isDataExist(const std::string &name) const
 {
     std::string fullpath = mResourcePath + "/" + name;
-    return boost::filesystem::exists(fullpath);
+    return std::filesystem::exists(fullpath);
 }
 
 const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern) const

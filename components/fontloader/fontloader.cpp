@@ -1,5 +1,6 @@
 #include "fontloader.hpp"
 
+#include <filesystem>
 #include <stdexcept>
 #include <string_view>
 #include <array>
@@ -216,7 +217,7 @@ namespace Gui
 
         const std::string cfg = dataManager->getDataPath("");
         const std::string fontFile = mUserDataPath + "/" + "Fonts" + "/" + "openmw_font.xml";
-        if (!boost::filesystem::exists(fontFile))
+        if (!std::filesystem::exists(fontFile))
             return;
 
         dataManager->setResourcePath(mUserDataPath + "/" + "Fonts");

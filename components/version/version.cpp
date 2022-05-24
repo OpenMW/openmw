@@ -1,16 +1,16 @@
 #include "version.hpp"
 
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 namespace Version
 {
 
 Version getOpenmwVersion(const std::string &resourcePath)
 {
-    boost::filesystem::path path (resourcePath + "/version");
+    std::filesystem::path path (resourcePath + "/version");
 
-    boost::filesystem::ifstream stream (path);
+    std::ifstream stream (path);
 
     Version v;
     std::getline(stream, v.mVersion);
