@@ -1,7 +1,6 @@
 #include <components/debug/debugging.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
-#include <components/esm3/variant.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/load.hpp>
 #include <components/fallback/fallback.hpp>
@@ -13,14 +12,10 @@
 #include <components/resource/niffilemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/settings/settings.hpp>
-#include <components/to_utf8/to_utf8.hpp>
 #include <components/version/version.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
 
-#include <osg/Vec3f>
-
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include <charconv>
