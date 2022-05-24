@@ -176,7 +176,7 @@ namespace MWPhysics
     bool PhysicsSystem::isOnSolidGround (const MWWorld::Ptr& actor) const
     {
         const Actor* physactor = getActor(actor);
-        if (!physactor || !physactor->getOnGround())
+        if (!physactor || !physactor->getOnGround() || !physactor->getCollisionMode())
             return false;
 
         const auto obj = physactor->getStandingOnPtr();
@@ -374,7 +374,7 @@ namespace MWPhysics
     bool PhysicsSystem::isOnGround(const MWWorld::Ptr &actor)
     {
         Actor* physactor = getActor(actor);
-        return physactor && physactor->getOnGround();
+        return physactor && physactor->getOnGround() && physactor->getCollisionMode();
     }
 
     bool PhysicsSystem::canMoveToWaterSurface(const MWWorld::ConstPtr &actor, const float waterlevel)
