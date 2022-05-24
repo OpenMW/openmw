@@ -34,6 +34,7 @@ variables:
     - ccache/
   stage: build
   script:
+    - df -h
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
     - ccache -z -M "${CCACHE_SIZE}"
@@ -44,6 +45,15 @@ variables:
     - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite --gtest_output="xml:tests.xml"; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - ccache -s
+    - df -h
+    - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
+    - ls | grep -v -e '^extern$' -e '^install$' -e '^tests.xml$' | xargs -I '{}' rm -rf './{}'
+    - cd ..
+    - df -h
+    - du -sh build/
+    - du -sh build/install/
+    - du -sh apt-cache/
+    - du -sh ccache/
   artifacts:
     paths:
       - build/install/
@@ -199,8 +209,6 @@ Ubuntu_GCC_tests_coverage:
     BUILD_WITH_CODE_COVERAGE: 1
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic openmw-coverage
-  after_script:
-    - gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root ${CI_PROJECT_DIR} -j $(nproc) -o coverage.xml
   coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
     paths: []
@@ -642,6 +650,7 @@ Ubuntu_AndroidNDK_arm64-v8a:
     - CI/install_debian_deps.sh gcc
   stage: build
   script:
+    - df -h
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
     - ccache -z -M "${CCACHE_SIZE}"
@@ -651,6 +660,15 @@ Ubuntu_AndroidNDK_arm64-v8a:
     - cmake --build . -- -j $(nproc)
     - cmake --install .
     - ccache -s
+    - df -h
+    - ls | grep -v -e '^extern$' -e '^install$' | xargs -I '{}' rm -rf './{}'
+    - cd ..
+    - df -h
+    - du -sh build/
+    - du -sh build/install/
+    - du -sh apt-cache/
+    - du -sh ccache/
+    - du -sh build/extern/fetched/
   artifacts:
     paths:
       - build/install/
