@@ -971,7 +971,7 @@ namespace MWMechanics
         const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
         const auto world = MWBase::Environment::get().getWorld();
 
-        if (actorClass.isClass(ptr, "Guard") && creatureStats.getAiSequence().isInPursuit() && !creatureStats.getAiSequence().isInCombat()
+        if (actorClass.isClass(ptr, "Guard") && !creatureStats.getAiSequence().isInPursuit() && !creatureStats.getAiSequence().isInCombat()
             && creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)
         {
             const MWWorld::ESMStore& esmStore = world->getStore();
