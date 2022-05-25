@@ -1,8 +1,8 @@
 #include "importer.hpp"
 
 #include <iomanip>
-
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 #include <osgDB/ReadFile>
 #include <osg/ImageUtils>
@@ -345,7 +345,7 @@ namespace ESSImport
 
         writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
-        boost::filesystem::ofstream stream(boost::filesystem::path(mOutFile), std::ios::out | std::ios::binary);
+        std::ofstream stream(std::filesystem::path(mOutFile), std::ios::out | std::ios::binary);
         // all unused
         writer.setVersion(0);
         writer.setType(0);

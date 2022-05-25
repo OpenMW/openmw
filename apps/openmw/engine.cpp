@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
+#include <filesystem>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -684,7 +685,7 @@ void OMW::Engine::createWindow()
 
 void OMW::Engine::setWindowIcon()
 {
-    boost::filesystem::ifstream windowIconStream;
+    std::ifstream windowIconStream;
     std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
     windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
@@ -759,13 +760,13 @@ void OMW::Engine::prepareEngine()
     // showing a loading screen and keeping the window responsive while doing so
 
     std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v3.xml").string();
-    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
+    bool keybinderUserExists = std::filesystem::exists(keybinderUser);
     if(!keybinderUserExists)
     {
         std::string input2 = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
-        if(boost::filesystem::exists(input2)) {
-            boost::filesystem::copy_file(input2, keybinderUser);
-            keybinderUserExists = boost::filesystem::exists(keybinderUser);
+        if(std::filesystem::exists(input2)) {
+            std::filesystem::copy_file(input2, keybinderUser);
+            keybinderUserExists = std::filesystem::exists(keybinderUser);
             Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
         }
     }
@@ -777,13 +778,13 @@ void OMW::Engine::prepareEngine()
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.txt";
 
     std::string userGameControllerdb;
-    if (boost::filesystem::exists(userdefault))
+    if (std::filesystem::exists(userdefault))
         userGameControllerdb = userdefault;
 
     std::string gameControllerdb;
-    if (boost::filesystem::exists(localdefault))
+    if (std::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
-    else if (boost::filesystem::exists(globaldefault))
+    else if (std::filesystem::exists(globaldefault))
         gameControllerdb = globaldefault;
     //else if it doesn't exist, pass in an empty string
 
