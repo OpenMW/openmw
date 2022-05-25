@@ -20,6 +20,7 @@
 #include <components/misc/stringops.hpp>
 
 #include <algorithm>
+#include <filesystem>
 #include <cstddef>
 #include <map>
 #include <set>
@@ -222,7 +223,7 @@ namespace EsmLoader
             for (std::size_t i = 0; i < contentFiles.size(); ++i)
             {
                 const std::string &file = contentFiles[i];
-                const std::string extension = Misc::StringUtils::lowerCase(boost::filesystem::path(file).extension().string());
+                const std::string extension = Misc::StringUtils::lowerCase(std::filesystem::path(file).extension().string());
 
                 if (supportedFormats.find(extension) == supportedFormats.end())
                 {

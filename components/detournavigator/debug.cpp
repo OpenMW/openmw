@@ -6,8 +6,8 @@
 
 #include <DetourNavMesh.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 namespace DetourNavigator
 {
@@ -15,7 +15,7 @@ namespace DetourNavigator
         const std::string& revision, const RecastSettings& settings)
     {
         const auto path = pathPrefix + "recastmesh" + revision + ".obj";
-        boost::filesystem::ofstream file(boost::filesystem::path(path), std::ios::out);
+        std::ofstream file(std::filesystem::path(path), std::ios::out);
         if (!file.is_open())
             throw NavigatorException("Open file failed: " + path);
         file.exceptions(std::ios::failbit | std::ios::badbit);
@@ -62,7 +62,7 @@ namespace DetourNavigator
         };
 
         const auto path = pathPrefix + "all_tiles_navmesh" + revision + ".bin";
-        boost::filesystem::ofstream file(boost::filesystem::path(path), std::ios::out | std::ios::binary);
+        std::ofstream file(std::filesystem::path(path), std::ios::out | std::ios::binary);
         if (!file.is_open())
             throw NavigatorException("Open file failed: " + path);
         file.exceptions(std::ios::failbit | std::ios::badbit);
