@@ -29,7 +29,7 @@ namespace SceneUtil
     class PPLightBuffer
     {
     public:
-        inline static constexpr auto sMaxPPLights = 30;
+        inline static constexpr auto sMaxPPLights = 40;
         inline static constexpr auto sMaxPPLightsArraySize = sMaxPPLights * 3;
 
         PPLightBuffer()
@@ -75,6 +75,11 @@ namespace SceneUtil
             mUniformBuffers[frameId]->setElement(i + 2, osg::Vec4f(ac, al, aq, radius));
 
             mIndex[frameId]++;
+        }
+
+        void updateCount(size_t frame)
+        {
+            size_t frameId = frame % 2;
             mUniformCount[frameId]->set(static_cast<int>(mIndex[frameId]));
         }
 

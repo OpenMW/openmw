@@ -86,7 +86,7 @@ int omw_GetPointLightCount()
     return omw_PointLightsCount;
 }
 
-vec3 omw_GetPointLightViewPos(int index)
+vec3 omw_GetPointLightWorldPos(int index)
 {
     return omw_PointLights[(index * 3)].xyz;
 }

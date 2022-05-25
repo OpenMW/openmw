@@ -635,6 +635,9 @@ namespace SceneUtil
             cv->pushStateSet(stateset);
             traverse(node, cv);
             cv->popStateSet();
+
+            if (node->getPPLightsBuffer() && cv->getCurrentCamera()->getName() == Constants::SceneCamera)
+                node->getPPLightsBuffer()->updateCount(cv->getTraversalNumber());
         }
     };
 
@@ -1141,12 +1144,15 @@ namespace SceneUtil
                 if (mPPLightBuffer && it->first->getName() == Constants::SceneCamera)
                 {
                     const auto* light = l.mLightSource->getLight(frameNum);
-                    mPPLightBuffer->setLight(frameNum, light->getPosition() * (*viewMatrix),
-                                            light->getDiffuse(),
-                                            light->getConstantAttenuation(),
-                                            light->getLinearAttenuation(),
-                                            light->getQuadraticAttenuation(),
-                                            l.mLightSource->getRadius());
+                    if (light->getDiffuse().x() >= 0.f)
+                    {
+                        mPPLightBuffer->setLight(frameNum, light->getPosition(),
+                                                light->getDiffuse(),
+                                                light->getConstantAttenuation(),
+                                                light->getLinearAttenuation(),
+                                                light->getQuadraticAttenuation(),
+                                                l.mLightSource->getRadius());
+                    }
                 }
             }
         }
