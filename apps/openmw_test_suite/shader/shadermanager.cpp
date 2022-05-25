@@ -1,6 +1,6 @@
 #include <components/shader/shadermanager.hpp>
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
 
 #include <gtest/gtest.h>
 
@@ -31,7 +31,7 @@ namespace
             const auto path = UnitTest::GetInstance()->current_test_info()->name() + suffix + ".glsl";
 
             {
-                boost::filesystem::ofstream stream;
+                std::ofstream stream;
                 stream.open(path);
                 stream << content;
                 stream.close();
