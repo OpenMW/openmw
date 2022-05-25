@@ -754,6 +754,8 @@ namespace MWWorld
             MWRender::RenderingManager* getRenderingManager() override { return mRendering.get(); }
 
             MWRender::PostProcessor* getPostProcessor() override;
+
+            void setActorActive(const MWWorld::Ptr& ptr, bool value) override;
     };
 }
 

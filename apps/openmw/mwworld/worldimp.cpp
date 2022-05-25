@@ -4002,4 +4002,10 @@ namespace MWWorld
     {
         return mRendering->getPostProcessor();
     }
+
+    void World::setActorActive(const MWWorld::Ptr& ptr, bool value)
+    {
+        if (MWPhysics::Actor* const actor = mPhysics->getActor(ptr))
+            actor->setActive(value);
+    }
 }

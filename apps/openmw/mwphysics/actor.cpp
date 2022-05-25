@@ -27,6 +27,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
   , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
   , mInternalCollisionMode(true)
   , mExternalCollisionMode(true)
+  , mActive(false)
   , mTaskScheduler(scheduler)
 {
     mPtr = ptr;

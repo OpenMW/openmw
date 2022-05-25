@@ -152,6 +152,10 @@ namespace MWPhysics
 
         bool canMoveToWaterSurface(float waterlevel, const btCollisionWorld* world) const;
 
+        bool isActive() const { return mActive; }
+
+        void setActive(bool value) { mActive = value; }
+
     private:
         MWWorld::Ptr mStandingOnPtr;
         /// Removes then re-adds the collision object to the dynamics world
@@ -190,6 +194,7 @@ namespace MWPhysics
         bool mOnSlope;
         bool mInternalCollisionMode;
         bool mExternalCollisionMode;
+        bool mActive;
 
         PhysicsTaskScheduler* mTaskScheduler;
 

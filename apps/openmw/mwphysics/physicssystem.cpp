@@ -712,6 +712,9 @@ namespace MWPhysics
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         for (const auto& [ref, physicActor] : mActors)
         {
+            if (!physicActor->isActive())
+                continue;
+
             auto ptr = physicActor->getPtr();
             if (!ptr.getClass().isMobile(ptr))
                 continue;
