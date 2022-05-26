@@ -1596,15 +1596,6 @@ namespace MWMechanics
                     world->setActorCollisionMode(actor.getPtr(), false, false);
                     continue;
                 }
-                else if (!isPlayer)
-                {
-                    actor.getPtr().getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
-                    if (!actor.getPositionAdjusted())
-                    {
-                        actor.getPtr().getClass().adjustPosition(actor.getPtr(), false);
-                        actor.setPositionAdjusted(true);
-                    }
-                }
 
                 const bool isDead = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead();
                 if (!isDead && (!godmode || !isPlayer) && actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isParalyzed())
@@ -1612,13 +1603,21 @@ namespace MWMechanics
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
-                if (actor.getPtr() == getPlayer())
+                if (isPlayer)
                 {
                     playerCharacter = &ctrl;
                     continue;
                 }
 
+                actor.getPtr().getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
                 world->setActorCollisionMode(actor.getPtr(), true, !actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDeathAnimationFinished());
+
+                if (!actor.getPositionAdjusted())
+                {
+                    actor.getPtr().getClass().adjustPosition(actor.getPtr(), false);
+                    actor.setPositionAdjusted(true);
+                }
+
                 ctrl.update(duration);
 
                 updateVisibility(actor.getPtr(), ctrl);

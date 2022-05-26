@@ -116,17 +116,11 @@ namespace MWPhysics
 
         void setOnGround(bool grounded);
 
-        bool getOnGround() const
-        {
-            return mInternalCollisionMode && mOnGround;
-        }
+        bool getOnGround() const { return mOnGround; }
 
         void setOnSlope(bool slope);
 
-        bool getOnSlope() const
-        {
-            return mInternalCollisionMode && mOnSlope;
-        }
+        bool getOnSlope() const { return mOnSlope; }
 
         /// Sets whether this actor should be able to collide with the water surface
         void setCanWaterWalk(bool waterWalk);
