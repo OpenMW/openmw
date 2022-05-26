@@ -2,6 +2,7 @@
 
 #include <set>
 #include <sstream>
+#include <filesystem>
 
 #include <components/debug/debuglog.hpp>
 
@@ -40,10 +41,10 @@ namespace VFS
 
         if (useLooseFiles)
         {
-            std::set<boost::filesystem::path> seen;
+            std::set<std::filesystem::path> seen;
             for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
             {
-                if (seen.insert(*iter).second)
+                if (seen.insert((*iter).c_str()).second)
                 {
                     Log(Debug::Info) << "Adding data directory " << iter->string();
                     // Last data dir has the highest priority
