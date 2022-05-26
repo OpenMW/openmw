@@ -3,11 +3,15 @@
 #include <components/esm3/loadcont.hpp>
 
 #include <apps/openmw/mwworld/esmstore.hpp>
-
-//#include "../mwworld/class.hpp"
-#include "apps/openmw/mwworld/class.hpp"
+#include <apps/openmw/mwworld/class.hpp>
 
 #include "../luabindings.hpp"
+
+namespace sol
+{
+    template <>
+    struct is_automagical<ESM::Container> : std::false_type {};
+}
 
 namespace MWLua
 {
