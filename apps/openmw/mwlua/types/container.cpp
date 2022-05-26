@@ -4,6 +4,9 @@
 
 #include <apps/openmw/mwworld/esmstore.hpp>
 
+//#include "../mwworld/class.hpp"
+#include "apps/openmw/mwworld/class.hpp"
+
 #include "../luabindings.hpp"
 
 namespace MWLua
@@ -17,10 +20,14 @@ namespace MWLua
             [](const LObject& o) { containerPtr(o); return Inventory<LObject>{o}; },
             [](const GObject& o) { containerPtr(o); return Inventory<GObject>{o}; }
         );
-        //container["capacity"] = [](const Object& o) { 
-            //const MWWorld::Class& cls = o.ptr().getClass();
-            //return cls.getCapacity(o);
-        //};
+        container["encumbrance"] = [](const Object& obj) -> float {
+            const MWWorld::Ptr& ptr = containerPtr(obj);
+            return ptr.getClass().getEncumbrance(ptr);
+        };
+        container["capacity"] = [](const Object& obj) -> float {
+            const MWWorld::Ptr& ptr = containerPtr(obj);
+            return ptr.getClass().getCapacity(ptr);
+        };
 
         const MWWorld::Store<ESM::Container>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>();
         container["record"] = sol::overload(
