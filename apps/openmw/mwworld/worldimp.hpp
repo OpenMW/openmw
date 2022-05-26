@@ -407,9 +407,6 @@ namespace MWWorld
                 const override;
             ///< Convert cell numbers to position.
 
-            void positionToIndex (float x, float y, int &cellX, int &cellY) const override;
-            ///< Convert position to cell numbers
-
             void queueMovement(const Ptr &ptr, const osg::Vec3f &velocity) override;
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.

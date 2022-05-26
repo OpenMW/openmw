@@ -23,6 +23,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellutils.hpp"
 
 #include "../mwrender/globalmap.hpp"
 #include "../mwrender/localmap.hpp"
@@ -277,22 +278,22 @@ namespace MWGui
 
     MyGUI::IntPoint LocalMapBase::getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const
     {
-        int cellX, cellY;
+        osg::Vec2i cellIndex;
         // normalized cell coordinates
         float nX,nY;
 
         if (!mInterior)
         {
-            MWBase::Environment::get().getWorld()->positionToIndex(worldX, worldY, cellX, cellY);
-            nX = (worldX - cellSize * cellX) / cellSize;
+            cellIndex = MWWorld::positionToCellIndex(worldX, worldY);
+            nX = (worldX - cellSize * cellIndex.x()) / cellSize;
             // Image space is -Y up, cells are Y up
-            nY = 1 - (worldY - cellSize * cellY) / cellSize;
+            nY = 1 - (worldY - cellSize * cellIndex.y()) / cellSize;
         }
         else
-            mLocalMapRender->worldToInteriorMapPosition({ worldX, worldY }, nX, nY, cellX, cellY);
+            mLocalMapRender->worldToInteriorMapPosition({ worldX, worldY }, nX, nY, cellIndex.x(), cellIndex.y());
 
-        markerPos.cellX = cellX;
-        markerPos.cellY = cellY;
+        markerPos.cellX = cellIndex.x();
+        markerPos.cellY = cellIndex.y();
         markerPos.nX = nX;
         markerPos.nY = nY;
         return getPosition(markerPos.cellX, markerPos.cellY, markerPos.nX, markerPos.nY);

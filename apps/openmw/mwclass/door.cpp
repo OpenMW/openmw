@@ -19,6 +19,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actiontrap.hpp"
 #include "../mwworld/customdata.hpp"
+#include "../mwworld/cellutils.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -303,10 +304,10 @@ namespace MWClass
         if (dest.empty())
         {
             // door leads to exterior, use cell name (if any), otherwise translated region name
-            int x,y;
             auto world = MWBase::Environment::get().getWorld();
-            world->positionToIndex (door.mRef.getDoorDest().pos[0], door.mRef.getDoorDest().pos[1], x, y);
-            const ESM::Cell* cell = world->getStore().get<ESM::Cell>().search(x,y);
+            const osg::Vec2i index = MWWorld::positionToCellIndex(door.mRef.getDoorDest().pos[0],
+                door.mRef.getDoorDest().pos[1]);
+            const ESM::Cell* cell = world->getStore().get<ESM::Cell>().search(index.x(), index.y());
             dest = world->getCellName(cell);
         }
 

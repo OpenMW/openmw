@@ -319,9 +319,6 @@ namespace MWBase
                 const = 0;
             ///< Convert cell numbers to position.
 
-            virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const = 0;
-            ///< Convert position to cell numbers
-
             virtual void queueMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity) = 0;
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
