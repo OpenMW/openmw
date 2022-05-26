@@ -7,8 +7,8 @@
 
 #include <osg/Program>
 
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
@@ -69,7 +69,7 @@ namespace Shader
     // Recursively replaces include statements with the actual source of the included files.
     // Adjusts #line statements accordingly and detects cyclic includes.
     // includingFiles is the set of files that include this file directly or indirectly, and is intentionally not a reference to allow automatic cleanup.
-    static bool parseIncludes(const boost::filesystem::path& shaderPath, std::string& source, const std::string& fileName, int& fileNumber, std::set<boost::filesystem::path> includingFiles)
+    static bool parseIncludes(const std::filesystem::path& shaderPath, std::string& source, const std::string& fileName, int& fileNumber, std::set<std::filesystem::path> includingFiles)
     {
         // An include is cyclic if it is being included by itself
         if (includingFiles.insert(shaderPath/fileName).second == false)
@@ -96,7 +96,7 @@ namespace Shader
                 return false;
             }
             std::string includeFilename = source.substr(start + 1, end - (start + 1));
-            boost::filesystem::path includePath = shaderPath / includeFilename;
+            std::filesystem::path includePath = shaderPath / includeFilename;
 
             // Determine the line number that will be used for the #line directive following the included source
             size_t lineDirectivePosition = source.rfind("#line", foundPos);
@@ -116,7 +116,7 @@ namespace Shader
             lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
 
             // Include the file recursively
-            boost::filesystem::ifstream includeFstream;
+            std::ifstream includeFstream;
             includeFstream.open(includePath);
             if (includeFstream.fail())
             {
@@ -364,8 +364,8 @@ namespace Shader
         TemplateMap::iterator templateIt = mShaderTemplates.find(templateName);
         if (templateIt == mShaderTemplates.end())
         {
-            boost::filesystem::path path = (boost::filesystem::path(mPath) / templateName);
-            boost::filesystem::ifstream stream;
+            std::filesystem::path path = (std::filesystem::path(mPath) / templateName);
+            std::ifstream stream;
             stream.open(path);
             if (stream.fail())
             {
@@ -379,7 +379,7 @@ namespace Shader
             int fileNumber = 1;
             std::string source = buffer.str();
             if (!addLineDirectivesAfterConditionalBlocks(source)
-                || !parseIncludes(boost::filesystem::path(mPath), source, templateName, fileNumber, {}))
+                || !parseIncludes(std::filesystem::path(mPath), source, templateName, fileNumber, {}))
                 return nullptr;
 
             templateIt = mShaderTemplates.insert(std::make_pair(templateName, source)).first;
