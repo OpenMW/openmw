@@ -1,6 +1,6 @@
 #include <components/settings/parser.hpp>
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
 
 #include <gtest/gtest.h>
 
@@ -20,7 +20,7 @@ namespace
             const auto path = std::string(UnitTest::GetInstance()->current_test_info()->name()) + ".cfg";
 
             {
-                boost::filesystem::ofstream stream;
+                std::ofstream stream;
                 stream.open(path);
                 stream << content;
                 stream.close();

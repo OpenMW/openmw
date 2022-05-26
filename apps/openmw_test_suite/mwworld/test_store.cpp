@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
+#include <filesystem>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -110,7 +111,7 @@ TEST_F(ContentFileTest, dialogue_merging_test)
 
     const std::string file = "test_dialogue_merging.txt";
 
-    boost::filesystem::ofstream stream;
+    std::ofstream stream;
     stream.open(file);
 
     const MWWorld::Store<ESM::Dialogue>& dialStore = mEsmStore.get<ESM::Dialogue>();
@@ -192,7 +193,7 @@ TEST_F(ContentFileTest, content_diagnostics_test)
 
     const std::string file = "test_content_diagnostics.txt";
 
-    boost::filesystem::ofstream stream;
+    std::ofstream stream;
     stream.open(file);
 
     RUN_TEST_FOR_TYPES(printRecords, mEsmStore, stream);

@@ -1,6 +1,6 @@
 #include "translation.hpp"
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
 
 namespace Translation
 {
@@ -32,8 +32,8 @@ namespace Translation
 
         if (dataFileCollections.getCollection (extension).doesExist (fileName))
         {
-            boost::filesystem::ifstream stream (
-                dataFileCollections.getCollection (extension).getPath (fileName));
+            std::ifstream stream (
+                dataFileCollections.getCollection (extension).getPath (fileName).c_str());
 
             if (!stream.is_open())
                 throw std::runtime_error ("failed to open translation file: " + fileName);

@@ -1,5 +1,7 @@
 #include "statemanagerimp.hpp"
 
+#include <filesystem>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm3/esmwriter.hpp>
@@ -388,7 +390,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
     {
         cleanup();
 
-        Log(Debug::Info) << "Reading save file " << boost::filesystem::path(filepath).filename().string();
+        Log(Debug::Info) << "Reading save file " << std::filesystem::path(filepath).filename().string();
 
         ESM::ESMReader reader;
         reader.open (filepath);

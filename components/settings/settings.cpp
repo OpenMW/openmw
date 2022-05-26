@@ -1,6 +1,7 @@
 #include "settings.hpp"
 #include "parser.hpp"
 
+#include <filesystem>
 #include <sstream>
 
 #include <components/files/configurationmanager.hpp>
@@ -44,7 +45,7 @@ std::string Manager::load(const Files::ConfigurationManager& cfgMgr, bool loadEd
 
     // Create the settings manager and load default settings file.
     const std::string defaultsBin = (paths.front() / defaultSettingsFile).string();
-    if (!boost::filesystem::exists(defaultsBin))
+    if (!std::filesystem::exists(defaultsBin))
         throw std::runtime_error ("No default settings file found! Make sure the file \"" + defaultSettingsFile + "\" was properly installed.");
     parser.loadSettingsFile(defaultsBin, mDefaultSettings, true, false);
 
@@ -52,13 +53,13 @@ std::string Manager::load(const Files::ConfigurationManager& cfgMgr, bool loadEd
     for (int i = 0; i < static_cast<int>(paths.size()) - 1; ++i)
     {
         const std::string additionalDefaults = (paths[i] / userSettingsFile).string();
-        if (boost::filesystem::exists(additionalDefaults))
+        if (std::filesystem::exists(additionalDefaults))
             parser.loadSettingsFile(additionalDefaults, mDefaultSettings, false, true);
     }
 
     // Load "settings.cfg" or "openmw-cs.cfg" from the last config dir as user settings. This path will be used to save modified settings.
     std::string settingspath = (paths.back() / userSettingsFile).string();
-    if (boost::filesystem::exists(settingspath))
+    if (std::filesystem::exists(settingspath))
         parser.loadSettingsFile(settingspath, mUserSettings, false, false);
 
     return settingspath;
