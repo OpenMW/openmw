@@ -103,6 +103,7 @@ namespace fx
         struct UniformBase
         {
             std::string mName;
+            std::string mDisplayName;
             std::string mHeader;
             std::string mTechniqueName;
             std::string mDescription;
