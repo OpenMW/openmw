@@ -59,7 +59,7 @@
                 <Widget type="AutoSizedTextBox" skin="SandText" name="Label" align="Top Right">
                     <UserString key="HStretch" value="true"/>
                     <UserString key="VStretch" value="true"/>
-                <Property key="Padding" value="8"/>
+                    <Property key="Padding" value="8"/>
                     <Property key="TextAlign" value="Left Top"/>
                     <Property key="NeedMouse" value="true"/>
                 </Widget>

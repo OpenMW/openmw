@@ -52,8 +52,6 @@ namespace MWGui
 
         void updateConfigView(const std::string& name);
 
-        void notifyModeToggle(MyGUI::Widget* sender);
-
         void notifyResetButtonClicked(MyGUI::Widget* sender);
 
         void notifyListChangePosition(MyGUI::ListBox* sender, size_t index);
@@ -67,6 +65,8 @@ namespace MWGui
         void notifyShaderUpPressed(MyGUI::Widget* sender);
 
         void notifyShaderDownPressed(MyGUI::Widget* sender);
+
+        void notifyMouseWheel(MyGUI::Widget *sender, int rel);
 
         enum class Direction
         {
@@ -97,7 +97,6 @@ namespace MWGui
         MyGUI::Widget* mConfigArea;
 
         MyGUI::EditBox* mFilter;
-        Gui::AutoSizedButton* mModeToggle;
         Gui::AutoSizedEditBox* mShaderInfo;
 
         std::string mOverrideHint;

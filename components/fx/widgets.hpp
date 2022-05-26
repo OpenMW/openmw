@@ -249,6 +249,8 @@ namespace fx
 
             void addItem(EditBase* item);
 
+            Gui::AutoSizedTextBox* getLabel() { return mLabel; }
+
         private:
 
             void notifyResetClicked(MyGUI::Widget* sender);

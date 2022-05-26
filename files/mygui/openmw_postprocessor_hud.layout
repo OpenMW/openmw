@@ -28,7 +28,7 @@
 				<Property key="Padding" value="0"/>
 				<Property key="Spacing" value="8"/>
 
-				<Widget type="Widget" position ="0 0 0 400">
+				<Widget type="Widget" position ="0 0 0 300">
 					<UserString key="HStretch" value="true"/>
 					<UserString key="VStretch" value="false"/>
 
@@ -102,31 +102,6 @@
 						</Widget>
 					</Widget>
 				</Widget>
-
-				<Widget type="Widget" position="0 0 230 28" align="Bottom Left">
-					<UserString key="HStretch" value="false"/>
-					<UserString key="VStretch" value="false"/>
-
-					<Widget type="HBox" position_real="0 0 1 1" align="Stretch">
-						<UserString key="HStretch" value="true"/>
-						<Property key="Spacing" value="4"/>
-
-						<Widget type="AutoSizedTextBox" skin="SandText">
-							<UserString key="HStretch" value="true"/>
-							<UserString key="VStretch" value="true"/>
-							<Property key="Caption" value="Enable Config Mode"/>
-							<Property key="TextAlign" value="Left VCenter"/>
-						</Widget>
-
-						<Widget type="AutoSizedButton" skin="MW_Button" name="ModeToggle">
-							<UserString key="VStretch" value="true"/>
-							<Property key="Caption" value="#{sOff}"/>
-						</Widget>
-					</Widget>
-
-				</Widget>
-
-				<Widget type="Widget" />
 
 			</Widget>
 

@@ -600,6 +600,11 @@ namespace fx
                 expect<Lexer::String>();
                 uniform->mHeader = std::get<Lexer::String>(mToken).value;
             }
+            else if (key == "display_name")
+            {
+                expect<Lexer::String>();
+                uniform->mDisplayName = std::get<Lexer::String>(mToken).value;
+            }
             else
                 error(Misc::StringUtils::format("unexpected key '%s'", std::string{key}));
 

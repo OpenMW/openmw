@@ -413,24 +413,25 @@ To use the sampler, define the appropriately named `sampler2D` in any of your pa
 It is possible to define settings for your shaders that can be adjusted by either users or a Lua script.
 
 
-+-----------------+----------+----------+----------+---------+----------+--------------+---------+
-| Block           | default  | min      | max      | static  | step     | description  | header  |
-+=================+==========+==========+==========+=========+==========+==============+=========+
-|``uniform_bool`` | boolean  | x        | x        | boolean | x        | string       | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+---------+
-|``uniform_float``| float    | float    | float    | boolean | float    | string       | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+---------+
-|``uniform_int``  | integer  | integer  | integer  | boolean | integer  | string       | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+---------+
-|``uniform_vec2`` | vec2     | vec2     | vec2     | boolean | vec2     | string       | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+---------+
-|``uniform_vec3`` | vec3     | vec3     | vec3     | boolean | vec3     | string       | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+---------+
-|``uniform_vec4`` | vec4     | vec4     | vec4     | boolean | vec4     | string       | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+---------+
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
+| Block           | default  | min      | max      | static  | step     | description  |  display_name     | header  |
++=================+==========+==========+==========+=========+==========+==============+===================+=========+
+|``uniform_bool`` | boolean  | x        | x        | boolean | x        | string       |  string           | string  |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
+|``uniform_float``| float    | float    | float    | boolean | float    | string       |  string           | string  |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
+|``uniform_int``  | integer  | integer  | integer  | boolean | integer  | string       |  string           | string  |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
+|``uniform_vec2`` | vec2     | vec2     | vec2     | boolean | vec2     | string       |  string           | string  |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
+|``uniform_vec3`` | vec3     | vec3     | vec3     | boolean | vec3     | string       |  string           | string  |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
+|``uniform_vec4`` | vec4     | vec4     | vec4     | boolean | vec4     | string       |  string           | string  |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
 
 The ``description`` field is used to display a toolip when viewed in the in-game HUD. The ``header`` field
-field can be used to organize uniforms into groups in the HUD.
+field can be used to organize uniforms into groups in the HUD. The ``display_name`` field can be used to create a
+more user friendly uniform name for display in the HUD.
 
 If you would like a uniform to be adjustable with Lua API you `must` set ``static = false;``. Doing this
 will also remove the uniform from the players HUD.
@@ -580,6 +581,7 @@ desaturation to apply to the scene. Here we setup a new variable of type
         max = 1.0;
         step = 0.05;
         static = true;
+        display_name = "Desaturation Factor";
         description = "Desaturation factor. A value of 1.0 is full grayscale.";
     }
 
