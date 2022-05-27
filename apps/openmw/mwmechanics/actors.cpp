@@ -2249,9 +2249,10 @@ namespace MWMechanics
         if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
             return;
 
-        for (const Actor& actor : mActors)
+        for (auto it = mActors.begin(); it != mActors.end();)
         {
-            const MWWorld::Ptr ptr = actor.getPtr();
+            const MWWorld::Ptr ptr = it->getPtr();
+            ++it;
             if (ptr == getPlayer()
                     || !isConscious(ptr)
                     || ptr.getClass().getCreatureStats(ptr).isParalyzed())
