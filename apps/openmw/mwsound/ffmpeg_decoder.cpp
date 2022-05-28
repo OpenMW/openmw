@@ -18,11 +18,14 @@ int FFmpeg_Decoder::readPacket(void *user_data, uint8_t *buf, int buf_size)
         std::istream& stream = *static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
         stream.clear();
         stream.read((char*)buf, buf_size);
-        return stream.gcount();
+        std::streamsize count = stream.gcount();
+        if (count == 0)
+            return AVERROR_EOF;
+        return count;
     }
     catch (std::exception& )
     {
-        return 0;
+        return AVERROR_UNKNOWN;
     }
 }
 
