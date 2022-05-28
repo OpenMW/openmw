@@ -869,7 +869,31 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Returns the total weight of everything in a container
+-- @function [parent=#Container] encumbrance
+-- @param openmw.core#GameObject object
+-- @return #number
 
+---
+-- Returns the capacity of a container
+-- @function [parent=#Container] capacity
+-- @param openmw.core#GameObject object
+-- @return #number
+
+---
+-- Returns the read-only @{#ContainerRecord} of a container
+-- @function [parent=#Container] record
+-- @param #any objectOrRecordId
+-- @return #ContainerRecord
+
+---
+-- @type ContainerRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this container (can be empty)
+-- @field #number weight capacity of this container (can be empty)
 
 --- @{#Door} functions
 -- @field [parent=#types] #Door Door
