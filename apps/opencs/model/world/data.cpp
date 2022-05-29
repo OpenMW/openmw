@@ -70,11 +70,11 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
   mReader (nullptr), mDialogue (nullptr), mReaderIndex(1),
   mFsStrict(fsStrict), mDataPaths(dataPaths), mArchives(archives)
 {
-    mVFS.reset(new VFS::Manager(mFsStrict));
+    mVFS = std::make_unique<VFS::Manager>(mFsStrict);
     VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths, !mFsStrict), mArchives, true);
 
     mResourcesManager.setVFS(mVFS.get());
-    mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
+    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get());
 
     Shader::ShaderManager::DefineMap defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
     Shader::ShaderManager::DefineMap shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
@@ -602,7 +602,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
         UniversalId::Type_Video);
     addModel (new IdTable (&mMetaData), UniversalId::Type_MetaData);
 
-    mActorAdapter.reset(new ActorAdapter(*this));
+    mActorAdapter = std::make_unique<ActorAdapter>(*this);
 
     mRefLoadCache.clear(); // clear here rather than startLoading() and continueLoading() for multiple content files
 }
@@ -963,7 +963,7 @@ int CSMWorld::Data::getTotalRecords (const std::vector<boost::filesystem::path>&
 {
     int records = 0;
 
-    std::unique_ptr<ESM::ESMReader> reader = std::unique_ptr<ESM::ESMReader>(new ESM::ESMReader);
+    std::unique_ptr<ESM::ESMReader> reader = std::make_unique<ESM::ESMReader>();
 
     for (unsigned int i = 0; i < files.size(); ++i)
     {
@@ -1032,7 +1032,7 @@ void CSMWorld::Data::loadFallbackEntries()
             ESM::Static newMarker;
             newMarker.mId = marker.first;
             newMarker.mModel = marker.second;
-            std::unique_ptr<CSMWorld::Record<ESM::Static> > record(new CSMWorld::Record<ESM::Static>);
+            auto record = std::make_unique<CSMWorld::Record<ESM::Static>>();
             record->mBase = newMarker;
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord (std::move(record), CSMWorld::UniversalId::Type_Static);
@@ -1046,7 +1046,7 @@ void CSMWorld::Data::loadFallbackEntries()
             ESM::Door newMarker;
             newMarker.mId = marker.first;
             newMarker.mModel = marker.second;
-            std::unique_ptr<CSMWorld::Record<ESM::Door> > record(new CSMWorld::Record<ESM::Door>);
+            auto record = std::make_unique<CSMWorld::Record<ESM::Door>>();
             record->mBase = newMarker;
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord (std::move(record), CSMWorld::UniversalId::Type_Door);

@@ -84,7 +84,7 @@ namespace CSMWorld
                 return -1;
             }
 
-            std::unique_ptr<Record<ESXRecordT> > baseRecord(new Record<ESXRecordT>(this->getRecord(index)));
+            auto baseRecord = std::make_unique<Record<ESXRecordT>>(this->getRecord(index));
             baseRecord->mState = RecordBase::State_Deleted;
             this->setRecord(index, std::move(baseRecord));
             return index;
@@ -103,7 +103,7 @@ namespace CSMWorld
         if (index==-1)
         {
             // new record
-            std::unique_ptr<Record<ESXRecordT> > record2(new Record<ESXRecordT>);
+            auto record2 = std::make_unique<Record<ESXRecordT>>();
             record2->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
             (base ? record2->mBase : record2->mModified) = record;
 
@@ -113,8 +113,7 @@ namespace CSMWorld
         else
         {
             // old record
-            std::unique_ptr<Record<ESXRecordT> > record2(
-                    new Record<ESXRecordT>(Collection<ESXRecordT, IdAccessorT>::getRecord(index)));
+            auto record2 = std::make_unique<Record<ESXRecordT>>(Collection<ESXRecordT, IdAccessorT>::getRecord(index));
 
             if (base)
                 record2->mBase = record;
@@ -146,8 +145,7 @@ namespace CSMWorld
         }
         else
         {
-            std::unique_ptr<Record<ESXRecordT> > record2(
-                    new Record<ESXRecordT>(Collection<ESXRecordT, IdAccessorT>::getRecord(index)));
+            auto record2 = std::make_unique<Record<ESXRecordT>>(Collection<ESXRecordT, IdAccessorT>::getRecord(index));
             record2->mState = RecordBase::State_Deleted;
             this->setRecord(index, std::move(record2));
         }

@@ -123,7 +123,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             ref.mId = getRecord(index).get().mId;
             ref.mIdNum = extractIdNum(ref.mId);
 
-            std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
+            auto record = std::make_unique<Record<CellRef>>();
             // TODO: check whether a base record be moved
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
             (base ? record->mBase : record->mModified) = std::move(ref);
@@ -158,7 +158,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             }
             else
             {
-                std::unique_ptr<Record<CellRef> > record(new Record<CellRef>(getRecord(index)));
+                auto record = std::make_unique<Record<CellRef>>(getRecord(index));
                 record->mState = RecordBase::State_Deleted;
                 setRecord(index, std::move(record));
             }
@@ -174,7 +174,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             cache.emplace(refNum, ref.mIdNum);
 
-            std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
+            auto record = std::make_unique<Record<CellRef>>();
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
             (base ? record->mBase : record->mModified) = std::move(ref);
 
@@ -205,7 +205,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             ref.mId = getRecord(index).get().mId;
             ref.mIdNum = extractIdNum(ref.mId);
 
-            std::unique_ptr<Record<CellRef> > record(new Record<CellRef>(getRecord(index)));
+            auto record = std::make_unique<Record<CellRef>>(getRecord(index));
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_Modified;
             (base ? record->mBase : record->mModified) = std::move(ref);
 
@@ -273,7 +273,7 @@ void CSMWorld::RefCollection::removeRows (int index, int count)
 
 void  CSMWorld::RefCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
 {
-    std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
+    auto record = std::make_unique<Record<CellRef>>();
 
     record->mState = Record<CellRef>::State_ModifiedOnly;
     record->mModified.blank();
@@ -288,15 +288,15 @@ void CSMWorld::RefCollection::cloneRecord (const std::string& origin,
                                            const std::string& destination,
                                            const UniversalId::Type type)
 {
-   std::unique_ptr<Record<CellRef> > copy(new Record<CellRef>);
+    auto copy = std::make_unique<Record<CellRef>>();
 
-   copy->mModified = getRecord(origin).get();
-   copy->mState = RecordBase::State_ModifiedOnly;
+    copy->mModified = getRecord(origin).get();
+    copy->mState = RecordBase::State_ModifiedOnly;
 
-   copy->get().mId = destination;
-   copy->get().mIdNum = extractIdNum(destination);
+    copy->get().mId = destination;
+    copy->get().mIdNum = extractIdNum(destination);
 
-   insertRecord(std::move(copy), getAppendIndex(destination, type)); // call RefCollection::insertRecord()
+    insertRecord(std::move(copy), getAppendIndex(destination, type)); // call RefCollection::insertRecord()
 }
 
 int CSMWorld::RefCollection::searchId(std::string_view id) const

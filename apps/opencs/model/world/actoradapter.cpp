@@ -228,7 +228,7 @@ namespace CSMWorld
         }
 
         // Create the actor data
-        data.reset(new ActorData());
+        data = std::make_shared<ActorData>();
         setupActor(id, data);
         mCachedActors.insert(id, data);
         return data;
@@ -431,7 +431,7 @@ namespace CSMWorld
         if (data) return data;
 
         // Create the race data
-        data.reset(new RaceData());
+        data = std::make_shared<RaceData>();
         setupRace(id, data);
         mCachedRaces.insert(id, data);
         return data;

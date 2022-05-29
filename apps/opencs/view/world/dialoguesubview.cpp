@@ -133,7 +133,7 @@ void CSVWorld::DialogueDelegateDispatcherProxy::editorDataCommited()
 
 void CSVWorld::DialogueDelegateDispatcherProxy::setIndex(const QModelIndex& index)
 {
-    mIndexWrapper.reset(new refWrapper(index));
+    mIndexWrapper = std::make_unique<refWrapper>(index);
 }
 
 QWidget* CSVWorld::DialogueDelegateDispatcherProxy::getEditor() const

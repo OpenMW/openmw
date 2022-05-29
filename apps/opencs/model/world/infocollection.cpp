@@ -77,7 +77,7 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
     if (index==-1)
     {
         // new record
-        std::unique_ptr<Record<Info> > record2(new Record<Info>);
+        auto record2 = std::make_unique<Record<Info>>();
         record2->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
         (base ? record2->mBase : record2->mModified) = record;
 
@@ -86,7 +86,7 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
     else
     {
         // old record
-        std::unique_ptr<Record<Info> > record2(new Record<Info>(getRecord(index)));
+        auto record2 = std::make_unique<Record<Info>>(getRecord(index));
 
         if (base)
             record2->mBase = record;
@@ -220,7 +220,7 @@ void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ES
         }
         else
         {
-            std::unique_ptr<Record<Info> > record(new Record<Info>(getRecord(index)));
+            auto record = std::make_unique<Record<Info>>(getRecord(index));
             record->mState = RecordBase::State_Deleted;
             setRecord (index, std::move(record));
         }
@@ -281,7 +281,7 @@ void CSMWorld::InfoCollection::removeDialogueInfos(const std::string& dialogueId
             }
             else
             {
-                std::unique_ptr<Record<Info> > record2(new Record<Info>(record));
+                auto record2 = std::make_unique<Record<Info>>(record);
                 record2->mState = RecordBase::State_Deleted;
                 setRecord(range.first - getRecords().begin(), std::move(record2));
             }
@@ -335,7 +335,7 @@ void CSMWorld::InfoCollection::removeRows (int index, int count)
 
 void  CSMWorld::InfoCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
 {
-    std::unique_ptr<Record<Info> > record2(new Record<Info>);
+    auto record2 = std::make_unique<Record<Info>>();
 
     record2->mState = Record<Info>::State_ModifiedOnly;
     record2->mModified.blank();

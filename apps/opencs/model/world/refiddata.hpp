@@ -130,7 +130,7 @@ namespace CSMWorld
     template<typename RecordT>
     void RefIdDataContainer<RecordT>::appendRecord (const std::string& id, bool base)
     {
-        std::unique_ptr<Record<RecordT> > record(new Record<RecordT>);
+        auto record = std::make_unique<Record<RecordT>>();
 
         record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
 

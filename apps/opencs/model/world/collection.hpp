@@ -249,12 +249,13 @@ namespace CSMWorld
     int Collection<ESXRecordT, IdAccessorT>::cloneRecordImp(const std::string& origin,
         const std::string& destination, UniversalId::Type type)
     {
-       std::unique_ptr<Record<ESXRecordT> > copy(new Record<ESXRecordT>);
-       copy->mModified = getRecord(origin).get();
-       copy->mState = RecordBase::State_ModifiedOnly;
-       IdAccessorT().setId(copy->get(), destination);
+        auto copy = std::make_unique<Record<ESXRecordT>>();
+        copy->mModified = getRecord(origin).get();
+        copy->mState = RecordBase::State_ModifiedOnly;
+        IdAccessorT().setId(copy->get(), destination);
 
-        if (type == UniversalId::Type_Reference) {
+        if (type == UniversalId::Type_Reference)
+        {
             CSMWorld::CellRef* ptr = (CSMWorld::CellRef*) &copy->mModified;
             ptr->mRefNum.mIndex = 0;
         }
@@ -338,7 +339,7 @@ namespace CSMWorld
 
         if (iter==mIndex.end())
         {
-            std::unique_ptr<Record<ESXRecordT> > record2(new Record<ESXRecordT>);
+            auto record2 = std::make_unique<Record<ESXRecordT>>();
             record2->mState = Record<ESXRecordT>::State_ModifiedOnly;
             record2->mModified = record;
 
@@ -469,7 +470,7 @@ namespace CSMWorld
         IdAccessorT().setId(record, id);
         record.blank();
 
-        std::unique_ptr<Record<ESXRecordT> > record2(new Record<ESXRecordT>);
+        auto record2 = std::make_unique<Record<ESXRecordT>>();
         record2->mState = Record<ESXRecordT>::State_ModifiedOnly;
         record2->mModified = record;
 

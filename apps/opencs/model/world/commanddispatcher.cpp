@@ -170,14 +170,13 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
                 if (cellId.find ('#')!=std::string::npos)
                 {
                     // Need to recalculate the cell
-                    modifyCell.reset (new UpdateCellCommand (model2, row));
+                    modifyCell = std::make_unique<UpdateCellCommand>(model2, row);
                 }
             }
         }
     }
 
-    std::unique_ptr<CSMWorld::ModifyCommand> modifyData (
-        new CSMWorld::ModifyCommand (*model, index, new_));
+    auto modifyData = std::make_unique<CSMWorld::ModifyCommand>(*model, index, new_);
 
     if (modifyCell.get())
     {
