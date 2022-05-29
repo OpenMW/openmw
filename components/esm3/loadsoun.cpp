@@ -63,6 +63,7 @@ namespace ESM
 
     void Sound::blank()
     {
+        mRecordFlags = 0;
         mSound.clear();
 
         mData.mVolume = 128;

@@ -112,6 +112,7 @@ namespace ESM
 
     void Container::blank()
     {
+        mRecordFlags = 0;
         mName.clear();
         mModel.clear();
         mScript.clear();

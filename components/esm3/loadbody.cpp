@@ -67,6 +67,7 @@ namespace ESM
 
     void BodyPart::blank()
     {
+        mRecordFlags = 0;
         mData.mPart = 0;
         mData.mVampire = 0;
         mData.mFlags = 0;

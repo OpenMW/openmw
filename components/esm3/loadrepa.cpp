@@ -76,6 +76,7 @@ namespace ESM
 
     void Repair::blank()
     {
+        mRecordFlags = 0;
         mData.mWeight = 0;
         mData.mValue = 0;
         mData.mQuality = 0;

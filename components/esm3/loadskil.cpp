@@ -173,6 +173,7 @@ namespace ESM
 
     void Skill::blank()
     {
+        mRecordFlags = 0;
         mData.mAttribute = 0;
         mData.mSpecialization = 0;
         mData.mUseValue[0] = mData.mUseValue[1] = mData.mUseValue[2] = mData.mUseValue[3] = 1.0;

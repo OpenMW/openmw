@@ -578,6 +578,7 @@ MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const {
 
     void MagicEffect::blank()
     {
+        mRecordFlags = 0;
         mData.mSchool = 0;
         mData.mBaseCost = 0;
         mData.mFlags = 0;

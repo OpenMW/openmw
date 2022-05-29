@@ -98,6 +98,7 @@ namespace ESM
 
     void Ingredient::blank()
     {
+        mRecordFlags = 0;
         mData.mWeight = 0;
         mData.mValue = 0;
         for (int i=0; i<4; ++i)

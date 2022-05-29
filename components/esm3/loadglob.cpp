@@ -42,6 +42,7 @@ namespace ESM
 
     void Global::blank()
     {
+        mRecordFlags = 0;
         mValue.setType (VT_None);
     }
 

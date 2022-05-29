@@ -56,6 +56,7 @@ void Filter::save (ESMWriter& esm, bool isDeleted) const
 
 void Filter::blank()
 {
+    mRecordFlags = 0;
     mFilter.clear();
     mDescription.clear();
 }

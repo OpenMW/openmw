@@ -71,6 +71,7 @@ namespace ESM
 
     void Door::blank()
     {
+        mRecordFlags = 0;
         mName.clear();
         mModel.clear();
         mScript.clear();

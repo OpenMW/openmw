@@ -138,6 +138,7 @@ namespace ESM
 
     void Creature::blank()
     {
+        mRecordFlags = 0;
         mData.mType = 0;
         mData.mLevel = 0;
         mData.mStrength = mData.mIntelligence = mData.mWillpower = mData.mAgility =

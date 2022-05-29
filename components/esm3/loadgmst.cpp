@@ -25,6 +25,7 @@ namespace ESM
 
     void GameSetting::blank()
     {
+        mRecordFlags = 0;
         mValue.setType (VT_None);
     }
 

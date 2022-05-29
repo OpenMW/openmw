@@ -106,6 +106,7 @@ namespace ESM
 
     void Region::blank()
     {
+        mRecordFlags = 0;
         mData.mClear = mData.mCloudy = mData.mFoggy = mData.mOvercast = mData.mRain =
             mData.mThunder = mData.mAsh = mData.mBlight = mData.mA = mData.mB = 0;
 

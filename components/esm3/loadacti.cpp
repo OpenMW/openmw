@@ -62,6 +62,7 @@ namespace ESM
 
     void Activator::blank()
     {
+        mRecordFlags = 0;
         mName.clear();
         mScript.clear();
         mModel.clear();

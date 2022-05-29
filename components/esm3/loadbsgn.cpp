@@ -69,6 +69,7 @@ namespace ESM
 
     void BirthSign::blank()
     {
+        mRecordFlags = 0;
         mName.clear();
         mDescription.clear();
         mTexture.clear();

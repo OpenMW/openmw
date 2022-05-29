@@ -116,6 +116,7 @@ namespace ESM
 
     void Faction::blank()
     {
+        mRecordFlags = 0;
         mName.clear();
         mData.mAttribute[0] = mData.mAttribute[1] = 0;
         mData.mIsHidden = 0;

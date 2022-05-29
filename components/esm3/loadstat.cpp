@@ -56,6 +56,7 @@ namespace ESM
 
     void Static::blank()
     {
+        mRecordFlags = 0;
         mModel.clear();
     }
 }
