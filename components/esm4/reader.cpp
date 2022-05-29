@@ -46,9 +46,9 @@
 #endif
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <components/bsa/memorystream.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "formid.hpp"
 
@@ -559,14 +559,14 @@ void Reader::updateModIndices(const std::vector<std::string>& files)
     std::unordered_map<std::string, size_t> fileIndex;
 
     for (size_t i = 0; i < files.size(); ++i) // ATTENTION: assumes current file is not included
-        fileIndex[boost::to_lower_copy<std::string>(files[i])] = i;
+        fileIndex[Misc::StringUtils::lowerCase(files[i])] = i;
 
     mCtx.parentFileIndices.resize(mHeader.mMaster.size());
     for (unsigned int i = 0; i < mHeader.mMaster.size(); ++i)
     {
         // locate the position of the dependency in already loaded files
         std::unordered_map<std::string, size_t>::const_iterator it
-            = fileIndex.find(boost::to_lower_copy<std::string>(mHeader.mMaster[i].name));
+            = fileIndex.find(Misc::StringUtils::lowerCase(mHeader.mMaster[i].name));
 
         if (it != fileIndex.end())
             mCtx.parentFileIndices[i] = (std::uint32_t)((it->second << 24) & 0xff000000);
