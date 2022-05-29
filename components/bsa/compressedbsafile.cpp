@@ -31,7 +31,6 @@
 
 #include <lz4frame.h>
 
-#include <boost/scoped_array.hpp>
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
@@ -89,19 +88,19 @@ void CompressedBSAFile::getBZString(std::string& str, std::istream& filestream)
     char size = 0;
     filestream.read(&size, 1);
 
-    boost::scoped_array<char> buf(new char[size]);
-    filestream.read(buf.get(), size);
+    auto buf = std::vector<char>(size);
+    filestream.read(buf.data(), size);
 
     if (buf[size - 1] != 0)
     {
-        str.assign(buf.get(), size);
+        str.assign(buf.data(), size);
         if (str.size() != ((size_t)size)) {
             fail("getBZString string size mismatch");
         }
     }
     else
     {
-        str.assign(buf.get(), size - 1); // don't copy null terminator
+        str.assign(buf.data(), size - 1); // don't copy null terminator
         if (str.size() != ((size_t)size - 1)) {
             fail("getBZString string size mismatch (null terminator)");
         }
@@ -384,12 +383,12 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
         }
         else // SSE: lz4
         {
-            boost::scoped_array<char> buffer(new char[size]);
-            fileStream->read(buffer.get(), size);
+            auto buffer = std::vector<char>(size);
+            fileStream->read(buffer.data(), size);
             LZ4F_decompressionContext_t context = nullptr;
             LZ4F_createDecompressionContext(&context, LZ4F_VERSION);
             LZ4F_decompressOptions_t options = {};
-            LZ4F_errorCode_t errorCode = LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.get(), &size, &options);
+            LZ4F_errorCode_t errorCode = LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.data(), &size, &options);
             if (LZ4F_isError(errorCode))
                 fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
             errorCode = LZ4F_freeDecompressionContext(context);
