@@ -251,7 +251,7 @@ set(USED_OSG_PLUGINS
 
 option(OPENMW_USE_SYSTEM_ICU "Use system ICU library instead of internal. If disabled, requires autotools" ON)
 if(OPENMW_USE_SYSTEM_ICU)
-    find_package(ICU REQUIRED COMPONENTS uc i18n)
+    find_package(ICU REQUIRED COMPONENTS uc i18n data)
 endif()
 
 option(OPENMW_USE_SYSTEM_YAML_CPP "Use system yaml-cpp library instead of internal." ON)
