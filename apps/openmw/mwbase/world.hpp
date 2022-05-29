@@ -669,6 +669,8 @@ namespace MWBase
             virtual MWRender::RenderingManager* getRenderingManager() = 0;
 
             virtual MWRender::PostProcessor* getPostProcessor() = 0;
+
+            virtual void setActorActive(const MWWorld::Ptr& ptr, bool value) = 0;
     };
 }
 

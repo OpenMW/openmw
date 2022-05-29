@@ -1593,9 +1593,11 @@ namespace MWMechanics
                 if (!inRange)
                 {
                     actor.getPtr().getRefData().getBaseNode()->setNodeMask(0);
-                    world->setActorCollisionMode(actor.getPtr(), false, false);
+                    world->setActorActive(actor.getPtr(), false);
                     continue;
                 }
+
+                world->setActorActive(actor.getPtr(), true);
 
                 const bool isDead = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead();
                 if (!isDead && (!godmode || !isPlayer) && actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isParalyzed())
