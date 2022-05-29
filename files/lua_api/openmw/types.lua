@@ -748,6 +748,34 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+--- Apparatus.TYPE
+-- @type ApparatusTYPE
+-- @field #number MortarPestle
+-- @field #number Alembic
+-- @field #number Calcinator
+-- @field #number Retort
+
+--- @{#ApparatusTYPE}
+-- @field [parent=#Apparatus] #ApparatusTYPE TYPE
+
+---
+-- Returns the read-only @{#ApparatusRecord} of an apparatus
+-- @function [parent=#Apparatus] record
+-- @param #any objectOrRecordId
+-- @return #ApparatusRecord
+
+---
+-- @type ApparatusRecord
+-- @field #string id The record ID of the apparatus
+-- @field #string name The name of the apparatus
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this apparatus (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #number type The type of apparatus. See @{#Apparatus.TYPE} 
+-- @field #number weight
+-- @field #number value
+-- @field #number quality The quality of the apparatus
+
 --- @{#Lockpick} functions
 -- @field [parent=#types] #Lockpick Lockpick
 

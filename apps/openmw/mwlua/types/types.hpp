@@ -34,6 +34,7 @@ namespace MWLua
     void addCreatureBindings(sol::table creature, const Context& context);
     void addLockpickBindings(sol::table lockpick, const Context& context);
     void addProbeBindings(sol::table probe, const Context& context);
+    void addApparatusBindings(sol::table apparatus, const Context& context);
 }
 
 #endif // MWLUA_TYPES_H

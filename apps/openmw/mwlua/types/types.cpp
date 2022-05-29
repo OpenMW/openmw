@@ -169,7 +169,7 @@ namespace MWLua
         addBookBindings(addType(ObjectTypeName::Book, {ESM::REC_BOOK}, ObjectTypeName::Item), context);
         addLockpickBindings(addType(ObjectTypeName::Lockpick, {ESM::REC_LOCK}, ObjectTypeName::Item), context);
         addProbeBindings(addType(ObjectTypeName::Probe, {ESM::REC_PROB}, ObjectTypeName::Item), context);
-        addType(ObjectTypeName::Apparatus, {ESM::REC_APPA}, ObjectTypeName::Item);
+        addApparatusBindings(addType(ObjectTypeName::Apparatus, {ESM::REC_APPA}, ObjectTypeName::Item), context);
         addType(ObjectTypeName::Repair, {ESM::REC_REPA}, ObjectTypeName::Item);
 
         addActivatorBindings(addType(ObjectTypeName::Activator, {ESM::REC_ACTI}), context);
