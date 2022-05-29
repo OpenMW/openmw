@@ -122,7 +122,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 
         if (segment.mFogOfWarImage && segment.mHasFogState)
         {
-            std::unique_ptr<ESM::FogState> fog (new ESM::FogState());
+            auto fog = std::make_unique<ESM::FogState>();
             fog->mFogTextures.emplace_back();
 
             segment.saveFogOfWar(fog->mFogTextures.back());
@@ -134,7 +134,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
     {
         auto segments = divideIntoSegments(mBounds, mMapWorldSize);
 
-        std::unique_ptr<ESM::FogState> fog (new ESM::FogState());
+        auto fog = std::make_unique<ESM::FogState>();
 
         fog->mBounds.mMinX = mBounds.xMin();
         fog->mBounds.mMaxX = mBounds.xMax();

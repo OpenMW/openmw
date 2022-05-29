@@ -458,7 +458,7 @@ namespace MWGui
         texture->setResizeNonPowerOfTwoHint(false);
         texture->setUnRefImageDataAfterApply(true);
 
-        mScreenshotTexture.reset(new osgMyGUI::OSGTexture(texture));
+        mScreenshotTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
 
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
         mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));

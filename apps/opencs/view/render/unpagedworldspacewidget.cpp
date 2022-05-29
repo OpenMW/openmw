@@ -56,7 +56,7 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
 
     update();
 
-    mCell.reset (new Cell (document.getData(), mRootNode, mCellId));
+    mCell = std::make_unique<Cell>(document.getData(), mRootNode, mCellId);
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
@@ -105,7 +105,7 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
 
     mCellId = universalIdData.begin()->getId();
 
-    mCell.reset (new Cell (getDocument().getData(), mRootNode, mCellId));
+    mCell = std::make_unique<Cell>(getDocument().getData(), mRootNode, mCellId);
     mCamPositionSet = false;
     mOrbitCamControl->reset();
 

@@ -865,7 +865,7 @@ namespace MWClass
     {
         // player got activated by another NPC
         if(ptr == MWMechanics::getPlayer())
-            return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
+            return std::make_unique<MWWorld::ActionTalk>(actor);
 
         // Werewolfs can't activate NPCs
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
@@ -874,7 +874,7 @@ namespace MWClass
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfNPC", prng);
 
-            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if(sound) action->setSound(sound->mId);
 
             return action;
@@ -888,33 +888,33 @@ namespace MWClass
 
             // by default user can loot friendly actors during death animation
             if (canLoot && !stats.getAiSequence().isInCombat())
-                return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
+                return std::make_unique<MWWorld::ActionOpen>(ptr);
 
             // otherwise wait until death animation
             if(stats.isDeathAnimationFinished())
-                return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
+                return std::make_unique<MWWorld::ActionOpen>(ptr);
         }
         else if (!stats.getAiSequence().isInCombat())
         {
             if (stats.getKnockedDown() || MWBase::Environment::get().getMechanicsManager()->isSneaking(actor))
-                return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+                return std::make_unique<MWWorld::ActionOpen>(ptr); // stealing
 
             // Can't talk to werewolves
             if (!getNpcStats(ptr).isWerewolf())
-                return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+                return std::make_unique<MWWorld::ActionTalk>(ptr);
         }
         else // In combat
         {
             const bool stealingInCombat = Settings::Manager::getBool ("always allow stealing from knocked out actors", "Game");
             if (stealingInCombat && stats.getKnockedDown())
-                return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+                return std::make_unique<MWWorld::ActionOpen>(ptr); // stealing
         }
 
         // Tribunal and some mod companions oddly enough must use open action as fallback
         if (!getScript(ptr).empty() && ptr.getRefData().getLocals().getIntVar(getScript(ptr), "companion"))
-            return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
+            return std::make_unique<MWWorld::ActionOpen>(ptr);
 
-        return std::unique_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
+        return std::make_unique<MWWorld::FailedAction>();
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)

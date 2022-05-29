@@ -96,7 +96,7 @@ namespace MWMechanics
 
     void AiEscort::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
-        std::unique_ptr<ESM::AiSequence::AiEscort> escort(new ESM::AiSequence::AiEscort());
+        auto escort = std::make_unique<ESM::AiSequence::AiEscort>();
         escort->mData.mX = mX;
         escort->mData.mY = mY;
         escort->mData.mZ = mZ;

@@ -148,7 +148,7 @@ namespace MWMechanics
         float bestActionRating = 0.f;
         float antiFleeRating = 0.f;
         // Default to hand-to-hand combat
-        std::unique_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
+        std::unique_ptr<Action> bestAction = std::make_unique<ActionWeapon>(MWWorld::Ptr());
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             bestAction->prepare(actor);
@@ -165,7 +165,7 @@ namespace MWMechanics
                 if (rating > bestActionRating)
                 {
                     bestActionRating = rating;
-                    bestAction.reset(new ActionPotion(*it));
+                    bestAction = std::make_unique<ActionPotion>(*it);
                     antiFleeRating = std::numeric_limits<float>::max();
                 }
             }
@@ -176,7 +176,7 @@ namespace MWMechanics
                 if (rating > bestActionRating)
                 {
                     bestActionRating = rating;
-                    bestAction.reset(new ActionEnchantedItem(it));
+                    bestAction = std::make_unique<ActionEnchantedItem>(it);
                     antiFleeRating = std::numeric_limits<float>::max();
                 }
             }
@@ -202,7 +202,7 @@ namespace MWMechanics
                         ammo = bestBolt;
 
                     bestActionRating = rating;
-                    bestAction.reset(new ActionWeapon(*it, ammo));
+                    bestAction = std::make_unique<ActionWeapon>(*it, ammo);
                     antiFleeRating = vanillaRateWeaponAndAmmo(*it, ammo, actor, enemy);
                 }
             }
@@ -214,13 +214,13 @@ namespace MWMechanics
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;
-                bestAction.reset(new ActionSpell(spell->mId));
+                bestAction = std::make_unique<ActionSpell>(spell->mId);
                 antiFleeRating = vanillaRateSpell(spell, actor, enemy);
             }
         }
 
         if (makeFleeDecision(actor, enemy, antiFleeRating))
-            bestAction.reset(new ActionFlee());
+            bestAction = std::make_unique<ActionFlee>();
 
         if (bestAction.get())
             bestAction->prepare(actor);

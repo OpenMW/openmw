@@ -1116,7 +1116,7 @@ public:
 
             if (j == this_->mActiveTextFormats.end ())
             {
-                std::unique_ptr<TextFormat> textFormat(new TextFormat (Font, this_));
+                auto textFormat = std::make_unique<TextFormat>(Font, this_);
 
                 textFormat->mTexture = Font->getTextureFont ();
 

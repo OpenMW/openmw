@@ -206,9 +206,8 @@ namespace MWClass
     std::unique_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
     {
         if (ptr.getCellRef().getSoul().empty() || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ptr.getCellRef().getSoul()))
-            return std::unique_ptr<MWWorld::Action>(new MWWorld::NullAction());
-        else
-            return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
+            return std::make_unique<MWWorld::NullAction>();
+        return std::make_unique<MWWorld::ActionSoulgem>(ptr);
     }
 
     bool Miscellaneous::canSell (const MWWorld::ConstPtr& item, int npcServices) const

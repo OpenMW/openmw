@@ -90,7 +90,7 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     void NestedIdCollection<ESXRecordT, IdAccessorT>::addNestedRow(int row, int column, int position)
     {
-        std::unique_ptr<Record<ESXRecordT> > record(new Record<ESXRecordT>);
+        auto record = std::make_unique<Record<ESXRecordT>>();
         record->assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
 
         getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).addRow(*record, position);
@@ -101,7 +101,7 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     void NestedIdCollection<ESXRecordT, IdAccessorT>::removeNestedRows(int row, int column, int subRow)
     {
-        std::unique_ptr<Record<ESXRecordT> > record(new Record<ESXRecordT>);
+        auto record = std::make_unique<Record<ESXRecordT>>();
         record->assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
 
         getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).removeRow(*record, subRow);
@@ -121,7 +121,7 @@ namespace CSMWorld
     void NestedIdCollection<ESXRecordT, IdAccessorT>::setNestedData(int row,
             int column, const QVariant& data, int subRow, int subColumn)
     {
-        std::unique_ptr<Record<ESXRecordT> > record(new Record<ESXRecordT>);
+        auto record = std::make_unique<Record<ESXRecordT>>();
         record->assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
 
         getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).setData(
@@ -142,7 +142,7 @@ namespace CSMWorld
     void NestedIdCollection<ESXRecordT, IdAccessorT>::setNestedTable(int row,
             int column, const CSMWorld::NestedTableWrapperBase& nestedTable)
     {
-        std::unique_ptr<Record<ESXRecordT> > record(new Record<ESXRecordT>);
+        auto record = std::make_unique<Record<ESXRecordT>>();
         record->assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
 
         getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).setTable(

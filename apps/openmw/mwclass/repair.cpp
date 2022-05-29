@@ -134,7 +134,7 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Repair::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionRepair(ptr, force));
+        return std::make_unique<MWWorld::ActionRepair>(ptr, force);
     }
 
     bool Repair::canSell (const MWWorld::ConstPtr& item, int npcServices) const

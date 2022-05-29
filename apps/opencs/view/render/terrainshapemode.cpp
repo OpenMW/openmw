@@ -41,7 +41,7 @@ void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
     if (!mTerrainShapeSelection)
     {
-        mTerrainShapeSelection.reset(new TerrainSelection(mParentNode, &getWorldspaceWidget(), TerrainSelectionType::Shape));
+        mTerrainShapeSelection = std::make_shared<TerrainSelection>(mParentNode, &getWorldspaceWidget(), TerrainSelectionType::Shape);
     }
 
     if(!mShapeBrushScenetool)
@@ -56,7 +56,7 @@ void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
     }
 
     if (!mBrushDraw)
-        mBrushDraw.reset(new BrushDraw(mParentNode));
+        mBrushDraw = std::make_unique<BrushDraw>(mParentNode);
 
     EditMode::activate(toolbar);
     toolbar->addTool (mShapeBrushScenetool);
@@ -956,15 +956,15 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
 
                     // Check for height limits on x-axis
                     if (leftHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightXAxis.reset(new float(leftHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightXAxis = std::make_unique<float>(leftHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
                     else if (leftHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightXAxis.reset(new float(leftHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightXAxis = std::make_unique<float>(leftHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Check for height limits on y-axis
                     if (upHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightYAxis.reset(new float(upHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightYAxis = std::make_unique<float>(upHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
                     else if (upHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightYAxis.reset(new float(upHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightYAxis = std::make_unique<float>(upHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Limit altered height value based on x or y, whichever is the smallest
                     compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis.get(), limitedAlteredHeightYAxis.get(), &steepnessIsWithinLimits);
@@ -985,15 +985,15 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
 
                     // Check for height limits on x-axis
                     if (rightHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightXAxis.reset(new float(rightHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightXAxis = std::make_unique<float>(rightHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
                     else if (rightHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightXAxis.reset(new float(rightHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightXAxis = std::make_unique<float>(rightHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Check for height limits on y-axis
                     if (downHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightYAxis.reset(new float(downHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightYAxis = std::make_unique<float>(downHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
                     else if (downHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightYAxis.reset(new float(downHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightYAxis = std::make_unique<float>(downHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Limit altered height value based on x or y, whichever is the smallest
                     compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis.get(), limitedAlteredHeightYAxis.get(), &steepnessIsWithinLimits);
@@ -1298,8 +1298,7 @@ bool CSVRender::TerrainShapeMode::allowLandShapeEditing(const std::string& cellI
 
         if (mode=="Create cell and land, then edit" && useTool)
         {
-            std::unique_ptr<CSMWorld::CreateCommand> createCommand (
-                new CSMWorld::CreateCommand (cellTable, cellId));
+            auto createCommand = std::make_unique<CSMWorld::CreateCommand>(cellTable, cellId);
             int parentIndex = cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
             int index = cellTable.findNestedColumnIndex (parentIndex, CSMWorld::Columns::ColumnId_Interior);
             createCommand->addNestedValue (parentIndex, index, false);

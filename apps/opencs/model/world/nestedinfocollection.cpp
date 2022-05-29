@@ -35,7 +35,7 @@ namespace CSMWorld
 
     void NestedInfoCollection::addNestedRow(int row, int column, int position)
     {
-        std::unique_ptr<Record<Info> > record(new Record<Info>);
+        auto record = std::make_unique<Record<Info>>();
         record->assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
 
         getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).addRow(*record, position);
@@ -45,7 +45,7 @@ namespace CSMWorld
 
     void NestedInfoCollection::removeNestedRows(int row, int column, int subRow)
     {
-        std::unique_ptr<Record<Info> > record(new Record<Info>);
+        auto record = std::make_unique<Record<Info>>();
         record->assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
 
         getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).removeRow(*record, subRow);
@@ -63,7 +63,7 @@ namespace CSMWorld
     void NestedInfoCollection::setNestedData(int row,
             int column, const QVariant& data, int subRow, int subColumn)
     {
-        std::unique_ptr<Record<Info> > record(new Record<Info>);
+        auto record = std::make_unique<Record<Info>>();
         record->assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
 
         getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).setData(
@@ -82,7 +82,7 @@ namespace CSMWorld
     void NestedInfoCollection::setNestedTable(int row,
             int column, const CSMWorld::NestedTableWrapperBase& nestedTable)
     {
-        std::unique_ptr<Record<Info> > record(new Record<Info>);
+        auto record = std::make_unique<Record<Info>>();
         record->assign(Collection<Info, IdAccessor<Info> >::getRecord(row));
 
         getAdapter(Collection<Info, IdAccessor<Info> >::getColumn(column)).setTable(

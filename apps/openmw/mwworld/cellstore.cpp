@@ -792,7 +792,7 @@ namespace MWWorld
 
     void CellStore::readFog(ESM::ESMReader &reader)
     {
-        mFogState.reset(new ESM::FogState());
+        mFogState = std::make_unique<ESM::FogState>();
         mFogState->load(reader);
     }
 

@@ -116,7 +116,7 @@ void CSMDoc::Document::addOptionalGmst (const ESM::GameSetting& gmst)
 {
     if (getData().getGmsts().searchId (gmst.mId)==-1)
     {
-        std::unique_ptr<CSMWorld::Record<ESM::GameSetting> > record(new CSMWorld::Record<ESM::GameSetting>);
+        auto record = std::make_unique<CSMWorld::Record<ESM::GameSetting>>();
         record->mBase = gmst;
         record->mState = CSMWorld::RecordBase::State_BaseOnly;
         getData().getGmsts().appendRecord (std::move(record));
@@ -127,7 +127,7 @@ void CSMDoc::Document::addOptionalGlobal (const ESM::Global& global)
 {
     if (getData().getGlobals().searchId (global.mId)==-1)
     {
-        std::unique_ptr<CSMWorld::Record<ESM::Global> > record(new CSMWorld::Record<ESM::Global>);
+        auto record = std::make_unique<CSMWorld::Record<ESM::Global>>();
         record->mBase = global;
         record->mState = CSMWorld::RecordBase::State_BaseOnly;
         getData().getGlobals().appendRecord (std::move(record));
@@ -138,7 +138,7 @@ void CSMDoc::Document::addOptionalMagicEffect (const ESM::MagicEffect& magicEffe
 {
     if (getData().getMagicEffects().searchId (magicEffect.mId)==-1)
     {
-        std::unique_ptr<CSMWorld::Record<ESM::MagicEffect> > record(new CSMWorld::Record<ESM::MagicEffect>);
+        auto record = std::make_unique<CSMWorld::Record<ESM::MagicEffect>>();
         record->mBase = magicEffect;
         record->mState = CSMWorld::RecordBase::State_BaseOnly;
         getData().getMagicEffects().appendRecord (std::move(record));

@@ -297,7 +297,7 @@ namespace MWGui
 
         if (!mGuiTexture.get())
         {
-            mGuiTexture.reset(new osgMyGUI::OSGTexture(mTexture));
+            mGuiTexture = std::make_unique<osgMyGUI::OSGTexture>(mTexture);
         }
 
         if (!mCopyFramebufferToTextureCallback)

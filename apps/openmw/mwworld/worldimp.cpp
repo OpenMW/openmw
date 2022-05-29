@@ -175,7 +175,7 @@ namespace MWWorld
             break;
         }
 
-        mCurrentDate.reset(new DateTimeManager());
+        mCurrentDate = std::make_unique<DateTimeManager>();
 
         fillGlobalVariables();
 
@@ -184,7 +184,7 @@ namespace MWWorld
 
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
 
-        mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
+        mPhysics = std::make_unique<MWPhysics::PhysicsSystem>(resourceSystem, rootNode);
 
         if (Settings::Manager::getBool("enable", "Navigator"))
         {
@@ -197,13 +197,13 @@ namespace MWWorld
             mNavigator = DetourNavigator::makeNavigatorStub();
         }
 
-        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator, mGroundcoverStore));
-        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot()->asGroup(), resourceSystem, mRendering.get(), mPhysics.get()));
+        mRendering = std::make_unique<MWRender::RenderingManager>(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator, mGroundcoverStore);
+        mProjectileManager = std::make_unique<ProjectileManager>(mRendering->getLightRoot()->asGroup(), resourceSystem, mRendering.get(), mPhysics.get());
         mRendering->preloadCommonAssets();
 
-        mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering, mStore));
+        mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering, mStore);
 
-        mWorldScene.reset(new Scene(*this, *mRendering.get(), mPhysics.get(), *mNavigator));
+        mWorldScene = std::make_unique<Scene>(*this, *mRendering.get(), mPhysics.get(), *mNavigator);
     }
 
     void World::fillGlobalVariables()
@@ -231,7 +231,7 @@ namespace MWWorld
         // we don't want old weather to persist on a new game
         // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
         mWeatherManager.reset();
-        mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering.get(), mStore));
+        mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering.get(), mStore);
 
         if (!bypass)
         {
@@ -2443,7 +2443,7 @@ namespace MWWorld
     {
         const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
         if (!mPlayer)
-            mPlayer.reset(new MWWorld::Player(player));
+            mPlayer = std::make_unique<MWWorld::Player>(player);
         else
         {
             // Remove the old CharacterController

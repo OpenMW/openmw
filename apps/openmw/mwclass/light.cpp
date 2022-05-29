@@ -89,11 +89,11 @@ namespace MWClass
         const MWWorld::Ptr& actor) const
     {
         if(!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return std::unique_ptr<MWWorld::Action>(new MWWorld::NullAction());
+            return std::make_unique<MWWorld::NullAction>();
 
         MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
         if(!(ref->mBase->mData.mFlags&ESM::Light::Carry))
-            return std::unique_ptr<MWWorld::Action>(new MWWorld::FailedAction());
+            return std::make_unique<MWWorld::FailedAction>();
 
         return defaultItemActivate(ptr, actor);
     }
@@ -186,7 +186,7 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::unique_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
+        std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEquip>(ptr, force);
 
         action->setSound(getUpSoundId(ptr));
 

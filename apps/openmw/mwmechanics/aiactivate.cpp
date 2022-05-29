@@ -46,7 +46,7 @@ namespace MWMechanics
 
     void AiActivate::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
-        std::unique_ptr<ESM::AiSequence::AiActivate> activate(new ESM::AiSequence::AiActivate());
+        auto activate = std::make_unique<ESM::AiSequence::AiActivate>();
         activate->mTargetId = mObjectId;
         activate->mRepeat = getRepeat();
 

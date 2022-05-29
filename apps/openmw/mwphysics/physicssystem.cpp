@@ -98,7 +98,7 @@ namespace
 namespace MWPhysics
 {
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
-        : mShapeManager(new Resource::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager(), resourceSystem->getNifFileManager()))
+        : mShapeManager(std::make_unique<Resource::BulletShapeManager>(resourceSystem->getVFS(), resourceSystem->getSceneManager(), resourceSystem->getNifFileManager()))
         , mResourceSystem(resourceSystem)
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
@@ -891,8 +891,8 @@ namespace MWPhysics
             return;
         }
 
-        mWaterCollisionObject.reset(new btCollisionObject());
-        mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));
+        mWaterCollisionObject = std::make_unique<btCollisionObject>();
+        mWaterCollisionShape = std::make_unique<btStaticPlaneShape>(btVector3(0,0,1), mWaterHeight);
         mWaterCollisionObject->setCollisionShape(mWaterCollisionShape.get());
         mTaskScheduler->addCollisionObject(mWaterCollisionObject.get(), CollisionType_Water,
                                                     CollisionType_Actor|CollisionType_Projectile);

@@ -200,7 +200,7 @@ namespace MWMechanics
         }
         else
         {
-            currentAction.reset(new ActionFlee());
+            currentAction = std::make_unique<ActionFlee>();
             actionCooldown = currentAction->getActionCooldown();
         }
 
@@ -300,7 +300,7 @@ namespace MWMechanics
                     storage.mUseCustomDestination = false;
                     storage.stopAttack();
                     actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
-                    currentAction.reset(new ActionFlee());
+                    currentAction = std::make_unique<ActionFlee>();
                     actionCooldown = currentAction->getActionCooldown();
                     storage.startFleeing();
                     MWBase::Environment::get().getDialogueManager()->say(actor, "flee");
@@ -460,7 +460,7 @@ namespace MWMechanics
 
     void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
-        std::unique_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());
+        auto combat = std::make_unique<ESM::AiSequence::AiCombat>();
         combat->mTargetActorId = mTargetActorId;
 
         ESM::AiSequence::AiPackageContainer package;

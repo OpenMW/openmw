@@ -206,7 +206,7 @@ namespace MWGui
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Load fonts
-        mFontLoader.reset(new Gui::FontLoader(encoding, resourceSystem->getVFS(), userDataPath, mScalingFactor));
+        mFontLoader = std::make_unique<Gui::FontLoader>(encoding, resourceSystem->getVFS(), userDataPath, mScalingFactor);
         mFontLoader->loadBitmapFonts(exportFonts);
 
         //Register own widgets with MyGUI
@@ -238,7 +238,7 @@ namespace MWGui
         WindowManager::loadUserFonts();
 
         bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
-        mKeyboardNavigation.reset(new KeyboardNavigation());
+        mKeyboardNavigation = std::make_unique<KeyboardNavigation>();
         mKeyboardNavigation->setEnabled(keyboardNav);
         Gui::ImageButton::setDefaultNeedKeyFocus(keyboardNav);
 
@@ -288,7 +288,7 @@ namespace MWGui
         if (useShaders)
             mGuiPlatform->getRenderManagerPtr()->enableShaders(mResourceSystem->getSceneManager()->getShaderManager());
 
-        mStatsWatcher.reset(new StatsWatcher());
+        mStatsWatcher = std::make_unique<StatsWatcher>();
     }
 
     void WindowManager::loadUserFonts()

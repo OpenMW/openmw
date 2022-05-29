@@ -21,8 +21,7 @@ void DataManager::setResourcePath(const std::string &path)
 MyGUI::IDataStream *DataManager::getData(const std::string &name) const
 {
     std::string fullpath = getDataPath(name);
-    std::unique_ptr<std::ifstream> stream;
-    stream.reset(new std::ifstream);
+    auto stream = std::make_unique<std::ifstream>();
     stream->open(fullpath, std::ios::binary);
     if (stream->fail())
     {

@@ -579,7 +579,7 @@ bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
         else
         {
             // Empty filter string equals to filter "true".
-            mFilter.reset (new BooleanNode (true));
+            mFilter = std::make_shared<BooleanNode>(true);
         }
 
         return true;

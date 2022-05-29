@@ -201,7 +201,7 @@ bool AiFollow::isCommanded() const
 
 void AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
 {
-    std::unique_ptr<ESM::AiSequence::AiFollow> follow(new ESM::AiSequence::AiFollow());
+    auto follow = std::make_unique<ESM::AiSequence::AiFollow>();
     follow->mData.mX = mX;
     follow->mData.mY = mY;
     follow->mData.mZ = mZ;

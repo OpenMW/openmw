@@ -32,7 +32,7 @@ namespace CSMWorld
                 return -1;
             }
 
-            std::unique_ptr<Record<Pathgrid> > baseRecord(new Record<Pathgrid>(this->getRecord(index)));
+            auto baseRecord = std::make_unique<Record<Pathgrid>>(this->getRecord(index));
             baseRecord->mState = RecordBase::State_Deleted;
             this->setRecord(index, std::move(baseRecord));
             return index;

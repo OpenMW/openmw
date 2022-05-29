@@ -119,12 +119,12 @@ namespace MWClass
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfActivator", prng);
 
-            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
-        return std::unique_ptr<MWWorld::Action>(new MWWorld::NullAction);
+        return std::make_unique<MWWorld::NullAction>();
     }
 
 
