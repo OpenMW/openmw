@@ -44,7 +44,8 @@ namespace VFS
             std::set<std::filesystem::path> seen;
             for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
             {
-                if (seen.insert((*iter).c_str()).second)
+                // TODO(jvoisin) Get rid of `->native()` when we move PathContainer from boost::filesystem to std::filesystem.
+                if (seen.insert(iter->native()).second)
                 {
                     Log(Debug::Info) << "Adding data directory " << iter->string();
                     // Last data dir has the highest priority
