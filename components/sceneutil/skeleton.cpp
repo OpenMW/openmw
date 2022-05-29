@@ -69,7 +69,7 @@ Bone* Skeleton::getBone(const std::string &name)
 
     if (!mRootBone.get())
     {
-        mRootBone.reset(new Bone);
+        mRootBone = std::make_unique<Bone>();
     }
 
     Bone* bone = mRootBone.get();

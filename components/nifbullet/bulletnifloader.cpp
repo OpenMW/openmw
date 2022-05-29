@@ -140,7 +140,7 @@ std::monostate fillTriangleMesh(std::unique_ptr<btTriangleMesh>& mesh, const Nif
     return handleNiGeometry(geometry, [&] (const auto& data)
     {
         if (mesh == nullptr)
-            mesh.reset(new btTriangleMesh(false));
+            mesh = std::make_unique<btTriangleMesh>(false);
         fillTriangleMesh(*mesh, data, transform);
         return std::monostate {};
     });
@@ -150,7 +150,7 @@ std::unique_ptr<btTriangleMesh> makeChildMesh(const Nif::NiGeometry& geometry)
 {
     return handleNiGeometry(geometry, [&] (const auto& data)
     {
-        std::unique_ptr<btTriangleMesh> mesh(new btTriangleMesh);
+        auto mesh = std::make_unique<btTriangleMesh>();
         fillTriangleMesh(*mesh, data, osg::Matrixf());
         return mesh;
     });
@@ -197,8 +197,8 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
         {
             const btVector3 extents = Misc::Convert::toBullet(mShape->mCollisionBox.mExtents);
             const btVector3 center = Misc::Convert::toBullet(mShape->mCollisionBox.mCenter);
-            std::unique_ptr<btCompoundShape> compound (new btCompoundShape);
-            std::unique_ptr<btBoxShape> boxShape(new btBoxShape(extents));
+            auto compound = std::make_unique<btCompoundShape>();
+            auto boxShape = std::make_unique<btBoxShape>(extents);
             btTransform transform = btTransform::getIdentity();
             transform.setOrigin(center);
             compound->addChildShape(transform, boxShape.get());
@@ -226,7 +226,7 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
         {
             btTransform trans;
             trans.setIdentity();
-            std::unique_ptr<btCollisionShape> child(new Resource::TriangleMeshShape(mStaticMesh.get(), true));
+            std::unique_ptr<btCollisionShape> child = std::make_unique<Resource::TriangleMeshShape>(mStaticMesh.get(), true);
             mCompoundShape->addChildShape(trans, child.get());
             child.release();
             mStaticMesh.release();
@@ -407,7 +407,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiGeometry& niGeometry, const 
         if (!mCompoundShape)
             mCompoundShape.reset(new btCompoundShape);
 
-        std::unique_ptr<Resource::TriangleMeshShape> childShape(new Resource::TriangleMeshShape(childMesh.get(), true));
+        auto childShape = std::make_unique<Resource::TriangleMeshShape>(childMesh.get(), true);
         childMesh.release();
 
         float scale = niGeometry.trafo.scale;
