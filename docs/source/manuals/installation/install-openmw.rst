@@ -61,3 +61,10 @@ However, it depends on several packages which are not in stable,
 so it is not possible to install OpenMW in Wheezy without creating a FrankenDebian.
 This is not recommended or supported.
 
+The Flatpak Way
+===============
+
+OpenMW is available as a flatpak. With flatpak installed, run the command below. It should show up on your desktop.
+::
+
+	# flatpak install openmw
