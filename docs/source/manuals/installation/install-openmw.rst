@@ -68,6 +68,3 @@ OpenMW is available as a flatpak. With flatpak installed, run the command below.
 ::
 
 	# flatpak install openmw
-
-
-
