@@ -189,6 +189,7 @@ namespace ESM
 
     void NPC::blank()
     {
+        mRecordFlags = 0;
         mNpdtType = NPC_DEFAULT;
         blankNpdt();
         mBloodType = 0;

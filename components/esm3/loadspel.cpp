@@ -71,6 +71,7 @@ namespace ESM
 
     void Spell::blank()
     {
+        mRecordFlags = 0;
         mData.mType = 0;
         mData.mCost = 0;
         mData.mFlags = 0;

@@ -75,6 +75,7 @@ namespace ESM
 
     void Apparatus::blank()
     {
+        mRecordFlags = 0;
         mData.mType = 0;
         mData.mQuality = 0;
         mData.mWeight = 0;

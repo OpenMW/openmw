@@ -82,6 +82,7 @@ namespace ESM
 
     void Book::blank()
     {
+        mRecordFlags = 0;
         mData.mWeight = 0;
         mData.mValue = 0;
         mData.mIsScroll = 0;

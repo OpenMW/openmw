@@ -181,6 +181,7 @@ namespace ESM
 
     void Script::blank()
     {
+        mRecordFlags = 0;
         mData.mNumShorts = mData.mNumLongs = mData.mNumFloats = 0;
         mData.mScriptDataSize = 0;
         mData.mStringTableSize = 0;

@@ -64,6 +64,7 @@ namespace ESM
 
     void Enchantment::blank()
     {
+        mRecordFlags = 0;
         mData.mType = 0;
         mData.mCost = 0;
         mData.mCharge = 0;

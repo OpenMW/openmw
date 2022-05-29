@@ -67,6 +67,7 @@ namespace ESM
 
     void SoundGenerator::blank()
     {
+        mRecordFlags = 0;
         mType = LeftFoot;
         mCreature.clear();
         mSound.clear();

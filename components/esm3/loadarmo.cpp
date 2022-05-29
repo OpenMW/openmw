@@ -115,6 +115,7 @@ namespace ESM
 
     void Armor::blank()
     {
+        mRecordFlags = 0;
         mData.mType = 0;
         mData.mWeight = 0;
         mData.mValue = 0;

@@ -81,6 +81,7 @@ namespace ESM
 
     void Race::blank()
     {
+        mRecordFlags = 0;
         mName.clear();
         mDescription.clear();
 

@@ -98,6 +98,7 @@ namespace ESM
 
     void LevelledListBase::blank()
     {
+        mRecordFlags = 0;
         mFlags = 0;
         mChanceNone = 0;
         mList.clear();

@@ -58,6 +58,7 @@ namespace ESM
 
     void StartScript::blank()
     {
+        mRecordFlags = 0;
         mData.clear();
     }
 }
