@@ -498,41 +498,41 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
         {
         case ESM::AiSequence::Ai_Wander:
         {
-            package.reset(new AiWander(&static_cast<const ESM::AiSequence::AiWander&>(*container.mPackage)));
+            package = std::make_unique<AiWander>(&static_cast<const ESM::AiSequence::AiWander&>(*container.mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Travel:
         {
             const ESM::AiSequence::AiTravel& source = static_cast<const ESM::AiSequence::AiTravel&>(*container.mPackage);
             if (source.mHidden)
-                package.reset(new AiInternalTravel(&source));
+                package = std::make_unique<AiInternalTravel>(&source);
             else
-                package.reset(new AiTravel(&source));
+                package = std::make_unique<AiTravel>(&source);
             break;
         }
         case ESM::AiSequence::Ai_Escort:
         {
-            package.reset(new AiEscort(&static_cast<const ESM::AiSequence::AiEscort&>(*container.mPackage)));
+            package = std::make_unique<AiEscort>(&static_cast<const ESM::AiSequence::AiEscort&>(*container.mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Follow:
         {
-            package.reset(new AiFollow(&static_cast<const ESM::AiSequence::AiFollow&>(*container.mPackage)));
+            package = std::make_unique<AiFollow>(&static_cast<const ESM::AiSequence::AiFollow&>(*container.mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Activate:
         {
-            package.reset(new AiActivate(&static_cast<const ESM::AiSequence::AiActivate&>(*container.mPackage)));
+            package = std::make_unique<AiActivate>(&static_cast<const ESM::AiSequence::AiActivate&>(*container.mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Combat:
         {
-            package.reset(new AiCombat(&static_cast<const ESM::AiSequence::AiCombat&>(*container.mPackage)));
+            package = std::make_unique<AiCombat>(&static_cast<const ESM::AiSequence::AiCombat&>(*container.mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Pursue:
         {
-            package.reset(new AiPursue(&static_cast<const ESM::AiSequence::AiPursue&>(*container.mPackage)));
+            package = std::make_unique<AiPursue>(&static_cast<const ESM::AiSequence::AiPursue&>(*container.mPackage));
             break;
         }
         default:

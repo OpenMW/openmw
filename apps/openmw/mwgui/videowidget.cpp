@@ -18,7 +18,7 @@ namespace MWGui
 VideoWidget::VideoWidget()
     : mVFS(nullptr)
 {
-    mPlayer.reset(new Video::VideoPlayer());
+    mPlayer = std::make_unique<Video::VideoPlayer>();
     setNeedKeyFocus(true);
 }
 
@@ -50,7 +50,7 @@ void VideoWidget::playVideo(const std::string &video)
     if (!texture)
         return;
 
-    mTexture.reset(new osgMyGUI::OSGTexture(texture));
+    mTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
 
     setRenderItemTexture(mTexture.get());
     getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));

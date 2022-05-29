@@ -84,7 +84,7 @@ MWWorld::Ptr AiPursue::getTarget() const
 
 void AiPursue::writeState(ESM::AiSequence::AiSequence &sequence) const
 {
-    std::unique_ptr<ESM::AiSequence::AiPursue> pursue(new ESM::AiSequence::AiPursue());
+    auto pursue = std::make_unique<ESM::AiSequence::AiPursue>();
     pursue->mTargetActorId = mTargetActorId;
 
     ESM::AiSequence::AiPackageContainer package;

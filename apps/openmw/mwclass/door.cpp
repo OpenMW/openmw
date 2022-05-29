@@ -131,7 +131,7 @@ namespace MWClass
         // Make such activation a no-op for now, like how it is in the vanilla game.
         if (actor != MWMechanics::getPlayer() && ptr.getCellRef().getTeleport())
         {
-            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string(), ptr);
             action->setSound(lockedSound);
             return action;
         }
@@ -182,7 +182,7 @@ namespace MWClass
             if(isTrapped)
             {
                 // Trap activation
-                std::unique_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(ptr.getCellRef().getTrap(), ptr));
+                std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionTrap>(ptr.getCellRef().getTrap(), ptr);
                 action->setSound(trapActivationSound);
                 return action;
             }
@@ -192,12 +192,11 @@ namespace MWClass
                 if (actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getDistanceToFacedObject() > MWBase::Environment::get().getWorld()->getMaxActivationDistance())
                 {
                     // player activated teleport door with telekinesis
-                    std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
-                    return action;
+                    return std::make_unique<MWWorld::FailedAction>();
                 }
                 else
                 {
-                    std::unique_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ptr.getCellRef().getDestCell(), ptr.getCellRef().getDoorDest(), true));
+                    std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionTeleport>(ptr.getCellRef().getDestCell(), ptr.getCellRef().getDoorDest(), true);
                     action->setSound(openSound);
                     return action;
                 }
@@ -205,7 +204,7 @@ namespace MWClass
             else
             {
                 // animated door
-                std::unique_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
+                std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionDoor>(ptr);
                 const auto doorState = getDoorState(ptr);
                 bool opening = true;
                 float doorRot = ptr.getRefData().getPosition().rot[2] - ptr.getCellRef().getPosition().rot[2];
@@ -239,7 +238,7 @@ namespace MWClass
         else
         {
             // locked, and we can't open.
-            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string(), ptr);
             action->setSound(lockedSound);
             return action;
         }

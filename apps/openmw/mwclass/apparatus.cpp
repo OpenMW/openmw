@@ -110,7 +110,7 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Apparatus::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionAlchemy(force));
+        return std::make_unique<MWWorld::ActionAlchemy>(force);
     }
 
     MWWorld::Ptr Apparatus::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

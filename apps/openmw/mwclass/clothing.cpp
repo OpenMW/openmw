@@ -230,7 +230,7 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Clothing::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::unique_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
+        std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEquip>(ptr, force);
 
         action->setSound(getUpSoundId(ptr));
 

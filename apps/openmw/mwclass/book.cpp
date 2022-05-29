@@ -63,13 +63,13 @@ namespace MWClass
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
 
-            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
-        return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+        return std::make_unique<MWWorld::ActionRead>(ptr);
     }
 
     std::string Book::getScript (const MWWorld::ConstPtr& ptr) const
@@ -151,7 +151,7 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        return std::unique_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+        return std::make_unique<MWWorld::ActionRead>(ptr);
     }
 
     MWWorld::Ptr Book::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

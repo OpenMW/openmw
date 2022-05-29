@@ -135,7 +135,7 @@ namespace MWClass
         const MWWorld::Ptr& actor) const
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return std::unique_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+            return std::make_unique<MWWorld::NullAction>();
 
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
@@ -143,7 +143,7 @@ namespace MWClass
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer", prng);
 
-            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if(sound) action->setSound(sound->mId);
 
             return action;
@@ -191,24 +191,22 @@ namespace MWClass
             {
                 if (canBeHarvested(ptr))
                 {
-                    std::unique_ptr<MWWorld::Action> action (new MWWorld::ActionHarvest(ptr));
-                    return action;
+                    return std::make_unique<MWWorld::ActionHarvest>(ptr);
                 }
 
-                std::unique_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
-                return action;
+                return std::make_unique<MWWorld::ActionOpen>(ptr);
             }
             else
             {
                 // Activate trap
-                std::unique_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(ptr.getCellRef().getTrap(), ptr));
+                std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionTrap>(ptr.getCellRef().getTrap(), ptr);
                 action->setSound(trapActivationSound);
                 return action;
             }
         }
         else
         {
-            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string(), ptr);
             action->setSound(lockedSound);
             return action;
         }

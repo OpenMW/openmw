@@ -117,12 +117,12 @@ namespace MWWorld
 
     std::unique_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
     {
-        return std::unique_ptr<Action> (new NullAction);
+        return std::make_unique<NullAction>();
     }
 
     std::unique_ptr<Action> Class::use (const Ptr& ptr, bool force) const
     {
-        return std::unique_ptr<Action> (new NullAction);
+        return std::make_unique<NullAction>();
     }
 
     ContainerStore& Class::getContainerStore (const Ptr& ptr) const
@@ -332,7 +332,7 @@ namespace MWWorld
     std::unique_ptr<Action> Class::defaultItemActivate(const Ptr &ptr, const Ptr &actor) const
     {
         if(!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return std::unique_ptr<Action>(new NullAction());
+            return std::make_unique<NullAction>();
 
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
@@ -340,13 +340,13 @@ namespace MWWorld
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
 
-            std::unique_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
-        std::unique_ptr<MWWorld::Action> action(new ActionTake(ptr));
+        std::unique_ptr<MWWorld::Action> action = std::make_unique<ActionTake>(ptr);
         action->setSound(getUpSoundId(ptr));
 
         return action;

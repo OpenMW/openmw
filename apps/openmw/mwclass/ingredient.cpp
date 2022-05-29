@@ -74,7 +74,7 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Ingredient::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::unique_ptr<MWWorld::Action> action (new MWWorld::ActionEat (ptr));
+        std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEat>(ptr);
 
         action->setSound ("Swallow");
 

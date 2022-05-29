@@ -456,7 +456,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     , mCullCallback(nullptr)
     , mShaderWaterStateSetUpdater(nullptr)
 {
-    mSimulation.reset(new RippleSimulation(mSceneRoot, resourceSystem));
+    mSimulation = std::make_unique<RippleSimulation>(mSceneRoot, resourceSystem);
 
     mWaterGeom = SceneUtil::createWaterGeometry(Constants::CellSizeInUnits*150, 40, 900);
     mWaterGeom->setDrawCallback(new DepthClampCallback);

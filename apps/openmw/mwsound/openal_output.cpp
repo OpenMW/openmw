@@ -428,7 +428,7 @@ bool OpenAL_SoundStream::init(bool getLoudnessData)
     mBufferSize *= mFrameSize;
 
     if (getLoudnessData)
-        mLoudnessAnalyzer.reset(new Sound_Loudness(sLoudnessFPS, mSampleRate, chans, type));
+        mLoudnessAnalyzer = std::make_unique<Sound_Loudness>(sLoudnessFPS, mSampleRate, chans, type);
 
     mIsFinished = false;
     return true;
@@ -1501,7 +1501,7 @@ OpenAL_Output::OpenAL_Output(SoundManager &mgr)
   , mDevice(nullptr), mContext(nullptr)
   , mListenerPos(0.0f, 0.0f, 0.0f), mListenerEnv(Env_Normal)
   , mWaterFilter(0), mWaterEffect(0), mDefaultEffect(0), mEffectSlot(0)
-  , mStreamThread(new StreamThread)
+  , mStreamThread(std::make_unique<StreamThread>())
 {
 }
 

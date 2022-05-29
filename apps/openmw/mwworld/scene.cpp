@@ -772,7 +772,7 @@ namespace MWWorld
     , mPreloadFastTravel(Settings::Manager::getBool("preload fast travel", "Cells"))
     , mPredictionTime(Settings::Manager::getFloat("prediction time", "Cells"))
     {
-        mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain(), rendering.getLandManager()));
+        mPreloader = std::make_unique<CellPreloader>(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain(), rendering.getLandManager());
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
 
         rendering.getResourceSystem()->setExpiryDelay(Settings::Manager::getFloat("cache expiry delay", "Cells"));

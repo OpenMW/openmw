@@ -899,7 +899,7 @@ namespace MWMechanics
         else
             remainingDuration = mDuration;
 
-        std::unique_ptr<ESM::AiSequence::AiWander> wander(new ESM::AiSequence::AiWander());
+        auto wander = std::make_unique<ESM::AiSequence::AiWander>();
         wander->mData.mDistance = mDistance;
         wander->mData.mDuration = mDuration;
         wander->mData.mTimeOfDay = mTimeOfDay;
