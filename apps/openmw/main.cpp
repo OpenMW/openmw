@@ -16,6 +16,8 @@
 #include <cstdlib>
 #endif
 
+#include <filesystem>
+
 #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
 #include <unistd.h>
 #endif
@@ -206,8 +208,8 @@ namespace
 int runApplication(int argc, char *argv[])
 {
 #ifdef __APPLE__
-    boost::filesystem::path binary_path = boost::filesystem::system_complete(boost::filesystem::path(argv[0]));
-    boost::filesystem::current_path(binary_path.parent_path());
+    std::filesystem::path binary_path = std::filesystem::system_complete(std::filesystem::path(argv[0]));
+    std::filesystem::current_path(binary_path.parent_path());
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
 #endif
 
