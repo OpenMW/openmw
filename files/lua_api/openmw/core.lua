@@ -230,9 +230,11 @@
 -- @param type (optional) items type (see @{openmw.types#types})
 -- @return #ObjectList
 -- @usage
--- local type = require('openmw.types')
--- local all = inventory:getAll()
--- local weapons = inventory:getAll(types.Weapon)
+-- local types = require('openmw.types')
+-- local self = require('openmw.self')
+-- local playerInventory = types.Actor.inventory(self.object)
+-- local all = playerInventory:getAll()
+-- local weapons = playerInventory:getAll(types.Weapon)
 
 
 return nil
