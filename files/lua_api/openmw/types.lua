@@ -650,7 +650,22 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Returns the read-only @{#MiscellaneousRecord} of a miscellaneous item
+-- @function [parent=#Miscellaneous] record
+-- @param #any objectOrRecordId
+-- @return #MiscellaneousRecord
 
+---
+-- @type MiscellaneousRecord
+-- @field #string id The record ID of the miscellaneous item
+-- @field #string name The name of the miscellaneous item
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this miscellaneous item (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #number weight
+-- @field #number value
+-- @field #boolean isKey
 
 --- @{#Potion} functions
 -- @field [parent=#types] #Potion Potion
