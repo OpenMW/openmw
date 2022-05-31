@@ -729,7 +729,7 @@
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this weapon (can be empty)
--- @field #string icon
+-- @field #string icon VFS path to the icon
 -- @field #string enchant
 -- @field #boolean isMagical
 -- @field #boolean isSilver
@@ -936,7 +936,7 @@
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this container (can be empty)
--- @field #number weight capacity of this container (can be empty)
+-- @field #number weight capacity of this container
 
 --- @{#Door} functions
 -- @field [parent=#types] #Door Door
