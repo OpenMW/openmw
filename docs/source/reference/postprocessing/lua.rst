@@ -5,8 +5,8 @@ Connecting With Lua
 Overview
 ########
 
-Every shader can be controlled through the Lua scripting system. While shaders can be disabled and enabled,
-shader uniforms can also be controlled. For details reference the API documentation, found :doc:`here<../lua-scripting/openmw_postprocessing>`.
+Every shader that is marked as ``dynamic`` can be controlled through the Lua scripting system. Shaders can be disabled and enabled,
+and their uniforms can be controlled via scripts. For details, reference the API documentation :doc:`here<../lua-scripting/openmw_postprocessing>`.
 
 Toggling Shaders With a Keybind
 ###############################
@@ -42,12 +42,14 @@ It is assumed the shader has the filename ``desaturate.omwfx`` in this example.
 
     technique {
         description = "Desaturates scene";
-        passes = desaturate;
         version = "1.0";
         author = "Fargoth";
         passes = desaturate;
+        dynamic = true;
     }
 
+.. note::
+    The ``dynamic`` flag here is very important, otherwise Lua will not be able to interact with this shader.
 
 Next, a script that is attached to the player is needed. The shader is loaded first, then toggled on and off in response to key presses.
 Below is a working example to illustrate this.
@@ -83,11 +85,11 @@ hidden in this HUD, this can done by adding the ``hidden`` flag to the main tech
 
     technique {
         description = "Desaturates scene";
-        passes = desaturate;
         version = "1.0";
         author = "Fargoth";
         passes = desaturate;
         flags = hidden;
+        dynamic = true;
     }
 
 This flag is usually used when the shader is associated with something special, like special weather, spell, or alcohol effects.

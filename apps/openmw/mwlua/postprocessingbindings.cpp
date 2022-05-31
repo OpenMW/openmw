@@ -117,10 +117,9 @@ namespace MWLua
                 [=, &shader] {
                     shader.mQueuedAction = Shader::Action_None;
 
-                    if (!MWBase::Environment::get().getWorld()->getPostProcessor()->enableTechnique(shader.mShader, pos))
+                    if (MWBase::Environment::get().getWorld()->getPostProcessor()->enableTechnique(shader.mShader, pos) == MWRender::PostProcessor::Status_Error)
                         throw std::runtime_error("Failed enabling shader '" + shader.mShader->getName() + "'");
-                },
-                "Enable shader " + (shader.mShader ? shader.mShader->getName() : "nil")
+                }
             );
         };
 
@@ -132,10 +131,9 @@ namespace MWLua
                 [&] {
                     shader.mQueuedAction = Shader::Action_None;
 
-                    if (!MWBase::Environment::get().getWorld()->getPostProcessor()->disableTechnique(shader.mShader))
+                    if (MWBase::Environment::get().getWorld()->getPostProcessor()->disableTechnique(shader.mShader) == MWRender::PostProcessor::Status_Error)
                         throw std::runtime_error("Failed disabling shader '" + shader.mShader->getName() + "'");
-                },
-                "Disable shader " + (shader.mShader ? shader.mShader->getName() : "nil")
+                }
             );
         };
 
@@ -167,6 +165,9 @@ namespace MWLua
 
             if (!shader.mShader || !shader.mShader->isValid())
                 throw std::runtime_error(Misc::StringUtils::format("Failed loading shader '%s'", name));
+
+            if (!shader.mShader->getDynamic())
+                throw std::runtime_error(Misc::StringUtils::format("Shader '%s' is not marked as dynamic", name));
 
             return shader;
         };

@@ -159,6 +159,8 @@ namespace fx
 
         UniformMap::iterator findUniform(const std::string& name);
 
+        bool getDynamic() const { return mDynamic; }
+
     private:
         [[noreturn]] void error(const std::string& msg);
 
@@ -275,6 +277,8 @@ namespace fx
         std::string mBuffer;
 
         std::string mLastError;
+
+        bool mDynamic = false;
     };
 
     template<> void Technique::parseBlockImp<Lexer::Shared>();

@@ -16,6 +16,8 @@
 
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwrender/postprocessor.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
@@ -271,6 +273,7 @@ namespace MWLua
         LuaUi::clearUserInterface();
         mUiResourceManager.clear();
         MWBase::Environment::get().getWindowManager()->setConsoleMode("");
+        MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
         mActiveLocalScripts.clear();
         mLocalEvents.clear();
         mGlobalEvents.clear();
