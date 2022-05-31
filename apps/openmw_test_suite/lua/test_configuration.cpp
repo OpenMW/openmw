@@ -3,7 +3,7 @@
 
 #include <components/lua/configuration.hpp>
 
-#include "testing_util.hpp"
+#include "../testing_util.hpp"
 
 namespace
 {

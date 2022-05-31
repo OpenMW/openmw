@@ -6,12 +6,12 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/files/configurationmanager.hpp>
 
-#include "../lua/testing_util.hpp"
+#include "../testing_util.hpp"
 
 namespace
 {
 
-TestFile technique_properties(R"(
+TestingOpenMW::VFSTestFile technique_properties(R"(
     fragment main {}
     vertex main {}
     technique {
@@ -27,7 +27,7 @@ TestFile technique_properties(R"(
     }
 )");
 
-TestFile rendertarget_properties{R"(
+TestingOpenMW::VFSTestFile rendertarget_properties{R"(
     render_target rendertarget {
         width_ratio = 0.5;
         height_ratio = 0.5;
@@ -54,7 +54,7 @@ TestFile rendertarget_properties{R"(
 )"};
 
 
-TestFile uniform_properties{R"(
+TestingOpenMW::VFSTestFile uniform_properties{R"(
     uniform_vec4 uVec4 {
         default = vec4(0,0,0,0);
         min = vec4(0,1,0,0);
@@ -69,13 +69,13 @@ TestFile uniform_properties{R"(
 )"};
 
 
-TestFile missing_sampler_source{R"(
+TestingOpenMW::VFSTestFile missing_sampler_source{R"(
     sampler_1d mysampler1d { }
     fragment main { }
     technique { passes = main; }
 )"};
 
-TestFile repeated_shared_block{R"(
+TestingOpenMW::VFSTestFile repeated_shared_block{R"(
     shared {
         float myfloat = 1.0;
     }
@@ -95,7 +95,7 @@ TestFile repeated_shared_block{R"(
         std::unique_ptr<Technique> mTechnique;
 
         TechniqueTest()
-            : mVFS(createTestVFS({
+            : mVFS(TestingOpenMW::createTestVFS({
                 {"shaders/technique_properties.omwfx", &technique_properties},
                 {"shaders/rendertarget_properties.omwfx", &rendertarget_properties},
                 {"shaders/uniform_properties.omwfx", &uniform_properties},

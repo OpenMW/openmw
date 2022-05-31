@@ -13,7 +13,7 @@
 #include <components/misc/endianness.hpp>
 #include <components/misc/color.hpp>
 
-#include "testing_util.hpp"
+#include "../testing_util.hpp"
 
 namespace
 {

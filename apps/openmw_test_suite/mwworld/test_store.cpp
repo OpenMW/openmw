@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <fstream>
-#include <filesystem>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -11,6 +10,8 @@
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwmechanics/spelllist.hpp"
+
+#include "../testing_util.hpp"
 
 namespace MWMechanics
 {
@@ -62,8 +63,6 @@ struct ContentFileTest : public ::testing::Test
         ("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""));
         Files::ConfigurationManager::addCommonOptions(desc);
 
-        boost::program_options::notify(variables);
-
         mConfigurationManager.readConfiguration(variables, desc, true);
 
         Files::PathContainer dataDirs, dataLocal;
@@ -73,10 +72,7 @@ struct ContentFileTest : public ::testing::Test
 
         Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
         if (!local.empty())
-        {
-            boost::filesystem::create_directories(local);
             dataLocal.push_back(local);
-        }
 
         mConfigurationManager.filterOutNonExistingPaths(dataDirs);
         mConfigurationManager.filterOutNonExistingPaths(dataLocal);
@@ -109,10 +105,8 @@ TEST_F(ContentFileTest, dialogue_merging_test)
         return;
     }
 
-    const std::string file = "test_dialogue_merging.txt";
-
-    std::ofstream stream;
-    stream.open(file);
+    const std::string file = TestingOpenMW::outputFilePath("test_dialogue_merging.txt");
+    std::ofstream stream(file);
 
     const MWWorld::Store<ESM::Dialogue>& dialStore = mEsmStore.get<ESM::Dialogue>();
     for (const auto & dial : dialStore)
@@ -191,10 +185,8 @@ TEST_F(ContentFileTest, content_diagnostics_test)
         return;
     }
 
-    const std::string file = "test_content_diagnostics.txt";
-
-    std::ofstream stream;
-    stream.open(file);
+    const std::string file = TestingOpenMW::outputFilePath("test_content_diagnostics.txt");
+    std::ofstream stream(file);
 
     RUN_TEST_FOR_TYPES(printRecords, mEsmStore, stream);
 

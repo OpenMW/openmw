@@ -4,6 +4,8 @@
 
 #include <gtest/gtest.h>
 
+#include "../testing_util.hpp"
+
 namespace
 {
     using namespace testing;
@@ -28,11 +30,11 @@ namespace
         template <class F>
         void withShaderFile(const std::string& suffix, const std::string& content, F&& f)
         {
-            const auto path = UnitTest::GetInstance()->current_test_info()->name() + suffix + ".glsl";
+            std::string path = TestingOpenMW::outputFilePath(
+                std::string(UnitTest::GetInstance()->current_test_info()->name()) + suffix + ".glsl");
 
             {
-                std::ofstream stream;
-                stream.open(path);
+                std::ofstream stream(path);
                 stream << content;
                 stream.close();
             }

@@ -6,6 +6,8 @@ if (GTEST_FOUND AND GMOCK_FOUND)
     include_directories(SYSTEM ${GMOCK_INCLUDE_DIRS})
 
     file(GLOB UNITTEST_SRC_FILES
+        testing_util.hpp
+
         ../openmw/mwworld/store.cpp
         ../openmw/mwworld/esmstore.cpp
         mwworld/test_store.cpp
