@@ -110,9 +110,16 @@ namespace MWRender
 
         void resize();
 
-        bool enableTechnique(std::shared_ptr<fx::Technique> technique, std::optional<int> location = std::nullopt);
+        enum Status
+        {
+            Status_Error,
+            Status_Toggled,
+            Status_Unchanged
+        };
 
-        bool disableTechnique(std::shared_ptr<fx::Technique> technique, bool dirty = true);
+        Status enableTechnique(std::shared_ptr<fx::Technique> technique, std::optional<int> location = std::nullopt);
+
+        Status disableTechnique(std::shared_ptr<fx::Technique> technique, bool dirty = true);
 
         bool getSupportsNormalsRT() const { return mNormalsSupported; }
 
@@ -154,7 +161,7 @@ namespace MWRender
 
         void toggleMode();
 
-        std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool loadNextFrame=true);
+        std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool loadNextFrame=false);
 
         bool isEnabled() const { return mUsePostProcessing && mEnabled; }
 
@@ -167,6 +174,8 @@ namespace MWRender
         void enable(bool usePostProcessing = true);
 
         void setRenderTargetSize(int width, int height) { mWidth = width; mHeight = height; }
+
+        void disableDynamicShaders();
 
     private:
 

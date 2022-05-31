@@ -314,6 +314,11 @@ Exactly one ``technique`` block is required for every shader file. In this we de
 +------------------+--------------------+---------------------------------------------------+
 | flags            | `SHADER_FLAG`_     | ``,`` separated list of shader flags              |
 +------------------+--------------------+---------------------------------------------------+
+| dynamic          | boolean            | Whether shader is exposed to Lua                  |
++------------------+--------------------+---------------------------------------------------+
+
+When ``dynamic`` is set to ``true``, the shaders order cannot be manually moved, enabled, or disabled. The shaders state
+can only be controlled via a Lua script.
 
 In the code snippet below, a shader is defined that requires GLSL `330`, HDR capatiblities, and is only enabled underwater in exteriors.
 

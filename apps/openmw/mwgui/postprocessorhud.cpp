@@ -30,7 +30,7 @@ namespace
         {
             auto technique = processor->getTechniques()[i];
 
-            if (!technique)
+            if (!technique || technique->getDynamic())
                 continue;
 
             chain << technique->getName();
@@ -140,10 +140,15 @@ namespace MWGui
         {
             auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
             mOverrideHint = list->getItemNameAt(selected);
+
+            auto technique = *list->getItemDataAt<std::shared_ptr<fx::Technique>>(selected);
+            if (technique->getDynamic())
+                return;
+
             if (enabled)
-                processor->enableTechnique(*list->getItemDataAt<std::shared_ptr<fx::Technique>>(selected));
+                processor->enableTechnique(technique);
             else
-                processor->disableTechnique(*list->getItemDataAt<std::shared_ptr<fx::Technique>>(selected));
+                processor->disableTechnique(technique);
             saveChain();
         }
     }
@@ -172,7 +177,11 @@ namespace MWGui
 
         if (static_cast<size_t>(index) != selected)
         {
-            if (processor->enableTechnique(*mActiveList->getItemDataAt<std::shared_ptr<fx::Technique>>(selected), index))
+            auto technique = *mActiveList->getItemDataAt<std::shared_ptr<fx::Technique>>(selected);
+            if (technique->getDynamic())
+                return;
+
+            if (processor->enableTechnique(technique, index) != MWRender::PostProcessor::Status_Error)
                 saveChain();
         }
     }
@@ -330,6 +339,9 @@ namespace MWGui
         {
             case fx::Technique::Status::Success:
             case fx::Technique::Status::Uncompiled:
+            {
+                if (technique->getDynamic())
+                    ss  << "#{fontcolourhtml=header}Locked:      #{fontcolourhtml=normal} Cannot be toggled or moved, controlled by external Lua script" << endl << endl;
                 ss  << "#{fontcolourhtml=header}Author:      #{fontcolourhtml=normal} " << author << endl << endl
                     << "#{fontcolourhtml=header}Version:     #{fontcolourhtml=normal} " << version << endl << endl
                     << "#{fontcolourhtml=header}Description: #{fontcolourhtml=normal} " << description << endl << endl
@@ -338,6 +350,7 @@ namespace MWGui
                     << "#{fontcolourhtml=header}   Underwater: #{fontcolourhtml=normal} " << flag_underwater
                     << "#{fontcolourhtml=header}   Abovewater: #{fontcolourhtml=normal} " << flag_abovewater;
                 break;
+            }
             case fx::Technique::Status::Parse_Error:
                 ss  << "#{fontcolourhtml=negative}Shader Compile Error: #{fontcolourhtml=normal} <" << std::string(technique->getName()) << "> failed to compile." << endl << endl
                     << technique->getLastError();

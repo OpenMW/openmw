@@ -75,6 +75,7 @@ namespace fx
         mGLSLExtensions.clear();
         mGLSLVersion = mUBO ? 330 : 120;
         mGLSLProfile.clear();
+        mDynamic = false;
     }
 
     std::string Technique::getBlockWithLineDirective()
@@ -249,11 +250,13 @@ namespace fx
                 for (const auto& ext : parseLiteralList<Lexer::Comma>())
                     mGLSLExtensions.emplace(ext);
             }
+            else if (key == "dynamic")
+                mDynamic = parseBool();
             else
                 error(Misc::StringUtils::format("unexpected key '%s'", std::string{key}));
 
             expect<Lexer::SemiColon>();
-        }
+    }
 
         if (mPassKeys.empty())
             error("pass list in 'technique' block cannot be empty.");
