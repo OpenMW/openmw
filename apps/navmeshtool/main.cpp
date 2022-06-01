@@ -21,6 +21,7 @@
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/platform/platform.hpp>
 
 #include <osg/Vec3f>
 
@@ -35,6 +36,7 @@
 #include <fcntl.h>
 #include <io.h>
 #endif
+
 
 namespace NavMeshTool
 {
@@ -102,6 +104,8 @@ namespace NavMeshTool
 
         int runNavMeshTool(int argc, char *argv[])
         {
+            Platform::init();
+
             bpo::options_description desc = makeOptionsDescription();
 
             bpo::parsed_options options = bpo::command_line_parser(argc, argv)

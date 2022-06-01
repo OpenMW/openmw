@@ -8,6 +8,7 @@
 #include <QMetaType>
 
 #include <components/debug/debugging.hpp>
+#include <components/platform/platform.hpp>
 
 #include "model/doc/messages.hpp"
 #include "model/world/universalid.hpp"
@@ -43,6 +44,8 @@ class Application : public QApplication
 
 int runApplication(int argc, char *argv[])
 {
+    Platform::init();
+
 #ifdef Q_OS_MAC
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
 #endif
