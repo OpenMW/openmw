@@ -32,6 +32,7 @@ namespace fx
                 return;
 
             mCheckbutton->setCaptionWithReplacing(value ? "#{sOn}" : "#{sOff}");
+            mFill->setVisible(value);
 
             uniform->setValue<bool>(value);
         }
@@ -61,6 +62,7 @@ namespace fx
             Base::initialiseOverride();
 
             assignWidget(mCheckbutton, "Checkbutton");
+            assignWidget(mFill, "Fill");
 
             mCheckbutton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditBool::notifyMouseButtonClick);
         }

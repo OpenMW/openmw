@@ -3,6 +3,11 @@
 
 	<Resource type="ResourceLayout" name="MW_ValueEditNumber" version="3.2.0">
 		<Widget type="Widget" skin="" position="0 0 100 50" align="Stretch" name="Root">
+            <Widget type="Widget" skin="BlackBG" position="0 0 100 50" name="Fill" align="Stretch">
+                <Property key="NeedMouse" value="false"/>
+                <Property key="NeedKey" value="false"/>
+                <Property key="Colour" value="#25436b"/>
+            </Widget>
             <Widget type="HBox" skin="MW_Box" position_real="0 0 1 1" align="Stretch" name="Layout">
                 <UserString key="HStretch" value="true"/>
                 <UserString key="VStretch" value="true"/>
@@ -26,6 +31,12 @@
 
 	<Resource type="ResourceLayout" name="MW_ValueEditBool" version="3.2.0">
 		<Widget type="Widget" skin="" position="0 0 100 50" align="Stretch" name="Root">
+            <Widget type="Widget" skin="BlackBG" position_real="0 0 1 1" name="Fill" align="Stretch">
+                <Property key="NeedMouse" value="false"/>
+                <Property key="NeedKey" value="false"/>
+                <Property key="Colour" value="#25436b"/>
+                <Property key="Visible" value="false"/>
+            </Widget>
             <Widget type="HBox" skin="MW_Box" position_real="0 0 1 1" align="Stretch" name="Layout">
                 <UserString key="HStretch" value="true"/>
                 <UserString key="VStretch" value="true"/>
@@ -35,7 +46,6 @@
                     <UserString key="VStretch" value="true"/>
                     <Property key="TextAlign" value="Center"/>
                     <Property key="Caption" value="On"/>
-                    <Property key="Colour" value="1 0 0 1"/>
                 </Widget>
             </Widget>
 		</Widget>
@@ -71,7 +81,7 @@
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left VCenter"/>
         <Property key="TextColour" value="#{fontcolour=header}"/>
-        
+
         <Child type="Widget" skin="IB_B" offset="0 14 16 2" align="Bottom HStretch"/>
         <BasisSkin type="SimpleText" offset="0 0 16 14" align="Stretch"/>
     </Resource>
