@@ -36,6 +36,7 @@ namespace MWLua
     void addProbeBindings(sol::table probe, const Context& context);
     void addApparatusBindings(sol::table apparatus, const Context& context);
     void addMiscellaneousBindings(sol::table miscellaneous, const Context& context);
+    void addPotionBindings(sol::table potion, const Context& context);
 }
 
 #endif // MWLUA_TYPES_H

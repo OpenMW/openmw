@@ -681,6 +681,22 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Returns the read-only @{#PotionRecord} of a potion
+-- @function [parent=#Potion] record
+-- @param #any objectOrRecordId
+-- @return #PotionRecord
+
+---
+-- @type PotionRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this potion (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #number weight
+-- @field #number value
+
 
 
 --- @{#Weapon} functions
