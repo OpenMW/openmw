@@ -11,6 +11,7 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
+    class ReadersCache;
     struct CellId;
     struct Cell;
     struct RefNum;
@@ -30,7 +31,7 @@ namespace MWWorld
     {
             typedef std::vector<std::pair<std::string, CellStore *> > IdCache;
             const MWWorld::ESMStore& mStore;
-            std::vector<ESM::ESMReader>& mReader;
+            ESM::ReadersCache& mReaders;
             mutable std::map<std::string, CellStore> mInteriors;
             mutable std::map<std::pair<int, int>, CellStore> mExteriors;
             IdCache mIdCache;
@@ -51,7 +52,7 @@ namespace MWWorld
 
             void clear();
 
-            Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader);
+            explicit Cells(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
 
             CellStore *getExterior (int x, int y);
 

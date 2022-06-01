@@ -12,7 +12,7 @@
 
 namespace ESM
 {
-    class ESMReader;
+    class ReadersCache;
     struct Cell;
 }
 
@@ -40,7 +40,7 @@ namespace Resource
         float mScale;
     };
 
-    void forEachBulletObject(std::vector<ESM::ESMReader>& readers, const VFS::Manager& vfs,
+    void forEachBulletObject(ESM::ReadersCache& readers, const VFS::Manager& vfs,
         Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
         std::function<void (const ESM::Cell&, const BulletObject& object)> callback);
 }

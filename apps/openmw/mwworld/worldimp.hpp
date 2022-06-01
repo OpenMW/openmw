@@ -5,6 +5,7 @@
 
 #include <components/settings/settings.hpp>
 #include <components/misc/rng.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include "../mwbase/world.hpp"
 
@@ -81,7 +82,7 @@ namespace MWWorld
         private:
             Resource::ResourceSystem* mResourceSystem;
 
-            std::vector<ESM::ESMReader> mEsm;
+            ESM::ReadersCache mReaders;
             MWWorld::ESMStore mStore;
             GroundcoverStore mGroundcoverStore;
             LocalScripts mLocalScripts;
@@ -162,13 +163,13 @@ namespace MWWorld
             void updateNavigatorObject(const MWPhysics::Object& object);
 
             void ensureNeededRecords();
-            void validateMasterFiles(const std::vector<ESM::ESMReader>& readers);
 
             void fillGlobalVariables();
 
             void updateSkyDate();
 
-            void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener);
+            void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content,
+                ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener);
 
             void loadGroundcoverFiles(const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder);
 
@@ -240,8 +241,6 @@ namespace MWWorld
             MWWorld::ConstPtr getPlayerConstPtr() const override;
 
             const MWWorld::ESMStore& getStore() const override;
-
-            std::vector<ESM::ESMReader>& getEsmReader() override;
 
             LocalScripts& getLocalScripts() override;
 

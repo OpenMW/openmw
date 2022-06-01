@@ -95,7 +95,7 @@ add_component_dir (esm3
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap
     inventorystate containerstate npcstate creaturestate dialoguestate statstate npcstats creaturestats
     weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
-    aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings
+    aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings readerscache
     )
 
 add_component_dir (esm3terrain

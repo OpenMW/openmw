@@ -68,9 +68,7 @@ MWWorld::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
         std::map<std::string, CellStore>::iterator result = mInteriors.find (lowerName);
 
         if (result==mInteriors.end())
-        {
-            result = mInteriors.insert (std::make_pair (lowerName, CellStore (cell, mStore, mReader))).first;
-        }
+            result = mInteriors.emplace(std::move(lowerName), CellStore(cell, mStore, mReaders)).first;
 
         return &result->second;
     }
@@ -80,11 +78,8 @@ MWWorld::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
             mExteriors.find (std::make_pair (cell->getGridX(), cell->getGridY()));
 
         if (result==mExteriors.end())
-        {
-            result = mExteriors.insert (std::make_pair (
-                std::make_pair (cell->getGridX(), cell->getGridY()), CellStore (cell, mStore, mReader))).first;
-
-        }
+            result = mExteriors.emplace(std::make_pair(cell->getGridX(), cell->getGridY()),
+                                        CellStore(cell, mStore, mReaders)).first;
 
         return &result->second;
     }
@@ -130,9 +125,10 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, CellStore& cell) const
     writer.endRecord (ESM::REC_CSTA);
 }
 
-MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader)
-: mStore (store), mReader (reader),
-  mIdCacheIndex (0)
+MWWorld::Cells::Cells (const MWWorld::ESMStore& store, ESM::ReadersCache& readers)
+    : mStore(store)
+    , mReaders(readers)
+    , mIdCacheIndex(0)
 {
     int cacheSize = std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000);
     mIdCache = IdCache(cacheSize, std::pair<std::string, CellStore *> ("", (CellStore*)nullptr));
@@ -165,8 +161,7 @@ MWWorld::CellStore *MWWorld::Cells::getExterior (int x, int y)
             cell = MWBase::Environment::get().getWorld()->createRecord (record);
         }
 
-        result = mExteriors.insert (std::make_pair (
-            std::make_pair (x, y), CellStore (cell, mStore, mReader))).first;
+        result = mExteriors.emplace(std::make_pair(x, y), CellStore(cell, mStore, mReaders)).first;
     }
 
     if (result->second.getState()!=CellStore::State_Loaded)
@@ -186,7 +181,7 @@ MWWorld::CellStore *MWWorld::Cells::getInterior (const std::string& name)
     {
         const ESM::Cell *cell = mStore.get<ESM::Cell>().find(lowerName);
 
-        result = mInteriors.insert (std::make_pair (lowerName, CellStore (cell, mStore, mReader))).first;
+        result = mInteriors.emplace(std::move(lowerName), CellStore(cell, mStore, mReaders)).first;
     }
 
     if (result->second.getState()!=CellStore::State_Loaded)

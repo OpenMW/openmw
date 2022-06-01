@@ -2,6 +2,7 @@
 
 #include <components/esmloader/load.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/esm3/readerscache.hpp>
 
 namespace MWWorld
 {
@@ -11,7 +12,7 @@ namespace MWWorld
         query.mLoadStatics = true;
         query.mLoadCells = true;
 
-        std::vector<ESM::ESMReader> readers(groundcoverFiles.size());
+        ESM::ReadersCache readers;
         const ::EsmLoader::EsmData content = ::EsmLoader::loadEsmData(query, groundcoverFiles, fileCollections, readers, encoder);
 
         for (const ESM::Static& stat : statics)

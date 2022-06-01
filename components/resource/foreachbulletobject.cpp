@@ -13,6 +13,7 @@
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include <osg/ref_ptr>
 
@@ -50,17 +51,17 @@ namespace Resource
         }
 
         std::vector<CellRef> loadCellRefs(const ESM::Cell& cell, const EsmLoader::EsmData& esmData,
-            std::vector<ESM::ESMReader>& readers)
+            ESM::ReadersCache& readers)
         {
             std::vector<EsmLoader::Record<CellRef>> cellRefs;
 
             for (std::size_t i = 0; i < cell.mContextList.size(); i++)
             {
-                ESM::ESMReader& reader = readers[static_cast<std::size_t>(cell.mContextList[i].index)];
-                cell.restore(reader, static_cast<int>(i));
+                const ESM::ReadersCache::BusyItem reader = readers.get(static_cast<std::size_t>(cell.mContextList[i].index));
+                cell.restore(*reader, static_cast<int>(i));
                 ESM::CellRef cellRef;
                 bool deleted = false;
-                while (ESM::Cell::getNextRef(reader, cellRef, deleted))
+                while (ESM::Cell::getNextRef(*reader, cellRef, deleted))
                 {
                     Misc::StringUtils::lowerCaseInPlace(cellRef.mRefID);
                     const ESM::RecNameInts type = getType(esmData, cellRef.mRefID);
@@ -83,7 +84,7 @@ namespace Resource
 
         template <class F>
         void forEachObject(const ESM::Cell& cell, const EsmLoader::EsmData& esmData, const VFS::Manager& vfs,
-            Resource::BulletShapeManager& bulletShapeManager, std::vector<ESM::ESMReader>& readers,
+            Resource::BulletShapeManager& bulletShapeManager, ESM::ReadersCache& readers,
             F&& f)
         {
             std::vector<CellRef> cellRefs = loadCellRefs(cell, esmData, readers);
@@ -130,7 +131,7 @@ namespace Resource
         }
     }
 
-    void forEachBulletObject(std::vector<ESM::ESMReader>& readers, const VFS::Manager& vfs,
+    void forEachBulletObject(ESM::ReadersCache& readers, const VFS::Manager& vfs,
         Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
         std::function<void (const ESM::Cell& cell, const BulletObject& object)> callback)
     {

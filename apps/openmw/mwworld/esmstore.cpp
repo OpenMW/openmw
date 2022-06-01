@@ -9,6 +9,7 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/lua/configuration.hpp>
 #include <components/misc/algorithm.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
 
@@ -24,19 +25,18 @@ namespace
 
     constexpr std::size_t deletedRefID = std::numeric_limits<std::size_t>::max();
 
-    void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, std::vector<ESM::ESMReader>& readers)
+    void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, ESM::ReadersCache& readers)
     {
         // TODO: we have many similar copies of this code.
         for (size_t i = 0; i < cell.mContextList.size(); i++)
         {
-            size_t index = cell.mContextList[i].index;
-            if (readers.size() <= index)
-                readers.resize(index + 1);
-            cell.restore(readers[index], i);
+            const std::size_t index = static_cast<std::size_t>(cell.mContextList[i].index);
+            const ESM::ReadersCache::BusyItem reader = readers.get(index);
+            cell.restore(*reader, i);
             ESM::CellRef ref;
             ref.mRefNum.unset();
             bool deleted = false;
-            while(cell.getNextRef(readers[index], ref, deleted))
+            while (cell.getNextRef(*reader, ref, deleted))
             {
                 if(deleted)
                     refs.emplace_back(ref.mRefNum, deletedRefID);
@@ -241,7 +241,7 @@ ESM::LuaScriptsCfg ESMStore::getLuaScriptsCfg() const
     return cfg;
 }
 
-void ESMStore::setUp(bool validateRecords)
+void ESMStore::setUp()
 {
     mIds.clear();
 
@@ -267,15 +267,15 @@ void ESMStore::setUp(bool validateRecords)
     mMagicEffects.setUp();
     mAttributes.setUp();
     mDialogs.setUp();
-
-    if (validateRecords)
-    {
-        validate();
-        countAllCellRefs();
-    }
 }
 
-void ESMStore::countAllCellRefs()
+void ESMStore::validateRecords(ESM::ReadersCache& readers)
+{
+    validate();
+    countAllCellRefs(readers);
+}
+
+void ESMStore::countAllCellRefs(ESM::ReadersCache& readers)
 {
     // TODO: We currently need to read entire files here again.
     // We should consider consolidating or deferring this reading.
@@ -283,7 +283,6 @@ void ESMStore::countAllCellRefs()
         return;
     std::vector<Ref> refs;
     std::vector<std::string> refIDs;
-    std::vector<ESM::ESMReader> readers;
     for(auto it = mCells.intBegin(); it != mCells.intEnd(); ++it)
         readRefs(*it, refs, refIDs, readers);
     for(auto it = mCells.extBegin(); it != mCells.extEnd(); ++it)

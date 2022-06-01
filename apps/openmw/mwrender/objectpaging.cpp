@@ -17,6 +17,7 @@
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include <osgParticle/ParticleProcessor>
 #include <osgParticle/ParticleSystemUpdater>
@@ -412,7 +413,7 @@ namespace MWRender
         osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
 
         std::map<ESM::RefNum, ESM::CellRef> refs;
-        std::vector<ESM::ESMReader> esm;
+        ESM::ReadersCache readers;
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
@@ -425,17 +426,16 @@ namespace MWRender
                 {
                     try
                     {
-                        unsigned int index = cell->mContextList[i].index;
-                        if (esm.size()<=index)
-                            esm.resize(index+1);
-                        cell->restore(esm[index], i);
+                        const std::size_t index = static_cast<std::size_t>(cell->mContextList[i].index);
+                        const ESM::ReadersCache::BusyItem reader = readers.get(index);
+                        cell->restore(*reader, i);
                         ESM::CellRef ref;
                         ref.mRefNum.unset();
                         ESM::MovedCellRef cMRef;
                         cMRef.mRefNum.mIndex = 0;
                         bool deleted = false;
                         bool moved = false;
-                        while (ESM::Cell::getNextRef(esm[index], ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
+                        while (ESM::Cell::getNextRef(*reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
                         {
                             if (moved)
                                 continue;

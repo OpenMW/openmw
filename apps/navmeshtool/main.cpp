@@ -20,6 +20,7 @@
 #include <components/version/version.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include <osg/Vec3f>
 
@@ -174,7 +175,7 @@ namespace NavMeshTool
 
             DetourNavigator::NavMeshDb db(dbPath, maxDbFileSize);
 
-            std::vector<ESM::ESMReader> readers(contentFiles.size());
+            ESM::ReadersCache readers;
             EsmLoader::Query query;
             query.mLoadActivators = true;
             query.mLoadCells = true;
