@@ -24,21 +24,7 @@ namespace Files
         {
             if (mStrict)
                 return left<right;
-
-            std::size_t min = std::min (left.length(), right.length());
-
-            for (std::size_t i=0; i<min; ++i)
-            {
-                char l = Misc::StringUtils::toLower (left[i]);
-                char r = Misc::StringUtils::toLower (right[i]);
-
-                if (l<r)
-                    return true;
-                if (l>r)
-                    return false;
-            }
-
-            return left.length()<right.length();
+            return Misc::StringUtils::ciLess(left, right);
         }
     };
 
