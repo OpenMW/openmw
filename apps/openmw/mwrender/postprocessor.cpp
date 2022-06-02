@@ -148,7 +148,6 @@ namespace MWRender
             {
                 const auto [w, h] = rt.mSize.get(mWidth, mHeight);
                 rt.mTarget->setTextureSize(w, h);
-                rt.mTarget->dirtyTextureObject();
             }
         }
 

@@ -378,7 +378,11 @@ namespace MWGui
                     continue;
 
                 if (!uniform->mHeader.empty())
-                    mConfigArea->createWidget<Gui::AutoSizedTextBox>("MW_UniformGroup", {0,0,0,34}, MyGUI::Align::Default)->setCaption(uniform->mHeader);
+                {
+                    Gui::AutoSizedTextBox* divider = mConfigArea->createWidget<Gui::AutoSizedTextBox>("MW_UniformGroup", {0,0,0,34}, MyGUI::Align::Default);
+                    divider->setNeedMouseFocus(false);
+                    divider->setCaption(uniform->mHeader);
+                }
 
                 fx::Widgets::UniformBase* uwidget = mConfigArea->createWidget<fx::Widgets::UniformBase>("MW_UniformEdit", {0,0,0,22}, MyGUI::Align::Default);
                 uwidget->init(uniform);
