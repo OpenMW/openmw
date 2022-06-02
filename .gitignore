@@ -34,7 +34,6 @@ CMakeLists.txt.user*
 .vscode
 
 ## resources
-data
 resources
 /*.cfg
 /*.desktop
