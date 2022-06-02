@@ -662,6 +662,8 @@ LocalMapRenderToTexture::LocalMapRenderToTexture(osg::Node* sceneRoot, int res, 
     , mSceneRoot(sceneRoot)
     , mActive(true)
 {
+    setNodeMask(Mask_RenderToTexture);
+
     if (SceneUtil::AutoDepth::isReversed())
         mProjectionMatrix = SceneUtil::getReversedZProjectionMatrixAsOrtho(-mapWorldSize / 2, mapWorldSize / 2, -mapWorldSize / 2, mapWorldSize / 2, 5, (zmax - zmin) + 10);
     else
