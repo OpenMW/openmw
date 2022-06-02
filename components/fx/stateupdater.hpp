@@ -85,7 +85,7 @@ namespace fx
 
         void setWindSpeed(float speed) { mData.get<WindSpeed>() = speed; }
 
-        void setWeatherTransition(float transition) { mData.get<WeatherTransition>() = transition; }
+        void setWeatherTransition(float transition) { mData.get<WeatherTransition>() = transition > 0 ? 1 - transition : 0; }
 
         void bindPointLights(std::shared_ptr<SceneUtil::PPLightBuffer> buffer)
         {
