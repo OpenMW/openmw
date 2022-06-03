@@ -16,22 +16,7 @@ namespace Files
         {
             if (mStrict)
                 return left==right;
-
-            std::size_t len = left.length();
-
-            if (len!=right.length())
-                return false;
-
-            for (std::size_t i=0; i<len; ++i)
-            {
-                char l = Misc::StringUtils::toLower (left[i]);
-                char r = Misc::StringUtils::toLower (right[i]);
-
-                if (l!=r)
-                    return false;
-            }
-
-            return true;
+            return Misc::StringUtils::ciEqual(left, right);
         }
     };
 
