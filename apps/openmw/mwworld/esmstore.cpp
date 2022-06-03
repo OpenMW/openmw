@@ -10,6 +10,7 @@
 #include <components/lua/configuration.hpp>
 #include <components/misc/algorithm.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/esmloader/load.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
 
@@ -145,7 +146,8 @@ static bool isCacheableRecord(int id)
 
 void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue)
 {
-    listener->setProgressRange(1000);
+    if (listener != nullptr)
+        listener->setProgressRange(::EsmLoader::fileProgress);
 
     // Land texture loading needs to use a separate internal store for each plugin.
     // We set the number of plugins here so we can properly verify if valid plugin
@@ -211,7 +213,8 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
                 dialogue = nullptr;
             }
         }
-        listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
+        if (listener != nullptr)
+            listener->setProgress(::EsmLoader::fileProgress * esm.getFileOffset() / esm.getFileSize());
     }
 }
 

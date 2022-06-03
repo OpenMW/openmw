@@ -157,7 +157,7 @@ namespace MWWorld
         listener->loadingOn();
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
-        loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder);
+        loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
 
         listener->loadingOff();
 
@@ -2940,13 +2940,14 @@ namespace MWWorld
             ensureNeededRecords(); // Insert records that may not be present in all versions of master files.
     }
 
-    void World::loadGroundcoverFiles(const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder)
+    void World::loadGroundcoverFiles(const Files::Collections& fileCollections,
+        const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         if (!Settings::Manager::getBool("enabled", "Groundcover")) return;
 
         Log(Debug::Info) << "Loading groundcover:";
 
-        mGroundcoverStore.init(mStore.get<ESM::Static>(), fileCollections, groundcoverFiles, encoder);
+        mGroundcoverStore.init(mStore.get<ESM::Static>(), fileCollections, groundcoverFiles, encoder, listener);
     }
 
     bool World::startSpellCast(const Ptr &actor)

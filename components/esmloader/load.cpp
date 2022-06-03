@@ -19,6 +19,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
 
 #include <algorithm>
 #include <filesystem>
@@ -190,7 +191,7 @@ namespace EsmLoader
             reader.skipRecord();
         }
 
-        void loadEsm(const Query& query, ESM::ESMReader& reader, ShallowContent& content)
+        void loadEsm(const Query& query, ESM::ESMReader& reader, ShallowContent& content, Loading::Listener* listener)
         {
             Log(Debug::Info) << "Loading ESM file " << reader.getName();
 
@@ -204,12 +205,15 @@ namespace EsmLoader
                     continue;
                 }
                 loadRecord(query, recName, reader, content);
+
+                if (listener != nullptr)
+                    listener->setProgress(fileProgress * reader.getFileOffset() / reader.getFileSize());
             }
         }
 
         ShallowContent shallowLoad(const Query& query, const std::vector<std::string>& contentFiles,
             const Files::Collections& fileCollections, ESM::ReadersCache& readers,
-            ToUTF8::Utf8Encoder* encoder)
+            ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
         {
             ShallowContent result;
 
@@ -232,6 +236,12 @@ namespace EsmLoader
                     continue;
                 }
 
+                if (listener != nullptr)
+                {
+                    listener->setLabel(file);
+                    listener->setProgressRange(fileProgress);
+                }
+
                 const Files::MultiDirCollection& collection = fileCollections.getCollection(extension);
 
                 const ESM::ReadersCache::BusyItem reader = readers.get(i);
@@ -241,7 +251,7 @@ namespace EsmLoader
                 if (query.mLoadCells)
                     reader->resolveParentFileIndices(readers);
 
-                loadEsm(query, *reader, result);
+                loadEsm(query, *reader, result, listener);
             }
 
             return result;
@@ -290,11 +300,12 @@ namespace EsmLoader
     }
 
     EsmData loadEsmData(const Query& query, const std::vector<std::string>& contentFiles,
-        const Files::Collections& fileCollections, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder)
+        const Files::Collections& fileCollections, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder,
+        Loading::Listener* listener)
     {
         Log(Debug::Info) << "Loading ESM data...";
 
-        ShallowContent content = shallowLoad(query, contentFiles, fileCollections, readers, encoder);
+        ShallowContent content = shallowLoad(query, contentFiles, fileCollections, readers, encoder, listener);
 
         std::ostringstream loaded;
 

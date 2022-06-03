@@ -6,14 +6,16 @@
 
 namespace MWWorld
 {
-    void GroundcoverStore::init(const Store<ESM::Static>& statics, const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder)
+    void GroundcoverStore::init(const Store<ESM::Static>& statics, const Files::Collections& fileCollections,
+        const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         ::EsmLoader::Query query;
         query.mLoadStatics = true;
         query.mLoadCells = true;
 
         ESM::ReadersCache readers;
-        const ::EsmLoader::EsmData content = ::EsmLoader::loadEsmData(query, groundcoverFiles, fileCollections, readers, encoder);
+        const ::EsmLoader::EsmData content = ::EsmLoader::loadEsmData(query, groundcoverFiles, fileCollections,
+                                                                      readers, encoder, listener);
 
         for (const ESM::Static& stat : statics)
         {
