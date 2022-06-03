@@ -9,9 +9,10 @@ namespace DetourNavigator
     {
         Aabb = 0,
         RotatingBox = 1,
+        Cylinder = 2,
     };
 
-    inline constexpr CollisionShapeType defaultCollisionShapeType = CollisionShapeType::Aabb;
+    CollisionShapeType toCollisionShapeType(int value);
 }
 
 #endif

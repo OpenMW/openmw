@@ -11,6 +11,7 @@
 #include <components/config/gamesettings.hpp>
 #include <components/contentselector/view/contentselector.hpp>
 #include <components/contentselector/model/esmfile.hpp>
+#include <components/detournavigator/collisionshapetype.hpp>
 
 #include "utils/openalutil.hpp"
 
@@ -109,6 +110,9 @@ bool Launcher::AdvancedPage::loadSettings()
             physicsThreadsSpinBox->setValue(numPhysicsThreads);
         loadSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
         loadSettingBool(unarmedCreatureAttacksDamageArmorCheckBox, "unarmed creature attacks damage armor", "Game");
+        const int actorCollisionShapeType = Settings::Manager::getInt("actor collision shape type", "Game");
+        if (0 <= actorCollisionShapeType && actorCollisionShapeType < actorCollisonShapeTypeComboBox->count())
+            actorCollisonShapeTypeComboBox->setCurrentIndex(actorCollisionShapeType);
     }
 
     // Visuals
@@ -264,6 +268,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingInt(physicsThreadsSpinBox, "async num threads", "Physics");
         saveSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
         saveSettingBool(unarmedCreatureAttacksDamageArmorCheckBox, "unarmed creature attacks damage armor", "Game");
+        saveSettingInt(actorCollisonShapeTypeComboBox, "actor collision shape type", "Game");
     }
 
     // Visuals

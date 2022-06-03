@@ -138,6 +138,7 @@ namespace MWLua
             context.mLua->tableFromPairs<std::string_view, DetourNavigator::CollisionShapeType>({
                 {"Aabb", DetourNavigator::CollisionShapeType::Aabb},
                 {"RotatingBox", DetourNavigator::CollisionShapeType::RotatingBox},
+                {"Cylinder", DetourNavigator::CollisionShapeType::Cylinder},
             }));
 
         api["FIND_PATH_STATUS"] = LuaUtil::makeStrictReadOnly(
@@ -154,7 +155,7 @@ namespace MWLua
             }));
 
         static const DetourNavigator::AgentBounds defaultAgentBounds {
-            DetourNavigator::defaultCollisionShapeType,
+            DetourNavigator::toCollisionShapeType(Settings::Manager::getInt("actor collision shape type", "Game")),
             Settings::Manager::getVector3("default actor pathfind half extents", "Game"),
         };
         static const float defaultStepSize = 2 * std::max(defaultAgentBounds.mHalfExtents.x(), defaultAgentBounds.mHalfExtents.y());

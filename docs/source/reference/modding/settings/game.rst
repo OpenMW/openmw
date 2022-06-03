@@ -476,7 +476,7 @@ day night switches
 Some mods add models which change visuals based on time of day. When this setting is enabled, supporting models will automatically make use of Day/night state.
 
 unarmed creature attacks damage armor
------------------------------------------
+-------------------------------------
 
 :Type:		boolean
 :Range:		True/False
@@ -487,3 +487,19 @@ If disabled unarmed creature attacks do not reduce armor condition, just as with
 If enabled unarmed creature attacks reduce armor condition, the same as attacks from NPCs and armed creatures.
 
 This setting can be controlled in Advanced tab of the launcher, under Game Mechanics.
+
+actor collision shape type
+--------------------------
+
+:Type:		integer
+:Range:		0, 1, 2
+:Default:	0 (Axis-aligned bounding box)
+
+Collision is used for both physics simulation and navigation mesh generation for pathfinding.
+Cylinder gives the best consistency bewtween available navigation paths and ability to move by them.
+Changing this value affects navigation mesh generation therefore navigation mesh disk cache generated for one value
+will not be useful with another.
+
+* 0: Axis-aligned bounding box
+* 1: Rotating box
+* 2: Cylinder

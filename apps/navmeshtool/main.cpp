@@ -174,7 +174,7 @@ namespace NavMeshTool
             Settings::Manager settings;
             settings.load(config);
 
-            const DetourNavigator::CollisionShapeType agentCollisionShape = DetourNavigator::defaultCollisionShapeType;
+            const auto agentCollisionShape = DetourNavigator::toCollisionShapeType(Settings::Manager::getInt("actor collision shape type", "Game"));
             const osg::Vec3f agentHalfExtents = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
             const DetourNavigator::AgentBounds agentBounds {agentCollisionShape, agentHalfExtents};
             const std::uint64_t maxDbFileSize = static_cast<std::uint64_t>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
