@@ -20,6 +20,7 @@
 #include <components/vfs/manager.hpp>
 #include <components/debug/debugging.hpp>
 #include <components/navmeshtool/protocol.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include <LinearMath/btVector3.h>
 
@@ -68,17 +69,17 @@ namespace NavMeshTool
         }
 
         std::vector<CellRef> loadCellRefs(const ESM::Cell& cell, const EsmLoader::EsmData& esmData,
-            std::vector<ESM::ESMReader>& readers)
+            ESM::ReadersCache& readers)
         {
             std::vector<EsmLoader::Record<CellRef>> cellRefs;
 
             for (std::size_t i = 0; i < cell.mContextList.size(); i++)
             {
-                ESM::ESMReader& reader = readers[static_cast<std::size_t>(cell.mContextList[i].index)];
-                cell.restore(reader, static_cast<int>(i));
+                ESM::ReadersCache::BusyItem reader = readers.get(static_cast<std::size_t>(cell.mContextList[i].index));
+                cell.restore(*reader, static_cast<int>(i));
                 ESM::CellRef cellRef;
                 bool deleted = false;
-                while (ESM::Cell::getNextRef(reader, cellRef, deleted))
+                while (ESM::Cell::getNextRef(*reader, cellRef, deleted))
                 {
                     Misc::StringUtils::lowerCaseInPlace(cellRef.mRefID);
                     const ESM::RecNameInts type = getType(esmData, cellRef.mRefID);
@@ -101,7 +102,7 @@ namespace NavMeshTool
 
         template <class F>
         void forEachObject(const ESM::Cell& cell, const EsmLoader::EsmData& esmData, const VFS::Manager& vfs,
-            Resource::BulletShapeManager& bulletShapeManager, std::vector<ESM::ESMReader>& readers,
+            Resource::BulletShapeManager& bulletShapeManager, ESM::ReadersCache& readers,
             F&& f)
         {
             std::vector<CellRef> cellRefs = loadCellRefs(cell, esmData, readers);
@@ -233,7 +234,7 @@ namespace NavMeshTool
         mAabb.m_max = btVector3(0, 0, 0);
     }
 
-    WorldspaceData gatherWorldspaceData(const DetourNavigator::Settings& settings, std::vector<ESM::ESMReader>& readers,
+    WorldspaceData gatherWorldspaceData(const DetourNavigator::Settings& settings, ESM::ReadersCache& readers,
         const VFS::Manager& vfs, Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
         bool processInteriorCells, bool writeBinaryLog)
     {

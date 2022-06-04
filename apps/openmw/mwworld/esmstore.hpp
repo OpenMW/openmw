@@ -20,6 +20,11 @@ namespace MWMechanics
     class SpellList;
 }
 
+namespace ESM
+{
+    class ReadersCache;
+}
+
 namespace MWWorld
 {
     class ESMStore
@@ -90,7 +95,7 @@ namespace MWWorld
         /// Validate entries in store after setup
         void validate();
 
-        void countAllCellRefs();
+        void countAllCellRefs(ESM::ReadersCache& readers);
 
         template<class T>
         void removeMissingObjects(Store<T>& store);
@@ -266,7 +271,8 @@ namespace MWWorld
 
         // This method must be called once, after loading all master/plugin files. This can only be done
         //  from the outside, so it must be public.
-        void setUp(bool validateRecords = false);
+        void setUp();
+        void validateRecords(ESM::ReadersCache& readers);
 
         int countSavedGameRecords() const;
 

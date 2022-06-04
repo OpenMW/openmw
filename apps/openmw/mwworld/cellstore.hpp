@@ -38,6 +38,7 @@
 
 namespace ESM
 {
+    class ReadersCache;
     struct Cell;
     struct CellState;
     struct CellId;
@@ -61,7 +62,7 @@ namespace MWWorld
         private:
 
             const MWWorld::ESMStore& mStore;
-            std::vector<ESM::ESMReader>& mReader;
+            ESM::ReadersCache& mReaders;
 
             // Even though fog actually belongs to the player and not cells,
             // it makes sense to store it here since we need it once for each cell.
@@ -211,9 +212,7 @@ namespace MWWorld
             }
 
             /// @param readerList The readers to use for loading of the cell on-demand.
-            CellStore (const ESM::Cell *cell_,
-                       const MWWorld::ESMStore& store,
-                       std::vector<ESM::ESMReader>& readerList);
+            CellStore(const ESM::Cell* cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
 
             const ESM::Cell *getCell() const;
 

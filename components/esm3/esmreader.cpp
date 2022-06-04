@@ -1,5 +1,7 @@
 #include "esmreader.hpp"
 
+#include "readerscache.hpp"
+
 #include <components/misc/stringops.hpp>
 #include <components/files/openfile.hpp>
 
@@ -61,21 +63,22 @@ void ESMReader::clearCtx()
    mCtx.subName.clear();
 }
 
-void ESMReader::resolveParentFileIndices(const std::vector<ESMReader>& allPlugins)
+void ESMReader::resolveParentFileIndices(ReadersCache& readers)
 {
     mCtx.parentFileIndices.clear();
-    const std::vector<Header::MasterData> &masters = getGameFiles();
-    for (size_t j = 0; j < masters.size(); j++) {
-        const Header::MasterData &mast = masters[j];
-        std::string fname = mast.name;
+    for (const Header::MasterData &mast : getGameFiles())
+    {
+        const std::string& fname = mast.name;
         int index = getIndex(); 
-        for (int i = 0; i < getIndex(); i++) {
-            const ESMReader& reader = allPlugins.at(i);
-            if (reader.getFileSize() == 0)
+        for (int i = 0; i < getIndex(); i++)
+        {
+            const ESM::ReadersCache::BusyItem reader = readers.get(static_cast<std::size_t>(i));
+            if (reader->getFileSize() == 0)
                 continue;  // Content file in non-ESM format
-            const std::string& candidate = reader.getName();
+            const std::string& candidate = reader->getName();
             std::string fnamecandidate = std::filesystem::path(candidate).filename().string();
-            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
+            if (Misc::StringUtils::ciEqual(fname, fnamecandidate))
+            {
                 index = i;
                 break;
             }

@@ -10,6 +10,7 @@
 #include <components/files/collections.hpp>
 #include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include <gtest/gtest.h>
 
@@ -39,7 +40,7 @@ namespace
         query.mLoadGameSettings = true;
         query.mLoadLands = true;
         query.mLoadStatics = true;
-        std::vector<ESM::ESMReader> readers(mContentFiles.size());
+        ESM::ReadersCache readers;
         ToUTF8::Utf8Encoder* const encoder = nullptr;
         const EsmData esmData = loadEsmData(query, mContentFiles, mFileCollections, readers, encoder);
         EXPECT_EQ(esmData.mActivators.size(), 0);
@@ -61,7 +62,7 @@ namespace
         query.mLoadGameSettings = true;
         query.mLoadLands = true;
         query.mLoadStatics = true;
-        std::vector<ESM::ESMReader> readers(mContentFiles.size());
+        ESM::ReadersCache readers;
         ToUTF8::Utf8Encoder* const encoder = nullptr;
         const EsmData esmData = loadEsmData(query, mContentFiles, mFileCollections, readers, encoder);
         EXPECT_EQ(esmData.mActivators.size(), 0);
@@ -83,7 +84,7 @@ namespace
         query.mLoadGameSettings = false;
         query.mLoadLands = true;
         query.mLoadStatics = true;
-        std::vector<ESM::ESMReader> readers(mContentFiles.size());
+        ESM::ReadersCache readers;
         ToUTF8::Utf8Encoder* const encoder = nullptr;
         const EsmData esmData = loadEsmData(query, mContentFiles, mFileCollections, readers, encoder);
         EXPECT_EQ(esmData.mActivators.size(), 0);
@@ -98,7 +99,7 @@ namespace
     TEST_F(EsmLoaderTest, shouldIgnoreAllWithDefaultQuery)
     {
         const Query query;
-        std::vector<ESM::ESMReader> readers(mContentFiles.size());
+        ESM::ReadersCache readers;
         ToUTF8::Utf8Encoder* const encoder = nullptr;
         const EsmData esmData = loadEsmData(query, mContentFiles, mFileCollections, readers, encoder);
         EXPECT_EQ(esmData.mActivators.size(), 0);
@@ -121,7 +122,7 @@ namespace
         query.mLoadLands = true;
         query.mLoadStatics = true;
         const std::vector<std::string> contentFiles {{"script.omwscripts"}};
-        std::vector<ESM::ESMReader> readers(contentFiles.size());
+        ESM::ReadersCache readers;
         ToUTF8::Utf8Encoder* const encoder = nullptr;
         const EsmData esmData = loadEsmData(query, contentFiles, mFileCollections, readers, encoder);
         EXPECT_EQ(esmData.mActivators.size(), 0);

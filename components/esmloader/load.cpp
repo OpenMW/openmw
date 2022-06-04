@@ -18,6 +18,7 @@
 #include <components/files/multidircollection.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include <algorithm>
 #include <filesystem>
@@ -207,7 +208,7 @@ namespace EsmLoader
         }
 
         ShallowContent shallowLoad(const Query& query, const std::vector<std::string>& contentFiles,
-            const Files::Collections& fileCollections, std::vector<ESM::ESMReader>& readers,
+            const Files::Collections& fileCollections, ESM::ReadersCache& readers,
             ToUTF8::Utf8Encoder* encoder)
         {
             ShallowContent result;
@@ -233,14 +234,14 @@ namespace EsmLoader
 
                 const Files::MultiDirCollection& collection = fileCollections.getCollection(extension);
 
-                ESM::ESMReader& reader = readers[i];
-                reader.setEncoder(encoder);
-                reader.setIndex(static_cast<int>(i));
-                reader.open(collection.getPath(file).string());
+                const ESM::ReadersCache::BusyItem reader = readers.get(i);
+                reader->setEncoder(encoder);
+                reader->setIndex(static_cast<int>(i));
+                reader->open(collection.getPath(file).string());
                 if (query.mLoadCells)
-                    reader.resolveParentFileIndices(readers);
+                    reader->resolveParentFileIndices(readers);
 
-                loadEsm(query, readers[i], result);
+                loadEsm(query, *reader, result);
             }
 
             return result;
@@ -289,7 +290,7 @@ namespace EsmLoader
     }
 
     EsmData loadEsmData(const Query& query, const std::vector<std::string>& contentFiles,
-        const Files::Collections& fileCollections, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder)
+        const Files::Collections& fileCollections, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder)
     {
         Log(Debug::Info) << "Loading ESM data...";
 

@@ -17,6 +17,7 @@
 #include <components/esm3/fogstate.hpp>
 #include <components/esm3/creaturelevliststate.hpp>
 #include <components/esm3/doorstate.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -387,8 +388,14 @@ namespace MWWorld
         return false;
     }
 
-    CellStore::CellStore (const ESM::Cell *cell, const MWWorld::ESMStore& esmStore, std::vector<ESM::ESMReader>& readerList)
-        : mStore(esmStore), mReader(readerList), mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0), mRechargingItemsUpToDate(false)
+    CellStore::CellStore(const ESM::Cell* cell, const MWWorld::ESMStore& esmStore, ESM::ReadersCache& readers)
+        : mStore(esmStore)
+        , mReaders(readers)
+        , mCell(cell)
+        , mState(State_Unloaded)
+        , mHasState(false)
+        , mLastRespawn(0, 0)
+        , mRechargingItemsUpToDate(false)
     {
         mWaterLevel = cell->mWater;
     }
@@ -545,8 +552,6 @@ namespace MWWorld
 
     void CellStore::listRefs()
     {
-        std::vector<ESM::ESMReader>& esm = mReader;
-
         assert (mCell);
 
         if (mCell->mContextList.empty())
@@ -558,8 +563,9 @@ namespace MWWorld
             try
             {
                 // Reopen the ESM reader and seek to the right position.
-                int index = mCell->mContextList[i].index;
-                mCell->restore (esm[index], i);
+                const std::size_t index = static_cast<std::size_t>(mCell->mContextList[i].index);
+                const ESM::ReadersCache::BusyItem reader = mReaders.get(index);
+                mCell->restore(*reader, i);
 
                 ESM::CellRef ref;
 
@@ -568,7 +574,7 @@ namespace MWWorld
                 cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
                 bool moved = false;
-                while (ESM::Cell::getNextRef(esm[index], ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
+                while (ESM::Cell::getNextRef(*reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
                 {
                     if (deleted || moved)
                         continue;
@@ -602,8 +608,6 @@ namespace MWWorld
 
     void CellStore::loadRefs()
     {
-        std::vector<ESM::ESMReader>& esm = mReader;
-
         assert (mCell);
 
         if (mCell->mContextList.empty())
@@ -617,8 +621,9 @@ namespace MWWorld
             try
             {
                 // Reopen the ESM reader and seek to the right position.
-                int index = mCell->mContextList[i].index;
-                mCell->restore (esm[index], i);
+                const std::size_t index = static_cast<std::size_t>(mCell->mContextList[i].index);
+                const ESM::ReadersCache::BusyItem reader = mReaders.get(index);
+                mCell->restore(*reader, i);
 
                 ESM::CellRef ref;
                 ref.mRefNum.unset();
@@ -628,7 +633,7 @@ namespace MWWorld
                 cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
                 bool moved = false;
-                while (ESM::Cell::getNextRef(esm[index], ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
+                while (ESM::Cell::getNextRef(*reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
                 {
                     if (moved)
                         continue;

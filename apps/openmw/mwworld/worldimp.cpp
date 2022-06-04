@@ -145,8 +145,8 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
         const std::string& startCell, const std::string& startupScript,
         const std::string& resourcePath, const std::string& userDataPath)
-    : mResourceSystem(resourceSystem), mLocalScripts (mStore),
-      mCells (mStore, mEsm), mSky (true),
+    : mResourceSystem(resourceSystem), mLocalScripts(mStore),
+      mCells(mStore, mReaders), mSky(true),
       mGodMode(false), mScriptsEnabled(true), mDiscardMovements(true), mContentFiles (contentFiles),
       mUserDataPath(userDataPath),
       mDefaultHalfExtents(Settings::Manager::getVector3("default actor pathfind half extents", "Game")),
@@ -156,30 +156,20 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
-        mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
 
-        loadContentFiles(fileCollections, contentFiles, mStore, mEsm, encoder, listener);
+        loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder);
 
         listener->loadingOff();
-
-        // Find main game file
-        for (const ESM::ESMReader& reader : mEsm)
-        {
-            if (!Misc::StringUtils::ciEndsWith(reader.getName(), ".esm") && !Misc::StringUtils::ciEndsWith(reader.getName(), ".omwgame"))
-                continue;
-            if (reader.getFormat() == 0)
-                ensureNeededRecords();  // and insert records that may not be present in all versions of MW.
-            break;
-        }
 
         mCurrentDate = std::make_unique<DateTimeManager>();
 
         fillGlobalVariables();
 
-        mStore.setUp(true);
+        mStore.setUp();
+        mStore.validateRecords(mReaders);
         mStore.movePlayerRecord();
 
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
@@ -417,23 +407,6 @@ namespace MWWorld
         }
     }
 
-    void World::validateMasterFiles(const std::vector<ESM::ESMReader>& readers)
-    {
-        for (const auto& esm : readers)
-        {
-            assert(esm.getGameFiles().size() == esm.getParentFileIndices().size());
-            for (unsigned int i=0; i<esm.getParentFileIndices().size(); ++i)
-            {
-                if (!esm.isValidParentFileIndex(i))
-                {
-                    std::string fstring = "File " + esm.getName() + " asks for parent file " + esm.getGameFiles()[i].name
-                        + ", but it is not available or has been loaded in the wrong order. Please run the launcher to fix this issue.";
-                    throw std::runtime_error(fstring);
-                }
-            }
-        }
-    }
-
     void World::ensureNeededRecords()
     {
         std::map<std::string, ESM::Variant> gmst;
@@ -639,11 +612,6 @@ namespace MWWorld
     const MWWorld::ESMStore& World::getStore() const
     {
         return mStore;
-    }
-
-    std::vector<ESM::ESMReader>& World::getEsmReader()
-    {
-        return mEsm;
     }
 
     LocalScripts& World::getLocalScripts()
@@ -2939,11 +2907,11 @@ namespace MWWorld
         return mScriptsEnabled;
     }
 
-    void World::loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content, ESMStore& store, std::vector<ESM::ESMReader>& readers, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
+    void World::loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content,
+        ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         GameContentLoader gameContentLoader;
-        EsmLoader esmLoader(store, readers, encoder);
-        validateMasterFiles(readers);
+        EsmLoader esmLoader(mStore, mReaders, encoder);
 
         gameContentLoader.addLoader(".esm", esmLoader);
         gameContentLoader.addLoader(".esp", esmLoader);
@@ -2951,7 +2919,7 @@ namespace MWWorld
         gameContentLoader.addLoader(".omwaddon", esmLoader);
         gameContentLoader.addLoader(".project", esmLoader);
 
-        OMWScriptsLoader omwScriptsLoader(store);
+        OMWScriptsLoader omwScriptsLoader(mStore);
         gameContentLoader.addLoader(".omwscripts", omwScriptsLoader);
 
         int idx = 0;
@@ -2970,6 +2938,9 @@ namespace MWWorld
             }
             idx++;
         }
+
+        if (const auto v = esmLoader.getMasterFileFormat(); v.has_value() && *v == 0)
+            ensureNeededRecords(); // Insert records that may not be present in all versions of master files.
     }
 
     void World::loadGroundcoverFiles(const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder)

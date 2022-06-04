@@ -12,6 +12,7 @@
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/terrain/quadtreenode.hpp>
 #include <components/shader/shadermanager.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include "../mwworld/groundcoverstore.hpp"
 
@@ -176,7 +177,7 @@ namespace MWRender
         osg::Vec2f minBound = (center - osg::Vec2f(size/2.f, size/2.f));
         osg::Vec2f maxBound = (center + osg::Vec2f(size/2.f, size/2.f));
         DensityCalculator calculator(mDensity);
-        std::vector<ESM::ESMReader> esm;
+        ESM::ReadersCache readers;
         osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size/2.f), std::floor(center.y() - size/2.f));
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
         {
@@ -190,14 +191,13 @@ namespace MWRender
                 std::map<ESM::RefNum, ESM::CellRef> refs;
                 for (size_t i=0; i<cell.mContextList.size(); ++i)
                 {
-                    unsigned int index = cell.mContextList[i].index;
-                    if (esm.size() <= index)
-                        esm.resize(index+1);
-                    cell.restore(esm[index], i);
+                    const std::size_t index = static_cast<std::size_t>(cell.mContextList[i].index);
+                    const ESM::ReadersCache::BusyItem reader = readers.get(index);
+                    cell.restore(*reader, i);
                     ESM::CellRef ref;
                     ref.mRefNum.unset();
                     bool deleted = false;
-                    while(cell.getNextRef(esm[index], ref, deleted))
+                    while (cell.getNextRef(*reader, ref, deleted))
                     {
                         if (!deleted && refs.find(ref.mRefNum) == refs.end() && !calculator.isInstanceEnabled()) deleted = true;
                         if (!deleted && !isInChunkBorders(ref, minBound, maxBound)) deleted = true;

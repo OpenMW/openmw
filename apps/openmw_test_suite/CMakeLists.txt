@@ -81,6 +81,8 @@ if (GTEST_FOUND AND GMOCK_FOUND)
 
         fx/lexer.cpp
         fx/technique.cpp
+
+        esm3/readerscache.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
