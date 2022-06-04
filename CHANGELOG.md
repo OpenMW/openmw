@@ -119,6 +119,7 @@
     Bug #6718: Throwable weapons cause arrow enchantment effect to be applied to the whole body
     Bug #6730: LoopGroup stalls animation after playing :Stop frame until another animation is played
     Bug #6753: Info records without a DATA subrecords are loaded incorrectly
+    Bug #6794: Light sources are attached to mesh bounds centers instead of mesh origins when AttachLight NiNode is missing
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
