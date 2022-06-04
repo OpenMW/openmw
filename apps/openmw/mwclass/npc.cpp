@@ -1,5 +1,7 @@
 ﻿#include "npc.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <memory>
 
 #include <components/misc/constants.hpp>

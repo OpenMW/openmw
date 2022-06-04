@@ -2,6 +2,7 @@
 
 #include <iomanip>
 
+#include <MyGUI_Button.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ControllerManager.h>

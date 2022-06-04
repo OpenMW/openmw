@@ -2,7 +2,7 @@
 #define OPENMW_MWGUI_LAYOUT_H
 
 #include <string>
-#include <MyGUI_WidgetDefines.h>
+
 #include <MyGUI_Widget.h>
 
 #include <components/debug/debuglog.hpp>

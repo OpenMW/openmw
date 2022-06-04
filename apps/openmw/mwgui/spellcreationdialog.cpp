@@ -1,7 +1,9 @@
 #include "spellcreationdialog.hpp"
 
+#include <MyGUI_Button.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ScrollBar.h>
 
 #include <components/esm/records.hpp>
 #include <components/widgets/list.hpp>

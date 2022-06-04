@@ -1,5 +1,7 @@
 #include "weapon.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadweap.hpp>
 #include <components/misc/constants.hpp>
 #include <components/settings/settings.hpp>

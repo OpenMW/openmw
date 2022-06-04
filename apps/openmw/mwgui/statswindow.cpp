@@ -6,6 +6,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_TextIterator.h>
 #include <MyGUI_Gui.h>
 
 #include <components/settings/settings.hpp>

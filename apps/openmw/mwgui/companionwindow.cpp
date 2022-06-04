@@ -2,7 +2,9 @@
 
 #include <cmath>
 
+#include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_EditBox.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

@@ -1,5 +1,7 @@
 #include "repair.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadrepa.hpp>
 
 #include "../mwbase/environment.hpp"

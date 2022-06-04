@@ -3,7 +3,6 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
-#include <MyGUI_Widget.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>

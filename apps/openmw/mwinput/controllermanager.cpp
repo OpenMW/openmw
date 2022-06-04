@@ -2,7 +2,6 @@
 
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
-#include <MyGUI_Widget.h>
 
 #include <SDL.h>
 

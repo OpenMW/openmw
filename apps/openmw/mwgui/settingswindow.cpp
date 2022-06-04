@@ -11,7 +11,6 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
-#include <MyGUI_TabItem.h>
 
 #include <SDL_video.h>
 

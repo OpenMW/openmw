@@ -3,7 +3,6 @@
 
 #include "windowbase.hpp"
 
-#include <MyGUI_Gui.h>
 #include <MyGUI_ListBox.h>
 
 #include <components/settings/shadermanager.hpp>

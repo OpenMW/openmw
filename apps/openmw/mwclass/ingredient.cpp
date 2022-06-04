@@ -1,5 +1,7 @@
 #include "ingredient.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadingr.hpp>
 
 #include "../mwbase/environment.hpp"

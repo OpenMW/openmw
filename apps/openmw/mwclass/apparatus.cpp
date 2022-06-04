@@ -1,5 +1,7 @@
 #include "apparatus.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadappa.hpp>
 
 #include "../mwbase/environment.hpp"

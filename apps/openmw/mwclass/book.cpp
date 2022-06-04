@@ -1,5 +1,7 @@
 #include "book.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadbook.hpp>
 
 #include "../mwbase/environment.hpp"

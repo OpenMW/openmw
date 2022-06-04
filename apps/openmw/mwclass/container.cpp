@@ -1,5 +1,7 @@
 #include "container.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/containerstate.hpp>
 #include <components/settings/settings.hpp>

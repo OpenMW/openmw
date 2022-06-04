@@ -1,5 +1,7 @@
 #include "misc.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadmisc.hpp>
 #include <components/settings/settings.hpp>
 

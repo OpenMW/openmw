@@ -1,5 +1,7 @@
 #include "clothing.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadclot.hpp>
 
 #include "../mwbase/environment.hpp"

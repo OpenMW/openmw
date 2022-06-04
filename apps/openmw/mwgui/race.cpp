@@ -3,6 +3,7 @@
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ScrollBar.h>
 
 #include <osg/Texture2D>
 

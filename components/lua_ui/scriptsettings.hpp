@@ -5,8 +5,6 @@
 #include <string_view>
 #include <memory>
 
-#include <MyGUI_Widget.h>
-
 namespace LuaUi
 {
     class LuaAdapter;

@@ -10,7 +10,6 @@
 #include <osgDB/WriteFile>
 
 #include <MyGUI_ResourceManager.h>
-#include <MyGUI_FontManager.h>
 #include <MyGUI_ResourceManualFont.h>
 #include <MyGUI_XmlDocument.h>
 #include <MyGUI_FactoryManager.h>
