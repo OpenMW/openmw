@@ -9,14 +9,12 @@
 #include <osgViewer/Viewer>
 
 #include <MyGUI_UString.h>
-#include <MyGUI_IPointer.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_PointerManager.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ClipboardManager.h>
-#include <MyGUI_WidgetManager.h>
 
 // For BT_NO_PROFILE
 #include <LinearMath/btQuickprof.h>

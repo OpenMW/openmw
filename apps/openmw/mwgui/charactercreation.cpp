@@ -1,5 +1,7 @@
 #include "charactercreation.hpp"
 
+#include <MyGUI_ITexture.h>
+
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/misc/rng.hpp>

@@ -1,5 +1,7 @@
 #include "light.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/objectstate.hpp>
 #include <components/settings/settings.hpp>

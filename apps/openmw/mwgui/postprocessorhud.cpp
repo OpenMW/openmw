@@ -3,8 +3,7 @@
 #include <MyGUI_Window.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_TabItem.h>
-#include <MyGUI_TabControl.h>
-#include <MyGUI_RenderManager.h>
+#include <MyGUI_ScrollView.h>
 #include <MyGUI_FactoryManager.h>
 
 #include <components/fx/widgets.hpp>

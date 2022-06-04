@@ -1,7 +1,7 @@
 #ifndef MWGUI_TIMEADVANCER_H
 #define MWGUI_TIMEADVANCER_H
 
-#include <MyGUI_Widget.h>
+#include <MyGUI_Delegate.h>
 
 namespace MWGui
 {

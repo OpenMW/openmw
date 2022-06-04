@@ -2,7 +2,6 @@
 
 #include <MyGUI_InputManager.h>
 #include <MyGUI_WidgetManager.h>
-#include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_Window.h>
 

@@ -1,6 +1,8 @@
 #ifndef GAME_MWCLASS_CREATURE_H
 #define GAME_MWCLASS_CREATURE_H
 
+#include <MyGUI_TextIterator.h>
+
 #include "../mwworld/registeredclass.hpp"
 
 #include "actor.hpp"

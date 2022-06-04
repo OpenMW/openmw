@@ -1,5 +1,7 @@
 #include "potion.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadalch.hpp>
 
 #include "../mwbase/environment.hpp"

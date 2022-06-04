@@ -10,6 +10,8 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_FactoryManager.h>
+#include <MyGUI_TextIterator.h>
+#include <MyGUI_Button.h>
 
 #include <components/esm3/globalmap.hpp>
 #include <components/esm3/esmwriter.hpp>

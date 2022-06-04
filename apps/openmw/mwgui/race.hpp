@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "windowbase.hpp"
-#include <MyGUI_RenderManager.h>
 
 
 namespace MWRender

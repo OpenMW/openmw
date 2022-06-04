@@ -1,5 +1,7 @@
 #include "activator.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadacti.hpp>
 #include <components/misc/rng.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>

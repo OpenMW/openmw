@@ -1,5 +1,7 @@
 #include "lockpick.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/loadlock.hpp>
 
 #include "../mwbase/environment.hpp"

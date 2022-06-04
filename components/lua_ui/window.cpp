@@ -1,6 +1,8 @@
 #include "window.hpp"
 
-#include <MyGUI_InputManager.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_MouseButton.h>
+#include <MyGUI_Types.h>
 
 namespace LuaUi
 {

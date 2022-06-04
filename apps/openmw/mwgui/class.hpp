@@ -1,8 +1,11 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
+#include <MyGUI_EditBox.h>
+
 #include <components/esm/attr.hpp>
 #include <components/esm3/loadclas.hpp>
+
 #include "widgets.hpp"
 #include "windowbase.hpp"
 

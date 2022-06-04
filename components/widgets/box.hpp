@@ -4,7 +4,6 @@
 #include <MyGUI_Widget.h>
 #include <MyGUI_TextBox.h>
 #include <MyGUI_EditBox.h>
-#include <MyGUI_ListBox.h>
 #include <MyGUI_Button.h>
 
 #include "fontwrapper.hpp"
