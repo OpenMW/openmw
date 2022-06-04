@@ -13,7 +13,7 @@ class ESMWriter;
 
 struct Probe
 {
-    constexpr static unsigned int sRecordId = REC_PROB;
+    constexpr static RecNameInts sRecordId = REC_PROB;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Probe"; }

@@ -20,7 +20,7 @@ class ESMWriter;
 class Script
 {
 public:
-    constexpr static unsigned int sRecordId = REC_SCPT;
+    constexpr static RecNameInts sRecordId = REC_SCPT;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Script"; }

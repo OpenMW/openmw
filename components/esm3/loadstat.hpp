@@ -25,7 +25,7 @@ class ESMWriter;
 
 struct Static
 {
-    constexpr static unsigned int sRecordId = REC_STAT;
+    constexpr static RecNameInts sRecordId = REC_STAT;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Static"; }

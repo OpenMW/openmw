@@ -14,7 +14,7 @@ class ESMWriter;
 
 struct BirthSign
 {
-    constexpr static unsigned int sRecordId = REC_BSGN;
+    constexpr static RecNameInts sRecordId = REC_BSGN;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "BirthSign"; }

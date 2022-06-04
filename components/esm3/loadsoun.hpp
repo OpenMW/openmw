@@ -18,7 +18,7 @@ struct SOUNstruct
 
 struct Sound
 {
-    constexpr static unsigned int sRecordId = REC_SOUN;
+    constexpr static RecNameInts sRecordId = REC_SOUN;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Sound"; }

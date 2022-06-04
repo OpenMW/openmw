@@ -17,7 +17,7 @@ class ESMWriter;
 
 struct SoundGenerator
 {
-    constexpr static unsigned int sRecordId = REC_SNDG;
+    constexpr static RecNameInts sRecordId = REC_SNDG;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "SoundGenerator"; }

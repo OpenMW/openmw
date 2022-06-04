@@ -15,7 +15,7 @@ class ESMWriter;
 
 struct Book
 {
-    constexpr static unsigned int sRecordId = REC_BOOK;
+    constexpr static RecNameInts sRecordId = REC_BOOK;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Book"; }

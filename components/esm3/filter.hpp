@@ -11,7 +11,7 @@ namespace ESM
 
     struct Filter
     {
-        constexpr static unsigned int sRecordId = REC_FILT;
+        constexpr static RecNameInts sRecordId = REC_FILT;
 
 
         unsigned int mRecordFlags;

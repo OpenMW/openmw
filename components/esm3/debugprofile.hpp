@@ -12,7 +12,7 @@ namespace ESM
 
     struct DebugProfile
     {
-        constexpr static unsigned int sRecordId = REC_DBGP;
+        constexpr static RecNameInts sRecordId = REC_DBGP;
 
 
         enum Flags

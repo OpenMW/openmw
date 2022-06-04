@@ -15,7 +15,7 @@ namespace ESM
 
     struct SavedGame
     {
-        constexpr static unsigned int sRecordId = REC_SAVE;
+        constexpr static RecNameInts sRecordId = REC_SAVE;
 
         static int sCurrentFormat;
 

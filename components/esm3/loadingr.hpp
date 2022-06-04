@@ -17,7 +17,7 @@ class ESMWriter;
 
 struct Ingredient
 {
-    constexpr static unsigned int sRecordId = REC_INGR;
+    constexpr static RecNameInts sRecordId = REC_INGR;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Ingredient"; }

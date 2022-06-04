@@ -15,7 +15,7 @@ class ESMWriter;
 
 struct MagicEffect
 {
-    constexpr static unsigned int sRecordId = REC_MGEF;
+    constexpr static RecNameInts sRecordId = REC_MGEF;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "MagicEffect"; }

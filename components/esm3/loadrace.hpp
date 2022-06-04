@@ -18,7 +18,7 @@ class ESMWriter;
 
 struct Race
 {
-    constexpr static unsigned int sRecordId = REC_RACE;
+    constexpr static RecNameInts sRecordId = REC_RACE;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Race"; }

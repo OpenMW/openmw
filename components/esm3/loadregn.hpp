@@ -19,7 +19,7 @@ class ESMWriter;
 
 struct Region
 {
-    constexpr static unsigned int sRecordId = REC_REGN;
+    constexpr static RecNameInts sRecordId = REC_REGN;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Region"; }

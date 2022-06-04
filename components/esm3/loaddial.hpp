@@ -21,7 +21,7 @@ class ESMWriter;
 
 struct Dialogue
 {
-    constexpr static unsigned int sRecordId = REC_DIAL;
+    constexpr static RecNameInts sRecordId = REC_DIAL;
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Dialogue"; }
 

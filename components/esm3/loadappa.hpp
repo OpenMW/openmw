@@ -17,7 +17,7 @@ class ESMWriter;
 
 struct Apparatus
 {
-    constexpr static unsigned int sRecordId = REC_APPA;
+    constexpr static RecNameInts sRecordId = REC_APPA;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Apparatus"; }

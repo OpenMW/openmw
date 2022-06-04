@@ -36,7 +36,7 @@ struct InventoryList
 
 struct Container
 {
-    constexpr static unsigned int sRecordId = REC_CONT;
+    constexpr static RecNameInts sRecordId = REC_CONT;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Container"; }

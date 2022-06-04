@@ -16,7 +16,7 @@ namespace ESM
     ///< \brief An image containing the explored areas on the global map.
     struct GlobalMap
     {
-        constexpr static unsigned int sRecordId = REC_GMAP;
+        constexpr static RecNameInts sRecordId = REC_GMAP;
 
 
         // The minimum and maximum cell coordinates

@@ -18,7 +18,7 @@ class ESMWriter;
 
 struct Light
 {
-    constexpr static unsigned int sRecordId = REC_LIGH;
+    constexpr static RecNameInts sRecordId = REC_LIGH;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Light"; }

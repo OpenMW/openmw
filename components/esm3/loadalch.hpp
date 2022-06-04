@@ -18,7 +18,7 @@ class ESMWriter;
 
 struct Potion
 {
-    constexpr static unsigned int sRecordId = REC_ALCH;
+    constexpr static RecNameInts sRecordId = REC_ALCH;
 
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.

@@ -13,7 +13,7 @@ class ESMWriter;
 
 struct Repair
 {
-    constexpr static unsigned int sRecordId = REC_REPA;
+    constexpr static RecNameInts sRecordId = REC_REPA;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Repair"; }

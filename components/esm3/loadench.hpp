@@ -18,7 +18,7 @@ class ESMWriter;
 
 struct Enchantment
 {
-    constexpr static unsigned int sRecordId = REC_ENCH;
+    constexpr static RecNameInts sRecordId = REC_ENCH;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Enchantment"; }

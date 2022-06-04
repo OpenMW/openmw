@@ -13,7 +13,7 @@ class ESMWriter;
 
 struct Door
 {
-    constexpr static unsigned int sRecordId = REC_DOOR;
+    constexpr static RecNameInts sRecordId = REC_DOOR;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Door"; }

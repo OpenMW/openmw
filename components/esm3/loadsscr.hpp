@@ -21,7 +21,7 @@ class ESMWriter;
 
 struct StartScript
 {
-    constexpr static unsigned int sRecordId = REC_SSCR;
+    constexpr static RecNameInts sRecordId = REC_SSCR;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "StartScript"; }

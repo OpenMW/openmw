@@ -23,7 +23,7 @@ class ESMWriter;
 
 struct NPC
 {
-    constexpr static unsigned int sRecordId = REC_NPC_;
+    constexpr static RecNameInts sRecordId = REC_NPC_;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "NPC"; }

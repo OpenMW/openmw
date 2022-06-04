@@ -19,7 +19,7 @@ class ESMWriter;
 // class
 struct Class
 {
-    constexpr static unsigned int sRecordId = REC_CLAS;
+    constexpr static RecNameInts sRecordId = REC_CLAS;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Class"; }

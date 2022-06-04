@@ -13,7 +13,7 @@ class ESMWriter;
 
 struct Lockpick
 {
-    constexpr static unsigned int sRecordId = REC_LOCK;
+    constexpr static RecNameInts sRecordId = REC_LOCK;
 
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Lockpick"; }
