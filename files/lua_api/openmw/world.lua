@@ -26,22 +26,22 @@
 ---
 -- Simulation time in seconds.
 -- The number of simulation seconds passed in the game world since starting a new game.
--- @function [parent=#core] getSimulationTime
+-- @function [parent=#world] getSimulationTime
 -- @return #number
 
 ---
 -- The scale of simulation time relative to real time.
--- @function [parent=#core] getSimulationTimeScale
+-- @function [parent=#world] getSimulationTimeScale
 -- @return #number
 
 ---
 -- Game time in seconds.
--- @function [parent=#core] getGameTime
+-- @function [parent=#world] getGameTime
 -- @return #number
 
 ---
 -- The scale of game time relative to simulation time.
--- @function [parent=#core] getGameTimeScale
+-- @function [parent=#world] getGameTimeScale
 -- @return #number
 
 ---
