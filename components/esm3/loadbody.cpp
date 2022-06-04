@@ -2,12 +2,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    unsigned int BodyPart::sRecordId = REC_BODY;
-
     void BodyPart::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;

@@ -2,12 +2,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    unsigned int Ingredient::sRecordId = REC_INGR;
-
     void Ingredient::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;

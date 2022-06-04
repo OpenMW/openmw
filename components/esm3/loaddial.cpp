@@ -4,11 +4,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    unsigned int Dialogue::sRecordId = REC_DIAL;
 
     void Dialogue::load(ESMReader &esm, bool &isDeleted)
     {

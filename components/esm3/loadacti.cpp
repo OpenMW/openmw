@@ -6,8 +6,6 @@
 
 namespace ESM
 {
-    unsigned int Activator::sRecordId = REC_ACTI;
-
     void Activator::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;

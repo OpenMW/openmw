@@ -2,12 +2,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    unsigned int Pathgrid::sRecordId = REC_PGRD;
-
     Pathgrid::Point& Pathgrid::Point::operator=(const float rhs[3])
     {
         mX = static_cast<int>(rhs[0]);

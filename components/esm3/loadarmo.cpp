@@ -36,8 +36,6 @@ namespace ESM
         }
     }
 
-    unsigned int Armor::sRecordId = REC_ARMO;
-
     void Armor::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;

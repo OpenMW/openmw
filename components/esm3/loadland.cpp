@@ -9,8 +9,6 @@
 
 namespace ESM
 {
-    unsigned int Land::sRecordId = REC_LAND;
-
     Land::Land()
         : mFlags(0)
         , mX(0)
