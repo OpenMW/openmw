@@ -502,7 +502,7 @@ is not wanted and you want a custom render target.
 +------------------+---------------------+-----------------------------------------------------------------------------+
 | width_ratio      | float               | Automatic width as a percentage of screen width                             |
 +------------------+---------------------+-----------------------------------------------------------------------------+
-| height_ratio     | float               | Automatic width as a percentage of screen height                            |
+| height_ratio     | float               | Automatic height as a percentage of screen height                           |
 +------------------+---------------------+-----------------------------------------------------------------------------+
 | width            | float               | Width in pixels                                                             |
 +------------------+---------------------+-----------------------------------------------------------------------------+
@@ -511,10 +511,9 @@ is not wanted and you want a custom render target.
 | mipmaps          | boolean             | Whether mipmaps should be generated every frame                             |
 +------------------+---------------------+-----------------------------------------------------------------------------+
 
+To use the render target a pass must be assigned to it, along with any optional clear or blend modes.
 
-To use the render target you must assign passes to it, along with any optional clear modes or custom blend modes.
-
-In the code snippet below a rendertarget is used to draw the red cannel of a scene at half resolution, then a quarter. As a restriction,
+In the code snippet below a rendertarget is used to draw the red channel of a scene at half resolution, then a quarter. As a restriction,
 only three render targets can be bound per pass with ``rt1``, ``rt2``, ``rt3``, respectively.
 
 .. code-block:: none
@@ -552,20 +551,8 @@ only three render targets can be bound per pass with ``rt1``, ``rt2``, ``rt3``, 
         }
     }
 
-Now, if we ever run the `downsample2x` pass it will write to the target buffer instead of the default
+Now, when the `downsample2x` pass runs it will write to the target buffer instead of the default
 one assigned by the engine.
-
-To use the uniform you can reference it in any pass, it should **not** be declared with the ``uniform`` keyword.
-
-.. code-block:: none
-
-    fragment pass {
-        void main()
-        {
-            // ...
-            vec3 color = uColor;
-        }
-    }
 
 Simple Example
 ##############
