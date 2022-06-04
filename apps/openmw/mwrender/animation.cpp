@@ -1507,7 +1507,7 @@ namespace MWRender
     {
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
-        mExtraLightSource = SceneUtil::addLight(parent, esmLight, Mask_ParticleSystem, Mask_Lighting, exterior);
+        mExtraLightSource = SceneUtil::addLight(parent, esmLight, Mask_Lighting, exterior);
         mExtraLightSource->setActorFade(mAlpha);
     }
 

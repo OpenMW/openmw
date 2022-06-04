@@ -26,13 +26,12 @@ namespace SceneUtil
 
     /// @brief Convert an ESM::Light to a SceneUtil::LightSource, and add it to a sub graph.
     /// @note If the sub graph contains a node named "AttachLight" (case insensitive), then the light is added to that.
-    /// Otherwise, the light is added in the center of the node's bounds.
+    /// Otherwise, the light is attached directly to the root node of the subgraph.
     /// @param node The sub graph to add a light to
     /// @param esmLight The light definition coming from the game files containing radius, color, flicker, etc.
-    /// @param partsysMask Node mask to ignore when computing the sub graph's bounding box.
     /// @param lightMask Mask to assign to the newly created LightSource.
     /// @param isExterior Is the light outside? May be used for deciding which attenuation settings to use.
-    osg::ref_ptr<LightSource> addLight (osg::Group* node, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior);
+    osg::ref_ptr<LightSource> addLight (osg::Group* node, const ESM::Light* esmLight, unsigned int lightMask, bool isExterior);
 
     /// @brief Convert an ESM::Light to a SceneUtil::LightSource, and return it.
     /// @param esmLight The light definition coming from the game files containing radius, color, flicker, etc.
