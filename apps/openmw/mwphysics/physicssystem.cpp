@@ -1,8 +1,5 @@
 #include "physicssystem.hpp"
 
-#include <LinearMath/btIDebugDraw.h>
-#include <LinearMath/btVector3.h>
-
 #include <memory>
 #include <algorithm>
 #include <vector>
@@ -14,12 +11,12 @@
 #include <BulletCollision/CollisionShapes/btConeShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btStaticPlaneShape.h>
-#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 
+#include <LinearMath/btVector3.h>
 #include <LinearMath/btQuickprof.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>

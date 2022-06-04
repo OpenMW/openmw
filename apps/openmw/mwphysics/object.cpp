@@ -9,7 +9,6 @@
 #include <components/bullethelpers/collisionobject.hpp>
 
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
-#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 #include <LinearMath/btTransform.h>
 

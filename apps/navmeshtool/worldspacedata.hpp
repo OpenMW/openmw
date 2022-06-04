@@ -8,7 +8,6 @@
 #include <components/resource/bulletshape.hpp>
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
-#include <BulletCollision/Gimpact/btBoxCollision.h>
 #include <LinearMath/btVector3.h>
 
 #include <memory>

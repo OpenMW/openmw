@@ -1,7 +1,6 @@
 #include <memory>
 
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <components/misc/convert.hpp>
 

@@ -8,7 +8,6 @@
 #include "waitconditiontype.hpp"
 #include "heightfieldshape.hpp"
 
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 #include <osg/Vec3f>
 

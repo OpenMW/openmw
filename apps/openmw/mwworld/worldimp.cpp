@@ -4,9 +4,6 @@
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Timer>
 
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
-#include <BulletCollision/CollisionShapes/btCompoundShape.h>
-
 #include <MyGUI_TextIterator.h>
 
 #include <components/debug/debuglog.hpp>
