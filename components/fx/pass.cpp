@@ -239,13 +239,13 @@ float omw_GetPointLightRadius(int index)
         stateSet->setAttribute(program);
 
         if (mBlendSource && mBlendDest)
-            stateSet->setAttribute(new osg::BlendFunc(mBlendSource.value(), mBlendDest.value()));
+            stateSet->setAttributeAndModes(new osg::BlendFunc(mBlendSource.value(), mBlendDest.value()));
 
         if (mBlendEq)
-            stateSet->setAttribute(new osg::BlendEquation(mBlendEq.value()));
+            stateSet->setAttributeAndModes(new osg::BlendEquation(mBlendEq.value()));
 
         if (mClearColor)
-            stateSet->setAttribute(new SceneUtil::ClearColor(mClearColor.value(), GL_COLOR_BUFFER_BIT));
+            stateSet->setAttributeAndModes(new SceneUtil::ClearColor(mClearColor.value(), GL_COLOR_BUFFER_BIT));
     }
 
     void Pass::dirty()
