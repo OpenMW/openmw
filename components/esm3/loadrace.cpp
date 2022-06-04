@@ -2,12 +2,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    unsigned int Race::sRecordId = REC_RACE;
-
     int Race::MaleFemale::getValue (bool male) const
     {
         return male ? mMale : mFemale;

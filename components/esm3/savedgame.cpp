@@ -6,7 +6,6 @@
 namespace ESM
 {
 
-unsigned int SavedGame::sRecordId = REC_SAVE;
 int SavedGame::sCurrentFormat = 21;
 
 void SavedGame::load (ESMReader &esm)

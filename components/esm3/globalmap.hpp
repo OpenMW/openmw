@@ -4,6 +4,8 @@
 #include <vector>
 #include <set>
 
+#include "components/esm/defs.hpp"
+
 namespace ESM
 {
     class ESMReader;
@@ -14,7 +16,8 @@ namespace ESM
     ///< \brief An image containing the explored areas on the global map.
     struct GlobalMap
     {
-        static unsigned int sRecordId;
+        constexpr static RecNameInts sRecordId = REC_GMAP;
+
 
         // The minimum and maximum cell coordinates
         struct Bounds

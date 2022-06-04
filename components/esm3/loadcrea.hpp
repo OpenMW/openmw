@@ -8,6 +8,8 @@
 #include "aipackage.hpp"
 #include "transport.hpp"
 
+#include "components/esm/defs.hpp"
+
 namespace ESM
 {
 
@@ -21,7 +23,8 @@ class ESMWriter;
 
 struct Creature
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_CREA;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Creature"; }
 

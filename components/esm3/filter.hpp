@@ -2,6 +2,7 @@
 #define COMPONENTS_ESM_FILTER_H
 
 #include <string>
+#include "components/esm/defs.hpp"
 
 namespace ESM
 {
@@ -10,7 +11,8 @@ namespace ESM
 
     struct Filter
     {
-        static unsigned int sRecordId;
+        constexpr static RecNameInts sRecordId = REC_FILT;
+
 
         unsigned int mRecordFlags;
         std::string mId;

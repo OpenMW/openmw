@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
 
 namespace ESM
@@ -19,7 +20,8 @@ class ESMWriter;
 class Script
 {
 public:
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_SCPT;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Script"; }
 

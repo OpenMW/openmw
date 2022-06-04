@@ -2,12 +2,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-
-unsigned int Filter::sRecordId = REC_FILT;
 
 void Filter::load (ESMReader& esm, bool &isDeleted)
 {

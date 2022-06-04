@@ -63,7 +63,8 @@ struct CellRefTrackerPredicate
  */
 struct Cell
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_CELL;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Cell"; }
 

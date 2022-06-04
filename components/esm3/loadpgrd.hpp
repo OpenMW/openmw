@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "components/esm/defs.hpp"
+
 namespace ESM
 {
 
@@ -15,7 +17,8 @@ class ESMWriter;
  */
 struct Pathgrid
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_PGRD;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Pathgrid"; }
 

@@ -6,8 +6,6 @@
 
 namespace ESM
 {
-    unsigned int LandTexture::sRecordId = REC_LTEX;
-
     void LandTexture::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;

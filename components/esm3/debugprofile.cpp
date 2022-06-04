@@ -2,12 +2,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-
-unsigned int DebugProfile::sRecordId = REC_DBGP;
 
 void DebugProfile::load (ESMReader& esm, bool &isDeleted)
 {

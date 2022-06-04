@@ -2,6 +2,7 @@
 #define OPENMW_ESM_BODY_H
 
 #include <string>
+#include "components/esm/defs.hpp"
 
 namespace ESM
 {
@@ -11,7 +12,8 @@ class ESMWriter;
 
 struct BodyPart
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_BODY;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "BodyPart"; }
 

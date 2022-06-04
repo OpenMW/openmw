@@ -2,12 +2,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    unsigned int Activator::sRecordId = REC_ACTI;
-
     void Activator::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false;

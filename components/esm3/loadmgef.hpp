@@ -5,6 +5,8 @@
 #include <string_view>
 #include <map>
 
+#include "components/esm/defs.hpp"
+
 namespace ESM
 {
 
@@ -13,7 +15,8 @@ class ESMWriter;
 
 struct MagicEffect
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_MGEF;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "MagicEffect"; }
 

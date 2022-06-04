@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "components/esm/defs.hpp"
 #include "effectlist.hpp"
 
 namespace ESM
@@ -17,7 +18,8 @@ class ESMWriter;
 
 struct Enchantment
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_ENCH;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Enchantment"; }
 

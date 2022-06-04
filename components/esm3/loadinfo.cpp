@@ -2,12 +2,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    unsigned int DialInfo::sRecordId = REC_INFO;
-
     void DialInfo::load(ESMReader &esm, bool &isDeleted)
     {
         mId = esm.getHNString("INAM");

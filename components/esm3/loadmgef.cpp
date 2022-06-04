@@ -187,8 +187,6 @@ namespace
 
 namespace ESM
 {
-    unsigned int MagicEffect::sRecordId = REC_MGEF;
-
 void MagicEffect::load(ESMReader &esm, bool &isDeleted)
 {
     isDeleted = false; // MagicEffect record can't be deleted now (may be changed in the future)

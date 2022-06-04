@@ -2,6 +2,7 @@
 #define OPENMW_ESM_BOOK_H
 
 #include <string>
+#include "components/esm/defs.hpp"
 
 namespace ESM
 {
@@ -14,7 +15,8 @@ class ESMWriter;
 
 struct Book
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_BOOK;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Book"; }
 

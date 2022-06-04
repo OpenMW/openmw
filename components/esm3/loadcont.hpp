@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "components/esm/esmcommon.hpp"
+#include "components/esm/defs.hpp"
 
 namespace ESM
 {
@@ -35,7 +36,8 @@ struct InventoryList
 
 struct Container
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_CONT;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Container"; }
 

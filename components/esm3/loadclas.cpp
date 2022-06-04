@@ -8,8 +8,6 @@
 
 namespace ESM
 {
-    unsigned int Class::sRecordId = REC_CLAS;
-
     const Class::Specialization Class::sSpecializationIds[3] = {
       Class::Combat,
       Class::Magic,

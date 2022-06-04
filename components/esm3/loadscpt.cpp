@@ -6,12 +6,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    unsigned int Script::sRecordId = REC_SCPT;
-
     void Script::loadSCVR(ESMReader &esm)
     {
         int s = mData.mStringTableSize;

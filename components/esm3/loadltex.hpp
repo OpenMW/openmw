@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "components/esm/defs.hpp"
+
 namespace ESM
 {
 
@@ -18,7 +20,8 @@ class ESMWriter;
 
 struct LandTexture
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_LTEX;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "LandTexture"; }
 

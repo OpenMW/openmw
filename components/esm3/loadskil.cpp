@@ -125,8 +125,6 @@ namespace ESM
         HandToHand
     }};
 
-    unsigned int Skill::sRecordId = REC_SKIL;
-
     void Skill::load(ESMReader &esm, bool &isDeleted)
     {
         isDeleted = false; // Skill record can't be deleted now (may be changed in the future)

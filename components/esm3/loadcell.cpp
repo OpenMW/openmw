@@ -9,7 +9,6 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 #include "cellid.hpp"
 
 namespace ESM
@@ -41,8 +40,6 @@ namespace
 
 namespace ESM
 {
-    unsigned int Cell::sRecordId = REC_CELL;
-
     // Some overloaded compare operators.
     bool operator== (const MovedCellRef& ref, const RefNum& refNum)
     {

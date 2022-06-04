@@ -5,6 +5,7 @@
 
 #include <components/misc/constants.hpp>
 
+#include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
 
 namespace ESM
@@ -19,7 +20,8 @@ class ESMWriter;
 
 struct Land
 {
-    static unsigned int sRecordId;
+    constexpr static RecNameInts sRecordId = REC_LAND;
+
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string_view getRecordType() { return "Land"; }
 

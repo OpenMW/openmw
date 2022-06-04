@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "components/esm/defs.hpp"
+
 namespace ESM
 {
     class ESMReader;
@@ -10,7 +12,8 @@ namespace ESM
 
     struct DebugProfile
     {
-        static unsigned int sRecordId;
+        constexpr static RecNameInts sRecordId = REC_DBGP;
+
 
         enum Flags
         {
