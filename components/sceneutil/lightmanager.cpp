@@ -1156,6 +1156,8 @@ namespace SceneUtil
                 {
                     for (const auto& bound : it->second)
                     {
+                        if (bound.mLightSource->getEmpty())
+                            continue;
                         const auto* light = bound.mLightSource->getLight(frameNum);
                         if (light->getDiffuse().x() >= 0.f)
                             mPPLightBuffer->setLight(frameNum, light, bound.mLightSource->getRadius());

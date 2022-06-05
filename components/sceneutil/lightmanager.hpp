@@ -118,6 +118,8 @@ namespace SceneUtil
 
         unsigned int mLastAppliedFrame;
 
+        bool mEmpty = false;
+
     public:
 
         META_Node(SceneUtil, LightSource)
@@ -145,6 +147,16 @@ namespace SceneUtil
         float getActorFade() const
         {
             return mActorFade;
+        }
+
+        void setEmpty(bool empty)
+        {
+            mEmpty = empty;
+        }
+
+        bool getEmpty() const
+        {
+            return mEmpty;
         }
 
         /// Get the osg::Light safe for modification in the given frame.
