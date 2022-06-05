@@ -34,7 +34,8 @@ void EsmLoader::load(const boost::filesystem::path& filepath, int& index, Loadin
 
     mStore.load(*reader, listener, mDialogue);
 
-    if (!mMasterFileFormat.has_value() && Misc::StringUtils::ciEndsWith(reader->getName(), ".esm") && !Misc::StringUtils::ciEndsWith(reader->getName(), ".omwgame"))
+    if (!mMasterFileFormat.has_value() && (Misc::StringUtils::ciEndsWith(reader->getName(), ".esm")
+                                           || Misc::StringUtils::ciEndsWith(reader->getName(), ".omwgame")))
         mMasterFileFormat = reader->getFormat();
 }
 
