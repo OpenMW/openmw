@@ -87,6 +87,7 @@ namespace fx
                     mValueLabel->setCaption(std::to_string(mValue));
 
                 float range = 0.f;
+                float min = 0.f;
 
                 if (auto uniform = mUniform.lock())
                 {
@@ -94,6 +95,7 @@ namespace fx
                     {
                         uniform->template setValue<UType>(mValue);
                         range = uniform->template getMax<UType>() - uniform->template getMin<UType>();
+                        min = uniform->template getMin<UType>();
                     }
                     else
                     {
@@ -101,10 +103,11 @@ namespace fx
                         uvalue[mIndex] = mValue;
                         uniform->template setValue<UType>(uvalue);
                         range = uniform->template getMax<UType>()[mIndex] - uniform->template getMin<UType>()[mIndex];
+                        min = uniform->template getMin<UType>()[mIndex];
                     }
                 }
 
-                float fill = (range == 0.f) ? 1.f : mValue / range;
+                float fill = (range == 0.f) ? 1.f : (mValue - min) / range;
                 mFill->setRealSize(fill, 1.0);
             }
 

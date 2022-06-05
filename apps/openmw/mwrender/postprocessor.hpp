@@ -251,6 +251,8 @@ namespace MWRender
     
         int mWidth;
         int mHeight;
+
+        fx::DispatchArray mTemplateData;
     };
 }
 

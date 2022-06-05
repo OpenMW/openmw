@@ -419,6 +419,8 @@ namespace MWRender
             createTexturesAndCamera(frameId);
             createObjectsForFrame(frameId);
             mDirty = false;
+
+            mPingPongCanvas->setCurrentFrameData(frameId, fx::DispatchArray(mTemplateData));
         }
 
         if ((mNormalsSupported && mNormals != mPrevNormals) || (mPassLights != mPrevPassLights))
@@ -520,7 +522,12 @@ namespace MWRender
         if (!isEnabled())
             return;
 
-        fx::DispatchArray data;
+        size_t frameId = frame() % 2;
+
+        mDirty = true;
+        mDirtyFrameId = !frameId;
+
+        mTemplateData = {};
 
         bool sunglare = true;
         mHDR = false;
@@ -632,12 +639,12 @@ namespace MWRender
                 node.mPasses.emplace_back(std::move(subPass));
             }
 
-            data.emplace_back(std::move(node));
+            node.compile();
+
+            mTemplateData.emplace_back(std::move(node));
         }
 
-        size_t frameId = frame() % 2;
-
-        mPingPongCanvas->setCurrentFrameData(frameId, std::move(data));
+        mPingPongCanvas->setCurrentFrameData(frameId, fx::DispatchArray(mTemplateData));
 
         if (auto hud = MWBase::Environment::get().getWindowManager()->getPostProcessorHud())
             hud->updateTechniques();
