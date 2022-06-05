@@ -7,6 +7,8 @@
 #include <components/detournavigator/navmeshdbutils.hpp>
 #include <components/detournavigator/dbrefgeometryobject.hpp>
 
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+
 #include <DetourNavMesh.h>
 
 #include <gtest/gtest.h>

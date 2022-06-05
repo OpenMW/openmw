@@ -6,10 +6,10 @@
 #include <ostream>
 #include <tuple>
 
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <BulletCollision/CollisionShapes/btCompoundShape.h>
-#include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
+
 #include <LinearMath/btTransform.h>
+#include <LinearMath/btAabbUtil2.h>
 
 inline std::ostream& operator <<(std::ostream& stream, const btVector3& value)
 {

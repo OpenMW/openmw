@@ -2,9 +2,7 @@
 #define OPENMW_MWPHYSICS_HASSPHERECOLLISIONCALLBACK_H
 
 #include <LinearMath/btVector3.h>
-#include <BulletCollision/BroadphaseCollision/btBroadphaseInterface.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <algorithm>
 

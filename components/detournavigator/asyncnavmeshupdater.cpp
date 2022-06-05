@@ -11,6 +11,8 @@
 #include <components/misc/thread.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+
 #include <DetourNavMesh.h>
 
 #include <osg/Stats>
