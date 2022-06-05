@@ -29,10 +29,10 @@ local function testTimers()
 
     while not (ts1 and ts2 and th1 and th2) do coroutine.yield() end
 
-    testing.expectAlmostEqual(th1, 36, 'async:newGameTimer failed')
-    testing.expectAlmostEqual(ts1, 0.5, 'async:newSimulationTimer failed')
-    testing.expectAlmostEqual(th2, 72, 'async:newUnsavableGameTimer failed')
-    testing.expectAlmostEqual(ts2, 1, 'async:newUnsavableSimulationTimer failed')
+    testing.expectGreaterOrEqual(th1, 36, 'async:newGameTimer failed')
+    testing.expectGreaterOrEqual(ts1, 0.5, 'async:newSimulationTimer failed')
+    testing.expectGreaterOrEqual(th2, 72, 'async:newUnsavableGameTimer failed')
+    testing.expectGreaterOrEqual(ts2, 1, 'async:newUnsavableSimulationTimer failed')
 end
 
 local function testTeleport()
@@ -51,9 +51,25 @@ local function testTeleport()
     testing.expectEqualWithDelta(player.rotation.z, math.rad(-90), 0.05, 'teleporting changes rotation')
 end
 
+local function initPlayer()
+    player:teleport('', util.vector3(4096, 4096, 867.237), util.vector3(0, 0, 0))
+    coroutine.yield()
+end
+
 tests = {
     {'timers', testTimers},
-    {'playerMovement', function() testing.runLocalTest(player, 'playerMovement') end},
+    {'playerRotation', function()
+        initPlayer()
+        testing.runLocalTest(player, 'playerRotation')
+    end},
+    {'playerForwardRunning', function()
+        initPlayer()
+        testing.runLocalTest(player, 'playerForwardRunning')
+    end},
+    {'playerDiagonalWalking', function()
+        initPlayer()
+        testing.runLocalTest(player, 'playerDiagonalWalking')
+    end},
     {'teleport', testTeleport},
 }
 

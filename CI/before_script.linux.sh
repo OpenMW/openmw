@@ -28,7 +28,6 @@ declare -a CMAKE_CONF_OPTS=(
     -DBUILD_SHARED_LIBS=OFF
     -DUSE_SYSTEM_TINYXML=ON
     -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
-    -DCMAKE_INSTALL_PREFIX=install
     -DOPENMW_CXX_FLAGS="-Werror -Werror=implicit-fallthrough"  # flags specific to OpenMW project
 )
 

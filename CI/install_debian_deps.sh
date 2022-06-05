@@ -42,6 +42,39 @@ declare -rA GROUPED_DEPS=(
   "
 
   [openmw-coverage]="gcovr"
+
+  [openmw-integration-tests]="
+    ca-certificates
+    git
+    git-lfs
+    libavcodec58
+    libavformat58
+    libavutil56
+    libboost-filesystem1.71.0
+    libboost-iostreams1.71.0
+    libboost-program-options1.71.0
+    libboost-system1.71.0
+    libbullet2.88
+    libcollada-dom2.4-dp0
+    libicu66
+    libjpeg8
+    libluajit-5.1-2
+    liblz4-1
+    libmyguiengine3debian1v5
+    libopenal1
+    libopenscenegraph161
+    libpng16-16
+    libqt5opengl5
+    librecast1
+    libsdl2-2.0-0
+    libsqlite3-0
+    libswresample3
+    libswscale5
+    libtinyxml2.6.2v5
+    libyaml-cpp0.6
+    python3-pip
+    xvfb
+  "
 )
 
 if [[ $# -eq 0 ]]; then

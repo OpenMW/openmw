@@ -5,6 +5,7 @@ default:
 # See https://docs.gitlab.com/ee/ci/yaml/#needs
 stages:
   - build
+  - test
 
 # https://blog.nimbleways.com/let-s-make-faster-gitlab-ci-cd-pipelines/
 variables:
@@ -21,7 +22,6 @@ variables:
   image: ubuntu:focal
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
-  
 
 .Ubuntu:
   extends: .Ubuntu_Image
@@ -299,6 +299,24 @@ Ubuntu_Clang_tests_Debug:
     when: always
     reports:
       junit: build/tests.xml
+
+Ubuntu_Clang_integration_tests:
+  extends: .Ubuntu_Image
+  stage: test
+  needs:
+    - Ubuntu_Clang
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: Ubuntu_Clang_integration_tests.v1
+    paths:
+      - .cache/pip
+      - apt-cache/
+  before_script:
+    - CI/install_debian_deps.sh openmw-integration-tests
+    - pip3 install --user numpy matplotlib termtables click
+  script:
+    - CI/run_integration_tests.sh
 
 .MacOS:
   image: macos-11-xcode-12
