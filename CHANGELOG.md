@@ -120,6 +120,7 @@
     Bug #6730: LoopGroup stalls animation after playing :Stop frame until another animation is played
     Bug #6753: Info records without a DATA subrecords are loaded incorrectly
     Bug #6794: Light sources are attached to mesh bounds centers instead of mesh origins when AttachLight NiNode is missing
+    Bug #6799: Game crashes if an NPC has no Class attached
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"

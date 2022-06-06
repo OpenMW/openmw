@@ -59,15 +59,18 @@ namespace
         }
     }
 
+    const std::string& getDefaultClass(const MWWorld::Store<ESM::Class>& classes)
+    {
+        auto it = classes.begin();
+        if (it != classes.end())
+            return it->mId;
+        throw std::runtime_error("List of NPC classes is empty!");
+    }
+
     std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions, const MWWorld::Store<ESM::Class>& classes, const std::unordered_map<std::string, ESM::NPC, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
-        std::string defaultCls;
-        auto it = classes.begin();
-        if (it != classes.end())
-            defaultCls = it->mId;
-        else
-            throw std::runtime_error("List of NPC classes is empty!");
+        const std::string& defaultCls = getDefaultClass(classes);
 
         // Validate NPCs for non-existing class and faction.
         // We will replace invalid entries by fixed ones
@@ -78,7 +81,7 @@ namespace
             ESM::NPC npc = npcIter.second;
             bool changed = false;
 
-            const std::string npcFaction = npc.mFaction;
+            const std::string& npcFaction = npc.mFaction;
             if (!npcFaction.empty())
             {
                 const ESM::Faction *fact = factions.search(npcFaction);
@@ -91,16 +94,13 @@ namespace
                 }
             }
 
-            std::string npcClass = npc.mClass;
-            if (!npcClass.empty())
+            const std::string& npcClass = npc.mClass;
+            const ESM::Class *cls = classes.search(npcClass);
+            if (!cls)
             {
-                const ESM::Class *cls = classes.search(npcClass);
-                if (!cls)
-                {
-                    Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent class '" << npc.mClass << "', using '" << defaultCls << "' class as replacement.";
-                    npc.mClass = defaultCls;
-                    changed = true;
-                }
+                Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent class '" << npc.mClass << "', using '" << defaultCls << "' class as replacement.";
+                npc.mClass = defaultCls;
+                changed = true;
             }
 
             if (changed)
