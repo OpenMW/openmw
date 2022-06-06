@@ -156,7 +156,7 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Navigation mesh cache</string>
+       <string>Navigation Mesh Cache</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>

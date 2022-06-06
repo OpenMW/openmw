@@ -312,19 +312,24 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
         saveSettingBool(postprocessLiveReloadCheckBox, "live reload", "Post Processing");
         saveSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
-        Settings::Manager::setDouble("hdr exposure time", "Post Processing", postprocessHDRTimeComboBox->value());
+        double hdrExposureTime = postprocessHDRTimeComboBox->value();
+        if (hdrExposureTime != Settings::Manager::getDouble("hdr exposure time", "Post Processing"))
+            Settings::Manager::setDouble("hdr exposure time", "Post Processing", hdrExposureTime);
     }
     
     // Audio
     {
         int audioDeviceIndex = audioDeviceSelectorComboBox->currentIndex();
+        std::string prevAudioDevice = Settings::Manager::getString("device", "Sound");
         if (audioDeviceIndex != 0)
         {
-            Settings::Manager::setString("device", "Sound", audioDeviceSelectorComboBox->currentText().toUtf8().constData());
-        } 
-        else 
+            const std::string& newAudioDevice = audioDeviceSelectorComboBox->currentText().toUtf8().constData();
+            if (newAudioDevice != prevAudioDevice)
+                Settings::Manager::setString("device", "Sound", newAudioDevice);
+        }
+        else if (!prevAudioDevice.empty())
         {
-            Settings::Manager::setString("device", "Sound", "");
+            Settings::Manager::setString("device", "Sound", {});
         }
         int hrtfEnabledIndex = enableHRTFComboBox->currentIndex() - 1;
         if (hrtfEnabledIndex != Settings::Manager::getInt("hrtf enable", "Sound"))
@@ -332,13 +337,16 @@ void Launcher::AdvancedPage::saveSettings()
             Settings::Manager::setInt("hrtf enable", "Sound", hrtfEnabledIndex);
         }
         int selectedHRTFProfileIndex = hrtfProfileSelectorComboBox->currentIndex();
+        std::string prevHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
         if (selectedHRTFProfileIndex != 0)
         {
-            Settings::Manager::setString("hrtf", "Sound", hrtfProfileSelectorComboBox->currentText().toUtf8().constData());
+            const std::string& newHRTFProfile  = hrtfProfileSelectorComboBox->currentText().toUtf8().constData();
+            if (newHRTFProfile != prevHRTFProfile)
+                Settings::Manager::setString("hrtf", "Sound", newHRTFProfile);
         }
-        else 
+        else if (!prevHRTFProfile.empty())
         {
-            Settings::Manager::setString("hrtf", "Sound", "");
+            Settings::Manager::setString("hrtf", "Sound", {});
         }
     }
 
