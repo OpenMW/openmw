@@ -85,6 +85,14 @@ require('scripts.omw.mwui.borders')(templates)
 ---
 -- Standard "sand" colored text
 -- @field [parent=#Templates] openmw.ui#Layout textNormal
+
+---
+-- Header white colored text
+-- @field [parent=#Templates] openmw.ui#Layout textHeader
+
+---
+-- Standard "sand" colored multiline text
+-- @field [parent=#Templates] openmw.ui#Layout textParagraph
 require('scripts.omw.mwui.text')(templates)
 
 ---

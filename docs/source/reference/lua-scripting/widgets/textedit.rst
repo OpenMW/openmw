@@ -35,6 +35,10 @@ Properties
   * - readOnly
     - boolean (false)
     - Whether the text can be edited.
+  * - autoSize
+    - boolean (false)
+    - | Automatically changes widget height to fix all the text.
+      | Only applies for readOnly = true.
 
 Events
 ------

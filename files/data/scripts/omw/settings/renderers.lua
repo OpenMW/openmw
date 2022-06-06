@@ -19,6 +19,18 @@ local function applyDefaults(argument, defaults)
     return argument
 end
 
+local function paddedBox(layout)
+    return {
+        template = I.MWUI.templates.box,
+        content = ui.content {
+            {
+                template = I.MWUI.templates.padding,
+                content = ui.content { layout },
+            },
+        }
+    }
+end
+
 local function disable(disabled, layout)
     if disabled then
         return {
@@ -39,7 +51,7 @@ return function(registerRenderer)
         }
         registerRenderer('textLine', function(value, set, argument)
             argument = applyDefaults(argument, defaultArgument)
-            return disable(argument.disabled, {
+            return disable(argument.disabled, paddedBox {
                 template = I.MWUI.templates.textEditLine,
                 props = {
                     text = tostring(value),
@@ -61,24 +73,19 @@ return function(registerRenderer)
         registerRenderer('checkbox', function(value, set, argument)
             argument = applyDefaults(argument, defaultArgument)
             local l10n = core.l10n(argument.l10n)
-            return disable(argument.disabled, {
-                template = I.MWUI.templates.box,
+            return disable(argument.disabled, paddedBox {
+                template = I.MWUI.templates.padding,
                 content = ui.content {
                     {
-                        template = I.MWUI.templates.padding,
-                        content = ui.content {
-                            {
-                                template = I.MWUI.templates.textNormal,
-                                props = {
-                                    text = l10n(value and argument.trueLabel or argument.falseLabel)
-                                },
-                                events = {
-                                    mouseClick = async:callback(function() set(not value) end),
-                                },
-                            },
+                        template = I.MWUI.templates.textNormal,
+                        props = {
+                            text = l10n(value and argument.trueLabel or argument.falseLabel)
+                        },
+                        events = {
+                            mouseClick = async:callback(function() set(not value) end),
                         },
                     },
-                },
+                }
             })
         end)
     end
@@ -101,7 +108,7 @@ return function(registerRenderer)
         registerRenderer('number', function(value, set, argument)
             argument = applyDefaults(argument, defaultArgument)
             local lastInput = nil
-            return disable(argument.disabled, {
+            return disable(argument.disabled, paddedBox {
                 template = I.MWUI.templates.textEditLine,
                 props = {
                     text = tostring(value),
@@ -173,6 +180,7 @@ return function(registerRenderer)
                             end),
                         },
                     },
+                    { template = I.MWUI.templates.interval },
                     {
                         template = I.MWUI.templates.textNormal,
                         props = {
@@ -182,6 +190,7 @@ return function(registerRenderer)
                             grow = 1,
                         },
                     },
+                    { template = I.MWUI.templates.interval },
                     {
                         type = ui.TYPE.Image,
                         props = {
@@ -197,17 +206,7 @@ return function(registerRenderer)
                     },
                 },
             }
-            return disable(argument.disabled, {
-                template = I.MWUI.templates.box,
-                content = ui.content {
-                    {
-                        template = I.MWUI.templates.padding,
-                        content = ui.content {
-                            body,
-                        },
-                    },
-                },
-            })
+            return disable(argument.disabled, paddedBox(body))
         end)
     end
 
@@ -233,7 +232,7 @@ return function(registerRenderer)
                 },
             }
             local lastInput = nil
-            local hexInput = {
+            local hexInput = paddedBox {
                 template = I.MWUI.templates.textEditLine,
                 props = {
                     text = value:asHex(),
