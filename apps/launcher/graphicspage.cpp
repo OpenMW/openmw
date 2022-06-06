@@ -233,7 +233,9 @@ void Launcher::GraphicsPage::saveSettings()
 
     // Lighting
     static std::array<std::string, 3> lightingMethodMap = {"legacy", "shaders compatibility", "shaders"};
-    Settings::Manager::setString("lighting method", "Shaders", lightingMethodMap[lightingMethodComboBox->currentIndex()]);
+    const std::string& cLightingMethod = lightingMethodMap[lightingMethodComboBox->currentIndex()];
+    if (cLightingMethod != Settings::Manager::getString("lighting method", "Shaders"))
+        Settings::Manager::setString("lighting method", "Shaders", cLightingMethod);
 
     // Shadows
     int cShadowDist = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;
