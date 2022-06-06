@@ -267,6 +267,7 @@ namespace MWRender
 
         void updateRecastMesh();
 
+        const bool mSkyBlending;
 
         osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
 

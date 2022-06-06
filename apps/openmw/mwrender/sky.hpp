@@ -30,6 +30,11 @@ namespace Resource
     class SceneManager;
 }
 
+namespace SceneUtil
+{
+    class RTTNode;
+}
+
 namespace MWRender
 {
     ///@brief The SkyManager handles rendering of the sky domes, celestial bodies as well as other objects that need to be rendered
@@ -37,7 +42,7 @@ namespace MWRender
     class SkyManager
     {
     public:
-        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager);
+        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, bool enableSkyRTT);
         ~SkyManager();
 
         void update(float duration);
@@ -97,6 +102,8 @@ namespace MWRender
         float getBaseWindSpeed() const;
 
         void setSunglare(bool enabled);
+
+        SceneUtil::RTTNode* getSkyRTT() { return mSkyRTT.get(); }
 
     private:
         void create();
@@ -192,6 +199,8 @@ namespace MWRender
         bool mDirtyParticlesEffect;
 
         osg::Vec4f mMoonScriptColor;
+
+        osg::ref_ptr<SceneUtil::RTTNode> mSkyRTT;
     };
 }
 

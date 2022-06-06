@@ -12,6 +12,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/settings/settings.hpp>
 
 namespace Shader
 {
@@ -507,6 +508,24 @@ namespace Shader
         if (linkedIt != mLinkedShaders.end())
             for (const auto& linkedShader : linkedIt->second)
                 program->addShader(linkedShader);
+    }
+
+    int ShaderManager::reserveGlobalTextureUnits(int count)
+    {
+        {
+            // Texture units from `8 - numberOfShadowMaps` to `8` are used for shadows, so we skip them here.
+            // TODO: Maybe instead of fixed texture units use `reserveGlobalTextureUnits` for shadows as well.
+            static const int numberOfShadowMaps = Settings::Manager::getBool("enable shadows", "Shadows") ?
+                                                  std::clamp(Settings::Manager::getInt("number of shadow maps", "Shadows"), 1, 8) :
+                                                  0;
+            if (getAvailableTextureUnits() >= 8 && getAvailableTextureUnits() - count < 8)
+                mReservedTextureUnits = mMaxTextureUnits - (8 - numberOfShadowMaps);
+        }
+
+        if (getAvailableTextureUnits() < count + 1)
+            throw std::runtime_error("Can't reserve texture unit; no available units");
+        mReservedTextureUnits += count;
+        return mMaxTextureUnits - mReservedTextureUnits;
     }
 
 }

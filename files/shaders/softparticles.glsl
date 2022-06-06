@@ -1,7 +1,5 @@
 uniform float near;
-uniform float far;
 uniform sampler2D opaqueDepthTex;
-uniform vec2 screenRes;
 uniform float particleSize;
 
 float viewDepth(float depth)

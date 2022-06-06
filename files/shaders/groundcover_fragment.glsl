@@ -27,6 +27,7 @@ varying vec4 passTangent;
 
 varying float euclideanDepth;
 varying float linearDepth;
+uniform vec2 screenRes;
 
 #if PER_PIXEL_LIGHTING
 varying vec3 passViewPos;
@@ -40,6 +41,7 @@ varying vec3 passNormal;
 #include "shadows_fragment.glsl"
 #include "lighting.glsl"
 #include "alpha.glsl"
+#include "fog.glsl"
 
 void main()
 {
@@ -82,13 +84,7 @@ void main()
     clampLightingResult(lighting);
 
     gl_FragData[0].xyz *= lighting;
-
-#if @radialFog
-    float fogValue = clamp((euclideanDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-#else
-    float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-#endif
-    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth);
 
 #if !@disableNormals
     gl_FragData[1].xyz = worldNormal * 0.5 + 0.5;

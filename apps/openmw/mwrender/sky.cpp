@@ -15,6 +15,7 @@
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/rtt.hpp>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -215,11 +216,35 @@ namespace
     private:
         const float &mAlpha;
     };
+
+    class SkyRTT : public SceneUtil::RTTNode
+    {
+    public:
+        SkyRTT(osg::Vec2f size, osg::Group* earlyRenderBinRoot) :
+            RTTNode(static_cast<int>(size.x()), static_cast<int>(size.y()), 0, false, 1, StereoAwareness::Aware),
+            mEarlyRenderBinRoot(earlyRenderBinRoot)
+        {
+            setDepthBufferInternalFormat(GL_DEPTH24_STENCIL8);
+        }
+
+        void setDefaults(osg::Camera* camera) override
+        {
+            camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
+            camera->setName("SkyCamera");
+            camera->setNodeMask(MWRender::Mask_RenderToTexture);
+            camera->addChild(mEarlyRenderBinRoot);
+            SceneUtil::ShadowManager::disableShadowsForStateSet(camera->getOrCreateStateSet());
+        }
+
+    private:
+        osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
+    };
+
 }
 
 namespace MWRender
 {
-    SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
+    SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, bool enableSkyRTT)
         : mSceneManager(sceneManager)
         , mCamera(nullptr)
         , mAtmosphereNightRoll(0.f)
@@ -270,6 +295,12 @@ namespace MWRender
         // Prevent unwanted clipping by water reflection camera's clipping plane
         mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_CLIP_PLANE0, osg::StateAttribute::OFF);
         mRootNode->addChild(mEarlyRenderBinRoot);
+
+        if (enableSkyRTT)
+        {
+            mSkyRTT = new SkyRTT(Settings::Manager::getVector2("sky rtt resolution", "Fog"), mEarlyRenderBinRoot);
+            mRootNode->addChild(mSkyRTT);
+        }
 
         mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
     }

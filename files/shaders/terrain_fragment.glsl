@@ -32,10 +32,13 @@ centroid varying vec3 shadowDiffuseLighting;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
+uniform vec2 screenRes;
+
 #include "vertexcolors.glsl"
 #include "shadows_fragment.glsl"
 #include "lighting.glsl"
 #include "parallax.glsl"
+#include "fog.glsl"
 
 void main()
 {
@@ -116,12 +119,7 @@ void main()
         gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec) * shadowing;
     }
 
-#if @radialFog
-    float fogValue = clamp((euclideanDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-#else
-    float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-#endif
-    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth);
 
 #if !@disableNormals && @writeNormals
     gl_FragData[1].xyz = worldNormal.xyz * 0.5 + 0.5;

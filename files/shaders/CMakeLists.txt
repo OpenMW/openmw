@@ -52,6 +52,7 @@ set(SHADER_FILES
     hdr_luminance_fragment.glsl
     fullscreen_tri_vertex.glsl
     fullscreen_tri_fragment.glsl
+    fog.glsl
 )
 
 copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")

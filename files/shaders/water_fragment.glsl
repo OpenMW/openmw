@@ -212,7 +212,6 @@ uniform sampler2D normalMap;
 uniform float osg_SimulationTime;
 
 uniform float near;
-uniform float far;
 uniform vec3 nodePosition;
 
 uniform float rainIntensity;
@@ -223,6 +222,7 @@ uniform vec2 screenRes;
 
 #include "shadows_fragment.glsl"
 #include "lighting.glsl"
+#include "fog.glsl"
 
 float frustumDepth;
 
@@ -291,6 +291,8 @@ void main(void)
     // TODO: Figure out how to properly radialise refraction depth and thus underwater fog
     // while avoiding oddities when the water plane is close to the clipping plane
     // radialise = radialDepth / linearDepth;
+#else
+    float radialDepth = 0.0;
 #endif
 
     vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
@@ -355,13 +357,7 @@ void main(void)
     gl_FragData[0].w = clamp(fresnel*6.0 + specular * sunSpec.w, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);
 #endif
 
-    // fog
-#if @radialFog
-    float fogValue = clamp((radialDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-#else
-    float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-#endif
-    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+    gl_FragData[0] = applyFogAtDist(gl_FragData[0], radialDepth, linearDepth);
 
 #if !@disableNormals
     gl_FragData[1].rgb = normal * 0.5 + 0.5;
