@@ -34,9 +34,6 @@
    </property>
    <item>
     <widget class="QGroupBox" name="contentGroupBox">
-     <property name="title">
-      <string>Content</string>
-     </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="bottomMargin">
        <number>3</number>
