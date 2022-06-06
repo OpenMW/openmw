@@ -885,6 +885,24 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Returns the read-only @{#RepairRecord} of a repair tool
+-- @function [parent=#Repair] record
+-- @param #any objectOrRecordId
+-- @return #RepairRecord
+
+---
+-- @type RepairRecord
+-- @field #string id The record ID of the repair tool
+-- @field #string name The name of the repair tool
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this repair tool (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #number maxCondition The maximum number of uses of this repair tool
+-- @field #number weight
+-- @field #number value
+-- @field #number quality The quality of the repair tool
+
 --- @{#Activator} functions
 -- @field [parent=#types] #Activator Activator
 
