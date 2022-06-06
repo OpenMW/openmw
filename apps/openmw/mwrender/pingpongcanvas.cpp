@@ -9,8 +9,6 @@ namespace MWRender
 {
     PingPongCanvas::PingPongCanvas(Shader::ShaderManager& shaderManager)
         : mFallbackStateSet(new osg::StateSet)
-        , mQueuedDispatchArray(std::nullopt)
-        , mQueuedDispatchFrameId(0)
     {
         setUseDisplayList(false);
         setUseVertexBufferObjects(true);
@@ -37,9 +35,6 @@ namespace MWRender
 
     void PingPongCanvas::setCurrentFrameData(size_t frameId, fx::DispatchArray&& data)
     {
-        mQueuedDispatchArray = fx::DispatchArray(data);
-        mQueuedDispatchFrameId = !frameId;
-
         mBufferData[frameId].data = std::move(data);
     }
 
@@ -65,19 +60,11 @@ namespace MWRender
 
         auto& bufferData = mBufferData[frameId];
 
-        if (mQueuedDispatchArray && mQueuedDispatchFrameId == frameId)
-        {
-            mBufferData[frameId].data = std::move(mQueuedDispatchArray.value());
-            mQueuedDispatchArray = std::nullopt;
-        }
-
         const auto& data = bufferData.data;
 
         std::vector<size_t> filtered;
 
         filtered.reserve(data.size());
-
-        const fx::DispatchNode::SubPass* resolvePass = nullptr;
 
         for (size_t i = 0; i < data.size(); ++i)
         {
@@ -85,15 +72,6 @@ namespace MWRender
 
             if (bufferData.mask & node.mFlags)
                 continue;
-
-            for (auto it = node.mPasses.crbegin(); it != node.mPasses.crend(); ++it)
-            {
-                if (!(*it).mRenderTarget)
-                {
-                    resolvePass = &(*it);
-                    break;
-                }
-            }
 
             filtered.push_back(i);
         }
@@ -113,10 +91,9 @@ namespace MWRender
             else
                 mLoggedLastError = false;
 
-            mFallbackStateSet->setTextureAttributeAndModes(0, bufferData.sceneTex);
-
             state.pushStateSet(mFallbackStateSet);
             state.apply();
+            state.applyTextureAttribute(0, bufferData.sceneTex);
             viewport->apply(state);
 
             drawGeometry(renderInfo);
@@ -223,7 +200,7 @@ namespace MWRender
 
                     lastApplied = pass.mRenderTarget->getHandle(state.getContextID());;
                 }
-                else if (&pass == resolvePass)
+                else if (pass.mResolve && index == filtered.back())
                 {
                     bindDestinationFbo();
                 }

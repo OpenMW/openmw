@@ -80,9 +80,6 @@ namespace MWRender
         mutable std::array<BufferData, 2> mBufferData;
         mutable std::array<osg::ref_ptr<osg::FrameBufferObject>, 3> mFbos;
 
-        mutable std::optional<fx::DispatchArray> mQueuedDispatchArray;
-        mutable size_t mQueuedDispatchFrameId;
-
         mutable bool mLoggedLastError = false;
     };
 }
