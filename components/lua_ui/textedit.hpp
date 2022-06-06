@@ -17,11 +17,13 @@ namespace LuaUi
             void updateProperties() override;
             void updateCoord() override;
             void updateChildren() override;
+            MyGUI::IntSize calculateSize() override;
 
         private:
             void textChange(MyGUI::EditBox*);
 
-        MyGUI::EditBox* mEditBox;
+            MyGUI::EditBox* mEditBox = nullptr;
+            bool mAutoSize;
     };
 }
 

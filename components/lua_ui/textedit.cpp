@@ -21,17 +21,23 @@ namespace LuaUi
 
     void LuaTextEdit::updateProperties()
     {
-        mEditBox->setCaption(propertyValue("text", std::string()));
         mEditBox->setFontHeight(propertyValue("textSize", 10));
         mEditBox->setTextColour(propertyValue("textColor", MyGUI::Colour(0, 0, 0, 1)));
-        mEditBox->setEditMultiLine(propertyValue("multiline", false));
         mEditBox->setEditWordWrap(propertyValue("wordWrap", false));
 
         Alignment horizontal(propertyValue("textAlignH", Alignment::Start));
         Alignment vertical(propertyValue("textAlignV", Alignment::Start));
         mEditBox->setTextAlign(alignmentToMyGui(horizontal, vertical));
 
-        mEditBox->setEditStatic(propertyValue("readOnly", false));
+        mEditBox->setEditMultiLine(propertyValue("multiline", false));
+
+        bool readOnly = propertyValue("readOnly", false);
+        mEditBox->setEditStatic(readOnly);
+
+        mAutoSize = readOnly && propertyValue("autoSize", false);
+
+        // change caption last, for multiline and wordwrap to apply
+        mEditBox->setCaption(propertyValue("text", std::string()));
 
         WidgetExtension::updateProperties();
     }
@@ -44,12 +50,7 @@ namespace LuaUi
     void LuaTextEdit::updateCoord()
     {
         WidgetExtension::updateCoord();
-        {
-            MyGUI::IntSize slotSize = slot()->calculateSize();
-            MyGUI::IntPoint slotPosition = slot()->widget()->getAbsolutePosition() - widget()->getAbsolutePosition();
-            MyGUI::IntCoord slotCoord(slotPosition, slotSize);
-            mEditBox->setCoord(slotCoord);
-        }
+        mEditBox->setSize(widget()->getSize());
     }
 
     void LuaTextEdit::updateChildren()
@@ -58,5 +59,17 @@ namespace LuaUi
         // otherwise it won't be focusable
         mEditBox->detachFromWidget();
         mEditBox->attachToWidget(this);
+    }
+    
+    MyGUI::IntSize LuaTextEdit::calculateSize()
+    {
+        MyGUI::IntSize normalSize = WidgetExtension::calculateSize();
+        if (mAutoSize)
+        {
+            mEditBox->setSize(normalSize);
+            MyGUI::IntSize textSize = mEditBox->getTextSize();
+            normalSize.height = std::max(normalSize.height, textSize.height);
+        }
+        return normalSize;
     }
 }

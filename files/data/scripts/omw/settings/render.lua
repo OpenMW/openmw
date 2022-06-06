@@ -94,10 +94,9 @@ local function renderSetting(group, setting, value, global)
         type = ui.TYPE.Flex,
         content = ui.content {
             {
-                template = I.MWUI.templates.textNormal,
+                template = I.MWUI.templates.textHeader,
                 props = {
                     text = l10n(setting.name),
-                    textSize = 18,
                 },
             },
         },
@@ -105,10 +104,10 @@ local function renderSetting(group, setting, value, global)
     if setting.description then
         titleLayout.content:add(interval)
         titleLayout.content:add {
-            template = I.MWUI.templates.textNormal,
+            template = I.MWUI.templates.textParagraph,
             props = {
                 text = l10n(setting.description),
-                textSize = 16,
+                size = util.vector2(300, 0),
             },
         }
     end
@@ -191,10 +190,10 @@ local function renderGroup(group, global)
     if group.description then
         titleLayout.content:add(interval)
         titleLayout.content:add {
-            template = I.MWUI.templates.textHeader,
+            template = I.MWUI.templates.textParagraph,
             props = {
                 text = l10n(group.description),
-                textSize = 18,
+                size = util.vector2(300, 0),
             },
         }
     end
@@ -301,10 +300,10 @@ local function renderPage(page)
     }
     if page.description then
         titleLayout.content:add {
-            template = I.MWUI.templates.textNormal,
+            template = I.MWUI.templates.textParagraph,
             props = {
                 text = l10n(page.description),
-                textSize = 20,
+                size = util.vector2(300, 0),
             },
         }
     end
