@@ -102,10 +102,12 @@ namespace ESM
                 auto it = lookup->second.first;
 
                 mLookup[info.mId] = std::make_pair(mInfo.insert(++it, info), isDeleted);
-                return;
             }
+            else
+                mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.end(), info), isDeleted);
         }
-        mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.begin(), info), isDeleted);
+        else
+            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.begin(), info), isDeleted);
     }
 
     void Dialogue::clearDeletedInfos()
