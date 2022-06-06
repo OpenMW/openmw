@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <iomanip>
+#include <chrono>
 
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>

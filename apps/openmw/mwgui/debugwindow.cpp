@@ -161,7 +161,8 @@ namespace MWGui
         std::string addition;
         const int64_t bufSize = sLogCircularBuffer.size();
         {
-            std::unique_lock<std::mutex> lock = Log::lock();
+            // Keep log object to stay keep the lock.
+            Log log(Debug::Debug);
             if (sLogStartIndex < sLogEndIndex)
                 addition = std::string(sLogCircularBuffer.data() + sLogStartIndex, sLogEndIndex - sLogStartIndex);
             else
