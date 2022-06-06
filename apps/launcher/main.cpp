@@ -5,6 +5,7 @@
 #include <QDir>
 
 #include <components/debug/debugging.hpp>
+#include <components/platform/platform.hpp>
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
@@ -16,6 +17,8 @@
 
 int runLauncher(int argc, char *argv[])
 {
+    Platform::init();
+
     try
     {
         QApplication app(argc, argv);

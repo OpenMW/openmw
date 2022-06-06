@@ -4,6 +4,7 @@
 #include <components/fallback/validate.hpp>
 #include <components/debug/debugging.hpp>
 #include <components/misc/rng.hpp>
+#include <components/platform/platform.hpp>
 
 #include "mwgui/debugwindow.hpp"
 
@@ -207,6 +208,8 @@ namespace
 
 int runApplication(int argc, char *argv[])
 {
+    Platform::init();
+
 #ifdef __APPLE__
     std::filesystem::path binary_path = std::filesystem::system_complete(std::filesystem::path(argv[0]));
     std::filesystem::current_path(binary_path.parent_path());
