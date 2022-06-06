@@ -1140,32 +1140,32 @@ namespace SceneUtil
                 l.mLightSource = transform.mLightSource;
                 l.mViewBound = viewBound;
                 it->second.push_back(l);
-
-                if (mPPLightBuffer && it->first->getName() == Constants::SceneCamera)
-                {
-                    const auto* light = l.mLightSource->getLight(frameNum);
-                    if (light->getDiffuse().x() >= 0.f)
-                    {
-                        mPPLightBuffer->setLight(frameNum, light->getPosition(),
-                                                light->getDiffuse(),
-                                                light->getConstantAttenuation(),
-                                                light->getLinearAttenuation(),
-                                                light->getQuadraticAttenuation(),
-                                                l.mLightSource->getRadius());
-                    }
-                }
             }
-        }
 
-        if (getLightingMethod() == LightingMethod::SingleUBO)
-        {
-            if (it->second.size() > static_cast<size_t>(getMaxLightsInScene() - 1))
+            const bool fillPPLights = mPPLightBuffer && it->first->getName() == Constants::SceneCamera;
+
+            if (fillPPLights || getLightingMethod() == LightingMethod::SingleUBO)
             {
                 auto sorter = [] (const LightSourceViewBound& left, const LightSourceViewBound& right) {
                     return left.mViewBound.center().length2() - left.mViewBound.radius2() < right.mViewBound.center().length2() - right.mViewBound.radius2();
                 };
-                std::sort(it->second.begin() + 1, it->second.end(), sorter);
-                it->second.erase((it->second.begin() + 1) + (getMaxLightsInScene() - 2), it->second.end());
+
+                std::sort(it->second.begin(), it->second.end(), sorter);
+
+                if (fillPPLights)
+                {
+                    for (const auto& bound : it->second)
+                    {
+                        if (bound.mLightSource->getEmpty())
+                            continue;
+                        const auto* light = bound.mLightSource->getLight(frameNum);
+                        if (light->getDiffuse().x() >= 0.f)
+                            mPPLightBuffer->setLight(frameNum, light, bound.mLightSource->getRadius());
+                    }
+                }
+
+                if (it->second.size() > static_cast<size_t>(getMaxLightsInScene() - 1))
+                    it->second.resize(getMaxLightsInScene() - 1);
             }
         }
 

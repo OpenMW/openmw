@@ -60,7 +60,7 @@ namespace SceneUtil
             mIndex[frame % 2] = 0;
         }
 
-        void setLight(size_t frame, const osg::Vec4f& position, osg::Vec4f diffuse, float ac, float al, float aq, float radius)
+        void setLight(size_t frame, const osg::Light* light, float radius)
         {
             size_t frameId = frame % 2;
             size_t i = mIndex[frameId];
@@ -70,9 +70,9 @@ namespace SceneUtil
 
             i *= 3;
 
-            mUniformBuffers[frameId]->setElement(i + 0, position);
-            mUniformBuffers[frameId]->setElement(i + 1, diffuse);
-            mUniformBuffers[frameId]->setElement(i + 2, osg::Vec4f(ac, al, aq, radius));
+            mUniformBuffers[frameId]->setElement(i + 0, light->getPosition());
+            mUniformBuffers[frameId]->setElement(i + 1, light->getDiffuse());
+            mUniformBuffers[frameId]->setElement(i + 2, osg::Vec4f(light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation(), radius));
 
             mIndex[frameId]++;
         }
@@ -118,6 +118,8 @@ namespace SceneUtil
 
         unsigned int mLastAppliedFrame;
 
+        bool mEmpty = false;
+
     public:
 
         META_Node(SceneUtil, LightSource)
@@ -145,6 +147,16 @@ namespace SceneUtil
         float getActorFade() const
         {
             return mActorFade;
+        }
+
+        void setEmpty(bool empty)
+        {
+            mEmpty = empty;
+        }
+
+        bool getEmpty() const
+        {
+            return mEmpty;
         }
 
         /// Get the osg::Light safe for modification in the given frame.

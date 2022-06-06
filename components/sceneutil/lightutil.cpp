@@ -3,6 +3,8 @@
 #include <osg/Light>
 #include <osg/Group>
 
+#include <osgParticle/ParticleSystem>
+
 #include <components/esm3/loadligh.hpp>
 #include <components/fallback/fallback.hpp>
 
@@ -10,6 +12,33 @@
 #include "lightcontroller.hpp"
 #include "util.hpp"
 #include "visitor.hpp"
+
+namespace
+{
+    class CheckEmptyLightVisitor : public osg::NodeVisitor
+    {
+    public:
+        CheckEmptyLightVisitor() : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN) {}
+
+        void apply(osg::Drawable& drawable) override
+        {
+            if (!mEmpty)
+                return;
+
+            if (dynamic_cast<const osgParticle::ParticleSystem*>(&drawable))
+                mEmpty = false;
+            else
+                traverse(drawable);
+        }
+
+        void apply(osg::Geometry& geometry) override
+        {
+            mEmpty = false;
+        }
+
+        bool mEmpty = true;
+    };
+}
 
 namespace SceneUtil
 {
@@ -64,6 +93,12 @@ namespace SceneUtil
         osg::Group* attachTo = visitor.mFoundNode ? visitor.mFoundNode : node;
         osg::ref_ptr<LightSource> lightSource = createLightSource(esmLight, lightMask, isExterior, osg::Vec4f(0,0,0,1));
         attachTo->addChild(lightSource);
+
+        CheckEmptyLightVisitor emptyVisitor;
+        node->accept(emptyVisitor);
+
+        lightSource->setEmpty(emptyVisitor.mEmpty);
+
         return lightSource;
     }
 
