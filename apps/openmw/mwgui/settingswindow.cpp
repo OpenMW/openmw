@@ -788,7 +788,7 @@ namespace MWGui
     void SettingsWindow::renderScriptSettings()
     {
         mScriptAdapter->detach();
-        mCurrentPage = -1;
+
         mScriptList->removeAllItems();
         mScriptView->setCanvasSize({0, 0});
 
@@ -824,6 +824,9 @@ namespace MWGui
         mScriptFilter->setVisible(!disabled);
         mScriptList->setVisible(!disabled);
         mScriptBox->setVisible(!disabled);
+
+        LuaUi::attachPageAt(mCurrentPage, mScriptAdapter);
+        mScriptView->setCanvasSize(mScriptAdapter->getSize());
     }
 
     void SettingsWindow::onScriptFilterChange(MyGUI::EditBox*)
