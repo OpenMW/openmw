@@ -63,10 +63,7 @@ namespace MWRender
 
             ext->glBlitFramebuffer(0, 0, tex->getTextureWidth(), tex->getTextureHeight(), 0, 0, tex->getTextureWidth(), tex->getTextureHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-            if (msaaFbo)
-                msaaFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
-            else
-                fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+            msaaFbo ? msaaFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER) : fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
 
             // draws scene into primary attachments
             bin->drawImplementation(renderInfo, previous);
@@ -82,8 +79,7 @@ namespace MWRender
             bin->drawImplementation(renderInfo, previous);
             bin->setStateSet(restore);
 
-            if (!msaaFbo)
-                fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+            msaaFbo ? msaaFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER) : fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
         }
 
 }
