@@ -11,7 +11,7 @@ namespace NifOsg
     class MatrixTransform : public osg::MatrixTransform
     {
     public:
-        MatrixTransform();
+        MatrixTransform() = default;
         MatrixTransform(const Nif::Transformation &trafo);
         MatrixTransform(const MatrixTransform &copy, const osg::CopyOp &copyop);
 
@@ -24,6 +24,13 @@ namespace NifOsg
         // we store the scale and rotation components separately here.
         float mScale{0.f};
         Nif::Matrix3 mRotationScale;
+
+        // Utility methods to transform the node and keep these components up-to-date.
+        // The matrix's components should not be overridden manually or using preMult/postMult
+        // unless you're sure you know what you are doing.
+        void setScale(float scale);
+        void setRotation(const osg::Quat &rotation);
+        void setTranslation(const osg::Vec3f &translation);
     };
 
 }

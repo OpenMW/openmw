@@ -165,48 +165,17 @@ void KeyframeController::operator() (NifOsg::MatrixTransform* node, osg::NodeVis
 {
     if (hasInput())
     {
-        osg::Matrix mat = node->getMatrix();
-
         float time = getInputValue(nv);
 
-        Nif::Matrix3& rot = node->mRotationScale;
-
-        bool setRot = false;
-        if(!mRotations.empty())
-        {
-            mat.setRotate(mRotations.interpKey(time));
-            setRot = true;
-        }
+        if (!mRotations.empty())
+            node->setRotation(mRotations.interpKey(time));
         else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
-        {
-            mat.setRotate(getXYZRotation(time));
-            setRot = true;
-        }
-        else
-        {
-            // no rotation specified, use the previous value
-            for (int i=0;i<3;++i)
-                for (int j=0;j<3;++j)
-                    mat(j,i) = rot.mValues[i][j]; // NB column/row major difference
-        }
+            node->setRotation(getXYZRotation(time));
 
-        if (setRot) // copy the new values back
-            for (int i=0;i<3;++i)
-                for (int j=0;j<3;++j)
-                    rot.mValues[i][j] = mat(j,i); // NB column/row major difference
-
-        float& scale = node->mScale;
-        if(!mScales.empty())
-            scale = mScales.interpKey(time);
-
-        for (int i=0;i<3;++i)
-            for (int j=0;j<3;++j)
-                mat(i,j) *= scale;
-
-        if(!mTranslations.empty())
-            mat.setTrans(mTranslations.interpKey(time));
-
-        node->setMatrix(mat);
+        if (!mScales.empty())
+            node->setScale(mScales.interpKey(time));
+        if (!mTranslations.empty())
+            node->setTranslation(mTranslations.interpKey(time));
     }
 
     traverse(node, nv);
@@ -396,14 +365,16 @@ void RollController::operator() (osg::MatrixTransform* node, osg::NodeVisitor* n
         mStartingTime = newTime;
 
         float value = mData.interpKey(getInputValue(nv));
-        osg::Matrix matrix = node->getMatrix();
 
         // Rotate around "roll" axis.
         // Note: in original game rotation speed is the framerate-dependent in a very tricky way.
         // Do not replicate this behaviour until we will really need it.
         // For now consider controller's current value as an angular speed in radians per 1/60 seconds.
-        matrix = osg::Matrix::rotate(value * duration * 60.f, 0, 0, 1) * matrix;
-        node->setMatrix(matrix);
+        node->preMult(osg::Matrix::rotate(value * duration * 60.f, 0, 0, 1));
+
+        // Note: doing it like this means RollControllers are not compatible with KeyframeControllers.
+        // KeyframeController currently wins the conflict.
+        // However unlikely that is, NetImmerse might combine the transformations somehow.
     }
 }
 
@@ -590,7 +561,7 @@ void ParticleSystemController::operator() (osgParticle::ParticleProcessor* node,
 }
 
 PathController::PathController(const PathController &copy, const osg::CopyOp &copyop)
-    : SceneUtil::NodeCallback<PathController, osg::MatrixTransform*>(copy, copyop)
+    : SceneUtil::NodeCallback<PathController, NifOsg::MatrixTransform*>(copy, copyop)
     , Controller(copy)
     , mPath(copy.mPath)
     , mPercent(copy.mPercent)
@@ -615,7 +586,7 @@ float PathController::getPercent(float time) const
     return percent;
 }
 
-void PathController::operator() (osg::MatrixTransform* node, osg::NodeVisitor* nv)
+void PathController::operator() (NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
 {
     if (mPath.empty() || mPercent.empty() || !hasInput())
     {
@@ -623,13 +594,9 @@ void PathController::operator() (osg::MatrixTransform* node, osg::NodeVisitor* n
         return;
     }
 
-    osg::Matrix mat = node->getMatrix();
-
     float time = getInputValue(nv);
     float percent = getPercent(time);
-    osg::Vec3f pos(mPath.interpKey(percent));
-    mat.setTrans(pos);
-    node->setMatrix(mat);
+    node->setTranslation(mPath.interpKey(percent));
 
     traverse(node, nv);
 }
