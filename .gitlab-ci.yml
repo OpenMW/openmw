@@ -1,3 +1,6 @@
+default:
+  interruptible: true
+
 include:
   - template: Security/SAST.gitlab-ci.yml
 
@@ -24,7 +27,6 @@ variables:
   image: ubuntu:focal
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
-  interruptible: true
   
 
 .Ubuntu:
@@ -106,161 +108,161 @@ Coverity:
     paths: 
       - /builds/OpenMW/openmw/cov-int/build-log.txt
 
-#Ubuntu_GCC:
-#  extends: .Ubuntu
-#  cache:
-#    key: Ubuntu_GCC.v2
-#  before_script:
-#    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
-#  variables:
-#    CC: gcc
-#    CXX: g++
-#    CCACHE_SIZE: 3G
-#  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
-#  timeout: 2h
+.Ubuntu_GCC:
+  extends: .Ubuntu
+  cache:
+    key: Ubuntu_GCC.v2
+  before_script:
+    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+  variables:
+    CC: gcc
+    CXX: g++
+    CCACHE_SIZE: 3G
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 2h
 
-#Ubuntu_GCC_tests:
-#  extends: Ubuntu_GCC
-#  cache:
-#    key: Ubuntu_GCC_tests.v3
-#  variables:
-#    CCACHE_SIZE: 1G
-#    BUILD_TESTS_ONLY: 1
-#  artifacts:
-#    paths: []
-#    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-#    when: always
-#    reports:
-#      junit: build/tests.xml
+.Ubuntu_GCC_tests:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_tests.v3
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
-#Ubuntu_GCC_tests_Debug:
-#  extends: Ubuntu_GCC
-#  cache:
-#    key: Ubuntu_GCC_tests_Debug.v2
-#  variables:
-#    CCACHE_SIZE: 1G
-#    BUILD_TESTS_ONLY: 1
-#    CMAKE_BUILD_TYPE: Debug
-#    CMAKE_CXX_FLAGS_DEBUG: -g -O0 -D_GLIBCXX_ASSERTIONS
-#  artifacts:
-#    paths: []
-#    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-#    when: always
-#    reports:
-#      junit: build/tests.xml
+.Ubuntu_GCC_tests_Debug:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_tests_Debug.v2
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O0 -D_GLIBCXX_ASSERTIONS
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
-#Ubuntu_GCC_tests_asan:
-#  extends: Ubuntu_GCC
-#  cache:
-#    key: Ubuntu_GCC_asan.v1
-#  variables:
-#    CCACHE_SIZE: 1G
-#    BUILD_TESTS_ONLY: 1
-#    CMAKE_BUILD_TYPE: Debug
-#    CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak
-#    CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak
-#    ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1
-#  artifacts:
-#    paths: []
-#    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-#    when: always
-#    reports:
-#      junit: build/tests.xml
-#
-#Ubuntu_GCC_tests_ubsan:
-#  extends: Ubuntu_GCC
-#  cache:
-#    key: Ubuntu_GCC_ubsan.v1
-#  variables:
-#    CCACHE_SIZE: 1G
-#    BUILD_TESTS_ONLY: 1
-#    CMAKE_BUILD_TYPE: Debug
-#    CMAKE_CXX_FLAGS_DEBUG: -g -O0 -fsanitize=undefined
-#    UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
-#  artifacts:
-#    paths: []
-#    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-#    when: always
-#    reports:
-#      junit: build/tests.xml
-#
-#Ubuntu_GCC_tests_tsan:
-#  extends: Ubuntu_GCC
-#  cache:
-#    key: Ubuntu_GCC_tsan.v1
-#  variables:
-#    CCACHE_SIZE: 1G
-#    BUILD_TESTS_ONLY: 1
-#    CMAKE_BUILD_TYPE: Debug
-#    CMAKE_CXX_FLAGS_DEBUG: -g -O2 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=thread -fPIE
-#    CMAKE_EXE_LINKER_FLAGS: -pthread -pie -fsanitize=thread
-#    TSAN_OPTIONS: second_deadlock_stack=1:halt_on_error=1
-#  artifacts:
-#    paths: []
-#    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-#    when: always
-#    reports:
-#      junit: build/tests.xml
+.Ubuntu_GCC_tests_asan:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_asan.v1
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak
+    CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak
+    ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
-#Ubuntu_GCC_tests_coverage:
-#  extends: Ubuntu_GCC_tests_Debug
-#  cache:
-#    key: Ubuntu_GCC_tests_coverage.v1
-#  variables:
-#    BUILD_WITH_CODE_COVERAGE: 1
-#  before_script:
-#    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic openmw-coverage
-#  coverage: /^\s*lines:\s*\d+.\d+\%/
-#  artifacts:
-#    paths: []
-#    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-#    when: always
-#    reports:
-#      coverage_report:
-#        coverage_format: cobertura
-#        path: coverage.xml
-#      junit: build/tests.xml
+.Ubuntu_GCC_tests_ubsan:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_ubsan.v1
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O0 -fsanitize=undefined
+    UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
-#Ubuntu_Static_Deps:
-#  extends: Ubuntu_Clang
-#  rules:
-#    - if: $CI_PIPELINE_SOURCE == "push"
-#      changes:
-#        - "**/CMakeLists.txt"
-#        - "cmake/**/*"
-#        - "CI/**/*"
-#        - ".gitlab-ci.yml"
-#  cache:
-#    key: Ubuntu_Static_Deps.V1
-#    paths:
-#      - apt-cache/
-#      - ccache/
-#      - build/extern/fetched/
-#  before_script:
-#    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-static
-#  variables:
-#    CI_OPENMW_USE_STATIC_DEPS: 1
-#    CC: clang
-#    CXX: clang++
-#    CXXFLAGS: -O0
-#  timeout: 3h
+.Ubuntu_GCC_tests_tsan:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_tsan.v1
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O2 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=thread -fPIE
+    CMAKE_EXE_LINKER_FLAGS: -pthread -pie -fsanitize=thread
+    TSAN_OPTIONS: second_deadlock_stack=1:halt_on_error=1
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
-#Ubuntu_Static_Deps_tests:
-#  extends: Ubuntu_Static_Deps
-#  cache:
-#    key: Ubuntu_Static_Deps_tests.V1
-#  variables:
-#    CCACHE_SIZE: 1G
-#    BUILD_TESTS_ONLY: 1
-#    CC: clang
-#    CXX: clang++
-#    CXXFLAGS: -O0
-#  artifacts:
-#    paths: []
-#    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-#    when: always
-#    reports:
-#      junit: build/tests.xml
+.Ubuntu_GCC_tests_coverage:
+  extends: Ubuntu_GCC_tests_Debug
+  cache:
+    key: Ubuntu_GCC_tests_coverage.v1
+  variables:
+    BUILD_WITH_CODE_COVERAGE: 1
+  before_script:
+    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic openmw-coverage
+  coverage: /^\s*lines:\s*\d+.\d+\%/
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: build/tests.xml
+
+.Ubuntu_Static_Deps:
+  extends: Ubuntu_Clang
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - "**/CMakeLists.txt"
+        - "cmake/**/*"
+        - "CI/**/*"
+        - ".gitlab-ci.yml"
+  cache:
+    key: Ubuntu_Static_Deps.V1
+    paths:
+      - apt-cache/
+      - ccache/
+      - build/extern/fetched/
+  before_script:
+    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-static
+  variables:
+    CI_OPENMW_USE_STATIC_DEPS: 1
+    CC: clang
+    CXX: clang++
+    CXXFLAGS: -O0
+  timeout: 3h
+
+.Ubuntu_Static_Deps_tests:
+  extends: Ubuntu_Static_Deps
+  cache:
+    key: Ubuntu_Static_Deps_tests.V1
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CC: clang
+    CXX: clang++
+    CXXFLAGS: -O0
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
 Ubuntu_Clang:
   extends: .Ubuntu
@@ -275,19 +277,19 @@ Ubuntu_Clang:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-#Ubuntu_Clang_tests:
-#  extends: Ubuntu_Clang
-#  cache:
-#    key: Ubuntu_Clang_tests.v3
-#  variables:
-#    CCACHE_SIZE: 1G
-#    BUILD_TESTS_ONLY: 1
-#  artifacts:
-#    paths: []
-#    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-#    when: always
-#    reports:
-#      junit: build/tests.xml
+.Ubuntu_Clang_tests:
+  extends: Ubuntu_Clang
+  cache:
+    key: Ubuntu_Clang_tests.v3
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/tests.xml
 
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
@@ -312,7 +314,6 @@ Ubuntu_Clang_tests_Debug:
   only:
     variables:
       - $CI_PROJECT_ID == "7107382"
-  interruptible: true
   cache:
     paths:
     - ccache/
@@ -352,151 +353,149 @@ variables: &tests-targets
   targets: "openmw_test_suite,openmw_detournavigator_navmeshtilescache_benchmark"
   package: "Tests"
 
-#.Windows_Ninja_Base:
-#  tags:
-#    - windows
-#  rules:
-#    - if: $CI_PIPELINE_SOURCE == "push"
-#  interruptible: true
-#  before_script:
-#  - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-#  - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
-#  - choco source disable -n=chocolatey
-#  - choco install git --force --params "/GitAndUnixToolsOnPath" -y
-#  - choco install 7zip -y
-#  - choco install ccache -y
-#  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
-#  - choco install vswhere -y
-#  - choco install ninja -y
-#  - choco install python -y
-#  - refreshenv
-#  - |
-#    function Make-SafeFileName {
-#      param(
-#        [Parameter(Mandatory=$true)]
-#        [String]
-#        $FileName
-#      )
-#      [IO.Path]::GetInvalidFileNameChars() | ForEach-Object {
-#        $FileName = $FileName.Replace($_, '_')
-#      }
-#      return $FileName
-#    }
-#  stage: build
-#  script:
-#    - $time = (Get-Date -Format "HH:mm:ss")
-#    - echo ${time}
-#    - echo "started by ${GITLAB_USER_NAME}"
-#    - $env:CCACHE_BASEDIR = Get-Location
-#    - $env:CCACHE_DIR = "$(Get-Location)\ccache"
-#    - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-#    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview
-#    - cd MSVC2019_64_Ninja
-#    - .\ActivateMSVC.ps1
-#    - cmake --build . --config $config --target ($targets.Split(','))
-#    - ccache --show-stats
-#    - cd $config
-#    - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
-#    - Get-ChildItem -Recurse *.ilk | Remove-Item
-#    - |
-#      if (Get-ChildItem -Recurse *.pdb) {
-#        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
-#        Get-ChildItem -Recurse *.pdb | Remove-Item
-#      }
-#    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
-#    - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
-#  after_script:
-#    - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
-#  cache:
-#    key: ninja-v2
-#    paths:
-#    - ccache
-#    - deps
-#    - MSVC2019_64_Ninja/deps/Qt
-#  artifacts:
-#    when: always
-#    paths:
-#    - "*.zip"
-#    - "*.log"
-#    - MSVC2019_64_Ninja/*.log
-#    - MSVC2019_64_Ninja/*/*.log
-#    - MSVC2019_64_Ninja/*/*/*.log
-#    - MSVC2019_64_Ninja/*/*/*/*.log
-#    - MSVC2019_64_Ninja/*/*/*/*/*.log
-#    - MSVC2019_64_Ninja/*/*/*/*/*/*.log
-#    - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
-#    - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
-#  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
-#  timeout: 2h
-#
-#Windows_Ninja_Engine_Release:
-#  extends:
-#    - .Windows_Ninja_Base
-#  variables:
-#    <<: *engine-targets
-#    config: "Release"
-#
-#Windows_Ninja_Engine_Release_MultiView:
-#  extends:
-#    - .Windows_Ninja_Base
-#  variables:
-#    <<: *engine-targets
-#    multiview: "-M"
-#    config: "Release"
-#
-#Windows_Ninja_Engine_Debug:
-#  extends:
-#    - .Windows_Ninja_Base
-#  variables:
-#    <<: *engine-targets
-#    config: "Debug"
-#
-#Windows_Ninja_Engine_RelWithDebInfo:
-#  extends:
-#    - .Windows_Ninja_Base
-#  variables:
-#    <<: *engine-targets
-#    config: "RelWithDebInfo"
-#
-#Windows_Ninja_CS_Release:
-#  extends:
-#    - .Windows_Ninja_Base
-#  variables:
-#    <<: *cs-targets
-#    config: "Release"
-#
-#Windows_Ninja_CS_Debug:
-#  extends:
-#    - .Windows_Ninja_Base
-#  variables:
-#    <<: *cs-targets
-#    config: "Debug"
-#
-#Windows_Ninja_CS_RelWithDebInfo:
-#  extends:
-#    - .Windows_Ninja_Base
-#  variables:
-#    <<: *cs-targets
-#    config: "RelWithDebInfo"
-#
-#Windows_Ninja_Tests_RelWithDebInfo:
-#  extends: .Windows_Ninja_Base
-#  stage: build
-#  variables:
-#    <<: *tests-targets
-#    config: "RelWithDebInfo"
-#    # Gitlab can't successfully execute following binaries due to unknown reason
-#    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
-#  artifacts:
-#    paths: []
-#    expire_in: 1 minute
+.Windows_Ninja_Base:
+  tags:
+    - windows
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+  before_script:
+  - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
+  - choco source disable -n=chocolatey
+  - choco install git --force --params "/GitAndUnixToolsOnPath" -y
+  - choco install 7zip -y
+  - choco install ccache -y
+  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
+  - choco install vswhere -y
+  - choco install ninja -y
+  - choco install python -y
+  - refreshenv
+  - |
+    function Make-SafeFileName {
+      param(
+        [Parameter(Mandatory=$true)]
+        [String]
+        $FileName
+      )
+      [IO.Path]::GetInvalidFileNameChars() | ForEach-Object {
+        $FileName = $FileName.Replace($_, '_')
+      }
+      return $FileName
+    }
+  stage: build
+  script:
+    - $time = (Get-Date -Format "HH:mm:ss")
+    - echo ${time}
+    - echo "started by ${GITLAB_USER_NAME}"
+    - $env:CCACHE_BASEDIR = Get-Location
+    - $env:CCACHE_DIR = "$(Get-Location)\ccache"
+    - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview
+    - cd MSVC2019_64_Ninja
+    - .\ActivateMSVC.ps1
+    - cmake --build . --config $config --target ($targets.Split(','))
+    - ccache --show-stats
+    - cd $config
+    - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
+    - Get-ChildItem -Recurse *.ilk | Remove-Item
+    - |
+      if (Get-ChildItem -Recurse *.pdb) {
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        Get-ChildItem -Recurse *.pdb | Remove-Item
+      }
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
+    - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
+  after_script:
+    - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
+  cache:
+    key: ninja-v2
+    paths:
+    - ccache
+    - deps
+    - MSVC2019_64_Ninja/deps/Qt
+  artifacts:
+    when: always
+    paths:
+    - "*.zip"
+    - "*.log"
+    - MSVC2019_64_Ninja/*.log
+    - MSVC2019_64_Ninja/*/*.log
+    - MSVC2019_64_Ninja/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 2h
+
+.Windows_Ninja_Engine_Release:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *engine-targets
+    config: "Release"
+
+.Windows_Ninja_Engine_Release_MultiView:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *engine-targets
+    multiview: "-M"
+    config: "Release"
+
+.Windows_Ninja_Engine_Debug:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *engine-targets
+    config: "Debug"
+
+.Windows_Ninja_Engine_RelWithDebInfo:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *engine-targets
+    config: "RelWithDebInfo"
+
+.Windows_Ninja_CS_Release:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *cs-targets
+    config: "Release"
+
+.Windows_Ninja_CS_Debug:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *cs-targets
+    config: "Debug"
+
+.Windows_Ninja_CS_RelWithDebInfo:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *cs-targets
+    config: "RelWithDebInfo"
+
+.Windows_Ninja_Tests_RelWithDebInfo:
+  extends: .Windows_Ninja_Base
+  stage: build
+  variables:
+    <<: *tests-targets
+    config: "RelWithDebInfo"
+    # Gitlab can't successfully execute following binaries due to unknown reason
+    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 .Windows_MSBuild_Base:
   tags:
     - windows
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
-  interruptible: true
   before_script:
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
@@ -566,23 +565,23 @@ variables: &tests-targets
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-#Windows_MSBuild_Engine_Release:
-#  extends:
-#    - .Windows_MSBuild_Base
-#  variables:
-#    <<: *engine-targets
-#    config: "Release"
-#  rules:
-#    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-#    - if: $CI_PIPELINE_SOURCE == "push"
-#    - if: $CI_PIPELINE_SOURCE == "schedule"
-#
-#Windows_MSBuild_Engine_Debug:
-#  extends:
-#    - .Windows_MSBuild_Base
-#  variables:
-#    <<: *engine-targets
-#    config: "Debug"
+.Windows_MSBuild_Engine_Release:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *engine-targets
+    config: "Release"
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+Windows_MSBuild_Engine_Debug:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *engine-targets
+    config: "Debug"
 
 Windows_MSBuild_Engine_RelWithDebInfo:
   extends:
@@ -591,42 +590,42 @@ Windows_MSBuild_Engine_RelWithDebInfo:
     <<: *engine-targets
     config: "RelWithDebInfo"
 
-#Windows_MSBuild_CS_Release:
-#  extends:
-#    - .Windows_MSBuild_Base
-#  variables:
-#    <<: *cs-targets
-#    config: "Release"
-#  rules:
-#    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-#    - if: $CI_PIPELINE_SOURCE == "push"
-#    - if: $CI_PIPELINE_SOURCE == "schedule"
-#
-#Windows_MSBuild_CS_Debug:
-#  extends:
-#    - .Windows_MSBuild_Base
-#  variables:
-#    <<: *cs-targets
-#    config: "Debug"
-#
-#Windows_MSBuild_CS_RelWithDebInfo:
-#  extends:
-#    - .Windows_MSBuild_Base
-#  variables:
-#    <<: *cs-targets
-#    config: "RelWithDebInfo"
-#
-#Windows_MSBuild_Tests_RelWithDebInfo:
-#  extends: .Windows_MSBuild_Base
-#  stage: build
-#  variables:
-#    <<: *tests-targets
-#    config: "RelWithDebInfo"
-#    # Gitlab can't successfully execute following binaries due to unknown reason
-#    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
-#  artifacts:
-#    paths: []
-#    expire_in: 1 minute
+.Windows_MSBuild_CS_Release:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *cs-targets
+    config: "Release"
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+.Windows_MSBuild_CS_Debug:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *cs-targets
+    config: "Debug"
+
+.Windows_MSBuild_CS_RelWithDebInfo:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *cs-targets
+    config: "RelWithDebInfo"
+
+.Windows_MSBuild_Tests_RelWithDebInfo:
+  extends: .Windows_MSBuild_Base
+  stage: build
+  variables:
+    <<: *tests-targets
+    config: "RelWithDebInfo"
+    # Gitlab can't successfully execute following binaries due to unknown reason
+    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+  artifacts:
+    paths: []
+    expire_in: 1 minute
 
 Ubuntu_AndroidNDK_arm64-v8a:
   tags:
@@ -634,7 +633,6 @@ Ubuntu_AndroidNDK_arm64-v8a:
   image: psi29a/android-ndk:focal-ndk22
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
-  interruptible: true
   variables:
     CCACHE_SIZE: 3G
   cache:
@@ -672,18 +670,18 @@ Ubuntu_AndroidNDK_arm64-v8a:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 1h30m
 
-#FindMissingMergeRequests:
-#  image: python:latest
-#  stage: build
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-#  variables:
-#    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-#  cache:
-#    key: FindMissingMergeRequests.v1
-#    paths:
-#      - .cache/pip
-#  before_script:
-#    - pip3 install --user requests click discord_webhook
-#  script:
-#    - scripts/find_missing_merge_requests.py --project_id=$CI_PROJECT_ID --ignored_mrs_path=$CI_PROJECT_DIR/.resubmitted_merge_requests.txt
+.FindMissingMergeRequests:
+  image: python:latest
+  stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: FindMissingMergeRequests.v1
+    paths:
+      - .cache/pip
+  before_script:
+    - pip3 install --user requests click discord_webhook
+  script:
+    - scripts/find_missing_merge_requests.py --project_id=$CI_PROJECT_ID --ignored_mrs_path=$CI_PROJECT_DIR/.resubmitted_merge_requests.txt
