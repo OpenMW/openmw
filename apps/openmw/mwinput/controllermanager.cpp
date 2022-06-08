@@ -277,7 +277,7 @@ namespace MWInput
         {
             gamepadToGuiControl(arg);
         }
-        else if (MWBase::Environment::get().getWorld()->isPreviewModeEnabled() &&
+        else if (mBindingsManager->actionIsActive(A_TogglePOV) &&
                 (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT || arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT))
         {
             // Preview Mode Gamepad Zooming; do not propagate to mBindingsManager

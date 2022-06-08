@@ -135,7 +135,7 @@ local function zoom(delta)
 end
 
 local function applyControllerZoom(dt)
-    if camera.getMode() == MODE.Preview then
+    if input.isActionPressed(input.ACTION.TogglePOV) then
         local triggerLeft = input.getAxisValue(input.CONTROLLER_AXIS.TriggerLeft)
         local triggerRight = input.getAxisValue(input.CONTROLLER_AXIS.TriggerRight)
         local controllerZoom = (triggerRight - triggerLeft) * 100 * dt
