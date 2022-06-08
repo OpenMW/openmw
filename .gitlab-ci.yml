@@ -1,3 +1,6 @@
+default:
+  interruptible: true
+
 include:
   - template: Security/SAST.gitlab-ci.yml
 
@@ -23,7 +26,7 @@ variables:
     - linux
   image: ubuntu:focal
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"  
+    - if: $CI_PIPELINE_SOURCE == "push"
   
 
 .Ubuntu:
@@ -118,7 +121,7 @@ Ubuntu_GCC:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-Ubuntu_GCC_tests:
+.Ubuntu_GCC_tests:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_tests.v3
@@ -132,7 +135,7 @@ Ubuntu_GCC_tests:
     reports:
       junit: build/tests.xml
 
-Ubuntu_GCC_tests_Debug:
+.Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_tests_Debug.v2
@@ -148,7 +151,7 @@ Ubuntu_GCC_tests_Debug:
     reports:
       junit: build/tests.xml
 
-Ubuntu_GCC_tests_asan:
+.Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_asan.v1
@@ -166,7 +169,7 @@ Ubuntu_GCC_tests_asan:
     reports:
       junit: build/tests.xml
 
-Ubuntu_GCC_tests_ubsan:
+.Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_ubsan.v1
@@ -183,7 +186,7 @@ Ubuntu_GCC_tests_ubsan:
     reports:
       junit: build/tests.xml
 
-Ubuntu_GCC_tests_tsan:
+.Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_tsan.v1
@@ -201,8 +204,8 @@ Ubuntu_GCC_tests_tsan:
     reports:
       junit: build/tests.xml
 
-Ubuntu_GCC_tests_coverage:
-  extends: Ubuntu_GCC_tests_Debug
+.Ubuntu_GCC_tests_coverage:
+  extends: .Ubuntu_GCC_tests_Debug
   cache:
     key: Ubuntu_GCC_tests_coverage.v1
   variables:
@@ -220,10 +223,10 @@ Ubuntu_GCC_tests_coverage:
         path: coverage.xml
       junit: build/tests.xml
 
-Ubuntu_Static_Deps:
+.Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"  
+    - if: $CI_PIPELINE_SOURCE == "push"
       changes:
         - "**/CMakeLists.txt"
         - "cmake/**/*"
@@ -244,8 +247,8 @@ Ubuntu_Static_Deps:
     CXXFLAGS: -O0
   timeout: 3h
 
-Ubuntu_Static_Deps_tests:
-  extends: Ubuntu_Static_Deps
+.Ubuntu_Static_Deps_tests:
+  extends: .Ubuntu_Static_Deps
   cache:
     key: Ubuntu_Static_Deps_tests.V1
   variables:
@@ -274,7 +277,7 @@ Ubuntu_Clang:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-Ubuntu_Clang_tests:
+.Ubuntu_Clang_tests:
   extends: Ubuntu_Clang
   cache:
     key: Ubuntu_Clang_tests.v3
@@ -354,7 +357,7 @@ variables: &tests-targets
   tags:
     - windows
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"    
+    - if: $CI_PIPELINE_SOURCE == "push"
   before_script:
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
@@ -425,15 +428,15 @@ variables: &tests-targets
     - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
-  
-Windows_Ninja_Engine_Release:
+
+.Windows_Ninja_Engine_Release:
   extends:
     - .Windows_Ninja_Base
   variables:
     <<: *engine-targets
     config: "Release"
 
-Windows_Ninja_Engine_Release_MultiView:
+.Windows_Ninja_Engine_Release_MultiView:
   extends:
     - .Windows_Ninja_Base
   variables:
@@ -441,42 +444,42 @@ Windows_Ninja_Engine_Release_MultiView:
     multiview: "-M"
     config: "Release"
 
-Windows_Ninja_Engine_Debug:
+.Windows_Ninja_Engine_Debug:
   extends:
     - .Windows_Ninja_Base
   variables:
     <<: *engine-targets
     config: "Debug"
 
-Windows_Ninja_Engine_RelWithDebInfo:
+.Windows_Ninja_Engine_RelWithDebInfo:
   extends:
     - .Windows_Ninja_Base
   variables:
     <<: *engine-targets
     config: "RelWithDebInfo"
 
-Windows_Ninja_CS_Release:
+.Windows_Ninja_CS_Release:
   extends:
     - .Windows_Ninja_Base
   variables:
     <<: *cs-targets
     config: "Release"
 
-Windows_Ninja_CS_Debug:
+.Windows_Ninja_CS_Debug:
   extends:
     - .Windows_Ninja_Base
   variables:
     <<: *cs-targets
     config: "Debug"
 
-Windows_Ninja_CS_RelWithDebInfo:
+.Windows_Ninja_CS_RelWithDebInfo:
   extends:
     - .Windows_Ninja_Base
   variables:
     <<: *cs-targets
     config: "RelWithDebInfo"
 
-Windows_Ninja_Tests_RelWithDebInfo:
+.Windows_Ninja_Tests_RelWithDebInfo:
   extends: .Windows_Ninja_Base
   stage: build
   variables:
@@ -492,7 +495,7 @@ Windows_Ninja_Tests_RelWithDebInfo:
   tags:
     - windows
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"    
+    - if: $CI_PIPELINE_SOURCE == "push"
   before_script:
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
@@ -562,7 +565,7 @@ Windows_Ninja_Tests_RelWithDebInfo:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-Windows_MSBuild_Engine_Release:
+.Windows_MSBuild_Engine_Release:
   extends:
     - .Windows_MSBuild_Base
   variables:
@@ -571,9 +574,9 @@ Windows_MSBuild_Engine_Release:
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push"
-    - if: $CI_PIPELINE_SOURCE == "schedule" 
+    - if: $CI_PIPELINE_SOURCE == "schedule"
 
-Windows_MSBuild_Engine_Debug:
+.Windows_MSBuild_Engine_Debug:
   extends:
     - .Windows_MSBuild_Base
   variables:
@@ -587,7 +590,7 @@ Windows_MSBuild_Engine_RelWithDebInfo:
     <<: *engine-targets
     config: "RelWithDebInfo"
 
-Windows_MSBuild_CS_Release:
+.Windows_MSBuild_CS_Release:
   extends:
     - .Windows_MSBuild_Base
   variables:
@@ -596,23 +599,23 @@ Windows_MSBuild_CS_Release:
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push"
-    - if: $CI_PIPELINE_SOURCE == "schedule" 
+    - if: $CI_PIPELINE_SOURCE == "schedule"
 
-Windows_MSBuild_CS_Debug:
+.Windows_MSBuild_CS_Debug:
   extends:
     - .Windows_MSBuild_Base
   variables:
     <<: *cs-targets
     config: "Debug"
 
-Windows_MSBuild_CS_RelWithDebInfo:
+.Windows_MSBuild_CS_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
     <<: *cs-targets
     config: "RelWithDebInfo"
 
-Windows_MSBuild_Tests_RelWithDebInfo:
+.Windows_MSBuild_Tests_RelWithDebInfo:
   extends: .Windows_MSBuild_Base
   stage: build
   variables:
@@ -629,7 +632,7 @@ Ubuntu_AndroidNDK_arm64-v8a:
     - linux
   image: psi29a/android-ndk:focal-ndk22
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"  
+    - if: $CI_PIPELINE_SOURCE == "push"
   variables:
     CCACHE_SIZE: 3G
   cache:
@@ -667,7 +670,7 @@ Ubuntu_AndroidNDK_arm64-v8a:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 1h30m
 
-FindMissingMergeRequests:
+.FindMissingMergeRequests:
   image: python:latest
   stage: build
   rules:
