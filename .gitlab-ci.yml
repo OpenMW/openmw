@@ -330,14 +330,6 @@ Ubuntu_Clang_tests_Debug:
       - build/OpenMW-*.dmg
       - "build/**/*.log"
 
-macOS11_Xcode12:
-  extends: .MacOS
-  image: macos-11-xcode-12
-  cache:
-    key: macOS11_Xcode12.v1
-  variables:
-    CCACHE_SIZE: 3G
-
 macOS12_Xcode13:
   extends: .MacOS
   image: macos-12-xcode-13
