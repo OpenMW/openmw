@@ -205,7 +205,7 @@ Ubuntu_GCC:
       junit: build/tests.xml
 
 .Ubuntu_GCC_tests_coverage:
-  extends: Ubuntu_GCC_tests_Debug
+  extends: .Ubuntu_GCC_tests_Debug
   cache:
     key: Ubuntu_GCC_tests_coverage.v1
   variables:
@@ -248,7 +248,7 @@ Ubuntu_GCC:
   timeout: 3h
 
 .Ubuntu_Static_Deps_tests:
-  extends: Ubuntu_Static_Deps
+  extends: .Ubuntu_Static_Deps
   cache:
     key: Ubuntu_Static_Deps_tests.V1
   variables:
