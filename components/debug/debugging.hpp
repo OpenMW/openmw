@@ -1,8 +1,8 @@
 #ifndef DEBUG_DEBUGGING_H
 #define DEBUG_DEBUGGING_H
 
-#include <boost/filesystem/fstream.hpp>
-#include <boost/iostreams/stream.hpp>
+#include <filesystem>
+#include <functional>
 
 #include <components/misc/guarded.hpp>
 

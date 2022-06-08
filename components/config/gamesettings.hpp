@@ -1,17 +1,17 @@
 #ifndef GAMESETTINGS_HPP
 #define GAMESETTINGS_HPP
 
+#include <filesystem>
+
 #include <QTextStream>
 #include <QStringList>
 #include <QString>
 #include <QFile>
 #include <QMultiMap>
 
-#include <boost/filesystem/path.hpp>
-
 namespace Files
 {
-  typedef std::vector<boost::filesystem::path> PathContainer;
+  typedef std::vector<std::filesystem::path> PathContainer;
   struct ConfigurationManager;
 }
 

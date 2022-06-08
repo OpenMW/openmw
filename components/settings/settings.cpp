@@ -24,7 +24,7 @@ void Manager::clear()
 std::string Manager::load(const Files::ConfigurationManager& cfgMgr, bool loadEditorSettings)
 {
     SettingsFileParser parser;
-    const std::vector<boost::filesystem::path>& paths = cfgMgr.getActiveConfigPaths();
+    const std::vector<std::filesystem::path>& paths = cfgMgr.getActiveConfigPaths();
     if (paths.empty())
         throw std::runtime_error("No config dirs! ConfigurationManager::readConfiguration must be called first.");
 

@@ -54,8 +54,8 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
                    <p>Please make sure you have the right permissions \
                    and try again.</p></body></html>");
 
-    boost::filesystem::create_directories(mCfgMgr.getUserConfigPath());
-    boost::filesystem::create_directories(mCfgMgr.getUserDataPath());
+    std::filesystem::create_directories(mCfgMgr.getUserConfigPath());
+    std::filesystem::create_directories(mCfgMgr.getUserDataPath());
 
     setupLog();
     setupGameSettings();
@@ -63,10 +63,10 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setupInstallations();
     setupPages();
 
-    const boost::filesystem::path& installationPath = mCfgMgr.getInstallPath();
+    const std::filesystem::path& installationPath = mCfgMgr.getInstallPath();
     if (!installationPath.empty())
     {
-        const boost::filesystem::path& dataPath = installationPath / "Data Files";
+        const std::filesystem::path& dataPath = installationPath / "Data Files";
         addInstallation(toQString(dataPath));
     }
 }
@@ -469,7 +469,7 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
             && dir.entryList().contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive));
 }
 
-QString Wizard::MainWizard::toQString(const boost::filesystem::path& path)
+QString Wizard::MainWizard::toQString(const std::filesystem::path& path)
 {
     return QString::fromUtf8(path.string().c_str());
 }

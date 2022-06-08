@@ -102,7 +102,7 @@ namespace MWWorld
             mLoaders.emplace(std::move(extension), &loader);
         }
 
-        void load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener) override
+        void load(const std::filesystem::path& filepath, int& index, Loading::Listener* listener) override
         {
             const auto it = mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string()));
             if (it != mLoaders.end())
@@ -129,7 +129,7 @@ namespace MWWorld
     {
         ESMStore& mStore;
         OMWScriptsLoader(ESMStore& store) : mStore(store) {}
-        void load(const boost::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
+        void load(const std::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
         {
             mStore.addOMWScripts(filepath.string());
         }
@@ -2963,7 +2963,7 @@ namespace MWWorld
         int idx = 0;
         for (const std::string &file : content)
         {
-            boost::filesystem::path filename(file);
+            std::filesystem::path filename(file);
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(file))
             {

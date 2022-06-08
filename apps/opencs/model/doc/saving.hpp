@@ -1,7 +1,7 @@
 #ifndef CSM_DOC_SAVING_H
 #define CSM_DOC_SAVING_H
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -21,7 +21,7 @@ namespace CSMDoc
 
         public:
 
-            Saving (Document& document, const boost::filesystem::path& projectPath,
+            Saving (Document& document, const std::filesystem::path& projectPath,
                 ToUTF8::FromType encoding);
 
     };

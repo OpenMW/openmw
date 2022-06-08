@@ -1,11 +1,7 @@
 #include "engine.hpp"
 
-#include <iomanip>
 #include <chrono>
 #include <thread>
-#include <filesystem>
-
-#include <boost/filesystem/fstream.hpp>
 
 #include <osgViewer/ViewerEventHandlers>
 #include <osgDB/WriteFile>
@@ -542,7 +538,7 @@ void OMW::Engine::addArchive (const std::string& archive) {
 }
 
 // Set resource dir
-void OMW::Engine::setResourceDir (const boost::filesystem::path& parResDir)
+void OMW::Engine::setResourceDir (const std::filesystem::path& parResDir)
 {
     mResDir = parResDir;
 }

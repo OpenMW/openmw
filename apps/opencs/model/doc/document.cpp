@@ -4,9 +4,7 @@
 
 #include <cassert>
 #include <memory>
-
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 
 #include "../world/defaultgmsts.hpp"
 
@@ -15,6 +13,7 @@
 #endif
 
 #include <components/debug/debuglog.hpp>
+#include <utility>
 
 void CSMDoc::Document::addGmsts()
 {
@@ -277,11 +276,11 @@ void CSMDoc::Document::createBase()
 }
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
-    const std::vector< boost::filesystem::path >& files,bool new_,
-    const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+    std::vector< std::filesystem::path >  files,bool new_,
+    const std::filesystem::path& savePath, const std::filesystem::path& resDir,
     ToUTF8::FromType encoding, const std::vector<std::string>& blacklistedScripts,
     bool fsStrict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives)
-: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, fsStrict, dataPaths, archives, resDir),
+: mSavePath (savePath), mContentFiles (std::move(files)), mNew (new_), mData (encoding, fsStrict, dataPaths, archives, resDir),
   mTools (*this, encoding),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
@@ -293,19 +292,19 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
 
-    if (mNew || !boost::filesystem::exists (mProjectPath))
+    if (mNew || !std::filesystem::exists (mProjectPath))
     {
-        boost::filesystem::path filtersPath (configuration.getUserDataPath() / "defaultfilters");
+        std::filesystem::path filtersPath (configuration.getUserDataPath() / "defaultfilters");
 
-        boost::filesystem::ofstream destination(mProjectPath, std::ios::out | std::ios::binary);
+        std::ofstream destination(mProjectPath, std::ios::out | std::ios::binary);
         if (!destination.is_open())
             throw std::runtime_error("Can not create project file: " + mProjectPath.string());
         destination.exceptions(std::ios::failbit | std::ios::badbit);
 
-        if (!boost::filesystem::exists (filtersPath))
+        if (!std::filesystem::exists (filtersPath))
             filtersPath = mResDir / "defaultfilters";
 
-        boost::filesystem::ifstream source(filtersPath, std::ios::in | std::ios::binary);
+        std::ifstream source(filtersPath, std::ios::in | std::ios::binary);
         if (!source.is_open())
             throw std::runtime_error("Can not read filters file: " + filtersPath.string());
         source.exceptions(std::ios::failbit | std::ios::badbit);
@@ -369,22 +368,22 @@ int CSMDoc::Document::getState() const
     return state;
 }
 
-const boost::filesystem::path& CSMDoc::Document::getResourceDir() const
+const std::filesystem::path& CSMDoc::Document::getResourceDir() const
 {
     return mResDir;
 }
 
-const boost::filesystem::path& CSMDoc::Document::getSavePath() const
+const std::filesystem::path& CSMDoc::Document::getSavePath() const
 {
     return mSavePath;
 }
 
-const boost::filesystem::path& CSMDoc::Document::getProjectPath() const
+const std::filesystem::path& CSMDoc::Document::getProjectPath() const
 {
     return mProjectPath;
 }
 
-const std::vector<boost::filesystem::path>& CSMDoc::Document::getContentFiles() const
+const std::vector<std::filesystem::path>& CSMDoc::Document::getContentFiles() const
 {
     return mContentFiles;
 }
@@ -483,7 +482,7 @@ void CSMDoc::Document::startRunning (const std::string& profile,
 {
     std::vector<std::string> contentFiles;
 
-    for (std::vector<boost::filesystem::path>::const_iterator iter (mContentFiles.begin());
+    for (std::vector<std::filesystem::path>::const_iterator iter (mContentFiles.begin());
         iter!=mContentFiles.end(); ++iter)
         contentFiles.push_back (iter->filename().string());
 

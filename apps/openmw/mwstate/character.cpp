@@ -1,14 +1,14 @@
 #include "character.hpp"
 
 #include <cctype>
+#include <filesystem>
 #include <sstream>
+#include <utility>
 
-#include <boost/filesystem.hpp>
-
-#include <components/esm3/esmreader.hpp>
 #include <components/esm/defs.hpp>
-
+#include <components/esm3/esmreader.hpp>
 #include <components/misc/utf8stream.hpp>
+#include <components/misc/timeconvert.hpp>
 
 #include <components/misc/strings/algorithm.hpp>
 
@@ -27,11 +27,11 @@ std::string MWState::getFirstGameFile(const std::vector<std::string>& contentFil
     return "";
 }
 
-void MWState::Character::addSlot (const boost::filesystem::path& path, const std::string& game)
+void MWState::Character::addSlot (const std::filesystem::path& path, const std::string& game)
 {
     Slot slot;
     slot.mPath = path;
-    slot.mTimeStamp = boost::filesystem::last_write_time (path);
+    slot.mTimeStamp = std::chrono::system_clock::to_time_t (Misc::clockCast<std::chrono::system_clock::time_point> (std::filesystem::last_write_time (path)));
 
     ESM::ESMReader reader;
     reader.open (slot.mPath.string());
@@ -71,7 +71,7 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
 
     // Append an index if necessary to ensure a unique file
     int i=0;
-    while (boost::filesystem::exists(slot.mPath))
+    while (std::filesystem::exists(slot.mPath))
     {
         const std::string test = stream.str() + " - " + std::to_string(++i);
         slot.mPath = mPath / (test + ext);
@@ -83,19 +83,18 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
     mSlots.push_back (slot);
 }
 
-MWState::Character::Character (const boost::filesystem::path& saves, const std::string& game)
-: mPath (saves)
+MWState::Character::Character (std::filesystem::path saves, const std::string& game)
+    : mPath (std::move(saves))
 {
-    if (!boost::filesystem::is_directory (mPath))
+    if (!std::filesystem::is_directory (mPath))
     {
-        boost::filesystem::create_directories (mPath);
+        std::filesystem::create_directories (mPath);
     }
     else
     {
-        for (boost::filesystem::directory_iterator iter (mPath);
-            iter!=boost::filesystem::directory_iterator(); ++iter)
+        for (std::filesystem::directory_iterator iter (mPath); iter!=std::filesystem::directory_iterator(); ++iter)
         {
-            boost::filesystem::path slotPath = *iter;
+            std::filesystem::path slotPath = *iter;
 
             try
             {
@@ -110,15 +109,15 @@ MWState::Character::Character (const boost::filesystem::path& saves, const std::
 
 void MWState::Character::cleanup()
 {
-    if (mSlots.size() == 0)
+    if (mSlots.empty())
     {
         // All slots are gone, no need to keep the empty directory
-        if (boost::filesystem::is_directory (mPath))
+        if (std::filesystem::is_directory (mPath))
         {
             // Extra safety check to make sure the directory is empty (e.g. slots failed to parse header)
-            boost::filesystem::directory_iterator it(mPath);
-            if (it == boost::filesystem::directory_iterator())
-                boost::filesystem::remove_all(mPath);
+            std::filesystem::directory_iterator it(mPath);
+            if (it == std::filesystem::directory_iterator())
+                std::filesystem::remove_all(mPath);
         }
     }
 }
@@ -140,7 +139,7 @@ void MWState::Character::deleteSlot (const Slot *slot)
         throw std::logic_error ("slot not found");
     }
 
-    boost::filesystem::remove(slot->mPath);
+    std::filesystem::remove(slot->mPath);
 
     mSlots.erase (mSlots.begin()+index);
 }
@@ -195,7 +194,7 @@ ESM::SavedGame MWState::Character::getSignature() const
     return slot.mProfile;
 }
 
-const boost::filesystem::path& MWState::Character::getPath() const
+const std::filesystem::path& MWState::Character::getPath() const
 {
     return mPath;
 }

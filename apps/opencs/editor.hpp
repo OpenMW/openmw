@@ -1,8 +1,10 @@
 #ifndef CS_EDITOR_H
 #define CS_EDITOR_H
 
+#include <filesystem>
+#include <fstream>
+
 #include <boost/interprocess/sync/file_lock.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/program_options/variables_map.hpp>
 
 #include <QObject>
@@ -48,15 +50,15 @@ namespace CS
             CSVDoc::NewGameDialogue mNewGame;
             CSVPrefs::Dialogue mSettings;
             CSVDoc::FileDialog mFileDialog;
-            boost::filesystem::path mLocal;
-            boost::filesystem::path mResources;
-            boost::filesystem::path mPid;
+            std::filesystem::path mLocal;
+            std::filesystem::path mResources;
+            std::filesystem::path mPid;
             boost::interprocess::file_lock mLock;
-            boost::filesystem::ofstream mPidFile;
+            std::ofstream mPidFile;
             bool mFsStrict;
             CSVTools::Merge mMerge;
             CSVDoc::ViewManager* mViewManager;
-            boost::filesystem::path mFileToLoad;
+            std::filesystem::path mFileToLoad;
             Files::PathContainer mDataDirs;
             std::string mEncodingName;
 
@@ -88,9 +90,9 @@ namespace CS
             void cancelFileDialog();
 
             void loadDocument();
-            void openFiles (const boost::filesystem::path &path, const std::vector<boost::filesystem::path> &discoveredFiles = std::vector<boost::filesystem::path>());
-            void createNewFile (const boost::filesystem::path& path);
-            void createNewGame (const boost::filesystem::path& file);
+            void openFiles (const std::filesystem::path &path, const std::vector<std::filesystem::path> &discoveredFiles = std::vector<std::filesystem::path>());
+            void createNewFile (const std::filesystem::path& path);
+            void createNewGame (const std::filesystem::path& file);
 
             void showStartup();
 

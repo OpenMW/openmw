@@ -3,8 +3,7 @@
 
 #include <vector>
 #include <string>
-
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <QObject>
 #include <QProcess>
@@ -29,11 +28,11 @@ namespace CSMDoc
             std::string mStartupInstruction;
             QTemporaryFile *mStartup;
             QTextDocument mLog;
-            boost::filesystem::path mProjectPath;
+            std::filesystem::path mProjectPath;
 
         public:
 
-            Runner (const boost::filesystem::path& projectPath);
+            Runner (std::filesystem::path  projectPath);
 
             ~Runner();
 

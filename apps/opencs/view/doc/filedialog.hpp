@@ -6,12 +6,12 @@
 
 #ifndef Q_MOC_RUN
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include "adjusterwidget.hpp"
 
 #ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
 #define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
-Q_DECLARE_METATYPE (boost::filesystem::path)
+Q_DECLARE_METATYPE (std::filesystem::path)
 #endif
 
 #endif
@@ -45,14 +45,14 @@ namespace CSVDoc
         explicit FileDialog(QWidget *parent = nullptr);
         void showDialog (ContentAction action);
 
-        void addFiles(const std::vector<boost::filesystem::path>& dataDirs);
+        void addFiles(const std::vector<std::filesystem::path>& dataDirs);
         void setEncoding (const QString &encoding);
         void clearFiles ();
 
         QString filename() const;
         QStringList selectedFilePaths();
 
-        void setLocalData (const boost::filesystem::path& localData);
+        void setLocalData (const std::filesystem::path& localData);
 
     private:
 
@@ -61,8 +61,8 @@ namespace CSVDoc
 
     signals:
 
-        void signalOpenFiles (const boost::filesystem::path &path);
-        void signalCreateNewFile (const boost::filesystem::path &path);
+        void signalOpenFiles (const std::filesystem::path &path);
+        void signalCreateNewFile (const std::filesystem::path &path);
 
         void signalUpdateAcceptButton (bool, int);
 

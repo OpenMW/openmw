@@ -3,8 +3,7 @@
 
 #include <map>
 #include <vector>
-
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <QObject>
 #include <QModelIndex>
@@ -148,7 +147,7 @@ namespace CSMWorld
         public:
 
             Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
-                const std::vector<std::string>& archives, const boost::filesystem::path& resDir);
+                const std::vector<std::string>& archives, const std::filesystem::path& resDir);
 
             ~Data() override;
 
@@ -290,9 +289,9 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
-            int getTotalRecords (const std::vector<boost::filesystem::path>& files); // for better loading bar
+            int getTotalRecords (const std::vector<std::filesystem::path>& files); // for better loading bar
 
-            int startLoading (const boost::filesystem::path& path, bool base, bool project);
+            int startLoading (const std::filesystem::path& path, bool base, bool project);
             ///< Begin merging content of a file into base or modified.
             ///
             /// \param project load project file instead of content file

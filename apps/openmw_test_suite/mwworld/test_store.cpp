@@ -97,7 +97,7 @@ struct ContentFileTest : public ::testing::Test
 protected:
     Files::ConfigurationManager mConfigurationManager;
     MWWorld::ESMStore mEsmStore;
-    std::vector<boost::filesystem::path> mContentFiles;
+    std::vector<std::filesystem::path> mContentFiles;
 };
 
 /// Print results of the dialogue merging process, i.e. the resulting linked list.

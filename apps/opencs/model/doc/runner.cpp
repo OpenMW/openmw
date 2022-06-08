@@ -1,5 +1,7 @@
 #include "runner.hpp"
 
+#include <utility>
+
 #include <QDir>
 #include <QTemporaryFile>
 #include <QTextStream>
@@ -7,8 +9,8 @@
 
 #include "operationholder.hpp"
 
-CSMDoc::Runner::Runner (const boost::filesystem::path& projectPath)
-: mRunning (false), mStartup (nullptr), mProjectPath (projectPath)
+CSMDoc::Runner::Runner (std::filesystem::path  projectPath)
+: mRunning (false), mStartup (nullptr), mProjectPath (std::move(projectPath))
 {
     connect (&mProcess, qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
         this, &Runner::finished);

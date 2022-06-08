@@ -68,8 +68,8 @@ void Config::GameSettings::validatePaths()
 std::string Config::GameSettings::getGlobalDataDir() const
 {
     // global data dir may not exists if OpenMW is not installed (ie if run from build directory)
-    if (boost::filesystem::exists(mCfgMgr.getGlobalDataPath()))
-        return boost::filesystem::canonical(mCfgMgr.getGlobalDataPath()).string();
+    if (std::filesystem::exists(mCfgMgr.getGlobalDataPath()))
+        return std::filesystem::canonical(mCfgMgr.getGlobalDataPath()).string();
     return {};
 }
 
@@ -173,7 +173,7 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
-        // path lines (e.g. 'data=...') need quotes and ampersands escaping to match how boost::filesystem::path uses boost::io::quoted
+        // path lines (e.g. 'data=...') need quotes and ampersands escaping to match how std::filesystem::path uses boost::io::quoted
         if (i.key() == QLatin1String("data")
             || i.key() == QLatin1String("data-local")
             || i.key() == QLatin1String("resources")

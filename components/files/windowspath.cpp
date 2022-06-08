@@ -38,79 +38,79 @@ WindowsPath::WindowsPath(const std::string& application_name)
         with UTF-8 encoding (generated for empty name from boost::locale)
         to handle Unicode in platform-agnostic way using std::string.
 
-        See boost::filesystem and boost::locale reference for details.
+        See std::filesystem and boost::locale reference for details.
     */
-    boost::filesystem::path::imbue(boost::locale::generator().generate(""));
+    std::filesystem::path::imbue(boost::locale::generator().generate(""));
 
-    boost::filesystem::path localPath = getLocalPath();
+    std::filesystem::path localPath = getLocalPath();
     if (!SetCurrentDirectoryA(localPath.string().c_str()))
         Log(Debug::Warning) << "Error " << GetLastError() << " when changing current directory";
 }
 
-boost::filesystem::path WindowsPath::getUserConfigPath() const
+std::filesystem::path WindowsPath::getUserConfigPath() const
 {
-    boost::filesystem::path userPath(".");
+    std::filesystem::path userPath(".");
 
     WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
     if(SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, nullptr, 0, path)))
     {
-        userPath = boost::filesystem::path(bconv::utf_to_utf<char>(path));
+        userPath = std::filesystem::path(bconv::utf_to_utf<char>(path));
     }
 
     return userPath / "My Games" / mName;
 }
 
-boost::filesystem::path WindowsPath::getUserDataPath() const
+std::filesystem::path WindowsPath::getUserDataPath() const
 {
     // Have some chaos, windows people!
     return getUserConfigPath();
 }
 
-boost::filesystem::path WindowsPath::getGlobalConfigPath() const
+std::filesystem::path WindowsPath::getGlobalConfigPath() const
 {
-    boost::filesystem::path globalPath(".");
+    std::filesystem::path globalPath(".");
 
     WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
     if(SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, nullptr, 0, path)))
     {
-        globalPath = boost::filesystem::path(bconv::utf_to_utf<char>(path));
+        globalPath = std::filesystem::path(bconv::utf_to_utf<char>(path));
     }
 
     return globalPath / mName;
 }
 
-boost::filesystem::path WindowsPath::getLocalPath() const
+std::filesystem::path WindowsPath::getLocalPath() const
 {
-    boost::filesystem::path localPath("./");
+    std::filesystem::path localPath("./");
     WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
     if (GetModuleFileNameW(nullptr, path, MAX_PATH + 1) > 0)
     {
-        localPath = boost::filesystem::path(bconv::utf_to_utf<char>(path)).parent_path() / "/";
+        localPath = std::filesystem::path(bconv::utf_to_utf<char>(path)).parent_path() / "/";
     }
 
     // lookup exe path
     return localPath;
 }
 
-boost::filesystem::path WindowsPath::getGlobalDataPath() const
+std::filesystem::path WindowsPath::getGlobalDataPath() const
 {
     return getGlobalConfigPath();
 }
 
-boost::filesystem::path WindowsPath::getCachePath() const
+std::filesystem::path WindowsPath::getCachePath() const
 {
     return getUserConfigPath() / "cache";
 }
 
-boost::filesystem::path WindowsPath::getInstallPath() const
+std::filesystem::path WindowsPath::getInstallPath() const
 {
-    boost::filesystem::path installPath("");
+    std::filesystem::path installPath("");
 
     HKEY hKey;
 

@@ -1,6 +1,6 @@
 #include "multidircollection.hpp"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <components/debug/debuglog.hpp>
 
@@ -26,19 +26,18 @@ namespace Files
     {
         NameEqual equal (!foldCase);
 
-        for (PathContainer::const_iterator iter = directories.begin();
-            iter!=directories.end(); ++iter)
+        for (const auto & directory : directories)
         {
-            if (!boost::filesystem::is_directory(*iter))
+            if (!std::filesystem::is_directory(directory))
             {
-                Log(Debug::Info) << "Skipping invalid directory: " << (*iter).string();
+                Log(Debug::Info) << "Skipping invalid directory: " << directory.string();
                 continue;
             }
 
-            for (boost::filesystem::directory_iterator dirIter(*iter);
-                    dirIter != boost::filesystem::directory_iterator(); ++dirIter)
+            for (std::filesystem::directory_iterator dirIter(directory);
+                    dirIter != std::filesystem::directory_iterator(); ++dirIter)
             {
-                boost::filesystem::path path = *dirIter;
+                std::filesystem::path path = *dirIter;
 
                 if (!equal (extension, path.extension().string()))
                     continue;
@@ -65,7 +64,7 @@ namespace Files
         }
     }
 
-    boost::filesystem::path MultiDirCollection::getPath (const std::string& file) const
+    std::filesystem::path MultiDirCollection::getPath (const std::string& file) const
     {
         TIter iter = mFiles.find (file);
 

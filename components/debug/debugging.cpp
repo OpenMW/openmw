@@ -2,9 +2,9 @@
 
 #include <chrono>
 #include <memory>
-#include <functional>
 #include <fstream>
-#include <filesystem>
+
+#include <boost/iostreams/stream.hpp>
 
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/configurationmanager.hpp>

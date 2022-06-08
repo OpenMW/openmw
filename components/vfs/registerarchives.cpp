@@ -40,17 +40,16 @@ namespace VFS
         if (useLooseFiles)
         {
             std::set<std::filesystem::path> seen;
-            for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+            for (const auto &dataDir : dataDirs)
             {
-                // TODO(jvoisin) Get rid of `->native()` when we move PathContainer from boost::filesystem to std::filesystem.
-                if (seen.insert(iter->native()).second)
+                if (seen.insert(dataDir).second)
                 {
-                    Log(Debug::Info) << "Adding data directory " << iter->string();
+                    Log(Debug::Info) << "Adding data directory " << dataDir;
                     // Last data dir has the highest priority
-                    vfs->addArchive(std::make_unique<FileSystemArchive>(iter->string()));
+                    vfs->addArchive(std::make_unique<FileSystemArchive>(dataDir));
                 }
                 else
-                    Log(Debug::Info) << "Ignoring duplicate data directory " << iter->string();
+                    Log(Debug::Info) << "Ignoring duplicate data directory " << dataDir;
             }
         }
 

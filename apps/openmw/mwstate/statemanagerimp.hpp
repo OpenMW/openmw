@@ -2,10 +2,9 @@
 #define GAME_STATE_STATEMANAGER_H
 
 #include <map>
+#include <filesystem>
 
 #include "../mwbase/statemanager.hpp"
-
-#include <boost/filesystem/path.hpp>
 
 #include "charactermanager.hpp"
 
@@ -31,7 +30,7 @@ namespace MWState
 
         public:
 
-            StateManager (const boost::filesystem::path& saves, const std::vector<std::string>& contentFiles);
+            StateManager (const std::filesystem::path& saves, const std::vector<std::string>& contentFiles);
 
             void requestQuit() override;
 

@@ -63,7 +63,7 @@ CS::Editor::Editor (int argc, char **argv)
     connect (&mStartup, &CSVDoc::StartupDialogue::editConfig, this, &Editor::showSettings);
 
     connect (&mFileDialog, &CSVDoc::FileDialog::signalOpenFiles,
-        this, [this](const boost::filesystem::path &savePath){ this->openFiles(savePath); });
+        this, [this](const std::filesystem::path &savePath){ this->openFiles(savePath); });
     connect (&mFileDialog, &CSVDoc::FileDialog::signalCreateNewFile, this, &Editor::createNewFile);
     connect (&mFileDialog, &CSVDoc::FileDialog::rejected, this, &Editor::cancelFileDialog);
 
@@ -77,7 +77,7 @@ CS::Editor::~Editor ()
 
     mPidFile.close();
 
-    if(mServer && boost::filesystem::exists(mPid))
+    if(mServer && std::filesystem::exists(mPid))
         static_cast<void> ( // silence coverity warning
         remove(mPid.string().c_str())); // ignore any error
 }
@@ -138,7 +138,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
     if (!local.empty())
     {
-        boost::filesystem::create_directories(local);
+        std::filesystem::create_directories(local);
         dataLocal.push_back(local);
     }
     mCfgMgr.filterOutNonExistingPaths(dataDirs);
@@ -225,9 +225,9 @@ void CS::Editor::loadDocument()
     mFileDialog.showDialog (CSVDoc::ContentAction_Edit);
 }
 
-void CS::Editor::openFiles (const boost::filesystem::path &savePath, const std::vector<boost::filesystem::path> &discoveredFiles)
+void CS::Editor::openFiles (const std::filesystem::path &savePath, const std::vector<std::filesystem::path> &discoveredFiles)
 {
-    std::vector<boost::filesystem::path> files;
+    std::vector<std::filesystem::path> files;
 
     if(discoveredFiles.empty())
     {
@@ -244,9 +244,9 @@ void CS::Editor::openFiles (const boost::filesystem::path &savePath, const std::
     mFileDialog.hide();
 }
 
-void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
+void CS::Editor::createNewFile (const std::filesystem::path &savePath)
 {
-    std::vector<boost::filesystem::path> files;
+    std::vector<std::filesystem::path> files;
 
     for (const QString &path : mFileDialog.selectedFilePaths()) {
         files.emplace_back(path.toUtf8().constData());
@@ -259,9 +259,9 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
     mFileDialog.hide();
 }
 
-void CS::Editor::createNewGame (const boost::filesystem::path& file)
+void CS::Editor::createNewGame (const std::filesystem::path& file)
 {
-    std::vector<boost::filesystem::path> files;
+    std::vector<std::filesystem::path> files;
 
     files.push_back (file);
 
@@ -292,9 +292,9 @@ bool CS::Editor::makeIPCServer()
 {
     try
     {
-        mPid = boost::filesystem::temp_directory_path();
+        mPid = std::filesystem::temp_directory_path();
         mPid /= "openmw-cs.pid";
-        bool pidExists = boost::filesystem::exists(mPid);
+        bool pidExists = std::filesystem::exists(mPid);
 
         mPidFile.open(mPid);
 
@@ -321,7 +321,7 @@ bool CS::Editor::makeIPCServer()
             mServer->close();
             fullPath.remove(QRegExp("dummy$"));
             fullPath += mIpcServerName;
-            if(boost::filesystem::exists(fullPath.toUtf8().constData()))
+            if(std::filesystem::exists(fullPath.toUtf8().constData()))
             {
                 // TODO: compare pid of the current process with that in the file
                 Log(Debug::Info) << "Detected unclean shutdown.";
@@ -376,7 +376,7 @@ int CS::Editor::run()
         fileReader.setEncoder(&encoder);
         fileReader.open(mFileToLoad.string());
 
-        std::vector<boost::filesystem::path> discoveredFiles;
+        std::vector<std::filesystem::path> discoveredFiles;
 
         for (std::vector<ESM::Header::MasterData>::const_iterator itemIter = fileReader.getGameFiles().begin();
             itemIter != fileReader.getGameFiles().end(); ++itemIter)
@@ -384,8 +384,8 @@ int CS::Editor::run()
             for (Files::PathContainer::const_iterator pathIter = mDataDirs.begin();
                 pathIter != mDataDirs.end(); ++pathIter)
             {
-                const boost::filesystem::path masterPath = *pathIter / itemIter->name;
-                if (boost::filesystem::exists(masterPath))
+                const std::filesystem::path masterPath = *pathIter / itemIter->name;
+                if (std::filesystem::exists(masterPath))
                 {
                     discoveredFiles.push_back(masterPath);
                     break;

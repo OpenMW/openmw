@@ -1,14 +1,14 @@
 #ifndef CSV_DOC_NEWGAME_H
 #define CSV_DOC_NEWGAME_H
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <QDialog>
 #include <QMetaType>
 
 #ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
 #define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
-Q_DECLARE_METATYPE (boost::filesystem::path)
+Q_DECLARE_METATYPE (std::filesystem::path)
 #endif
 
 class QPushButton;
@@ -30,11 +30,11 @@ namespace CSVDoc
 
             NewGameDialogue();
 
-            void setLocalData (const boost::filesystem::path& localData);
+            void setLocalData (const std::filesystem::path& localData);
 
         signals:
 
-            void createRequest (const boost::filesystem::path& file);
+            void createRequest (const std::filesystem::path& file);
 
             void cancelCreateGame ();
 

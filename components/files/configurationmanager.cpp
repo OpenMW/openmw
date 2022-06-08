@@ -1,10 +1,11 @@
 #include "configurationmanager.hpp"
 
+#include <fstream>
+
 #include <components/debug/debuglog.hpp>
 #include <components/files/configfileparser.hpp>
 #include <components/fallback/validate.hpp>
 
-#include <boost/filesystem/fstream.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/options_description.hpp>
 
@@ -86,18 +87,18 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
         return;
     }
 
-    std::stack<boost::filesystem::path> extraConfigDirs;
+    std::stack<std::filesystem::path> extraConfigDirs;
     addExtraConfigDirs(extraConfigDirs, variables);
     if (!hasReplaceConfig(variables))
         addExtraConfigDirs(extraConfigDirs, *config);
 
     std::vector<bpo::variables_map> parsedConfigs{*std::move(config)};
-    std::set<boost::filesystem::path> alreadyParsedPaths;  // needed to prevent infinite loop in case of a circular link
-    alreadyParsedPaths.insert(boost::filesystem::path(mActiveConfigPaths.front()));
+    std::set<std::filesystem::path> alreadyParsedPaths;  // needed to prevent infinite loop in case of a circular link
+    alreadyParsedPaths.insert(std::filesystem::path(mActiveConfigPaths.front()));
 
     while (!extraConfigDirs.empty())
     {
-        boost::filesystem::path path = extraConfigDirs.top();
+        std::filesystem::path path = extraConfigDirs.top();
         extraConfigDirs.pop();
         if (alreadyParsedPaths.count(path) > 0)
         {
@@ -145,11 +146,11 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
     }
     mScreenshotPath = mUserDataPath / "screenshots";
 
-    boost::filesystem::create_directories(getUserConfigPath());
-    boost::filesystem::create_directories(mScreenshotPath);
+    std::filesystem::create_directories(getUserConfigPath());
+    std::filesystem::create_directories(mScreenshotPath);
 
     // probably not necessary but validate the creation of the screenshots directory and fallback to the original behavior if it fails
-    if (!boost::filesystem::is_directory(mScreenshotPath))
+    if (!std::filesystem::is_directory(mScreenshotPath))
         mScreenshotPath = mUserDataPath;
 
     if (!quiet)
@@ -162,7 +163,7 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
     mSilent = silent;
 }
 
-void ConfigurationManager::addExtraConfigDirs(std::stack<boost::filesystem::path>& dirs,
+void ConfigurationManager::addExtraConfigDirs(std::stack<std::filesystem::path>& dirs,
                                               const bpo::variables_map& variables) const
 {
     auto configIt = variables.find("config");
@@ -267,7 +268,7 @@ void mergeComposingVariables(bpo::variables_map& first, bpo::variables_map& seco
     }
 }
 
-void ConfigurationManager::processPath(boost::filesystem::path& path, const boost::filesystem::path& basePath) const
+void ConfigurationManager::processPath(std::filesystem::path& path, const std::filesystem::path& basePath) const
 {
     std::string str = path.string();
 
@@ -284,7 +285,7 @@ void ConfigurationManager::processPath(boost::filesystem::path& path, const boos
         auto tokenIt = mTokensMapping.find(str.substr(0, pos + 1));
         if (tokenIt != mTokensMapping.end())
         {
-            boost::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
+            std::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
             if (pos < str.length() - 1)
             {
                 // There is something after the token, so we should
@@ -303,13 +304,13 @@ void ConfigurationManager::processPath(boost::filesystem::path& path, const boos
     }
 }
 
-void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, const boost::filesystem::path& basePath) const
+void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, const std::filesystem::path& basePath) const
 {
     for (auto& path : dataDirs)
         processPath(path, basePath);
 }
 
-void ConfigurationManager::processPaths(boost::program_options::variables_map& variables, const boost::filesystem::path& basePath) const
+void ConfigurationManager::processPaths(boost::program_options::variables_map& variables, const std::filesystem::path& basePath) const
 {
     for (auto& [name, var] : variables)
     {
@@ -323,7 +324,7 @@ void ConfigurationManager::processPaths(boost::program_options::variables_map& v
         }
         else if (var.value().type() == typeid(MaybeQuotedPath))
         {
-            boost::filesystem::path& path = boost::any_cast<Files::MaybeQuotedPath&>(var.value());
+            std::filesystem::path& path = boost::any_cast<Files::MaybeQuotedPath&>(var.value());
             processPath(path, basePath);
         }
     }
@@ -332,9 +333,9 @@ void ConfigurationManager::processPaths(boost::program_options::variables_map& v
 void ConfigurationManager::filterOutNonExistingPaths(Files::PathContainer& dataDirs) const
 {
     dataDirs.erase(std::remove_if(dataDirs.begin(), dataDirs.end(),
-        [this](const boost::filesystem::path& p)
+        [this](const std::filesystem::path& p)
         {
-            bool exists = boost::filesystem::is_directory(p);
+            bool exists = std::filesystem::is_directory(p);
             if (!exists && !mSilent)
                 Log(Debug::Warning) << "No such dir: " << p;
             return !exists;
@@ -343,16 +344,16 @@ void ConfigurationManager::filterOutNonExistingPaths(Files::PathContainer& dataD
 }
 
 std::optional<bpo::variables_map> ConfigurationManager::loadConfig(
-    const boost::filesystem::path& path, const bpo::options_description& description) const
+    const std::filesystem::path& path, const bpo::options_description& description) const
 {
-    boost::filesystem::path cfgFile(path);
+    std::filesystem::path cfgFile(path);
     cfgFile /= std::string(openmwCfgFile);
-    if (boost::filesystem::is_regular_file(cfgFile))
+    if (std::filesystem::is_regular_file(cfgFile))
     {
         if (!mSilent)
             Log(Debug::Info) << "Loading config file: " << cfgFile.string();
 
-        boost::filesystem::ifstream configFileStream(cfgFile);
+        std::ifstream configFileStream(cfgFile);
 
         if (configFileStream.is_open())
         {
@@ -367,12 +368,12 @@ std::optional<bpo::variables_map> ConfigurationManager::loadConfig(
     return std::nullopt;
 }
 
-const boost::filesystem::path& ConfigurationManager::getGlobalPath() const
+const std::filesystem::path& ConfigurationManager::getGlobalPath() const
 {
     return mFixedPath.getGlobalConfigPath();
 }
 
-const boost::filesystem::path& ConfigurationManager::getUserConfigPath() const
+const std::filesystem::path& ConfigurationManager::getUserConfigPath() const
 {
     if (mActiveConfigPaths.empty())
         return mFixedPath.getUserConfigPath();
@@ -380,32 +381,32 @@ const boost::filesystem::path& ConfigurationManager::getUserConfigPath() const
         return mActiveConfigPaths.back();
 }
 
-const boost::filesystem::path& ConfigurationManager::getUserDataPath() const
+const std::filesystem::path& ConfigurationManager::getUserDataPath() const
 {
     return mUserDataPath;
 }
 
-const boost::filesystem::path& ConfigurationManager::getLocalPath() const
+const std::filesystem::path& ConfigurationManager::getLocalPath() const
 {
     return mFixedPath.getLocalPath();
 }
 
-const boost::filesystem::path& ConfigurationManager::getGlobalDataPath() const
+const std::filesystem::path& ConfigurationManager::getGlobalDataPath() const
 {
     return mFixedPath.getGlobalDataPath();
 }
 
-const boost::filesystem::path& ConfigurationManager::getCachePath() const
+const std::filesystem::path& ConfigurationManager::getCachePath() const
 {
     return mFixedPath.getCachePath();
 }
 
-const boost::filesystem::path& ConfigurationManager::getInstallPath() const
+const std::filesystem::path& ConfigurationManager::getInstallPath() const
 {
     return mFixedPath.getInstallPath();
 }
 
-const boost::filesystem::path& ConfigurationManager::getScreenshotPath() const
+const std::filesystem::path& ConfigurationManager::getScreenshotPath() const
 {
     return mScreenshotPath;
 }
@@ -426,12 +427,12 @@ void parseConfig(std::istream& stream, bpo::variables_map& variables, const bpo:
 
 std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPath)
 {
-    // If the stream starts with a double quote, read from stream using boost::filesystem::path rules, then discard anything remaining.
+    // If the stream starts with a double quote, read from stream using std::filesystem::path rules, then discard anything remaining.
     // This prevents boost::program_options getting upset that we've not consumed the whole stream.
     // If it doesn't start with a double quote, read the whole thing verbatim
     if (istream.peek() == '"')
     {
-        istream >> static_cast<boost::filesystem::path&>(MaybeQuotedPath);
+        istream >> static_cast<std::filesystem::path&>(MaybeQuotedPath);
         if (istream && !istream.eof() && istream.peek() != EOF)
         {
             std::string remainder{std::istreambuf_iterator(istream), {}};
@@ -441,7 +442,7 @@ std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPat
     else
     {
         std::string intermediate{std::istreambuf_iterator(istream), {}};
-        static_cast<boost::filesystem::path&>(MaybeQuotedPath) = intermediate;
+        static_cast<std::filesystem::path&>(MaybeQuotedPath) = intermediate;
     }
     return istream;
 }

@@ -1,8 +1,7 @@
 #include "adjusterwidget.hpp"
+#include <filesystem>
 
 #include <components/misc/strings/lower.hpp>
-
-#include <boost/filesystem.hpp>
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -33,12 +32,12 @@ void CSVDoc::AdjusterWidget::setAction (ContentAction action)
     mAction = action;
 }
 
-void CSVDoc::AdjusterWidget::setLocalData (const boost::filesystem::path& localData)
+void CSVDoc::AdjusterWidget::setLocalData (const std::filesystem::path& localData)
 {
     mLocalData = localData;
 }
 
-boost::filesystem::path CSVDoc::AdjusterWidget::getPath() const
+std::filesystem::path CSVDoc::AdjusterWidget::getPath() const
 {
     if (!mValid)
         throw std::logic_error ("invalid content file path");
@@ -69,7 +68,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
     }
     else
     {
-        boost::filesystem::path path (name.toUtf8().data());
+        std::filesystem::path path (name.toUtf8().data());
 
         std::string extension = Misc::StringUtils::lowerCase(path.extension().string());
 
@@ -99,7 +98,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
             message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
             mResultPath = path;
 
-            if (boost::filesystem::exists (path))
+            if (std::filesystem::exists (path))
             {
                 /// \todo add an user setting to make this an error.
                 message += "<p>A file with the same name already exists. If you continue, it will be overwritten.";

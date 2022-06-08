@@ -648,7 +648,7 @@ CSMPrefs::State::~State()
 
 void CSMPrefs::State::save()
 {
-    boost::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
+    std::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
     Settings::Manager::saveUser (user.string());
 }
 

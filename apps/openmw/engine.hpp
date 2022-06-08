@@ -1,6 +1,8 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <filesystem>
+
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
 #include <components/translation/translation.hpp>
@@ -135,7 +137,7 @@ namespace OMW
             std::unique_ptr<ToUTF8::Utf8Encoder> mEncoder;
             Files::PathContainer mDataDirs;
             std::vector<std::string> mArchives;
-            boost::filesystem::path mResDir;
+            std::filesystem::path mResDir;
             osg::ref_ptr<osgViewer::Viewer> mViewer;
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
             osg::ref_ptr<SceneUtil::AsyncScreenCaptureOperation> mScreenCaptureOperation;
@@ -203,7 +205,7 @@ namespace OMW
             void addArchive(const std::string& archive);
 
             /// Set resource dir
-            void setResourceDir(const boost::filesystem::path& parResDir);
+            void setResourceDir(const std::filesystem::path& parResDir);
 
             /// Set start cell name
             void setCell(const std::string& cellName);

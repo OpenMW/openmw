@@ -5,14 +5,13 @@
 #include <vector>
 #include <string>
 #include <cctype>
-
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <components/misc/strings/algorithm.hpp>
 
 namespace Files
 {
-    typedef std::vector<boost::filesystem::path> PathContainer;
+    typedef std::vector<std::filesystem::path> PathContainer;
 
     struct NameLess
     {
@@ -37,7 +36,7 @@ namespace Files
     {
         public:
 
-            typedef std::map<std::string, boost::filesystem::path, NameLess> TContainer;
+            typedef std::map<std::string, std::filesystem::path, NameLess> TContainer;
             typedef TContainer::const_iterator TIter;
 
         private:
@@ -53,7 +52,7 @@ namespace Files
             /// contain the leading dot.
             /// \param foldCase Ignore filename case
 
-            boost::filesystem::path getPath (const std::string& file) const;
+            std::filesystem::path getPath (const std::string& file) const;
             ///< Return full path (including filename) of \a file.
             ///
             /// If the file does not exist, an exception is thrown. \a file must include

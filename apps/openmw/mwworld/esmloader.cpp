@@ -16,7 +16,7 @@ EsmLoader::EsmLoader(MWWorld::ESMStore& store, ESM::ReadersCache& readers, ToUTF
 {
 }
 
-void EsmLoader::load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener)
+void EsmLoader::load(const std::filesystem::path& filepath, int& index, Loading::Listener* listener)
 {
     const ESM::ReadersCache::BusyItem reader = mReaders.get(static_cast<std::size_t>(index));
 

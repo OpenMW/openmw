@@ -2,8 +2,7 @@
 #define CSM_DOC_DOCUMENT_H
 
 #include <string>
-
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <QUndoStack>
 #include <QObject>
@@ -58,15 +57,15 @@ namespace CSMDoc
 
         private:
 
-            boost::filesystem::path mSavePath;
-            std::vector<boost::filesystem::path> mContentFiles;
+            std::filesystem::path mSavePath;
+            std::vector<std::filesystem::path> mContentFiles;
             bool mNew;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
-            boost::filesystem::path mProjectPath;
+            std::filesystem::path mProjectPath;
             Saving mSavingOperation;
             OperationHolder mSaving;
-            boost::filesystem::path mResDir;
+            std::filesystem::path mResDir;
             Blacklist mBlacklist;
             Runner mRunner;
             bool mDirty;
@@ -100,8 +99,8 @@ namespace CSMDoc
         public:
 
             Document (const Files::ConfigurationManager& configuration,
-                const std::vector< boost::filesystem::path >& files, bool new_,
-                const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+                std::vector< std::filesystem::path >  files, bool new_,
+                const std::filesystem::path& savePath, const std::filesystem::path& resDir,
                 ToUTF8::FromType encoding, const std::vector<std::string>& blacklistedScripts,
                 bool fsStrict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
 
@@ -111,13 +110,13 @@ namespace CSMDoc
 
             int getState() const;
 
-            const boost::filesystem::path& getResourceDir() const;
+            const std::filesystem::path& getResourceDir() const;
 
-            const boost::filesystem::path& getSavePath() const;
+            const std::filesystem::path& getSavePath() const;
 
-            const boost::filesystem::path& getProjectPath() const;
+            const std::filesystem::path& getProjectPath() const;
 
-            const std::vector<boost::filesystem::path>& getContentFiles() const;
+            const std::vector<std::filesystem::path>& getContentFiles() const;
             ///< \attention The last element in this collection is the file that is being edited,
             /// but with its original path instead of the save path.
 

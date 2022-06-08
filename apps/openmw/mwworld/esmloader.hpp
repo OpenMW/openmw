@@ -27,7 +27,7 @@ struct EsmLoader : public ContentLoader
 
     std::optional<int> getMasterFileFormat() const { return mMasterFileFormat; }
 
-    void load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener) override;
+    void load(const std::filesystem::path& filepath, int& index, Loading::Listener* listener) override;
 
     private:
         ESM::ReadersCache& mReaders;

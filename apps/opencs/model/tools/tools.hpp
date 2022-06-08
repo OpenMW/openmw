@@ -3,12 +3,11 @@
 
 #include <memory>
 #include <map>
+#include <filesystem>
 
 #include <components/to_utf8/to_utf8.hpp>
 
 #include <QObject>
-
-#include <boost/filesystem/path.hpp>
 
 #include "../doc/operationholder.hpp"
 

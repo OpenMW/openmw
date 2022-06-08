@@ -18,9 +18,6 @@
 
 #include <osgDB/Registry>
 
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/operations.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -91,7 +88,7 @@ std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM::E
     return map;
 }
 
-MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::vector<std::string>& contentFiles)
+MWState::StateManager::StateManager (const std::filesystem::path& saves, const std::vector<std::string>& contentFiles)
 : mQuitRequest (false), mAskLoadRecent(false), mState (State_NoGame), mCharacterManager (saves, contentFiles), mTimePlayed (0)
 {
 
@@ -301,7 +298,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             throw std::runtime_error("Write operation failed (memory stream)");
 
         // All good, write to file
-        boost::filesystem::ofstream filestream (slot->mPath, std::ios::binary);
+        std::ofstream filestream (slot->mPath, std::ios::binary);
         filestream << stream.rdbuf();
 
         if (filestream.fail())
@@ -327,7 +324,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
 
         // If no file was written, clean up the slot
-        if (character && slot && !boost::filesystem::exists(slot->mPath))
+        if (character && slot && !std::filesystem::exists(slot->mPath))
         {
             character->deleteSlot(slot);
             character->cleanup();
@@ -373,7 +370,7 @@ void MWState::StateManager::loadGame(const std::string& filepath)
     {
         for (const auto& slot : character)
         {
-            if (slot.mPath == boost::filesystem::path(filepath))
+            if (slot.mPath == std::filesystem::path(filepath))
             {
                 loadGame(&character, slot.mPath.string());
                 return;
