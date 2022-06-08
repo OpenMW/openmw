@@ -26,6 +26,8 @@ set(BUILTIN_DATA_FILES
     scripts/omw/camera/head_bobbing.lua
     scripts/omw/camera/third_person.lua
     scripts/omw/camera/settings.lua
+    scripts/omw/camera/move360.lua
+    scripts/omw/camera/first_person_auto_switch.lua
     scripts/omw/console/player.lua
     scripts/omw/console/global.lua
     scripts/omw/console/local.lua

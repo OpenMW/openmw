@@ -48,6 +48,10 @@ I.Settings.registerGroup({
         boolSetting('', 'previewIfStandStill', true),
         boolSetting('', 'deferredPreviewRotation', true),
         boolSetting('', 'ignoreNC', true),
+        boolSetting('', 'move360', false),
+        floatSetting('', 'move360TurnSpeed', 5),
+        boolSetting('', 'slowViewChange', false),
+        boolSetting('', 'povAutoSwitch', false),
     },
 })
 
@@ -72,11 +76,14 @@ local settings = {
 }
 
 local function updateViewOverShoulderDisabled()
-    local disabled = not settings.thirdPerson:get('viewOverShoulder')
-    I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetX', {disabled = disabled})
-    I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetY', {disabled = disabled})
-    I.Settings.updateRendererArgument(thirdPersonGroup, 'autoSwitchShoulder', {disabled = disabled})
-    I.Settings.updateRendererArgument(thirdPersonGroup, 'zoomOutWhenMoveCoef', {disabled = disabled})
+    local shoulderDisabled = not settings.thirdPerson:get('viewOverShoulder')
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetX', {disabled = shoulderDisabled})
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetY', {disabled = shoulderDisabled})
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'autoSwitchShoulder', {disabled = shoulderDisabled})
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'zoomOutWhenMoveCoef', {disabled = shoulderDisabled})
+
+    local move360Disabled = not settings.thirdPerson:get('move360')
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'move360TurnSpeed', {disabled = move360Disabled})
 end
 
 local function updateHeadBobbingDisabled()

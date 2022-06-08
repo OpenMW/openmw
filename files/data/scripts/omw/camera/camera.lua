@@ -11,11 +11,14 @@ local Actor = require('openmw.types').Actor
 local settings = require('scripts.omw.camera.settings').thirdPerson
 local head_bobbing = require('scripts.omw.camera.head_bobbing')
 local third_person = require('scripts.omw.camera.third_person')
+local pov_auto_switch = require('scripts.omw.camera.first_person_auto_switch')
+local move360 = require('scripts.omw.camera.move360')
 
 local MODE = camera.MODE
 
 local previewIfStandStill = false
 local showCrosshairInThirdPerson = false
+local slowViewChange = false
 
 local function updateSettings()
     previewIfStandStill = settings:get('previewIfStandStill')
@@ -27,6 +30,10 @@ local function updateSettings()
         collisionType = util.bitOr(collisionType, nearby.COLLISION_TYPE.VisualOnly)
     end
     camera.setCollisionType(collisionType)
+    move360.enabled = settings:get('move360')
+    move360.turnSpeed = settings:get('move360TurnSpeed')
+    pov_auto_switch.enabled = settings:get('povAutoSwitch')
+    slowViewChange = settings:get('slowViewChange')
 end
 
 local primaryMode
@@ -167,6 +174,7 @@ local function onUpdate(dt)
     camera.setExtraRoll(0)
     camera.setFirstPersonOffset(util.vector3(0, 0, 0))
     updateSmoothedSpeed(dt)
+    pov_auto_switch.onUpdate(dt)
 end
 
 local function onFrame(dt)
@@ -188,6 +196,12 @@ local function onFrame(dt)
     applyControllerZoom(dt)
     third_person.update(dt, smoothedSpeed)
     if noHeadBobbing == 0 then head_bobbing.update(dt, smoothedSpeed) end
+    if slowViewChange then
+        local maxIncrease = dt * (100 + third_person.baseDistance)
+        camera.setPreferredThirdPersonDistance(
+            math.min(camera.getThirdPersonDistance() + maxIncrease, third_person.preferredDistance))
+    end
+    move360.onFrame(dt)
 end
 
 return {
@@ -255,6 +269,7 @@ return {
             elseif action == input.ACTION.ZoomOut then
                 zoom(-10)
             end
+            move360.onInputAction(action)
         end,
         onActive = init,
         onLoad = function(data)
@@ -265,4 +280,3 @@ return {
         end,
     },
 }
-

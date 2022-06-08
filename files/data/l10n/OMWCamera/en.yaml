@@ -1,5 +1,5 @@
-Camera: "Camera"
-settingsPageDescription: "OpenMW camera settings"
+Camera: "OpenMW Camera"
+settingsPageDescription: "OpenMW Camera settings"
 
 thirdPersonSettings: "Third person mode"
 
@@ -41,6 +41,19 @@ deferredPreviewRotationDescription: |
 ignoreNC: "Ignore 'No Collision' flag"
 ignoreNCDescription: >
     Prevents camera from clipping through the objects with the NC (No Collision) NIF flag.
+
+move360: "Move 360"
+move360Description: >
+    When without weapon in hands the character rotates to the direction of movement. I.e. looks to the camera when run backwards.
+
+move360TurnSpeed: "Move 360 turning speed"
+move360TurnSpeedDescription: A multiplier for the turning speed (5.0 by default)
+
+slowViewChange: "Smooth view change"
+slowViewChangeDescription: "Makes switching from 1st person to 3rd person view not instant."
+
+povAutoSwitch: "First person auto switch"
+povAutoSwitchDescription: "Auto switch to 1st person view if there is an obstacle right behind the player."
 
 
 headBobbingSettings: "Head bobbing in first person view"
