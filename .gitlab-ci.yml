@@ -108,7 +108,7 @@ Coverity:
     paths: 
       - /builds/OpenMW/openmw/cov-int/build-log.txt
 
-.Ubuntu_GCC:
+Ubuntu_GCC:
   extends: .Ubuntu
   cache:
     key: Ubuntu_GCC.v2
