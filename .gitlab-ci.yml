@@ -23,7 +23,8 @@ variables:
     - linux
   image: ubuntu:focal
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"  
+    - if: $CI_PIPELINE_SOURCE == "push"
+  interruptible: true
   
 
 .Ubuntu:
@@ -311,6 +312,7 @@ Ubuntu_Clang_tests_Debug:
   only:
     variables:
       - $CI_PROJECT_ID == "7107382"
+  interruptible: true
   cache:
     paths:
     - ccache/
@@ -355,6 +357,7 @@ variables: &tests-targets
 #    - windows
 #  rules:
 #    - if: $CI_PIPELINE_SOURCE == "push"
+#  interruptible: true
 #  before_script:
 #  - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 #  - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
@@ -492,7 +495,8 @@ variables: &tests-targets
   tags:
     - windows
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"    
+    - if: $CI_PIPELINE_SOURCE == "push"
+  interruptible: true
   before_script:
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
@@ -629,7 +633,8 @@ Ubuntu_AndroidNDK_arm64-v8a:
     - linux
   image: psi29a/android-ndk:focal-ndk22
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"  
+    - if: $CI_PIPELINE_SOURCE == "push"
+  interruptible: true
   variables:
     CCACHE_SIZE: 3G
   cache:
