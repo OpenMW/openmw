@@ -576,7 +576,7 @@ variables: &tests-targets
     - if: $CI_PIPELINE_SOURCE == "push"
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
-Windows_MSBuild_Engine_Debug:
+.Windows_MSBuild_Engine_Debug:
   extends:
     - .Windows_MSBuild_Base
   variables:
