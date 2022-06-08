@@ -20,13 +20,7 @@ namespace MWGui
         void updateBulletProfile();
 
         MyGUI::TabControl* mTabControl;
-
         MyGUI::EditBox* mLogView;
-
-        static std::vector<char> sLogCircularBuffer;
-        static int64_t sLogStartIndex;
-        static int64_t sLogEndIndex;
-
         MyGUI::EditBox* mBulletProfilerEdit;
     };
 

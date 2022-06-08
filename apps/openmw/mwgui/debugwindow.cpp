@@ -8,6 +8,8 @@
 #include <components/debug/debugging.hpp>
 #include <components/settings/settings.hpp>
 
+#include <mutex>
+
 #ifndef BT_NO_PROFILE
 
 namespace
@@ -103,9 +105,10 @@ namespace MWGui
 #endif
     }
 
-    std::vector<char> DebugWindow::sLogCircularBuffer;
-    int64_t DebugWindow::sLogStartIndex = 0;
-    int64_t DebugWindow::sLogEndIndex = 0;
+    static std::vector<char> sLogCircularBuffer;
+    static std::mutex sBufferMutex;
+    static int64_t sLogStartIndex;
+    static int64_t sLogEndIndex;
 
     void DebugWindow::startLogRecording()
     {
@@ -125,6 +128,7 @@ namespace MWGui
                 default: color = "#FFFFFF";
             }
             bool bufferOverflow = false;
+            std::lock_guard lock(sBufferMutex);
             const int64_t bufSize = sLogCircularBuffer.size();
             auto addChar = [&](char c)
             {
@@ -153,6 +157,8 @@ namespace MWGui
 
     void DebugWindow::updateLogView()
     {
+        std::lock_guard lock(sBufferMutex);
+
         if (!mLogView || sLogCircularBuffer.empty() || sLogStartIndex == sLogEndIndex)
             return;
         if (mLogView->isTextSelection())
@@ -161,7 +167,6 @@ namespace MWGui
         std::string addition;
         const int64_t bufSize = sLogCircularBuffer.size();
         {
-            std::unique_lock<std::mutex> lock = Log::lock();
             if (sLogStartIndex < sLogEndIndex)
                 addition = std::string(sLogCircularBuffer.data() + sLogStartIndex, sLogEndIndex - sLogStartIndex);
             else
