@@ -397,7 +397,7 @@ namespace NifOsg
         float mEmitStop;
     };
 
-    class PathController : public SceneUtil::NodeCallback<PathController, osg::MatrixTransform*>, public SceneUtil::Controller
+    class PathController : public SceneUtil::NodeCallback<PathController, NifOsg::MatrixTransform*>, public SceneUtil::Controller
     {
     public:
         PathController(const Nif::NiPathController* ctrl);
@@ -406,7 +406,7 @@ namespace NifOsg
 
         META_Object(NifOsg, PathController)
 
-        void operator() (osg::MatrixTransform*, osg::NodeVisitor*);
+        void operator() (NifOsg::MatrixTransform*, osg::NodeVisitor*);
 
     private:
         Vec3Interpolator mPath;
