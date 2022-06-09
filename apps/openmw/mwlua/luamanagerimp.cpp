@@ -503,6 +503,7 @@ namespace MWLua
         MWBase::Environment::get().getWindowManager()->setConsoleMode("");
         mUiResourceManager.clear();
         mLua.dropScriptCache();
+        mL10n.clear();
         initConfiguration();
 
         {  // Reload global scripts

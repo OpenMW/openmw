@@ -13,6 +13,7 @@ namespace LuaUtil
     public:
         L10nManager(const VFS::Manager* vfs, LuaState* lua) : mVFS(vfs), mLua(lua) {}
         void init();
+        void clear() { mContexts.clear(); }
 
         void setPreferredLocales(const std::vector<std::string>& locales);
         const std::vector<icu::Locale>& getPreferredLocales() const { return mPreferredLocales; }
