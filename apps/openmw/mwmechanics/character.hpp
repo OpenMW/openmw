@@ -149,50 +149,50 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     typedef std::deque<AnimationQueueEntry> AnimationQueue;
     AnimationQueue mAnimQueue;
 
-    CharacterState mIdleState;
+    CharacterState mIdleState{CharState_None};
     std::string mCurrentIdle;
 
-    CharacterState mMovementState;
+    CharacterState mMovementState{CharState_None};
     std::string mCurrentMovement;
-    float mMovementAnimSpeed;
-    bool mAdjustMovementAnimSpeed;
-    bool mHasMovedInXY;
-    bool mMovementAnimationControlled;
+    float mMovementAnimSpeed{0.f};
+    bool mAdjustMovementAnimSpeed{false};
+    bool mHasMovedInXY{false};
+    bool mMovementAnimationControlled{true};
 
-    CharacterState mDeathState;
+    CharacterState mDeathState{CharState_None};
     std::string mCurrentDeath;
-    bool mFloatToSurface;
+    bool mFloatToSurface{true};
 
-    CharacterState mHitState;
+    CharacterState mHitState{CharState_None};
     std::string mCurrentHit;
 
-    UpperBodyCharacterState mUpperBodyState;
+    UpperBodyCharacterState mUpperBodyState{UpperCharState_Nothing};
 
-    JumpingState mJumpState;
+    JumpingState mJumpState{JumpState_None};
     std::string mCurrentJump;
 
-    int mWeaponType;
+    int mWeaponType{ESM::Weapon::None};
     std::string mCurrentWeapon;
 
-    float mAttackStrength;
+    float mAttackStrength{0.f};
 
-    bool mSkipAnim;
+    bool mSkipAnim{false};
 
     // counted for skill increase
-    float mSecondsOfSwimming;
-    float mSecondsOfRunning;
+    float mSecondsOfSwimming{0.f};
+    float mSecondsOfRunning{0.f};
 
     MWWorld::ConstPtr mHeadTrackTarget;
 
-    float mTurnAnimationThreshold; // how long to continue playing turning animation after actor stopped turning
+    float mTurnAnimationThreshold{0.f}; // how long to continue playing turning animation after actor stopped turning
 
     std::string mAttackType; // slash, chop or thrust
 
-    bool mCastingManualSpell;
+    bool mCastingManualSpell{false};
 
-    float mTimeUntilWake;
+    float mTimeUntilWake{0.f};
 
-    bool mIsMovingBackward;
+    bool mIsMovingBackward{false};
     osg::Vec2f mSmoothedSpeed;
 
     void setAttackTypeBasedOnMovement();
