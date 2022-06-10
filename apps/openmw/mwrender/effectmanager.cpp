@@ -66,10 +66,13 @@ void EffectManager::update(float dt)
         std::remove_if(
             mEffects.begin(), 
             mEffects.end(), 
-            [dt](Effect& effect)
+            [dt, this](Effect& effect)
             {
                 effect.mAnimTime->addTime(dt);
-                return effect.mAnimTime->getTime() >= effect.mMaxControllerLength;
+                const auto remove = effect.mAnimTime->getTime() >= effect.mMaxControllerLength;
+                if (remove)
+                    mParentNode->removeChild(effect.mTransform);
+                return remove;
             }), 
         mEffects.end()
     );
