@@ -7,8 +7,8 @@ include:
 # Note: We set `needs` on each job to control the job DAG.
 # See https://docs.gitlab.com/ee/ci/yaml/#needs
 stages:
-  - test
   - build
+  - test
 
 # https://blog.nimbleways.com/let-s-make-faster-gitlab-ci-cd-pipelines/
 variables:
@@ -19,6 +19,12 @@ variables:
   CACHE_COMPRESSION_LEVEL: "fast"
   SAST_EXCLUDED_ANALYZERS: "bandit"
   SAST_EXCLUDED_PATHS: "extern"
+
+sast:
+  tags:
+    - docker
+    - linux
+  needs: []
 
 .Ubuntu_Image:
   tags:
