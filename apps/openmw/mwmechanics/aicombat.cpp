@@ -703,7 +703,7 @@ std::string chooseBestAttack(const ESM::Weapon* weapon)
             attackType = "chop";
     }
     else
-        MWMechanics::CharacterController::setAttackTypeRandomly(attackType);
+        attackType = MWMechanics::CharacterController::getRandomAttackType();
 
     return attackType;
 }

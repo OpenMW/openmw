@@ -385,7 +385,7 @@ void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, Ju
     }
 }
 
-bool CharacterController::onOpen()
+bool CharacterController::onOpen() const
 {
     if (mPtr.getType() == ESM::Container::sRecordId)
     {
@@ -406,7 +406,7 @@ bool CharacterController::onOpen()
     return true;
 }
 
-void CharacterController::onClose()
+void CharacterController::onClose() const
 {
     if (mPtr.getType() == ESM::Container::sRecordId)
     {
@@ -445,7 +445,7 @@ std::string CharacterController::getWeaponAnimation(int weaponType) const
     return weaponGroup;
 }
 
-std::string CharacterController::fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask)
+std::string CharacterController::fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask) const
 {
     bool isRealWeapon = mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::None;
     if (!isRealWeapon)
@@ -1072,7 +1072,7 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
     mPtr = ptr;
 }
 
-void CharacterController::updateIdleStormState(bool inwater)
+void CharacterController::updateIdleStormState(bool inwater) const
 {
     if (!mAnimation->hasAnimation("idlestorm") || mUpperBodyState != UpperCharState_Nothing || inwater)
     {
@@ -1527,12 +1527,12 @@ bool CharacterController::updateState(CharacterState idle)
                             else
                             {
                                 // There is no "best attack" for Hand-to-Hand
-                                setAttackTypeRandomly(mAttackType);
+                                mAttackType = getRandomAttackType();
                             }
                         }
                         else
                         {
-                            setAttackTypeBasedOnMovement();
+                            mAttackType = getMovementBasedAttackType();
                         }
                     }
                     // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
@@ -2361,7 +2361,7 @@ void CharacterController::update(float duration)
     mAnimation->enableHeadAnimation(cls.isActor() && !cls.getCreatureStats(mPtr).isDead());
 }
 
-void CharacterController::persistAnimationState()
+void CharacterController::persistAnimationState() const
 {
     ESM::AnimationState& state = mPtr.getRefData().getAnimationState();
 
@@ -2497,18 +2497,18 @@ void CharacterController::skipAnim()
     mSkipAnim = true;
 }
 
-bool CharacterController::isPersistentAnimPlaying()
+bool CharacterController::isPersistentAnimPlaying() const
 {
     if (!mAnimQueue.empty())
     {
-        AnimationQueueEntry& first = mAnimQueue.front();
+        const AnimationQueueEntry& first = mAnimQueue.front();
         return first.mPersist && isAnimPlaying(first.mGroup);
     }
 
     return false;
 }
 
-bool CharacterController::isAnimPlaying(const std::string &groupName)
+bool CharacterController::isAnimPlaying(const std::string &groupName) const
 {
     if(mAnimation == nullptr)
         return false;
@@ -2589,7 +2589,7 @@ void CharacterController::resurrect()
     mWeaponType = ESM::Weapon::None;
 }
 
-void CharacterController::updateContinuousVfx()
+void CharacterController::updateContinuousVfx() const
 {
     // Keeping track of when to stop a continuous VFX seems to be very difficult to do inside the spells code,
     // as it's extremely spread out (ActiveSpells, Spells, InventoryStore effects, etc...) so we do it here.
@@ -2606,7 +2606,7 @@ void CharacterController::updateContinuousVfx()
     }
 }
 
-void CharacterController::updateMagicEffects()
+void CharacterController::updateMagicEffects() const
 {
     if (!mPtr.getClass().isActor())
         return;
@@ -2622,7 +2622,7 @@ void CharacterController::updateMagicEffects()
     mAnimation->setVampire(vampire);
 }
 
-void CharacterController::setVisibility(float visibility)
+void CharacterController::setVisibility(float visibility) const
 {
     // We should take actor's invisibility in account
     if (mPtr.getClass().isActor())
@@ -2648,18 +2648,17 @@ void CharacterController::setVisibility(float visibility)
     mAnimation->setAlpha(visibility);
 }
 
-void CharacterController::setAttackTypeBasedOnMovement()
+std::string CharacterController::getMovementBasedAttackType() const
 {
     float *move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
     if (std::abs(move[1]) > std::abs(move[0]) + 0.2f) // forward-backward
-        mAttackType = "thrust";
-    else if (std::abs(move[0]) > std::abs(move[1]) + 0.2f) // sideway
-        mAttackType = "slash";
-    else
-        mAttackType = "chop";
+        return "thrust";
+    if (std::abs(move[0]) > std::abs(move[1]) + 0.2f) // sideway
+        return "slash";
+    return "chop";
 }
 
-bool CharacterController::isRandomAttackAnimation(const std::string& group) const
+bool CharacterController::isRandomAttackAnimation(const std::string& group)
 {
     return (group == "attack1" || group == "swimattack1" ||
             group == "attack2" || group == "swimattack2" ||
@@ -2753,16 +2752,15 @@ void CharacterController::setAIAttackType(const std::string& attackType)
     mAttackType = attackType;
 }
 
-void CharacterController::setAttackTypeRandomly(std::string& attackType)
+std::string CharacterController::getRandomAttackType()
 {
     MWBase::World* world = MWBase::Environment::get().getWorld();
     float random = Misc::Rng::rollProbability(world->getPrng());
     if (random >= 2/3.f)
-        attackType = "thrust";
-    else if (random >= 1/3.f)
-        attackType = "slash";
-    else
-        attackType = "chop";
+        return "thrust";
+    if (random >= 1/3.f)
+        return "slash";
+    return "chop";
 }
 
 bool CharacterController::readyToPrepareAttack() const
@@ -2784,12 +2782,12 @@ float CharacterController::getAttackStrength() const
     return mAttackStrength;
 }
 
-bool CharacterController::getAttackingOrSpell()
+bool CharacterController::getAttackingOrSpell() const
 {
     return mPtr.getClass().getCreatureStats(mPtr).getAttackingOrSpell();
 }
 
-void CharacterController::setActive(int active)
+void CharacterController::setActive(int active) const
 {
     mAnimation->setActive(active);
 }
@@ -2799,7 +2797,7 @@ void CharacterController::setHeadTrackTarget(const MWWorld::ConstPtr &target)
     mHeadTrackTarget = target;
 }
 
-void CharacterController::playSwishSound(float attackStrength)
+void CharacterController::playSwishSound(float attackStrength) const
 {
     MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 

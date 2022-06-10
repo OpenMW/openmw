@@ -195,7 +195,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     bool mIsMovingBackward{false};
     osg::Vec2f mSmoothedSpeed;
 
-    void setAttackTypeBasedOnMovement();
+    std::string getMovementBasedAttackType() const;
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
     void refreshHitRecoilAnims(CharacterState& idle);
@@ -206,18 +206,18 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     void clearAnimQueue(bool clearPersistAnims = false);
 
     bool updateState(CharacterState idle);
-    void updateIdleStormState(bool inwater);
+    void updateIdleStormState(bool inwater) const;
 
     std::string chooseRandomAttackAnimation() const;
-    bool isRandomAttackAnimation(const std::string& group) const;
+    static bool isRandomAttackAnimation(const std::string& group);
 
-    bool isPersistentAnimPlaying();
+    bool isPersistentAnimPlaying() const;
 
     void updateAnimQueue();
 
     void updateHeadTracking(float duration);
 
-    void updateMagicEffects();
+    void updateMagicEffects() const;
 
     void playDeath(float startpoint, CharacterState death);
     CharacterState chooseRandomDeathState() const;
@@ -229,11 +229,11 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     bool updateCarriedLeftVisible(int weaptype) const;
 
-    std::string fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask = nullptr);
+    std::string fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask = nullptr) const;
 
     std::string getWeaponAnimation(int weaponType) const;
 
-    bool getAttackingOrSpell();
+    bool getAttackingOrSpell() const;
     void setAttackingOrSpell(bool attackingOrSpell);
 
 
@@ -249,21 +249,21 @@ public:
     void handleTextKey(const std::string &groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map) override;
 
     // Be careful when to call this, see comment in Actors
-    void updateContinuousVfx();
+    void updateContinuousVfx() const;
 
     void updatePtr(const MWWorld::Ptr &ptr);
 
     void update(float duration);
 
-    bool onOpen();
-    void onClose();
+    bool onOpen() const;
+    void onClose() const;
 
-    void persistAnimationState();
+    void persistAnimationState() const;
     void unpersistAnimationState();
 
     bool playGroup(const std::string &groupname, int mode, int count, bool persist=false);
     void skipAnim();
-    bool isAnimPlaying(const std::string &groupName);
+    bool isAnimPlaying(const std::string &groupName) const;
 
     enum KillResult
     {
@@ -291,10 +291,10 @@ public:
     bool isTurning() const;
     bool isAttackingOrSpell() const;
 
-    void setVisibility(float visibility);
+    void setVisibility(float visibility) const;
     void castSpell(const std::string& spellId, bool manualSpell=false);
     void setAIAttackType(const std::string& attackType);
-    static void setAttackTypeRandomly(std::string& attackType);
+    static std::string getRandomAttackType();
 
     bool readyToPrepareAttack() const;
     bool readyToStartAttack() const;
@@ -302,12 +302,12 @@ public:
     float getAttackStrength() const;
 
     /// @see Animation::setActive
-    void setActive(int active);
+    void setActive(int active) const;
 
     /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
     void setHeadTrackTarget(const MWWorld::ConstPtr& target);
 
-    void playSwishSound(float attackStrength);
+    void playSwishSound(float attackStrength) const;
 };
 }
 
