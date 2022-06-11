@@ -11,7 +11,7 @@ namespace MWState
     {
         std::filesystem::path mPath;
         ESM::SavedGame mProfile;
-        std::time_t mTimeStamp;
+        std::filesystem::file_time_type mTimeStamp;
     };
 
     bool operator< (const Slot& left, const Slot& right);

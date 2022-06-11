@@ -20,6 +20,7 @@
 #include <components/settings/settings.hpp>
 
 #include <components/files/memorystream.hpp>
+#include <components/misc/timeconvert.hpp>
 
 #include <components/esm3/loadclas.hpp>
 
@@ -403,7 +404,7 @@ namespace MWGui
             throw std::runtime_error("Can't find selected slot");
 
         std::stringstream text;
-        time_t time = mCurrentSlot->mTimeStamp;
+        time_t time = Misc::to_time_t(mCurrentSlot->mTimeStamp);
         struct tm* timeinfo;
         timeinfo = localtime(&time);
 

@@ -3,9 +3,7 @@
 
 #include <QWidget>
 
-#ifndef Q_MOC_RUN
 #include <filesystem>
-#endif
 
 class QPushButton;
 class QListWidget;

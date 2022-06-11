@@ -7,6 +7,7 @@
 #include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/esm3/esmreader.hpp>
+#include <components/misc/timeconvert.hpp>
 
 
 
@@ -990,7 +991,7 @@ std::time_t MwIniImporter::lastWriteTime(const std::filesystem::path& filename, 
     if (std::filesystem::exists(filename))
     {
         std::filesystem::path resolved = std::filesystem::canonical(filename);
-        writeTime = std::chrono::system_clock::to_time_t (Misc::clockCast<std::chrono::system_clock::time_point> (std::filesystem::last_write_time (resolved)));;
+        writeTime = Misc::to_time_t(std::filesystem::last_write_time (resolved));
 
         // print timestamp
         const int size=1024;

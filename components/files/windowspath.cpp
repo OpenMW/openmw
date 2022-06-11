@@ -38,10 +38,10 @@ WindowsPath::WindowsPath(const std::string& application_name)
         with UTF-8 encoding (generated for empty name from boost::locale)
         to handle Unicode in platform-agnostic way using std::string.
 
-        See std::filesystem and boost::locale reference for details.
+        See boost::filesystem and boost::locale reference for details.
     */
     // TODO(Project579): Temporarly disabled until a good solution is found (no solution might actually be needed)
-    //std::filesystem::path::imbue(boost::locale::generator().generate(""));
+    //boost::filesystem::path::imbue(boost::locale::generator().generate(""));
 
     std::filesystem::path localPath = getLocalPath();
     if (!SetCurrentDirectoryA(localPath.string().c_str()))
@@ -111,7 +111,7 @@ std::filesystem::path WindowsPath::getCachePath() const
 
 std::filesystem::path WindowsPath::getInstallPath() const
 {
-    std::filesystem::path installPath("");
+    std::filesystem::path installPath();
 
     HKEY hKey;
 

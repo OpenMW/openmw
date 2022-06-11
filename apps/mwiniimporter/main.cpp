@@ -47,13 +47,13 @@ private:
     OpenMW application stack assumes UTF-8 encoding, therefore this
     conversion.
 
-    For std::filesystem::path::imbue see components/files/windowspath.cpp
+    For boost::filesystem::path::imbue see components/files/windowspath.cpp
 */
 int wmain(int argc, wchar_t *wargv[]) {
     utf8argv converter(argc, wargv);
     char **argv = converter.get();
     // TODO(Project579): Temporarly disabled until a good solution is found (no solution might actually be needed)
-    //std::filesystem::path::imbue(boost::locale::generator().generate(""));
+    //boost::filesystem::path::imbue(boost::locale::generator().generate(""));
 #endif
 
     try

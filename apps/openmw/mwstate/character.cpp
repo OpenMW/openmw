@@ -8,7 +8,6 @@
 #include <components/esm/defs.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/misc/utf8stream.hpp>
-#include <components/misc/timeconvert.hpp>
 
 #include <components/misc/strings/algorithm.hpp>
 
@@ -31,7 +30,7 @@ void MWState::Character::addSlot (const std::filesystem::path& path, const std::
 {
     Slot slot;
     slot.mPath = path;
-    slot.mTimeStamp = std::chrono::system_clock::to_time_t (Misc::clockCast<std::chrono::system_clock::time_point> (std::filesystem::last_write_time (path)));
+    slot.mTimeStamp = std::filesystem::last_write_time (path);
 
     ESM::ESMReader reader;
     reader.open (slot.mPath.string());
@@ -78,7 +77,7 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
     }
 
     slot.mProfile = profile;
-    slot.mTimeStamp = std::time (nullptr);
+    slot.mTimeStamp = std::filesystem::file_time_type ();
 
     mSlots.push_back (slot);
 }
@@ -156,7 +155,7 @@ const MWState::Slot *MWState::Character::updateSlot (const Slot *slot, const ESM
 
     Slot newSlot = *slot;
     newSlot.mProfile = profile;
-    newSlot.mTimeStamp = std::time (nullptr);
+    newSlot.mTimeStamp = std::filesystem::file_time_type ();
 
     mSlots.erase (mSlots.begin()+index);
 
