@@ -1,7 +1,6 @@
 #ifndef CS_EDITOR_H
 #define CS_EDITOR_H
 
-#include <filesystem>
 #include <fstream>
 
 #include <boost/interprocess/sync/file_lock.hpp>
