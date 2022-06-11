@@ -1,8 +1,6 @@
 #ifndef CSM_DOC_SAVING_H
 #define CSM_DOC_SAVING_H
 
-#include <filesystem>
-
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "operation.hpp"

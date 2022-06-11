@@ -1,9 +1,10 @@
 #ifndef CSV_DOC_ADJUSTERWIDGET_H
 #define CSV_DOC_ADJUSTERWIDGET_H
 
-#include <filesystem>
 
 #include <QWidget>
+
+#include <filesystem>
 
 class QLabel;
 

@@ -1,13 +1,13 @@
 #ifndef GAMESETTINGS_HPP
 #define GAMESETTINGS_HPP
 
-#include <filesystem>
-
 #include <QTextStream>
 #include <QStringList>
 #include <QString>
 #include <QFile>
 #include <QMultiMap>
+
+#include <filesystem>
 
 namespace Files
 {

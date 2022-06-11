@@ -2,7 +2,6 @@
 #define CSM_DOC_DOCUMENT_H
 
 #include <string>
-#include <filesystem>
 
 #include <QUndoStack>
 #include <QObject>

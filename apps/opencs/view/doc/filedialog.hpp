@@ -6,7 +6,6 @@
 
 #ifndef Q_MOC_RUN
 
-#include <filesystem>
 #include "adjusterwidget.hpp"
 
 #ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED

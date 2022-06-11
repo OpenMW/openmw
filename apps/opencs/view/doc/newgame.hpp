@@ -1,10 +1,10 @@
 #ifndef CSV_DOC_NEWGAME_H
 #define CSV_DOC_NEWGAME_H
 
-#include <filesystem>
-
 #include <QDialog>
 #include <QMetaType>
+
+#include <filesystem>
 
 #ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
 #define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED

@@ -3,13 +3,14 @@
 
 #include <vector>
 #include <string>
-#include <filesystem>
 
 #include <QObject>
 #include <QProcess>
 #include <QTextDocument>
 
 #include <components/esm3/debugprofile.hpp>
+
+#include <filesystem>
 
 class QTemporaryFile;
 

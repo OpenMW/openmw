@@ -3,7 +3,6 @@
 
 #include <map>
 #include <vector>
-#include <filesystem>
 
 #include <QObject>
 #include <QModelIndex>
