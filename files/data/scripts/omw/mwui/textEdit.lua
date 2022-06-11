@@ -7,7 +7,8 @@ return function(templates)
     templates.textEditLine = {
         type = ui.TYPE.TextEdit,
         props = {
-            size = util.vector2(150, constants.textNormalSize),
+            size = util.vector2(150, 0),
+            autoSize = true,
             textSize = constants.textNormalSize,
             textColor = constants.normalColor,
             multiline = false,
