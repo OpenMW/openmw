@@ -86,6 +86,20 @@ MWMechanics::CharacterState runStateToWalkState (MWMechanics::CharacterState sta
     }
 }
 
+// Converts a Hit state to its equivalent Death state.
+MWMechanics::CharacterState hitStateToDeathState (MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    switch (state)
+    {
+        case CharState_SwimKnockDown: return CharState_SwimDeathKnockDown;
+        case CharState_SwimKnockOut: return CharState_SwimDeathKnockOut;
+        case CharState_KnockDown: return CharState_DeathKnockDown;
+        case CharState_DeathKnockOut: return CharState_DeathKnockOut;
+        default: return CharState_None;
+    }
+}
+
 // Converts a movement state to its equivalent base animation group as long as it is a movement state.
 std::string movementStateToAnimGroup(MWMechanics::CharacterState state)
 {
@@ -123,6 +137,26 @@ std::string movementStateToAnimGroup(MWMechanics::CharacterState state)
         case CharState_TurnRight: return "turnright";
         case CharState_SwimTurnLeft: return "swimturnleft";
         case CharState_SwimTurnRight: return "swimturnright";
+        default: return {};
+    }
+}
+
+// Converts a death state to its equivalent animation group as long as it is a death state.
+std::string deathStateToAnimGroup(MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    switch (state)
+    {
+        case CharState_SwimDeath: return "swimdeath";
+        case CharState_SwimDeathKnockDown: return "swimdeathknockdown";
+        case CharState_SwimDeathKnockOut: return "swimdeathknockout";
+        case CharState_DeathKnockDown: return "deathknockdown";
+        case CharState_DeathKnockOut: return "deathknockout";
+        case CharState_Death1: return "death1";
+        case CharState_Death2: return "death2";
+        case CharState_Death3: return "death3";
+        case CharState_Death4: return "death4";
+        case CharState_Death5: return "death5";
         default: return {};
     }
 }
@@ -689,30 +723,17 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
 void CharacterController::playDeath(float startpoint, CharacterState death)
 {
-    // Make sure the character was swimming upon death for forward-compatibility
-    const bool wasSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
-
-    switch (death)
-    {
-    case CharState_SwimDeath:
-        mCurrentDeath = "swimdeath";
-        break;
-    case CharState_SwimDeathKnockDown:
-        mCurrentDeath = (wasSwimming ? "swimdeathknockdown" : "deathknockdown");
-        break;
-    case CharState_SwimDeathKnockOut:
-        mCurrentDeath = (wasSwimming ? "swimdeathknockout" : "deathknockout");
-        break;
-    case CharState_DeathKnockDown:
-        mCurrentDeath = "deathknockdown";
-        break;
-    case CharState_DeathKnockOut:
-        mCurrentDeath = "deathknockout";
-        break;
-    default:
-        mCurrentDeath = "death" + std::to_string(death - CharState_Death1 + 1);
-    }
     mDeathState = death;
+    mCurrentDeath = deathStateToAnimGroup(mDeathState);
+
+    // Make sure the character was swimming upon death for forward-compatibility
+    if (!MWBase::Environment::get().getWorld()->isSwimming(mPtr))
+    {
+        if (mDeathState == CharState_SwimDeathKnockDown)
+            mCurrentDeath = "deathknockdown";
+        else if (mDeathState == CharState_SwimDeathKnockOut)
+            mCurrentDeath = "deathknockout";
+    }
 
     mPtr.getClass().getCreatureStats(mPtr).setDeathAnimation(mDeathState - CharState_Death1);
 
@@ -756,30 +777,12 @@ void CharacterController::playRandomDeath(float startpoint)
         MWBase::Environment::get().getWorld()->useDeathCamera();
     }
 
-    if(mHitState == CharState_SwimKnockDown && mAnimation->hasAnimation("swimdeathknockdown"))
-    {
-        mDeathState = CharState_SwimDeathKnockDown;
-    }
-    else if(mHitState == CharState_SwimKnockOut && mAnimation->hasAnimation("swimdeathknockout"))
-    {
-        mDeathState = CharState_SwimDeathKnockOut;
-    }
-    else if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
-    {
+    mDeathState = hitStateToDeathState(mHitState);
+    if (mDeathState == CharState_None && MWBase::Environment::get().getWorld()->isSwimming(mPtr))
         mDeathState = CharState_SwimDeath;
-    }
-    else if (mHitState == CharState_KnockDown && mAnimation->hasAnimation("deathknockdown"))
-    {
-        mDeathState = CharState_DeathKnockDown;
-    }
-    else if (mHitState == CharState_KnockOut && mAnimation->hasAnimation("deathknockout"))
-    {
-        mDeathState = CharState_DeathKnockOut;
-    }
-    else
-    {
+
+    if (mDeathState == CharState_None || !mAnimation->hasAnimation(deathStateToAnimGroup(mDeathState)))
         mDeathState = chooseRandomDeathState();
-    }
 
     // Do not interrupt scripted animation by death
     if (isPersistentAnimPlaying())
