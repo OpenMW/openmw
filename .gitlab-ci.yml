@@ -614,7 +614,7 @@ Windows_MSBuild_Engine_RelWithDebInfo:
     <<: *cs-targets
     config: "Debug"
 
-.Windows_MSBuild_CS_RelWithDebInfo:
+Windows_MSBuild_CS_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
