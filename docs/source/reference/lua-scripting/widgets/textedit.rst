@@ -38,7 +38,7 @@ Properties
   * - autoSize
     - boolean (false)
     - | Automatically changes widget height to fix all the text.
-      | Only applies for readOnly = true.
+      | Only applies when readOnly = true or multiline = false.
 
 Events
 ------

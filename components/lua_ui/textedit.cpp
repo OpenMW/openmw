@@ -29,12 +29,13 @@ namespace LuaUi
         Alignment vertical(propertyValue("textAlignV", Alignment::Start));
         mEditBox->setTextAlign(alignmentToMyGui(horizontal, vertical));
 
-        mEditBox->setEditMultiLine(propertyValue("multiline", false));
+        mMultiline = propertyValue("multiline", false);
+        mEditBox->setEditMultiLine(mMultiline);
 
         bool readOnly = propertyValue("readOnly", false);
         mEditBox->setEditStatic(readOnly);
 
-        mAutoSize = readOnly && propertyValue("autoSize", false);
+        mAutoSize = (readOnly || !mMultiline) && propertyValue("autoSize", false);
 
         // change caption last, for multiline and wordwrap to apply
         mEditBox->setCaption(propertyValue("text", std::string()));
@@ -67,8 +68,8 @@ namespace LuaUi
         if (mAutoSize)
         {
             mEditBox->setSize(normalSize);
-            MyGUI::IntSize textSize = mEditBox->getTextSize();
-            normalSize.height = std::max(normalSize.height, textSize.height);
+            int targetHeight = mMultiline ? mEditBox->getTextSize().height : mEditBox->getFontHeight();
+            normalSize.height = std::max(normalSize.height, targetHeight);
         }
         return normalSize;
     }
