@@ -2523,9 +2523,15 @@ void CharacterController::clearAnimQueue(bool clearPersistAnims)
     if ((!isPersistentAnimPlaying() || clearPersistAnims) && !mAnimQueue.empty())
         mAnimation->disable(mAnimQueue.front().mGroup);
 
+    if (clearPersistAnims)
+    {
+        mAnimQueue.clear();
+        return;
+    }
+
     for (AnimationQueue::iterator it = mAnimQueue.begin(); it != mAnimQueue.end();)
     {
-        if (clearPersistAnims || !it->mPersist)
+        if (!it->mPersist)
             it = mAnimQueue.erase(it);
         else
             ++it;
