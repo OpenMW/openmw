@@ -561,7 +561,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
                     std::string::size_type runpos = movementAnimName.find("run");
                     if (runpos != std::string::npos)
                     {
-                        movementAnimName.replace(runpos, runpos+3, "walk");
+                        movementAnimName.replace(runpos, 3, "walk");
                         if (!mAnimation->hasAnimation(movementAnimName))
                             movementAnimName.clear();
                     }
