@@ -18,16 +18,13 @@ namespace NifOsg
 
     void MatrixTransform::setScale(float scale)
     {
-        if (mScale == scale)
-            return;
+        // Update the decomposed scale.
+        mScale = scale;
 
-        // Rescale the node using the known decomposed rotation.
+        // Rescale the node using the known components.
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
-                _matrix(i,j) = mRotationScale.mValues[j][i] * scale; // NB: column/row major difference
-
-        // Update the current decomposed scale.
-        mScale = scale;
+                _matrix(i,j) = mRotationScale.mValues[j][i] * mScale; // NB: column/row major difference
 
         _inverseDirty = true;
         dirtyBound();
@@ -37,6 +34,7 @@ namespace NifOsg
     {
         // First override the rotation ignoring the scale.
         _matrix.setRotate(rotation);
+
         for (int i = 0; i < 3; ++i)
         {
             for (int j = 0; j < 3; ++j)
@@ -46,6 +44,20 @@ namespace NifOsg
                 _matrix(i,j) *= mScale;
             }
         }
+
+        _inverseDirty = true;
+        dirtyBound();
+    }
+
+    void MatrixTransform::setRotation(const Nif::Matrix3 &rotation)
+    {
+        // Update the decomposed rotation.
+        mRotationScale = rotation;
+
+        // Reorient the node using the known components.
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                _matrix(i,j) = mRotationScale.mValues[j][i] * mScale; // NB: column/row major difference
 
         _inverseDirty = true;
         dirtyBound();

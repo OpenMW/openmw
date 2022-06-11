@@ -171,9 +171,12 @@ void KeyframeController::operator() (NifOsg::MatrixTransform* node, osg::NodeVis
             node->setRotation(mRotations.interpKey(time));
         else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
             node->setRotation(getXYZRotation(time));
+        else
+            node->setRotation(node->mRotationScale);
 
         if (!mScales.empty())
             node->setScale(mScales.interpKey(time));
+
         if (!mTranslations.empty())
             node->setTranslation(mTranslations.interpKey(time));
     }
