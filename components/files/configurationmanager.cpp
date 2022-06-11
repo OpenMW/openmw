@@ -432,7 +432,9 @@ std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPat
     // If it doesn't start with a double quote, read the whole thing verbatim
     if (istream.peek() == '"')
     {
-        istream >> static_cast<std::filesystem::path&>(MaybeQuotedPath);
+        std::string intermediate;
+        istream >> std::quoted(intermediate, '"', '&');
+        static_cast<std::filesystem::path&>(MaybeQuotedPath) = intermediate;
         if (istream && !istream.eof() && istream.peek() != EOF)
         {
             std::string remainder{std::istreambuf_iterator(istream), {}};
