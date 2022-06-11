@@ -149,7 +149,7 @@ public:
     class TextKeyListener
     {
     public:
-        virtual void handleTextKey(const std::string &groupname, SceneUtil::TextKeyMap::ConstIterator key,
+        virtual void handleTextKey(std::string_view groupname, SceneUtil::TextKeyMap::ConstIterator key,
                                    const SceneUtil::TextKeyMap& map) = 0;
 
         virtual ~TextKeyListener() = default;
