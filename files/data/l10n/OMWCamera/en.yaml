@@ -7,31 +7,30 @@ viewOverShoulder: "View over the shoulder"
 viewOverShoulderDescription: |
     Controls third person view mode.
       No: view is centered on the character's head. Crosshair is hidden.
-      Yes: in non-combat mode camera is positioned behind the character's shoulder, crosshair is always visible.
+      Yes: while weapon sheathed the camera is positioned behind the character's shoulder, crosshair is always visible.
 
 shoulderOffsetX: "Shoulder view horizontal offset"
 shoulderOffsetXDescription: >
-    Horizontal offset of the camera in the view-over-the-shoulder mode.
+    Horizontal offset of the over-the-shoulder view.
     For the left shoulder use a negative value.
 
 shoulderOffsetY: "Shoulder view vertical offset"
 shoulderOffsetYDescription: >
-    Vertical offset of the camera in the view-over-the-shoulder mode.
+    Vertical offset of the over-the-shoulder view.
 
 autoSwitchShoulder: "Auto switch shoulder"
 autoSwitchShoulderDescription: >
-    When player is close to an obstacle, automatically switches camera
-    to the shoulder that is farther away from the obstacle.
+    When there are obstacles that would push the camera close to the player character,
+    this setting makes the camera automatically switch to the shoulder farther away from the obstacles.
 
 zoomOutWhenMoveCoef: "Zoom out when move coef"
 zoomOutWhenMoveCoefDescription: >
-    Slightly pulls camera away (or closer in case of a negative value) when the character moves.
-    Works only if "view over the shoulder" is enabled. To disable set it to zero (default: 20.0).
+    Moves the camera away (positive value) or towards (negative value) the player character while the character is moving.
+    Works only if "view over the shoulder" is enabled. Set this to zero to disable (default: 20.0).
 
 previewIfStandStill: "Preview if stand still"
 previewIfStandStillDescription: >
-    If enabled then the character rotation is not synchonized with the camera rotation
-    while the character doesn't move and not in combat mode.
+    Prevents the player character from turning towards the camera direction while they're idle and have their weapon sheathed.
 
 deferredPreviewRotation: "Deferred preview rotation"
 deferredPreviewRotationDescription: |
@@ -40,20 +39,21 @@ deferredPreviewRotationDescription: |
 
 ignoreNC: "Ignore 'No Collision' flag"
 ignoreNCDescription: >
-    Prevents camera from clipping through the objects with the NC (No Collision) NIF flag.
+    Prevents the camera from clipping through objects that have NC (No Collision) flag turned on in the NIF model.
 
 move360: "Move 360"
 move360Description: >
-    When without weapon in hands the character rotates to the direction of movement. I.e. looks to the camera when run backwards.
+    Makes the movement direction independent from the camera direction while the player character's weapon
+    is sheathed. For example, the player character will look at the camera while running backwards.
 
 move360TurnSpeed: "Move 360 turning speed"
-move360TurnSpeedDescription: A multiplier for the turning speed (5.0 by default)
+move360TurnSpeedDescription: "Turning speed multiplier (default: 5.0)."
 
 slowViewChange: "Smooth view change"
-slowViewChangeDescription: "Makes switching from 1st person to 3rd person view not instant."
+slowViewChangeDescription: "Makes the transition from 1st person to 3rd person view non-instantaneous."
 
 povAutoSwitch: "First person auto switch"
-povAutoSwitchDescription: "Auto switch to 1st person view if there is an obstacle right behind the player."
+povAutoSwitchDescription: "Auto switch to the first person view if there is an obstacle right behind the player."
 
 
 headBobbingSettings: "Head bobbing in first person view"
