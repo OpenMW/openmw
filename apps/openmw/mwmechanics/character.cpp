@@ -68,41 +68,22 @@ std::string getBestAttack (const ESM::Weapon* weapon)
         return "chop";
 }
 
-// Converts a movement Run state to its equivalent Walk state.
+// Converts a movement Run state to its equivalent Walk state, if there is one.
 MWMechanics::CharacterState runStateToWalkState (MWMechanics::CharacterState state)
 {
     using namespace MWMechanics;
-    CharacterState ret = state;
     switch (state)
     {
-        case CharState_RunForward:
-            ret = CharState_WalkForward;
-            break;
-        case CharState_RunBack:
-            ret = CharState_WalkBack;
-            break;
-        case CharState_RunLeft:
-            ret = CharState_WalkLeft;
-            break;
-        case CharState_RunRight:
-            ret = CharState_WalkRight;
-            break;
-        case CharState_SwimRunForward:
-            ret = CharState_SwimWalkForward;
-            break;
-        case CharState_SwimRunBack:
-            ret = CharState_SwimWalkBack;
-            break;
-        case CharState_SwimRunLeft:
-            ret = CharState_SwimWalkLeft;
-            break;
-        case CharState_SwimRunRight:
-            ret = CharState_SwimWalkRight;
-            break;
-        default:
-            break;
+        case CharState_RunForward: return CharState_WalkForward;
+        case CharState_RunBack: return CharState_WalkBack;
+        case CharState_RunLeft: return CharState_WalkLeft;
+        case CharState_RunRight: return CharState_WalkRight;
+        case CharState_SwimRunForward: return CharState_SwimWalkForward;
+        case CharState_SwimRunBack: return CharState_SwimWalkBack;
+        case CharState_SwimRunLeft: return CharState_SwimWalkLeft;
+        case CharState_SwimRunRight: return CharState_SwimWalkRight;
+        default: return state;
     }
-    return ret;
 }
 
 // Converts a movement state to its equivalent base animation group as long as it is a movement state.
