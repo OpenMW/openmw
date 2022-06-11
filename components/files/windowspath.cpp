@@ -40,7 +40,8 @@ WindowsPath::WindowsPath(const std::string& application_name)
 
         See std::filesystem and boost::locale reference for details.
     */
-    std::filesystem::path::imbue(boost::locale::generator().generate(""));
+    // TODO(Project579): Temporarly disabled until a good solution is found (no solution might actually be needed)
+    //std::filesystem::path::imbue(boost::locale::generator().generate(""));
 
     std::filesystem::path localPath = getLocalPath();
     if (!SetCurrentDirectoryA(localPath.string().c_str()))
@@ -91,7 +92,7 @@ std::filesystem::path WindowsPath::getLocalPath() const
 
     if (GetModuleFileNameW(nullptr, path, MAX_PATH + 1) > 0)
     {
-        localPath = std::filesystem::path(bconv::utf_to_utf<char>(path)).parent_path() / "/";
+        localPath = std::filesystem::path(bconv::utf_to_utf<char>(path)).parent_path().string() + "/";
     }
 
     // lookup exe path

@@ -33,7 +33,7 @@ namespace
         std::vector<std::string> result;
         (result.emplace_back(makeString(args)) , ...);
         for (int i = 1; i <= std::numeric_limits<char>::max(); ++i)
-            if (i != '&' && i != '"' && i != ' ' && i != '\n')
+            if (i != '\\' && i != '"' && i != ' ' && i != '\n')
                 result.push_back(std::string(1, i));
         return result;
     }
@@ -127,22 +127,22 @@ namespace
         EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"(save)");
     }
 
-    TEST(OpenMWOptionsFromArguments, should_support_quoted_load_savegame_path_with_escaped_quote_by_ampersand)
+    TEST(OpenMWOptionsFromArguments, should_support_quoted_load_savegame_path_with_escaped_quote)
     {
         bpo::options_description description = makeOptionsDescription();
-        const std::array arguments {"openmw", "--load-savegame", R"("save&".omwsave")"};
+        const std::array arguments {"openmw", "--load-savegame", R"("save\".omwsave")"};
         bpo::variables_map variables;
         parseArgs(arguments, variables, description);
         EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"(save".omwsave)");
     }
 
-    TEST(OpenMWOptionsFromArguments, should_support_quoted_load_savegame_path_with_escaped_ampersand)
+    TEST(OpenMWOptionsFromArguments, should_support_quoted_load_savegame_path_with_escaped_backslash)
     {
         bpo::options_description description = makeOptionsDescription();
-        const std::array arguments {"openmw", "--load-savegame", R"("save.omwsave&&")"};
+        const std::array arguments {"openmw", "--load-savegame", R"("save.omwsave\\")"};
         bpo::variables_map variables;
         parseArgs(arguments, variables, description);
-        EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), "save.omwsave&");
+        EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"(save.omwsave\)");
     }
 
     TEST(OpenMWOptionsFromArguments, should_support_load_savegame_path_with_ampersand)
@@ -274,7 +274,7 @@ namespace
     TEST(OpenMWOptionsFromConfig, should_support_confusing_savegame_path_with_lots_going_on)
     {
         bpo::options_description description = makeOptionsDescription();
-        std::istringstream stream(R"(load-savegame="one &"two"three".omwsave")");
+        std::istringstream stream(R"(load-savegame="one \"two"three".omwsave")");
         bpo::variables_map variables;
         Files::parseConfig(stream, variables, description);
         EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"(one "two)");
@@ -283,7 +283,7 @@ namespace
     TEST(OpenMWOptionsFromConfig, should_support_confusing_savegame_path_with_even_more_going_on)
     {
         bpo::options_description description = makeOptionsDescription();
-        std::istringstream stream(R"(load-savegame="one &"two"three ".omwsave")");
+        std::istringstream stream(R"(load-savegame="one \"two"three ".omwsave")");
         bpo::variables_map variables;
         Files::parseConfig(stream, variables, description);
         EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"(one "two)");
@@ -351,22 +351,22 @@ namespace
         EXPECT_THAT(variables["data"].as<Files::MaybeQuotedPathContainer>(), ElementsAre(IsPath("1"), IsPath("2")));
     }
 
-    TEST(OpenMWOptionsFromConfig, should_support_quoted_load_savegame_path_with_escaped_quote_by_ampersand)
+    TEST(OpenMWOptionsFromConfig, should_support_quoted_load_savegame_path_with_escaped_quote)
     {
         bpo::options_description description = makeOptionsDescription();
-        std::istringstream stream(R"(load-savegame="save&".omwsave")");
+        std::istringstream stream(R"(load-savegame="save\".omwsave")");
         bpo::variables_map variables;
         Files::parseConfig(stream, variables, description);
         EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"(save".omwsave)");
     }
 
-    TEST(OpenMWOptionsFromConfig, should_support_quoted_load_savegame_path_with_escaped_ampersand)
+    TEST(OpenMWOptionsFromConfig, should_support_quoted_load_savegame_path_with_escaped_backslash)
     {
         bpo::options_description description = makeOptionsDescription();
-        std::istringstream stream(R"(load-savegame="save.omwsave&&")");
+        std::istringstream stream(R"(load-savegame="save.omwsave\\")");
         bpo::variables_map variables;
         Files::parseConfig(stream, variables, description);
-        EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), "save.omwsave&");
+        EXPECT_EQ(variables["load-savegame"].as<Files::MaybeQuotedPath>().string(), R"(save.omwsave\)");
     }
 
     TEST(OpenMWOptionsFromConfig, should_support_load_savegame_path_with_ampersand)
