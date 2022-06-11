@@ -15,7 +15,7 @@ namespace MWLua
     class PlayerScripts : public LocalScripts
     {
     public:
-        PlayerScripts(LuaUtil::LuaState* lua, const LObject& obj) : LocalScripts(lua, obj, ESM::LuaScriptCfg::sPlayer)
+        PlayerScripts(LuaUtil::LuaState* lua, const LObject& obj) : LocalScripts(lua, obj)
         {
             registerEngineHandlers({
                 &mConsoleCommandHandlers, &mKeyPressHandlers, &mKeyReleaseHandlers,

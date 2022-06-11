@@ -53,7 +53,10 @@ void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
         mState.getWriter().setAuthor ("");
         mState.getWriter().setDescription ("");
         mState.getWriter().setRecordCount (0);
-        mState.getWriter().setFormat (ESM::Header::CurrentFormat);
+
+        // ESM::Header::CurrentFormat is `1` but since new records are not yet used in opencs
+        // we use the format `0` for compatibility with old versions.
+        mState.getWriter().setFormat(0);
     }
     else
     {

@@ -123,7 +123,8 @@ namespace MWLua
 
     private:
         void initConfiguration();
-        LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScriptCfg::Flags);
+        LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,
+                                         std::optional<LuaUtil::ScriptIdsWithInitializationData> autoStartConf = std::nullopt);
 
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;

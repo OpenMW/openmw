@@ -3,6 +3,8 @@
 
 #include <sol/sol.hpp>
 
+#include <components/esm3/cellref.hpp>
+
 namespace LuaUtil
 {
 
@@ -24,6 +26,26 @@ namespace LuaUtil
 
     protected:
         static void append(BinaryData&, std::string_view typeName, const void* data, size_t dataSize);
+
+        static constexpr std::string_view sRefNumTypeName = "o";
+        static void appendRefNum(BinaryData&, ESM::RefNum);
+        static ESM::RefNum loadRefNum(std::string_view data);
+    };
+
+    // Serializer that can load Lua data from content files and saved games, but doesn't depend on apps/openmw.
+    // Instead of LObject/GObject (that are defined in apps/openmw) it loads refnums directly as ESM::RefNum.
+    class BasicSerializer final : public UserdataSerializer
+    {
+    public:
+        BasicSerializer() = default;
+        explicit BasicSerializer(std::function<int(int)> adjustContentFileIndexFn) :
+            mAdjustContentFilesIndexFn(std::move(adjustContentFileIndexFn)) {}
+
+    private:
+        bool serialize(LuaUtil::BinaryData& out, const sol::userdata& data) const override;
+        bool deserialize(std::string_view typeName, std::string_view binaryData, lua_State* lua) const override;
+
+        std::function<int(int)> mAdjustContentFilesIndexFn;
     };
 
     BinaryData serialize(const sol::object&, const UserdataSerializer* customSerializer = nullptr);

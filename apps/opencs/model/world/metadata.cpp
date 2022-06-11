@@ -6,7 +6,9 @@
 
 void CSMWorld::MetaData::blank()
 {
-    mFormat = ESM::Header::CurrentFormat;
+    // ESM::Header::CurrentFormat is `1` but since new records are not yet used in opencs
+    // we use the format `0` for compatibility with old versions.
+    mFormat = 0;
     mAuthor.clear();
     mDescription.clear();
 }

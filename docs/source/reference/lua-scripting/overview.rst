@@ -165,7 +165,11 @@ Possible flags are:
 - ``MISC_ITEM`` - a local script that will be automatically attached to any miscellaneous item;
 - ``NPC`` - a local script that will be automatically attached to any NPC;
 - ``POTION`` - a local script that will be automatically attached to any potion;
-- ``WEAPON`` - a local script that will be automatically attached to any weapon.
+- ``WEAPON`` - a local script that will be automatically attached to any weapon;
+- ``APPARATUS`` - a local script that will be automatically attached to any apparatus;
+- ``LOCKPICK`` - a local script that will be automatically attached to any lockpick;
+- ``PROBE`` - a local script that will be automatically attached to any probe tool;
+- ``REPAIR`` - a local script that will be automatically attached to any repair tool.
 
 Several flags (except ``GLOBAL``) can be used with a single script. Use space or comma as a separator.
 

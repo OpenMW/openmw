@@ -96,6 +96,42 @@ namespace LuaUtil
         appendData(out, data, dataSize);
     }
 
+    void UserdataSerializer::appendRefNum(BinaryData& out, ESM::RefNum refnum)
+    {
+        static_assert(sizeof(ESM::RefNum) == 8);
+        refnum.mIndex = Misc::toLittleEndian(refnum.mIndex);
+        refnum.mContentFile = Misc::toLittleEndian(refnum.mContentFile);
+        append(out, sRefNumTypeName, &refnum, sizeof(ESM::RefNum));
+    }
+
+    bool BasicSerializer::serialize(BinaryData& out, const sol::userdata& data) const
+    {
+        appendRefNum(out, data.as<ESM::RefNum>());
+        return true;
+    }
+
+    bool BasicSerializer::deserialize(std::string_view typeName, std::string_view binaryData, lua_State* lua) const
+    {
+        if (typeName != sRefNumTypeName)
+            return false;
+        ESM::RefNum refnum = loadRefNum(binaryData);
+        if (mAdjustContentFilesIndexFn)
+            refnum.mContentFile = mAdjustContentFilesIndexFn(refnum.mContentFile);
+        sol::stack::push<ESM::RefNum>(lua, refnum);
+        return true;
+    }
+
+    ESM::RefNum UserdataSerializer::loadRefNum(std::string_view data)
+    {
+        if (data.size() != sizeof(ESM::RefNum))
+            throw std::runtime_error("Incorrect serialization format. Size of RefNum doesn't match.");
+        ESM::RefNum refnum;
+        std::memcpy(&refnum, data.data(), sizeof(ESM::RefNum));
+        refnum.mIndex = Misc::fromLittleEndian(refnum.mIndex);
+        refnum.mContentFile = Misc::fromLittleEndian(refnum.mContentFile);
+        return refnum;
+    }
+
     static void serializeUserdata(BinaryData& out, const sol::userdata& data, const UserdataSerializer* customSerializer)
     {
         if (data.is<osg::Vec2f>())

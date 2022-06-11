@@ -191,7 +191,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
             {
                 ESM::LuaScriptsCfg cfg;
                 cfg.load(esm);
-                // TODO: update refnums in cfg.mScripts[].mInitializationData according to load order
+                cfg.adjustRefNums(esm);
                 mLuaContent.push_back(std::move(cfg));
             }
             else {

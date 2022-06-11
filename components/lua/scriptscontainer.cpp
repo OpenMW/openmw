@@ -15,8 +15,8 @@ namespace LuaUtil
     static constexpr std::string_view HANDLER_LOAD = "onLoad";
     static constexpr std::string_view HANDLER_INTERFACE_OVERRIDE = "onInterfaceOverride";
 
-    ScriptsContainer::ScriptsContainer(LuaUtil::LuaState* lua, std::string_view namePrefix, ESM::LuaScriptCfg::Flags autoStartMode)
-        : mNamePrefix(namePrefix), mLua(*lua), mAutoStartMode(autoStartMode)
+    ScriptsContainer::ScriptsContainer(LuaUtil::LuaState* lua, std::string_view namePrefix)
+        : mNamePrefix(namePrefix), mLua(*lua)
     {
         registerEngineHandlers({&mUpdateHandlers});
         mPublicInterfaces = sol::table(lua->sol(), sol::create);
@@ -35,22 +35,23 @@ namespace LuaUtil
 
     bool ScriptsContainer::addCustomScript(int scriptId)
     {
-        assert(mLua.getConfiguration()[scriptId].mFlags & ESM::LuaScriptCfg::sCustom);
+        const ScriptsConfiguration& conf = mLua.getConfiguration();
+        assert(conf.isCustomScript(scriptId));
         std::optional<sol::function> onInit, onLoad;
         bool ok = addScript(scriptId, onInit, onLoad);
         if (ok && onInit)
-            callOnInit(scriptId, *onInit);
+            callOnInit(scriptId, *onInit, conf[scriptId].mInitializationData);
         return ok;
     }
 
     void ScriptsContainer::addAutoStartedScripts()
     {
-        for (int scriptId : mLua.getConfiguration().getListByFlag(mAutoStartMode))
+        for (const auto& [scriptId, data] : mAutoStartScripts)
         {
             std::optional<sol::function> onInit, onLoad;
             bool ok = addScript(scriptId, onInit, onLoad);
             if (ok && onInit)
-                callOnInit(scriptId, *onInit);
+                callOnInit(scriptId, *onInit, data);
         }
     }
 
@@ -296,11 +297,10 @@ namespace LuaUtil
             mEngineHandlers[h->mName] = h;
     }
 
-    void ScriptsContainer::callOnInit(int scriptId, const sol::function& onInit)
+    void ScriptsContainer::callOnInit(int scriptId, const sol::function& onInit, std::string_view data)
     {
         try
         {
-            const std::string& data = mLua.getConfiguration()[scriptId].mInitializationData;
             LuaUtil::call(onInit, deserialize(mLua.sol(), data, mSerializer));
         }
         catch (std::exception& e) { printError(scriptId, "onInit failed", e); }
@@ -352,9 +352,14 @@ namespace LuaUtil
         removeAllScripts();
         const ScriptsConfiguration& cfg = mLua.getConfiguration();
 
-        std::map<int, const ESM::LuaScript*> scripts;
-        for (int scriptId : mLua.getConfiguration().getListByFlag(mAutoStartMode))
-            scripts[scriptId] = nullptr;
+        struct ScriptInfo
+        {
+            std::string_view mInitData;
+            const ESM::LuaScript* mSavedData;
+        };
+        std::map<int, ScriptInfo> scripts;
+        for (const auto& [scriptId, initData] : mAutoStartScripts)
+            scripts[scriptId] = {initData, nullptr};
         for (const ESM::LuaScript& s : data.mScripts)
         {
             std::optional<int> scriptId = cfg.findId(s.mScriptPath);
@@ -363,37 +368,38 @@ namespace LuaUtil
                 Log(Debug::Verbose) << "Ignoring " << mNamePrefix << "[" << s.mScriptPath << "]; script not registered";
                 continue;
             }
-            if (!(cfg[*scriptId].mFlags & (ESM::LuaScriptCfg::sCustom | mAutoStartMode)))
-            {
+            auto it = scripts.find(*scriptId);
+            if (it != scripts.end())
+                it->second.mSavedData = &s;
+            else if (cfg.isCustomScript(*scriptId))
+                scripts[*scriptId] = {cfg[*scriptId].mInitializationData, &s};
+            else
                 Log(Debug::Verbose) << "Ignoring " << mNamePrefix << "[" << s.mScriptPath << "]; this script is not allowed here";
-                continue;
-            }
-            scripts[*scriptId] = &s;
         }
 
-        for (const auto& [scriptId, savedScript] : scripts)
+        for (const auto& [scriptId, scriptInfo] : scripts)
         {
             std::optional<sol::function> onInit, onLoad;
             if (!addScript(scriptId, onInit, onLoad))
                 continue;
-            if (savedScript == nullptr)
+            if (scriptInfo.mSavedData == nullptr)
             {
                 if (onInit)
-                    callOnInit(scriptId, *onInit);
+                    callOnInit(scriptId, *onInit, scriptInfo.mInitData);
                 continue;
             }
             if (onLoad)
             {
                 try
                 {
-                    sol::object state = deserialize(mLua.sol(), savedScript->mData, mSerializer);
+                    sol::object state = deserialize(mLua.sol(), scriptInfo.mSavedData->mData, mSavedDataDeserializer);
                     sol::object initializationData =
-                        deserialize(mLua.sol(), mLua.getConfiguration()[scriptId].mInitializationData, mSerializer);
+                        deserialize(mLua.sol(), scriptInfo.mInitData, mSerializer);
                     LuaUtil::call(*onLoad, state, initializationData);
                 }
                 catch (std::exception& e) { printError(scriptId, "onLoad failed", e); }
             }
-            for (const ESM::LuaTimer& savedTimer : savedScript->mTimers)
+            for (const ESM::LuaTimer& savedTimer : scriptInfo.mSavedData->mTimers)
             {
                 Timer timer;
                 timer.mCallback = savedTimer.mCallbackName;
@@ -403,7 +409,7 @@ namespace LuaUtil
 
                 try
                 {
-                    timer.mArg = deserialize(mLua.sol(), savedTimer.mCallbackArgument, mSerializer);
+                    timer.mArg = deserialize(mLua.sol(), savedTimer.mCallbackArgument, mSavedDataDeserializer);
                     // It is important if the order of content files was changed. The deserialize-serialize procedure
                     // updates refnums, so timer.mSerializedArg may be not equal to savedTimer.mCallbackArgument.
                     timer.mSerializedArg = serialize(timer.mArg, mSerializer);
