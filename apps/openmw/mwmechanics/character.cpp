@@ -928,9 +928,9 @@ CharacterController::~CharacterController()
     }
 }
 
-void CharacterController::handleTextKey(const std::string &groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map)
+void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map)
 {
-    const std::string &evt = key->second;
+    std::string_view evt = key->second;
 
     if(evt.compare(0, 7, "sound: ") == 0)
     {
@@ -942,7 +942,7 @@ void CharacterController::handleTextKey(const std::string &groupname, SceneUtil:
     auto& charClass = mPtr.getClass();
     if(evt.compare(0, 10, "soundgen: ") == 0)
     {
-        std::string soundgen = evt.substr(10);
+        std::string soundgen = std::string(evt.substr(10));
 
         // The event can optionally contain volume and pitch modifiers
         float volume=1.f, pitch=1.f;
@@ -1022,16 +1022,18 @@ void CharacterController::handleTextKey(const std::string &groupname, SceneUtil:
     {
         std::multimap<float, std::string>::const_iterator hitKey = key;
 
+        std::string hitKeyName = std::string(groupname) + ": hit";
+        std::string stopKeyName = std::string(groupname) + ": stop";
         // Not all animations have a hit key defined. If there is none, the hit happens with the start key.
         bool hasHitKey = false;
         while (hitKey != map.end())
         {
-            if (hitKey->second == groupname + ": hit")
+            if (hitKey->second == hitKeyName)
             {
                 hasHitKey = true;
                 break;
             }
-            if (hitKey->second == groupname + ": stop")
+            if (hitKey->second == stopKeyName)
                 break;
             ++hitKey;
         }
@@ -2658,7 +2660,7 @@ std::string CharacterController::getMovementBasedAttackType() const
     return "chop";
 }
 
-bool CharacterController::isRandomAttackAnimation(const std::string& group)
+bool CharacterController::isRandomAttackAnimation(std::string_view group)
 {
     return (group == "attack1" || group == "swimattack1" ||
             group == "attack2" || group == "swimattack2" ||

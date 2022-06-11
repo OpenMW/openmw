@@ -209,7 +209,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     void updateIdleStormState(bool inwater) const;
 
     std::string chooseRandomAttackAnimation() const;
-    static bool isRandomAttackAnimation(const std::string& group);
+    static bool isRandomAttackAnimation(std::string_view group);
 
     bool isPersistentAnimPlaying() const;
 
@@ -246,7 +246,7 @@ public:
 
     const MWWorld::Ptr& getPtr() const { return mPtr; }
 
-    void handleTextKey(const std::string &groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map) override;
+    void handleTextKey(std::string_view groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map) override;
 
     // Be careful when to call this, see comment in Actors
     void updateContinuousVfx() const;
