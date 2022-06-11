@@ -105,6 +105,47 @@ MWMechanics::CharacterState runStateToWalkState (MWMechanics::CharacterState sta
     return ret;
 }
 
+// Converts a movement state to its equivalent base animation group as long as it is a movement state.
+std::string movementStateToAnimGroup(MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    switch (state)
+    {
+        case CharState_WalkForward: return "walkforward";
+        case CharState_WalkBack: return "walkback";
+        case CharState_WalkLeft: return "walkleft";
+        case CharState_WalkRight: return "walkright";
+
+        case CharState_SwimWalkForward: return "swimwalkforward";
+        case CharState_SwimWalkBack: return "swimwalkback";
+        case CharState_SwimWalkLeft: return "swimwalkleft";
+        case CharState_SwimWalkRight: return "swimwalkright";
+
+        case CharState_RunForward: return "runforward";
+        case CharState_RunBack: return "runback";
+        case CharState_RunLeft: return "runleft";
+        case CharState_RunRight: return "runright";
+
+        case CharState_SwimRunForward: return "swimrunforward";
+        case CharState_SwimRunBack: return "swimrunback";
+        case CharState_SwimRunLeft: return "swimrunleft";
+        case CharState_SwimRunRight: return "swimrunright";
+
+        case CharState_SneakForward: return "sneakforward";
+        case CharState_SneakBack: return "sneakback";
+        case CharState_SneakLeft: return "sneakleft";
+        case CharState_SneakRight: return "sneakright";
+
+        case CharState_Jump: return "jump";
+
+        case CharState_TurnLeft: return "turnleft";
+        case CharState_TurnRight: return "turnright";
+        case CharState_SwimTurnLeft: return "swimturnleft";
+        case CharState_SwimTurnRight: return "swimturnright";
+        default: return {};
+    }
+}
+
 float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -138,58 +179,6 @@ float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
 
 namespace MWMechanics
 {
-
-struct StateInfo {
-    CharacterState state;
-    const char groupname[32];
-};
-
-static const StateInfo sMovementList[] = {
-    { CharState_WalkForward, "walkforward" },
-    { CharState_WalkBack, "walkback" },
-    { CharState_WalkLeft, "walkleft" },
-    { CharState_WalkRight, "walkright" },
-
-    { CharState_SwimWalkForward, "swimwalkforward" },
-    { CharState_SwimWalkBack, "swimwalkback" },
-    { CharState_SwimWalkLeft, "swimwalkleft" },
-    { CharState_SwimWalkRight, "swimwalkright" },
-
-    { CharState_RunForward, "runforward" },
-    { CharState_RunBack, "runback" },
-    { CharState_RunLeft, "runleft" },
-    { CharState_RunRight, "runright" },
-
-    { CharState_SwimRunForward, "swimrunforward" },
-    { CharState_SwimRunBack, "swimrunback" },
-    { CharState_SwimRunLeft, "swimrunleft" },
-    { CharState_SwimRunRight, "swimrunright" },
-
-    { CharState_SneakForward, "sneakforward" },
-    { CharState_SneakBack, "sneakback" },
-    { CharState_SneakLeft, "sneakleft" },
-    { CharState_SneakRight, "sneakright" },
-
-    { CharState_Jump, "jump" },
-
-    { CharState_TurnLeft, "turnleft" },
-    { CharState_TurnRight, "turnright" },
-    { CharState_SwimTurnLeft, "swimturnleft" },
-    { CharState_SwimTurnRight, "swimturnright" },
-};
-static const StateInfo *sMovementListEnd = &sMovementList[sizeof(sMovementList)/sizeof(sMovementList[0])];
-
-
-class FindCharState {
-    CharacterState state;
-
-public:
-    FindCharState(CharacterState _state) : state(_state) { }
-
-    bool operator()(const StateInfo &info) const
-    { return info.state == state; }
-};
-
 
 std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num) const
 {
@@ -492,33 +481,25 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
     // 2. When we use a fallback animation for lower body since movement animation for given weapon is missing (e.g. for crossbows and spellcasting)
     bool resetIdle = (movement != CharState_None && !isTurning());
 
-    std::string movementAnimName;
-    MWRender::Animation::BlendMask movemask;
-    const StateInfo *movestate;
+    std::string movementAnimName = movementStateToAnimGroup(movement);
+    MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
 
-    movemask = MWRender::Animation::BlendMask_All;
-    movestate = std::find_if(sMovementList, sMovementListEnd, FindCharState(movement));
-    if(movestate != sMovementListEnd)
+    if (!movementAnimName.empty())
     {
-        movementAnimName = movestate->groupname;
         if(!weapShortGroup.empty())
         {
             std::string::size_type swimpos = movementAnimName.find("swim");
             if (swimpos == std::string::npos)
             {
+                std::string weapMovementAnimName;
                 if (mWeaponType == ESM::Weapon::Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight)) // Spellcasting stance turning is a special case
-                    movementAnimName = weapShortGroup + movementAnimName;
+                    weapMovementAnimName = weapShortGroup + movementAnimName;
                 else
-                    movementAnimName += weapShortGroup;
-            }
+                    weapMovementAnimName = movementAnimName + weapShortGroup;
 
-            if(!mAnimation->hasAnimation(movementAnimName))
-            {
-                movementAnimName = movestate->groupname;
-                if (swimpos == std::string::npos)
+                if (!mAnimation->hasAnimation(weapMovementAnimName))
                 {
-                    movementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
-
+                    weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
                     // If we apply movement only for lower body, do not reset idle animations.
                     // For upper body there will be idle animation.
                     if (movemask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
@@ -527,6 +508,8 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
                     if (movemask == MWRender::Animation::BlendMask_LowerBody)
                         resetIdle = false;
                 }
+
+                movementAnimName = weapMovementAnimName;
             }
         }
     }
@@ -534,7 +517,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
     if(force || movement != mMovementState)
     {
         mMovementState = movement;
-        if(movestate != sMovementListEnd)
+        if (!movementAnimName.empty())
         {
             if(!mAnimation->hasAnimation(movementAnimName))
             {
@@ -595,14 +578,12 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
 
             // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
-            std::string anim = mCurrentMovement;
             mAdjustMovementAnimSpeed = true;
             if (mPtr.getClass().getType() == ESM::Creature::sRecordId
                     && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
             {
                 CharacterState walkState = runStateToWalkState(mMovementState);
-                const StateInfo *stateinfo = std::find_if(sMovementList, sMovementListEnd, FindCharState(walkState));
-                anim = stateinfo->groupname;
+                std::string anim = movementStateToAnimGroup(walkState);
 
                 mMovementAnimSpeed = mAnimation->getVelocity(anim);
                 if (mMovementAnimSpeed <= 1.0f)
@@ -618,7 +599,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
             }
             else
             {
-                mMovementAnimSpeed = mAnimation->getVelocity(anim);
+                mMovementAnimSpeed = mAnimation->getVelocity(mCurrentMovement);
 
                 if (mMovementAnimSpeed <= 1.0f)
                 {
