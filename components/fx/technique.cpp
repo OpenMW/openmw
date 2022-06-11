@@ -731,7 +731,7 @@ namespace fx
 
         for (auto t = mLexer->next(); !std::holds_alternative<Lexer::Eof>(t); t = mLexer->next())
         {
-            std::visit([=](auto&& arg) {
+            std::visit([this](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
 
                 if constexpr (std::is_same_v<Lexer::Shared, T>)
