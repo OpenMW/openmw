@@ -12,6 +12,7 @@ set(BUILTIN_DATA_FILES
 
     l10n/Calendar/en.yaml
     l10n/Interface/en.yaml
+    l10n/OMWCamera/en.yaml
 
     openmw_aux/util.lua
     openmw_aux/time.lua
@@ -21,9 +22,12 @@ set(BUILTIN_DATA_FILES
     builtin.omwscripts
 
     scripts/omw/ai.lua
-    scripts/omw/camera.lua
-    scripts/omw/head_bobbing.lua
-    scripts/omw/third_person.lua
+    scripts/omw/camera/camera.lua
+    scripts/omw/camera/head_bobbing.lua
+    scripts/omw/camera/third_person.lua
+    scripts/omw/camera/settings.lua
+    scripts/omw/camera/move360.lua
+    scripts/omw/camera/first_person_auto_switch.lua
     scripts/omw/console/player.lua
     scripts/omw/console/global.lua
     scripts/omw/console/local.lua

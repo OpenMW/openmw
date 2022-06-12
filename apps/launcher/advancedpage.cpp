@@ -180,20 +180,6 @@ bool Launcher::AdvancedPage::loadSettings()
         }
     }
 
-
-    // Camera
-    {
-        loadSettingBool(viewOverShoulderCheckBox, "view over shoulder", "Camera");
-        connect(viewOverShoulderCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotViewOverShoulderToggled(bool)));
-        viewOverShoulderVerticalLayout->setEnabled(viewOverShoulderCheckBox->checkState());
-        loadSettingBool(autoSwitchShoulderCheckBox, "auto switch shoulder", "Camera");
-        loadSettingBool(previewIfStandStillCheckBox, "preview if stand still", "Camera");
-        loadSettingBool(deferredPreviewRotationCheckBox, "deferred preview rotation", "Camera");
-        loadSettingBool(headBobbingCheckBox, "head bobbing", "Camera");
-        defaultShoulderComboBox->setCurrentIndex(
-            Settings::Manager::getVector2("view over shoulder offset", "Camera").x() >= 0 ? 0 : 1);
-    }
-
     // Interface Changes
     {
         loadSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
@@ -350,25 +336,6 @@ void Launcher::AdvancedPage::saveSettings()
         }
     }
 
-    // Camera
-    {
-        saveSettingBool(viewOverShoulderCheckBox, "view over shoulder", "Camera");
-        saveSettingBool(autoSwitchShoulderCheckBox, "auto switch shoulder", "Camera");
-        saveSettingBool(previewIfStandStillCheckBox, "preview if stand still", "Camera");
-        saveSettingBool(deferredPreviewRotationCheckBox, "deferred preview rotation", "Camera");
-        saveSettingBool(headBobbingCheckBox, "head bobbing", "Camera");
-
-        osg::Vec2f shoulderOffset = Settings::Manager::getVector2("view over shoulder offset", "Camera");
-        if (defaultShoulderComboBox->currentIndex() != (shoulderOffset.x() >= 0 ? 0 : 1))
-        {
-            if (defaultShoulderComboBox->currentIndex() == 0)
-                shoulderOffset.x() = std::abs(shoulderOffset.x());
-            else
-                shoulderOffset.x() = -std::abs(shoulderOffset.x());
-            Settings::Manager::setVector2("view over shoulder offset", "Camera", shoulderOffset);
-        }
-    }
-
     // Interface Changes
     {
         saveSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
@@ -477,11 +444,6 @@ void Launcher::AdvancedPage::slotAnimSourcesToggled(bool checked)
         weaponSheathingCheckBox->setCheckState(Qt::Unchecked);
         shieldSheathingCheckBox->setCheckState(Qt::Unchecked);
     }
-}
-
-void Launcher::AdvancedPage::slotViewOverShoulderToggled(bool checked)
-{
-    viewOverShoulderVerticalLayout->setEnabled(viewOverShoulderCheckBox->checkState());
 }
 
 void Launcher::AdvancedPage::slotPostProcessToggled(bool checked)

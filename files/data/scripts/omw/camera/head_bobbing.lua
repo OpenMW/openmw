@@ -1,20 +1,28 @@
 local camera = require('openmw.camera')
 local self = require('openmw.self')
-local settings = require('openmw.settings')
 local util = require('openmw.util')
+local async = require('openmw.async')
 
 local Actor = require('openmw.types').Actor
 
-local doubleStepLength = settings._getFloatFromSettingsCfg('Camera', 'head bobbing step') * 2
-local stepHeight = settings._getFloatFromSettingsCfg('Camera', 'head bobbing height')
-local maxRoll = math.rad(settings._getFloatFromSettingsCfg('Camera', 'head bobbing roll'))
+local M = {}
+
+local settings = require('scripts.omw.camera.settings').headBobbing
+
+local doubleStepLength, stepHeight, maxRoll
+
+local function updateSettings()
+    M.enabled = settings:get('enabled')
+    doubleStepLength = settings:get('step') * 2
+    stepHeight = settings:get('height')
+    maxRoll = math.rad(settings:get('roll'))
+end
+
+updateSettings()
+settings:subscribe(async:callback(updateSettings))
 
 local effectWeight = 0
 local totalMovement = 0
-
-local M = {
-    enabled = settings._getBoolFromSettingsCfg('Camera', 'head bobbing')
-}
 
 -- Trajectory of each step is a scaled arc of 60 degrees.
 local halfArc = math.rad(30)

@@ -249,13 +249,13 @@ settings
 --------
 
 :Default:
-	x = 0.33
+	x = 0.1
 
-	y = 0.18
+	y = 0.1
 
-	w = 0.33
+	w = 0.8
 
-	h = 0.66
+	h = 0.8
 
 The settings window.
 Activated by clicking Options in the main menu.

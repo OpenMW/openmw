@@ -137,8 +137,6 @@ namespace MWLua
         sol::table mUserInterfacePackage;
         sol::table mCameraPackage;
         sol::table mInputPackage;
-        sol::table mLocalSettingsPackage;
-        sol::table mPlayerSettingsPackage;
         sol::table mLocalStoragePackage;
         sol::table mPlayerStoragePackage;
         sol::table mPostprocessingPackage;

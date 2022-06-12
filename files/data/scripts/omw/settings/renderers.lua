@@ -112,6 +112,7 @@ return function(registerRenderer)
                 template = I.MWUI.templates.textEditLine,
                 props = {
                     text = tostring(value),
+                    size = util.vector2(80, 0),
                 },
                 events = {
                     textChanged = async:callback(function(text)

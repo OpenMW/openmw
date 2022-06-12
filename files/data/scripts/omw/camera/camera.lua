@@ -1,20 +1,40 @@
 local camera = require('openmw.camera')
 local core = require('openmw.core')
 local input = require('openmw.input')
-local settings = require('openmw.settings')
 local util = require('openmw.util')
 local self = require('openmw.self')
 local nearby = require('openmw.nearby')
+local async = require('openmw.async')
 
 local Actor = require('openmw.types').Actor
 
-local head_bobbing = require('scripts.omw.head_bobbing')
-local third_person = require('scripts.omw.third_person')
+local settings = require('scripts.omw.camera.settings').thirdPerson
+local head_bobbing = require('scripts.omw.camera.head_bobbing')
+local third_person = require('scripts.omw.camera.third_person')
+local pov_auto_switch = require('scripts.omw.camera.first_person_auto_switch')
+local move360 = require('scripts.omw.camera.move360')
 
 local MODE = camera.MODE
 
-local previewIfStandSill = settings._getBoolFromSettingsCfg('Camera', 'preview if stand still')
-local showCrosshairInThirdPerson = settings._getBoolFromSettingsCfg('Camera', 'view over shoulder')
+local previewIfStandStill = false
+local showCrosshairInThirdPerson = false
+local slowViewChange = false
+
+local function updateSettings()
+    previewIfStandStill = settings:get('previewIfStandStill')
+    showCrosshairInThirdPerson = settings:get('viewOverShoulder')
+    camera.allowCharacterDeferredRotation(settings:get('deferredPreviewRotation'))
+    local collisionType = util.bitAnd(nearby.COLLISION_TYPE.Default, util.bitNot(nearby.COLLISION_TYPE.Actor))
+    collisionType = util.bitOr(collisionType, nearby.COLLISION_TYPE.Camera)
+    if settings:get('ignoreNC') then
+        collisionType = util.bitOr(collisionType, nearby.COLLISION_TYPE.VisualOnly)
+    end
+    camera.setCollisionType(collisionType)
+    move360.enabled = settings:get('move360')
+    move360.turnSpeed = settings:get('move360TurnSpeed')
+    pov_auto_switch.enabled = settings:get('povAutoSwitch')
+    slowViewChange = settings:get('slowViewChange')
+end
 
 local primaryMode
 
@@ -24,16 +44,17 @@ local noHeadBobbing = 0
 local noZoom = 0
 
 local function init()
-    camera.setCollisionType(util.bitOr(util.bitAnd(nearby.COLLISION_TYPE.Default, util.bitNot(nearby.COLLISION_TYPE.Actor)), nearby.COLLISION_TYPE.Camera))
     camera.setFieldOfView(camera.getBaseFieldOfView())
-    camera.allowCharacterDeferredRotation(settings._getBoolFromSettingsCfg('Camera', 'deferred preview rotation'))
     if camera.getMode() == MODE.FirstPerson then
         primaryMode = MODE.FirstPerson
     else
         primaryMode = MODE.ThirdPerson
         camera.setMode(MODE.ThirdPerson)
     end
+    updateSettings()
 end
+
+settings:subscribe(async:callback(updateSettings))
 
 local smoothedSpeed = 0
 local previewTimer = 0
@@ -60,7 +81,7 @@ local function updatePOV(dt)
 end
 
 local idleTimer = 0
-local vanityDelay = settings.getGMST('fVanityDelay')
+local vanityDelay = core.getGMST('fVanityDelay')
 
 local function updateVanity(dt)
     if input.isIdle() then
@@ -114,7 +135,7 @@ local function zoom(delta)
 end
 
 local function applyControllerZoom(dt)
-    if camera.getMode() == MODE.Preview then
+    if input.isActionPressed(input.ACTION.TogglePOV) then
         local triggerLeft = input.getAxisValue(input.CONTROLLER_AXIS.TriggerLeft)
         local triggerRight = input.getAxisValue(input.CONTROLLER_AXIS.TriggerRight)
         local controllerZoom = (triggerRight - triggerLeft) * 100 * dt
@@ -126,7 +147,7 @@ end
 
 local function updateStandingPreview()
     local mode = camera.getMode()
-    if not previewIfStandSill or noStandingPreview > 0
+    if not previewIfStandStill or noStandingPreview > 0
        or mode == MODE.FirstPerson or mode == MODE.Static or mode == MODE.Vanity then
         third_person.standingPreview = false
         return
@@ -153,6 +174,7 @@ local function onUpdate(dt)
     camera.setExtraRoll(0)
     camera.setFirstPersonOffset(util.vector3(0, 0, 0))
     updateSmoothedSpeed(dt)
+    pov_auto_switch.onUpdate(dt)
 end
 
 local function onFrame(dt)
@@ -174,6 +196,12 @@ local function onFrame(dt)
     applyControllerZoom(dt)
     third_person.update(dt, smoothedSpeed)
     if noHeadBobbing == 0 then head_bobbing.update(dt, smoothedSpeed) end
+    if slowViewChange then
+        local maxIncrease = dt * (100 + third_person.baseDistance)
+        camera.setPreferredThirdPersonDistance(
+            math.min(camera.getThirdPersonDistance() + maxIncrease, third_person.preferredDistance))
+    end
+    move360.onFrame(dt)
 end
 
 return {
@@ -204,7 +232,7 @@ return {
         enableModeControl = function() noModeControl = math.max(0, noModeControl - 1) end,
 
         --- @function [parent=#Camera] isStandingPreviewEnabled
-        isStandingPreviewEnabled = function() return previewIfStandSill and noStandingPreview == 0 end,
+        isStandingPreviewEnabled = function() return previewIfStandStill and noStandingPreview == 0 end,
         --- @function [parent=#Camera] disableStandingPreview
         disableStandingPreview = function() noStandingPreview = noStandingPreview + 1 end,
         --- @function [parent=#Camera] enableStandingPreview
@@ -241,6 +269,7 @@ return {
             elseif action == input.ACTION.ZoomOut then
                 zoom(-10)
             end
+            move360.onInputAction(action)
         end,
         onActive = init,
         onLoad = function(data)
@@ -251,4 +280,3 @@ return {
         end,
     },
 }
-

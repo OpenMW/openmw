@@ -29,7 +29,6 @@ namespace Launcher
         void on_skipMenuCheckBox_stateChanged(int state);
         void on_runScriptAfterStartupBrowseButton_clicked();
         void slotAnimSourcesToggled(bool checked);
-        void slotViewOverShoulderToggled(bool checked);
         void slotPostProcessToggled(bool checked);
 
     private:

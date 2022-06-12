@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout" version="3.2.0">
     <Widget type="Window" skin="MW_Window" position="0 0 400 485" layer="MainMenu" name="_Main">
-        <Property key="MinSize" value="430 446"/>
+        <Property key="MinSize" value="640 480"/>
         <Widget type="TabControl" skin="TabControl" position="8 8 368 405" align="Stretch" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
             <Widget type="TabItem" skin="" position="4 32 360 358">
@@ -302,7 +302,7 @@
                         </Widget>
 
                         <Widget type="TextBox" skin="SandText" position="182 124 300 32" align="Left Top">
-                            <Property key="Caption" value="Hint: press F3 to show \nthe current frame rate."/>
+                            <Property key="Caption" value="Hint: press F3 to show the current frame rate."/>
                         </Widget>
 
                         <Widget type="HBox" skin="" position="182 160 300 24">
@@ -317,7 +317,7 @@
                         </Widget>
 
                         <Widget type="TextBox" skin="SandText" position="182 190 300 32" align="Left Top">
-                            <Property key="Caption" value="Hint: press F2 to show \nthe config HUD."/>
+                            <Property key="Caption" value="Hint: press F2 to show the config HUD."/>
                         </Widget>
 
                         <Widget type="TextBox" skin="NormalText" position="0 228 352 18" align="Left Top" name="FovText">

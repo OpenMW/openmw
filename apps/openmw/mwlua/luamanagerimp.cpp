@@ -88,15 +88,12 @@ namespace MWLua
         mLua.addCommonPackage("openmw.core", initCorePackage(context));
         mLua.addCommonPackage("openmw.types", initTypesPackage(context));
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
-        mGlobalScripts.addPackage("openmw.settings", initGlobalSettingsPackage(context));
         mGlobalScripts.addPackage("openmw.storage", initGlobalStoragePackage(context, &mGlobalStorage));
 
         mCameraPackage = initCameraPackage(localContext);
         mUserInterfacePackage = initUserInterfacePackage(localContext);
         mInputPackage = initInputPackage(localContext);
         mNearbyPackage = initNearbyPackage(localContext);
-        mLocalSettingsPackage = initGlobalSettingsPackage(localContext);
-        mPlayerSettingsPackage = initPlayerSettingsPackage(localContext);
         mLocalStoragePackage = initLocalStoragePackage(localContext, &mGlobalStorage);
         mPlayerStoragePackage = initPlayerStoragePackage(localContext, &mGlobalStorage, &mPlayerStorage);
         mPostprocessingPackage = initPostprocessingPackage(localContext);
@@ -423,7 +420,6 @@ namespace MWLua
             scripts->addPackage("openmw.ui", mUserInterfacePackage);
             scripts->addPackage("openmw.camera", mCameraPackage);
             scripts->addPackage("openmw.input", mInputPackage);
-            scripts->addPackage("openmw.settings", mPlayerSettingsPackage);
             scripts->addPackage("openmw.storage", mPlayerStoragePackage);
             scripts->addPackage("openmw.postprocessing", mPostprocessingPackage);
             scripts->addPackage("openmw.debug", mDebugPackage);
@@ -434,7 +430,6 @@ namespace MWLua
             if (!autoStartConf.has_value())
                 autoStartConf = mConfiguration.getLocalConf(type, ptr.getCellRef().getRefId(), getId(ptr));
             scripts->setAutoStartConf(std::move(*autoStartConf));
-            scripts->addPackage("openmw.settings", mLocalSettingsPackage);
             scripts->addPackage("openmw.storage", mLocalStoragePackage);
         }
         scripts->addPackage("openmw.nearby", mNearbyPackage);
