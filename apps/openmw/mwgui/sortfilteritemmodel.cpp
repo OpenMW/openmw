@@ -28,27 +28,30 @@
 
 namespace
 {
+    unsigned int getTypeOrder(unsigned int type)
+    {
+        switch (type)
+        {
+            case ESM::Weapon::sRecordId: return 0;
+            case ESM::Armor::sRecordId: return 1;
+            case ESM::Clothing::sRecordId: return 2;
+            case ESM::Potion::sRecordId: return 3;
+            case ESM::Ingredient::sRecordId: return 4;
+            case ESM::Apparatus::sRecordId: return 5;
+            case ESM::Book::sRecordId: return 6;
+            case ESM::Light::sRecordId: return 7;
+            case ESM::Miscellaneous::sRecordId: return 8;
+            case ESM::Lockpick::sRecordId: return 9;
+            case ESM::Repair::sRecordId: return 10;
+            case ESM::Probe::sRecordId: return 11;
+        }
+        assert(false && "Invalid type value");
+        return std::numeric_limits<unsigned int>::max();
+    }
+
     bool compareType(unsigned int type1, unsigned int type2)
     {
-        // this defines the sorting order of types. types that are first in the vector appear before other types.
-        std::vector<unsigned int> mapping;
-        mapping.emplace_back(ESM::Weapon::sRecordId );
-        mapping.emplace_back(ESM::Armor::sRecordId );
-        mapping.emplace_back(ESM::Clothing::sRecordId );
-        mapping.emplace_back(ESM::Potion::sRecordId );
-        mapping.emplace_back(ESM::Ingredient::sRecordId );
-        mapping.emplace_back(ESM::Apparatus::sRecordId );
-        mapping.emplace_back(ESM::Book::sRecordId );
-        mapping.emplace_back(ESM::Light::sRecordId );
-        mapping.emplace_back(ESM::Miscellaneous::sRecordId );
-        mapping.emplace_back(ESM::Lockpick::sRecordId );
-        mapping.emplace_back(ESM::Repair::sRecordId );
-        mapping.emplace_back(ESM::Probe::sRecordId );
-
-        assert( std::find(mapping.begin(), mapping.end(), type1) != mapping.end() );
-        assert( std::find(mapping.begin(), mapping.end(), type2) != mapping.end() );
-
-        return std::find(mapping.begin(), mapping.end(), type1) < std::find(mapping.begin(), mapping.end(), type2);
+        return getTypeOrder(type1) < getTypeOrder(type2);
     }
 
     struct Compare
@@ -180,23 +183,29 @@ namespace MWGui
         MWWorld::Ptr base = item.mBase;
 
         int category = 0;
-        if (base.getType() == ESM::Armor::sRecordId
-                || base.getType() == ESM::Clothing::sRecordId)
-            category = Category_Apparel;
-        else if (base.getType() == ESM::Weapon::sRecordId)
-            category = Category_Weapon;
-        else if (base.getType() == ESM::Ingredient::sRecordId
-                     || base.getType() == ESM::Potion::sRecordId)
-            category = Category_Magic;
-        else if (base.getType() == ESM::Miscellaneous::sRecordId
-                 || base.getType() == ESM::Ingredient::sRecordId
-                 || base.getType() == ESM::Repair::sRecordId
-                 || base.getType() == ESM::Lockpick::sRecordId
-                 || base.getType() == ESM::Light::sRecordId
-                 || base.getType() == ESM::Apparatus::sRecordId
-                 || base.getType() == ESM::Book::sRecordId
-                 || base.getType() == ESM::Probe::sRecordId)
-            category = Category_Misc;
+        switch (base.getType())
+        {
+            case ESM::Armor::sRecordId:
+            case ESM::Clothing::sRecordId:
+                category = Category_Apparel;
+                break;
+            case ESM::Weapon::sRecordId:
+                category = Category_Weapon;
+                break;
+            case ESM::Ingredient::sRecordId:
+            case ESM::Potion::sRecordId:
+                category = Category_Magic;
+                break;
+            case ESM::Miscellaneous::sRecordId:
+            case ESM::Repair::sRecordId:
+            case ESM::Lockpick::sRecordId:
+            case ESM::Light::sRecordId:
+            case ESM::Apparatus::sRecordId:
+            case ESM::Book::sRecordId:
+            case ESM::Probe::sRecordId:
+                category = Category_Misc;
+                break;
+        }
 
         if (item.mFlags & ItemStack::Flag_Enchanted)
             category |= Category_Magic;
