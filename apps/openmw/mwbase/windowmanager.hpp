@@ -339,7 +339,6 @@ namespace MWBase
 
             // In WindowManager for now since there isn't a VFS singleton
             virtual std::string correctIconPath(const std::string& path) = 0;
-            virtual std::string correctBookartPath(const std::string& path, int width, int height, bool* exists = nullptr) = 0;
             virtual std::string correctTexturePath(const std::string& path) = 0;
             virtual std::string correctMeshPath(const std::string& path) = 0;
             virtual bool textureExists(const std::string& path) = 0;

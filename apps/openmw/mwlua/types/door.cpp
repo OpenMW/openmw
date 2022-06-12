@@ -1,9 +1,10 @@
 #include "types.hpp"
 
 #include <components/esm3/loaddoor.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <apps/openmw/mwworld/esmstore.hpp>
-#include <apps/openmw/mwbase/windowmanager.hpp>
 
 #include "../luabindings.hpp"
 
@@ -41,6 +42,8 @@ namespace MWLua
                 return sol::nil;
         };
 
+        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
         const MWWorld::Store<ESM::Door>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Door>();
         door["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Door* { return obj.ptr().get<ESM::Door>()->mBase; },
@@ -49,9 +52,9 @@ namespace MWLua
         record[sol::meta_function::to_string] = [](const ESM::Door& rec) -> std::string { return "ESM3_Door[" + rec.mId + "]"; };
         record["id"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mId; });
         record["name"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([](const ESM::Door& rec) -> std::string
+        record["model"] = sol::readonly_property([vfs](const ESM::Door& rec) -> std::string
         {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(rec.mModel);
+            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
         record["mwscript"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mScript; });
         record["openSound"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mOpenSound; });

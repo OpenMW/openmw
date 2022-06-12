@@ -1,6 +1,8 @@
 #include "types.hpp"
 
 #include <components/esm3/loadcont.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <apps/openmw/mwworld/esmstore.hpp>
 #include <apps/openmw/mwworld/class.hpp>
@@ -33,6 +35,8 @@ namespace MWLua
             return ptr.getClass().getCapacity(ptr);
         };
 
+        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
         const MWWorld::Store<ESM::Container>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>();
         container["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Container* { return obj.ptr().get<ESM::Container>()->mBase; },
@@ -41,7 +45,10 @@ namespace MWLua
         record[sol::meta_function::to_string] = [](const ESM::Container& rec) -> std::string { return "ESM3_Container[" + rec.mId + "]"; };
         record["id"] = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mId; });
         record["name"] = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mModel; });
+        record["model"] = sol::readonly_property([vfs](const ESM::Container& rec) -> std::string
+        {
+            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
+        });
         record["mwscript"] = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mScript; });
         record["weight"] = sol::readonly_property([](const ESM::Container& rec) -> float { return rec.mWeight; });
     }

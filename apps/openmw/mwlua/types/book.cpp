@@ -1,6 +1,8 @@
 #include "types.hpp"
 
 #include <components/esm3/loadbook.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <apps/openmw/mwworld/esmstore.hpp>
 
@@ -24,6 +26,8 @@ namespace MWLua
             skill[skillName] = skillName;
         }
 
+        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
         const MWWorld::Store<ESM::Book>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Book>();
         book["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Book* { return obj.ptr().get<ESM::Book>()->mBase; },
@@ -32,9 +36,15 @@ namespace MWLua
         record[sol::meta_function::to_string] = [](const ESM::Book& rec) { return "ESM3_Book[" + rec.mId + "]"; };
         record["id"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mId; });
         record["name"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mModel; });
+        record["model"] = sol::readonly_property([vfs](const ESM::Book& rec) -> std::string
+        {
+            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
+        });
         record["mwscript"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mScript; });
-        record["icon"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mIcon; });
+        record["icon"] = sol::readonly_property([vfs](const ESM::Book& rec) -> std::string
+        {
+            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+        });
         record["text"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mText; });
         record["enchant"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mEnchant; });
         record["isScroll"] = sol::readonly_property([](const ESM::Book& rec) -> bool { return rec.mData.mIsScroll; });
