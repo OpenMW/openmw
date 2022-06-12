@@ -317,9 +317,6 @@ Ubuntu_Clang_tests_Debug:
   tags:
     - shared-macos-amd64
   stage: build
-  only:
-    variables:
-      - $CI_PROJECT_ID == "7107382"
   cache:
     paths:
     - ccache/
