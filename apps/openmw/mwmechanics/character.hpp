@@ -234,8 +234,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     std::string getWeaponAnimation(int weaponType) const;
 
     bool getAttackingOrSpell() const;
-    void setAttackingOrSpell(bool attackingOrSpell);
-
+    void setAttackingOrSpell(bool attackingOrSpell) const;
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);

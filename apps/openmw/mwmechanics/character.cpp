@@ -68,41 +68,97 @@ std::string getBestAttack (const ESM::Weapon* weapon)
         return "chop";
 }
 
-// Converts a movement Run state to its equivalent Walk state.
+// Converts a movement Run state to its equivalent Walk state, if there is one.
 MWMechanics::CharacterState runStateToWalkState (MWMechanics::CharacterState state)
 {
     using namespace MWMechanics;
-    CharacterState ret = state;
     switch (state)
     {
-        case CharState_RunForward:
-            ret = CharState_WalkForward;
-            break;
-        case CharState_RunBack:
-            ret = CharState_WalkBack;
-            break;
-        case CharState_RunLeft:
-            ret = CharState_WalkLeft;
-            break;
-        case CharState_RunRight:
-            ret = CharState_WalkRight;
-            break;
-        case CharState_SwimRunForward:
-            ret = CharState_SwimWalkForward;
-            break;
-        case CharState_SwimRunBack:
-            ret = CharState_SwimWalkBack;
-            break;
-        case CharState_SwimRunLeft:
-            ret = CharState_SwimWalkLeft;
-            break;
-        case CharState_SwimRunRight:
-            ret = CharState_SwimWalkRight;
-            break;
-        default:
-            break;
+        case CharState_RunForward: return CharState_WalkForward;
+        case CharState_RunBack: return CharState_WalkBack;
+        case CharState_RunLeft: return CharState_WalkLeft;
+        case CharState_RunRight: return CharState_WalkRight;
+        case CharState_SwimRunForward: return CharState_SwimWalkForward;
+        case CharState_SwimRunBack: return CharState_SwimWalkBack;
+        case CharState_SwimRunLeft: return CharState_SwimWalkLeft;
+        case CharState_SwimRunRight: return CharState_SwimWalkRight;
+        default: return state;
     }
-    return ret;
+}
+
+// Converts a Hit state to its equivalent Death state.
+MWMechanics::CharacterState hitStateToDeathState (MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    switch (state)
+    {
+        case CharState_SwimKnockDown: return CharState_SwimDeathKnockDown;
+        case CharState_SwimKnockOut: return CharState_SwimDeathKnockOut;
+        case CharState_KnockDown: return CharState_DeathKnockDown;
+        case CharState_DeathKnockOut: return CharState_DeathKnockOut;
+        default: return CharState_None;
+    }
+}
+
+// Converts a movement state to its equivalent base animation group as long as it is a movement state.
+std::string movementStateToAnimGroup(MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    switch (state)
+    {
+        case CharState_WalkForward: return "walkforward";
+        case CharState_WalkBack: return "walkback";
+        case CharState_WalkLeft: return "walkleft";
+        case CharState_WalkRight: return "walkright";
+
+        case CharState_SwimWalkForward: return "swimwalkforward";
+        case CharState_SwimWalkBack: return "swimwalkback";
+        case CharState_SwimWalkLeft: return "swimwalkleft";
+        case CharState_SwimWalkRight: return "swimwalkright";
+
+        case CharState_RunForward: return "runforward";
+        case CharState_RunBack: return "runback";
+        case CharState_RunLeft: return "runleft";
+        case CharState_RunRight: return "runright";
+
+        case CharState_SwimRunForward: return "swimrunforward";
+        case CharState_SwimRunBack: return "swimrunback";
+        case CharState_SwimRunLeft: return "swimrunleft";
+        case CharState_SwimRunRight: return "swimrunright";
+
+        case CharState_SneakForward: return "sneakforward";
+        case CharState_SneakBack: return "sneakback";
+        case CharState_SneakLeft: return "sneakleft";
+        case CharState_SneakRight: return "sneakright";
+
+        case CharState_Jump: return "jump";
+
+        case CharState_TurnLeft: return "turnleft";
+        case CharState_TurnRight: return "turnright";
+        case CharState_SwimTurnLeft: return "swimturnleft";
+        case CharState_SwimTurnRight: return "swimturnright";
+        default: return {};
+    }
+}
+
+// Converts a death state to its equivalent animation group as long as it is a death state.
+std::string deathStateToAnimGroup(MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    switch (state)
+    {
+        case CharState_SwimDeath: return "swimdeath";
+        case CharState_SwimDeathKnockDown: return "swimdeathknockdown";
+        case CharState_SwimDeathKnockOut: return "swimdeathknockout";
+        case CharState_DeathKnockDown: return "deathknockdown";
+        case CharState_DeathKnockOut: return "deathknockout";
+        case CharState_Death1: return "death1";
+        case CharState_Death2: return "death2";
+        case CharState_Death3: return "death3";
+        case CharState_Death4: return "death4";
+        case CharState_Death5: return "death5";
+        default: return {};
+    }
 }
 
 float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
@@ -138,58 +194,6 @@ float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
 
 namespace MWMechanics
 {
-
-struct StateInfo {
-    CharacterState state;
-    const char groupname[32];
-};
-
-static const StateInfo sMovementList[] = {
-    { CharState_WalkForward, "walkforward" },
-    { CharState_WalkBack, "walkback" },
-    { CharState_WalkLeft, "walkleft" },
-    { CharState_WalkRight, "walkright" },
-
-    { CharState_SwimWalkForward, "swimwalkforward" },
-    { CharState_SwimWalkBack, "swimwalkback" },
-    { CharState_SwimWalkLeft, "swimwalkleft" },
-    { CharState_SwimWalkRight, "swimwalkright" },
-
-    { CharState_RunForward, "runforward" },
-    { CharState_RunBack, "runback" },
-    { CharState_RunLeft, "runleft" },
-    { CharState_RunRight, "runright" },
-
-    { CharState_SwimRunForward, "swimrunforward" },
-    { CharState_SwimRunBack, "swimrunback" },
-    { CharState_SwimRunLeft, "swimrunleft" },
-    { CharState_SwimRunRight, "swimrunright" },
-
-    { CharState_SneakForward, "sneakforward" },
-    { CharState_SneakBack, "sneakback" },
-    { CharState_SneakLeft, "sneakleft" },
-    { CharState_SneakRight, "sneakright" },
-
-    { CharState_Jump, "jump" },
-
-    { CharState_TurnLeft, "turnleft" },
-    { CharState_TurnRight, "turnright" },
-    { CharState_SwimTurnLeft, "swimturnleft" },
-    { CharState_SwimTurnRight, "swimturnright" },
-};
-static const StateInfo *sMovementListEnd = &sMovementList[sizeof(sMovementList)/sizeof(sMovementList[0])];
-
-
-class FindCharState {
-    CharacterState state;
-
-public:
-    FindCharState(CharacterState _state) : state(_state) { }
-
-    bool operator()(const StateInfo &info) const
-    { return info.state == state; }
-};
-
 
 std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num) const
 {
@@ -492,33 +496,25 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
     // 2. When we use a fallback animation for lower body since movement animation for given weapon is missing (e.g. for crossbows and spellcasting)
     bool resetIdle = (movement != CharState_None && !isTurning());
 
-    std::string movementAnimName;
-    MWRender::Animation::BlendMask movemask;
-    const StateInfo *movestate;
+    std::string movementAnimName = movementStateToAnimGroup(movement);
+    MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
 
-    movemask = MWRender::Animation::BlendMask_All;
-    movestate = std::find_if(sMovementList, sMovementListEnd, FindCharState(movement));
-    if(movestate != sMovementListEnd)
+    if (!movementAnimName.empty())
     {
-        movementAnimName = movestate->groupname;
         if(!weapShortGroup.empty())
         {
             std::string::size_type swimpos = movementAnimName.find("swim");
             if (swimpos == std::string::npos)
             {
+                std::string weapMovementAnimName;
                 if (mWeaponType == ESM::Weapon::Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight)) // Spellcasting stance turning is a special case
-                    movementAnimName = weapShortGroup + movementAnimName;
+                    weapMovementAnimName = weapShortGroup + movementAnimName;
                 else
-                    movementAnimName += weapShortGroup;
-            }
+                    weapMovementAnimName = movementAnimName + weapShortGroup;
 
-            if(!mAnimation->hasAnimation(movementAnimName))
-            {
-                movementAnimName = movestate->groupname;
-                if (swimpos == std::string::npos)
+                if (!mAnimation->hasAnimation(weapMovementAnimName))
                 {
-                    movementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
-
+                    weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
                     // If we apply movement only for lower body, do not reset idle animations.
                     // For upper body there will be idle animation.
                     if (movemask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
@@ -527,6 +523,8 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
                     if (movemask == MWRender::Animation::BlendMask_LowerBody)
                         resetIdle = false;
                 }
+
+                movementAnimName = weapMovementAnimName;
             }
         }
     }
@@ -534,7 +532,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
     if(force || movement != mMovementState)
     {
         mMovementState = movement;
-        if(movestate != sMovementListEnd)
+        if (!movementAnimName.empty())
         {
             if(!mAnimation->hasAnimation(movementAnimName))
             {
@@ -595,14 +593,12 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
 
             // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
-            std::string anim = mCurrentMovement;
             mAdjustMovementAnimSpeed = true;
             if (mPtr.getClass().getType() == ESM::Creature::sRecordId
                     && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
             {
                 CharacterState walkState = runStateToWalkState(mMovementState);
-                const StateInfo *stateinfo = std::find_if(sMovementList, sMovementListEnd, FindCharState(walkState));
-                anim = stateinfo->groupname;
+                std::string anim = movementStateToAnimGroup(walkState);
 
                 mMovementAnimSpeed = mAnimation->getVelocity(anim);
                 if (mMovementAnimSpeed <= 1.0f)
@@ -618,7 +614,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
             }
             else
             {
-                mMovementAnimSpeed = mAnimation->getVelocity(anim);
+                mMovementAnimSpeed = mAnimation->getVelocity(mCurrentMovement);
 
                 if (mMovementAnimSpeed <= 1.0f)
                 {
@@ -727,30 +723,17 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
 void CharacterController::playDeath(float startpoint, CharacterState death)
 {
-    // Make sure the character was swimming upon death for forward-compatibility
-    const bool wasSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
-
-    switch (death)
-    {
-    case CharState_SwimDeath:
-        mCurrentDeath = "swimdeath";
-        break;
-    case CharState_SwimDeathKnockDown:
-        mCurrentDeath = (wasSwimming ? "swimdeathknockdown" : "deathknockdown");
-        break;
-    case CharState_SwimDeathKnockOut:
-        mCurrentDeath = (wasSwimming ? "swimdeathknockout" : "deathknockout");
-        break;
-    case CharState_DeathKnockDown:
-        mCurrentDeath = "deathknockdown";
-        break;
-    case CharState_DeathKnockOut:
-        mCurrentDeath = "deathknockout";
-        break;
-    default:
-        mCurrentDeath = "death" + std::to_string(death - CharState_Death1 + 1);
-    }
     mDeathState = death;
+    mCurrentDeath = deathStateToAnimGroup(mDeathState);
+
+    // Make sure the character was swimming upon death for forward-compatibility
+    if (!MWBase::Environment::get().getWorld()->isSwimming(mPtr))
+    {
+        if (mDeathState == CharState_SwimDeathKnockDown)
+            mCurrentDeath = "deathknockdown";
+        else if (mDeathState == CharState_SwimDeathKnockOut)
+            mCurrentDeath = "deathknockout";
+    }
 
     mPtr.getClass().getCreatureStats(mPtr).setDeathAnimation(mDeathState - CharState_Death1);
 
@@ -794,30 +777,12 @@ void CharacterController::playRandomDeath(float startpoint)
         MWBase::Environment::get().getWorld()->useDeathCamera();
     }
 
-    if(mHitState == CharState_SwimKnockDown && mAnimation->hasAnimation("swimdeathknockdown"))
-    {
-        mDeathState = CharState_SwimDeathKnockDown;
-    }
-    else if(mHitState == CharState_SwimKnockOut && mAnimation->hasAnimation("swimdeathknockout"))
-    {
-        mDeathState = CharState_SwimDeathKnockOut;
-    }
-    else if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
-    {
+    mDeathState = hitStateToDeathState(mHitState);
+    if (mDeathState == CharState_None && MWBase::Environment::get().getWorld()->isSwimming(mPtr))
         mDeathState = CharState_SwimDeath;
-    }
-    else if (mHitState == CharState_KnockDown && mAnimation->hasAnimation("deathknockdown"))
-    {
-        mDeathState = CharState_DeathKnockDown;
-    }
-    else if (mHitState == CharState_KnockOut && mAnimation->hasAnimation("deathknockout"))
-    {
-        mDeathState = CharState_DeathKnockOut;
-    }
-    else
-    {
+
+    if (mDeathState == CharState_None || !mAnimation->hasAnimation(deathStateToAnimGroup(mDeathState)))
         mDeathState = chooseRandomDeathState();
-    }
 
     // Do not interrupt scripted animation by death
     if (isPersistentAnimPlaying())
@@ -2742,7 +2707,7 @@ bool CharacterController::isRunning() const
             mMovementState == CharState_SwimRunRight;
 }
 
-void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
+void CharacterController::setAttackingOrSpell(bool attackingOrSpell) const
 {
     mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(attackingOrSpell);
 }
