@@ -1,6 +1,8 @@
 #include "types.hpp"
 
 #include <components/esm3/loadweap.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <apps/openmw/mwworld/esmstore.hpp>
 
@@ -11,7 +13,7 @@ namespace sol
     template <>
     struct is_automagical<ESM::Weapon> : std::false_type {};
 }
-
+#include <components/resource/resourcesystem.hpp>
 namespace MWLua
 {
     void addWeaponBindings(sol::table weapon, const Context& context)
@@ -33,6 +35,8 @@ namespace MWLua
             {"Bolt", ESM::Weapon::Bolt},
         }));
 
+        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
         const MWWorld::Store<ESM::Weapon>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>();
         weapon["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Weapon* { return obj.ptr().get<ESM::Weapon>()->mBase; },
@@ -41,8 +45,14 @@ namespace MWLua
         record[sol::meta_function::to_string] = [](const ESM::Weapon& rec) -> std::string { return "ESM3_Weapon[" + rec.mId + "]"; };
         record["id"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mId; });
         record["name"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mModel; });
-        record["icon"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mIcon; });
+        record["model"] = sol::readonly_property([vfs](const ESM::Weapon& rec) -> std::string
+        {
+            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
+        });
+        record["icon"] = sol::readonly_property([vfs](const ESM::Weapon& rec) -> std::string
+        {
+            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+        });
         record["enchant"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mEnchant; });
         record["mwscript"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mScript; });
         record["isMagical"] = sol::readonly_property(

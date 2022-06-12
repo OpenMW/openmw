@@ -4,6 +4,9 @@
 #include <components/misc/stringops.hpp>
 #include <components/esm3/readerscache.hpp>
 
+#include <apps/openmw/mwbase/environment.hpp>
+#include <apps/openmw/mwbase/windowmanager.hpp>
+
 namespace MWWorld
 {
     void GroundcoverStore::init(const Store<ESM::Static>& statics, const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder)
@@ -18,13 +21,15 @@ namespace MWWorld
         for (const ESM::Static& stat : statics)
         {
             std::string id = Misc::StringUtils::lowerCase(stat.mId);
-            mMeshCache[id] = "meshes\\" + Misc::StringUtils::lowerCase(stat.mModel);
+            mMeshCache[id] = Misc::StringUtils::lowerCase(
+                MWBase::Environment::get().getWindowManager()->correctMeshPath(stat.mModel));
         }
 
         for (const ESM::Static& stat : content.mStatics)
         {
             std::string id = Misc::StringUtils::lowerCase(stat.mId);
-            mMeshCache[id] = "meshes\\" + Misc::StringUtils::lowerCase(stat.mModel);
+            mMeshCache[id] = Misc::StringUtils::lowerCase(
+                MWBase::Environment::get().getWindowManager()->correctMeshPath(stat.mModel));
         }
 
         for (const ESM::Cell& cell : content.mCells)

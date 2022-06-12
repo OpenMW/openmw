@@ -17,6 +17,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -261,7 +262,9 @@ namespace MWMechanics
                 const ESM::Static* reflectStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find("VFX_Reflect");
                 MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
                 if(animation && !reflectStatic->mModel.empty())
-                    animation->addEffect("meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, std::string());
+                    animation->addEffect(
+                        MWBase::Environment::get().getWindowManager()->correctMeshPath(reflectStatic->mModel),
+                        ESM::MagicEffect::Reflect, false, std::string());
                 caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
             }
             if(removedSpell)

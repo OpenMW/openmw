@@ -24,6 +24,7 @@ namespace Misc
         std::string correctBookartPath(const std::string &resPath, int width, int height, const VFS::Manager* vfs);
         /// Use "xfoo.nif" instead of "foo.nif" if available
         std::string correctActorModelPath(const std::string &resPath, const VFS::Manager* vfs);
+        std::string correctMeshPath(const std::string &resPath, const VFS::Manager* vfs);
 
         std::string correctSoundPath(const std::string& resPath, const VFS::Manager* vfs);
 

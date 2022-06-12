@@ -272,7 +272,9 @@ namespace
         const ESM::Static* absorbStatic = esmStore.get<ESM::Static>().find("VFX_Absorb");
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
         if (animation && !absorbStatic->mModel.empty())
-            animation->addEffect( "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, std::string());
+            animation->addEffect(
+                MWBase::Environment::get().getWindowManager()->correctMeshPath(absorbStatic->mModel),
+                ESM::MagicEffect::SpellAbsorption, false, std::string());
         const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellId);
         int spellCost = 0;
         if (spell)
@@ -430,7 +432,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                     anim->removeEffect(effect.mEffectId);
                     const ESM::Static* fx = world->getStore().get<ESM::Static>().search("VFX_Summon_end");
                     if (fx)
-                        anim->addEffect("meshes\\" + fx->mModel, -1);
+                        anim->addEffect(MWBase::Environment::get().getWindowManager()->correctMeshPath(fx->mModel), -1);
                 }
             }
             else if (caster == getPlayer())

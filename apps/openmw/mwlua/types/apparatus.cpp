@@ -1,6 +1,8 @@
 #include "types.hpp"
 
 #include <components/esm3/loadappa.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <apps/openmw/mwworld/esmstore.hpp>
 
@@ -23,6 +25,8 @@ namespace MWLua
             {"Retort", ESM::Apparatus::Retort},
             }));
 
+        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
         const MWWorld::Store<ESM::Apparatus>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Apparatus>();
         apparatus["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Apparatus* { return obj.ptr().get<ESM::Apparatus>()->mBase; },
@@ -31,9 +35,15 @@ namespace MWLua
         record[sol::meta_function::to_string] = [](const ESM::Apparatus& rec) { return "ESM3_Apparatus[" + rec.mId + "]"; };
         record["id"] = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mId; });
         record["name"] = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mModel; });
+        record["model"] = sol::readonly_property([vfs](const ESM::Apparatus& rec) -> std::string
+        {
+            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
+        });
         record["mwscript"] = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mScript; });
-        record["icon"] = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mIcon; });
+        record["icon"] = sol::readonly_property([vfs](const ESM::Apparatus& rec) -> std::string
+        {
+            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+        });
         record["type"] = sol::readonly_property([](const ESM::Apparatus& rec) -> int { return rec.mData.mType; });
         record["value"] = sol::readonly_property([](const ESM::Apparatus& rec) -> int { return rec.mData.mValue; });
         record["weight"] = sol::readonly_property([](const ESM::Apparatus& rec) -> float { return rec.mData.mWeight; });

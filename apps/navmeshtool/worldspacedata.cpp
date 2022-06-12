@@ -122,7 +122,7 @@ namespace NavMeshTool
                 {
                     try
                     {
-                        return bulletShapeManager.getShape("meshes/" + model);
+                        return bulletShapeManager.getShape(Misc::ResourceHelpers::correctMeshPath(model, &vfs));
                     }
                     catch (const std::exception& e)
                     {

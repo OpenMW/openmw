@@ -3683,7 +3683,8 @@ namespace MWWorld
         if (texture.empty())
             texture = Fallback::Map::getString("Blood_Texture_0");
 
-        std::string model = "meshes\\" + Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))); // [0, 2]
+        std::string model = MWBase::Environment::get().getWindowManager()->correctMeshPath(
+            Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3)))); // [0, 2]
 
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
@@ -3722,11 +3723,15 @@ namespace MWWorld
             if (effectInfo.mArea <= 0)
             {
                 if (effectInfo.mRange == ESM::RT_Target)
-                    mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, 1.0f);
+                    mRendering->spawnEffect(
+                        MWBase::Environment::get().getWindowManager()->correctMeshPath(areaStatic->mModel),
+                        texture, origin, 1.0f);
                 continue;
             }
             else
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectInfo.mArea * 2));
+                mRendering->spawnEffect(
+                    MWBase::Environment::get().getWindowManager()->correctMeshPath(areaStatic->mModel),
+                    texture, origin, static_cast<float>(effectInfo.mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {

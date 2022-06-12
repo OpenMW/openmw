@@ -32,6 +32,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -218,7 +219,8 @@ namespace MWWorld
                 SceneUtil::FindByNameVisitor findVisitor(nodeName.str());
                 attachTo->accept(findVisitor);
                 if (findVisitor.mFoundNode)
-                    mResourceSystem->getSceneManager()->getInstance("meshes\\" + weapon->mModel, findVisitor.mFoundNode);
+                    mResourceSystem->getSceneManager()->getInstance(
+                        MWBase::Environment::get().getWindowManager()->correctMeshPath(weapon->mModel), findVisitor.mFoundNode);
             }
 
         if (createLight)
@@ -318,7 +320,8 @@ namespace MWWorld
 
         // in case there are multiple effects, the model is a dummy without geometry. Use the second effect for physics shape
         if (state.mIdMagic.size() > 1)
-            model = "meshes\\" + MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find(state.mIdMagic[1])->mModel;
+            model = MWBase::Environment::get().getWindowManager()->correctMeshPath(
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find(state.mIdMagic[1])->mModel);
         state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true);
         state.mToDelete = false;
         mMagicBolts.push_back(state);

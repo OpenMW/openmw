@@ -37,7 +37,7 @@ namespace MWClass
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
-            return "meshes\\" + model;
+            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
         }
         return "";
     }

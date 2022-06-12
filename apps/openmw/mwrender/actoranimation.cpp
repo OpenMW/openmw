@@ -24,6 +24,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -127,7 +128,7 @@ std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield, bool 
                 if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
                     return std::string();
                 if (!bodypart->mModel.empty())
-                    return "meshes\\" + bodypart->mModel;
+                    return MWBase::Environment::get().getWindowManager()->correctMeshPath(bodypart->mModel);
             }
         }
     }

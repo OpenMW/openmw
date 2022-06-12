@@ -379,8 +379,8 @@ namespace MWGui
 
     // In WindowManager for now since there isn't a VFS singleton
     std::string correctIconPath(const std::string& path) override;
-    std::string correctBookartPath(const std::string& path, int width, int height, bool* exists = nullptr) override;
     std::string correctTexturePath(const std::string& path) override;
+    std::string correctMeshPath(const std::string& path) override;
     bool textureExists(const std::string& path) override;
 
     void addCell(MWWorld::CellStore* cell) override;
