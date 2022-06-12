@@ -2707,7 +2707,7 @@ bool CharacterController::isRunning() const
             mMovementState == CharState_SwimRunRight;
 }
 
-void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
+void CharacterController::setAttackingOrSpell(bool attackingOrSpell) const
 {
     mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(attackingOrSpell);
 }
