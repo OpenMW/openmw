@@ -139,14 +139,14 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
             this, SLOT(updateNewProfileOkButton(QString)));
     connect(mCloneProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
             this, SLOT(updateCloneProfileOkButton(QString)));
-    connect(ui.directoryAddSubdirsButton, &QPushButton::released, this, [=]() { this->addSubdirectories(true); });
-    connect(ui.directoryInsertButton,     &QPushButton::released, this, [=]() { this->addSubdirectories(false); });
-    connect(ui.directoryUpButton,         &QPushButton::released, this, [=]() { this->moveDirectory(-1); });
-    connect(ui.directoryDownButton,       &QPushButton::released, this, [=]() { this->moveDirectory(1); });
-    connect(ui.directoryRemoveButton,     &QPushButton::released, this, [=]() { this->removeDirectory(); });
-    connect(ui.archiveUpButton,           &QPushButton::released, this, [=]() { this->moveArchive(-1); });
-    connect(ui.archiveDownButton,         &QPushButton::released, this, [=]() { this->moveArchive(1); });
-    connect(ui.directoryListWidget->model(), &QAbstractItemModel::rowsMoved, this, [=]() { this->sortDirectories(); });
+    connect(ui.directoryAddSubdirsButton, &QPushButton::released, this, [this]() { this->addSubdirectories(true); });
+    connect(ui.directoryInsertButton,     &QPushButton::released, this, [this]() { this->addSubdirectories(false); });
+    connect(ui.directoryUpButton,         &QPushButton::released, this, [this]() { this->moveDirectory(-1); });
+    connect(ui.directoryDownButton,       &QPushButton::released, this, [this]() { this->moveDirectory(1); });
+    connect(ui.directoryRemoveButton,     &QPushButton::released, this, [this]() { this->removeDirectory(); });
+    connect(ui.archiveUpButton,           &QPushButton::released, this, [this]() { this->moveArchive(-1); });
+    connect(ui.archiveDownButton,         &QPushButton::released, this, [this]() { this->moveArchive(1); });
+    connect(ui.directoryListWidget->model(), &QAbstractItemModel::rowsMoved, this, [this]() { this->sortDirectories(); });
 
     buildView();
     loadSettings();

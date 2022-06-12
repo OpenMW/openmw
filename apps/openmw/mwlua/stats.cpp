@@ -155,7 +155,7 @@ namespace MWLua
         template<class G>
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
-            return getValue(context, mObject, &DynamicStat::setValue, mIndex, prop, [=](const MWLua::Object* obj)
+            return getValue(context, mObject, &DynamicStat::setValue, mIndex, prop, [this, getter](const MWLua::Object* obj)
             {
                 const auto& ptr = obj->ptr();
                 return (ptr.getClass().getCreatureStats(ptr).getDynamic(mIndex).*getter)();
@@ -202,7 +202,7 @@ namespace MWLua
         template<class G>
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
-            return getValue(context, mObject, &AttributeStat::setValue, mIndex, prop, [=](const MWLua::Object* obj)
+            return getValue(context, mObject, &AttributeStat::setValue, mIndex, prop, [this, getter](const MWLua::Object* obj)
             {
                 const auto& ptr = obj->ptr();
                 return (ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex).*getter)();
@@ -266,7 +266,7 @@ namespace MWLua
         template<class G>
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
-            return getValue(context, mObject, &SkillStat::setValue, mIndex, prop, [=](const MWLua::Object* obj)
+            return getValue(context, mObject, &SkillStat::setValue, mIndex, prop, [this, getter](const MWLua::Object* obj)
             {
                 const auto& ptr = obj->ptr();
                 return (ptr.getClass().getNpcStats(ptr).getSkill(mIndex).*getter)();
@@ -275,7 +275,7 @@ namespace MWLua
 
         sol::object getProgress(const Context& context) const
         {
-            return getValue(context, mObject, &SkillStat::setValue, mIndex, "progress", [=](const MWLua::Object* obj)
+            return getValue(context, mObject, &SkillStat::setValue, mIndex, "progress", [this](const MWLua::Object* obj)
             {
                 const auto& ptr = obj->ptr();
                 return getProgress(ptr, mIndex, ptr.getClass().getNpcStats(ptr).getSkill(mIndex));

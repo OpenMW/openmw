@@ -608,12 +608,12 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"LuaJIT-2.1.0-beta3-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
 
 	# Google test and mock
-	if [ ! -z $TEST_FRAMEWORK ]; then
-		echo "Google test 1.10.0..."
+	if [ -n "$TEST_FRAMEWORK" ]; then
+		echo "Google test 1.11.0..."
 		if [ -d googletest ]; then
 			printf "  Google test exists, skipping."
 		else
-			git clone -b release-1.10.0 https://github.com/google/googletest.git
+			git clone -b release-1.11.0 https://github.com/google/googletest.git
 		fi
 	fi
 
@@ -1002,8 +1002,8 @@ printf "LuaJIT 2.1.0-beta3... "
 cd $DEPS
 echo
 # Google Test and Google Mock
-if [ ! -z $TEST_FRAMEWORK ]; then
-	printf "Google test 1.10.0 ..."
+if [ -n "$TEST_FRAMEWORK" ]; then
+	printf "Google test 1.11.0 ..."
 
 	cd googletest
 	mkdir -p build${MSVC_REAL_YEAR}
