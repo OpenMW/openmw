@@ -491,149 +491,138 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
     if (movement == mMovementState && idle == mIdleState && !force)
         return;
 
+    std::string movementAnimName = movementStateToAnimGroup(movement);
+
+    if (movementAnimName.empty())
+    {
+        if (!mCurrentMovement.empty())
+        {
+            mAnimation->disable(mCurrentMovement);
+            mCurrentMovement.clear();
+        }
+        mMovementState = CharState_None;
+        return;
+    }
+
+    std::string::size_type swimpos = movementAnimName.find("swim");
+    if (!mAnimation->hasAnimation(movementAnimName))
+    {
+        if (swimpos != std::string::npos)
+        {
+            movementAnimName.erase(swimpos, 4);
+            swimpos = std::string::npos;
+        }
+    }
+
+    MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
+
+    if (swimpos == std::string::npos && !weapShortGroup.empty())
+    {
+        std::string weapMovementAnimName;
+        // Spellcasting stance turning is a special case
+        if (mWeaponType == ESM::Weapon::Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight))
+            weapMovementAnimName = weapShortGroup + movementAnimName;
+        else
+            weapMovementAnimName = movementAnimName + weapShortGroup;
+
+        if (!mAnimation->hasAnimation(weapMovementAnimName))
+        {
+            weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
+            // If we apply movement only for lower body, do not reset idle animations.
+            // For upper body there will be idle animation.
+            if (movemask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
+                idle = CharState_Idle;
+        }
+
+        movementAnimName = weapMovementAnimName;
+    }
+
+    if (!force && movement == mMovementState)
+        return;
+
+    if (!mAnimation->hasAnimation(movementAnimName))
+    {
+        std::string::size_type runpos = movementAnimName.find("run");
+        if (runpos != std::string::npos)
+            movementAnimName.replace(runpos, 3, "walk");
+
+        if (!mAnimation->hasAnimation(movementAnimName))
+        {
+            if (!mCurrentMovement.empty())
+            {
+                mAnimation->disable(mCurrentMovement);
+                mCurrentMovement.clear();
+            }
+            mMovementState = CharState_None;
+            return;
+        }
+    }
+
+    mMovementState = movement;
+
+    // If we're playing the same animation, start it from the point it ended
+    float startpoint = 0.f;
+    if (!mCurrentMovement.empty() && movementAnimName == mCurrentMovement)
+        mAnimation->getInfo(mCurrentMovement, &startpoint);
+
+    mMovementAnimationControlled = true;
+
+    if (!mCurrentMovement.empty())
+        mAnimation->disable(mCurrentMovement);
+
+    mCurrentMovement = movementAnimName;
+
     // Reset idle if we actually play movement animations excepts of these cases:
     // 1. When we play turning animations
     // 2. When we use a fallback animation for lower body since movement animation for given weapon is missing (e.g. for crossbows and spellcasting)
-    bool resetIdle = (movement != CharState_None && !isTurning());
-
-    std::string movementAnimName = movementStateToAnimGroup(movement);
-    MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
-
-    if (!movementAnimName.empty())
+    if (!isTurning() && movemask == MWRender::Animation::BlendMask_All)
     {
-        if(!weapShortGroup.empty())
+        if (!mCurrentIdle.empty())
         {
-            std::string::size_type swimpos = movementAnimName.find("swim");
-            if (swimpos == std::string::npos)
-            {
-                std::string weapMovementAnimName;
-                if (mWeaponType == ESM::Weapon::Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight)) // Spellcasting stance turning is a special case
-                    weapMovementAnimName = weapShortGroup + movementAnimName;
-                else
-                    weapMovementAnimName = movementAnimName + weapShortGroup;
+            mAnimation->disable(mCurrentIdle);
+            mCurrentIdle.clear();
+        }
+        mIdleState = CharState_None;
+        idle = CharState_None;
+    }
 
-                if (!mAnimation->hasAnimation(weapMovementAnimName))
-                {
-                    weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
-                    // If we apply movement only for lower body, do not reset idle animations.
-                    // For upper body there will be idle animation.
-                    if (movemask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
-                        idle = CharState_Idle;
+    // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
+    // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
+    mAdjustMovementAnimSpeed = true;
+    if (mPtr.getClass().getType() == ESM::Creature::sRecordId && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
+    {
+        CharacterState walkState = runStateToWalkState(mMovementState);
+        std::string anim = movementStateToAnimGroup(walkState);
 
-                    if (movemask == MWRender::Animation::BlendMask_LowerBody)
-                        resetIdle = false;
-                }
+        mMovementAnimSpeed = mAnimation->getVelocity(anim);
+        if (mMovementAnimSpeed <= 1.0f)
+        {
+            // Another bug: when using a fallback animation (e.g. RunForward as fallback to SwimRunForward),
+            // then the equivalent Walk animation will not use a fallback, and if that animation doesn't exist
+            // we will play without any scaling.
+            // Makes the speed attribute of most water creatures totally useless.
+            // And again, this can not be fixed without patching game data.
+            mAdjustMovementAnimSpeed = false;
+            mMovementAnimSpeed = 1.f;
+        }
+    }
+    else
+    {
+        mMovementAnimSpeed = mAnimation->getVelocity(mCurrentMovement);
 
-                movementAnimName = weapMovementAnimName;
-            }
+        if (mMovementAnimSpeed <= 1.0f)
+        {
+            // The first person anims don't have any velocity to calculate a speed multiplier from.
+            // We use the third person velocities instead.
+            // FIXME: should be pulled from the actual animation, but it is not presently loaded.
+            bool sneaking = mMovementState == CharState_SneakForward || mMovementState == CharState_SneakBack
+                         || mMovementState == CharState_SneakLeft    || mMovementState == CharState_SneakRight;
+            mMovementAnimSpeed = (sneaking ? 33.5452f : (isRunning() ? 222.857f : 154.064f));
+            mMovementAnimationControlled = false;
         }
     }
 
-    if(force || movement != mMovementState)
-    {
-        mMovementState = movement;
-        if (!movementAnimName.empty())
-        {
-            if(!mAnimation->hasAnimation(movementAnimName))
-            {
-                std::string::size_type swimpos = movementAnimName.find("swim");
-                if (swimpos != std::string::npos)
-                {
-                    movementAnimName.erase(swimpos, 4);
-                    if (!weapShortGroup.empty())
-                    {
-                        std::string weapMovementAnimName = movementAnimName + weapShortGroup;
-                        if(mAnimation->hasAnimation(weapMovementAnimName))
-                            movementAnimName = weapMovementAnimName;
-                        else
-                        {
-                            movementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
-                            if (movemask == MWRender::Animation::BlendMask_LowerBody)
-                                resetIdle = false;
-                        }
-                    }
-                }
-
-                if (swimpos == std::string::npos || !mAnimation->hasAnimation(movementAnimName))
-                {
-                    std::string::size_type runpos = movementAnimName.find("run");
-                    if (runpos != std::string::npos)
-                    {
-                        movementAnimName.replace(runpos, 3, "walk");
-                        if (!mAnimation->hasAnimation(movementAnimName))
-                            movementAnimName.clear();
-                    }
-                    else
-                        movementAnimName.clear();
-                }
-            }
-        }
-
-        // If we're playing the same animation, start it from the point it ended
-        float startpoint = 0.f;
-        if (!mCurrentMovement.empty() && movementAnimName == mCurrentMovement)
-            mAnimation->getInfo(mCurrentMovement, &startpoint);
-
-        mMovementAnimationControlled = true;
-
-        mAnimation->disable(mCurrentMovement);
-
-        if (!mAnimation->hasAnimation(movementAnimName))
-            movementAnimName.clear();
-
-        mCurrentMovement = movementAnimName;
-        if(!mCurrentMovement.empty())
-        {
-            if (resetIdle)
-            {
-                mAnimation->disable(mCurrentIdle);
-                mIdleState = CharState_None;
-                idle = CharState_None;
-            }
-
-            // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
-            // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
-            mAdjustMovementAnimSpeed = true;
-            if (mPtr.getClass().getType() == ESM::Creature::sRecordId
-                    && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
-            {
-                CharacterState walkState = runStateToWalkState(mMovementState);
-                std::string anim = movementStateToAnimGroup(walkState);
-
-                mMovementAnimSpeed = mAnimation->getVelocity(anim);
-                if (mMovementAnimSpeed <= 1.0f)
-                {
-                    // Another bug: when using a fallback animation (e.g. RunForward as fallback to SwimRunForward),
-                    // then the equivalent Walk animation will not use a fallback, and if that animation doesn't exist
-                    // we will play without any scaling.
-                    // Makes the speed attribute of most water creatures totally useless.
-                    // And again, this can not be fixed without patching game data.
-                    mAdjustMovementAnimSpeed = false;
-                    mMovementAnimSpeed = 1.f;
-                }
-            }
-            else
-            {
-                mMovementAnimSpeed = mAnimation->getVelocity(mCurrentMovement);
-
-                if (mMovementAnimSpeed <= 1.0f)
-                {
-                    // The first person anims don't have any velocity to calculate a speed multiplier from.
-                    // We use the third person velocities instead.
-                    // FIXME: should be pulled from the actual animation, but it is not presently loaded.
-                    bool sneaking = mMovementState == CharState_SneakForward || mMovementState == CharState_SneakBack
-                                 || mMovementState == CharState_SneakLeft    || mMovementState == CharState_SneakRight;
-                    mMovementAnimSpeed = (sneaking ? 33.5452f : (isRunning() ? 222.857f : 154.064f));
-                    mMovementAnimationControlled = false;
-                }
-            }
-
-            mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false,
-                             1.f, "start", "stop", startpoint, ~0ul, true);
-        }
-        else
-            mMovementState = CharState_None;
-    }
+    mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false, 1.f, "start", "stop", startpoint, ~0ul, true);
 }
 
 void CharacterController::refreshIdleAnims(const std::string& weapShortGroup, CharacterState idle, bool force)
