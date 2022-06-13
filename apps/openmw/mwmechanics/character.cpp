@@ -558,15 +558,17 @@ std::string CharacterController::fallbackShortWeaponGroup(const std::string& bas
     return groupName;
 }
 
-void CharacterController::refreshMovementAnims(CharacterState movement, CharacterState& idle, bool force)
+void CharacterController::refreshMovementAnims(CharacterState movement, bool force)
 {
-    if (movement == mMovementState && idle == mIdleState && !force)
+    if (movement == mMovementState && !force)
         return;
 
     std::string movementAnimName = movementStateToAnimGroup(movement);
 
     if (movementAnimName.empty())
     {
+        if (!mCurrentMovement.empty())
+            resetCurrentIdleState();
         resetCurrentMovementState();
         return;
     }
@@ -594,19 +596,10 @@ void CharacterController::refreshMovementAnims(CharacterState movement, Characte
             weapMovementAnimName = movementAnimName + weapShortGroup;
 
         if (!mAnimation->hasAnimation(weapMovementAnimName))
-        {
             weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
-            // If we apply movement only for lower body, do not reset idle animations.
-            // For upper body there will be idle animation.
-            if (movemask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
-                idle = CharState_Idle;
-        }
 
         movementAnimName = weapMovementAnimName;
     }
-
-    if (!force && movement == mMovementState)
-        return;
 
     if (!mAnimation->hasAnimation(movementAnimName))
     {
@@ -616,6 +609,8 @@ void CharacterController::refreshMovementAnims(CharacterState movement, Characte
 
         if (!mAnimation->hasAnimation(movementAnimName))
         {
+            if (!mCurrentMovement.empty())
+                resetCurrentIdleState();
             resetCurrentMovementState();
             return;
         }
@@ -632,15 +627,6 @@ void CharacterController::refreshMovementAnims(CharacterState movement, Characte
 
     clearStateAnimation(mCurrentMovement);
     mCurrentMovement = movementAnimName;
-
-    // Reset idle if we actually play movement animations excepts of these cases:
-    // 1. When we play turning animations
-    // 2. When we use a fallback animation for lower body since movement animation for given weapon is missing (e.g. for crossbows and spellcasting)
-    if (!isTurning() && movemask == MWRender::Animation::BlendMask_All)
-    {
-        resetCurrentIdleState();
-        idle = CharState_None;
-    }
 
     // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
     // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
@@ -686,10 +672,11 @@ void CharacterController::refreshIdleAnims(CharacterState idle, bool force)
     // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
     // the idle animation should be displayed
     if (((mUpperBodyState != UpperCharState_Nothing && mUpperBodyState != UpperCharState_WeapEquiped)
-            || (mMovementState != CharState_None && !isTurning())
-            || mHitState != CharState_None)
-            && !mPtr.getClass().isBipedal(mPtr))
-        idle = CharState_None;
+       || mMovementState != CharState_None || mHitState != CharState_None) && !mPtr.getClass().isBipedal(mPtr))
+    {
+        resetCurrentIdleState();
+        return;
+    }
 
     if (!force && idle == mIdleState && (mAnimation->isPlaying(mCurrentIdle) || !mAnimQueue.empty()))
         return;
@@ -754,7 +741,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
     refreshHitRecoilAnims();
     refreshJumpAnims(jump, force);
-    refreshMovementAnims(movement, idle, force);
+    refreshMovementAnims(movement, force);
 
     // idle handled last as it can depend on the other states
     refreshIdleAnims(idle, force);
@@ -2220,7 +2207,7 @@ void CharacterController::update(float duration)
             }
         }
 
-        if(movestate != CharState_None && !isTurning())
+        if (movestate != CharState_None)
             clearAnimQueue();
 
         if(mAnimQueue.empty() || inwater || (sneak && mIdleState != CharState_SpecialIdle))
