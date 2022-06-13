@@ -1941,7 +1941,7 @@ void CharacterController::update(float duration)
             vec = osg::Vec3f();
 
         CharacterState movestate = CharState_None;
-        CharacterState idlestate = CharState_SpecialIdle;
+        CharacterState idlestate = CharState_None;
         JumpingState jumpstate = JumpState_None;
 
         bool forcestateupdate = false;
