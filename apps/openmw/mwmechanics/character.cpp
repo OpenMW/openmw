@@ -886,7 +886,7 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
 {
     std::string_view evt = key->second;
 
-    if(evt.compare(0, 7, "sound: ") == 0)
+    if (evt.substr(0, 7) == "sound: ")
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
@@ -894,7 +894,7 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
     }
 
     auto& charClass = mPtr.getClass();
-    if(evt.compare(0, 10, "soundgen: ") == 0)
+    if (evt.substr(0, 10) == "soundgen: ")
     {
         std::string soundgen = std::string(evt.substr(10));
 
@@ -936,30 +936,34 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
         return;
     }
 
-    if(evt.compare(0, groupname.size(), groupname) != 0 ||
-       evt.compare(groupname.size(), 2, ": ") != 0)
+    if (evt.substr(0, groupname.size()) != groupname || evt.substr(groupname.size(), 2) != ": ")
     {
         // Not ours, skip it
         return;
     }
-    const size_t off = groupname.size()+2;
-    const size_t len = evt.size() - off;
 
-    if(groupname == "shield" && evt.compare(off, len, "equip attach") == 0)
-        mAnimation->showCarriedLeft(true);
-    else if(groupname == "shield" && evt.compare(off, len, "unequip detach") == 0)
-        mAnimation->showCarriedLeft(false);
-    else if(evt.compare(off, len, "equip attach") == 0)
-        mAnimation->showWeapons(true);
-    else if(evt.compare(off, len, "unequip detach") == 0)
-        mAnimation->showWeapons(false);
-    else if(evt.compare(off, len, "chop hit") == 0)
+    std::string_view action = evt.substr(groupname.size() + 2);
+    if (action == "equip attach")
+    {
+        if (groupname == "shield")
+            mAnimation->showCarriedLeft(true);
+        else
+            mAnimation->showWeapons(true);
+    }
+    else if (action == "unequip detach")
+    {
+        if (groupname == "shield")
+            mAnimation->showCarriedLeft(false);
+        else
+            mAnimation->showWeapons(false);
+    }
+    else if (action == "chop hit")
         charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
-    else if(evt.compare(off, len, "slash hit") == 0)
+    else if (action == "slash hit")
         charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
-    else if(evt.compare(off, len, "thrust hit") == 0)
+    else if (action == "thrust hit")
         charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
-    else if(evt.compare(off, len, "hit") == 0)
+    else if (action == "hit")
     {
         if (groupname == "attack1" || groupname == "swimattack1")
             charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
@@ -970,9 +974,7 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
         else
             charClass.hit(mPtr, mAttackStrength);
     }
-    else if (!groupname.empty()
-             && (groupname.compare(0, groupname.size()-1, "attack") == 0 || groupname.compare(0, groupname.size()-1, "swimattack") == 0)
-             && evt.compare(off, len, "start") == 0)
+    else if (isRandomAttackAnimation(groupname) && action == "start")
     {
         std::multimap<float, std::string>::const_iterator hitKey = key;
 
@@ -1001,25 +1003,22 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
                 charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         }
     }
-    else if (evt.compare(off, len, "shoot attach") == 0)
+    else if (action == "shoot attach")
         mAnimation->attachArrow();
-    else if (evt.compare(off, len, "shoot release") == 0)
+    else if (action == "shoot release")
         mAnimation->releaseArrow(mAttackStrength);
-    else if (evt.compare(off, len, "shoot follow attach") == 0)
+    else if (action == "shoot follow attach")
         mAnimation->attachArrow();
-
-    else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release"
-             // Make sure this key is actually for the RangeType we are casting. The flame atronach has
-             // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range type.
-             && evt.compare(off, len, mAttackType + " release") == 0)
+    // Make sure this key is actually for the RangeType we are casting. The flame atronach has
+    // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range type.
+    else if (groupname == "spellcast" && action == mAttackType + " release")
     {
         MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell);
         mCastingManualSpell = false;
     }
-
-    else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
+    else if (groupname == "shield" && action == "block hit")
         charClass.block(mPtr);
-    else if (groupname == "containeropen" && evt.compare(off, len, "loot") == 0)
+    else if (groupname == "containeropen" && action == "loot")
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container, mPtr);
 }
 
