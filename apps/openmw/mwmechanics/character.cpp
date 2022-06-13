@@ -161,6 +161,26 @@ std::string deathStateToAnimGroup(MWMechanics::CharacterState state)
     }
 }
 
+// Converts a hit state to its equivalent animation group as long as it is a hit state.
+std::string hitStateToAnimGroup(MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    switch (state)
+    {
+        case CharState_SwimHit: return "swimhit";
+        case CharState_SwimKnockDown: return "swimknockdown";
+        case CharState_SwimKnockOut: return "swimknockout";
+
+        case CharState_Hit: return "hit";
+        case CharState_KnockDown: return "knockdown";
+        case CharState_KnockOut: return "knockout";
+
+        case CharState_Block: return "shield";
+
+        default: return {};
+    }
+}
+
 float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -211,125 +231,114 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
 
 void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
 {
-    const auto world = MWBase::Environment::get().getWorld();
     auto& charClass = mPtr.getClass();
+    if (!charClass.isActor())
+        return;
+    const auto world = MWBase::Environment::get().getWorld();
     auto& stats = charClass.getCreatureStats(mPtr);
+    bool knockout = stats.getFatigue().getCurrent() < 0 || stats.getFatigue().getBase() == 0;
     bool recovery = stats.getHitRecovery();
     bool knockdown = stats.getKnockedDown();
     bool block = stats.getBlock();
     bool isSwimming = world->isSwimming(mPtr);
     auto& prng = world->getPrng();
-    if(mHitState == CharState_None)
-    {
-        if (stats.getFatigue().getCurrent() < 0 || stats.getFatigue().getBase() == 0)
-        {
-            mTimeUntilWake = Misc::Rng::rollClosedProbability(prng) * 2 + 1; // Wake up after 1 to 3 seconds
-            if (isSwimming && mAnimation->hasAnimation("swimknockout"))
-            {
-                mHitState = CharState_SwimKnockOut;
-                mCurrentHit = "swimknockout";
-                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, false, 1, "start", "stop", 0.0f, ~0ul);
-            }
-            else if (!isSwimming && mAnimation->hasAnimation("knockout"))
-            {
-                mHitState = CharState_KnockOut;
-                mCurrentHit = "knockout";
-                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, false, 1, "start", "stop", 0.0f, ~0ul);
-            }
-            else
-            {
-                // Knockout animations are missing. Fall back to idle animation, so target actor still can be killed via HtH.
-                mCurrentHit.erase();
-            }
 
-            stats.setKnockedDown(true);
-        }
-        else if (knockdown)
-        {
-            if (isSwimming && mAnimation->hasAnimation("swimknockdown"))
-            {
-                mHitState = CharState_SwimKnockDown;
-                mCurrentHit = "swimknockdown";
-                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
-            }
-            else if (!isSwimming && mAnimation->hasAnimation("knockdown"))
-            {
-                mHitState = CharState_KnockDown;
-                mCurrentHit = "knockdown";
-                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
-            }
-            else
-            {
-                // Knockdown animation is missing. Cancel knockdown state.
-                stats.setKnockedDown(false);
-            }
-        }
-        else if (recovery)
-        {
-            std::string anim = chooseRandomGroup("swimhit");
-            if (isSwimming && mAnimation->hasAnimation(anim))
-            {
-                mHitState = CharState_SwimHit;
-                mCurrentHit = anim;
-                mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
-            }
-            else
-            {
-                anim = chooseRandomGroup("hit");
-                if (mAnimation->hasAnimation(anim))
-                {
-                    mHitState = CharState_Hit;
-                    mCurrentHit = anim;
-                    mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
-                }
-            }
-        }
-        else if (block && mAnimation->hasAnimation("shield"))
-        {
-            mHitState = CharState_Block;
-            mCurrentHit = "shield";
-            MWRender::Animation::AnimPriority priorityBlock (Priority_Hit);
-            priorityBlock[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
-            priorityBlock[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
-            mAnimation->play(mCurrentHit, priorityBlock, MWRender::Animation::BlendMask_All, true, 1, "block start", "block stop", 0.0f, 0);
-        }
-
-        // Cancel upper body animations
-        if (isKnockedOut() || isKnockedDown())
-        {
-            if (mUpperBodyState > UpperCharState_WeapEquiped)
-            {
-                mAnimation->disable(mCurrentWeapon);
-                mUpperBodyState = UpperCharState_WeapEquiped;
-                if (mWeaponType > ESM::Weapon::None)
-                    mAnimation->showWeapons(true);
-            }
-            else if (mUpperBodyState > UpperCharState_Nothing && mUpperBodyState < UpperCharState_WeapEquiped)
-            {
-                mAnimation->disable(mCurrentWeapon);
-                mUpperBodyState = UpperCharState_Nothing;
-            }
-        }
-        if (mHitState != CharState_None)
-            idle = CharState_None;
-    }
-    else if(!mAnimation->isPlaying(mCurrentHit))
+    if (mHitState != CharState_None)
     {
-        mCurrentHit.erase();
-        if (knockdown)
+        if (!mAnimation->isPlaying(mCurrentHit))
+        {
+            mHitState = CharState_None;
+            mCurrentHit.clear();
             stats.setKnockedDown(false);
-        if (recovery)
             stats.setHitRecovery(false);
-        if (block)
             stats.setBlock(false);
-        mHitState = CharState_None;
+        }
+        else if (isKnockedOut() && !knockout && mTimeUntilWake <= 0)
+        {
+            mAnimation->disable(mCurrentHit);
+            mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "loop stop", "stop", 0.0f, 0);
+        }
+        return;
     }
-    else if (isKnockedOut() && stats.getFatigue().getCurrent() > 0 && mTimeUntilWake <= 0)
+
+    if (!knockout && !knockdown && !recovery && !block)
+        return;
+
+    if (knockout)
+        mTimeUntilWake = Misc::Rng::rollClosedProbability(prng) * 2 + 1; // Wake up after 1 to 3 seconds
+
+    MWRender::Animation::AnimPriority priority(Priority_Knockdown);
+    bool autodisable = true;
+    std::string startKey = "start";
+    std::string stopKey = "stop";
+    if (knockout)
+    {
+        mHitState = isSwimming ? CharState_SwimKnockOut : CharState_KnockOut;
+        stats.setKnockedDown(true);
+        autodisable = false;
+    }
+    else if (knockdown)
     {
         mHitState = isSwimming ? CharState_SwimKnockDown : CharState_KnockDown;
-        mAnimation->disable(mCurrentHit);
-        mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "loop stop", "stop", 0.0f, 0);
     }
+    else if (recovery)
+    {
+        mHitState = isSwimming ? CharState_SwimHit : CharState_Hit;
+        priority = Priority_Hit;
+    }
+    else if (block)
+    {
+        mHitState = CharState_Block;
+        priority = Priority_Block;
+        priority[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
+        priority[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
+        startKey = "block start";
+        stopKey = "block stop";
+    }
+
+    mCurrentHit = hitStateToAnimGroup(mHitState);
+
+    if (isRecovery())
+    {
+        mCurrentHit = chooseRandomGroup(mCurrentHit);
+        if (mHitState == CharState_SwimHit && !mAnimation->hasAnimation(mCurrentHit))
+            mCurrentHit = chooseRandomGroup(hitStateToAnimGroup(CharState_Hit));
+    }
+
+    if (!mAnimation->hasAnimation(mCurrentHit))
+    {
+        // The hit animation is missing. Reset the current hit state and immediately cancel all states as if the animation were instantaneous.
+        mHitState = CharState_None;
+        mCurrentHit.clear();
+        stats.setKnockedDown(false);
+        stats.setHitRecovery(false);
+        stats.setBlock(false);
+        return;
+    }
+
+    // Cancel upper body animations
+    if (isKnockedOut() || isKnockedDown())
+    {
+        if (!mCurrentWeapon.empty())
+        {
+            mAnimation->disable(mCurrentWeapon);
+            mCurrentWeapon.clear();
+        }
+        if (mUpperBodyState > UpperCharState_WeapEquiped)
+        {
+            mUpperBodyState = UpperCharState_WeapEquiped;
+            if (mWeaponType > ESM::Weapon::None)
+                mAnimation->showWeapons(true);
+        }
+        else if (mUpperBodyState < UpperCharState_WeapEquiped)
+        {
+            mUpperBodyState = UpperCharState_Nothing;
+        }
+    }
+
+    mAnimation->play(mCurrentHit, priority, MWRender::Animation::BlendMask_All, autodisable, 1, startKey, stopKey, 0.0f, ~0ul);
+
+    idle = CharState_None;
 }
 
 void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, JumpingState jump, CharacterState& idle, bool force)
@@ -689,8 +698,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (isPersistentAnimPlaying())
         return;
 
-    if (mPtr.getClass().isActor())
-        refreshHitRecoilAnims(idle);
+    refreshHitRecoilAnims(idle);
 
     std::string weap;
     if (mWeaponType != ESM::Weapon::HandToHand || mPtr.getClass().isBipedal(mPtr))
