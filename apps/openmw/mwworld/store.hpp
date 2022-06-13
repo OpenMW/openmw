@@ -31,7 +31,7 @@ namespace MWWorld
         std::string mId;
         bool mIsDeleted;
 
-        RecordId(const std::string &id = "", bool isDeleted = false);
+        RecordId(const std::string &id = {}, bool isDeleted = false);
     };
 
     class StoreBase
@@ -48,7 +48,7 @@ namespace MWWorld
         virtual int getDynamicSize() const { return 0; }
         virtual RecordId load(ESM::ESMReader &esm) = 0;
 
-        virtual bool eraseStatic(const std::string &id) {return false;}
+        virtual bool eraseStatic(std::string_view id) { return false; }
         virtual void clearDynamic() {}
 
         virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
@@ -175,19 +175,19 @@ namespace MWWorld
         void clearDynamic() override;
         void setUp() override;
 
-        const T *search(const std::string &id) const;
-        const T *searchStatic(const std::string &id) const;
+        const T* search(std::string_view id) const;
+        const T* searchStatic(std::string_view id) const;
 
         /**
          * Does the record with this ID come from the dynamic store?
          */
-        bool isDynamic(const std::string &id) const;
+        bool isDynamic(std::string_view id) const;
 
         /** Returns a random record that starts with the named ID, or nullptr if not found. */
-        const T *searchRandom(const std::string &id, Misc::Rng::Generator& prng) const;
+        const T* searchRandom(std::string_view id, Misc::Rng::Generator& prng) const;
 
         // calls `search` and throws an exception if not found
-        const T *find(const std::string &id) const;
+        const T* find(std::string_view id) const;
 
         iterator begin() const;
         iterator end() const;
@@ -201,8 +201,8 @@ namespace MWWorld
         T *insert(const T &item, bool overrideOnly = false);
         T *insertStatic(const T &item);
 
-        bool eraseStatic(const std::string &id) override;
-        bool erase(const std::string &id);
+        bool eraseStatic(std::string_view id) override;
+        bool erase(std::string_view id);
         bool erase(const T &item);
 
         RecordId load(ESM::ESMReader &esm) override;
@@ -318,12 +318,12 @@ namespace MWWorld
     public:
         typedef SharedIterator<ESM::Cell> iterator;
 
-        const ESM::Cell *search(const std::string &id) const;
+        const ESM::Cell* search(std::string_view id) const;
         const ESM::Cell *search(int x, int y) const;
         const ESM::Cell *searchStatic(int x, int y) const;
         const ESM::Cell *searchOrCreate(int x, int y);
 
-        const ESM::Cell *find(const std::string &id) const;
+        const ESM::Cell* find(std::string_view id) const;
         const ESM::Cell *find(int x, int y) const;
 
         void clearDynamic() override;
@@ -337,10 +337,10 @@ namespace MWWorld
         iterator extEnd() const;
 
         // Return the northernmost cell in the easternmost column.
-        const ESM::Cell *searchExtByName(const std::string &id) const;
+        const ESM::Cell* searchExtByName(std::string_view id) const;
 
         // Return the northernmost cell in the easternmost column.
-        const ESM::Cell *searchExtByRegion(const std::string &id) const;
+        const ESM::Cell* searchExtByRegion(std::string_view id) const;
 
         size_t getSize() const override;
         size_t getExtSize() const;
@@ -351,7 +351,7 @@ namespace MWWorld
         ESM::Cell *insert(const ESM::Cell &cell);
 
         bool erase(const ESM::Cell &cell);
-        bool erase(const std::string &id);
+        bool erase(std::string_view id);
 
         bool erase(int x, int y);
     };
@@ -379,9 +379,9 @@ namespace MWWorld
         void setUp() override;
 
         const ESM::Pathgrid *search(int x, int y) const;
-        const ESM::Pathgrid *search(const std::string& name) const;
+        const ESM::Pathgrid* search(std::string_view name) const;
         const ESM::Pathgrid *find(int x, int y) const;
-        const ESM::Pathgrid* find(const std::string& name) const;
+        const ESM::Pathgrid* find(std::string_view name) const;
         const ESM::Pathgrid *search(const ESM::Cell &cell) const;
         const ESM::Pathgrid *find(const ESM::Cell &cell) const;
     };
@@ -470,15 +470,15 @@ namespace MWWorld
 
         void setUp() override;
 
-        const ESM::Dialogue *search(const std::string &id) const;
-        const ESM::Dialogue *find(const std::string &id) const;
+        const ESM::Dialogue* search(std::string_view id) const;
+        const ESM::Dialogue* find(std::string_view id) const;
 
         iterator begin() const;
         iterator end() const;
 
         size_t getSize() const override;
 
-        bool eraseStatic(const std::string &id) override;
+        bool eraseStatic(std::string_view id) override;
 
         RecordId load(ESM::ESMReader &esm) override;
 

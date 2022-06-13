@@ -1433,7 +1433,7 @@ namespace MWClass
         return true;
     }
 
-    std::string Npc::getPrimaryFaction (const MWWorld::ConstPtr& ptr) const
+    std::string_view Npc::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->mFaction;
@@ -1441,7 +1441,7 @@ namespace MWClass
 
     int Npc::getPrimaryFactionRank (const MWWorld::ConstPtr& ptr) const
     {
-        std::string factionID = ptr.getClass().getPrimaryFaction(ptr);
+        std::string_view factionID = ptr.getClass().getPrimaryFaction(ptr);
         if(factionID.empty())
             return -1;
 

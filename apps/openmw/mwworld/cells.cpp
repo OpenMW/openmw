@@ -172,7 +172,7 @@ MWWorld::CellStore *MWWorld::Cells::getExterior (int x, int y)
     return &result->second;
 }
 
-MWWorld::CellStore *MWWorld::Cells::getInterior (const std::string& name)
+MWWorld::CellStore* MWWorld::Cells::getInterior(std::string_view name)
 {
     std::string lowerName = Misc::StringUtils::lowerCase(name);
     std::map<std::string, CellStore>::iterator result = mInteriors.find (lowerName);

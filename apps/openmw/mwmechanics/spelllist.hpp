@@ -37,7 +37,7 @@ namespace MWMechanics
             SpellList(const std::string& id, int type);
 
             /// Get spell from ID, throws exception if not found
-            static const ESM::Spell* getSpell(const std::string& id);
+            static const ESM::Spell* getSpell(std::string_view id);
 
             void add (const ESM::Spell* spell);
             ///< Adding a spell that is already listed in *this is a no-op.

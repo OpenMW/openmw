@@ -46,7 +46,7 @@ namespace MWMechanics
         return mSpells.end();
     }
 
-    bool Spells::hasSpell(const std::string &spell) const
+    bool Spells::hasSpell(std::string_view spell) const
     {
         return hasSpell(SpellList::getSpell(spell));
     }
@@ -61,7 +61,7 @@ namespace MWMechanics
         mSpellList->add(spell);
     }
 
-    void Spells::add (const std::string& spellId)
+    void Spells::add(std::string_view spellId)
     {
         add(SpellList::getSpell(spellId));
     }
@@ -72,7 +72,7 @@ namespace MWMechanics
             mSpells.emplace_back(spell);
     }
 
-    void Spells::remove (const std::string& spellId)
+    void Spells::remove(std::string_view spellId)
     {
         const auto spell = SpellList::getSpell(spellId);
         removeSpell(spell);

@@ -61,22 +61,22 @@ namespace MWMechanics
             SkillValue& getSkill (int index);
             void setSkill(int index, const SkillValue& value);
 
-            int getFactionRank(const std::string &faction) const;
+            int getFactionRank(std::string_view faction) const;
             const std::map<std::string, int>& getFactionRanks() const;
 
             /// Increase the rank in this faction by 1, if such a rank exists.
-            void raiseRank(const std::string& faction);
+            void raiseRank(std::string_view faction);
             /// Lower the rank in this faction by 1, if such a rank exists.
-            void lowerRank(const std::string& faction);
+            void lowerRank(std::string_view faction);
             /// Join this faction, setting the initial rank to 0.
-            void joinFaction(const std::string& faction);
+            void joinFaction(std::string_view faction);
 
             const std::set<std::string>& getExpelled() const { return mExpelled; }
-            bool getExpelled(const std::string& factionID) const;
-            void expell(const std::string& factionID);
-            void clearExpelled(const std::string& factionID);
+            bool getExpelled(std::string_view factionID) const;
+            void expell(std::string_view factionID);
+            void clearExpelled(std::string_view factionID);
 
-            bool isInFaction (const std::string& faction) const;
+            bool isInFaction(std::string_view faction) const;
 
             float getSkillProgressRequirement (int skillIndex, const ESM::Class& class_) const;
 
@@ -107,11 +107,11 @@ namespace MWMechanics
 
             void setBounty (int bounty);
 
-            int getFactionReputation (const std::string& faction) const;
+            int getFactionReputation(std::string_view faction) const;
 
-            void setFactionReputation (const std::string& faction, int value);
+            void setFactionReputation(std::string_view faction, int value);
 
-            bool hasSkillsForRank (const std::string& factionId, int rank) const;
+            bool hasSkillsForRank(std::string_view factionId, int rank) const;
 
             bool isWerewolf() const;
 

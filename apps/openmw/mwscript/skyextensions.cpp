@@ -87,7 +87,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string region{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view region{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     Interpreter::Type_Integer id = runtime[0].mInteger;
@@ -97,7 +97,7 @@ namespace MWScript
                     if (reg)
                         MWBase::Environment::get().getWorld()->changeWeather(region, id);
                     else
-                        runtime.getContext().report("Warning: Region \"" + region + "\" was not found");
+                        runtime.getContext().report("Warning: Region \"" + std::string(region) + "\" was not found");
                 }
         };
 
@@ -107,7 +107,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime, unsigned int arg0) override
                 {
-                    std::string region{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view region{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     std::vector<char> chances;

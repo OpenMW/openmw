@@ -306,7 +306,7 @@ void ESMStore::countAllCellRefs(ESM::ReadersCache& readers)
     Misc::forEachUnique(refs.rbegin(), refs.rend(), equalByRefNum, incrementRefCount);
 }
 
-int ESMStore::getRefCount(const std::string& id) const
+int ESMStore::getRefCount(std::string_view id) const
 {
     const std::string lowerId = Misc::StringUtils::lowerCase(id);
     auto it = mRefCount.find(lowerId);

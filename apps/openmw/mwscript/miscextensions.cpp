@@ -1215,7 +1215,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string spellId{runtime.getStringLiteral(runtime[0].mInteger)};
+                std::string_view spellId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral(runtime[0].mInteger));
@@ -1224,7 +1224,7 @@ namespace MWScript
                 const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
                 if (!spell)
                 {
-                    runtime.getContext().report("spellcasting failed: cannot find spell \""+spellId+"\"");
+                    runtime.getContext().report("spellcasting failed: cannot find spell \""+std::string(spellId)+"\"");
                     return;
                 }
 
@@ -1264,13 +1264,13 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string spellId{runtime.getStringLiteral(runtime[0].mInteger)};
+                std::string_view spellId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
                 if (!spell)
                 {
-                    runtime.getContext().report("spellcasting failed: cannot find spell \""+spellId+"\"");
+                    runtime.getContext().report("spellcasting failed: cannot find spell \""+std::string(spellId)+"\"");
                     return;
                 }
 
@@ -1427,7 +1427,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime &runtime) override
             {
-                std::string levId{runtime.getStringLiteral(runtime[0].mInteger)};
+                std::string_view levId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
                 std::string_view creatureId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
@@ -1445,7 +1445,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime &runtime) override
             {
-                std::string levId{runtime.getStringLiteral(runtime[0].mInteger)};
+                std::string_view levId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
                 std::string_view creatureId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
@@ -1463,7 +1463,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime &runtime) override
             {
-                std::string levId{runtime.getStringLiteral(runtime[0].mInteger)};
+                std::string_view levId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
                 std::string_view itemId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
@@ -1481,7 +1481,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime &runtime) override
             {
-                std::string levId{runtime.getStringLiteral(runtime[0].mInteger)};
+                std::string_view levId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
                 std::string_view itemId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();

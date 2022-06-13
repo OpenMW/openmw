@@ -197,7 +197,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         if (!character)
         {
             MWWorld::ConstPtr player = MWMechanics::getPlayer();
-            std::string name = player.get<ESM::NPC>()->mBase->mName;
+            const std::string& name = player.get<ESM::NPC>()->mBase->mName;
 
             character = mCharacterManager.createCharacter(name);
             mCharacterManager.setCurrentCharacter(character);
@@ -214,7 +214,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         profile.mPlayerName = player.get<ESM::NPC>()->mBase->mName;
         profile.mPlayerLevel = player.getClass().getNpcStats (player).getLevel();
 
-        std::string classId = player.get<ESM::NPC>()->mBase->mClass;
+        const std::string& classId = player.get<ESM::NPC>()->mBase->mClass;
         if (world.getStore().get<ESM::Class>().isDynamic(classId))
             profile.mPlayerClassName = world.getStore().get<ESM::Class>().find(classId)->mName;
         else

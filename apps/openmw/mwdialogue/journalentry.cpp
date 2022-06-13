@@ -16,7 +16,7 @@
 
 namespace MWDialogue
 {
-    Entry::Entry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor)
+    Entry::Entry(std::string_view topic, std::string_view infoId, const MWWorld::Ptr& actor)
     : mInfoId (infoId)
     {
         const ESM::Dialogue *dialogue =
@@ -40,7 +40,7 @@ namespace MWDialogue
                 return;
             }
 
-        throw std::runtime_error ("unknown info ID " + mInfoId + " for topic " + topic);
+        throw std::runtime_error ("unknown info ID " + mInfoId + " for topic " + std::string(topic));
     }
 
     Entry::Entry (const ESM::JournalEntry& record) : mInfoId (record.mInfo), mText (record.mText), mActorName(record.mActorName) {}
@@ -58,7 +58,7 @@ namespace MWDialogue
     }
 
 
-    JournalEntry::JournalEntry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor)
+    JournalEntry::JournalEntry(std::string_view topic, std::string_view infoId, const MWWorld::Ptr& actor)
         : Entry (topic, infoId, actor), mTopic (topic)
     {}
 
@@ -72,12 +72,12 @@ namespace MWDialogue
         entry.mTopic = mTopic;
     }
 
-    JournalEntry JournalEntry::makeFromQuest (const std::string& topic, int index)
+    JournalEntry JournalEntry::makeFromQuest(std::string_view topic, int index)
     {
         return JournalEntry (topic, idFromIndex (topic, index), MWWorld::Ptr());
     }
 
-    std::string JournalEntry::idFromIndex (const std::string& topic, int index)
+    std::string_view JournalEntry::idFromIndex (std::string_view topic, int index)
     {
         const ESM::Dialogue *dialogue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic);
@@ -89,7 +89,7 @@ namespace MWDialogue
                 return iter->mId;
             }
 
-        throw std::runtime_error ("unknown journal index for topic " + topic);
+        throw std::runtime_error ("unknown journal index for topic " + std::string(topic));
     }
 
 
@@ -97,7 +97,7 @@ namespace MWDialogue
     : mDay (0), mMonth (0), mDayOfMonth (0)
     {}
 
-    StampedJournalEntry::StampedJournalEntry (const std::string& topic, const std::string& infoId,
+    StampedJournalEntry::StampedJournalEntry(std::string_view topic, std::string_view infoId,
         int day, int month, int dayOfMonth, const MWWorld::Ptr& actor)
     : JournalEntry (topic, infoId, actor), mDay (day), mMonth (month), mDayOfMonth (dayOfMonth)
     {}
@@ -115,7 +115,7 @@ namespace MWDialogue
         entry.mDayOfMonth = mDayOfMonth;
     }
 
-    StampedJournalEntry StampedJournalEntry::makeFromQuest (const std::string& topic, int index, const MWWorld::Ptr& actor)
+    StampedJournalEntry StampedJournalEntry::makeFromQuest(std::string_view topic, int index, const MWWorld::Ptr& actor)
     {
         int day = MWBase::Environment::get().getWorld()->getGlobalInt ("dayspassed");
         int month = MWBase::Environment::get().getWorld()->getGlobalInt ("month");

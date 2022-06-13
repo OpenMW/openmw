@@ -381,7 +381,7 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
-                    std::string cellID{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     if (ptr.getContainerStore())
@@ -404,7 +404,7 @@ namespace MWScript
                         const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         if(!cell)
                         {
-                            std::string error = "Warning: PositionCell: unknown interior cell (" + cellID + ")";
+                            std::string error = "Warning: PositionCell: unknown interior cell (" + std::string(cellID) + ")";
                             if(isPlayer)
                                 error += ", moving to exterior instead";
                             runtime.getContext().report (error);
@@ -496,7 +496,7 @@ namespace MWScript
                 {
                     std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
-                    std::string cellID{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float x = runtime[0].mFloat;
@@ -520,7 +520,7 @@ namespace MWScript
                         store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
                         if(!cell)
                         {
-                            runtime.getContext().report ("unknown cell (" + cellID + ")");
+                            runtime.getContext().report("unknown cell (" + std::string(cellID) + ")");
                             Log(Debug::Error) << "Error: unknown cell (" << cellID << ")";
                         }
                     }

@@ -120,7 +120,7 @@ namespace MWWorld
         }
 
         /// Look up the given ID in 'all'. Returns 0 if not found.
-        int find(const std::string &id) const
+        int find(std::string_view id) const
         {
             IDMap::const_iterator it = mIds.find(id);
             if (it == mIds.end()) {
@@ -284,7 +284,7 @@ namespace MWWorld
         void checkPlayer();
 
         /// @return The number of instances defined in the base files. Excludes changes from the save file.
-        int getRefCount(const std::string& id) const;
+        int getRefCount(std::string_view id) const;
 
         /// Actors with the same ID share spells, abilities, etc.
         /// @return The shared spell list to use for this actor and whether or not it has already been initialized.

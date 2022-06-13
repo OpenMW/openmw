@@ -14,13 +14,13 @@
 namespace
 {
     template<class T>
-    const std::vector<std::string> getSpellList(const std::string& id)
+    const std::vector<std::string> getSpellList(std::string_view id)
     {
         return MWBase::Environment::get().getWorld()->getStore().get<T>().find(id)->mSpells.mList;
     }
 
     template<class T>
-    bool withBaseRecord(const std::string& id, const std::function<bool(std::vector<std::string>&)>& function)
+    bool withBaseRecord(std::string_view id, const std::function<bool(std::vector<std::string>&)>& function)
     {
         T copy = *MWBase::Environment::get().getWorld()->getStore().get<T>().find(id);
         bool changed = function(copy.mSpells.mList);
@@ -60,7 +60,7 @@ namespace MWMechanics
         }
     }
 
-    const ESM::Spell* SpellList::getSpell(const std::string& id)
+    const ESM::Spell* SpellList::getSpell(std::string_view id)
     {
         return MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(id);
     }

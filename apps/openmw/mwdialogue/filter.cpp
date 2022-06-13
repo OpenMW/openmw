@@ -359,7 +359,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_RankRequirement:
         {
-            std::string faction = mActor.getClass().getPrimaryFaction(mActor);
+            std::string_view faction = mActor.getClass().getPrimaryFaction(mActor);
             if (faction.empty())
                 return 0;
 
@@ -397,7 +397,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_FactionRankDiff:
         {
-            std::string faction = mActor.getClass().getPrimaryFaction(mActor);
+            std::string_view faction = mActor.getClass().getPrimaryFaction(mActor);
 
             if (faction.empty())
                 return 0;
@@ -416,7 +416,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         {
             bool low = select.getFunction()==SelectWrapper::Function_RankLow;
 
-            std::string factionId = mActor.getClass().getPrimaryFaction(mActor);
+            std::string_view factionId = mActor.getClass().getPrimaryFaction(mActor);
 
             if (factionId.empty())
                 return 0;
@@ -517,7 +517,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_PcExpelled:
         {
-            std::string faction = mActor.getClass().getPrimaryFaction(mActor);
+            std::string_view faction = mActor.getClass().getPrimaryFaction(mActor);
 
             if (faction.empty())
                 return false;
@@ -561,20 +561,13 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
     }
 }
 
-int MWDialogue::Filter::getFactionRank (const MWWorld::Ptr& actor, const std::string& factionId) const
+int MWDialogue::Filter::getFactionRank (const MWWorld::Ptr& actor, std::string_view factionId) const
 {
     MWMechanics::NpcStats& stats = actor.getClass().getNpcStats (actor);
-
-    std::map<std::string, int>::const_iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase(factionId));
-
-    if (iter==stats.getFactionRanks().end())
-        return -1;
-
-    return iter->second;
+    return stats.getFactionRank(factionId);
 }
 
-bool MWDialogue::Filter::hasFactionRankSkillRequirements (const MWWorld::Ptr& actor,
-    const std::string& factionId, int rank) const
+bool MWDialogue::Filter::hasFactionRankSkillRequirements(const MWWorld::Ptr& actor, std::string_view factionId, int rank) const
 {
     if (rank<0 || rank>=10)
         throw std::runtime_error ("rank index out of range");
@@ -591,8 +584,7 @@ bool MWDialogue::Filter::hasFactionRankSkillRequirements (const MWWorld::Ptr& ac
         stats.getAttribute (faction.mData.mAttribute[1]).getBase()>=faction.mData.mRankData[rank].mAttribute2;
 }
 
-bool MWDialogue::Filter::hasFactionRankReputationRequirements (const MWWorld::Ptr& actor,
-    const std::string& factionId, int rank) const
+bool MWDialogue::Filter::hasFactionRankReputationRequirements(const MWWorld::Ptr& actor, std::string_view factionId, int rank) const
 {
     if (rank<0 || rank>=10)
         throw std::runtime_error ("rank index out of range");
