@@ -190,8 +190,6 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     bool mCastingManualSpell{false};
 
-    float mTimeUntilWake{0.f};
-
     bool mIsMovingBackward{false};
     osg::Vec2f mSmoothedSpeed;
 

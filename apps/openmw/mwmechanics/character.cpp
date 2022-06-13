@@ -329,7 +329,6 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
     bool knockdown = stats.getKnockedDown();
     bool block = stats.getBlock();
     bool isSwimming = world->isSwimming(mPtr);
-    auto& prng = world->getPrng();
 
     if (mHitState != CharState_None)
     {
@@ -341,29 +340,21 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
             stats.setHitRecovery(false);
             stats.setBlock(false);
         }
-        else if (isKnockedOut() && !knockout && mTimeUntilWake <= 0)
-        {
-            mAnimation->disable(mCurrentHit);
-            mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "loop stop", "stop", 0.0f, 0);
-        }
+        else if (isKnockedOut())
+            mAnimation->setLoopingEnabled(mCurrentHit, knockout);
         return;
     }
 
     if (!knockout && !knockdown && !recovery && !block)
         return;
 
-    if (knockout)
-        mTimeUntilWake = Misc::Rng::rollClosedProbability(prng) * 2 + 1; // Wake up after 1 to 3 seconds
-
     MWRender::Animation::AnimPriority priority(Priority_Knockdown);
-    bool autodisable = true;
     std::string startKey = "start";
     std::string stopKey = "stop";
     if (knockout)
     {
         mHitState = isSwimming ? CharState_SwimKnockOut : CharState_KnockOut;
         stats.setKnockedDown(true);
-        autodisable = false;
     }
     else if (knockdown)
     {
@@ -420,7 +411,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
         }
     }
 
-    mAnimation->play(mCurrentHit, priority, MWRender::Animation::BlendMask_All, autodisable, 1, startKey, stopKey, 0.0f, ~0ul);
+    mAnimation->play(mCurrentHit, priority, MWRender::Animation::BlendMask_All, true, 1, startKey, stopKey, 0.0f, ~0ul);
 
     idle = CharState_None;
 }
@@ -1816,9 +1807,6 @@ void CharacterController::update(float duration)
     float speed = 0.f;
 
     updateMagicEffects();
-
-    if (isKnockedOut())
-        mTimeUntilWake -= duration;
 
     bool isPlayer = mPtr == MWMechanics::getPlayer();
     bool isFirstPersonPlayer = isPlayer && MWBase::Environment::get().getWorld()->isFirstPerson();
