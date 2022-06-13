@@ -87,20 +87,6 @@ TEST(EsmFixedString, empty_strings)
     }
 }
 
-TEST(EsmFixedString, struct_size)
-{
-    ASSERT_EQ(4, sizeof(ESM::NAME));
-    ASSERT_EQ(32, sizeof(ESM::NAME32));
-    ASSERT_EQ(64, sizeof(ESM::NAME64));
-}
-
-TEST(EsmFixedString, is_pod)
-{
-     ASSERT_TRUE(std::is_standard_layout_v<ESM::NAME> && std::is_trivial_v<ESM::NAME>);
-     ASSERT_TRUE(std::is_standard_layout_v<ESM::NAME32> && std::is_trivial_v<ESM::NAME32>);
-     ASSERT_TRUE(std::is_standard_layout_v<ESM::NAME64> && std::is_trivial_v<ESM::NAME64>);
-}
-
 TEST(EsmFixedString, assign_should_zero_untouched_bytes_for_4)
 {
     ESM::NAME value;

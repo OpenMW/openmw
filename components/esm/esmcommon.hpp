@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cassert>
 #include <limits>
+#include <type_traits>
 
 namespace ESM
 {
@@ -170,6 +171,14 @@ inline bool operator!=(const FixedString<capacity>& lhs, const Rhs& rhs) noexcep
 using NAME = FixedString<4>;
 using NAME32 = FixedString<32>;
 using NAME64 = FixedString<64>;
+
+static_assert(std::is_standard_layout_v<NAME> && std::is_trivial_v<NAME>);
+static_assert(std::is_standard_layout_v<NAME32> && std::is_trivial_v<NAME32>);
+static_assert(std::is_standard_layout_v<NAME64> && std::is_trivial_v<NAME64>);
+
+static_assert(sizeof(NAME) == 4);
+static_assert(sizeof(NAME32) == 32);
+static_assert(sizeof(NAME64) == 64);
 
 /* This struct defines a file 'context' which can be saved and later
    restored by an ESMReader instance. It will save the position within
