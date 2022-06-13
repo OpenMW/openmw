@@ -425,7 +425,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
     idle = CharState_None;
 }
 
-void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, JumpingState jump, CharacterState& idle, bool force)
+void CharacterController::refreshJumpAnims(JumpingState jump, CharacterState& idle, bool force)
 {
     if (!force && jump == mJumpState && idle == CharState_None)
         return;
@@ -436,6 +436,7 @@ void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, Ju
         return;
     }
 
+    std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
     std::string jumpAnimName = "jump" + weapShortGroup;
     MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
     if (!weapShortGroup.empty() && !mAnimation->hasAnimation(jumpAnimName))
@@ -525,6 +526,13 @@ std::string CharacterController::getWeaponAnimation(int weaponType) const
     return weaponGroup;
 }
 
+std::string CharacterController::getWeaponShortGroup(int weaponType) const
+{
+    if (weaponType == ESM::Weapon::HandToHand && !mPtr.getClass().isBipedal(mPtr))
+        return {};
+    return getWeaponType(weaponType)->mShortGroup;
+}
+
 std::string CharacterController::fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask) const
 {
     bool isRealWeapon = mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::None;
@@ -536,8 +544,8 @@ std::string CharacterController::fallbackShortWeaponGroup(const std::string& bas
         return baseGroupName;
     }
 
-    static const std::string oneHandFallback = getWeaponType(ESM::Weapon::LongBladeOneHand)->mShortGroup;
-    static const std::string twoHandFallback = getWeaponType(ESM::Weapon::LongBladeTwoHand)->mShortGroup;
+    static const std::string oneHandFallback = getWeaponShortGroup(ESM::Weapon::LongBladeOneHand);
+    static const std::string twoHandFallback = getWeaponShortGroup(ESM::Weapon::LongBladeTwoHand);
 
     std::string groupName = baseGroupName;
     const ESM::WeaponType* weapInfo = getWeaponType(mWeaponType);
@@ -562,7 +570,7 @@ std::string CharacterController::fallbackShortWeaponGroup(const std::string& bas
     return groupName;
 }
 
-void CharacterController::refreshMovementAnims(const std::string& weapShortGroup, CharacterState movement, CharacterState& idle, bool force)
+void CharacterController::refreshMovementAnims(CharacterState movement, CharacterState& idle, bool force)
 {
     if (movement == mMovementState && idle == mIdleState && !force)
         return;
@@ -587,6 +595,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
 
     MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
 
+    std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
     if (swimpos == std::string::npos && !weapShortGroup.empty())
     {
         std::string weapMovementAnimName;
@@ -684,7 +693,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
     mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false, 1.f, "start", "stop", startpoint, ~0ul, true);
 }
 
-void CharacterController::refreshIdleAnims(const std::string& weapShortGroup, CharacterState idle, bool force)
+void CharacterController::refreshIdleAnims(CharacterState idle, bool force)
 {
     // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
     // the idle animation should be displayed
@@ -714,6 +723,7 @@ void CharacterController::refreshIdleAnims(const std::string& weapShortGroup, Ch
         return;
     }
 
+    std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
     if (mIdleState != CharState_IdleSwim && mIdleState != CharState_IdleSneak && mIdleState != CharState_None && !weapShortGroup.empty())
     {
         std::string weapIdleGroup = idleGroup + weapShortGroup;
@@ -751,16 +761,11 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         return;
 
     refreshHitRecoilAnims(idle);
-
-    std::string weap;
-    if (mWeaponType != ESM::Weapon::HandToHand || mPtr.getClass().isBipedal(mPtr))
-        weap = getWeaponType(mWeaponType)->mShortGroup;
-
-    refreshJumpAnims(weap, jump, idle, force);
-    refreshMovementAnims(weap, movement, idle, force);
+    refreshJumpAnims(jump, idle, force);
+    refreshMovementAnims(movement, idle, force);
 
     // idle handled last as it can depend on the other states
-    refreshIdleAnims(weap, idle, force);
+    refreshIdleAnims(idle, force);
 }
 
 void CharacterController::playDeath(float startpoint, CharacterState death)

@@ -207,9 +207,9 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
     void refreshHitRecoilAnims(CharacterState& idle);
-    void refreshJumpAnims(const std::string& weapShortGroup, JumpingState jump, CharacterState& idle, bool force=false);
-    void refreshMovementAnims(const std::string& weapShortGroup, CharacterState movement, CharacterState& idle, bool force=false);
-    void refreshIdleAnims(const std::string& weapShortGroup, CharacterState idle, bool force=false);
+    void refreshJumpAnims(JumpingState jump, CharacterState& idle, bool force=false);
+    void refreshMovementAnims(CharacterState movement, CharacterState& idle, bool force=false);
+    void refreshIdleAnims(CharacterState idle, bool force=false);
 
     void clearAnimQueue(bool clearPersistAnims = false);
 
@@ -240,6 +240,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     std::string fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask = nullptr) const;
 
     std::string getWeaponAnimation(int weaponType) const;
+    std::string getWeaponShortGroup(int weaponType) const;
 
     bool getAttackingOrSpell() const;
     void setAttackingOrSpell(bool attackingOrSpell) const;
