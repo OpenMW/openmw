@@ -416,13 +416,15 @@ void CharacterController::refreshHitRecoilAnims()
     mAnimation->play(mCurrentHit, priority, MWRender::Animation::BlendMask_All, true, 1, startKey, stopKey, 0.0f, ~0ul);
 }
 
-void CharacterController::refreshJumpAnims(JumpingState jump, CharacterState& idle, bool force)
+void CharacterController::refreshJumpAnims(JumpingState jump, bool force)
 {
-    if (!force && jump == mJumpState && idle == CharState_None)
+    if (!force && jump == mJumpState)
         return;
 
     if (jump == JumpState_None)
     {
+        if (!mCurrentJump.empty())
+            resetCurrentIdleState();
         resetCurrentJumpState();
         return;
     }
@@ -431,24 +433,19 @@ void CharacterController::refreshJumpAnims(JumpingState jump, CharacterState& id
     std::string jumpAnimName = "jump" + weapShortGroup;
     MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
     if (!weapShortGroup.empty() && !mAnimation->hasAnimation(jumpAnimName))
-    {
         jumpAnimName = fallbackShortWeaponGroup("jump", &jumpmask);
 
-        // If we apply jump only for lower body, do not reset idle animations.
-        // For upper body there will be idle animation.
-        if (jumpmask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
-            idle = CharState_Idle;
-    }
-
-    if (!force && jump == mJumpState)
+    if (!mAnimation->hasAnimation(jumpAnimName))
+    {
+        if (!mCurrentJump.empty())
+            resetCurrentIdleState();
+        resetCurrentJumpState();
         return;
+    }
 
     bool startAtLoop = (jump == mJumpState);
     mJumpState = jump;
     clearStateAnimation(mCurrentJump);
-
-    if (!mAnimation->hasAnimation(jumpAnimName))
-        return;
 
     mCurrentJump = jumpAnimName;
     if(mJumpState == JumpState_InAir)
@@ -756,7 +753,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         return;
 
     refreshHitRecoilAnims();
-    refreshJumpAnims(jump, idle, force);
+    refreshJumpAnims(jump, force);
     refreshMovementAnims(movement, idle, force);
 
     // idle handled last as it can depend on the other states
@@ -2070,9 +2067,6 @@ void CharacterController::update(float duration)
             forcestateupdate = true;
             jumpstate = JumpState_Landing;
             vec.z() = 0.0f;
-
-            // We should reset idle animation during landing
-            clearStateAnimation(mCurrentIdle);
 
             float height = cls.getCreatureStats(mPtr).land(isPlayer);
             float healthLost = getFallDamage(mPtr, height);

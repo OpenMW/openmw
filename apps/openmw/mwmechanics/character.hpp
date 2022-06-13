@@ -205,7 +205,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
     void refreshHitRecoilAnims();
-    void refreshJumpAnims(JumpingState jump, CharacterState& idle, bool force=false);
+    void refreshJumpAnims(JumpingState jump, bool force=false);
     void refreshMovementAnims(CharacterState movement, CharacterState& idle, bool force=false);
     void refreshIdleAnims(CharacterState idle, bool force=false);
 
