@@ -573,6 +573,7 @@ void CharacterController::refreshMovementAnims(CharacterState movement, bool for
         return;
     }
 
+    mMovementState = movement;
     std::string::size_type swimpos = movementAnimName.find("swim");
     if (!mAnimation->hasAnimation(movementAnimName))
     {
@@ -590,7 +591,7 @@ void CharacterController::refreshMovementAnims(CharacterState movement, bool for
     {
         std::string weapMovementAnimName;
         // Spellcasting stance turning is a special case
-        if (mWeaponType == ESM::Weapon::Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight))
+        if (mWeaponType == ESM::Weapon::Spell && isTurning())
             weapMovementAnimName = weapShortGroup + movementAnimName;
         else
             weapMovementAnimName = movementAnimName + weapShortGroup;
@@ -615,8 +616,6 @@ void CharacterController::refreshMovementAnims(CharacterState movement, bool for
             return;
         }
     }
-
-    mMovementState = movement;
 
     // If we're playing the same animation, start it from the point it ended
     float startpoint = 0.f;
