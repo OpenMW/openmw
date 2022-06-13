@@ -337,24 +337,27 @@ void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, Ju
     if (!force && jump == mJumpState && idle == CharState_None)
         return;
 
-    std::string jumpAnimName;
-    MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
-    if (jump != JumpState_None)
+    if (jump == JumpState_None)
     {
-        jumpAnimName = "jump";
-        if(!weapShortGroup.empty())
+        if (!mCurrentJump.empty())
         {
-            jumpAnimName += weapShortGroup;
-            if(!mAnimation->hasAnimation(jumpAnimName))
-            {
-                jumpAnimName = fallbackShortWeaponGroup("jump", &jumpmask);
-
-                // If we apply jump only for lower body, do not reset idle animations.
-                // For upper body there will be idle animation.
-                if (jumpmask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
-                    idle = CharState_Idle;
-            }
+            mAnimation->disable(mCurrentJump);
+            mCurrentJump.clear();
         }
+        mJumpState = JumpState_None;
+        return;
+    }
+
+    std::string jumpAnimName = "jump" + weapShortGroup;
+    MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
+    if (!weapShortGroup.empty() && !mAnimation->hasAnimation(jumpAnimName))
+    {
+        jumpAnimName = fallbackShortWeaponGroup("jump", &jumpmask);
+
+        // If we apply jump only for lower body, do not reset idle animations.
+        // For upper body there will be idle animation.
+        if (jumpmask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
+            idle = CharState_Idle;
     }
 
     if (!force && jump == mJumpState)
@@ -369,24 +372,14 @@ void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, Ju
         mCurrentJump.clear();
     }
 
+    if (!mAnimation->hasAnimation(jumpAnimName))
+        return;
+
+    mCurrentJump = jumpAnimName;
     if(mJumpState == JumpState_InAir)
-    {
-        if (mAnimation->hasAnimation(jumpAnimName))
-        {
-            mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, false,
-                         1.0f, startAtLoop ? "loop start" : "start", "stop", 0.f, ~0ul);
-            mCurrentJump = jumpAnimName;
-        }
-    }
+        mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, false, 1.0f, startAtLoop ? "loop start" : "start", "stop", 0.f, ~0ul);
     else if (mJumpState == JumpState_Landing)
-    {
-        if (mAnimation->hasAnimation(jumpAnimName))
-        {
-            mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
-                         1.0f, "loop stop", "stop", 0.0f, 0);
-            mCurrentJump = jumpAnimName;
-        }
-    }
+        mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true, 1.0f, "loop stop", "stop", 0.0f, 0);
 }
 
 bool CharacterController::onOpen() const
