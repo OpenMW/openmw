@@ -96,9 +96,9 @@ TEST(EsmFixedString, struct_size)
 
 TEST(EsmFixedString, is_pod)
 {
-     ASSERT_TRUE(std::is_pod<ESM::NAME>::value);
-     ASSERT_TRUE(std::is_pod<ESM::NAME32>::value);
-     ASSERT_TRUE(std::is_pod<ESM::NAME64>::value);
+     ASSERT_TRUE(std::is_standard_layout_v<ESM::NAME> && std::is_trivial_v<ESM::NAME>);
+     ASSERT_TRUE(std::is_standard_layout_v<ESM::NAME32> && std::is_trivial_v<ESM::NAME32>);
+     ASSERT_TRUE(std::is_standard_layout_v<ESM::NAME64> && std::is_trivial_v<ESM::NAME64>);
 }
 
 TEST(EsmFixedString, assign_should_zero_untouched_bytes_for_4)
