@@ -181,6 +181,48 @@ std::string hitStateToAnimGroup(MWMechanics::CharacterState state)
     }
 }
 
+// Converts an idle state to its equivalent animation group.
+std::string idleStateToAnimGroup(MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    switch (state)
+    {
+        case CharState_IdleSwim:
+            return "idleswim";
+        case CharState_IdleSneak:
+            return "idlesneak";
+        case CharState_Idle:
+        case CharState_Idle2:
+        case CharState_Idle3:
+        case CharState_Idle4:
+        case CharState_Idle5:
+        case CharState_Idle6:
+        case CharState_Idle7:
+        case CharState_Idle8:
+        case CharState_Idle9:
+        case CharState_SpecialIdle:
+            return "idle";
+        default:
+            return {};
+    }
+}
+
+MWRender::Animation::AnimPriority getIdlePriority(MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    MWRender::Animation::AnimPriority priority(Priority_Default);
+    switch (state)
+    {
+        case CharState_IdleSwim:
+            return Priority_SwimIdle;
+        case CharState_IdleSneak:
+            priority[MWRender::Animation::BoneGroup_LowerBody] = Priority_SneakIdleLowerBody;
+            [[fallthrough]];
+        default:
+            return priority;
+    }
+}
+
 float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -637,59 +679,68 @@ void CharacterController::refreshIdleAnims(const std::string& weapShortGroup, Ch
             && !mPtr.getClass().isBipedal(mPtr))
         idle = CharState_None;
 
-    if(force || idle != mIdleState || (!mAnimation->isPlaying(mCurrentIdle) && mAnimQueue.empty()))
+    if (!force && idle == mIdleState && (mAnimation->isPlaying(mCurrentIdle) || !mAnimQueue.empty()))
+        return;
+
+    mIdleState = idle;
+    size_t numLoops = ~0ul;
+
+    std::string idleGroup = idleStateToAnimGroup(mIdleState);
+    MWRender::Animation::AnimPriority priority = getIdlePriority(mIdleState);
+
+    // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
+    // "idle"+weapon or "idle".
+    if ((mIdleState == CharState_IdleSwim || mIdleState == CharState_IdleSneak) && !mAnimation->hasAnimation(idleGroup))
+        idleGroup = idleStateToAnimGroup(CharState_Idle);
+
+    if (idleGroup.empty())
     {
-        mIdleState = idle;
-        size_t numLoops = ~0ul;
-
-        std::string idleGroup;
-        MWRender::Animation::AnimPriority idlePriority (Priority_Default);
-        // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
-        // "idle"+weapon or "idle".
-        if(mIdleState == CharState_IdleSwim && mAnimation->hasAnimation("idleswim"))
+        if (mCurrentIdle.empty())
         {
-            idleGroup = "idleswim";
-            idlePriority = Priority_SwimIdle;
-        }
-        else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak"))
-        {
-            idleGroup = "idlesneak";
-            idlePriority[MWRender::Animation::BoneGroup_LowerBody] = Priority_SneakIdleLowerBody;
-        }
-        else if(mIdleState != CharState_None)
-        {
-            idleGroup = "idle";
-            if(!weapShortGroup.empty())
-            {
-                idleGroup += weapShortGroup;
-                if(!mAnimation->hasAnimation(idleGroup))
-                {
-                    idleGroup = fallbackShortWeaponGroup("idle");
-                }
-
-                // play until the Loop Stop key 2 to 5 times, then play until the Stop key
-                // this replicates original engine behavior for the "Idle1h" 1st-person animation
-                auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-                numLoops = 1 + Misc::Rng::rollDice(4, prng); 
-            }
-        }
-
-        // There is no need to restart anim if the new and old anims are the same.
-        // Just update a number of loops.
-        float startPoint = 0;
-        if (!mCurrentIdle.empty() && mCurrentIdle == idleGroup)
-        {
-            mAnimation->getInfo(mCurrentIdle, &startPoint);
-        }
-
-        if(!mCurrentIdle.empty())
             mAnimation->disable(mCurrentIdle);
-
-        mCurrentIdle = idleGroup;
-        if(!mCurrentIdle.empty())
-            mAnimation->play(mCurrentIdle, idlePriority, MWRender::Animation::BlendMask_All, false,
-                             1.0f, "start", "stop", startPoint, numLoops, true);
+            mCurrentIdle.clear();
+        }
+        mIdleState = CharState_None;
+        return;
     }
+
+    if (mIdleState != CharState_IdleSwim && mIdleState != CharState_IdleSneak && mIdleState != CharState_None && !weapShortGroup.empty())
+    {
+        std::string weapIdleGroup = idleGroup + weapShortGroup;
+        if (!mAnimation->hasAnimation(weapIdleGroup))
+            weapIdleGroup = fallbackShortWeaponGroup(idleGroup);
+        idleGroup = weapIdleGroup;
+
+        // play until the Loop Stop key 2 to 5 times, then play until the Stop key
+        // this replicates original engine behavior for the "Idle1h" 1st-person animation
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        numLoops = 1 + Misc::Rng::rollDice(4, prng);
+    }
+
+    if (!mAnimation->hasAnimation(idleGroup))
+    {
+        if (mCurrentIdle.empty())
+        {
+            mAnimation->disable(mCurrentIdle);
+            mCurrentIdle.clear();
+        }
+        mIdleState = CharState_None;
+        return;
+    }
+
+    float startPoint = 0.f;
+    if (!mCurrentIdle.empty())
+    {
+        // There is no need to restart anim if the new and old anims are the same.
+        // Just update the number of loops.
+        if (mCurrentIdle == idleGroup)
+            mAnimation->getInfo(mCurrentIdle, &startPoint);
+
+        mAnimation->disable(mCurrentIdle);
+    }
+
+    mCurrentIdle = idleGroup;
+    mAnimation->play(mCurrentIdle, priority, MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop", startPoint, numLoops, true);
 }
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force)
