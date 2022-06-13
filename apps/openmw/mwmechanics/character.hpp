@@ -197,6 +197,14 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     std::string getMovementBasedAttackType() const;
 
+    void clearStateAnimation(std::string &anim) const;
+    void resetCurrentJumpState();
+    void resetCurrentMovementState();
+    void resetCurrentIdleState();
+    void resetCurrentHitState();
+    void resetCurrentWeaponState();
+    void resetCurrentDeathState();
+
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
     void refreshHitRecoilAnims(CharacterState& idle);
     void refreshJumpAnims(const std::string& weapShortGroup, JumpingState jump, CharacterState& idle, bool force=false);

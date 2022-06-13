@@ -271,6 +271,52 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
     return prefix + std::to_string(roll);
 }
 
+
+void CharacterController::clearStateAnimation(std::string &anim) const
+{
+    if (anim.empty())
+        return;
+    if (mAnimation)
+        mAnimation->disable(anim);
+    anim.clear();
+}
+
+void CharacterController::resetCurrentJumpState()
+{
+    clearStateAnimation(mCurrentJump);
+    mJumpState = JumpState_None;
+}
+
+void CharacterController::resetCurrentMovementState()
+{
+    clearStateAnimation(mCurrentMovement);
+    mMovementState = CharState_None;
+}
+
+void CharacterController::resetCurrentIdleState()
+{
+    clearStateAnimation(mCurrentIdle);
+    mIdleState = CharState_None;
+}
+
+void CharacterController::resetCurrentHitState()
+{
+    clearStateAnimation(mCurrentHit);
+    mHitState = CharState_None;
+}
+
+void CharacterController::resetCurrentWeaponState()
+{
+    clearStateAnimation(mCurrentWeapon);
+    mUpperBodyState = UpperCharState_Nothing;
+}
+
+void CharacterController::resetCurrentDeathState()
+{
+    clearStateAnimation(mCurrentDeath);
+    mDeathState = CharState_None;
+}
+
 void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
 {
     auto& charClass = mPtr.getClass();
@@ -361,11 +407,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
     // Cancel upper body animations
     if (isKnockedOut() || isKnockedDown())
     {
-        if (!mCurrentWeapon.empty())
-        {
-            mAnimation->disable(mCurrentWeapon);
-            mCurrentWeapon.clear();
-        }
+        clearStateAnimation(mCurrentWeapon);
         if (mUpperBodyState > UpperCharState_WeapEquiped)
         {
             mUpperBodyState = UpperCharState_WeapEquiped;
@@ -390,12 +432,7 @@ void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, Ju
 
     if (jump == JumpState_None)
     {
-        if (!mCurrentJump.empty())
-        {
-            mAnimation->disable(mCurrentJump);
-            mCurrentJump.clear();
-        }
-        mJumpState = JumpState_None;
+        resetCurrentJumpState();
         return;
     }
 
@@ -416,12 +453,7 @@ void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, Ju
 
     bool startAtLoop = (jump == mJumpState);
     mJumpState = jump;
-
-    if (!mCurrentJump.empty())
-    {
-        mAnimation->disable(mCurrentJump);
-        mCurrentJump.clear();
-    }
+    clearStateAnimation(mCurrentJump);
 
     if (!mAnimation->hasAnimation(jumpAnimName))
         return;
@@ -539,12 +571,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
 
     if (movementAnimName.empty())
     {
-        if (!mCurrentMovement.empty())
-        {
-            mAnimation->disable(mCurrentMovement);
-            mCurrentMovement.clear();
-        }
-        mMovementState = CharState_None;
+        resetCurrentMovementState();
         return;
     }
 
@@ -592,12 +619,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
 
         if (!mAnimation->hasAnimation(movementAnimName))
         {
-            if (!mCurrentMovement.empty())
-            {
-                mAnimation->disable(mCurrentMovement);
-                mCurrentMovement.clear();
-            }
-            mMovementState = CharState_None;
+            resetCurrentMovementState();
             return;
         }
     }
@@ -611,9 +633,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
 
     mMovementAnimationControlled = true;
 
-    if (!mCurrentMovement.empty())
-        mAnimation->disable(mCurrentMovement);
-
+    clearStateAnimation(mCurrentMovement);
     mCurrentMovement = movementAnimName;
 
     // Reset idle if we actually play movement animations excepts of these cases:
@@ -621,12 +641,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
     // 2. When we use a fallback animation for lower body since movement animation for given weapon is missing (e.g. for crossbows and spellcasting)
     if (!isTurning() && movemask == MWRender::Animation::BlendMask_All)
     {
-        if (!mCurrentIdle.empty())
-        {
-            mAnimation->disable(mCurrentIdle);
-            mCurrentIdle.clear();
-        }
-        mIdleState = CharState_None;
+        resetCurrentIdleState();
         idle = CharState_None;
     }
 
@@ -695,12 +710,7 @@ void CharacterController::refreshIdleAnims(const std::string& weapShortGroup, Ch
 
     if (idleGroup.empty())
     {
-        if (mCurrentIdle.empty())
-        {
-            mAnimation->disable(mCurrentIdle);
-            mCurrentIdle.clear();
-        }
-        mIdleState = CharState_None;
+        resetCurrentIdleState();
         return;
     }
 
@@ -719,26 +729,17 @@ void CharacterController::refreshIdleAnims(const std::string& weapShortGroup, Ch
 
     if (!mAnimation->hasAnimation(idleGroup))
     {
-        if (mCurrentIdle.empty())
-        {
-            mAnimation->disable(mCurrentIdle);
-            mCurrentIdle.clear();
-        }
-        mIdleState = CharState_None;
+        resetCurrentIdleState();
         return;
     }
 
     float startPoint = 0.f;
-    if (!mCurrentIdle.empty())
-    {
-        // There is no need to restart anim if the new and old anims are the same.
-        // Just update the number of loops.
-        if (mCurrentIdle == idleGroup)
-            mAnimation->getInfo(mCurrentIdle, &startPoint);
+    // There is no need to restart anim if the new and old anims are the same.
+    // Just update the number of loops.
+    if (mCurrentIdle == idleGroup)
+        mAnimation->getInfo(mCurrentIdle, &startPoint);
 
-        mAnimation->disable(mCurrentIdle);
-    }
-
+    clearStateAnimation(mCurrentIdle);
     mCurrentIdle = idleGroup;
     mAnimation->play(mCurrentIdle, priority, MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop", startPoint, numLoops, true);
 }
@@ -781,21 +782,11 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
     // For dead actors, refreshCurrentAnims is no longer called, so we need to disable the movement state manually.
     // Note that these animations wouldn't actually be visible (due to the Death animation's priority being higher).
     // However, they could still trigger text keys, such as Hit events, or sounds.
-    mMovementState = CharState_None;
-    mAnimation->disable(mCurrentMovement);
-    mCurrentMovement.clear();
-    mUpperBodyState = UpperCharState_Nothing;
-    mAnimation->disable(mCurrentWeapon);
-    mCurrentWeapon.clear();
-    mHitState = CharState_None;
-    mAnimation->disable(mCurrentHit);
-    mCurrentHit.clear();
-    mIdleState = CharState_None;
-    mAnimation->disable(mCurrentIdle);
-    mCurrentIdle.clear();
-    mJumpState = JumpState_None;
-    mAnimation->disable(mCurrentJump);
-    mCurrentJump.clear();
+    resetCurrentMovementState();
+    resetCurrentWeaponState();
+    resetCurrentHitState();
+    resetCurrentIdleState();
+    resetCurrentJumpState();
     mMovementAnimationControlled = true;
 
     mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::BlendMask_All,
@@ -1184,9 +1175,9 @@ bool CharacterController::updateState(CharacterState idle)
     if (isStillWeapon && mWeaponType != weaptype && mUpperBodyState > UpperCharState_WeapEquiped)
     {
         forcestateupdate = true;
+        clearStateAnimation(mCurrentWeapon);
         mUpperBodyState = UpperCharState_WeapEquiped;
         setAttackingOrSpell(false);
-        mAnimation->disable(mCurrentWeapon);
         mAnimation->showWeapons(true);
         stats.setAttackingOrSpell(false);
     }
@@ -1256,7 +1247,7 @@ bool CharacterController::updateState(CharacterState idle)
 
                 if (!isStillWeapon)
                 {
-                    mAnimation->disable(mCurrentWeapon);
+                    clearStateAnimation(mCurrentWeapon);
                     if (weaptype != ESM::Weapon::None)
                     {
                         mAnimation->showWeapons(false);
@@ -1304,8 +1295,7 @@ bool CharacterController::updateState(CharacterState idle)
             // Make sure that we disabled unequipping animation
             if (mUpperBodyState == UpperCharState_UnEquipingWeap)
             {
-                mUpperBodyState = UpperCharState_Nothing;
-                mAnimation->disable(mCurrentWeapon);
+                resetCurrentWeaponState();
                 mWeaponType = ESM::Weapon::None;
                 mCurrentWeapon = getWeaponAnimation(mWeaponType);
             }
@@ -1347,7 +1337,7 @@ bool CharacterController::updateState(CharacterState idle)
 
         if (!ammunition && mUpperBodyState > UpperCharState_WeapEquiped)
         {
-            mAnimation->disable(mCurrentWeapon);
+            clearStateAnimation(mCurrentWeapon);
             mUpperBodyState = UpperCharState_WeapEquiped;
         }
     }
@@ -1572,8 +1562,7 @@ bool CharacterController::updateState(CharacterState idle)
             idle != CharState_IdleSneak && idle != CharState_IdleSwim &&
             mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
         {
-            mAnimation->disable(mCurrentIdle);
-            mIdleState = CharState_None;
+            resetCurrentIdleState();
         }
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
@@ -1629,7 +1618,7 @@ bool CharacterController::updateState(CharacterState idle)
                 if (mWeaponType > ESM::Weapon::None)
                     mAnimation->showWeapons(true);
             }
-            mAnimation->disable(mCurrentWeapon);
+            clearStateAnimation(mCurrentWeapon);
         }
     }
 
@@ -1766,7 +1755,7 @@ bool CharacterController::updateState(CharacterState idle)
     }
     else if(complete >= 1.0f && isRandomAttackAnimation(mCurrentWeapon))
     {
-        mAnimation->disable(mCurrentWeapon);
+        clearStateAnimation(mCurrentWeapon);
         mUpperBodyState = UpperCharState_WeapEquiped;
     }
 
@@ -2086,7 +2075,7 @@ void CharacterController::update(float duration)
             vec.z() = 0.0f;
 
             // We should reset idle animation during landing
-            mAnimation->disable(mCurrentIdle);
+            clearStateAnimation(mCurrentIdle);
 
             float height = cls.getCreatureStats(mPtr).land(isPlayer);
             float healthLost = getFallDamage(mPtr, height);
@@ -2429,8 +2418,7 @@ void CharacterController::unpersistAnimationState()
             complete = (time - start) / (stop - start);
         }
 
-        mAnimation->disable(mCurrentIdle);
-        mCurrentIdle.clear();
+        clearStateAnimation(mCurrentIdle);
         mIdleState = CharState_SpecialIdle;
 
         bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
@@ -2480,8 +2468,7 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
     {
         clearAnimQueue(persist);
 
-        mAnimation->disable(mCurrentIdle);
-        mCurrentIdle.clear();
+        clearStateAnimation(mCurrentIdle);
 
         mIdleState = CharState_SpecialIdle;
         bool loopfallback = (entry.mGroup.compare(0,4,"idle") == 0);
@@ -2575,11 +2562,7 @@ CharacterController::KillResult CharacterController::kill()
     if (mDeathState == CharState_None)
     {
         playRandomDeath();
-
-        mAnimation->disable(mCurrentIdle);
-
-        mIdleState = CharState_None;
-        mCurrentIdle.clear();
+        resetCurrentIdleState();
         return Result_DeathAnimStarted;
     }
 
@@ -2599,10 +2582,7 @@ void CharacterController::resurrect()
     if(mDeathState == CharState_None)
         return;
 
-    if(mAnimation)
-        mAnimation->disable(mCurrentDeath);
-    mCurrentDeath.clear();
-    mDeathState = CharState_None;
+    resetCurrentDeathState();
     mWeaponType = ESM::Weapon::None;
 }
 
