@@ -131,8 +131,6 @@ std::string movementStateToAnimGroup(MWMechanics::CharacterState state)
         case CharState_SneakLeft: return "sneakleft";
         case CharState_SneakRight: return "sneakright";
 
-        case CharState_Jump: return "jump";
-
         case CharState_TurnLeft: return "turnleft";
         case CharState_TurnRight: return "turnright";
         case CharState_SwimTurnLeft: return "swimturnleft";
@@ -1944,8 +1942,6 @@ void CharacterController::update(float duration)
         CharacterState idlestate = CharState_None;
         JumpingState jumpstate = JumpState_None;
 
-        bool forcestateupdate = false;
-
         mHasMovedInXY = std::abs(vec.x())+std::abs(vec.y()) > 0.0f;
         isrunning = isrunning && mHasMovedInXY;
 
@@ -2021,8 +2017,6 @@ void CharacterController::update(float duration)
         if(!onground && !flying && !inwater && solid)
         {
             // In the air (either getting up —ascending part of jump— or falling).
-
-            forcestateupdate = (mJumpState != JumpState_InAir);
             jumpstate = JumpState_InAir;
 
             static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->mValue.getFloat();
@@ -2050,7 +2044,6 @@ void CharacterController::update(float duration)
         }
         else if(mJumpState == JumpState_InAir && !inwater && !flying && solid)
         {
-            forcestateupdate = true;
             jumpstate = JumpState_Landing;
             vec.z() = 0.0f;
 
@@ -2223,9 +2216,7 @@ void CharacterController::update(float duration)
 
         if (!mSkipAnim)
         {
-            forcestateupdate = updateState(idlestate) || forcestateupdate;
-
-            refreshCurrentAnims(idlestate, movestate, jumpstate, forcestateupdate);
+            refreshCurrentAnims(idlestate, movestate, jumpstate, updateState(idlestate));
             updateIdleStormState(inwater);
         }
 

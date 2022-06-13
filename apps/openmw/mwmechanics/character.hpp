@@ -91,8 +91,6 @@ enum CharacterState {
     CharState_SwimTurnLeft,
     CharState_SwimTurnRight,
 
-    CharState_Jump,
-
     CharState_Death1,
     CharState_Death2,
     CharState_Death3,
