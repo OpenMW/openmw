@@ -344,6 +344,9 @@ variables: &tests-targets
   targets: "openmw_test_suite,openmw_detournavigator_navmeshtilescache_benchmark"
   package: "Tests"
 
+variables: &combined-targets
+  targets: "openmw,openmw-iniimporter,openmw-launcher,openmw-wizard,openmw-navmeshtool,openmw-bulletobjecttool,openmw-cs,bsatool,esmtool,niftest,openmw-essimporter"
+
 .Windows_Ninja_Base:
   tags:
     - windows
@@ -574,7 +577,7 @@ variables: &tests-targets
     <<: *engine-targets
     config: "Debug"
 
-Windows_MSBuild_Engine_RelWithDebInfo:
+.Windows_MSBuild_Engine_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
@@ -599,11 +602,18 @@ Windows_MSBuild_Engine_RelWithDebInfo:
     <<: *cs-targets
     config: "Debug"
 
-Windows_MSBuild_CS_RelWithDebInfo:
+.Windows_MSBuild_CS_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
     <<: *cs-targets
+    config: "RelWithDebInfo"
+
+Windows_MSBuild_Combined_RelWithDebInfo:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *combined-targets
     config: "RelWithDebInfo"
 
 .Windows_MSBuild_Tests_RelWithDebInfo:
