@@ -190,18 +190,24 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     bool mCastingManualSpell{false};
 
-    float mTimeUntilWake{0.f};
-
     bool mIsMovingBackward{false};
     osg::Vec2f mSmoothedSpeed;
 
     std::string getMovementBasedAttackType() const;
 
+    void clearStateAnimation(std::string &anim) const;
+    void resetCurrentJumpState();
+    void resetCurrentMovementState();
+    void resetCurrentIdleState();
+    void resetCurrentHitState();
+    void resetCurrentWeaponState();
+    void resetCurrentDeathState();
+
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
     void refreshHitRecoilAnims(CharacterState& idle);
-    void refreshJumpAnims(const std::string& weapShortGroup, JumpingState jump, CharacterState& idle, bool force=false);
-    void refreshMovementAnims(const std::string& weapShortGroup, CharacterState movement, CharacterState& idle, bool force=false);
-    void refreshIdleAnims(const std::string& weapShortGroup, CharacterState idle, bool force=false);
+    void refreshJumpAnims(JumpingState jump, CharacterState& idle, bool force=false);
+    void refreshMovementAnims(CharacterState movement, CharacterState& idle, bool force=false);
+    void refreshIdleAnims(CharacterState idle, bool force=false);
 
     void clearAnimQueue(bool clearPersistAnims = false);
 
@@ -232,6 +238,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     std::string fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask = nullptr) const;
 
     std::string getWeaponAnimation(int weaponType) const;
+    std::string getWeaponShortGroup(int weaponType) const;
 
     bool getAttackingOrSpell() const;
     void setAttackingOrSpell(bool attackingOrSpell) const;
