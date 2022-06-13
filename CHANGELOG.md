@@ -33,6 +33,7 @@
     Bug #5453: Magic effect VFX are offset for creatures
     Bug #5483: AutoCalc flag is not used to calculate spells cost
     Bug #5508: Engine binary links to Qt without using it
+    Bug #5592: Weapon idle animations do not work properly
     Bug #5596: Effects in constant spells should not be merged
     Bug #5621: Drained stats cannot be restored
     Bug #5766: Active grid object paging - disappearing textures
