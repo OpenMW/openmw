@@ -2200,7 +2200,10 @@ void CharacterController::update(float duration)
         }
 
         if (movestate != CharState_None)
+        {
             clearAnimQueue();
+            jumpstate = JumpState_None;
+        }
 
         if(mAnimQueue.empty() || inwater || (sneak && mIdleState != CharState_SpecialIdle))
         {
