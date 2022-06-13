@@ -317,7 +317,7 @@ void CharacterController::resetCurrentDeathState()
     mDeathState = CharState_None;
 }
 
-void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
+void CharacterController::refreshHitRecoilAnims()
 {
     auto& charClass = mPtr.getClass();
     if (!charClass.isActor())
@@ -339,6 +339,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
             stats.setKnockedDown(false);
             stats.setHitRecovery(false);
             stats.setBlock(false);
+            resetCurrentIdleState();
         }
         else if (isKnockedOut())
             mAnimation->setLoopingEnabled(mCurrentHit, knockout);
@@ -392,6 +393,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
         stats.setKnockedDown(false);
         stats.setHitRecovery(false);
         stats.setBlock(false);
+        resetCurrentIdleState();
         return;
     }
 
@@ -412,8 +414,6 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
     }
 
     mAnimation->play(mCurrentHit, priority, MWRender::Animation::BlendMask_All, true, 1, startKey, stopKey, 0.0f, ~0ul);
-
-    idle = CharState_None;
 }
 
 void CharacterController::refreshJumpAnims(JumpingState jump, CharacterState& idle, bool force)
@@ -755,7 +755,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (isPersistentAnimPlaying())
         return;
 
-    refreshHitRecoilAnims(idle);
+    refreshHitRecoilAnims();
     refreshJumpAnims(jump, idle, force);
     refreshMovementAnims(movement, idle, force);
 
