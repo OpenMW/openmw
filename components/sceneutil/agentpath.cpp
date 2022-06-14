@@ -4,6 +4,7 @@
 #include <osg/Material>
 
 #include <components/detournavigator/settings.hpp>
+#include <components/detournavigator/recastparams.hpp>
 
 #include <algorithm>
 
@@ -45,8 +46,8 @@ namespace SceneUtil
 
         DebugDraw debugDraw(*group, DebugDraw::makeStateSet(), osg::Vec3f(0, 0, 0), 1);
 
-        const auto agentRadius = halfExtents.x();
-        const auto agentHeight = 2.0f * halfExtents.z();
+        const auto agentRadius = DetourNavigator::getAgentRadius(halfExtents);
+        const auto agentHeight = DetourNavigator::getAgentHeight(halfExtents);
         const auto agentClimb = settings.mMaxClimb;
         const auto startColor = duRGBA(128, 25, 0, 192);
         const auto endColor = duRGBA(51, 102, 0, 129);
