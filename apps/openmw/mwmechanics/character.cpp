@@ -701,12 +701,16 @@ void CharacterController::refreshIdleAnims(CharacterState idle, bool force)
     size_t numLoops = ~0ul;
 
     std::string idleGroup = idleStateToAnimGroup(mIdleState);
-    MWRender::Animation::AnimPriority priority = getIdlePriority(mIdleState);
 
     // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
     // "idle"+weapon or "idle".
     if ((mIdleState == CharState_IdleSwim || mIdleState == CharState_IdleSneak) && !mAnimation->hasAnimation(idleGroup))
-        idleGroup = idleStateToAnimGroup(CharState_Idle);
+    {
+        mIdleState = CharState_Idle;
+        idleGroup = idleStateToAnimGroup(mIdleState);
+    }
+
+    MWRender::Animation::AnimPriority priority = getIdlePriority(mIdleState);
 
     if (idleGroup.empty())
     {
