@@ -50,14 +50,6 @@ enum CharacterState {
 
     CharState_SpecialIdle,
     CharState_Idle,
-    CharState_Idle2,
-    CharState_Idle3,
-    CharState_Idle4,
-    CharState_Idle5,
-    CharState_Idle6,
-    CharState_Idle7,
-    CharState_Idle8,
-    CharState_Idle9,
     CharState_IdleSwim,
     CharState_IdleSneak,
 

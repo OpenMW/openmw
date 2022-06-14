@@ -190,14 +190,6 @@ std::string idleStateToAnimGroup(MWMechanics::CharacterState state)
         case CharState_IdleSneak:
             return "idlesneak";
         case CharState_Idle:
-        case CharState_Idle2:
-        case CharState_Idle3:
-        case CharState_Idle4:
-        case CharState_Idle5:
-        case CharState_Idle6:
-        case CharState_Idle7:
-        case CharState_Idle8:
-        case CharState_Idle9:
         case CharState_SpecialIdle:
             return "idle";
         default:
