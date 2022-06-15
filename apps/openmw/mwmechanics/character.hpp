@@ -50,14 +50,6 @@ enum CharacterState {
 
     CharState_SpecialIdle,
     CharState_Idle,
-    CharState_Idle2,
-    CharState_Idle3,
-    CharState_Idle4,
-    CharState_Idle5,
-    CharState_Idle6,
-    CharState_Idle7,
-    CharState_Idle8,
-    CharState_Idle9,
     CharState_IdleSwim,
     CharState_IdleSneak,
 
@@ -90,8 +82,6 @@ enum CharacterState {
     CharState_TurnRight,
     CharState_SwimTurnLeft,
     CharState_SwimTurnRight,
-
-    CharState_Jump,
 
     CharState_Death1,
     CharState_Death2,
@@ -204,9 +194,9 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     void resetCurrentDeathState();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
-    void refreshHitRecoilAnims(CharacterState& idle);
-    void refreshJumpAnims(JumpingState jump, CharacterState& idle, bool force=false);
-    void refreshMovementAnims(CharacterState movement, CharacterState& idle, bool force=false);
+    void refreshHitRecoilAnims();
+    void refreshJumpAnims(JumpingState jump, bool force=false);
+    void refreshMovementAnims(CharacterState movement, bool force=false);
     void refreshIdleAnims(CharacterState idle, bool force=false);
 
     void clearAnimQueue(bool clearPersistAnims = false);

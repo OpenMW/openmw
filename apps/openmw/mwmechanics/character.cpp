@@ -131,8 +131,6 @@ std::string movementStateToAnimGroup(MWMechanics::CharacterState state)
         case CharState_SneakLeft: return "sneakleft";
         case CharState_SneakRight: return "sneakright";
 
-        case CharState_Jump: return "jump";
-
         case CharState_TurnLeft: return "turnleft";
         case CharState_TurnRight: return "turnright";
         case CharState_SwimTurnLeft: return "swimturnleft";
@@ -192,14 +190,6 @@ std::string idleStateToAnimGroup(MWMechanics::CharacterState state)
         case CharState_IdleSneak:
             return "idlesneak";
         case CharState_Idle:
-        case CharState_Idle2:
-        case CharState_Idle3:
-        case CharState_Idle4:
-        case CharState_Idle5:
-        case CharState_Idle6:
-        case CharState_Idle7:
-        case CharState_Idle8:
-        case CharState_Idle9:
         case CharState_SpecialIdle:
             return "idle";
         default:
@@ -317,7 +307,7 @@ void CharacterController::resetCurrentDeathState()
     mDeathState = CharState_None;
 }
 
-void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
+void CharacterController::refreshHitRecoilAnims()
 {
     auto& charClass = mPtr.getClass();
     if (!charClass.isActor())
@@ -339,6 +329,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
             stats.setKnockedDown(false);
             stats.setHitRecovery(false);
             stats.setBlock(false);
+            resetCurrentIdleState();
         }
         else if (isKnockedOut())
             mAnimation->setLoopingEnabled(mCurrentHit, knockout);
@@ -392,6 +383,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
         stats.setKnockedDown(false);
         stats.setHitRecovery(false);
         stats.setBlock(false);
+        resetCurrentIdleState();
         return;
     }
 
@@ -412,17 +404,17 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
     }
 
     mAnimation->play(mCurrentHit, priority, MWRender::Animation::BlendMask_All, true, 1, startKey, stopKey, 0.0f, ~0ul);
-
-    idle = CharState_None;
 }
 
-void CharacterController::refreshJumpAnims(JumpingState jump, CharacterState& idle, bool force)
+void CharacterController::refreshJumpAnims(JumpingState jump, bool force)
 {
-    if (!force && jump == mJumpState && idle == CharState_None)
+    if (!force && jump == mJumpState)
         return;
 
     if (jump == JumpState_None)
     {
+        if (!mCurrentJump.empty())
+            resetCurrentIdleState();
         resetCurrentJumpState();
         return;
     }
@@ -431,24 +423,19 @@ void CharacterController::refreshJumpAnims(JumpingState jump, CharacterState& id
     std::string jumpAnimName = "jump" + weapShortGroup;
     MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
     if (!weapShortGroup.empty() && !mAnimation->hasAnimation(jumpAnimName))
-    {
         jumpAnimName = fallbackShortWeaponGroup("jump", &jumpmask);
 
-        // If we apply jump only for lower body, do not reset idle animations.
-        // For upper body there will be idle animation.
-        if (jumpmask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
-            idle = CharState_Idle;
-    }
-
-    if (!force && jump == mJumpState)
+    if (!mAnimation->hasAnimation(jumpAnimName))
+    {
+        if (!mCurrentJump.empty())
+            resetCurrentIdleState();
+        resetCurrentJumpState();
         return;
+    }
 
     bool startAtLoop = (jump == mJumpState);
     mJumpState = jump;
     clearStateAnimation(mCurrentJump);
-
-    if (!mAnimation->hasAnimation(jumpAnimName))
-        return;
 
     mCurrentJump = jumpAnimName;
     if(mJumpState == JumpState_InAir)
@@ -561,19 +548,22 @@ std::string CharacterController::fallbackShortWeaponGroup(const std::string& bas
     return groupName;
 }
 
-void CharacterController::refreshMovementAnims(CharacterState movement, CharacterState& idle, bool force)
+void CharacterController::refreshMovementAnims(CharacterState movement, bool force)
 {
-    if (movement == mMovementState && idle == mIdleState && !force)
+    if (movement == mMovementState && !force)
         return;
 
     std::string movementAnimName = movementStateToAnimGroup(movement);
 
     if (movementAnimName.empty())
     {
+        if (!mCurrentMovement.empty())
+            resetCurrentIdleState();
         resetCurrentMovementState();
         return;
     }
 
+    mMovementState = movement;
     std::string::size_type swimpos = movementAnimName.find("swim");
     if (!mAnimation->hasAnimation(movementAnimName))
     {
@@ -591,25 +581,16 @@ void CharacterController::refreshMovementAnims(CharacterState movement, Characte
     {
         std::string weapMovementAnimName;
         // Spellcasting stance turning is a special case
-        if (mWeaponType == ESM::Weapon::Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight))
+        if (mWeaponType == ESM::Weapon::Spell && isTurning())
             weapMovementAnimName = weapShortGroup + movementAnimName;
         else
             weapMovementAnimName = movementAnimName + weapShortGroup;
 
         if (!mAnimation->hasAnimation(weapMovementAnimName))
-        {
             weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
-            // If we apply movement only for lower body, do not reset idle animations.
-            // For upper body there will be idle animation.
-            if (movemask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
-                idle = CharState_Idle;
-        }
 
         movementAnimName = weapMovementAnimName;
     }
-
-    if (!force && movement == mMovementState)
-        return;
 
     if (!mAnimation->hasAnimation(movementAnimName))
     {
@@ -619,12 +600,12 @@ void CharacterController::refreshMovementAnims(CharacterState movement, Characte
 
         if (!mAnimation->hasAnimation(movementAnimName))
         {
+            if (!mCurrentMovement.empty())
+                resetCurrentIdleState();
             resetCurrentMovementState();
             return;
         }
     }
-
-    mMovementState = movement;
 
     // If we're playing the same animation, start it from the point it ended
     float startpoint = 0.f;
@@ -635,15 +616,6 @@ void CharacterController::refreshMovementAnims(CharacterState movement, Characte
 
     clearStateAnimation(mCurrentMovement);
     mCurrentMovement = movementAnimName;
-
-    // Reset idle if we actually play movement animations excepts of these cases:
-    // 1. When we play turning animations
-    // 2. When we use a fallback animation for lower body since movement animation for given weapon is missing (e.g. for crossbows and spellcasting)
-    if (!isTurning() && movemask == MWRender::Animation::BlendMask_All)
-    {
-        resetCurrentIdleState();
-        idle = CharState_None;
-    }
 
     // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
     // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
@@ -689,10 +661,11 @@ void CharacterController::refreshIdleAnims(CharacterState idle, bool force)
     // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
     // the idle animation should be displayed
     if (((mUpperBodyState != UpperCharState_Nothing && mUpperBodyState != UpperCharState_WeapEquiped)
-            || (mMovementState != CharState_None && !isTurning())
-            || mHitState != CharState_None)
-            && !mPtr.getClass().isBipedal(mPtr))
-        idle = CharState_None;
+       || mMovementState != CharState_None || mHitState != CharState_None) && !mPtr.getClass().isBipedal(mPtr))
+    {
+        resetCurrentIdleState();
+        return;
+    }
 
     if (!force && idle == mIdleState && (mAnimation->isPlaying(mCurrentIdle) || !mAnimQueue.empty()))
         return;
@@ -755,9 +728,9 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (isPersistentAnimPlaying())
         return;
 
-    refreshHitRecoilAnims(idle);
-    refreshJumpAnims(jump, idle, force);
-    refreshMovementAnims(movement, idle, force);
+    refreshHitRecoilAnims();
+    refreshJumpAnims(jump, force);
+    refreshMovementAnims(movement, force);
 
     // idle handled last as it can depend on the other states
     refreshIdleAnims(idle, force);
@@ -1958,10 +1931,8 @@ void CharacterController::update(float duration)
             vec = osg::Vec3f();
 
         CharacterState movestate = CharState_None;
-        CharacterState idlestate = CharState_SpecialIdle;
+        CharacterState idlestate = CharState_None;
         JumpingState jumpstate = JumpState_None;
-
-        bool forcestateupdate = false;
 
         mHasMovedInXY = std::abs(vec.x())+std::abs(vec.y()) > 0.0f;
         isrunning = isrunning && mHasMovedInXY;
@@ -2038,8 +2009,6 @@ void CharacterController::update(float duration)
         if(!onground && !flying && !inwater && solid)
         {
             // In the air (either getting up —ascending part of jump— or falling).
-
-            forcestateupdate = (mJumpState != JumpState_InAir);
             jumpstate = JumpState_InAir;
 
             static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->mValue.getFloat();
@@ -2067,12 +2036,8 @@ void CharacterController::update(float duration)
         }
         else if(mJumpState == JumpState_InAir && !inwater && !flying && solid)
         {
-            forcestateupdate = true;
             jumpstate = JumpState_Landing;
             vec.z() = 0.0f;
-
-            // We should reset idle animation during landing
-            clearStateAnimation(mCurrentIdle);
 
             float height = cls.getCreatureStats(mPtr).land(isPlayer);
             float healthLost = getFallDamage(mPtr, height);
@@ -2226,8 +2191,11 @@ void CharacterController::update(float duration)
             }
         }
 
-        if(movestate != CharState_None && !isTurning())
+        if (movestate != CharState_None)
+        {
             clearAnimQueue();
+            jumpstate = JumpState_None;
+        }
 
         if(mAnimQueue.empty() || inwater || (sneak && mIdleState != CharState_SpecialIdle))
         {
@@ -2243,9 +2211,7 @@ void CharacterController::update(float duration)
 
         if (!mSkipAnim)
         {
-            forcestateupdate = updateState(idlestate) || forcestateupdate;
-
-            refreshCurrentAnims(idlestate, movestate, jumpstate, forcestateupdate);
+            refreshCurrentAnims(idlestate, movestate, jumpstate, updateState(idlestate));
             updateIdleStormState(inwater);
         }
 
