@@ -14,6 +14,7 @@
 #include "serialization.hpp"
 #include "dbrefgeometryobject.hpp"
 #include "navmeshdbutils.hpp"
+#include "recastparams.hpp"
 
 #include <components/misc/convert.hpp>
 #include <components/bullethelpers/processtrianglecallback.hpp>
@@ -102,7 +103,7 @@ namespace
 
     float getHeight(const RecastSettings& settings,const osg::Vec3f& agentHalfExtents)
     {
-        return 2.0f * agentHalfExtents.z() * settings.mRecastScaleFactor;
+        return getAgentHeight(agentHalfExtents) * settings.mRecastScaleFactor;
     }
 
     float getMaxClimb(const RecastSettings& settings)
@@ -112,7 +113,7 @@ namespace
 
     float getRadius(const RecastSettings& settings, const osg::Vec3f& agentHalfExtents)
     {
-        return std::max(agentHalfExtents.x(), agentHalfExtents.y()) * std::sqrt(2) * settings.mRecastScaleFactor;
+        return getAgentRadius(agentHalfExtents) * settings.mRecastScaleFactor;
     }
 
     float getSwimLevel(const RecastSettings& settings, const float waterLevel, const float agentHalfExtentsZ)

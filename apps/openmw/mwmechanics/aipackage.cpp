@@ -114,8 +114,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     const osg::Vec3f position = actor.getRefData().getPosition().asVec3(); //position of the actor
     MWBase::World* world = MWBase::Environment::get().getWorld();
 
-    const osg::Vec3f halfExtents = world->getHalfExtents(actor);
-
     /// Stops the actor when it gets too close to a unloaded cell
     //... At current time, this test is unnecessary. AI shuts down when actor is more than "actors processing range" setting value
     //... units from player, and exterior cells are 8192 units long and wide.
@@ -124,7 +122,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     {
         actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-        world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
+        world->updateActorPath(actor, mPathFinder.getPath(), world->getPathfindingHalfExtents(actor), position, dest);
         return false;
     }
 
@@ -180,6 +178,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         }
     }
 
+    const osg::Vec3f halfExtents = world->getHalfExtents(actor);
     const float pointTolerance = getPointTolerance(actor.getClass().getMaxSpeed(actor), duration, halfExtents);
 
     static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
@@ -198,7 +197,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     else if (mPathFinder.getPath().empty())
         return false;
 
-    world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
+    world->updateActorPath(actor, mPathFinder.getPath(), world->getPathfindingHalfExtents(actor), position, dest);
 
     if (mRotateOnTheRunChecks == 0
         || isReachableRotatingOnTheRun(actor, *mPathFinder.getPath().begin())) // to prevent circling around a path point
