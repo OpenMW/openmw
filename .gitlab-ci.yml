@@ -514,10 +514,11 @@ macOS12_Xcode13:
     - .Windows_MSBuild_Base
   variables:
     config: "Release"
-  rules:
-    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-    - if: $CI_PIPELINE_SOURCE == "push"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+# temporarily disabled while this isn't the thing we link on the downloads page
+#  rules:
+#    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+#    - if: $CI_PIPELINE_SOURCE == "push"
+#    - if: $CI_PIPELINE_SOURCE == "schedule"
 
 .Windows_MSBuild_Debug:
   extends:
@@ -532,6 +533,12 @@ Windows_MSBuild_RelWithDebInfo:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+  # temporarily enabled while we're linking these on the downloads page
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
 
 Ubuntu_AndroidNDK_arm64-v8a:
   tags:
