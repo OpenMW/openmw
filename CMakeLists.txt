@@ -1,24 +1,31 @@
-project(OpenMW)
 cmake_minimum_required(VERSION 3.1.0)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-include(GNUInstallDirs)
 
 # for link time optimization, remove if cmake version is >= 3.9
 if(POLICY CMP0069) # LTO
-  cmake_policy(SET CMP0069 NEW)
+    cmake_policy(SET CMP0069 NEW)
 endif()
 
 # for position-independent executable, remove if cmake version is >= 3.14
 if(POLICY CMP0083)
-  cmake_policy(SET CMP0083 NEW)
+    cmake_policy(SET CMP0083 NEW)
 endif()
 
 # to link with freetype library
 if(POLICY CMP0079)
-  cmake_policy(SET CMP0079 NEW)
+    cmake_policy(SET CMP0079 NEW)
 endif()
+
+# don't add /W3 flag by default for MSVC
+if(POLICY CMP0092)
+    cmake_policy(SET CMP0092 NEW)
+endif()
+
+project(OpenMW)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(GNUInstallDirs)
 
 option(OPENMW_GL4ES_MANUAL_INIT "Manually initialize gl4es. This is more reliable on platforms without a windowing system. Requires gl4es to be configured with -DNOEGL=ON -DNO_LOADER=ON -DNO_INIT_CONSTRUCTOR=ON." OFF)
 if(OPENMW_GL4ES_MANUAL_INIT)
