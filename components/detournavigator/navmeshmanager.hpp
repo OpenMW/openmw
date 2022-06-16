@@ -7,7 +7,7 @@
 #include "recastmeshtiles.hpp"
 #include "waitconditiontype.hpp"
 #include "heightfieldshape.hpp"
-
+#include "agentbounds.hpp"
 
 #include <osg/Vec3f>
 
@@ -35,7 +35,7 @@ namespace DetourNavigator
 
         bool removeObject(const ObjectId id);
 
-        void addAgent(const osg::Vec3f& agentHalfExtents);
+        void addAgent(const AgentBounds& agentBounds);
 
         bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
 
@@ -45,19 +45,19 @@ namespace DetourNavigator
 
         bool removeHeightfield(const osg::Vec2i& cellPosition);
 
-        bool reset(const osg::Vec3f& agentHalfExtents);
+        bool reset(const AgentBounds& agentBounds);
 
         void addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end, const AreaType areaType);
 
         void removeOffMeshConnections(const ObjectId id);
 
-        void update(const osg::Vec3f& playerPosition, const osg::Vec3f& agentHalfExtents);
+        void update(const osg::Vec3f& playerPosition, const AgentBounds& agentBounds);
 
         void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
 
-        SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& agentHalfExtents) const;
+        SharedNavMeshCacheItem getNavMesh(const AgentBounds& agentBounds) const;
 
-        std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const;
+        std::map<AgentBounds, SharedNavMeshCacheItem> getNavMeshes() const;
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
 
@@ -69,11 +69,11 @@ namespace DetourNavigator
         TileCachedRecastMeshManager mRecastMeshManager;
         OffMeshConnectionsManager mOffMeshConnectionsManager;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;
-        std::map<osg::Vec3f, SharedNavMeshCacheItem> mCache;
-        std::map<osg::Vec3f, std::map<TilePosition, ChangeType>> mChangedTiles;
+        std::map<AgentBounds, SharedNavMeshCacheItem> mCache;
+        std::map<AgentBounds, std::map<TilePosition, ChangeType>> mChangedTiles;
         std::size_t mGenerationCounter = 0;
-        std::map<osg::Vec3f, TilePosition> mPlayerTile;
-        std::map<osg::Vec3f, std::size_t> mLastRecastMeshManagerRevision;
+        std::map<AgentBounds, TilePosition> mPlayerTile;
+        std::map<AgentBounds, std::size_t> mLastRecastMeshManagerRevision;
 
         void addChangedTiles(const btCollisionShape& shape, const btTransform& transform, const ChangeType changeType);
 
@@ -81,7 +81,7 @@ namespace DetourNavigator
 
         void addChangedTile(const TilePosition& tilePosition, const ChangeType changeType);
 
-        SharedNavMeshCacheItem getCached(const osg::Vec3f& agentHalfExtents) const;
+        SharedNavMeshCacheItem getCached(const AgentBounds& agentBounds) const;
     };
 }
 

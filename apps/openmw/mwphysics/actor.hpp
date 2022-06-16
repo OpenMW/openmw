@@ -6,6 +6,8 @@
 
 #include "ptrholder.hpp"
 
+#include <components/detournavigator/collisionshapetype.hpp>
+
 #include <LinearMath/btTransform.h>
 #include <osg/Vec3f>
 #include <osg/Quat>
@@ -156,6 +158,8 @@ namespace MWPhysics
 
         void setActive(bool value) { mActive = value; }
 
+        DetourNavigator::CollisionShapeType getCollisionShapeType() const { return mCollisionShapeType; }
+
     private:
         MWWorld::Ptr mStandingOnPtr;
         /// Removes then re-adds the collision object to the dynamics world
@@ -170,6 +174,8 @@ namespace MWPhysics
         bool mWalkingOnWater;
 
         bool mRotationallyInvariant;
+
+        DetourNavigator::CollisionShapeType mCollisionShapeType;
 
         std::unique_ptr<btCollisionShape> mShape;
         btConvexShape* mConvexShape;

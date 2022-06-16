@@ -95,7 +95,7 @@ namespace
 
     struct DetourNavigatorNavMeshTilesCacheTest : Test
     {
-        const osg::Vec3f mAgentHalfExtents {1, 2, 3};
+        const AgentBounds mAgentBounds {CollisionShapeType::Aabb, {1, 2, 3}};
         const TilePosition mTilePosition {0, 0};
         const std::size_t mGeneration = 0;
         const std::size_t mRevision = 0;
@@ -117,7 +117,7 @@ namespace
         const std::size_t maxSize = 0;
         NavMeshTilesCache cache(maxSize);
 
-        EXPECT_FALSE(cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh));
+        EXPECT_FALSE(cache.get(mAgentBounds, mTilePosition, mRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_for_not_enought_cache_size_should_return_empty_value)
@@ -125,7 +125,7 @@ namespace
         const std::size_t maxSize = 0;
         NavMeshTilesCache cache(maxSize);
 
-        EXPECT_FALSE(cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData)));
+        EXPECT_FALSE(cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData)));
         EXPECT_NE(mPreparedNavMeshData, nullptr);
     }
 
@@ -136,7 +136,7 @@ namespace
         const auto copy = clone(*mPreparedNavMeshData);
         ASSERT_EQ(*mPreparedNavMeshData, *copy);
 
-        const auto result = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        const auto result = cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
         ASSERT_TRUE(result);
         EXPECT_EQ(result.get(), *copy);
     }
@@ -148,9 +148,9 @@ namespace
         auto copy = clone(*mPreparedNavMeshData);
         const auto sameCopy = clone(*mPreparedNavMeshData);
 
-        cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
         EXPECT_EQ(mPreparedNavMeshData, nullptr);
-        const auto result = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(copy));
+        const auto result = cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(copy));
         ASSERT_TRUE(result);
         EXPECT_EQ(result.get(), *sameCopy);
     }
@@ -161,8 +161,8 @@ namespace
         NavMeshTilesCache cache(maxSize);
         const auto copy = clone(*mPreparedNavMeshData);
 
-        cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
-        const auto result = cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh);
+        cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        const auto result = cache.get(mAgentBounds, mTilePosition, mRecastMesh);
         ASSERT_TRUE(result);
         EXPECT_EQ(result.get(), *copy);
     }
@@ -171,10 +171,10 @@ namespace
     {
         const std::size_t maxSize = 1;
         NavMeshTilesCache cache(maxSize);
-        const osg::Vec3f unexsistentAgentHalfExtents {1, 1, 1};
+        const AgentBounds absentAgentBounds {CollisionShapeType::Aabb, {1, 1, 1}};
 
-        cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
-        EXPECT_FALSE(cache.get(unexsistentAgentHalfExtents, mTilePosition, mRecastMesh));
+        cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        EXPECT_FALSE(cache.get(absentAgentBounds, mTilePosition, mRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, get_for_cache_miss_by_tile_position_should_return_empty_value)
@@ -183,8 +183,8 @@ namespace
         NavMeshTilesCache cache(maxSize);
         const TilePosition unexistentTilePosition {1, 1};
 
-        cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
-        EXPECT_FALSE(cache.get(mAgentHalfExtents, unexistentTilePosition, mRecastMesh));
+        cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        EXPECT_FALSE(cache.get(mAgentBounds, unexistentTilePosition, mRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, get_for_cache_miss_by_recast_mesh_should_return_empty_value)
@@ -194,8 +194,8 @@ namespace
         const std::vector<CellWater> water(1, CellWater {osg::Vec2i(), Water {1, 0.0f}});
         const RecastMesh unexistentRecastMesh(mGeneration, mRevision, mMesh, water, mHeightfields, mFlatHeightfields, mSources);
 
-        cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
-        EXPECT_FALSE(cache.get(mAgentHalfExtents, mTilePosition, unexistentRecastMesh));
+        cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        EXPECT_FALSE(cache.get(mAgentBounds, mTilePosition, unexistentRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_replace_unused_value)
@@ -208,12 +208,12 @@ namespace
         auto anotherPreparedNavMeshData = makePeparedNavMeshData(3);
         const auto copy = clone(*anotherPreparedNavMeshData);
 
-        cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
-        const auto result = cache.set(mAgentHalfExtents, mTilePosition, anotherRecastMesh,
+        cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        const auto result = cache.set(mAgentBounds, mTilePosition, anotherRecastMesh,
                                       std::move(anotherPreparedNavMeshData));
         ASSERT_TRUE(result);
         EXPECT_EQ(result.get(), *copy);
-        EXPECT_FALSE(cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh));
+        EXPECT_FALSE(cache.get(mAgentBounds, mTilePosition, mRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_not_replace_used_value)
@@ -225,9 +225,9 @@ namespace
         const RecastMesh anotherRecastMesh(mGeneration, mRevision, mMesh, water, mHeightfields, mFlatHeightfields, mSources);
         auto anotherPreparedNavMeshData = makePeparedNavMeshData(3);
 
-        const auto value = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh,
+        const auto value = cache.set(mAgentBounds, mTilePosition, mRecastMesh,
                                      std::move(mPreparedNavMeshData));
-        EXPECT_FALSE(cache.set(mAgentHalfExtents, mTilePosition, anotherRecastMesh,
+        EXPECT_FALSE(cache.set(mAgentBounds, mTilePosition, anotherRecastMesh,
                                std::move(anotherPreparedNavMeshData)));
     }
 
@@ -247,17 +247,17 @@ namespace
                     mHeightfields, mFlatHeightfields, mSources);
         auto mostRecentlySetData = makePeparedNavMeshData(3);
 
-        ASSERT_TRUE(cache.set(mAgentHalfExtents, mTilePosition, leastRecentlySetRecastMesh,
+        ASSERT_TRUE(cache.set(mAgentBounds, mTilePosition, leastRecentlySetRecastMesh,
                               std::move(leastRecentlySetData)));
-        ASSERT_TRUE(cache.set(mAgentHalfExtents, mTilePosition, mostRecentlySetRecastMesh,
+        ASSERT_TRUE(cache.set(mAgentBounds, mTilePosition, mostRecentlySetRecastMesh,
                               std::move(mostRecentlySetData)));
 
-        const auto result = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh,
+        const auto result = cache.set(mAgentBounds, mTilePosition, mRecastMesh,
                                       std::move(mPreparedNavMeshData));
         EXPECT_EQ(result.get(), *copy);
 
-        EXPECT_FALSE(cache.get(mAgentHalfExtents, mTilePosition, leastRecentlySetRecastMesh));
-        EXPECT_TRUE(cache.get(mAgentHalfExtents, mTilePosition, mostRecentlySetRecastMesh));
+        EXPECT_FALSE(cache.get(mAgentBounds, mTilePosition, leastRecentlySetRecastMesh));
+        EXPECT_TRUE(cache.get(mAgentBounds, mTilePosition, mostRecentlySetRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_replace_unused_least_recently_used_value)
@@ -277,28 +277,28 @@ namespace
         auto mostRecentlyUsedData = makePeparedNavMeshData(3);
         const auto mostRecentlyUsedCopy = clone(*mostRecentlyUsedData);
 
-        cache.set(mAgentHalfExtents, mTilePosition, leastRecentlyUsedRecastMesh, std::move(leastRecentlyUsedData));
-        cache.set(mAgentHalfExtents, mTilePosition, mostRecentlyUsedRecastMesh, std::move(mostRecentlyUsedData));
+        cache.set(mAgentBounds, mTilePosition, leastRecentlyUsedRecastMesh, std::move(leastRecentlyUsedData));
+        cache.set(mAgentBounds, mTilePosition, mostRecentlyUsedRecastMesh, std::move(mostRecentlyUsedData));
 
         {
-            const auto value = cache.get(mAgentHalfExtents, mTilePosition, leastRecentlyUsedRecastMesh);
+            const auto value = cache.get(mAgentBounds, mTilePosition, leastRecentlyUsedRecastMesh);
             ASSERT_TRUE(value);
             ASSERT_EQ(value.get(), *leastRecentlyUsedCopy);
         }
 
         {
-            const auto value = cache.get(mAgentHalfExtents, mTilePosition, mostRecentlyUsedRecastMesh);
+            const auto value = cache.get(mAgentBounds, mTilePosition, mostRecentlyUsedRecastMesh);
             ASSERT_TRUE(value);
             ASSERT_EQ(value.get(), *mostRecentlyUsedCopy);
         }
 
         const auto copy = clone(*mPreparedNavMeshData);
-        const auto result = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh,
+        const auto result = cache.set(mAgentBounds, mTilePosition, mRecastMesh,
                                       std::move(mPreparedNavMeshData));
         EXPECT_EQ(result.get(), *copy);
 
-        EXPECT_FALSE(cache.get(mAgentHalfExtents, mTilePosition, leastRecentlyUsedRecastMesh));
-        EXPECT_TRUE(cache.get(mAgentHalfExtents, mTilePosition, mostRecentlyUsedRecastMesh));
+        EXPECT_FALSE(cache.get(mAgentBounds, mTilePosition, leastRecentlyUsedRecastMesh));
+        EXPECT_TRUE(cache.get(mAgentBounds, mTilePosition, mostRecentlyUsedRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_not_replace_unused_least_recently_used_value_when_item_does_not_not_fit_cache_max_size)
@@ -311,9 +311,9 @@ namespace
                     mHeightfields, mFlatHeightfields, mSources);
         auto tooLargeData = makePeparedNavMeshData(10);
 
-        cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
-        EXPECT_FALSE(cache.set(mAgentHalfExtents, mTilePosition, tooLargeRecastMesh, std::move(tooLargeData)));
-        EXPECT_TRUE(cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh));
+        cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        EXPECT_FALSE(cache.set(mAgentBounds, mTilePosition, tooLargeRecastMesh, std::move(tooLargeData)));
+        EXPECT_TRUE(cache.get(mAgentBounds, mTilePosition, mRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_not_replace_unused_least_recently_used_value_when_item_does_not_not_fit_size_of_unused_items)
@@ -331,15 +331,15 @@ namespace
                     mHeightfields, mFlatHeightfields, mSources);
         auto tooLargeData = makePeparedNavMeshData(10);
 
-        const auto value = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh,
+        const auto value = cache.set(mAgentBounds, mTilePosition, mRecastMesh,
                                      std::move(mPreparedNavMeshData));
         ASSERT_TRUE(value);
-        ASSERT_TRUE(cache.set(mAgentHalfExtents, mTilePosition, anotherRecastMesh,
+        ASSERT_TRUE(cache.set(mAgentBounds, mTilePosition, anotherRecastMesh,
                               std::move(anotherData)));
-        EXPECT_FALSE(cache.set(mAgentHalfExtents, mTilePosition, tooLargeRecastMesh,
+        EXPECT_FALSE(cache.set(mAgentBounds, mTilePosition, tooLargeRecastMesh,
                                std::move(tooLargeData)));
-        EXPECT_TRUE(cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh));
-        EXPECT_TRUE(cache.get(mAgentHalfExtents, mTilePosition, anotherRecastMesh));
+        EXPECT_TRUE(cache.get(mAgentBounds, mTilePosition, mRecastMesh));
+        EXPECT_TRUE(cache.get(mAgentBounds, mTilePosition, anotherRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, release_used_after_set_then_used_by_get_item_should_left_this_item_available)
@@ -351,14 +351,14 @@ namespace
         const RecastMesh anotherRecastMesh(mGeneration, mRevision, mMesh, water, mHeightfields, mFlatHeightfields, mSources);
         auto anotherData = makePeparedNavMeshData(3);
 
-        const auto firstCopy = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        const auto firstCopy = cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
         ASSERT_TRUE(firstCopy);
         {
-            const auto secondCopy = cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh);
+            const auto secondCopy = cache.get(mAgentBounds, mTilePosition, mRecastMesh);
             ASSERT_TRUE(secondCopy);
         }
-        EXPECT_FALSE(cache.set(mAgentHalfExtents, mTilePosition, anotherRecastMesh, std::move(anotherData)));
-        EXPECT_TRUE(cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh));
+        EXPECT_FALSE(cache.set(mAgentBounds, mTilePosition, anotherRecastMesh, std::move(anotherData)));
+        EXPECT_TRUE(cache.get(mAgentBounds, mTilePosition, mRecastMesh));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, release_twice_used_item_should_left_this_item_available)
@@ -370,14 +370,14 @@ namespace
         const RecastMesh anotherRecastMesh(mGeneration, mRevision, mMesh, water, mHeightfields, mFlatHeightfields, mSources);
         auto anotherData = makePeparedNavMeshData(3);
 
-        cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
-        const auto firstCopy = cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh);
+        cache.set(mAgentBounds, mTilePosition, mRecastMesh, std::move(mPreparedNavMeshData));
+        const auto firstCopy = cache.get(mAgentBounds, mTilePosition, mRecastMesh);
         ASSERT_TRUE(firstCopy);
         {
-            const auto secondCopy = cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh);
+            const auto secondCopy = cache.get(mAgentBounds, mTilePosition, mRecastMesh);
             ASSERT_TRUE(secondCopy);
         }
-        EXPECT_FALSE(cache.set(mAgentHalfExtents, mTilePosition, anotherRecastMesh, std::move(anotherData)));
-        EXPECT_TRUE(cache.get(mAgentHalfExtents, mTilePosition, mRecastMesh));
+        EXPECT_FALSE(cache.set(mAgentBounds, mTilePosition, anotherRecastMesh, std::move(anotherData)));
+        EXPECT_TRUE(cache.get(mAgentBounds, mTilePosition, mRecastMesh));
     }
 }

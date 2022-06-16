@@ -268,11 +268,11 @@ namespace MWMechanics
         {
             const MWBase::World* world = MWBase::Environment::get().getWorld();
             // Try to build path to the target.
-            const auto halfExtents = world->getPathfindingHalfExtents(actor);
+            const auto agentBounds = world->getPathfindingAgentBounds(actor);
             const auto navigatorFlags = getNavigatorFlags(actor);
             const auto areaCosts = getAreaCosts(actor);
             const auto pathGridGraph = getPathGridGraph(actor.getCell());
-            mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, halfExtents,
+            mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, agentBounds,
                                   navigatorFlags, areaCosts, storage.mAttackRange, PathType::Full);
 
             if (!mPathFinder.isPathConstructed())
@@ -280,12 +280,12 @@ namespace MWMechanics
                 // If there is no path, try to find a point on a line from the actor position to target projected
                 // on navmesh to attack the target from there.
                 const auto navigator = world->getNavigator();
-                const auto hit = DetourNavigator::raycast(*navigator, halfExtents, vActorPos, vTargetPos, navigatorFlags);
+                const auto hit = DetourNavigator::raycast(*navigator, agentBounds, vActorPos, vTargetPos, navigatorFlags);
 
                 if (hit.has_value() && (*hit - vTargetPos).length() <= rangeAttack)
                 {
                     // If the point is close enough, try to find a path to that point.
-                    mPathFinder.buildPath(actor, vActorPos, *hit, actor.getCell(), pathGridGraph, halfExtents,
+                    mPathFinder.buildPath(actor, vActorPos, *hit, actor.getCell(), pathGridGraph, agentBounds,
                                           navigatorFlags, areaCosts, storage.mAttackRange, PathType::Full);
                     if (mPathFinder.isPathConstructed())
                     {

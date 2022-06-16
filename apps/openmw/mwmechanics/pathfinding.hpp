@@ -18,6 +18,11 @@ namespace MWWorld
     class Ptr;
 }
 
+namespace DetourNavigator
+{
+    struct AgentBounds;
+}
+
 namespace MWMechanics
 {
     class PathgridGraph;
@@ -98,25 +103,26 @@ namespace MWMechanics
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
             void buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
-                const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
-                const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType);
-
-            void buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
+                const osg::Vec3f& endPoint, const DetourNavigator::AgentBounds& agentBounds,
                 const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
                 PathType pathType);
 
-            void buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor, const osg::Vec3f& halfExtents,
+            void buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph,
+                const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
+                const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType);
+
+            void buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor, const DetourNavigator::AgentBounds& agentBounds,
                 const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts);
 
             void buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
+                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
                 const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
                 PathType pathType);
 
             /// Remove front point if exist and within tolerance
             void update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,
-                        bool shortenIfAlmostStraight, bool canMoveByZ, const osg::Vec3f& halfExtents,
+                        bool shortenIfAlmostStraight, bool canMoveByZ, const DetourNavigator::AgentBounds& agentBounds,
                         const DetourNavigator::Flags flags);
 
             bool checkPathCompleted() const
@@ -219,7 +225,7 @@ namespace MWMechanics
                 const PathgridGraph& pathgridGraph, std::back_insert_iterator<std::deque<osg::Vec3f>> out);
 
             [[nodiscard]] DetourNavigator::Status buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor,
-                const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents,
+                const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const DetourNavigator::AgentBounds& agentBounds,
                 const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType,
                 std::back_insert_iterator<std::deque<osg::Vec3f>> out);
     };

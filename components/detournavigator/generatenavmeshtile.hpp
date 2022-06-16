@@ -3,6 +3,7 @@
 
 #include "recastmeshprovider.hpp"
 #include "tileposition.hpp"
+#include "agentbounds.hpp"
 
 #include <components/sceneutil/workqueue.hpp>
 
@@ -57,7 +58,7 @@ namespace DetourNavigator
     {
     public:
         GenerateNavMeshTile(std::string worldspace, const TilePosition& tilePosition,
-                RecastMeshProvider recastMeshProvider, const osg::Vec3f& agentHalfExtents, const Settings& settings,
+                RecastMeshProvider recastMeshProvider, const AgentBounds& agentBounds, const Settings& settings,
                 std::weak_ptr<NavMeshTileConsumer> consumer);
 
         void doWork() final;
@@ -66,7 +67,7 @@ namespace DetourNavigator
         const std::string mWorldspace;
         const TilePosition mTilePosition;
         const RecastMeshProvider mRecastMeshProvider;
-        const osg::Vec3f mAgentHalfExtents;
+        const AgentBounds mAgentBounds;
         const Settings& mSettings;
         std::weak_ptr<NavMeshTileConsumer> mConsumer;
 

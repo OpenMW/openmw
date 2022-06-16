@@ -4,6 +4,7 @@
 #include "tilebounds.hpp"
 #include "status.hpp"
 #include "recastmesh.hpp"
+#include "agentbounds.hpp"
 
 #include <osg/io_utils>
 
@@ -67,6 +68,21 @@ namespace DetourNavigator
             s << h << ", ";
         s << "}";
         return s << ", .mOriginalSize=" << v.mOriginalSize << "}";
+    }
+
+    inline std::ostream& operator<<(std::ostream& s, CollisionShapeType v)
+    {
+        switch (v)
+        {
+            case CollisionShapeType::Aabb: return s << "AgentShapeType::Aabb";
+            case CollisionShapeType::RotatingBox: return s << "AgentShapeType::RotatingBox";
+        }
+        return s << "AgentShapeType::" << static_cast<std::underlying_type_t<CollisionShapeType>>(v);
+    }
+
+    inline std::ostream& operator<<(std::ostream& s, const AgentBounds& v)
+    {
+        return s << "AgentBounds {" << v.mShapeType << ", " << v.mHalfExtents << "}";
     }
 
     class RecastMesh;

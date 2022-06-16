@@ -71,7 +71,7 @@ namespace MWMechanics
             const auto position = actor.getRefData().getPosition().asVec3();
             const bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
             const bool isFlyingCreature = actor.getClass().isPureFlyingCreature(actor);
-            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(actor).mHalfExtents;
             osg::Vec3f direction = destination - position;
             direction.normalize();
             const auto visibleDestination = (
@@ -210,10 +210,10 @@ namespace MWMechanics
             }
             else
             {
-                const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+                const auto agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(actor);
                 constexpr float endTolerance = 0;
                 mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(),
-                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor), getAreaCosts(actor),
+                    getPathGridGraph(actor.getCell()), agentBounds, getNavigatorFlags(actor), getAreaCosts(actor),
                     endTolerance, PathType::Full);
             }
 
@@ -345,7 +345,7 @@ namespace MWMechanics
         const bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
         const bool isFlyingCreature = actor.getClass().isPureFlyingCreature(actor);
         const auto world = MWBase::Environment::get().getWorld();
-        const auto halfExtents = world->getPathfindingHalfExtents(actor);
+        const auto agentBounds = world->getPathfindingAgentBounds(actor);
         const auto navigator = world->getNavigator();
         const auto navigatorFlags = getNavigatorFlags(actor);
         const auto areaCosts = getAreaCosts(actor);
@@ -358,7 +358,7 @@ namespace MWMechanics
             if (!isWaterCreature && !isFlyingCreature)
             {
                 // findRandomPointAroundCircle uses wanderDistance as limit for random and not as exact distance
-                if (const auto destination = DetourNavigator::findRandomPointAroundCircle(*navigator, halfExtents,
+                if (const auto destination = DetourNavigator::findRandomPointAroundCircle(*navigator, agentBounds,
                     mInitialActorPosition, wanderDistance, navigatorFlags, []() {
                         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
                         return Misc::Rng::rollProbability(prng);
@@ -385,7 +385,7 @@ namespace MWMechanics
             if (isWaterCreature || isFlyingCreature)
                 mPathFinder.buildStraightPath(mDestination);
             else
-                mPathFinder.buildPathByNavMesh(actor, currentPosition, mDestination, halfExtents, navigatorFlags,
+                mPathFinder.buildPathByNavMesh(actor, currentPosition, mDestination, agentBounds, navigatorFlags,
                                                areaCosts, endTolerance, PathType::Full);
 
             if (mPathFinder.isPathConstructed())
@@ -532,8 +532,8 @@ namespace MWMechanics
     {
         if (mUsePathgrid)
         {
-            const auto halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
-            mPathFinder.buildPathByNavMeshToNextPoint(actor, halfExtents, getNavigatorFlags(actor),
+            const auto agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(actor);
+            mPathFinder.buildPathByNavMeshToNextPoint(actor, agentBounds, getNavigatorFlags(actor),
                                                       getAreaCosts(actor));
         }
 

@@ -101,9 +101,9 @@ namespace
         return result;
     }
 
-    float getHeight(const RecastSettings& settings,const osg::Vec3f& agentHalfExtents)
+    float getHeight(const RecastSettings& settings,const AgentBounds& agentBounds)
     {
-        return getAgentHeight(agentHalfExtents) * settings.mRecastScaleFactor;
+        return getAgentHeight(agentBounds) * settings.mRecastScaleFactor;
     }
 
     float getMaxClimb(const RecastSettings& settings)
@@ -111,14 +111,14 @@ namespace
         return settings.mMaxClimb * settings.mRecastScaleFactor;
     }
 
-    float getRadius(const RecastSettings& settings, const osg::Vec3f& agentHalfExtents)
+    float getRadius(const RecastSettings& settings, const AgentBounds& agentBounds)
     {
-        return getAgentRadius(agentHalfExtents) * settings.mRecastScaleFactor;
+        return getAgentRadius(agentBounds) * settings.mRecastScaleFactor;
     }
 
     float getSwimLevel(const RecastSettings& settings, const float waterLevel, const float agentHalfExtentsZ)
     {
-        return waterLevel - settings.mSwimHeightScale * agentHalfExtentsZ - agentHalfExtentsZ;;
+        return waterLevel - settings.mSwimHeightScale * agentHalfExtentsZ - agentHalfExtentsZ;
     }
 
     struct RecastParams
@@ -131,13 +131,13 @@ namespace
         int mWalkableRadius = 0;
     };
 
-    RecastParams makeRecastParams(const RecastSettings& settings, const osg::Vec3f& agentHalfExtents)
+    RecastParams makeRecastParams(const RecastSettings& settings, const AgentBounds& agentBounds)
     {
         RecastParams result;
 
-        result.mWalkableHeight = static_cast<int>(std::ceil(getHeight(settings, agentHalfExtents) / settings.mCellHeight));
+        result.mWalkableHeight = static_cast<int>(std::ceil(getHeight(settings, agentBounds) / settings.mCellHeight));
         result.mWalkableClimb = static_cast<int>(std::floor(getMaxClimb(settings) / settings.mCellHeight));
-        result.mWalkableRadius = static_cast<int>(std::ceil(getRadius(settings, agentHalfExtents) / settings.mCellSize));
+        result.mWalkableRadius = static_cast<int>(std::ceil(getRadius(settings, agentBounds) / settings.mCellSize));
         result.mMaxEdgeLen = static_cast<int>(std::round(static_cast<float>(settings.mMaxEdgeLen) / settings.mCellSize));
         result.mSampleDist = settings.mDetailSampleDist < 0.9f ? 0 : settings.mCellSize * settings.mDetailSampleDist;
         result.mSampleMaxError = settings.mCellHeight * settings.mDetailSampleMaxError;
@@ -227,7 +227,7 @@ namespace
         );
     }
 
-    bool rasterizeTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const std::vector<CellWater>& water,
+    bool rasterizeTriangles(rcContext& context, float agentHalfExtentsZ, const std::vector<CellWater>& water,
         const RecastSettings& settings, const RecastParams& params, const TileBounds& realTileBounds, rcHeightfield& solid)
     {
         for (const CellWater& cellWater : water)
@@ -237,7 +237,7 @@ namespace
             {
                 const Rectangle rectangle {
                     toNavMeshCoordinates(settings, *intersection),
-                    toNavMeshCoordinates(settings, getSwimLevel(settings, cellWater.mWater.mLevel, agentHalfExtents.z()))
+                    toNavMeshCoordinates(settings, getSwimLevel(settings, cellWater.mWater.mLevel, agentHalfExtentsZ))
                 };
                 if (!rasterizeTriangles(context, rectangle, AreaType_water, params, solid))
                     return false;
@@ -277,12 +277,12 @@ namespace
         return true;
     }
 
-    bool rasterizeTriangles(rcContext& context, const TilePosition& tilePosition, const osg::Vec3f& agentHalfExtents,
+    bool rasterizeTriangles(rcContext& context, const TilePosition& tilePosition, float agentHalfExtentsZ,
         const RecastMesh& recastMesh, const RecastSettings& settings, const RecastParams& params, rcHeightfield& solid)
     {
         const TileBounds realTileBounds = makeRealTileBoundsWithBorder(settings, tilePosition);
         return rasterizeTriangles(context, recastMesh.getMesh(), settings, params, solid)
-            && rasterizeTriangles(context, agentHalfExtents, recastMesh.getWater(), settings, params, realTileBounds, solid)
+            && rasterizeTriangles(context, agentHalfExtentsZ, recastMesh.getWater(), settings, params, realTileBounds, solid)
             && rasterizeTriangles(context, recastMesh.getHeightfields(), settings, params, solid)
             && rasterizeTriangles(context, realTileBounds, recastMesh.getFlatHeightfields(), settings, params, solid);
     }
@@ -389,7 +389,7 @@ namespace
         return power;
     }
 
-    std::pair<float, float> getBoundsByZ(const RecastMesh& recastMesh, const osg::Vec3f& agentHalfExtents, const RecastSettings& settings)
+    std::pair<float, float> getBoundsByZ(const RecastMesh& recastMesh, float agentHalfExtentsZ, const RecastSettings& settings)
     {
         float minZ = 0;
         float maxZ = 0;
@@ -403,7 +403,7 @@ namespace
 
         for (const CellWater& water : recastMesh.getWater())
         {
-            const float swimLevel = getSwimLevel(settings, water.mWater.mLevel, agentHalfExtents.z());
+            const float swimLevel = getSwimLevel(settings, water.mWater.mLevel, agentHalfExtentsZ);
             minZ = std::min(minZ, swimLevel);
             maxZ = std::max(maxZ, swimLevel);
         }
@@ -431,19 +431,19 @@ namespace
 namespace DetourNavigator
 {
     std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
-        const TilePosition& tilePosition, const osg::Vec3f& agentHalfExtents, const RecastSettings& settings)
+        const TilePosition& tilePosition, const AgentBounds& agentBounds, const RecastSettings& settings)
     {
         rcContext context;
 
-        const auto [minZ, maxZ] = getBoundsByZ(recastMesh, agentHalfExtents, settings);
+        const auto [minZ, maxZ] = getBoundsByZ(recastMesh, agentBounds.mHalfExtents.z(), settings);
 
         rcHeightfield solid;
         initHeightfield(context, tilePosition, toNavMeshCoordinates(settings, minZ),
                         toNavMeshCoordinates(settings, maxZ), settings, solid);
 
-        const RecastParams params = makeRecastParams(settings, agentHalfExtents);
+        const RecastParams params = makeRecastParams(settings, agentBounds);
 
-        if (!rasterizeTriangles(context, tilePosition, agentHalfExtents, recastMesh, settings, params, solid))
+        if (!rasterizeTriangles(context, tilePosition, agentBounds.mHalfExtents.z(), recastMesh, settings, params, solid))
             return nullptr;
 
         rcFilterLowHangingWalkableObstacles(&context, params.mWalkableClimb, solid);
@@ -462,11 +462,11 @@ namespace DetourNavigator
     }
 
     NavMeshData makeNavMeshTileData(const PreparedNavMeshData& data,
-        const std::vector<OffMeshConnection>& offMeshConnections, const osg::Vec3f& agentHalfExtents,
+        const std::vector<OffMeshConnection>& offMeshConnections, const AgentBounds& agentBounds,
         const TilePosition& tile, const RecastSettings& settings)
     {
         const auto offMeshConVerts = getOffMeshVerts(offMeshConnections);
-        const std::vector<float> offMeshConRad(offMeshConnections.size(), getRadius(settings, agentHalfExtents));
+        const std::vector<float> offMeshConRad(offMeshConnections.size(), getRadius(settings, agentBounds));
         const std::vector<unsigned char> offMeshConDir(offMeshConnections.size(), 0);
         const std::vector<unsigned char> offMeshConAreas = getOffMeshConAreas(offMeshConnections);
         const std::vector<unsigned short> offMeshConFlags = getOffMeshFlags(offMeshConnections);
@@ -491,8 +491,8 @@ namespace DetourNavigator
         params.offMeshConFlags = offMeshConFlags.data();
         params.offMeshConUserID = nullptr;
         params.offMeshConCount = static_cast<int>(offMeshConnections.size());
-        params.walkableHeight = getHeight(settings, agentHalfExtents);
-        params.walkableRadius = getRadius(settings, agentHalfExtents);
+        params.walkableHeight = getHeight(settings, agentBounds);
+        params.walkableRadius = getRadius(settings, agentBounds);
         params.walkableClimb = getMaxClimb(settings);
         rcVcopy(params.bmin, data.mPolyMesh.bmin);
         rcVcopy(params.bmax, data.mPolyMesh.bmax);

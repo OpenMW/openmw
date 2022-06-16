@@ -13,7 +13,7 @@ namespace
 
     struct Key
     {
-        osg::Vec3f mAgentHalfExtents;
+        AgentBounds mAgentBounds;
         TilePosition mTilePosition;
         RecastMesh mRecastMesh;
     };
@@ -137,6 +137,7 @@ namespace
     template <class Random>
     Key generateKey(std::size_t triangles, Random& random)
     {
+        const CollisionShapeType agentShapeType = CollisionShapeType::Aabb;
         const osg::Vec3f agentHalfExtents = generateAgentHalfExtents(0.5, 1.5, random);
         const TilePosition tilePosition = generateVec2i(10000, random);
         const std::size_t generation = std::uniform_int_distribution<std::size_t>(0, 100)(random);
@@ -146,7 +147,7 @@ namespace
         generateWater(std::back_inserter(water), 1, random);
         RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water),
                               {generateHeightfield(random)}, {generateFlatHeightfield(random)}, {});
-        return Key {agentHalfExtents, tilePosition, std::move(recastMesh)};
+        return Key {AgentBounds {agentShapeType, agentHalfExtents}, tilePosition, std::move(recastMesh)};
     }
 
     constexpr std::size_t trianglesPerTile = 239;
@@ -165,7 +166,7 @@ namespace
         while (true)
         {
             Key key = generateKey(trianglesPerTile, random);
-            cache.set(key.mAgentHalfExtents, key.mTilePosition, key.mRecastMesh,
+            cache.set(key.mAgentBounds, key.mTilePosition, key.mRecastMesh,
                       std::make_unique<PreparedNavMeshData>());
             *out++ = std::move(key);
             const std::size_t newSize = cache.getStats().mNavMeshCacheSize;
@@ -188,7 +189,7 @@ namespace
         while (state.KeepRunning())
         {
             const auto& key = keys[n++ % keys.size()];
-            const auto result = cache.get(key.mAgentHalfExtents, key.mTilePosition, key.mRecastMesh);
+            const auto result = cache.get(key.mAgentBounds, key.mTilePosition, key.mRecastMesh);
             benchmark::DoNotOptimize(result);
         }
     }
@@ -216,7 +217,7 @@ namespace
         while (state.KeepRunning())
         {
             const auto& key = keys[n++ % keys.size()];
-            const auto result = cache.set(key.mAgentHalfExtents, key.mTilePosition, key.mRecastMesh,
+            const auto result = cache.set(key.mAgentBounds, key.mTilePosition, key.mRecastMesh,
                                           std::make_unique<PreparedNavMeshData>());
             benchmark::DoNotOptimize(result);
         }

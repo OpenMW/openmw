@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATORSTUB_H
 
 #include "navigator.hpp"
+#include "settings.hpp"
 
 namespace Loading
 {
@@ -15,9 +16,9 @@ namespace DetourNavigator
     public:
         NavigatorStub() = default;
 
-        void addAgent(const osg::Vec3f& /*agentHalfExtents*/) override {}
+        void addAgent(const AgentBounds& /*agentBounds*/) override {}
 
-        void removeAgent(const osg::Vec3f& /*agentHalfExtents*/) override {}
+        void removeAgent(const AgentBounds& /*agentBounds*/) override {}
 
         void setWorldspace(std::string_view /*worldspace*/) override {}
 
@@ -80,14 +81,14 @@ namespace DetourNavigator
 
         void wait(Loading::Listener& /*listener*/, WaitConditionType /*waitConditionType*/) override {}
 
-        SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& /*agentHalfExtents*/) const override
+        SharedNavMeshCacheItem getNavMesh(const AgentBounds& /*agentBounds*/) const override
         {
             return mEmptyNavMeshCacheItem;
         }
 
-        std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const override
+        std::map<AgentBounds, SharedNavMeshCacheItem> getNavMeshes() const override
         {
-            return std::map<osg::Vec3f, SharedNavMeshCacheItem>();
+            return {};
         }
 
         const Settings& getSettings() const override

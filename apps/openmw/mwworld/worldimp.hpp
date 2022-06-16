@@ -727,14 +727,13 @@ namespace MWWorld
             DetourNavigator::Navigator* getNavigator() const override;
 
             void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
-                    const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const override;
+                const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end) const override;
 
             void removeActorPath(const MWWorld::ConstPtr& actor) const override;
 
             void setNavMeshNumberToRender(const std::size_t value) override;
 
-            /// Return physical half extents of the given actor to be used in pathfinding
-            osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const override;
+            DetourNavigator::AgentBounds getPathfindingAgentBounds(const MWWorld::ConstPtr& actor) const override;
 
             bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
 

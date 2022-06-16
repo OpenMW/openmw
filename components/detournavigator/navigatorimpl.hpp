@@ -18,9 +18,9 @@ namespace DetourNavigator
          */
         explicit NavigatorImpl(const Settings& settings, std::unique_ptr<NavMeshDb>&& db);
 
-        void addAgent(const osg::Vec3f& agentHalfExtents) override;
+        void addAgent(const AgentBounds& agentBounds) override;
 
-        void removeAgent(const osg::Vec3f& agentHalfExtents) override;
+        void removeAgent(const AgentBounds& agentBounds) override;
 
         void setWorldspace(std::string_view worldspace) override;
 
@@ -56,9 +56,9 @@ namespace DetourNavigator
 
         void wait(Loading::Listener& listener, WaitConditionType waitConditionType) override;
 
-        SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& agentHalfExtents) const override;
+        SharedNavMeshCacheItem getNavMesh(const AgentBounds& agentBounds) const override;
 
-        std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const override;
+        std::map<AgentBounds, SharedNavMeshCacheItem> getNavMeshes() const override;
 
         const Settings& getSettings() const override;
 
@@ -73,7 +73,7 @@ namespace DetourNavigator
         NavMeshManager mNavMeshManager;
         bool mUpdatesEnabled;
         std::optional<TilePosition> mLastPlayerPosition;
-        std::map<osg::Vec3f, std::size_t> mAgents;
+        std::map<AgentBounds, std::size_t> mAgents;
         std::unordered_map<ObjectId, ObjectId> mAvoidIds;
         std::unordered_map<ObjectId, ObjectId> mWaterIds;
 

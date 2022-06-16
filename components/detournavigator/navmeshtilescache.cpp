@@ -10,14 +10,14 @@ namespace DetourNavigator
         : mMaxNavMeshDataSize(maxNavMeshDataSize), mUsedNavMeshDataSize(0), mFreeNavMeshDataSize(0),
           mHitCount(0), mGetCount(0) {}
 
-    NavMeshTilesCache::Value NavMeshTilesCache::get(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
+    NavMeshTilesCache::Value NavMeshTilesCache::get(const AgentBounds& agentBounds, const TilePosition& changedTile,
         const RecastMesh& recastMesh)
     {
         const std::lock_guard<std::mutex> lock(mMutex);
 
         ++mGetCount;
 
-        const auto tile = mValues.find(std::make_tuple(agentHalfExtents, changedTile, recastMesh));
+        const auto tile = mValues.find(std::make_tuple(agentBounds, changedTile, recastMesh));
         if (tile == mValues.end())
             return Value();
 
@@ -28,7 +28,7 @@ namespace DetourNavigator
         return Value(*this, tile->second);
     }
 
-    NavMeshTilesCache::Value NavMeshTilesCache::set(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
+    NavMeshTilesCache::Value NavMeshTilesCache::set(const AgentBounds& agentBounds, const TilePosition& changedTile,
         const RecastMesh& recastMesh, std::unique_ptr<PreparedNavMeshData>&& value)
     {
         const auto itemSize = sizeof(RecastMesh) + getSize(recastMesh)
@@ -45,8 +45,8 @@ namespace DetourNavigator
         RecastMeshData key {recastMesh.getMesh(), recastMesh.getWater(),
                     recastMesh.getHeightfields(), recastMesh.getFlatHeightfields()};
 
-        const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, std::move(key), itemSize);
-        const auto emplaced = mValues.emplace(std::make_tuple(agentHalfExtents, changedTile, std::cref(iterator->mRecastMeshData)), iterator);
+        const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentBounds, changedTile, std::move(key), itemSize);
+        const auto emplaced = mValues.emplace(std::make_tuple(agentBounds, changedTile, std::cref(iterator->mRecastMeshData)), iterator);
 
         if (!emplaced.second)
         {
@@ -92,7 +92,7 @@ namespace DetourNavigator
     {
         const auto& item = mFreeItems.back();
 
-        const auto value = mValues.find(std::make_tuple(item.mAgentHalfExtents, item.mChangedTile, std::cref(item.mRecastMeshData)));
+        const auto value = mValues.find(std::make_tuple(item.mAgentBounds, item.mChangedTile, std::cref(item.mRecastMeshData)));
         if (value == mValues.end())
             return;
 

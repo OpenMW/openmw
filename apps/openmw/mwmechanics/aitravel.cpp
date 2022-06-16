@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <components/esm3/aisequence.hpp>
+#include <components/detournavigator/agentbounds.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

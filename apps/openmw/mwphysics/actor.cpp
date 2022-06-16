@@ -57,7 +57,18 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     }
 
     mShape = std::make_unique<btBoxShape>(Misc::Convert::toBullet(mOriginalHalfExtents));
-    mRotationallyInvariant = (mMeshTranslation.x() == 0.0 && mMeshTranslation.y() == 0.0) && std::fabs(mOriginalHalfExtents.x() - mOriginalHalfExtents.y()) < 2.2;
+
+    if ((mMeshTranslation.x() == 0.0 && mMeshTranslation.y() == 0.0)
+            && std::fabs(mOriginalHalfExtents.x() - mOriginalHalfExtents.y()) < 2.2)
+    {
+        mRotationallyInvariant = true;
+        mCollisionShapeType = DetourNavigator::CollisionShapeType::Aabb;
+    }
+    else
+    {
+        mRotationallyInvariant = false;
+        mCollisionShapeType = DetourNavigator::CollisionShapeType::RotatingBox;
+    }
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
     mConvexShape->setMargin(0.001); // make sure bullet isn't using the huge default convex shape margin of 0.04

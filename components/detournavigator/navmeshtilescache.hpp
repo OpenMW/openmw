@@ -4,6 +4,7 @@
 #include "preparednavmeshdata.hpp"
 #include "recastmesh.hpp"
 #include "tileposition.hpp"
+#include "agentbounds.hpp"
 
 #include <atomic>
 #include <map>
@@ -52,16 +53,16 @@ namespace DetourNavigator
         struct Item
         {
             std::atomic<std::int64_t> mUseCount;
-            osg::Vec3f mAgentHalfExtents;
+            AgentBounds mAgentBounds;
             TilePosition mChangedTile;
             RecastMeshData mRecastMeshData;
             std::unique_ptr<PreparedNavMeshData> mPreparedNavMeshData;
             std::size_t mSize;
 
-            Item(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
+            Item(const AgentBounds& agentBounds, const TilePosition& changedTile,
                  RecastMeshData&& recastMeshData, std::size_t size)
                 : mUseCount(0)
-                , mAgentHalfExtents(agentHalfExtents)
+                , mAgentBounds(agentBounds)
                 , mChangedTile(changedTile)
                 , mRecastMeshData(std::move(recastMeshData))
                 , mSize(size)
@@ -136,10 +137,10 @@ namespace DetourNavigator
 
         NavMeshTilesCache(const std::size_t maxNavMeshDataSize);
 
-        Value get(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
+        Value get(const AgentBounds& agentBounds, const TilePosition& changedTile,
             const RecastMesh& recastMesh);
 
-        Value set(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
+        Value set(const AgentBounds& agentBounds, const TilePosition& changedTile,
             const RecastMesh& recastMesh, std::unique_ptr<PreparedNavMeshData>&& value);
 
         Stats getStats() const;
@@ -153,7 +154,7 @@ namespace DetourNavigator
         std::size_t mGetCount;
         std::list<Item> mBusyItems;
         std::list<Item> mFreeItems;
-        std::map<std::tuple<osg::Vec3f, TilePosition, std::reference_wrapper<const RecastMeshData>>, ItemIterator, std::less<>> mValues;
+        std::map<std::tuple<AgentBounds, TilePosition, std::reference_wrapper<const RecastMeshData>>, ItemIterator, std::less<>> mValues;
 
         void removeLeastRecentlyUsed();
 

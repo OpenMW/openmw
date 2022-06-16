@@ -1,20 +1,32 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTPARAMS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTPARAMS_H
 
+#include "agentbounds.hpp"
+
 #include <osg/Vec3f>
 
+#include <cassert>
 #include <cmath>
+#include <algorithm>
 
 namespace DetourNavigator
 {
-    inline float getAgentHeight(const osg::Vec3f& agentHalfExtents)
+    inline float getAgentHeight(const AgentBounds& agentBounds)
     {
-        return 2.0f * agentHalfExtents.z();
+        return 2.0f * agentBounds.mHalfExtents.z();
     }
 
-    inline float getAgentRadius(const osg::Vec3f& agentHalfExtents)
+    inline float getAgentRadius(const AgentBounds& agentBounds)
     {
-        return std::max(agentHalfExtents.x(), agentHalfExtents.y()) * std::sqrt(2);
+        switch (agentBounds.mShapeType)
+        {
+            case CollisionShapeType::Aabb:
+                return std::max(agentBounds.mHalfExtents.x(), agentBounds.mHalfExtents.y()) * std::sqrt(2);
+            case CollisionShapeType::RotatingBox:
+                return agentBounds.mHalfExtents.x();
+        }
+        assert(false && "Unsupported agent shape type");
+        return 0;
     }
 }
 

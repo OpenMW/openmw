@@ -9,6 +9,7 @@ namespace DetourNavigator
 {
     class NavMeshDb;
     struct Settings;
+    struct AgentBounds;
 }
 
 namespace NavMeshTool
@@ -22,7 +23,7 @@ namespace NavMeshTool
         NotEnoughSpace,
     };
 
-    Status generateAllNavMeshTiles(const osg::Vec3f& agentHalfExtents, const DetourNavigator::Settings& settings,
+    Status generateAllNavMeshTiles(const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Settings& settings,
         std::size_t threadsNumber, bool removeUnusedTiles, bool writeBinaryLog, WorldspaceData& cellsData,
         DetourNavigator::NavMeshDb&& db);
 }
