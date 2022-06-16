@@ -3,9 +3,7 @@
 #include <chrono>
 #include <thread>
 
-#include <QEvent>
-#include <QResizeEvent>
-#include <QTimer>
+#include <QMouseEvent>
 #include <QLayout>
 
 #include <extern/osgQt/GraphicsWindowQt>

@@ -1,4 +1,3 @@
-
 #include "coloursetting.hpp"
 
 #include <QLabel>

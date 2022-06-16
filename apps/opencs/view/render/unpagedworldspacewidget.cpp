@@ -2,8 +2,6 @@
 
 #include <sstream>
 
-#include <QEvent>
-
 #include <components/sceneutil/util.hpp>
 
 #include "../../model/doc/document.hpp"

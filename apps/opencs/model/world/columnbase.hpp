@@ -5,7 +5,6 @@
 #include <vector>
 #include <stdexcept>
 
-#include <Qt>
 #include <QVariant>
 
 #include "record.hpp"

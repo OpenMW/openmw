@@ -16,7 +16,6 @@
 #include "universalid.hpp"
 #include "nestedtablewrapper.hpp"
 
-class QModelIndex;
 class QAbstractItemModel;
 
 namespace CSMWorld

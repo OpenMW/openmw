@@ -1,7 +1,6 @@
 #ifndef DATADISPLAYDELEGATE_HPP
 #define DATADISPLAYDELEGATE_HPP
 
-#include <QTextOption>
 #include "enumdelegate.hpp"
 
 namespace CSMPrefs

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include <QApplication>
 #include <QStringList>
 
 #include "shortcut.hpp"

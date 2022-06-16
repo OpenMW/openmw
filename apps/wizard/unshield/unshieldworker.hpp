@@ -2,8 +2,6 @@
 #define UNSHIELDWORKER_HPP
 
 #include <QObject>
-#include <QThread>
-#include <QMutex>
 #include <QWaitCondition>
 #include <QReadWriteLock>
 #include <QStringList>

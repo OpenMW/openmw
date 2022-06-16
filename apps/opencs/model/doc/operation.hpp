@@ -6,7 +6,6 @@
 
 #include <QObject>
 #include <QTimer>
-#include <QStringList>
 
 #include "messages.hpp"
 

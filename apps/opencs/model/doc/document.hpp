@@ -7,7 +7,6 @@
 
 #include <QUndoStack>
 #include <QObject>
-#include <QTimer>
 
 #include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>

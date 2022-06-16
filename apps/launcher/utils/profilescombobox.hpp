@@ -4,7 +4,7 @@
 #include "components/contentselector/view/combobox.hpp"
 #include "lineedit.hpp"
 
-#include <QDebug>
+#include <QWidget>
 
 class QString;
 

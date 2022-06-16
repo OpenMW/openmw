@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include <QDragEnterEvent>
-#include <QRegExp>
 #include <QString>
 #include <QPainter>
 #include <QTextDocumentFragment>

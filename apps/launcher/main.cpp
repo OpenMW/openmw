@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <QTranslator>
-#include <QTextCodec>
 #include <QDir>
 
 #include <components/debug/debugging.hpp>

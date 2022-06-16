@@ -1,7 +1,6 @@
 #include "columnimp.hpp"
 
 #include <stdexcept>
-#include <QVector>
 
 namespace CSMWorld
 {

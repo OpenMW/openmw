@@ -1,7 +1,6 @@
 #include "newgame.hpp"
 
-#include <QApplication>
-#include <QDesktopWidget>
+#include <QGuiApplication>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QPushButton>

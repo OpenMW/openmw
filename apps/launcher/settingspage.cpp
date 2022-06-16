@@ -2,6 +2,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDebug>
 #include <QDir>
 
 #include "utils/textinputdialog.hpp"

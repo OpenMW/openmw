@@ -5,7 +5,6 @@
 
 #include <QComboBox>
 #include <QApplication>
-#include <QUndoStack>
 
 #include "../../model/world/commands.hpp"
 

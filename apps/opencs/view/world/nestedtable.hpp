@@ -1,8 +1,6 @@
 #ifndef CSV_WORLD_NESTEDTABLE_H
 #define CSV_WORLD_NESTEDTABLE_H
 
-#include <QEvent>
-
 #include "dragrecordtable.hpp"
 
 class QAction;

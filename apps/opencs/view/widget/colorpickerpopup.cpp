@@ -4,8 +4,8 @@
 #include <QPushButton>
 #include <QEvent>
 #include <QKeyEvent>
-#include <QLayout>
-#include <QStyleOption>
+#include <QStyleOptionButton>
+#include <QVBoxLayout>
 
 CSVWidget::ColorPickerPopup::ColorPickerPopup(QWidget *parent) 
     : QFrame(parent)

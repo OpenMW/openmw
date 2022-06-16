@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <QString>
-#include <QStyledItemDelegate>
 
 #include <components/esm/defs.hpp>
 

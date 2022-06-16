@@ -1,6 +1,5 @@
 #include "runner.hpp"
 
-#include <QApplication>
 #include <QDir>
 #include <QTemporaryFile>
 #include <QTextStream>

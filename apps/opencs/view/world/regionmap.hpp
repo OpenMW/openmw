@@ -4,9 +4,6 @@
 #include <cstddef>
 #include <vector>
 
-#include <QObject>
-#include <QTableView>
-
 #include "./dragrecordtable.hpp"
 
 class QAction;

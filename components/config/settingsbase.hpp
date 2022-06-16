@@ -5,7 +5,6 @@
 #include <QStringList>
 #include <QString>
 #include <QRegExp>
-#include <QMultiMap>
 
 namespace Config
 {

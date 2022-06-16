@@ -2,15 +2,15 @@
 
 #include <array>
 #include <string>
+#include <cmath>
 
-#include <components/config/gamesettings.hpp>
 #include <QFileDialog>
 #include <QCompleter>
 #include <QString>
+
+#include <components/config/gamesettings.hpp>
 #include <components/contentselector/view/contentselector.hpp>
 #include <components/contentselector/model/esmfile.hpp>
-
-#include <cmath>
 
 #include "utils/openalutil.hpp"
 

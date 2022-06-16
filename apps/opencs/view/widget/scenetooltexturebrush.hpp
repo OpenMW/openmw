@@ -1,18 +1,15 @@
 #ifndef CSV_WIDGET_SCENETOOLTEXTUREBRUSH_H
 #define CSV_WIDGET_SCENETOOLTEXTUREBRUSH_H
 
-#include <QIcon>
 #include <QFrame>
-#include <QModelIndex>
-
-#include <QWidget>
-#include <QLabel>
-#include <QSpinBox>
 #include <QGroupBox>
-#include <QSlider>
-#include <QEvent>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QModelIndex>
 #include <QPushButton>
+#include <QSlider>
+#include <QSpinBox>
+#include <QWidget>
 
 #ifndef Q_MOC_RUN
 #include "brushshapes.hpp"

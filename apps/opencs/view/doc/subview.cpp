@@ -2,7 +2,6 @@
 
 #include "view.hpp"
 
-#include <QShortcut>
 #include <QEvent>
 #include <QKeyEvent>
 

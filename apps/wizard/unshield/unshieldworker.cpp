@@ -1,16 +1,13 @@
 #include "unshieldworker.hpp"
 
 #include <QDebug>
-
 #include <QReadLocker>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QStringList>
 #include <QTextStream>
 #include <QTextCodec>
 #include <QFile>
 #include <QDir>
-#include <QDirIterator>
 
 Wizard::UnshieldWorker::UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject *parent) :
     QObject(parent),

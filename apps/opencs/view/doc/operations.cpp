@@ -1,7 +1,6 @@
 #include "operations.hpp"
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 
 #include "operation.hpp"
 

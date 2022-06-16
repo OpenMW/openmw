@@ -4,7 +4,7 @@
 
 #include <QProgressBar>
 #include <QPushButton>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 #include "../../model/doc/document.hpp"
 

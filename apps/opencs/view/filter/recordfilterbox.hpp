@@ -2,9 +2,6 @@
 #define CSV_FILTER_RECORDFILTERBOX_H
 
 #include <QWidget>
-#include <QtCore/qnamespace.h>
-
-#include <QHBoxLayout>
 
 #include "../../model/filter/node.hpp"
 

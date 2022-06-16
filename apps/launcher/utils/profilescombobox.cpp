@@ -1,7 +1,5 @@
-#include <QRegExpValidator>
 #include <QString>
 #include <QApplication>
-#include <QKeyEvent>
 
 #include "profilescombobox.hpp"
 

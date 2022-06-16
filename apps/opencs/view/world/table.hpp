@@ -4,8 +4,6 @@
 #include <vector>
 #include <string>
 
-#include <QEvent>
-
 #include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/universalid.hpp"

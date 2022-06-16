@@ -1,8 +1,7 @@
 #include "mainwizard.hpp"
 
 #include <QDebug>
-
-#include <QTime>
+#include <QDateTime>
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QDir>

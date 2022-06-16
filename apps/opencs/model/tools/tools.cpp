@@ -1,7 +1,5 @@
 #include "tools.hpp"
 
-#include <QThreadPool>
-
 #include "../doc/state.hpp"
 #include "../doc/operation.hpp"
 #include "../doc/document.hpp"

@@ -4,8 +4,6 @@
 #include <sstream>
 #include <string>
 
-#include <QMouseEvent>
-#include <QApplication>
 
 #include <components/misc/constants.hpp>
 

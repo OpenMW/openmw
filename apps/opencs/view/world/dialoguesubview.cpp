@@ -4,22 +4,18 @@
 #include <memory>
 #include <stdexcept>
 
-#include <QGridLayout>
-#include <QLabel>
-#include <QSize>
 #include <QAbstractItemModel>
-#include <QDoubleSpinBox>
-#include <QSpinBox>
-#include <QLineEdit>
-#include <QEvent>
-#include <QDataWidgetMapper>
 #include <QCheckBox>
-#include <QLineEdit>
-#include <QPlainTextEdit>
 #include <QComboBox>
+#include <QDataWidgetMapper>
+#include <QGridLayout>
 #include <QHeaderView>
-#include <QScrollBar>
+#include <QLabel>
+#include <QLineEdit>
 #include <QMenu>
+#include <QPlainTextEdit>
+#include <QScrollBar>
+#include <QSize>
 
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/columnbase.hpp"

@@ -1,8 +1,6 @@
 #include "graphicspage.hpp"
 
-#include <QDesktopWidget>
 #include <QMessageBox>
-#include <QDir>
 #include <QScreen>
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
