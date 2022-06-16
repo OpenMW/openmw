@@ -113,6 +113,7 @@
     Bug #6631: Fix ffmpeg avio API usage causing hangs in ffmpeg version 5
     Bug #6667: Pressing the Esc key while resting or waiting causes black screen.
     Bug #6670: Dialogue order is incorrect
+    Bug #6672: Garbage object refs in groundcover plugins like Vurt's grass plugins
     Bug #6680: object.cpp handles nodetree unsafely, memory access with dangling pointer
     Bug #6682: HitOnMe doesn't fire as intended
     Bug #6697: Shaders vertex lighting incorrectly clamped
