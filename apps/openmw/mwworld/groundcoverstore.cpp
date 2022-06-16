@@ -18,18 +18,25 @@ namespace MWWorld
         ESM::ReadersCache readers;
         const ::EsmLoader::EsmData content = ::EsmLoader::loadEsmData(query, groundcoverFiles, fileCollections, readers, encoder);
 
+        static constexpr std::string_view prefix = "grass\\";
         for (const ESM::Static& stat : statics)
         {
             std::string id = Misc::StringUtils::lowerCase(stat.mId);
-            mMeshCache[id] = Misc::StringUtils::lowerCase(
-                MWBase::Environment::get().getWindowManager()->correctMeshPath(stat.mModel));
+            std::string model = Misc::StringUtils::lowerCase(stat.mModel);
+            std::replace(model.begin(), model.end(), '/', '\\');
+            if (model.compare(0, prefix.size(), prefix) != 0)
+                continue;
+            mMeshCache[id] = MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
         }
 
         for (const ESM::Static& stat : content.mStatics)
         {
             std::string id = Misc::StringUtils::lowerCase(stat.mId);
-            mMeshCache[id] = Misc::StringUtils::lowerCase(
-                MWBase::Environment::get().getWindowManager()->correctMeshPath(stat.mModel));
+            std::string model = Misc::StringUtils::lowerCase(stat.mModel);
+            std::replace(model.begin(), model.end(), '/', '\\');
+            if (model.compare(0, prefix.size(), prefix) != 0)
+                continue;
+            mMeshCache[id] = MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
         }
 
         for (const ESM::Cell& cell : content.mCells)
