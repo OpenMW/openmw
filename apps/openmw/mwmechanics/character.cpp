@@ -390,7 +390,8 @@ void CharacterController::refreshHitRecoilAnims()
     // Cancel upper body animations
     if (isKnockedOut() || isKnockedDown())
     {
-        clearStateAnimation(mCurrentWeapon);
+        if (!mCurrentWeapon.empty())
+            mAnimation->disable(mCurrentWeapon);
         if (mUpperBodyState > UpperCharState_WeapEquiped)
         {
             mUpperBodyState = UpperCharState_WeapEquiped;
@@ -1148,7 +1149,8 @@ bool CharacterController::updateState(CharacterState idle)
     if (isStillWeapon && mWeaponType != weaptype && mUpperBodyState > UpperCharState_WeapEquiped)
     {
         forcestateupdate = true;
-        clearStateAnimation(mCurrentWeapon);
+        if (!mCurrentWeapon.empty())
+            mAnimation->disable(mCurrentWeapon);
         mUpperBodyState = UpperCharState_WeapEquiped;
         setAttackingOrSpell(false);
         mAnimation->showWeapons(true);
@@ -1310,7 +1312,8 @@ bool CharacterController::updateState(CharacterState idle)
 
         if (!ammunition && mUpperBodyState > UpperCharState_WeapEquiped)
         {
-            clearStateAnimation(mCurrentWeapon);
+            if (!mCurrentWeapon.empty())
+                mAnimation->disable(mCurrentWeapon);
             mUpperBodyState = UpperCharState_WeapEquiped;
         }
     }
@@ -1591,7 +1594,8 @@ bool CharacterController::updateState(CharacterState idle)
                 if (mWeaponType > ESM::Weapon::None)
                     mAnimation->showWeapons(true);
             }
-            clearStateAnimation(mCurrentWeapon);
+            if (!mCurrentWeapon.empty())
+                mAnimation->disable(mCurrentWeapon);
         }
     }
 
