@@ -332,18 +332,6 @@ macOS12_Xcode13:
   variables:
     CCACHE_SIZE: 3G
 
-variables: &engine-targets
-  targets: "openmw,openmw-iniimporter,openmw-launcher,openmw-wizard,openmw-navmeshtool,openmw-bulletobjecttool"
-  package: "Engine"
-
-variables: &cs-targets
-  targets: "openmw-cs,bsatool,esmtool,niftest,openmw-essimporter"
-  package: "CS"
-
-variables: &tests-targets
-  targets: "openmw_test_suite,openmw_detournavigator_navmeshtilescache_benchmark"
-  package: "Tests"
-
 .Windows_Ninja_Base:
   tags:
     - windows
@@ -384,17 +372,17 @@ variables: &tests-targets
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
-    - cmake --build . --config $config --target ($targets.Split(','))
+    - cmake --build . --config $config
     - ccache --show-stats
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
@@ -420,67 +408,32 @@ variables: &tests-targets
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-.Windows_Ninja_Engine_Release:
+.Windows_Ninja_Release:
   extends:
     - .Windows_Ninja_Base
   variables:
-    <<: *engine-targets
     config: "Release"
 
-.Windows_Ninja_Engine_Release_MultiView:
+.Windows_Ninja_Release_MultiView:
   extends:
     - .Windows_Ninja_Base
   variables:
-    <<: *engine-targets
     multiview: "-M"
     config: "Release"
 
-.Windows_Ninja_Engine_Debug:
+.Windows_Ninja_Debug:
   extends:
     - .Windows_Ninja_Base
   variables:
-    <<: *engine-targets
     config: "Debug"
 
-.Windows_Ninja_Engine_RelWithDebInfo:
+.Windows_Ninja_RelWithDebInfo:
   extends:
     - .Windows_Ninja_Base
   variables:
-    <<: *engine-targets
-    config: "RelWithDebInfo"
-
-.Windows_Ninja_CS_Release:
-  extends:
-    - .Windows_Ninja_Base
-  variables:
-    <<: *cs-targets
-    config: "Release"
-
-.Windows_Ninja_CS_Debug:
-  extends:
-    - .Windows_Ninja_Base
-  variables:
-    <<: *cs-targets
-    config: "Debug"
-
-.Windows_Ninja_CS_RelWithDebInfo:
-  extends:
-    - .Windows_Ninja_Base
-  variables:
-    <<: *cs-targets
-    config: "RelWithDebInfo"
-
-.Windows_Ninja_Tests_RelWithDebInfo:
-  extends: .Windows_Ninja_Base
-  stage: build
-  variables:
-    <<: *tests-targets
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
-  artifacts:
-    paths: []
-    expire_in: 1 minute
 
 .Windows_MSBuild_Base:
   tags:
@@ -520,17 +473,17 @@ variables: &tests-targets
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C $multiview
     - cd MSVC2019_64
-    - cmake --build . --config $config --target ($targets.Split(','))
+    - cmake --build . --config $config
     - ccache --show-stats
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${package}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
@@ -556,67 +509,36 @@ variables: &tests-targets
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-.Windows_MSBuild_Engine_Release:
+.Windows_MSBuild_Release:
   extends:
     - .Windows_MSBuild_Base
   variables:
-    <<: *engine-targets
     config: "Release"
-  rules:
-    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-    - if: $CI_PIPELINE_SOURCE == "push"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+# temporarily disabled while this isn't the thing we link on the downloads page
+#  rules:
+#    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+#    - if: $CI_PIPELINE_SOURCE == "push"
+#    - if: $CI_PIPELINE_SOURCE == "schedule"
 
-.Windows_MSBuild_Engine_Debug:
+.Windows_MSBuild_Debug:
   extends:
     - .Windows_MSBuild_Base
   variables:
-    <<: *engine-targets
     config: "Debug"
 
-Windows_MSBuild_Engine_RelWithDebInfo:
+Windows_MSBuild_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
-    <<: *engine-targets
-    config: "RelWithDebInfo"
-
-.Windows_MSBuild_CS_Release:
-  extends:
-    - .Windows_MSBuild_Base
-  variables:
-    <<: *cs-targets
-    config: "Release"
-  rules:
-    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-    - if: $CI_PIPELINE_SOURCE == "push"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-
-.Windows_MSBuild_CS_Debug:
-  extends:
-    - .Windows_MSBuild_Base
-  variables:
-    <<: *cs-targets
-    config: "Debug"
-
-Windows_MSBuild_CS_RelWithDebInfo:
-  extends:
-    - .Windows_MSBuild_Base
-  variables:
-    <<: *cs-targets
-    config: "RelWithDebInfo"
-
-.Windows_MSBuild_Tests_RelWithDebInfo:
-  extends: .Windows_MSBuild_Base
-  stage: build
-  variables:
-    <<: *tests-targets
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
-  artifacts:
-    paths: []
-    expire_in: 1 minute
+  # temporarily enabled while we're linking these on the downloads page
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
 
 Ubuntu_AndroidNDK_arm64-v8a:
   tags:
