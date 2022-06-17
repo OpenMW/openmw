@@ -672,38 +672,41 @@ void CharacterController::refreshIdleAnims(CharacterState idle, bool force)
         return;
 
     mIdleState = idle;
-    size_t numLoops = ~0ul;
 
     std::string idleGroup = idleStateToAnimGroup(mIdleState);
-
-    // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
-    // "idle"+weapon or "idle".
-    if ((mIdleState == CharState_IdleSwim || mIdleState == CharState_IdleSneak) && !mAnimation->hasAnimation(idleGroup))
-    {
-        mIdleState = CharState_Idle;
-        idleGroup = idleStateToAnimGroup(mIdleState);
-    }
-
-    MWRender::Animation::AnimPriority priority = getIdlePriority(mIdleState);
-
     if (idleGroup.empty())
     {
         resetCurrentIdleState();
         return;
     }
 
-    std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
-    if (mIdleState != CharState_IdleSwim && mIdleState != CharState_IdleSneak && mIdleState != CharState_None && !weapShortGroup.empty())
-    {
-        std::string weapIdleGroup = idleGroup + weapShortGroup;
-        if (!mAnimation->hasAnimation(weapIdleGroup))
-            weapIdleGroup = fallbackShortWeaponGroup(idleGroup);
-        idleGroup = weapIdleGroup;
+    MWRender::Animation::AnimPriority priority = getIdlePriority(mIdleState);
+    size_t numLoops = ~0ul;
 
-        // play until the Loop Stop key 2 to 5 times, then play until the Stop key
-        // this replicates original engine behavior for the "Idle1h" 1st-person animation
-        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        numLoops = 1 + Misc::Rng::rollDice(4, prng);
+    // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
+    // "idle"+weapon or "idle".
+    bool fallback = mIdleState != CharState_Idle && !mAnimation->hasAnimation(idleGroup);
+    if (fallback)
+    {
+        priority = getIdlePriority(CharState_Idle);
+        idleGroup = idleStateToAnimGroup(CharState_Idle);
+    }
+
+    if (fallback || mIdleState == CharState_Idle || mIdleState == CharState_SpecialIdle)
+    {
+        std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
+        if (!weapShortGroup.empty())
+        {
+            std::string weapIdleGroup = idleGroup + weapShortGroup;
+            if (!mAnimation->hasAnimation(weapIdleGroup))
+                weapIdleGroup = fallbackShortWeaponGroup(idleGroup);
+            idleGroup = weapIdleGroup;
+
+            // play until the Loop Stop key 2 to 5 times, then play until the Stop key
+            // this replicates original engine behavior for the "Idle1h" 1st-person animation
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            numLoops = 1 + Misc::Rng::rollDice(4, prng);
+        }
     }
 
     if (!mAnimation->hasAnimation(idleGroup))
