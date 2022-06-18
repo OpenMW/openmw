@@ -71,9 +71,9 @@ void Manager::saveUser(const std::string &file)
     parser.saveSettingsFile(file, mUserSettings);
 }
 
-std::string Manager::getString(const std::string &setting, const std::string &category)
+std::string Manager::getString(std::string_view setting, std::string_view category)
 {
-    CategorySettingValueMap::key_type key (category, setting);
+    const auto key = std::make_pair(category, setting);
     CategorySettingValueMap::iterator it = mUserSettings.find(key);
     if (it != mUserSettings.end())
         return it->second;
@@ -82,11 +82,13 @@ std::string Manager::getString(const std::string &setting, const std::string &ca
     if (it != mDefaultSettings.end())
         return it->second;
 
-    throw std::runtime_error(std::string("Trying to retrieve a non-existing setting: ") + setting
-                             + ".\nMake sure the defaults.bin file was properly installed.");
+    std::string error("Trying to retrieve a non-existing setting: ");
+    error += setting;
+    error += ".\nMake sure the defaults.bin file was properly installed.";
+    throw std::runtime_error(error);
 }
 
-float Manager::getFloat (const std::string& setting, const std::string& category)
+float Manager::getFloat(std::string_view setting, std::string_view category)
 {
     const std::string& value = getString(setting, category);
     std::stringstream stream(value);
@@ -95,7 +97,7 @@ float Manager::getFloat (const std::string& setting, const std::string& category
     return number;
 }
 
-double Manager::getDouble (const std::string& setting, const std::string& category)
+double Manager::getDouble(std::string_view setting, std::string_view category)
 {
     const std::string& value = getString(setting, category);
     std::stringstream stream(value);
@@ -104,7 +106,7 @@ double Manager::getDouble (const std::string& setting, const std::string& catego
     return number;
 }
 
-int Manager::getInt (const std::string& setting, const std::string& category)
+int Manager::getInt(std::string_view setting, std::string_view category)
 {
     const std::string& value = getString(setting, category);
     std::stringstream stream(value);
@@ -113,7 +115,7 @@ int Manager::getInt (const std::string& setting, const std::string& category)
     return number;
 }
 
-std::int64_t Manager::getInt64 (const std::string& setting, const std::string& category)
+std::int64_t Manager::getInt64(std::string_view setting, std::string_view category)
 {
     const std::string& value = getString(setting, category);
     std::stringstream stream(value);
@@ -122,13 +124,13 @@ std::int64_t Manager::getInt64 (const std::string& setting, const std::string& c
     return number;
 }
 
-bool Manager::getBool (const std::string& setting, const std::string& category)
+bool Manager::getBool(std::string_view setting, std::string_view category)
 {
     const std::string& string = getString(setting, category);
     return Misc::StringUtils::ciEqual(string, "true");
 }
 
-osg::Vec2f Manager::getVector2 (const std::string& setting, const std::string& category)
+osg::Vec2f Manager::getVector2(std::string_view setting, std::string_view category)
 {
     const std::string& value = getString(setting, category);
     std::stringstream stream(value);
@@ -139,7 +141,7 @@ osg::Vec2f Manager::getVector2 (const std::string& setting, const std::string& c
     return {x, y};
 }
 
-osg::Vec3f Manager::getVector3 (const std::string& setting, const std::string& category)
+osg::Vec3f Manager::getVector3(std::string_view setting, std::string_view category)
 {
     const std::string& value = getString(setting, category);
     std::stringstream stream(value);
@@ -150,73 +152,67 @@ osg::Vec3f Manager::getVector3 (const std::string& setting, const std::string& c
     return {x, y, z};
 }
 
-void Manager::setString(const std::string &setting, const std::string &category, const std::string &value)
+void Manager::setString(std::string_view setting, std::string_view category, const std::string &value)
 {
-    CategorySettingValueMap::key_type key (category, setting);
-
-    auto found = mUserSettings.find(key);
+    auto found = mUserSettings.find(std::make_pair(category, setting));
     if (found != mUserSettings.end())
     {
         if (found->second == value)
             return;
     }
 
+    CategorySettingValueMap::key_type key(category, setting);
+
     mUserSettings[key] = value;
 
-    mChangedSettings.insert(key);
+    mChangedSettings.insert(std::move(key));
 }
 
-void Manager::setInt (const std::string& setting, const std::string& category, const int value)
+void Manager::setInt(std::string_view setting, std::string_view category, const int value)
 {
     std::ostringstream stream;
     stream << value;
     setString(setting, category, stream.str());
 }
 
-void Manager::setInt64 (const std::string& setting, const std::string& category, const std::int64_t value)
+void Manager::setInt64(std::string_view setting, std::string_view category, const std::int64_t value)
 {
     std::ostringstream stream;
     stream << value;
     setString(setting, category, stream.str());
 }
 
-void Manager::setFloat (const std::string &setting, const std::string &category, const float value)
+void Manager::setFloat (std::string_view setting, std::string_view category, const float value)
 {
     std::ostringstream stream;
     stream << value;
     setString(setting, category, stream.str());
 }
 
-void Manager::setDouble (const std::string &setting, const std::string &category, const double value)
+void Manager::setDouble (std::string_view setting, std::string_view category, const double value)
 {
     std::ostringstream stream;
     stream << value;
     setString(setting, category, stream.str());
 }
 
-void Manager::setBool(const std::string &setting, const std::string &category, const bool value)
+void Manager::setBool(std::string_view setting, std::string_view category, const bool value)
 {
     setString(setting, category, value ? "true" : "false");
 }
 
-void Manager::setVector2 (const std::string &setting, const std::string &category, const osg::Vec2f value)
+void Manager::setVector2 (std::string_view setting, std::string_view category, const osg::Vec2f value)
 {
     std::ostringstream stream;
     stream << value.x() << " " << value.y();
     setString(setting, category, stream.str());
 }
 
-void Manager::setVector3 (const std::string &setting, const std::string &category, const osg::Vec3f value)
+void Manager::setVector3 (std::string_view setting, std::string_view category, const osg::Vec3f value)
 {
     std::ostringstream stream;
     stream << value.x() << ' ' << value.y() << ' ' << value.z();
     setString(setting, category, stream.str());
-}
-
-void Manager::resetPendingChange(const std::string &setting, const std::string &category)
-{
-    CategorySettingValueMap::key_type key (category, setting);
-    mChangedSettings.erase(key);
 }
 
 CategorySettingVector Manager::getPendingChanges()
