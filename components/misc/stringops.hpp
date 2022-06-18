@@ -62,7 +62,8 @@ public:
         return tolowermap[static_cast<unsigned char>(c)];
     }
 
-    static bool ciLess(const std::string &x, const std::string &y) {
+    static bool ciLess(std::string_view x, std::string_view y)
+    {
         return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end(), ci());
     }
 
@@ -96,10 +97,10 @@ public:
         return ciEqual(x, std::string_view(y, n - 1));
     }
 
-    static int ciCompareLen(const std::string &x, const std::string &y, size_t len)
+    static int ciCompareLen(std::string_view x, std::string_view y, std::size_t len)
     {
-        std::string::const_iterator xit = x.begin();
-        std::string::const_iterator yit = y.begin();
+        std::string_view::const_iterator xit = x.begin();
+        std::string_view::const_iterator yit = y.begin();
         for(;xit != x.end() && yit != y.end() && len > 0;++xit,++yit,--len)
         {
             char left = *xit;
@@ -139,11 +140,12 @@ public:
 
     struct CiEqual
     {
-        bool operator()(const std::string& left, const std::string& right) const
+        bool operator()(std::string_view left, std::string_view right) const
         {
             return ciEqual(left, right);
         }
     };
+
     struct CiHash
     {
         std::size_t operator()(std::string str) const
@@ -152,9 +154,10 @@ public:
             return std::hash<std::string>{}(str);
         }
     };
+
     struct CiComp
     {
-        bool operator()(const std::string& left, const std::string& right) const
+        bool operator()(std::string_view left, std::string_view right) const
         {
             return ciLess(left, right);
         }
@@ -216,20 +219,20 @@ public:
     }
 
     template <class Container>
-    static inline void split(const std::string& str, Container& cont, const std::string& delims = " ")
+    static inline void split(std::string_view str, Container& cont, std::string_view delims = " ")
     {
-        std::size_t current, previous = 0;
-        current = str.find_first_of(delims);
+        std::size_t current = str.find_first_of(delims);
+        std::size_t previous = 0;
         while (current != std::string::npos)
         {
-            cont.push_back(str.substr(previous, current - previous));
+            cont.emplace_back(str.substr(previous, current - previous));
             previous = current + 1;
             current = str.find_first_of(delims, previous);
         }
-        cont.push_back(str.substr(previous, current - previous));
+        cont.emplace_back(str.substr(previous, current - previous));
     }
 
-    static inline void replaceLast(std::string& str, const std::string& substr, const std::string& with)
+    static inline void replaceLast(std::string& str, std::string_view substr, std::string_view with)
     {
         size_t pos = str.rfind(substr);
         if (pos == std::string::npos)
