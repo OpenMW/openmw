@@ -42,7 +42,14 @@ add_component_dir (l10n
     )
 
 add_component_dir (settings
-    settings parser
+    categories
+    parser
+    sanitizer
+    sanitizerimpl
+    settings
+    settingvalue
+    shadermanager
+    values
     )
 
 add_component_dir (bsa
