@@ -34,7 +34,7 @@ namespace VFS
                 if(std::filesystem::is_directory (*i))
                     continue;
 
-                std::u8string proper = i->path ().u8string ();
+                auto proper = i->path ().u8string ();
 
                 FileSystemArchiveFile file(std::string((char*)proper.c_str(), proper.size()));
 
