@@ -681,7 +681,7 @@ void CharacterController::refreshIdleAnims(CharacterState idle, bool force)
     }
 
     MWRender::Animation::AnimPriority priority = getIdlePriority(mIdleState);
-    size_t numLoops = ~0ul;
+    size_t numLoops = std::numeric_limits<size_t>::max();
 
     // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
     // "idle"+weapon or "idle".
