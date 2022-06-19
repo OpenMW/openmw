@@ -74,12 +74,12 @@ namespace
 
     double convertToCells(double unitRadius)
     {
-        return std::round((unitRadius + 1024) / CellSizeInUnits);
+        return unitRadius / CellSizeInUnits;
     }
 
-    double convertToUnits(double CellGridRadius)
+    int convertToUnits(double CellGridRadius)
     {
-        return CellSizeInUnits * CellGridRadius - 1024;
+        return static_cast<int>(CellSizeInUnits * CellGridRadius);
     }
 }
 
@@ -284,10 +284,10 @@ void Launcher::AdvancedPage::saveSettings()
         }
 
         saveSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
-        double viewingDistance = viewingDistanceComboBox->value();
-        if (viewingDistance != convertToCells(Settings::Manager::getInt("viewing distance", "Camera")))
+        int viewingDistance = convertToUnits(viewingDistanceComboBox->value());
+        if (viewingDistance != Settings::Manager::getInt("viewing distance", "Camera"))
         {
-            Settings::Manager::setInt("viewing distance", "Camera", convertToUnits(viewingDistance));
+            Settings::Manager::setInt("viewing distance", "Camera", viewingDistance);
         }
         double objectPagingMinSize = objectPagingMinSizeComboBox->value();
         if (objectPagingMinSize != Settings::Manager::getDouble("object paging min size", "Terrain"))
