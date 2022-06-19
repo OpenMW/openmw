@@ -575,26 +575,7 @@ namespace MWWorld
             return cellsPositionsToLoad;
         };
 
-        for(const auto& cell : mActiveCells)
-        {
-            cell->forEach([&](const MWWorld::Ptr& ptr)
-            {
-                if(ptr.mRef->mData.mPhysicsPostponed)
-                {
-                    ptr.mRef->mData.mPhysicsPostponed = false;
-                    if (ptr.mRef->mData.isEnabled() && ptr.mRef->mData.getCount() > 0)
-                    {
-                        std::string model = getModel(ptr, MWBase::Environment::get().getResourceSystem()->getVFS());
-                        if (!model.empty())
-                        {
-                            const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
-                            ptr.getClass().insertObjectPhysics(ptr, model, rotation, *mPhysics);
-                        }
-                    }
-                }
-                return true;
-            });
-        }
+        addPostponedPhysicsObjects();
 
         auto cellsPositionsToLoad = cellsToLoad(mActiveCells,mHalfGridSize);
 
@@ -635,6 +616,30 @@ namespace MWWorld
             mCellChanged = true;
 
         mNavigator.wait(*loadingListener, DetourNavigator::WaitConditionType::requiredTilesPresent);
+    }
+
+    void Scene::addPostponedPhysicsObjects()
+    {
+        for(const auto& cell : mActiveCells)
+        {
+            cell->forEach([&](const MWWorld::Ptr& ptr)
+            {
+                if(ptr.mRef->mData.mPhysicsPostponed)
+                {
+                    ptr.mRef->mData.mPhysicsPostponed = false;
+                    if (ptr.mRef->mData.isEnabled() && ptr.mRef->mData.getCount() > 0)
+                    {
+                        std::string model = getModel(ptr, MWBase::Environment::get().getResourceSystem()->getVFS());
+                        if (!model.empty())
+                        {
+                            const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
+                            ptr.getClass().insertObjectPhysics(ptr, model, rotation, *mPhysics);
+                        }
+                    }
+                }
+                return true;
+            });
+        }
     }
 
     void Scene::testExteriorCells()
