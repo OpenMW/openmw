@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_NIF_NODE_HPP
 #define OPENMW_COMPONENTS_NIF_NODE_HPP
 
+#include <osg/Plane>
+
 #include "controlled.hpp"
 #include "extra.hpp"
 #include "data.hpp"
@@ -21,6 +23,7 @@ struct NiBoundingVolume
 {
     enum Type
     {
+        BASE_BV = 0xFFFFFFFF,
         SPHERE_BV = 0,
         BOX_BV = 1,
         CAPSULE_BV = 2,
@@ -38,7 +41,7 @@ struct NiBoundingVolume
     struct NiBoxBV
     {
         osg::Vec3f center;
-        Matrix3 axis;
+        Matrix3 axes;
         osg::Vec3f extents;
     };
 
@@ -56,7 +59,8 @@ struct NiBoundingVolume
 
     struct NiHalfSpaceBV
     {
-        osg::Vec3f center, normal;
+        osg::Plane plane;
+        osg::Vec3f origin;
     };
 
     unsigned int type;
@@ -65,12 +69,14 @@ struct NiBoundingVolume
     NiCapsuleBV capsule;
     NiLozengeBV lozenge;
     std::vector<NiBoundingVolume> children;
-    NiHalfSpaceBV plane;
+    NiHalfSpaceBV halfSpace;
     void read(NIFStream* nif)
     {
         type = nif->getUInt();
         switch (type)
         {
+            case BASE_BV:
+                break;
             case SPHERE_BV:
             {
                 sphere.center = nif->getVector3();
@@ -80,7 +86,7 @@ struct NiBoundingVolume
             case BOX_BV:
             {
                 box.center = nif->getVector3();
-                box.axis = nif->getMatrix3();
+                box.axes = nif->getMatrix3();
                 box.extents = nif->getVector3();
                 break;
             }
@@ -95,8 +101,11 @@ struct NiBoundingVolume
             case LOZENGE_BV:
             {
                 lozenge.radius = nif->getFloat();
-                lozenge.extent0 = nif->getFloat();
-                lozenge.extent1 = nif->getFloat();
+                if (nif->getVersion() >= NIFStream::generateVersion(4,2,1,0))
+                {
+                    lozenge.extent0 = nif->getFloat();
+                    lozenge.extent1 = nif->getFloat();
+                }
                 lozenge.center = nif->getVector3();
                 lozenge.axis0 = nif->getVector3();
                 lozenge.axis1 = nif->getVector3();
@@ -114,8 +123,9 @@ struct NiBoundingVolume
             }
             case HALFSPACE_BV:
             {
-                plane.center = nif->getVector3();
-                plane.normal = nif->getVector3();
+                halfSpace.plane = osg::Plane(nif->getVector4());
+                if (nif->getVersion() >= NIFStream::generateVersion(4,2,1,0))
+                    halfSpace.origin = nif->getVector3();
                 break;
             }
             default:
