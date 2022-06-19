@@ -221,7 +221,7 @@ namespace MWWorld
             ///< Returns encumbrance re-scaled to capacity
 
             virtual bool consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const;
-            /// Consume an item, e. g. a potion.
+            ///< Consume an item, e. g. a potion.
 
             virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
