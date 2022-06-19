@@ -174,6 +174,8 @@ namespace MWWorld
             void removeObjectFromScene (const Ptr& ptr, bool keepActive = false);
             ///< Remove an object from the scene, but not from the world model.
 
+            void addPostponedPhysicsObjects();
+
             void removeFromPagedRefs(const Ptr &ptr);
 
             void updateObjectRotation(const Ptr& ptr, RotationOrder order);

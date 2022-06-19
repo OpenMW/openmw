@@ -881,7 +881,10 @@ namespace MWWorld
         }
 
         if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
+        {
             mWorldScene->removeObjectFromScene (reference);
+            mWorldScene->addPostponedPhysicsObjects();
+        }
     }
 
     void World::advanceTime (double hours, bool incremental)
