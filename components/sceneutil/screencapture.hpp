@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 
 namespace osg
 {
@@ -19,19 +20,20 @@ namespace SceneUtil
     class WorkQueue;
     class WorkItem;
 
-    std::string writeScreenshotToFile(const std::string& screenshotPath, const std::string& screenshotFormat,
-                                      const osg::Image& image);
+    std::filesystem::path writeScreenshotToFile(const std::filesystem::path& screenshotPath,
+                                                const std::string& screenshotFormat,
+                                                const osg::Image& image);
 
     class WriteScreenshotToFileOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation
     {
         public:
-            WriteScreenshotToFileOperation(const std::string& screenshotPath, const std::string& screenshotFormat,
+            WriteScreenshotToFileOperation(const std::filesystem::path &screenshotPath, const std::string& screenshotFormat,
                                            std::function<void (std::string)> callback);
 
             void operator()(const osg::Image& image, const unsigned int context_id) override;
 
         private:
-            const std::string mScreenshotPath;
+            const std::filesystem::path mScreenshotPath;
             const std::string mScreenshotFormat;
             const std::function<void (std::string)> mCallback;
     };

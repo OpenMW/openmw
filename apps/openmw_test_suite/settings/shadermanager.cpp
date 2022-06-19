@@ -17,7 +17,7 @@ namespace
         template <typename F>
         void withSettingsFile( const std::string& content, F&& f)
         {
-            std::string path = TestingOpenMW::outputFilePath(
+            auto path = TestingOpenMW::outputFilePath(
                 std::string(UnitTest::GetInstance()->current_test_info()->name()) + ".yaml");
 
             {

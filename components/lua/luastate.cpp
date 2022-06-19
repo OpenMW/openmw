@@ -26,21 +26,20 @@ namespace LuaUtil
             throw std::runtime_error("module not found: " + std::string(packageName));
     }
 
-    static std::string packageNameToPath(std::string_view packageName, const std::vector<std::string>& searchDirs)
+    static std::filesystem::path packageNameToPath(std::string_view packageName, const std::vector<std::filesystem::path> &searchDirs)
     {
         std::string path(packageName);
         std::replace(path.begin(), path.end(), '.', '/');
         std::string pathWithInit = path + "/init.lua";
         path.append(".lua");
-        for (const std::string& dir : searchDirs)
+        for (const auto& base : searchDirs)
         {
-            std::filesystem::path base(dir);
             std::filesystem::path p1 = base / path;
             if (std::filesystem::exists(p1))
-                return p1.string();
+                return p1;
             std::filesystem::path p2 = base / pathWithInit;
             if (std::filesystem::exists(p2))
-                return p2.string();
+                return p2;
         }
         throw std::runtime_error("module not found: " + std::string(packageName));
     }
@@ -270,8 +269,8 @@ namespace LuaUtil
 
     sol::function LuaState::loadInternalLib(std::string_view libName)
     {
-        std::string path = packageNameToPath(libName, mLibSearchPaths);
-        sol::load_result res = mLua.load_file(path, sol::load_mode::text);
+        const auto path = packageNameToPath(libName, mLibSearchPaths);
+        sol::load_result res = mLua.load_file(path.string(), sol::load_mode::text); //TODO(Project579): This will probably break in windows with unicode paths
         if (!res.valid())
             throw std::runtime_error("Lua error: " + res.get<std::string>());
         return res;

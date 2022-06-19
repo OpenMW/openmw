@@ -228,7 +228,7 @@ namespace EsmLoader
             for (std::size_t i = 0; i < contentFiles.size(); ++i)
             {
                 const std::string &file = contentFiles[i];
-                const std::string extension = Misc::StringUtils::lowerCase(std::filesystem::path(file).extension().string());
+                const std::string extension = Misc::StringUtils::lowerCase(std::filesystem::path(file).extension().string()); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
 
                 if (supportedFormats.find(extension) == supportedFormats.end())
                 {
@@ -247,7 +247,7 @@ namespace EsmLoader
                 const ESM::ReadersCache::BusyItem reader = readers.get(i);
                 reader->setEncoder(encoder);
                 reader->setIndex(static_cast<int>(i));
-                reader->open(collection.getPath(file).string());
+                reader->open(collection.getPath(file));
                 if (query.mLoadCells)
                     reader->resolveParentFileIndices(readers);
 

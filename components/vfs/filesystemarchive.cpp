@@ -10,7 +10,7 @@
 namespace VFS
 {
 
-    FileSystemArchive::FileSystemArchive(const std::string &path)
+    FileSystemArchive::FileSystemArchive(const std::filesystem::path &path)
         : mBuiltIndex(false)
         , mPath(path)
     {
@@ -21,31 +21,30 @@ namespace VFS
     {
         if (!mBuiltIndex)
         {
-            typedef std::filesystem::recursive_directory_iterator directory_iterator;
+            const auto str = mPath.string(); //TODO(Project579): This will probably break in windows with unicode paths
+            size_t prefix = str.size ();
 
-            directory_iterator end;
-
-            size_t prefix = mPath.size ();
-
-            if (mPath.size () > 0 && mPath [prefix - 1] != '\\' && mPath [prefix - 1] != '/')
+            if (!mPath.empty() && str [prefix - 1] != '\\' && str [prefix - 1] != '/')
                 ++prefix;
 
-            for (directory_iterator i (std::filesystem::u8path(mPath)); i != end; ++i)
+            for (const auto& i :
+                    std::filesystem::recursive_directory_iterator(mPath))
             {
-                if(std::filesystem::is_directory (*i))
+                if(std::filesystem::is_directory (i))
                     continue;
 
-                auto proper = i->path ().u8string ();
+                const auto& path = i.path ();
+                const auto& proper = path.string (); //TODO(Project579): This will probably break in windows with unicode paths
 
-                FileSystemArchiveFile file(std::string((char*)proper.c_str(), proper.size()));
+                FileSystemArchiveFile file(path);
 
                 std::string searchable;
 
-                std::transform(proper.begin() + prefix, proper.end(), std::back_inserter(searchable), normalize_function);
+                std::transform(std::next(proper.begin(), static_cast<std::string::difference_type>(prefix)), proper.end(), std::back_inserter(searchable), normalize_function);
 
                 const auto inserted = mIndex.insert(std::make_pair(searchable, file));
                 if (!inserted.second)
-                    Log(Debug::Warning) << "Warning: found duplicate file for '" << std::string((char*)proper.c_str(), proper.size()) << "', please check your file system for two files with the same name in different cases.";
+                    Log(Debug::Warning) << "Warning: found duplicate file for '" << proper << "', please check your file system for two files with the same name in different cases."; //TODO(Project579): This will probably break in windows with unicode paths
                 else
                     out[inserted.first->first] = &inserted.first->second;
             }
@@ -67,12 +66,12 @@ namespace VFS
 
     std::string FileSystemArchive::getDescription() const
     {
-        return std::string{"DIR: "} + mPath;
+        return std::string{"DIR: "} + mPath.string(); //TODO(Project579): This will probably break in windows with unicode paths
     }
 
     // ----------------------------------------------------------------------------------
 
-    FileSystemArchiveFile::FileSystemArchiveFile(const std::string &path)
+    FileSystemArchiveFile::FileSystemArchiveFile(const std::filesystem::path &path)
         : mPath(path)
     {
     }

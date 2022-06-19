@@ -22,13 +22,13 @@ void EsmLoader::load(const std::filesystem::path& filepath, int& index, Loading:
 
     reader->setEncoder(mEncoder);
     reader->setIndex(index);
-    reader->open(filepath.string());
+    reader->open(filepath);
     reader->resolveParentFileIndices(mReaders);
 
     assert(reader->getGameFiles().size() == reader->getParentFileIndices().size());
     for (std::size_t i = 0, n = reader->getParentFileIndices().size(); i < n; ++i)
         if (i == static_cast<std::size_t>(reader->getIndex()))
-            throw std::runtime_error("File " + reader->getName() + " asks for parent file "
+            throw std::runtime_error("File " + reader->getName().string() + " asks for parent file " //TODO(Project579): This will probably break in windows with unicode paths
                 + reader->getGameFiles()[i].name
                 + ", but it is not available or has been loaded in the wrong order. "
                   "Please run the launcher to fix this issue.");
@@ -36,8 +36,8 @@ void EsmLoader::load(const std::filesystem::path& filepath, int& index, Loading:
     mESMVersions[index] = reader->getVer();
     mStore.load(*reader, listener, mDialogue);
 
-    if (!mMasterFileFormat.has_value() && (Misc::StringUtils::ciEndsWith(reader->getName(), ".esm")
-                                           || Misc::StringUtils::ciEndsWith(reader->getName(), ".omwgame")))
+    if (!mMasterFileFormat.has_value() && (Misc::StringUtils::ciEndsWith(reader->getName().string(), ".esm") //TODO(Project579): This will probably break in windows with unicode paths
+                                           || Misc::StringUtils::ciEndsWith(reader->getName().string(), ".omwgame"))) //TODO(Project579): This will probably break in windows with unicode paths
         mMasterFileFormat = reader->getFormat();
 }
 

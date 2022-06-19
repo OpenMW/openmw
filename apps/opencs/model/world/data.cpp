@@ -88,7 +88,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
         defines[define.first] = define.second;
     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
-    mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
+    mResourceSystem->getSceneManager()->setShaderPath(resDir / "shaders");
 
     int index = 0;
 
@@ -969,7 +969,7 @@ int CSMWorld::Data::getTotalRecords (const std::vector<std::filesystem::path>& f
         if (!std::filesystem::exists(files[i]))
             continue;
 
-        reader->open(files[i].string());
+        reader->open(files[i]);
         records += reader->getRecordCount();
         reader->close();
     }
@@ -989,9 +989,9 @@ int CSMWorld::Data::startLoading (const std::filesystem::path& path, bool base, 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
     mReader->setIndex((project || !base) ? 0 : mReaderIndex++);
-    mReader->open (path.string());
+    mReader->open (path);
 
-    mContentFileNames.insert(std::make_pair(path.filename().string(), mReader->getIndex()));
+    mContentFileNames.insert(std::make_pair(path.filename().string(), mReader->getIndex())); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
 
     mBase = base;
     mProject = project;

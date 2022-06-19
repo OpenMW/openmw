@@ -143,7 +143,7 @@ namespace NavMeshTool
 
             const auto fsStrict = variables["fs-strict"].as<bool>();
             const auto resDir = variables["resources"].as<Files::MaybeQuotedPath>();
-            Version::Version v = Version::getOpenmwVersion(resDir.string());
+            Version::Version v = Version::getOpenmwVersion(resDir);
             Log(Debug::Info) << v.describe();
             dataDirs.insert(dataDirs.begin(), resDir / "vfs");
             const auto fileCollections = Files::Collections(dataDirs, !fsStrict);
@@ -179,9 +179,9 @@ namespace NavMeshTool
             const osg::Vec3f agentHalfExtents = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
             const DetourNavigator::AgentBounds agentBounds {agentCollisionShape, agentHalfExtents};
             const std::uint64_t maxDbFileSize = static_cast<std::uint64_t>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
-            const std::string dbPath = (config.getUserDataPath() / "navmesh.db").string();
+            const auto dbPath = config.getUserDataPath() / "navmesh.db";
 
-            DetourNavigator::NavMeshDb db(dbPath, maxDbFileSize);
+            DetourNavigator::NavMeshDb db(dbPath.string(), maxDbFileSize); //TODO(Project579): This will probably break in windows with unicode paths
 
             ESM::ReadersCache readers;
             EsmLoader::Query query;

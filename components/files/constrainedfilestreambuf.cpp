@@ -2,12 +2,13 @@
 
 #include <algorithm>
 #include <limits>
+#include <filesystem>
 
 namespace Files
 {
     namespace File = Platform::File;
-    
-    ConstrainedFileStreamBuf::ConstrainedFileStreamBuf(const std::string& fname, std::size_t start, std::size_t length)
+
+    ConstrainedFileStreamBuf::ConstrainedFileStreamBuf(const std::filesystem::path& fname, std::size_t start, std::size_t length)
         : mOrigin(start)
     {
         mFile = File::open(fname.c_str());

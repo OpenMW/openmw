@@ -42,7 +42,7 @@ namespace
         const Files::PathContainer mDataDirs {{std::string(OPENMW_DATA_DIR)}};
         const Files::Collections mFileCollections {mDataDirs, true};
         const std::string mContentFile = "template.omwgame";
-        const std::string mContentFilePath = mFileCollections.getCollection(".omwgame").getPath(mContentFile).string();
+        const std::filesystem::path mContentFilePath = mFileCollections.getCollection(".omwgame").getPath(mContentFile);
     };
 
     TEST_F(ESM3ReadersCacheWithContentFile, shouldKeepOpenReleasedOpenReader)

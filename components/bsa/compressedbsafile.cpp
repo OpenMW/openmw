@@ -119,7 +119,7 @@ void CompressedBSAFile::readHeader()
 {
     assert(!mIsLoaded);
 
-    std::ifstream input(std::filesystem::path(mFilename), std::ios_base::binary);
+    std::ifstream input(mFilepath, std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -299,17 +299,22 @@ void CompressedBSAFile::readHeader()
 
 CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string& str) const
 {
-    // Force-convert the path into something both Windows and UNIX can handle first
-    // to make sure Boost doesn't think the entire path is the filename on Linux
+#ifdef _WIN32
+    const auto& path = str;
+#else
+    // Force-convert the path into something UNIX can handle first
+    // to make sure std::filesystem::path doesn't think the entire path is the filename on Linux
     // and subsequently purge it to determine the file folder.
     std::string path = str;
     std::replace(path.begin(), path.end(), '\\', '/');
+#endif
 
     std::filesystem::path p(path);
     std::string stem = p.stem().string();
     std::string ext = p.extension().string();
-    
-    std::string folder = p.parent_path().string();
+    p.remove_filename();
+
+    std::string folder = p.string();
     std::uint64_t folderHash = generateHash(folder, std::string());
 
     auto it = mFolders.find(folderHash);

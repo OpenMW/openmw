@@ -33,7 +33,7 @@ void MWState::Character::addSlot (const std::filesystem::path& path, const std::
     slot.mTimeStamp = std::filesystem::last_write_time (path);
 
     ESM::ESMReader reader;
-    reader.open (slot.mPath.string());
+    reader.open (slot.mPath);
 
     if (reader.getRecName()!=ESM::REC_SAVE)
         return; // invalid save file -> ignore
@@ -91,13 +91,11 @@ MWState::Character::Character (std::filesystem::path saves, const std::string& g
     }
     else
     {
-        for (std::filesystem::directory_iterator iter (mPath); iter!=std::filesystem::directory_iterator(); ++iter)
+        for (const auto& iter : std::filesystem::directory_iterator (mPath))
         {
-            std::filesystem::path slotPath = *iter;
-
             try
             {
-                addSlot (slotPath, game);
+                addSlot (iter, game);
             }
             catch (...) {} // ignoring bad saved game files for now
         }

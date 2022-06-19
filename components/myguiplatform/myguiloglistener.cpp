@@ -8,9 +8,9 @@ namespace osgMyGUI
 {
     void CustomLogListener::open()
     {
-        mStream.open(std::filesystem::path(mFileName), std::ios_base::out);
+        mStream.open(mFileName, std::ios_base::out);
         if (!mStream.is_open())
-            Log(Debug::Error) << "Unable to create MyGUI log with path " << mFileName;
+            Log(Debug::Error) << "Unable to create MyGUI log with path " << mFileName; //TODO(Project579): This is broken on windows with unicode paths
     }
 
     void CustomLogListener::close()

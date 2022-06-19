@@ -11,7 +11,7 @@ namespace Files
     class ConstrainedFileStreamBuf final : public std::streambuf
     {
     public:
-        ConstrainedFileStreamBuf(const std::string& fname, std::size_t start, std::size_t length);
+        ConstrainedFileStreamBuf(const std::filesystem::path &fname, std::size_t start, std::size_t length);
 
         int_type underflow() final;
 

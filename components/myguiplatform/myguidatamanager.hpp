@@ -4,6 +4,7 @@
 #include <MyGUI_DataManager.h>
 
 #include <string>
+#include <filesystem>
 
 namespace VFS
 {
@@ -18,7 +19,7 @@ class DataManager : public MyGUI::DataManager
 public:
     explicit DataManager(const std::string& path, const VFS::Manager* vfs);
 
-    void setResourcePath(const std::string& path);
+    void setResourcePath(const std::filesystem::path &path);
 
     /** Get data stream from specified resource name.
         @param _name Resource name (usually file name).
@@ -47,7 +48,7 @@ public:
     const std::string& getDataPath(const std::string& _name) const override;
 
 private:
-    std::string mResourcePath;
+    std::filesystem::path mResourcePath;
 
     const VFS::Manager* mVfs;
 };

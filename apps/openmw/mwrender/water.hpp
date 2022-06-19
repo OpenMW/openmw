@@ -65,7 +65,7 @@ namespace MWRender
         osg::ref_ptr<Refraction> mRefraction;
         osg::ref_ptr<Reflection> mReflection;
 
-        const std::string mResourcePath;
+        const std::filesystem::path mResourcePath;
 
         bool mEnabled;
         bool mToggled;
@@ -90,7 +90,7 @@ namespace MWRender
     public:
         Water(osg::Group* parent, osg::Group* sceneRoot,
               Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
-              const std::string& resourcePath);
+              const std::filesystem::path& resourcePath);
         ~Water();
 
         void setCullCallback(osg::Callback* callback);

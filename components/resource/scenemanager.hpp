@@ -14,6 +14,7 @@
 #include "resourcemanager.hpp"
 
 #include <components/sceneutil/lightmanager.hpp>
+#include <filesystem>
 
 namespace Resource
 {
@@ -124,7 +125,7 @@ namespace Resource
         
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
 
-        void setShaderPath(const std::string& path);
+        void setShaderPath(const std::filesystem::path &path);
 
         /// Check if a given scene is loaded and if so, update its usage timestamp to prevent it from being unloaded
         bool checkLoaded(const std::string& name, double referenceTime);

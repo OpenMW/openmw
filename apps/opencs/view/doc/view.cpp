@@ -387,7 +387,7 @@ void CSVDoc::View::updateTitle()
 {
     std::ostringstream stream;
 
-    stream << mDocument->getSavePath().filename().string();
+    stream << mDocument->getSavePath().filename().string(); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
 
     if (mDocument->getState() & CSMDoc::State_Modified)
             stream << " *";
@@ -747,7 +747,7 @@ void CSVDoc::View::tutorial()
 void CSVDoc::View::infoAbout()
 {
     // Get current OpenMW version
-    QString versionInfo = (Version::getOpenmwVersionDescription(mDocument->getResourceDir().string())+
+    QString versionInfo = (Version::getOpenmwVersionDescription(mDocument->getResourceDir())+
 #if defined(__x86_64__) || defined(_M_X64)
     " (64-bit)").c_str();
 #else

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <optional>
-#include <string>
+#include <filesystem>
 
 #include <components/esm/format.hpp>
 
@@ -18,8 +18,8 @@ namespace EsmTool
 
         std::string mode;
         std::string encoding;
-        std::string filename;
-        std::string outname;
+        std::filesystem::path filename;
+        std::filesystem::path outname;
 
         std::vector<std::string> types;
         std::string name;

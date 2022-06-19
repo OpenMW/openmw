@@ -5,6 +5,8 @@
 
 #include <sol/sol.hpp>
 
+#include <filesystem>
+
 #include "configuration.hpp"
 
 namespace VFS
@@ -80,7 +82,7 @@ namespace LuaUtil
         const ScriptsConfiguration& getConfiguration() const { return *mConf; }
 
         // Load internal Lua library. All libraries are loaded in one sandbox and shouldn't be exposed to scripts directly.
-        void addInternalLibSearchPath(const std::string& path) { mLibSearchPaths.push_back(path); }
+        void addInternalLibSearchPath(const std::filesystem::path &path) { mLibSearchPaths.push_back(path); }
         sol::function loadInternalLib(std::string_view libName);
         sol::function loadFromVFS(const std::string& path);
         sol::environment newInternalLibEnvironment();
@@ -98,7 +100,7 @@ namespace LuaUtil
         std::map<std::string, sol::bytecode> mCompiledScripts;
         std::map<std::string, sol::object> mCommonPackages;
         const VFS::Manager* mVFS;
-        std::vector<std::string> mLibSearchPaths;
+        std::vector<std::filesystem::path> mLibSearchPaths;
     };
 
     // Should be used for every call of every Lua function.

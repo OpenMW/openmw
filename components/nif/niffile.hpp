@@ -31,7 +31,7 @@ struct File
 
     virtual bool getUseSkinning() const = 0;
 
-    virtual std::string getFilename() const = 0;
+    virtual std::filesystem::path getFilename() const = 0;
 
     virtual std::string getHash() const = 0;
 
@@ -50,7 +50,7 @@ class NIFFile final : public File
     unsigned int bethVer = 0;
 
     /// File name, used for error messages and opening the file
-    std::string filename;
+    std::filesystem::path filename;
     std::string hash;
 
     /// Record list
@@ -100,7 +100,7 @@ public:
     void warn(const std::string &msg) const;
 
     /// Open a NIF stream. The name is used for error messages.
-    NIFFile(Files::IStreamPtr&& stream, const std::string &name);
+    NIFFile(Files::IStreamPtr&& stream, const std::filesystem::path &name);
 
     /// Get a given record
     Record *getRecord(size_t index) const override
@@ -129,7 +129,7 @@ public:
     bool getUseSkinning() const override;
 
     /// Get the name of the file
-    std::string getFilename() const override { return filename; }
+    std::filesystem::path getFilename() const override { return filename; }
 
     std::string getHash() const override { return hash; }
 

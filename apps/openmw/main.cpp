@@ -61,7 +61,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         cfgMgr.readConfiguration(variables, desc, true);
 
-        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>());
         getRawStdout() << v.describe() << std::endl;
         return false;
     }
@@ -69,10 +69,10 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.readConfiguration(variables, desc);
     Settings::Manager::load(cfgMgr);
 
-    setupLogging(cfgMgr.getLogPath().string(), "OpenMW");
+    setupLogging(cfgMgr.getLogPath(), "OpenMW");
     MWGui::DebugWindow::startLogRecording();
 
-    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>());
     Log(Debug::Info) << v.describe();
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
@@ -150,7 +150,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setWarningsMode (variables["script-warn"].as<int>());
     engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
-    engine.setSaveGameFile (variables["load-savegame"].as<Files::MaybeQuotedPath>().string());
+    engine.setSaveGameFile (variables["load-savegame"].as<Files::MaybeQuotedPath>());
 
     // other settings
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);

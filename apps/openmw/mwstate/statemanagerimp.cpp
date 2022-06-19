@@ -305,7 +305,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             throw std::runtime_error("Write operation failed (file stream)");
 
         Settings::Manager::setString ("character", "Saves",
-            slot->mPath.parent_path().filename().string());
+            slot->mPath.parent_path().filename().string()); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
 
         const auto finish = std::chrono::steady_clock::now();
 
@@ -364,15 +364,15 @@ void MWState::StateManager::quickSave (std::string name)
     saveGame(name, saveFinder.getNextQuickSaveSlot());
 }
 
-void MWState::StateManager::loadGame(const std::string& filepath)
+void MWState::StateManager::loadGame(const std::filesystem::path &filepath)
 {
     for (const auto& character : mCharacterManager)
     {
         for (const auto& slot : character)
         {
-            if (slot.mPath == std::filesystem::path(filepath))
+            if (slot.mPath == filepath)
             {
-                loadGame(&character, slot.mPath.string());
+                loadGame(&character, slot.mPath);
                 return;
             }
         }
@@ -382,13 +382,13 @@ void MWState::StateManager::loadGame(const std::string& filepath)
     loadGame(character, filepath);
 }
 
-void MWState::StateManager::loadGame (const Character *character, const std::string& filepath)
+void MWState::StateManager::loadGame (const Character *character, const std::filesystem::path &filepath)
 {
     try
     {
         cleanup();
 
-        Log(Debug::Info) << "Reading save file " << std::filesystem::path(filepath).filename().string();
+        Log(Debug::Info) << "Reading save file " << filepath.filename(); //TODO(Project579): This will probably break in windows with unicode paths
 
         ESM::ESMReader reader;
         reader.open (filepath);
@@ -521,7 +521,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         if (character)
             Settings::Manager::setString ("character", "Saves",
-                                      character->getPath().filename().string());
+                                      character->getPath().filename().string()); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
         MWBase::Environment::get().getWorld()->saveLoaded();
@@ -593,7 +593,7 @@ void MWState::StateManager::quickLoad()
     {
         if (currentCharacter->begin() == currentCharacter->end())
             return;
-        loadGame (currentCharacter, currentCharacter->begin()->mPath.string()); //Get newest save
+        loadGame (currentCharacter, currentCharacter->begin()->mPath); //Get newest save
     }
 }
 
@@ -632,7 +632,7 @@ void MWState::StateManager::update (float duration)
             //Load last saved game for current character
 
             MWState::Slot lastSave = *curCharacter->begin();
-            loadGame(curCharacter, lastSave.mPath.string());
+            loadGame(curCharacter, lastSave.mPath);
         }
         else if(iButton==1)
         {

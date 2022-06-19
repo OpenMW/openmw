@@ -83,7 +83,7 @@ void CSMDoc::Runner::start (bool delayed)
         arguments << ("--script-run="+mStartup->fileName());
 
         arguments <<
-            QString::fromUtf8 (("--data=\""+mProjectPath.parent_path().string()+"\"").c_str());
+            QString::fromUtf8 (("--data=\""+mProjectPath.parent_path().string()+"\"").c_str()); //TODO(Project579): This will probably break in windows with unicode paths
 
         arguments << "--replace=content";
 
@@ -94,7 +94,7 @@ void CSMDoc::Runner::start (bool delayed)
         }
 
         arguments
-            << QString::fromUtf8 (("--content="+mProjectPath.filename().string()).c_str());
+            << QString::fromUtf8 (("--content="+mProjectPath.filename().string()).c_str()); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
 
         mProcess.start (path, arguments);
     }

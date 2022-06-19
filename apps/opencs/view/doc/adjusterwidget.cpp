@@ -68,14 +68,14 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
     }
     else
     {
-        std::filesystem::path path (name.toUtf8().data());
+        std::filesystem::path path (name.toUtf8().data()); //TODO(Project579): Replace with char8_t in C++20
 
-        std::string extension = Misc::StringUtils::lowerCase(path.extension().string());
+        std::string extension = Misc::StringUtils::lowerCase(path.extension().string()); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
 
         bool isLegacyPath = (extension == ".esm" ||
                              extension == ".esp");
 
-        bool isFilePathChanged = (path.parent_path().string() != mLocalData.string());
+        bool isFilePathChanged = (path.parent_path() != mLocalData);
 
         if (isLegacyPath)
             path.replace_extension (addon ? ".omwaddon" : ".omwgame");
@@ -85,7 +85,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
         if (!isFilePathChanged && !isLegacyPath)
         {
             // path already points to the local data directory
-            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
+            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());  //TODO(Project579): This is probably broken on windows with unicode paths
             mResultPath = path;
         }
         //in all other cases, ensure the path points to data-local and do an existing file check
@@ -95,7 +95,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
             if (isFilePathChanged)
                 path = mLocalData / path.filename();
 
-            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
+            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str()); //TODO(Project579): This is probably broken on windows with unicode paths
             mResultPath = path;
 
             if (std::filesystem::exists (path))

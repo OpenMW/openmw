@@ -155,9 +155,9 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
 
     if (!quiet)
     {
-        Log(Debug::Info) << "Logs dir: " << getUserConfigPath().string();
-        Log(Debug::Info) << "User data dir: " << mUserDataPath.string();
-        Log(Debug::Info) << "Screenshots dir: " << mScreenshotPath.string();
+        Log(Debug::Info) << "Logs dir: " << getUserConfigPath().string(); //TODO(Project579): This will probably break in windows with unicode paths
+        Log(Debug::Info) << "User data dir: " << mUserDataPath.string(); //TODO(Project579): This will probably break in windows with unicode paths
+        Log(Debug::Info) << "Screenshots dir: " << mScreenshotPath.string(); //TODO(Project579): This will probably break in windows with unicode paths
     }
 
     mSilent = silent;
@@ -270,7 +270,7 @@ void mergeComposingVariables(bpo::variables_map& first, bpo::variables_map& seco
 
 void ConfigurationManager::processPath(std::filesystem::path& path, const std::filesystem::path& basePath) const
 {
-    std::string str = path.string();
+    std::string str = path.string(); //TODO(Project579): This will probably break in windows with unicode paths
 
     if (str.empty() || str[0] != '?')
     {
@@ -285,7 +285,7 @@ void ConfigurationManager::processPath(std::filesystem::path& path, const std::f
         auto tokenIt = mTokensMapping.find(str.substr(0, pos + 1));
         if (tokenIt != mTokensMapping.end())
         {
-            std::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
+            std::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))()); //TODO(Project579): This will probably break in windows with unicode paths
             if (pos < str.length() - 1)
             {
                 // There is something after the token, so we should
@@ -293,7 +293,7 @@ void ConfigurationManager::processPath(std::filesystem::path& path, const std::f
                 tempPath /= str.substr(pos + 1, str.length() - pos);
             }
 
-            path = tempPath;
+            path = tempPath; //TODO(Project579): This will probably break in windows with unicode paths
         }
         else
         {
@@ -351,7 +351,7 @@ std::optional<bpo::variables_map> ConfigurationManager::loadConfig(
     if (std::filesystem::is_regular_file(cfgFile))
     {
         if (!mSilent)
-            Log(Debug::Info) << "Loading config file: " << cfgFile.string();
+            Log(Debug::Info) << "Loading config file: " << cfgFile.string(); //TODO(Project579): This will probably break in windows with unicode paths
 
         std::ifstream configFileStream(cfgFile);
 
@@ -438,7 +438,7 @@ std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPat
         if (istream && !istream.eof() && istream.peek() != EOF)
         {
             std::string remainder{std::istreambuf_iterator(istream), {}};
-            Log(Debug::Warning) << "Trailing data in path setting. Used '" << MaybeQuotedPath.string() << "' but '" << remainder << "' remained";
+            Log(Debug::Warning) << "Trailing data in path setting. Used '" << MaybeQuotedPath.string() << "' but '" << remainder << "' remained"; //TODO(Project579): This will probably break in windows with unicode paths
         }
     }
     else

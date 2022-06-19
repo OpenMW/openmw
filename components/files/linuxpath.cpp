@@ -51,9 +51,12 @@ namespace Files
 LinuxPath::LinuxPath(const std::string& application_name)
     : mName(application_name)
 {
-    std::filesystem::path localPath = getLocalPath();
-    if (chdir(localPath.string().c_str()) != 0)
-        Log(Debug::Warning) << "Error " << errno << " when changing current directory";
+    std::error_code ec;
+    current_path(getLocalPath(), ec);
+    const auto err = ec.value();
+    if (err != 0) {
+        Log(Debug::Warning) << "Error " << err << " " << std::strerror(err) << " when changing current directory";
+    }
 }
 
 std::filesystem::path LinuxPath::getUserConfigPath() const
@@ -79,18 +82,16 @@ std::filesystem::path LinuxPath::getGlobalConfigPath() const
 
 std::filesystem::path LinuxPath::getLocalPath() const
 {
-    std::filesystem::path localPath("./");
-    const char *statusPaths[] = {"/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file"};
+    auto localPath = std::filesystem::current_path();
+    static const std::filesystem::path statusPaths[] = {"/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file"};
 
-    for(const char *path : statusPaths)
+    for(const auto& path : statusPaths)
     {
-        std::filesystem::path statusPath(path);
-        if (!std::filesystem::exists(statusPath)) continue;
-
-        statusPath = std::filesystem::read_symlink(statusPath);
-        if (!std::filesystem::is_empty(statusPath))
+        std::error_code ec;
+        const auto binPath = read_symlink(path, ec);
+        if (ec.value() != -1)
         {
-            localPath = statusPath.parent_path() / "/";
+            localPath = binPath.parent_path();
             break;
         }
     }

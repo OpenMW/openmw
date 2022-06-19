@@ -1,6 +1,8 @@
 ﻿#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 
+#include <filesystem>
+
 #include "objectid.hpp"
 #include "sharednavmeshcacheitem.hpp"
 #include "recastmeshtiles.hpp"
@@ -10,7 +12,6 @@
 
 #include <components/resource/bulletshape.hpp>
 
-#include <string_view>
 
 namespace ESM
 {
@@ -195,7 +196,7 @@ namespace DetourNavigator
         virtual float getMaxNavmeshAreaRealRadius() const = 0;
     };
 
-    std::unique_ptr<Navigator> makeNavigator(const Settings& settings, const std::string& userDataPath);
+    std::unique_ptr<Navigator> makeNavigator(const Settings& settings, const std::filesystem::path& userDataPath);
 
     std::unique_ptr<Navigator> makeNavigatorStub();
 }

@@ -34,7 +34,7 @@ void CSMDoc::SavingState::start (Document& document, bool project)
     else
         mPath = document.getSavePath();
 
-    std::filesystem::path file (mPath.filename().string() + ".tmp");
+    std::filesystem::path file (mPath.filename().u8string() + u8".tmp");
 
     mTmpPath = mPath.parent_path();
 

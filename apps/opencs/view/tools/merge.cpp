@@ -102,7 +102,7 @@ void CSVTools::Merge::configure (CSMDoc::Document *document)
 
     for (std::vector<std::filesystem::path>::const_iterator iter (files.begin());
         iter!=files.end(); ++iter)
-        mFiles->addItem (QString::fromUtf8 (iter->filename().string().c_str()));
+        mFiles->addItem (QString::fromUtf8 (iter->filename().string().c_str())); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
 }
 
 void CSVTools::Merge::setLocalData (const std::filesystem::path& localData)

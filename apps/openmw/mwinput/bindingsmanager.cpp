@@ -43,8 +43,8 @@ namespace MWInput
     class InputControlSystem : public ICS::InputControlSystem
     {
     public:
-        InputControlSystem(const std::string& bindingsFile)
-            : ICS::InputControlSystem(bindingsFile, true, nullptr, nullptr, A_Last)
+        InputControlSystem(const std::filesystem::path &bindingsFile)
+            : ICS::InputControlSystem(bindingsFile.string(), true, nullptr, nullptr, A_Last) //TODO(Project579): This is probably broken on windows with unicode paths
         {
         }
     };
@@ -167,11 +167,11 @@ namespace MWInput
         bool mDetectingKeyboard;
     };
 
-    BindingsManager::BindingsManager(const std::string& userFile, bool userFileExists)
+    BindingsManager::BindingsManager(const std::filesystem::path &userFile, bool userFileExists)
         : mUserFile(userFile)
         , mDragDrop(false)
     {
-        std::string file = userFileExists ? userFile : "";
+        const auto file = userFileExists ? userFile : std::filesystem::path();
         mInputBinder = std::make_unique<InputControlSystem>(file);
         mListener = std::make_unique<BindingsListener>(mInputBinder.get(), this);
         mInputBinder->setDetectingBindingListener(mListener.get());
@@ -192,7 +192,7 @@ namespace MWInput
 
     BindingsManager::~BindingsManager()
     {
-        mInputBinder->save(mUserFile);
+        mInputBinder->save(mUserFile.string()); //TODO(Project579): This will probably break in windows with unicode paths
     }
 
     void BindingsManager::update(float dt)

@@ -22,7 +22,7 @@ namespace Nif
 {
 
 /// Open a NIF stream. The name is used for error messages.
-NIFFile::NIFFile(Files::IStreamPtr&& stream, const std::string &name)
+NIFFile::NIFFile(Files::IStreamPtr&& stream, const std::filesystem::path &name)
     : filename(name)
 {
     parse(std::move(stream));
@@ -316,7 +316,7 @@ void NIFFile::parse(Files::IStreamPtr&& stream)
         r = entry->second();
 
         if (!supportedVersion)
-            Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " (" << filename << ")";
+            Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " (" << filename << ")"; //TODO(Project579): This will probably break in windows with unicode paths
 
         assert(r != nullptr);
         assert(r->recType != RC_MISSING);

@@ -27,6 +27,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include <components/files/istreamptr.hpp>
 
@@ -85,7 +86,7 @@ protected:
     bool mIsLoaded;
 
     /// Used for error messages
-    std::string mFilename;
+    std::filesystem::path mFilepath;
 
     /// Error handling
     [[noreturn]] void fail(const std::string &msg);
@@ -110,7 +111,7 @@ public:
     }
 
     /// Open an archive file.
-    void open(const std::string &file);
+    void open(const std::filesystem::path &file);
 
     void close();
 
@@ -131,9 +132,9 @@ public:
     const FileList &getList() const
     { return mFiles; }
 
-    const std::string& getFilename() const
+    std::string getFilename() const
     {
-        return mFilename;
+        return mFilepath.string(); //TODO(Project579): This will probably break in windows with unicode paths
     }
 };
 

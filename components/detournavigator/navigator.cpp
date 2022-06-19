@@ -7,7 +7,7 @@
 
 namespace DetourNavigator
 {
-    std::unique_ptr<Navigator> makeNavigator(const Settings& settings, const std::string& userDataPath)
+    std::unique_ptr<Navigator> makeNavigator(const Settings& settings, const std::filesystem::path& userDataPath)
     {
         DetourNavigator::RecastGlobalAllocator::init();
 
@@ -16,7 +16,7 @@ namespace DetourNavigator
         {
             try
             {
-                db = std::make_unique<NavMeshDb>(userDataPath + "/navmesh.db", settings.mMaxDbFileSize);
+                db = std::make_unique<NavMeshDb>((userDataPath / "navmesh.db").string(), settings.mMaxDbFileSize); //TODO(Project579): This will probably break in windows with unicode paths
             }
             catch (const std::exception& e)
             {

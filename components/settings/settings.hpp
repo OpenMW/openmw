@@ -11,6 +11,7 @@
 
 #include <osg/Vec2f>
 #include <osg/Vec3f>
+#include <filesystem>
 
 namespace Files
 {
@@ -41,10 +42,10 @@ namespace Settings
         static void clear();
         ///< clears all settings and default settings
 
-        static std::string load(const Files::ConfigurationManager& cfgMgr, bool loadEditorSettings = false);
+        static std::filesystem::path load(const Files::ConfigurationManager& cfgMgr, bool loadEditorSettings = false);
         ///< load settings from all active config dirs. Returns the path of the last loaded file.
 
-        static void saveUser (const std::string& file);
+        static void saveUser (const std::filesystem::path &file);
         ///< save user settings to file
 
         static void resetPendingChanges();

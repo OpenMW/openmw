@@ -1527,8 +1527,8 @@ namespace MWScript
                     runtime.getContext().report("Exporting the entire scene graph will result in a large file. Confirm this action using 'showscenegraph 1' or select an object instead.");
                 else
                 {
-                    const std::string& filename = MWBase::Environment::get().getWorld()->exportSceneGraph(ptr);
-                    runtime.getContext().report("Wrote '" + filename + "'");
+                    const auto filename = MWBase::Environment::get().getWorld()->exportSceneGraph(ptr);
+                    runtime.getContext().report("Wrote '" + filename.string() + "'"); //TODO(Project579): This will probably break in windows with unicode paths
                 }
             }
         };

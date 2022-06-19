@@ -661,7 +661,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::filesystem::pat
 
     std::string section("");
     MwIniImporter::multistrmap map;
-    std::ifstream file((sfs::path(filename)));
+    std::ifstream file(filename);
     ToUTF8::Utf8Encoder encoder(mEncoding);
 
     std::string line;
@@ -721,7 +721,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::filesystem::pat
     std::cout << "load cfg file: " << filename << std::endl;
 
     MwIniImporter::multistrmap map;
-    std::ifstream file((sfs::path(filename)));
+    std::ifstream file(filename);
 
     std::string line;
     while (std::getline(file, line)) {
@@ -938,13 +938,13 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
     reader.setEncoder(&encoder);
     for (auto& file : contentFiles)
     {
-        reader.open(file.second.string());
+        reader.open(file.second);
         std::vector<std::string> dependencies;
         for (auto& gameFile : reader.getGameFiles())
         {
             dependencies.push_back(gameFile.name);
         }
-        unsortedFiles.emplace_back(std::filesystem::path(reader.getName()).filename().string(), dependencies);
+        unsortedFiles.emplace_back(reader.getName().filename().string(), dependencies); //TODO(Project579): This will probably break in windows with unicode paths
         reader.close();
     }
 

@@ -41,7 +41,7 @@ struct ContentFileTest : public ::testing::Test
             ESM::ESMReader lEsm;
             lEsm.setEncoder(nullptr);
             lEsm.setIndex(index);
-            lEsm.open(mContentFile.string());
+            lEsm.open(mContentFile);
             mEsmStore.load(lEsm, &dummyListener, dialogue);
 
             ++index;
@@ -109,7 +109,7 @@ TEST_F(ContentFileTest, dialogue_merging_test)
         return;
     }
 
-    const std::string file = TestingOpenMW::outputFilePath("test_dialogue_merging.txt");
+    const auto file = TestingOpenMW::outputFilePath("test_dialogue_merging.txt");
     std::ofstream stream(file);
 
     const MWWorld::Store<ESM::Dialogue>& dialStore = mEsmStore.get<ESM::Dialogue>();
@@ -124,7 +124,7 @@ TEST_F(ContentFileTest, dialogue_merging_test)
         stream << std::endl;
     }
 
-    std::cout << "dialogue_merging_test successful, results printed to " << file << std::endl;
+    std::cout << "dialogue_merging_test successful, results printed to " << file << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
 }
 
 // Note: here we don't test records that don't use string names (e.g. Land, Pathgrid, Cell)
@@ -189,12 +189,12 @@ TEST_F(ContentFileTest, content_diagnostics_test)
         return;
     }
 
-    const std::string file = TestingOpenMW::outputFilePath("test_content_diagnostics.txt");
+    const auto file = TestingOpenMW::outputFilePath("test_content_diagnostics.txt");
     std::ofstream stream(file);
 
     RUN_TEST_FOR_TYPES(printRecords, mEsmStore, stream);
 
-    std::cout << "diagnostics_test successful, results printed to " << file << std::endl;
+    std::cout << "diagnostics_test successful, results printed to " << file << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
 }
 
 // TODO:

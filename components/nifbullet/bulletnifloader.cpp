@@ -187,7 +187,7 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
         if (node)
             roots.emplace_back(node);
     }
-    const std::string filename = nif.getFilename();
+    const std::string filename = nif.getFilename().string(); //TODO(Project579): This will probably break in windows with unicode paths
     mShape->mFileName = filename;
     if (roots.empty())
     {

@@ -4,11 +4,11 @@
 #include <array>
 #include <cstdint>
 #include <iosfwd>
-#include <string>
+#include <filesystem>
 
 namespace Files
 {
-    std::array<std::uint64_t, 2> getHash(const std::string& fileName, std::istream& stream);
+    std::array<std::uint64_t, 2> getHash(const std::filesystem::path& fileName, std::istream& stream);
 }
 
 #endif

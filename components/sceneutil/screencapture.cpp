@@ -61,8 +61,9 @@ namespace
 
 namespace SceneUtil
 {
-    std::string writeScreenshotToFile(const std::string& screenshotPath, const std::string& screenshotFormat,
-                                      const osg::Image& image)
+    std::filesystem::path writeScreenshotToFile(const std::filesystem::path& screenshotPath,
+                                                const std::string& screenshotFormat,
+                                                const osg::Image& image)
     {
         // Count screenshots.
         int shotCount = 0;
@@ -70,7 +71,7 @@ namespace SceneUtil
         // Find the first unused filename with a do-while
         std::ostringstream stream;
         std::string lastFileName;
-        std::string lastFilePath;
+        std::filesystem::path lastFilePath;
         do
         {
             // Reset the stream
@@ -80,12 +81,12 @@ namespace SceneUtil
             stream << "screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << screenshotFormat;
 
             lastFileName = stream.str();
-            lastFilePath = screenshotPath + "/" + lastFileName;
+            lastFilePath = screenshotPath / lastFileName;
 
         } while (std::filesystem::exists(lastFilePath));
 
         std::ofstream outStream;
-        outStream.open(std::filesystem::path(std::move(lastFilePath)), std::ios::binary);
+        outStream.open(lastFilePath, std::ios::binary);
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(screenshotFormat);
         if (!readerwriter)
@@ -104,7 +105,7 @@ namespace SceneUtil
         return lastFileName;
     }
 
-    WriteScreenshotToFileOperation::WriteScreenshotToFileOperation(const std::string& screenshotPath,
+    WriteScreenshotToFileOperation::WriteScreenshotToFileOperation(const std::filesystem::path &screenshotPath,
                                                                    const std::string& screenshotFormat,
                                                                    std::function<void (std::string)> callback)
         : mScreenshotPath(screenshotPath)
@@ -115,7 +116,7 @@ namespace SceneUtil
 
     void WriteScreenshotToFileOperation::operator()(const osg::Image& image, const unsigned int /*context_id*/)
     {
-        std::string fileName;
+        std::filesystem::path fileName;
         try
         {
             fileName = writeScreenshotToFile(mScreenshotPath, mScreenshotFormat, image);
@@ -128,7 +129,7 @@ namespace SceneUtil
         if (fileName.empty())
             mCallback("Failed to save screenshot");
         else
-            mCallback(fileName + " has been saved");
+            mCallback(fileName.string() + " has been saved"); //TODO(Project579): This will probably break in windows with unicode paths
     }
 
     AsyncScreenCaptureOperation::AsyncScreenCaptureOperation(osg::ref_ptr<WorkQueue> queue,

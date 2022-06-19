@@ -78,8 +78,7 @@ CS::Editor::~Editor ()
     mPidFile.close();
 
     if(mServer && std::filesystem::exists(mPid))
-        static_cast<void> ( // silence coverity warning
-        remove(mPid.string().c_str())); // ignore any error
+        std::filesystem::remove(mPid);
 }
 
 boost::program_options::variables_map CS::Editor::readConfiguration()
@@ -107,7 +106,7 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
 
     mCfgMgr.readConfiguration(variables, desc, false);
     Settings::Manager::load(mCfgMgr, true);
-    setupLogging(mCfgMgr.getLogPath().string(), "OpenMW-CS");
+    setupLogging(mCfgMgr.getLogPath(), "OpenMW-CS");
 
     return variables;
 }
@@ -298,7 +297,7 @@ bool CS::Editor::makeIPCServer()
 
         mPidFile.open(mPid);
 
-        mLock = boost::interprocess::file_lock(mPid.string().c_str());
+        mLock = boost::interprocess::file_lock(mPid.c_str());
         if(!mLock.try_lock())
         {
             Log(Debug::Error) << "Error: OpenMW-CS is already running.";
@@ -374,7 +373,7 @@ int CS::Editor::run()
         ESM::ESMReader fileReader;
         ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncodingName));
         fileReader.setEncoder(&encoder);
-        fileReader.open(mFileToLoad.string());
+        fileReader.open(mFileToLoad);
 
         std::vector<std::filesystem::path> discoveredFiles;
 
@@ -394,7 +393,7 @@ int CS::Editor::run()
         }
         discoveredFiles.push_back(mFileToLoad);
 
-        QString extension = QString::fromStdString(mFileToLoad.extension().string()).toLower();
+        QString extension = QString::fromStdString(mFileToLoad.extension().string()).toLower(); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
         if (extension == ".esm")
         {
             mFileToLoad.replace_extension(".omwgame");

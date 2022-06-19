@@ -27,8 +27,8 @@ namespace MWInput
     ControllerManager::ControllerManager(BindingsManager* bindingsManager,
             ActionManager* actionManager,
             MouseManager* mouseManager,
-            const std::string& userControllerBindingsFile,
-            const std::string& controllerBindingsFile)
+            const std::filesystem::path &userControllerBindingsFile,
+            const std::filesystem::path &controllerBindingsFile)
         : mBindingsManager(bindingsManager)
         , mActionManager(actionManager)
         , mMouseManager(mouseManager)
@@ -43,12 +43,12 @@ namespace MWInput
     {
         if (!controllerBindingsFile.empty())
         {
-            SDL_GameControllerAddMappingsFromFile(controllerBindingsFile.c_str());
+            SDL_GameControllerAddMappingsFromFile(controllerBindingsFile.string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
         }
 
         if (!userControllerBindingsFile.empty())
         {
-            SDL_GameControllerAddMappingsFromFile(userControllerBindingsFile.c_str());
+            SDL_GameControllerAddMappingsFromFile(userControllerBindingsFile.string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
         }
 
         // Open all presently connected sticks

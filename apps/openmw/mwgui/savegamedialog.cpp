@@ -200,7 +200,7 @@ namespace MWGui
 
                 if (mCurrentCharacter == &*it ||
                     (!mCurrentCharacter && !mSaving && directory==Misc::StringUtils::lowerCase (
-                    it->begin()->mPath.parent_path().filename().string())))
+                    it->begin()->mPath.parent_path().filename().string()))) //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
                 {
                     mCurrentCharacter = &*it;
                     selectedIndex = mCharacterSelection->getItemCount()-1;
@@ -303,7 +303,7 @@ namespace MWGui
         else
         {
             assert (mCurrentCharacter && mCurrentSlot);
-            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot->mPath.string());
+            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot->mPath);
         }
     }
 

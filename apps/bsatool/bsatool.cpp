@@ -17,7 +17,7 @@ namespace bpo = boost::program_options;
 struct Arguments
 {
     std::string mode;
-    std::string filename;
+    std::filesystem::path filename;
     std::string extractfile;
     std::string addfile;
     std::string outdir;
@@ -112,7 +112,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
             << desc << std::endl;
         return false;
     }
-    info.filename = variables["input-file"].as< std::vector<std::string> >()[0];
+    info.filename = variables["input-file"].as< std::vector<std::string> >()[0]; //TODO(Project579): This will probably break in windows with unicode paths
 
     // Default output to the working directory
     info.outdir = ".";

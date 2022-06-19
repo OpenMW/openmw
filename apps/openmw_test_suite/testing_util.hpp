@@ -10,16 +10,16 @@
 namespace TestingOpenMW
 {
 
-    inline std::string outputFilePath(const std::string name)
+    inline std::filesystem::path outputFilePath(const std::string name)
     {
         std::filesystem::path dir("tests_output");
         std::filesystem::create_directory(dir);
-        return (dir / name).string();
+        return dir / name;
     }
 
-    inline std::string temporaryFilePath(const std::string name)
+    inline std::filesystem::path temporaryFilePath(const std::string name)
     {
-        return (std::filesystem::temp_directory_path() / name).string();
+        return std::filesystem::temp_directory_path() / name;
     }
 
     class VFSTestFile : public VFS::File
@@ -32,7 +32,7 @@ namespace TestingOpenMW
             return std::make_unique<std::stringstream>(mContent, std::ios_base::in);
         }
 
-        std::string getPath() override
+        std::filesystem::path getPath() override
         {
             return "TestFile";
         }

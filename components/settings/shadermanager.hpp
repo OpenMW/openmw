@@ -104,12 +104,12 @@ namespace Settings
             return std::nullopt;
         }
 
-        bool load(const std::string& path)
+        bool load(const std::filesystem::path &path)
         {
             mData = YAML::Null;
-            mPath = std::filesystem::path(path);
+            mPath = path;
 
-            Log(Debug::Info) << "Loading shader settings file: " << mPath;
+            Log(Debug::Info) << "Loading shader settings file: " << mPath; //TODO(Project579): This will probably break in windows with unicode paths
 
             if (!std::filesystem::exists(mPath))
             {
@@ -123,7 +123,7 @@ namespace Settings
 
             try
             {
-                mData = YAML::LoadFile(mPath.string());
+                mData = YAML::LoadFile(mPath.string()); //TODO(Project579): This will probably break in windows with unicode paths
                 mData.SetStyle(YAML::EmitterStyle::Block);
 
                 if (!mData["config"])
@@ -153,7 +153,7 @@ namespace Settings
             out.SetMapFormat(YAML::Block);
             out << mData;
 
-            std::ofstream fout(mPath.string());
+            std::ofstream fout(mPath);
             fout << out.c_str();
 
             if (!fout)

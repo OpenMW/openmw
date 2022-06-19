@@ -8,7 +8,7 @@ namespace osgMyGUI
 {
 
 Platform::Platform(osgViewer::Viewer *viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager,
-    const VFS::Manager* vfs, float uiScalingFactor, const std::string& resourcePath, const std::string& logName)
+    const VFS::Manager* vfs, float uiScalingFactor, const std::filesystem::path& resourcePath, const std::filesystem::path& logName)
     : mLogFacility(logName.empty() ? nullptr : std::make_unique<LogFacility>(logName, false))
     , mLogManager(std::make_unique<MyGUI::LogManager>())
     , mDataManager(std::make_unique<DataManager>(resourcePath, vfs))

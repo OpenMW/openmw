@@ -6,11 +6,9 @@
 namespace Version
 {
 
-Version getOpenmwVersion(const std::string &resourcePath)
+Version getOpenmwVersion(const std::filesystem::path &resourcePath)
 {
-    std::filesystem::path path (resourcePath + "/version");
-
-    std::ifstream stream (path);
+    std::ifstream stream (resourcePath / "version");
 
     Version v;
     std::getline(stream, v.mVersion);
@@ -31,7 +29,7 @@ std::string Version::describe()
     return str;
 }
 
-std::string getOpenmwVersionDescription(const std::string &resourcePath)
+std::string getOpenmwVersionDescription(const std::filesystem::path &resourcePath)
 {
     Version v = getOpenmwVersion(resourcePath);
     return v.describe();

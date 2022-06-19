@@ -9,7 +9,7 @@
 
 namespace Files
 {
-    std::array<std::uint64_t, 2> getHash(const std::string& fileName, std::istream& stream)
+    std::array<std::uint64_t, 2> getHash(const std::filesystem::path& fileName, std::istream& stream)
     {
         std::array<std::uint64_t, 2> hash {0, 0};
         try
@@ -34,7 +34,7 @@ namespace Files
         }
         catch (const std::exception& e)
         {
-            throw std::runtime_error("Error while reading \"" + fileName + "\" to get hash: " + std::string(e.what()));
+            throw std::runtime_error("Error while reading \"" + fileName.string() + "\" to get hash: " + std::string(e.what())); //TODO(Project579): This will probably break in windows with unicode paths
         }
         return hash;
     }

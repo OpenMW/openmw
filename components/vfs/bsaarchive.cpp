@@ -7,7 +7,7 @@
 namespace VFS
 {
 
-BsaArchive::BsaArchive(const std::string &filename)
+BsaArchive::BsaArchive(const std::filesystem::path &filename)
 {
     mFile = std::make_unique<Bsa::BSAFile>();
     mFile->open(filename);
@@ -68,7 +68,7 @@ Files::IStreamPtr BsaArchiveFile::open()
     return mFile->getFile(mInfo);
 }
 
-CompressedBsaArchive::CompressedBsaArchive(const std::string &filename)
+CompressedBsaArchive::CompressedBsaArchive(const std::filesystem::path &filename)
     : Archive()
 {
     mCompressedFile = std::make_unique<Bsa::CompressedBSAFile>();

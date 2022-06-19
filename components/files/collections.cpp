@@ -36,21 +36,19 @@ namespace Files
 
     std::filesystem::path Collections::getPath(const std::string& file) const
     {
-        for (Files::PathContainer::const_iterator iter = mDirectories.begin();
-             iter != mDirectories.end(); ++iter)
+        for (const auto & mDirectorie : mDirectories)
         {
-            for (std::filesystem::directory_iterator iter2 (*iter);
-                iter2!=std::filesystem::directory_iterator(); ++iter2)
+            for (const auto& iter2 :
+                std::filesystem::directory_iterator (mDirectorie))
             {
-                std::filesystem::path path = *iter2;
-
+                const auto& path = iter2.path();
                 if (mFoldCase)
                 {
-                    if (Misc::StringUtils::ciEqual(file, path.filename().string()))
-                        return path.string();
+                    if (Misc::StringUtils::ciEqual(file, path.filename().string())) //TODO(Project579): This will probably break in windows with unicode paths
+                        return path;
                 }
-                else if (path.filename().string() == file)
-                    return path.string();
+                else if (path.filename().string() == file) //TODO(Project579): This will probably break in windows with unicode paths
+                    return path;
             }
         }
 
@@ -59,20 +57,19 @@ namespace Files
 
     bool Collections::doesExist(const std::string& file) const
     {
-        for (Files::PathContainer::const_iterator iter = mDirectories.begin();
-             iter != mDirectories.end(); ++iter)
+        for (const auto & mDirectorie : mDirectories)
         {
-            for (std::filesystem::directory_iterator iter2 (*iter);
-                iter2!=std::filesystem::directory_iterator(); ++iter2)
+            for (const auto& iter2 :
+                std::filesystem::directory_iterator (mDirectorie))
             {
-                std::filesystem::path path = *iter2;
+                const auto& path = iter2.path();
 
                 if (mFoldCase)
                 {
-                    if (Misc::StringUtils::ciEqual(file, path.filename().string()))
+                    if (Misc::StringUtils::ciEqual(file, path.filename().string())) //TODO(Project579): This will probably break in windows with unicode paths
                         return true;
                 }
-                else if (path.filename().string() == file)
+                else if (path.filename().string() == file) //TODO(Project579): This will probably break in windows with unicode paths
                     return true;
             }
         }

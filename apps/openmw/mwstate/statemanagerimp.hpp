@@ -66,12 +66,12 @@ namespace MWState
             /** Used for quickload **/
             void quickLoad() override;
 
-            void loadGame (const std::string& filepath) override;
+            void loadGame (const std::filesystem::path &filepath) override;
             ///< Load a saved game directly from the given file path. This will search the CharacterManager
             /// for a Character containing this save file, and set this Character current if one was found.
             /// Otherwise, a new Character will be created.
 
-            void loadGame (const Character *character, const std::string &filepath) override;
+            void loadGame (const Character *character, const std::filesystem::path &filepath) override;
             ///< Load a saved game file belonging to the given character.
 
             Character *getCurrentCharacter () override;

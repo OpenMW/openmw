@@ -39,7 +39,7 @@ namespace fx
 {
     Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, const std::string& name, int width, int height, bool ubo, bool supportsNormals)
         : mName(name)
-        , mFileName((std::filesystem::path(Technique::sSubdir) / (mName + Technique::sExt)).string())
+        , mFileName((std::filesystem::path(Technique::sSubdir) / (mName + Technique::sExt)).string()) //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
         , mLastModificationTime(std::filesystem::file_time_type())
         , mWidth(width)
         , mHeight(height)

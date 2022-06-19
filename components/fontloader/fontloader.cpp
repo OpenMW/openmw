@@ -251,7 +251,7 @@ namespace Gui
         MyGUI::IntSize bookSize = getBookSize(layersStream.get());
         float bookScale = osgMyGUI::ScalingLayer::getScaleFactor(bookSize);
 
-        std::string oldDataPath = dataManager->getDataPath("");
+        const auto oldDataPath = dataManager->getDataPath("");
         dataManager->setResourcePath("fonts");
         std::unique_ptr<MyGUI::IDataStream> dataStream(dataManager->getData(fileName));
 

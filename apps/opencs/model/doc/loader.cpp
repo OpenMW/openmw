@@ -93,7 +93,7 @@ void CSMDoc::Loader::load()
             iter->second.mRecordsLeft = true;
             iter->second.mRecordsLoaded = 0;
 
-            emit nextStage (document, path.filename().string(), steps);
+            emit nextStage (document, path.filename().string(), steps); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
         }
         else if (iter->second.mFile==size) // start loading the last (project) file
         {

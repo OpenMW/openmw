@@ -44,7 +44,7 @@ void CSMTools::FinishMergedDocumentStage::perform (int stage, CSMDoc::Messages& 
 
     ESM::ESMReader reader;
     reader.setEncoder (&mEncoder);
-    reader.open (path.string());
+    reader.open (path);
 
     CSMWorld::MetaData source;
     source.mId = "sys::meta";

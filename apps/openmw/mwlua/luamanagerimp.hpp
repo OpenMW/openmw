@@ -11,6 +11,7 @@
 #include <components/lua_ui/resources.hpp>
 
 #include <components/misc/color.hpp>
+#include <filesystem>
 
 #include "../mwbase/luamanager.hpp"
 
@@ -26,7 +27,7 @@ namespace MWLua
     class LuaManager : public MWBase::LuaManager
     {
     public:
-        LuaManager(const VFS::Manager* vfs, const std::string& libsDir);
+        LuaManager(const VFS::Manager* vfs, const std::filesystem::path &libsDir);
 
         // Called by engine.cpp before UI setup.
         void initL10n();
@@ -34,8 +35,8 @@ namespace MWLua
         // Called by engine.cpp when the environment is fully initialized.
         void init();
 
-        void loadPermanentStorage(const std::string& userConfigPath);
-        void savePermanentStorage(const std::string& userConfigPath);
+        void loadPermanentStorage(const std::filesystem::path &userConfigPath);
+        void savePermanentStorage(const std::filesystem::path &userConfigPath);
 
         // Called by engine.cpp every frame. For performance reasons it works in a separate
         // thread (in parallel with osg Cull). Can not use scene graph.

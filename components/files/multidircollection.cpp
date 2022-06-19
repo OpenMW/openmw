@@ -30,7 +30,7 @@ namespace Files
         {
             if (!std::filesystem::is_directory(directory))
             {
-                Log(Debug::Info) << "Skipping invalid directory: " << directory.string();
+                Log(Debug::Info) << "Skipping invalid directory: " << directory.string(); //TODO(Project579): This will probably break in windows with unicode paths
                 continue;
             }
 
@@ -39,10 +39,10 @@ namespace Files
             {
                 std::filesystem::path path = *dirIter;
 
-                if (!equal (extension, path.extension().string()))
+                if (!equal (extension, path.extension().string())) //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
                     continue;
 
-                std::string filename = path.filename().string();
+                std::string filename = path.filename().string(); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
 
                 TIter result = mFiles.find (filename);
 

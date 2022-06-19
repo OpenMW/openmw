@@ -72,7 +72,7 @@ void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
         for (std::vector<std::filesystem::path>::const_iterator iter (dependencies.begin());
             iter!=end; ++iter)
         {
-            std::string name = iter->filename().string();
+            std::string name = iter->filename().string(); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
             uint64_t size = std::filesystem::file_size (*iter);
 
             mState.getWriter().addMaster (name, size);

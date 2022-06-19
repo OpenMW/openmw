@@ -73,8 +73,7 @@ void ESMReader::resolveParentFileIndices(ReadersCache& readers)
             const ESM::ReadersCache::BusyItem reader = readers.get(static_cast<std::size_t>(i));
             if (reader->getFileSize() == 0)
                 continue;  // Content file in non-ESM format
-            const std::string& candidate = reader->getName();
-            std::string fnamecandidate = std::filesystem::path(candidate).filename().string();
+            std::string fnamecandidate = reader->getName().filename().string(); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
             if (Misc::StringUtils::ciEqual(fname, fnamecandidate))
             {
                 index = i;
@@ -85,7 +84,7 @@ void ESMReader::resolveParentFileIndices(ReadersCache& readers)
     }
 }
 
-void ESMReader::openRaw(std::unique_ptr<std::istream>&& stream, std::string_view name)
+void ESMReader::openRaw(std::unique_ptr<std::istream>&& stream, const std::filesystem::path &name)
 {
     close();
     mEsm = std::move(stream);
@@ -95,12 +94,12 @@ void ESMReader::openRaw(std::unique_ptr<std::istream>&& stream, std::string_view
     mEsm->seekg(0, mEsm->beg);
 }
 
-void ESMReader::openRaw(std::string_view filename)
+void ESMReader::openRaw(const std::filesystem::path &filename)
 {
-    openRaw(Files::openBinaryInputFileStream(std::string(filename)), filename);
+    openRaw(Files::openBinaryInputFileStream(filename), filename);
 }
 
-void ESMReader::open(std::unique_ptr<std::istream>&& stream, const std::string &name)
+void ESMReader::open(std::unique_ptr<std::istream>&& stream, const std::filesystem::path &name)
 {
     openRaw(std::move(stream), name);
 
@@ -112,7 +111,7 @@ void ESMReader::open(std::unique_ptr<std::istream>&& stream, const std::string &
     mHeader.load (*this);
 }
 
-void ESMReader::open(const std::string &file)
+void ESMReader::open(const std::filesystem::path &file)
 {
     open(Files::openBinaryInputFileStream(file), file);
 }
@@ -360,7 +359,7 @@ std::string ESMReader::getString(int size)
     std::stringstream ss;
 
     ss << "ESM Error: " << msg;
-    ss << "\n  File: " << mCtx.filename;
+    ss << "\n  File: " << mCtx.filename; //TODO(Project579): This will probably break in windows with unicode paths
     ss << "\n  Record: " << mCtx.recName.toStringView();
     ss << "\n  Subrecord: " << mCtx.subName.toStringView();
     if (mEsm.get())

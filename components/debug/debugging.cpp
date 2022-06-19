@@ -269,7 +269,7 @@ Misc::Locked<std::ostream&> getLockedRawStderr()
 }
 
 // Redirect cout and cerr to the log file
-void setupLogging(const std::string& logDir, const std::string& appName, std::ios_base::openmode mode)
+void setupLogging(const std::filesystem::path &logDir, const std::string& appName, std::ios_base::openmode mode)
 {
 #if defined(_WIN32) && defined(_DEBUG)
     // Redirect cout and cerr to VS debug output when running in debug mode
@@ -278,7 +278,7 @@ void setupLogging(const std::string& logDir, const std::string& appName, std::io
     std::cerr.rdbuf(&sb);
 #else
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
-    logfile.open(std::filesystem::path(logDir) / logName, mode);
+    logfile.open(logDir / logName, mode);
 
     coutsb.open(Debug::Tee(logfile, *rawStdout));
     cerrsb.open(Debug::Tee(logfile, *rawStderr));
@@ -311,7 +311,7 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
             if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
                 mode |= std::ios::app;
 
-            setupLogging(cfgMgr.getLogPath().string(), appName, mode);
+            setupLogging(cfgMgr.getLogPath(), appName, mode);
         }
 
         if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"); env == nullptr || std::atol(env) == 0)

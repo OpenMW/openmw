@@ -218,11 +218,11 @@ namespace MWRender
         for (const auto& name : mVFS->getRecursiveDirectoryIterator(fx::Technique::sSubdir))
         {
             std::filesystem::path path = name;
-            std::string fileExt = Misc::StringUtils::lowerCase(path.extension().string());
+            std::string fileExt = Misc::StringUtils::lowerCase(path.extension().string()); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
             if (!path.parent_path().has_parent_path() && fileExt == fx::Technique::sExt)
             {
-                auto absolutePath = std::filesystem::path(mVFS->getAbsoluteFileName(name));
-                mTechniqueFileMap[absolutePath.stem().string()] = absolutePath;
+                const auto absolutePath = mVFS->getAbsoluteFileName(name); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+                mTechniqueFileMap[absolutePath.stem().string()] = absolutePath; //TODO(Project579): This will probably break in windows with unicode paths
             }
         }
     }
@@ -387,7 +387,7 @@ namespace MWRender
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
             if (technique->compile())
-                Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()].string();
+                Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()].string(); //TODO(Project579): This will probably break in windows with unicode paths
 
             mReload = technique->isValid();
         }

@@ -283,7 +283,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 : mSavePath (savePath), mContentFiles (std::move(files)), mNew (new_), mData (encoding, fsStrict, dataPaths, archives, resDir),
   mTools (*this, encoding),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
-  (savePath.filename().string() + ".project")),
+  (savePath.filename().u8string() + u8".project")),
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir), mRunner (mProjectPath),
@@ -298,7 +298,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
         std::ofstream destination(mProjectPath, std::ios::out | std::ios::binary);
         if (!destination.is_open())
-            throw std::runtime_error("Can not create project file: " + mProjectPath.string());
+            throw std::runtime_error("Can not create project file: " + mProjectPath.string()); //TODO(Project579): This will probably break in windows with unicode paths
         destination.exceptions(std::ios::failbit | std::ios::badbit);
 
         if (!std::filesystem::exists (filtersPath))
@@ -306,7 +306,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
         std::ifstream source(filtersPath, std::ios::in | std::ios::binary);
         if (!source.is_open())
-            throw std::runtime_error("Can not read filters file: " + filtersPath.string());
+            throw std::runtime_error("Can not read filters file: " + filtersPath.string()); //TODO(Project579): This will probably break in windows with unicode paths
         source.exceptions(std::ios::failbit | std::ios::badbit);
 
         destination << source.rdbuf();
@@ -484,7 +484,7 @@ void CSMDoc::Document::startRunning (const std::string& profile,
 
     for (std::vector<std::filesystem::path>::const_iterator iter (mContentFiles.begin());
         iter!=mContentFiles.end(); ++iter)
-        contentFiles.push_back (iter->filename().string());
+        contentFiles.push_back (iter->filename().string()); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
 
     mRunner.configure (getData().getDebugProfiles().getRecord (profile).get(), contentFiles,
         startupInstruction);

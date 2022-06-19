@@ -54,7 +54,7 @@ namespace Config
         }
 
         QStringList getDataDirs() const;
-        std::string getGlobalDataDir() const;
+        std::filesystem::path getGlobalDataDir() const;
 
         inline void removeDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.removeAll(dir); }
         inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }

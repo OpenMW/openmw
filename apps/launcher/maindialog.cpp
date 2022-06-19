@@ -155,7 +155,7 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         return FirstRunDialogResultFailure;
 
     // Dialog wizard and setup will fail if the config directory does not already exist
-    QDir userConfigDir = QDir(QString::fromStdString(mCfgMgr.getUserConfigPath().string()));
+    QDir userConfigDir = QDir(QString::fromStdString(mCfgMgr.getUserConfigPath().string())); //TODO(Project579): This will probably break in windows with unicode paths, in Qt 6 it's possible to convert directly from std::filesystem::path to QDir and that would solve the issue
     if ( ! userConfigDir.exists() ) {
         if ( ! userConfigDir.mkpath(".") )
         {
@@ -295,7 +295,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());  //TODO(Project579): This will probably break in windows with unicode paths
 
     QStringList paths;
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
@@ -328,9 +328,9 @@ bool Launcher::MainDialog::setupGameSettings()
 {
     mGameSettings.clear();
 
-    QString localPath = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str());
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
-    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
+    QString localPath = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
 
     QFile file;
 
@@ -479,7 +479,7 @@ bool Launcher::MainDialog::writeSettings()
     mSettingsPage->saveSettings();
     mAdvancedPage->saveSettings();
 
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
     QDir dir(userPath);
 
     if (!dir.exists()) {
@@ -509,13 +509,13 @@ bool Launcher::MainDialog::writeSettings()
     file.close();
 
     // Graphics settings
-    const std::string settingsPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
+    const auto settingsPath = mCfgMgr.getUserConfigPath() / "settings.cfg";
     try {
         Settings::Manager::saveUser(settingsPath);
     }
     catch (std::exception& e) {
         std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" +
-            settingsPath + "<br><br>" + e.what();
+            settingsPath.string() + "<br><br>" + e.what(); //TODO(Project579): This will probably break in windows with unicode paths
         cfgError(tr("Error writing user settings file"), tr(msg.c_str()));
         return false;
     }

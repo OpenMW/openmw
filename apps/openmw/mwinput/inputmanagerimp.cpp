@@ -28,8 +28,8 @@ namespace MWInput
             osg::ref_ptr<osgViewer::Viewer> viewer,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
-            const std::string& userFile, bool userFileExists, const std::string& userControllerBindingsFile,
-            const std::string& controllerBindingsFile, bool grab)
+            const std::filesystem::path &userFile, bool userFileExists, const std::filesystem::path &userControllerBindingsFile,
+            const std::filesystem::path &controllerBindingsFile, bool grab)
         : mControlsDisabled(false)
         , mInputWrapper(std::make_unique<SDLUtil::InputWrapper>(window, viewer, grab))
         , mBindingsManager(std::make_unique<BindingsManager>(userFile, userFileExists))

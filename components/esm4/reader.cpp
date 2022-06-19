@@ -67,7 +67,7 @@ ReaderContext::ReaderContext() : modIndex(0), recHeaderSize(sizeof(RecordHeader)
     subRecordHeader.dataSize = 0;
 }
 
-Reader::Reader(Files::IStreamPtr&& esmStream, const std::string& filename)
+Reader::Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path &filename)
     : mEncoder(nullptr), mFileSize(0), mStream(std::move(esmStream))
 {
     // used by ESMReader only?
@@ -150,7 +150,7 @@ void Reader::close()
     //mHeader.blank();
 }
 
-void Reader::openRaw(Files::IStreamPtr&& stream, const std::string& filename)
+void Reader::openRaw(Files::IStreamPtr&& stream, const std::filesystem::path &filename)
 {
     close();
 
@@ -163,7 +163,7 @@ void Reader::openRaw(Files::IStreamPtr&& stream, const std::string& filename)
 
 }
 
-void Reader::open(Files::IStreamPtr&& stream, const std::string &filename)
+void Reader::open(Files::IStreamPtr&& stream, const std::filesystem::path &filename)
 {
     openRaw(std::move(stream), filename);
 
@@ -199,21 +199,20 @@ void Reader::setRecHeaderSize(const std::size_t size)
     mCtx.recHeaderSize = size;
 }
 
-// FIXME: only "English" strings supported for now
 void Reader::buildLStringIndex()
 {
     if ((mHeader.mFlags & Rec_ESM) == 0 || (mHeader.mFlags & Rec_Localized) == 0)
         return;
 
-    std::filesystem::path p(mCtx.filename);
-    std::string filename = p.stem().filename().string();
+    const auto filename = mCtx.filename.stem().filename().u8string();
 
-    buildLStringIndex("Strings/" + filename + "_English.STRINGS",   Type_Strings);
-    buildLStringIndex("Strings/" + filename + "_English.ILSTRINGS", Type_ILStrings);
-    buildLStringIndex("Strings/" + filename + "_English.DLSTRINGS", Type_DLStrings);
+    static const std::filesystem::path s("Strings");
+    buildLStringIndex(s / (filename + u8"_English.STRINGS"),   Type_Strings);
+    buildLStringIndex(s / (filename + u8"_English.ILSTRINGS"), Type_ILStrings);
+    buildLStringIndex(s / (filename + u8"_English.DLSTRINGS"), Type_DLStrings);
 }
 
-void Reader::buildLStringIndex(const std::string& stringFile, LocalizedStringType stringType)
+void Reader::buildLStringIndex(const std::filesystem::path &stringFile, LocalizedStringType stringType)
 {
     std::uint32_t numEntries;
     std::uint32_t dataSize;
@@ -638,7 +637,7 @@ void Reader::adjustGRUPFormId()
     std::stringstream ss;
 
     ss << "ESM Error: " << msg;
-    ss << "\n  File: " << mCtx.filename;
+    ss << "\n  File: " << mCtx.filename.string(); //TODO(Project579): This will probably break in windows with unicode paths
     ss << "\n  Record: " << ESM::printName(mCtx.recordHeader.record.typeId);
     ss << "\n  Subrecord: " << ESM::printName(mCtx.subRecordHeader.typeId);
     if (mStream.get())

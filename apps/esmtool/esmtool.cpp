@@ -154,9 +154,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
       return false;
       }*/
 
-    info.filename = variables["input-file"].as< std::vector<std::string> >()[0];
+    info.filename = variables["input-file"].as< std::vector<std::filesystem::path> >()[0];
     if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-        info.outname = variables["input-file"].as< std::vector<std::string> >()[1];
+        info.outname = variables["input-file"].as< std::vector<std::filesystem::path> >()[1];
 
     if (const auto it = variables.find("raw"); it != variables.end())
         info.mRawFormat = ESM::parseFormat(it->second.as<std::string>());
@@ -284,9 +284,9 @@ void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMDa
     }
 }
 
-void printRawTes3(std::string_view path)
+void printRawTes3(const std::filesystem::path &path)
 {
-    std::cout << "TES3 RAW file listing: " << path << '\n';
+    std::cout << "TES3 RAW file listing: " << path << '\n'; //TODO(Project579): This will probably break in windows with unicode paths
     ESM::ESMReader esm;
     esm.openRaw(path);
     while(esm.hasMoreRecs())
@@ -310,7 +310,7 @@ void printRawTes3(std::string_view path)
 
 int loadTes3(const Arguments& info, std::unique_ptr<std::ifstream>&& stream, ESMData* data)
 {
-    std::cout << "Loading TES3 file: " << info.filename << '\n';
+    std::cout << "Loading TES3 file: " << info.filename << '\n'; //TODO(Project579): This will probably break in windows with unicode paths
 
     ESM::ESMReader esm;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
@@ -419,7 +419,7 @@ int load(const Arguments& info, ESMData* data)
                 printRawTes3(info.filename);
                 break;
             case ESM::Format::Tes4:
-                std::cout << "Printing raw TES4 file is not supported: " << info.filename << "\n";
+                std::cout << "Printing raw TES4 file is not supported: " << info.filename << "\n"; //TODO(Project579): This will probably break in windows with unicode paths
                 break;
         }
         return 0;
@@ -490,7 +490,7 @@ int clone(const Arguments& info)
     if (i % 3 != 0)
         std::cout << '\n';
 
-    std::cout << "\nSaving records to: " << info.outname << "...\n";
+    std::cout << "\nSaving records to: " << info.outname << "...\n"; //TODO(Project579): This will probably break in windows with unicode paths
 
     ESM::ESMWriter esm;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
@@ -499,7 +499,7 @@ int clone(const Arguments& info)
     esm.setVersion(ESM::VER_13);
     esm.setRecordCount (recordCount);
 
-    std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
+    std::fstream save(info.outname, std::fstream::out | std::fstream::binary);
     esm.save(save);
 
     int saved = 0;
@@ -563,14 +563,14 @@ int comp(const Arguments& info)
     ESMData dataOne;
     if (load(fileOne, &dataOne) != 0)
     {
-        std::cout << "Failed to load " << info.filename << ", aborting comparison." << std::endl;
+        std::cout << "Failed to load " << info.filename << ", aborting comparison." << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
         return 1;
     }
 
     ESMData dataTwo;
     if (load(fileTwo, &dataTwo) != 0)
     {
-        std::cout << "Failed to load " << info.outname << ", aborting comparison." << std::endl;
+        std::cout << "Failed to load " << info.outname << ", aborting comparison." << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
         return 1;
     }
 

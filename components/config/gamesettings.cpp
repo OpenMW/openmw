@@ -32,7 +32,7 @@ void Config::GameSettings::validatePaths()
     mDataDirs.clear();
 
     for (auto & dataDir : dataDirs) {
-        QString path = QString::fromUtf8(dataDir.string().c_str());
+        QString path = QString::fromUtf8(dataDir.string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
 
         QDir dir(path);
         if (dir.exists())
@@ -57,7 +57,7 @@ void Config::GameSettings::validatePaths()
     mCfgMgr.processPaths(dataDirs, /*basePath=*/"");
 
     if (!dataDirs.empty()) {
-        QString path = QString::fromUtf8(dataDirs.front().string().c_str());
+        QString path = QString::fromUtf8(dataDirs.front().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
 
         QDir dir(path);
         if (dir.exists())
@@ -65,11 +65,11 @@ void Config::GameSettings::validatePaths()
     }
 }
 
-std::string Config::GameSettings::getGlobalDataDir() const
+std::filesystem::path Config::GameSettings::getGlobalDataDir() const
 {
     // global data dir may not exists if OpenMW is not installed (ie if run from build directory)
     if (std::filesystem::exists(mCfgMgr.getGlobalDataPath()))
-        return std::filesystem::canonical(mCfgMgr.getGlobalDataPath()).string();
+        return std::filesystem::canonical(mCfgMgr.getGlobalDataPath());
     return {};
 }
 

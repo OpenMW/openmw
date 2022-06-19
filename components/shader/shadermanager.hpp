@@ -12,6 +12,7 @@
 
 #include <osg/Shader>
 #include <osg/Program>
+#include <filesystem>
 
 namespace osgViewer {
     class Viewer;
@@ -29,7 +30,7 @@ namespace Shader
         ShaderManager();
         ~ShaderManager();
 
-        void setShaderPath(const std::string& path);
+        void setShaderPath(const std::filesystem::path &path);
 
         typedef std::map<std::string, std::string> DefineMap;
 
@@ -80,7 +81,7 @@ namespace Shader
         void getLinkedShaders(osg::ref_ptr<osg::Shader> shader, const std::vector<std::string>& linkedShaderNames, const DefineMap& defines);
         void addLinkedShaders(osg::ref_ptr<osg::Shader> shader, osg::ref_ptr<osg::Program> program);
 
-        std::string mPath;
+        std::filesystem::path mPath;
 
         DefineMap mGlobalDefines;
 

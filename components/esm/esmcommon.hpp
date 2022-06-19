@@ -9,6 +9,7 @@
 #include <cassert>
 #include <limits>
 #include <type_traits>
+#include <filesystem>
 
 namespace ESM
 {
@@ -187,7 +188,7 @@ static_assert(sizeof(NAME64) == 64);
  */
 struct ESM_Context
 {
-  std::string filename;
+  std::filesystem::path filename;
   uint32_t leftRec, leftSub;
   size_t leftFile;
   NAME recName, subName;

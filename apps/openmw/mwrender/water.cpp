@@ -238,21 +238,21 @@ private:
     float mRainIntensity;
 };
 
-osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
+osg::ref_ptr<osg::Image> readPngImage (const std::filesystem::path& file)
 {
     std::ifstream inStream;
     inStream.open(file, std::ios_base::in | std::ios_base::binary);
     if (inStream.fail())
-        Log(Debug::Error) << "Error: Failed to open " << file;
+        Log(Debug::Error) << "Error: Failed to open " << file; //TODO(Project579): This will probably break in windows with unicode paths
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!reader)
     {
-        Log(Debug::Error) << "Error: Failed to read " << file << ", no png readerwriter found";
+        Log(Debug::Error) << "Error: Failed to read " << file << ", no png readerwriter found"; //TODO(Project579): This will probably break in windows with unicode paths
         return osg::ref_ptr<osg::Image>();
     }
     osgDB::ReaderWriter::ReadResult result = reader->readImage(inStream);
     if (!result.success())
-        Log(Debug::Error) << "Error: Failed to read " << file << ": " << result.message() << " code " << result.status();
+        Log(Debug::Error) << "Error: Failed to read " << file << ": " << result.message() << " code " << result.status(); //TODO(Project579): This will probably break in windows with unicode paths
 
     return result.getImage();
 }
@@ -444,7 +444,7 @@ public:
 };
 
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem,
-             osgUtil::IncrementalCompileOperation *ico, const std::string& resourcePath)
+             osgUtil::IncrementalCompileOperation *ico, const std::filesystem::path& resourcePath)
     : mRainIntensityUpdater(nullptr)
     , mParent(parent)
     , mSceneRoot(sceneRoot)
@@ -695,7 +695,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     osg::ref_ptr<osg::Shader> fragmentShader(shaderMgr.getShader("water_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
     osg::ref_ptr<osg::Program> program = shaderMgr.getProgram(vertexShader, fragmentShader);
 
-    osg::ref_ptr<osg::Texture2D> normalMap(new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
+    osg::ref_ptr<osg::Texture2D> normalMap(new osg::Texture2D(readPngImage(mResourcePath / "shaders" / "water_nm.png")));
 
     if (normalMap->getImage())
         normalMap->getImage()->flipVertical();

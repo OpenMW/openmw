@@ -102,7 +102,7 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     mMain->writeSettings();
 
     // Create the file if it doesn't already exist, else the importer will fail
-    QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
+    QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str())); //TODO(Project579): This will probably break in windows with unicode paths
     path.append(QLatin1String("openmw.cfg"));
     QFile file(path);
 

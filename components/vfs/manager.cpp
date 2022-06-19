@@ -56,7 +56,7 @@ namespace VFS
         mIndex.clear();
 
         for (const auto& archive : mArchives)
-            archive->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
+            archive->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char); //TODO(Project579): This will probably break in windows with unicode paths
     }
 
     Files::IStreamPtr Manager::get(std::string_view name) const
@@ -102,15 +102,15 @@ namespace VFS
         return {};
     }
 
-    std::string Manager::getAbsoluteFileName(std::string_view name) const
+    std::filesystem::path Manager::getAbsoluteFileName(const std::filesystem::path &name) const
     {
-        std::string normalized(name);
-        normalize_path(normalized, mStrict);
+        std::string normalized(name); //TODO(Project579): This will probably break in windows with unicode paths
+        normalize_path(normalized, mStrict); //TODO(Project579): This will probably break in windows with unicode paths
 
-        std::map<std::string, File*>::const_iterator found = mIndex.find(normalized);
+        const auto found = mIndex.find(normalized);
         if (found == mIndex.end())
             throw std::runtime_error("Resource '" + normalized + "' not found");
-        return found->second->getPath();
+        return found->second->getPath();//TODO(Project579): This will probably break in windows with unicode paths
     }
 
     namespace

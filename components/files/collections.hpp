@@ -19,14 +19,14 @@ namespace Files
             /// leading dot and must be all lower-case.
             const MultiDirCollection& getCollection(const std::string& extension) const;
 
-            std::filesystem::path getPath(const std::string& file) const;
+            std::filesystem::path getPath(const std::string& file) const; //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
             ///< Return full path (including filename) of \a file.
             ///
             /// If the file does not exist in any of the collection's
             /// directories, an exception is thrown. \a file must include the
             /// extension.
 
-            bool doesExist(const std::string& file) const;
+            bool doesExist(const std::string& file) const; //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
             ///< \return Does a file with the given name exist?
 
             const Files::PathContainer& getPaths() const;
