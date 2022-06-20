@@ -175,6 +175,9 @@ namespace fx
 
         bool getDynamic() const { return mDynamic; }
 
+        void setLocked(bool locked) { mLocked = locked; }
+        bool getLocked() const { return mLocked; }
+
     private:
         [[noreturn]] void error(const std::string& msg);
 
@@ -293,6 +296,7 @@ namespace fx
         std::string mLastError;
 
         bool mDynamic = false;
+        bool mLocked = false;
     };
 
     template<> void Technique::parseBlockImp<Lexer::Shared>();

@@ -228,22 +228,11 @@ namespace MWRender
 
         mViewer->setSceneData(this);
         mViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-        mViewer->getCamera()->setImplicitBufferAttachmentMask(0, 0);
         mViewer->getCamera()->getGraphicsContext()->setResizedCallback(new ResizedCallback(this));
         mViewer->getCamera()->setUserData(this);
 
         setCullCallback(mStateUpdater);
         mHUDCamera->setCullCallback(new HUDCullCallback);
-
-        static bool init = false;
-
-        if (init)
-        {
-            resize();
-            init = true;
-        }
-
-        init = true;
     }
 
     void PostProcessor::disable()
@@ -631,7 +620,7 @@ namespace MWRender
                     auto it = technique->getRenderTargetsMap().find(whitelist);
                     if (it != technique->getRenderTargetsMap().end() && renderTargetCache[it->second.mTarget])
                     {
-                        subPass.mStateSet->setTextureAttributeAndModes(subTexUnit, renderTargetCache[it->second.mTarget]);
+                        subPass.mStateSet->setTextureAttribute(subTexUnit, renderTargetCache[it->second.mTarget]);
                         subPass.mStateSet->addUniform(new osg::Uniform(std::string(it->first).c_str(), subTexUnit++));
                     }
                 }
@@ -660,7 +649,7 @@ namespace MWRender
             return Status_Error;
         }
 
-        if (!technique || Misc::StringUtils::ciEqual(technique->getName(), "main") || (location.has_value() && location.value() <= 0))
+        if (!technique || technique->getLocked() || (location.has_value() && location.value() <= 0))
             return Status_Error;
 
         disableTechnique(technique, false);
@@ -675,7 +664,7 @@ namespace MWRender
 
     PostProcessor::Status PostProcessor::disableTechnique(std::shared_ptr<fx::Technique> technique, bool dirty)
     {
-        if (Misc::StringUtils::ciEqual(technique->getName(), "main"))
+        if (technique->getLocked())
             return Status_Error;
 
         auto it = std::find(mTechniques.begin(), mTechniques.end(), technique);
@@ -819,20 +808,21 @@ namespace MWRender
         std::vector<std::string> techniqueStrings;
         Misc::StringUtils::split(Settings::Manager::getString("chain", "Post Processing"), techniqueStrings, ",");
 
-        techniqueStrings.insert(techniqueStrings.begin(), "main");
+        const std::string& mainIdentifier = "main";
+
+        auto main = loadTechnique(mainIdentifier);
+
+        if (main)
+            main->setLocked(true);
+
+        mTechniques.push_back(std::move(main));
 
         for (auto& techniqueName : techniqueStrings)
         {
             Misc::StringUtils::trim(techniqueName);
 
-            if (techniqueName.empty())
+            if (techniqueName.empty() || Misc::StringUtils::ciEqual(techniqueName, mainIdentifier))
                 continue;
-
-            if ((&techniqueName != &techniqueStrings.front()) && techniqueName == "main")
-            {
-                Log(Debug::Warning) << "main.omwfx techniqued specified in chain, this is not allowed. technique file will be ignored if it exists.";
-                continue;
-            }
 
             mTechniques.push_back(loadTechnique(techniqueName));
         }
