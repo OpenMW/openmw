@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-#include <QStatusBar>
-#include <QStackedLayout>
 #include <QSplitter>
 #include <QTimer>
 

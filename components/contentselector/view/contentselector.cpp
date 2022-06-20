@@ -3,10 +3,7 @@
 #include <components/contentselector/model/esmfile.hpp>
 
 #include <QSortFilterProxyModel>
-
 #include <QMenu>
-#include <QContextMenuEvent>
-
 #include <QClipboard>
 #include <QModelIndex>
 

@@ -4,8 +4,10 @@
 #include <QStringList>
 #include <QString>
 #include <QDir>
-#include <QDebug>
+
+#if defined(Q_OS_MAC)
 #include <QCoreApplication>
+#endif
 
 Process::ProcessInvoker::ProcessInvoker(QObject* parent)
     : QObject(parent)

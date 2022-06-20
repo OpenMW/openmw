@@ -3,11 +3,10 @@
 #include <components/version/version.hpp>
 #include <components/misc/helpviewer.hpp>
 
-#include <QDate>
+#include <QTime>
 #include <QDir>
+#include <QDebug>
 #include <QMessageBox>
-#include <QFontDatabase>
-#include <QFileDialog>
 #include <QCloseEvent>
 #include <QTextCodec>
 

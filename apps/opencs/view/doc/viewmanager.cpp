@@ -4,7 +4,6 @@
 #include <map>
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QMessageBox>
 #include <QPushButton>
 

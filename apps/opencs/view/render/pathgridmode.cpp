@@ -1,6 +1,5 @@
 #include "pathgridmode.hpp"
 
-#include <QMenu>
 #include <QPoint>
 
 #include <components/sceneutil/pathgridutil.hpp>

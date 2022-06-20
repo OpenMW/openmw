@@ -1,25 +1,20 @@
 #include "scenetoolshapebrush.hpp"
 
-#include <QFrame>
-#include <QIcon>
-#include <QTableWidget>
-#include <QHBoxLayout>
-
-#include <QWidget>
-#include <QComboBox>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QSlider>
-#include <QEvent>
-#include <QDropEvent>
 #include <QButtonGroup>
-#include <QVBoxLayout>
+#include <QComboBox>
 #include <QDragEnterEvent>
-#include <QDrag>
-#include <QTableWidget>
+#include <QDropEvent>
+#include <QFrame>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QHeaderView>
-#include <QApplication>
+#include <QIcon>
+#include <QLabel>
 #include <QSizePolicy>
+#include <QSlider>
+#include <QTableWidget>
+#include <QVBoxLayout>
+#include <QWidget>
 
 #include "brushshapes.hpp"
 #include "scenetool.hpp"

@@ -2,7 +2,6 @@
 #define CSV_WORLD_DRAGRECORDTABLE_H
 
 #include <QTableView>
-#include <QEvent>
 
 #include "../../model/world/columnbase.hpp"
 

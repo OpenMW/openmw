@@ -6,13 +6,9 @@
 #include <QCloseEvent>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QMdiArea>
-#include <QDockWidget>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QScrollArea>
-#include <QHBoxLayout>
-#include <QDesktopWidget>
 #include <QScrollBar>
 #include <QScreen>
 

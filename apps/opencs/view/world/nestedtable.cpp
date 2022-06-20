@@ -3,7 +3,6 @@
 #include <QHeaderView>
 #include <QContextMenuEvent>
 #include <QMenu>
-#include <QDebug>
 
 #include "../../model/prefs/shortcut.hpp"
 

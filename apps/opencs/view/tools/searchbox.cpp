@@ -3,8 +3,6 @@
 #include <stdexcept>
 
 #include <QGridLayout>
-#include <QComboBox>
-#include <QPushButton>
 
 #include "../../model/world/columns.hpp"
 

@@ -1,10 +1,9 @@
 #include "installationpage.hpp"
 
-#include <QDebug>
 #include <QTextCodec>
-#include <QFileInfo>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QThread>
 
 #include "mainwizard.hpp"
 

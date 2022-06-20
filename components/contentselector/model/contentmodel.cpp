@@ -5,7 +5,6 @@
 #include <unordered_set>
 
 #include <QDir>
-#include <QTextCodec>
 #include <QDebug>
 
 #include <components/esm3/esmreader.hpp>

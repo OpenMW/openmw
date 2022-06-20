@@ -5,7 +5,6 @@
 
 #include <QObject>
 #include <QWidget>
-#include <QSignalMapper>
 
 class QLabel;
 class QProgressBar;

@@ -1,6 +1,5 @@
 #include "existinginstallationpage.hpp"
 
-#include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>

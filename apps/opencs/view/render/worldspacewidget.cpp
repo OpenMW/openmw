@@ -2,13 +2,10 @@
 
 #include <algorithm>
 
-#include <QEvent>
 #include <QDragEnterEvent>
 #include <QDragMoveEvent>
 #include <QDropEvent>
 #include <QMouseEvent>
-#include <QKeyEvent>
-#include <QApplication>
 #include <QToolTip>
 
 #include <osgUtil/LineSegmentIntersector>

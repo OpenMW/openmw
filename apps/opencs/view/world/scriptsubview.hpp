@@ -9,7 +9,6 @@
 
 class QModelIndex;
 class QLabel;
-class QVBoxLayout;
 class QSplitter;
 class QTime;
 

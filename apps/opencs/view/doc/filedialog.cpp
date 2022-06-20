@@ -2,9 +2,6 @@
 
 #include <QPushButton>
 #include <QDialogButtonBox>
-#include <QSortFilterProxyModel>
-#include <QRegExp>
-#include <QLabel>
 
 #include "components/contentselector/model/esmfile.hpp"
 #include "components/contentselector/view/contentselector.hpp"

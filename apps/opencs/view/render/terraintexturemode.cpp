@@ -5,10 +5,7 @@
 
 #include <QWidget>
 #include <QIcon>
-#include <QEvent>
 #include <QDropEvent>
-#include <QDragEnterEvent>
-#include <QDrag>
 
 #include <osg/Group>
 

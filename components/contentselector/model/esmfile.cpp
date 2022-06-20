@@ -1,6 +1,5 @@
 #include "esmfile.hpp"
 
-#include <QMimeData>
 #include <QDataStream>
 
 int ContentSelectorModel::EsmFile::sPropertyCount = 7;

@@ -4,13 +4,10 @@
 #include <stdexcept>
 
 #include <QUndoStack>
-#include <QMetaProperty>
 #include <QStyledItemDelegate>
 #include <QLineEdit>
-#include <QComboBox>
 #include <QCheckBox>
 #include <QPlainTextEdit>
-#include <QEvent>
 #include <QItemEditorFactory>
 
 #include "../../model/world/commands.hpp"

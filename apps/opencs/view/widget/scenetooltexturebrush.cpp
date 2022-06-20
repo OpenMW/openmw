@@ -1,24 +1,19 @@
 #include "scenetooltexturebrush.hpp"
 
-#include <QFrame>
-#include <QIcon>
-#include <QTableWidget>
-#include <QHBoxLayout>
-
-#include <QWidget>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QSlider>
-#include <QEvent>
-#include <QDropEvent>
 #include <QButtonGroup>
-#include <QVBoxLayout>
 #include <QDragEnterEvent>
-#include <QDrag>
-#include <QTableWidget>
+#include <QDropEvent>
+#include <QFrame>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QHeaderView>
-#include <QApplication>
+#include <QIcon>
 #include <QSizePolicy>
+#include <QSlider>
+#include <QSpinBox>
+#include <QTableWidget>
+#include <QVBoxLayout>
+#include <QWidget>
 
 #include "scenetool.hpp"
 

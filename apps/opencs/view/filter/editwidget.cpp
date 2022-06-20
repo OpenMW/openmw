@@ -2,7 +2,6 @@
 
 #include <sstream>
 
-#include <QAbstractItemModel>
 #include <QAction>
 #include <QContextMenuEvent>
 #include <QMenu>

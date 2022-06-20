@@ -2,14 +2,10 @@
 #include "maindialog.hpp"
 
 #include <QDebug>
-
 #include <QPushButton>
 #include <QMessageBox>
-#include <QMenu>
-#include <QSortFilterProxyModel>
 #include <QFileDialog>
-#include <QTreeView>
-#include <qnamespace.h>
+
 #include <thread>
 #include <mutex>
 #include <algorithm>

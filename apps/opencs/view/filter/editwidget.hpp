@@ -3,7 +3,6 @@
 
 #include <QLineEdit>
 #include <QPalette>
-#include <QtCore/qnamespace.h>
 
 #include "../../model/filter/parser.hpp"
 #include "../../model/filter/node.hpp"

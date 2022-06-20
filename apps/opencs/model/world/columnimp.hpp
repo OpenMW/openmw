@@ -6,7 +6,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <QColor>
 #include <QVector>
 
 #include <components/esm3/loadbody.hpp>

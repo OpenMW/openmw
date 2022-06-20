@@ -5,7 +5,6 @@
 #include <QPushButton>
 #include <QGroupBox>
 #include <QCheckBox>
-#include <QLabel>
 #include <QLayout>
 
 #include "../../model/doc/document.hpp"

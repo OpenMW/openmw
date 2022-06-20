@@ -2,8 +2,6 @@
 #define RECORDSTATUSDELEGATE_H
 
 #include "util.hpp"
-#include <QTextOption>
-#include <QFont>
 
 #include "datadisplaydelegate.hpp"
 #include "../../model/world/record.hpp"

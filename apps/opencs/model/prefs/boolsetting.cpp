@@ -1,4 +1,3 @@
-
 #include "boolsetting.hpp"
 
 #include <QCheckBox>

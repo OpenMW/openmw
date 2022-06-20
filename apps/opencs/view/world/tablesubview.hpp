@@ -3,8 +3,6 @@
 
 #include "../doc/subview.hpp"
 
-#include <QtCore/qnamespace.h>
-
 class QModelIndex;
 class QWidget;
 

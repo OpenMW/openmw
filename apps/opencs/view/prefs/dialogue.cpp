@@ -1,9 +1,7 @@
 #include "dialogue.hpp"
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QSplitter>
-#include <QListWidget>
 #include <QStackedWidget>
 #include <QListWidgetItem>
 #include <QScreen>

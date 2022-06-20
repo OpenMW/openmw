@@ -5,7 +5,6 @@
 
 #include <QApplication>
 #include <QIcon>
-#include <QMetaType>
 
 #include <components/debug/debugging.hpp>
 #include <components/platform/platform.hpp>

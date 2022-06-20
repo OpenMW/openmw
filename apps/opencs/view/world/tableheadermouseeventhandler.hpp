@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QHeaderView>
-#include <QtGui>
+#include <QEvent>
 
 namespace CSVWorld
 {

@@ -2,7 +2,6 @@
 
 #include <QHBoxLayout>
 #include <QFrame>
-#include <QSignalMapper>
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QEvent>

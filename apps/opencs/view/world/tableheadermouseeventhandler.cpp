@@ -3,6 +3,7 @@
 
 #include <QMenu>
 #include <QPoint>
+#include <QMouseEvent>
 
 namespace CSVWorld
 {

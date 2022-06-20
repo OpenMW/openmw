@@ -2,7 +2,6 @@
 #define COMBOBOX_HPP
 
 #include <QComboBox>
-#include <QStylePainter>
 
 class QString;
 class QRegExpValidator;

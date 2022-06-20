@@ -6,7 +6,6 @@
 #include <QContextMenuEvent>
 #include <QString>
 #include <QMetaObject>
-#include <QtCore/qnamespace.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/helpviewer.hpp>

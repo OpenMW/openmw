@@ -6,7 +6,6 @@
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QIcon>
-#include <QPainter>
 
 #include "scenetoolbar.hpp"
 #include "pushbutton.hpp"

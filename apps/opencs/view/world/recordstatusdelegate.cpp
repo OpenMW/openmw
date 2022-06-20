@@ -1,9 +1,5 @@
 #include "recordstatusdelegate.hpp"
 
-#include <QPainter>
-#include <QApplication>
-#include <QUndoStack>
-
 #include "../../model/world/columns.hpp"
 
 CSVWorld::RecordStatusDelegate::RecordStatusDelegate(const ValueList& values,
