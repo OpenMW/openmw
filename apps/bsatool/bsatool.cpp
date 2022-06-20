@@ -8,6 +8,7 @@
 
 #include <components/bsa/compressedbsafile.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/files/configurationmanager.hpp>
 
 #define BSATOOL_VERSION 1.1
 
@@ -112,37 +113,39 @@ bool parseOptions (int argc, char** argv, Arguments &info)
             << desc << std::endl;
         return false;
     }
-    info.filename = variables["input-file"].as< std::vector<std::string> >()[0]; //TODO(Project579): This will probably break in windows with unicode paths
+    auto inputFiles = variables["input-file"].as< std::vector<Files::MaybeQuotedPath> >();
+
+    info.filename = inputFiles[0];
 
     // Default output to the working directory
     info.outdir = ".";
 
     if (info.mode == "extract")
     {
-        if (variables["input-file"].as< std::vector<std::string> >().size() < 2)
+        if (inputFiles.size() < 2)
         {
             std::cout << "\nERROR: file to extract unspecified\n\n"
                 << desc << std::endl;
             return false;
         }
-        if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-            info.extractfile = variables["input-file"].as< std::vector<std::string> >()[1];
-        if (variables["input-file"].as< std::vector<std::string> >().size() > 2)
-            info.outdir = variables["input-file"].as< std::vector<std::string> >()[2];
+        if (inputFiles.size() > 1)
+            info.extractfile = inputFiles[1];
+        if (inputFiles.size() > 2)
+            info.outdir = inputFiles[2];
     }
     else if (info.mode == "add")
     {
-        if (variables["input-file"].as< std::vector<std::string> >().size() < 1)
+        if (inputFiles.empty())
         {
             std::cout << "\nERROR: file to add unspecified\n\n"
                 << desc << std::endl;
             return false;
         }
-        if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-            info.addfile = variables["input-file"].as< std::vector<std::string> >()[1];
+        if (inputFiles.size() > 1)
+            info.addfile = inputFiles[1];
     }
-    else if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-        info.outdir = variables["input-file"].as< std::vector<std::string> >()[1];
+    else if (inputFiles.size() > 1)
+        info.outdir = inputFiles[1];
 
     info.longformat = variables.count("long") != 0;
     info.fullpath = variables.count("full-path") != 0;

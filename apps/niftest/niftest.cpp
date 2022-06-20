@@ -9,6 +9,7 @@
 #include <components/vfs/manager.hpp>
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
+#include <components/files/configurationmanager.hpp>
 
 #include <boost/program_options.hpp>
 
@@ -66,7 +67,7 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
     }
 }
 
-bool parseOptions (int argc, char** argv, std::vector<std::string>& files)
+bool parseOptions (int argc, char** argv, std::vector<Files::MaybeQuotedPath> &files)
 {
     bpo::options_description desc("Ensure that OpenMW can use the provided NIF and BSA files\n\n"
         "Usages:\n"
@@ -75,7 +76,7 @@ bool parseOptions (int argc, char** argv, std::vector<std::string>& files)
         "Allowed options");
     desc.add_options()
         ("help,h", "print help message.")
-        ("input-file", bpo::value< std::vector<std::filesystem::path> >(), "input file")
+        ("input-file", bpo::value< std::vector<Files::MaybeQuotedPath> >(), "input file")
         ;
 
     //Default option if none provided
@@ -96,7 +97,7 @@ bool parseOptions (int argc, char** argv, std::vector<std::string>& files)
         }
         if (variables.count("input-file"))
         {
-            files = variables["input-file"].as< std::vector<std::string> >();
+            files = variables["input-file"].as< std::vector<Files::MaybeQuotedPath> >();
             return true;
         }
     }
@@ -114,18 +115,16 @@ bool parseOptions (int argc, char** argv, std::vector<std::string>& files)
 
 int main(int argc, char **argv)
 {
-    std::vector<std::string> files;
+    std::vector<Files::MaybeQuotedPath> files;
     if(!parseOptions (argc, argv, files))
         return 1;
 
     Nif::NIFFile::setLoadUnsupportedFiles(true);
 //     std::cout << "Reading Files" << std::endl;
-    for(const auto& name : files)
+    for(const auto& path : files)
     {
         try
         {
-            const std::filesystem::path path(name); //TODO(Project579): This will probably break in windows with unicode paths
-
             if(isNIF(path))
             {
                 //std::cout << "Decoding: " << name << std::endl;
@@ -143,7 +142,7 @@ int main(int argc, char **argv)
              }
              else
              {
-                 std::cerr << "ERROR:  \"" << path << "\" is not a nif file, bsa file, or directory!" << std::endl;
+                 std::cerr << "ERROR:  \"" << path << "\" is not a nif file, bsa file, or directory!" << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
              }
         }
         catch (std::exception& e)

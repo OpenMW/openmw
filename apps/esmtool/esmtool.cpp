@@ -17,6 +17,7 @@
 #include <components/esm/format.hpp>
 #include <components/files/openfile.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/files/configurationmanager.hpp>
 
 #include "record.hpp"
 #include "labels.hpp"
@@ -154,9 +155,10 @@ bool parseOptions (int argc, char** argv, Arguments &info)
       return false;
       }*/
 
-    info.filename = variables["input-file"].as< std::vector<std::filesystem::path> >()[0];
-    if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-        info.outname = variables["input-file"].as< std::vector<std::filesystem::path> >()[1];
+    const auto inputFiles = variables["input-file"].as< std::vector<Files::MaybeQuotedPath> >();
+    info.filename = inputFiles[0];
+    if (inputFiles.size() > 1)
+        info.outname = inputFiles[1];
 
     if (const auto it = variables.find("raw"); it != variables.end())
         info.mRawFormat = ESM::parseFormat(it->second.as<std::string>());
