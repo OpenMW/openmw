@@ -40,7 +40,7 @@ namespace MWWorld
     void Class::insertObjectPhysics(const Ptr& ptr, const std::string& mesh, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const
     {}
 
-    bool Class::apply (const MWWorld::Ptr& ptr, const std::string& id,  const MWWorld::Ptr& actor) const
+    bool Class::consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const
     {
         return false;
     }

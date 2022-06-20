@@ -62,7 +62,7 @@ namespace MWLua
         };
         struct OnConsume
         {
-            std::string mRecordId;
+            LObject mConsumable;
         };
         using EngineEvent = std::variant<OnActive, OnInactive, OnConsume, OnActivated>;
 

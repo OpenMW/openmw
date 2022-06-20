@@ -374,9 +374,10 @@ namespace MWLua
         mWorldView.getObjectRegistry()->deregisterPtr(ptr);
     }
 
-    void LuaManager::appliedToObject(const MWWorld::Ptr& toPtr, std::string_view recordId, const MWWorld::Ptr& fromPtr)
+    void LuaManager::itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor)
     {
-        mLocalEngineEvents.push_back({getId(toPtr), LocalScripts::OnConsume{std::string(recordId)}});
+        mWorldView.getObjectRegistry()->registerPtr(consumable);
+        mLocalEngineEvents.push_back({getId(actor), LocalScripts::OnConsume{LObject(getId(consumable), mWorldView.getObjectRegistry())}});
     }
 
     void LuaManager::objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor)

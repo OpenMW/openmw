@@ -220,13 +220,8 @@ namespace MWWorld
             virtual float getNormalizedEncumbrance (const MWWorld::Ptr& ptr) const;
             ///< Returns encumbrance re-scaled to capacity
 
-            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
-                const MWWorld::Ptr& actor) const;
-            ///< Apply \a id on \a ptr.
-            /// \param actor Actor that is resposible for the ID being applied to \a ptr.
-            /// \return Any effect?
-            ///
-            /// (default implementation: ignore and return false)
+            virtual bool consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const;
+            ///< Consume an item, e. g. a potion.
 
             virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.

@@ -177,7 +177,7 @@ namespace MWLua
             else
             {
                 static_assert(std::is_same_v<EventT, OnConsume>);
-                callEngineHandlers(mOnConsumeHandlers, arg.mRecordId);
+                callEngineHandlers(mOnConsumeHandlers, arg.mConsumable);
             }
         }, event);
     }

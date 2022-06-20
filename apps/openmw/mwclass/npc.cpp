@@ -1100,12 +1100,14 @@ namespace MWClass
         return getNpcStats(ptr).isWerewolf() ? 0.0f : Actor::getEncumbrance(ptr);
     }
 
-    bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,
-        const MWWorld::Ptr& actor) const
+    bool Npc::consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const
     {
-        MWBase::Environment::get().getLuaManager()->appliedToObject(ptr, id, actor);
-        MWMechanics::CastSpell cast(ptr, ptr);
-        return cast.cast(id);
+        MWBase::Environment::get().getWorld()->breakInvisibility(actor);
+        MWMechanics::CastSpell cast(actor, actor);
+        std::string recordId = consumable.getCellRef().getRefId();
+        MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
+        actor.getClass().getContainerStore(actor).remove(consumable, 1, actor);
+        return cast.cast(recordId);
     }
 
     void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor) const
