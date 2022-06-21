@@ -44,7 +44,7 @@ return {
         -- @field #string type Type of the AI package.
         -- @field openmw.core#GameObject target Target (usually an actor) of the AI package (can be nil).
         -- @field #boolean sideWithTarget Whether to help the target in combat (true or false).
-        -- @field openmw.util#Vector3 position Destination point of the AI package (can be nil).
+        -- @field openmw.util#Vector3 destPosition Destination point of the AI package.
 
         --- Return the currently active AI package (or `nil` if there are no AI packages).
         -- @function [parent=#AI] getActivePackage
