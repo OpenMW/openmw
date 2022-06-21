@@ -79,7 +79,7 @@ namespace MWLua
                 return LObject(getId(target), worldView->getObjectRegistry());
         });
         aiPackage["sideWithTarget"] = sol::readonly_property([](const AiPackage& p) { return p.sideWithTarget(); });
-        aiPackage["destination"] = sol::readonly_property([](const AiPackage& p) { return p.getDestination(); });
+        aiPackage["destPosition"] = sol::readonly_property([](const AiPackage& p) { return p.getDestination(); });
 
         selfAPI["_getActiveAiPackage"] = [](SelfObject& self) -> sol::optional<std::shared_ptr<AiPackage>>
         {
