@@ -53,7 +53,7 @@ namespace MWMechanics
 
             const bool mHidden;
 
-            AiReactionTimer mDestinationCheck;
+            float mDestinationTimer;
     };
 
     struct AiInternalTravel final : public AiTravel
