@@ -96,6 +96,10 @@ namespace LuaUi
         ext->mParent = this;
         ext->mTemplateChild = false;
         ext->widget()->attachToWidget(mSlot->widget());
+        // workaround for MyGUI bug
+        // parent visibility doesn't affect added children
+        ext->widget()->setVisible(!ext->widget()->getVisible());
+        ext->widget()->setVisible(!ext->widget()->getVisible());
     }
 
     void WidgetExtension::attachTemplate(WidgetExtension* ext)
@@ -103,6 +107,10 @@ namespace LuaUi
         ext->mParent = this;
         ext->mTemplateChild = true;
         ext->widget()->attachToWidget(widget());
+        // workaround for MyGUI bug
+        // parent visibility doesn't affect added children
+        ext->widget()->setVisible(!ext->widget()->getVisible());
+        ext->widget()->setVisible(!ext->widget()->getVisible());
     }
 
     WidgetExtension* WidgetExtension::findDeep(std::string_view flagName)
