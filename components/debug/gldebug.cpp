@@ -82,18 +82,23 @@ namespace Debug
             break;
         case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
             typeStr = "DEPRECATED_BEHAVIOR";
+            logSeverity = Warning;
             break;
         case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
             typeStr = "UNDEFINED_BEHAVIOR";
+            logSeverity = Warning;
             break;
         case GL_DEBUG_TYPE_PORTABILITY:
             typeStr = "PORTABILITY";
+            logSeverity = Debug;
             break;
         case GL_DEBUG_TYPE_PERFORMANCE:
             typeStr = "PERFORMANCE";
+            logSeverity = Debug;
             break;
         case GL_DEBUG_TYPE_OTHER:
             typeStr = "OTHER";
+            logSeverity = Debug;
             break;
         default:
             typeStr = "UNDEFINED";

@@ -38,11 +38,11 @@ namespace MWRender
 
         void setSceneTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].sceneTex = tex; }
 
-        void setLDRSceneTexture(size_t frameId, osg::ref_ptr<osg::Texture2D> tex) { mBufferData[frameId].sceneTexLDR = tex; }
+        void setLDRSceneTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].sceneTexLDR = tex; }
 
         void setDepthTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].depthTex = tex; }
 
-        void setNormalsTexture(size_t frameId, osg::ref_ptr<osg::Texture2D> tex) { mBufferData[frameId].normalsTex = tex; }
+        void setNormalsTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].normalsTex = tex; }
 
         void setHDR(size_t frameId, bool hdr) { mBufferData[frameId].hdr = hdr; }
 
@@ -58,7 +58,10 @@ namespace MWRender
         mutable HDRDriver mHDRDriver;
 
         osg::ref_ptr<osg::Program> mFallbackProgram;
+        osg::ref_ptr<osg::Program> mMultiviewResolveProgram;
         osg::ref_ptr<osg::StateSet> mFallbackStateSet;
+        osg::ref_ptr<osg::StateSet> mMultiviewResolveStateSet;
+        mutable osg::ref_ptr<osg::FrameBufferObject> mMultiviewResolveFramebuffer;
 
         struct BufferData
         {
@@ -73,12 +76,13 @@ namespace MWRender
 
             osg::ref_ptr<osg::Texture> sceneTex;
             osg::ref_ptr<osg::Texture> depthTex;
-            osg::ref_ptr<osg::Texture2D> sceneTexLDR;
-            osg::ref_ptr<osg::Texture2D> normalsTex;
+            osg::ref_ptr<osg::Texture> sceneTexLDR;
+            osg::ref_ptr<osg::Texture> normalsTex;
         };
 
         mutable std::array<BufferData, 2> mBufferData;
         mutable std::array<osg::ref_ptr<osg::FrameBufferObject>, 3> mFbos;
+        mutable osg::ref_ptr<osg::Viewport> mRenderViewport;
 
         mutable bool mLoggedLastError = false;
     };

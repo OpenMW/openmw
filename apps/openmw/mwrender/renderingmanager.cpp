@@ -110,14 +110,14 @@ namespace MWRender
         {
             auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
             if (uProjectionMatrix)
-                uProjectionMatrix->set(Stereo::Manager::instance().computeEyeProjection(0, SceneUtil::AutoDepth::isReversed()));
+                uProjectionMatrix->set(Stereo::Manager::instance().computeEyeViewOffset(0) * Stereo::Manager::instance().computeEyeProjection(0, SceneUtil::AutoDepth::isReversed()));
         }
 
         void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
         {
             auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
             if (uProjectionMatrix)
-                uProjectionMatrix->set(Stereo::Manager::instance().computeEyeProjection(1, SceneUtil::AutoDepth::isReversed()));
+                uProjectionMatrix->set(Stereo::Manager::instance().computeEyeViewOffset(1) * Stereo::Manager::instance().computeEyeProjection(1, SceneUtil::AutoDepth::isReversed()));
         }
 
         void setProjectionMatrix(const osg::Matrixf& projectionMatrix)

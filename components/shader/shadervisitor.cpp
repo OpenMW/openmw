@@ -40,7 +40,7 @@ namespace
         OpaqueDepthAttribute(const OpaqueDepthAttribute& copy, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
             : osg::StateAttribute(copy, copyop), mTextures(copy.mTextures), mUnit(copy.mUnit) {}
 
-        void setTexturesAndUnit(const std::array<osg::ref_ptr<osg::Texture2D>, 2>& textures, int unit)
+        void setTexturesAndUnit(const std::array<osg::ref_ptr<osg::Texture>, 2>& textures, int unit)
         {
             mTextures = textures;
             mUnit = unit;
@@ -69,7 +69,7 @@ namespace
         }
 
     private:
-        mutable std::array<osg::ref_ptr<osg::Texture2D>, 2> mTextures;
+        mutable std::array<osg::ref_ptr<osg::Texture>, 2> mTextures;
         int mUnit;
     };
 }
@@ -982,7 +982,7 @@ namespace Shader
         mConvertAlphaTestToAlphaToCoverage = convert;
     }
 
-    void ShaderVisitor::setOpaqueDepthTex(osg::ref_ptr<osg::Texture2D> texturePing, osg::ref_ptr<osg::Texture2D> texturePong)
+    void ShaderVisitor::setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong)
     {
         mOpaqueDepthTex = { texturePing, texturePong };
     }

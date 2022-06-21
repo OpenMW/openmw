@@ -68,7 +68,6 @@ namespace Stereo
         void setCullCallback(osg::ref_ptr<osg::NodeCallback> cb);
 
         osg::Matrixd computeEyeProjection(int view, bool reverseZ) const;
-        osg::Matrixd computeEyeView(int view) const;
         osg::Matrixd computeEyeViewOffset(int view) const;
 
         //! Sets up any definitions necessary for stereo rendering
@@ -116,7 +115,6 @@ namespace Stereo
         osg::Vec2i                      mEyeResolutionOverride;
 
         std::array<View, 2>         mView;
-        std::array<osg::Matrix, 2>  mViewMatrix;
         std::array<osg::Matrix, 2>  mViewOffsetMatrix;
         std::array<osg::Matrix, 2>  mProjectionMatrix;
         std::array<osg::Matrix, 2>  mProjectionMatrixReverseZ;

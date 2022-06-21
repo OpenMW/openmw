@@ -5,8 +5,13 @@
 
 #include <osg/Texture1D>
 #include <osg/Texture2D>
+#include <osg/Texture2DMultisample>
 #include <osg/Texture3D>
 #include <osg/Texture2DArray>
+
+#ifdef OSG_HAS_MULTIVIEW
+#include <osg/Texture2DMultisampleArray>
+#endif
 
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/depth.hpp>
@@ -66,9 +71,102 @@ namespace
 
             cv->pushStateSet(stateset);
             traverse(camera, cv);
-            cv->popViewport();
+            cv->popStateSet();
         }
     };
+
+
+    static void setTextureSize(osg::Texture* tex, int w, int h)
+    {
+        switch (tex->getTextureTarget())
+        {
+        case GL_TEXTURE_2D:
+            static_cast<osg::Texture2D*>(tex)->setTextureSize(w, h);
+            break;
+        case GL_TEXTURE_2D_ARRAY:
+            static_cast<osg::Texture2DArray*>(tex)->setTextureSize(w, h, 2);
+            break;
+        default:
+            throw std::logic_error("Invalid texture type received");
+        }
+    }
+
+    static void setAttachment(osg::FrameBufferObject* fbo, osg::Camera::BufferComponent component, osg::Texture* tex)
+    {
+        switch (tex->getTextureTarget())
+        {
+        case GL_TEXTURE_2D:
+        {
+            auto* tex2d = static_cast<osg::Texture2D*>(tex);
+            fbo->setAttachment(component, osg::FrameBufferAttachment(tex2d));
+        }
+        break;
+        case GL_TEXTURE_2D_ARRAY:
+        {
+#ifdef OSG_HAS_MULTIVIEW
+            auto* tex2dArray = static_cast<osg::Texture2DArray*>(tex);
+            fbo->setAttachment(component, osg::FrameBufferAttachment(tex2dArray, osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, 0));
+#endif
+        }
+        break;
+        default:
+            throw std::logic_error("Invalid texture type received");
+        }
+    }
+
+    enum class Usage
+    {
+        RENDER_BUFFER,
+        TEXTURE,
+    };
+
+    static osg::FrameBufferAttachment createFrameBufferAttachmentFromTemplate(Usage usage, int width, int height, osg::Texture* template_, int samples)
+    {
+        if (usage == Usage::RENDER_BUFFER && !Stereo::getMultiview())
+        {
+            osg::ref_ptr<osg::RenderBuffer> attachment = new osg::RenderBuffer(width, height, template_->getInternalFormat(), samples);
+            return osg::FrameBufferAttachment(attachment);
+        }
+
+        osg::FrameBufferAttachment attachment;
+
+#ifdef OSG_HAS_MULTIVIEW
+        if (Stereo::getMultiview())
+        {
+            if (samples > 1)
+            {
+                attachment = osg::FrameBufferAttachment(new osg::Texture2DMultisampleArray(), osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, 0);
+            }
+            else
+            {
+                attachment = osg::FrameBufferAttachment(new osg::Texture2DArray(), osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, 0);
+            }
+        }
+        else
+#endif
+        {
+            if (samples > 1)
+            {
+                attachment = osg::FrameBufferAttachment(new osg::Texture2DMultisample());
+            }
+            else
+            {
+                attachment =  osg::FrameBufferAttachment(new osg::Texture2D());
+            }
+        }
+
+        osg::Texture* texture = attachment.getTexture();
+        setTextureSize(texture, width, height);
+        texture->setSourceFormat(template_->getSourceFormat());
+        texture->setSourceType(template_->getSourceType());
+        texture->setInternalFormat(template_->getInternalFormat());
+        texture->setFilter(osg::Texture2D::MIN_FILTER, template_->getFilter(osg::Texture2D::MIN_FILTER));
+        texture->setFilter(osg::Texture2D::MAG_FILTER, template_->getFilter(osg::Texture2D::MAG_FILTER));
+        texture->setWrap(osg::Texture::WRAP_S, template_->getWrap(osg::Texture2D::WRAP_S));
+        texture->setWrap(osg::Texture::WRAP_T, template_->getWrap(osg::Texture2D::WRAP_T));
+
+        return attachment;
+    }
 }
 
 namespace MWRender
@@ -99,7 +197,7 @@ namespace MWRender
         , mPrevPassLights(false)
         , mMainTemplate(new osg::Texture2D)
     {
-        mSoftParticles = Settings::Manager::getBool("soft particles", "Shaders") && !Stereo::getStereo() && !Stereo::getMultiview();
+        mSoftParticles = Settings::Manager::getBool("soft particles", "Shaders");
         mUsePostProcessing = Settings::Manager::getBool("enabled", "Post Processing");
 
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
@@ -121,14 +219,21 @@ namespace MWRender
             Log(Debug::Error) << "'glDisablei' unsupported, pass normals will not be available to shaders.";
 
         if (mSoftParticles)
+        {
             for (int i = 0; i < 2; ++i)
-                mTextures[i][Tex_OpaqueDepth] = new osg::Texture2D;
+            {
+                if (Stereo::getMultiview())
+                    mTextures[i][Tex_OpaqueDepth] = new osg::Texture2DArray;
+                else
+                    mTextures[i][Tex_OpaqueDepth] = new osg::Texture2D;
+            }
+        }
 
         mGLSLVersion = ext->glslLanguageVersion * 100;
         mUBO = ext && ext->isUniformBufferObjectSupported && mGLSLVersion >= 330;
         mStateUpdater = new fx::StateUpdater(mUBO);
 
-        if (!SceneUtil::AutoDepth::isReversed() && !mSoftParticles && !mUsePostProcessing && !Stereo::getStereo() && !Stereo::getMultiview())
+        if (!SceneUtil::AutoDepth::isReversed() && !mSoftParticles && !mUsePostProcessing)
             return;
 
         enable(mUsePostProcessing);
@@ -142,11 +247,18 @@ namespace MWRender
 
     void PostProcessor::resize()
     {
+        mHUDCamera->resize(mWidth, mHeight);
+        mViewer->getCamera()->resize(mWidth, mHeight);
+        if (Stereo::getStereo())
+            Stereo::Manager::instance().screenResolutionChanged();
+
+        auto width = renderWidth();
+        auto height = renderHeight();
         for (auto& technique : mTechniques)
         {
             for (auto& [name, rt] : technique->getRenderTargetsMap())
             {
-                const auto [w, h] = rt.mSize.get(mWidth, mHeight);
+                const auto [w, h] = rt.mSize.get(width, height);
                 rt.mTarget->setTextureSize(w, h);
             }
         }
@@ -156,10 +268,8 @@ namespace MWRender
         createTexturesAndCamera(frameId);
         createObjectsForFrame(frameId);
 
-        mHUDCamera->resize(mWidth, mHeight);
-        mViewer->getCamera()->resize(mWidth, mHeight);
         mRendering.updateProjectionMatrix();
-        mRendering.setScreenRes(mWidth, mHeight);
+        mRendering.setScreenRes(width, height);
 
         dirtyTechniques();
 
@@ -168,8 +278,6 @@ namespace MWRender
         mDirty = true;
         mDirtyFrameId = !frameId;
 
-        if (Stereo::getStereo())
-            Stereo::Manager::instance().screenResolutionChanged();
     }
 
     void PostProcessor::populateTechniqueFiles()
@@ -191,7 +299,7 @@ namespace MWRender
         mReload = true;
         mEnabled = true;
         bool postPass = Settings::Manager::getBool("transparent postpass", "Post Processing");
-        mUsePostProcessing = usePostProcessing && !Stereo::getStereo() && !Stereo::getMultiview();
+        mUsePostProcessing = usePostProcessing;
 
         mDisableDepthPasses = !mSoftParticles && !postPass;
 
@@ -199,7 +307,7 @@ namespace MWRender
         mDisableDepthPasses = true;
 #endif
 
-        if (!mDisableDepthPasses && !Stereo::getStereo() && !Stereo::getMultiview())
+        if (!mDisableDepthPasses)
         {
             mTransparentDepthPostPass = new TransparentDepthBinCallback(mRendering.getResourceSystem()->getSceneManager()->getShaderManager(), postPass);
             osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(mTransparentDepthPostPass);
@@ -240,7 +348,7 @@ namespace MWRender
         if (!mSoftParticles)
             osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(nullptr);
 
-        if (!SceneUtil::AutoDepth::isReversed() && !mSoftParticles && !Stereo::getStereo() && !Stereo::getMultiview())
+        if (!SceneUtil::AutoDepth::isReversed() && !mSoftParticles)
         {
             removeChild(mHUDCamera);
             setCullCallback(nullptr);
@@ -289,25 +397,7 @@ namespace MWRender
         mPingPongCanvas->setMask(frameId, mUnderwater, mExteriorFlag);
         mPingPongCanvas->setHDR(frameId, getHDR());
 
-        if (Stereo::getStereo())
-        {
-            auto& sm = Stereo::Manager::instance();
-
-            int index = sm.getEye(cv) == Stereo::Eye::Left ? 0 : 1;
-
-            mPingPongCanvas->setSceneTexture(frameId, sm.multiviewFramebuffer()->layerColorBuffer(index));
-            mPingPongCanvas->setDepthTexture(frameId, sm.multiviewFramebuffer()->layerDepthBuffer(index));
-        }
-        else if (Stereo::getMultiview())
-        {
-            auto& sm = Stereo::Manager::instance();
-
-            mPingPongCanvas->setSceneTexture(frameId, sm.multiviewFramebuffer()->multiviewColorBuffer());
-            mPingPongCanvas->setDepthTexture(frameId, sm.multiviewFramebuffer()->multiviewDepthBuffer());
-        }
-        else
-        {
-            mPingPongCanvas->setSceneTexture(frameId, getTexture(Tex_Scene, frameId));
+        mPingPongCanvas->setSceneTexture(frameId, getTexture(Tex_Scene, frameId));
             if (mDisableDepthPasses)
                 mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_Depth, frameId));
             else
@@ -315,12 +405,12 @@ namespace MWRender
 
             mPingPongCanvas->setLDRSceneTexture(frameId, getTexture(Tex_Scene_LDR, frameId));
 
-            if (mTransparentDepthPostPass)
-            {
-                mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
-                mTransparentDepthPostPass->mMsaaFbo[frameId] = mFbos[frameId][FBO_Multisample];
-                mTransparentDepthPostPass->mOpaqueFbo[frameId] = mFbos[frameId][FBO_OpaqueDepth];
-            }
+        if (mTransparentDepthPostPass)
+        {
+            mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
+            mTransparentDepthPostPass->mMsaaFbo[frameId] = mFbos[frameId][FBO_Multisample];
+            mTransparentDepthPostPass->mOpaqueFbo[frameId] = mFbos[frameId][FBO_OpaqueDepth];
+            mTransparentDepthPostPass->dirtyFrame(frameId);
         }
 
         size_t frame = cv->getTraversalNumber();
@@ -331,7 +421,6 @@ namespace MWRender
         if (frame != mLastFrameNumber)
         {
             mLastFrameNumber = frame;
-
             auto stamp = cv->getFrameStamp();
 
             mStateUpdater->setSimulationTime(static_cast<float>(stamp->getSimulationTime()));
@@ -440,29 +529,29 @@ namespace MWRender
 
     void PostProcessor::createObjectsForFrame(size_t frameId)
     {
-        if (Stereo::getStereo() || Stereo::getMultiview())
-            return;
-
         auto& fbos = mFbos[frameId];
         auto& textures = mTextures[frameId];
+        auto width = renderWidth();
+        auto height = renderHeight();
 
         for (auto& tex : textures)
         {
             if (!tex)
                 continue;
 
-            tex->setTextureSize(mWidth, mHeight);
+            setTextureSize(tex, width, height);
             tex->dirtyTextureObject();
         }
 
         fbos[FBO_Primary] = new osg::FrameBufferObject;
-        fbos[FBO_Primary]->setAttachment(osg::Camera::COLOR_BUFFER0, osg::FrameBufferAttachment(textures[Tex_Scene]));
+        setAttachment(fbos[FBO_Primary], osg::Camera::COLOR_BUFFER0, textures[Tex_Scene]);
         if (mNormals && mNormalsSupported)
-            fbos[FBO_Primary]->setAttachment(osg::Camera::COLOR_BUFFER1, osg::FrameBufferAttachment(textures[Tex_Normal]));
-        fbos[FBO_Primary]->setAttachment(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, osg::FrameBufferAttachment(textures[Tex_Depth]));
+            setAttachment(fbos[FBO_Primary], osg::Camera::COLOR_BUFFER1, textures[Tex_Normal]);
+        setAttachment(fbos[FBO_Primary], osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, textures[Tex_Depth]);
 
         fbos[FBO_FirstPerson] = new osg::FrameBufferObject;
-        osg::ref_ptr<osg::RenderBuffer> fpDepthRb = new osg::RenderBuffer(mWidth, mHeight, textures[Tex_Depth]->getInternalFormat(), mSamples > 1 ? mSamples : 0);
+
+        auto fpDepthRb = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
         fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, osg::FrameBufferAttachment(fpDepthRb));
 
         // When MSAA is enabled we must first render to a render buffer, then
@@ -471,33 +560,33 @@ namespace MWRender
         if (mSamples > 1)
         {
             fbos[FBO_Multisample] = new osg::FrameBufferObject;
-            osg::ref_ptr<osg::RenderBuffer> colorRB = new osg::RenderBuffer(mWidth, mHeight, textures[Tex_Scene]->getInternalFormat(), mSamples);
+            auto colorRB = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Scene], mSamples);
             if (mNormals && mNormalsSupported)
             {
-                osg::ref_ptr<osg::RenderBuffer> normalRB = new osg::RenderBuffer(mWidth, mHeight, textures[Tex_Normal]->getInternalFormat(), mSamples);
-                fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, osg::FrameBufferAttachment(normalRB));
-                fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, osg::FrameBufferAttachment(normalRB));
+                auto normalRB = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Normal], mSamples);
+                fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, normalRB);
+                fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, normalRB);
             }
-            osg::ref_ptr<osg::RenderBuffer> depthRB = new osg::RenderBuffer(mWidth, mHeight, textures[Tex_Depth]->getInternalFormat(), mSamples);
-            fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(colorRB));
-            fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, osg::FrameBufferAttachment(depthRB));
-            fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(colorRB));
+            auto depthRB = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
+            fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, colorRB);
+            fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, depthRB);
+            fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, colorRB);
 
             fbos[FBO_Intercept] = new osg::FrameBufferObject;
-            fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(textures[Tex_Scene]));
-            fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, osg::FrameBufferAttachment(textures[Tex_Normal]));
+            setAttachment(fbos[FBO_Intercept], osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, textures[Tex_Scene]);
+            setAttachment(fbos[FBO_Intercept], osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, textures[Tex_Normal]);
         }
         else
         {
-            fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(textures[Tex_Scene]));
+            setAttachment(fbos[FBO_FirstPerson], osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, textures[Tex_Scene]);
             if (mNormals && mNormalsSupported)
-                fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, osg::FrameBufferAttachment(textures[Tex_Normal]));
+                setAttachment(fbos[FBO_FirstPerson], osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, textures[Tex_Normal]);
         }
 
         if (textures[Tex_OpaqueDepth])
         {
             fbos[FBO_OpaqueDepth] = new osg::FrameBufferObject;
-            fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, osg::FrameBufferAttachment(textures[Tex_OpaqueDepth]));
+            setAttachment(fbos[FBO_OpaqueDepth], osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, textures[Tex_OpaqueDepth]);
         }
 
 #ifdef __APPLE__
@@ -600,7 +689,7 @@ namespace MWRender
                 {
                     const auto& rt = technique->getRenderTargetsMap()[pass->getTarget()];
 
-                    const auto [w, h] = rt.mSize.get(mWidth, mHeight);
+                    const auto [w, h] = rt.mSize.get(renderWidth(), renderHeight());
 
                     subPass.mRenderTexture = new osg::Texture2D(*rt.mTarget);
                     renderTargetCache[rt.mTarget] = subPass.mRenderTexture;
@@ -690,11 +779,19 @@ namespace MWRender
     {
         auto& textures = mTextures[frameId];
 
+        auto width = renderWidth();
+        auto height = renderHeight();
+
         for (auto& texture : textures)
         {
             if (!texture)
-                texture = new osg::Texture2D;
-            texture->setTextureSize(mWidth, mHeight);
+            {
+                if (Stereo::getMultiview())
+                    texture = new osg::Texture2DArray;
+                else
+                    texture = new osg::Texture2D;
+            }
+            setTextureSize(texture, width, height);
             texture->setSourceFormat(GL_RGBA);
             texture->setSourceType(GL_UNSIGNED_BYTE);
             texture->setInternalFormat(GL_RGBA);
@@ -719,7 +816,7 @@ namespace MWRender
             textures[Tex_Scene]->setWrap(osg::Texture::WRAP_T, mMainTemplate->getWrap(osg::Texture2D::WRAP_T));
         }
 
-        auto setupDepth = [] (osg::Texture2D* tex) {
+        auto setupDepth = [] (osg::Texture* tex) {
             tex->setSourceFormat(GL_DEPTH_STENCIL_EXT);
             tex->setSourceType(SceneUtil::AutoDepth::depthSourceType());
             tex->setInternalFormat(SceneUtil::AutoDepth::depthInternalFormat());
@@ -750,11 +847,10 @@ namespace MWRender
         mHUDCamera->setViewport(0, 0, mWidth, mHeight);
 
         mViewer->getCamera()->removeCullCallback(mPingPongCull);
-        mPingPongCull = new PingPongCull;
+        mPingPongCull = new PingPongCull(this);
         mViewer->getCamera()->addCullCallback(mPingPongCull);
 
         mPingPongCanvas = new PingPongCanvas(mRendering.getResourceSystem()->getSceneManager()->getShaderManager());
-
         mHUDCamera->addChild(mPingPongCanvas);
         mHUDCamera->setNodeMask(Mask_RenderToTexture);
 
@@ -778,7 +874,7 @@ namespace MWRender
             if (Misc::StringUtils::ciEqual(technique->getName(), name))
                 return technique;
 
-        auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(), name, mWidth, mHeight, mUBO, mNormalsSupported);
+        auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(), name, renderWidth(), renderHeight(), mUBO, mNormalsSupported);
 
         technique->compile();
 
@@ -853,6 +949,20 @@ namespace MWRender
         for (auto& technique : mTechniques)
             if (technique->getDynamic())
                 disableTechnique(technique);
+    }
+
+    int PostProcessor::renderWidth() const
+    {
+        if (Stereo::getStereo())
+            return Stereo::Manager::instance().eyeResolution().x();
+        return mWidth;
+    }
+
+    int PostProcessor::renderHeight() const
+    {
+        if (Stereo::getStereo())
+            return Stereo::Manager::instance().eyeResolution().y();
+        return mHeight;
     }
 }
 

@@ -48,7 +48,7 @@ namespace Shader
 
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
 
-        void setOpaqueDepthTex(osg::ref_ptr<osg::Texture2D> texturePing, osg::ref_ptr<osg::Texture2D> texturePong);
+        void setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong);
 
         void setSupportsNormalsRT(bool supports) { mSupportsNormalsRT = supports; }
 
@@ -122,7 +122,7 @@ namespace Shader
         bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
 
         osg::ref_ptr<const osg::Program> mProgramTemplate;
-        std::array<osg::ref_ptr<osg::Texture2D>, 2> mOpaqueDepthTex;
+        std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
     };
 
     class ReinstateRemovedStateVisitor : public osg::NodeVisitor

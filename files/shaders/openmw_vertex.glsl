@@ -18,8 +18,3 @@ vec4 mw_viewToClip(vec4 pos)
 {
     return projectionMatrix * pos;
 }
-
-vec4 mw_viewStereoAdjust(vec4 pos)
-{
-    return pos;
-}

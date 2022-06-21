@@ -35,6 +35,19 @@ void main()
     omw_TexCoord = omw_Position.xy * 0.5 + 0.5;
 })GLSL";
 
+    constexpr char s_DefaultVertexMultiview[] = R"GLSL(
+layout(num_views = 2) in;
+#if OMW_USE_BINDINGS
+    omw_In vec2 omw_Vertex;
+#endif
+omw_Out vec2 omw_TexCoord;
+
+void main()
+{
+    omw_Position = vec4(omw_Vertex.xy, 0.0, 1.0);
+    omw_TexCoord = omw_Position.xy * 0.5 + 0.5;
+})GLSL";
+
 }
 
 namespace fx
@@ -81,6 +94,11 @@ uniform @builtinSampler omw_SamplerNormals;
 uniform vec4 omw_PointLights[@pointLightCount];
 uniform int omw_PointLightsCount;
 
+#if OMW_MULTIVIEW
+uniform mat4 projectionMatrixMultiView[2];
+uniform mat4 invProjectionMatrixMultiView[2];
+#endif
+
 int omw_GetPointLightCount()
 {
     return omw_PointLightsCount;
@@ -111,6 +129,25 @@ float omw_GetPointLightRadius(int index)
 #else
     uniform _omw_data omw;
 #endif
+
+
+mat4 omw_ProjectionMatrix()
+{
+#if OMW_MULTIVIEW
+    return projectionMatrixMultiView[gl_ViewID_OVR];
+#else
+    return omw.projectionMatrix;
+#endif
+}
+
+mat4 omw_InvProjectionMatrix()
+{
+#if OMW_MULTIVIEW
+    return invProjectionMatrixMultiView[gl_ViewID_OVR];
+#else
+    return omw.invProjectionMatrix;
+#endif
+}
 
     float omw_GetDepth(vec2 uv)
     {
@@ -266,7 +303,7 @@ float omw_GetPointLightRadius(int index)
         if (mType == Type::Pixel)
         {
             if (!mVertex)
-                mVertex = new osg::Shader(osg::Shader::VERTEX, s_DefaultVertex);
+                mVertex = new osg::Shader(osg::Shader::VERTEX, Stereo::getMultiview() ? s_DefaultVertexMultiview : s_DefaultVertex);
 
             mVertex->setShaderSource(getPassHeader(technique, preamble).append(mVertex->getShaderSource()));
             mFragment->setShaderSource(getPassHeader(technique, preamble, true).append(mFragment->getShaderSource()));

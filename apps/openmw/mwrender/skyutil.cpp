@@ -22,6 +22,7 @@
 
 #include <components/misc/rng.hpp>
 #include <components/stereo/stereomanager.hpp>
+#include <components/stereo/multiview.hpp>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -604,32 +605,62 @@ namespace MWRender
     }
 
 
-    class SkyMultiviewStatesetUpdater: public SceneUtil::StateSetUpdater
+    class SkyStereoStatesetUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        SkyMultiviewStatesetUpdater()
+        SkyStereoStatesetUpdater()
         {
         }
 
     protected:
-        virtual void setDefaults(osg::StateSet* stateset)
+        void setDefaults(osg::StateSet* stateset) override
         {
-            stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "viewMatrixMultiView", 2), osg::StateAttribute::OVERRIDE);
+            if (Stereo::getMultiview())
+                stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrixMultiView", 2), osg::StateAttribute::OVERRIDE);
+            else
+                stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrix"), osg::StateAttribute::OVERRIDE);
+
         }
 
-        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
         {
-            auto* viewMatrixMultiViewUniform = stateset->getUniform("viewMatrixMultiView");
-            auto& sm = Stereo::Manager::instance();
-
-            for (int view : {0, 1})
+            if (Stereo::getMultiview())
             {
-                auto viewOffsetMatrix = sm.computeEyeViewOffset(view);
-                for (int col : {0, 1, 2})
-                    viewOffsetMatrix(3, col) = 0;
+                auto* projectionMatrixMultiViewUniform = stateset->getUniform("projectionMatrixMultiView");
+                auto& sm = Stereo::Manager::instance();
 
-                viewMatrixMultiViewUniform->setElement(view, viewOffsetMatrix);
+                for (int view : {0, 1})
+                {
+                    auto projectionMatrix = sm.computeEyeProjection(view, true);
+                    auto viewOffsetMatrix = sm.computeEyeViewOffset(view);
+                    for (int col : {0, 1, 2})
+                        viewOffsetMatrix(3, col) = 0;
+
+                    projectionMatrixMultiViewUniform->setElement(view, viewOffsetMatrix * projectionMatrix);
+                }
             }
+        }
+        void applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* /*cv*/) override
+        {
+            auto& sm = Stereo::Manager::instance();
+            auto* projectionMatrixUniform = stateset->getUniform("projectionMatrix");
+            auto projectionMatrix = sm.computeEyeProjection(0, true);
+            auto viewOffsetMatrix = sm.computeEyeViewOffset(0);
+            for (int col : {0, 1, 2})
+                viewOffsetMatrix(3, col) = 0;
+
+            projectionMatrixUniform->set(viewOffsetMatrix * projectionMatrix);
+        }
+        void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* /*cv*/) override
+        {
+            auto& sm = Stereo::Manager::instance();
+            auto* projectionMatrixUniform = stateset->getUniform("projectionMatrix");
+            auto projectionMatrix = sm.computeEyeProjection(1, true);
+            auto viewOffsetMatrix = sm.computeEyeViewOffset(1);
+            for (int col : {0, 1, 2})
+                viewOffsetMatrix(3, col) = 0;
+
+            projectionMatrixUniform->set(viewOffsetMatrix * projectionMatrix);
         }
 
     private:
@@ -643,7 +674,8 @@ namespace MWRender
         setCullingActive(false);
 
         addCullCallback(new CameraRelativeTransformCullCallback);
-        addCullCallback(new SkyMultiviewStatesetUpdater);
+        if (Stereo::getStereo())
+            addCullCallback(new SkyStereoStatesetUpdater);
     }
 
     CameraRelativeTransform::CameraRelativeTransform(const CameraRelativeTransform& copy, const osg::CopyOp& copyop)

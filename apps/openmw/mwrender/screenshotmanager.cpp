@@ -109,9 +109,7 @@ namespace MWRender
                 size_t frameId = renderInfo.getState()->getFrameStamp()->getFrameNumber() % 2;
                 osg::FrameBufferObject* fbo = nullptr;
 
-                if (Stereo::getStereo())
-                    fbo = Stereo::Manager::instance().multiviewFramebuffer()->layerFbo(0);
-                else if (postProcessor && postProcessor->getFbo(PostProcessor::FBO_Primary, frameId))
+                if (postProcessor && postProcessor->getFbo(PostProcessor::FBO_Primary, frameId))
                     fbo = postProcessor->getFbo(PostProcessor::FBO_Primary, frameId);
 
                 if (fbo)

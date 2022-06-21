@@ -55,7 +55,7 @@ namespace MWRender
     {
     public:
         using FBOArray = std::array<osg::ref_ptr<osg::FrameBufferObject>, 5>;
-        using TextureArray = std::array<osg::ref_ptr<osg::Texture2D>, 5>;
+        using TextureArray = std::array<osg::ref_ptr<osg::Texture>, 5>;
         using TechniqueList = std::vector<std::shared_ptr<fx::Technique>>;
 
         enum TextureIndex
@@ -94,7 +94,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::FrameBufferObject> getFbo(FBOIndex index, unsigned int frameId) { return mFbos[frameId][index]; }
 
-        osg::ref_ptr<osg::Texture2D> getTexture(TextureIndex index, unsigned int frameId) { return mTextures[frameId][index]; }
+        osg::ref_ptr<osg::Texture> getTexture(TextureIndex index, unsigned int frameId) { return mTextures[frameId][index]; }
 
         osg::ref_ptr<osg::FrameBufferObject> getPrimaryFbo(unsigned int frameId) { return mFbos[frameId][FBO_Multisample] ? mFbos[frameId][FBO_Multisample] : mFbos[frameId][FBO_Primary]; }
 
@@ -177,6 +177,9 @@ namespace MWRender
 
         void disableDynamicShaders();
 
+        int renderWidth() const;
+        int renderHeight() const;
+
     private:
 
         void populateTechniqueFiles();
@@ -242,7 +245,7 @@ namespace MWRender
         bool mUBO;
         int mGLSLVersion;
 
-        osg::ref_ptr<osg::Texture2D> mMainTemplate;
+        osg::ref_ptr<osg::Texture> mMainTemplate;
 
         osg::ref_ptr<fx::StateUpdater> mStateUpdater;
         osg::ref_ptr<PingPongCull> mPingPongCull;

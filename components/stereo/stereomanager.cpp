@@ -72,7 +72,7 @@ namespace Stereo
             osg::Matrix dummy;
             auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
             if (uProjectionMatrix)
-                uProjectionMatrix->set(mManager->computeEyeProjection(0, SceneUtil::AutoDepth::isReversed()));
+                uProjectionMatrix->set(mManager->computeEyeViewOffset(0) * mManager->computeEyeProjection(0, SceneUtil::AutoDepth::isReversed()));
         }
 
         void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
@@ -80,7 +80,7 @@ namespace Stereo
             osg::Matrix dummy;
             auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
             if (uProjectionMatrix)
-                uProjectionMatrix->set(mManager->computeEyeProjection(1, SceneUtil::AutoDepth::isReversed()));
+                uProjectionMatrix->set(mManager->computeEyeViewOffset(1) * mManager->computeEyeProjection(1, SceneUtil::AutoDepth::isReversed()));
         }
 
     private:
@@ -99,8 +99,8 @@ namespace Stereo
     protected:
         virtual void setDefaults(osg::StateSet* stateset)
         {
-            stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "viewMatrixMultiView", 2));
             stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrixMultiView", 2));
+            stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "invProjectionMatrixMultiView", 2));
         }
 
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
@@ -248,25 +248,23 @@ namespace Stereo
             osg::Matrixd computeLeftEyeProjection(const osg::Matrixd& projection) const override
             {
                 (void)projection;
-                return mManager->computeEyeProjection(0, false);
+                return mManager->computeEyeViewOffset(0) * mManager->computeEyeProjection(0, false);
             }
 
             osg::Matrixd computeLeftEyeView(const osg::Matrixd& view) const override
             {
-                (void)view;
-                return mManager->computeEyeView(0);
+                return view;
             }
 
             osg::Matrixd computeRightEyeProjection(const osg::Matrixd& projection) const override
             {
                 (void)projection;
-                return mManager->computeEyeProjection(1, false);
+                return mManager->computeEyeViewOffset(1) * mManager->computeEyeProjection(1, false);
             }
 
             osg::Matrixd computeRightEyeView(const osg::Matrixd& view) const override
             {
-                (void)view;
-                return mManager->computeEyeView(1);
+                return view;
             }
 
             Manager* mManager;
@@ -305,15 +303,16 @@ namespace Stereo
 
     void Manager::updateStereoFramebuffer()
     {
+        //VR-TODO: in VR, still need to have this framebuffer attached before the postprocessor is created
         auto samples = Settings::Manager::getInt("antialiasing", "Video");
         auto eyeRes = eyeResolution();
 
-        if (mMultiviewFramebuffer)
-            mMultiviewFramebuffer->detachFrom(mMainCamera);
+        //if (mMultiviewFramebuffer)
+        //    mMultiviewFramebuffer->detachFrom(mMainCamera);
         mMultiviewFramebuffer = std::make_shared<MultiviewFramebuffer>(static_cast<int>(eyeRes.x()), static_cast<int>(eyeRes.y()), samples);
         mMultiviewFramebuffer->attachColorComponent(SceneUtil::Color::colorSourceFormat(), SceneUtil::Color::colorSourceType(), SceneUtil::Color::colorInternalFormat());
         mMultiviewFramebuffer->attachDepthComponent(SceneUtil::AutoDepth::depthSourceFormat(), SceneUtil::AutoDepth::depthSourceType(), SceneUtil::AutoDepth::depthInternalFormat());
-        mMultiviewFramebuffer->attachTo(mMainCamera);
+        //mMultiviewFramebuffer->attachTo(mMainCamera);
     }
 
     void Manager::update()
@@ -328,17 +327,14 @@ namespace Stereo
         if (mUpdateViewCallback)
         {
             mUpdateViewCallback->updateView(mView[0], mView[1]);
-            auto viewMatrix = mMainCamera->getViewMatrix();
             mViewOffsetMatrix[0] = mView[0].viewMatrix(true);
             mViewOffsetMatrix[1] = mView[1].viewMatrix(true);
-            mViewMatrix[0] = viewMatrix * mViewOffsetMatrix[0];
-            mViewMatrix[1] = viewMatrix * mViewOffsetMatrix[1];
             mProjectionMatrix[0] = mView[0].perspectiveMatrix(near_, far_, false);
             mProjectionMatrix[1] = mView[1].perspectiveMatrix(near_, far_, false);
             if (SceneUtil::AutoDepth::isReversed())
             {
                 mProjectionMatrixReverseZ[0] = mView[0].perspectiveMatrix(near_, far_, true);
-                mProjectionMatrixReverseZ[1] = mView[1].perspectiveMatrix(near_, far_, true);
+                mProjectionMatrixReverseZ[1] =  mView[1].perspectiveMatrix(near_, far_, true);
             }
 
             View masterView;
@@ -353,10 +349,8 @@ namespace Stereo
         {
             auto* ds = osg::DisplaySettings::instance().get();
             auto viewMatrix = mMainCamera->getViewMatrix();
-            mViewMatrix[0] = ds->computeLeftEyeViewImplementation(viewMatrix);
-            mViewMatrix[1] = ds->computeRightEyeViewImplementation(viewMatrix);
-            mViewOffsetMatrix[0] = osg::Matrix::inverse(viewMatrix) * mViewMatrix[0];
-            mViewOffsetMatrix[1] = osg::Matrix::inverse(viewMatrix) * mViewMatrix[1];
+            mViewOffsetMatrix[0] = osg::Matrix::inverse(viewMatrix) * ds->computeLeftEyeViewImplementation(viewMatrix);
+            mViewOffsetMatrix[1] = osg::Matrix::inverse(viewMatrix) * ds->computeRightEyeViewImplementation(viewMatrix);
             mProjectionMatrix[0] = ds->computeLeftEyeProjectionImplementation(projectionMatrix);
             mProjectionMatrix[1] = ds->computeRightEyeProjectionImplementation(projectionMatrix);
             if (SceneUtil::AutoDepth::isReversed())
@@ -368,21 +362,23 @@ namespace Stereo
 
         mFrustumManager->update(
             { 
-                mViewOffsetMatrix[0] * mProjectionMatrix[0], 
-                mViewOffsetMatrix[1] * mProjectionMatrix[1] 
+                mViewOffsetMatrix[0] * mProjectionMatrix[0],
+                mViewOffsetMatrix[1] * mProjectionMatrix[1]
             });
     }
 
     void Manager::updateMultiviewStateset(osg::StateSet* stateset)
     {
         // Update stereo uniforms
-        auto * viewMatrixMultiViewUniform = stateset->getUniform("viewMatrixMultiView");
         auto * projectionMatrixMultiViewUniform = stateset->getUniform("projectionMatrixMultiView");
+        auto * invProjectionMatrixMultiViewUniform = stateset->getUniform("invProjectionMatrixMultiView");
 
         for (int view : {0, 1})
         {
-            viewMatrixMultiViewUniform->setElement(view, mViewOffsetMatrix[view]);
-            projectionMatrixMultiViewUniform->setElement(view, computeEyeProjection(view, SceneUtil::AutoDepth::isReversed()));
+            auto projectionMatrix = computeEyeViewOffset(view) * computeEyeProjection(view, SceneUtil::AutoDepth::isReversed());
+            auto invProjectionMatrix = osg::Matrix::inverse(projectionMatrix);
+            projectionMatrixMultiViewUniform->setElement(view, projectionMatrix);
+            invProjectionMatrixMultiViewUniform->setElement(view, invProjectionMatrix);
         }
     }
 
@@ -399,11 +395,6 @@ namespace Stereo
     osg::Matrixd Manager::computeEyeProjection(int view, bool reverseZ) const
     {
         return reverseZ ? mProjectionMatrixReverseZ[view] : mProjectionMatrix[view];
-    }
-
-    osg::Matrixd Manager::computeEyeView(int view) const
-    {
-        return mViewMatrix[view];
     }
 
     osg::Matrixd Manager::computeEyeViewOffset(int view) const
