@@ -38,7 +38,7 @@ namespace MWRender
     }
 
     void ActorsPaths::update(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
-            const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end,
+            const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
             const DetourNavigator::Settings& settings)
     {
         if (!mEnabled)
@@ -48,7 +48,7 @@ namespace MWRender
         if (group != mGroups.end())
             mRootNode->removeChild(group->second.mNode);
 
-        auto newGroup = SceneUtil::createAgentPathGroup(path, halfExtents, start, end, settings.mRecast);
+        auto newGroup = SceneUtil::createAgentPathGroup(path, agentBounds, start, end, settings.mRecast);
         if (newGroup)
         {
             MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(newGroup, "debug");

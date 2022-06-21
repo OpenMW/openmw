@@ -32,6 +32,7 @@ namespace NavMeshTool
 {
     namespace
     {
+        using DetourNavigator::AgentBounds;
         using DetourNavigator::GenerateNavMeshTile;
         using DetourNavigator::NavMeshDb;
         using DetourNavigator::NavMeshTileInfo;
@@ -250,7 +251,7 @@ namespace NavMeshTool
         };
     }
 
-    Status generateAllNavMeshTiles(const osg::Vec3f& agentHalfExtents, const Settings& settings,
+    Status generateAllNavMeshTiles(const AgentBounds& agentBounds, const Settings& settings,
         std::size_t threadsNumber, bool removeUnusedTiles, bool writeBinaryLog, WorldspaceData& data,
         NavMeshDb&& db)
     {
@@ -291,7 +292,7 @@ namespace NavMeshTool
                     input->mWorldspace,
                     tilePosition,
                     RecastMeshProvider(input->mTileCachedRecastMeshManager),
-                    agentHalfExtents,
+                    agentBounds,
                     settings,
                     navMeshTileConsumer
                 ));

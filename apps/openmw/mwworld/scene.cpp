@@ -187,7 +187,7 @@ namespace
         }
         else if (physics.getActor(ptr))
         {
-            navigator.addAgent(world.getPathfindingHalfExtents(ptr));
+            navigator.addAgent(world.getPathfindingAgentBounds(ptr));
         }
     }
 
@@ -332,7 +332,7 @@ namespace MWWorld
             }
             else if (mPhysics->getActor(ptr))
             {
-                mNavigator.removeAgent(mWorld.getPathfindingHalfExtents(ptr));
+                mNavigator.removeAgent(mWorld.getPathfindingAgentBounds(ptr));
                 mRendering.removeActorPath(ptr);
                 mPhysics->remove(ptr);
             }
@@ -940,7 +940,7 @@ namespace MWWorld
         }
         else if (mPhysics->getActor(ptr))
         {
-            mNavigator.removeAgent(mWorld.getPathfindingHalfExtents(ptr));
+            mNavigator.removeAgent(mWorld.getPathfindingAgentBounds(ptr));
         }
         mPhysics->remove(ptr);
         mRendering.removeObject (ptr);

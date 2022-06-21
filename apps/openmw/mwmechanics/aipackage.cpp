@@ -113,6 +113,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
     const osg::Vec3f position = actor.getRefData().getPosition().asVec3(); //position of the actor
     MWBase::World* world = MWBase::Environment::get().getWorld();
+    const DetourNavigator::AgentBounds agentBounds = world->getPathfindingAgentBounds(actor);
 
     /// Stops the actor when it gets too close to a unloaded cell
     //... At current time, this test is unnecessary. AI shuts down when actor is more than "actors processing range" setting value
@@ -122,7 +123,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     {
         actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-        world->updateActorPath(actor, mPathFinder.getPath(), world->getPathfindingHalfExtents(actor), position, dest);
+        world->updateActorPath(actor, mPathFinder.getPath(), agentBounds, position, dest);
         return false;
     }
 
@@ -148,9 +149,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         {
             if (wasShortcutting || doesPathNeedRecalc(dest, actor)) // if need to rebuild path
             {
-                const auto pathfindingHalfExtents = world->getPathfindingHalfExtents(actor);
                 mPathFinder.buildLimitedPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
-                    pathfindingHalfExtents, getNavigatorFlags(actor), getAreaCosts(actor), endTolerance, pathType);
+                    agentBounds, getNavigatorFlags(actor), getAreaCosts(actor), endTolerance, pathType);
                 mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity
@@ -178,13 +178,13 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         }
     }
 
-    const osg::Vec3f halfExtents = world->getHalfExtents(actor);
-    const float pointTolerance = getPointTolerance(actor.getClass().getMaxSpeed(actor), duration, halfExtents);
+    const float pointTolerance = getPointTolerance(actor.getClass().getMaxSpeed(actor), duration,
+                                                   world->getHalfExtents(actor));
 
     static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
     mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE,
                        /*shortenIfAlmostStraight=*/smoothMovement, actorCanMoveByZ,
-                       halfExtents, getNavigatorFlags(actor));
+                       agentBounds, getNavigatorFlags(actor));
 
     if (isDestReached || mPathFinder.checkPathCompleted()) // if path is finished
     {
@@ -197,7 +197,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     else if (mPathFinder.getPath().empty())
         return false;
 
-    world->updateActorPath(actor, mPathFinder.getPath(), world->getPathfindingHalfExtents(actor), position, dest);
+    world->updateActorPath(actor, mPathFinder.getPath(), agentBounds, position, dest);
 
     if (mRotateOnTheRunChecks == 0
         || isReachableRotatingOnTheRun(actor, *mPathFinder.getPath().begin())) // to prevent circling around a path point

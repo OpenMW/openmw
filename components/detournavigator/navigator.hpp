@@ -26,6 +26,7 @@ namespace Loading
 namespace DetourNavigator
 {
     struct Settings;
+    struct AgentBounds;
 
     struct ObjectShapes
     {
@@ -66,16 +67,16 @@ namespace DetourNavigator
 
         /**
          * @brief addAgent should be called for each agent even if all of them has same half extents.
-         * @param agentHalfExtents allows to setup bounding cylinder for each agent, for each different half extents
+         * @param agentBounds allows to setup bounding cylinder for each agent, for each different half extents
          * there is different navmesh.
          */
-        virtual void addAgent(const osg::Vec3f& agentHalfExtents) = 0;
+        virtual void addAgent(const AgentBounds& agentBounds) = 0;
 
         /**
          * @brief removeAgent should be called for each agent even if all of them has same half extents
-         * @param agentHalfExtents allows determine which agent to remove
+         * @param agentBounds allows determine which agent to remove
          */
-        virtual void removeAgent(const osg::Vec3f& agentHalfExtents) = 0;
+        virtual void removeAgent(const AgentBounds& agentBounds) = 0;
 
         /**
          * @brief setWorldspace should be called before adding object from new worldspace
@@ -185,13 +186,13 @@ namespace DetourNavigator
          * @brief getNavMesh returns navmesh for specific agent half extents
          * @return navmesh
          */
-        virtual SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& agentHalfExtents) const = 0;
+        virtual SharedNavMeshCacheItem getNavMesh(const AgentBounds& agentBounds) const = 0;
 
         /**
          * @brief getNavMeshes returns all current navmeshes
          * @return map of agent half extents to navmesh
          */
-        virtual std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const = 0;
+        virtual std::map<AgentBounds, SharedNavMeshCacheItem> getNavMeshes() const = 0;
 
         virtual const Settings& getSettings() const = 0;
 

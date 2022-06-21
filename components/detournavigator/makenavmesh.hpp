@@ -51,10 +51,10 @@ namespace DetourNavigator
     }
 
     std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
-        const TilePosition& tilePosition, const osg::Vec3f& agentHalfExtents, const RecastSettings& settings);
+        const TilePosition& tilePosition, const AgentBounds& agentBounds, const RecastSettings& settings);
 
     NavMeshData makeNavMeshTileData(const PreparedNavMeshData& data,
-        const std::vector<OffMeshConnection>& offMeshConnections, const osg::Vec3f& agentHalfExtents,
+        const std::vector<OffMeshConnection>& offMeshConnections, const AgentBounds& agentBounds,
         const TilePosition& tile, const RecastSettings& settings);
 
     NavMeshPtr makeEmptyNavMesh(const Settings& settings);

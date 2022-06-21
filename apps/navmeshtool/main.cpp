@@ -22,6 +22,7 @@
 #include <components/vfs/registerarchives.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/platform/platform.hpp>
+#include <components/detournavigator/agentbounds.hpp>
 
 #include <osg/Vec3f>
 
@@ -173,7 +174,9 @@ namespace NavMeshTool
             Settings::Manager settings;
             settings.load(config);
 
+            const DetourNavigator::CollisionShapeType agentCollisionShape = DetourNavigator::defaultCollisionShapeType;
             const osg::Vec3f agentHalfExtents = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
+            const DetourNavigator::AgentBounds agentBounds {agentCollisionShape, agentHalfExtents};
             const std::uint64_t maxDbFileSize = static_cast<std::uint64_t>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
             const std::string dbPath = (config.getUserDataPath() / "navmesh.db").string();
 
@@ -201,7 +204,7 @@ namespace NavMeshTool
             WorldspaceData cellsData = gatherWorldspaceData(navigatorSettings, readers, vfs, bulletShapeManager,
                                                             esmData, processInteriorCells, writeBinaryLog);
 
-            const Status status = generateAllNavMeshTiles(agentHalfExtents, navigatorSettings, threadsNumber,
+            const Status status = generateAllNavMeshTiles(agentBounds, navigatorSettings, threadsNumber,
                 removeUnusedTiles, writeBinaryLog, cellsData, std::move(db));
 
             switch (status)

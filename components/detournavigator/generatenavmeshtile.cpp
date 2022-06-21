@@ -38,12 +38,12 @@ namespace DetourNavigator
     }
 
     GenerateNavMeshTile::GenerateNavMeshTile(std::string worldspace, const TilePosition& tilePosition,
-            RecastMeshProvider recastMeshProvider, const osg::Vec3f& agentHalfExtents,
+            RecastMeshProvider recastMeshProvider, const AgentBounds& agentBounds,
             const DetourNavigator::Settings& settings, std::weak_ptr<NavMeshTileConsumer> consumer)
         : mWorldspace(std::move(worldspace))
         , mTilePosition(tilePosition)
         , mRecastMeshProvider(recastMeshProvider)
-        , mAgentHalfExtents(agentHalfExtents)
+        , mAgentBounds(agentBounds)
         , mSettings(settings)
         , mConsumer(std::move(consumer)) {}
 
@@ -70,25 +70,25 @@ namespace DetourNavigator
 
             const std::vector<DbRefGeometryObject> objects = makeDbRefGeometryObjects(recastMesh->getMeshSources(),
                 [&] (const MeshSource& v) { return consumer->resolveMeshSource(v); });
-            std::vector<std::byte> input = serialize(mSettings.mRecast, *recastMesh, objects);
+            std::vector<std::byte> input = serialize(mSettings.mRecast, mAgentBounds, *recastMesh, objects);
             const std::optional<NavMeshTileInfo> info = consumer->find(mWorldspace, mTilePosition, input);
 
-            if (info.has_value() && info->mVersion == mSettings.mNavMeshVersion)
+            if (info.has_value() && info->mVersion == navMeshVersion)
             {
                 consumer->identity(mWorldspace, mTilePosition, info->mTileId);
                 ignore.mConsumer = nullptr;
                 return;
             }
 
-            const auto data = prepareNavMeshTileData(*recastMesh, mTilePosition, mAgentHalfExtents, mSettings.mRecast);
+            const auto data = prepareNavMeshTileData(*recastMesh, mTilePosition, mAgentBounds, mSettings.mRecast);
 
             if (data == nullptr)
                 return;
 
             if (info.has_value())
-                consumer->update(mWorldspace, mTilePosition, info->mTileId, mSettings.mNavMeshVersion, *data);
+                consumer->update(mWorldspace, mTilePosition, info->mTileId, navMeshVersion, *data);
             else
-                consumer->insert(mWorldspace, mTilePosition, mSettings.mNavMeshVersion, input, *data);
+                consumer->insert(mWorldspace, mTilePosition, navMeshVersion, input, *data);
 
             ignore.mConsumer = nullptr;
         }

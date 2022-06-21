@@ -151,27 +151,27 @@ namespace DetourNavigator
         return true;
     }
 
-    void NavMeshManager::addAgent(const osg::Vec3f& agentHalfExtents)
+    void NavMeshManager::addAgent(const AgentBounds& agentBounds)
     {
-        auto cached = mCache.find(agentHalfExtents);
+        auto cached = mCache.find(agentBounds);
         if (cached != mCache.end())
             return;
-        mCache.insert(std::make_pair(agentHalfExtents,
+        mCache.insert(std::make_pair(agentBounds,
             std::make_shared<GuardedNavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter)));
-        Log(Debug::Debug) << "cache add for agent=" << agentHalfExtents;
+        Log(Debug::Debug) << "cache add for agent=" << agentBounds;
     }
 
-    bool NavMeshManager::reset(const osg::Vec3f& agentHalfExtents)
+    bool NavMeshManager::reset(const AgentBounds& agentBounds)
     {
-        const auto it = mCache.find(agentHalfExtents);
+        const auto it = mCache.find(agentBounds);
         if (it == mCache.end())
             return true;
         if (!resetIfUnique(it->second))
             return false;
-        mCache.erase(agentHalfExtents);
-        mChangedTiles.erase(agentHalfExtents);
-        mPlayerTile.erase(agentHalfExtents);
-        mLastRecastMeshManagerRevision.erase(agentHalfExtents);
+        mCache.erase(agentBounds);
+        mChangedTiles.erase(agentBounds);
+        mPlayerTile.erase(agentBounds);
+        mLastRecastMeshManagerRevision.erase(agentBounds);
         return true;
     }
 
@@ -195,28 +195,28 @@ namespace DetourNavigator
             addChangedTile(tile, ChangeType::update);
     }
 
-    void NavMeshManager::update(const osg::Vec3f& playerPosition, const osg::Vec3f& agentHalfExtents)
+    void NavMeshManager::update(const osg::Vec3f& playerPosition, const AgentBounds& agentBounds)
     {
         const auto playerTile = getTilePosition(mSettings.mRecast, toNavMeshCoordinates(mSettings.mRecast, playerPosition));
-        auto& lastRevision = mLastRecastMeshManagerRevision[agentHalfExtents];
-        auto lastPlayerTile = mPlayerTile.find(agentHalfExtents);
+        auto& lastRevision = mLastRecastMeshManagerRevision[agentBounds];
+        auto lastPlayerTile = mPlayerTile.find(agentBounds);
         if (lastRevision == mRecastMeshManager.getRevision() && lastPlayerTile != mPlayerTile.end()
                 && lastPlayerTile->second == playerTile)
             return;
         lastRevision = mRecastMeshManager.getRevision();
         if (lastPlayerTile == mPlayerTile.end())
-            lastPlayerTile = mPlayerTile.insert(std::make_pair(agentHalfExtents, playerTile)).first;
+            lastPlayerTile = mPlayerTile.insert(std::make_pair(agentBounds, playerTile)).first;
         else
             lastPlayerTile->second = playerTile;
         std::map<TilePosition, ChangeType> tilesToPost;
-        const auto cached = getCached(agentHalfExtents);
+        const auto cached = getCached(agentBounds);
         if (!cached)
         {
             std::ostringstream stream;
-            stream << "Agent with half extents is not found: " << agentHalfExtents;
+            stream << "Agent with half extents is not found: " << agentBounds;
             throw InvalidArgument(stream.str());
         }
-        const auto changedTiles = mChangedTiles.find(agentHalfExtents);
+        const auto changedTiles = mChangedTiles.find(agentBounds);
         {
             const auto locked = cached->lockConst();
             const auto& navMesh = locked->getImpl();
@@ -247,10 +247,10 @@ namespace DetourNavigator
                     recastMeshManager.reportNavMeshChange(recastMeshManager.getVersion(), Version {0, 0});
             });
         }
-        mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, mRecastMeshManager.getWorldspace(), tilesToPost);
+        mAsyncNavMeshUpdater.post(agentBounds, cached, playerTile, mRecastMeshManager.getWorldspace(), tilesToPost);
         if (changedTiles != mChangedTiles.end())
             changedTiles->second.clear();
-        Log(Debug::Debug) << "Cache update posted for agent=" << agentHalfExtents <<
+        Log(Debug::Debug) << "Cache update posted for agent=" << agentBounds <<
             " playerTile=" << lastPlayerTile->second <<
             " recastMeshManagerRevision=" << lastRevision;
     }
@@ -260,12 +260,12 @@ namespace DetourNavigator
         mAsyncNavMeshUpdater.wait(listener, waitConditionType);
     }
 
-    SharedNavMeshCacheItem NavMeshManager::getNavMesh(const osg::Vec3f& agentHalfExtents) const
+    SharedNavMeshCacheItem NavMeshManager::getNavMesh(const AgentBounds& agentBounds) const
     {
-        return getCached(agentHalfExtents);
+        return getCached(agentBounds);
     }
 
-    std::map<osg::Vec3f, SharedNavMeshCacheItem> NavMeshManager::getNavMeshes() const
+    std::map<AgentBounds, SharedNavMeshCacheItem> NavMeshManager::getNavMeshes() const
     {
         return mCache;
     }
@@ -319,9 +319,9 @@ namespace DetourNavigator
         }
     }
 
-    SharedNavMeshCacheItem NavMeshManager::getCached(const osg::Vec3f& agentHalfExtents) const
+    SharedNavMeshCacheItem NavMeshManager::getCached(const AgentBounds& agentBounds) const
     {
-        const auto cached = mCache.find(agentHalfExtents);
+        const auto cached = mCache.find(agentBounds);
         if (cached != mCache.end())
             return cached->second;
         return SharedNavMeshCacheItem();

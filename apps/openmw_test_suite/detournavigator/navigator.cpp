@@ -42,7 +42,7 @@ namespace
         std::unique_ptr<Navigator> mNavigator;
         const osg::Vec3f mPlayerPosition;
         const std::string mWorldspace;
-        const osg::Vec3f mAgentHalfExtents;
+        const AgentBounds mAgentBounds {CollisionShapeType::Aabb, {29, 29, 66}};
         osg::Vec3f mStart;
         osg::Vec3f mEnd;
         std::deque<osg::Vec3f> mPath;
@@ -59,7 +59,6 @@ namespace
         DetourNavigatorNavigatorTest()
             : mPlayerPosition(256, 256, 0)
             , mWorldspace("sys::default")
-            , mAgentHalfExtents(29, 29, 66)
             , mStart(52, 460, 1)
             , mEnd(460, 52, 1)
             , mOut(mPath)
@@ -122,24 +121,24 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_empty_should_return_empty)
     {
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::NavMeshNotFound);
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>());
     }
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_existing_agent_with_no_navmesh_should_throw_exception)
     {
-        mNavigator->addAgent(mAgentHalfExtents);
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        mNavigator->addAgent(mAgentBounds);
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::StartPolygonNotFound);
     }
 
     TEST_F(DetourNavigatorNavigatorTest, add_agent_should_count_each_agent)
     {
-        mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->removeAgent(mAgentHalfExtents);
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        mNavigator->addAgent(mAgentBounds);
+        mNavigator->addAgent(mAgentBounds);
+        mNavigator->removeAgent(mAgentBounds);
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::StartPolygonNotFound);
     }
 
@@ -155,12 +154,12 @@ namespace
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -204,12 +203,12 @@ namespace
         CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -243,7 +242,7 @@ namespace
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -288,13 +287,13 @@ namespace
         CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -331,7 +330,7 @@ namespace
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -382,13 +381,13 @@ namespace
         CollisionShapeInstance heightfield2(makeSquareHeightfieldTerrainShape(heightfieldData2));
         heightfield2.shape().setLocalScaling(btVector3(128, 128, 1));
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addObject(ObjectId(&heightfield1.shape()), ObjectShapes(heightfield1.instance(), mObjectTransform), mTransform);
         mNavigator->addObject(ObjectId(&heightfield2.shape()), ObjectShapes(heightfield2.instance(), mObjectTransform), mTransform);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -439,7 +438,7 @@ namespace
         const HeightfieldSurface surface2 = makeSquareHeightfieldSurface(heightfieldData2);
         const int cellSize2 = mHeightfieldTileSize * (surface2.mSize - 1);
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         EXPECT_TRUE(mNavigator->addHeightfield(mCellPosition, cellSize1, surface1));
         EXPECT_FALSE(mNavigator->addHeightfield(mCellPosition, cellSize2, surface2));
     }
@@ -472,12 +471,12 @@ namespace
 
         osg::ref_ptr<const Resource::BulletShapeInstance> instance(new Resource::BulletShapeInstance(bulletShape));
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addObject(ObjectId(instance->mCollisionShape.get()), ObjectShapes(instance, mObjectTransform), mTransform);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -519,7 +518,7 @@ namespace
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addWater(mCellPosition, cellSize, 300);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
@@ -530,7 +529,7 @@ namespace
         mEnd.x() = 256;
         mEnd.z() = 300;
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_swim, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -567,7 +566,7 @@ namespace
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addWater(mCellPosition, cellSize, -25);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
@@ -576,7 +575,7 @@ namespace
         mStart.x() = 256;
         mEnd.x() = 256;
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -613,7 +612,7 @@ namespace
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addWater(mCellPosition, std::numeric_limits<int>::max(), -25);
         mNavigator->update(mPlayerPosition);
@@ -622,7 +621,7 @@ namespace
         mStart.x() = 256;
         mEnd.x() = 256;
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -659,7 +658,7 @@ namespace
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addWater(mCellPosition, cellSize, -25);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
@@ -668,7 +667,7 @@ namespace
         mStart.x() = 256;
         mEnd.x() = 256;
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -703,7 +702,7 @@ namespace
         CollisionShapeInstance heightfield(makeSquareHeightfieldTerrainShape(heightfieldData));
         heightfield.shape().setLocalScaling(btVector3(128, 128, 1));
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform), mTransform);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -716,7 +715,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -757,7 +756,7 @@ namespace
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
@@ -770,7 +769,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -812,14 +811,14 @@ namespace
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
         Misc::Rng::init(42);
 
-        const auto result = findRandomPointAroundCircle(*mNavigator, mAgentHalfExtents, mStart, 100.0, Flag_walk, 
+        const auto result = findRandomPointAroundCircle(*mNavigator, mAgentBounds, mStart, 100.0, Flag_walk,
             []() { return Misc::Rng::rollClosedProbability(); });
 
         ASSERT_THAT(result, Optional(Vec3fEq(70.35845947265625, 335.592041015625, -2.6667339801788330078125)))
@@ -849,7 +848,7 @@ namespace
         std::vector<CollisionShapeInstance<btBoxShape>> boxes;
         std::generate_n(std::back_inserter(boxes), 100, [] { return std::make_unique<btBoxShape>(btVector3(20, 20, 100)); });
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
 
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
 
@@ -870,7 +869,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -905,7 +904,7 @@ namespace
         std::vector<CollisionShapeInstance<btBoxShape>> shapes;
         std::generate_n(std::back_inserter(shapes), 100, [] { return std::make_unique<btBoxShape>(btVector3(64, 64, 64)); });
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
 
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
@@ -950,14 +949,14 @@ namespace
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
         const osg::Vec3f start(57, 460, 1);
         const osg::Vec3f end(460, 57, 1);
-        const auto result = raycast(*mNavigator, mAgentHalfExtents, start, end, Flag_walk);
+        const auto result = raycast(*mNavigator, mAgentBounds, start, end, Flag_walk);
 
         ASSERT_THAT(result, Optional(Vec3fEq(end.x(), end.y(), 1.95257937908172607421875)))
             << (result ? *result : osg::Vec3f());
@@ -979,7 +978,7 @@ namespace
         const btVector3 oscillatingBoxShapePosition(288, 288, 400);
         CollisionShapeInstance borderBox(std::make_unique<btBoxShape>(btVector3(50, 50, 50)));
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addObject(ObjectId(&oscillatingBox.shape()), ObjectShapes(oscillatingBox.instance(), mObjectTransform),
                               btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition));
@@ -1013,12 +1012,12 @@ namespace
         const HeightfieldPlane plane {100};
         const int cellSize = mHeightfieldTileSize * 4;
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, plane);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -1063,13 +1062,13 @@ namespace
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(204, -204, 0)),
                                        new btBoxShape(btVector3(200, 200, 1000)));
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
         mNavigator->update(mPlayerPosition);
         mNavigator->wait(mListener, WaitConditionType::allJobsDone);
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::PartialPath);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -1102,7 +1101,7 @@ namespace
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(204, -204, 0)),
                                        new btBoxShape(btVector3(100, 100, 1000)));
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         mNavigator->addHeightfield(mCellPosition, cellSize, surface);
         mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
         mNavigator->update(mPlayerPosition);
@@ -1110,7 +1109,7 @@ namespace
 
         const float endTolerance = 1000.0f;
 
-        EXPECT_EQ(findPath(*mNavigator, mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, endTolerance, mOut),
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, endTolerance, mOut),
                   Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
@@ -1142,7 +1141,7 @@ namespace
         const int cellSize2 = 200;
         const float level2 = 2;
 
-        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentBounds);
         EXPECT_TRUE(mNavigator->addWater(mCellPosition, cellSize1, level1));
         EXPECT_FALSE(mNavigator->addWater(mCellPosition, cellSize2, level2));
     }

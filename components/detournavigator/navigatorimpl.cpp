@@ -16,17 +16,17 @@ namespace DetourNavigator
     {
     }
 
-    void NavigatorImpl::addAgent(const osg::Vec3f& agentHalfExtents)
+    void NavigatorImpl::addAgent(const AgentBounds& agentBounds)
     {
-        if(agentHalfExtents.length2() <= 0)
+        if(agentBounds.mHalfExtents.length2() <= 0)
             return;
-        ++mAgents[agentHalfExtents];
-        mNavMeshManager.addAgent(agentHalfExtents);
+        ++mAgents[agentBounds];
+        mNavMeshManager.addAgent(agentBounds);
     }
 
-    void NavigatorImpl::removeAgent(const osg::Vec3f& agentHalfExtents)
+    void NavigatorImpl::removeAgent(const AgentBounds& agentBounds)
     {
-        const auto it = mAgents.find(agentHalfExtents);
+        const auto it = mAgents.find(agentBounds);
         if (it == mAgents.end())
             return;
         if (it->second > 0)
@@ -178,12 +178,12 @@ namespace DetourNavigator
         mNavMeshManager.wait(listener, waitConditionType);
     }
 
-    SharedNavMeshCacheItem NavigatorImpl::getNavMesh(const osg::Vec3f& agentHalfExtents) const
+    SharedNavMeshCacheItem NavigatorImpl::getNavMesh(const AgentBounds& agentBounds) const
     {
-        return mNavMeshManager.getNavMesh(agentHalfExtents);
+        return mNavMeshManager.getNavMesh(agentBounds);
     }
 
-    std::map<osg::Vec3f, SharedNavMeshCacheItem> NavigatorImpl::getNavMeshes() const
+    std::map<AgentBounds, SharedNavMeshCacheItem> NavigatorImpl::getNavMeshes() const
     {
         return mNavMeshManager.getNavMeshes();
     }

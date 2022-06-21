@@ -5,6 +5,7 @@
 #include "recast.hpp"
 #include "recastmesh.hpp"
 #include "settings.hpp"
+#include "agentbounds.hpp"
 
 #include <components/serialization/binaryreader.hpp>
 #include <components/serialization/binarywriter.hpp>
@@ -136,12 +137,13 @@ namespace
         }
 
         template <class Visitor>
-        void operator()(Visitor&& visitor, const RecastSettings& settings, const RecastMesh& recastMesh,
-            const std::vector<DbRefGeometryObject>& dbRefGeometryObjects) const
+        void operator()(Visitor&& visitor, const RecastSettings& settings, const AgentBounds& agentBounds,
+            const RecastMesh& recastMesh, const std::vector<DbRefGeometryObject>& dbRefGeometryObjects) const
         {
             visitor(*this, DetourNavigator::recastMeshMagic);
             visitor(*this, DetourNavigator::recastMeshVersion);
             visitor(*this, settings);
+            visitor(*this, agentBounds);
             visitor(*this, recastMesh);
             visitor(*this, dbRefGeometryObjects);
         }
@@ -228,21 +230,28 @@ namespace
             visitor(*this, value.mPolyMesh);
             visitor(*this, value.mPolyMeshDetail);
         }
+
+        template <class Visitor>
+        void operator()(Visitor&& visitor, const AgentBounds& value) const
+        {
+            visitor(*this, value.mShapeType);
+            visitor(*this, value.mHalfExtents);
+        }
     };
 }
 } // namespace DetourNavigator
 
 namespace DetourNavigator
 {
-    std::vector<std::byte> serialize(const RecastSettings& settings, const RecastMesh& recastMesh,
-        const std::vector<DbRefGeometryObject>& dbRefGeometryObjects)
+    std::vector<std::byte> serialize(const RecastSettings& settings, const AgentBounds& agentBounds,
+        const RecastMesh& recastMesh, const std::vector<DbRefGeometryObject>& dbRefGeometryObjects)
     {
         constexpr Format<Serialization::Mode::Write> format;
         Serialization::SizeAccumulator sizeAccumulator;
-        format(sizeAccumulator, settings, recastMesh, dbRefGeometryObjects);
+        format(sizeAccumulator, settings, agentBounds, recastMesh, dbRefGeometryObjects);
         std::vector<std::byte> result(sizeAccumulator.value());
         format(Serialization::BinaryWriter(result.data(), result.data() + result.size()),
-               settings, recastMesh, dbRefGeometryObjects);
+               settings, agentBounds, recastMesh, dbRefGeometryObjects);
         return result;
     }
 

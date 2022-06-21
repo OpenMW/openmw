@@ -3,6 +3,7 @@
 #include <array>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/detournavigator/agentbounds.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -80,7 +81,7 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr>* occupyingActors)
     {
         const auto world = MWBase::Environment::get().getWorld();
-        const osg::Vec3f halfExtents = world->getPathfindingHalfExtents(actor);
+        const osg::Vec3f halfExtents = world->getPathfindingAgentBounds(actor).mHalfExtents;
         const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
         if (ignorePlayer)
         {

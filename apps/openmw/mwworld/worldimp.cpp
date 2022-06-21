@@ -1275,7 +1275,7 @@ namespace MWWorld
         if (!force && scale == ptr.getCellRef().getScale())
             return;
         if (mPhysics->getActor(ptr))
-            mNavigator->removeAgent(getPathfindingHalfExtents(ptr));
+            mNavigator->removeAgent(getPathfindingAgentBounds(ptr));
 
         ptr.getCellRef().setScale(scale);
         mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
@@ -1285,7 +1285,7 @@ namespace MWWorld
             mWorldScene->updateObjectScale(ptr);
 
         if (mPhysics->getActor(ptr))
-            mNavigator->addAgent(getPathfindingHalfExtents(ptr));
+            mNavigator->addAgent(getPathfindingAgentBounds(ptr));
         else if (const auto object = mPhysics->getObject(ptr))
             updateNavigatorObject(*object);
     }
@@ -2416,7 +2416,7 @@ namespace MWWorld
         {
             // Remove the old CharacterController
             MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr(), true);
-            mNavigator->removeAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
+            mNavigator->removeAgent(getPathfindingAgentBounds(getPlayerConstPtr()));
             mPhysics->remove(getPlayerPtr());
             mRendering->removePlayer(getPlayerPtr());
             MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(getPlayerPtr());
@@ -2453,7 +2453,7 @@ namespace MWWorld
 
         applyLoopingParticles(player);
 
-        mNavigator->addAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
+        mNavigator->addAgent(getPathfindingAgentBounds(getPlayerConstPtr()));
     }
 
     World::RestPermitted World::canRest () const
@@ -3898,9 +3898,9 @@ namespace MWWorld
     }
 
     void World::updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
-            const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const
+        const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end) const
     {
-        mRendering->updateActorPath(actor, path, halfExtents, start, end);
+        mRendering->updateActorPath(actor, path, agentBounds, start, end);
     }
 
     void World::removeActorPath(const MWWorld::ConstPtr& actor) const
@@ -3913,12 +3913,13 @@ namespace MWWorld
         mRendering->setNavMeshNumber(value);
     }
 
-    osg::Vec3f World::getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const
+    DetourNavigator::AgentBounds World::getPathfindingAgentBounds(const MWWorld::ConstPtr& actor) const
     {
-        if (actor.isInCell() && actor.getCell()->isExterior())
-            return mDefaultHalfExtents; // Using default half extents for better performance
+        const MWPhysics::Actor* physicsActor = mPhysics->getActor(actor);
+        if (physicsActor == nullptr || (actor.isInCell() && actor.getCell()->isExterior()))
+            return DetourNavigator::AgentBounds {DetourNavigator::defaultCollisionShapeType, mDefaultHalfExtents};
         else
-            return getHalfExtents(actor);
+            return DetourNavigator::AgentBounds {physicsActor->getCollisionShapeType(), physicsActor->getHalfExtents()};
     }
 
     bool World::hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const
