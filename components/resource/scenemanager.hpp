@@ -109,7 +109,7 @@ namespace Resource
         void setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported);
         bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
 
-        void setOpaqueDepthTex(osg::ref_ptr<osg::Texture2D> texturePing, osg::ref_ptr<osg::Texture2D> texturePong);
+        void setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong);
 
         enum class UBOBinding
         {
@@ -213,7 +213,7 @@ namespace Resource
         SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
         bool mConvertAlphaTestToAlphaToCoverage;
         bool mSupportsNormalsRT;
-        std::array<osg::ref_ptr<osg::Texture2D>, 2> mOpaqueDepthTex;
+        std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
         mutable std::mutex mSharedStateMutex;

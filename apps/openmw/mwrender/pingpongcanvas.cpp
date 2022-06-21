@@ -2,6 +2,10 @@
 
 #include <components/shader/shadermanager.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/stereo/stereomanager.hpp>
+#include <components/stereo/multiview.hpp>
+
+#include <osg/Texture2DArray>
 
 #include "postprocessor.hpp"
 
@@ -9,6 +13,7 @@ namespace MWRender
 {
     PingPongCanvas::PingPongCanvas(Shader::ShaderManager& shaderManager)
         : mFallbackStateSet(new osg::StateSet)
+        , mMultiviewResolveStateSet(new osg::StateSet)
     {
         setUseDisplayList(false);
         setUseVertexBufferObjects(true);
@@ -25,12 +30,21 @@ namespace MWRender
         mHDRDriver = HDRDriver(shaderManager);
         mHDRDriver.disable();
 
-        auto fallbackVertex = shaderManager.getShader("fullscreen_tri_vertex.glsl", {}, osg::Shader::VERTEX);
-        auto fallbackFragment = shaderManager.getShader("fullscreen_tri_fragment.glsl", {}, osg::Shader::FRAGMENT);
+        Shader::ShaderManager::DefineMap defines;
+        Stereo::Manager::instance().shaderStereoDefines(defines);
+
+        auto fallbackVertex = shaderManager.getShader("fullscreen_tri_vertex.glsl", defines, osg::Shader::VERTEX);
+        auto fallbackFragment = shaderManager.getShader("fullscreen_tri_fragment.glsl", defines, osg::Shader::FRAGMENT);
         mFallbackProgram = shaderManager.getProgram(fallbackVertex, fallbackFragment);
 
         mFallbackStateSet->setAttributeAndModes(mFallbackProgram);
         mFallbackStateSet->addUniform(new osg::Uniform("omw_SamplerLastShader", 0));
+
+        auto multiviewResolveVertex = shaderManager.getShader("multiview_resolve_vertex.glsl", {}, osg::Shader::VERTEX);
+        auto multiviewResolveFragment = shaderManager.getShader("multiview_resolve_fragment.glsl", {}, osg::Shader::FRAGMENT);
+        mMultiviewResolveProgram = shaderManager.getProgram(multiviewResolveVertex, multiviewResolveFragment);
+        mMultiviewResolveStateSet->setAttributeAndModes(mMultiviewResolveProgram);
+        mMultiviewResolveStateSet->addUniform(new osg::Uniform("omw_SamplerLastShader", 0));
     }
 
     void PingPongCanvas::setCurrentFrameData(size_t frameId, fx::DispatchArray&& data)
@@ -49,6 +63,29 @@ namespace MWRender
     void PingPongCanvas::drawGeometry(osg::RenderInfo& renderInfo) const
     {
         osg::Geometry::drawImplementation(renderInfo);
+    }
+
+    static void attachCloneOfTemplate(osg::FrameBufferObject* fbo, osg::Camera::BufferComponent component, osg::Texture* tex)
+    {
+        switch (tex->getTextureTarget())
+        {
+        case GL_TEXTURE_2D:
+        {
+            auto* tex2d = new osg::Texture2D(*static_cast<osg::Texture2D*>(tex));
+            fbo->setAttachment(component, osg::FrameBufferAttachment(tex2d));
+        }
+        break;
+        case GL_TEXTURE_2D_ARRAY:
+        {
+#ifdef OSG_HAS_MULTIVIEW
+            auto* tex2dArray = new osg::Texture2DArray(*static_cast<osg::Texture2DArray*>(tex));
+            fbo->setAttachment(component, osg::FrameBufferAttachment(tex2dArray, osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, 0));
+#endif
+        }
+        break;
+        default:
+            throw std::logic_error("Invalid texture type received");
+        }
     }
 
     void PingPongCanvas::drawImplementation(osg::RenderInfo& renderInfo) const
@@ -76,7 +113,7 @@ namespace MWRender
             filtered.push_back(i);
         }
 
-        auto* viewport = state.getCurrentViewport();
+        auto* resolveViewport = state.getCurrentViewport();
 
         if (filtered.empty() || !bufferData.postprocessing)
         {
@@ -94,7 +131,7 @@ namespace MWRender
             state.pushStateSet(mFallbackStateSet);
             state.apply();
             state.applyTextureAttribute(0, bufferData.sceneTex);
-            viewport->apply(state);
+            resolveViewport->apply(state);
 
             drawGeometry(renderInfo);
             state.popStateSet();
@@ -108,13 +145,29 @@ namespace MWRender
             for (auto& fbo : mFbos)
             {
                 fbo = new osg::FrameBufferObject;
-                fbo->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(new osg::Texture2D(*bufferData.sceneTexLDR)));
+                attachCloneOfTemplate(fbo, osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, bufferData.sceneTexLDR);
                 fbo->apply(state);
                 glClearColor(0.5, 0.5, 0.5, 1);
                 glClear(GL_COLOR_BUFFER_BIT);
             }
 
+            if (Stereo::getMultiview())
+            {
+                mMultiviewResolveFramebuffer = new osg::FrameBufferObject();
+                attachCloneOfTemplate(mMultiviewResolveFramebuffer, osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, bufferData.sceneTexLDR);
+                mMultiviewResolveFramebuffer->apply(state);
+                glClearColor(0.5, 0.5, 0.5, 1);
+                glClear(GL_COLOR_BUFFER_BIT);
+
+                mMultiviewResolveStateSet->setTextureAttribute(PostProcessor::Unit_LastShader, (osg::Texture*)mMultiviewResolveFramebuffer->getAttachment(osg::Camera::COLOR_BUFFER0).getTexture());
+            }
+
             mHDRDriver.dirty(bufferData.sceneTex->getTextureWidth(), bufferData.sceneTex->getTextureHeight());
+
+            if (Stereo::getStereo())
+                mRenderViewport = new osg::Viewport(0, 0, bufferData.sceneTex->getTextureWidth(), bufferData.sceneTex->getTextureHeight());
+            else
+                mRenderViewport = nullptr;
 
             bufferData.dirty = false;
         }
@@ -148,6 +201,11 @@ namespace MWRender
                 destinationFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
                 lastApplied = destinationHandle;
             }
+            else if (Stereo::getMultiview())
+            {
+                mMultiviewResolveFramebuffer->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+                lastApplied = mMultiviewResolveFramebuffer->getHandle(cid);
+            }
             else
             {
                 ext->glBindFramebuffer(GL_DRAW_FRAMEBUFFER_EXT, 0);
@@ -173,19 +231,22 @@ namespace MWRender
 
             for (size_t passIndex = 0; passIndex < node.mPasses.size(); ++passIndex)
             {
+                if (mRenderViewport)
+                    mRenderViewport->apply(state);
                 const auto& pass = node.mPasses[passIndex];
 
                 bool lastPass = passIndex == node.mPasses.size() - 1;
 
+                //VR-TODO: This won't actually work for tex2darrays
                 if (lastShader == 0)
                     pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastShader, bufferData.sceneTex);
                 else
-                    pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastShader, (osg::Texture2D*)mFbos[lastShader - GL_COLOR_ATTACHMENT0_EXT]->getAttachment(osg::Camera::COLOR_BUFFER0).getTexture());
+                    pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastShader, (osg::Texture*)mFbos[lastShader - GL_COLOR_ATTACHMENT0_EXT]->getAttachment(osg::Camera::COLOR_BUFFER0).getTexture());
 
                 if (lastDraw == 0)
                     pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastPass, bufferData.sceneTex);
                 else
-                    pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastPass, (osg::Texture2D*)mFbos[lastDraw - GL_COLOR_ATTACHMENT0_EXT]->getAttachment(osg::Camera::COLOR_BUFFER0).getTexture());
+                    pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastPass, (osg::Texture*)mFbos[lastDraw - GL_COLOR_ATTACHMENT0_EXT]->getAttachment(osg::Camera::COLOR_BUFFER0).getTexture());
 
                 if (pass.mRenderTarget)
                 {
@@ -203,6 +264,10 @@ namespace MWRender
                 else if (pass.mResolve && index == filtered.back())
                 {
                     bindDestinationFbo();
+                    if (!destinationFbo && !Stereo::getMultiview())
+                    {
+                        resolveViewport->apply(state);
+                    }
                 }
                 else if (lastPass)
                 {
@@ -235,6 +300,21 @@ namespace MWRender
             }
 
             state.popStateSet();
+        }
+
+        if (Stereo::getMultiview() && mMultiviewResolveProgram)
+        {
+            ext->glBindFramebuffer(GL_DRAW_FRAMEBUFFER_EXT, 0);
+            lastApplied = 0;
+
+            resolveViewport->apply(state);
+            state.pushStateSet(mMultiviewResolveStateSet);
+            state.apply();
+
+            drawGeometry(renderInfo);
+
+            state.popStateSet();
+            state.apply();
         }
 
         if (lastApplied != destinationHandle)

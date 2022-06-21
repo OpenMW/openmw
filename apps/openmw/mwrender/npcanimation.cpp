@@ -361,6 +361,8 @@ public:
             glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             bin->drawImplementation(renderInfo, previous);
         }
+
+        state->checkGLErrors("after DepthClearCallback::drawImplementation");
     }
 
     osg::ref_ptr<osg::Depth> mDepth;

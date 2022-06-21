@@ -20,9 +20,11 @@ namespace fx
             mData.get<InvProjectionMatrix>() = osg::Matrixf::inverse(matrix);
         }
 
-        void setViewMatrix(const osg::Matrixf& matrix) { mData.get<ViewMatrix>() = matrix; }
-
-        void setInvViewMatrix(const osg::Matrixf& matrix) { mData.get<InvViewMatrix>() = matrix; }
+        void setViewMatrix(const osg::Matrixf& matrix) 
+        { 
+            mData.get<ViewMatrix>() = matrix;
+            mData.get<InvViewMatrix>() = osg::Matrixf::inverse(matrix);
+        }
 
         void setPrevViewMatrix(const osg::Matrixf& matrix) { mData.get<PrevViewMatrix>() = matrix;}
 

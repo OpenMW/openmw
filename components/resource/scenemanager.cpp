@@ -430,7 +430,7 @@ namespace Resource
         mConvertAlphaTestToAlphaToCoverage = convert;
     }
 
-    void SceneManager::setOpaqueDepthTex(osg::ref_ptr<osg::Texture2D> texturePing, osg::ref_ptr<osg::Texture2D> texturePong)
+    void SceneManager::setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong)
     {
         mOpaqueDepthTex = { texturePing, texturePong };
     }
