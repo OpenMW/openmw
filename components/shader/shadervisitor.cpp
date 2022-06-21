@@ -5,6 +5,7 @@
 #include <set>
 
 #include <osg/AlphaFunc>
+#include <osg/BlendFunc>
 #include <osg/Geometry>
 #include <osg/GLExtensions>
 #include <osg/Material>
@@ -195,6 +196,8 @@ namespace Shader
         , mAlphaFunc(GL_ALWAYS)
         , mAlphaRef(1.0)
         , mAlphaBlend(false)
+        , mBlendFuncOverridden(false)
+        , mAdditiveBlending(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
         , mSoftParticles(false)
@@ -517,6 +520,18 @@ namespace Shader
                         mRequirements.back().mAlphaRef = alpha->getReferenceValue();
                     }
                 }
+                else if (it->first.first == osg::StateAttribute::BLENDFUNC)
+                {
+                    if (!mRequirements.back().mBlendFuncOverridden || it->second.second & osg::StateAttribute::PROTECTED)
+                    {
+                        if (it->second.second & osg::StateAttribute::OVERRIDE)
+                            mRequirements.back().mBlendFuncOverridden = true;
+
+                        const osg::BlendFunc* blend = static_cast<const osg::BlendFunc*>(it->second.first.get());
+                        mRequirements.back().mAdditiveBlending =
+                            blend->getSource() == osg::BlendFunc::SRC_ALPHA && blend->getDestination() == osg::BlendFunc::ONE;
+                    }
+                }
             }
         }
 
@@ -603,6 +618,8 @@ namespace Shader
         addedState->addUniform("colorMode");
 
         defineMap["alphaFunc"] = std::to_string(reqs.mAlphaFunc);
+
+        defineMap["additiveBlending"] = reqs.mAdditiveBlending ? "1" : "0";
 
         osg::ref_ptr<osg::StateSet> removedState;
         if ((removedState = getRemovedState(*writableStateSet)) && !mAllowedToModifyStateSets)

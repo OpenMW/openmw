@@ -77,6 +77,10 @@ uniform float specStrength;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
+#if @additiveBlending
+#define ADDITIVE_BLENDING
+#endif
+
 #include "vertexcolors.glsl"
 #include "shadows_fragment.glsl"
 #include "lighting.glsl"
@@ -188,7 +192,7 @@ void main()
 
 #endif
 
-    float shadowing = unshadowedLightRatio(passViewPos.z);
+    float shadowing = unshadowedLightRatio(-passViewPos.z);
     vec3 lighting;
 #if !PER_PIXEL_LIGHTING
     lighting = passLighting + shadowDiffuseLighting * shadowing;
