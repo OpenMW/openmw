@@ -104,7 +104,7 @@ TestingOpenMW::VFSTestFile repeated_shared_block{R"(
             }))
             , mImageManager(mVFS.get())
         {
-            Settings::Manager::setBool("radial fog", "Shaders", true);
+            Settings::Manager::setBool("radial fog", "Fog", true);
             Settings::Manager::setBool("stereo enabled", "Stereo", false);
         }
 

@@ -41,6 +41,7 @@
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/rtt.hpp>
 
 #include <components/misc/constants.hpp>
 
@@ -82,7 +83,6 @@ namespace MWRender
     class PerViewUniformStateUpdater final : public SceneUtil::StateSetUpdater
     {
     public:
-    public:
         PerViewUniformStateUpdater()
         {
         }
@@ -90,6 +90,8 @@ namespace MWRender
         void setDefaults(osg::StateSet* stateset) override
         {
             stateset->addUniform(new osg::Uniform("projectionMatrix", osg::Matrixf{}));
+            if (mSkyRTT)
+                stateset->addUniform(new osg::Uniform("sky", mSkyTextureUnit));
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
@@ -97,6 +99,11 @@ namespace MWRender
             auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
             if (uProjectionMatrix)
                 uProjectionMatrix->set(mProjectionMatrix);
+            if (mSkyRTT && nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+            {
+                osg::Texture* skyTexture = mSkyRTT->getColorTexture(static_cast<osgUtil::CullVisitor*>(nv));
+                stateset->setTextureAttribute(mSkyTextureUnit, skyTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            }
         }
 
         void applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
@@ -123,8 +130,16 @@ namespace MWRender
             return mProjectionMatrix;
         }
 
+        void enableSkyRTT(int skyTextureUnit, SceneUtil::RTTNode* skyRTT)
+        {
+            mSkyTextureUnit = skyTextureUnit;
+            mSkyRTT = skyRTT;
+        }
+
     private:
         osg::Matrixf mProjectionMatrix;
+        int mSkyTextureUnit = -1;
+        SceneUtil::RTTNode* mSkyRTT = nullptr;
     };
 
     class SharedUniformStateUpdater : public SceneUtil::StateSetUpdater
@@ -144,6 +159,7 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("linearFac", 0.f));
             stateset->addUniform(new osg::Uniform("near", 0.f));
             stateset->addUniform(new osg::Uniform("far", 0.f));
+            stateset->addUniform(new osg::Uniform("skyBlendingStart", 0.f));
             stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{}));
             if (mUsePlayerUniforms)
             {
@@ -165,6 +181,11 @@ namespace MWRender
             auto* uFar = stateset->getUniform("far");
             if (uFar)
                 uFar->set(mFar);
+
+            static const float mSkyBlendingStartCoef = Settings::Manager::getFloat("sky blending start", "Fog");
+            auto* uSkyBlendingStart = stateset->getUniform("skyBlendingStart");
+            if (uSkyBlendingStart)
+                uSkyBlendingStart->set(mFar * mSkyBlendingStartCoef);
 
             auto* uScreenRes = stateset->getUniform("screenRes");
             if (uScreenRes)
@@ -337,7 +358,8 @@ namespace MWRender
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
                                        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                                        const std::string& resourcePath, DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore)
-        : mViewer(viewer)
+        : mSkyBlending(Settings::Manager::getBool("sky blending", "Fog"))
+        , mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
         , mWorkQueue(workQueue)
@@ -358,12 +380,14 @@ namespace MWRender
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         // Shadows and radial fog have problems with fixed-function mode.
-        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders")
+        bool forceShaders = Settings::Manager::getBool("radial fog", "Fog")
+                            || Settings::Manager::getBool("exponential fog", "Fog")
                             || Settings::Manager::getBool("soft particles", "Shaders")
                             || Settings::Manager::getBool("force shaders", "Shaders")
                             || Settings::Manager::getBool("enable shadows", "Shadows")
                             || lightingMethod != SceneUtil::LightingMethod::FFP
                             || reverseZ
+                            || mSkyBlending
                             || Stereo::getMultiview();
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
 
@@ -413,7 +437,10 @@ namespace MWRender
         globalDefines["forcePPL"] = Settings::Manager::getBool("force per pixel lighting", "Shaders") ? "1" : "0";
         globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
         globalDefines["preLightEnv"] = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
-        globalDefines["radialFog"] = Settings::Manager::getBool("radial fog", "Shaders") ? "1" : "0";
+        bool exponentialFog = Settings::Manager::getBool("exponential fog", "Fog");
+        globalDefines["radialFog"] = (exponentialFog || Settings::Manager::getBool("radial fog", "Fog")) ? "1" : "0";
+        globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
+        globalDefines["skyBlending"] = mSkyBlending ? "1" : "0";
         globalDefines["refraction_enabled"] = "0";
         globalDefines["useGPUShader4"] = "0";
         globalDefines["useOVR_multiview"] = "0";
@@ -546,8 +573,14 @@ namespace MWRender
 
         mFog = std::make_unique<FogManager>();
 
-        mSky = std::make_unique<SkyManager>(sceneRoot, resourceSystem->getSceneManager());
+        mSky = std::make_unique<SkyManager>(sceneRoot, resourceSystem->getSceneManager(), mSkyBlending);
         mSky->setCamera(mViewer->getCamera());
+        if (mSkyBlending)
+        {
+            int skyTextureUnit = mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(1);
+            Log(Debug::Info) << "Reserving texture unit for sky RTT: " << skyTextureUnit;
+            mPerViewUniformStateUpdater->enableSkyRTT(skyTextureUnit, mSky->getSkyRTT());
+        }
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
@@ -572,8 +605,6 @@ namespace MWRender
         Nif::NIFFile::setLoadUnsupportedFiles(Settings::Manager::getBool("load unsupported nif files", "Models"));
 
         mStateUpdater->setFogEnd(mViewDistance);
-
-        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
 
         // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
         mRootNode->getOrCreateStateSet()->setAttribute(Shader::RemovedAlphaFunc::getInstance(GL_ALWAYS));

@@ -268,6 +268,12 @@ namespace MWRender
         fog->setEnd(10000000);
         stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
 
+        // turn of sky blending
+        stateset->addUniform(new osg::Uniform("far", 10000000.0f));
+        stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
+        stateset->addUniform(new osg::Uniform("sky", 0));
+        stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{1, 1}));
+
         // Opaque stuff must have 1 as its fragment alpha as the FBO is translucent, so having blending off isn't enough
         osg::ref_ptr<osg::TexEnvCombine> noBlendAlphaEnv = new osg::TexEnvCombine();
         noBlendAlphaEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);

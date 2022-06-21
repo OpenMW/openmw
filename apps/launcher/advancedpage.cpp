@@ -117,7 +117,7 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(autoUseTerrainNormalMapsCheckBox, "auto use terrain normal maps", "Shaders");
         loadSettingBool(autoUseTerrainSpecularMapsCheckBox, "auto use terrain specular maps", "Shaders");
         loadSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
-        loadSettingBool(radialFogCheckBox, "radial fog", "Shaders");
+        loadSettingBool(radialFogCheckBox, "radial fog", "Fog");
         loadSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
         loadSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
         if (Settings::Manager::getInt("antialiasing", "Video") == 0) {
@@ -265,7 +265,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(autoUseTerrainNormalMapsCheckBox, "auto use terrain normal maps", "Shaders");
         saveSettingBool(autoUseTerrainSpecularMapsCheckBox, "auto use terrain specular maps", "Shaders");
         saveSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
-        saveSettingBool(radialFogCheckBox, "radial fog", "Shaders");
+        saveSettingBool(radialFogCheckBox, "radial fog", "Fog");
         saveSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
         saveSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
         saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");

@@ -54,6 +54,12 @@ namespace Shader
 
         bool createSourceFromTemplate(std::string& source, std::vector<std::string>& linkedShaderTemplateNames, const std::string& templateName, const ShaderManager::DefineMap& defines);
 
+        void setMaxTextureUnits(int maxTextureUnits) { mMaxTextureUnits = maxTextureUnits; }
+        int getMaxTextureUnits() const { return mMaxTextureUnits; }
+        int getAvailableTextureUnits() const { return mMaxTextureUnits - mReservedTextureUnits; }
+
+        int reserveGlobalTextureUnits(int count);
+
     private:
         void getLinkedShaders(osg::ref_ptr<osg::Shader> shader, const std::vector<std::string>& linkedShaderNames, const DefineMap& defines);
         void addLinkedShaders(osg::ref_ptr<osg::Shader> shader, osg::ref_ptr<osg::Program> program);
@@ -80,6 +86,9 @@ namespace Shader
         std::mutex mMutex;
 
         osg::ref_ptr<const osg::Program> mProgramTemplate;
+
+        int mMaxTextureUnits = 0;
+        int mReservedTextureUnits = 0;
     };
 
     bool parseForeachDirective(std::string& source, const std::string& templateName, size_t foundPos);

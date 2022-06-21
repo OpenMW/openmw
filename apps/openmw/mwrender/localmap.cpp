@@ -720,6 +720,12 @@ void LocalMapRenderToTexture::setDefaults(osg::Camera* camera)
     fog->setEnd(10000000);
     stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
 
+    // turn of sky blending
+    stateset->addUniform(new osg::Uniform("far", 10000000.0f));
+    stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
+    stateset->addUniform(new osg::Uniform("sky", 0));
+    stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{1, 1}));
+
     osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
     lightmodel->setAmbientIntensity(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
     stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);

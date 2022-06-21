@@ -182,7 +182,7 @@ float omw_GetPointLightRadius(int index)
             {"@ubo", mUBO ? "1" : "0"},
             {"@normals", technique.getNormals() ? "1" : "0"},
             {"@reverseZ", SceneUtil::AutoDepth::isReversed() ? "1" : "0"},
-            {"@radialFog", Settings::Manager::getBool("radial fog", "Shaders") ? "1" : "0"},
+            {"@radialFog", Settings::Manager::getBool("radial fog", "Fog") ? "1" : "0"},
             {"@hdr", technique.getHDR() ? "1" : "0"},
             {"@in", mLegacyGLSL ? "varying" : "in"},
             {"@out", mLegacyGLSL ? "varying" : "out"},

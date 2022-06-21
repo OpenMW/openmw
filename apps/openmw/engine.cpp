@@ -256,7 +256,18 @@ namespace
             Log(Debug::Info) << "OpenGL Vendor: " << glGetString(GL_VENDOR);
             Log(Debug::Info) << "OpenGL Renderer: " << glGetString(GL_RENDERER);
             Log(Debug::Info) << "OpenGL Version: " << glGetString(GL_VERSION);
+            glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &mMaxTextureImageUnits);
         }
+
+        int getMaxTextureImageUnits() const
+        {
+            if (mMaxTextureImageUnits == 0)
+                throw std::logic_error("mMaxTextureImageUnits is not initialized");
+            return mMaxTextureImageUnits;
+        }
+
+    private:
+        int mMaxTextureImageUnits = 0;
     };
 
     class InitializeStereoOperation final : public osg::GraphicsOperation
@@ -664,7 +675,8 @@ void OMW::Engine::createWindow()
 
     osg::ref_ptr<SceneUtil::OperationSequence> realizeOperations = new SceneUtil::OperationSequence(false);
     mViewer->setRealizeOperation(realizeOperations);
-    realizeOperations->add(new IdentifyOpenGLOperation());
+    osg::ref_ptr<IdentifyOpenGLOperation> identifyOp = new IdentifyOpenGLOperation();
+    realizeOperations->add(identifyOp);
 
     if (Debug::shouldDebugOpenGL())
         realizeOperations->add(new Debug::EnableGLDebugOperation());
@@ -679,6 +691,7 @@ void OMW::Engine::createWindow()
     }
 
     mViewer->realize();
+    mGlMaxTextureImageUnits = identifyOp->getMaxTextureImageUnits();
 
     mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, graphicsWindow->getTraits()->width, graphicsWindow->getTraits()->height);
 }
@@ -724,6 +737,7 @@ void OMW::Engine::prepareEngine()
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 
     mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get());
+    mResourceSystem->getSceneManager()->getShaderManager().setMaxTextureUnits(mGlMaxTextureImageUnits);
     mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(false); // keep to Off for now to allow better state sharing
     mResourceSystem->getSceneManager()->setFilterSettings(
         Settings::Manager::getString("texture mag filter", "General"),
