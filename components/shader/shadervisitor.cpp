@@ -25,6 +25,7 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/riggeometryosgaextension.hpp>
 
 #include "removedalphafunc.hpp"
 #include "shadermanager.hpp"
@@ -922,6 +923,17 @@ namespace Shader
                 if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
                     morph->setSourceGeometry(sourceGeometry);
             }
+            else if (auto osgaRig = dynamic_cast<SceneUtil::RigGeometryHolder*>(&drawable))
+            {
+                osg::ref_ptr<SceneUtil::OsgaRigGeometry> sourceOsgaRigGeometry = osgaRig->getSourceRigGeometry();
+                osg::ref_ptr<osg::Geometry> sourceGeometry = sourceOsgaRigGeometry->getSourceGeometry();
+                if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
+                {
+                    sourceOsgaRigGeometry->setSourceGeometry(sourceGeometry);
+                    osgaRig->setSourceRigGeometry(sourceOsgaRigGeometry);
+                }
+            }
+
         }
         else
             ensureFFP(drawable);

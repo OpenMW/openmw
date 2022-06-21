@@ -4,8 +4,11 @@
 #include <filesystem>
 
 #include <osg/AlphaFunc>
+#include <osg/Group>
 #include <osg/Node>
 #include <osg/UserDataContainer>
+
+#include <osgAnimation/RigGeometry>
 
 #include <osgParticle/ParticleSystem>
 
@@ -35,6 +38,7 @@
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/riggeometryosgaextension.hpp>
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
@@ -226,11 +230,12 @@ namespace Resource
     };
 
     // Check Collada extra descriptions
-    class ColladaAlphaTrickVisitor : public osg::NodeVisitor
+    class ColladaDescriptionVisitor : public osg::NodeVisitor
     {
     public:
-        ColladaAlphaTrickVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        ColladaDescriptionVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),
+            mSkeleton(nullptr)
         {
         }
 
@@ -268,7 +273,6 @@ namespace Resource
                     stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 }
             }
-
             /* Check if the <node> has <extra type="Node"> <technique profile="OpenSceneGraph"> <Descriptions> <Description>
                correct format for OpenMW: <Description>alphatest mode value MaterialName</Description>
                                       e.g <Description>alphatest GEQUAL 0.8 MyAlphaTestedMaterial</Description> */
@@ -299,6 +303,25 @@ namespace Resource
                             node.getStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
                         }
                     }
+
+                    if (descriptionParts.size() > (0) && descriptionParts.at(0) == "bodypart")
+                    {
+                        SceneUtil::FindByClassVisitor osgaRigFinder("RigGeometryHolder");
+                        node.accept(osgaRigFinder);
+                        for(osg::Node* foundRigNode : osgaRigFinder.mFoundNodes)
+                        {
+                            if (SceneUtil::RigGeometryHolder* rigGeometryHolder = dynamic_cast<SceneUtil::RigGeometryHolder*> (foundRigNode))
+                                mRigGeometryHolders.emplace_back(osg::ref_ptr<SceneUtil::RigGeometryHolder> (rigGeometryHolder));
+                            else Log(Debug::Error) << "Converted RigGeometryHolder is of a wrong type.";
+                        }
+
+                        if (!mRigGeometryHolders.empty())
+                        {
+                            osgAnimation::RigGeometry::FindNearestParentSkeleton skeletonFinder;
+                            mRigGeometryHolders[0]->accept(skeletonFinder);
+                            if (skeletonFinder._root.valid()) mSkeleton = skeletonFinder._root;
+                        }
+                    }
                 }
             }
 
@@ -306,6 +329,9 @@ namespace Resource
         }
         private:
             std::vector<std::string> mDescriptions;
+        public:
+            osgAnimation::Skeleton* mSkeleton; //pointer is valid only if the model is a bodypart, osg::ref_ptr<Skeleton>
+            std::vector<osg::ref_ptr<SceneUtil::RigGeometryHolder>> mRigGeometryHolders;
     };
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
@@ -424,7 +450,7 @@ namespace Resource
     {
         return mLightingMethod;
     }
-    
+
     void SceneManager::setConvertAlphaTestToAlphaToCoverage(bool convert)
     {
         mConvertAlphaTestToAlphaToCoverage = convert;
@@ -525,11 +551,55 @@ namespace Resource
             if (nameFinder.mFoundNode)
                 nameFinder.mFoundNode->setNodeMask(hiddenNodeMask);
 
+            // Recognize and convert osgAnimation::RigGeometry to OpenMW-optimized type
+            SceneUtil::FindByClassVisitor rigFinder("RigGeometry");
+            node->accept(rigFinder);
+            for(osg::Node* foundRigNode : rigFinder.mFoundNodes)
+            {
+                if (foundRigNode->libraryName() == std::string("osgAnimation"))
+                {
+                    osgAnimation::RigGeometry* foundRigGeometry = static_cast<osgAnimation::RigGeometry*> (foundRigNode);
+                    osg::ref_ptr<SceneUtil::RigGeometryHolder> newRig = new SceneUtil::RigGeometryHolder(*foundRigGeometry, osg::CopyOp::DEEP_COPY_ALL);
+
+                    if (foundRigGeometry->getStateSet()) newRig->setStateSet(foundRigGeometry->getStateSet());
+
+                    if (osg::Group* parent = dynamic_cast<osg::Group*> (foundRigGeometry->getParent(0)))
+                    {
+                        parent->removeChild(foundRigGeometry);
+                        parent->addChild(newRig);
+                    }
+                }
+            }
+
             if (ext == "dae")
             {
-                // Collada alpha testing
-                Resource::ColladaAlphaTrickVisitor colladaAlphaTrickVisitor;
-                node->accept(colladaAlphaTrickVisitor);
+                Resource::ColladaDescriptionVisitor colladaDescriptionVisitor;
+                node->accept(colladaDescriptionVisitor);
+
+                if (colladaDescriptionVisitor.mSkeleton)
+                {
+                    if ( osg::Group* group = dynamic_cast<osg::Group*> (node) )
+                    {
+                        group->removeChildren(0, group->getNumChildren());
+                        for (osg::ref_ptr<SceneUtil::RigGeometryHolder> newRiggeometryHolder : colladaDescriptionVisitor.mRigGeometryHolders)
+                        {
+                            osg::ref_ptr<osg::MatrixTransform> backToOriginTrans = new osg::MatrixTransform();
+
+                            newRiggeometryHolder->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(newRiggeometryHolder->getGeometry(0)));
+                            backToOriginTrans->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(newRiggeometryHolder->getGeometry(0)));
+
+                            newRiggeometryHolder->setBodyPart(true);
+
+                            for (int i = 0; i < 2; ++i)
+                            {
+                                if (newRiggeometryHolder->getGeometry(i)) newRiggeometryHolder->getGeometry(i)->setSkeleton(nullptr);
+                            }
+
+                            backToOriginTrans->addChild(newRiggeometryHolder);
+                            group->addChild(backToOriginTrans);
+                        }
+                    }
+                }
 
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));

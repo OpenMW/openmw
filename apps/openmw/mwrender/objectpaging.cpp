@@ -24,6 +24,7 @@
 
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/settings/settings.hpp>
 #include <components/misc/rng.hpp>
@@ -244,6 +245,8 @@ namespace MWRender
             if (dynamic_cast<const osgParticle::ParticleSystem*>(drawable))
                 return nullptr;
 
+            if (dynamic_cast<const SceneUtil::OsgaRigGeometry*>(drawable))
+                return nullptr;
             if (const SceneUtil::RigGeometry* rig = dynamic_cast<const SceneUtil::RigGeometry*>(drawable))
                 return operator()(rig->getSourceGeometry());
             if (const SceneUtil::MorphGeometry* morph = dynamic_cast<const SceneUtil::MorphGeometry*>(drawable))
