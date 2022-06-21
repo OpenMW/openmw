@@ -8,6 +8,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/riggeometry.hpp>
+#include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
 namespace SceneUtil
@@ -45,6 +46,24 @@ class RigGeometrySerializer : public osgDB::ObjectWrapper
 public:
     RigGeometrySerializer()
         : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::RigGeometry>, "SceneUtil::RigGeometry", "osg::Object osg::Node osg::Drawable SceneUtil::RigGeometry")
+    {
+    }
+};
+
+class RigGeometryHolderSerializer : public osgDB::ObjectWrapper
+{
+public:
+    RigGeometryHolderSerializer()
+        : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::RigGeometryHolder>, "SceneUtil::RigGeometryHolder", "osg::Object osg::Node osg::Drawable SceneUtil::RigGeometryHolder")
+    {
+    }
+};
+
+class OsgaRigGeometrySerializer : public osgDB::ObjectWrapper
+{
+public:
+    OsgaRigGeometrySerializer()
+        : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::OsgaRigGeometry>, "SceneUtil::OsgaRigGeometry", "osg::Object osg::Node osg::Geometry osgAnimation::RigGeometry SceneUtil::OsgaRigGeometry")
     {
     }
 };
@@ -108,6 +127,8 @@ void registerSerializers()
         mgr->addWrapper(new PositionAttitudeTransformSerializer);
         mgr->addWrapper(new SkeletonSerializer);
         mgr->addWrapper(new RigGeometrySerializer);
+        mgr->addWrapper(new RigGeometryHolderSerializer);
+        mgr->addWrapper(new OsgaRigGeometrySerializer);
         mgr->addWrapper(new MorphGeometrySerializer);
         mgr->addWrapper(new LightManagerSerializer);
         mgr->addWrapper(new CameraRelativeTransformSerializer);

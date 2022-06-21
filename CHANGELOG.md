@@ -140,6 +140,7 @@
     Feature #5198: Implement "Magic effect expired" event
     Feature #5454: Clear active spells from actor when he disappears from scene
     Feature #5489: MCP: Telekinesis fix for activators
+    Feature #5701: Convert osgAnimation::RigGeometry to double-buffered custom version
     Feature #5737: Handle instance move from one cell to another
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
