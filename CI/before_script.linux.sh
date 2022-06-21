@@ -4,6 +4,9 @@ set -xeo pipefail
 
 free -m
 
+# Silence a git warning
+git config --global advice.detachedHead false
+
 BUILD_UNITTESTS=OFF
 BUILD_BENCHMARKS=OFF
 

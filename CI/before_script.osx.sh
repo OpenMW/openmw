@@ -3,6 +3,9 @@
 export CXX=clang++
 export CC=clang
 
+# Silence a git warning
+git config --global advice.detachedHead false
+
 DEPENDENCIES_ROOT="/private/tmp/openmw-deps/openmw-deps"
 QT_PATH=$(brew --prefix qt@5)
 CCACHE_EXECUTABLE=$(brew --prefix ccache)/bin/ccache

@@ -3,6 +3,9 @@
 # hack to work around: FFmpeg version is too old, 3.2 is required
 sed -i s/"NOT FFVER_OK"/"FALSE"/ CMakeLists.txt
 
+# Silence a git warning
+git config --global advice.detachedHead false
+
 mkdir -p build
 cd build
 
