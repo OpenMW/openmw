@@ -12,12 +12,12 @@
     Bug #3846: Strings starting with "-" fail to compile if not enclosed in quotes
     Bug #3855: AI sometimes spams defensive spells
     Bug #3905: Great House Dagoth issues
-    Bug #4203: Resurrecting an actor should close the loot GUI
+    Bug #4203: Resurrecting an actor doesn't close the loot GUI
     Bug #4376: Moved actors don't respawn in their original cells
     Bug #4389: NPC's lips do not move if his head model has the NiBSAnimationNode root node
     Bug #4602: Robert's Bodies: crash inside createInstance()
     Bug #4700: Editor: Incorrect command implementation
-    Bug #4744: Invisible particles must still be processed
+    Bug #4744: Invisible particles aren't always processed
     Bug #4949: Incorrect particle lighting
     Bug #5054: Non-biped creatures don't use spellcast equip/unequip animations
     Bug #5088: Sky abruptly changes direction during certain weather transitions
@@ -26,7 +26,7 @@
     Bug #5192: Actor turn rate is too slow
     Bug #5207: Loose summons can be present in scene
     Bug #5279: Ingame console stops auto-scrolling after clicking output
-    Bug #5377: console does not appear after using menutest in inventory
+    Bug #5377: Console does not appear after using menutest in inventory
     Bug #5379: Wandering NPCs falling through cantons
     Bug #5394: Windows snapping no longer works
     Bug #5434: Pinned windows shouldn't cover breath progress bar
@@ -40,15 +40,15 @@
     Bug #5788: Texture editing parses the selected indexes wrongly
     Bug #5801: A multi-effect spell with the intervention effects and recall always favors Almsivi intervention
     Bug #5842: GetDisposition adds temporary disposition change from different actors
+    Bug #5858: Visible modal windows and dropdowns crashing game on exit
     Bug #5863: GetEffect should return true after the player has teleported
     Bug #5913: Failed assertion during Ritual of Trees quest
-    Bug #5928: Glow in the Dahrk functionality used without mod installed
     Bug #5937: Lights always need to be rotated by 90 degrees
     Bug #5989: Simple water isn't affected by texture filter settings
-    Bug #6037: Morrowind Content Language Cannot be Set to English in OpenMW Launcher
+    Bug #6037: Launcher: Morrowind content language cannot be set to English
     Bug #6051: NaN water height in ESM file is not handled gracefully
-    Bug #6066: addtopic "return" does not work from within script. No errors thrown
-    Bug #6067: esp loader fails in for certain subrecord orders
+    Bug #6066: Addtopic "return" does not work from within script. No errors thrown
+    Bug #6067: ESP loader fails for certain subrecord orders
     Bug #6087: Bound items added directly to the inventory disappear if their corresponding spell effect ends
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
     Bug #6107: Fatigue is incorrectly recalculated when fortify effect is applied or removed
@@ -58,7 +58,8 @@
     Bug #6129: Player avatar not displayed correctly for large window sizes when GUI scaling active
     Bug #6131: Item selection in the avatar window not working correctly for large window sizes
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
-    Bug #6143: Capturing a screenshot makes engine to be a temporary unresponsive
+    Bug #6142: Groundcover plugins change cells flags
+    Bug #6143: Capturing a screenshot renders the engine temporarily unresponsive
     Bug #6165: Paralyzed player character can pickup items when the inventory is open
     Bug #6168: Weather particles flicker for a frame at start of storms
     Bug #6172: Some creatures can't open doors
@@ -69,15 +70,17 @@
     Bug #6197: Infinite Casting Loop
     Bug #6253: Multiple instances of Reflect stack additively
     Bug #6255: Reflect is different from vanilla
+    Bug #6256: Crash on exit with enabled shadows and statically linked OpenSceneGraph
     Bug #6258: Barter menu glitches out when modifying prices
     Bug #6273: Respawning NPCs rotation is inconsistent
+    Bug #6276: Deleted groundcover instances are not deleted in game
     Bug #6282: Laura craft doesn't follow the player character
     Bug #6283: Avis Dorsey follows you after her death
     Bug #6285: Brush template drawing and terrain selection drawing performance is very bad
     Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
     Bug #6291: Can't pickup the dead mage's journal from the mysterious hunter mod
     Bug #6302: Teleporting disabled actor breaks its disabled state
-    Bug #6303: After "go to jail" weapon can stuck in the ready to attack state
+    Bug #6303: After "go to jail" weapon can be stuck in the ready to attack state
     Bug #6307: Pathfinding in Infidelities quest from Tribunal addon is broken
     Bug #6321: Arrow enchantments should always be applied to the target
     Bug #6322: Total sold/cost should reset to 0 when there are no items offered
@@ -88,11 +91,13 @@
     Bug #6333: Werewolf stat changes should be implemented as damage/fortifications
     Bug #6343: Magic projectile speed doesn't take race weight into account
     Bug #6347: PlaceItem/PlaceItemCell/PlaceAt should work with levelled creatures
-    Bug #6354: SFX abruptly cut off after crossing max distance; implement soft fading of sound effects
+    Bug #6354: SFX abruptly cut off after crossing max distance
     Bug #6358: Changeweather command does not report an error when entering non-existent region
     Bug #6363: Some scripts in Morrowland fail to work
     Bug #6376: Creatures should be able to use torches
     Bug #6386: Artifacts in water reflection due to imprecise screen-space coordinate computation
+    Bug #6389: Maximum light distance setting doesn't affect water reflections
+    Bug #6395: Translations with longer tab titles may cause tabs to disappear from the options menu
     Bug #6396: Inputting certain Unicode characters triggers an assertion
     Bug #6416: Morphs are applied to the wrong target
     Bug #6417: OpenMW doesn't always use the right node to accumulate movement
@@ -110,7 +115,6 @@
     Bug #6606: Quests with multiple IDs cannot always be restarted
     Bug #6653: With default settings the in-game console doesn't fit into screen
     Bug #6655: Constant effect absorb attribute causes the game to break
-    Bug #6631: Fix ffmpeg avio API usage causing hangs in ffmpeg version 5
     Bug #6667: Pressing the Esc key while resting or waiting causes black screen.
     Bug #6670: Dialogue order is incorrect
     Bug #6672: Garbage object refs in groundcover plugins like Vurt's grass plugins
@@ -127,7 +131,7 @@
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
-    Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
+    Feature #2554: OpenMW-CS: Modifying an object in the cell view should trigger the instances table to scroll to the corresponding record
     Feature #2766: Warn user if their version of Morrowind is not the latest.
     Feature #2780: A way to see current OpenMW version in the console
     Feature #2858: Add a tab to the launcher for handling datafolders
@@ -142,13 +146,12 @@
     Feature #5489: MCP: Telekinesis fix for activators
     Feature #5701: Convert osgAnimation::RigGeometry to double-buffered custom version
     Feature #5737: Handle instance move from one cell to another
+    Feature #5928: Allow Glow in the Dahrk to be disabled
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
+    Feature #6019: Add antialias alpha test to the launcher or enable by default if possible
     Feature #6032: Reverse-z depth buffer
-    Feature #6078: First person should not clear depth buffer
     Feature #6128: Soft Particles
-    Feature #6161: Refactor Sky to use shaders and GLES/GL3 friendly
-    Feature #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Feature #6171: In-game log viewer
     Feature #6189: Navigation mesh disk cache
     Feature #6199: Support FBO Rendering
@@ -156,24 +159,31 @@
     Feature #6249: Alpha testing support for Collada
     Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
     Feature #6288: Preserve the "blocked" record flag for referenceable objects.
-    Feature #6380: Commas are treated as whitespace in vanilla
-    Feature #6419: Topics shouldn't be greyed out if they can produce another topic reference
+    Feature #6360: More realistic raindrop ripples
+    Feature #6380: Treat commas as whitespace in scripts
+    Feature #6419: Don't grey out topics if they can produce another topic reference
     Feature #6443: Support NiStencilProperty
-    Feature #6496: NCC flag isn't handled properly
+    Feature #6496: Handle NCC flag in NIF files
     Feature #6534: Shader-based object texture blending
     Feature #6541: Gloss-mapping
-    Feature #6592: Missing support for NiTriShape particle emitters
+    Feature #6557: Add support for controller gyroscope
+    Feature #6592: Support for NiTriShape particle emitters
     Feature #6600: Support NiSortAdjustNode
     Feature #6684: Support NiFltAnimationNode
-    Feature #6699: Ignored flag
+    Feature #6699: Support Ignored flag
     Feature #6700: Support windowed fullscreen
     Feature #6706: Save the size of the Options window
     Feature #6721: [OpenMW-CS] Add option to open records in new window
+    Task #6078: First person should not clear depth buffer
+    Task #6161: Refactor Sky to use shaders and be GLES/GL3 friendly
+    Task #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
     Task #6264: Remove the old classes in animation.cpp
     Task #6553: Simplify interpreter instruction registration
     Task #6564: Remove predefined data paths `data="?global?data"`, `data=./data`
+    Task #6631: Fix ffmpeg avio API usage causing hangs in ffmpeg version 5
     Task #6709: Move KeyframeController transformation magic to NifOsg::MatrixTransform
+    Task #6763: gcc 12.1 multiple compiler warnings
 
 0.47.0
 ------
@@ -308,8 +318,6 @@
     Bug #6043: Actor can have torch missing when torch animation is played
     Bug #6047: Mouse bindings can be triggered during save loading
     Bug #6136: Game freezes when NPCs try to open doors that are about to be closed
-    Bug #6142: Groundcover plugins change cells flags
-    Bug #6276: Deleted groundcover instances are not deleted in game
     Bug #6294: Game crashes with empty pathgrid
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
