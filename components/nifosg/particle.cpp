@@ -396,7 +396,7 @@ void Emitter::emitParticles(double dt)
 
     osg::ref_ptr<osg::Vec3Array> geometryVertices = nullptr;
 
-    const bool useGeometryEmitter = mFlags & Nif::NiNode::BSPArrayController_AtVertex;
+    const bool useGeometryEmitter = mFlags & Nif::NiParticleSystemController::BSPArrayController_AtVertex;
 
     if (useGeometryEmitter || !mTargets.empty())
     {
@@ -445,7 +445,7 @@ void Emitter::emitParticles(double dt)
 
         osg::NodePath path = visitor.mFoundPath;
         path.erase(path.begin());
-        if (!useGeometryEmitter && (mFlags & Nif::NiNode::BSPArrayController_AtNode) && path.size())
+        if (!useGeometryEmitter && (mFlags & Nif::NiParticleSystemController::BSPArrayController_AtNode) && path.size())
         {
             osg::Matrix current;
 

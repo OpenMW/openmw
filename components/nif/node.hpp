@@ -144,8 +144,16 @@ struct NiBoundingVolume
  */
 struct Node : public Named
 {
+    enum Flags {
+        Flag_Hidden = 0x0001,
+        Flag_MeshCollision = 0x0002,
+        Flag_BBoxCollision = 0x0004,
+        Flag_ActiveCollision = 0x0020
+    };
+
     // Node flags. Interpretation depends somewhat on the type of node.
     unsigned int flags;
+
     Transformation trafo;
     osg::Vec3f velocity; // Unused? Might be a run-time game state
     PropertyList props;
@@ -198,6 +206,11 @@ struct Node : public Named
     {
         isBone = true;
     }
+
+    bool isHidden() const { return flags & Flag_Hidden; }
+    bool hasMeshCollision() const { return flags & Flag_MeshCollision; }
+    bool hasBBoxCollision() const { return flags & Flag_BBoxCollision; }
+    bool collisionActive() const { return flags & Flag_ActiveCollision; }
 };
 
 struct NiNode : Node
@@ -205,25 +218,12 @@ struct NiNode : Node
     NodeList children;
     NodeList effects;
 
-    enum Flags {
-        Flag_Hidden = 0x0001,
-        Flag_MeshCollision = 0x0002,
-        Flag_BBoxCollision = 0x0004,
-        Flag_ActiveCollision = 0x0020
-    };
     enum BSAnimFlags {
         AnimFlag_AutoPlay = 0x0020
     };
     enum BSParticleFlags {
         ParticleFlag_AutoPlay = 0x0020,
         ParticleFlag_LocalSpace = 0x0080
-    };
-    enum ControllerFlags {
-        ControllerFlag_Active = 0x8
-    };
-    enum BSPArrayController {
-        BSPArrayController_AtNode = 0x8,
-        BSPArrayController_AtVertex = 0x10
     };
 
     void read(NIFStream *nif) override
@@ -450,12 +450,13 @@ struct NiFltAnimationNode : public NiSwitchNode
         Flag_Swing = 0x40
     };
 
-
     void read(NIFStream *nif) override
     {
         NiSwitchNode::read(nif);
         mDuration = nif->getFloat();
     }
+
+    bool swing() const { return flags & Flag_Swing; }
 };
 
 // Abstract

@@ -484,7 +484,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_root_nif_node_with_bounding_box_should_return_shape_with_compound_shape_and_box_inside)
     {
         mNode.hasBounds = true;
-        mNode.flags |= Nif::NiNode::Flag_BBoxCollision;
+        mNode.flags |= Nif::Node::Flag_BBoxCollision;
         mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
         mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
@@ -508,7 +508,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_child_nif_node_with_bounding_box)
     {
         mNode.hasBounds = true;
-        mNode.flags |= Nif::NiNode::Flag_BBoxCollision;
+        mNode.flags |= Nif::Node::Flag_BBoxCollision;
         mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
         mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
@@ -534,7 +534,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_root_and_child_nif_node_with_bounding_box_but_root_without_flag_should_use_child_bounds)
     {
         mNode.hasBounds = true;
-        mNode.flags |= Nif::NiNode::Flag_BBoxCollision;
+        mNode.flags |= Nif::Node::Flag_BBoxCollision;
         mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
         mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
@@ -565,7 +565,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_root_and_two_children_where_both_with_bounds_but_only_first_with_flag_should_use_first_bounds)
     {
         mNode.hasBounds = true;
-        mNode.flags |= Nif::NiNode::Flag_BBoxCollision;
+        mNode.flags |= Nif::Node::Flag_BBoxCollision;
         mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
         mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
@@ -608,7 +608,7 @@ namespace
         mNode.parents.push_back(&mNiNode);
 
         mNode2.hasBounds = true;
-        mNode2.flags |= Nif::NiNode::Flag_BBoxCollision;
+        mNode2.flags |= Nif::Node::Flag_BBoxCollision;
         mNode2.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
         mNode2.bounds.box.extents = osg::Vec3f(4, 5, 6);
         mNode2.bounds.box.center = osg::Vec3f(-4, -5, -6);
@@ -861,7 +861,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_controller_should_return_shape_with_compound_shape)
     {
         mController.recType = Nif::RC_NiKeyframeController;
-        mController.flags |= Nif::NiNode::ControllerFlag_Active;
+        mController.flags |= Nif::Controller::Flag_Active;
         copy(mTransform, mNiTriShape.trafo);
         mNiTriShape.trafo.scale = 3;
         mNiTriShape.parents.push_back(&mNiNode);
@@ -890,7 +890,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_two_tri_shape_children_nodes_where_one_with_controller_should_return_shape_with_compound_shape)
     {
         mController.recType = Nif::RC_NiKeyframeController;
-        mController.flags |= Nif::NiNode::ControllerFlag_Active;
+        mController.flags |= Nif::Controller::Flag_Active;
         copy(mTransform, mNiTriShape.trafo);
         mNiTriShape.trafo.scale = 3;
         mNiTriShape.parents.push_back(&mNiNode);

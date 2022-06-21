@@ -439,7 +439,7 @@ namespace NifOsg
             sequenceNode->setName(niFltAnimationNode->name);
             if (niFltAnimationNode->children.length()!=0)
             {
-                if (niFltAnimationNode->flags & Nif::NiFltAnimationNode::Flag_Swing)
+                if (niFltAnimationNode->swing())
                     sequenceNode->setDefaultTime(niFltAnimationNode->mDuration/(niFltAnimationNode->children.length()*2));
                 else
                     sequenceNode->setDefaultTime(niFltAnimationNode->mDuration/niFltAnimationNode->children.length());
@@ -451,7 +451,7 @@ namespace NifOsg
         {
             const Nif::NiFltAnimationNode* niFltAnimationNode = static_cast<const Nif::NiFltAnimationNode*>(nifNode);
             osg::Sequence* sequenceNode = static_cast<osg::Sequence*>(osgNode);
-            if (niFltAnimationNode->flags & Nif::NiFltAnimationNode::Flag_Swing)
+            if (niFltAnimationNode->swing())
                 sequenceNode->setInterval(osg::Sequence::SWING, 0,-1);
             else
                 sequenceNode->setInterval(osg::Sequence::LOOP, 0,-1);
@@ -520,10 +520,8 @@ namespace NifOsg
             if (image)
                 texture2d->setTextureSize(image->s(), image->t());
             texture2d->setName("envMap");
-            bool wrapT = textureEffect->clamp & 0x1;
-            bool wrapS = (textureEffect->clamp >> 1) & 0x1;
-            texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-            texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+            texture2d->setWrap(osg::Texture::WRAP_S, textureEffect->wrapS() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+            texture2d->setWrap(osg::Texture::WRAP_T, textureEffect->wrapT() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
 
             int texUnit = 3; // FIXME
 
@@ -659,7 +657,7 @@ namespace NifOsg
 
             // We can skip creating meshes for hidden nodes if they don't have a VisController that
             // might make them visible later
-            if (nifNode->flags & Nif::NiNode::Flag_Hidden)
+            if (nifNode->isHidden())
             {
                 bool hasVisController = false;
                 for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
@@ -675,7 +673,7 @@ namespace NifOsg
                 node->setNodeMask(Loader::getHiddenNodeMask());
             }
 
-            if (nifNode->recType == Nif::RC_NiCollisionSwitch && !(nifNode->flags & Nif::NiNode::Flag_ActiveCollision))
+            if (nifNode->recType == Nif::RC_NiCollisionSwitch && !nifNode->collisionActive())
                 node->setNodeMask(Loader::getIntersectionDisabledNodeMask());
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
@@ -786,7 +784,7 @@ namespace NifOsg
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                if (!ctrl->isActive())
                     continue;
                 if (ctrl->recType == Nif::RC_NiUVController)
                 {
@@ -813,7 +811,7 @@ namespace NifOsg
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                if (!ctrl->isActive())
                     continue;
                 if (ctrl->recType == Nif::RC_NiKeyframeController)
                 {
@@ -874,7 +872,7 @@ namespace NifOsg
         {
             for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                if (!ctrl->isActive())
                     continue;
                 if (ctrl->recType == Nif::RC_NiAlphaController)
                 {
@@ -914,7 +912,7 @@ namespace NifOsg
         {
             for (Nif::ControllerPtr ctrl = texProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                if (!ctrl->isActive())
                     continue;
                 if (ctrl->recType == Nif::RC_NiFlipController)
                 {
@@ -1063,8 +1061,7 @@ namespace NifOsg
         osg::ref_ptr<Emitter> handleParticleEmitter(const Nif::NiParticleSystemController* partctrl)
         {
             std::vector<int> targets;
-            const bool atVertex = (partctrl->flags & Nif::NiNode::BSPArrayController_AtVertex);
-            if (partctrl->recType == Nif::RC_NiBSPArrayController && !atVertex)
+            if (partctrl->recType == Nif::RC_NiBSPArrayController && !partctrl->emitAtVertex())
             {
                 getAllNiNodes(partctrl->emitter.getPtr(), targets);
             }
@@ -1072,7 +1069,7 @@ namespace NifOsg
             osg::ref_ptr<Emitter> emitter = new Emitter(targets);
 
             osgParticle::ConstantRateCounter* counter = new osgParticle::ConstantRateCounter;
-            if (partctrl->emitFlags & Nif::NiParticleSystemController::NoAutoAdjust)
+            if (partctrl->noAutoAdjust())
                 counter->setNumberOfParticlesPerSecondToCreate(partctrl->emitRate);
             else if (partctrl->lifetime == 0 && partctrl->lifetimeRandom == 0)
                 counter->setNumberOfParticlesPerSecondToCreate(0);
@@ -1089,7 +1086,7 @@ namespace NifOsg
             emitter->setShooter(shooter);
             emitter->setFlags(partctrl->flags);
 
-            if (partctrl->recType == Nif::RC_NiBSPArrayController && atVertex)
+            if (partctrl->recType == Nif::RC_NiBSPArrayController && partctrl->emitAtVertex())
             {
                 emitter->setGeometryEmitterTarget(partctrl->emitter->recIndex);
             }
@@ -1138,7 +1135,7 @@ namespace NifOsg
             const Nif::NiParticleSystemController* partctrl = nullptr;
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                if (!ctrl->isActive())
                     continue;
                 if(ctrl->recType == Nif::RC_NiParticleSystemController || ctrl->recType == Nif::RC_NiBSPArrayController)
                     partctrl = static_cast<Nif::NiParticleSystemController*>(ctrl.getPtr());
@@ -1321,7 +1318,7 @@ namespace NifOsg
             osg::ref_ptr<osg::Drawable> drawable;
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                if (!ctrl->isActive())
                     continue;
                 if(ctrl->recType == Nif::RC_NiGeomMorpherController)
                 {
@@ -1636,11 +1633,8 @@ namespace NifOsg
                         else
                             texture2d = new osg::Texture2D;
 
-                        bool wrapT = tex.clamp & 0x1;
-                        bool wrapS = (tex.clamp >> 1) & 0x1;
-
-                        texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-                        texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        texture2d->setWrap(osg::Texture::WRAP_S, tex.wrapS() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        texture2d->setWrap(osg::Texture::WRAP_T, tex.wrapT() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
 
                         uvSet = tex.uvSet;
                     }
@@ -1909,8 +1903,7 @@ namespace NifOsg
             {
                 const Nif::NiWireframeProperty* wireprop = static_cast<const Nif::NiWireframeProperty*>(property);
                 osg::ref_ptr<osg::PolygonMode> mode = new osg::PolygonMode;
-                mode->setMode(osg::PolygonMode::FRONT_AND_BACK, wireprop->flags == 0 ? osg::PolygonMode::FILL
-                                                                                     : osg::PolygonMode::LINE);
+                mode->setMode(osg::PolygonMode::FRONT_AND_BACK, wireprop->isEnabled() ? osg::PolygonMode::LINE : osg::PolygonMode::FILL);
                 mode = shareAttribute(mode);
                 node->getOrCreateStateSet()->setAttributeAndModes(mode, osg::StateAttribute::ON);
                 break;
@@ -1919,12 +1912,9 @@ namespace NifOsg
             {
                 const Nif::NiZBufferProperty* zprop = static_cast<const Nif::NiZBufferProperty*>(property);
                 osg::StateSet* stateset = node->getOrCreateStateSet();
-                // Depth test flag
-                stateset->setMode(GL_DEPTH_TEST, zprop->flags&1 ? osg::StateAttribute::ON
-                                                                : osg::StateAttribute::OFF);
+                stateset->setMode(GL_DEPTH_TEST, zprop->depthTest() ? osg::StateAttribute::ON : osg::StateAttribute::OFF);
                 osg::ref_ptr<osg::Depth> depth = new osg::Depth;
-                // Depth write flag
-                depth->setWriteMask((zprop->flags>>1)&1);
+                depth->setWriteMask(zprop->depthWrite());
                 // Morrowind ignores depth test function, unless a NiStencilProperty is present, in which case it uses a fixed depth function of GL_ALWAYS.
                 if (hasStencilProperty)
                     depth->setFunction(osg::Depth::ALWAYS);
@@ -1988,10 +1978,8 @@ namespace NifOsg
                     texture2d->setName("diffuseMap");
                     if (image)
                         texture2d->setTextureSize(image->s(), image->t());
-                    bool wrapT = texprop->clamp & 0x1;
-                    bool wrapS = (texprop->clamp >> 1) & 0x1;
-                    texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-                    texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                    texture2d->setWrap(osg::Texture::WRAP_S, texprop->wrapS() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                    texture2d->setWrap(osg::Texture::WRAP_T, texprop->wrapT() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
                     const unsigned int texUnit = 0;
                     const unsigned int uvSet = 0;
                     stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
@@ -2090,7 +2078,7 @@ namespace NifOsg
                     // Specular property can turn specular lighting off.
                     // FIXME: NiMaterialColorController doesn't care about this.
                     auto specprop = static_cast<const Nif::NiSpecularProperty*>(property);
-                    specEnabled = specprop->flags & 1;
+                    specEnabled = specprop->isEnabled();
                     break;
                 }
                 case Nif::RC_NiMaterialProperty:
@@ -2138,10 +2126,10 @@ namespace NifOsg
                 case Nif::RC_NiAlphaProperty:
                 {
                     const Nif::NiAlphaProperty* alphaprop = static_cast<const Nif::NiAlphaProperty*>(property);
-                    if (alphaprop->flags&1)
+                    if (alphaprop->useAlphaBlending())
                     {
-                        osg::ref_ptr<osg::BlendFunc> blendFunc (new osg::BlendFunc(getBlendMode((alphaprop->flags>>1)&0xf),
-                                                                                   getBlendMode((alphaprop->flags>>5)&0xf)));
+                        osg::ref_ptr<osg::BlendFunc> blendFunc (new osg::BlendFunc(getBlendMode(alphaprop->sourceBlendMode()),
+                                                                                   getBlendMode(alphaprop->destinationBlendMode())));
                         // on AMD hardware, alpha still seems to be stored with an RGBA framebuffer with OpenGL.
                         // This might be mandated by the OpenGL 2.1 specification section 2.14.9, or might be a bug.
                         // Either way, D3D8.1 doesn't do that, so adapt the destination factor.
@@ -2150,8 +2138,7 @@ namespace NifOsg
                         blendFunc = shareAttribute(blendFunc);
                         node->getOrCreateStateSet()->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
 
-                        bool noSort = (alphaprop->flags>>13)&1;
-                        if (!noSort)
+                        if (!alphaprop->noSorter())
                         {
                             hasSortAlpha = true;
                             if (!mPushedSorter)
@@ -2172,9 +2159,9 @@ namespace NifOsg
                             blendFuncStateSet->setRenderBinToInherit();
                     }
 
-                    if((alphaprop->flags>>9)&1)
+                    if (alphaprop->useAlphaTesting())
                     {
-                        osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(getTestMode((alphaprop->flags>>10)&0x7), alphaprop->data.threshold/255.f));
+                        osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(getTestMode(alphaprop->alphaTestMode()), alphaprop->data.threshold/255.f));
                         alphaFunc = shareAttribute(alphaFunc);
                         node->getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
                     }

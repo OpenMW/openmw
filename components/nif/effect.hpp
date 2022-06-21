@@ -96,6 +96,9 @@ struct NiTextureEffect : NiDynamicEffect
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
+
+    bool wrapT() const { return clamp & 1; }
+    bool wrapS() const { return (clamp >> 1) & 1; }
 };
 
 } // Namespace

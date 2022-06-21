@@ -200,13 +200,7 @@ namespace NifOsg
         float mPhase;
         float mStartTime;
         float mStopTime;
-        enum ExtrapolationMode
-        {
-            Cycle = 0,
-            Reverse = 1,
-            Constant = 2
-        };
-        ExtrapolationMode mExtrapolationMode;
+        Nif::Controller::ExtrapolationMode mExtrapolationMode;
 
     public:
         ControllerFunction(const Nif::Controller *ctrl);
