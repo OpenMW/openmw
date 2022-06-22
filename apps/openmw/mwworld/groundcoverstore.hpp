@@ -20,7 +20,10 @@ namespace MWWorld
             std::map<std::pair<int, int>, std::vector<ESM::ESM_Context>> mCellContexts;
 
         public:
-            void init(const Store<ESM::Static>& statics, const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder);
+            void init(const Store<ESM::Static>& statics, const Files::Collections& fileCollections,
+                const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder,
+                Loading::Listener* listener);
+
             std::string getGroundcoverModel(const std::string& id) const;
             void initCell(ESM::Cell& cell, int cellX, int cellY) const;
     };

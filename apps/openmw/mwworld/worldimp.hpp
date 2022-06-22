@@ -171,7 +171,9 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content,
                 ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener);
 
-            void loadGroundcoverFiles(const Files::Collections& fileCollections, const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder);
+            void loadGroundcoverFiles(const Files::Collections& fileCollections,
+                const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder,
+                Loading::Listener* listener);
 
             float feetToGameUnits(float feet);
             float getActivationDistancePlusTelekinesis();
