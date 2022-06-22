@@ -11,8 +11,8 @@ namespace DetourNavigator
     namespace Tests
     {
         template <class T, class Random>
-        inline auto generateValue(T& value, Random& random)
-            -> std::enable_if_t<sizeof(T) >= 2>
+            requires (sizeof(T) >= 2)
+        inline void generateValue(T& value, Random& random)
         {
             using Distribution = std::conditional_t<
                 std::is_floating_point_v<T>,
@@ -24,8 +24,8 @@ namespace DetourNavigator
         }
 
         template <class T, class Random>
-        inline auto generateValue(T& value, Random& random)
-            -> std::enable_if_t<sizeof(T) == 1>
+            requires (sizeof(T) == 1)
+        inline void generateValue(T& value, Random& random)
         {
             unsigned short v;
             generateValue(v, random);

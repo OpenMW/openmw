@@ -18,8 +18,8 @@ namespace NavMeshTool
             using Serialization::Format<mode, Format<mode>>::operator();
 
             template <class Visitor, class T>
+                requires std::is_same_v<std::decay_t<T>, Message>
             auto operator()(Visitor&& visitor, T& value) const
-                -> std::enable_if_t<std::is_same_v<std::decay_t<T>, Message>>
             {
                 if constexpr (mode == Serialization::Mode::Write)
                     visitor(*this, messageMagic);
@@ -40,29 +40,29 @@ namespace NavMeshTool
             }
 
             template <class Visitor, class T>
+                requires std::is_same_v<std::decay_t<T>, ExpectedCells>
             auto operator()(Visitor&& visitor, T& value) const
-                -> std::enable_if_t<std::is_same_v<std::decay_t<T>, ExpectedCells>>
             {
                 visitor(*this, value.mCount);
             }
 
             template <class Visitor, class T>
+                requires std::is_same_v<std::decay_t<T>, ProcessedCells>
             auto operator()(Visitor&& visitor, T& value) const
-                -> std::enable_if_t<std::is_same_v<std::decay_t<T>, ProcessedCells>>
             {
                 visitor(*this, value.mCount);
             }
 
             template <class Visitor, class T>
+                requires std::is_same_v<std::decay_t<T>, ExpectedTiles>
             auto operator()(Visitor&& visitor, T& value) const
-                -> std::enable_if_t<std::is_same_v<std::decay_t<T>, ExpectedTiles>>
             {
                 visitor(*this, value.mCount);
             }
 
             template <class Visitor, class T>
+                requires std::is_same_v<std::decay_t<T>, GeneratedTiles>
             auto operator()(Visitor&& visitor, T& value) const
-                -> std::enable_if_t<std::is_same_v<std::decay_t<T>, GeneratedTiles>>
             {
                 visitor(*this, value.mCount);
             }

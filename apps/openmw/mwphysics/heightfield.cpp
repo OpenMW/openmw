@@ -11,8 +11,8 @@
 #include <LinearMath/btTransform.h>
 
 #include <type_traits>
+#include <concepts>
 
-#if BT_BULLET_VERSION < 310
 // Older Bullet versions only support `btScalar` heightfields.
 // Our heightfield data is `float`.
 //
@@ -20,35 +20,32 @@
 // `btScalar` is `double` (`BT_USE_DOUBLE_PRECISION`).
 namespace
 {
-    template <class T>
-    auto makeHeights(const T* heights, int verts)
-        -> std::enable_if_t<std::is_same<btScalar, T>::value, std::vector<btScalar>>
+    template <std::same_as<btScalar> T>
+    std::vector<btScalar> makeHeights(const T* /*heights*/, int /*verts*/)
     {
         return {};
     }
 
     template <class T>
-    auto makeHeights(const T* heights, int verts)
-        -> std::enable_if_t<!std::is_same<btScalar, T>::value, std::vector<btScalar>>
+    std::vector<btScalar> makeHeights(const T* heights, int verts)
+        requires (!std::is_same_v<btScalar, T>)
     {
         return std::vector<btScalar>(heights, heights + static_cast<std::ptrdiff_t>(verts * verts));
     }
 
-    template <class T>
-    auto getHeights(const T* floatHeights, const std::vector<btScalar>&)
-        -> std::enable_if_t<std::is_same<btScalar, T>::value, const btScalar*>
+    template <std::same_as<btScalar> T>
+    const btScalar* getHeights(const T* floatHeights, const std::vector<btScalar>&)
     {
         return floatHeights;
     }
 
     template <class T>
-    auto getHeights(const T*, const std::vector<btScalar>& btScalarHeights)
-        -> std::enable_if_t<!std::is_same<btScalar, T>::value, const btScalar*>
+        requires (!std::is_same_v<btScalar, T>)
+    const btScalar* getHeights(const T*, const std::vector<btScalar>& btScalarHeights)
     {
         return btScalarHeights.data();
     }
 }
-#endif
 
 namespace MWPhysics
 {

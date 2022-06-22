@@ -79,8 +79,8 @@ namespace EsmLoader
         constexpr bool hasId = HasId<T>::value;
 
         template <class T>
+            requires hasId<T>
         auto loadRecord(ESM::ESMReader& reader, Records<T>& records)
-            -> std::enable_if_t<hasId<T>>
         {
             T record;
             bool deleted = false;
@@ -92,8 +92,8 @@ namespace EsmLoader
         }
 
         template <class T>
+            requires (!hasId<T>)
         auto loadRecord(ESM::ESMReader& reader, Records<T>& records)
-            -> std::enable_if_t<!hasId<T>>
         {
             T record;
             bool deleted = false;

@@ -9,6 +9,7 @@
 #include <cassert>
 #include <limits>
 #include <type_traits>
+#include <concepts>
 
 namespace ESM
 {
@@ -126,7 +127,7 @@ struct FixedString
     }
 };
 
-template <std::size_t capacity, class T, typename = std::enable_if_t<std::is_same_v<T, char>>>
+template <std::size_t capacity, std::same_as<char> T>
 inline bool operator==(const FixedString<capacity>& lhs, const T* const& rhs) noexcept
 {
     for (std::size_t i = 0; i < capacity; ++i)

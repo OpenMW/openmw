@@ -6,6 +6,7 @@
 #include <utility>
 #include <type_traits>
 #include <cstdint>
+#include <array>
 
 namespace SerializationTesting
 {
@@ -38,6 +39,7 @@ namespace SerializationTesting
         std::vector<Pod> mPodBuffer;
         std::size_t mCharDataSize = 0;
         std::vector<char> mCharBuffer;
+        std::array<std::uint16_t, 2> mStdArray;
     };
 
     template <Serialization::Mode mode>
@@ -46,16 +48,16 @@ namespace SerializationTesting
         using Serialization::Format<mode, TestFormat<mode>>::operator();
 
         template <class Visitor, class T>
-        auto operator()(Visitor&& visitor, T& value) const
-            -> std::enable_if_t<std::is_same_v<std::decay_t<T>, Pod>>
+            requires std::is_same_v<std::decay_t<T>, Pod>
+        void operator()(Visitor&& visitor, T& value) const
         {
             visitor(*this, value.mInt);
             visitor(*this, value.mDouble);
         }
 
         template <class Visitor, class T>
-        auto operator()(Visitor&& visitor, T& value) const
-            -> std::enable_if_t<std::is_same_v<std::decay_t<T>, Composite>>
+            requires std::is_same_v<std::decay_t<T>, Composite>
+        void operator()(Visitor&& visitor, T& value) const
         {
             visitor(*this, value.mFloatArray);
             visitor(*this, value.mIntVector);
@@ -69,6 +71,7 @@ namespace SerializationTesting
             if constexpr (mode == Serialization::Mode::Read)
                 value.mCharBuffer.resize(value.mCharDataSize);
             visitor(*this, value.mCharBuffer.data(), value.mCharDataSize);
+            visitor(*this, value.mStdArray);
         }
     };
 }

@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 #include <cstdint>
+#include <stdexcept>
 
 namespace Serialization
 {
@@ -17,17 +18,37 @@ namespace Serialization
         Write,
     };
 
-    template <class>
-    struct IsContiguousContainer : std::false_type {};
-
-    template <class ... Args>
-    struct IsContiguousContainer<std::vector<Args ...>> : std::true_type {};
-
-    template <class T, std::size_t n>
-    struct IsContiguousContainer<std::array<T, n>> : std::true_type {};
+    template <class T>
+    concept ContiguousContainer = requires (T v)
+    {
+        std::data(v);
+        std::size(v);
+    };
 
     template <class T>
-    inline constexpr bool isContiguousContainer = IsContiguousContainer<std::decay_t<T>>::value;
+    concept Resizeable = requires (T v)
+    {
+        v.resize(std::size_t{});
+    };
+
+    template <class T, std::size_t size>
+    void resize(std::size_t dataSize, T(&/*value*/)[size])
+    {
+        if (static_cast<std::size_t>(dataSize) > size)
+            throw std::runtime_error("Not enough array size");
+    }
+
+    template <class T, std::size_t size>
+    void resize(std::size_t dataSize, std::array<T, size>& /*value*/)
+    {
+        if (static_cast<std::size_t>(dataSize) > size)
+            throw std::runtime_error("Not enough std::array size");
+    }
+
+    void resize(std::size_t size, Resizeable auto& value)
+    {
+        value.resize(size);
+    }
 
     template <Mode mode, class Derived>
     struct Format
@@ -47,20 +68,19 @@ namespace Serialization
             self()(std::forward<Visitor>(visitor), data, size);
         }
 
-        template <class Visitor, class T>
-        auto operator()(Visitor&& visitor, T&& value) const
-            -> std::enable_if_t<isContiguousContainer<T>>
+        template <class Visitor>
+        void operator()(Visitor&& visitor, ContiguousContainer auto&& value) const
         {
             if constexpr (mode == Mode::Write)
-                visitor(self(), static_cast<std::uint64_t>(value.size()));
+                visitor(self(), static_cast<std::uint64_t>(std::size(value)));
             else
             {
                 static_assert(mode == Mode::Read);
                 std::uint64_t size = 0;
                 visitor(self(), size);
-                value.resize(static_cast<std::size_t>(size));
+                resize(static_cast<std::size_t>(size), value);
             }
-            self()(std::forward<Visitor>(visitor), value.data(), value.size());
+            self()(std::forward<Visitor>(visitor), std::data(value), std::size(value));
         }
 
         const Derived& self() const { return static_cast<const Derived&>(*this); }

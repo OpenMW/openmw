@@ -149,8 +149,8 @@ namespace
         }
 
         template <class Visitor, class T>
-        auto operator()(Visitor&& visitor, T& value) const
-            -> std::enable_if_t<std::is_same_v<std::decay_t<T>, rcPolyMesh>>
+            requires std::is_same_v<std::decay_t<T>, rcPolyMesh>
+        void operator()(Visitor&& visitor, T& value) const
         {
             visitor(*this, value.nverts);
             visitor(*this, value.npolys);
@@ -183,8 +183,8 @@ namespace
         }
 
         template <class Visitor, class T>
-        auto operator()(Visitor&& visitor, T& value) const
-            -> std::enable_if_t<std::is_same_v<std::decay_t<T>, rcPolyMeshDetail>>
+            requires std::is_same_v<std::decay_t<T>, rcPolyMeshDetail>
+        void operator()(Visitor&& visitor, T& value) const
         {
             visitor(*this, value.nmeshes);
             if constexpr (mode == Serialization::Mode::Read)
@@ -204,8 +204,8 @@ namespace
         }
 
         template <class Visitor, class T>
-        auto operator()(Visitor&& visitor, T& value) const
-            -> std::enable_if_t<std::is_same_v<std::decay_t<T>, PreparedNavMeshData>>
+            requires std::is_same_v<std::decay_t<T>, PreparedNavMeshData>
+        void operator()(Visitor&& visitor, T& value) const
         {
             if constexpr (mode == Serialization::Mode::Write)
             {

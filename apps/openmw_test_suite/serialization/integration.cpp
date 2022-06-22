@@ -29,6 +29,7 @@ namespace
             std::string charData = "serialization";
             mComposite.mCharBuffer = {charData.begin(), charData.end()};
             mComposite.mCharDataSize = charData.size();
+            mComposite.mStdArray = {42, 13};
         }
     };
 
@@ -36,12 +37,12 @@ namespace
     {
         SizeAccumulator sizeAccumulator;
         TestFormat<Mode::Write>{}(sizeAccumulator, mComposite);
-        EXPECT_EQ(sizeAccumulator.value(), 143);
+        EXPECT_EQ(sizeAccumulator.value(), 155);
     }
 
     TEST_F(DetourNavigatorSerializationIntegrationTest, binaryReaderShouldDeserializeDataWrittenByBinaryWriter)
     {
-        std::vector<std::byte> data(143);
+        std::vector<std::byte> data(155);
         TestFormat<Mode::Write>{}(BinaryWriter(data.data(), data.data() + data.size()), mComposite);
         Composite result;
         TestFormat<Mode::Read>{}(BinaryReader(data.data(), data.data() + data.size()), result);
@@ -52,5 +53,6 @@ namespace
         EXPECT_EQ(result.mPodBuffer, mComposite.mPodBuffer);
         EXPECT_EQ(result.mCharDataSize, mComposite.mCharDataSize);
         EXPECT_EQ(result.mCharBuffer, mComposite.mCharBuffer);
+        EXPECT_EQ(result.mStdArray, mComposite.mStdArray);
     }
 }
