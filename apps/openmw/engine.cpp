@@ -912,6 +912,15 @@ public:
             mThread = std::thread([this]{ threadBody(); });
     };
 
+    ~LuaWorker()
+    {
+        if (mThread && mThread->joinable())
+        {
+            Log(Debug::Error) << "Unexpected destruction of LuaWorker; likely there is an unhandled exception in the main thread.";
+            join();
+        }
+    }
+
     void allowUpdate()
     {
         if (!mThread)
