@@ -52,6 +52,9 @@ struct NiTexturingProperty : public Property
 
         void read(NIFStream *nif);
         void post(NIFFile *nif);
+
+        bool wrapT() const { return clamp & 1; }
+        bool wrapS() const { return (clamp >> 1) & 1; }
     };
 
     /* Apply mode:
@@ -140,6 +143,9 @@ struct BSShaderLightingProperty : public BSShaderProperty
 {
     unsigned int clamp{0u};
     void read(NIFStream *nif) override;
+
+    bool wrapT() const { return clamp & 1; }
+    bool wrapS() const { return (clamp >> 1) & 1; }
 };
 
 struct BSShaderPPLightingProperty : public BSShaderLightingProperty
@@ -230,6 +236,10 @@ struct NiZBufferProperty : public Property
         if (nif->getVersion() >= NIFStream::generateVersion(4,1,0,12) && nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
             testFunction = nif->getUInt();
     }
+
+    bool depthTest() const { return flags & 1; }
+
+    bool depthWrite() const { return (flags >> 1) & 1; }
 };
 
 struct NiSpecularProperty : public Property
@@ -240,6 +250,8 @@ struct NiSpecularProperty : public Property
         Property::read(nif);
         flags = nif->getUShort();
     }
+
+    bool isEnabled() const { return flags & 1; }
 };
 
 struct NiWireframeProperty : public Property
@@ -250,6 +262,8 @@ struct NiWireframeProperty : public Property
         Property::read(nif);
         flags = nif->getUShort();
     }
+
+    bool isEnabled() const { return flags & 1; }
 };
 
 // The rest are all struct-based
@@ -296,16 +310,7 @@ struct S_VertexColorProperty
 struct S_AlphaProperty
 {
     /*
-        In NiAlphaProperty, the flags have the following meaning:
-
-        Bit 0 : alpha blending enable
-        Bits 1-4 : source blend mode
-        Bits 5-8 : destination blend mode
-        Bit 9 : alpha test enable
-        Bit 10-12 : alpha test mode
-        Bit 13 : no sorter flag ( disables triangle sorting )
-
-        blend modes (glBlendFunc):
+        NiAlphaProperty blend modes (glBlendFunc):
         0000 GL_ONE
         0001 GL_ZERO
         0010 GL_SRC_COLOR
@@ -384,7 +389,17 @@ struct S_StencilProperty
     void read(NIFStream *nif);
 };
 
-struct NiAlphaProperty : public StructPropT<S_AlphaProperty> { };
+struct NiAlphaProperty : public StructPropT<S_AlphaProperty>
+{
+    bool useAlphaBlending() const { return flags & 1; }
+    int sourceBlendMode() const { return (flags >> 1) & 0xF; }
+    int destinationBlendMode() const { return (flags >> 5) & 0xF; }
+    bool noSorter() const { return (flags >> 13) & 1; }
+
+    bool useAlphaTesting() const { return (flags >> 9) & 1; }
+    int alphaTestMode() const { return (flags >> 10) & 0x7; }
+};
+
 struct NiVertexColorProperty : public StructPropT<S_VertexColorProperty> { };
 struct NiStencilProperty : public Property
 {

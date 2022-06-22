@@ -33,6 +33,18 @@ struct Extra : public Record
 
 struct Controller : public Record
 {
+    enum Flags {
+        Flag_Active = 0x8
+    };
+
+    enum ExtrapolationMode
+    {
+        Cycle = 0,
+        Reverse = 2,
+        Constant = 4,
+        Mask = 6
+    };
+
     ControllerPtr next;
     int flags;
     float frequency, phase;
@@ -41,6 +53,9 @@ struct Controller : public Record
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
+
+    bool isActive() const { return flags & Flag_Active; }
+    ExtrapolationMode extrapolationMode() const { return static_cast<ExtrapolationMode>(flags & Mask); }
 };
 
 /// Has name, extra-data and controller
