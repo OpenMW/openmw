@@ -880,12 +880,10 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     {
         /* Don't accumulate with non-actors. */
         mAnimation->setAccumulation(osg::Vec3f(0.f, 0.f, 0.f));
-
-        mIdleState = CharState_Idle;
     }
 
-    // Do not update animation status for dead actors
-    if(mDeathState == CharState_None && (!cls.isActor() || !cls.getCreatureStats(mPtr).isDead()))
+    // Update animation status for living actors
+    if (mDeathState == CharState_None && cls.isActor() && !cls.getCreatureStats(mPtr).isDead())
         refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
 
     mAnimation->runAnimation(0.f);
