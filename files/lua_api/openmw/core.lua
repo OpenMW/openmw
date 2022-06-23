@@ -182,7 +182,8 @@
 -- @type Cell
 -- @field #string name Name of the cell (can be empty string).
 -- @field #string region Region of the cell.
--- @field #boolean isExterior Is it exterior or interior.
+-- @field #boolean isExterior Whether the cell is an exterior.
+-- @field #boolean isQuasiExterior Whether the cell is a quasi exterior (like interior but with the sky and the wheather).
 -- @field #number gridX Index of the cell by X (only for exteriors).
 -- @field #number gridY Index of the cell by Y (only for exteriors).
 -- @field #boolean hasWater True if the cell contains water.

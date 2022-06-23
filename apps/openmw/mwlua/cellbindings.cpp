@@ -37,8 +37,12 @@ namespace MWLua
         cellT["region"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->mRegion; });
         cellT["gridX"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridX(); });
         cellT["gridY"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridY(); });
-        cellT["isExterior"] = sol::readonly_property([](const CellT& c) { return c.mStore->isExterior(); });
         cellT["hasWater"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->hasWater(); });
+        cellT["isExterior"] = sol::readonly_property([](const CellT& c) { return c.mStore->isExterior(); });
+        cellT["isQuasiExterior"] = sol::readonly_property([](const CellT& c)
+        {
+            return c.mStore->getCell()->mData.mFlags & ESM::Cell::QuasiEx;
+        });
 
         cellT["isInSameSpace"] = [](const CellT& c, const ObjectT& obj)
         {
