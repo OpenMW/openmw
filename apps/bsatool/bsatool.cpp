@@ -19,9 +19,9 @@ struct Arguments
 {
     std::string mode;
     std::filesystem::path filename;
-    std::string extractfile;
-    std::string addfile;
-    std::string outdir;
+    std::filesystem::path extractfile;
+    std::filesystem::path addfile;
+    std::filesystem::path outdir;
 
     bool longformat;
     bool fullpath;
@@ -115,10 +115,10 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     }
     auto inputFiles = variables["input-file"].as< std::vector<Files::MaybeQuotedPath> >();
 
-    info.filename = inputFiles[0];
+    info.filename = inputFiles[0].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
     // Default output to the working directory
-    info.outdir = ".";
+    info.outdir = std::filesystem::current_path();
 
     if (info.mode == "extract")
     {
@@ -129,9 +129,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
             return false;
         }
         if (inputFiles.size() > 1)
-            info.extractfile = inputFiles[1];
+            info.extractfile = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
         if (inputFiles.size() > 2)
-            info.outdir = inputFiles[2];
+            info.outdir = inputFiles[2].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     }
     else if (info.mode == "add")
     {
@@ -142,10 +142,10 @@ bool parseOptions (int argc, char** argv, Arguments &info)
             return false;
         }
         if (inputFiles.size() > 1)
-            info.addfile = inputFiles[1];
+            info.addfile = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     }
     else if (inputFiles.size() > 1)
-        info.outdir = inputFiles[1];
+        info.outdir = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
     info.longformat = variables.count("long") != 0;
     info.fullpath = variables.count("full-path") != 0;
@@ -179,10 +179,10 @@ int list(std::unique_ptr<File>& bsa, Arguments& info)
 template<typename File>
 int extract(std::unique_ptr<File>& bsa, Arguments& info)
 {
-    std::string archivePath = info.extractfile;
+    std::string archivePath = info.extractfile.string(); //TODO(Project579): This will probably break in windows with unicode paths
     Misc::StringUtils::replaceAll(archivePath, "/", "\\");
 
-    std::string extractPath = info.extractfile;
+    std::string extractPath = info.extractfile.string(); //TODO(Project579): This will probably break in windows with unicode paths
     Misc::StringUtils::replaceAll(extractPath, "\\", "/");
 
     Files::IStreamPtr stream;
@@ -204,13 +204,12 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
 
     // Get the target path (the path the file will be extracted to)
     std::filesystem::path relPath (extractPath);
-    std::filesystem::path outdir (info.outdir);
 
     std::filesystem::path target;
     if (info.fullpath)
-        target = outdir / relPath;
+        target = info.outdir / relPath;
     else
-        target = outdir / relPath.filename();
+        target = info.outdir / relPath.filename();
 
     // Create the directory hierarchy
     std::filesystem::create_directories(target.parent_path());
@@ -225,7 +224,7 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     std::ofstream out(target, std::ios::binary);
 
     // Write the file to disk
-    std::cout << "Extracting " << info.extractfile << " to " << target << std::endl;
+    std::cout << "Extracting " << info.extractfile << " to " << target << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
 
     out << stream->rdbuf();
     out.close();
@@ -242,7 +241,7 @@ int extractAll(std::unique_ptr<File>& bsa, Arguments& info)
         Misc::StringUtils::replaceAll(extractPath, "\\", "/");
 
         // Get the target path (the path the file will be extracted to)
-        std::filesystem::path target (info.outdir);
+        auto target = info.outdir;
         target /= extractPath;
 
         // Create the directory hierarchy
@@ -272,7 +271,7 @@ template<typename File>
 int add(std::unique_ptr<File>& bsa, Arguments& info)
 {
     std::fstream stream(info.addfile, std::ios_base::binary | std::ios_base::out | std::ios_base::in);
-    bsa->addFile(info.addfile, stream);
+    bsa->addFile(info.addfile.string(), stream); //TODO(Project579): This will probably break in windows with unicode paths
 
     return 0;
 }

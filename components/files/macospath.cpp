@@ -6,6 +6,7 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <filesystem>
+#include <fstream>
 
 #include <components/misc/strings/lower.hpp>
 
@@ -90,7 +91,7 @@ std::filesystem::path MacOsPath::getInstallPath() const
 
         if (std::filesystem::is_regular_file(wineDefaultRegistry))
         {
-            std::filesystem::ifstream file(wineDefaultRegistry);
+            std::ifstream file(wineDefaultRegistry);
             bool isRegEntry = false;
             std::string line;
             std::string mwpath;

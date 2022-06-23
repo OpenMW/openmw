@@ -74,7 +74,7 @@ struct ContentFileTest : public ::testing::Test
             dataDirs = asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>());
         }
 
-        Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
+        Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>().u8string());
         if (!local.empty())
             dataLocal.push_back(local);
 

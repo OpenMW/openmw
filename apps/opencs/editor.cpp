@@ -121,7 +121,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     mDocumentManager.setEncoding(ToUTF8::calculateEncoding(mEncodingName));
     mFileDialog.setEncoding (QString::fromUtf8(mEncodingName.c_str()));
 
-    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::MaybeQuotedPath>());
+    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
@@ -134,7 +134,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         dataDirs = asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>());
     }
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     if (!local.empty())
     {
         std::filesystem::create_directories(local);
