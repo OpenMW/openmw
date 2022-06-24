@@ -41,7 +41,7 @@ namespace MWLua
         cellT["isExterior"] = sol::readonly_property([](const CellT& c) { return c.mStore->isExterior(); });
         cellT["isQuasiExterior"] = sol::readonly_property([](const CellT& c)
         {
-            return c.mStore->getCell()->mData.mFlags & ESM::Cell::QuasiEx;
+            return (c.mStore->getCell()->mData.mFlags & ESM::Cell::QuasiEx) != 0;
         });
 
         cellT["isInSameSpace"] = [](const CellT& c, const ObjectT& obj)
