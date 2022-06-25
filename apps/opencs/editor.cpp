@@ -5,6 +5,8 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
+#include <boost/program_options/options_description.hpp>
+
 #include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>

@@ -5,6 +5,9 @@
 #include <components/fallback/validate.hpp>
 
 #include <boost/filesystem/fstream.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/options_description.hpp>
+
 /**
  * \namespace Files
  */

@@ -1,5 +1,8 @@
 #include "validate.hpp"
 
+#include <boost/any.hpp>
+#include <boost/program_options/errors.hpp>
+
 void Fallback::validate(boost::any& v, std::vector<std::string> const& tokens, FallbackMap*, int)
 {
     if (v.empty())
