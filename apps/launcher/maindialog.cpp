@@ -10,6 +10,9 @@
 #include <QCloseEvent>
 #include <QTextCodec>
 
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+
 #include "playpage.hpp"
 #include "graphicspage.hpp"
 #include "datafilespage.hpp"

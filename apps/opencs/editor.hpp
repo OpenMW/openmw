@@ -3,6 +3,7 @@
 
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/program_options/variables_map.hpp>
 
 #include <QObject>
 #include <QString>

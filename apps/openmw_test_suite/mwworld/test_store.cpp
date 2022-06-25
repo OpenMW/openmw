@@ -2,6 +2,9 @@
 
 #include <fstream>
 
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+
 #include <components/files/configurationmanager.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>

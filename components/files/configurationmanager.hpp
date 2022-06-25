@@ -5,10 +5,14 @@
 #include <optional>
 #include <stack>
 
-#include <boost/program_options.hpp>
-
 #include <components/files/fixedpath.hpp>
 #include <components/files/collections.hpp>
+
+namespace boost::program_options
+{
+    class options_description;
+    class variables_map;
+}
 
 /**
  * \namespace Files
