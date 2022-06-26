@@ -7,7 +7,13 @@
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/customdata.hpp"
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/manualref.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWClass
 {

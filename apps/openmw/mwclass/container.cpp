@@ -27,8 +27,8 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
-#include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/inventory.hpp"
 
 namespace MWClass
 {

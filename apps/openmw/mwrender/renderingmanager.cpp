@@ -52,14 +52,18 @@
 
 #include <components/detournavigator/navigator.hpp>
 
-#include "../mwbase/windowmanager.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/groundcoverstore.hpp"
+
 #include "../mwgui/loadingscreen.hpp"
 #include "../mwgui/postprocessorhud.hpp"
+
 #include "../mwmechanics/actorutil.hpp"
+
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "sky.hpp"
 #include "effectmanager.hpp"

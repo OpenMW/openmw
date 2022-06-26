@@ -8,6 +8,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 

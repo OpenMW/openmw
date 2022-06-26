@@ -5,9 +5,9 @@
 #include <vector>
 #include <set>
 #include <cstdint>
+#include <map>
 
-#include "../mwmechanics/actorutil.hpp"
-// For MWMechanics::GreetingState
+#include "../mwmechanics/greetingstate.hpp"
 
 #include "../mwworld/ptr.hpp"
 

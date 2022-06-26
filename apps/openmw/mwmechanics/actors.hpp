@@ -7,7 +7,6 @@
 #include <list>
 #include <map>
 
-#include "actorutil.hpp"
 #include "actor.hpp"
 
 namespace ESM

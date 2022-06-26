@@ -9,10 +9,14 @@
 #include <components/misc/barrier.hpp>
 #include "components/misc/convert.hpp"
 #include "components/settings/settings.hpp"
+
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwrender/bulletdebugdraw.hpp"
 #include "../mwworld/class.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "actor.hpp"
 #include "contacttestwrapper.h"

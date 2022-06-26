@@ -12,6 +12,12 @@
 #include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
+#include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/combat.hpp"
+#include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturecustomdataresetter.hpp"
+#include "../mwmechanics/aisetting.hpp"
+#include "../mwmechanics/inventory.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -27,17 +33,13 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/localscripts.hpp"
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
 #include "../mwrender/objects.hpp"
 
 #include "../mwgui/tooltips.hpp"
-
-#include "../mwworld/inventorystore.hpp"
-
-#include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/combat.hpp"
-#include "../mwmechanics/actorutil.hpp"
 
 namespace
 {
@@ -117,7 +119,7 @@ namespace MWClass
         {
             auto tempData = std::make_unique<CreatureCustomData>();
             CreatureCustomData* data = tempData.get();
-            MWMechanics::CreatureCustomDataResetter resetter(ptr);
+            MWMechanics::CreatureCustomDataResetter resetter {ptr};
             ptr.getRefData().setCustomData(std::move(tempData));
 
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
