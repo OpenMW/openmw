@@ -5,14 +5,33 @@
 #include <string>
 #include <map>
 
-#include <components/esm3/esmreader.hpp>
-#include <components/esmloader/esmdata.hpp>
-#include <components/files/collections.hpp>
+namespace ESM
+{
+    struct ESM_Context;
+    struct Static;
+    struct Cell;
+}
 
-#include "esmstore.hpp"
+namespace Loading
+{
+    class Listener;
+}
+
+namespace Files
+{
+    class Collections;
+}
+
+namespace ToUTF8
+{
+    class Utf8Encoder;
+}
 
 namespace MWWorld
 {
+    template <class T>
+    class Store;
+
     class GroundcoverStore
     {
         private:

@@ -13,6 +13,7 @@
 #include <components/terrain/quadtreenode.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/esm3/loadland.hpp>
 
 #include "../mwworld/groundcoverstore.hpp"
 

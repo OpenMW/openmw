@@ -1,11 +1,14 @@
 #include "groundcoverstore.hpp"
 
 #include <components/esmloader/load.hpp>
+#include <components/esmloader/esmdata.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/esm3/readerscache.hpp>
 
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/windowmanager.hpp>
+
+#include "store.hpp"
 
 namespace MWWorld
 {
