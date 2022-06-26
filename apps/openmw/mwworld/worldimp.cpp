@@ -47,6 +47,7 @@
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
 #include "../mwmechanics/summoning.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/npcanimation.hpp"

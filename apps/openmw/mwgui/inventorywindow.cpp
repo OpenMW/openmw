@@ -28,6 +28,7 @@
 #include "../mwworld/actionequip.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"

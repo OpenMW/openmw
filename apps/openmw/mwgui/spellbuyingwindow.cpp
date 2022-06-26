@@ -4,6 +4,8 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
 
+#include <components/misc/stringops.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -11,7 +13,9 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 
 namespace MWGui
 {

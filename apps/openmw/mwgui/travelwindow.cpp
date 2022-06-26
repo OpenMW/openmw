@@ -5,6 +5,7 @@
 #include <MyGUI_Gui.h>
 
 #include <components/settings/settings.hpp>
+#include <components/esm3/loadgmst.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -16,7 +17,10 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/cellutils.hpp"
+#include "../mwworld/store.hpp"
+#include "../mwworld/esmstore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 
 namespace MWGui
 {

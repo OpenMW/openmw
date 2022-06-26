@@ -3,8 +3,11 @@
 
 #include <memory>
 
-#include "actorutil.hpp"
 #include "character.hpp"
+#include "greetingstate.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include <components/misc/timer.hpp>
 

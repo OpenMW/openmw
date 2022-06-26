@@ -5,6 +5,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/inventorystate.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -19,6 +20,7 @@
 #include "class.hpp"
 #include "localscripts.hpp"
 #include "player.hpp"
+#include "esmstore.hpp"
 
 namespace
 {

@@ -14,6 +14,7 @@
 #include <components/misc/stringops.hpp>
 
 #include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadlevlist.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -26,6 +27,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/levelledlist.hpp"

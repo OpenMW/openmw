@@ -12,6 +12,9 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/npcstate.hpp>
 #include <components/settings/settings.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -31,6 +34,9 @@
 #include "../mwmechanics/difficultyscaling.hpp"
 #include "../mwmechanics/weapontype.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturecustomdataresetter.hpp"
+#include "../mwmechanics/inventory.hpp"
+#include "../mwmechanics/aisetting.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -40,6 +46,7 @@
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/localscripts.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -311,7 +318,7 @@ namespace MWClass
             bool recalculate = false;
             auto tempData = std::make_unique<NpcCustomData>();
             NpcCustomData* data = tempData.get();
-            MWMechanics::CreatureCustomDataResetter resetter(ptr);
+            MWMechanics::CreatureCustomDataResetter resetter {ptr};
             ptr.getRefData().setCustomData(std::move(tempData));
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
