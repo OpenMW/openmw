@@ -1,6 +1,5 @@
 #include "tileposition.hpp"
 #include "navmeshtilescache.hpp"
-#include "dtstatus.hpp"
 #include "navmeshtileview.hpp"
 #include "navmeshcacheitem.hpp"
 #include "navmeshdata.hpp"
@@ -8,6 +7,8 @@
 #include <components/misc/guarded.hpp>
 
 #include <DetourNavMesh.h>
+
+#include <ostream>
 
 namespace
 {
@@ -35,6 +36,32 @@ namespace
 
 namespace DetourNavigator
 {
+    std::ostream& operator<<(std::ostream& stream, UpdateNavMeshStatus value)
+    {
+        switch (value)
+        {
+            case UpdateNavMeshStatus::ignored:
+                return stream << "ignore";
+            case UpdateNavMeshStatus::removed:
+                return stream << "removed";
+            case UpdateNavMeshStatus::added:
+                return stream << "add";
+            case UpdateNavMeshStatus::replaced:
+                return stream << "replaced";
+            case UpdateNavMeshStatus::failed:
+                return stream << "failed";
+            case UpdateNavMeshStatus::lost:
+                return stream << "lost";
+            case UpdateNavMeshStatus::cached:
+                return stream << "cached";
+            case UpdateNavMeshStatus::unchanged:
+                return stream << "unchanged";
+            case UpdateNavMeshStatus::restored:
+                return stream << "restored";
+        }
+        return stream << "unknown(" << static_cast<unsigned>(value) << ")";
+    }
+
     const dtMeshTile* getTile(const dtNavMesh& navMesh, const TilePosition& position)
     {
         const int layer = 0;

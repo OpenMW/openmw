@@ -4,13 +4,192 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 
+#include <components/bullethelpers/operators.hpp>
+
 #include <DetourNavMesh.h>
+#include <DetourStatus.h>
+
+#include <osg/io_utils>
 
 #include <filesystem>
 #include <fstream>
+#include <ostream>
+#include <array>
+#include <string_view>
 
 namespace DetourNavigator
 {
+    std::ostream& operator<<(std::ostream& stream, const TileBounds& value)
+    {
+        return stream << "TileBounds {" << value.mMin << ", " << value.mMax << "}";
+    }
+
+    std::ostream& operator<<(std::ostream& stream, Status value)
+    {
+#define OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(name) \
+    case Status::name: return stream << "DetourNavigator::Status::"#name;
+        switch (value)
+        {
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(Success)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(PartialPath)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(NavMeshNotFound)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(StartPolygonNotFound)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(EndPolygonNotFound)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(MoveAlongSurfaceFailed)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(FindPathOverPolygonsFailed)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(GetPolyHeightFailed)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(InitNavMeshQueryFailed)
+        }
+#undef OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE
+        return stream << "DetourNavigator::Error::" << static_cast<int>(value);
+    }
+
+    std::ostream& operator<<(std::ostream& s, const Water& v)
+    {
+        return s << "Water {" << v.mCellSize << ", " << v.mLevel << "}";
+    }
+
+    std::ostream& operator<<(std::ostream& s, const CellWater& v)
+    {
+        return s << "CellWater {" << v.mCellPosition << ", " << v.mWater << "}";
+    }
+
+    std::ostream& operator<<(std::ostream& s, const FlatHeightfield& v)
+    {
+        return s << "FlatHeightfield {" << v.mCellPosition << ", " << v.mCellSize << ", " << v.mHeight << "}";
+    }
+
+    std::ostream& operator<<(std::ostream& s, const Heightfield& v)
+    {
+        s << "Heightfield {.mCellPosition=" << v.mCellPosition
+          << ", .mCellSize=" << v.mCellSize
+          << ", .mLength=" << static_cast<int>(v.mLength)
+          << ", .mMinHeight=" << v.mMinHeight
+          << ", .mMaxHeight=" << v.mMaxHeight
+          << ", .mHeights={";
+        for (float h : v.mHeights)
+            s << h << ", ";
+        s << "}";
+        return s << ", .mOriginalSize=" << v.mOriginalSize << "}";
+    }
+
+    std::ostream& operator<<(std::ostream& s, CollisionShapeType v)
+    {
+        switch (v)
+        {
+            case CollisionShapeType::Aabb: return s << "AgentShapeType::Aabb";
+            case CollisionShapeType::RotatingBox: return s << "AgentShapeType::RotatingBox";
+        }
+        return s << "AgentShapeType::" << static_cast<std::underlying_type_t<CollisionShapeType>>(v);
+    }
+
+    std::ostream& operator<<(std::ostream& s, const AgentBounds& v)
+    {
+        return s << "AgentBounds {" << v.mShapeType << ", " << v.mHalfExtents << "}";
+    }
+
+    namespace
+    {
+        struct StatusString
+        {
+            dtStatus mStatus;
+            std::string_view mString;
+        };
+    }
+
+    static constexpr std::array dtStatuses {
+        StatusString {DT_FAILURE, "DT_FAILURE"},
+        StatusString {DT_SUCCESS, "DT_SUCCESS"},
+        StatusString {DT_IN_PROGRESS, "DT_IN_PROGRESS"},
+        StatusString {DT_WRONG_MAGIC, "DT_WRONG_MAGIC"},
+        StatusString {DT_WRONG_VERSION, "DT_WRONG_VERSION"},
+        StatusString {DT_OUT_OF_MEMORY, "DT_OUT_OF_MEMORY"},
+        StatusString {DT_INVALID_PARAM, "DT_INVALID_PARAM"},
+        StatusString {DT_BUFFER_TOO_SMALL, "DT_BUFFER_TOO_SMALL"},
+        StatusString {DT_OUT_OF_NODES, "DT_OUT_OF_NODES"},
+        StatusString {DT_PARTIAL_RESULT, "DT_PARTIAL_RESULT"},
+    };
+
+    std::ostream& operator<<(std::ostream& stream, const WriteDtStatus& value)
+    {
+        for (const auto& status : dtStatuses)
+            if (value.mStatus & status.mStatus)
+                stream << status.mString;
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const Flag value)
+    {
+        switch (value)
+        {
+            case Flag_none:
+                return stream << "none";
+            case Flag_walk:
+                return stream << "walk";
+            case Flag_swim:
+                return stream << "swim";
+            case Flag_openDoor:
+                return stream << "openDoor";
+            case Flag_usePathgrid:
+                return stream << "usePathgrid";
+        }
+
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const WriteFlags& value)
+    {
+        if (value.mValue == Flag_none)
+        {
+            return stream << Flag_none;
+        }
+        else
+        {
+            bool first = true;
+            for (const auto flag : {Flag_walk, Flag_swim, Flag_openDoor, Flag_usePathgrid})
+            {
+                if (value.mValue & flag)
+                {
+                    if (!first)
+                        stream << " | ";
+                    first = false;
+                    stream << flag;
+                }
+            }
+
+            return stream;
+        }
+    }
+
+    std::ostream& operator<<(std::ostream& stream, AreaType value)
+    {
+        switch (value)
+        {
+            case AreaType_null: return stream << "null";
+            case AreaType_water: return stream << "water";
+            case AreaType_door: return stream << "door";
+            case AreaType_pathgrid: return stream << "pathgrid";
+            case AreaType_ground: return stream << "ground";
+        }
+        return stream << "unknown area type (" << static_cast<std::underlying_type_t<AreaType>>(value) << ")";
+    }
+
+    std::ostream& operator<<(std::ostream& stream, ChangeType value)
+    {
+        switch (value)
+        {
+            case ChangeType::remove:
+                return stream << "ChangeType::remove";
+            case ChangeType::mixed:
+                return stream << "ChangeType::mixed";
+            case ChangeType::add:
+                return stream << "ChangeType::add";
+            case ChangeType::update:
+                return stream << "ChangeType::update";
+        }
+        return stream << "ChangeType::" << static_cast<int>(value);
+    }
+
     void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix,
         const std::string& revision, const RecastSettings& settings)
     {

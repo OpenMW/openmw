@@ -3,7 +3,10 @@
 #include <iterator>
 #include <limits>
 
+#include <osg/io_utils>
+
 #include <components/detournavigator/navigatorutils.hpp>
+#include <components/detournavigator/debug.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/coordinateconverter.hpp>
 #include <components/misc/math.hpp>

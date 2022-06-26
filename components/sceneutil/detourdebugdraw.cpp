@@ -1,16 +1,12 @@
 #include "detourdebugdraw.hpp"
 #include "util.hpp"
 
-#include <components/detournavigator/debug.hpp>
-
 #include <osg/BlendFunc>
 #include <osg/Group>
 #include <osg/LineWidth>
 
 namespace
 {
-    using DetourNavigator::operator<<;
-
     osg::PrimitiveSet::Mode toOsgPrimitiveSetMode(duDebugDrawPrimitives value)
     {
         switch (value)
