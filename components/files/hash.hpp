@@ -3,7 +3,7 @@
 
 #include <array>
 #include <cstdint>
-#include <istream>
+#include <iosfwd>
 #include <string>
 
 namespace Files

@@ -1,5 +1,7 @@
 #include "livecellref.hpp"
 
+#include <sstream>
+
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/objectstate.hpp>
 
@@ -77,4 +79,21 @@ bool MWWorld::LiveCellRefBase::checkStateImp (const ESM::ObjectState& state)
 unsigned int MWWorld::LiveCellRefBase::getType() const
 {
     return mClass->getType();
+}
+
+namespace MWWorld
+{
+    std::string makeDynamicCastErrorMessage(const LiveCellRefBase* value, std::string_view recordType)
+    {
+        std::stringstream message;
+
+        message << "Bad LiveCellRef cast to " << recordType << " from ";
+
+        if (value != nullptr)
+            message << value->getTypeDescription();
+        else
+            message << "an empty object";
+
+        return message.str();
+    }
 }

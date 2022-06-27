@@ -1,7 +1,5 @@
 #include "chunkmanager.hpp"
 
-#include <sstream>
-
 #include <osg/Texture2D>
 #include <osg/Material>
 

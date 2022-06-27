@@ -27,7 +27,7 @@
 #define BSA_MEMORY_STREAM_H
 
 #include <vector>
-#include <iostream>
+#include <istream>
 #include <components/files/memorystream.hpp>
 
 namespace Bsa

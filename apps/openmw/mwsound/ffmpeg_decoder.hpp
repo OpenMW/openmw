@@ -27,7 +27,6 @@ extern "C"
 #include <components/files/constrainedfilestream.hpp>
 
 #include <string>
-#include <istream>
 
 #include "sound_decoder.hpp"
 

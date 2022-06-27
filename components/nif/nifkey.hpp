@@ -5,7 +5,6 @@
 
 #include "nifstream.hpp"
 
-#include <sstream>
 #include <map>
 
 #include "niffile.hpp"
@@ -103,9 +102,7 @@ struct KeyMapT {
         }
         else if (count != 0)
         {
-            std::stringstream error;
-            error << "Unhandled interpolation type: " << mInterpolationType;
-            nif->file->fail(error.str());
+            nif->file->fail("Unhandled interpolation type: " + std::to_string(mInterpolationType));
         }
 
         if (morph && nif->getVersion() > NIFStream::generateVersion(10,1,0,0))

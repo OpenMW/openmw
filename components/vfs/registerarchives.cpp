@@ -1,8 +1,8 @@
 #include "registerarchives.hpp"
 
 #include <set>
-#include <sstream>
 #include <filesystem>
+#include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
 
@@ -33,9 +33,7 @@ namespace VFS
             }
             else
             {
-                std::stringstream message;
-                message << "Archive '" << *archive << "' not found";
-                throw std::runtime_error(message.str());
+                throw std::runtime_error("Archive '" + *archive + "' not found");
             }
         }
 

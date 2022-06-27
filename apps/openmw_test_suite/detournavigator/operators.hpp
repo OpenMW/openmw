@@ -6,9 +6,7 @@
 
 #include <deque>
 #include <iomanip>
-#include <iostream>
 #include <limits>
-#include <sstream>
 
 #include <gtest/gtest.h>
 

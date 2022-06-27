@@ -2,7 +2,6 @@
 #define OPENMW_ESSIMPORT_CONVERTER_H
 
 #include <limits>
-#include <sstream>
 
 #include <osg/Image>
 #include <osg/ref_ptr>
@@ -544,9 +543,7 @@ public:
         }
         else
         {
-            std::stringstream error;
-            error << "Invalid weather ID:" << weatherID << std::endl;
-            throw std::runtime_error(error.str());
+            throw std::runtime_error("Invalid weather ID: " + std::to_string(weatherID));
         }
     }
 

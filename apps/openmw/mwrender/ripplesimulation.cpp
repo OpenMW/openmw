@@ -1,6 +1,7 @@
 #include "ripplesimulation.hpp"
 
 #include <iomanip>
+#include <sstream>
 
 #include <osg/PolygonOffset>
 #include <osg/Texture2D>

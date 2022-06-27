@@ -2,6 +2,9 @@
 
 #include <components/esm/esmcommon.hpp>
 
+#include <istream>
+#include <stdexcept>
+
 namespace ESM
 {
     namespace

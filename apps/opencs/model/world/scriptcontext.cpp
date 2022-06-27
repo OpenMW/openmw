@@ -1,6 +1,7 @@
 #include "scriptcontext.hpp"
 
 #include <algorithm>
+#include <sstream>
 
 #include <components/misc/stringops.hpp>
 
