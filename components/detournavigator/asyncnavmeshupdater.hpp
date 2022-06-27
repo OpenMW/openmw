@@ -24,6 +24,7 @@
 #include <tuple>
 #include <list>
 #include <optional>
+#include <iosfwd>
 
 class dtNavMesh;
 
@@ -72,16 +73,7 @@ namespace DetourNavigator
         MemoryCacheMiss,
     };
 
-    inline std::ostream& operator<<(std::ostream& stream, JobStatus value)
-    {
-        switch (value)
-        {
-            case JobStatus::Done: return stream << "JobStatus::Done";
-            case JobStatus::Fail: return stream << "JobStatus::Fail";
-            case JobStatus::MemoryCacheMiss: return stream << "JobStatus::MemoryCacheMiss";
-        }
-        return stream << "JobStatus::" << static_cast<std::underlying_type_t<JobState>>(value);
-    }
+    std::ostream& operator<<(std::ostream& stream, JobStatus value);
 
     class DbJobQueue
     {

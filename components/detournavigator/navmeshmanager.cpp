@@ -11,6 +11,8 @@
 #include <components/bullethelpers/heightfield.hpp>
 #include <components/misc/convert.hpp>
 
+#include <osg/io_utils>
+
 #include <DetourNavMesh.h>
 
 #include <iterator>

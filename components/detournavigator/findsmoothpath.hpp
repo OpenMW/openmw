@@ -1,12 +1,10 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_FINDSMOOTHPATH_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_FINDSMOOTHPATH_H
 
-#include "dtstatus.hpp"
 #include "exceptions.hpp"
 #include "flags.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
-#include "debug.hpp"
 #include "status.hpp"
 #include "areatype.hpp"
 

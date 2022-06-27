@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <osg/Matrixf>
+
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/esm3/aisequence.hpp>

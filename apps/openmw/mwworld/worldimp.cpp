@@ -6,6 +6,8 @@
 
 #include <MyGUI_TextIterator.h>
 
+#include <LinearMath/btAabbUtil2.h>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm3/esmreader.hpp>
