@@ -2,6 +2,7 @@
 #define OPENMW_MWGUI_LAYOUT_H
 
 #include <string>
+#include <string_view>
 
 #include <MyGUI_Widget.h>
 
@@ -15,9 +16,12 @@ namespace MWGui
   class Layout
   {
   public:
-    Layout(const std::string & _layout, MyGUI::Widget* _parent = nullptr)
-      : mMainWidget(nullptr)
-    { initialise(_layout, _parent); }
+    Layout(std::string_view layout) : mMainWidget(nullptr)
+    {
+      initialise(layout);
+      assert(mMainWidget);
+    }
+
     virtual ~Layout()
     {
         try
@@ -30,10 +34,10 @@ namespace MWGui
         }
     }
 
-    MyGUI::Widget* getWidget(const std::string& _name);
+    MyGUI::Widget* getWidget(std::string_view name);
 
     template <typename T>
-    void getWidget(T * & _widget, const std::string & _name)
+    void getWidget(T * & _widget, std::string_view _name)
     {
         MyGUI::Widget* w = getWidget(_name);
         T* cast = w->castType<T>(false);
@@ -48,8 +52,7 @@ namespace MWGui
     }
 
   private:
-    void initialise(const std::string & _layout,
-                    MyGUI::Widget* _parent = nullptr);
+    void initialise(std::string_view layout);
 
     void shutdown();
 
@@ -58,7 +61,7 @@ namespace MWGui
 
     virtual void setVisible(bool b);
 
-    void setText(const std::string& name, const std::string& caption);
+    void setText(std::string_view name, const std::string& caption);
 
     // NOTE: this assume that mMainWidget is of type Window.
     void setTitle(const std::string& title);

@@ -14,7 +14,7 @@
 
 using namespace MWGui;
 
-WindowBase::WindowBase(const std::string& parLayout)
+WindowBase::WindowBase(std::string_view parLayout)
   : Layout(parLayout)
 {
     mMainWidget->setVisible(false);
@@ -139,12 +139,12 @@ void NoDrop::setAlpha(float alpha)
         mWidget->setAlpha(alpha);
 }
 
-BookWindowBase::BookWindowBase(const std::string& parLayout)
+BookWindowBase::BookWindowBase(std::string_view parLayout)
   : WindowBase(parLayout)
 {
 }
 
-float BookWindowBase::adjustButton (char const * name)
+float BookWindowBase::adjustButton(std::string_view name)
 {
     Gui::ImageButton* button;
     WindowBase::getWidget (button, name);
