@@ -232,6 +232,7 @@ namespace
             camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
             camera->setName("SkyCamera");
             camera->setNodeMask(MWRender::Mask_RenderToTexture);
+            camera->setCullMask(MWRender::Mask_Sky);
             camera->addChild(mEarlyRenderBinRoot);
             SceneUtil::ShadowManager::disableShadowsForStateSet(camera->getOrCreateStateSet());
         }
@@ -283,25 +284,26 @@ namespace MWRender
         if (!mSceneManager->getForceShaders())
             skyroot->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(), osg::StateAttribute::OVERRIDE|osg::StateAttribute::PROTECTED|osg::StateAttribute::ON);
         SceneUtil::ShadowManager::disableShadowsForStateSet(skyroot->getOrCreateStateSet());
-
-        skyroot->setNodeMask(Mask_Sky);
         parentNode->addChild(skyroot);
-
-        mRootNode = skyroot;
 
         mEarlyRenderBinRoot = new osg::Group;
         // render before the world is rendered
         mEarlyRenderBinRoot->getOrCreateStateSet()->setRenderBinDetails(RenderBin_Sky, "RenderBin");
         // Prevent unwanted clipping by water reflection camera's clipping plane
         mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_CLIP_PLANE0, osg::StateAttribute::OFF);
-        mRootNode->addChild(mEarlyRenderBinRoot);
 
         if (enableSkyRTT)
         {
             mSkyRTT = new SkyRTT(Settings::Manager::getVector2("sky rtt resolution", "Fog"), mEarlyRenderBinRoot);
-            mRootNode->addChild(mSkyRTT);
+            skyroot->addChild(mSkyRTT);
+            mRootNode = new osg::Group;
+            skyroot->addChild(mRootNode);
         }
+        else
+            mRootNode = skyroot;
 
+        mRootNode->setNodeMask(Mask_Sky);
+        mRootNode->addChild(mEarlyRenderBinRoot);
         mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
     }
 

@@ -102,6 +102,9 @@ namespace Shader
             float mAlphaRef;
             bool mAlphaBlend;
 
+            bool mBlendFuncOverridden;
+            bool mAdditiveBlending;
+
             bool mNormalHeight; // true if normal map has height info in alpha channel
 
             // -1 == no tangents required
