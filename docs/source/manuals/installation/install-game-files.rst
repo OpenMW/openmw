@@ -80,6 +80,18 @@ Afterwards, you can point OpenMW to the Steam install location at
 ``C:\Program Files\Steam\SteamApps\common\Morrowind\Data Files\``
 and find ``Morrowind.esm`` there.
 
+XBox Game Pass for PC
+---------------------
+
+Default Morrowind Game Pass files are in a restricted WindowsApps folder 
+that OpenMW cannot scan for content files in the usual way.
+However, in the Xbox App for PC, inside the Manage game settings
+(three-dots menu-> Manage), there is an option to enable advanced
+management options (or similar phrasing) for Morrowind. Choose this
+option and the app will prompt you to move the Morrowind files to a
+new folder. Once done you can find ``Morrowind.esm`` in the folder you 
+chose.
+
 macOS
 -----
 
