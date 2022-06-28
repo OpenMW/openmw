@@ -39,7 +39,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 #include "camera.hpp"
 #include "rotatecontroller.hpp"
@@ -51,7 +50,7 @@
 namespace
 {
 
-std::string getVampireHead(const std::string& race, bool female)
+std::string getVampireHead(const std::string& race, bool female, const VFS::Manager& vfs)
 {
     static std::map <std::pair<std::string,int>, const ESM::BodyPart* > sVampireMapping;
 
@@ -81,7 +80,7 @@ std::string getVampireHead(const std::string& race, bool female)
     const ESM::BodyPart* bodyPart = sVampireMapping[thisCombination];
     if (!bodyPart)
         return std::string();
-    return MWBase::Environment::get().getWindowManager()->correctMeshPath(bodyPart->mModel);
+    return Misc::ResourceHelpers::correctMeshPath(bodyPart->mModel, &vfs);
 }
 
 }
@@ -470,7 +469,7 @@ void NpcAnimation::updateNpcBase()
     {
         const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(headName);
         if (bp)
-            mHeadModel = MWBase::Environment::get().getWindowManager()->correctMeshPath(bp->mModel);
+            mHeadModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel, mResourceSystem->getVFS());
         else
             Log(Debug::Warning) << "Warning: Failed to load body part '" << headName << "'";
     }
@@ -479,12 +478,12 @@ void NpcAnimation::updateNpcBase()
     {
         const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(hairName);
         if (bp)
-            mHairModel = MWBase::Environment::get().getWindowManager()->correctMeshPath(bp->mModel);
+            mHairModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel, mResourceSystem->getVFS());
         else
             Log(Debug::Warning) << "Warning: Failed to load body part '" << hairName << "'";
     }
 
-    const std::string& vampireHead = getVampireHead(mNpc->mRace, isFemale);
+    const std::string vampireHead = getVampireHead(mNpc->mRace, isFemale, *mResourceSystem->getVFS());
     if (!isWerewolf && isVampire && !vampireHead.empty())
         mHeadModel = vampireHead;
 
@@ -497,7 +496,7 @@ void NpcAnimation::updateNpcBase()
     std::string smodel = defaultSkeleton;
     if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
         smodel = Misc::ResourceHelpers::correctActorModelPath(
-            MWBase::Environment::get().getWindowManager()->correctMeshPath(mNpc->mModel), mResourceSystem->getVFS());
+            Misc::ResourceHelpers::correctMeshPath(mNpc->mModel, mResourceSystem->getVFS()), mResourceSystem->getVFS());
 
     setObjectRoot(smodel, true, true, false);
 
@@ -657,8 +656,9 @@ void NpcAnimation::updateParts()
         if(store != inv.end() && (part=*store).getType() == ESM::Light::sRecordId)
         {
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
+            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
             addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                MWBase::Environment::get().getWindowManager()->correctMeshPath(light->mModel), false, nullptr, true);
+                Misc::ResourceHelpers::correctMeshPath(light->mModel, vfs), false, nullptr, true);
             if (mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), light);
         }
@@ -677,8 +677,11 @@ void NpcAnimation::updateParts()
         {
             const ESM::BodyPart* bodypart = parts[part];
             if(bodypart)
-                addOrReplaceIndividualPart((ESM::PartReferenceType)part, -1, 1,
-                    MWBase::Environment::get().getWindowManager()->correctMeshPath(bodypart->mModel));
+            {
+                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+                addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part), -1, 1,
+                    Misc::ResourceHelpers::correctMeshPath(bodypart->mModel, vfs));
+            }
         }
     }
 
@@ -908,8 +911,11 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
         }
 
         if(bodypart)
-            addOrReplaceIndividualPart((ESM::PartReferenceType)part.mPart, group, priority,
-                MWBase::Environment::get().getWindowManager()->correctMeshPath(bodypart->mModel), enchantedGlow, glowColor);
+        {
+            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+            addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part.mPart), group, priority,
+                Misc::ResourceHelpers::correctMeshPath(bodypart->mModel, vfs), enchantedGlow, glowColor);
+        }
         else
             reserveIndividualPart((ESM::PartReferenceType)part.mPart, group, priority);
     }

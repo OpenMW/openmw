@@ -20,6 +20,8 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     Lockpick::Lockpick()
@@ -36,13 +38,7 @@ namespace MWClass
 
     std::string Lockpick::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Lockpick>(ptr);
     }
 
     std::string Lockpick::getName (const MWWorld::ConstPtr& ptr) const

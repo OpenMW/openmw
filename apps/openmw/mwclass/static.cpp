@@ -11,8 +11,7 @@
 #include "../mwrender/renderinginterface.hpp"
 #include "../mwrender/vismask.hpp"
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
+#include "classmodel.hpp"
 
 namespace MWClass
 {
@@ -42,13 +41,7 @@ namespace MWClass
 
     std::string Static::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Static>(ptr);
     }
 
     std::string Static::getName (const MWWorld::ConstPtr& ptr) const

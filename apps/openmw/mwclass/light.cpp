@@ -23,6 +23,8 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     Light::Light()
@@ -67,13 +69,7 @@ namespace MWClass
 
     std::string Light::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Light>(ptr);
     }
 
     std::string Light::getName (const MWWorld::ConstPtr& ptr) const

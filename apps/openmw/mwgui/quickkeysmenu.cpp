@@ -8,6 +8,8 @@
 
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/quickkeys.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -300,7 +302,7 @@ namespace MWGui
         std::string path = effect->mIcon;
         int slashPos = path.rfind('\\');
         path.insert(slashPos+1, "b_");
-        path = MWBase::Environment::get().getWindowManager()->correctIconPath(path);
+        path = Misc::ResourceHelpers::correctIconPath(path, MWBase::Environment::get().getResourceSystem()->getVFS());
 
         float scale = 1.f;
         MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture("textures\\menu_icon_select_magic.dds");

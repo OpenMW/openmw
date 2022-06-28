@@ -32,9 +32,10 @@
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/world.hpp"
-#include "apps/openmw/mwbase/windowmanager.hpp"
 
 #include "vismask.hpp"
+
+#include <condition_variable>
 
 namespace MWRender
 {
@@ -532,7 +533,7 @@ namespace MWRender
             int type = store.findStatic(ref.mRefID);
             std::string model = getModel(type, ref.mRefID, store);
             if (model.empty()) continue;
-            model = MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
+            model = Misc::ResourceHelpers::correctMeshPath(model, mSceneManager->getVFS());
 
             if (activeGrid && type != ESM::REC_STAT)
             {

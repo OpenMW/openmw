@@ -6,6 +6,7 @@
 
 #include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadmgef.hpp>
@@ -449,20 +450,22 @@ namespace MWClass
         models.emplace_back(Settings::Manager::getString("xbaseanimfemale", "Models"));
         models.emplace_back(Settings::Manager::getString("xbaseanim", "Models"));
 
+        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
         if (!npc->mBase->mModel.empty())
-            models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(npc->mBase->mModel));
+            models.push_back(Misc::ResourceHelpers::correctMeshPath(npc->mBase->mModel, vfs));
 
         if (!npc->mBase->mHead.empty())
         {
             const ESM::BodyPart* head = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(npc->mBase->mHead);
             if (head)
-                models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(head->mModel));
+                models.push_back(Misc::ResourceHelpers::correctMeshPath(head->mModel, vfs));
         }
         if (!npc->mBase->mHair.empty())
         {
             const ESM::BodyPart* hair = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(npc->mBase->mHair);
             if (hair)
-                models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(hair->mModel));
+                models.push_back(Misc::ResourceHelpers::correctMeshPath(hair->mModel, vfs));
         }
 
         bool female = (npc->mBase->mFlags & ESM::NPC::Female);
@@ -500,7 +503,7 @@ namespace MWClass
                         partname = female ? it->mMale : it->mFemale;
                     const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
                     if (part && !part->mModel.empty())
-                        models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(part->mModel));
+                        models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel, vfs));
                 }
             }
         }
@@ -513,7 +516,7 @@ namespace MWClass
             {
                 const ESM::BodyPart* part = *it;
                 if (part && !part->mModel.empty())
-                    models.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(part->mModel));
+                    models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel, vfs));
             }
         }
 

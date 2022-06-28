@@ -5,6 +5,9 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
 
+#include <components/resource/resourcesystem.hpp>
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -190,7 +193,8 @@ namespace MWGui
         const ESM::BirthSign *birth =
             store.get<ESM::BirthSign>().find(mCurrentBirthId);
 
-        mBirthImage->setImageTexture(MWBase::Environment::get().getWindowManager()->correctTexturePath(birth->mTexture));
+        mBirthImage->setImageTexture(Misc::ResourceHelpers::correctTexturePath(birth->mTexture,
+            MWBase::Environment::get().getResourceSystem()->getVFS()));
 
         std::vector<std::string> abilities, powers, spells;
 

@@ -24,6 +24,7 @@
 #include <components/misc/mathutil.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -1402,16 +1403,18 @@ bool CharacterController::updateState(CharacterState idle)
 
                     const ESM::Static* castStatic = world->getStore().get<ESM::Static>().find ("VFX_Hands");
 
+                    const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
                     for (size_t iter = 0; iter < effects.size(); ++iter) // play hands vfx for each effect
                     {
                         if (mAnimation->getNode("Bip01 L Hand"))
                             mAnimation->addEffect(
-                                MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                                Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
                                 -1, false, "Bip01 L Hand", effect->mParticle);
 
                         if (mAnimation->getNode("Bip01 R Hand"))
                             mAnimation->addEffect(
-                                MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                                Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
                                 -1, false, "Bip01 R Hand", effect->mParticle);
                     }
 

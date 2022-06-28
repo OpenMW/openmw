@@ -20,6 +20,8 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     Ingredient::Ingredient()
@@ -36,13 +38,7 @@ namespace MWClass
 
     std::string Ingredient::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Ingredient>(ptr);
     }
 
     std::string Ingredient::getName (const MWWorld::ConstPtr& ptr) const

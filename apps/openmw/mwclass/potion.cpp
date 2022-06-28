@@ -22,6 +22,8 @@
 
 #include "../mwmechanics/alchemy.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     Potion::Potion()
@@ -38,13 +40,7 @@ namespace MWClass
 
     std::string Potion::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Potion>(ptr);
     }
 
     std::string Potion::getName (const MWWorld::ConstPtr& ptr) const

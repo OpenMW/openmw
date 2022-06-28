@@ -337,12 +337,6 @@ namespace MWBase
 
             virtual void playSound(const std::string& soundId, float volume = 1.f, float pitch = 1.f) = 0;
 
-            // In WindowManager for now since there isn't a VFS singleton
-            virtual std::string correctIconPath(const std::string& path) = 0;
-            virtual std::string correctTexturePath(const std::string& path) = 0;
-            virtual std::string correctMeshPath(const std::string& path) = 0;
-            virtual bool textureExists(const std::string& path) = 0;
-
             virtual void addCell(MWWorld::CellStore* cell) = 0;
             virtual void removeCell(MWWorld::CellStore* cell) = 0;
             virtual void writeFog(MWWorld::CellStore* cell) = 0;

@@ -26,6 +26,8 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     Armor::Armor()
@@ -42,13 +44,7 @@ namespace MWClass
 
     std::string Armor::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Armor>(ptr);
     }
 
     std::string Armor::getName (const MWWorld::ConstPtr& ptr) const

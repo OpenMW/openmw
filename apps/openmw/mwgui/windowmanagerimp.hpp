@@ -377,12 +377,6 @@ namespace MWGui
 
     void playSound(const std::string& soundId, float volume = 1.f, float pitch = 1.f) override;
 
-    // In WindowManager for now since there isn't a VFS singleton
-    std::string correctIconPath(const std::string& path) override;
-    std::string correctTexturePath(const std::string& path) override;
-    std::string correctMeshPath(const std::string& path) override;
-    bool textureExists(const std::string& path) override;
-
     void addCell(MWWorld::CellStore* cell) override;
     void removeCell(MWWorld::CellStore* cell) override;
     void writeFog(MWWorld::CellStore* cell) override;

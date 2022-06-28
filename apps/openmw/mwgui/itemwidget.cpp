@@ -9,6 +9,7 @@
 // correctIconPath
 #include <components/resource/resourcesystem.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -110,11 +111,12 @@ namespace MWGui
         std::string invIcon = ptr.getClass().getInventoryIcon(ptr);
         if (invIcon.empty())
             invIcon = "default icon.tga";
-        invIcon = MWBase::Environment::get().getWindowManager()->correctIconPath(invIcon);
-        if (!MWBase::Environment::get().getResourceSystem()->getVFS()->exists(invIcon))
+        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+        invIcon = Misc::ResourceHelpers::correctIconPath(invIcon, vfs);
+        if (!vfs->exists(invIcon))
         {
             Log(Debug::Error) << "Failed to open image: '" << invIcon << "' not found, falling back to 'default-icon.tga'";
-            invIcon = MWBase::Environment::get().getWindowManager()->correctIconPath("default icon.tga");
+            invIcon = Misc::ResourceHelpers::correctIconPath("default icon.tga", vfs);
         }
         setIcon(invIcon);
     }

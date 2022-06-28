@@ -13,6 +13,7 @@
 
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -211,6 +212,9 @@ namespace MWWorld
         osg::ref_ptr<osg::Node> projectile = mResourceSystem->getSceneManager()->getInstance(model, attachTo);
 
         if (state.mIdMagic.size() > 1)
+        {
+            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
             {
                 std::ostringstream nodeName;
@@ -220,8 +224,9 @@ namespace MWWorld
                 attachTo->accept(findVisitor);
                 if (findVisitor.mFoundNode)
                     mResourceSystem->getSceneManager()->getInstance(
-                        MWBase::Environment::get().getWindowManager()->correctMeshPath(weapon->mModel), findVisitor.mFoundNode);
+                        Misc::ResourceHelpers::correctMeshPath(weapon->mModel, vfs), findVisitor.mFoundNode);
             }
+        }
 
         if (createLight)
         {
@@ -320,8 +325,11 @@ namespace MWWorld
 
         // in case there are multiple effects, the model is a dummy without geometry. Use the second effect for physics shape
         if (state.mIdMagic.size() > 1)
-            model = MWBase::Environment::get().getWindowManager()->correctMeshPath(
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find(state.mIdMagic[1])->mModel);
+        {
+            model = Misc::ResourceHelpers::correctMeshPath(
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find(state.mIdMagic[1])->mModel,
+                MWBase::Environment::get().getResourceSystem()->getVFS());
+        }
         state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true);
         state.mToDelete = false;
         mMagicBolts.push_back(state);

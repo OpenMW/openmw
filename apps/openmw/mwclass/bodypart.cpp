@@ -5,8 +5,7 @@
 
 #include "../mwworld/cellstore.hpp"
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
+#include "classmodel.hpp"
 
 namespace MWClass
 {
@@ -41,13 +40,7 @@ namespace MWClass
 
     std::string BodyPart::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::BodyPart> *ref = ptr.get<ESM::BodyPart>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::BodyPart>(ptr);
     }
 
 }

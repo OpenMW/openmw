@@ -27,6 +27,7 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "classmodel.hpp"
 
 namespace MWClass
 {
@@ -56,13 +57,7 @@ namespace MWClass
 
     std::string Activator::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Activator>(ptr);
     }
 
     bool Activator::isActivator() const
@@ -142,11 +137,12 @@ namespace MWClass
         const std::string model = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore(); 
         std::string creatureId;
+        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         for (const ESM::Creature &iter : store.get<ESM::Creature>())
         {
             if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model,
-                MWBase::Environment::get().getWindowManager()->correctMeshPath(iter.mModel)))
+                Misc::ResourceHelpers::correctMeshPath(iter.mModel, vfs)))
             {
                 creatureId = !iter.mOriginal.empty() ? iter.mOriginal : iter.mId;
                 break;

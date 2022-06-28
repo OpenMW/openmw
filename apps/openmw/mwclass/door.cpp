@@ -32,6 +32,8 @@
 
 #include "../mwmechanics/actorutil.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     class DoorCustomData : public MWWorld::TypedCustomData<DoorCustomData>
@@ -95,13 +97,7 @@ namespace MWClass
 
     std::string Door::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Door>(ptr);
     }
 
     std::string Door::getName (const MWWorld::ConstPtr& ptr) const
