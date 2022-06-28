@@ -24,3 +24,11 @@ if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(esmtool gcov)
 endif()
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    target_precompile_headers(esmtool PRIVATE
+        <fstream>
+        <string>
+        <vector>
+    )
+endif()
