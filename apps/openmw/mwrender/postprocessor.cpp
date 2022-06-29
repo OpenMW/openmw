@@ -904,7 +904,7 @@ namespace MWRender
         std::vector<std::string> techniqueStrings;
         Misc::StringUtils::split(Settings::Manager::getString("chain", "Post Processing"), techniqueStrings, ",");
 
-        const std::string& mainIdentifier = "main";
+        const std::string mainIdentifier = "main";
 
         auto main = loadTechnique(mainIdentifier);
 

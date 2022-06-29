@@ -173,8 +173,6 @@ The following functions can be accessed in any fragment or vertex shader.
 |                                        |                                                                               |
 |                                        |  Scene luminance is always calculated on original scene texture.              |
 +----------------------------------------+-------------------------------------------------------------------------------+
-| ``vec4 omw_GetDepth(vec2 uv)``         | Returns non-linear normalized depth                                           |
-+----------------------------------------+-------------------------------------------------------------------------------+
 | ``vec4 omw_GetLastShader(vec2 uv)``    | Returns RGBA color output of the last shader                                  |
 +----------------------------------------+-------------------------------------------------------------------------------+
 | ``vec4 omw_GetLastPass(vec2 uv)``      | Returns RGBA color output of the last pass                                    |
