@@ -105,6 +105,16 @@ typedef std::vector<MaybeQuotedPath> MaybeQuotedPathContainer;
 
 PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathContainer);
 
+std::string pathToUnicodeString(const std::filesystem::path& path);
+
+std::string pathToUnicodeString(std::filesystem::path&& path);
+
+std::filesystem::path unicodeStringToPath(const std::string_view path);
+
+std::filesystem::path unicodeStringToPath(std::string&& path);
+
+std::filesystem::path unicodeStringToPath(const char* path);
+
 } /* namespace Files */
 
 #endif /* COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP */

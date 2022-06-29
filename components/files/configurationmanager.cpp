@@ -460,4 +460,29 @@ PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathCon
     return res;
 }
 
+std::string pathToUnicodeString(const std::filesystem::path& path)
+{
+    return Misc::StringUtils::u8StringToString(path.u8string());
+}
+
+std::string pathToUnicodeString(std::filesystem::path&& path)
+{
+    return Misc::StringUtils::u8StringToString(path.u8string());
+}
+
+std::filesystem::path unicodeStringToPath(const std::string_view path)
+{
+    return Misc::StringUtils::stringToU8String(path);
+}
+
+std::filesystem::path unicodeStringToPath(std::string&& path)
+{
+    return Misc::StringUtils::stringToU8String(std::move(path));
+}
+
+std::filesystem::path unicodeStringToPath(const char* path)
+{
+    return Misc::StringUtils::stringToU8String(path);
+}
+
 } /* namespace Files */
