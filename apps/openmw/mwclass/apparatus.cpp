@@ -18,6 +18,8 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     Apparatus::Apparatus()
@@ -34,13 +36,7 @@ namespace MWClass
 
     std::string Apparatus::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Apparatus>(ptr);
     }
 
     std::string Apparatus::getName (const MWWorld::ConstPtr& ptr) const

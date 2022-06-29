@@ -41,6 +41,8 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "classmodel.hpp"
+
 namespace
 {
     bool isFlagBitSet(const MWWorld::ConstPtr &ptr, ESM::Creature::Flags bitMask)
@@ -182,13 +184,7 @@ namespace MWClass
 
     std::string Creature::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Creature>(ptr);
     }
 
     void Creature::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const
@@ -625,11 +621,12 @@ namespace MWClass
             const std::string model = getModel(ptr);
             if (!model.empty())
             {
+                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 for (const ESM::Creature &creature : store.get<ESM::Creature>())
                 {
                     if (creature.mId != ourId && creature.mOriginal != ourId && !creature.mModel.empty()
                         && Misc::StringUtils::ciEqual(model,
-                            MWBase::Environment::get().getWindowManager()->correctMeshPath(creature.mModel)))
+                            Misc::ResourceHelpers::correctMeshPath(creature.mModel, vfs)))
                     {
                         const std::string& fallbackId = !creature.mOriginal.empty() ? creature.mOriginal : creature.mId;
                         sound = store.get<ESM::SoundGenerator>().begin();

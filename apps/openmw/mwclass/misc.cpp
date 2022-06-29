@@ -21,6 +21,8 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     Miscellaneous::Miscellaneous()
@@ -46,13 +48,7 @@ namespace MWClass
 
     std::string Miscellaneous::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Miscellaneous>(ptr);
     }
 
     std::string Miscellaneous::getName (const MWWorld::ConstPtr& ptr) const

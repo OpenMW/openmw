@@ -2,6 +2,7 @@
 
 #include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -464,6 +465,8 @@ namespace MWMechanics
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         std::vector<std::string> addedEffects;
+        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
         for (const ESM::ENAMstruct& effectData : effects)
         {
             const auto effect = store.get<ESM::MagicEffect>().find(effectData.mEffectID);
@@ -477,7 +480,7 @@ namespace MWMechanics
 
             // check if the effect was already added
             if (std::find(addedEffects.begin(), addedEffects.end(),
-                MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel))
+                Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs))
                 != addedEffects.end())
                 continue;
 
@@ -485,7 +488,7 @@ namespace MWMechanics
             if (animation)
             {
                 animation->addEffect(
-                    MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
                     effect->mIndex, false, "", effect->mParticle);
             }
             else
@@ -516,7 +519,7 @@ namespace MWMechanics
                 }
                 scale = std::max(scale, 1.f);
                 MWBase::Environment::get().getWorld()->spawnEffect(
-                    MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
                     effect->mParticle, pos, scale);
             }
 
@@ -527,7 +530,7 @@ namespace MWMechanics
                 "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
             };
 
-            addedEffects.push_back(MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel));
+            addedEffects.push_back(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs));
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             if(!effect->mCastSound.empty())
@@ -565,9 +568,12 @@ namespace MWMechanics
         {
             // Don't play particle VFX unless the effect is new or it should be looping.
             if (playNonLooping || loop)
+            {
+                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 anim->addEffect(
-                    MWBase::Environment::get().getWindowManager()->correctMeshPath(castStatic->mModel),
+                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
                     magicEffect.mIndex, loop, "", magicEffect.mParticle);
+            }
         }
     }
 }

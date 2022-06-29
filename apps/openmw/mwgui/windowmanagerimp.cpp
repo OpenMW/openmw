@@ -2122,27 +2122,6 @@ namespace MWGui
         mConsole->setConsoleMode(mode);
     }
 
-    std::string WindowManager::correctIconPath(const std::string& path)
-    {
-        return Misc::ResourceHelpers::correctIconPath(path, mResourceSystem->getVFS());
-    }
-
-    std::string WindowManager::correctTexturePath(const std::string& path)
-    {
-        return Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
-    }
-
-    std::string WindowManager::correctMeshPath(const std::string& path)
-    {
-        return Misc::ResourceHelpers::correctMeshPath(path, mResourceSystem->getVFS());
-    }
-
-    bool WindowManager::textureExists(const std::string &path)
-    {
-        std::string corrected = Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
-        return mResourceSystem->getVFS()->exists(corrected);
-    }
-
     void WindowManager::createCursors()
     {
         // FIXME: currently we do not scale cursor since it is not a MyGUI widget.

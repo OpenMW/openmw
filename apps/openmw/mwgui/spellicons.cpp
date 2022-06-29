@@ -7,6 +7,8 @@
 
 #include <components/esm3/loadmgef.hpp>
 #include <components/settings/settings.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -134,7 +136,8 @@ namespace MWGui
                         ("ImageBox", MyGUI::IntCoord(w,2,16,16), MyGUI::Align::Default);
                     mWidgetMap[effectId] = image;
 
-                    image->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(effect->mIcon));
+                    image->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon,
+                        MWBase::Environment::get().getResourceSystem()->getVFS()));
 
                     std::string name = ESM::MagicEffect::effectIdToString (effectId);
 

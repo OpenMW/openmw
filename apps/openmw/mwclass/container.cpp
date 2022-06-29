@@ -30,6 +30,8 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/inventory.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     ContainerCustomData::ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell)
@@ -119,13 +121,7 @@ namespace MWClass
 
     std::string Container::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Container>(ptr);
     }
 
     bool Container::useAnim() const

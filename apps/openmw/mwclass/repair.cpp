@@ -17,6 +17,8 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     Repair::Repair()
@@ -33,13 +35,7 @@ namespace MWClass
 
     std::string Repair::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Repair>(ptr);
     }
 
     std::string Repair::getName (const MWWorld::ConstPtr& ptr) const

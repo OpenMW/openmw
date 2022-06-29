@@ -9,6 +9,7 @@
 
 #include <components/settings/settings.hpp>
 #include <components/widgets/box.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -436,7 +437,8 @@ namespace MWGui
 
         const int maximumWidth = MyGUI::RenderManager::getInstance().getViewSize().width - imageCaptionHPadding * 2;
 
-        std::string realImage = MWBase::Environment::get().getWindowManager()->correctIconPath(image);
+        const std::string realImage = Misc::ResourceHelpers::correctIconPath(image,
+            MWBase::Environment::get().getResourceSystem()->getVFS());
 
         Gui::EditBox* captionWidget = mDynamicToolTipBox->createWidget<Gui::EditBox>("NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
         captionWidget->setEditStatic(true);
@@ -843,10 +845,11 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore();
 
         const ESM::BirthSign *sign = store.get<ESM::BirthSign>().find(birthsignId);
+        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
-        widget->setUserString("ImageTexture_BirthSignImage", MWBase::Environment::get().getWindowManager()->correctTexturePath(sign->mTexture));
+        widget->setUserString("ImageTexture_BirthSignImage", Misc::ResourceHelpers::correctTexturePath(sign->mTexture, vfs));
         std::string text;
 
         text += sign->mName;
@@ -938,7 +941,7 @@ namespace MWGui
         std::string icon = effect->mIcon;
         int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-        icon = MWBase::Environment::get().getWindowManager()->correctIconPath(icon);
+        icon = Misc::ResourceHelpers::correctIconPath(icon, MWBase::Environment::get().getResourceSystem()->getVFS());
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");

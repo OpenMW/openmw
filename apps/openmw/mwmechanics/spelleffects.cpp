@@ -5,6 +5,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -272,9 +273,12 @@ namespace
         const ESM::Static* absorbStatic = esmStore.get<ESM::Static>().find("VFX_Absorb");
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
         if (animation && !absorbStatic->mModel.empty())
+        {
+            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
             animation->addEffect(
-                MWBase::Environment::get().getWindowManager()->correctMeshPath(absorbStatic->mModel),
+                Misc::ResourceHelpers::correctMeshPath(absorbStatic->mModel, vfs),
                 ESM::MagicEffect::SpellAbsorption, false, std::string());
+        }
         const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellId);
         int spellCost = 0;
         if (spell)
@@ -432,7 +436,10 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                     anim->removeEffect(effect.mEffectId);
                     const ESM::Static* fx = world->getStore().get<ESM::Static>().search("VFX_Summon_end");
                     if (fx)
-                        anim->addEffect(MWBase::Environment::get().getWindowManager()->correctMeshPath(fx->mModel), -1);
+                    {
+                        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+                        anim->addEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs), -1);
+                    }
                 }
             }
             else if (caster == getPlayer())

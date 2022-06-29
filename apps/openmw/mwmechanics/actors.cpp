@@ -10,6 +10,7 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/mathutil.hpp>
 #include <components/settings/settings.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -203,9 +204,12 @@ void soulTrap(const MWWorld::Ptr& creature)
             const ESM::Static* fx = world->getStore().get<ESM::Static>()
                     .search("VFX_Soul_Trap");
             if (fx)
+            {
+                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 world->spawnEffect(
-                    MWBase::Environment::get().getWindowManager()->correctMeshPath(fx->mModel),
+                    Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs),
                     "", creature.getRefData().getPosition().asVec3());
+            }
 
             MWBase::Environment::get().getSoundManager()->playSound3D(creature.getRefData().getPosition().asVec3(), "conjuration hit", 1.f, 1.f);
             return; //remove to get vanilla behaviour
@@ -1747,9 +1751,12 @@ namespace MWMechanics
             const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
                     .search("VFX_Summon_End");
             if (fx)
+            {
+                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 MWBase::Environment::get().getWorld()->spawnEffect(
-                    MWBase::Environment::get().getWindowManager()->correctMeshPath(fx->mModel),
+                    Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs),
                     "", ptr.getRefData().getPosition().asVec3());
+            }
 
             // Remove the summoned creature's summoned creatures as well
             MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);

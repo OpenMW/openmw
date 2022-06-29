@@ -17,6 +17,7 @@
 #include <components/sceneutil/visitor.hpp>
 
 #include <components/misc/stringops.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -24,7 +25,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/windowmanager.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -128,7 +128,8 @@ std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield, bool 
                 if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
                     return std::string();
                 if (!bodypart->mModel.empty())
-                    return MWBase::Environment::get().getWindowManager()->correctMeshPath(bodypart->mModel);
+                    return Misc::ResourceHelpers::correctMeshPath(bodypart->mModel,
+                        MWBase::Environment::get().getResourceSystem()->getVFS());
             }
         }
     }

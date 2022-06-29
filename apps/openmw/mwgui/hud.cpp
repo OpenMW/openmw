@@ -8,6 +8,8 @@
 #include <MyGUI_ScrollView.h>
 
 #include <components/settings/settings.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -413,7 +415,7 @@ namespace MWGui
         std::string icon = effect->mIcon;
         int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-        icon = MWBase::Environment::get().getWindowManager()->correctIconPath(icon);
+        icon = Misc::ResourceHelpers::correctIconPath(icon, MWBase::Environment::get().getResourceSystem()->getVFS());
 
         mSpellImage->setSpellIcon(icon);
     }

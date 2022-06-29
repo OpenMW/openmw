@@ -23,6 +23,8 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
     Book::Book()
@@ -39,13 +41,7 @@ namespace MWClass
 
     std::string Book::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return MWBase::Environment::get().getWindowManager()->correctMeshPath(model);
-        }
-        return "";
+        return getClassModel<ESM::Book>(ptr);
     }
 
     std::string Book::getName (const MWWorld::ConstPtr& ptr) const

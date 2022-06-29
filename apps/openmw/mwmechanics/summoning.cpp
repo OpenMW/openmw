@@ -1,11 +1,11 @@
 #include "summoning.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -86,7 +86,10 @@ namespace MWMechanics
                 {
                     const ESM::Static* fx = world->getStore().get<ESM::Static>().search("VFX_Summon_Start");
                     if (fx)
-                        anim->addEffect(MWBase::Environment::get().getWindowManager()->correctMeshPath(fx->mModel), -1, false);
+                    {
+                        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+                        anim->addEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs), -1, false);
+                    }
                 }
             }
             catch (std::exception& e)

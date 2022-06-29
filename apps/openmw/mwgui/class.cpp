@@ -13,6 +13,9 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "tooltips.hpp"
 
@@ -920,8 +923,9 @@ namespace MWGui
 
     void setClassImage(MyGUI::ImageBox* imageBox, const std::string &classId)
     {
-        std::string classImage = std::string("textures\\levelup\\") + classId + ".dds";
-        if (!MWBase::Environment::get().getWindowManager()->textureExists(classImage))
+        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+        std::string classImage = Misc::ResourceHelpers::correctTexturePath("textures\\levelup\\" + classId + ".dds", vfs);
+        if (!vfs->exists(classImage))
         {
             Log(Debug::Warning) << "No class image for " << classId << ", falling back to default";
             classImage = "textures\\levelup\\warrior.dds";
