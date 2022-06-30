@@ -25,10 +25,10 @@ static const char* const applicationName = "OpenMW";
 static const char* const applicationName = "openmw";
 #endif
 
-const char* const localToken = "?local?";
-const char* const userConfigToken = "?userconfig?";
-const char* const userDataToken = "?userdata?";
-const char* const globalToken = "?global?";
+static constexpr auto localToken = u8"?local?";
+static constexpr auto userConfigToken = u8"?userconfig?";
+static constexpr auto userDataToken = u8"?userdata?";
+static constexpr auto globalToken = u8"?global?";
 
 ConfigurationManager::ConfigurationManager(bool silent)
     : mFixedPath(applicationName)
@@ -94,7 +94,7 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
 
     std::vector<bpo::variables_map> parsedConfigs{*std::move(config)};
     std::set<std::filesystem::path> alreadyParsedPaths;  // needed to prevent infinite loop in case of a circular link
-    alreadyParsedPaths.insert(std::filesystem::path(mActiveConfigPaths.front()));
+    alreadyParsedPaths.insert(mActiveConfigPaths.front());
 
     while (!extraConfigDirs.empty())
     {
@@ -155,9 +155,9 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
 
     if (!quiet)
     {
-        Log(Debug::Info) << "Logs dir: " << getUserConfigPath().string(); //TODO(Project579): This will probably break in windows with unicode paths
-        Log(Debug::Info) << "User data dir: " << mUserDataPath.string(); //TODO(Project579): This will probably break in windows with unicode paths
-        Log(Debug::Info) << "Screenshots dir: " << mScreenshotPath.string(); //TODO(Project579): This will probably break in windows with unicode paths
+        Log(Debug::Info) << "Logs dir: " << getUserConfigPath();
+        Log(Debug::Info) << "User data dir: " << mUserDataPath;
+        Log(Debug::Info) << "Screenshots dir: " << mScreenshotPath;
     }
 
     mSilent = silent;
@@ -239,7 +239,7 @@ void mergeComposingVariables(bpo::variables_map& first, bpo::variables_map& seco
 
             boost::any& firstValue = firstPosition->second.value();
             const boost::any& secondValue = second[name].value();
-            
+
             if (firstValue.type() == typeid(Files::MaybeQuotedPathContainer))
             {
                 auto& firstPathContainer = boost::any_cast<Files::MaybeQuotedPathContainer&>(firstValue);
@@ -270,22 +270,22 @@ void mergeComposingVariables(bpo::variables_map& first, bpo::variables_map& seco
 
 void ConfigurationManager::processPath(std::filesystem::path& path, const std::filesystem::path& basePath) const
 {
-    std::string str = path.string(); //TODO(Project579): This will probably break in windows with unicode paths
+    const auto str = path.u8string();
 
-    if (str.empty() || str[0] != '?')
+    if (str.empty() || str[0] != u8'?')
     {
         if (!path.is_absolute())
             path = basePath / path;
         return;
     }
 
-    std::string::size_type pos = str.find('?', 1);
-    if (pos != std::string::npos && pos != 0)
+    const auto pos = str.find('?', 1);
+    if (pos != std::u8string::npos && pos != 0)
     {
         auto tokenIt = mTokensMapping.find(str.substr(0, pos + 1));
         if (tokenIt != mTokensMapping.end())
         {
-            std::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))()); //TODO(Project579): This will probably break in windows with unicode paths
+            auto tempPath(((mFixedPath).*(tokenIt->second))());
             if (pos < str.length() - 1)
             {
                 // There is something after the token, so we should
@@ -293,7 +293,7 @@ void ConfigurationManager::processPath(std::filesystem::path& path, const std::f
                 tempPath /= str.substr(pos + 1, str.length() - pos);
             }
 
-            path = tempPath; //TODO(Project579): This will probably break in windows with unicode paths
+            path = tempPath;
         }
         else
         {
@@ -347,11 +347,11 @@ std::optional<bpo::variables_map> ConfigurationManager::loadConfig(
     const std::filesystem::path& path, const bpo::options_description& description) const
 {
     std::filesystem::path cfgFile(path);
-    cfgFile /= std::string(openmwCfgFile);
+    cfgFile /= openmwCfgFile;
     if (std::filesystem::is_regular_file(cfgFile))
     {
         if (!mSilent)
-            Log(Debug::Info) << "Loading config file: " << cfgFile.string(); //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Info) << "Loading config file: " << cfgFile;
 
         std::ifstream configFileStream(cfgFile);
 
@@ -434,17 +434,17 @@ std::istream& operator>> (std::istream& istream, MaybeQuotedPath& MaybeQuotedPat
     {
         std::string intermediate;
         istream >> std::quoted(intermediate, '"', '&');
-        static_cast<std::filesystem::path&>(MaybeQuotedPath) = intermediate;
+        static_cast<std::filesystem::path&>(MaybeQuotedPath) = Misc::StringUtils::stringToU8String(intermediate);
         if (istream && !istream.eof() && istream.peek() != EOF)
         {
             std::string remainder{std::istreambuf_iterator(istream), {}};
-            Log(Debug::Warning) << "Trailing data in path setting. Used '" << MaybeQuotedPath.string() << "' but '" << remainder << "' remained"; //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Warning) << "Trailing data in path setting. Used '" << MaybeQuotedPath << "' but '" << remainder << "' remained";
         }
     }
     else
     {
         std::string intermediate{std::istreambuf_iterator(istream), {}};
-        static_cast<std::filesystem::path&>(MaybeQuotedPath) = intermediate;
+        static_cast<std::filesystem::path&>(MaybeQuotedPath) = Misc::StringUtils::stringToU8String(intermediate);
     }
     return istream;
 }
