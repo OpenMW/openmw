@@ -30,8 +30,10 @@ float calcSoftParticleFade(in vec3 viewDir, in vec3 viewNormal, in vec3 viewPos)
     const float nearMult = 300.0;
     float viewBias = 1.0;
 
-    if (particleFade)
-        viewBias = abs(dot(-viewDir, viewNormal) * quickstep(euclidianDepth / nearMult));
+    if (particleFade) {
+        float VdotN = dot(viewDir, viewNormal);
+        viewBias = abs(VdotN) * quickstep(euclidianDepth / nearMult) * (1.0 - pow(1.0 + VdotN, 1.3));
+    }
 
     const float shift = 0.845;
     return shift * pow(clamp(delta/falloff, 0.0, 1.0), contrast) * viewBias;
