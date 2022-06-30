@@ -1,0 +1,200 @@
+---
+app-id: org.openmw.OpenMW.devel
+runtime: org.kde.Platform
+runtime-version: '5.15-21.08'
+sdk: org.kde.Sdk
+command: openmw-launcher
+rename-appdata-file: openmw.appdata.xml
+finish-args:
+  - "--share=ipc"
+  - "--socket=x11"
+  - "--device=all"
+  - "--filesystem=host"
+  - "--socket=pulseaudio"
+build-options:
+  cflags: "-O2 -g"
+  cxxflags: "-O2 -g"
+cleanup:
+  - "/include"
+  - "/lib/pkgconfig"
+  - "/lib/cmake"
+  - "/share/pkgconfig"
+  - "/share/aclocal"
+  - "/share/doc"
+  - "/man"
+  - "/share/man"
+  - "/share/gtk-doc"
+  - "/share/vala"
+  - "*.la"
+  - "*.a"
+
+modules:
+  - name: boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app --with-libraries=filesystem,iostreams,program_options,system
+      - ./b2 headers
+      - ./b2 install
+    sources:
+      - type: archive
+        url: https://boostorg.jfrog.io/artifactory/main/release/1.75.0/source/boost_1_75_0.tar.gz
+        sha256: aeb26f80e80945e82ee93e5939baebdca47b9dee80a07d3144be1e1a6a66dd6a
+
+  - name: collada-dom
+    buildsystem: cmake-ninja
+    config-opts:
+      - "-DOPT_COLLADA14=1"
+      - "-DOPT_COLLADA15=0"
+    sources:
+      - type: archive
+        url: https://github.com/rdiankov/collada-dom/archive/c1e20b7d6ff806237030fe82f126cb86d661f063.zip
+        sha256: 6c51cd068c7d6760b587391884942caaac8a515d138535041e42d00d3e5c9152
+
+  - name: ffmpeg
+    config-opts:
+      - "--disable-static"
+      - "--enable-shared"
+      - "--disable-programs"
+      - "--disable-doc"
+      - "--disable-avdevice"
+      - "--disable-avfilter"
+      - "--disable-postproc"
+
+      - "--disable-encoders"
+      - "--disable-muxers"
+      - "--disable-protocols"
+      - "--disable-indevs"
+      - "--disable-devices"
+      - "--disable-filters"
+    sources:
+      - type: archive
+        url: http://ffmpeg.org/releases/ffmpeg-4.3.2.tar.xz
+        sha256: 46e4e64f1dd0233cbc0934b9f1c0da676008cad34725113fb7f802cfa84ccddb
+    cleanup:
+      - "/share/ffmpeg"
+
+  - name: openscenegraph
+    buildsystem: cmake-ninja
+    config-opts:
+      - "-DBUILD_OSG_PLUGINS_BY_DEFAULT=0"
+      - "-DBUILD_OSG_PLUGIN_OSG=1"
+      - "-DBUILD_OSG_PLUGIN_DDS=1"
+      - "-DBUILD_OSG_PLUGIN_DAE=1"
+      - "-DBUILD_OSG_PLUGIN_TGA=1"
+      - "-DBUILD_OSG_PLUGIN_BMP=1"
+      - "-DBUILD_OSG_PLUGIN_JPEG=1"
+      - "-DBUILD_OSG_PLUGIN_PNG=1"
+      - "-DBUILD_OSG_DEPRECATED_SERIALIZERS=0"
+      - "-DBUILD_OSG_APPLICATIONS=0"
+      - "-DCMAKE_BUILD_TYPE=Release"
+    build-options:
+      env:
+        COLLADA_DIR: /app/include/collada-dom2.5
+    sources:
+      - type: archive
+        url: https://github.com/openmw/osg/archive/76e061739610bc9a3420a59e7c9395e742ce2f97.zip
+        sha256: fa1100362eae260192819d65d90b29ec0b88fdf80e30cee677730b7a0d68637e
+
+  - name: bullet
+    # The cmake + ninja buildsystem doesn't install the required binaries correctly
+    buildsystem: cmake
+    config-opts:
+      - "-DBUILD_BULLET2_DEMOS=0"
+      - "-DBUILD_BULLET3=0"
+      - "-DBUILD_CPU_DEMOS=0"
+      - "-DBUILD_EXTRAS=0"
+      - "-DBUILD_OPENGL3_DEMOS=0"
+      - "-DBUILD_UNIT_TESTS=0"
+      - "-DCMAKE_BUILD_TYPE=Release"
+      - "-DUSE_GLUT=0"
+      - "-DUSE_GRAPHICAL_BENCHMARK=0"
+      - "-DUSE_DOUBLE_PRECISION=on"
+      - "-DBULLET2_MULTITHREADING=on"
+    sources:
+      - type: archive
+        url: https://github.com/bulletphysics/bullet3/archive/93be7e644024e92df13b454a4a0b0fcd02b21b10.zip
+        sha256: 82968fbf20a92c51bc71ac9ee8f6381ecf3420c7cbb881ffb7bb633fa13b27f9
+
+  - name: mygui
+    buildsystem: cmake-ninja
+    config-opts:
+      - "-DCMAKE_BUILD_TYPE=Release"
+      - "-DMYGUI_RENDERSYSTEM=1"
+      - "-DMYGUI_BUILD_DEMOS=0"
+      - "-DMYGUI_BUILD_TOOLS=0"
+      - "-DMYGUI_BUILD_PLUGINS=0"
+    sources:
+      - type: archive
+        url: https://github.com/MyGUI/mygui/archive/refs/tags/MyGUI3.4.1.tar.gz
+        sha256: bdf730bdeb4ad89e6b8223967db01aa5274d2b93adc2c0d6aa4842faeed4de1a
+
+  - name: libunshield
+    buildsystem: cmake-ninja
+    config-opts:
+      - "-DCMAKE_BUILD_TYPE=Release"
+    sources:
+      - type: archive
+        url: https://github.com/twogood/unshield/archive/1.4.3.tar.gz
+        sha256: aa8c978dc0eb1158d266eaddcd1852d6d71620ddfc82807fe4bf2e19022b7bab
+
+  - name: lz4
+    buildsystem: simple
+    build-commands:
+      - "make lib"
+      - "PREFIX=/app make install"
+    sources:
+      - type: archive
+        url: https://github.com/lz4/lz4/archive/refs/tags/v1.9.3.tar.gz
+        sha256: 030644df4611007ff7dc962d981f390361e6c97a34e5cbc393ddfbe019ffe2c1
+
+  - name: recastnavigation
+    buildsystem: cmake-ninja
+    config-opts:
+      - "-DCMAKE_BUILD_TYPE=Release"
+      - "-DRECASTNAVIGATION_DEMO=no"
+      - "-DRECASTNAVIGATION_TESTS=no"
+      - "-DRECASTNAVIGATION_EXAMPLES=no"
+    sources:
+      - type: archive
+        url: https://github.com/recastnavigation/recastnavigation/archive/c5cbd53024c8a9d8d097a4371215e3342d2fdc87.zip
+        sha256: 53dacfd7bead4d3b0c9a04a648caed3e7c3900e0aba765c15dee26b50f6103c6
+
+  - name: yaml-cpp
+    buildsystem: cmake-ninja
+    sources:
+      - type: archive
+        url: https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.zip
+        sha256: 4d5e664a7fb2d7445fc548cc8c0e1aa7b1a496540eb382d137e2cc263e6d3ef5
+
+  - name: LuaJIT
+    buildsystem: simple
+    build-commands:
+      - make install PREFIX=/app
+    sources:
+      - type: archive
+        url: https://github.com/LuaJIT/LuaJIT/archive/refs/tags/v2.0.5.zip
+        sha256: 2adbe397a5b6b8ab22fa8396507ce852a2495db50e50734b3daa1ffcadd9eeb4
+
+  - name: openmw
+    builddir: true
+    buildsystem: cmake-ninja
+    config-opts:
+      - "-DBUILD_BSATOOL=no"
+      - "-DBUILD_ESMTOOL=no"
+      - "-DCMAKE_BUILD_TYPE=Release"
+      - "-DICONDIR=/app/share/icons"
+      - "-DOPENMW_USE_SYSTEM_RECASTNAVIGATION=yes"
+    sources:
+      - type: dir
+        path: ..
+      - type: shell
+        commands:
+          - "sed -i 's:/wiki:/old-wiki:' ./files/openmw.appdata.xml"
+          - "sed -i 's:>org.openmw.launcher.desktop<:>org.openmw.OpenMW.devel.desktop<:' ./files/openmw.appdata.xml"
+          - "sed -i 's:Icon=openmw:Icon=org.openmw.OpenMW.devel.png:' ./files/org.openmw.launcher.desktop"
+          - "sed -i 's:Icon=openmw-cs:Icon=org.openmw.OpenMW.OpenCS.devel.png:' ./files/org.openmw.cs.desktop"
+    post-install:
+      - "mv /app/share/applications/org.openmw.launcher.desktop /app/share/applications/org.openmw.OpenMW.devel.desktop"
+      - "mv /app/share/applications/org.openmw.cs.desktop /app/share/applications/org.openmw.OpenMW.OpenCS.devel.desktop"
+      - "mv /app/share/icons/openmw.png /app/share/icons/org.openmw.OpenMW.devel.png"
+      - "mv /app/share/icons/openmw-cs.png /app/share/icons/org.openmw.OpenMW.OpenCS.devel.png"

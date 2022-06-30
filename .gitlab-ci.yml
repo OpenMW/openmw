@@ -598,3 +598,23 @@ Ubuntu_AndroidNDK_arm64-v8a:
     - pip3 install --user requests click discord_webhook
   script:
     - scripts/find_missing_merge_requests.py --project_id=$CI_PROJECT_ID --ignored_mrs_path=$CI_PROJECT_DIR/.resubmitted_merge_requests.txt
+
+flatpak:
+    image: 'docker.io/bilelmoussaoui/flatpak-github-actions'
+    stage: build
+    script:
+      - flatpak install -y flathub org.kde.Platform/x86_64/5.15-21.08
+      - flatpak install -y flathub org.kde.Sdk/x86_64/5.15-21.08
+      - flatpak-builder --ccache --force-clean --repo=repo build CI/org.openmw.OpenMW.devel.yaml
+      - flatpak build-bundle ./repo openmw.flatpak org.openmw.OpenMW.devel
+    cache:
+      key: flatpak
+      paths: 
+        - ".flatpak-builder"
+    artifacts:
+      untracked: false
+      paths:
+        - "openmw.flatpak"
+    # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+    # Flatpak Builds compile all dependencies aswell so need more time. Build results of libraries are cached
+    timeout: 4h
