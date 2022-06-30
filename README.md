@@ -18,18 +18,18 @@ Font Licenses:
 Current Status
 --------------
 
-The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare). Check the [bug tracker](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=1.0) for a list of issues we need to resolve before the "1.0" release. Even before the "1.0" release however, OpenMW boasts some new [features](https://gitlab.com/OpenMW/openmw/-/wikis/features), such as improved graphics and user interfaces.
+The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare). Check the [bug tracker](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=1.0) for a list of issues we need to resolve before the "1.0" release. Even before the "1.0" release however, OpenMW boasts some new [features](https://wiki.openmw.org/index.php?title=Features), such as improved graphics and user interfaces.
 
-Pre-existing modifications created for the original Morrowind engine can be hit-and-miss. The OpenMW script compiler performs more thorough error-checking than Morrowind does, meaning that a mod created for Morrowind may not necessarily run in OpenMW. Some mods also rely on quirky behaviour or engine bugs in order to work. We are considering such compatibility issues on a case-by-case basis - in some cases adding a workaround to OpenMW may be feasible, in other cases fixing the mod will be the only option. If you know of any mods that work or don't work, feel free to add them to the [Mod status](https://old-wiki.openmw.org/index.php?title=Mod_status) wiki page.
+Pre-existing modifications created for the original Morrowind engine can be hit-and-miss. The OpenMW script compiler performs more thorough error-checking than Morrowind does, meaning that a mod created for Morrowind may not necessarily run in OpenMW. Some mods also rely on quirky behaviour or engine bugs in order to work. We are considering such compatibility issues on a case-by-case basis - in some cases adding a workaround to OpenMW may be feasible, in other cases fixing the mod will be the only option. If you know of any mods that work or don't work, feel free to add them to the [Mod status](https://wiki.openmw.org/index.php?title=Mod_status) wiki page.
 
 Getting Started
 ---------------
 
 * [Official forums](https://forum.openmw.org/)
 * [Installation instructions](https://openmw.readthedocs.io/en/latest/manuals/installation/index.html)
-* [Build from source](https://gitlab.com/OpenMW/openmw/-/wikis/development/development_environment_setup)
-* [Testing the game](https://old-wiki.openmw.org/index.php?title=Testing)
-* [How to contribute](https://old-wiki.openmw.org/index.php?title=Contribution_Wanted)
+* [Build from source](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
+* [Testing the game](https://wiki.openmw.org/index.php?title=Testing)
+* [How to contribute](https://wiki.openmw.org/index.php?title=Contribution_Wanted)
 * [Report a bug](https://gitlab.com/OpenMW/openmw/issues) - read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug!
 * [Known issues](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=Bug)
 
