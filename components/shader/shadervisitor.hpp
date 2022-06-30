@@ -48,8 +48,6 @@ namespace Shader
 
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
 
-        void setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong);
-
         void setSupportsNormalsRT(bool supports) { mSupportsNormalsRT = supports; }
 
         void apply(osg::Node& node) override;
@@ -111,7 +109,6 @@ namespace Shader
             int mTexStageRequiringTangents;
 
             bool mSoftParticles;
-            float mSoftParticleSize;
 
             // the Node that requested these requirements
             osg::Node* mNode;
@@ -125,7 +122,6 @@ namespace Shader
         bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
 
         osg::ref_ptr<const osg::Program> mProgramTemplate;
-        std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
     };
 
     class ReinstateRemovedStateVisitor : public osg::NodeVisitor

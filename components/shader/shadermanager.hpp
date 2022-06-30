@@ -5,6 +5,7 @@
 #include <map>
 #include <mutex>
 #include <vector>
+#include <array>
 
 #include <osg/ref_ptr>
 
@@ -58,7 +59,13 @@ namespace Shader
         int getMaxTextureUnits() const { return mMaxTextureUnits; }
         int getAvailableTextureUnits() const { return mMaxTextureUnits - mReservedTextureUnits; }
 
-        int reserveGlobalTextureUnits(int count);
+        enum class Slot
+        {
+            OpaqueDepthTexture,
+            SkyTexture,
+        };
+
+        int reserveGlobalTextureUnits(Slot slot);
 
     private:
         void getLinkedShaders(osg::ref_ptr<osg::Shader> shader, const std::vector<std::string>& linkedShaderNames, const DefineMap& defines);
@@ -89,6 +96,8 @@ namespace Shader
 
         int mMaxTextureUnits = 0;
         int mReservedTextureUnits = 0;
+
+        std::array<int, 2> mReservedTextureUnitsBySlot = {-1, -1};
     };
 
     bool parseForeachDirective(std::string& source, const std::string& templateName, size_t foundPos);

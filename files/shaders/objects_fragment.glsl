@@ -99,6 +99,7 @@ void main()
 #endif
 
     vec3 worldNormal = normalize(passNormal);
+    vec3 viewVec = normalize(passViewPos.xyz);
 
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
@@ -168,7 +169,6 @@ void main()
 
 #if @normalMap
     // if using normal map + env map, take advantage of per-pixel normals for envTexCoordGen
-    vec3 viewVec = normalize(passViewPos.xyz);
     vec3 r = reflect( viewVec, viewNormal );
     float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );
     envTexCoordGen = vec2(r.x/m + 0.5, r.y/m + 0.5);
@@ -230,13 +230,13 @@ void main()
 #if (!@normalMap && !@parallax && !@forcePPL)
         vec3 viewNormal = gl_NormalMatrix * worldNormal;
 #endif
-        gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
+        gl_FragData[0].xyz += getSpecular(normalize(viewNormal), viewVec, shininess, matSpec) * shadowing;
     }
 
     gl_FragData[0] = applyFogAtPos(gl_FragData[0], passViewPos);
 
 #if !defined(FORCE_OPAQUE) && @softParticles
-    gl_FragData[0].a *= calcSoftParticleFade();
+    gl_FragData[0].a *= calcSoftParticleFade(viewVec, viewNormal, passViewPos);
 #endif
 
 #if defined(FORCE_OPAQUE) && FORCE_OPAQUE

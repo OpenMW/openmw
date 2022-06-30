@@ -1,4 +1,3 @@
-#if !@lightingMethodFFP
 float quickstep(float x)
 {
     x = clamp(x, 0.0, 1.0);
@@ -6,7 +5,6 @@ float quickstep(float x)
     x = 1.0 - x*x;
     return x;
 }
-#endif
 
 #if @lightingMethodUBO
 

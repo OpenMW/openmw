@@ -77,7 +77,7 @@ namespace Resource
         Shader::ShaderManager& getShaderManager();
 
         /// Re-create shaders for this node, need to call this if alpha testing, texture stages or vertex color mode have changed.
-        void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects", bool forceShadersForNode = false, const osg::Program* programTemplate = nullptr, bool disableSoftParticles = false);
+        void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects", bool forceShadersForNode = false, const osg::Program* programTemplate = nullptr);
 
         /// Applying shaders to a node may replace some fixed-function state.
         /// This restores it.
@@ -110,6 +110,8 @@ namespace Resource
         bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
 
         void setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong);
+
+        osg::ref_ptr<osg::Texture> getOpaqueDepthTex(size_t frame);
 
         enum class UBOBinding
         {
