@@ -59,7 +59,12 @@ function M.onFrame(dt)
 end
 
 function M.onInputAction(action)
-    if not active or core.isWorldPaused() then return end
+    if not active or core.isWorldPaused() or
+       not input.getControlSwitch(input.CONTROL_SWITCH.ViewMode) or
+       not input.getControlSwitch(input.CONTROL_SWITCH.Controls) or
+       not I.Camera.isModeControlEnabled() then
+        return
+    end
     if action == input.ACTION.ZoomIn and camera.getMode() == MODE.Preview
        and I.Camera.getBaseThirdPersonDistance() == 30 then
         self.controls.yawChange = camera.getYaw() - self.rotation.z
