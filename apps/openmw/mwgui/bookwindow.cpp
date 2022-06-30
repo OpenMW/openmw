@@ -43,6 +43,9 @@ namespace MWGui
         getWidget(mLeftPage, "LeftPage");
         getWidget(mRightPage, "RightPage");
 
+        getWidget(mBackgroundImage, "JImage");
+        mDefaultBackground = mBackgroundImage->_getTextureName();
+
         adjustButton("CloseButton");
         adjustButton("TakeButton");
         adjustButton("PrevPageBTN");
@@ -93,9 +96,15 @@ namespace MWGui
 
         MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
 
+        std::string backgroundImage;
         Formatting::BookFormatter formatter;
-        mPages = formatter.markupToWidget(mLeftPage, ref->mBase->mText);
-        formatter.markupToWidget(mRightPage, ref->mBase->mText);
+        mPages = formatter.markupToWidget(mLeftPage, ref->mBase->mText, backgroundImage);
+        formatter.markupToWidget(mRightPage, ref->mBase->mText, backgroundImage);
+
+        if (backgroundImage.empty())
+            mBackgroundImage->setImageTexture(mDefaultBackground);
+        else
+            mBackgroundImage->setImageTexture(backgroundImage);
 
         updatePages();
 

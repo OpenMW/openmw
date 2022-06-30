@@ -32,6 +32,8 @@ namespace MWGui
             Gui::ImageButton* mCloseButton;
             Gui::ImageButton* mTakeButton;
             MyGUI::ScrollView* mTextView;
+            MyGUI::ImageBox* mBackgroundImage;
+            std::string mDefaultBackground;
 
             MWWorld::Ptr mScroll;
 

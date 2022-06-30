@@ -46,7 +46,8 @@ namespace MWGui
                     Event_PTag,
                     Event_ImgTag,
                     Event_DivTag,
-                    Event_FontTag
+                    Event_FontTag,
+                    Event_BodyTag
                 };
 
                 BookTextParser(const std::string & text);
@@ -118,8 +119,8 @@ namespace MWGui
         class BookFormatter
         {
             public:
-                Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup, const int pageWidth, const int pageHeight);
-                Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup);
+                Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup, const int pageWidth, const int pageHeight, std::string & backgroundImage);
+                Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup, std::string & backgroundImage);
 
             private:
                 void resetFontProperties();

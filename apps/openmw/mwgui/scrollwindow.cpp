@@ -25,6 +25,8 @@ namespace MWGui
         , mTakeButtonAllowed(true)
     {
         getWidget(mTextView, "TextView");
+        getWidget(mBackgroundImage, "ScrollImage");
+        mDefaultBackground = mBackgroundImage->_getTextureName();
 
         getWidget(mCloseButton, "CloseButton");
         mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onCloseButtonClicked);
@@ -50,9 +52,15 @@ namespace MWGui
 
         MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
 
+        std::string backgroundImage;
         Formatting::BookFormatter formatter;
-        formatter.markupToWidget(mTextView, ref->mBase->mText, 390, mTextView->getHeight());
+        formatter.markupToWidget(mTextView, ref->mBase->mText, 390, mTextView->getHeight(), backgroundImage);
         MyGUI::IntSize size = mTextView->getChildAt(0)->getSize();
+
+        if (backgroundImage.empty())
+            mBackgroundImage->setImageTexture(mDefaultBackground);
+        else
+            mBackgroundImage->setImageTexture(backgroundImage);
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
         mTextView->setVisibleVScroll(false);

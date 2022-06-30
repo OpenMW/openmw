@@ -47,6 +47,7 @@ namespace MWGui::Formatting
             registerTag("img", Event_ImgTag);
             registerTag("div", Event_DivTag);
             registerTag("font", Event_FontTag);
+            registerTag("body", Event_BodyTag);
         }
 
         void BookTextParser::registerTag(const std::string & tag, BookTextParser::Events type)
@@ -199,7 +200,7 @@ namespace MWGui::Formatting
         }
 
         /* BookFormatter */
-        Paginator::Pages BookFormatter::markupToWidget(MyGUI::Widget * parent, const std::string & markup, const int pageWidth, const int pageHeight)
+        Paginator::Pages BookFormatter::markupToWidget(MyGUI::Widget * parent, const std::string & markup, const int pageWidth, const int pageHeight, std::string & backgroundImage)
         {
             Paginator pag(pageWidth, pageHeight);
 
@@ -311,6 +312,18 @@ namespace MWGui::Formatting
                     case BookTextParser::Event_DivTag:
                         handleDiv(parser.getAttributes());
                         break;
+                    case BookTextParser::Event_BodyTag:
+                    {
+                        const BookTextParser::Attributes & attr = parser.getAttributes();
+                        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+                        backgroundImage = Misc::ResourceHelpers::correctTexturePath(attr.at("background"), vfs);
+                        if (!vfs->exists(backgroundImage))
+                        {
+                            Log(Debug::Warning) << "Warning: Could not find \"" << backgroundImage << "\" referenced by a <body> tag.";
+                            backgroundImage.clear();
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -325,9 +338,9 @@ namespace MWGui::Formatting
             return pag.getPages();
         }
 
-        Paginator::Pages BookFormatter::markupToWidget(MyGUI::Widget * parent, const std::string & markup)
+        Paginator::Pages BookFormatter::markupToWidget(MyGUI::Widget * parent, const std::string & markup, std::string & backgroundImage)
         {
-            return markupToWidget(parent, markup, parent->getWidth(), parent->getHeight());
+            return markupToWidget(parent, markup, parent->getWidth(), parent->getHeight(), backgroundImage);
         }
 
         void BookFormatter::resetFontProperties()

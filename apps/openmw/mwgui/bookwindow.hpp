@@ -48,6 +48,8 @@ namespace MWGui
             MyGUI::TextBox* mRightPageNumber;
             MyGUI::Widget* mLeftPage;
             MyGUI::Widget* mRightPage;
+            MyGUI::ImageBox* mBackgroundImage;
+            std::string mDefaultBackground;
 
             unsigned int mCurrentPage; // 0 is first page
             Pages mPages;
