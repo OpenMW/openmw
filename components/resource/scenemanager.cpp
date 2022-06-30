@@ -39,6 +39,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/extradata.hpp>
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
@@ -366,15 +367,13 @@ namespace Resource
         return mForceShaders;
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool forceShadersForNode, const osg::Program* programTemplate, bool disableSoftParticles)
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool forceShadersForNode, const osg::Program* programTemplate)
     {
         osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix));
         shaderVisitor->setAllowedToModifyStateSets(false);
         shaderVisitor->setProgramTemplate(programTemplate);
         if (forceShadersForNode)
             shaderVisitor->setForceShaders(true);
-        if (disableSoftParticles)
-            shaderVisitor->setOpaqueDepthTex(nullptr, nullptr);
         node->accept(*shaderVisitor);
     }
 
@@ -459,6 +458,11 @@ namespace Resource
     void SceneManager::setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong)
     {
         mOpaqueDepthTex = { texturePing, texturePong };
+    }
+
+    osg::ref_ptr<osg::Texture> SceneManager::getOpaqueDepthTex(size_t frame)
+    {
+        return mOpaqueDepthTex[frame % 2];
     }
 
     SceneManager::~SceneManager()
@@ -737,6 +741,9 @@ namespace Resource
             try
             {
                 loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
+
+                SceneUtil::ProcessExtraDataVisitor extraDataVisitor(this);
+                loaded->accept(extraDataVisitor);
             }
             catch (const std::exception& e)
             {
@@ -990,7 +997,6 @@ namespace Resource
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
-        shaderVisitor->setOpaqueDepthTex(mOpaqueDepthTex[0], mOpaqueDepthTex[1]);
         shaderVisitor->setSupportsNormalsRT(mSupportsNormalsRT);
         return shaderVisitor;
     }

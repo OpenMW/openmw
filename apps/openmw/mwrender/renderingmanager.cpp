@@ -87,8 +87,10 @@ namespace MWRender
     class PerViewUniformStateUpdater final : public SceneUtil::StateSetUpdater
     {
     public:
-        PerViewUniformStateUpdater()
+        PerViewUniformStateUpdater(Resource::SceneManager* sceneManager)
+            : mSceneManager(sceneManager)
         {
+            mOpaqueTextureUnit = mSceneManager->getShaderManager().reserveGlobalTextureUnits(Shader::ShaderManager::Slot::OpaqueDepthTexture);
         }
 
         void setDefaults(osg::StateSet* stateset) override
@@ -108,6 +110,8 @@ namespace MWRender
                 osg::Texture* skyTexture = mSkyRTT->getColorTexture(static_cast<osgUtil::CullVisitor*>(nv));
                 stateset->setTextureAttribute(mSkyTextureUnit, skyTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
             }
+
+            stateset->setTextureAttribute(mOpaqueTextureUnit, mSceneManager->getOpaqueDepthTex(nv->getTraversalNumber()), osg::StateAttribute::ON);
         }
 
         void applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
@@ -144,6 +148,9 @@ namespace MWRender
         osg::Matrixf mProjectionMatrix;
         int mSkyTextureUnit = -1;
         SceneUtil::RTTNode* mSkyRTT = nullptr;
+
+        Resource::SceneManager* mSceneManager;
+        int mOpaqueTextureUnit = -1;
     };
 
     class SharedUniformStateUpdater : public SceneUtil::StateSetUpdater
@@ -536,7 +543,7 @@ namespace MWRender
         mSharedUniformStateUpdater = new SharedUniformStateUpdater(groundcover);
         rootNode->addUpdateCallback(mSharedUniformStateUpdater);
 
-        mPerViewUniformStateUpdater = new PerViewUniformStateUpdater();
+        mPerViewUniformStateUpdater = new PerViewUniformStateUpdater(mResourceSystem->getSceneManager());
         rootNode->addCullCallback(mPerViewUniformStateUpdater);
 
         mPostProcessor = new PostProcessor(*this, viewer, mRootNode, resourceSystem->getVFS());
@@ -581,7 +588,7 @@ namespace MWRender
         mSky->setCamera(mViewer->getCamera());
         if (mSkyBlending)
         {
-            int skyTextureUnit = mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(1);
+            int skyTextureUnit = mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(Shader::ShaderManager::Slot::SkyTexture);
             Log(Debug::Info) << "Reserving texture unit for sky RTT: " << skyTextureUnit;
             mPerViewUniformStateUpdater->enableSkyRTT(skyTextureUnit, mSky->getSkyRTT());
         }

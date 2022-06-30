@@ -614,16 +614,23 @@ namespace NifOsg
                 else if(e->recType == Nif::RC_NiStringExtraData)
                 {
                     const Nif::NiStringExtraData *sd = static_cast<const Nif::NiStringExtraData*>(e.getPtr());
+
+                    constexpr std::string_view extraDataIdentifer = "omw:data";
+
                     // String markers may contain important information
                     // affecting the entire subtree of this obj
-                    if(sd->string == "MRK" && !Loader::getShowMarkers())
+                    if (sd->string == "MRK" && !Loader::getShowMarkers())
                     {
                         // Marker objects. These meshes are only visible in the editor.
                         hasMarkers = true;
                     }
-                    else if(sd->string == "BONE")
+                    else if (sd->string == "BONE")
                     {
                         node->getOrCreateUserDataContainer()->addDescription("CustomBone");
+                    }
+                    else if (sd->string.rfind(extraDataIdentifer, 0) == 0)
+                    {
+                        node->setUserValue(Misc::OsgUserValues::sExtraData, sd->string.substr(extraDataIdentifer.length()));
                     }
                 }
             }

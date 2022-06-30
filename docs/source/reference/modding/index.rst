@@ -26,6 +26,7 @@ about creating new content for OpenMW, please refer to
 	custom-models/index
 	font
 	sky-system
+	custom-shader-effects
 	extended
 	paths
 	localisation
