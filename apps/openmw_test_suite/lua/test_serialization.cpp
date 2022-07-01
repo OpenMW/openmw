@@ -33,7 +33,7 @@ namespace
         EXPECT_EQ(serialized.size(), 10);  // version, type, 8 bytes value
         sol::object value = LuaUtil::deserialize(lua, serialized);
         ASSERT_TRUE(value.is<double>());
-        EXPECT_FLOAT_EQ(value.as<double>(), 3.14);
+        EXPECT_DOUBLE_EQ(value.as<double>(), 3.14);
     }
 
     TEST(LuaSerializationTest, Boolean)
@@ -183,7 +183,7 @@ namespace
             EXPECT_EQ(t.get<bool>("ab"), true);
             EXPECT_EQ(t.get<sol::table>("nested").get<int>("aa"), 2);
             EXPECT_EQ(t.get<sol::table>("nested").get<std::string>("bb"), "something");
-            EXPECT_FLOAT_EQ(t.get<sol::table>("nested").get<double>(5), -0.5);
+            EXPECT_DOUBLE_EQ(t.get<sol::table>("nested").get<double>(5), -0.5);
             EXPECT_EQ(t.get<osg::Vec2f>(1), osg::Vec2f(1, 2));
             EXPECT_EQ(t.get<osg::Vec2f>(2), osg::Vec2f(2, 1));
         }

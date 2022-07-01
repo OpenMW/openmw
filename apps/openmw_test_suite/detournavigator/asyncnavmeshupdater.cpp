@@ -78,7 +78,7 @@ namespace
         const std::map<TilePosition, ChangeType> changedTiles {{TilePosition {0, 0}, ChangeType::add}};
         updater.post(mAgentBounds, navMeshCacheItem, mPlayerTile, mWorldspace, changedTiles);
         updater.wait(mListener, WaitConditionType::allJobsDone);
-        EXPECT_NE(navMeshCacheItem->lockConst()->getImpl().getTileRefAt(0, 0, 0), 0);
+        EXPECT_NE(navMeshCacheItem->lockConst()->getImpl().getTileRefAt(0, 0, 0), 0u);
     }
 
     TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, repeated_post_should_lead_to_cache_hit)
@@ -150,7 +150,7 @@ namespace
                                           serialize(mSettings.mRecast, mAgentBounds, *recastMesh, objects));
         ASSERT_TRUE(tile.has_value());
         EXPECT_EQ(tile->mTileId, 1);
-        EXPECT_EQ(tile->mVersion, navMeshVersion);
+        EXPECT_EQ(tile->mVersion, navMeshFormatVersion);
     }
 
     TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, post_when_writing_to_db_disabled_should_not_write_tiles)
@@ -240,12 +240,12 @@ namespace
         const std::map<TilePosition, ChangeType> changedTilesAdd {{TilePosition {0, 0}, ChangeType::add}};
         updater.post(mAgentBounds, navMeshCacheItem, mPlayerTile, mWorldspace, changedTilesAdd);
         updater.wait(mListener, WaitConditionType::allJobsDone);
-        ASSERT_NE(navMeshCacheItem->lockConst()->getImpl().getTileRefAt(0, 0, 0), 0);
+        ASSERT_NE(navMeshCacheItem->lockConst()->getImpl().getTileRefAt(0, 0, 0), 0u);
         const std::map<TilePosition, ChangeType> changedTilesRemove {{TilePosition {0, 0}, ChangeType::remove}};
         const TilePosition playerTile(100, 100);
         updater.post(mAgentBounds, navMeshCacheItem, playerTile, mWorldspace, changedTilesRemove);
         updater.wait(mListener, WaitConditionType::allJobsDone);
-        EXPECT_EQ(navMeshCacheItem->lockConst()->getImpl().getTileRefAt(0, 0, 0), 0);
+        EXPECT_EQ(navMeshCacheItem->lockConst()->getImpl().getTileRefAt(0, 0, 0), 0u);
     }
 
     TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, should_stop_writing_to_db_when_size_limit_is_reached)

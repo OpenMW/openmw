@@ -172,12 +172,12 @@ namespace
         lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
         lua["util"] = LuaUtil::initUtilPackage(lua);
         lua.safe_script("v = util.vector2(1, 0):rotate(math.rad(120))");
-        EXPECT_FLOAT_EQ(get<float>(lua, "v.x"), -0.5);
-        EXPECT_FLOAT_EQ(get<float>(lua, "v.y"), 0.86602539);
-        EXPECT_FLOAT_EQ(get<float>(lua, "util.normalizeAngle(math.pi * 10 + 0.1)"), 0.1);
-        EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(0.1, 0, 1.5)"), 0.1);
+        EXPECT_FLOAT_EQ(get<float>(lua, "v.x"), -0.5f);
+        EXPECT_FLOAT_EQ(get<float>(lua, "v.y"), 0.86602539f);
+        EXPECT_FLOAT_EQ(get<float>(lua, "util.normalizeAngle(math.pi * 10 + 0.1)"), 0.1f);
+        EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(0.1, 0, 1.5)"), 0.1f);
         EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(-0.1, 0, 1.5)"), 0);
-        EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(2.1, 0, 1.5)"), 1.5);
+        EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(2.1, 0, 1.5)"), 1.5f);
         lua.safe_script("t = util.makeReadOnly({x = 1})");
         EXPECT_FLOAT_EQ(get<float>(lua, "t.x"), 1);
         EXPECT_ERROR(lua.safe_script("t.y = 2"), "userdata value");

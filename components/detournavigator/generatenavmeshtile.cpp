@@ -73,7 +73,7 @@ namespace DetourNavigator
             std::vector<std::byte> input = serialize(mSettings.mRecast, mAgentBounds, *recastMesh, objects);
             const std::optional<NavMeshTileInfo> info = consumer->find(mWorldspace, mTilePosition, input);
 
-            if (info.has_value() && info->mVersion == navMeshVersion)
+            if (info.has_value() && info->mVersion == navMeshFormatVersion)
             {
                 consumer->identity(mWorldspace, mTilePosition, info->mTileId);
                 ignore.mConsumer = nullptr;
@@ -86,9 +86,9 @@ namespace DetourNavigator
                 return;
 
             if (info.has_value())
-                consumer->update(mWorldspace, mTilePosition, info->mTileId, navMeshVersion, *data);
+                consumer->update(mWorldspace, mTilePosition, info->mTileId, navMeshFormatVersion, *data);
             else
-                consumer->insert(mWorldspace, mTilePosition, navMeshVersion, input, *data);
+                consumer->insert(mWorldspace, mTilePosition, navMeshFormatVersion, input, *data);
 
             ignore.mConsumer = nullptr;
         }
