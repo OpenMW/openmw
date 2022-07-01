@@ -113,7 +113,7 @@ void main()
     vec3 viewNormal = gl_NormalMatrix * worldNormal;
 #endif
 
-#if (!@normalMap && (@parallax || @forcePPL))
+#if (!@normalMap && (@parallax || @forcePPL || @softParticles))
     vec3 viewNormal = gl_NormalMatrix * worldNormal;
 #endif
 
