@@ -261,3 +261,18 @@ endif()
 if(USE_QT)
     set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
 endif(USE_QT)
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    target_precompile_headers(openmw-cs PRIVATE
+        <boost/filesystem.hpp>
+        <boost/program_options/options_description.hpp>
+
+        <algorithm>
+        <fstream>
+        <functional>
+        <ostream>
+        <string>
+        <string_view>
+        <vector>
+    )
+endif()

@@ -23,6 +23,8 @@
 
 #include <cmath>
 
+namespace MWWorld
+{
 namespace
 {
     static const int invalidWeatherID = -1;
@@ -53,8 +55,6 @@ namespace
     }
 }
 
-namespace MWWorld
-{
     template <typename T>
     T TimeOfDayInterpolator<T>::getValue(const float gameHour, const TimeOfDaySettings& timeSettings, const std::string& prefix) const
     {

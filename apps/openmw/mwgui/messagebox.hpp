@@ -3,8 +3,6 @@
 
 #include "windowbase.hpp"
 
-#undef MessageBox
-
 namespace MyGUI
 {
     class Widget;

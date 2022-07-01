@@ -18,3 +18,10 @@ endif()
 if (WIN32)
     install(TARGETS openmw-bulletobjecttool RUNTIME DESTINATION ".")
 endif()
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    target_precompile_headers(openmw-bulletobjecttool PRIVATE
+        <string>
+        <vector>
+    )
+endif()
