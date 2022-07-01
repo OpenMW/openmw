@@ -68,8 +68,11 @@ namespace SceneUtil
             traverse( node );
     }
 
-    OsgAnimationController::OsgAnimationController(const OsgAnimationController &copy, const osg::CopyOp &copyop) : SceneUtil::KeyframeController(copy, copyop), SceneUtil::NodeCallback<OsgAnimationController>(copy, copyop)
-    , mEmulatedAnimations(copy.mEmulatedAnimations)
+    OsgAnimationController::OsgAnimationController(const OsgAnimationController &copy, const osg::CopyOp &copyop)
+        : osg::Object(copy, copyop)
+        , SceneUtil::KeyframeController(copy)
+        , SceneUtil::NodeCallback<OsgAnimationController>(copy, copyop)
+        , mEmulatedAnimations(copy.mEmulatedAnimations)
     {
         mLinker = nullptr;
         for (const auto& mergedAnimationTrack : copy.mMergedAnimationTracks)
