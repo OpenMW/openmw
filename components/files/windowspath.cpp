@@ -4,9 +4,15 @@
 
 #include <cstring>
 
+#define FAR
+#define NEAR
+
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <winreg.h>
+
+#undef NEAR
+#undef FAR
 
 #include <boost/locale.hpp>
 namespace bconv = boost::locale::conv;

@@ -9,3 +9,7 @@ target_link_libraries(openmw_detournavigator_navmeshtilescache_benchmark benchma
 if (UNIX AND NOT APPLE)
     target_link_libraries(openmw_detournavigator_navmeshtilescache_benchmark ${CMAKE_THREAD_LIBS_INIT})
 endif()
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    target_precompile_headers(openmw_detournavigator_navmeshtilescache_benchmark PRIVATE <algorithm>)
+endif()

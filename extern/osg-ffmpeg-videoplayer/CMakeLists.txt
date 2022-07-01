@@ -16,3 +16,13 @@ target_link_libraries(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} ${FFmpeg_LIBRARIES})
 target_link_libraries(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} ${OSG_LIBRARIES})
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    target_precompile_headers(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} PUBLIC
+        <memory>
+        <string>
+        <vector>
+    )
+
+    target_precompile_headers(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} PRIVATE <algorithm>)
+endif()

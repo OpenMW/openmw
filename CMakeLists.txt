@@ -346,7 +346,12 @@ if (WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
 
     # Get rid of useless crud from windows.h
-    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
+    add_definitions(
+        -DNOMINMAX # name conflict with std::min, std::max
+        -DWIN32_LEAN_AND_MEAN
+        -DNOMB # name conflict with MWGui::MessageBox
+        -DNOGDI # name conflict with osgAnimation::MorphGeometry::RELATIVE
+    )
 endif()
 
 if(OPENMW_USE_SYSTEM_BULLET)

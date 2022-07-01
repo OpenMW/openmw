@@ -110,4 +110,21 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         PRIVATE OPENMW_DATA_DIR="${CMAKE_CURRENT_BINARY_DIR}/data"
                 OPENMW_TEST_SUITE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+        target_precompile_headers(openmw_test_suite PRIVATE
+            <boost/program_options/options_description.hpp>
+
+            <gtest/gtest.h>
+
+            <sol/sol.hpp>
+
+            <algorithm>
+            <filesystem>
+            <fstream>
+            <functional>
+            <memory>
+            <string>
+            <vector>
+        )
+    endif()
 endif()

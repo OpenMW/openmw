@@ -96,3 +96,12 @@ if(USE_QT)
     set_property(TARGET openmw-launcher PROPERTY AUTOMOC ON)
 endif(USE_QT)
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    target_precompile_headers(openmw-launcher PRIVATE
+        <boost/program_options/options_description.hpp>
+
+        <algorithm>
+        <string>
+        <vector>
+    )
+endif()
