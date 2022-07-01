@@ -75,7 +75,7 @@ namespace l10n
             {
                 const auto key = it.first.as<std::string>();
                 const auto value = it.second.as<std::string>();
-                icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(value);
+                icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(icu::StringPiece(value.data(), value.size()));
                 icu::ErrorCode status;
                 UParseError parseError;
                 icu::MessageFormat message(pattern, lang, parseError, status);
@@ -112,7 +112,7 @@ namespace l10n
         std::vector<icu::Formattable> argValues;
         for (auto& [k, v] : args)
         {
-            argNames.push_back(icu::UnicodeString::fromUTF8(k));
+            argNames.push_back(icu::UnicodeString::fromUTF8(icu::StringPiece(k.data(), k.size())));
             argValues.push_back(v);
         }
         return formatMessage(key, argNames, argValues);
