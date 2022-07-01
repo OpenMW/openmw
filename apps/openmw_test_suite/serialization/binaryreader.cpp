@@ -24,7 +24,7 @@ namespace
         std::uint32_t result = 0;
         const TestFormat<Mode::Read> format;
         binaryReader(format, result);
-        EXPECT_EQ(result, 42);
+        EXPECT_EQ(result, 42u);
     }
 
     TEST(DetourNavigatorSerializationBinaryReaderTest, shouldReadArithmeticTypeRangeValue)

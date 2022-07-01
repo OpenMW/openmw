@@ -31,24 +31,24 @@ TEST_F(EndiannessTest, test_swap_endianness_inplace2)
   uint16_t fortytwo = 0x0042;
 
   Misc::swapEndiannessInplace(zero);
-  EXPECT_EQ(zero, 0x0000);
+  EXPECT_EQ(zero, 0x0000u);
   Misc::swapEndiannessInplace(zero);
-  EXPECT_EQ(zero, 0x0000);
+  EXPECT_EQ(zero, 0x0000u);
 
   Misc::swapEndiannessInplace(ffff);
-  EXPECT_EQ(ffff, 0xFFFF);
+  EXPECT_EQ(ffff, 0xFFFFu);
   Misc::swapEndiannessInplace(ffff);
-  EXPECT_EQ(ffff, 0xFFFF);
+  EXPECT_EQ(ffff, 0xFFFFu);
 
   Misc::swapEndiannessInplace(n12);
-  EXPECT_EQ(n12, 0x0201);
+  EXPECT_EQ(n12, 0x0201u);
   Misc::swapEndiannessInplace(n12);
-  EXPECT_EQ(n12, 0x0102);
+  EXPECT_EQ(n12, 0x0102u);
 
   Misc::swapEndiannessInplace(fortytwo);
-  EXPECT_EQ(fortytwo, 0x4200);
+  EXPECT_EQ(fortytwo, 0x4200u);
   Misc::swapEndiannessInplace(fortytwo);
-  EXPECT_EQ(fortytwo, 0x0042);
+  EXPECT_EQ(fortytwo, 0x0042u);
 }
 
 TEST_F(EndiannessTest, test_swap_endianness_inplace4)
@@ -58,19 +58,19 @@ TEST_F(EndiannessTest, test_swap_endianness_inplace4)
   uint32_t ffff = 0xFFFFFFFF;
 
   Misc::swapEndiannessInplace(zero);
-  EXPECT_EQ(zero, 0x00000000);
+  EXPECT_EQ(zero, 0x00000000u);
   Misc::swapEndiannessInplace(zero);
-  EXPECT_EQ(zero, 0x00000000);
+  EXPECT_EQ(zero, 0x00000000u);
 
   Misc::swapEndiannessInplace(n1234);
-  EXPECT_EQ(n1234, 0x04030201);
+  EXPECT_EQ(n1234, 0x04030201u);
   Misc::swapEndiannessInplace(n1234);
-  EXPECT_EQ(n1234, 0x01020304);
+  EXPECT_EQ(n1234, 0x01020304u);
   
   Misc::swapEndiannessInplace(ffff);
-  EXPECT_EQ(ffff, 0xFFFFFFFF);
+  EXPECT_EQ(ffff, 0xFFFFFFFFu);
   Misc::swapEndiannessInplace(ffff);
-  EXPECT_EQ(ffff, 0xFFFFFFFF);
+  EXPECT_EQ(ffff, 0xFFFFFFFFu);
 }
 
 TEST_F(EndiannessTest, test_swap_endianness_inplace8)
@@ -80,19 +80,19 @@ TEST_F(EndiannessTest, test_swap_endianness_inplace8)
   uint64_t ffff = 0xFFFF'FFFF'FFFF'FFFF;
 
   Misc::swapEndiannessInplace(zero);
-  EXPECT_EQ(zero, 0x0000'0000'0000'0000);
+  EXPECT_EQ(zero, 0x0000'0000'0000'0000u);
   Misc::swapEndiannessInplace(zero);
-  EXPECT_EQ(zero, 0x0000'0000'0000'0000);
+  EXPECT_EQ(zero, 0x0000'0000'0000'0000u);
   
   Misc::swapEndiannessInplace(ffff);
-  EXPECT_EQ(ffff, 0xFFFF'FFFF'FFFF'FFFF);
+  EXPECT_EQ(ffff, 0xFFFF'FFFF'FFFF'FFFFu);
   Misc::swapEndiannessInplace(ffff);
-  EXPECT_EQ(ffff, 0xFFFF'FFFF'FFFF'FFFF);
+  EXPECT_EQ(ffff, 0xFFFF'FFFF'FFFF'FFFFu);
 
   Misc::swapEndiannessInplace(n1234);
-  EXPECT_EQ(n1234, 0x0807'0605'0403'0201);
+  EXPECT_EQ(n1234, 0x0807'0605'0403'0201u);
   Misc::swapEndiannessInplace(n1234);
-  EXPECT_EQ(n1234, 0x0102'0304'0506'0708);
+  EXPECT_EQ(n1234, 0x0102'0304'0506'0708u);
 }
 
 TEST_F(EndiannessTest, test_swap_endianness_inplace_float)

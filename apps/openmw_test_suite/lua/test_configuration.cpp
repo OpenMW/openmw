@@ -236,7 +236,7 @@ namespace
         {
             sol::table data = LuaUtil::deserialize(lua.lua_state(), loadedCfg.mScripts[1].mRefs[1].mInitializationData, &serializer);
             ESM::RefNum adjustedRef = data["fargoth"].get<ESM::RefNum>();
-            EXPECT_EQ(adjustedRef.mIndex, 128964);
+            EXPECT_EQ(adjustedRef.mIndex, 128964u);
             EXPECT_EQ(adjustedRef.mContentFile, 2);
         }
     }
