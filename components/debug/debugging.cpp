@@ -314,16 +314,21 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
             setupLogging(cfgMgr.getLogPath().string(), appName, mode);
         }
 
+        if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"); env == nullptr || std::atol(env) == 0)
+        {
 #if defined(_WIN32)
-        const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
-        Crash::CrashCatcher crashy(argc, argv, (cfgMgr.getLogPath() / crashLogName).make_preferred().string());
+            const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
+            Crash::CrashCatcher crashy(argc, argv, (cfgMgr.getLogPath() / crashLogName).make_preferred().string());
 #else
-        const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
-        // install the crash handler as soon as possible. note that the log path
-        // does not depend on config being read.
-        crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / crashLogName).string());
+            const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
+            // install the crash handler as soon as possible. note that the log path
+            // does not depend on config being read.
+            crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / crashLogName).string());
 #endif
-        ret = innerApplication(argc, argv);
+            ret = innerApplication(argc, argv);
+        }
+        else
+            ret = innerApplication(argc, argv);
     }
     catch (const std::exception& e)
     {
