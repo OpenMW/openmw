@@ -128,11 +128,11 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
         auto composingVariables = separateComposingVariables(variables, description);
         for (auto& [k, v] : *it)
         {
-            auto it = variables.find(k);
-            if (it == variables.end())
+            auto variable = variables.find(k);
+            if (variable == variables.end())
                 variables.insert({k, v});
-            else if (it->second.defaulted())
-                it->second = v;
+            else if (variable->second.defaulted())
+                variable->second = v;
         }
         mergeComposingVariables(variables, composingVariables, description);
     }
