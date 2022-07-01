@@ -238,15 +238,15 @@ namespace MWScript
 
     void GlobalScripts::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
-        for (const auto& iter : mScripts)
+        for (const auto& [id, desc] : mScripts)
         {
-            ESM::GlobalScript script = std::visit (ScriptCreatingVisitor {}, iter.second->mTarget);
+            ESM::GlobalScript script = std::visit(ScriptCreatingVisitor {}, desc->mTarget);
 
-            script.mId = iter.first;
+            script.mId = id;
 
-            iter.second->mLocals.write (script.mLocals, iter.first);
+            desc->mLocals.write(script.mLocals, id);
 
-            script.mRunning = iter.second->mRunning ? 1 : 0;
+            script.mRunning = desc->mRunning ? 1 : 0;
 
             writer.startRecord (ESM::REC_GSCR);
             script.save (writer);
