@@ -150,7 +150,7 @@ namespace
                                           serialize(mSettings.mRecast, mAgentBounds, *recastMesh, objects));
         ASSERT_TRUE(tile.has_value());
         EXPECT_EQ(tile->mTileId, 1);
-        EXPECT_EQ(tile->mVersion, navMeshVersion);
+        EXPECT_EQ(tile->mVersion, navMeshFormatVersion);
     }
 
     TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, post_when_writing_to_db_disabled_should_not_write_tiles)

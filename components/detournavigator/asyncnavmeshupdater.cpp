@@ -92,7 +92,7 @@ namespace DetourNavigator
         {
             if (db == nullptr)
                 return nullptr;
-            return std::make_unique<DbWorker>(updater, std::move(db), TileVersion(navMeshVersion),
+            return std::make_unique<DbWorker>(updater, std::move(db), TileVersion(navMeshFormatVersion),
                                               settings.mRecast, settings.mWriteToNavMeshDb);
         }
 
@@ -483,7 +483,7 @@ namespace DetourNavigator
         std::unique_ptr<PreparedNavMeshData> preparedNavMeshData;
         bool generatedNavMeshData = false;
 
-        if (job.mCachedTileData.has_value() && job.mCachedTileData->mVersion == navMeshVersion)
+        if (job.mCachedTileData.has_value() && job.mCachedTileData->mVersion == navMeshFormatVersion)
         {
             preparedNavMeshData = std::make_unique<PreparedNavMeshData>();
             if (deserialize(job.mCachedTileData->mData, *preparedNavMeshData))

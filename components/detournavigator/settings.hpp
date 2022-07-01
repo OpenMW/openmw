@@ -53,7 +53,7 @@ namespace DetourNavigator
         std::uint64_t mMaxDbFileSize = 0;
     };
 
-    inline constexpr std::int64_t navMeshVersion = 2;
+    inline constexpr std::int64_t navMeshFormatVersion = 2;
 
     RecastSettings makeRecastSettingsFromSettingsManager();
 
