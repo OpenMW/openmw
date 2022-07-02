@@ -131,6 +131,7 @@
     Bug #6753: Info records without a DATA subrecords are loaded incorrectly
     Bug #6794: Light sources are attached to mesh bounds centers instead of mesh origins when AttachLight NiNode is missing
     Bug #6799: Game crashes if an NPC has no Class attached
+    Bug #6849: ImageButton texture is not scaled properly
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
