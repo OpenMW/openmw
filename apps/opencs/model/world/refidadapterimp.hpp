@@ -27,7 +27,10 @@ namespace CSMWorld
         const RefIdColumn *mType;
         const RefIdColumn *mBlocked;
 
-        BaseColumns () : mBlocked(nullptr) {}
+        BaseColumns () : mId(nullptr)
+        , mModified(nullptr)
+        , mType(nullptr)
+        , mBlocked(nullptr) {}
     };
 
     /// \brief Base adapter for all refereceable record types

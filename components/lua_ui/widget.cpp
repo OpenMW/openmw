@@ -160,7 +160,7 @@ namespace LuaUi
 
     sol::object WidgetExtension::keyEvent(MyGUI::KeyCode code) const
     {
-        SDL_Keysym keySym;
+        auto keySym = SDL_Keysym();
         keySym.sym = SDLUtil::myGuiKeyToSdl(code);
         keySym.scancode = SDL_GetScancodeFromKey(keySym.sym);
         keySym.mod = SDL_GetModState();

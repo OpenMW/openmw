@@ -21,6 +21,7 @@ void CSMDoc::Document::addGmsts()
         ESM::GameSetting gmst;
         gmst.mId = CSMWorld::DefaultGmsts::Floats[i];
         gmst.mValue.setType (ESM::VT_Float);
+        gmst.mRecordFlags = 0;
         gmst.mValue.setFloat (CSMWorld::DefaultGmsts::FloatsDefaultValues[i]);
         getData().getGmsts().add (gmst);
     }
@@ -30,6 +31,7 @@ void CSMDoc::Document::addGmsts()
         ESM::GameSetting gmst;
         gmst.mId = CSMWorld::DefaultGmsts::Ints[i];
         gmst.mValue.setType (ESM::VT_Int);
+        gmst.mRecordFlags = 0;
         gmst.mValue.setInteger (CSMWorld::DefaultGmsts::IntsDefaultValues[i]);
         getData().getGmsts().add (gmst);
     }
@@ -39,6 +41,7 @@ void CSMDoc::Document::addGmsts()
         ESM::GameSetting gmst;
         gmst.mId = CSMWorld::DefaultGmsts::Strings[i];
         gmst.mValue.setType (ESM::VT_String);
+        gmst.mRecordFlags = 0;
         gmst.mValue.setString ("");
         getData().getGmsts().add (gmst);
     }
@@ -164,6 +167,7 @@ void CSMDoc::Document::createBase()
     {
         ESM::Global record;
         record.mId = sGlobals[i];
+        record.mRecordFlags = 0;
         record.mValue.setType (i==2 ? ESM::VT_Float : ESM::VT_Long);
 
         if (i==0 || i==1)
