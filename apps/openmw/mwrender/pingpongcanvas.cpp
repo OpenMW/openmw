@@ -130,11 +130,24 @@ namespace MWRender
 
             state.pushStateSet(mFallbackStateSet);
             state.apply();
+
+            if (Stereo::getMultiview() && mMultiviewResolveProgram)
+            {
+                state.pushStateSet(mMultiviewResolveStateSet);
+                state.apply();
+            }
+
             state.applyTextureAttribute(0, bufferData.sceneTex);
             resolveViewport->apply(state);
 
             drawGeometry(renderInfo);
             state.popStateSet();
+
+            if (Stereo::getMultiview() && mMultiviewResolveProgram)
+            {
+                state.popStateSet();
+            }
+
             return;
         }
 

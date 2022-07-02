@@ -7,6 +7,10 @@
 #include <osgUtil/RenderStage>
 #include <osgUtil/CullVisitor>
 
+#ifdef OSG_HAS_MULTIVIEW
+#include <osg/Texture2DMultisampleArray>
+#endif
+
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/settings/settings.hpp>
 #include <components/debug/debuglog.hpp>
@@ -240,6 +244,97 @@ namespace Stereo
         texture2d->setInternalFormat(textureArray->getInternalFormat());
         texture2d->setNumMipmapLevels(textureArray->getNumMipmapLevels());
         return texture2d;
+    }
+
+#ifdef OSG_HAS_MULTIVIEW
+    //! Draw callback that, if set on a RenderStage, resolves MSAA after draw. Needed when using custom fbo/resolve fbos on renderstages in combination with multiview.
+    struct MultiviewMSAAResolveCallback : public osgUtil::RenderBin::DrawCallback
+    {
+        void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override
+        {
+            osgUtil::RenderStage* stage = static_cast<osgUtil::RenderStage*>(bin);
+            auto msaaFbo = stage->getFrameBufferObject();
+            auto resolveFbo = stage->getMultisampleResolveFramebufferObject();
+            if (msaaFbo != mMsaaFbo)
+            {
+                mMsaaFbo = msaaFbo;
+                setupMsaaLayers();
+            }
+            if (resolveFbo != mFbo)
+            {
+                mFbo = resolveFbo;
+                setupLayers();
+            }
+
+            // Null the resolve framebuffer to keep osg from doing redundant work.
+            stage->setMultisampleResolveFramebufferObject(nullptr);
+
+            // Do the actual render work
+            bin->drawImplementation(renderInfo, previous);
+
+            // Blit layers
+            osg::State& state = *renderInfo.getState();
+            osg::GLExtensions* ext = state.get<osg::GLExtensions>();
+            for (int i = 0; i < 2; i++)
+            {
+                mLayers[i]->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+                mMsaaLayers[i]->apply(state, osg::FrameBufferObject::READ_FRAMEBUFFER);
+                ext->glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, mWidth, mHeight, GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            }
+            msaaFbo->apply(state, osg::FrameBufferObject::READ_DRAW_FRAMEBUFFER);
+        }
+
+        void setupLayers()
+        {
+            const auto& attachments = mFbo->getAttachmentMap();
+            for (int i = 0; i < 2; i++)
+            {
+                mLayers[i] = new osg::FrameBufferObject;
+                // Intentionally not using ref& so attachment can be non-const
+                for (auto [component, attachment] : attachments)
+                {
+                    osg::Texture2DArray* texture = static_cast<osg::Texture2DArray*>(attachment.getTexture());
+                    mLayers[i]->setAttachment(component, osg::FrameBufferAttachment(texture, i));
+                    mWidth = texture->getTextureWidth();
+                    mHeight = texture->getTextureHeight();
+                }
+            }
+        }
+
+        void setupMsaaLayers()
+        {
+            const auto& attachments = mMsaaFbo->getAttachmentMap();
+            for (int i = 0; i < 2; i++)
+            {
+                mMsaaLayers[i] = new osg::FrameBufferObject;
+                // Intentionally not using ref& so attachment can be non-const
+                for (auto [component, attachment] : attachments)
+                {
+                    osg::Texture2DMultisampleArray* texture = static_cast<osg::Texture2DMultisampleArray*>(attachment.getTexture());
+                    mMsaaLayers[i]->setAttachment(component, osg::FrameBufferAttachment(texture, i));
+                    mWidth = texture->getTextureWidth();
+                    mHeight = texture->getTextureHeight();
+                }
+            }
+        }
+
+        osg::ref_ptr<osg::FrameBufferObject> mFbo;
+        osg::ref_ptr<osg::FrameBufferObject> mMsaaFbo;
+        osg::ref_ptr<osg::FrameBufferObject> mLayers[2];
+        osg::ref_ptr<osg::FrameBufferObject> mMsaaLayers[2];
+        int mWidth;
+        int mHeight;
+    };
+#endif
+
+    void setMultiviewMSAAResolveCallback(osgUtil::RenderStage* renderStage)
+    {
+#ifdef OSG_HAS_MULTIVIEW
+        if (Stereo::getMultiview())
+        {
+            renderStage->setDrawCallback(new MultiviewMSAAResolveCallback);
+        }
+#endif
     }
 
     class UpdateRenderStagesCallback : public SceneUtil::NodeCallback<UpdateRenderStagesCallback, osg::Node*, osgUtil::CullVisitor*>
