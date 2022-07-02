@@ -198,6 +198,9 @@ namespace Resource
         void setSupportsNormalsRT(bool supports) { mSupportsNormalsRT = supports; }
         bool getSupportsNormalsRT() const { return mSupportsNormalsRT; }
 
+        void setSoftParticles(bool enabled) { mSoftParticles = enabled; }
+        bool getSoftParticles() const { return mSoftParticles; }
+
     private:
 
         Shader::ShaderVisitor* createShaderVisitor(const std::string& shaderPrefix = "objects");
@@ -216,6 +219,7 @@ namespace Resource
         bool mConvertAlphaTestToAlphaToCoverage;
         bool mSupportsNormalsRT;
         std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
+        bool mSoftParticles = false;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
         mutable std::mutex mSharedStateMutex;
