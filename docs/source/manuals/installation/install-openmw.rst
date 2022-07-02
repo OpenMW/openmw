@@ -18,7 +18,7 @@ and run the install package once downloaded. It's now installed!
 The (bleeding edge) Source Way
 ==============================
 
-Visit the `Development Environment Setup <https://gitlab.com/OpenMW/openmw/-/wikis/development/development_environment_setup>`_
+Visit the `Development Environment Setup <https://wiki.openmw.org/index.php?title=Development_Environment_Setup>`_
 section of the Wiki for detailed instructions on how to build the engine.
 
 The Ubuntu Way
