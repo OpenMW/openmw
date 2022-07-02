@@ -2,7 +2,8 @@
 
 #include <mutex>
 
-#include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace Debug
 {

@@ -24,6 +24,7 @@
 #include <components/esm3/readerscache.hpp>
 #include <components/platform/platform.hpp>
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/files/conversion.hpp>
 
 #include <osg/Vec3f>
 
@@ -179,9 +180,9 @@ namespace NavMeshTool
             const osg::Vec3f agentHalfExtents = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
             const DetourNavigator::AgentBounds agentBounds {agentCollisionShape, agentHalfExtents};
             const std::uint64_t maxDbFileSize = static_cast<std::uint64_t>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
-            const auto dbPath = config.getUserDataPath() / "navmesh.db";
+            const auto dbPath = Files::pathToUnicodeString(config.getUserDataPath() / "navmesh.db");
 
-            DetourNavigator::NavMeshDb db(dbPath.string(), maxDbFileSize); //TODO(Project579): This will probably break in windows with unicode paths
+            DetourNavigator::NavMeshDb db(dbPath, maxDbFileSize);
 
             ESM::ReadersCache readers;
             EsmLoader::Query query;

@@ -17,7 +17,7 @@ Version getOpenmwVersion(const std::filesystem::path &resourcePath)
     return v;
 }
 
-std::string Version::describe()
+std::string Version::describe() const
 {
     std::string str = "OpenMW version " + mVersion;
     std::string rev = mCommitHash;

@@ -261,7 +261,7 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (CSVDoc::View *view)
     QMessageBox messageBox(view);
     CSMDoc::Document *document = view->getDocument();
 
-    messageBox.setWindowTitle (QString::fromUtf8(document->getSavePath().filename().string().c_str())); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+    messageBox.setWindowTitle (QString::fromStdWString(document->getSavePath().filename().wstring()));
     messageBox.setText ("The document has been modified.");
     messageBox.setInformativeText ("Do you want to save your changes?");
     messageBox.setStandardButtons (QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);

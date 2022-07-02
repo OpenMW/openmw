@@ -35,7 +35,7 @@ namespace MWScript
         mScriptBlacklist.resize (scriptBlacklist.size());
 
         std::transform (scriptBlacklist.begin(), scriptBlacklist.end(),
-            mScriptBlacklist.begin(), Misc::StringUtils::lowerCase);
+            mScriptBlacklist.begin(), [](const std::string& s) { return Misc::StringUtils::lowerCase(s); });
         std::sort (mScriptBlacklist.begin(), mScriptBlacklist.end());
     }
 

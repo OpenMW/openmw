@@ -8,6 +8,7 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/misc/timeconvert.hpp>
+#include <components/files/conversion.hpp>
 
 
 
@@ -944,7 +945,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
         {
             dependencies.push_back(gameFile.name);
         }
-        unsortedFiles.emplace_back(reader.getName().filename().string(), dependencies); //TODO(Project579): This will probably break in windows with unicode paths
+        unsortedFiles.emplace_back(Files::pathToUnicodeString(reader.getName().filename()), dependencies);
         reader.close();
     }
 

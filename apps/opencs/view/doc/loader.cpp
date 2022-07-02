@@ -19,7 +19,7 @@ void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 : mDocument (document), mTotalRecordsLabel (0), mRecordsLabel (0), mAborted (false), mMessages (nullptr), mRecords(0)
 {
-    setWindowTitle (QString::fromUtf8((std::string("Opening ") + document->getSavePath().filename().string()).c_str())); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+    setWindowTitle (QString::fromStdWString(L"Opening " + document->getSavePath().filename().wstring()));
 
     setMinimumWidth (400);
 

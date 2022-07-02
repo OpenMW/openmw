@@ -12,6 +12,7 @@
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <components/files/conversion.hpp>
 
 #include "playpage.hpp"
 #include "graphicspage.hpp"
@@ -155,14 +156,14 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         return FirstRunDialogResultFailure;
 
     // Dialog wizard and setup will fail if the config directory does not already exist
-    QDir userConfigDir = QDir(QString::fromStdString(mCfgMgr.getUserConfigPath().string())); //TODO(Project579): This will probably break in windows with unicode paths, in Qt 6 it's possible to convert directly from std::filesystem::path to QDir and that would solve the issue
-    if ( ! userConfigDir.exists() ) {
-        if ( ! userConfigDir.mkpath(".") )
+    const auto& userConfigDir = mCfgMgr.getUserConfigPath();
+    if ( ! exists(userConfigDir) ) {
+        if ( ! create_directory(userConfigDir) )
         {
             cfgError(tr("Error opening OpenMW configuration file"),
                      tr("<br><b>Could not create directory %0</b><br><br> \
                         Please make sure you have the right permissions \
-                        and try again.<br>").arg(userConfigDir.canonicalPath())
+                        and try again.<br>").arg(QString::fromStdWString(canonical(userConfigDir).wstring()))
             );
             return FirstRunDialogResultFailure;
         }
@@ -295,7 +296,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());  //TODO(Project579): This will probably break in windows with unicode paths
+    QString userPath = QString::fromStdWString(mCfgMgr.getUserConfigPath().wstring());
 
     QStringList paths;
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
@@ -328,9 +329,9 @@ bool Launcher::MainDialog::setupGameSettings()
 {
     mGameSettings.clear();
 
-    QString localPath = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
-    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+    QString localPath = QString::fromStdWString(mCfgMgr.getLocalPath().wstring());
+    QString userPath = QString::fromStdWString(mCfgMgr.getUserConfigPath().wstring());
+    QString globalPath = QString::fromStdWString(mCfgMgr.getGlobalPath().wstring());
 
     QFile file;
 
@@ -479,21 +480,20 @@ bool Launcher::MainDialog::writeSettings()
     mSettingsPage->saveSettings();
     mAdvancedPage->saveSettings();
 
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
-    QDir dir(userPath);
+    const auto& userPath = mCfgMgr.getUserConfigPath();
 
-    if (!dir.exists()) {
-        if (!dir.mkpath(userPath)) {
+    if (!exists(userPath)) {
+        if (!create_directory(userPath)) {
             cfgError(tr("Error creating OpenMW configuration directory"),
                      tr("<br><b>Could not create %0</b><br><br> \
                          Please make sure you have the right permissions \
-                         and try again.<br>").arg(userPath));
+                         and try again.<br>").arg(QString::fromStdWString(userPath.wstring())));
             return false;
         }
     }
 
     // Game settings
-    QFile file(userPath + QString("openmw.cfg"));
+    QFile file(QString::fromStdWString((userPath / "openmw.cfg").wstring()));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
@@ -515,13 +515,13 @@ bool Launcher::MainDialog::writeSettings()
     }
     catch (std::exception& e) {
         std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" +
-            settingsPath.string() + "<br><br>" + e.what(); //TODO(Project579): This will probably break in windows with unicode paths
+            Files::pathToUnicodeString(settingsPath) + "<br><br>" + e.what();
         cfgError(tr("Error writing user settings file"), tr(msg.c_str()));
         return false;
     }
 
     // Launcher settings
-    file.setFileName(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
+    file.setFileName(QString::fromStdWString((userPath / Config::LauncherSettings::sLauncherConfigFileName).wstring()));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created

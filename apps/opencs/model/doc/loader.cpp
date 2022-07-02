@@ -1,5 +1,7 @@
 #include "loader.hpp"
 
+#include <components/files/conversion.hpp>
+
 #include <iostream>
 
 #include "../tools/reportmodel.hpp"
@@ -93,7 +95,7 @@ void CSMDoc::Loader::load()
             iter->second.mRecordsLeft = true;
             iter->second.mRecordsLoaded = 0;
 
-            emit nextStage (document, path.filename().string(), steps); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+            emit nextStage (document, Files::pathToUnicodeString(path.filename()), steps);
         }
         else if (iter->second.mFile==size) // start loading the last (project) file
         {

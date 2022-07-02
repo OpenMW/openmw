@@ -131,7 +131,7 @@ namespace ESM
                     {
                         if(!overriding)
                             mWater = std::numeric_limits<float>::max();
-                        Log(Debug::Warning) << "Warning: Encountered invalid water level in cell " << mName << " defined in " << esm.getContext().filename; //TODO(Project579): This will probably break in windows with unicode paths
+                        Log(Debug::Warning) << "Warning: Encountered invalid water level in cell " << mName << " defined in " << esm.getContext().filename;
                     }
                     else
                         mWater = waterLevel;

@@ -13,7 +13,7 @@ namespace Version
         std::string mCommitHash;
         std::string mTagHash;
 
-        std::string describe();
+        std::string describe() const;
     };
 
     /// Read OpenMW version from the version file located in resourcePath.

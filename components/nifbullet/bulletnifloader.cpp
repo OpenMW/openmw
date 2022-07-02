@@ -21,6 +21,7 @@
 #include <components/nif/parent.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/files/conversion.hpp>
 
 namespace
 {
@@ -187,7 +188,7 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
         if (node)
             roots.emplace_back(node);
     }
-    const std::string filename = nif.getFilename().string(); //TODO(Project579): This will probably break in windows with unicode paths
+    const std::string filename = Files::pathToUnicodeString(nif.getFilename());
     mShape->mFileName = filename;
     if (roots.empty())
     {

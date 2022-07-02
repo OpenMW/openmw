@@ -1,4 +1,5 @@
 #include "hash.hpp"
+#include "conversion.hpp"
 
 #include <extern/smhasher/MurmurHash3.h>
 
@@ -34,7 +35,7 @@ namespace Files
         }
         catch (const std::exception& e)
         {
-            throw std::runtime_error("Error while reading \"" + fileName.string() + "\" to get hash: " + std::string(e.what())); //TODO(Project579): This will probably break in windows with unicode paths
+            throw std::runtime_error("Error while reading \"" + Files::pathToUnicodeString(fileName) + "\" to get hash: " + e.what());
         }
         return hash;
     }

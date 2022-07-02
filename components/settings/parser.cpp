@@ -304,7 +304,7 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::filesystem::path 
 
     // Now install the newly written file in the requested place.
     if (changed) {
-        Log(Debug::Info) << "Updating settings file: " << file; //TODO(Project579): This will probably break in windows with unicode paths
+        Log(Debug::Info) << "Updating settings file: " << file;
         std::ofstream ofstream;
         ofstream.open(file);
         ofstream << ostream.rdbuf();

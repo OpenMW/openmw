@@ -20,6 +20,7 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/files/conversion.hpp>
 
 #include <algorithm>
 #include <filesystem>
@@ -228,7 +229,7 @@ namespace EsmLoader
             for (std::size_t i = 0; i < contentFiles.size(); ++i)
             {
                 const std::string &file = contentFiles[i];
-                const std::string extension = Misc::StringUtils::lowerCase(std::filesystem::path(file).extension().string()); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
+                const std::string extension = Misc::StringUtils::lowerCase(Files::pathToUnicodeString(std::filesystem::path(file).extension()));
 
                 if (supportedFormats.find(extension) == supportedFormats.end())
                 {

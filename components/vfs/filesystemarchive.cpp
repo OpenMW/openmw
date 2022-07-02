@@ -6,6 +6,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/constrainedfilestream.hpp>
+#include <components/files/conversion.hpp>
 
 namespace VFS
 {
@@ -21,7 +22,7 @@ namespace VFS
     {
         if (!mBuiltIndex)
         {
-            const auto str = mPath.string(); //TODO(Project579): This will probably break in windows with unicode paths
+            const auto str = mPath.u8string();
             size_t prefix = str.size ();
 
             if (!mPath.empty() && str [prefix - 1] != '\\' && str [prefix - 1] != '/')
@@ -34,7 +35,7 @@ namespace VFS
                     continue;
 
                 const auto& path = i.path ();
-                const auto& proper = path.string (); //TODO(Project579): This will probably break in windows with unicode paths
+                const auto& proper = Files::pathToUnicodeString(path);
 
                 FileSystemArchiveFile file(path);
 
@@ -44,7 +45,7 @@ namespace VFS
 
                 const auto inserted = mIndex.insert(std::make_pair(searchable, file));
                 if (!inserted.second)
-                    Log(Debug::Warning) << "Warning: found duplicate file for '" << proper << "', please check your file system for two files with the same name in different cases."; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Warning) << "Warning: found duplicate file for '" << proper << "', please check your file system for two files with the same name in different cases.";
                 else
                     out[inserted.first->first] = &inserted.first->second;
             }
@@ -66,7 +67,7 @@ namespace VFS
 
     std::string FileSystemArchive::getDescription() const
     {
-        return std::string{"DIR: "} + mPath.string(); //TODO(Project579): This will probably break in windows with unicode paths
+        return "DIR: " + Files::pathToUnicodeString(mPath);
     }
 
     // ----------------------------------------------------------------------------------

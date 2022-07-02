@@ -10,6 +10,7 @@
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 
 #include <boost/program_options.hpp>
 
@@ -19,7 +20,7 @@ namespace bpo = boost::program_options;
 ///See if the file has the named extension
 bool hasExtension(const std::filesystem::path& filename, const std::string& extensionToFind)
 {
-    std::string extension = filename.extension().string(); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
+    const auto extension = Files::pathToUnicodeString(filename.extension());
     return Misc::StringUtils::ciEqual(extension, extensionToFind);
 }
 
@@ -42,7 +43,7 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
     myManager.addArchive(std::move(anArchive));
     myManager.buildIndex();
 
-    for(const auto& name : myManager.getRecursiveDirectoryIterator("")) //TODO(Project579): This will probably break in windows with unicode paths
+    for(const auto& name : myManager.getRecursiveDirectoryIterator(""))
     {
         try{
             if(isNIF(name))
@@ -142,7 +143,7 @@ int main(int argc, char **argv)
              }
              else
              {
-                 std::cerr << "ERROR:  \"" << path << "\" is not a nif file, bsa file, or directory!" << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
+                 std::cerr << "ERROR:  \"" << Files::pathToUnicodeString(path) << "\" is not a nif file, bsa file, or directory!" << std::endl;
              }
         }
         catch (std::exception& e)

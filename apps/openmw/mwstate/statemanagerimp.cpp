@@ -13,6 +13,7 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/files/conversion.hpp>
 
 #include <osg/Image>
 
@@ -305,7 +306,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             throw std::runtime_error("Write operation failed (file stream)");
 
         Settings::Manager::setString ("character", "Saves",
-            slot->mPath.parent_path().filename().string()); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+            Files::pathToUnicodeString(slot->mPath.parent_path().filename()));
 
         const auto finish = std::chrono::steady_clock::now();
 
@@ -388,7 +389,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::fil
     {
         cleanup();
 
-        Log(Debug::Info) << "Reading save file " << filepath.filename(); //TODO(Project579): This will probably break in windows with unicode paths
+        Log(Debug::Info) << "Reading save file " << filepath.filename();
 
         ESM::ESMReader reader;
         reader.open (filepath);
@@ -521,7 +522,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::fil
 
         if (character)
             Settings::Manager::setString ("character", "Saves",
-                                      character->getPath().filename().string()); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+                                      Files::pathToUnicodeString(character->getPath().filename()));
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
         MWBase::Environment::get().getWorld()->saveLoaded();

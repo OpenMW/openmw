@@ -24,9 +24,9 @@ namespace
             }
         }
         if (dir == nullptr)
-            return std::filesystem::path();
+            return {};
         else
-            return std::filesystem::path(dir);
+            return dir;
     }
 
     std::filesystem::path getEnv(const std::string& envVariable, const std::filesystem::path& fallback)

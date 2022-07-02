@@ -83,18 +83,17 @@ void CSMDoc::Runner::start (bool delayed)
         arguments << ("--script-run="+mStartup->fileName());
 
         arguments <<
-            QString::fromUtf8 (("--data=\""+mProjectPath.parent_path().string()+"\"").c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+            QString::fromStdWString (L"--data=\""+mProjectPath.parent_path().wstring()+L"\"");
 
         arguments << "--replace=content";
 
-        for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
-            iter!=mContentFiles.end(); ++iter)
+        for (const auto & mContentFile : mContentFiles)
         {
-            arguments << QString::fromUtf8 (("--content="+*iter).c_str());
+            arguments << QString::fromStdWString (L"--content="+mContentFile.wstring());
         }
 
         arguments
-            << QString::fromUtf8 (("--content="+mProjectPath.filename().string()).c_str()); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+            << QString::fromStdWString (L"--content="+mProjectPath.filename().wstring());
 
         mProcess.start (path, arguments);
     }
@@ -123,7 +122,7 @@ bool CSMDoc::Runner::isRunning() const
 }
 
 void CSMDoc::Runner::configure (const ESM::DebugProfile& profile,
-    const std::vector<std::string>& contentFiles, const std::string& startupInstruction)
+    const std::vector<std::filesystem::path> &contentFiles, const std::string& startupInstruction)
 {
     mProfile = profile;
     mContentFiles = contentFiles;

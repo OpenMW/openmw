@@ -6,6 +6,7 @@
 
 #include <components/vfs/archive.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace TestingOpenMW
 {
@@ -14,7 +15,7 @@ namespace TestingOpenMW
     {
         std::filesystem::path dir("tests_output");
         std::filesystem::create_directory(dir);
-        return dir / name;
+        return dir / Misc::StringUtils::stringToU8String(name);
     }
 
     inline std::filesystem::path temporaryFilePath(const std::string name)

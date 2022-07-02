@@ -299,7 +299,7 @@ namespace NifOsg
                 setupController(key, callback, /*animflags*/0);
 
                 if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
-                    Log(Debug::Verbose) << "Controller " << strdata->string << " present more than once in " << nif->getFilename() << ", ignoring later version"; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Verbose) << "Controller " << strdata->string << " present more than once in " << nif->getFilename() << ", ignoring later version";
             }
         }
 
@@ -485,20 +485,20 @@ namespace NifOsg
         {
             if (nifNode->recType != Nif::RC_NiTextureEffect)
             {
-                Log(Debug::Info) << "Unhandled effect " << nifNode->recName << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Unhandled effect " << nifNode->recName << " in " << mFilename;
                 return;
             }
 
             const Nif::NiTextureEffect* textureEffect = static_cast<const Nif::NiTextureEffect*>(nifNode);
             if (textureEffect->textureType != Nif::NiTextureEffect::Environment_Map)
             {
-                Log(Debug::Info) << "Unhandled NiTextureEffect type " << textureEffect->textureType << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Unhandled NiTextureEffect type " << textureEffect->textureType << " in " << mFilename;
                 return;
             }
 
             if (textureEffect->texture.empty())
             {
-                Log(Debug::Info) << "NiTextureEffect missing source texture in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "NiTextureEffect missing source texture in " << mFilename;
                 return;
             }
 
@@ -515,7 +515,7 @@ namespace NifOsg
                 texGen->setMode(osg::TexGen::SPHERE_MAP);
                 break;
             default:
-                Log(Debug::Info) << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType << " in " << mFilename;
                 return;
             }
 
@@ -875,7 +875,7 @@ namespace NifOsg
                     // These controllers are handled elsewhere
                 }
                 else
-                    Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
         }
 
@@ -915,7 +915,7 @@ namespace NifOsg
                     composite->addController(osgctrl);
                 }
                 else
-                    Log(Debug::Info) << "Unexpected material controller " << ctrl->recType << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Info) << "Unexpected material controller " << ctrl->recType << " in " << mFilename;
             }
         }
 
@@ -959,7 +959,7 @@ namespace NifOsg
                     composite->addController(callback);
                 }
                 else
-                    Log(Debug::Info) << "Unexpected texture controller " << ctrl->recName << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Info) << "Unexpected texture controller " << ctrl->recName << " in " << mFilename;
             }
         }
 
@@ -994,7 +994,7 @@ namespace NifOsg
                     // unused
                 }
                 else
-                    Log(Debug::Info) << "Unhandled particle modifier " << affectors->recName << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Info) << "Unhandled particle modifier " << affectors->recName << " in " << mFilename;
             }
             for (; !colliders.empty(); colliders = colliders->next)
             {
@@ -1009,7 +1009,7 @@ namespace NifOsg
                     program->addOperator(new SphericalCollider(sphericalcollider));
                 }
                 else
-                    Log(Debug::Info) << "Unhandled particle collider " << colliders->recName << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Info) << "Unhandled particle collider " << colliders->recName << " in " << mFilename;
             }
         }
 
@@ -1152,7 +1152,7 @@ namespace NifOsg
             }
             if (!partctrl)
             {
-                Log(Debug::Info) << "No particle controller found in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "No particle controller found in " << mFilename;
                 return;
             }
 
@@ -1247,7 +1247,7 @@ namespace NifOsg
                 unsigned int uvSet = *it;
                 if (uvSet >= uvlist.size())
                 {
-                    Log(Debug::Verbose) << "Out of bounds UV set " << uvSet << " on shape \"" << name << "\" in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Verbose) << "Out of bounds UV set " << uvSet << " on shape \"" << name << "\" in " << mFilename;
                     if (uvlist.empty())
                         continue;
                     uvSet = 0;
@@ -1419,7 +1419,7 @@ namespace NifOsg
             case 9: return osg::BlendFunc::ONE_MINUS_DST_ALPHA;
             case 10: return osg::BlendFunc::SRC_ALPHA_SATURATE;
             default:
-                Log(Debug::Info) << "Unexpected blend mode: "<< mode << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Unexpected blend mode: "<< mode << " in " << mFilename;
                 return osg::BlendFunc::SRC_ALPHA;
             }
         }
@@ -1437,7 +1437,7 @@ namespace NifOsg
             case 6: return osg::AlphaFunc::GEQUAL;
             case 7: return osg::AlphaFunc::NEVER;
             default:
-                Log(Debug::Info) << "Unexpected blend mode: " << mode << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Unexpected blend mode: " << mode << " in " << mFilename;
                 return osg::AlphaFunc::LEQUAL;
             }
         }
@@ -1455,7 +1455,7 @@ namespace NifOsg
             case 6: return osg::Stencil::GEQUAL;
             case 7: return osg::Stencil::ALWAYS;
             default:
-                Log(Debug::Info) << "Unexpected stencil function: " << func << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Unexpected stencil function: " << func << " in " << mFilename;
                 return osg::Stencil::NEVER;
             }
         }
@@ -1471,7 +1471,7 @@ namespace NifOsg
             case 4: return osg::Stencil::DECR;
             case 5: return osg::Stencil::INVERT;
             default:
-                Log(Debug::Info) << "Unexpected stencil operation: " << op << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Unexpected stencil operation: " << op << " in " << mFilename;
                 return osg::Stencil::KEEP;
             }
         }
@@ -1514,7 +1514,7 @@ namespace NifOsg
                 packing = 4;
                 break;
             default:
-                Log(Debug::Info) << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename;
                 return nullptr;
             }
 
@@ -1572,7 +1572,7 @@ namespace NifOsg
             {
                 if (pixelData->palette.empty() || pixelData->bpp != 8)
                 {
-                    Log(Debug::Info) << "Palettized texture in " << mFilename << " is invalid, ignoring"; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Info) << "Palettized texture in " << mFilename << " is invalid, ignoring";
                     return nullptr;
                 }
                 pixelformat = pixelData->fmt == Nif::NiPixelData::NIPXFMT_PAL8 ? GL_RGB : GL_RGBA;
@@ -1644,7 +1644,7 @@ namespace NifOsg
                             break;
                         default:
                         {
-                            Log(Debug::Info) << "Unhandled texture stage " << i << " on shape \"" << nodeName << "\" in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                            Log(Debug::Info) << "Unhandled texture stage " << i << " on shape \"" << nodeName << "\" in " << mFilename;
                             continue;
                         }
                     }
@@ -1658,7 +1658,7 @@ namespace NifOsg
                         if(tex.texture.empty() && texprop->controller.empty())
                         {
                             if (i == 0)
-                                Log(Debug::Warning) << "Base texture is in use but empty on shape \"" << nodeName << "\" in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                                Log(Debug::Warning) << "Base texture is in use but empty on shape \"" << nodeName << "\" in " << mFilename;
                             continue;
                         }
 
@@ -1815,7 +1815,7 @@ namespace NifOsg
                         break;
                     default:
                     {
-                        Log(Debug::Info) << "Unhandled texture stage " << i << " on shape \"" << nodeName << "\" in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                        Log(Debug::Info) << "Unhandled texture stage " << i << " on shape \"" << nodeName << "\" in " << mFilename;
                         continue;
                     }
                 }
@@ -1859,10 +1859,10 @@ namespace NifOsg
                 case Nif::BSShaderType::ShaderType_Water:
                 case Nif::BSShaderType::ShaderType_Lighting30:
                 case Nif::BSShaderType::ShaderType_Tile:
-                    Log(Debug::Warning) << "Unhandled BSShaderType " << type << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Warning) << "Unhandled BSShaderType " << type << " in " << mFilename;
                     return std::string_view();
             }
-            Log(Debug::Warning) << "Unknown BSShaderType " << type << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Warning) << "Unknown BSShaderType " << type << " in " << mFilename;
             return std::string_view();
         }
 
@@ -1891,10 +1891,10 @@ namespace NifOsg
                 case Nif::BSLightingShaderType::ShaderType_LODNoise:
                 case Nif::BSLightingShaderType::ShaderType_MultitexLandLODBlend:
                 case Nif::BSLightingShaderType::ShaderType_Dismemberment:
-                    Log(Debug::Warning) << "Unhandled BSLightingShaderType " << type << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Warning) << "Unhandled BSLightingShaderType " << type << " in " << mFilename;
                     return std::string_view();
             }
-            Log(Debug::Warning) << "Unknown BSLightingShaderType " << type << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Warning) << "Unknown BSLightingShaderType " << type << " in " << mFilename;
             return std::string_view();
         }
 
@@ -2057,7 +2057,7 @@ namespace NifOsg
                 break;
             }
             default:
-                Log(Debug::Info) << "Unhandled " << property->recName << " in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Unhandled " << property->recName << " in " << mFilename;
                 break;
             }
         }
@@ -2304,7 +2304,7 @@ namespace NifOsg
                 else if (type == Nif::RC_NiClusterAccumulator)
                     setBin_BackToFront(stateset);
                 else
-                    Log(Debug::Error) << "Unrecognized NiAccumulator in " << mFilename; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Error) << "Unrecognized NiAccumulator in " << mFilename;
             };
 
             switch (mPushedSorter->mMode)

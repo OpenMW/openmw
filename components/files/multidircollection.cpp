@@ -1,4 +1,5 @@
 #include "multidircollection.hpp"
+#include "conversion.hpp"
 
 #include <filesystem>
 
@@ -30,19 +31,18 @@ namespace Files
         {
             if (!std::filesystem::is_directory(directory))
             {
-                Log(Debug::Info) << "Skipping invalid directory: " << directory.string(); //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Skipping invalid directory: " << directory;
                 continue;
             }
 
-            for (std::filesystem::directory_iterator dirIter(directory);
-                    dirIter != std::filesystem::directory_iterator(); ++dirIter)
+            for (const auto& dirIter : std::filesystem::directory_iterator(directory))
             {
-                std::filesystem::path path = *dirIter;
+                const auto& path = dirIter.path();
 
-                if (!equal (extension, path.extension().string())) //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
+                if (!equal (extension, Files::pathToUnicodeString(path.extension())))
                     continue;
 
-                std::string filename = path.filename().string(); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+                const auto filename = Files::pathToUnicodeString(path.filename());
 
                 TIter result = mFiles.find (filename);
 

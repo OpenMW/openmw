@@ -9,6 +9,7 @@
 #include <components/bsa/compressedbsafile.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 
 #define BSATOOL_VERSION 1.1
 
@@ -179,17 +180,17 @@ int list(std::unique_ptr<File>& bsa, Arguments& info)
 template<typename File>
 int extract(std::unique_ptr<File>& bsa, Arguments& info)
 {
-    std::string archivePath = info.extractfile.string(); //TODO(Project579): This will probably break in windows with unicode paths
-    Misc::StringUtils::replaceAll(archivePath, "/", "\\");
+    auto archivePath = info.extractfile.u8string();
+    Misc::StringUtils::replaceAll(archivePath, u8"/", u8"\\");
 
-    std::string extractPath = info.extractfile.string(); //TODO(Project579): This will probably break in windows with unicode paths
-    Misc::StringUtils::replaceAll(extractPath, "\\", "/");
+    auto extractPath = info.extractfile.u8string();
+    Misc::StringUtils::replaceAll(extractPath, u8"\\", u8"/");
 
     Files::IStreamPtr stream;
     // Get a stream for the file to extract
     for (auto it = bsa->getList().rbegin(); it != bsa->getList().rend(); ++it)
     {
-        if (Misc::StringUtils::ciEqual(std::string(it->name()), archivePath))
+        if (Misc::StringUtils::ciEqual(Misc::StringUtils::stringToU8String(it->name()), archivePath))
         {
             stream = bsa->getFile(&*it);
             break;
@@ -197,8 +198,8 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     }
     if (!stream)
     {
-        std::cout << "ERROR: file '" << archivePath << "' not found\n";
-        std::cout << "In archive: " << info.filename << std::endl;
+        std::cout << "ERROR: file '" << Misc::StringUtils::u8StringToString(archivePath) << "' not found\n";
+        std::cout << "In archive: " << Files::pathToUnicodeString(info.filename) << std::endl;
         return 3;
     }
 
@@ -217,14 +218,14 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     std::filesystem::file_status s = std::filesystem::status(target.parent_path());
     if (!std::filesystem::is_directory(s))
     {
-        std::cout << "ERROR: " << target.parent_path() << " is not a directory." << std::endl;
+        std::cout << "ERROR: " << Files::pathToUnicodeString(target.parent_path()) << " is not a directory." << std::endl;
         return 3;
     }
 
     std::ofstream out(target, std::ios::binary);
 
     // Write the file to disk
-    std::cout << "Extracting " << info.extractfile << " to " << target << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
+    std::cout << "Extracting " << Files::pathToUnicodeString(info.extractfile) << " to " << Files::pathToUnicodeString(target) << std::endl;
 
     out << stream->rdbuf();
     out.close();
@@ -271,7 +272,7 @@ template<typename File>
 int add(std::unique_ptr<File>& bsa, Arguments& info)
 {
     std::fstream stream(info.addfile, std::ios_base::binary | std::ios_base::out | std::ios_base::in);
-    bsa->addFile(info.addfile.string(), stream); //TODO(Project579): This will probably break in windows with unicode paths
+    bsa->addFile(Files::pathToUnicodeString(info.addfile), stream);
 
     return 0;
 }

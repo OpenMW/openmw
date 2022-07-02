@@ -11,6 +11,7 @@
 #include <components/esm/records.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/files/conversion.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwmechanics/spelllist.hpp"
@@ -124,7 +125,7 @@ TEST_F(ContentFileTest, dialogue_merging_test)
         stream << std::endl;
     }
 
-    std::cout << "dialogue_merging_test successful, results printed to " << file << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
+    std::cout << "dialogue_merging_test successful, results printed to " << Files::pathToUnicodeString(file) << std::endl;
 }
 
 // Note: here we don't test records that don't use string names (e.g. Land, Pathgrid, Cell)
@@ -194,7 +195,7 @@ TEST_F(ContentFileTest, content_diagnostics_test)
 
     RUN_TEST_FOR_TYPES(printRecords, mEsmStore, stream);
 
-    std::cout << "diagnostics_test successful, results printed to " << file << std::endl; //TODO(Project579): This will probably break in windows with unicode paths
+    std::cout << "diagnostics_test successful, results printed to " << Files::pathToUnicodeString(file) << std::endl;
 }
 
 // TODO:

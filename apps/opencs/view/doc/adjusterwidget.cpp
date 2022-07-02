@@ -68,12 +68,12 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
     }
     else
     {
-        std::filesystem::path path (name.toUtf8().data()); //TODO(Project579): Replace with char8_t in C++20
+        std::filesystem::path path (name.toStdWString());
 
-        std::string extension = Misc::StringUtils::lowerCase(path.extension().string()); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
+        const auto extension = Misc::StringUtils::lowerCase(path.extension().u8string());
 
-        bool isLegacyPath = (extension == ".esm" ||
-                             extension == ".esp");
+        bool isLegacyPath = (extension == u8".esm" ||
+                             extension == u8".esp");
 
         bool isFilePathChanged = (path.parent_path() != mLocalData);
 
@@ -85,7 +85,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
         if (!isFilePathChanged && !isLegacyPath)
         {
             // path already points to the local data directory
-            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());  //TODO(Project579): This is probably broken on windows with unicode paths
+            message = QString::fromStdWString (L"Will be saved as: " + path.wstring());
             mResultPath = path;
         }
         //in all other cases, ensure the path points to data-local and do an existing file check
@@ -95,7 +95,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
             if (isFilePathChanged)
                 path = mLocalData / path.filename();
 
-            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str()); //TODO(Project579): This is probably broken on windows with unicode paths
+            message = QString::fromStdWString (L"Will be saved as: " + path.wstring());
             mResultPath = path;
 
             if (std::filesystem::exists (path))

@@ -1,4 +1,5 @@
 #include "collections.hpp"
+#include "conversion.hpp"
 
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
@@ -42,12 +43,14 @@ namespace Files
                 std::filesystem::directory_iterator (mDirectorie))
             {
                 const auto& path = iter2.path();
+                const auto str = Files::pathToUnicodeString(path.filename());
+
                 if (mFoldCase)
                 {
-                    if (Misc::StringUtils::ciEqual(file, path.filename().string())) //TODO(Project579): This will probably break in windows with unicode paths
+                    if (Misc::StringUtils::ciEqual(file, str))
                         return path;
                 }
-                else if (path.filename().string() == file) //TODO(Project579): This will probably break in windows with unicode paths
+                else if (str == file)
                     return path;
             }
         }
@@ -63,13 +66,14 @@ namespace Files
                 std::filesystem::directory_iterator (mDirectorie))
             {
                 const auto& path = iter2.path();
+                const auto str = Files::pathToUnicodeString(path.filename());
 
                 if (mFoldCase)
                 {
-                    if (Misc::StringUtils::ciEqual(file, path.filename().string())) //TODO(Project579): This will probably break in windows with unicode paths
+                    if (Misc::StringUtils::ciEqual(file, str))
                         return true;
                 }
-                else if (path.filename().string() == file) //TODO(Project579): This will probably break in windows with unicode paths
+                else if (str == file)
                     return true;
             }
         }

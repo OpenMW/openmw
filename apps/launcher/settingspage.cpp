@@ -102,9 +102,9 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     mMain->writeSettings();
 
     // Create the file if it doesn't already exist, else the importer will fail
-    QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str())); //TODO(Project579): This will probably break in windows with unicode paths
-    path.append(QLatin1String("openmw.cfg"));
-    QFile file(path);
+    auto path = mCfgMgr.getUserConfigPath();
+    path /= "openmw.cfg";
+    QFile file(QString::fromStdWString(path.wstring()));
 
     if (!file.exists()) {
         if (!file.open(QIODevice::ReadWrite)) {
@@ -137,7 +137,7 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     arguments.append(QString("--ini"));
     arguments.append(settingsComboBox->currentText());
     arguments.append(QString("--cfg"));
-    arguments.append(path);
+    arguments.append(QString::fromStdWString(path.wstring()));
 
     qDebug() << "arguments " << arguments;
 

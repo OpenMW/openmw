@@ -89,7 +89,7 @@ namespace CS
             void cancelFileDialog();
 
             void loadDocument();
-            void openFiles (const std::filesystem::path &path, const std::vector<std::filesystem::path> &discoveredFiles = std::vector<std::filesystem::path>());
+            void openFiles (const std::filesystem::path &path, const std::vector<std::filesystem::path> &discoveredFiles = {});
             void createNewFile (const std::filesystem::path& path);
             void createNewGame (const std::filesystem::path& file);
 

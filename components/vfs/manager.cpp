@@ -5,6 +5,8 @@
 #include <algorithm>
 
 #include <components/misc/strings/lower.hpp>
+#include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 
 #include "archive.hpp"
 
@@ -56,7 +58,7 @@ namespace VFS
         mIndex.clear();
 
         for (const auto& archive : mArchives)
-            archive->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char); //TODO(Project579): This will probably break in windows with unicode paths
+            archive->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
     }
 
     Files::IStreamPtr Manager::get(std::string_view name) const
@@ -104,13 +106,13 @@ namespace VFS
 
     std::filesystem::path Manager::getAbsoluteFileName(const std::filesystem::path &name) const
     {
-        std::string normalized(name); //TODO(Project579): This will probably break in windows with unicode paths
-        normalize_path(normalized, mStrict); //TODO(Project579): This will probably break in windows with unicode paths
+        std::string normalized = Files::pathToUnicodeString(name);
+        normalize_path(normalized, mStrict);
 
         const auto found = mIndex.find(normalized);
         if (found == mIndex.end())
             throw std::runtime_error("Resource '" + normalized + "' not found");
-        return found->second->getPath();//TODO(Project579): This will probably break in windows with unicode paths
+        return found->second->getPath();
     }
 
     namespace

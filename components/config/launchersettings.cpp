@@ -119,7 +119,7 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     }
 
     // global and local data directories are not part of any profile
-    const auto globalDataDir = QString(gameSettings.getGlobalDataDir().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+    const auto globalDataDir = QString::fromStdWString(gameSettings.getGlobalDataDir().wstring());
     const auto dataLocal = gameSettings.getDataLocal();
     dirs.removeAll(globalDataDir);
     dirs.removeAll(dataLocal);

@@ -8,6 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/files/conversion.hpp>
 
 namespace LuaUtil
 {
@@ -270,7 +271,7 @@ namespace LuaUtil
     sol::function LuaState::loadInternalLib(std::string_view libName)
     {
         const auto path = packageNameToPath(libName, mLibSearchPaths);
-        sol::load_result res = mLua.load_file(path.string(), sol::load_mode::text); //TODO(Project579): This will probably break in windows with unicode paths
+        sol::load_result res = mLua.load_file(Files::pathToUnicodeString(path), sol::load_mode::text);
         if (!res.valid())
             throw std::runtime_error("Lua error: " + res.get<std::string>());
         return res;

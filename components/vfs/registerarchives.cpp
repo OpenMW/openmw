@@ -23,7 +23,7 @@ namespace VFS
             {
                 // Last BSA has the highest priority
                 const auto archivePath = collections.getPath(*archive);
-                Log(Debug::Info) << "Adding BSA archive " << archivePath; //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Info) << "Adding BSA archive " << archivePath;
                 Bsa::BsaVersion bsaVersion = Bsa::CompressedBSAFile::detectVersion(archivePath);
 
                 if (bsaVersion == Bsa::BSAVER_COMPRESSED)
@@ -49,7 +49,7 @@ namespace VFS
                     vfs->addArchive(std::make_unique<FileSystemArchive>(dataDir));
                 }
                 else
-                    Log(Debug::Info) << "Ignoring duplicate data directory " << dataDir; //TODO(Project579): This will probably break in windows with unicode paths
+                    Log(Debug::Info) << "Ignoring duplicate data directory " << dataDir;
             }
         }
 

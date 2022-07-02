@@ -37,7 +37,7 @@ using namespace Bsa;
 /// Error handling
 [[noreturn]] void BSAFile::fail(const std::string &msg)
 {
-    throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + mFilepath.string()); //TODO(Project579): This will probably break in windows with unicode paths
+    throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + Files::pathToUnicodeString(mFilepath));
 }
 
 //the getHash code is from bsapack from ghostwheel

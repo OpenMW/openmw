@@ -32,7 +32,7 @@ void Config::GameSettings::validatePaths()
     mDataDirs.clear();
 
     for (auto & dataDir : dataDirs) {
-        QString path = QString::fromUtf8(dataDir.string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+        QString path = QString::fromStdWString(dataDir.wstring());
 
         QDir dir(path);
         if (dir.exists())
@@ -57,7 +57,7 @@ void Config::GameSettings::validatePaths()
     mCfgMgr.processPaths(dataDirs, /*basePath=*/"");
 
     if (!dataDirs.empty()) {
-        QString path = QString::fromUtf8(dataDirs.front().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+        QString path = QString::fromStdWString(dataDirs.front().wstring());
 
         QDir dir(path);
         if (dir.exists())

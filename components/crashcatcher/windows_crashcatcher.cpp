@@ -140,7 +140,7 @@ namespace Crash
         const auto str = crashLogPath.u8string();
         size_t length = str.length();
         if (length >= MAX_LONG_PATH) length = MAX_LONG_PATH - 1;
-        strncpy_s(mShm->mStartup.mLogFilePath, sizeof mShm->mStartup.mLogFilePath, Misc::StringUtils::char8_to_char(str.c_str()), length); //TODO(Project579): This will probably break in windows with unicode paths
+        strncpy_s(mShm->mStartup.mLogFilePath, sizeof mShm->mStartup.mLogFilePath, Misc::StringUtils::u8StringToString(str).c_str(), length);
         mShm->mStartup.mLogFilePath[length] = '\0';
 
         // note that we don't need to lock the SHM here, the other process has not started yet

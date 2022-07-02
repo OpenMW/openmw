@@ -30,6 +30,7 @@
 #include <filesystem>
 
 #include <components/files/istreamptr.hpp>
+#include <components/files/conversion.hpp>
 
 namespace Bsa
 {
@@ -134,7 +135,7 @@ public:
 
     std::string getFilename() const
     {
-        return mFilepath.string(); //TODO(Project579): This will probably break in windows with unicode paths
+        return Files::pathToUnicodeString(mFilepath);
     }
 };
 

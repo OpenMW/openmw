@@ -4,6 +4,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include <components/files/conversion.hpp>
+
 #include "mainwizard.hpp"
 
 Wizard::InstallationTargetPage::InstallationTargetPage(QWidget *parent, const Files::ConfigurationManager &cfg) :
@@ -19,7 +21,7 @@ Wizard::InstallationTargetPage::InstallationTargetPage(QWidget *parent, const Fi
 
 void Wizard::InstallationTargetPage::initializePage()
 {
-    QString path(QFile::decodeName(mCfgMgr.getUserDataPath().string().c_str())); //TODO(Project579): This will probably break in windows with unicode paths
+    QString path(QFile::decodeName(Files::pathToUnicodeString(mCfgMgr.getUserDataPath()).c_str()));
     path.append(QDir::separator() + QLatin1String("basedata"));
 
     QDir dir(path);

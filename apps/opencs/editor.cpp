@@ -393,7 +393,7 @@ int CS::Editor::run()
         }
         discoveredFiles.push_back(mFileToLoad);
 
-        QString extension = QString::fromStdString(mFileToLoad.extension().string()).toLower(); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
+        QString extension = QString::fromStdWString(mFileToLoad.extension().wstring()).toLower();
         if (extension == ".esm")
         {
             mFileToLoad.replace_extension(".omwgame");

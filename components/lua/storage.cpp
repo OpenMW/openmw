@@ -160,7 +160,7 @@ namespace LuaUtil
         assert(mData.empty());  // Shouldn't be used before loading
         try
         {
-            Log(Debug::Info) << "Loading Lua storage \"" << path << "\" (" << std::filesystem::file_size(path) << " bytes)"; //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Info) << "Loading Lua storage \"" << path << "\" (" << std::filesystem::file_size(path) << " bytes)";
             std::ifstream fin(path, std::fstream::binary);
             std::string serializedData((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
             sol::table data = deserialize(mLua, serializedData);
@@ -186,7 +186,7 @@ namespace LuaUtil
                 data[sectionName] = section->asTable();
         }
         std::string serializedData = serialize(data);
-        Log(Debug::Info) << "Saving Lua storage \"" << path << "\" (" << serializedData.size() << " bytes)"; //TODO(Project579): This will probably break in windows with unicode paths
+        Log(Debug::Info) << "Saving Lua storage \"" << path << "\" (" << serializedData.size() << " bytes)";
         std::ofstream fout(path, std::fstream::binary);
         fout.write(serializedData.data(), serializedData.size());
         fout.close();

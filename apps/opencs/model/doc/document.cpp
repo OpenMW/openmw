@@ -5,6 +5,7 @@
 #include <cassert>
 #include <memory>
 #include <filesystem>
+#include <utility>
 
 #include "../world/defaultgmsts.hpp"
 
@@ -13,7 +14,7 @@
 #endif
 
 #include <components/debug/debuglog.hpp>
-#include <utility>
+#include <components/files/conversion.hpp>
 
 void CSMDoc::Document::addGmsts()
 {
@@ -294,11 +295,11 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     if (mNew || !std::filesystem::exists (mProjectPath))
     {
-        std::filesystem::path filtersPath (configuration.getUserDataPath() / "defaultfilters");
+        auto filtersPath = configuration.getUserDataPath() / "defaultfilters";
 
         std::ofstream destination(mProjectPath, std::ios::out | std::ios::binary);
         if (!destination.is_open())
-            throw std::runtime_error("Can not create project file: " + mProjectPath.string()); //TODO(Project579): This will probably break in windows with unicode paths
+            throw std::runtime_error("Can not create project file: " + Files::pathToUnicodeString(mProjectPath));
         destination.exceptions(std::ios::failbit | std::ios::badbit);
 
         if (!std::filesystem::exists (filtersPath))
@@ -306,7 +307,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
         std::ifstream source(filtersPath, std::ios::in | std::ios::binary);
         if (!source.is_open())
-            throw std::runtime_error("Can not read filters file: " + filtersPath.string()); //TODO(Project579): This will probably break in windows with unicode paths
+            throw std::runtime_error("Can not read filters file: " + Files::pathToUnicodeString(filtersPath));
         source.exceptions(std::ios::failbit | std::ios::badbit);
 
         destination << source.rdbuf();
@@ -480,11 +481,11 @@ bool CSMDoc::Document::isBlacklisted (const CSMWorld::UniversalId& id)
 void CSMDoc::Document::startRunning (const std::string& profile,
     const std::string& startupInstruction)
 {
-    std::vector<std::string> contentFiles;
+    std::vector<std::filesystem::path> contentFiles;
 
-    for (std::vector<std::filesystem::path>::const_iterator iter (mContentFiles.begin());
-        iter!=mContentFiles.end(); ++iter)
-        contentFiles.push_back (iter->filename().string()); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+    for (const auto & mContentFile : mContentFiles) {
+        contentFiles.emplace_back(mContentFile.filename());
+    }
 
     mRunner.configure (getData().getDebugProfiles().getRecord (profile).get(), contentFiles,
         startupInstruction);

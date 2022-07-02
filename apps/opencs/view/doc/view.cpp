@@ -30,6 +30,7 @@
 
 #include <components/misc/helpviewer.hpp>
 #include <components/version/version.hpp>
+#include <components/files/conversion.hpp>
 
 #include "viewmanager.hpp"
 #include "operations.hpp"
@@ -387,7 +388,7 @@ void CSVDoc::View::updateTitle()
 {
     std::ostringstream stream;
 
-    stream << mDocument->getSavePath().filename().string(); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+    stream << Files::pathToUnicodeString(mDocument->getSavePath().filename());
 
     if (mDocument->getState() & CSMDoc::State_Modified)
             stream << " *";

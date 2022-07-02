@@ -230,9 +230,9 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     if (!mDataLocal.isEmpty())
         directories.insert(0, mDataLocal);
 
-    const auto globalDataDir = QString(mGameSettings.getGlobalDataDir().string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
-    if (!globalDataDir.isEmpty())
-        directories.insert(0, globalDataDir);
+    const auto& globalDataDir = mGameSettings.getGlobalDataDir();
+    if (!globalDataDir.empty())
+        directories.insert(0, QString::fromStdWString(globalDataDir.wstring()));
 
     // normalize user supplied directories: resolve symlink, convert to native separator, make absolute
     for (auto& currentDir : directories)
@@ -264,7 +264,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         }
 
         // deactivate data-local and global data directory: they are always included
-        if (currentDir == mDataLocal || currentDir == globalDataDir)
+        if (currentDir == mDataLocal || std::filesystem::path(currentDir.toStdWString()) == globalDataDir)
         {
             auto flags = item->flags();
             item->setFlags(flags & ~(Qt::ItemIsDragEnabled|Qt::ItemIsDropEnabled|Qt::ItemIsEnabled));

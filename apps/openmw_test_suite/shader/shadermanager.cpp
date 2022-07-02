@@ -1,4 +1,5 @@
 #include <components/shader/shadermanager.hpp>
+#include <components/files/conversion.hpp>
 
 #include <fstream>
 
@@ -48,7 +49,7 @@ namespace
         const std::string content;
 
         withShaderFile(content, [this] (const std::filesystem::path& templateName) {
-            EXPECT_TRUE(mManager.getShader(templateName.string(), {}, osg::Shader::VERTEX)); //TODO(Project579): This will probably break in windows with unicode paths
+            EXPECT_TRUE(mManager.getShader(Files::pathToUnicodeString(templateName), {}, osg::Shader::VERTEX));
         });
     }
 
@@ -59,7 +60,7 @@ namespace
             "void main() {}\n";
 
         withShaderFile(content, [&] (const std::filesystem::path& templateName) {
-            const auto shader = mManager.getShader(templateName.string(), mDefines, osg::Shader::VERTEX); //TODO(Project579): This will probably break in windows with unicode paths
+            const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX);
             ASSERT_TRUE(shader);
             EXPECT_EQ(shader->getShaderSource(), content);
         });
@@ -72,17 +73,17 @@ namespace
 
         withShaderFile("_0", content0, [&] (const std::filesystem::path& templateName0) {
             const std::string content1 =
-                "#include \"" + templateName0.string() + "\"\n" //TODO(Project579): This will probably break in windows with unicode paths
+                "#include \"" + Files::pathToUnicodeString(templateName0) + "\"\n"
                 "void bar() { foo() }\n";
 
             withShaderFile("_1", content1, [&] (const std::filesystem::path& templateName1) {
                 const std::string content2 =
                     "#version 120\n"
-                    "#include \"" + templateName1.string() + "\"\n" //TODO(Project579): This will probably break in windows with unicode paths
+                    "#include \"" + Files::pathToUnicodeString(templateName1) + "\"\n"
                     "void main() { bar() }\n";
 
                 withShaderFile(content2, [&] (const std::filesystem::path& templateName2) {
-                    const auto shader = mManager.getShader(templateName2.string(), mDefines, osg::Shader::VERTEX); //TODO(Project579): This will probably break in windows with unicode paths
+                    const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName2), mDefines, osg::Shader::VERTEX);
                     ASSERT_TRUE(shader);
                     const std::string expected =
                         "#version 120\n"
@@ -113,7 +114,7 @@ namespace
 
         withShaderFile(content, [&] (const std::filesystem::path& templateName) {
             mDefines["flag"] = "1";
-            const auto shader = mManager.getShader(templateName.string(), mDefines, osg::Shader::VERTEX); //TODO(Project579): This will probably break in windows with unicode paths
+            const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX);
             ASSERT_TRUE(shader);
             const std::string expected =
                 "#version 120\n"
@@ -135,7 +136,7 @@ namespace
 
         withShaderFile(content, [&] (const std::filesystem::path& templateName) {
             mDefines["list"] = "1,2,3";
-            const auto shader = mManager.getShader(templateName.string(), mDefines, osg::Shader::VERTEX); //TODO(Project579): This will probably break in windows with unicode paths
+            const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX);
             ASSERT_TRUE(shader);
             const std::string expected =
                 "#version 120\n"
@@ -176,7 +177,7 @@ namespace
 
         withShaderFile(content, [&] (const std::filesystem::path& templateName) {
             mDefines["list"] = "1,2,3";
-            const auto shader = mManager.getShader(templateName.string(), mDefines, osg::Shader::VERTEX); //TODO(Project579): This will probably break in windows with unicode paths
+            const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX);
             ASSERT_TRUE(shader);
             const std::string expected =
                 "#version 120\n"
@@ -223,7 +224,7 @@ namespace
         ;
 
         withShaderFile(content, [&] (const std::filesystem::path& templateName) {
-            EXPECT_FALSE(mManager.getShader(templateName.string(), mDefines, osg::Shader::VERTEX)); //TODO(Project579): This will probably break in windows with unicode paths
+            EXPECT_FALSE(mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX));
         });
     }
 
@@ -236,7 +237,7 @@ namespace
         ;
 
         withShaderFile(content, [&] (const std::filesystem::path& templateName) {
-            EXPECT_FALSE(mManager.getShader(templateName.string(), mDefines, osg::Shader::VERTEX)); //TODO(Project579): This will probably break in windows with unicode paths
+            EXPECT_FALSE(mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX));
         });
     }
 }

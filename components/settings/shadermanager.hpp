@@ -15,6 +15,7 @@
 
 #include <components/serialization/osgyaml.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
 
 namespace Settings
 {
@@ -109,7 +110,7 @@ namespace Settings
             mData = YAML::Null;
             mPath = path;
 
-            Log(Debug::Info) << "Loading shader settings file: " << mPath; //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Info) << "Loading shader settings file: " << mPath;
 
             if (!std::filesystem::exists(mPath))
             {
@@ -123,7 +124,7 @@ namespace Settings
 
             try
             {
-                mData = YAML::LoadFile(mPath.string()); //TODO(Project579): This will probably break in windows with unicode paths
+                mData = YAML::LoadFile(Files::pathToUnicodeString(mPath));
                 mData.SetStyle(YAML::EmitterStyle::Block);
 
                 if (!mData["config"])

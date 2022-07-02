@@ -51,6 +51,7 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/to_utf8/to_utf8.hpp>
+#include <components/files/conversion.hpp>
 
 #include "formid.hpp"
 
@@ -184,12 +185,7 @@ void Reader::open(Files::IStreamPtr&& stream, const std::filesystem::path &filen
     throw std::runtime_error("Unknown file format"); // can't yet use fail() as mCtx is not setup
 }
 
-void Reader::openRaw(const std::string& filename)
-{
-    openRaw(Files::openConstrainedFileStream(filename), filename);
-}
-
-void Reader::open(const std::string& filename)
+void Reader::open(const std::filesystem::path& filename)
 {
     open(Files::openConstrainedFileStream(filename), filename);
 }
@@ -637,7 +633,7 @@ void Reader::adjustGRUPFormId()
     std::stringstream ss;
 
     ss << "ESM Error: " << msg;
-    ss << "\n  File: " << mCtx.filename.string(); //TODO(Project579): This will probably break in windows with unicode paths
+    ss << "\n  File: " << Files::pathToUnicodeString(mCtx.filename);
     ss << "\n  Record: " << ESM::printName(mCtx.recordHeader.record.typeId);
     ss << "\n  Subrecord: " << ESM::printName(mCtx.subRecordHeader.typeId);
     if (mStream.get())

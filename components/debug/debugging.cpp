@@ -8,9 +8,11 @@
 
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 #ifdef _WIN32
 #include <components/crashcatcher/windows_crashcatcher.hpp>
 #include <components/windows.hpp>
+#include <components/files/conversion.hpp>
 #endif
 
 #include <SDL_messagebox.h>
@@ -318,12 +320,12 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         {
 #if defined(_WIN32)
             const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
-            Crash::CrashCatcher crashy(argc, argv, (cfgMgr.getLogPath() / crashLogName).make_preferred().string());
+            Crash::CrashCatcher crashy(argc, argv, Files::pathToUnicodeString(cfgMgr.getLogPath() / crashLogName));
 #else
             const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
             // install the crash handler as soon as possible. note that the log path
             // does not depend on config being read.
-            crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / crashLogName).string());
+            crashCatcherInstall(argc, argv, Files::pathToUnicodeString(cfgMgr.getLogPath() / crashLogName));
 #endif
             ret = innerApplication(argc, argv);
         }

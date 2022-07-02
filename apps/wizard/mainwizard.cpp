@@ -471,5 +471,5 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
 
 QString Wizard::MainWizard::toQString(const std::filesystem::path& path)
 {
-    return QString::fromUtf8(path.string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+    return QString::fromStdWString(path.wstring());
 }

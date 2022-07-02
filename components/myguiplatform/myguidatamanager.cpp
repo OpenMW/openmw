@@ -7,6 +7,7 @@
 #include <MyGUI_DataFileStream.h>
 
 #include <components/vfs/manager.hpp>
+#include <components/files/conversion.hpp>
 
 namespace
 {
@@ -68,7 +69,7 @@ const std::string &DataManager::getDataPath(const std::string &name) const
     if (!isDataExist(name))
         return result;
 
-    result = (mResourcePath / name).string(); //TODO(Project579): This is broken on windows with unicode paths
+    result = Files::pathToUnicodeString(mResourcePath / name);
     return result;
 }
 

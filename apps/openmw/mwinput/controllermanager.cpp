@@ -7,6 +7,8 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
+#include <components/misc/stringops.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -43,12 +45,12 @@ namespace MWInput
     {
         if (!controllerBindingsFile.empty())
         {
-            SDL_GameControllerAddMappingsFromFile(controllerBindingsFile.string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+            SDL_GameControllerAddMappingsFromFile(Files::pathToUnicodeString(controllerBindingsFile).c_str());
         }
 
         if (!userControllerBindingsFile.empty())
         {
-            SDL_GameControllerAddMappingsFromFile(userControllerBindingsFile.string().c_str()); //TODO(Project579): This will probably break in windows with unicode paths
+            SDL_GameControllerAddMappingsFromFile(Files::pathToUnicodeString(userControllerBindingsFile).c_str());
         }
 
         // Open all presently connected sticks

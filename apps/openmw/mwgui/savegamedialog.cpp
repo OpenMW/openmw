@@ -21,6 +21,7 @@
 
 #include <components/files/memorystream.hpp>
 #include <components/misc/timeconvert.hpp>
+#include <components/files/conversion.hpp>
 
 #include <components/esm3/loadclas.hpp>
 
@@ -200,7 +201,7 @@ namespace MWGui
 
                 if (mCurrentCharacter == &*it ||
                     (!mCurrentCharacter && !mSaving && directory==Misc::StringUtils::lowerCase (
-                    it->begin()->mPath.parent_path().filename().string()))) //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+                    Files::pathToUnicodeString(it->begin()->mPath.parent_path().filename()))))
                 {
                     mCurrentCharacter = &*it;
                     selectedIndex = mCharacterSelection->getItemCount()-1;

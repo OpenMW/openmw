@@ -126,7 +126,7 @@ namespace Shader
             includeFstream.open(includePath);
             if (includeFstream.fail())
             {
-                Log(Debug::Error) << "Shader " << fileName << " error: Failed to open include " << includePath.string(); //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Error) << "Shader " << fileName << " error: Failed to open include " << includePath;
                 return false;
             }
             int includedFileNumber = fileNumber++;
@@ -472,7 +472,7 @@ namespace Shader
             stream.open(path);
             if (stream.fail())
             {
-                Log(Debug::Error) << "Failed to open " << path.string(); //TODO(Project579): This will probably break in windows with unicode paths
+                Log(Debug::Error) << "Failed to open " << path;
                 return nullptr;
             }
             std::stringstream buffer;

@@ -24,6 +24,7 @@
 #include <components/esm3/loadcrea.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -1528,7 +1529,7 @@ namespace MWScript
                 else
                 {
                     const auto filename = MWBase::Environment::get().getWorld()->exportSceneGraph(ptr);
-                    runtime.getContext().report("Wrote '" + filename.string() + "'"); //TODO(Project579): This will probably break in windows with unicode paths
+                    runtime.getContext().report("Wrote '" + Files::pathToUnicodeString(filename) + "'");
                 }
             }
         };

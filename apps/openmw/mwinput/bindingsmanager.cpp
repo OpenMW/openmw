@@ -6,6 +6,7 @@
 #include <extern/oics/ICSInputControlSystem.h>
 
 #include <components/sdlutil/sdlmappings.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -44,7 +45,7 @@ namespace MWInput
     {
     public:
         InputControlSystem(const std::filesystem::path &bindingsFile)
-            : ICS::InputControlSystem(bindingsFile.string(), true, nullptr, nullptr, A_Last) //TODO(Project579): This is probably broken on windows with unicode paths
+            : ICS::InputControlSystem(Files::pathToUnicodeString(bindingsFile), true, nullptr, nullptr, A_Last)
         {
         }
     };
@@ -192,7 +193,7 @@ namespace MWInput
 
     BindingsManager::~BindingsManager()
     {
-        mInputBinder->save(mUserFile.string()); //TODO(Project579): This will probably break in windows with unicode paths
+        mInputBinder->save(Files::pathToUnicodeString(mUserFile));
     }
 
     void BindingsManager::update(float dt)

@@ -44,6 +44,7 @@
 #include <components/detournavigator/navigatorimpl.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -104,19 +105,19 @@ namespace MWWorld
 
         void load(const std::filesystem::path& filepath, int& index, Loading::Listener* listener) override
         {
-            const auto it = mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
+            const auto it = mLoaders.find(Misc::StringUtils::lowerCase( Files::pathToUnicodeString(filepath.extension())));
             if (it != mLoaders.end())
             {
-                const std::string filename = filepath.filename().string(); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+                const auto filename = filepath.filename();
                 Log(Debug::Info) << "Loading content file " << filename;
                 if (listener != nullptr)
-                    listener->setLabel(MyGUI::TextIterator::toTagsString(filename));
+                    listener->setLabel(MyGUI::TextIterator::toTagsString(Files::pathToUnicodeString(filename)));
                 it->second->load(filepath, index, listener);
             }
             else
             {
                 std::string msg("Cannot load file: ");
-                msg += filepath.string(); //TODO(Project579): This will probably break in windows with unicode paths
+                msg += Files::pathToUnicodeString(filepath);
                 throw std::runtime_error(msg.c_str());
             }
         }
@@ -2963,8 +2964,8 @@ namespace MWWorld
         int idx = 0;
         for (const std::string &file : content)
         {
-            std::filesystem::path filename(file);
-            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string()); //TODO(Project579): let's hope unicode characters are never used in these extensions on windows or this will break
+            const auto filename = Files::pathFromUnicodeString( file);
+            const Files::MultiDirCollection& col = fileCollections.getCollection(Files::pathToUnicodeString(filename.extension()));
             if (col.doesExist(file))
             {
                 gameContentLoader.load(col.getPath(file), idx, listener);

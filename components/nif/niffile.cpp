@@ -316,7 +316,7 @@ void NIFFile::parse(Files::IStreamPtr&& stream)
         r = entry->second();
 
         if (!supportedVersion)
-            Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " (" << filename << ")"; //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " (" << filename << ")";
 
         assert(r != nullptr);
         assert(r->recType != RC_MISSING);

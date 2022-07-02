@@ -4,6 +4,7 @@
 
 #include <components/misc/strings/algorithm.hpp>
 #include <components/files/openfile.hpp>
+#include <components/files/conversion.hpp>
 
 #include <stdexcept>
 #include <sstream>
@@ -73,7 +74,7 @@ void ESMReader::resolveParentFileIndices(ReadersCache& readers)
             const ESM::ReadersCache::BusyItem reader = readers.get(static_cast<std::size_t>(i));
             if (reader->getFileSize() == 0)
                 continue;  // Content file in non-ESM format
-            std::string fnamecandidate = reader->getName().filename().string(); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
+            const auto fnamecandidate = Files::pathToUnicodeString(reader->getName().filename());
             if (Misc::StringUtils::ciEqual(fname, fnamecandidate))
             {
                 index = i;
@@ -359,7 +360,7 @@ std::string ESMReader::getString(int size)
     std::stringstream ss;
 
     ss << "ESM Error: " << msg;
-    ss << "\n  File: " << mCtx.filename; //TODO(Project579): This will probably break in windows with unicode paths
+    ss << "\n  File: " << Files::pathToUnicodeString(mCtx.filename);
     ss << "\n  Record: " << mCtx.recName.toStringView();
     ss << "\n  Subrecord: " << mCtx.subName.toStringView();
     if (mEsm.get())

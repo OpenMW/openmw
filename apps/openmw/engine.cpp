@@ -711,7 +711,7 @@ void OMW::Engine::setWindowIcon()
     const auto windowIcon = mResDir / "openmw.png";
     windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
-        Log(Debug::Error) << "Error: Failed to open " << windowIcon; //TODO(Project579): This will probably break in windows with unicode paths
+        Log(Debug::Error) << "Error: Failed to open " << windowIcon;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!reader)
     {
@@ -720,7 +720,7 @@ void OMW::Engine::setWindowIcon()
     }
     osgDB::ReaderWriter::ReadResult result = reader->readImage(windowIconStream);
     if (!result.success())
-        Log(Debug::Error) << "Error: Failed to read " << windowIcon << ": " << result.message() << " code " << result.status(); //TODO(Project579): This will probably break in windows with unicode paths
+        Log(Debug::Error) << "Error: Failed to read " << windowIcon << ": " << result.message() << " code " << result.status();
     else
     {
         osg::ref_ptr<osg::Image> image = result.getImage();
@@ -790,11 +790,11 @@ void OMW::Engine::prepareEngine()
         const auto input2 = (mCfgMgr.getUserConfigPath() / "input_v2.xml");
         if(std::filesystem::exists(input2)) {
             keybinderUserExists = std::filesystem::copy_file(input2, keybinderUser);
-            Log(Debug::Info) << "Loading keybindings file: " << keybinderUser; //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
         }
     }
     else
-        Log(Debug::Info) << "Loading keybindings file: " << keybinderUser; //TODO(Project579): This will probably break in windows with unicode paths
+        Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
 
     const auto userdefault = mCfgMgr.getUserConfigPath() / "gamecontrollerdb.txt";
     const auto localdefault = mCfgMgr.getLocalPath() / "gamecontrollerdb.txt";
@@ -1032,13 +1032,17 @@ void OMW::Engine::go()
     prepareEngine();
 
     std::ofstream stats;
-    if (const auto path = std::getenv("OPENMW_OSG_STATS_FILE")) //TODO(Project579): This will probably break in windows with unicode paths
+#ifdef _WIN32
+    if (const auto path = std::filesystem::path{_wgetenv(L"OPENMW_OSG_STATS_FILE")}; !path.empty())
+#else
+    if (const auto path = std::filesystem::path{std::getenv("OPENMW_OSG_STATS_FILE")}; !path.empty())
+#endif
     {
-        stats.open(path, std::ios_base::out); //TODO(Project579): This will probably break in windows with unicode paths
+        stats.open(path, std::ios_base::out);
         if (stats.is_open())
-            Log(Debug::Info) << "Stats will be written to: " << path; //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Info) << "Stats will be written to: " << path;
         else
-            Log(Debug::Warning) << "Failed to open file for stats: " << path; //TODO(Project579): This will probably break in windows with unicode paths
+            Log(Debug::Warning) << "Failed to open file for stats: " << path;
     }
 
     // Setup profiler

@@ -2,6 +2,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/sceneutil/workqueue.hpp>
+#include <components/files/conversion.hpp>
 
 #include <osg/ref_ptr>
 #include <osg/Image>
@@ -129,7 +130,7 @@ namespace SceneUtil
         if (fileName.empty())
             mCallback("Failed to save screenshot");
         else
-            mCallback(fileName.string() + " has been saved"); //TODO(Project579): This will probably break in windows with unicode paths
+            mCallback(Files::pathToUnicodeString(fileName) + " has been saved");
     }
 
     AsyncScreenCaptureOperation::AsyncScreenCaptureOperation(osg::ref_ptr<WorkQueue> queue,

@@ -4,6 +4,7 @@
 #include "recastglobalallocator.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
 
 namespace DetourNavigator
 {
@@ -16,7 +17,7 @@ namespace DetourNavigator
         {
             try
             {
-                db = std::make_unique<NavMeshDb>((userDataPath / "navmesh.db").string(), settings.mMaxDbFileSize); //TODO(Project579): This will probably break in windows with unicode paths
+                db = std::make_unique<NavMeshDb>(Files::pathToUnicodeString(userDataPath / "navmesh.db"), settings.mMaxDbFileSize);
             }
             catch (const std::exception& e)
             {
