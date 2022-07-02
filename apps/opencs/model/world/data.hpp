@@ -126,8 +126,6 @@ namespace CSMWorld
 
             std::vector<std::shared_ptr<ESM::ESMReader> > mReaders;
 
-            std::map<std::string, int> mContentFileNames;
-
             // not implemented
             Data (const Data&);
             Data& operator= (const Data&);

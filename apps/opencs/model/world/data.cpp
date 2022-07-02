@@ -991,8 +991,6 @@ int CSMWorld::Data::startLoading (const std::filesystem::path& path, bool base, 
     mReader->setIndex((project || !base) ? 0 : mReaderIndex++);
     mReader->open (path);
 
-    mContentFileNames.insert(std::make_pair(path.filename().string(), mReader->getIndex())); //TODO(Project579): let's hope unicode characters are never used in these filenames on windows or this will break
-
     mBase = base;
     mProject = project;
 
