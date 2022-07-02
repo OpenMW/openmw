@@ -307,9 +307,8 @@ CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string
     std::filesystem::path p(path);
     std::string stem = p.stem().string();
     std::string ext = p.extension().string();
-    p.remove_filename();
-
-    std::string folder = p.string();
+    
+    std::string folder = p.parent_path().string();
     std::uint64_t folderHash = generateHash(folder, std::string());
 
     auto it = mFolders.find(folderHash);
