@@ -238,7 +238,7 @@ namespace MWRender
         }
 
         mGLSLVersion = ext->glslLanguageVersion * 100;
-        mUBO = ext && ext->isUniformBufferObjectSupported && mGLSLVersion >= 330;
+        mUBO = ext->isUniformBufferObjectSupported && mGLSLVersion >= 330;
         mStateUpdater = new fx::StateUpdater(mUBO);
 
         if (!Stereo::getStereo() && !SceneUtil::AutoDepth::isReversed() && !mSoftParticles && !mUsePostProcessing)
