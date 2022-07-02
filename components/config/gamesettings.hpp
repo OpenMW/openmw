@@ -64,9 +64,9 @@ namespace Config
 
         QStringList values(const QString &key, const QStringList &defaultValues = QStringList()) const;
 
-        bool readFile(QTextStream &stream);
-        bool readFile(QTextStream &stream, QMultiMap<QString, QString> &settings);
-        bool readUserFile(QTextStream &stream);
+        bool readFile(QTextStream &stream, bool ignoreContent = false);
+        bool readFile(QTextStream &stream, QMultiMap<QString, QString> &settings, bool ignoreContent = false);
+        bool readUserFile(QTextStream &stream, bool ignoreContent = false);
 
         bool writeFile(QTextStream &stream);
         bool writeFileWithComments(QFile &file);

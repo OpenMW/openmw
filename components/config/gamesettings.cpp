@@ -80,17 +80,17 @@ QStringList Config::GameSettings::values(const QString &key, const QStringList &
     return defaultValues;
 }
 
-bool Config::GameSettings::readFile(QTextStream &stream)
+bool Config::GameSettings::readFile(QTextStream &stream, bool ignoreContent)
 {
-    return readFile(stream, mSettings);
+    return readFile(stream, mSettings, ignoreContent);
 }
 
-bool Config::GameSettings::readUserFile(QTextStream &stream)
+bool Config::GameSettings::readUserFile(QTextStream &stream, bool ignoreContent)
 {
-    return readFile(stream, mUserSettings);
+    return readFile(stream, mUserSettings, ignoreContent);
 }
 
-bool Config::GameSettings::readFile(QTextStream &stream, QMultiMap<QString, QString> &settings)
+bool Config::GameSettings::readFile(QTextStream &stream, QMultiMap<QString, QString> &settings, bool ignoreContent)
 {
     QMultiMap<QString, QString> cache;
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
@@ -139,6 +139,8 @@ bool Config::GameSettings::readFile(QTextStream &stream, QMultiMap<QString, QStr
                     }
                 }
             }
+            else if(ignoreContent && key == QLatin1String("content"))
+                continue;
 
             QStringList values = cache.values(key);
             values.append(settings.values(key));

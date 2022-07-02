@@ -334,54 +334,46 @@ bool Launcher::MainDialog::setupGameSettings()
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
     QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 
-    // Load the user config file first, separately
-    // So we can write it properly, uncontaminated
-    QString path = userPath + QLatin1String("openmw.cfg");
-    QFile file(path);
+    QFile file;
 
-    qDebug() << "Loading config file:" << path.toUtf8().constData();
-
-    if (file.exists()) {
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            cfgError(tr("Error opening OpenMW configuration file"),
-                     tr("<br><b>Could not open %0 for reading</b><br><br> \
-                         Please make sure you have the right permissions \
-                         and try again.<br>").arg(file.fileName()));
-            return false;
-        }
-        QTextStream stream(&file);
-        stream.setCodec(QTextCodec::codecForName("UTF-8"));
-
-        mGameSettings.readUserFile(stream);
-        file.close();
-    }
-
-    // Now the rest - priority: user > local > global
-    QStringList paths;
-    paths.append(globalPath + QString("openmw.cfg"));
-    paths.append(localPath + QString("openmw.cfg"));
-    paths.append(userPath + QString("openmw.cfg"));
-
-    for (const QString &path2 : paths)
+    auto loadFile = [&] (const QString& path, bool(Config::GameSettings::*reader)(QTextStream&, bool), bool ignoreContent = false) -> std::optional<bool>
     {
-        qDebug() << "Loading config file:" << path2.toUtf8().constData();
-
-        file.setFileName(path2);
+        qDebug() << "Loading config file:" << path.toUtf8().constData();
+        file.setFileName(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 cfgError(tr("Error opening OpenMW configuration file"),
-                         tr("<br><b>Could not open %0 for reading</b><br><br> \
-                             Please make sure you have the right permissions \
-                             and try again.<br>").arg(file.fileName()));
-                return false;
+                        tr("<br><b>Could not open %0 for reading</b><br><br> \
+                            Please make sure you have the right permissions \
+                            and try again.<br>").arg(file.fileName()));
+                return {};
             }
             QTextStream stream(&file);
             stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
-            mGameSettings.readFile(stream);
+            (mGameSettings.*reader)(stream, ignoreContent);
             file.close();
+            return true;
         }
+        return false;
+    };
+
+    // Load the user config file first, separately
+    // So we can write it properly, uncontaminated
+    if(!loadFile(userPath + QLatin1String("openmw.cfg"), &Config::GameSettings::readUserFile))
+        return false;
+
+    // Now the rest - priority: user > local > global
+    if(auto result = loadFile(localPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+    {
+        // Load global if local wasn't found
+        if(!*result && !loadFile(globalPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+            return false;
     }
+    else
+        return false;
+    if(!loadFile(userPath + QString("openmw.cfg"), &Config::GameSettings::readFile))
+        return false;
 
     return true;
 }
