@@ -336,7 +336,7 @@ bool Launcher::MainDialog::setupGameSettings()
 
     QFile file;
 
-    auto loadFile = [&] (const QString& path, bool(Config::GameSettings::*reader)(QTextStream&, bool), bool ignoreContent = false)
+    auto loadFile = [&] (const QString& path, bool(Config::GameSettings::*reader)(QTextStream&, bool), bool ignoreContent = false) -> std::optional<bool>
     {
         qDebug() << "Loading config file:" << path.toUtf8().constData();
         file.setFileName(path);
@@ -346,24 +346,34 @@ bool Launcher::MainDialog::setupGameSettings()
                         tr("<br><b>Could not open %0 for reading</b><br><br> \
                             Please make sure you have the right permissions \
                             and try again.<br>").arg(file.fileName()));
-                return false;
+                return {};
             }
             QTextStream stream(&file);
             stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
             (mGameSettings.*reader)(stream, ignoreContent);
             file.close();
+            return true;
         }
+        return false;
     };
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
-    loadFile(userPath + QLatin1String("openmw.cfg"), &Config::GameSettings::readUserFile);
+    if(!loadFile(userPath + QLatin1String("openmw.cfg"), &Config::GameSettings::readUserFile))
+        return false;
 
     // Now the rest - priority: user > local > global
-    loadFile(globalPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true);
-    loadFile(localPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true);
-    loadFile(userPath + QString("openmw.cfg"), &Config::GameSettings::readFile);
+    if(auto result = loadFile(localPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+    {
+        // Load global if local wasn't found
+        if(!*result && !loadFile(globalPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+            return false;
+    }
+    else
+        return false;
+    if(!loadFile(userPath + QString("openmw.cfg"), &Config::GameSettings::readFile))
+        return false;
 
     return true;
 }
