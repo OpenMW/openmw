@@ -87,7 +87,7 @@ namespace Stereo
 
         //! The projection intended for rendering. When reverse Z is enabled, this is not the same as the camera's projection matrix, 
         //! and therefore must be provided to the manager explicitly.
-        void setMasterProjectionMatrix(const osg::Matrix& projectionMatrix) { mMasterProjectionMatrix = projectionMatrix; }
+        void setMasterProjectionMatrix(const osg::Matrixd& projectionMatrix) { mMasterProjectionMatrix = projectionMatrix; }
 
         //! Causes the subgraph represented by the node to draw to the full viewport.
         //! This has no effect if stereo is not enabled
@@ -109,15 +109,15 @@ namespace Stereo
         osg::ref_ptr<osg::Camera>       mMainCamera;
         osg::ref_ptr<osg::Callback>     mUpdateCallback;
         std::string                     mError;
-        osg::Matrix                     mMasterProjectionMatrix;
+        osg::Matrixd                     mMasterProjectionMatrix;
         std::shared_ptr<MultiviewFramebuffer> mMultiviewFramebuffer;
         bool                            mEyeResolutionOverriden;
         osg::Vec2i                      mEyeResolutionOverride;
 
         std::array<View, 2>         mView;
-        std::array<osg::Matrix, 2>  mViewOffsetMatrix;
-        std::array<osg::Matrix, 2>  mProjectionMatrix;
-        std::array<osg::Matrix, 2>  mProjectionMatrixReverseZ;
+        std::array<osg::Matrixd, 2>  mViewOffsetMatrix;
+        std::array<osg::Matrixd, 2>  mProjectionMatrix;
+        std::array<osg::Matrixd, 2>  mProjectionMatrixReverseZ;
 
         std::unique_ptr<StereoFrustumManager> mFrustumManager;
         std::shared_ptr<UpdateViewCallback> mUpdateViewCallback;

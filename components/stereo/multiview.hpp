@@ -16,6 +16,11 @@ namespace osg
     class Texture2DArray;
 }
 
+namespace osgUtil
+{
+    class RenderStage;
+}
+
 namespace Stereo
 {
     class UpdateRenderStagesCallback;
@@ -34,6 +39,9 @@ namespace Stereo
 
     //! Creates a Texture2D as a texture view into a Texture2DArray
     osg::ref_ptr<osg::Texture2D> createTextureView_Texture2DFromTexture2DArray(osg::Texture2DArray* textureArray, int layer);
+
+    //! Sets up a draw callback on the render stage that performs the MSAA resolve operation
+    void setMultiviewMSAAResolveCallback(osgUtil::RenderStage* renderStage);
 
     //! Class that manages the specifics of GL_OVR_Multiview aware framebuffers, separating the layers into separate framebuffers, and disabling
     class MultiviewFramebuffer
@@ -77,6 +85,7 @@ namespace Stereo
         std::array<osg::ref_ptr<osg::Texture2D>, 2> mColorTexture;
         std::array<osg::ref_ptr<osg::Texture2D>, 2> mDepthTexture;
     };
+
 }
 
 #endif

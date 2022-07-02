@@ -86,6 +86,14 @@ namespace
         case GL_TEXTURE_2D_ARRAY:
             static_cast<osg::Texture2DArray*>(tex)->setTextureSize(w, h, 2);
             break;
+        case GL_TEXTURE_2D_MULTISAMPLE:
+            static_cast<osg::Texture2DMultisample*>(tex)->setTextureSize(w, h);
+            break;
+#ifdef OSG_HAS_MULTIVIEW
+        case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
+            static_cast<osg::Texture2DMultisampleArray*>(tex)->setTextureSize(w, h, 2);
+            break;
+#endif
         default:
             throw std::logic_error("Invalid texture type received");
         }
@@ -233,7 +241,7 @@ namespace MWRender
         mUBO = ext && ext->isUniformBufferObjectSupported && mGLSLVersion >= 330;
         mStateUpdater = new fx::StateUpdater(mUBO);
 
-        if (!SceneUtil::AutoDepth::isReversed() && !mSoftParticles && !mUsePostProcessing)
+        if (!Stereo::getStereo() && !SceneUtil::AutoDepth::isReversed() && !mSoftParticles && !mUsePostProcessing)
             return;
 
         enable(mUsePostProcessing);
