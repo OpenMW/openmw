@@ -320,6 +320,8 @@ namespace ESSImport
         esm.startRecord(ESM::REC_CSTA);
         ESM::CellState csta;
         csta.mHasFogOfWar = 0;
+        csta.mLastRespawn.mDay = 0;
+        csta.mLastRespawn.mHour = 0;
         csta.mId = esmcell.getCellId();
         csta.mId.save(esm);
         // TODO csta.mLastRespawn;

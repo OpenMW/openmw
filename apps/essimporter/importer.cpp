@@ -368,6 +368,7 @@ namespace ESSImport
         profile.mInGameTime.mGameHour = context.mHour;
         profile.mInGameTime.mMonth = context.mMonth;
         profile.mInGameTime.mYear = context.mYear;
+        profile.mTimePlayed = 0;
         profile.mPlayerCell = header.mGameData.mCurrentCell.toString();
         if (context.mPlayerBase.mClass == "NEWCLASSID_CHARGEN")
             profile.mPlayerClassName = context.mCustomPlayerClassName;
