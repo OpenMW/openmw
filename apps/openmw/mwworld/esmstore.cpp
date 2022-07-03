@@ -128,6 +128,66 @@ namespace
     }
 }
 
+static int sRecordTypeCounter = 0;
+template<typename T> struct SRecordType
+{
+    static const int recordId;
+    static int getId() { return recordId; };
+};
+
+#define AddStoreType(__Type) const int SRecordType<__Type>::recordId = sRecordTypeCounter++;
+#define GetRecordTypeId(__Type) SRecordType<__Type>::recordId
+
+AddStoreType(ESM::Activator);
+AddStoreType(ESM::Potion);
+AddStoreType(ESM::Apparatus);
+AddStoreType(ESM::Armor);
+AddStoreType(ESM::BodyPart);
+AddStoreType(ESM::Book);
+AddStoreType(ESM::BirthSign);
+AddStoreType(ESM::Class);
+AddStoreType(ESM::Clothing);
+AddStoreType(ESM::Container);
+AddStoreType(ESM::Creature);
+AddStoreType(ESM::Dialogue);
+AddStoreType(ESM::Door);
+AddStoreType(ESM::Enchantment);
+AddStoreType(ESM::Faction);
+AddStoreType(ESM::Global);
+AddStoreType(ESM::Ingredient);
+AddStoreType(ESM::CreatureLevList);
+AddStoreType(ESM::ItemLevList);
+AddStoreType(ESM::Light);
+AddStoreType(ESM::Lockpick);
+AddStoreType(ESM::Miscellaneous);
+AddStoreType(ESM::NPC);
+AddStoreType(ESM::Probe);
+AddStoreType(ESM::Race);
+AddStoreType(ESM::Region);
+AddStoreType(ESM::Repair);
+AddStoreType(ESM::SoundGenerator);
+AddStoreType(ESM::Sound);
+AddStoreType(ESM::Spell);
+AddStoreType(ESM::StartScript);
+AddStoreType(ESM::Static);
+AddStoreType(ESM::Weapon);
+AddStoreType(ESM::GameSetting);
+AddStoreType(ESM::Script);
+
+// Lists that need special rules
+AddStoreType(ESM::Cell);
+AddStoreType(ESM::Land);
+AddStoreType(ESM::LandTexture);
+AddStoreType(ESM::Pathgrid);
+
+AddStoreType(ESM::MagicEffect);
+AddStoreType(ESM::Skill);
+
+// Special entry which is hardcoded and not loaded from an ESM
+AddStoreType(ESM::Attribute);
+
+static const int sRecordTypeCount = sRecordTypeCounter;
+
 namespace MWWorld
 {
 
