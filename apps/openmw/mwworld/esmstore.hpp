@@ -29,8 +29,8 @@ namespace MWWorld
 
     class ESMStore
     {
-        std::unique_ptr<ESMStoreImp> mStoreImp;
-
+        friend struct ESMStoreImp; //This allows StoreImp to extend esmstore without beeing included everywhere
+		std::unique_ptr<ESMStoreImp> mStoreImp;
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
@@ -111,34 +111,11 @@ namespace MWWorld
         void load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
 
         template <class T>
-        const Store<T> &get() const {
-            throw std::runtime_error("Storage for this type not exist");
-        }
+        const Store<T>& get() const;
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
         template <class T>
-        const T *insert(const T &x)
-        {
-            const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
-
-            Store<T> &store = const_cast<Store<T> &>(get<T>());
-            if (store.search(id) != nullptr)
-            {
-                const std::string msg = "Try to override existing record '" + id + "'";
-                throw std::runtime_error(msg);
-            }
-            T record = x;
-
-            record.mId = id;
-
-            T *ptr = store.insert(record);
-            for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
-                if (it->second == &store) {
-                    mIds[ptr->mId] = it->first;
-                }
-            }
-            return ptr;
-        }
+        const T* insert(const T& x);
 
         /// Insert a record with set ID, and allow it to override a pre-existing static record.
         template <class T>
@@ -197,57 +174,7 @@ namespace MWWorld
     };
 
 
-    template <>
-    const ESM::Cell* ESMStore::insert<ESM::Cell>(const ESM::Cell& cell);
 
-    template <>
-    const ESM::NPC* ESMStore::insert<ESM::NPC>(const ESM::NPC& npc);
-#define DeclareStoreGet(__Type ) template<> const Store<__Type>& ESMStore::get<__Type>() const;
-
-    DeclareStoreGet(ESM::Activator)
-    DeclareStoreGet(ESM::Potion)
-    DeclareStoreGet(ESM::Apparatus)
-    DeclareStoreGet(ESM::Armor)
-    DeclareStoreGet(ESM::BodyPart)
-    DeclareStoreGet(ESM::Book)
-    DeclareStoreGet(ESM::BirthSign)
-    DeclareStoreGet(ESM::Class)
-    DeclareStoreGet(ESM::Clothing)
-    DeclareStoreGet(ESM::Container)
-    DeclareStoreGet(ESM::Creature)
-    DeclareStoreGet(ESM::Dialogue)
-    DeclareStoreGet(ESM::Door)
-    DeclareStoreGet(ESM::Enchantment)
-    DeclareStoreGet(ESM::Faction)
-    DeclareStoreGet(ESM::Global)
-    DeclareStoreGet(ESM::Ingredient)
-    DeclareStoreGet(ESM::CreatureLevList)
-    DeclareStoreGet(ESM::ItemLevList)
-    DeclareStoreGet(ESM::Light)
-    DeclareStoreGet(ESM::Lockpick)
-    DeclareStoreGet(ESM::Miscellaneous)
-    DeclareStoreGet(ESM::NPC)
-    DeclareStoreGet(ESM::Probe)
-    DeclareStoreGet(ESM::Race)
-    DeclareStoreGet(ESM::Region)
-    DeclareStoreGet(ESM::Repair)
-    DeclareStoreGet(ESM::SoundGenerator)
-    DeclareStoreGet(ESM::Sound)
-    DeclareStoreGet(ESM::Spell)
-    DeclareStoreGet(ESM::StartScript)
-    DeclareStoreGet(ESM::Static)
-    DeclareStoreGet(ESM::Weapon)
-    DeclareStoreGet(ESM::GameSetting)
-    DeclareStoreGet(ESM::Script)
-    DeclareStoreGet(ESM::Cell)
-    DeclareStoreGet(ESM::Land)
-    DeclareStoreGet(ESM::LandTexture)
-    DeclareStoreGet(ESM::Pathgrid)
-    DeclareStoreGet(ESM::MagicEffect)
-    DeclareStoreGet(ESM::Skill)
-    DeclareStoreGet(ESM::Attribute)
-
-#undef DeclareStoreGet
 }
 
 #endif

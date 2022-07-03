@@ -180,6 +180,30 @@ namespace MWWorld
 
         // Special entry which is hardcoded and not loaded from an ESM
         Store<ESM::Attribute>   mAttributes;
+
+        template<typename T> 
+        static const T* ESM3StoreInsert(ESMStore& stores, const T &toInsert)
+        {
+            const std::string id = "$dynamic" + std::to_string(stores.mDynamicCount++);
+
+            Store<T> &store = const_cast<Store<T> &>(stores.get<T>());
+            if (store.search(id) != nullptr)
+            {
+                const std::string msg = "Try to override existing record '" + id + "'";
+                throw std::runtime_error(msg);
+            }
+            T record = toInsert;
+
+            record.mId = id;
+
+            T *ptr = store.insert(record);
+            for (ESMStore::iterator it = stores.mStores.begin(); it != stores.mStores.end(); ++it) {
+                if (it->second == &store) {
+                    stores.mIds[ptr->mId] = it->first;
+                }
+            }
+            return ptr;
+        }
     };
 
     ESMStore::ESMStore()
@@ -663,6 +687,17 @@ void ESMStore::removeMissingObjects(Store<T>& store)
         mIds[ptr->mId] = ESM::REC_NPC_;
         return ptr;
     }
+
+#define ESM3Insert(__Type) template<> const __Type* ESMStore::insert<__Type>(const __Type &toInsert) { return ESMStoreImp::ESM3StoreInsert(*this, toInsert);   }
+    ESM3Insert(ESM::Book);
+    ESM3Insert(ESM::Armor);
+    ESM3Insert(ESM::Class);
+    ESM3Insert(ESM::Enchantment);
+    ESM3Insert(ESM::Potion);
+    ESM3Insert(ESM::Weapon);
+    ESM3Insert(ESM::Clothing);
+    ESM3Insert(ESM::Spell);
+#undef ESM3Insert
 
     template <>
     const Store<ESM::Activator> &ESMStore::get<ESM::Activator>() const {
