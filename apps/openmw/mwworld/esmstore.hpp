@@ -4,9 +4,7 @@
 #include <memory>
 #include <stdexcept>
 #include <unordered_map>
-#include <map>
 
-#include <components/misc/stringops.hpp>
 #include <components/esm/luascripts.hpp>
 #include "store.hpp"
 
@@ -23,7 +21,6 @@ namespace MWMechanics
 namespace ESM
 {
     class ReadersCache;
-    struct Dialogue;
 }
 
 namespace MWWorld

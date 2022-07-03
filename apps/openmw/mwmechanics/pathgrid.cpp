@@ -5,7 +5,6 @@
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/storeSpecialization.hpp"
 
 namespace
 {

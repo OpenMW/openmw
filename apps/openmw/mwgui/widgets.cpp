@@ -15,7 +15,6 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/storeSpecialization.hpp"
 
 #include "controllers.hpp"
 #include "ustring.hpp"

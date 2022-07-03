@@ -3,7 +3,6 @@
 #include <limits>
 
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/storeSpecialization.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

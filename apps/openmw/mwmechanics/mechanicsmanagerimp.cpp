@@ -14,7 +14,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/storeSpecialization.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"

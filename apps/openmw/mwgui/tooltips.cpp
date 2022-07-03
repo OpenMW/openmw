@@ -18,8 +18,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/storeSpecialization.hpp"
-
 #include "../mwmechanics/spellutil.hpp"
 #include "../mwmechanics/actorutil.hpp"
 

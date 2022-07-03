@@ -19,7 +19,6 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/pathfinding.hpp"
-#include "../mwworld/storeSpecialization.hpp"
 
 #include "vismask.hpp"
 

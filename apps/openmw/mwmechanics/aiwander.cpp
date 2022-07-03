@@ -17,7 +17,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/storeSpecialization.hpp"
 
 #include "../mwphysics/collisiontype.hpp"
 

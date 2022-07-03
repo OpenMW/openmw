@@ -13,7 +13,6 @@
 #include <components/esmloader/load.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
-#include "storeSpecialization.hpp"
 
 namespace
 {

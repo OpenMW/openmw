@@ -25,7 +25,6 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/storeSpecialization.hpp"
 
 namespace MWGui
 {

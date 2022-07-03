@@ -23,7 +23,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/storeSpecialization.hpp"
 
 #include "vismask.hpp"
 #include "util.hpp"
