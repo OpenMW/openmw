@@ -130,6 +130,109 @@ namespace
 namespace MWWorld
 {
 
+    struct ESMStoreImp
+    {
+        Store<ESM::Activator>       mActivators;
+        Store<ESM::Potion>          mPotions;
+        Store<ESM::Apparatus>       mAppas;
+        Store<ESM::Armor>           mArmors;
+        Store<ESM::BodyPart>        mBodyParts;
+        Store<ESM::Book>            mBooks;
+        Store<ESM::BirthSign>       mBirthSigns;
+        Store<ESM::Class>           mClasses;
+        Store<ESM::Clothing>        mClothes;
+        Store<ESM::Container>       mContainers;
+        Store<ESM::Creature>        mCreatures;
+        Store<ESM::Dialogue>        mDialogs;
+        Store<ESM::Door>            mDoors;
+        Store<ESM::Enchantment>     mEnchants;
+        Store<ESM::Faction>         mFactions;
+        Store<ESM::Global>          mGlobals;
+        Store<ESM::Ingredient>      mIngreds;
+        Store<ESM::CreatureLevList> mCreatureLists;
+        Store<ESM::ItemLevList>     mItemLists;
+        Store<ESM::Light>           mLights;
+        Store<ESM::Lockpick>        mLockpicks;
+        Store<ESM::Miscellaneous>   mMiscItems;
+        Store<ESM::NPC>             mNpcs;
+        Store<ESM::Probe>           mProbes;
+        Store<ESM::Race>            mRaces;
+        Store<ESM::Region>          mRegions;
+        Store<ESM::Repair>          mRepairs;
+        Store<ESM::SoundGenerator>  mSoundGens;
+        Store<ESM::Sound>           mSounds;
+        Store<ESM::Spell>           mSpells;
+        Store<ESM::StartScript>     mStartScripts;
+        Store<ESM::Static>          mStatics;
+        Store<ESM::Weapon>          mWeapons;
+
+        Store<ESM::GameSetting>     mGameSettings;
+        Store<ESM::Script>          mScripts;
+
+        // Lists that need special rules
+        Store<ESM::Cell>        mCells;
+        Store<ESM::Land>        mLands;
+        Store<ESM::LandTexture> mLandTextures;
+        Store<ESM::Pathgrid>    mPathgrids;
+
+        Store<ESM::MagicEffect> mMagicEffects;
+        Store<ESM::Skill>       mSkills;
+
+        // Special entry which is hardcoded and not loaded from an ESM
+        Store<ESM::Attribute>   mAttributes;
+    };
+
+    ESMStore::ESMStore()
+    {
+        mStoreImp = std::make_unique<ESMStoreImp>();
+        mDynamicCount = 0;
+        mStores[ESM::REC_ACTI] = &mStoreImp->mActivators;
+        mStores[ESM::REC_ALCH] = &mStoreImp->mPotions;
+        mStores[ESM::REC_APPA] = &mStoreImp->mAppas;
+        mStores[ESM::REC_ARMO] = &mStoreImp->mArmors;
+        mStores[ESM::REC_BODY] = &mStoreImp->mBodyParts;
+        mStores[ESM::REC_BOOK] = &mStoreImp->mBooks;
+        mStores[ESM::REC_BSGN] = &mStoreImp->mBirthSigns;
+        mStores[ESM::REC_CELL] = &mStoreImp->mCells;
+        mStores[ESM::REC_CLAS] = &mStoreImp->mClasses;
+        mStores[ESM::REC_CLOT] = &mStoreImp->mClothes;
+        mStores[ESM::REC_CONT] = &mStoreImp->mContainers;
+        mStores[ESM::REC_CREA] = &mStoreImp->mCreatures;
+        mStores[ESM::REC_DIAL] = &mStoreImp->mDialogs;
+        mStores[ESM::REC_DOOR] = &mStoreImp->mDoors;
+        mStores[ESM::REC_ENCH] = &mStoreImp->mEnchants;
+        mStores[ESM::REC_FACT] = &mStoreImp->mFactions;
+        mStores[ESM::REC_GLOB] = &mStoreImp->mGlobals;
+        mStores[ESM::REC_GMST] = &mStoreImp->mGameSettings;
+        mStores[ESM::REC_INGR] = &mStoreImp->mIngreds;
+        mStores[ESM::REC_LAND] = &mStoreImp->mLands;
+        mStores[ESM::REC_LEVC] = &mStoreImp->mCreatureLists;
+        mStores[ESM::REC_LEVI] = &mStoreImp->mItemLists;
+        mStores[ESM::REC_LIGH] = &mStoreImp->mLights;
+        mStores[ESM::REC_LOCK] = &mStoreImp->mLockpicks;
+        mStores[ESM::REC_LTEX] = &mStoreImp->mLandTextures;
+        mStores[ESM::REC_MISC] = &mStoreImp->mMiscItems;
+        mStores[ESM::REC_NPC_] = &mStoreImp->mNpcs;
+        mStores[ESM::REC_PGRD] = &mStoreImp->mPathgrids;
+        mStores[ESM::REC_PROB] = &mStoreImp->mProbes;
+        mStores[ESM::REC_RACE] = &mStoreImp->mRaces;
+        mStores[ESM::REC_REGN] = &mStoreImp->mRegions;
+        mStores[ESM::REC_REPA] = &mStoreImp->mRepairs;
+        mStores[ESM::REC_SCPT] = &mStoreImp->mScripts;
+        mStores[ESM::REC_SNDG] = &mStoreImp->mSoundGens;
+        mStores[ESM::REC_SOUN] = &mStoreImp->mSounds;
+        mStores[ESM::REC_SPEL] = &mStoreImp->mSpells;
+        mStores[ESM::REC_SSCR] = &mStoreImp->mStartScripts;
+        mStores[ESM::REC_STAT] = &mStoreImp->mStatics;
+        mStores[ESM::REC_WEAP] = &mStoreImp->mWeapons;
+
+        mStoreImp->mPathgrids.setCells(mStoreImp->mCells);
+    }
+
+    ESMStore::~ESMStore()
+    {
+    }
+
 static bool isCacheableRecord(int id)
 {
     if (id == ESM::REC_ACTI || id == ESM::REC_ALCH || id == ESM::REC_APPA || id == ESM::REC_ARMO ||
@@ -152,7 +255,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
     // Land texture loading needs to use a separate internal store for each plugin.
     // We set the number of plugins here so we can properly verify if valid plugin
     // indices are being passed to the LandTexture Store retrieval methods.
-    mLandTextures.resize(esm.getIndex()+1);
+    mStoreImp->mLandTextures.resize(esm.getIndex()+1);
 
     // Loop through all records
     while(esm.hasMoreRecs())
@@ -180,9 +283,9 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
                     esm.skipRecord();
                 }
             } else if (n.toInt() == ESM::REC_MGEF) {
-                mMagicEffects.load (esm);
+                mStoreImp->mMagicEffects.load (esm);
             } else if (n.toInt() == ESM::REC_SKIL) {
-                mSkills.load (esm);
+                mStoreImp->mSkills.load (esm);
             }
             else if (n.toInt() == ESM::REC_FILT || n.toInt() == ESM::REC_DBGP)
             {
@@ -208,7 +311,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
             }
 
             if (n.toInt() == ESM::REC_DIAL) {
-                dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id.mId));
+                dialogue = const_cast<ESM::Dialogue*>(mStoreImp->mDialogs.find(id.mId));
             } else {
                 dialogue = nullptr;
             }
@@ -266,10 +369,10 @@ void ESMStore::setUp()
         for (const auto& [k, v] : mIds)
             mStaticIds.emplace(Misc::StringUtils::lowerCase(k), v);
 
-    mSkills.setUp();
-    mMagicEffects.setUp();
-    mAttributes.setUp();
-    mDialogs.setUp();
+    mStoreImp->mSkills.setUp();
+    mStoreImp->mMagicEffects.setUp();
+    mStoreImp->mAttributes.setUp();
+    mStoreImp->mDialogs.setUp();
 }
 
 void ESMStore::validateRecords(ESM::ReadersCache& readers)
@@ -286,9 +389,9 @@ void ESMStore::countAllCellRefs(ESM::ReadersCache& readers)
         return;
     std::vector<Ref> refs;
     std::vector<std::string> refIDs;
-    for(auto it = mCells.intBegin(); it != mCells.intEnd(); ++it)
+    for(auto it = mStoreImp->mCells.intBegin(); it != mStoreImp->mCells.intEnd(); ++it)
         readRefs(*it, refs, refIDs, readers);
-    for(auto it = mCells.extBegin(); it != mCells.extEnd(); ++it)
+    for(auto it = mStoreImp->mCells.extBegin(); it != mStoreImp->mCells.extEnd(); ++it)
         readRefs(*it, refs, refIDs, readers);
     const auto lessByRefNum = [] (const Ref& l, const Ref& r) { return l.mRefNum < r.mRefNum; };
     std::stable_sort(refs.begin(), refs.end(), lessByRefNum);
@@ -317,17 +420,17 @@ int ESMStore::getRefCount(std::string_view id) const
 
 void ESMStore::validate()
 {
-    std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(mFactions, mClasses, mNpcs.mStatic);
+    std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(mStoreImp->mFactions, mStoreImp->mClasses, mStoreImp->mNpcs.mStatic);
 
     for (const ESM::NPC &npc : npcsToReplace)
     {
-        mNpcs.eraseStatic(npc.mId);
-        mNpcs.insertStatic(npc);
+        mStoreImp->mNpcs.eraseStatic(npc.mId);
+        mStoreImp->mNpcs.insertStatic(npc);
     }
 
     // Validate spell effects for invalid arguments
     std::vector<ESM::Spell> spellsToReplace;
-    for (ESM::Spell spell : mSpells)
+    for (ESM::Spell spell : mStoreImp->mSpells)
     {
         if (spell.mEffects.mList.empty())
             continue;
@@ -336,7 +439,7 @@ void ESMStore::validate()
         auto iter = spell.mEffects.mList.begin();
         while (iter != spell.mEffects.mList.end())
         {
-            const ESM::MagicEffect* mgef = mMagicEffects.search(iter->mEffectID);
+            const ESM::MagicEffect* mgef = mStoreImp->mMagicEffects.search(iter->mEffectID);
             if (!mgef)
             {
                 Log(Debug::Verbose) << "Spell '" << spell.mId << "' has an invalid effect (index " << iter->mEffectID << ") present. Dropping the effect.";
@@ -383,25 +486,31 @@ void ESMStore::validate()
 
     for (const ESM::Spell &spell : spellsToReplace)
     {
-        mSpells.eraseStatic(spell.mId);
-        mSpells.insertStatic(spell);
+        mStoreImp->mSpells.eraseStatic(spell.mId);
+        mStoreImp->mSpells.insertStatic(spell);
     }
+}
+
+void ESMStore::movePlayerRecord()
+{
+    auto player = mStoreImp->mNpcs.find("player");
+    mStoreImp->mNpcs.insert(*player);
 }
 
 void ESMStore::validateDynamic()
 {
-    std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(mFactions, mClasses, mNpcs.mDynamic);
+    std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(mStoreImp->mFactions, mStoreImp->mClasses, mStoreImp->mNpcs.mDynamic);
 
     for (const ESM::NPC &npc : npcsToReplace)
-        mNpcs.insert(npc);
+        mStoreImp->mNpcs.insert(npc);
 
-    removeMissingScripts(mScripts, mArmors.mDynamic);
-    removeMissingScripts(mScripts, mBooks.mDynamic);
-    removeMissingScripts(mScripts, mClothes.mDynamic);
-    removeMissingScripts(mScripts, mWeapons.mDynamic);
+    removeMissingScripts(mStoreImp->mScripts, mStoreImp->mArmors.mDynamic);
+    removeMissingScripts(mStoreImp->mScripts, mStoreImp->mBooks.mDynamic);
+    removeMissingScripts(mStoreImp->mScripts, mStoreImp->mClothes.mDynamic);
+    removeMissingScripts(mStoreImp->mScripts, mStoreImp->mWeapons.mDynamic);
 
-    removeMissingObjects(mCreatureLists);
-    removeMissingObjects(mItemLists);
+    removeMissingObjects(mStoreImp->mCreatureLists);
+    removeMissingObjects(mStoreImp->mItemLists);
 }
 
 // Leveled lists can be modified by scripts. This removes items that no longer exist (presumably because the plugin was removed) from modified lists
@@ -426,19 +535,19 @@ void ESMStore::removeMissingObjects(Store<T>& store)
     int ESMStore::countSavedGameRecords() const
     {
         return 1 // DYNA (dynamic name counter)
-            +mPotions.getDynamicSize()
-            +mArmors.getDynamicSize()
-            +mBooks.getDynamicSize()
-            +mClasses.getDynamicSize()
-            +mClothes.getDynamicSize()
-            +mEnchants.getDynamicSize()
-            +mNpcs.getDynamicSize()
-            +mSpells.getDynamicSize()
-            +mWeapons.getDynamicSize()
-            +mCreatureLists.getDynamicSize()
-            +mItemLists.getDynamicSize()
-            +mCreatures.getDynamicSize()
-            +mContainers.getDynamicSize();
+            +mStoreImp->mPotions.getDynamicSize()
+            +mStoreImp->mArmors.getDynamicSize()
+            +mStoreImp->mBooks.getDynamicSize()
+            +mStoreImp->mClasses.getDynamicSize()
+            +mStoreImp->mClothes.getDynamicSize()
+            +mStoreImp->mEnchants.getDynamicSize()
+            +mStoreImp->mNpcs.getDynamicSize()
+            +mStoreImp->mSpells.getDynamicSize()
+            +mStoreImp->mWeapons.getDynamicSize()
+            +mStoreImp->mCreatureLists.getDynamicSize()
+            +mStoreImp->mItemLists.getDynamicSize()
+            +mStoreImp->mCreatures.getDynamicSize()
+            +mStoreImp->mContainers.getDynamicSize();
     }
 
     void ESMStore::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -449,19 +558,19 @@ void ESMStore::removeMissingObjects(Store<T>& store)
         writer.endRecord("COUN");
         writer.endRecord(ESM::REC_DYNA);
 
-        mPotions.write (writer, progress);
-        mArmors.write (writer, progress);
-        mBooks.write (writer, progress);
-        mClasses.write (writer, progress);
-        mClothes.write (writer, progress);
-        mEnchants.write (writer, progress);
-        mSpells.write (writer, progress);
-        mWeapons.write (writer, progress);
-        mNpcs.write (writer, progress);
-        mItemLists.write (writer, progress);
-        mCreatureLists.write (writer, progress);
-        mCreatures.write (writer, progress);
-        mContainers.write (writer, progress);
+        mStoreImp->mPotions.write (writer, progress);
+        mStoreImp->mArmors.write (writer, progress);
+        mStoreImp->mBooks.write (writer, progress);
+        mStoreImp->mClasses.write (writer, progress);
+        mStoreImp->mClothes.write (writer, progress);
+        mStoreImp->mEnchants.write (writer, progress);
+        mStoreImp->mSpells.write (writer, progress);
+        mStoreImp->mWeapons.write (writer, progress);
+        mStoreImp->mNpcs.write (writer, progress);
+        mStoreImp->mItemLists.write (writer, progress);
+        mStoreImp->mCreatureLists.write (writer, progress);
+        mStoreImp->mCreatures.write (writer, progress);
+        mStoreImp->mContainers.write (writer, progress);
     }
 
     bool ESMStore::readRecord (ESM::ESMReader& reader, uint32_t type)
@@ -501,10 +610,10 @@ void ESMStore::removeMissingObjects(Store<T>& store)
     {
         setUp();
 
-        const ESM::NPC *player = mNpcs.find ("player");
+        const ESM::NPC *player = mStoreImp->mNpcs.find ("player");
 
-        if (!mRaces.find (player->mRace) ||
-            !mClasses.find (player->mClass))
+        if (!mStoreImp->mRaces.find (player->mRace) ||
+            !mStoreImp->mClasses.find (player->mClass))
             throw std::runtime_error ("Invalid player record (race or class unavailable");
     }
 
@@ -525,5 +634,243 @@ void ESMStore::removeMissingObjects(Store<T>& store)
             return {ptr, false};
         }
         return {ptr, true};
+    }
+
+    template <>
+    const ESM::Cell *ESMStore::insert<ESM::Cell>(const ESM::Cell &cell) {
+        return mStoreImp->mCells.insert(cell);
+    }
+
+    template <>
+    const ESM::NPC *ESMStore::insert<ESM::NPC>(const ESM::NPC &npc)
+    {
+        const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
+
+        if (Misc::StringUtils::ciEqual(npc.mId, "player"))
+        {
+            return mStoreImp->mNpcs.insert(npc);
+        }
+        else if (mStoreImp->mNpcs.search(id) != nullptr)
+        {
+            const std::string msg = "Try to override existing record '" + id + "'";
+            throw std::runtime_error(msg);
+        }
+        ESM::NPC record = npc;
+
+        record.mId = id;
+
+        ESM::NPC *ptr = mStoreImp->mNpcs.insert(record);
+        mIds[ptr->mId] = ESM::REC_NPC_;
+        return ptr;
+    }
+
+    template <>
+    const Store<ESM::Activator> &ESMStore::get<ESM::Activator>() const {
+        return mStoreImp->mActivators;
+    }
+
+    template <>
+    const Store<ESM::Potion> &ESMStore::get<ESM::Potion>() const {
+        return mStoreImp->mPotions;
+    }
+
+    template <>
+    const Store<ESM::Apparatus> &ESMStore::get<ESM::Apparatus>() const {
+        return mStoreImp->mAppas;
+    }
+
+    template <>
+    const Store<ESM::Armor> &ESMStore::get<ESM::Armor>() const {
+        return mStoreImp->mArmors;
+    }
+
+    template <>
+    const Store<ESM::BodyPart> &ESMStore::get<ESM::BodyPart>() const {
+        return mStoreImp->mBodyParts;
+    }
+
+    template <>
+    const Store<ESM::Book> &ESMStore::get<ESM::Book>() const {
+        return mStoreImp->mBooks;
+    }
+
+    template <>
+    const Store<ESM::BirthSign> &ESMStore::get<ESM::BirthSign>() const {
+        return mStoreImp->mBirthSigns;
+    }
+
+    template <>
+    const Store<ESM::Class> &ESMStore::get<ESM::Class>() const {
+        return mStoreImp->mClasses;
+    }
+
+    template <>
+    const Store<ESM::Clothing> &ESMStore::get<ESM::Clothing>() const {
+        return mStoreImp->mClothes;
+    }
+
+    template <>
+    const Store<ESM::Container> &ESMStore::get<ESM::Container>() const {
+        return mStoreImp->mContainers;
+    }
+
+    template <>
+    const Store<ESM::Creature> &ESMStore::get<ESM::Creature>() const {
+        return mStoreImp->mCreatures;
+    }
+
+    template <>
+    const Store<ESM::Dialogue> &ESMStore::get<ESM::Dialogue>() const {
+        return mStoreImp->mDialogs;
+    }
+
+    template <>
+    const Store<ESM::Door> &ESMStore::get<ESM::Door>() const {
+        return mStoreImp->mDoors;
+    }
+
+    template <>
+    const Store<ESM::Enchantment> &ESMStore::get<ESM::Enchantment>() const {
+        return mStoreImp->mEnchants;
+    }
+
+    template <>
+    const Store<ESM::Faction> &ESMStore::get<ESM::Faction>() const {
+        return mStoreImp->mFactions;
+    }
+
+    template <>
+    const Store<ESM::Global> &ESMStore::get<ESM::Global>() const {
+        return mStoreImp->mGlobals;
+    }
+
+    template <>
+    const Store<ESM::Ingredient> &ESMStore::get<ESM::Ingredient>() const {
+        return mStoreImp->mIngreds;
+    }
+
+    template <>
+    const Store<ESM::CreatureLevList> &ESMStore::get<ESM::CreatureLevList>() const {
+        return mStoreImp->mCreatureLists;
+    }
+
+    template <>
+    const Store<ESM::ItemLevList> &ESMStore::get<ESM::ItemLevList>() const {
+        return mStoreImp->mItemLists;
+    }
+
+    template <>
+    const Store<ESM::Light> &ESMStore::get<ESM::Light>() const {
+        return mStoreImp->mLights;
+    }
+
+    template <>
+    const Store<ESM::Lockpick> &ESMStore::get<ESM::Lockpick>() const {
+        return mStoreImp->mLockpicks;
+    }
+
+    template <>
+    const Store<ESM::Miscellaneous> &ESMStore::get<ESM::Miscellaneous>() const {
+        return mStoreImp->mMiscItems;
+    }
+
+    template <>
+    const Store<ESM::NPC> &ESMStore::get<ESM::NPC>() const {
+        return mStoreImp->mNpcs;
+    }
+
+    template <>
+    const Store<ESM::Probe> &ESMStore::get<ESM::Probe>() const {
+        return mStoreImp->mProbes;
+    }
+
+    template <>
+    const Store<ESM::Race> &ESMStore::get<ESM::Race>() const {
+        return mStoreImp->mRaces;
+    }
+
+    template <>
+    const Store<ESM::Region> &ESMStore::get<ESM::Region>() const {
+        return mStoreImp->mRegions;
+    }
+
+    template <>
+    const Store<ESM::Repair> &ESMStore::get<ESM::Repair>() const {
+        return mStoreImp->mRepairs;
+    }
+
+    template <>
+    const Store<ESM::SoundGenerator> &ESMStore::get<ESM::SoundGenerator>() const {
+        return mStoreImp->mSoundGens;
+    }
+
+    template <>
+    const Store<ESM::Sound> &ESMStore::get<ESM::Sound>() const {
+        return mStoreImp->mSounds;
+    }
+
+    template <>
+    const Store<ESM::Spell> &ESMStore::get<ESM::Spell>() const {
+        return mStoreImp->mSpells;
+    }
+
+    template <>
+    const Store<ESM::StartScript> &ESMStore::get<ESM::StartScript>() const {
+        return mStoreImp->mStartScripts;
+    }
+
+    template <>
+    const Store<ESM::Static> &ESMStore::get<ESM::Static>() const {
+        return mStoreImp->mStatics;
+    }
+
+    template <>
+    const Store<ESM::Weapon> &ESMStore::get<ESM::Weapon>() const {
+        return mStoreImp->mWeapons;
+    }
+
+    template <>
+    const Store<ESM::GameSetting> &ESMStore::get<ESM::GameSetting>() const {
+        return mStoreImp->mGameSettings;
+    }
+
+    template <>
+    const Store<ESM::Script> &ESMStore::get<ESM::Script>() const {
+        return mStoreImp->mScripts;
+    }
+
+    template <>
+    const Store<ESM::Cell> &ESMStore::get<ESM::Cell>() const {
+        return mStoreImp->mCells;
+    }
+
+    template <>
+    const Store<ESM::Land> &ESMStore::get<ESM::Land>() const {
+        return mStoreImp->mLands;
+    }
+
+    template <>
+    const Store<ESM::LandTexture> &ESMStore::get<ESM::LandTexture>() const {
+        return mStoreImp->mLandTextures;
+    }
+
+    template <>
+    const Store<ESM::Pathgrid> &ESMStore::get<ESM::Pathgrid>() const {
+        return mStoreImp->mPathgrids;
+    }
+
+    template <>
+    const Store<ESM::MagicEffect> &ESMStore::get<ESM::MagicEffect>() const {
+        return mStoreImp->mMagicEffects;
+    }
+
+    template <>
+    const Store<ESM::Skill> &ESMStore::get<ESM::Skill>() const {
+        return mStoreImp->mSkills;
+    }
+
+    template <>
+    const Store<ESM::Attribute> &ESMStore::get<ESM::Attribute>() const {
+        return mStoreImp->mAttributes;
     }
 } // end namespace
