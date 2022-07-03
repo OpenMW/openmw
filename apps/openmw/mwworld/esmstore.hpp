@@ -4,7 +4,9 @@
 #include <memory>
 #include <stdexcept>
 #include <unordered_map>
+#include <map>
 
+#include <components/misc/stringops.hpp>
 #include <components/esm/luascripts.hpp>
 #include "store.hpp"
 
@@ -21,6 +23,7 @@ namespace MWMechanics
 namespace ESM
 {
     class ReadersCache;
+    struct Dialogue;
 }
 
 namespace MWWorld
@@ -95,13 +98,7 @@ namespace MWWorld
         ESMStore();
         ~ESMStore();
 
-        void clearDynamic ()
-        {
-            for (std::map<int, StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
-                it->second->clearDynamic();
-
-            movePlayerRecord();
-        }
+        void clearDynamic();
 
         void movePlayerRecord();
 

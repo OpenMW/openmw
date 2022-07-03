@@ -8,6 +8,7 @@
 
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
+#include "StoreSpecialization.hpp"
 
 #include <iterator>
 #include <stdexcept>

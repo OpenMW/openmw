@@ -14,6 +14,8 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/StoreSpecialization.hpp"
+
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"

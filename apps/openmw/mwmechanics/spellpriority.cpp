@@ -13,6 +13,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/StoreSpecialization.hpp"
 
 #include "creaturestats.hpp"
 #include "spellresistance.hpp"

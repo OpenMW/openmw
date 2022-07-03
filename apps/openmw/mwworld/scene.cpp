@@ -43,6 +43,7 @@
 #include "cellpreloader.hpp"
 #include "worldimp.hpp"
 #include "cellutils.hpp"
+#include "StoreSpecialization.hpp"
 
 namespace
 {

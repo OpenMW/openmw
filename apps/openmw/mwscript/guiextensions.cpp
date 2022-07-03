@@ -7,6 +7,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/StoreSpecialization.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

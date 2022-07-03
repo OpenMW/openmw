@@ -8,6 +8,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/StoreSpecialization.hpp"
 
 #include "ptr.hpp"
 #include "nullaction.hpp"

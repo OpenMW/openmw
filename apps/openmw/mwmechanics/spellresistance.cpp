@@ -7,6 +7,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/StoreSpecialization.hpp"
 
 #include "creaturestats.hpp"
 #include "spellutil.hpp"

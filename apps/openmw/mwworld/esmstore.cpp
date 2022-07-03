@@ -13,6 +13,7 @@
 #include <components/esmloader/load.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
+#include "StoreSpecialization.hpp"
 
 namespace
 {
@@ -290,6 +291,14 @@ namespace MWWorld
 
     ESMStore::~ESMStore()
     {
+    }
+
+    void ESMStore::clearDynamic()
+    {
+        for (std::map<int, StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
+            it->second->clearDynamic();
+
+        movePlayerRecord();
     }
 
 static bool isCacheableRecord(int id)

@@ -5,6 +5,7 @@
 
 #include "../mwworld/store.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/StoreSpecialization.hpp"
 
 #include "keywordsearch.hpp"
 

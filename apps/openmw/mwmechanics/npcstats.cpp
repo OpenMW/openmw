@@ -11,6 +11,7 @@
 #include <components/misc/strings/format.hpp>
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/StoreSpecialization.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

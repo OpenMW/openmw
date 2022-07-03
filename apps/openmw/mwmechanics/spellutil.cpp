@@ -7,6 +7,8 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/StoreSpecialization.hpp"
+
 
 #include "actorutil.hpp"
 #include "creaturestats.hpp"

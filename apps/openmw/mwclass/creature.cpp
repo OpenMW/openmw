@@ -35,6 +35,7 @@
 #include "../mwworld/localscripts.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/StoreSpecialization.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
 #include "../mwrender/objects.hpp"
