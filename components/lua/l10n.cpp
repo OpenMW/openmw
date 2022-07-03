@@ -68,7 +68,8 @@ namespace LuaUtil
             }
 
             // Argument names
-            argNames.push_back(icu::UnicodeString::fromUTF8(key.as<std::string>()));
+            const auto str = key.as<std::string>();
+            argNames.push_back(icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), str.size())));
         }
         return std::make_pair(args, argNames);
     }
