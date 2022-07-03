@@ -56,11 +56,13 @@ namespace ESM4
 {
 
 ReaderContext::ReaderContext() : modIndex(0), recHeaderSize(sizeof(RecordHeader)),
-    filePos(0), recordRead(0), currWorld(0), currCell(0), cellGridValid(false)
+    filePos(0), fileRead(0), recordRead(0), currWorld(0), currCell(0), cellGridValid(false)
 {
     currCellGrid.cellId = 0;
     currCellGrid.grid.x = 0;
     currCellGrid.grid.y = 0;
+    subRecordHeader.typeId = 0;
+    subRecordHeader.dataSize = 0;
 }
 
 Reader::Reader(Files::IStreamPtr&& esmStream, const std::string& filename)

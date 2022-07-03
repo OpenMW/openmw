@@ -62,6 +62,7 @@ namespace MWWorld
             else
                 params.mType = ESM::ActiveSpells::Type_Permanent;
             params.mWorsenings = -1;
+            params.mNextWorsening = ESM::TimeStamp();
             int effectIndex = 0;
             for(const auto& enam : spell->mEffects.mList)
             {
@@ -131,6 +132,7 @@ namespace MWWorld
             params.mCasterActorId = creatureStats.mActorId;
             params.mType = ESM::ActiveSpells::Type_Enchantment;
             params.mWorsenings = -1;
+            params.mNextWorsening = ESM::TimeStamp();
             for(std::size_t effectIndex = 0; effectIndex < oldMagnitudes.size() && effectIndex < enchantment->mEffects.mList.size(); ++effectIndex)
             {
                 const auto& enam = enchantment->mEffects.mList[effectIndex];
