@@ -196,137 +196,58 @@ namespace MWWorld
         std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
     };
 
+
     template <>
     const ESM::Cell* ESMStore::insert<ESM::Cell>(const ESM::Cell& cell);
 
     template <>
     const ESM::NPC* ESMStore::insert<ESM::NPC>(const ESM::NPC& npc);
+#define DeclareStoreGet(__Type ) template<> const Store<__Type>& ESMStore::get<__Type>() const;
 
-    template <>
-    const Store<ESM::Activator>& ESMStore::get<ESM::Activator>() const;
+    DeclareStoreGet(ESM::Activator)
+    DeclareStoreGet(ESM::Potion)
+    DeclareStoreGet(ESM::Apparatus)
+    DeclareStoreGet(ESM::Armor)
+    DeclareStoreGet(ESM::BodyPart)
+    DeclareStoreGet(ESM::Book)
+    DeclareStoreGet(ESM::BirthSign)
+    DeclareStoreGet(ESM::Class)
+    DeclareStoreGet(ESM::Clothing)
+    DeclareStoreGet(ESM::Container)
+    DeclareStoreGet(ESM::Creature)
+    DeclareStoreGet(ESM::Dialogue)
+    DeclareStoreGet(ESM::Door)
+    DeclareStoreGet(ESM::Enchantment)
+    DeclareStoreGet(ESM::Faction)
+    DeclareStoreGet(ESM::Global)
+    DeclareStoreGet(ESM::Ingredient)
+    DeclareStoreGet(ESM::CreatureLevList)
+    DeclareStoreGet(ESM::ItemLevList)
+    DeclareStoreGet(ESM::Light)
+    DeclareStoreGet(ESM::Lockpick)
+    DeclareStoreGet(ESM::Miscellaneous)
+    DeclareStoreGet(ESM::NPC)
+    DeclareStoreGet(ESM::Probe)
+    DeclareStoreGet(ESM::Race)
+    DeclareStoreGet(ESM::Region)
+    DeclareStoreGet(ESM::Repair)
+    DeclareStoreGet(ESM::SoundGenerator)
+    DeclareStoreGet(ESM::Sound)
+    DeclareStoreGet(ESM::Spell)
+    DeclareStoreGet(ESM::StartScript)
+    DeclareStoreGet(ESM::Static)
+    DeclareStoreGet(ESM::Weapon)
+    DeclareStoreGet(ESM::GameSetting)
+    DeclareStoreGet(ESM::Script)
+    DeclareStoreGet(ESM::Cell)
+    DeclareStoreGet(ESM::Land)
+    DeclareStoreGet(ESM::LandTexture)
+    DeclareStoreGet(ESM::Pathgrid)
+    DeclareStoreGet(ESM::MagicEffect)
+    DeclareStoreGet(ESM::Skill)
+    DeclareStoreGet(ESM::Attribute)
 
-    template <>
-    const Store<ESM::Potion>& ESMStore::get<ESM::Potion>() const;
-
-    template <>
-    const Store<ESM::Apparatus>& ESMStore::get<ESM::Apparatus>() const;
-
-    template <>
-    const Store<ESM::Armor>& ESMStore::get<ESM::Armor>() const;
-
-    template <>
-    const Store<ESM::BodyPart>& ESMStore::get<ESM::BodyPart>() const;
-
-    template <>
-    const Store<ESM::Book>& ESMStore::get<ESM::Book>() const;
-
-    template <>
-    const Store<ESM::BirthSign>& ESMStore::get<ESM::BirthSign>() const;
-
-    template <>
-    const Store<ESM::Class>& ESMStore::get<ESM::Class>() const;
-
-    template <>
-    const Store<ESM::Clothing>& ESMStore::get<ESM::Clothing>() const;
-
-    template <>
-    const Store<ESM::Container>& ESMStore::get<ESM::Container>() const;
-
-    template <>
-    const Store<ESM::Creature>& ESMStore::get<ESM::Creature>() const;
-
-    template <>
-    const Store<ESM::Dialogue>& ESMStore::get<ESM::Dialogue>() const;
-
-    template <>
-    const Store<ESM::Door>& ESMStore::get<ESM::Door>() const;
-
-    template <>
-    const Store<ESM::Enchantment>& ESMStore::get<ESM::Enchantment>() const;
-
-    template <>
-    const Store<ESM::Faction>& ESMStore::get<ESM::Faction>() const;
-
-    template <>
-    const Store<ESM::Global>& ESMStore::get<ESM::Global>() const;
-
-    template <>
-    const Store<ESM::Ingredient>& ESMStore::get<ESM::Ingredient>() const;
-
-    template <>
-    const Store<ESM::CreatureLevList>& ESMStore::get<ESM::CreatureLevList>() const;
-
-    template <>
-    const Store<ESM::ItemLevList>& ESMStore::get<ESM::ItemLevList>() const;
-
-    template <>
-    const Store<ESM::Light>& ESMStore::get<ESM::Light>() const;
-
-    template <>
-    const Store<ESM::Lockpick>& ESMStore::get<ESM::Lockpick>() const;
-
-    template <>
-    const Store<ESM::Miscellaneous>& ESMStore::get<ESM::Miscellaneous>() const;
-
-    template <>
-    const Store<ESM::NPC>& ESMStore::get<ESM::NPC>() const;
-
-    template <>
-    const Store<ESM::Probe>& ESMStore::get<ESM::Probe>() const;
-
-    template <>
-    const Store<ESM::Race>& ESMStore::get<ESM::Race>() const;
-
-    template <>
-    const Store<ESM::Region>& ESMStore::get<ESM::Region>() const;
-
-    template <>
-    const Store<ESM::Repair>& ESMStore::get<ESM::Repair>() const;
-
-    template <>
-    const Store<ESM::SoundGenerator>& ESMStore::get<ESM::SoundGenerator>() const;
-
-    template <>
-    const Store<ESM::Sound>& ESMStore::get<ESM::Sound>() const;
-
-    template <>
-    const Store<ESM::Spell>& ESMStore::get<ESM::Spell>() const;
-
-    template <>
-    const Store<ESM::StartScript>& ESMStore::get<ESM::StartScript>() const;
-
-    template <>
-    const Store<ESM::Static>& ESMStore::get<ESM::Static>() const;
-
-    template <>
-    const Store<ESM::Weapon>& ESMStore::get<ESM::Weapon>() const;
-
-    template <>
-    const Store<ESM::GameSetting>& ESMStore::get<ESM::GameSetting>() const;
-
-    template <>
-    const Store<ESM::Script>& ESMStore::get<ESM::Script>() const;
-
-    template <>
-    const Store<ESM::Cell>& ESMStore::get<ESM::Cell>() const;
-
-    template <>
-    const Store<ESM::Land>& ESMStore::get<ESM::Land>() const;
-
-    template <>
-    const Store<ESM::LandTexture>& ESMStore::get<ESM::LandTexture>() const;
-
-    template <>
-    const Store<ESM::Pathgrid>& ESMStore::get<ESM::Pathgrid>() const;
-
-    template <>
-    const Store<ESM::MagicEffect>& ESMStore::get<ESM::MagicEffect>() const;
-
-    template <>
-    const Store<ESM::Skill>& ESMStore::get<ESM::Skill>() const;
-
-    template <>
-    const Store<ESM::Attribute>& ESMStore::get<ESM::Attribute>() const;
+#undef DeclareStoreGet
 }
 
 #endif
