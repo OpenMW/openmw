@@ -29,6 +29,12 @@ namespace ESM
 namespace MWWorld
 {
     struct ESMStoreImp;
+    template<typename T> struct SRecordType
+    {
+        static const int recordId;
+        static int getId() { return recordId; };
+    };
+    #define GetRecordTypeId(__Type) SRecordType<__Type>::recordId
 
     class ESMStore
     {
@@ -50,7 +56,7 @@ namespace MWWorld
         mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> mSpellListCache;
 
         template <class T>
-        Store<T>& getWritable();
+        Store<T>& getWritable() {return static_cast<Store<T>&>(*mStores[GetRecordTypeId(T)]);};
 
         /// Validate entries in store after setup
         void validate();
@@ -111,7 +117,7 @@ namespace MWWorld
         void load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
 
         template <class T>
-        const Store<T>& get() const;
+        const Store<T>& get() const {return static_cast<const Store<T>&>(*mStores[GetRecordTypeId(T)]);};
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
         template <class T>
@@ -147,7 +153,15 @@ namespace MWWorld
         std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
     };
 
+    //Special cases these aren't StoreBase, but IndexedStore
+    template <> const Store<ESM::MagicEffect>& ESMStore::get<ESM::MagicEffect>() const;
+    template <> Store<ESM::MagicEffect>& ESMStore::getWritable<ESM::MagicEffect>();
 
+    template <> const Store<ESM::Skill>& ESMStore::get<ESM::Skill>() const;
+    template <> Store<ESM::Skill>& ESMStore::getWritable<ESM::Skill>();
+
+    template <> const Store<ESM::Attribute>& ESMStore::get<ESM::Attribute>() const;
+    template <> Store<ESM::Attribute>& ESMStore::getWritable<ESM::Attribute>();
 
 }
 

@@ -129,14 +129,8 @@ namespace
 }
 
 static int sRecordTypeCounter = 0;
-template<typename T> struct SRecordType
-{
-    static const int recordId;
-    static int getId() { return recordId; };
-};
 
-#define AddStoreType(__Type) const int SRecordType<__Type>::recordId = sRecordTypeCounter++;
-#define GetRecordTypeId(__Type) SRecordType<__Type>::recordId
+#define AddStoreType(__Type) const int MWWorld::SRecordType<__Type>::recordId = sRecordTypeCounter++;
 
 AddStoreType(ESM::Activator);
 AddStoreType(ESM::Potion);
@@ -306,58 +300,6 @@ namespace MWWorld
         }
     };
 
-
-#define defineGetters(__Type) template <> const Store<__Type>& ESMStore::get<__Type>() const { return static_cast<const Store<__Type>&>(*mStores[GetRecordTypeId(__Type)]);  } \
-    template <> Store<__Type>& ESMStore::getWritable<__Type>() { return static_cast<Store<__Type>&>(*mStores[GetRecordTypeId(__Type)]);  }
-
-    defineGetters(ESM::Activator);
-    defineGetters(ESM::Potion);
-    defineGetters(ESM::Apparatus);
-    defineGetters(ESM::Armor);
-    defineGetters(ESM::BodyPart);
-    defineGetters(ESM::Book);
-    defineGetters(ESM::BirthSign);
-    defineGetters(ESM::Class);
-    defineGetters(ESM::Clothing);
-    defineGetters(ESM::Container);
-    defineGetters(ESM::Creature);
-    defineGetters(ESM::Dialogue);
-    defineGetters(ESM::Door);
-    defineGetters(ESM::Enchantment);
-    defineGetters(ESM::Faction);
-    defineGetters(ESM::Global);
-    defineGetters(ESM::Ingredient);
-    defineGetters(ESM::CreatureLevList);
-    defineGetters(ESM::ItemLevList);
-    defineGetters(ESM::Light);
-    defineGetters(ESM::Lockpick);
-    defineGetters(ESM::Miscellaneous);
-    defineGetters(ESM::NPC);
-    defineGetters(ESM::Probe);
-    defineGetters(ESM::Race);
-    defineGetters(ESM::Region);
-    defineGetters(ESM::Repair);
-    defineGetters(ESM::SoundGenerator);
-    defineGetters(ESM::Sound);
-    defineGetters(ESM::Spell);
-    defineGetters(ESM::StartScript);
-    defineGetters(ESM::Static);
-    defineGetters(ESM::Weapon);
-    defineGetters(ESM::GameSetting);
-    defineGetters(ESM::Script);
-    defineGetters(ESM::Cell);
-    defineGetters(ESM::Land);
-    defineGetters(ESM::LandTexture);
-    defineGetters(ESM::Pathgrid);
-#undef defineGetters
-    template <> const Store<ESM::MagicEffect>& ESMStore::get<ESM::MagicEffect>() const { return mStoreImp->mMagicEffect; }
-    template <> Store<ESM::MagicEffect>& ESMStore::getWritable<ESM::MagicEffect>() { return mStoreImp->mMagicEffect; }
-
-    template <> const Store<ESM::Skill>& ESMStore::get<ESM::Skill>() const { return mStoreImp->mSkills; }
-    template <> Store<ESM::Skill>& ESMStore::getWritable<ESM::Skill>() { return mStoreImp->mSkills; }
-
-    template <> const Store<ESM::Attribute>& ESMStore::get<ESM::Attribute>() const { return mStoreImp->mAttributes; }
-    template <> Store<ESM::Attribute>& ESMStore::getWritable<ESM::Attribute>() { return mStoreImp->mAttributes; }
 
     ESMStore::ESMStore()
     {
@@ -891,5 +833,13 @@ void ESMStore::removeMissingObjects(Store<T>& store)
     ESM3overrideRecord(ESM::NPC);
 #undef ESM3overrideRecord
 
+    template <> const Store<ESM::MagicEffect>& ESMStore::get<ESM::MagicEffect>() const { return mStoreImp->mMagicEffect; }
+    template <> Store<ESM::MagicEffect>& ESMStore::getWritable<ESM::MagicEffect>() { return mStoreImp->mMagicEffect; }
+
+    template <> const Store<ESM::Skill>& ESMStore::get<ESM::Skill>() const { return mStoreImp->mSkills; }
+    template <> Store<ESM::Skill>& ESMStore::getWritable<ESM::Skill>() { return mStoreImp->mSkills; }
+
+    template <> const Store<ESM::Attribute>& ESMStore::get<ESM::Attribute>() const { return mStoreImp->mAttributes; }
+    template <> Store<ESM::Attribute>& ESMStore::getWritable<ESM::Attribute>() { return mStoreImp->mAttributes; }
 
 } // end namespace
