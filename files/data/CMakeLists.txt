@@ -11,8 +11,11 @@ set(BUILTIN_DATA_FILES
     textures/omw_menu_scroll_center_v.dds
 
     l10n/Calendar/en.yaml
+    l10n/Calendar/ru.yaml
     l10n/Interface/en.yaml
+    l10n/Interface/ru.yaml
     l10n/OMWCamera/en.yaml
+    l10n/OMWCamera/ru.yaml
 
     openmw_aux/util.lua
     openmw_aux/time.lua
