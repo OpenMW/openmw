@@ -8,7 +8,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 
-
 namespace MWRender
 {
 
