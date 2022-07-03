@@ -226,7 +226,6 @@ namespace MWGui
         getWidget(mWindowModeList, "WindowModeList");
         getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
-        getWidget(mAnisotropyBox, "AnisotropyBox");
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mKeyboardSwitch, "KeyboardButton");
@@ -242,7 +241,6 @@ namespace MWGui
         getWidget(mScriptBox, "ScriptBox");
         getWidget(mScriptView, "ScriptView");
         getWidget(mScriptAdapter, "ScriptAdapter");
-        getWidget(mScriptDisabled, "ScriptDisabled");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -731,24 +729,6 @@ namespace MWGui
         mControlsBox->setVisibleVScroll(true);
     }
 
-    void SettingsWindow::resizeScriptSettings()
-    {
-        constexpr int minListWidth = 150;
-        constexpr float relativeListWidth = 0.2f;
-        constexpr int padding = 2;
-        constexpr int outerPadding = padding * 2;
-        MyGUI::IntSize parentSize = mScriptFilter->getParent()->getClientCoord().size();
-        int listWidth = std::max(minListWidth, static_cast<int>(parentSize.width * relativeListWidth));
-        int filterHeight = mScriptFilter->getSize().height;
-        int listHeight = parentSize.height - mScriptList->getPosition().top - outerPadding;
-        mScriptFilter->setSize({ listWidth, filterHeight });
-        mScriptList->setSize({ listWidth, listHeight });
-        mScriptBox->setPosition({ listWidth + padding, 0 });
-        mScriptBox->setSize({ parentSize.width - listWidth - padding, parentSize.height - outerPadding });
-        mScriptDisabled->setPosition({0, 0});
-        mScriptDisabled->setSize(parentSize);
-    }
-
     namespace
     {
         std::string escapeRegex(const std::string& str)
@@ -784,7 +764,7 @@ namespace MWGui
             return static_cast<double>(matches.size());
         }
     }
-         
+
     void SettingsWindow::renderScriptSettings()
     {
         mScriptAdapter->detach();
@@ -820,7 +800,6 @@ namespace MWGui
 
         // Hide script settings tab when the game world isn't loaded and scripts couldn't add their settings
         bool disabled = LuaUi::scriptSettingsPageCount() == 0;
-        mScriptDisabled->setVisible(disabled);
         mScriptFilter->setVisible(!disabled);
         mScriptList->setVisible(!disabled);
         mScriptBox->setVisible(!disabled);
@@ -893,14 +872,12 @@ namespace MWGui
         updateWindowModeSettings();
         resetScrollbars();
         renderScriptSettings();
-        resizeScriptSettings();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
     }
 
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)
     {
         layoutControlsBox();
-        resizeScriptSettings();
     }
 
     void SettingsWindow::computeMinimumWindowSize()
