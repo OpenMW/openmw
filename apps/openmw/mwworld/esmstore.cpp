@@ -204,6 +204,41 @@ namespace MWWorld
             }
             return ptr;
         }
+
+        template <class T>
+        static const T * ESM3overrideRecord(ESMStore& stores, const T &x) {
+            Store<T> &store = const_cast<Store<T> &>( stores.get<T>());
+
+            T *ptr = store.insert(x);
+            for (ESMStore::iterator it = stores.mStores.begin(); it !=  stores.mStores.end(); ++it) {
+                if (it->second == &store) {
+                     stores.mIds[ptr->mId] = it->first;
+                }
+            }
+            return ptr;
+        }
+
+                template <class T>
+        static const T *ESM3insertStatic(ESMStore& stores, const T &x)
+        {
+            const std::string id = "$dynamic" + std::to_string(stores.mDynamicCount++);
+
+            Store<T> &store = const_cast<Store<T> &>( stores.get<T>());
+            if (store.search(id) != nullptr)
+            {
+                const std::string msg = "Try to override existing record '" + id + "'";
+                throw std::runtime_error(msg);
+            }
+            T record = x;
+
+            T *ptr = store.insertStatic(record);
+            for (ESMStore::iterator it =  stores.mStores.begin(); it !=  stores.mStores.end(); ++it) {
+                if (it->second == &store) {
+                     stores.mIds[ptr->mId] = it->first;
+                }
+            }
+            return ptr;
+        }
     };
 
     ESMStore::ESMStore()
@@ -698,6 +733,24 @@ void ESMStore::removeMissingObjects(Store<T>& store)
     ESM3Insert(ESM::Clothing);
     ESM3Insert(ESM::Spell);
 #undef ESM3Insert
+
+#define ESM3InsertStatic(__Type) template<> const __Type* ESMStore::insertStatic<__Type>(const __Type &toInsert) { return ESMStoreImp::ESM3insertStatic(*this, toInsert);   }
+    ESM3InsertStatic(ESM::GameSetting);
+    ESM3InsertStatic(ESM::Static);
+    ESM3InsertStatic(ESM::Door);
+    ESM3InsertStatic(ESM::Global);
+    ESM3InsertStatic(ESM::NPC);
+#undef ESM3InsertStatic
+
+
+#define ESM3overrideRecord(__Type) template<> const __Type* ESMStore::overrideRecord<__Type>(const __Type &toInsert) { return ESMStoreImp::ESM3overrideRecord(*this, toInsert);   }
+    ESM3overrideRecord(ESM::Container);
+    ESM3overrideRecord(ESM::Creature);
+    ESM3overrideRecord(ESM::CreatureLevList);
+    ESM3overrideRecord(ESM::Door);
+    ESM3overrideRecord(ESM::ItemLevList);
+    ESM3overrideRecord(ESM::NPC);
+#undef ESM3overrideRecord
 
     template <>
     const Store<ESM::Activator> &ESMStore::get<ESM::Activator>() const {
