@@ -187,6 +187,7 @@ namespace Resource
         return compareObjects(lhs.mCollisionShape.get(), rhs.mCollisionShape.get())
             && compareObjects(lhs.mAvoidCollisionShape.get(), rhs.mAvoidCollisionShape.get())
             && lhs.mCollisionBox == rhs.mCollisionBox
+            && lhs.mCollisionType == rhs.mCollisionType
             && lhs.mAnimatedShapes == rhs.mAnimatedShapes;
     }
 
@@ -197,6 +198,7 @@ namespace Resource
             << value.mAvoidCollisionShape.get() << ", "
             << value.mCollisionBox << ", "
             << value.mAnimatedShapes
+            << ", collisionType=" << value.mCollisionType
             << "}";
     }
 }
@@ -1034,7 +1036,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_not_first_extra_data_string_equal_ncc_should_return_shape_with_cameraonly_collision)
     {
         mNiStringExtraData.next = Nif::ExtraPtr(&mNiStringExtraData2);
-        mNiStringExtraData2.string = "NC___";
+        mNiStringExtraData2.string = "NCC__";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
@@ -1053,7 +1055,6 @@ namespace
 
         EXPECT_EQ(*result, expected);
     }
-
 
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_extra_data_string_starting_with_nc_should_return_shape_with_nocollision)
     {
@@ -1096,6 +1097,36 @@ namespace
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
         expected.mCollisionType = Resource::BulletShape::CollisionType::None;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, for_empty_root_collision_node_without_nc_should_return_shape_with_cameraonly_collision)
+    {
+        Nif::NiTriShape niTriShape;
+        Nif::NiNode emptyCollisionNode;
+        init(niTriShape);
+        init(emptyCollisionNode);
+
+        niTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
+        niTriShape.parents.push_back(&mNiNode);
+
+        emptyCollisionNode.recType = Nif::RC_RootCollisionNode;
+        emptyCollisionNode.parents.push_back(&mNiNode);
+
+        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>(
+            {Nif::NodePtr(&niTriShape), Nif::NodePtr(&emptyCollisionNode)}));
+
+        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
+        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
+        const auto result = mLoader.load(mNifFile);
+
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionType = Resource::BulletShape::CollisionType::Camera;
 
         EXPECT_EQ(*result, expected);
     }
