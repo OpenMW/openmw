@@ -43,11 +43,14 @@ namespace MWWorld
 
         std::unordered_map<std::string, int> mRefCount;
 
-        std::map<int, StoreBase *> mStores;
+        std::vector<std::unique_ptr< StoreBase >> mStores;
 
         unsigned int mDynamicCount;
 
         mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> mSpellListCache;
+
+        template <class T>
+        Store<T>& getWritable();
 
         /// Validate entries in store after setup
         void validate();
@@ -67,7 +70,7 @@ namespace MWWorld
         ESM::LuaScriptsCfg getLuaScriptsCfg() const;
 
         /// \todo replace with SharedIterator<StoreBase>
-        typedef std::map<int, StoreBase *>::const_iterator iterator;
+        typedef std::vector<std::unique_ptr< StoreBase>>::const_iterator iterator;
 
         iterator begin() const {
             return mStores.begin();
