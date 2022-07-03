@@ -22,7 +22,10 @@ public:
     }
 
     Utf8Stream (const char * str) :
-        cur ((unsigned char*) str), nxt ((unsigned char*) str), end ((unsigned char*) str + strlen(str)), val(Utf8Stream::sBadChar())
+        cur (reinterpret_cast<const unsigned char*>(str)),
+        nxt (reinterpret_cast<const unsigned char*>(str)),
+        end (reinterpret_cast<const unsigned char*>(str) + strlen(str)),
+        val(Utf8Stream::sBadChar())
     {
     }
 

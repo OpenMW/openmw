@@ -115,7 +115,7 @@ class ESMWriter
         void writeT(const T& data)
         {
             static_assert(!std::is_pointer_v<T>);
-            write((char*)&data, sizeof(T));
+            write(reinterpret_cast<const char*>(&data), sizeof(T));
         }
 
         template<typename T, std::size_t size>
