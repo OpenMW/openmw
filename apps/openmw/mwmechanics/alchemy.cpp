@@ -21,7 +21,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/StoreSpecialization.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 #include "magiceffects.hpp"
 #include "creaturestats.hpp"

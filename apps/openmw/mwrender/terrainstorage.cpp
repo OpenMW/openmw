@@ -3,7 +3,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/StoreSpecialization.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 #include "landmanager.hpp"
 

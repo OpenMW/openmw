@@ -30,7 +30,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/StoreSpecialization.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"

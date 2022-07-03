@@ -49,7 +49,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/localscripts.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/StoreSpecialization.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"

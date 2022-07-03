@@ -18,7 +18,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/StoreSpecialization.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 #include "../mwrender/animation.hpp"
 

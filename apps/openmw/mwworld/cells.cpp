@@ -15,7 +15,7 @@
 #include "esmstore.hpp"
 #include "containerstore.hpp"
 #include "cellstore.hpp"
-#include "StoreSpecialization.hpp"
+#include "storeSpecialization.hpp"
 
 namespace
 {

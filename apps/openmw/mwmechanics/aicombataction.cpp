@@ -12,7 +12,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/StoreSpecialization.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 #include "actorutil.hpp"
 #include "npcstats.hpp"

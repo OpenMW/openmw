@@ -86,7 +86,7 @@
 #include "contentloader.hpp"
 #include "esmloader.hpp"
 #include "cellutils.hpp"
-#include "StoreSpecialization.hpp"
+#include "storeSpecialization.hpp"
 
 namespace MWWorld
 {
