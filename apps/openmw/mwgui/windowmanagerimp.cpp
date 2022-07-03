@@ -2098,7 +2098,7 @@ namespace MWGui
         if (soundId.empty())
             return;
 
-        MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
+        MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnvNoScaling);
     }
 
     void WindowManager::updateSpellWindow()

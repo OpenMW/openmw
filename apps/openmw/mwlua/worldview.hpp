@@ -30,7 +30,6 @@ namespace MWLua
         // The number of seconds passed from the beginning of the game.
         double getSimulationTime() const { return mSimulationTime; }
         void setSimulationTime(double t) { mSimulationTime = t; }
-        double getSimulationTimeScale() const { return 1.0; }
 
         // The game time (in game seconds) passed from the beginning of the game.
         // Note that game time generally goes faster than the simulation time.

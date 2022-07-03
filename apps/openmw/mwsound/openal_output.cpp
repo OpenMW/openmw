@@ -1126,7 +1126,7 @@ bool OpenAL_Output::playSound(Sound *sound, Sound_Handle data, float offset)
     }
     source = mFreeSources.front();
 
-    initCommon2D(source, sound->getPosition(), sound->getRealVolume(), sound->getPitch(),
+    initCommon2D(source, sound->getPosition(), sound->getRealVolume(), getTimeScaledPitch(sound),
                  sound->getIsLooping(), sound->getUseEnv());
     alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcef(source, AL_SEC_OFFSET, offset);
@@ -1166,7 +1166,7 @@ bool OpenAL_Output::playSound3D(Sound *sound, Sound_Handle data, float offset)
     source = mFreeSources.front();
 
     initCommon3D(source, sound->getPosition(), sound->getMinDistance(), sound->getMaxDistance(),
-                 sound->getRealVolume(), sound->getPitch(), sound->getIsLooping(),
+                 sound->getRealVolume(), getTimeScaledPitch(sound), sound->getIsLooping(),
                  sound->getUseEnv());
     alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcef(source, AL_SEC_OFFSET, offset);
@@ -1228,7 +1228,7 @@ void OpenAL_Output::updateSound(Sound *sound)
     ALuint source = GET_PTRID(sound->mHandle);
 
     updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
-                 sound->getPitch(), sound->getUseEnv());
+                 getTimeScaledPitch(sound), sound->getUseEnv());
     getALError();
 }
 
@@ -1245,7 +1245,7 @@ bool OpenAL_Output::streamSound(DecoderPtr decoder, Stream *sound, bool getLoudn
     if(sound->getIsLooping())
         Log(Debug::Warning) << "Warning: cannot loop stream \"" << decoder->getName() << "\"";
 
-    initCommon2D(source, sound->getPosition(), sound->getRealVolume(), sound->getPitch(),
+    initCommon2D(source, sound->getPosition(), sound->getRealVolume(), getTimeScaledPitch(sound),
                  false, sound->getUseEnv());
     if(getALError() != AL_NO_ERROR)
         return false;
@@ -1277,7 +1277,7 @@ bool OpenAL_Output::streamSound3D(DecoderPtr decoder, Stream *sound, bool getLou
         Log(Debug::Warning) << "Warning: cannot loop stream \"" << decoder->getName() << "\"";
 
     initCommon3D(source, sound->getPosition(), sound->getMinDistance(), sound->getMaxDistance(),
-                 sound->getRealVolume(), sound->getPitch(), false, sound->getUseEnv());
+                 sound->getRealVolume(), getTimeScaledPitch(sound), false, sound->getUseEnv());
     if(getALError() != AL_NO_ERROR)
         return false;
 
@@ -1354,7 +1354,7 @@ void OpenAL_Output::updateStream(Stream *sound)
     ALuint source = stream->mSource;
 
     updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
-                 sound->getPitch(), sound->getUseEnv());
+                 getTimeScaledPitch(sound), sound->getUseEnv());
     getALError();
 }
 
@@ -1508,6 +1508,12 @@ OpenAL_Output::OpenAL_Output(SoundManager &mgr)
 OpenAL_Output::~OpenAL_Output()
 {
     OpenAL_Output::deinit();
+}
+
+float OpenAL_Output::getTimeScaledPitch(SoundBase *sound)
+{
+    const bool shouldScale = !(sound->mParams.mFlags & PlayMode::NoScaling);
+    return shouldScale ? sound->getPitch() * mManager.getSimulationTimeScale() : sound->getPitch();
 }
 
 }

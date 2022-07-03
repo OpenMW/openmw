@@ -35,6 +35,11 @@
 -- @return #number
 
 ---
+-- Set the simulation time scale.
+-- @function [parent=#world] setSimulationTimeScale
+-- @param #number scale
+
+---
 -- Game time in seconds.
 -- @function [parent=#world] getGameTime
 -- @return #number

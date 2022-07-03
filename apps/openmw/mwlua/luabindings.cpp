@@ -13,6 +13,7 @@
 
 #include "eventqueue.hpp"
 #include "worldview.hpp"
+#include "luamanagerimp.hpp"
 #include "types/types.hpp"
 
 namespace MWLua
@@ -20,8 +21,10 @@ namespace MWLua
 
     static void addTimeBindings(sol::table& api, const Context& context, bool global)
     {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+
         api["getSimulationTime"] = [world=context.mWorldView]() { return world->getSimulationTime(); };
-        api["getSimulationTimeScale"] = [world=context.mWorldView]() { return world->getSimulationTimeScale(); };
+        api["getSimulationTimeScale"] = [world]() { return world->getSimulationTimeScale(); };
         api["getGameTime"] = [world=context.mWorldView]() { return world->getGameTime(); };
         api["getGameTimeScale"] = [world=context.mWorldView]() { return world->getGameTimeScale(); };
         api["isWorldPaused"] = [world=context.mWorldView]() { return world->isPaused(); };
@@ -35,8 +38,12 @@ namespace MWLua
 
         api["setGameTimeScale"] = [world=context.mWorldView](double scale) { world->setGameTimeScale(scale); };
 
-        // TODO: Ability to make game time slower or faster than real time (needed for example for mechanics like VATS)
-        // api["setSimulationTimeScale"] = [](double scale) {};
+        api["setSimulationTimeScale"] = [context, world](float scale)
+        {
+            context.mLuaManager->addAction([scale, world] {
+                world->setSimulationTimeScale(scale);
+            });
+        };
 
         // TODO: Ability to pause/resume world from Lua (needed for UI dehardcoding)
         // api["pause"] = []() {};
@@ -47,7 +54,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 26;
+        api["API_REVISION"] = 27;
         api["quit"] = [lua]()
         {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();

@@ -921,6 +921,12 @@ namespace MWWorld
         return mCurrentDate->getTimeScaleFactor();
     }
 
+    void World::setSimulationTimeScale(float scale)
+    {
+        mSimulationTimeScale = std::max(0.f, scale);
+        MWBase::Environment::get().getSoundManager()->setSimulationTimeScale(mSimulationTimeScale);
+    }
+
     TimeStamp World::getTimeStamp() const
     {
         return mCurrentDate->getTimeStamp();

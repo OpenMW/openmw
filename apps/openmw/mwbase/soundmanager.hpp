@@ -43,6 +43,8 @@ namespace MWSound
                                   * much. */
         NoPlayerLocal = 1<<3, /* (3D only) Don't play the sound local to the listener even if the
                                * player is making it. */
+        NoScaling = 1<<4, /* Don't scale audio with simulation time */
+        NoEnvNoScaling = NoEnv | NoScaling,
         LoopNoEnv = Loop | NoEnv,
         LoopRemoveAtDistance = Loop | RemoveAtDistance
     };
@@ -71,6 +73,8 @@ namespace MWBase
         protected:
             using PlayMode = MWSound::PlayMode;
             using Type = MWSound::Type;
+
+            float mSimulationTimeScale = 1.0;
 
         public:
             SoundManager() {}
@@ -180,6 +184,9 @@ namespace MWBase
             virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up, bool underwater) = 0;
 
             virtual void updatePtr(const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated) = 0;
+
+            void setSimulationTimeScale(float scale) { mSimulationTimeScale = scale; }
+            float getSimulationTimeScale() const { return mSimulationTimeScale; }
 
             virtual void clear() = 0;
     };

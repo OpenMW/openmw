@@ -134,6 +134,8 @@ namespace MWWorld
 
             uint32_t mRandomSeed{};
 
+            float mSimulationTimeScale = 1.0;
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
@@ -346,6 +348,10 @@ namespace MWWorld
             void modRegion(const std::string &regionid, const std::vector<char> &chances) override;
 
             float getTimeScaleFactor() const override;
+
+            float getSimulationTimeScale() const override { return mSimulationTimeScale; }
+
+            void setSimulationTimeScale(float scale) override;
 
             void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true) override;
             ///< Move to interior cell.
