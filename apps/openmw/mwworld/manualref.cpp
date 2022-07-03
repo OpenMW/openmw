@@ -11,17 +11,8 @@ namespace
         const T* base = list.find(name);
 
         ESM::CellRef cellRef;
-        cellRef.mRefNum.unset();
+        cellRef.blank();
         cellRef.mRefID = name;
-        cellRef.mScale = 1;
-        cellRef.mFactionRank = 0;
-        cellRef.mChargeInt = -1;
-        cellRef.mChargeIntRemainder = 0.0f;
-        cellRef.mGoldValue = 1;
-        cellRef.mEnchantmentCharge = -1;
-        cellRef.mTeleport = false;
-        cellRef.mLockLevel = 0;
-        cellRef.mReferenceBlocked = 0;
 
         MWWorld::LiveCellRef<T> ref(cellRef, base);
 

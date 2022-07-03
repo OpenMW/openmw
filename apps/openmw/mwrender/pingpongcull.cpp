@@ -56,7 +56,7 @@ namespace MWRender
         postProcessor->getStateUpdater()->setEyePos(cv->getEyePoint());
         postProcessor->getStateUpdater()->setEyeVec(cv->getLookVectorLocal());
 
-        if (!postProcessor || !postProcessor->getFbo(PostProcessor::FBO_Primary, frameId))
+        if (!postProcessor->getFbo(PostProcessor::FBO_Primary, frameId))
         {
             renderStage->setMultisampleResolveFramebufferObject(nullptr);
             renderStage->setFrameBufferObject(nullptr);

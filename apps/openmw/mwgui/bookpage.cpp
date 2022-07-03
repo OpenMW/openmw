@@ -1047,7 +1047,7 @@ public:
 
             for (ActiveTextFormats::iterator i = mActiveTextFormats.begin (); i != mActiveTextFormats.end (); ++i)
             {
-                if (mNode != nullptr)
+                if (mNode != nullptr && i->second != nullptr)
                     i->second->destroyDrawItem (mNode);
                 i->second.reset();
             }

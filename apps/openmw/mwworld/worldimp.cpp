@@ -490,6 +490,7 @@ namespace MWWorld
                 ESM::Global record;
                 record.mId = params.first;
                 record.mValue = params.second;
+                record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
         }
@@ -509,6 +510,7 @@ namespace MWWorld
                 ESM::Static record;
                 record.mId = params.first;
                 record.mModel = params.second;
+                record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
         }
@@ -523,6 +525,7 @@ namespace MWWorld
                 ESM::Door record;
                 record.mId = params.first;
                 record.mModel = params.second;
+                record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
         }

@@ -67,7 +67,6 @@ namespace fx
         std::string mName;
         bool mLegacyGLSL;
         bool mUBO;
-        bool mSupportsNormals;
 
         std::array<std::string, 3> mRenderTargets;
 

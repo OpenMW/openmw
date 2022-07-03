@@ -66,8 +66,8 @@ namespace fx
             void initialiseOverride() override;
             void notifyMouseButtonClick(MyGUI::Widget* sender);
 
-            MyGUI::Button* mCheckbutton;
-            MyGUI::Widget* mFill;
+            MyGUI::Button* mCheckbutton{nullptr};
+            MyGUI::Widget* mFill{nullptr};
         };
 
         template <class T, class UType>
@@ -236,11 +236,11 @@ namespace fx
                     increment(uniform->mStep);
             }
 
-            MyGUI::Button* mButtonDecrease;
-            MyGUI::Button* mButtonIncrease;
-            MyGUI::Widget* mDragger;
-            MyGUI::Widget* mFill;
-            MyGUI::TextBox* mValueLabel;
+            MyGUI::Button* mButtonDecrease{nullptr};
+            MyGUI::Button* mButtonIncrease{nullptr};
+            MyGUI::Widget* mDragger{nullptr};
+            MyGUI::Widget* mFill{nullptr};
+            MyGUI::TextBox* mValueLabel{nullptr};
             T mValue;
 
             int mLastPointerX;
@@ -271,9 +271,9 @@ namespace fx
 
             void initialiseOverride() override;
 
-            Gui::AutoSizedButton* mReset;
-            Gui::AutoSizedTextBox* mLabel;
-            MyGUI::Widget* mClient;
+            Gui::AutoSizedButton* mReset{nullptr};
+            Gui::AutoSizedTextBox* mLabel{nullptr};
+            MyGUI::Widget* mClient{nullptr};
             std::vector<EditBase*> mBases;
         };
     }

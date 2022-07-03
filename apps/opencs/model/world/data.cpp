@@ -1032,6 +1032,7 @@ void CSMWorld::Data::loadFallbackEntries()
             ESM::Static newMarker;
             newMarker.mId = marker.first;
             newMarker.mModel = marker.second;
+            newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Static>>();
             record->mBase = newMarker;
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
@@ -1046,6 +1047,7 @@ void CSMWorld::Data::loadFallbackEntries()
             ESM::Door newMarker;
             newMarker.mId = marker.first;
             newMarker.mModel = marker.second;
+            newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Door>>();
             record->mBase = newMarker;
             record->mState = CSMWorld::RecordBase::State_BaseOnly;

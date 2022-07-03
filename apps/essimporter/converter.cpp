@@ -68,7 +68,7 @@ namespace
     {
         if (isIndexedRefId(indexedRefId))
         {
-            int refIndex;
+            int refIndex = 0;
             std::string refId;
             splitIndexedRefId(indexedRefId, refIndex, refId);
 
@@ -320,6 +320,8 @@ namespace ESSImport
         esm.startRecord(ESM::REC_CSTA);
         ESM::CellState csta;
         csta.mHasFogOfWar = 0;
+        csta.mLastRespawn.mDay = 0;
+        csta.mLastRespawn.mHour = 0;
         csta.mId = esmcell.getCellId();
         csta.mId.save(esm);
         // TODO csta.mLastRespawn;
@@ -352,7 +354,7 @@ namespace ESSImport
             }
             else
             {
-                int refIndex;
+                int refIndex = 0;
                 splitIndexedRefId(cellref.mIndexedRefId, refIndex, out.mRefID);
 
                 std::string idLower = Misc::StringUtils::lowerCase(out.mRefID);
@@ -490,6 +492,7 @@ namespace ESSImport
 
                 out.mSpellId = it->mSPDT.mId.toString();
                 out.mSpeed = pnam.mSpeed * 0.001f; // not sure where this factor comes from
+                out.mSlot = 0;
 
                 esm.startRecord(ESM::REC_MPRJ);
                 out.save(esm);

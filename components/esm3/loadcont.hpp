@@ -19,7 +19,7 @@ class ESMWriter;
 
 struct ContItem
 {
-    int mCount;
+    int mCount{0};
     std::string mItem;
 };
 

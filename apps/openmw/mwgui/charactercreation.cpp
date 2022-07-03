@@ -494,6 +494,7 @@ namespace MWGui
             klass.mDescription = mCreateClassDialog->getDescription();
             klass.mData.mSpecialization = mCreateClassDialog->getSpecializationId();
             klass.mData.mIsPlayable = 0x1;
+            klass.mRecordFlags = 0;
 
             std::vector<int> attributes = mCreateClassDialog->getFavoriteAttributes();
             assert(attributes.size() == 2);

@@ -80,14 +80,17 @@ boost::filesystem::path LinuxPath::getGlobalConfigPath() const
 boost::filesystem::path LinuxPath::getLocalPath() const
 {
     boost::filesystem::path localPath("./");
-    std::string binPath(pathconf(".", _PC_PATH_MAX), '\0');
     const char *statusPaths[] = {"/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file"};
 
     for(const char *path : statusPaths)
     {
-        if (readlink(path, &binPath[0], binPath.size()) != -1)
+        boost::filesystem::path statusPath(path);
+        if (!boost::filesystem::exists(statusPath)) continue;
+
+        statusPath = boost::filesystem::read_symlink(statusPath);
+        if (!boost::filesystem::is_empty(statusPath))
         {
-            localPath = boost::filesystem::path(binPath).parent_path() / "/";
+            localPath = statusPath.parent_path() / "/";
             break;
         }
     }

@@ -23,8 +23,8 @@ namespace LuaUi
             void textChange(MyGUI::EditBox*);
 
             MyGUI::EditBox* mEditBox = nullptr;
-            bool mMultiline;
-            bool mAutoSize;
+            bool mMultiline{false};
+            bool mAutoSize{false};
     };
 }
 
