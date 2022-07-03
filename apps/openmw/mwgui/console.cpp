@@ -25,6 +25,7 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 namespace MWGui
 {
@@ -111,7 +112,7 @@ namespace MWGui
 
             for (MWWorld::ESMStore::iterator it = store.begin(); it != store.end(); ++it)
             {
-                it->second->listIdentifier (mNames);
+                (*it)->listIdentifier (mNames);
             }
 
             // exterior cell names aren't technically identifiers, but since the COC function accepts them,

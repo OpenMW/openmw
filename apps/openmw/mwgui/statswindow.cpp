@@ -18,6 +18,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"

@@ -17,6 +17,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 #include <MyGUI_Macros.h>
 

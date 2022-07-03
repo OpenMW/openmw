@@ -31,6 +31,8 @@
 #include <components/misc/rng.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
+#include "apps/openmw/mwworld/storeSpecialization.hpp"
+
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/world.hpp"
 

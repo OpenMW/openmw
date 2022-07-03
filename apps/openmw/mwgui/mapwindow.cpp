@@ -26,6 +26,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellutils.hpp"
+#include "../mwworld/storeSpecialization.hpp"
 
 #include "../mwrender/globalmap.hpp"
 #include "../mwrender/localmap.hpp"
