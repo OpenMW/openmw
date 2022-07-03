@@ -1082,7 +1082,7 @@ void OMW::Engine::go()
         const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(std::min(
             frameRateLimiter.getLastFrameDuration(),
             maxSimulationInterval
-        )).count();
+        )).count() * mEnvironment.getWorld()->getSimulationTimeScale();
 
         mViewer->advance(simulationTime);
 

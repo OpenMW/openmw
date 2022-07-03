@@ -15,6 +15,7 @@
 namespace MWSound
 {
     class SoundManager;
+    class SoundBase;
     class Sound;
     class Stream;
 
@@ -54,6 +55,8 @@ namespace MWSound
         void initCommon3D(ALuint source, const osg::Vec3f &pos, ALfloat mindist, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool loop, bool useenv);
 
         void updateCommon(ALuint source, const osg::Vec3f &pos, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv);
+
+        float getTimeScaledPitch(SoundBase *sound);
 
         OpenAL_Output& operator=(const OpenAL_Output &rhs);
         OpenAL_Output(const OpenAL_Output &rhs);

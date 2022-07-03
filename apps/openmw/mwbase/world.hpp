@@ -255,6 +255,10 @@ namespace MWBase
 
             virtual float getTimeScaleFactor() const = 0;
 
+            virtual float getSimulationTimeScale() const = 0;
+
+            virtual void setSimulationTimeScale(float scale) = 0;
+
             virtual void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) = 0;
             ///< Move to interior cell.
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
