@@ -1284,7 +1284,7 @@ namespace NifOsg
                     if (strip.size() < 3)
                         continue;
                     geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(),
-                                                                            (unsigned short*)strip.data()));
+                                                                            reinterpret_cast<const unsigned short*>(strip.data())));
                     hasGeometry = true;
                 }
                 if (!hasGeometry)
@@ -1299,7 +1299,7 @@ namespace NifOsg
                 if (line.empty())
                     return;
                 geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, line.size(),
-                                                                        (unsigned short*)line.data()));
+                                                                        reinterpret_cast<const unsigned short*>(line.data())));
             }
             handleNiGeometryData(geometry, niGeometryData, boundTextures, nifNode->name);
 

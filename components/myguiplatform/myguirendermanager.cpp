@@ -137,9 +137,9 @@ public:
             }
             else
             {
-                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer());
-                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 12);
-                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 16);
+                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), reinterpret_cast<const char*>(vbo->getArray(0)->getDataPointer()));
+                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), reinterpret_cast<const char*>(vbo->getArray(0)->getDataPointer()) + 12);
+                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), reinterpret_cast<const char*>(vbo->getArray(0)->getDataPointer()) + 16);
             }
 
             glDrawArrays(GL_TRIANGLES, 0, batch.mVertexCount);
