@@ -1,5 +1,7 @@
 #include "imagebutton.hpp"
 
+#include <cmath>
+
 #include <MyGUI_RenderManager.h>
 
 #include <components/debug/debuglog.hpp>
@@ -88,13 +90,17 @@ namespace Gui
 
         if (!mUseWholeTexture)
         {
-            int scale = 1.f;
+            float scale = 1.f;
             MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture(textureName);
             if (texture && getHeight() != 0)
-                scale = texture->getHeight() / getHeight();
+                scale = static_cast<float>(texture->getHeight()) / getHeight();
 
-            setImageTile(MyGUI::IntSize(mTextureRect.width * scale, mTextureRect.height * scale));
-            MyGUI::IntCoord scaledSize(mTextureRect.left * scale, mTextureRect.top * scale, mTextureRect.width * scale, mTextureRect.height * scale);
+            const int width = static_cast<int>(std::round(mTextureRect.width * scale));
+            const int height = static_cast<int>(std::round(mTextureRect.height * scale));
+            setImageTile(MyGUI::IntSize(width, height));
+            MyGUI::IntCoord scaledSize(static_cast<int>(std::round(mTextureRect.left * scale)),
+                                       static_cast<int>(std::round(mTextureRect.top * scale)),
+                                       width, height);
             setImageCoord(scaledSize);
         }
 
