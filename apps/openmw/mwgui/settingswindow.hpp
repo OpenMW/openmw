@@ -31,7 +31,6 @@ namespace MWGui
             MyGUI::ComboBox* mWindowModeList;
             MyGUI::Button* mWindowBorderButton;
             MyGUI::ComboBox* mTextureFilteringButton;
-            MyGUI::Widget* mAnisotropyBox;
 
             MyGUI::ComboBox* mWaterTextureSize;
             MyGUI::ComboBox* mWaterReflectionDetail;
@@ -53,7 +52,6 @@ namespace MWGui
             MyGUI::Widget* mScriptBox;
             MyGUI::ScrollView* mScriptView;
             LuaUi::LuaAdapter* mScriptAdapter;
-            MyGUI::EditBox* mScriptDisabled;
             int mCurrentPage;
 
             void onTabChanged(MyGUI::TabControl* _sender, size_t index);
@@ -94,7 +92,6 @@ namespace MWGui
             void updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value);
 
             void layoutControlsBox();
-            void resizeScriptSettings();
             void renderScriptSettings();
 
             void computeMinimumWindowSize();
