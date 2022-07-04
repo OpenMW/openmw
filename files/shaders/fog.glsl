@@ -18,7 +18,7 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist)
     float fogValue = clamp((dist - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
 #ifdef ADDITIVE_BLENDING
-    color.xyz *= 1 - fogValue;
+    color.xyz *= 1.0 - fogValue;
 #else
     color.xyz = mix(color.xyz, gl_Fog.color.xyz, fogValue);
 #endif
