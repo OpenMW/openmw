@@ -224,6 +224,7 @@ void removeTemporaryEffects(const MWWorld::Ptr& ptr)
         return spell.getType() == ESM::ActiveSpells::Type_Consumable || spell.getType() == ESM::ActiveSpells::Type_Temporary;
     }, ptr);
 }
+
 }
 
 namespace MWMechanics
@@ -240,6 +241,86 @@ namespace MWMechanics
             const auto distanceToNextPathPoint = (package.getNextPathPoint(package.getDestination()) - position).length();
             return (distanceToNextPathPoint - package.getNextPathPointTolerance(speed, duration, halfExtents)) / speed;
         }
+
+        void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
+            MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance, bool inCombatOrPursue)
+        {
+            const auto& actorRefData = actor.getRefData();
+            if (!actorRefData.getBaseNode())
+                return;
+
+            if (targetActor.getClass().getCreatureStats(targetActor).isDead())
+                return;
+
+            static const float fMaxHeadTrackDistance = MWBase::Environment::get().getWorld()->getStore()
+                .get<ESM::GameSetting>().find("fMaxHeadTrackDistance")->mValue.getFloat();
+            static const float fInteriorHeadTrackMult = MWBase::Environment::get().getWorld()->getStore()
+                .get<ESM::GameSetting>().find("fInteriorHeadTrackMult")->mValue.getFloat();
+            float maxDistance = fMaxHeadTrackDistance;
+            const ESM::Cell* currentCell = actor.getCell()->getCell();
+            if (!currentCell->isExterior() && !(currentCell->mData.mFlags & ESM::Cell::QuasiEx))
+                maxDistance *= fInteriorHeadTrackMult;
+
+            const osg::Vec3f actor1Pos(actorRefData.getPosition().asVec3());
+            const osg::Vec3f actor2Pos(targetActor.getRefData().getPosition().asVec3());
+            float sqrDist = (actor1Pos - actor2Pos).length2();
+
+            if (sqrDist > std::min(maxDistance * maxDistance, sqrHeadTrackDistance) && !inCombatOrPursue)
+                return;
+
+            // stop tracking when target is behind the actor
+            osg::Vec3f actorDirection = actorRefData.getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
+            osg::Vec3f targetDirection(actor2Pos - actor1Pos);
+            actorDirection.z() = 0;
+            targetDirection.z() = 0;
+            if ((actorDirection * targetDirection > 0 || inCombatOrPursue)
+                // check LOS and awareness last as it's the most expensive function
+                && MWBase::Environment::get().getWorld()->getLOS(actor, targetActor)
+                && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(targetActor, actor))
+            {
+                sqrHeadTrackDistance = sqrDist;
+                headTrackTarget = targetActor;
+            }
+        }
+
+        void updateHeadTracking(const MWWorld::Ptr& ptr, const std::list<Actor>& actors, bool isPlayer, CharacterController& ctrl)
+        {
+            float sqrHeadTrackDistance = std::numeric_limits<float>::max();
+            MWWorld::Ptr headTrackTarget;
+
+            const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+            const bool firstPersonPlayer = isPlayer && MWBase::Environment::get().getWorld()->isFirstPerson();
+
+            // 1. Unconsious actor can not track target
+            // 2. Actors in combat and pursue mode do not bother to headtrack anyone except their target
+            // 3. Player character does not use headtracking in the 1st-person view
+            if (!stats.getKnockedDown() && !firstPersonPlayer)
+            {
+                bool inCombatOrPursue = stats.getAiSequence().isInCombat() || stats.getAiSequence().isInPursuit();
+                if (inCombatOrPursue)
+                {
+                    auto activePackageTarget = stats.getAiSequence().getActivePackage().getTarget();
+                    if (!activePackageTarget.isEmpty())
+                    {
+                        // Track the specified target of package.
+                        updateHeadTracking(ptr, activePackageTarget, headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
+                    }
+                }
+                else
+                {
+                    // Find something nearby.
+                    for (const Actor& otherActor : actors)
+                    {
+                        if (otherActor.getPtr() == ptr)
+                            continue;
+
+                        updateHeadTracking(ptr, otherActor.getPtr(), headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
+                    }
+                }
+            }
+
+            ctrl.setHeadTrackTarget(headTrackTarget);
+        }
     }
 
     void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
@@ -249,46 +330,6 @@ namespace MWMechanics
 
         // fatigue restoration
         calculateRestoration(ptr, duration);
-    }
-
-    static void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
-        MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance, bool inCombatOrPursue)
-    {
-        const auto& actorRefData = actor.getRefData();
-        if (!actorRefData.getBaseNode())
-            return;
-
-        if (targetActor.getClass().getCreatureStats(targetActor).isDead())
-            return;
-
-        static const float fMaxHeadTrackDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("fMaxHeadTrackDistance")->mValue.getFloat();
-        static const float fInteriorHeadTrackMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("fInteriorHeadTrackMult")->mValue.getFloat();
-        float maxDistance = fMaxHeadTrackDistance;
-        const ESM::Cell* currentCell = actor.getCell()->getCell();
-        if (!currentCell->isExterior() && !(currentCell->mData.mFlags & ESM::Cell::QuasiEx))
-            maxDistance *= fInteriorHeadTrackMult;
-
-        const osg::Vec3f actor1Pos(actorRefData.getPosition().asVec3());
-        const osg::Vec3f actor2Pos(targetActor.getRefData().getPosition().asVec3());
-        float sqrDist = (actor1Pos - actor2Pos).length2();
-
-        if (sqrDist > std::min(maxDistance * maxDistance, sqrHeadTrackDistance) && !inCombatOrPursue)
-            return;
-
-        // stop tracking when target is behind the actor
-        osg::Vec3f actorDirection = actorRefData.getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
-        osg::Vec3f targetDirection(actor2Pos - actor1Pos);
-        actorDirection.z() = 0;
-        targetDirection.z() = 0;
-        if ((actorDirection * targetDirection > 0 || inCombatOrPursue)
-            && MWBase::Environment::get().getWorld()->getLOS(actor, targetActor) // check LOS and awareness last as it's the most expensive function
-            && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(targetActor, actor))
-        {
-            sqrHeadTrackDistance = sqrDist;
-            headTrackTarget = targetActor;
-        }
     }
 
     void Actors::playIdleDialogue(const MWWorld::Ptr& actor)
@@ -1461,43 +1502,7 @@ namespace MWMechanics
                             }
                         }
                         if (mTimerUpdateHeadTrack == 0)
-                        {
-                            float sqrHeadTrackDistance = std::numeric_limits<float>::max();
-                            MWWorld::Ptr headTrackTarget;
-
-                            MWMechanics::CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
-                            bool firstPersonPlayer = isPlayer && world->isFirstPerson();
-  
-                            // 1. Unconsious actor can not track target
-                            // 2. Actors in combat and pursue mode do not bother to headtrack anyone except their target
-                            // 3. Player character does not use headtracking in the 1st-person view
-                            if (!stats.getKnockedDown() && !firstPersonPlayer)
-                            {
-                                bool inCombatOrPursue = stats.getAiSequence().isInCombat() || stats.getAiSequence().isInPursuit();
-                                if (inCombatOrPursue)
-                                {
-                                    auto activePackageTarget = stats.getAiSequence().getActivePackage().getTarget();
-                                    if (!activePackageTarget.isEmpty())
-                                    {
-                                        // Track the specified target of package.
-                                        updateHeadTracking(actor.getPtr(), activePackageTarget, headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
-                                    }
-                                }
-                                else
-                                {
-                                    // Find something nearby.
-                                    for (const Actor& otherActor : mActors)
-                                    {
-                                        if (otherActor.getPtr() == actor.getPtr())
-                                            continue;
-
-                                        updateHeadTracking(actor.getPtr(), otherActor.getPtr(), headTrackTarget, sqrHeadTrackDistance, inCombatOrPursue);
-                                    }
-                                }
-                            }
-
-                            ctrl.setHeadTrackTarget(headTrackTarget);
-                        }
+                            updateHeadTracking(actor.getPtr(), mActors, isPlayer, ctrl);
 
                         if (actor.getPtr().getClass().isNpc() && actor.getPtr() != player)
                             updateCrimePursuit(actor.getPtr(), duration);
