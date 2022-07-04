@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-  <Widget type="Window" skin="" position="0 0 400 400" layer="Debug" name="_Main" align="Stretch">
+  <Widget type="Window" skin="MW_Window" position="0 0 400 400" layer="Debug" name="_Main" align="Stretch">
     <Property key="Caption" value="Debug"/>
     <Property key="Visible" value="false"/>
 
