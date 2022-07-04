@@ -713,11 +713,10 @@ namespace MWMechanics
             std::set<MWWorld::Ptr> playerFollowers;
             getActorsSidingWith(player, playerFollowers);
 
-            for (ActiveSpells::TIterator it = spells.begin(); it != spells.end(); ++it)
+            for (const ActiveSpells::ActiveSpellParams& spell : spells)
             {
                 bool actorKilled = false;
 
-                const ActiveSpells::ActiveSpellParams& spell = *it;
                 MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.getCasterActorId());
                 for (const auto& effect : spell.getEffects())
                 {
@@ -2152,16 +2151,17 @@ namespace MWMechanics
 
         std::set<MWWorld::Ptr> followers;
         getActorsFollowing(actor, followers);
-        for (auto neighbor = neighbors.begin(); neighbor != neighbors.end(); ++neighbor)
+        for (const MWWorld::Ptr& neighbor : neighbors)
         {
-            const CreatureStats &stats = neighbor->getClass().getCreatureStats(*neighbor);
-            if (stats.isDead() || *neighbor == actor || neighbor->getClass().isPureWaterCreature(*neighbor))
+            const CreatureStats &stats = neighbor.getClass().getCreatureStats(neighbor);
+            if (stats.isDead() || neighbor == actor || neighbor.getClass().isPureWaterCreature(neighbor))
                 continue;
 
-            const bool isFollower = followers.find(*neighbor) != followers.end();
+            const bool isFollower = followers.find(neighbor) != followers.end();
 
-            if (stats.getAiSequence().isInCombat(actor) || (MWBase::Environment::get().getMechanicsManager()->isAggressive(*neighbor, actor) && !isFollower))
-                list.push_back(*neighbor);
+            if (stats.getAiSequence().isInCombat(actor)
+                    || (MWBase::Environment::get().getMechanicsManager()->isAggressive(neighbor, actor) && !isFollower))
+                list.push_back(neighbor);
         }
         return list;
     }
@@ -2170,10 +2170,10 @@ namespace MWMechanics
     void Actors::write (ESM::ESMWriter& writer, Loading::Listener& listener) const
     {
         writer.startRecord(ESM::REC_DCOU);
-        for (std::map<std::string, int>::const_iterator it = mDeathCount.begin(); it != mDeathCount.end(); ++it)
+        for (const auto& [id, count] : mDeathCount)
         {
-            writer.writeHNString("ID__", it->first);
-            writer.writeHNT ("COUN", it->second);
+            writer.writeHNString("ID__", id);
+            writer.writeHNT ("COUN", count);
         }
         writer.endRecord(ESM::REC_DCOU);
     }
