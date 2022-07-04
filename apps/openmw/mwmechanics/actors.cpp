@@ -230,10 +230,10 @@ void removeTemporaryEffects(const MWWorld::Ptr& ptr)
 
 namespace MWMechanics
 {
-    static const int GREETING_SHOULD_START = 4; // how many updates should pass before NPC can greet player
-    static const int GREETING_SHOULD_END = 20;  // how many updates should pass before NPC stops turning to player
-    static const int GREETING_COOLDOWN = 40;    // how many updates should pass before NPC can continue movement
-    static const float DECELERATE_DISTANCE = 512.f;
+    static constexpr int GREETING_SHOULD_START = 4; // how many updates should pass before NPC can greet player
+    static constexpr int GREETING_SHOULD_END = 20;  // how many updates should pass before NPC stops turning to player
+    static constexpr int GREETING_COOLDOWN = 40;    // how many updates should pass before NPC can continue movement
+    static constexpr float DECELERATE_DISTANCE = 512.f;
 
     namespace
     {
@@ -1111,8 +1111,8 @@ namespace MWMechanics
     void Actors::updateProcessingRange()
     {
         // We have to cap it since using high values (larger than 7168) will make some quests harder or impossible to complete (bug #1876)
-        static const float maxRange = 7168.f;
-        static const float minRange = maxRange / 2.f;
+        static constexpr float maxRange = 7168.f;
+        static constexpr float minRange = maxRange / 2.f;
 
         mActorsProcessingRange = std::clamp(Settings::Manager::getFloat("actors processing range", "Game"), minRange, maxRange);
     }
