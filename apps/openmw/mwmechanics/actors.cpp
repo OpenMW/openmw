@@ -1450,7 +1450,7 @@ namespace MWMechanics
                 bool inProcessingRange = distSqr <= mActorsProcessingRange*mActorsProcessingRange;
 
                 // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for the player.
-                if (actor.getPtr() != player && (actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead()
+                if (!isPlayer && (actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead()
                     || !actor.getPtr().getClass().getCreatureStats(actor.getPtr()).getAiSequence().isInCombat()
                     || !inProcessingRange))
                 {
@@ -1504,10 +1504,10 @@ namespace MWMechanics
                         if (mTimerUpdateHeadTrack == 0)
                             updateHeadTracking(actor.getPtr(), mActors, isPlayer, ctrl);
 
-                        if (actor.getPtr().getClass().isNpc() && actor.getPtr() != player)
+                        if (actor.getPtr().getClass().isNpc() && !isPlayer)
                             updateCrimePursuit(actor.getPtr(), duration);
 
-                        if (actor.getPtr() != player)
+                        if (!isPlayer)
                         {
                             CreatureStats &stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
                             if (isConscious(actor.getPtr()) && !(luaControls && luaControls->mDisableAI))
@@ -1519,7 +1519,7 @@ namespace MWMechanics
                             }
                         }
                     }
-                    else if (aiActive && actor.getPtr() != player && isConscious(actor.getPtr()) && !(luaControls && luaControls->mDisableAI))
+                    else if (aiActive && !isPlayer && isConscious(actor.getPtr()) && !(luaControls && luaControls->mDisableAI))
                     {
                         CreatureStats &stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
                         stats.getAiSequence().execute(actor.getPtr(), ctrl, duration, /*outOfRange*/true);
