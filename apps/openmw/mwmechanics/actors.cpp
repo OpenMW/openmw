@@ -321,6 +321,39 @@ namespace MWMechanics
 
             ctrl.setHeadTrackTarget(headTrackTarget);
         }
+
+        void updateLuaControls(const MWWorld::Ptr& ptr, bool isPlayer, MWBase::LuaManager::ActorControls& controls)
+        {
+            Movement& mov = ptr.getClass().getMovementSettings(ptr);
+            CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+            const float speedFactor = isPlayer ? 1.f : mov.mSpeedFactor;
+            const osg::Vec2f movement = osg::Vec2f(mov.mPosition[0], mov.mPosition[1]) * speedFactor;
+            const float rotationX = mov.mRotation[0];
+            const float rotationZ = mov.mRotation[2];
+            const bool jump = mov.mPosition[2] == 1;
+            const bool runFlag = stats.getMovementFlag(MWMechanics::CreatureStats::Flag_Run);
+            const bool attackingOrSpell = stats.getAttackingOrSpell();
+            if (controls.mChanged)
+            {
+                mov.mPosition[0] = controls.mSideMovement;
+                mov.mPosition[1] = controls.mMovement;
+                mov.mPosition[2] = controls.mJump ? 1 : 0;
+                mov.mRotation[0] = controls.mPitchChange;
+                mov.mRotation[1] = 0;
+                mov.mRotation[2] = controls.mYawChange;
+                mov.mSpeedFactor = osg::Vec2(controls.mMovement, controls.mSideMovement).length();
+                stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, controls.mRun);
+                stats.setAttackingOrSpell((controls.mUse & 1) == 1);
+                controls.mChanged = false;
+            }
+            controls.mSideMovement = movement.x();
+            controls.mMovement = movement.y();
+            controls.mPitchChange = rotationX;
+            controls.mYawChange = rotationZ;
+            controls.mJump = jump;
+            controls.mRun = runFlag;
+            controls.mUse = attackingOrSpell ? controls.mUse | 1 : controls.mUse & ~1;
+        }
     }
 
     void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
@@ -1533,38 +1566,8 @@ namespace MWMechanics
                     if (mTimerUpdateEquippedLight == 0 && actor.getPtr().getClass().hasInventoryStore(actor.getPtr()))
                         updateEquippedLight(actor.getPtr(), updateEquippedLightInterval, showTorches);
 
-                    if (luaControls && isConscious(actor.getPtr()))
-                    {
-                        Movement& mov = actor.getPtr().getClass().getMovementSettings(actor.getPtr());
-                        CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
-                        float speedFactor = isPlayer ? 1.f : mov.mSpeedFactor;
-                        osg::Vec2f movement = osg::Vec2f(mov.mPosition[0], mov.mPosition[1]) * speedFactor;
-                        float rotationX = mov.mRotation[0];
-                        float rotationZ = mov.mRotation[2];
-                        bool jump = mov.mPosition[2] == 1;
-                        bool runFlag = stats.getMovementFlag(MWMechanics::CreatureStats::Flag_Run);
-                        bool attackingOrSpell = stats.getAttackingOrSpell();
-                        if (luaControls->mChanged)
-                        {
-                            mov.mPosition[0] = luaControls->mSideMovement;
-                            mov.mPosition[1] = luaControls->mMovement;
-                            mov.mPosition[2] = luaControls->mJump ? 1 : 0;
-                            mov.mRotation[0] = luaControls->mPitchChange;
-                            mov.mRotation[1] = 0;
-                            mov.mRotation[2] = luaControls->mYawChange;
-                            mov.mSpeedFactor = osg::Vec2(luaControls->mMovement, luaControls->mSideMovement).length();
-                            stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, luaControls->mRun);
-                            stats.setAttackingOrSpell((luaControls->mUse & 1) == 1);
-                            luaControls->mChanged = false;
-                        }
-                        luaControls->mSideMovement = movement.x();
-                        luaControls->mMovement = movement.y();
-                        luaControls->mPitchChange = rotationX;
-                        luaControls->mYawChange = rotationZ;
-                        luaControls->mJump = jump;
-                        luaControls->mRun = runFlag;
-                        luaControls->mUse = attackingOrSpell ? luaControls->mUse | 1 : luaControls->mUse & ~1;
-                    }
+                    if (luaControls != nullptr && isConscious(actor.getPtr()))
+                        updateLuaControls(actor.getPtr(), isPlayer, *luaControls);
                 }
             }
 
