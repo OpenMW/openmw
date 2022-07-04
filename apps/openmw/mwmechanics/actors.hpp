@@ -195,10 +195,6 @@ namespace MWMechanics
 
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
-            void updateDrowning (const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer);
-
-            void updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip);
-
             void updateCrimePursuit (const MWWorld::Ptr& ptr, float duration);
 
             void killDeadActors ();

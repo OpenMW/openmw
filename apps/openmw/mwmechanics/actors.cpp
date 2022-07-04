@@ -871,7 +871,7 @@ namespace MWMechanics
         return it->second->getCharacterController().isSneaking();
     }
 
-    void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer)
+    static void updateDrowning(const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer)
     {
         const auto& actorClass = ptr.getClass();
         NpcStats& stats = actorClass.getNpcStats(ptr);
@@ -927,7 +927,7 @@ namespace MWMechanics
             stats.setTimeToStartDrowning(fHoldBreathTime);
     }
 
-    void Actors::updateEquippedLight(const MWWorld::Ptr& ptr, float duration, bool mayEquip)
+    static void updateEquippedLight(const MWWorld::Ptr& ptr, float duration, bool mayEquip)
     {
         const bool isPlayer = (ptr == getPlayer());
 
