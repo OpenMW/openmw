@@ -7,6 +7,8 @@
 #include <string_view>
 #include <sstream>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "livecellref.hpp"
 
 namespace MWWorld
@@ -58,7 +60,7 @@ namespace MWWorld
                 std::string_view id = mRef->mRef.getRefId();
                 if (id == "player")
                     return ESM::REC_INTERNAL_PLAYER;
-                else if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
+                else if (Misc::ResourceHelpers::isHiddenMarker(id))
                     return ESM::REC_INTERNAL_MARKER;
                 else
                     return mRef->getType();
