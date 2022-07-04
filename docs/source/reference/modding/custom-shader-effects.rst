@@ -2,16 +2,16 @@ Custom Shader Effects
 #####################
 
 OpenMW leverages the `NiStringExtraData` node to inject special shader flags and effects.
-This nodes must have the prefix `omw:data` and have a valid JSON object that follows.
+This node must have the prefix `omw:data` and have a valid JSON object that follows.
 
 .. note::
 
-    This is a new feature to inject OpenMW specific effects. Only a single
+    This is a new feature to inject OpenMW-specific shader effects. Only a single
     effect is currently supported. By default, the shader effects will propogate
-    to all a nodes children. Other propogation modes and effects will come with
+    to all a node's children. Other propogation modes and effects will come with
     future releases.
 
-See below to see the currently supported effects.
+Look below to see the currently supported effects.
 
 Soft Effect
 -----------
@@ -23,7 +23,7 @@ planes for various effects like steam over a hotspring or low hanging fog for
 dungeons.
 
 To use this feature the :ref:`soft particles` setting must be enabled.
-This settings can either be activated in the OpenMW launcher or changed in `settings.cfg`:
+This setting can either be activated in the OpenMW launcher or changed in `settings.cfg`:
 
 ::
 
