@@ -11,7 +11,6 @@ This node must have the prefix `omw:data` and have a valid JSON object that foll
     to all a node's children. Other propogation modes and effects will come with
     future releases.
 
-Look below to see the currently supported effects.
 
 Soft Effect
 -----------
