@@ -852,6 +852,7 @@ void OMW::Engine::prepareEngine()
     mEnvironment.setWorld(*mWorld);
 
     mWindowManager->setStore(mWorld->getStore());
+    mLuaManager->initL10n();
     mWindowManager->initUI();
 
     //Load translation data

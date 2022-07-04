@@ -55,6 +55,14 @@ namespace MWLua
         mGlobalScripts.setAutoStartConf(mConfiguration.getGlobalConf());
     }
 
+    void LuaManager::initL10n()
+    {
+        mL10n.init();
+        std::vector<std::string> preferredLocales;
+        Misc::StringUtils::split(Settings::Manager::getString("preferred locales", "General"), preferredLocales, ", ");
+        mL10n.setPreferredLocales(preferredLocales);
+    }
+
     void LuaManager::init()
     {
         Context context;
@@ -70,11 +78,6 @@ namespace MWLua
         Context localContext = context;
         localContext.mIsGlobal = false;
         localContext.mSerializer = mLocalSerializer.get();
-
-        mL10n.init();
-        std::vector<std::string> preferredLocales;
-        Misc::StringUtils::split(Settings::Manager::getString("preferred locales", "General"), preferredLocales, ", ");
-        mL10n.setPreferredLocales(preferredLocales);
 
         initObjectBindingsForGlobalScripts(context);
         initCellBindingsForGlobalScripts(context);
@@ -101,6 +104,11 @@ namespace MWLua
 
         initConfiguration();
         mInitialized = true;
+    }
+
+    std::string LuaManager::translate(const std::string& contextName, const std::string& key)
+    {
+        return mL10n.translate(contextName, key);
     }
 
     void LuaManager::loadPermanentStorage(const std::string& userConfigPath)

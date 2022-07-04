@@ -19,6 +19,7 @@ namespace LuaUtil
         const std::vector<icu::Locale>& getPreferredLocales() const { return mPreferredLocales; }
 
         sol::object getContext(const std::string& contextName, const std::string& fallbackLocale = "en");
+        std::string translate(const std::string& contextName, const std::string& key);
 
     private:
         struct Context

@@ -2,7 +2,7 @@
 <MyGUI type="Layout">
   <Widget type="Window" skin="MW_Window" position="0 0 500 500" layer="Debug" name="_Main" align="Stretch">
     <Property key="Visible" value="false"/>
-    <Property key="Caption" value="Postprocess HUD"/>
+    <Property key="Caption" value="#{PostProcessing:PostProcessHUD}"/>
 	<Property key="MinSize" value="600 600"/>
 
     <Widget type="TabControl" skin="TabControl_NoBorder" position="8 8 468 450" align="Stretch" name="TabControl">
@@ -12,17 +12,11 @@
 			<Property key="Caption" value="[?]"/>
 			<UserString key="ToolTipType" value="Layout"/>
 			<UserString key="ToolTipLayout" value="TextToolTip"/>
-			<UserString key="Caption_Text" value="Keyboard controls:\n\n
-				Shift+Right-Arrow > Activate shader\n
-				Shift+Left-Arrow > Deactive shader\n
-				Shift+Up-Arrow > Move shader up\n
-				Shift+Down-Arrow > Move shader down\n
-				Hold Shift > Fine tune sliders\n
-				"/>
+			<UserString key="Caption_Text" value="#{PostProcessing:KeyboardControls}"/>
 		</Widget>
 
         <Widget type="TabItem" skin="" position_real="0 0 1 1" name="TabConfiguration">
-			<Property key="Caption" value="Configuration"/>
+			<Property key="Caption" value="#{PostProcessing:Configuration}"/>
 
 			<Widget type="VBox" position_real="0 0.02 1 0.98" align="Stretch" name="Layout">
 				<Property key="Padding" value="0"/>

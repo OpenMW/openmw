@@ -55,6 +55,7 @@
 #include <components/lua_ui/util.hpp>
 
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -1065,12 +1066,27 @@ namespace MWGui
         }
         else
         {
+            std::vector<std::string> split;
+            Misc::StringUtils::split(tag, split, ":");
+
+            // TODO: LocalizationManager should not be a part of lua
+            const auto& luaManager = MWBase::Environment::get().getLuaManager();
+
+            // If a key has a "Context:KeyName" format, use YAML to translate data
+            if (split.size() == 2 && luaManager != nullptr)
+            {
+                _result = luaManager->translate(split[0], split[1]);
+                return;
+            }
+
+            // If not, treat is as GMST name from legacy localization
             if (!mStore)
             {
                 Log(Debug::Error) << "Error: WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'";
+                _result = tag;
                 return;
             }
-            const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);
+            const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().search(tag);
 
             if (setting && setting->mValue.getType()==ESM::VT_String)
                 _result = setting->mValue.getString();

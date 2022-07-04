@@ -18,6 +18,12 @@ namespace LuaUtil
         ctx[sol::meta_function::call] = &Context::translate;
     }
 
+    std::string L10nManager::translate(const std::string& contextName, const std::string& key)
+    {
+        Context& ctx = getContext(contextName).as<Context>();
+        return ctx.translate(key, sol::nil);
+    }
+
     void L10nManager::setPreferredLocales(const std::vector<std::string>& langs)
     {
         mPreferredLocales.clear();
