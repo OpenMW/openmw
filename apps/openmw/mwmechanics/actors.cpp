@@ -93,16 +93,18 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
     });
 }
 
-void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float& magicka)
+std::pair<float, float> getRestorationPerHourOfSleep(const MWWorld::Ptr& ptr)
 {
     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
     const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
     float endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
-    health = 0.1f * endurance;
+    const float health = 0.1f * endurance;
 
     float fRestMagicMult = settings.find("fRestMagicMult")->mValue.getFloat ();
-    magicka = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
+    const float magicka = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
+
+    return {health, magicka};
 }
 
 template<class T>
@@ -764,8 +766,7 @@ namespace MWMechanics
 
         if (sleep)
         {
-            float health, magicka;
-            getRestorationPerHourOfSleep(ptr, health, magicka);
+            auto [health, magicka] = getRestorationPerHourOfSleep(ptr);
 
             DynamicStat<float> stat = stats.getHealth();
             stat.setCurrent(stat.getCurrent() + health * hours);
@@ -1908,8 +1909,7 @@ namespace MWMechanics
 
     int Actors::getHoursToRest(const MWWorld::Ptr &ptr) const
     {
-        float healthPerHour, magickaPerHour;
-        getRestorationPerHourOfSleep(ptr, healthPerHour, magickaPerHour);
+        auto [healthPerHour, magickaPerHour] = getRestorationPerHourOfSleep(ptr);
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
         bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
