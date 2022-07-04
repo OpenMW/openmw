@@ -62,7 +62,7 @@ namespace MWLua
                 auto visitor = [&](const MWWorld::Ptr& ptr)
                 {
                     worldView->getObjectRegistry()->registerPtr(ptr);
-                    if (ptr.getLuaType() == ptr.getType())
+                    if (getLiveCellRefType(ptr.mRef) == ptr.getType())
                         res->push_back(getId(ptr));
                     return true;
                 };

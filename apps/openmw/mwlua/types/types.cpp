@@ -1,6 +1,7 @@
 #include "types.hpp"
 
 #include <components/lua/luastate.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 namespace MWLua
 {
@@ -60,6 +61,18 @@ namespace MWLua
 
     }
 
+    unsigned int getLiveCellRefType(const MWWorld::LiveCellRefBase* ref)
+    {
+        if (ref == nullptr)
+            throw std::runtime_error("Can't get type name from an empty object.");
+        const std::string_view id = ref->mRef.getRefId();
+        if (id == "player")
+            return ESM::REC_INTERNAL_PLAYER;
+        if (Misc::ResourceHelpers::isHiddenMarker(id))
+            return ESM::REC_INTERNAL_MARKER;
+        return ref->getType();
+    }
+
     std::string_view getLuaObjectTypeName(ESM::RecNameInts type, std::string_view fallback)
     {
         auto it = luaObjectTypeInfo.find(type);
@@ -71,7 +84,7 @@ namespace MWLua
 
     std::string_view getLuaObjectTypeName(const MWWorld::Ptr& ptr)
     {
-        return getLuaObjectTypeName(static_cast<ESM::RecNameInts>(ptr.getLuaType()), /*fallback=*/ptr.getTypeDescription());
+        return getLuaObjectTypeName(static_cast<ESM::RecNameInts>(getLiveCellRefType(ptr.mRef)), /*fallback=*/ptr.getTypeDescription());
     }
 
     const MWWorld::Ptr& verifyType(ESM::RecNameInts recordType, const MWWorld::Ptr& ptr)
@@ -125,7 +138,7 @@ namespace MWLua
             }
             t["objectIsInstance"] = [types=recTypes](const Object& o)
             {
-                unsigned int type = o.ptr().getLuaType();
+                unsigned int type = getLiveCellRefType(o.ptr().mRef);
                 for (ESM::RecNameInts t : types)
                     if (t == type)
                         return true;
