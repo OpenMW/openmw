@@ -96,8 +96,9 @@ namespace Stereo
         : mCamera(camera)
         , mShadowTechnique(nullptr)
         , mShadowFrustumCallback(nullptr)
+        , mMultiview(Stereo::getMultiview())
     {
-        if (Stereo::getMultiview())
+        if (mMultiview)
         {
 #ifdef OSG_HAS_MULTIVIEW
             mMultiviewFrustumCallback = new MultiviewFrustumCallback(this);
@@ -118,7 +119,7 @@ namespace Stereo
 
     StereoFrustumManager::~StereoFrustumManager()
     {
-        if (Stereo::getMultiview())
+        if (mMultiview)
         {
 #ifdef OSG_HAS_MULTIVIEW
             mCamera->setInitialFrustumCallback(nullptr);
