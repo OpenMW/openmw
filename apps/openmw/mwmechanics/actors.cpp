@@ -108,7 +108,7 @@ std::pair<float, float> getRestorationPerHourOfSleep(const MWWorld::Ptr& ptr)
 }
 
 template<class T>
-void forEachFollowingPackage(std::list<MWMechanics::Actor>& actors, const MWWorld::Ptr& actorPtr, const MWWorld::Ptr& player, T&& func)
+void forEachFollowingPackage(const std::list<MWMechanics::Actor>& actors, const MWWorld::Ptr& actorPtr, const MWWorld::Ptr& player, T&& func)
 {
     for (const MWMechanics::Actor& actor : actors)
     {
@@ -357,7 +357,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
+    void Actors::updateActor(const MWWorld::Ptr& ptr, float duration) const
     {
         // magic effects
         adjustMagicEffects (ptr, duration);
@@ -366,7 +366,7 @@ namespace MWMechanics
         calculateRestoration(ptr, duration);
     }
 
-    void Actors::playIdleDialogue(const MWWorld::Ptr& actor)
+    void Actors::playIdleDialogue(const MWWorld::Ptr& actor) const
     {
         if (!actor.getClass().isActor() || actor == getPlayer() || MWBase::Environment::get().getSoundManager()->sayActive(actor))
             return;
@@ -393,7 +393,7 @@ namespace MWMechanics
             MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
     }
 
-    void Actors::updateMovementSpeed(const MWWorld::Ptr& actor)
+    void Actors::updateMovementSpeed(const MWWorld::Ptr& actor) const
     {
         if (mSmoothMovement)
             return;
@@ -510,7 +510,7 @@ namespace MWMechanics
         actorState.setGreetingState(greetingState);
     }
 
-    void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor& actorState, const osg::Vec3f& dir)
+    void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor& actorState, const osg::Vec3f& dir) const
     {
         auto& movementSettings = actor.getClass().getMovementSettings(actor);
         movementSettings.mPosition[1] = 0;
@@ -528,7 +528,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::stopCombat(const MWWorld::Ptr& ptr)
+    void Actors::stopCombat(const MWWorld::Ptr& ptr) const
     {
         auto& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
         std::vector<MWWorld::Ptr> targets;
@@ -545,7 +545,8 @@ namespace MWMechanics
         }
     }
 
-    void Actors::engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer)
+    void Actors::engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2,
+        std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr>>& cachedAllies, bool againstPlayer) const
     {
         // No combat for totally static creatures
         if (!actor1.getClass().isMobile(actor1))
@@ -698,7 +699,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::adjustMagicEffects (const MWWorld::Ptr& creature, float duration)
+    void Actors::adjustMagicEffects(const MWWorld::Ptr& creature, float duration) const
     {
         CreatureStats& creatureStats = creature.getClass().getCreatureStats (creature);
         const bool wasDead = creatureStats.isDead();
@@ -754,7 +755,7 @@ namespace MWMechanics
             updateSummons(creature, mTimerDisposeSummonsCorpses == 0.f);
     }
 
-    void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, double hours, bool sleep)
+    void Actors::restoreDynamicStats(const MWWorld::Ptr& ptr, double hours, bool sleep) const
     {
         MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
         if (stats.isDead())
@@ -822,7 +823,7 @@ namespace MWMechanics
         stats.setFatigue (fatigue);
     }
 
-    void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
+    void Actors::calculateRestoration(const MWWorld::Ptr& ptr, float duration) const
     {
         if (ptr.getClass().getCreatureStats(ptr).isDead())
             return;
@@ -847,7 +848,7 @@ namespace MWMechanics
         stats.setFatigue (fatigue);
     }
 
-    bool Actors::isAttackPreparing(const MWWorld::Ptr& ptr)
+    bool Actors::isAttackPreparing(const MWWorld::Ptr& ptr) const
     {
         const auto it = mIndex.find(ptr.mRef);
         if (it == mIndex.end())
@@ -855,7 +856,7 @@ namespace MWMechanics
         return it->second->getCharacterController().isAttackPreparing();
     }
 
-    bool Actors::isRunning(const MWWorld::Ptr& ptr)
+    bool Actors::isRunning(const MWWorld::Ptr& ptr) const
     {
         const auto it = mIndex.find(ptr.mRef);
         if (it == mIndex.end())
@@ -863,7 +864,7 @@ namespace MWMechanics
         return it->second->getCharacterController().isRunning();
     }
 
-    bool Actors::isSneaking(const MWWorld::Ptr& ptr)
+    bool Actors::isSneaking(const MWWorld::Ptr& ptr) const
     {
         const auto it = mIndex.find(ptr.mRef);
         if (it == mIndex.end())
@@ -1027,7 +1028,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::updateCrimePursuit(const MWWorld::Ptr& ptr, float duration)
+    void Actors::updateCrimePursuit(const MWWorld::Ptr& ptr, float duration) const
     {
         const MWWorld::Ptr player = getPlayer();
         if (ptr == player)
@@ -1139,7 +1140,7 @@ namespace MWMechanics
         updateVisibility(ptr, it->getCharacterController());
     }
 
-    void Actors::updateVisibility (const MWWorld::Ptr& ptr, CharacterController& ctrl)
+    void Actors::updateVisibility(const MWWorld::Ptr& ptr, CharacterController& ctrl) const
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         if (ptr == player)
@@ -1179,14 +1180,14 @@ namespace MWMechanics
         }
     }
 
-    void Actors::castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell)
+    void Actors::castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
             iter->second->getCharacterController().castSpell(spellId, manualSpell);
     }
 
-    bool Actors::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)
+    bool Actors::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer) const
     {
         if (!actor.getClass().isActor())
             return false;
@@ -1218,7 +1219,7 @@ namespace MWMechanics
         return false;
     }
 
-    void Actors::updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
+    void Actors::updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr) const
     {
         const auto iter = mIndex.find(old.mRef);
         if (iter != mIndex.end())
@@ -1282,7 +1283,7 @@ namespace MWMechanics
 
     }
 
-    void Actors::predictAndAvoidCollisions(float duration)
+    void Actors::predictAndAvoidCollisions(float duration) const
     {
         if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
             return;
@@ -1675,7 +1676,7 @@ namespace MWMechanics
         ++mDeathCount[Misc::StringUtils::lowerCase(actor.getCellRef().getRefId())];
     }
 
-    void Actors::resurrect(const MWWorld::Ptr &ptr)
+    void Actors::resurrect(const MWWorld::Ptr &ptr) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
@@ -1745,7 +1746,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::cleanupSummonedCreature (MWMechanics::CreatureStats& casterStats, int creatureActorId)
+    void Actors::cleanupSummonedCreature(MWMechanics::CreatureStats& casterStats, int creatureActorId) const
     {
         const MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(creatureActorId);
         if (!ptr.isEmpty())
@@ -1780,7 +1781,7 @@ namespace MWMechanics
         purgeSpellEffects(creatureActorId);
     }
 
-    void Actors::purgeSpellEffects(int casterActorId)
+    void Actors::purgeSpellEffects(int casterActorId) const
     {
         for (const Actor& actor : mActors)
         {
@@ -1789,7 +1790,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::rest(double hours, bool sleep)
+    void Actors::rest(double hours, bool sleep) const
     {
         float duration = hours * 3600.f;
         const float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
@@ -1928,14 +1929,14 @@ namespace MWMechanics
         return 0;
     }
 
-    void Actors::forceStateUpdate(const MWWorld::Ptr & ptr)
+    void Actors::forceStateUpdate(const MWWorld::Ptr& ptr) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
             iter->second->getCharacterController().forceStateUpdate();
     }
 
-    bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist)
+    bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if(iter != mIndex.end())
@@ -1948,14 +1949,14 @@ namespace MWMechanics
             return false;
         }
     }
-    void Actors::skipAnimation(const MWWorld::Ptr& ptr)
+    void Actors::skipAnimation(const MWWorld::Ptr& ptr) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
             iter->second->getCharacterController().skipAnim();
     }
 
-    bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName)
+    bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if(iter != mIndex.end())
@@ -1963,13 +1964,13 @@ namespace MWMechanics
         return false;
     }
 
-    void Actors::persistAnimationStates()
+    void Actors::persistAnimationStates() const
     {
-        for (Actor& actor : mActors)
+        for (const Actor& actor : mActors)
             actor.getCharacterController().persistAnimationState();
     }
 
-    void Actors::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out)
+    void Actors::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const
     {
         for (const Actor& actor : mActors)
         {
@@ -1978,7 +1979,7 @@ namespace MWMechanics
         }
     }
 
-    bool Actors::isAnyObjectInRange(const osg::Vec3f& position, float radius)
+    bool Actors::isAnyObjectInRange(const osg::Vec3f& position, float radius) const
     {
         for (const Actor& actor : mActors)
         {
@@ -1989,7 +1990,7 @@ namespace MWMechanics
         return false;
     }
 
-    std::vector<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actorPtr, bool excludeInfighting)
+    std::vector<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actorPtr, bool excludeInfighting) const
     {
         std::vector<MWWorld::Ptr> list;
         for (const Actor& actor : mActors)
@@ -2037,7 +2038,7 @@ namespace MWMechanics
         return list;
     }
 
-    std::vector<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actorPtr)
+    std::vector<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actorPtr) const
     {
         std::vector<MWWorld::Ptr> list;
         forEachFollowingPackage(mActors, actorPtr, getPlayer(), [&] (const Actor& actor, const std::shared_ptr<AiPackage>& package)
@@ -2051,21 +2052,25 @@ namespace MWMechanics
         return list;
     }
 
-    void Actors::getActorsFollowing(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out) {
+    void Actors::getActorsFollowing(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out) const
+    {
         auto followers = getActorsFollowing(actor);
         for(const MWWorld::Ptr &follower : followers)
             if (out.insert(follower).second)
                 getActorsFollowing(follower, out);
     }
 
-    void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, bool excludeInfighting) {
+    void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, bool excludeInfighting) const
+    {
         auto followers = getActorsSidingWith(actor, excludeInfighting);
         for(const MWWorld::Ptr &follower : followers)
             if (out.insert(follower).second)
                 getActorsSidingWith(follower, out, excludeInfighting);
     }
 
-    void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies) {
+    void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out,
+        std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr>>& cachedAllies) const
+    {
         // If we have already found actor's allies, use the cache
         std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >::const_iterator search = cachedAllies.find(actor);
         if (search != cachedAllies.end())
@@ -2087,7 +2092,7 @@ namespace MWMechanics
         }
     }
 
-    std::vector<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
+    std::vector<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor) const
     {
         std::vector<int> list;
         forEachFollowingPackage(mActors, actor, getPlayer(), [&] (const Actor&, const std::shared_ptr<AiPackage>& package)
@@ -2104,7 +2109,7 @@ namespace MWMechanics
         return list;
     }
 
-    std::map<int, MWWorld::Ptr> Actors::getActorsFollowingByIndex(const MWWorld::Ptr &actor)
+    std::map<int, MWWorld::Ptr> Actors::getActorsFollowingByIndex(const MWWorld::Ptr &actor) const
     {
         std::map<int, MWWorld::Ptr> map;
         forEachFollowingPackage(mActors, actor, getPlayer(), [&] (const Actor& otherActor, const std::shared_ptr<AiPackage>& package)
@@ -2122,7 +2127,8 @@ namespace MWMechanics
         return map;
     }
 
-    std::vector<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
+    std::vector<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) const
+    {
         std::vector<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
         const osg::Vec3f position(actor.getRefData().getPosition().asVec3());
@@ -2142,7 +2148,7 @@ namespace MWMechanics
         return list;
     }
 
-    std::vector<MWWorld::Ptr> Actors::getEnemiesNearby(const MWWorld::Ptr& actor)
+    std::vector<MWWorld::Ptr> Actors::getEnemiesNearby(const MWWorld::Ptr& actor) const
     {
         std::vector<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
@@ -2200,7 +2206,7 @@ namespace MWMechanics
         mDeathCount.clear();
     }
 
-    void Actors::updateMagicEffects(const MWWorld::Ptr &ptr)
+    void Actors::updateMagicEffects(const MWWorld::Ptr &ptr) const
     {
         adjustMagicEffects(ptr, 0.f);
     }
@@ -2268,7 +2274,7 @@ namespace MWMechanics
         return it->second->isTurningToPlayer();
     }
 
-    void Actors::fastForwardAi()
+    void Actors::fastForwardAi() const
     {
         if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
             return;
