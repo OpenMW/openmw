@@ -360,7 +360,7 @@ void CharacterController::refreshHitRecoilAnims()
     else if (block)
     {
         mHitState = CharState_Block;
-        priority = Priority_Block;
+        priority = Priority_Hit;
         priority[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
         priority[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
         startKey = "block start";
