@@ -44,10 +44,10 @@ namespace
     {
         float sum = 0;
 
-        for (const auto& iter : cellRefList.mList)
+        for (const MWWorld::LiveCellRef<T>& liveCellRef : cellRefList.mList)
         {
-            if (iter.mData.getCount()>0)
-                sum += iter.mData.getCount()*iter.mBase->mData.mWeight;
+            if (const int count = liveCellRef.mData.getCount(); count > 0)
+                sum += count * liveCellRef.mBase->mData.mWeight;
         }
 
         return sum;
@@ -60,11 +60,11 @@ namespace
         store->resolve();
         std::string id2 = Misc::StringUtils::lowerCase (id);
 
-        for (auto& iter : list.mList)
+        for (MWWorld::LiveCellRef<T>& liveCellRef : list.mList)
         {
-            if (Misc::StringUtils::ciEqual(iter.mBase->mId, id2) && iter.mData.getCount())
+            if (Misc::StringUtils::ciEqual(liveCellRef.mBase->mId, id2) && liveCellRef.mData.getCount())
             {
-                MWWorld::Ptr ptr (&iter, nullptr);
+                MWWorld::Ptr ptr(&liveCellRef, nullptr);
                 ptr.setContainerStore (store);
                 return ptr;
             }
@@ -124,15 +124,15 @@ template<typename T>
 void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
     ESM::InventoryState& inventory, int& index, bool equipable) const
 {
-    for (const auto& iter : collection.mList)
+    for (const LiveCellRef<T>& liveCellRef : collection.mList)
     {
-        if (iter.mData.getCount() == 0)
+        if (liveCellRef.mData.getCount() == 0)
             continue;
         ESM::ObjectState state;
-        storeState (iter, state);
+        storeState(liveCellRef, state);
         if (equipable)
-            storeEquipmentState(iter, index, inventory);
-        inventory.mItems.push_back (state);
+            storeEquipmentState(liveCellRef, index, inventory);
+        inventory.mItems.push_back(std::move(state));
         ++index;
     }
 }
