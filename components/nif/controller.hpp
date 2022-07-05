@@ -82,7 +82,7 @@ struct NiParticleSystemController : public Controller
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
 
-    bool noAutoAdjust() const { return flags & EmitFlag_NoAutoAdjust; }
+    bool noAutoAdjust() const { return emitFlags & EmitFlag_NoAutoAdjust; }
     bool emitAtVertex() const { return flags & BSPArrayController_AtVertex; }
 };
 using NiBSPArrayController = NiParticleSystemController;
