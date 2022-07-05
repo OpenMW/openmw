@@ -17,6 +17,8 @@
 #include <components/windows.hpp>
 // makes __argc and __argv available on windows
 #include <cstdlib>
+
+extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #endif
 
 #include <filesystem>
