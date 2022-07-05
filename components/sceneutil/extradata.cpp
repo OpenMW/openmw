@@ -20,6 +20,9 @@ namespace SceneUtil
 {
     void ProcessExtraDataVisitor::setupSoftEffect(osg::Node& node, float size, bool falloff)
     {
+        if (!mSceneMgr->getSoftParticles())
+            return;
+
         const int unitSoftEffect = mSceneMgr->getShaderManager().reserveGlobalTextureUnits(Shader::ShaderManager::Slot::OpaqueDepthTexture);
         static const osg::ref_ptr<SceneUtil::AutoDepth> depth = new SceneUtil::AutoDepth(osg::Depth::LESS, 0, 1, false);
 
