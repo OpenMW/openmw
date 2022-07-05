@@ -40,6 +40,8 @@ namespace fx
         if (mUseUBO)
         {
             osg::UniformBufferBinding* ubb = dynamic_cast<osg::UniformBufferBinding*>(stateset->getAttribute(osg::StateAttribute::UNIFORMBUFFERBINDING, static_cast<int>(Resource::SceneManager::UBOBinding::PostProcessor)));
+            if (!ubb)
+                throw std::runtime_error("StateUpdater::apply: failed to get an UniformBufferBinding!");
 
             auto& dest = static_cast<osg::BufferTemplate<UniformData::BufferType>*>(ubb->getBufferData())->getData();
             mData.copyTo(dest);
