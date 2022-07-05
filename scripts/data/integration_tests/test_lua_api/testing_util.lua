@@ -52,6 +52,12 @@ function M.expectAlmostEqual(v1, v2, msg)
     end
 end
 
+function M.expectGreaterOrEqual(v1, v2, msg)
+    if not (v1 >= v2) then
+        error(string.format('%s: %f >= %f', msg or '', v1, v2), 2)
+    end
+end
+
 local localTests = {}
 local localTestRunner = nil
 

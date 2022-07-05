@@ -51,14 +51,30 @@ def runTest(name):
         )
         if (test_dir / "test.omwscripts").exists():
             omw_cfg.write("content=test.omwscripts\n")
+    with open(config_dir / "settings.cfg", "a", encoding="utf-8") as settings_cfg:
+        settings_cfg.write(
+            "[Video]\n"
+            "resolution x = 640\n"
+            "resolution y = 480\n"
+            "framerate limit = 60\n"
+        )
+    stdout_lines = list()
+    exit_ok = True
+    test_success = True
     with subprocess.Popen(
-        [f"{openmw_binary}", "--replace=config", f"--config={config_dir}", "--skip-menu", "--no-grab"],
+        [openmw_binary, "--replace=config", "--config", config_dir, "--skip-menu", "--no-grab", "--no-sound"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         encoding="utf-8",
+        env={
+            "OPENMW_OSG_STATS_FILE": work_dir / f"{name}.{time_str}.osg_stats.log",
+            "OPENMW_OSG_STATS_LIST": "times",
+            **os.environ,
+        },
     ) as process:
         quit_requested = False
         for line in process.stdout:
+            stdout_lines.append(line)
             words = line.split(" ")
             if len(words) > 1 and words[1] == "E]":
                 print(line, end="")
@@ -72,16 +88,30 @@ def runTest(name):
             elif "TEST_FAILED" in line:
                 w = line.split("TEST_FAILED")[1].split("\t")
                 print(f"FAILED {w[3]}\t\t")
+                test_success = False
         process.wait(5)
         if not quit_requested:
             print("ERROR: Unexpected termination")
-    shutil.copyfile(config_dir / "openmw.log", work_dir / f"{name}.{time_str}.log")
-    print(f"{name} finished")
+            exit_ok = False
+        if process.returncode != 0:
+            print(f"ERROR: openmw exited with code {process.returncode}")
+            exit_ok = False
+    if os.path.exists(config_dir / "openmw.log"):
+        shutil.copyfile(config_dir / "openmw.log", work_dir / f"{name}.{time_str}.log")
+    if not exit_ok:
+        sys.stdout.writelines(stdout_lines)
+    if test_success and exit_ok:
+        print(f"{name} succeeded")
+    else:
+        print(f"{name} failed")
+    return test_success and exit_ok
 
 
+status = 0
 for entry in tests_dir.glob("test_*"):
     if entry.is_dir():
-        runTest(entry.name)
+        if not runTest(entry.name):
+            status = -1
 shutil.rmtree(config_dir, ignore_errors=True)
 shutil.rmtree(userdata_dir, ignore_errors=True)
-
+exit(status)

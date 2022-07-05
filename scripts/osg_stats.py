@@ -76,7 +76,7 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     def matching_keys(patterns):
         if regexp_match:
             return [key for pattern in patterns for key in keys if re.search(pattern, key)]
-        return keys
+        return patterns
     if timeseries:
         draw_timeseries(sources=frames, keys=matching_keys(timeseries), add_sum=timeseries_sum,
                         begin_frame=begin_frame, end_frame=end_frame)
