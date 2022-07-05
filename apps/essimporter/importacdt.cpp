@@ -9,6 +9,8 @@ namespace ESSImport
 
     void ActorData::load(ESM::ESMReader &esm)
     {
+        blank();
+
         if (esm.isNextSub("ACTN"))
         {
             /*

@@ -76,8 +76,6 @@ namespace fx
             MYGUI_RTTI_DERIVED(EditNumber)
 
         public:
-            EditNumber() : mLastPointerX(0) {}
-
             void setValue(T value)
             {
                 mValue = value;
@@ -241,9 +239,9 @@ namespace fx
             MyGUI::Widget* mDragger{nullptr};
             MyGUI::Widget* mFill{nullptr};
             MyGUI::TextBox* mValueLabel{nullptr};
-            T mValue;
+            T mValue{};
 
-            int mLastPointerX;
+            int mLastPointerX{0};
         };
 
         class EditNumberFloat4 : public EditNumber<float, osg::Vec4f> { MYGUI_RTTI_DERIVED(EditNumberFloat4) };
