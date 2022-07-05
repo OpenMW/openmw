@@ -39,6 +39,8 @@ namespace MWRender
         size_t frameId = frame % 2;
 
         MWRender::PostProcessor* postProcessor = dynamic_cast<MWRender::PostProcessor*>(cv->getCurrentCamera()->getUserData());
+        if (!postProcessor)
+            throw std::runtime_error("PingPongCull: failed to get a PostProcessor!");
 
         if (Stereo::getStereo())
         {

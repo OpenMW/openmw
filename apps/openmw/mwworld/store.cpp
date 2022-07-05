@@ -528,6 +528,10 @@ namespace MWWorld
         newCell.mAmbi.mSunlight = 0;
         newCell.mAmbi.mFog = 0;
         newCell.mAmbi.mFogDensity = 0;
+        newCell.mCellId.mPaged = true;
+        newCell.mCellId.mIndex.mX = x;
+        newCell.mCellId.mIndex.mY = y;
+
         return &mExt.insert(std::make_pair(key, newCell)).first->second;
     }
     const ESM::Cell *Store<ESM::Cell>::find(const std::string &id) const

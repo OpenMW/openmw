@@ -460,6 +460,7 @@ namespace MWWorld
                 ESM::GameSetting record;
                 record.mId = params.first;
                 record.mValue = params.second;
+                record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
         }
