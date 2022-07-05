@@ -627,10 +627,10 @@ namespace Shader
         bool simpleLighting = false;
         node.getUserValue("simpleLighting", simpleLighting);
         if (simpleLighting)
-        {
-            defineMap["forcePPL"] = "1";
             defineMap["endLight"] = "0";
-        }
+
+        if (simpleLighting || dynamic_cast<osgParticle::ParticleSystem*>(&node))
+            defineMap["forcePPL"] = "0";
 
         if (reqs.mAlphaBlend && mSupportsNormalsRT)
         {
