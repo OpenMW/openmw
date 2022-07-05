@@ -1,7 +1,5 @@
 #include "ornode.hpp"
 
-#include <sstream>
-
 CSMFilter::OrNode::OrNode (const std::vector<std::shared_ptr<Node> >& nodes)
 : NAryNode (nodes, "or")
 {}

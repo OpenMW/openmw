@@ -1,8 +1,6 @@
 #ifndef COMPILER_STREAMERRORHANDLER_H_INCLUDED
 #define COMPILER_STREAMERRORHANDLER_H_INCLUDED
 
-#include <ostream>
-
 #include "errorhandler.hpp"
 
 namespace Compiler

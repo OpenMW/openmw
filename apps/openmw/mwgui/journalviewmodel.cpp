@@ -1,7 +1,6 @@
 #include "journalviewmodel.hpp"
 
 #include <map>
-#include <sstream>
 
 #include <MyGUI_LanguageManager.h>
 

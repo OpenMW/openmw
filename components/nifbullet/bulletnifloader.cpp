@@ -3,6 +3,7 @@
 #include <cassert>
 #include <vector>
 #include <variant>
+#include <sstream>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>

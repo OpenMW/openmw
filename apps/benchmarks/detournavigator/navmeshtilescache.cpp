@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <random>
-#include <iostream>
 
 namespace
 {

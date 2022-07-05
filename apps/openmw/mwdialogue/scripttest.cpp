@@ -19,6 +19,8 @@
 
 #include "filter.hpp"
 
+#include <sstream>
+
 namespace
 {
 

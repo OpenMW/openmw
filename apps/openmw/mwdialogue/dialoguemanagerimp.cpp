@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <list>
+#include <sstream>
 
 #include <components/debug/debuglog.hpp>
 

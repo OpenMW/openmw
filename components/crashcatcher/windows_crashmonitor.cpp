@@ -5,9 +5,7 @@
 
 #include <DbgHelp.h>
 
-#include <iostream>
 #include <memory>
-#include <sstream>
 #include <thread>
 
 #include <SDL_messagebox.h>

@@ -14,7 +14,6 @@
 #include <osgViewer/Renderer>
 #include <osgViewer/Viewer>
 
-#include <iostream>
 #include <map>
 #include <string>
 

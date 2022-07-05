@@ -1,6 +1,5 @@
 #include "universalid.hpp"
 
-#include <ostream>
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
@@ -404,9 +403,4 @@ bool CSMWorld::operator!= (const CSMWorld::UniversalId& left, const CSMWorld::Un
 bool CSMWorld::operator< (const UniversalId& left, const UniversalId& right)
 {
     return left.isLess (right);
-}
-
-std::ostream& CSMWorld::operator< (std::ostream& stream, const CSMWorld::UniversalId& universalId)
-{
-    return stream << universalId.toString();
 }

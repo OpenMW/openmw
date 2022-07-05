@@ -4,11 +4,9 @@
 #include <algorithm>
 #include <sstream>
 #include <regex>
+#include <filesystem>
 
 #include <osg/Program>
-
-#include <filesystem>
-#include <fstream>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>

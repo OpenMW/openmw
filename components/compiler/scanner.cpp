@@ -1,6 +1,7 @@
 #include "scanner.hpp"
 
 #include <cassert>
+#include <sstream>
 
 #include "exception.hpp"
 #include "errorhandler.hpp"

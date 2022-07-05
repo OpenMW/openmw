@@ -1,6 +1,7 @@
 #include "npcstats.hpp"
 
 #include <iomanip>
+#include <sstream>
 
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadgmst.hpp>

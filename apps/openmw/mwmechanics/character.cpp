@@ -19,7 +19,7 @@
 
 #include "character.hpp"
 
-#include <iostream>
+#include <sstream>
 
 #include <components/misc/mathutil.hpp>
 #include <components/misc/rng.hpp>

@@ -65,11 +65,7 @@ namespace MWWorld
         }
 
         if (it == invStore.end())
-        {
-            std::stringstream error;
-            error << "ActionEquip can't find item " << object.getCellRef().getRefId();
-            throw std::runtime_error(error.str());
-        }
+            throw std::runtime_error("ActionEquip can't find item " + object.getCellRef().getRefId());
 
         // equip the item in the first free slot
         std::vector<int>::const_iterator slot=slots_.first.begin();

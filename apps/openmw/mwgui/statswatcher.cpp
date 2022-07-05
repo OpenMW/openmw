@@ -11,6 +11,8 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include <string>
+
 namespace MWGui
 {
     // mWatchedTimeToStartDrowning = -1 for correct drowning state check,
@@ -36,11 +38,8 @@ namespace MWGui
         {
             if (stats.getAttribute(i) != mWatchedAttributes[i] || mWatchedStatsEmpty)
             {
-                std::stringstream attrname;
-                attrname << "AttribVal"<<(i+1);
-
                 mWatchedAttributes[i] = stats.getAttribute(i);
-                setValue(attrname.str(), stats.getAttribute(i));
+                setValue("AttribVal" + std::to_string(i + 1), stats.getAttribute(i));
             }
         }
 

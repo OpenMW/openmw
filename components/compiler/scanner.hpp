@@ -5,7 +5,7 @@
 #include <string>
 #include <iosfwd>
 #include <vector>
-#include <sstream>
+#include <istream>
 
 #include "tokenloc.hpp"
 

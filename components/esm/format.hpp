@@ -4,7 +4,7 @@
 #include "defs.hpp"
 
 #include <cstdint>
-#include <istream>
+#include <iosfwd>
 #include <string_view>
 
 namespace ESM

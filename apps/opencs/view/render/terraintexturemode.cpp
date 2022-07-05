@@ -1,7 +1,6 @@
 #include "terraintexturemode.hpp"
 
 #include <string>
-#include <sstream>
 
 #include <QWidget>
 #include <QIcon>

@@ -1,5 +1,7 @@
 #include "scripterrortable.hpp"
 
+#include <sstream>
+
 #include <QHeaderView>
 
 #include <components/compiler/tokenloc.hpp>

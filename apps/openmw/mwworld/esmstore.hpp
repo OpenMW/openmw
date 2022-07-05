@@ -2,7 +2,6 @@
 #define OPENMW_MWWORLD_ESMSTORE_H
 
 #include <memory>
-#include <sstream>
 #include <stdexcept>
 #include <unordered_map>
 

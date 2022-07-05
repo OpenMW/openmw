@@ -1,7 +1,5 @@
 #include "andnode.hpp"
 
-#include <sstream>
-
 CSMFilter::AndNode::AndNode (const std::vector<std::shared_ptr<Node> >& nodes)
 : NAryNode (nodes, "and")
 {}

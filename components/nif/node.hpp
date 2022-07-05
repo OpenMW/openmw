@@ -130,9 +130,7 @@ struct NiBoundingVolume
             }
             default:
             {
-                std::stringstream error;
-                error << "Unhandled NiBoundingVolume type: " << type;
-                nif->file->fail(error.str());
+                nif->file->fail("Unhandled NiBoundingVolume type: " + std::to_string(type));
             }
         }
     }

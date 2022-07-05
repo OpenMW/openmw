@@ -4,7 +4,7 @@
 #include "constrainedfilestreambuf.hpp"
 #include "streamwithbuffer.hpp"
 
-#include <istream>
+#include <iosfwd>
 #include <memory>
 #include <limits>
 #include <string>

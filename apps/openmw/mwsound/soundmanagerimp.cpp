@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <map>
 #include <numeric>
+#include <sstream>
 
 #include <osg/Matrixf>
 

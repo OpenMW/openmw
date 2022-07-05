@@ -1,9 +1,10 @@
 #include "projectilemanager.hpp"
 
 #include <iomanip>
-
+#include <sstream>
 #include <memory>
 #include <optional>
+
 #include <osg/PositionAttitudeTransform>
 
 #include <components/debug/debuglog.hpp>

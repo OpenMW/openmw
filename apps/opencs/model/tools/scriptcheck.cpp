@@ -1,5 +1,7 @@
 #include "scriptcheck.hpp"
 
+#include <sstream>
+
 #include <components/compiler/tokenloc.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/fileparser.hpp>

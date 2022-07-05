@@ -5,7 +5,6 @@
 #include <type_traits>
 #include <string>
 #include <string_view>
-#include <sstream>
 
 #include "livecellref.hpp"
 
@@ -76,19 +75,8 @@ namespace MWWorld
                 throw std::runtime_error("Cannot get class of an empty object");
             }
 
-            template<typename T>
-            TypeTransform<MWWorld::LiveCellRef<T>> *get() const
-            {
-                TypeTransform<MWWorld::LiveCellRef<T>> *ref = dynamic_cast<TypeTransform<MWWorld::LiveCellRef<T>>*>(mRef);
-                if(ref) return ref;
-
-                std::stringstream str;
-                str<< "Bad LiveCellRef cast to "<<T::getRecordType()<<" from ";
-                if(mRef != nullptr) str<< getTypeDescription();
-                else str<< "an empty object";
-
-                throw std::runtime_error(str.str());
-            }
+            template <class T>
+            auto* get() const { return LiveCellRefBase::dynamicCast<T>(mRef); }
 
             LiveCellRefBaseType *getBase() const
             {
