@@ -591,7 +591,7 @@ Ubuntu_AndroidNDK_arm64-v8a:
     - cd ..
     - df -h
     - du -sh build/
-    - du -sh build/install/
+    # - du -sh build/install/ # no install dir because it's commented out above
     - du -sh apt-cache/
     - du -sh ccache/
     - du -sh build/extern/fetched/
