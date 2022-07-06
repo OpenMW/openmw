@@ -30,7 +30,7 @@ DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *
     : mParentNode(parentNode),
       mWorld(world)
 {
-    setDebugMode(debugMode);
+    DebugDrawer::setDebugMode(debugMode);
 }
 
 void DebugDrawer::createGeometry()
