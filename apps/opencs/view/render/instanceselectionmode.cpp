@@ -284,14 +284,14 @@ namespace CSVRender
         osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
 
         osg::Vec3Array *vertices = new osg::Vec3Array;
-        int resolution = 32;
+        constexpr int resolution = 32;
         float radiusPerResolution = radius / resolution;
         float reciprocalResolution = 1.0f / resolution;
         float doubleReciprocalRes = reciprocalResolution * 2;
 
         osg::Vec4Array *colours = new osg::Vec4Array;
 
-        for (float i = 0.0; i <= resolution; i += 2)
+        for (int i = 0; i <= resolution; i += 2)
         {
             float iShifted = (static_cast<float>(i) - resolution / 2.0f); // i - 16 = -16 ... 16
             float xPercentile = iShifted * doubleReciprocalRes;
