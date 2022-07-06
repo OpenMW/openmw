@@ -584,7 +584,7 @@ Ubuntu_AndroidNDK_arm64-v8a:
     - CI/before_script.android.sh
     - cd build
     - cmake --build . -- -j $(nproc)
-    - # cmake --install .  # no one uses builds anyway, disable until 'no space left' is resolved
+    # - cmake --install .  # no one uses builds anyway, disable until 'no space left' is resolved
     - ccache -s
     - df -h
     - ls | grep -v -e '^extern$' -e '^install$' | xargs -I '{}' rm -rf './{}'
