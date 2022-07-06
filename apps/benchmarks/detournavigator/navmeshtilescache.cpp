@@ -193,14 +193,45 @@ namespace
         }
     }
 
-    constexpr auto getFromFilledCache_1m_100hit = getFromFilledCache<1 * 1024 * 1024, 100>;
-    constexpr auto getFromFilledCache_4m_100hit = getFromFilledCache<4 * 1024 * 1024, 100>;
-    constexpr auto getFromFilledCache_16m_100hit = getFromFilledCache<16 * 1024 * 1024, 100>;
-    constexpr auto getFromFilledCache_64m_100hit = getFromFilledCache<64 * 1024 * 1024, 100>;
-    constexpr auto getFromFilledCache_1m_70hit = getFromFilledCache<1 * 1024 * 1024, 70>;
-    constexpr auto getFromFilledCache_4m_70hit = getFromFilledCache<4 * 1024 * 1024, 70>;
-    constexpr auto getFromFilledCache_16m_70hit = getFromFilledCache<16 * 1024 * 1024, 70>;
-    constexpr auto getFromFilledCache_64m_70hit = getFromFilledCache<64 * 1024 * 1024, 70>;
+    void getFromFilledCache_1m_100hit(benchmark::State& state)
+    {
+        getFromFilledCache<1 * 1024 * 1024, 100>(state);
+    }
+
+    void getFromFilledCache_4m_100hit(benchmark::State& state)
+    {
+        getFromFilledCache<4 * 1024 * 1024, 100>(state);
+    }
+
+    void getFromFilledCache_16m_100hit(benchmark::State& state)
+    {
+        getFromFilledCache<16 * 1024 * 1024, 100>(state);
+    }
+
+    void getFromFilledCache_64m_100hit(benchmark::State& state)
+    {
+        getFromFilledCache<64 * 1024 * 1024, 100>(state);
+    }
+
+    void getFromFilledCache_1m_70hit(benchmark::State& state)
+    {
+        getFromFilledCache<1 * 1024 * 1024, 70>(state);
+    }
+
+    void getFromFilledCache_4m_70hit(benchmark::State& state)
+    {
+        getFromFilledCache<4 * 1024 * 1024, 70>(state);
+    }
+
+    void getFromFilledCache_16m_70hit(benchmark::State& state)
+    {
+        getFromFilledCache<16 * 1024 * 1024, 70>(state);
+    }
+
+    void getFromFilledCache_64m_70hit(benchmark::State& state)
+    {
+        getFromFilledCache<64 * 1024 * 1024, 70>(state);
+    }
 
     template <std::size_t maxCacheSize>
     void setToBoundedNonEmptyCache(benchmark::State& state)
@@ -222,10 +253,25 @@ namespace
         }
     }
 
-    constexpr auto setToBoundedNonEmptyCache_1m = setToBoundedNonEmptyCache<1 * 1024 * 1024>;
-    constexpr auto setToBoundedNonEmptyCache_4m = setToBoundedNonEmptyCache<4 * 1024 * 1024>;
-    constexpr auto setToBoundedNonEmptyCache_16m = setToBoundedNonEmptyCache<16 * 1024 * 1024>;
-    constexpr auto setToBoundedNonEmptyCache_64m = setToBoundedNonEmptyCache<64 * 1024 * 1024>;
+    void setToBoundedNonEmptyCache_1m(benchmark::State& state)
+    {
+        setToBoundedNonEmptyCache<1 * 1024 * 1024>(state);
+    }
+
+    void setToBoundedNonEmptyCache_4m(benchmark::State& state)
+    {
+        setToBoundedNonEmptyCache<4 * 1024 * 1024>(state);
+    }
+
+    void setToBoundedNonEmptyCache_16m(benchmark::State& state)
+    {
+        setToBoundedNonEmptyCache<16 * 1024 * 1024>(state);
+    }
+
+    void setToBoundedNonEmptyCache_64m(benchmark::State& state)
+    {
+        setToBoundedNonEmptyCache<64 * 1024 * 1024>(state);
+    }
 } // namespace
 
 BENCHMARK(getFromFilledCache_1m_100hit);
