@@ -96,7 +96,7 @@ MWMechanics::CharacterState hitStateToDeathState (MWMechanics::CharacterState st
         case CharState_SwimKnockDown: return CharState_SwimDeathKnockDown;
         case CharState_SwimKnockOut: return CharState_SwimDeathKnockOut;
         case CharState_KnockDown: return CharState_DeathKnockDown;
-        case CharState_DeathKnockOut: return CharState_DeathKnockOut;
+        case CharState_KnockOut: return CharState_DeathKnockOut;
         default: return CharState_None;
     }
 }
