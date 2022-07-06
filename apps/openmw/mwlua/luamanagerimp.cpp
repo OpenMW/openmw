@@ -335,7 +335,7 @@ namespace MWLua
         if (!localScripts)
         {
             LuaUtil::ScriptIdsWithInitializationData autoStartConf =
-                mConfiguration.getLocalConf(ptr.getLuaType(), ptr.getCellRef().getRefId(), getId(ptr));
+                mConfiguration.getLocalConf(getLiveCellRefType(ptr.mRef), ptr.getCellRef().getRefId(), getId(ptr));
             if (!autoStartConf.empty())
             {
                 localScripts = createLocalScripts(ptr, std::move(autoStartConf));
@@ -411,7 +411,7 @@ namespace MWLua
     {
         assert(mInitialized);
         std::shared_ptr<LocalScripts> scripts;
-        uint32_t type = ptr.getLuaType();
+        const uint32_t type = getLiveCellRefType(ptr.mRef);
         if (type == ESM::REC_STAT)
             throw std::runtime_error("Lua scripts on static objects are not allowed");
         else if (type == ESM::REC_INTERNAL_PLAYER)

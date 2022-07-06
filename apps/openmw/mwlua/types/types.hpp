@@ -10,6 +10,13 @@
 
 namespace MWLua
 {
+    // `getLiveCellRefType()` is not exactly what we usually mean by "type" because some refids have special meaning.
+    // This function handles these special refids (and by this adds some performance overhead).
+    // We use this "fixed" type in Lua because we don't want to expose the weirdness of Morrowind internals to our API.
+    // TODO: Implement https://gitlab.com/OpenMW/openmw/-/issues/6617 and make `MWWorld::PtrBase::getType` work the
+    // same as `getLiveCellRefType`.
+    unsigned int getLiveCellRefType(const MWWorld::LiveCellRefBase* ref);
+
     std::string_view getLuaObjectTypeName(ESM::RecNameInts type, std::string_view fallback = "Unknown");
     std::string_view getLuaObjectTypeName(const MWWorld::Ptr& ptr);
     const MWWorld::Ptr& verifyType(ESM::RecNameInts type, const MWWorld::Ptr& ptr);

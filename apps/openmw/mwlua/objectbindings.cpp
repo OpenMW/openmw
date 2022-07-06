@@ -165,7 +165,7 @@ namespace MWLua
 
             objectT["type"] = sol::readonly_property([types=getTypeToPackageTable(context.mLua->sol())](const ObjectT& o) mutable
             {
-                return types[o.ptr().getLuaType()];
+                return types[getLiveCellRefType(o.ptr().mRef)];
             });
 
             objectT["count"] = sol::readonly_property([](const ObjectT& o) { return o.ptr().getRefData().getCount(); });

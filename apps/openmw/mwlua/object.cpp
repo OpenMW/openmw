@@ -2,6 +2,8 @@
 
 #include "types/types.hpp"
 
+#include <components/misc/resourcehelpers.hpp>
+
 namespace MWLua
 {
 
@@ -12,8 +14,7 @@ namespace MWLua
 
     bool isMarker(const MWWorld::Ptr& ptr)
     {
-        std::string_view id = ptr.getCellRef().getRefId();
-        return id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker";
+        return Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId());
     }
 
     std::string ptrToString(const MWWorld::Ptr& ptr)
