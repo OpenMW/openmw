@@ -17,7 +17,7 @@ namespace DetourNavigator
 
         ++mGetCount;
 
-        const auto tile = mValues.find(std::make_tuple(agentBounds, changedTile, recastMesh));
+        const auto tile = mValues.find(std::tie(agentBounds, changedTile, recastMesh));
         if (tile == mValues.end())
             return Value();
 
@@ -92,7 +92,7 @@ namespace DetourNavigator
     {
         const auto& item = mFreeItems.back();
 
-        const auto value = mValues.find(std::make_tuple(item.mAgentBounds, item.mChangedTile, std::cref(item.mRecastMeshData)));
+        const auto value = mValues.find(std::tie(item.mAgentBounds, item.mChangedTile, item.mRecastMeshData));
         if (value == mValues.end())
             return;
 
