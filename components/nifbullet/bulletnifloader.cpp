@@ -4,6 +4,7 @@
 #include <vector>
 #include <variant>
 #include <sstream>
+#include <tuple>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
@@ -205,7 +206,7 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
             btTransform transform = btTransform::getIdentity();
             transform.setOrigin(center);
             compound->addChildShape(transform, boxShape.get());
-            boxShape.release();
+            std::ignore = boxShape.release();
 
             mShape->mCollisionShape.reset(compound.release());
             return mShape;
@@ -231,21 +232,21 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
             trans.setIdentity();
             std::unique_ptr<btCollisionShape> child = std::make_unique<Resource::TriangleMeshShape>(mStaticMesh.get(), true);
             mCompoundShape->addChildShape(trans, child.get());
-            child.release();
-            mStaticMesh.release();
+            std::ignore = child.release();
+            std::ignore = mStaticMesh.release();
         }
         mShape->mCollisionShape = std::move(mCompoundShape);
     }
     else if (mStaticMesh != nullptr && mStaticMesh->getNumTriangles() > 0)
     {
         mShape->mCollisionShape.reset(new Resource::TriangleMeshShape(mStaticMesh.get(), true));
-        mStaticMesh.release();
+        std::ignore = mStaticMesh.release();
     }
 
     if (mAvoidStaticMesh != nullptr && mAvoidStaticMesh->getNumTriangles() > 0)
     {
         mShape->mAvoidCollisionShape.reset(new Resource::TriangleMeshShape(mAvoidStaticMesh.get(), false));
-        mAvoidStaticMesh.release();
+        std::ignore = mAvoidStaticMesh.release();
     }
 
     return mShape;
@@ -410,7 +411,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiGeometry& niGeometry, const 
             mCompoundShape.reset(new btCompoundShape);
 
         auto childShape = std::make_unique<Resource::TriangleMeshShape>(childMesh.get(), true);
-        childMesh.release();
+        std::ignore = childMesh.release();
 
         float scale = niGeometry.trafo.scale;
         for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
@@ -424,7 +425,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiGeometry& niGeometry, const 
         mShape->mAnimatedShapes.emplace(niGeometry.recIndex, mCompoundShape->getNumChildShapes());
 
         mCompoundShape->addChildShape(trans, childShape.get());
-        childShape.release();
+        std::ignore = childShape.release();
     }
     else if (avoid)
         fillTriangleMesh(mAvoidStaticMesh, niGeometry, transform);
