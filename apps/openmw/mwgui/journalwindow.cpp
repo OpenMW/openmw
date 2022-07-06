@@ -83,16 +83,16 @@ namespace
                 setVisible (visible);
         }
 
-        void adviseButtonClick (char const * name, void (JournalWindowImpl::*Handler) (MyGUI::Widget* _sender))
+        void adviseButtonClick (char const * name, void (JournalWindowImpl::*handler)(MyGUI::Widget*))
         {
             getWidget <MyGUI::Widget> (name) ->
-                eventMouseButtonClick += newDelegate(this, Handler);
+                eventMouseButtonClick += newDelegate(this, handler);
         }
 
-        void adviseKeyPress (char const * name, void (JournalWindowImpl::*Handler) (MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char character))
+        void adviseKeyPress (char const * name, void (JournalWindowImpl::*handler)(MyGUI::Widget*, MyGUI::KeyCode, MyGUI::Char))
         {
             getWidget <MyGUI::Widget> (name) ->
-                eventKeyButtonPressed += newDelegate(this, Handler);
+                eventKeyButtonPressed += newDelegate(this, handler);
         }
 
         MWGui::BookPage* getPage (char const * name)
