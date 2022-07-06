@@ -49,19 +49,18 @@ void paintSun(inout vec4 color)
     color.a *= gl_FrontMaterial.diffuse.a;
 }
 
-void paintSunflashQuery(inout vec4 color)
-{
-    const float threshold = 0.8;
-
-    color = texture2D(diffuseMap, diffuseMapUV);
-    if (color.a <= threshold)
-        discard;
-}
-
 void paintSunglare(inout vec4 color)
 {
     color = gl_FrontMaterial.emission;
     color.a = gl_FrontMaterial.diffuse.a;
+}
+
+void processSunflashQuery()
+{
+    const float threshold = 0.8;
+
+    if (texture2D(diffuseMap, diffuseMapUV).a <= threshold)
+        discard;
 }
 
 void main()
@@ -78,10 +77,12 @@ void main()
         paintMoon(color);
     else if (pass == PASS_SUN)
         paintSun(color);
-    else if (pass == PASS_SUNFLASH_QUERY)
-        paintSunflashQuery(color);
     else if (pass == PASS_SUNGLARE)
         paintSunglare(color);
+    else if (pass == PASS_SUNFLASH_QUERY) {
+        processSunflashQuery();
+        return;
+    }
 
     gl_FragData[0] = color;
 }
