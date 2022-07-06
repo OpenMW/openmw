@@ -60,7 +60,7 @@ namespace MWInput
                 SDL_ControllerDeviceEvent evt;
                 evt.which = i;
                 static const int fakeDeviceID = 1;
-                controllerAdded(fakeDeviceID, evt);
+                ControllerManager::controllerAdded(fakeDeviceID, evt);
                 Log(Debug::Info) << "Detected game controller: " << SDL_GameControllerNameForIndex(i);
             }
             else

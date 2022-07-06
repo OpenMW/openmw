@@ -179,7 +179,9 @@ namespace DetourNavigator
         , mInsertShape(*mDb, DbQueries::InsertShape {})
         , mVacuum(*mDb, DbQueries::Vacuum {})
     {
-        const auto dbPageSize = getPageSize(*mDb);
+        const std::uint64_t dbPageSize = getPageSize(*mDb);
+        if (dbPageSize == 0)
+            throw std::runtime_error("NavMeshDb page size is zero");
         setMaxPageCount(*mDb, maxFileSize / dbPageSize + static_cast<std::uint64_t>((maxFileSize % dbPageSize) != 0));
     }
 

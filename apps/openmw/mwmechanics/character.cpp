@@ -243,6 +243,13 @@ float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
     return 0.f;
 }
 
+bool isRealWeapon(int weaponType)
+{
+    return weaponType != ESM::Weapon::HandToHand
+        && weaponType != ESM::Weapon::Spell
+        && weaponType != ESM::Weapon::None;
+}
+
 }
 
 namespace MWMechanics
@@ -486,8 +493,7 @@ void CharacterController::onClose() const
 std::string CharacterController::getWeaponAnimation(int weaponType) const
 {
     std::string weaponGroup = getWeaponType(weaponType)->mLongGroup;
-    bool isRealWeapon = weaponType != ESM::Weapon::HandToHand && weaponType != ESM::Weapon::Spell && weaponType != ESM::Weapon::None;
-    if (isRealWeapon && !mAnimation->hasAnimation(weaponGroup))
+    if (isRealWeapon(weaponType) && !mAnimation->hasAnimation(weaponGroup))
     {
         static const std::string oneHandFallback = getWeaponType(ESM::Weapon::LongBladeOneHand)->mLongGroup;
         static const std::string twoHandFallback = getWeaponType(ESM::Weapon::LongBladeTwoHand)->mLongGroup;
@@ -497,7 +503,7 @@ std::string CharacterController::getWeaponAnimation(int weaponType) const
         // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
         if (weapInfo->mFlags & ESM::WeaponType::TwoHanded && weapInfo->mWeaponClass == ESM::WeaponType::Melee)
             weaponGroup = twoHandFallback;
-        else if (isRealWeapon)
+        else
             weaponGroup = oneHandFallback;
     }
     else if (weaponType == ESM::Weapon::HandToHand && !mPtr.getClass().isBipedal(mPtr))
@@ -515,8 +521,7 @@ std::string CharacterController::getWeaponShortGroup(int weaponType) const
 
 std::string CharacterController::fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask) const
 {
-    bool isRealWeapon = mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::None;
-    if (!isRealWeapon)
+    if (!isRealWeapon(mWeaponType))
     {
         if (blendMask != nullptr)
             *blendMask = MWRender::Animation::BlendMask_LowerBody;
