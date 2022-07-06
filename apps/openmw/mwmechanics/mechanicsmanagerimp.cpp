@@ -1463,7 +1463,10 @@ namespace MWMechanics
                     std::set<MWWorld::Ptr> followersTarget;
                     getActorsSidingWith(target, followersTarget);
                     for(const auto& follower : followersTarget)
-                        startCombat(follower, attacker);
+                    {
+                        if(follower != attacker && follower != player)
+                            startCombat(follower, attacker);
+                    }
                 }
             }
         }
