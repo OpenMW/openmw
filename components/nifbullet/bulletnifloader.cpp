@@ -76,7 +76,9 @@ void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data, co
         if (strip.size() < 3)
             continue;
 
-        unsigned short a = strip[0], b = strip[0], c = strip[1];
+        unsigned short a;
+        unsigned short b = strip[0];
+        unsigned short c = strip[1];
         for (size_t i = 2; i < strip.size(); i++)
         {
             a = b;
