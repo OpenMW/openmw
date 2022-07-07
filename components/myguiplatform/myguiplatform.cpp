@@ -30,7 +30,7 @@ Platform::~Platform()
     mLogFacility = nullptr;
 }
 
-void Platform::initialise(const std::string &resourcePath, const std::string &_logName)
+void Platform::initialise(const VFS::Manager* vfs, const std::string &resourcePath, const std::string &_logName)
 {
     if (!_logName.empty() && !mLogFacility)
     {
@@ -39,6 +39,7 @@ void Platform::initialise(const std::string &resourcePath, const std::string &_l
     }
 
     mDataManager->setResourcePath(resourcePath);
+    mDataManager->setVfs(vfs);
 
     mRenderManager->initialise();
     mDataManager->initialise();

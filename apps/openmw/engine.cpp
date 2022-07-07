@@ -1037,13 +1037,13 @@ void OMW::Engine::go()
     }
 
     // Setup profiler
-    osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler(stats.is_open());
+    osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler(stats.is_open(), mVFS.get());
 
     initStatsHandler(*statshandler);
 
     mViewer->addEventHandler(statshandler);
 
-    osg::ref_ptr<Resource::StatsHandler> resourceshandler = new Resource::StatsHandler(stats.is_open());
+    osg::ref_ptr<Resource::StatsHandler> resourceshandler = new Resource::StatsHandler(stats.is_open(), mVFS.get());
     mViewer->addEventHandler(resourceshandler);
 
     if (stats.is_open())

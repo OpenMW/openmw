@@ -32,7 +32,6 @@ set(MYGUI_FILES
     openmw_dialogue_window.layout
     openmw_dialogue_window.skin.xml
     openmw_edit.skin.xml
-    openmw_font.xml
     openmw_hud_box.skin.xml
     openmw_hud_energybar.skin.xml
     openmw_hud.layout
@@ -93,7 +92,6 @@ set(MYGUI_FILES
     openmw_postprocessor_hud.layout
     openmw_postprocessor_hud.skin.xml
     openmw_jail_screen.layout
-    DejaVuLGCSansMono.ttf
     ../launcher/images/openmw.png
     OpenMWResourcePlugin.xml
     skins.xml

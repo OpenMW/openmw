@@ -214,16 +214,16 @@ namespace Gui
             return;
         }
 
-        const std::string cfg = dataManager->getDataPath("");
-        const std::string fontFile = mUserDataPath + "/" + "Fonts" + "/" + "openmw_font.xml";
-        if (!std::filesystem::exists(fontFile))
-            return;
+        dataManager->setUseVfs(true);
 
-        dataManager->setResourcePath(mUserDataPath + "/" + "Fonts");
-        MyGUI::ResourceManager::getInstance().load("openmw_font.xml");
-        dataManager->setResourcePath(cfg);
+        for (const auto& name : mVFS->getRecursiveDirectoryIterator("Fonts/"))
+        {
+            if (Misc::getFileExtension(name) == "omwfont")
+                MyGUI::ResourceManager::getInstance().load(name);
+        }
+
+        dataManager->setUseVfs(false);
     }
-
 
     typedef struct
     {

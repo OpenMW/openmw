@@ -15,6 +15,8 @@
 
 #include <components/myguiplatform/myguidatamanager.hpp>
 
+#include <components/vfs/manager.hpp>
+
 namespace Resource
 {
 
@@ -27,6 +29,8 @@ static bool collectStatEvent = false;
 static bool collectStatFrameRate = false;
 static bool collectStatUpdate = false;
 static bool collectStatEngine = false;
+
+inline static std::string sFontName = "Fonts\\DejaVuLGCSansMono.ttf";
 
 static void setupStatCollection()
 {
@@ -79,7 +83,7 @@ static void setupStatCollection()
     }
 }
 
-StatsHandler::StatsHandler(bool offlineCollect):
+StatsHandler::StatsHandler(bool offlineCollect, VFS::Manager* vfs):
     _key(osgGA::GUIEventAdapter::KEY_F4),
     _initialized(false),
     _statsType(false),
@@ -96,15 +100,19 @@ StatsHandler::StatsHandler(bool offlineCollect):
 
     _resourceStatsChildNum = 0;
 
-    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf"))
-        _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
+    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf") && vfs->exists(sFontName))
+    {
+        _font = vfs->getAbsoluteFileName(sFontName);
+    }
 }
 
-Profiler::Profiler(bool offlineCollect):
+Profiler::Profiler(bool offlineCollect, VFS::Manager* vfs):
     _offlineCollect(offlineCollect)
 {
-    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf"))
-        _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
+    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf") && vfs->exists(sFontName))
+    {
+        _font = vfs->getAbsoluteFileName(sFontName);
+    }
     else
         _font.clear();
 

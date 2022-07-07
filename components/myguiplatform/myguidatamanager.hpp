@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include <components/vfs/manager.hpp>
+
 namespace osgMyGUI
 {
 
@@ -15,6 +17,10 @@ public:
     void shutdown() {}
 
     void setResourcePath(const std::string& path);
+
+    void setUseVfs(bool useVfs);
+
+    void setVfs(const VFS::Manager* vfs);
 
     /** Get data stream from specified resource name.
         @param _name Resource name (usually file name).
@@ -44,6 +50,10 @@ public:
 
 private:
     std::string mResourcePath;
+
+    const VFS::Manager* mVfs;
+
+    bool mUseVfs{false};
 };
 
 }

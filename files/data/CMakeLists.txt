@@ -10,6 +10,16 @@ set(BUILTIN_DATA_FILES
     textures/omw_menu_scroll_center_h.dds
     textures/omw_menu_scroll_center_v.dds
 
+    fonts/DejaVuFontLicense.txt
+    fonts/DejaVuLGCSansMono.ttf
+    fonts/DejaVuLGCSansMono.omwfont
+    fonts/OMWAyembedt.ttf
+    fonts/OMWAyembedt.omwfont
+    fonts/OMWAyembedtFontLicense.txt
+    fonts/Pelagiad.ttf
+    fonts/Pelagiad.omwfont
+    fonts/PelagiadFontLicense.txt
+
     l10n/Calendar/en.yaml
     l10n/Calendar/ru.yaml
     l10n/DebugMenu/en.yaml

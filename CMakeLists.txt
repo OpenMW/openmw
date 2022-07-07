@@ -921,7 +921,6 @@ elseif(NOT APPLE)
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/mygui/DejaVuFontLicense.txt" DESTINATION ".")
         INSTALL(FILES "${INSTALL_SOURCE}/defaults.bin" DESTINATION ".")
         INSTALL(FILES "${INSTALL_SOURCE}/gamecontrollerdb.txt" DESTINATION ".")
 
@@ -1022,9 +1021,6 @@ elseif(NOT APPLE)
         IF(BUILD_BULLETOBJECTTOOL)
             INSTALL(PROGRAMS "${INSTALL_SOURCE}/openmw-bulletobjecttool" DESTINATION "${BINDIR}" )
         ENDIF(BUILD_BULLETOBJECTTOOL)
-
-        # Install licenses
-        INSTALL(FILES "files/mygui/DejaVuFontLicense.txt" DESTINATION "${LICDIR}" )
 
         # Install icon and desktop file
         INSTALL(FILES "${OpenMW_BINARY_DIR}/org.openmw.launcher.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "openmw")

@@ -13,12 +13,17 @@ namespace osg
     class Switch;
 }
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace Resource
 {
     class Profiler : public osgViewer::StatsHandler
     {
     public:
-        Profiler(bool offlineCollect);
+        Profiler(bool offlineCollect, VFS::Manager* vfs);
         bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
 
     private:
@@ -28,7 +33,7 @@ namespace Resource
     class StatsHandler : public osgGA::GUIEventHandler
     {
     public:
-        StatsHandler(bool offlineCollect);
+        StatsHandler(bool offlineCollect, VFS::Manager* vfs);
 
         void setKey(int key) { _key = key; }
         int getKey() const { return _key; }
