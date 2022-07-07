@@ -37,6 +37,7 @@ namespace MWMechanics
         void updatePtr(const MWWorld::Ptr& newPtr) { mCharacterController.updatePtr(newPtr); }
 
         CharacterController& getCharacterController() { return mCharacterController; }
+        const CharacterController& getCharacterController() const { return mCharacterController; }
 
         int getGreetingTimer() const { return mGreetingTimer; }
         void setGreetingTimer(int timer) { mGreetingTimer = timer; }
