@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Resource" version="1.1">
-    <Resource type="ResourceTrueTypeFont" name="Magic Cards">
+    <Resource type="ResourceTrueTypeFont" name="pelagiad">
         <Property key="Source" value="Fonts/Pelagiad.ttf"/>
         <Property key="Antialias" value="false"/>
         <Property key="TabWidth" value="8"/>

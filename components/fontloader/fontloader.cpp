@@ -304,13 +304,7 @@ namespace Gui
             fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
         bitmapFile.reset();
 
-        std::string resourceName;
-        if (name.size() >= 5 && Misc::StringUtils::ciEqual(name.substr(0, 5), "magic"))
-            resourceName = "Magic Cards";
-        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "century"))
-            resourceName = "Century Gothic";
-        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "daedric"))
-            resourceName = "Daedric";
+        std::string resourceName = name;
 
         if (exportToFile)
         {
@@ -346,7 +340,9 @@ namespace Gui
         // We need to emulate loading from XML because the data members are private as of mygui 3.2.0
         MyGUI::xml::Document xmlDocument;
         MyGUI::xml::ElementPtr root = xmlDocument.createRoot("ResourceManualFont");
-        root->addAttribute("name", resourceName);
+
+        const std::string baseName = Misc::StringUtils::lowerCase(std::filesystem::path(mVFS->getAbsoluteFileName(fileName)).stem().string());
+        root->addAttribute("name", getInternalFontName(baseName));
 
         MyGUI::xml::ElementPtr defaultHeight = root->createChild("Property");
         defaultHeight->addAttribute("key", "DefaultHeight");
@@ -506,12 +502,11 @@ namespace Gui
 
         font->deserialization(root, MyGUI::Version(3,2,0));
 
-        // Setup "book" version of font as fallback if we will not use TrueType fonts
         MyGUI::ResourceManualFont* bookFont = static_cast<MyGUI::ResourceManualFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
         mFonts.push_back(bookFont);
         bookFont->deserialization(root, MyGUI::Version(3,2,0));
-        bookFont->setResourceName("Journalbook " + resourceName);
+        bookFont->setResourceName("Journalbook " + getInternalFontName(baseName));
 
         // Remove automatically registered fonts
         for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end();)
@@ -564,6 +559,8 @@ namespace Gui
                 MyGUI::xml::ElementPtr sizeNode = resourceNode->createChild("Property");
                 sizeNode->addAttribute("key", "Size");
                 sizeNode->addAttribute("value", std::to_string(mFontHeight));
+
+                resourceNode->setAttribute("name", getInternalFontName(name));
             }
             else if (Misc::StringUtils::ciEqual(type, "ResourceSkin") ||
                      Misc::StringUtils::ciEqual(type, "AutoSizedResourceSkin"))
@@ -611,7 +608,7 @@ namespace Gui
                     resolutionNode->addAttribute("key", "Resolution");
                     resolutionNode->addAttribute("value", std::to_string(resolution));
 
-                    copyFont->setAttribute("name", "Journalbook " + name);
+                    copyFont->setAttribute("name", "Journalbook " + getInternalFontName(name));
                 }
             }
 
@@ -622,5 +619,31 @@ namespace Gui
     int FontLoader::getFontHeight()
     {
         return mFontHeight;
+    }
+
+    std::string FontLoader::getInternalFontName(const std::string& name)
+    {
+        if (name == Settings::Manager::getString("default font", "GUI"))
+            return "DefaultFont";
+        if (name == Settings::Manager::getString("scroll font", "GUI"))
+            return "ScrollFont";
+        if (name == Settings::Manager::getString("mono font", "GUI"))
+            return "MonoFont";
+
+        return name;
+    }
+
+    std::string FontLoader::getFontForFace(const std::string& face)
+    {
+        const std::string lowerFace = Misc::StringUtils::lowerCase(face);
+
+        if (lowerFace == "magic cards")
+            return "DefaultFont";
+        if (lowerFace == "daedric")
+            return "ScrollFont";
+        if (lowerFace == "century gothic")
+            return "MonoFont";
+
+        return face;
     }
 }

@@ -36,6 +36,8 @@ namespace Gui
 
         int getFontHeight();
 
+        static std::string getFontForFace(const std::string& face);
+
     private:
         ToUTF8::FromType mEncoding;
         const VFS::Manager* mVFS;
@@ -45,6 +47,8 @@ namespace Gui
 
         std::vector<MyGUI::ITexture*> mTextures;
         std::vector<MyGUI::ResourceManualFont*> mFonts;
+
+        std::string getInternalFontName(const std::string& name);
 
         /// @param exportToFile export the converted font (Image and XML with glyph metrics) to files?
         void loadBitmapFont (const std::string& fileName, bool exportToFile);

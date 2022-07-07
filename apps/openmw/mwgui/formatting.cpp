@@ -11,6 +11,7 @@
 #include <components/vfs/manager.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/fontloader/fontloader.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -367,7 +368,9 @@ namespace MWGui::Formatting
             if (attr.find("face") != attr.end())
             {
                 std::string face = attr.at("face");
-                mTextStyle.mFont = "Journalbook "+face;
+                std::string name = Gui::FontLoader::getFontForFace(face);
+
+                mTextStyle.mFont = "Journalbook "+name;
             }
             if (attr.find("size") != attr.end())
             {
